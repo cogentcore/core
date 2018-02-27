@@ -4,7 +4,7 @@
 
 // Ki is the base element of GoKi Trees
 // Ki = Tree in Japanese, and "Key" in English
-package goki
+package ki
 
 import ()
 
@@ -46,24 +46,24 @@ func NewNode() *Node {
 	return &Node{}
 }
 
-func (node *Node) SetParent(parent *Node) {
-	if node.Parent != nil {
-		node.Parent.RemoveChild(node, false)
+func (n *Node) SetParent(parent *Node) {
+	if n.Parent != nil {
+		n.Parent.RemoveChild(n, false)
 	}
-	node.Parent = parent
+	n.Parent = parent
 }
 
-func (node *Node) AddChildren(kids ...*Node) {
+func (n *Node) AddChildren(kids ...*Node) {
 	for _, kid := range kids {
-		kid.SetParent(node)
+		kid.SetParent(n)
 	}
-	node.Children = append(node.Children, kids...)
+	n.Children = append(n.Children, kids...)
 }
 
 // find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
+func (n *Node) FindChildIndex(kid *Node, start_idx int) int {
 	if start_idx == 0 {
-		for idx, child := range node.Children {
+		for idx, child := range n.Children {
 			if child == kid {
 				return idx
 			}
@@ -72,10 +72,10 @@ func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
 		upi := start_idx + 1
 		dni := start_idx
 		upo := false
-		sz := len(node.Children)
+		sz := len(n.Children)
 		for {
 			if !upo && upi < sz {
-				if node.Children[upi] == kid {
+				if n.Children[upi] == kid {
 					return upi
 				}
 				upi++
@@ -83,7 +83,7 @@ func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
 				upo = true
 			}
 			if dni >= 0 {
-				if node.Children[dni] == kid {
+				if n.Children[dni] == kid {
 					return dni
 				}
 				dni--
@@ -95,10 +95,10 @@ func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
 	return -1
 }
 
-// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (node *Node) FindChildNameIndex(name string, start_idx int) int {
+// find index of child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
+func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 	if start_idx == 0 {
-		for idx, child := range node.Children {
+		for idx, child := range n.Children {
 			if child.Name == name {
 				return idx
 			}
@@ -107,10 +107,10 @@ func (node *Node) FindChildNameIndex(name string, start_idx int) int {
 		upi := start_idx + 1
 		dni := start_idx
 		upo := false
-		sz := len(node.Children)
+		sz := len(n.Children)
 		for {
 			if !upo && upi < sz {
-				if node.Children[upi].Name == name {
+				if n.Children[upi].Name == name {
 					return upi
 				}
 				upi++
@@ -118,7 +118,7 @@ func (node *Node) FindChildNameIndex(name string, start_idx int) int {
 				upo = true
 			}
 			if dni >= 0 {
-				if node.Children[dni].Name == name {
+				if n.Children[dni].Name == name {
 					return dni
 				}
 				dni--
@@ -130,64 +130,73 @@ func (node *Node) FindChildNameIndex(name string, start_idx int) int {
 	return -1
 }
 
-func (node *Node) RemoveChildIndex(idx int, destroy bool) {
-	child := node.Children[idx]
+// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
+func (n *Node) FindChildName(name string, start_idx int) *Node {
+	idx := n.FindChildNameIndex(name, start_idx)
+	if idx < 0 {
+		return nil
+	}
+	return n.Children[idx]
+}
+
+func (n *Node) RemoveChildIndex(idx int, destroy bool) {
+	child := n.Children[idx]
 	// this copy makes sure there are no memory leaks
-	copy(node.Children[idx:], node.Children[idx+1:])
-	node.Children[len(node.Children)-1] = nil
-	node.Children = node.Children[:len(node.Children)-1]
+	copy(n.Children[idx:], n.Children[idx+1:])
+	n.Children[len(n.Children)-1] = nil
+	n.Children = n.Children[:len(n.Children)-1]
 	child.SetParent(nil)
 	if destroy {
-		node.deleted = append(node.deleted, child)
+		n.deleted = append(n.deleted, child)
 	}
 }
 
 // Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (node *Node) RemoveChild(child *Node, destroy bool) {
-	idx := node.FindChildIndex(child, 0)
+func (n *Node) RemoveChild(child *Node, destroy bool) {
+	idx := n.FindChildIndex(child, 0)
 	if idx < 0 {
 		return
 	}
-	node.RemoveChildIndex(idx, destroy)
+	n.RemoveChildIndex(idx, destroy)
 }
 
 // Remove child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (node *Node) RemoveChildName(name string, destroy bool) *Node {
-	idx := node.FindChildNameIndex(name, 0)
+func (n *Node) RemoveChildName(name string, destroy bool) *Node {
+	idx := n.FindChildNameIndex(name, 0)
 	if idx < 0 {
 		return nil
 	}
-	child := node.Children[idx]
-	node.RemoveChildIndex(idx, destroy)
+	child := n.Children[idx]
+	n.RemoveChildIndex(idx, destroy)
 	return child
 }
 
 // Remove all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
-func (node *Node) RemoveAllChildren(destroy bool) {
-	for _, child := range node.Children {
+func (n *Node) RemoveAllChildren(destroy bool) {
+	for _, child := range n.Children {
 		child.SetParent(nil)
 	}
 	if destroy {
-		node.deleted = append(node.deleted, node.Children...)
+		n.deleted = append(n.deleted, n.Children...)
 	}
-	node.Children = node.Children[:0]
+	n.Children = n.Children[:0]
 }
 
 // second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
-func (node *Node) DestroyDeleted() {
-	for _, child := range node.deleted {
+func (n *Node) DestroyDeleted() {
+	for _, child := range n.deleted {
 		child.DestroyNode()
 	}
-	node.deleted = node.deleted[:0]
+	n.deleted = n.deleted[:0]
 }
 
 // remove all children and their childrens-children, etc
-func (node *Node) DestroyNode() {
-	for _, child := range node.Children {
+func (n *Node) DestroyNode() {
+	for _, child := range n.Children {
 		child.DestroyNode()
 	}
-	node.RemoveAllChildren(true)
-	node.DestroyDeleted()
+	n.RemoveAllChildren(true)
+	n.DestroyDeleted()
 }
 
 // todo: paths, notifications

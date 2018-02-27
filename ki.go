@@ -4,10 +4,9 @@
 
 // Ki is the base element of GoKi Trees
 // Ki = Tree in Japanese, and "Key" in English
-package goki
+package ki
 
-import (
-)
+import ()
 
 // General Ki interface for GoKi Tree elements -- any Ki element must implement this
 type Ki interface {
@@ -24,4 +23,3 @@ type Ki interface {
 }
 
 // see node for struct implementing this interface
-

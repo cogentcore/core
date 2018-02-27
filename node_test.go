@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goki
+package ki
 
 import (
 	"testing"
@@ -44,3 +44,23 @@ func TestNodeRemoveChildName(t *testing.T) {
 	}
 }
 
+func TestNodeFindName(t *testing.T) {
+	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
+	parent := NewNode()
+	for _, nm := range names {
+		child := NewNode()
+		child.Name = nm
+		parent.AddChildren(child)
+	}
+	if len(parent.Children) != len(names) {
+		t.Errorf("Children length != n, was %d", len(parent.Children))
+	}
+	for i, nm := range names {
+		for st, _ := range names { // test all starting indexes
+			idx := parent.FindChildNameIndex(nm, st)
+			if idx != i {
+				t.Errorf("find index was not correct val of %d, was %d", i, idx)
+			}
+		}
+	}
+}
