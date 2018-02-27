@@ -199,5 +199,17 @@ func (n *Node) DestroyNode() {
 	n.DestroyDeleted()
 }
 
+// is this a terminal node in the tree?  i.e., has no children
+func (n *Node) IsLeaf() bool {
+	return len(n.Children) == 0
+}
+
+// does this node have children (i.e., non-terminal)
+func (n *Node) HasChildren() bool {
+	return len(n.Children) > 0
+}
+
+// todo: look at QObject interface, also qtquick 2 scenegraph methods
+
 // todo: paths, notifications
 // github.com/tucnak/meta has signal / slot impl -- doesn't use reflect though
