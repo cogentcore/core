@@ -6,9 +6,7 @@
 // Ki = Tree in Japanese, and "Key" in English
 package goki
 
-import (
-)
-
+import ()
 
 // Default implementation of a Ki node -- use this as embedded element in other structs
 type Node struct {
@@ -16,10 +14,10 @@ type Node struct {
 	Children   []*Node
 	Name       string
 	UniqueName string
-	Properties []string	// todo: map
+	Properties []string // todo: map
 
 	// keep track of deleted items until truly done with them
-	deleted    []*Node
+	deleted []*Node
 }
 
 // not really clear what use interface is at this point
@@ -71,7 +69,7 @@ func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
 			}
 		}
 	} else {
-		upi := start_idx+1
+		upi := start_idx + 1
 		dni := start_idx
 		upo := false
 		sz := len(node.Children)
@@ -92,7 +90,7 @@ func (node *Node) FindChildIndex(kid *Node, start_idx int) int {
 			} else if upo {
 				break
 			}
-		}        
+		}
 	}
 	return -1
 }
@@ -106,7 +104,7 @@ func (node *Node) FindChildNameIndex(name string, start_idx int) int {
 			}
 		}
 	} else {
-		upi := start_idx+1
+		upi := start_idx + 1
 		dni := start_idx
 		upo := false
 		sz := len(node.Children)
@@ -127,7 +125,7 @@ func (node *Node) FindChildNameIndex(name string, start_idx int) int {
 			} else if upo {
 				break
 			}
-		}        
+		}
 	}
 	return -1
 }
@@ -144,22 +142,27 @@ func (node *Node) RemoveChildIndex(idx int, destroy bool) {
 	}
 }
 
-func (node *Node) RemoveChild(kid *Node, destroy bool) {
-	idx := node.FindChildIndex(kid, 0)
+// Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+func (node *Node) RemoveChild(child *Node, destroy bool) {
+	idx := node.FindChildIndex(child, 0)
 	if idx < 0 {
 		return
 	}
 	node.RemoveChildIndex(idx, destroy)
 }
 
-func (node *Node) RemoveChildName(name string, destroy bool) {
+// Remove child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+func (node *Node) RemoveChildName(name string, destroy bool) *Node {
 	idx := node.FindChildNameIndex(name, 0)
 	if idx < 0 {
-		return
+		return nil
 	}
+	child := node.Children[idx]
 	node.RemoveChildIndex(idx, destroy)
+	return child
 }
 
+// Remove all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
 func (node *Node) RemoveAllChildren(destroy bool) {
 	for _, child := range node.Children {
 		child.SetParent(nil)
@@ -178,6 +181,7 @@ func (node *Node) DestroyDeleted() {
 	node.deleted = node.deleted[:0]
 }
 
+// remove all children and their childrens-children, etc
 func (node *Node) DestroyNode() {
 	for _, child := range node.Children {
 		child.DestroyNode()
