@@ -6,11 +6,26 @@
 // Ki = Tree in Japanese, and "Key" in English
 package ki
 
-import ()
+import (
+	"fmt"
+	"github.com/cznic/mathutil"
+	"reflect"
+	"strconv"
+	"strings"
+)
 
-// Default implementation of a Ki node -- use this as embedded element in other structs
+/*
+The Node implements the Ki interface and provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general -- provides core functionality:
+* Parent / Child Tree structure -- each Node can ONLY have one parent
+* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
+* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc
+* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
+*/
+
 type Node struct {
-	Parent     *Node
+	// parent can be any Ki type
+	Parent Ki
+	// children must be Node types, to support pointer-based slice which is more efficient
 	Children   []*Node
 	Name       string
 	UniqueName string
@@ -20,48 +35,145 @@ type Node struct {
 	deleted []*Node
 }
 
-// not really clear what use interface is at this point
-
-// func (n Node) KiParent() Ki {
-// 	return n.Parent;
-// }
-
-// func (n Node) KiChildren() []Ki {
-// 	return n.Parent;
-// }
-
-// func (n Node) KiName() string {
-// 	return n.Name;
-// }
-
-// func (n Node) KiUniqueName() string {
-// 	return n.UniqueName;
-// }
-
-// func (n Node) KiProperties() []string {
-// 	return n.Properties;
-// }
-
 func NewNode() *Node {
 	return &Node{}
 }
 
-func (n *Node) SetParent(parent *Node) {
+// Kier interface
+func (n *Node) Ki() Ki {
+	return n
+}
+
+// Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
+func KiToNodePtr(ki Ki) (*Node, error) {
+	vp := reflect.New(reflect.TypeOf(ki))
+	vp.Elem().Set(reflect.ValueOf(ki))
+	rval, ok := vp.Interface().(*Node)
+	if !ok {
+		rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
+		if !ok {
+			return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
+		}
+		return *rval, nil
+	}
+	return rval, nil
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Basic Ki properties
+
+func (n *Node) KiParent() Ki {
+	return n.Parent
+}
+
+func (n *Node) KiChild(idx int) (Ki, error) {
+	// todo range checking?
+	if idx > len(n.Children) || idx < 0 {
+		return nil, fmt.Errorf("ki Node Child: index out of range: %d, n children: %d", idx, len(n.Children))
+	}
+	return n.Children[idx], nil
+}
+
+func (n *Node) KiChildren() []Ki {
+	kids := make([]Ki, len(n.Children))
+	for i, child := range n.Children {
+		kids[i] = child
+	}
+	return kids
+}
+
+func (n *Node) KiName() string {
+	return n.Name
+}
+
+func (n *Node) KiUniqueName() string {
+	return n.UniqueName
+}
+
+func (n *Node) KiProperties() []string {
+	return n.Properties
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Parent / Child Functionality
+
+// set name and unique name, ensuring unique name is unique..
+func (n *Node) SetName(name string) {
+	n.Name = name
+	n.UniqueName = name
+	if n.Parent != nil {
+		n.Parent.UniquifyNames()
+	}
+}
+
+// make sure that the names are unique -- n^2 ish
+func (n *Node) UniquifyNames() {
+	for i, child := range n.Children {
+		if len(child.UniqueName) == 0 {
+			if n.Parent != nil {
+				child.UniqueName = n.Parent.KiUniqueName()
+			} else {
+				child.UniqueName = fmt.Sprintf("c%04d", i)
+			}
+		}
+		for { // changed
+			changed := false
+			for j := i - 1; j >= 0; j-- { // check all prior
+				if child.UniqueName == n.Children[j].UniqueName {
+					if idx := strings.LastIndex(child.UniqueName, "_"); idx >= 0 {
+						curnum, err := strconv.ParseInt(child.UniqueName[idx+1:], 10, 64)
+						if err == nil { // it was a number
+							curnum++
+							child.UniqueName = child.UniqueName[:idx+1] +
+								strconv.FormatInt(curnum, 10)
+							changed = true
+							break
+						}
+					}
+					child.UniqueName = child.UniqueName + "_1"
+					changed = true
+					break
+				}
+			}
+			if !changed {
+				break
+			}
+		}
+	}
+}
+
+// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
+func (n *Node) SetParent(parent Ki) {
 	if n.Parent != nil {
 		n.Parent.RemoveChild(n, false)
 	}
 	n.Parent = parent
 }
 
-func (n *Node) AddChildren(kids ...*Node) {
-	for _, kid := range kids {
+func (n *Node) AddChild(kid Ki) error {
+	nkid, err := KiToNodePtr(kid)
+	if err == nil {
+		n.Children = append(n.Children, nkid)
+		nkid.SetParent(n)
+	}
+	return err
+}
+
+func (n *Node) InsertChild(kid Ki, at int) error {
+	nkid, err := KiToNodePtr(kid)
+	if err == nil {
+		at = mathutil.Min(at, len(n.Children))
+		// this avoids extra garbage collection
+		n.Children = append(n.Children, nil)
+		copy(n.Children[at+1:], n.Children[at:])
+		n.Children[at] = nkid
 		kid.SetParent(n)
 	}
-	n.Children = append(n.Children, kids...)
+	return err
 }
 
 // find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (n *Node) FindChildIndex(kid *Node, start_idx int) int {
+func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
 			if child == kid {
@@ -130,8 +242,43 @@ func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 	return -1
 }
 
+// find index of child from unique name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
+func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
+	if start_idx == 0 {
+		for idx, child := range n.Children {
+			if child.UniqueName == name {
+				return idx
+			}
+		}
+	} else {
+		upi := start_idx + 1
+		dni := start_idx
+		upo := false
+		sz := len(n.Children)
+		for {
+			if !upo && upi < sz {
+				if n.Children[upi].UniqueName == name {
+					return upi
+				}
+				upi++
+			} else {
+				upo = true
+			}
+			if dni >= 0 {
+				if n.Children[dni].UniqueName == name {
+					return dni
+				}
+				dni--
+			} else if upo {
+				break
+			}
+		}
+	}
+	return -1
+}
+
 // find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (n *Node) FindChildName(name string, start_idx int) *Node {
+func (n *Node) FindChildName(name string, start_idx int) Ki {
 	idx := n.FindChildNameIndex(name, start_idx)
 	if idx < 0 {
 		return nil
@@ -139,6 +286,7 @@ func (n *Node) FindChildName(name string, start_idx int) *Node {
 	return n.Children[idx]
 }
 
+// Remove child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 func (n *Node) RemoveChildIndex(idx int, destroy bool) {
 	child := n.Children[idx]
 	// this copy makes sure there are no memory leaks
@@ -152,7 +300,7 @@ func (n *Node) RemoveChildIndex(idx int, destroy bool) {
 }
 
 // Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (n *Node) RemoveChild(child *Node, destroy bool) {
+func (n *Node) RemoveChild(child Ki, destroy bool) {
 	idx := n.FindChildIndex(child, 0)
 	if idx < 0 {
 		return
@@ -161,7 +309,7 @@ func (n *Node) RemoveChild(child *Node, destroy bool) {
 }
 
 // Remove child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (n *Node) RemoveChildName(name string, destroy bool) *Node {
+func (n *Node) RemoveChildName(name string, destroy bool) Ki {
 	idx := n.FindChildNameIndex(name, 0)
 	if idx < 0 {
 		return nil
@@ -185,15 +333,15 @@ func (n *Node) RemoveAllChildren(destroy bool) {
 // second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
 func (n *Node) DestroyDeleted() {
 	for _, child := range n.deleted {
-		child.DestroyNode()
+		child.DestroyKi()
 	}
 	n.deleted = n.deleted[:0]
 }
 
 // remove all children and their childrens-children, etc
-func (n *Node) DestroyNode() {
+func (n *Node) DestroyKi() {
 	for _, child := range n.Children {
-		child.DestroyNode()
+		child.DestroyKi()
 	}
 	n.RemoveAllChildren(true)
 	n.DestroyDeleted()
@@ -208,6 +356,27 @@ func (n *Node) IsLeaf() bool {
 func (n *Node) HasChildren() bool {
 	return len(n.Children) > 0
 }
+
+func (n *Node) IsTop() bool {
+	return n.Parent == nil
+}
+
+func (n *Node) Path() string {
+	if n.Parent != nil {
+		return n.Parent.Path() + "." + n.Name
+	}
+	return "." + n.Name
+}
+
+func (n *Node) PathUnique() string {
+	if n.Parent != nil {
+		return n.Parent.PathUnique() + "." + n.UniqueName
+	}
+	return "." + n.UniqueName
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Signal / Slot Functionality
 
 // todo: look at QObject interface, also qtquick 2 scenegraph methods
 
