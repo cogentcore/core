@@ -19,6 +19,9 @@ func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
 	parent.node.SetName("par1")
 	child := HasNode{}
+	// Note: must pass child.node as a pointer  -- if it is a plain Node it is ok but
+	// as a member of a struct, for somewhat obscure reasons having to do with the
+	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
 	err := parent.node.AddChild(&child.node)
 	if err != nil {
 		t.Error(err)
