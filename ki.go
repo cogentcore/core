@@ -50,6 +50,12 @@ type Ki interface {
 	// add a new child at given position in children list
 	InsertChild(kid Ki, at int) error
 
+	// add a new child at end of children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
+	AddChildNamed(kid Ki, name string) error
+
+	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
+	InsertChildNamed(kid Ki, at int, name string) error
+
 	// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndex(kid Ki, start_idx int) int
 

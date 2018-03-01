@@ -5,7 +5,7 @@
 package ki
 
 import (
-	"fmt"
+	//	"fmt"
 	"testing"
 )
 
@@ -19,11 +19,11 @@ func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
 	parent.node.SetName("par1")
 	child := HasNode{}
-	child.node.SetName("child1")
 	err := parent.node.AddChild(&child.node)
 	if err != nil {
 		t.Error(err)
 	}
+	child.node.SetName("child1")
 	if len(parent.node.Children) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.node.Children))
 	}
@@ -36,33 +36,31 @@ func TestNodeUniqueNames(t *testing.T) {
 	parent := HasNode{}
 	parent.node.SetName("par1")
 	child := HasNode{}
-	parent.node.AddChild(&child.node)
-	child.node.SetName("child1")
+	parent.node.AddChildNamed(&child.node, "child1")
 	child2 := HasNode{}
-	parent.node.AddChild(&child2.node)
-	child2.node.SetName("child1")
+	parent.node.AddChildNamed(&child2.node, "child1")
 	child3 := HasNode{}
-	parent.node.AddChild(&child3.node)
-	child3.node.SetName("child1")
+	parent.node.AddChildNamed(&child3.node, "child1")
 	if len(parent.node.Children) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.node.Children))
 	}
-	fmt.Print(child.node.PathUnique() + "\n")
-	fmt.Print(child2.node.PathUnique() + "\n")
-	fmt.Print(child3.node.PathUnique() + "\n")
+	if pth := child.node.PathUnique(); pth != ".par1.child1" {
+		t.Errorf("child path != correct, was %v", pth)
+	}
+	if pth := child2.node.PathUnique(); pth != ".par1.child1_1" {
+		t.Errorf("child2 path != correct, was %v", pth)
+	}
+	if pth := child3.node.PathUnique(); pth != ".par1.child1_2" {
+		t.Errorf("child3 path != correct, was %v", pth)
+	}
+
 }
 
 func TestNodeRemoveChild(t *testing.T) {
-	parent := HasNode{
-		node: Node{Name: "par1"},
-	}
-	child := HasNode{
-		node: Node{Name: "child1"},
-	}
-	err := parent.node.AddChild(&child.node)
-	if err != nil {
-		t.Error(err)
-	}
+	parent := HasNode{}
+	parent.node.SetName("par1")
+	child := HasNode{}
+	parent.node.AddChildNamed(&child.node, "child1")
 	parent.node.RemoveChild(&child.node, true)
 	if len(parent.node.Children) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.node.Children))
@@ -73,13 +71,10 @@ func TestNodeRemoveChild(t *testing.T) {
 }
 
 func TestNodeRemoveChildName(t *testing.T) {
-	parent := HasNode{
-		node: Node{Name: "par1"},
-	}
-	child := HasNode{
-		node: Node{Name: "child1"},
-	}
-	parent.node.AddChild(&child.node)
+	parent := HasNode{}
+	parent.node.SetName("par1")
+	child := HasNode{}
+	parent.node.AddChildNamed(&child.node, "child1")
 	parent.node.RemoveChildName("child1", true)
 	if len(parent.node.Children) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.node.Children))
@@ -94,8 +89,7 @@ func TestNodeFindName(t *testing.T) {
 	parent := NewNode()
 	for _, nm := range names {
 		child := NewNode()
-		child.Name = nm
-		parent.AddChild(child)
+		parent.AddChildNamed(child, nm)
 	}
 	if len(parent.Children) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Children))
@@ -103,6 +97,26 @@ func TestNodeFindName(t *testing.T) {
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
 			idx := parent.FindChildNameIndex(nm, st)
+			if idx != i {
+				t.Errorf("find index was not correct val of %d, was %d", i, idx)
+			}
+		}
+	}
+}
+
+func TestNodeFindNameUnique(t *testing.T) {
+	names := [...]string{"child", "child_1", "child_2", "child_3", "child_4", "child_5"}
+	parent := NewNode()
+	for range names {
+		child := NewNode()
+		parent.AddChildNamed(child, "child")
+	}
+	if len(parent.Children) != len(names) {
+		t.Errorf("Children length != n, was %d", len(parent.Children))
+	}
+	for i, nm := range names {
+		for st, _ := range names { // test all starting indexes
+			idx := parent.FindChildUniqueNameIndex(nm, st)
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}

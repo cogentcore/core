@@ -172,6 +172,22 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 	return err
 }
 
+func (n *Node) AddChildNamed(kid Ki, name string) error {
+	err := n.AddChild(kid)
+	if err == nil {
+		kid.SetName(name)
+	}
+	return err
+}
+
+func (n *Node) InsertChildNamed(kid Ki, at int, name string) error {
+	err := n.InsertChild(kid, at)
+	if err == nil {
+		kid.SetName(name)
+	}
+	return err
+}
+
 // find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
 	if start_idx == 0 {
