@@ -7,6 +7,8 @@
 package ki
 
 import (
+	// "encoding/json"
+	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
 	"reflect"
@@ -23,16 +25,15 @@ The Node implements the Ki interface and provides the core functionality for the
 */
 
 type Node struct {
-	// parent can be any Ki type
-	Parent Ki
-	// children must be Node types, to support pointer-based slice which is more efficient
-	Children   []*Node
 	Name       string
 	UniqueName string
-	Properties []string // todo: map
+	Properties []string
+	Parent     Ki `json:"-"`
+	Children   []Ki
+	ChildType  reflect.Type
 
 	// keep track of deleted items until truly done with them
-	deleted []*Node
+	deleted []Ki
 }
 
 func NewNode() *Node {
@@ -45,16 +46,44 @@ func (n *Node) Ki() Ki {
 }
 
 // Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
+// func KiToNodePtr(ki Ki) (*Node, error) {
+// 	vp := reflect.New(reflect.TypeOf(ki))
+// 	vp.Elem().Set(reflect.ValueOf(ki))
+// 	rval, ok := vp.Interface().(*Node)
+// 	if !ok {
+// 		rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
+// 		if !ok {
+// 			return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
+// 		}
+// 		return *rval, nil
+// 	}
+// 	return rval, nil
+// }
+
+// above is unnec -- just convert directly..
 func KiToNodePtr(ki Ki) (*Node, error) {
-	vp := reflect.New(reflect.TypeOf(ki))
-	vp.Elem().Set(reflect.ValueOf(ki))
+	rval, ok := ki.(*Node)
+	if !ok {
+		// rval, ok := ki.(**Node) // maybe we got a double-pointer
+		// if !ok {
+		return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
+		// }
+		// return *rval, nil
+	}
+	return rval, nil
+}
+
+// Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
+func ObjToNodePtr(obj interface{}) (*Node, error) {
+	vp := reflect.New(reflect.TypeOf(obj))
+	vp.Elem().Set(reflect.ValueOf(obj))
 	rval, ok := vp.Interface().(*Node)
 	if !ok {
-		rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
-		if !ok {
-			return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
-		}
-		return *rval, nil
+		// rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
+		// if !ok {
+		return nil, fmt.Errorf("KiToNodePtr: Obj was not a Node type, is: %T", obj)
+		// }
+		// return *rval, nil
 	}
 	return rval, nil
 }
@@ -106,31 +135,35 @@ func (n *Node) SetName(name string) {
 	}
 }
 
+func (n *Node) SetUniqueName(name string) {
+	n.UniqueName = name
+}
+
 // make sure that the names are unique -- n^2 ish
 func (n *Node) UniquifyNames() {
 	for i, child := range n.Children {
-		if len(child.UniqueName) == 0 {
+		if len(child.KiUniqueName()) == 0 {
 			if n.Parent != nil {
-				child.UniqueName = n.Parent.KiUniqueName()
+				child.SetUniqueName(n.Parent.KiUniqueName())
 			} else {
-				child.UniqueName = fmt.Sprintf("c%04d", i)
+				child.SetUniqueName(fmt.Sprintf("c%04d", i))
 			}
 		}
 		for { // changed
 			changed := false
 			for j := i - 1; j >= 0; j-- { // check all prior
-				if child.UniqueName == n.Children[j].UniqueName {
-					if idx := strings.LastIndex(child.UniqueName, "_"); idx >= 0 {
-						curnum, err := strconv.ParseInt(child.UniqueName[idx+1:], 10, 64)
+				if child.KiUniqueName() == n.Children[j].KiUniqueName() {
+					if idx := strings.LastIndex(child.KiUniqueName(), "_"); idx >= 0 {
+						curnum, err := strconv.ParseInt(child.KiUniqueName()[idx+1:], 10, 64)
 						if err == nil { // it was a number
 							curnum++
-							child.UniqueName = child.UniqueName[:idx+1] +
-								strconv.FormatInt(curnum, 10)
+							child.SetUniqueName(child.KiUniqueName()[:idx+1] +
+								strconv.FormatInt(curnum, 10))
 							changed = true
 							break
 						}
 					}
-					child.UniqueName = child.UniqueName + "_1"
+					child.SetUniqueName(child.KiUniqueName() + "_1")
 					changed = true
 					break
 				}
@@ -150,42 +183,84 @@ func (n *Node) SetParent(parent Ki) {
 	n.Parent = parent
 }
 
-func (n *Node) AddChild(kid Ki) error {
-	nkid, err := KiToNodePtr(kid)
-	if err == nil {
-		n.Children = append(n.Children, nkid)
-		nkid.SetParent(n)
-	}
-	return err
+func (n *Node) SetChildType(t reflect.Type) error {
+	// var tst Ki = &Node{}
+	// if !t.Implements(reflect.TypeOf(tst)) {
+	// 	return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
+	// }
+	n.ChildType = t
+	return nil
 }
 
-func (n *Node) InsertChild(kid Ki, at int) error {
-	nkid, err := KiToNodePtr(kid)
-	if err == nil {
-		at = mathutil.Min(at, len(n.Children))
-		// this avoids extra garbage collection
-		n.Children = append(n.Children, nil)
-		copy(n.Children[at+1:], n.Children[at:])
-		n.Children[at] = nkid
-		kid.SetParent(n)
-	}
-	return err
+func (n *Node) AddChild(kid Ki) {
+	n.Children = append(n.Children, kid)
+	kid.SetParent(n)
 }
 
-func (n *Node) AddChildNamed(kid Ki, name string) error {
-	err := n.AddChild(kid)
-	if err == nil {
-		kid.SetName(name)
-	}
-	return err
+func (n *Node) InsertChild(kid Ki, at int) {
+	at = mathutil.Min(at, len(n.Children))
+	// this avoids extra garbage collection
+	n.Children = append(n.Children, nil)
+	copy(n.Children[at+1:], n.Children[at:])
+	n.Children[at] = kid
+	kid.SetParent(n)
 }
 
-func (n *Node) InsertChildNamed(kid Ki, at int, name string) error {
-	err := n.InsertChild(kid, at)
-	if err == nil {
-		kid.SetName(name)
+func (n *Node) AddChildNamed(kid Ki, name string) {
+	n.AddChild(kid)
+	kid.SetName(name)
+}
+
+func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
+	n.InsertChild(kid, at)
+	kid.SetName(name)
+}
+
+func (n *Node) AddNewChild() (Ki, error) {
+	if n.ChildType == nil {
+		return nil, errors.New("Node AddNewChild: ChildType not set -- must set first")
 	}
-	return err
+	nkid := reflect.New(n.ChildType).Interface()
+	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
+	kid, ok := nkid.(Ki)
+	if !ok {
+		return nil, errors.New("Node AddNewChild: ChildType cannot convert to Ki")
+	}
+	// fmt.Printf("kid is new obj of type %T val: %+v\n", kid, kid)
+	n.AddChild(kid)
+	return kid, nil
+}
+
+func (n *Node) InsertNewChild(at int) (Ki, error) {
+	if n.ChildType == nil {
+		return nil, errors.New("Node InsertNewChild: ChildType not set -- must set first")
+	}
+	nkid := reflect.New(n.ChildType).Interface()
+	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
+	kid, ok := nkid.(Ki)
+	if !ok {
+		return nil, errors.New("Node AddNewChild: ChildType cannot convert to Ki")
+	}
+	n.InsertChild(kid, at)
+	return kid, nil
+}
+
+func (n *Node) AddNewChildNamed(name string) (Ki, error) {
+	kid, err := n.AddNewChild()
+	if err != nil {
+		return nil, err
+	}
+	kid.SetName(name)
+	return kid, err
+}
+
+func (n *Node) InsertNewChildNamed(at int, name string) (Ki, error) {
+	kid, err := n.InsertNewChild(at)
+	if err != nil {
+		return nil, err
+	}
+	kid.SetName(name)
+	return kid, err
 }
 
 // find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
@@ -227,7 +302,7 @@ func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
 func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
-			if child.Name == name {
+			if child.KiName() == name {
 				return idx
 			}
 		}
@@ -238,7 +313,7 @@ func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 		sz := len(n.Children)
 		for {
 			if !upo && upi < sz {
-				if n.Children[upi].Name == name {
+				if n.Children[upi].KiName() == name {
 					return upi
 				}
 				upi++
@@ -246,7 +321,7 @@ func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 				upo = true
 			}
 			if dni >= 0 {
-				if n.Children[dni].Name == name {
+				if n.Children[dni].KiName() == name {
 					return dni
 				}
 				dni--
@@ -262,7 +337,7 @@ func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
-			if child.UniqueName == name {
+			if child.KiUniqueName() == name {
 				return idx
 			}
 		}
@@ -273,7 +348,7 @@ func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
 		sz := len(n.Children)
 		for {
 			if !upo && upi < sz {
-				if n.Children[upi].UniqueName == name {
+				if n.Children[upi].KiUniqueName() == name {
 					return upi
 				}
 				upi++
@@ -281,7 +356,7 @@ func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
 				upo = true
 			}
 			if dni >= 0 {
-				if n.Children[dni].UniqueName == name {
+				if n.Children[dni].KiUniqueName() == name {
 					return dni
 				}
 				dni--
@@ -390,6 +465,39 @@ func (n *Node) PathUnique() string {
 	}
 	return "." + n.UniqueName
 }
+
+///////////////////////////////////////////////////
+//  JSON marshaling
+
+// json tags allow parent to be omitted!
+
+// for example code on running unmarshall:
+// http://gregtrowbridge.com/golang-json-serialization-with-interfaces/
+
+// func (n *Node) MarshalJSON() ([]byte, error) {
+// 	// must exclude parent and deal with children!
+// 	totlen := 0
+// 	fi := 0
+// 	t := reflect.TypeOf(n)
+// 	b := make([]byte, 0, 250)
+// 	for i := 0; i < t.NumField(); i++ {
+// 		f := t.Field(i)
+// 		// fmt.Printf("%d: %s %s = %v\n", i,
+// 		// 	f.Name, f.Type(), f.Interface())
+// 		if f.Name != "Parent" {
+// 			fb, err := json.Marshal(f.Type.Value.Interface())
+// 			if fi == 0 {
+// 				b = append(b, []byte("\"")...)
+// 			} else {
+// 				b = append(b, []byte(",\"")...)
+// 			}
+// 			b = append(b, []byte(f.Name)...)
+// 			b = append(b, []byte("\":")...)
+// 			b = append(b, fb...)
+// 		}
+// 	}
+// 	return b, err
+// }
 
 //////////////////////////////////////////////////////////////////////////
 //  Signal / Slot Functionality

@@ -38,23 +38,41 @@ type Ki interface {
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
 	SetName(name string)
 
+	// sets the unique name of this node -- should generally only be used by UniquifyNames
+	SetUniqueName(name string)
+
 	// ensure all my children have unique, non-empty names -- duplicates are named sequentially _1, _2 etc, and empty names
 	UniquifyNames()
 
 	// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
 	SetParent(parent Ki)
 
+	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type
+	SetChildType(t reflect.Type) error
+
 	// add a new child at end of children list
-	AddChild(kid Ki) error
+	AddChild(kid Ki)
 
 	// add a new child at given position in children list
-	InsertChild(kid Ki, at int) error
+	InsertChild(kid Ki, at int)
 
 	// add a new child at end of children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	AddChildNamed(kid Ki, name string) error
+	AddChildNamed(kid Ki, name string)
 
 	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	InsertChildNamed(kid Ki, at int, name string) error
+	InsertChildNamed(kid Ki, at int, name string)
+
+	// create a new child of ChildType and add at end of children list -- must have set ChildType first!
+	AddNewChild() (Ki, error)
+
+	// create a new child of ChildType and add at given position in children list -- must have set ChildType first!
+	InsertNewChild(at int) (Ki, error)
+
+	// create a new child of ChildType and add at end of children list, and give it a name -- must have set ChildType first!
+	AddNewChildNamed(name string) (Ki, error)
+
+	// create a new child of ChildType and add at given position in children list, and give it a name -- must have set ChildType first!
+	InsertNewChildNamed(at int, name string) (Ki, error)
 
 	// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndex(kid Ki, start_idx int) int

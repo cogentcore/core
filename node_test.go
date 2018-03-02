@@ -5,55 +5,108 @@
 package ki
 
 import (
-	//	"fmt"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"reflect"
 	"testing"
 )
 
 type HasNode struct {
-	node Node
-	mbr1 string
-	mbr2 int
+	//	Node ki.Node // others will use it this way
+	KiNode Node
+	Mbr1   string
+	Mbr2   int
+}
+
+type NodeEmbed struct {
+	Node
+	Mbr1 string
+	Mbr2 int
+}
+
+// Kier interface
+func (n *NodeEmbed) Ki() Ki {
+	return n
+}
+
+// Kier interface
+func (n *HasNode) Ki() Ki {
+	return &n.KiNode
 }
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
-	parent.node.SetName("par1")
+	parent.KiNode.SetName("par1")
 	child := HasNode{}
-	// Note: must pass child.node as a pointer  -- if it is a plain Node it is ok but
+	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
-	err := parent.node.AddChild(&child.node)
+	parent.KiNode.AddChild(&child.KiNode)
+	child.KiNode.SetName("child1")
+	if len(parent.KiNode.Children) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.KiNode.Children))
+	}
+	if child.KiNode.Path() != ".par1.child1" {
+		t.Errorf("child path != correct, was %v", child.KiNode.Path())
+	}
+}
+
+func TestNodeEmbedAddChild(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	child := NodeEmbed{}
+	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
+	// as a member of a struct, for somewhat obscure reasons having to do with the
+	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
+	parent.AddChild(&child.Node)
+	child.SetName("child1")
+	if len(parent.Children) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.Children))
+	}
+	if child.Path() != ".par1.child1" {
+		t.Errorf("child path != correct, was %v", child.Path())
+	}
+}
+
+func TestNodeEmbedAddNewChild(t *testing.T) {
+	// nod := Node{}
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	// parent.SetChildType(reflect.TypeOf(nod))
+	parent.SetChildType(reflect.TypeOf(parent))
+	child, err := parent.AddNewChild()
 	if err != nil {
 		t.Error(err)
 	}
-	child.node.SetName("child1")
-	if len(parent.node.Children) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.node.Children))
+	child.SetName("child1")
+	if len(parent.Children) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.Children))
 	}
-	if child.node.Path() != ".par1.child1" {
-		t.Errorf("child path != correct, was %v", child.node.Path())
+	if child.Path() != ".par1.child1" {
+		t.Errorf("child path != correct, was %v", child.Path())
 	}
 }
 
 func TestNodeUniqueNames(t *testing.T) {
 	parent := HasNode{}
-	parent.node.SetName("par1")
+	parent.KiNode.SetName("par1")
 	child := HasNode{}
-	parent.node.AddChildNamed(&child.node, "child1")
+	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	child2 := HasNode{}
-	parent.node.AddChildNamed(&child2.node, "child1")
+	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
 	child3 := HasNode{}
-	parent.node.AddChildNamed(&child3.node, "child1")
-	if len(parent.node.Children) != 3 {
-		t.Errorf("Children length != 3, was %d", len(parent.node.Children))
+	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
+	if len(parent.KiNode.Children) != 3 {
+		t.Errorf("Children length != 3, was %d", len(parent.KiNode.Children))
 	}
-	if pth := child.node.PathUnique(); pth != ".par1.child1" {
+	if pth := child.KiNode.PathUnique(); pth != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", pth)
 	}
-	if pth := child2.node.PathUnique(); pth != ".par1.child1_1" {
+	if pth := child2.KiNode.PathUnique(); pth != ".par1.child1_1" {
 		t.Errorf("child2 path != correct, was %v", pth)
 	}
-	if pth := child3.node.PathUnique(); pth != ".par1.child1_2" {
+	if pth := child3.KiNode.PathUnique(); pth != ".par1.child1_2" {
 		t.Errorf("child3 path != correct, was %v", pth)
 	}
 
@@ -61,29 +114,29 @@ func TestNodeUniqueNames(t *testing.T) {
 
 func TestNodeRemoveChild(t *testing.T) {
 	parent := HasNode{}
-	parent.node.SetName("par1")
+	parent.KiNode.SetName("par1")
 	child := HasNode{}
-	parent.node.AddChildNamed(&child.node, "child1")
-	parent.node.RemoveChild(&child.node, true)
-	if len(parent.node.Children) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.node.Children))
+	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
+	parent.KiNode.RemoveChild(&child.KiNode, true)
+	if len(parent.KiNode.Children) != 0 {
+		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
 	}
-	if len(parent.node.deleted) != 1 {
-		t.Errorf("deleted length != 1, was %d", len(parent.node.Children))
+	if len(parent.KiNode.deleted) != 1 {
+		t.Errorf("deleted length != 1, was %d", len(parent.KiNode.Children))
 	}
 }
 
 func TestNodeRemoveChildName(t *testing.T) {
 	parent := HasNode{}
-	parent.node.SetName("par1")
+	parent.KiNode.SetName("par1")
 	child := HasNode{}
-	parent.node.AddChildNamed(&child.node, "child1")
-	parent.node.RemoveChildName("child1", true)
-	if len(parent.node.Children) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.node.Children))
+	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
+	parent.KiNode.RemoveChildName("child1", true)
+	if len(parent.KiNode.Children) != 0 {
+		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
 	}
-	if len(parent.node.deleted) != 1 {
-		t.Errorf("deleted length != 1, was %d", len(parent.node.Children))
+	if len(parent.KiNode.deleted) != 1 {
+		t.Errorf("deleted length != 1, was %d", len(parent.KiNode.Children))
 	}
 }
 
@@ -123,6 +176,73 @@ func TestNodeFindNameUnique(t *testing.T) {
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
+		}
+	}
+}
+
+//////////////////////////////////////////
+//  JSON I/O
+
+func TestNodeJSonSave(t *testing.T) {
+	parent := HasNode{}
+	parent.KiNode.SetName("par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	child := HasNode{}
+	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
+	child2 := HasNode{}
+	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
+	child3 := HasNode{}
+	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
+
+	b, err := json.Marshal(parent)
+	if err != nil {
+		t.Error(err)
+	} else {
+		fmt.Printf("json output: %v\n", string(b))
+	}
+
+	tstload := HasNode{}
+	err = json.Unmarshal(b, &tstload)
+	if err != nil {
+		t.Error(err)
+	} else {
+		tstb, _ := json.Marshal(tstload)
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd json rep are not equivalent")
+		}
+	}
+}
+
+func TestNodeEmbedJSonSave(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	child := NodeEmbed{}
+	parent.AddChildNamed(&child.Node, "child1")
+	child2 := NodeEmbed{}
+	parent.AddChildNamed(&child2.Node, "child1")
+	child3 := NodeEmbed{}
+	parent.AddChildNamed(&child3.Node, "child1")
+
+	b, err := json.Marshal(parent)
+	if err != nil {
+		t.Error(err)
+		// } else {
+		// 	fmt.Printf("json output: %v\n", string(b))
+	}
+
+	tstload := NodeEmbed{}
+	err = json.Unmarshal(b, &tstload)
+	if err != nil {
+		t.Error(err)
+	} else {
+		tstb, _ := json.Marshal(tstload)
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
 }
