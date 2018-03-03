@@ -19,11 +19,15 @@ type HasNode struct {
 	Mbr2   int
 }
 
+var KtHasNode = KiTypes.AddType(&HasNode{})
+
 type NodeEmbed struct {
 	Node
 	Mbr1 string
 	Mbr2 int
 }
+
+var KtNodeEmbed = KiTypes.AddType(&NodeEmbed{})
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
@@ -185,7 +189,7 @@ func TestNodeJSonSave(t *testing.T) {
 	child3 := HasNode{}
 	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
 
-	b, err := json.Marshal(parent)
+	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -217,7 +221,7 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	child3 := NodeEmbed{}
 	parent.AddChildNamed(&child3.Node, "child1")
 
-	b, err := json.Marshal(parent)
+	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
 		t.Error(err)
 		// } else {

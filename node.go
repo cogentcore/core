@@ -36,6 +36,9 @@ type Node struct {
 	deleted []Ki
 }
 
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KtNode = KiTypes.AddType(&Node{})
+
 func NewNode() *Node {
 	return &Node{}
 }

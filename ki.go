@@ -128,6 +128,10 @@ type Kier interface {
 	Ki() Ki
 }
 
+// IMPORTANT: all types must initialize their entry in the KiTypes Registry as follows
+
+// var KtTypeName = KiTypes.AddType(&TypeName{})
+
 type KiSlice []Ki
 
 // this saves type information for each object in a slice, and the unmarshal uses it to create
