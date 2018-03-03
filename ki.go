@@ -7,6 +7,8 @@
 package ki
 
 import (
+	"encoding/json"
+	// "fmt"
 	"reflect"
 )
 
@@ -120,19 +122,39 @@ type Ki interface {
 	PathUnique() string
 }
 
+// see node.go for struct implementing this interface
+
 type Kier interface {
 	Ki() Ki
 }
 
-// see node.go for struct implementing this interface
+type KiSlice []Ki
 
-//
-// Return a pointer to the supplied struct via interface{}
-// https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ
-//
-func InterfaceToStructPtr(obj interface{}) interface{} {
-	// Create a new instance of the underlying type
-	vp := reflect.New(reflect.TypeOf(obj))
-	vp.Elem().Set(reflect.ValueOf(obj))
-	return vp.Interface()
+// this saves type information for each object in a slice, and the unmarshal uses it to create
+// proper object types
+func (k KiSlice) MarshalJSON() ([]byte, error) {
+	nk := len(k)
+	b := make([]byte, 0, nk*100+20)
+	if nk == 0 {
+		b = append(b, []byte("null")...)
+		return b, nil
+	}
+	b = append(b, []byte("[")...)
+	for i, kid := range k {
+		kb, err := json.Marshal(kid)
+		if err == nil {
+			b = append(b, []byte("{\"type\":\"")...)
+			knm := reflect.TypeOf(kid).Elem().Name()
+			b = append(b, []byte(knm)...)
+			b = append(b, []byte("\",")...)
+			b = append(b, kb[1:len(kb)-1]...)
+			b = append(b, []byte("}")...)
+			if i < nk-1 {
+				b = append(b, []byte(",")...)
+			}
+		}
+	}
+	b = append(b, []byte("]")...)
+	// fmt.Printf("json out: %v\n", string(b))
+	return b, nil
 }

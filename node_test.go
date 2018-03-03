@@ -25,16 +25,6 @@ type NodeEmbed struct {
 	Mbr2 int
 }
 
-// Kier interface
-func (n *NodeEmbed) Ki() Ki {
-	return n
-}
-
-// Kier interface
-func (n *HasNode) Ki() Ki {
-	return &n.KiNode
-}
-
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")

@@ -29,7 +29,7 @@ type Node struct {
 	UniqueName string
 	Properties []string
 	Parent     Ki `json:"-"`
-	Children   []Ki
+	Children   KiSlice
 	ChildType  reflect.Type
 
 	// keep track of deleted items until truly done with them
