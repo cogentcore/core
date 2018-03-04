@@ -32,8 +32,8 @@ type Ki interface {
 	KiName() string
 	// A name that is guaranteed to be non-empty and unique within the children of this node -- important for generating unique paths
 	KiUniqueName() string
-	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree -- todo: this should be a map!
-	KiProperties() []string
+	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree
+	KiProperties() map[string]interface{}
 
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
 	SetName(name string)

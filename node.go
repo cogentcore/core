@@ -27,10 +27,10 @@ The Node implements the Ki interface and provides the core functionality for the
 type Node struct {
 	Name       string
 	UniqueName string
-	Properties []string
+	Properties map[string]interface{}
 	Parent     Ki `json:"-"`
+	ChildType  KiType
 	Children   KiSlice
-	ChildType  reflect.Type `json:"-"`
 
 	// keep track of deleted items until truly done with them
 	deleted []Ki
@@ -120,7 +120,7 @@ func (n *Node) KiUniqueName() string {
 	return n.UniqueName
 }
 
-func (n *Node) KiProperties() []string {
+func (n *Node) KiProperties() map[string]interface{} {
 	return n.Properties
 }
 
@@ -189,7 +189,7 @@ func (n *Node) SetChildType(t reflect.Type) error {
 	// if !t.Implements(reflect.TypeOf(tst)) {
 	// 	return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
 	// }
-	n.ChildType = t
+	n.ChildType.t = t
 	return nil
 }
 
@@ -218,10 +218,10 @@ func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 }
 
 func (n *Node) AddNewChild() (Ki, error) {
-	if n.ChildType == nil {
+	if n.ChildType.t == nil {
 		return nil, errors.New("Node AddNewChild: ChildType not set -- must set first")
 	}
-	nkid := reflect.New(n.ChildType).Interface()
+	nkid := reflect.New(n.ChildType.t).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 	kid, ok := nkid.(Ki)
 	if !ok {
@@ -233,10 +233,10 @@ func (n *Node) AddNewChild() (Ki, error) {
 }
 
 func (n *Node) InsertNewChild(at int) (Ki, error) {
-	if n.ChildType == nil {
+	if n.ChildType.t == nil {
 		return nil, errors.New("Node InsertNewChild: ChildType not set -- must set first")
 	}
-	nkid := reflect.New(n.ChildType).Interface()
+	nkid := reflect.New(n.ChildType.t).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 	kid, ok := nkid.(Ki)
 	if !ok {

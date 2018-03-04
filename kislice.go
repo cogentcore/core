@@ -15,6 +15,7 @@ import (
 	"strconv"
 )
 
+// KiSlice provides JSON marshal / unmarshal with encoding of underlying types
 type KiSlice []Ki
 
 // this saves type information for each object in a slice, and the unmarshal uses it to create
@@ -58,6 +59,7 @@ func (k KiSlice) MarshalJSON() ([]byte, error) {
 func (k *KiSlice) UnmarshalJSON(b []byte) error {
 	// fmt.Printf("json in: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
+		*k = nil
 		return nil
 	}
 	lb := bytes.IndexRune(b, '{')
@@ -71,7 +73,7 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
 	ns := bytes.Index(flds[0], []byte("\"n\":"))
-	bn := bytes.TrimLeft(flds[0][ns+4:], " ")
+	bn := bytes.TrimSpace(flds[0][ns+4:])
 
 	n64, err := strconv.ParseInt(string(bn), 10, 64)
 	if err != nil {
