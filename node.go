@@ -8,13 +8,19 @@ package ki
 
 import (
 	// "encoding/json"
-	"errors"
+	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+// todo
+// * KiPtr -- save as unique path, restore with one method that walks tree
+// * walk tree with fun
+// * property agg
+// * support signals for child add / remove
 
 /*
 The Node implements the Ki interface and provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general -- provides core functionality:
@@ -28,12 +34,11 @@ type Node struct {
 	Name       string
 	UniqueName string
 	Properties map[string]interface{}
-	Parent     Ki `json:"-"`
-	ChildType  KiType
+	Parent     Ki     `json:"-"`
+	ChildType  KiType `desc:"default type of child to create"`
 	Children   KiSlice
-
-	// keep track of deleted items until truly done with them
-	deleted []Ki
+	NodeSig    Signal `json:"-", desc:"signal for node structure changes"`
+	deleted    []Ki   `desc:"keeps track of deleted nodes until destroyed"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -185,10 +190,9 @@ func (n *Node) SetParent(parent Ki) {
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
-	// var tst Ki = &Node{}
-	// if !t.Implements(reflect.TypeOf(tst)) {
-	// 	return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
-	// }
+	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
+		return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
+	}
 	n.ChildType.t = t
 	return nil
 }
@@ -217,51 +221,41 @@ func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 	kid.SetName(name)
 }
 
-func (n *Node) AddNewChild() (Ki, error) {
-	if n.ChildType.t == nil {
-		return nil, errors.New("Node AddNewChild: ChildType not set -- must set first")
+func (n *Node) AddNewChild() Ki {
+	typ := n.ChildType.t
+	if typ == nil {
+		typ = reflect.TypeOf(n).Elem() // make us by default
 	}
-	nkid := reflect.New(n.ChildType.t).Interface()
+	nkid := reflect.New(typ).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-	kid, ok := nkid.(Ki)
-	if !ok {
-		return nil, errors.New("Node AddNewChild: ChildType cannot convert to Ki")
-	}
+	kid, _ := nkid.(Ki)
 	// fmt.Printf("kid is new obj of type %T val: %+v\n", kid, kid)
 	n.AddChild(kid)
-	return kid, nil
+	return kid
 }
 
-func (n *Node) InsertNewChild(at int) (Ki, error) {
-	if n.ChildType.t == nil {
-		return nil, errors.New("Node InsertNewChild: ChildType not set -- must set first")
+func (n *Node) InsertNewChild(at int) Ki {
+	typ := n.ChildType.t
+	if typ == nil {
+		typ = reflect.TypeOf(n).Elem() // make us by default
 	}
-	nkid := reflect.New(n.ChildType.t).Interface()
+	nkid := reflect.New(typ).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-	kid, ok := nkid.(Ki)
-	if !ok {
-		return nil, errors.New("Node AddNewChild: ChildType cannot convert to Ki")
-	}
+	kid, _ := nkid.(Ki)
 	n.InsertChild(kid, at)
-	return kid, nil
+	return kid
 }
 
-func (n *Node) AddNewChildNamed(name string) (Ki, error) {
-	kid, err := n.AddNewChild()
-	if err != nil {
-		return nil, err
-	}
+func (n *Node) AddNewChildNamed(name string) Ki {
+	kid := n.AddNewChild()
 	kid.SetName(name)
-	return kid, err
+	return kid
 }
 
-func (n *Node) InsertNewChildNamed(at int, name string) (Ki, error) {
-	kid, err := n.InsertNewChild(at)
-	if err != nil {
-		return nil, err
-	}
+func (n *Node) InsertNewChildNamed(at int, name string) Ki {
+	kid := n.InsertNewChild(at)
 	kid.SetName(name)
-	return kid, err
+	return kid
 }
 
 // find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
@@ -468,9 +462,28 @@ func (n *Node) PathUnique() string {
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Signal / Slot Functionality
+//  Tree walking and state updating
 
-// todo: look at QObject interface, also qtquick 2 scenegraph methods
+// call function on given node and all the way up to its parents, and so on..
+func (n *Node) FunUp(fun KiFun, data interface{}) {
+	fun(n, data)
+	if n.Parent != nil {
+		n.Parent.FunUp(fun, data)
+	}
+}
 
-// todo: paths, notifications
-// github.com/tucnak/meta has signal / slot impl -- doesn't use reflect though
+// call function on given node and all the way down to its children, and so on..
+func (n *Node) FunDown(fun KiFun, data interface{}) {
+	fun(n, data)
+	for _, child := range n.Children {
+		child.FunDown(fun, data)
+	}
+}
+
+// concurrent go function on given node and all the way down to its children, and so on..
+func (n *Node) GoFunDown(fun KiFun, data interface{}) {
+	go fun(n, data)
+	for _, child := range n.Children {
+		child.GoFunDown(fun, data)
+	}
+}

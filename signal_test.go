@@ -6,7 +6,7 @@ package ki
 
 import (
 	"fmt"
-	"reflect"
+	//	"reflect"
 	"testing"
 	"time"
 )
@@ -20,21 +20,20 @@ type TestNode struct {
 var KtTestNode = KiTypes.AddType(&TestNode{})
 
 func Slot1(receiver, sender Ki, sig SignalType, data interface{}) {
-	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v",
+	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v\n",
 		receiver.KiName(), sender.KiName(), sig, data)
 }
 
 func Slot2(receiver, sender Ki, sig SignalType, data interface{}) {
-	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v",
+	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v\n",
 		receiver.KiName(), sender.KiName(), sig, data)
 }
 
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.SetName("par1")
-	parent.SetChildType(reflect.TypeOf(parent))
-	child1, _ := parent.AddNewChildNamed("child1")
-	child2, _ := parent.AddNewChildNamed("child2")
+	child1 := parent.AddNewChildNamed("child1")
+	child2 := parent.AddNewChildNamed("child2")
 
 	parent.sig1.Connect(child1, Slot1)
 	parent.sig1.Connect(child2, Slot2)

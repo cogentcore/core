@@ -7,7 +7,6 @@ package ki
 import (
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -29,7 +28,7 @@ const (
 )
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
-type RecvFunc func(receiver, sender Ki, sig SignalType, data interface{})
+type RecvFun func(receiver, sender Ki, sig SignalType, data interface{})
 
 // Signal -- add one of these for each signal a node can emit
 type Signal struct {
@@ -41,11 +40,11 @@ type Connection struct {
 	// node that will receive the signal
 	Recv Ki
 	// function on the receiver node that will receive the signal
-	Func RecvFunc
+	Fun RecvFun
 }
 
 // Connect attaches a new receiver to the signal -- error if not ok
-func (sig *Signal) Connect(recv Ki, recvfun RecvFunc) error {
+func (sig *Signal) Connect(recv Ki, recvfun RecvFun) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")
 	}
@@ -55,17 +54,17 @@ func (sig *Signal) Connect(recv Ki, recvfun RecvFunc) error {
 
 	con := Connection{
 		Recv: recv,
-		Func: recvfun,
+		Fun:  recvfun,
 	}
 	sig.Cons = append(sig.Cons, con)
 
-	log.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(recvfun))
+	// fmt.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(recvfun))
 
 	return nil
 }
 
 // Disconnect receiver and signal
-func (sig *Signal) Disconnect(recv Ki, recvfun RecvFunc) error {
+func (sig *Signal) Disconnect(recv Ki, recvfun RecvFun) error {
 	if recv == nil {
 		return errors.New("ki Signal Disconnect: no recv node provided")
 	}
@@ -74,7 +73,7 @@ func (sig *Signal) Disconnect(recv Ki, recvfun RecvFunc) error {
 	}
 
 	for i, con := range sig.Cons {
-		if con.Recv == recv /* && con.Func == recvfun */ {
+		if con.Recv == recv /* && con.Fun == recvfun */ {
 			// this copy makes sure there are no memory leaks
 			copy(sig.Cons[i:], sig.Cons[i+1:])
 			sig.Cons = sig.Cons[:len(sig.Cons)-1]
@@ -84,17 +83,22 @@ func (sig *Signal) Disconnect(recv Ki, recvfun RecvFunc) error {
 	return errors.New(fmt.Sprintf("ki Signal Disconnect: connection not found for node: %v func: %v", recv.KiName(), reflect.ValueOf(recvfun)))
 }
 
-// Emit executes all the connected slots with data given.
+// Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
 	if sig == NoSignal && s.DefSig != NoSignal {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
-		go con.Func(con.Recv, sender, sig, data)
+		con.Fun(con.Recv, sender, sig, data)
 	}
 }
 
-// Emit given signal on node
-func (n *Node) Emit(s *Signal, sig SignalType, data interface{}) {
-	s.Emit(n, sig, data)
+// EmitGo concurrent version -- sends the signal across all the connections to the receivers
+func (s *Signal) EmitGo(sender Ki, sig SignalType, data interface{}) {
+	if sig == NoSignal && s.DefSig != NoSignal {
+		sig = s.DefSig
+	}
+	for _, con := range s.Cons {
+		go con.Fun(con.Recv, sender, sig, data)
+	}
 }

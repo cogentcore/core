@@ -20,6 +20,9 @@ The Ki provides the core functionality for the GoKi Tree functionality -- insipr
 NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
 */
 
+// function to call on ki objects walking the tree
+type KiFun func(node Ki, data interface{})
+
 type Ki interface {
 	KiParent() Ki
 	// get child at index, does range checking to avoid slice panic
@@ -63,16 +66,16 @@ type Ki interface {
 	InsertChildNamed(kid Ki, at int, name string)
 
 	// create a new child of ChildType and add at end of children list -- must have set ChildType first!
-	AddNewChild() (Ki, error)
+	AddNewChild() Ki
 
 	// create a new child of ChildType and add at given position in children list -- must have set ChildType first!
-	InsertNewChild(at int) (Ki, error)
+	InsertNewChild(at int) Ki
 
 	// create a new child of ChildType and add at end of children list, and give it a name -- must have set ChildType first!
-	AddNewChildNamed(name string) (Ki, error)
+	AddNewChildNamed(name string) Ki
 
 	// create a new child of ChildType and add at given position in children list, and give it a name -- must have set ChildType first!
-	InsertNewChildNamed(at int, name string) (Ki, error)
+	InsertNewChildNamed(at int, name string) Ki
 
 	// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndex(kid Ki, start_idx int) int
@@ -118,6 +121,15 @@ type Ki interface {
 
 	// report path to this node using unique names, all the way up to top-level parent
 	PathUnique() string
+
+	// call function on given node and all the way up to its parents, and so on..
+	FunUp(fun KiFun, data interface{})
+
+	// call function on given node and all the way down to its children, and so on..
+	FunDown(fun KiFun, data interface{})
+
+	// concurrent go function on given node and all the way down to its children, and so on..
+	GoFunDown(fun KiFun, data interface{})
 }
 
 // see node.go for struct implementing this interface

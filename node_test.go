@@ -72,11 +72,11 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
 	// parent.SetChildType(reflect.TypeOf(nod))
-	parent.SetChildType(reflect.TypeOf(parent))
-	child, err := parent.AddNewChild()
+	err := parent.SetChildType(reflect.TypeOf(parent))
 	if err != nil {
 		t.Error(err)
 	}
+	child := parent.AddNewChild()
 	child.SetName("child1")
 	if len(parent.Children) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Children))
@@ -184,47 +184,21 @@ func TestNodeFindNameUnique(t *testing.T) {
 //////////////////////////////////////////
 //  JSON I/O
 
-// func TestNodeJSonSave(t *testing.T) {
-// 	parent := HasNode{}
-// 	parent.KiNode.SetName("par1")
-// 	parent.Mbr1 = "bloop"
-// 	parent.Mbr2 = 32
-// 	child := HasNode{}
-// 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
-// 	child2 := HasNode{}
-// 	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
-// 	child3 := HasNode{}
-// 	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
-
-// 	b, err := json.MarshalIndent(parent, "", "  ")
-// 	if err != nil {
-// 		t.Error(err)
-// 		// } else {
-// 		// 	fmt.Printf("json output: %v\n", string(b))
-// 	}
-
-// 	tstload := HasNode{}
-// 	err = json.Unmarshal(b, &tstload)
-// 	if err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		tstb, _ := json.Marshal(tstload)
-// 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-// 		if !bytes.Equal(tstb, b) {
-// 			t.Error("original and unmarshal'd json rep are not equivalent")
-// 		}
-// 	}
-// }
-
 func TestNodeEmbedJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
+	// child1 :=
 	parent.AddNewChildNamed("child1")
+	child2 := parent.AddNewChildNamed("child1")
+	// child3 :=
 	parent.AddNewChildNamed("child1")
-	parent.AddNewChildNamed("child1")
+
+	child2.SetChildType(reflect.TypeOf(parent))
+	// schild2 :=
+	child2.AddNewChildNamed("subchild1")
 
 	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
@@ -244,4 +218,27 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
+}
+
+func NodeTestFun1(node Ki, data interface{}) {
+	fmt.Printf("node fun1 on: %v, data %v\n", node.KiUniqueName(), data)
+}
+
+func TestNodeCallFun(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	parent.SetChildType(reflect.TypeOf(parent))
+	// child1 :=
+	parent.AddNewChildNamed("child1")
+	child2 := parent.AddNewChildNamed("child1")
+	// child3 :=
+	parent.AddNewChildNamed("child1")
+
+	child2.SetChildType(reflect.TypeOf(parent))
+	// schild2 :=
+	child2.AddNewChildNamed("subchild1")
+
+	parent.FunDown(NodeTestFun1, "wow")
 }
