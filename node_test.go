@@ -220,8 +220,8 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	}
 }
 
-func NodeTestFun1(node Ki, data interface{}) {
-	fmt.Printf("node fun1 on: %v, data %v\n", node.KiUniqueName(), data)
+func NodeTestFun1(n Ki, d interface{}) {
+	fmt.Printf("node fun1 on: %v, data %v\n", n.KiUniqueName(), d)
 }
 
 func TestNodeCallFun(t *testing.T) {
@@ -237,8 +237,13 @@ func TestNodeCallFun(t *testing.T) {
 	parent.AddNewChildNamed("child1")
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	// schild2 :=
-	child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed("subchild1")
 
 	parent.FunDown(NodeTestFun1, "wow")
+	schild2.FunUp(NodeTestFun1, "wow")
+	schild2.FunUp(func(n Ki, d interface{}) {
+		fmt.Printf("node anon fun on: %v, data %v\n", n.KiUniqueName(), d)
+	},
+		"woww")
+
 }
