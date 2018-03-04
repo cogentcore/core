@@ -30,7 +30,7 @@ type Node struct {
 	Properties []string
 	Parent     Ki `json:"-"`
 	Children   KiSlice
-	ChildType  reflect.Type
+	ChildType  reflect.Type `json:"-"`
 
 	// keep track of deleted items until truly done with them
 	deleted []Ki
@@ -44,9 +44,7 @@ func NewNode() *Node {
 }
 
 // Kier interface
-func (n *Node) Ki() Ki {
-	return n
-}
+func (n *Node) Ki() Ki { return n }
 
 // Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
 // func KiToNodePtr(ki Ki) (*Node, error) {
@@ -468,39 +466,6 @@ func (n *Node) PathUnique() string {
 	}
 	return "." + n.UniqueName
 }
-
-///////////////////////////////////////////////////
-//  JSON marshaling
-
-// json tags allow parent to be omitted!
-
-// for example code on running unmarshall:
-// http://gregtrowbridge.com/golang-json-serialization-with-interfaces/
-
-// func (n *Node) MarshalJSON() ([]byte, error) {
-// 	// must exclude parent and deal with children!
-// 	totlen := 0
-// 	fi := 0
-// 	t := reflect.TypeOf(n)
-// 	b := make([]byte, 0, 250)
-// 	for i := 0; i < t.NumField(); i++ {
-// 		f := t.Field(i)
-// 		// fmt.Printf("%d: %s %s = %v\n", i,
-// 		// 	f.Name, f.Type(), f.Interface())
-// 		if f.Name != "Parent" {
-// 			fb, err := json.Marshal(f.Type.Value.Interface())
-// 			if fi == 0 {
-// 				b = append(b, []byte("\"")...)
-// 			} else {
-// 				b = append(b, []byte(",\"")...)
-// 			}
-// 			b = append(b, []byte(f.Name)...)
-// 			b = append(b, []byte("\":")...)
-// 			b = append(b, fb...)
-// 		}
-// 	}
-// 	return b, err
-// }
 
 //////////////////////////////////////////////////////////////////////////
 //  Signal / Slot Functionality

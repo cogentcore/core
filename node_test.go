@@ -19,6 +19,8 @@ type HasNode struct {
 	Mbr2   int
 }
 
+func (t *HasNode) Ki() Ki { return &t.KiNode }
+
 var KtHasNode = KiTypes.AddType(&HasNode{})
 
 type NodeEmbed struct {
@@ -26,6 +28,8 @@ type NodeEmbed struct {
 	Mbr1 string
 	Mbr2 int
 }
+
+// func (t *NodeEmbed) Ki() Ki { return t }
 
 var KtNodeEmbed = KiTypes.AddType(&NodeEmbed{})
 
@@ -53,7 +57,7 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
-	parent.AddChild(&child.Node)
+	parent.AddChild(&child)
 	child.SetName("child1")
 	if len(parent.Children) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Children))
@@ -79,6 +83,9 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	}
 	if child.Path() != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
+	}
+	if reflect.TypeOf(child).Elem() != parent.ChildType {
+		t.Errorf("child type != correct, was %T", child)
 	}
 }
 
@@ -177,49 +184,47 @@ func TestNodeFindNameUnique(t *testing.T) {
 //////////////////////////////////////////
 //  JSON I/O
 
-func TestNodeJSonSave(t *testing.T) {
-	parent := HasNode{}
-	parent.KiNode.SetName("par1")
-	parent.Mbr1 = "bloop"
-	parent.Mbr2 = 32
-	child := HasNode{}
-	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
-	child2 := HasNode{}
-	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
-	child3 := HasNode{}
-	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
+// func TestNodeJSonSave(t *testing.T) {
+// 	parent := HasNode{}
+// 	parent.KiNode.SetName("par1")
+// 	parent.Mbr1 = "bloop"
+// 	parent.Mbr2 = 32
+// 	child := HasNode{}
+// 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
+// 	child2 := HasNode{}
+// 	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
+// 	child3 := HasNode{}
+// 	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
 
-	b, err := json.MarshalIndent(parent, "", "  ")
-	if err != nil {
-		t.Error(err)
-	} else {
-		fmt.Printf("json output: %v\n", string(b))
-	}
+// 	b, err := json.MarshalIndent(parent, "", "  ")
+// 	if err != nil {
+// 		t.Error(err)
+// 		// } else {
+// 		// 	fmt.Printf("json output: %v\n", string(b))
+// 	}
 
-	tstload := HasNode{}
-	err = json.Unmarshal(b, &tstload)
-	if err != nil {
-		t.Error(err)
-	} else {
-		tstb, _ := json.Marshal(tstload)
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-		}
-	}
-}
+// 	tstload := HasNode{}
+// 	err = json.Unmarshal(b, &tstload)
+// 	if err != nil {
+// 		t.Error(err)
+// 	} else {
+// 		tstb, _ := json.Marshal(tstload)
+// 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+// 		if !bytes.Equal(tstb, b) {
+// 			t.Error("original and unmarshal'd json rep are not equivalent")
+// 		}
+// 	}
+// }
 
 func TestNodeEmbedJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	child := NodeEmbed{}
-	parent.AddChildNamed(&child.Node, "child1")
-	child2 := NodeEmbed{}
-	parent.AddChildNamed(&child2.Node, "child1")
-	child3 := NodeEmbed{}
-	parent.AddChildNamed(&child3.Node, "child1")
+	parent.SetChildType(reflect.TypeOf(parent))
+	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed("child1")
 
 	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
@@ -233,8 +238,8 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstb, _ := json.Marshal(tstload)
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		tstb, _ := json.MarshalIndent(tstload, "", "  ")
+		fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
