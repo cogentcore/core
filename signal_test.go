@@ -5,40 +5,40 @@
 package ki
 
 import (
-/*	"fmt"
+	"fmt"
+	"reflect"
 	"testing"
-*/
+	"time"
 )
 
-/*
 type TestNode struct {
-	node Node
+	Node
 	sig1 Signal
 	sig2 Signal
 }
 
-func (n *TestNode) Node() *Node {
-	return &n.node
+var KtTestNode = KiTypes.AddType(&TestNode{})
+
+func Slot1(receiver, sender Ki, sig SignalType, data interface{}) {
+	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v",
+		receiver.KiName(), sender.KiName(), sig, data)
 }
 
-func (n *TestNode) Slot1(sender *Node, data interface{}) {
-	fmt.Printf("Slot1 called from sender: %v with data: $v", sender.Name, data)
-}
-
-func (n *TestNode) Slot2(sender *Node, data interface{}) {
-	fmt.Printf("Slot2 called from sender: %v with data: $v", sender.Name, data)
+func Slot2(receiver, sender Ki, sig SignalType, data interface{}) {
+	fmt.Printf("Slot1 called on recv: %v, from sender: %v sig: %v with data: %v",
+		receiver.KiName(), sender.KiName(), sig, data)
 }
 
 func TestSignalConnect(t *testing.T) {
-	sender1 := TestNode{node: Node{Name: "sender1"}}
-	recv1 := TestNode{node: Node{Name: "recv1"}}
-	recv2 := TestNode{node: Node{Name: "recv2"}}
+	parent := TestNode{}
+	parent.SetName("par1")
+	parent.SetChildType(reflect.TypeOf(parent))
+	child1, _ := parent.AddNewChildNamed("child1")
+	child2, _ := parent.AddNewChildNamed("child2")
 
-	sender1.node.AddChildren(&recv1, &recv2)
+	parent.sig1.Connect(child1, Slot1)
+	parent.sig1.Connect(child2, Slot2)
 
-	// sender1.sig1.Connect(recv1, TestNode.Slot1)
-	// sender1.sig1.Connect(recv2, TestNode.Slot2)
-
-	// sender1.Emit(sender.sig1, 1234)
+	parent.sig1.Emit(&parent, NoSignal, 1234)
+	time.Sleep(time.Second * 2)
 }
-*/

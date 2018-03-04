@@ -11,25 +11,41 @@ import (
 	"reflect"
 )
 
-// based on: github.com/tucnak/meta/
+// this implemeents general signal passing between Ki objects, like Qt's Signal / Slot system
+
+// started from: github.com/tucnak/meta/
+
+// standard signals -- can extend by starting at iota + last signal here
+
+type SignalType int64
+
+const (
+	NoSignal            SignalType = iota
+	SignalChildAdded    SignalType = iota
+	SignalChildRemoved  SignalType = iota
+	SignalChildrenReset SignalType = iota
+	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
+	SignalNodeUpdated   SignalType = iota // entire node updated
+)
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
-type RecvFunc func(receiver, sender *Node, data interface{})
+type RecvFunc func(receiver, sender Ki, sig SignalType, data interface{})
 
 // Signal -- add one of these for each signal a node can emit
 type Signal struct {
-	Cons []Connection
+	DefSig SignalType
+	Cons   []Connection
 }
 
 type Connection struct {
 	// node that will receive the signal
-	Recv *Node
+	Recv Ki
 	// function on the receiver node that will receive the signal
 	Func RecvFunc
 }
 
 // Connect attaches a new receiver to the signal -- error if not ok
-func (sig *Signal) Connect(recv *Node, recvfun RecvFunc) error {
+func (sig *Signal) Connect(recv Ki, recvfun RecvFunc) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")
 	}
@@ -43,13 +59,13 @@ func (sig *Signal) Connect(recv *Node, recvfun RecvFunc) error {
 	}
 	sig.Cons = append(sig.Cons, con)
 
-	log.Printf("added connection to recv %v fun %v", recv.Name, reflect.ValueOf(recvfun))
+	log.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(recvfun))
 
 	return nil
 }
 
 // Disconnect receiver and signal
-func (sig *Signal) Disconnect(recv *Node, recvfun RecvFunc) error {
+func (sig *Signal) Disconnect(recv Ki, recvfun RecvFunc) error {
 	if recv == nil {
 		return errors.New("ki Signal Disconnect: no recv node provided")
 	}
@@ -65,17 +81,20 @@ func (sig *Signal) Disconnect(recv *Node, recvfun RecvFunc) error {
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprintf("ki Signal Disconnect: connection not found for node: %v func: %v", recv.Name, reflect.ValueOf(recvfun)))
+	return errors.New(fmt.Sprintf("ki Signal Disconnect: connection not found for node: %v func: %v", recv.KiName(), reflect.ValueOf(recvfun)))
 }
 
 // Emit executes all the connected slots with data given.
-func (sig *Signal) Emit(sender *Node, data interface{}) {
-	for _, con := range sig.Cons {
-		go con.Func(con.Recv, sender, data)
+func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
+	if sig == NoSignal && s.DefSig != NoSignal {
+		sig = s.DefSig
+	}
+	for _, con := range s.Cons {
+		go con.Func(con.Recv, sender, sig, data)
 	}
 }
 
 // Emit given signal on node
-func (n *Node) Emit(sig *Signal, data interface{}) {
-	sig.Emit(n, data)
+func (n *Node) Emit(s *Signal, sig SignalType, data interface{}) {
+	s.Emit(n, sig, data)
 }
