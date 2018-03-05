@@ -54,6 +54,7 @@ func TestNodeAddChild(t *testing.T) {
 func TestNodeEmbedAddChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
+	parent.SetRoot()
 	child := NodeEmbed{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
@@ -72,6 +73,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	// nod := Node{}
 	parent := NodeEmbed{}
 	parent.SetName("par1")
+	parent.SetRoot()
 	// parent.SetChildType(reflect.TypeOf(nod))
 	err := parent.SetChildType(reflect.TypeOf(parent))
 	if err != nil {
@@ -188,26 +190,27 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeEmbedJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
+	parent.SetRoot()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
 	// child1 :=
 	parent.AddNewChildNamed("child1")
-	child2 := parent.AddNewChildNamed("child1")
+	var child2 *NodeEmbed = parent.AddNewChildNamed("child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChildNamed("child1")
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	// schild2 :=
-	child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed("subchild1")
 
 	parent.Ptr.Ptr = child2
+	child2.Ptr.Ptr = schild2
 
 	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
 		t.Error(err)
-		// } else {
-		// 	fmt.Printf("json output: %v\n", string(b))
+	} else {
+		fmt.Printf("json output: %v\n", string(b))
 	}
 
 	tstload := NodeEmbed{}
@@ -215,6 +218,7 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else {
+		tstload.UnmarshalPost(&tstload)
 		tstb, _ := json.MarshalIndent(tstload, "", "  ")
 		fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
@@ -243,9 +247,9 @@ func TestNodeCallFun(t *testing.T) {
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
 
-	parent.FunDown(NodeTestFun1, "fun down")
-	schild2.FunUp(NodeTestFun1, "fun up")
-	schild2.FunUp(func(n Ki, d interface{}) bool {
+	parent.FunDown(&parent, NodeTestFun1, "fun down")
+	schild2.FunUp(schild2, NodeTestFun1, "fun up")
+	schild2.FunUp(schild2, func(n Ki, d interface{}) bool {
 		fmt.Printf("node anon fun on: %v, data %v\n", n.KiUniqueName(), d)
 		return true
 	}, "fun up2")
@@ -269,7 +273,7 @@ func TestNodeUpdate(t *testing.T) {
 	parent.AddNewChildNamed("child1")
 	parent.UpdateEnd(false)
 
-	parent.FunDown(func(n Ki, d interface{}) bool {
+	parent.FunDown(&parent, func(n Ki, d interface{}) bool {
 		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
 		return true
 	}, "upcnt")
@@ -302,7 +306,7 @@ func TestNodeUpdate(t *testing.T) {
 	child2.UpdateEnd(false)
 
 	fmt.Print("\nfinal node counts should all be zero\n")
-	parent.FunDown(func(n Ki, d interface{}) bool {
+	parent.FunDown(&parent, func(n Ki, d interface{}) bool {
 		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
 		return true
 	}, "upcnt")

@@ -17,7 +17,11 @@ The Ki provides the core functionality for the GoKi Tree functionality -- insipr
 * Generalized I/O -- can Save and Load the Tree as JSON, XML, etc
 * Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
 
-NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
+NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix for basic items here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
+
+Other key issues with the Ki design / Go:
+* All interfaces are implicitly pointers: this is why you have to pass args with & address of
+* Any object that you need to reflect on MUST be passed as an arg, NOT as a receiver!  only args retain their true underlying type -- receivers are always just what they say they are.
 */
 
 // function to call on ki objects walking the tree -- bool rval = false means stop traversing
@@ -37,18 +41,46 @@ type KiCtr int64
 
 type Ki interface {
 	KiParent() Ki
+
 	// get child at index, does range checking to avoid slice panic
 	KiChild(idx int) (Ki, error)
+
 	// get list of children -- this is a new temporary list of Ki's so any changes to it have no effect on structure -- use Ki methods to add / remove children -- underlying struct will have its own actual list -- can use (specific version of) InterfaceToStructPtr to recover underlying struct from each Ki child
 	KiChildren() []Ki
 
 	// These allow generic GUI / Text / Path / etc representation of Trees
 	// The user-defined name of the object, for finding elements, generating paths, io, etc
 	KiName() string
+
 	// A name that is guaranteed to be non-empty and unique within the children of this node -- important for generating unique paths
 	KiUniqueName() string
+
 	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree
 	KiProperties() map[string]interface{}
+
+	// Set given property key to value val -- initializes property map if nil
+	SetProp(key string, val interface{})
+
+	// Get property value from key, safely -- if inherit, then check all parents too
+	GetProp(key string, inherit bool) interface{}
+
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a bool -- false if not set or false
+	GetPropBool(key string, inherit bool) bool
+
+	// Get property value from key, safely -- if inherit, then check all parents too -- as an int64 -- 0 if not set
+	GetPropInt64(key string, inherit bool) int64
+
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a float -- 0 if not set
+	GetPropFloat64(key string, inherit bool) float64
+
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a string -- "" if not set
+	GetPropString(key string, inherit bool) string
+
+	// Delete property key, safely
+	DelProp(key string)
+
+	//////////////////////////////////////////////////////////////////////////
+	//  Parent / Child Functionality
 
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
 	SetName(name string)
@@ -61,6 +93,12 @@ type Ki interface {
 
 	// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
 	SetParent(parent Ki)
+
+	// mark this node as the root node of the tree by adding "root" = true to Properties -- this is important for properly triggering updates of pointers after JSON Unmarshal for example -- only possible to do in root -- doesn't happen otherwise
+	SetRoot()
+
+	// test if this node is the root node -- checks Properties for "root" bool = true
+	IsRoot() bool
 
 	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type
 	SetChildType(t reflect.Type) error
@@ -134,6 +172,9 @@ type Ki interface {
 	// does this node have children (i.e., non-terminal)
 	HasChildren() bool
 
+	//////////////////////////////////////////////////////////////////////////
+	//  Tree walking and state updating
+
 	// report path to this node, all the way up to top-level parent
 	Path() string
 
@@ -143,14 +184,23 @@ type Ki interface {
 	// find Ki object at given unique path
 	FindPathUnique(path string) Ki
 
-	// call function on given node and all the way up to its parents, and so on..
-	FunUp(fun KiFun, data interface{})
+	// walk the tree down from current node and call FindPtrFromPath on all KiPtr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
+	SetKiPtrsFmPaths(ki Ki)
 
-	// call function on given node and all the way down to its children, and so on..
-	FunDown(fun KiFun, data interface{})
+	// walk the tree down from current node and call SetParent on all children -- needed after JSON Unmarshal, etc
+	ParentAllChildren()
 
-	// concurrent go function on given node and all the way down to its children, and so on..
-	GoFunDown(fun KiFun, data interface{})
+	// this must be called after an Unmarshal -- calls SetKiPtrsFmPaths and ParentAllChildren -- due to inability to reflect into receiver types, cannot do it automatically unfortunately
+	UnmarshalPost(ki Ki)
+
+	// call function on given node and all the way up to its parents, and so on -- current ki obj passed as arg so that it can be operated on by reflect
+	FunUp(ki Ki, fun KiFun, data interface{})
+
+	// call function on given node and all the way down to its children, and so on -- current ki obj passed as arg so that it can be operated on by reflect
+	FunDown(ki Ki, fun KiFun, data interface{})
+
+	// concurrent go function on given node and all the way down to its children, and so on  -- current ki obj passed as arg so that it can be operated on by reflect
+	GoFunDown(ki Ki, fun KiFun, data interface{})
 
 	// the main signal for this node that is used for update, child signals
 	NodeSignal() *Signal

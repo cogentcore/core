@@ -24,11 +24,12 @@ func (k *KiPtr) GetPath() {
 }
 
 func (k *KiPtr) FindPtrFromPath(top Ki) bool {
+	fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
 		return false
 	}
-	fmt.Printf("finding path: %v\n", k.Path)
 	k.Ptr = top.FindPathUnique(k.Path)
+	fmt.Printf("found: %v\n", k.Ptr != nil)
 	return k.Ptr != nil
 }
 
@@ -41,20 +42,23 @@ func (k KiPtr) MarshalJSON() ([]byte, error) {
 		return b, nil
 	}
 	k.GetPath()
-	b := make([]byte, 0, len(k.Path)+4)
+	b := make([]byte, 0, len(k.Path)+8)
+	// b = append(b, []byte("{\"Path\":\"")...)
 	b = append(b, []byte("\"")...)
 	b = append(b, []byte(k.Path)...)
 	b = append(b, []byte("\"")...)
-	// fmt.Printf("json out: %v\n", string(b))
+	fmt.Printf("json out: %v\n", string(b))
 	return b, nil
 }
 
 func (k *KiPtr) UnmarshalJSON(b []byte) error {
+	// fmt.Printf("attempt to load path: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
 		k.Ptr = nil
 		k.Path = ""
 		return nil
 	}
 	k.Path = string(b)
+	fmt.Printf("loaded path: %v\n", k.Path)
 	return nil
 }

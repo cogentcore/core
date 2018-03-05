@@ -7,7 +7,7 @@
 package ki
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
@@ -131,6 +131,81 @@ func (n *Node) KiProperties() map[string]interface{} {
 	return n.Properties
 }
 
+func (n *Node) SetProp(key string, val interface{}) {
+	if n.Properties == nil {
+		n.Properties = make(map[string]interface{})
+	}
+	n.Properties[key] = val
+}
+
+func (n *Node) GetProp(key string, inherit bool) interface{} {
+	if n.Properties != nil {
+		v, ok := n.Properties[key]
+		if ok {
+			return v
+		}
+	}
+	if !inherit || n.Parent == nil {
+		return nil
+	}
+	return n.Parent.GetProp(key, inherit)
+}
+
+func (n *Node) GetPropBool(key string, inherit bool) bool {
+	v := n.GetProp(key, inherit)
+	if v == nil {
+		return false
+	}
+	b, ok := v.(bool)
+	if !ok {
+		return false
+	}
+	return b
+}
+
+func (n *Node) GetPropInt64(key string, inherit bool) int64 {
+	v := n.GetProp(key, inherit)
+	if v == nil {
+		return 0
+	}
+	b, ok := v.(int64)
+	if !ok {
+		return 0
+	}
+	return b
+}
+
+func (n *Node) GetPropFloat64(key string, inherit bool) float64 {
+	v := n.GetProp(key, inherit)
+	if v == nil {
+		return 0
+	}
+	b, ok := v.(float64)
+	if !ok {
+		return 0
+	}
+	return b
+}
+
+func (n *Node) GetPropString(key string, inherit bool) string {
+	v := n.GetProp(key, inherit)
+	if v == nil {
+		return ""
+	}
+	b, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	return b
+}
+
+func (n *Node) DelProp(key string) {
+	if n.Properties == nil {
+		return
+	}
+	delete(n.Properties, key)
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Parent / Child Functionality
 
@@ -191,7 +266,16 @@ func (n *Node) SetParent(parent Ki) {
 	n.Parent = parent
 	if parent != nil {
 		n.Updating = *(parent.UpdateCtr()) // we need parent's update counter b/c they will end
+		n.DelProp("root")                  // can't be root anymore!
 	}
+}
+
+func (n *Node) SetRoot() {
+	n.SetProp("root", true)
+}
+
+func (n *Node) IsRoot() bool {
+	return n.GetPropBool("root", false) // not inherit
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
@@ -469,6 +553,9 @@ func (n *Node) IsTop() bool {
 	return n.Parent == nil
 }
 
+//////////////////////////////////////////////////////////////////////////
+//  Tree walking and state updating
+
 func (n *Node) Path() string {
 	if n.Parent != nil {
 		return n.Parent.Path() + "." + n.Name
@@ -485,8 +572,15 @@ func (n *Node) PathUnique() string {
 
 func (n *Node) FindPathUnique(path string) Ki {
 	curn := Ki(n)
-	pels := strings.Split(path, ".")
-	for _, pe := range pels {
+	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), ".")
+	for i, pe := range pels {
+		if len(pe) == 0 {
+			continue
+		}
+		fmt.Printf("pe: %v\n", pe)
+		if i <= 1 && curn.KiUniqueName() == pe {
+			continue
+		}
 		idx := curn.FindChildUniqueNameIndex(pe, 0)
 		if idx < 0 {
 			return nil
@@ -496,9 +590,9 @@ func (n *Node) FindPathUnique(path string) Ki {
 	return curn
 }
 
-func (n *Node) SetKiPtrsFmPaths() {
-	n.FunDown(func(k Ki, d interface{}) bool {
-		top := d.(Ki)
+func (n *Node) SetKiPtrsFmPaths(ki Ki) {
+	top := ki
+	n.FunDown(ki, func(k Ki, d interface{}) bool {
 		v := reflect.ValueOf(k).Elem()
 		// fmt.Printf("v: %v\n", v.Type())
 		for i := 0; i < v.NumField(); i++ {
@@ -513,49 +607,71 @@ func (n *Node) SetKiPtrsFmPaths() {
 		}
 		return true
 	},
+		ki)
+}
+
+func (n *Node) ParentAllChildren() {
+	n.FunDown(n, func(k Ki, d interface{}) bool {
+		for _, child := range k.KiChildren() {
+			child.SetParent(k)
+		}
+		return true
+	},
 		n)
 }
 
-func (n *Node) UnmarshalJSON(b []byte) error {
-	type Node2 Node
-	err := json.Unmarshal(b, (*Node2)(n))
-	if err != nil {
-		return nil
-	}
-	if n.IsTop() {
-		n.SetKiPtrsFmPaths()
-	}
-	return nil
+func (n *Node) UnmarshalPost(ki Ki) {
+	n.ParentAllChildren()
+	n.SetKiPtrsFmPaths(ki)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Tree walking and state updating
+// following prevents true types from being used, due to receiver issue..
+//
+// func (n *Node) UnmarshalJSON(b []byte) error {
+// 	type Node2 Node // this trick allows us to call the default Unmarshal first
+// 	err := json.Unmarshal(b, (*Node2)(n))
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	// KiSlice creates children but can't set their parent -- we do that here..
+// 	for _, child := range n.KiChildren() {
+// 		child.SetParent(n)
+// 	}
+// 	// if n.IsRoot() {
+// 	// 	n.SetKiPtrsFmPaths(n)
+// 	// }
+// 	return nil
+// }
+
+// NOTE: redundant ki Ki arg = Node receiver is needed because only args retain their true
+// underlying types, whereas the receiver is always just a Node -- but we need the
+// receiver to have this function within the Ki interface, so, a little bit of redundancy..
 
 // call function on given node and all the way up to its parents, and so on..
-func (n *Node) FunUp(fun KiFun, data interface{}) {
-	if !fun(n, data) {
+func (n *Node) FunUp(ki Ki, fun KiFun, data interface{}) {
+	if !fun(ki, data) {
 		return
 	}
-	if n.Parent != nil {
-		n.Parent.FunUp(fun, data)
+	if ki.KiParent() != nil {
+		ki.KiParent().FunUp(ki.KiParent(), fun, data)
 	}
 }
 
 // call function on given node and all the way down to its children, and so on..
-func (n *Node) FunDown(fun KiFun, data interface{}) {
-	if !fun(n, data) {
+func (n *Node) FunDown(ki Ki, fun KiFun, data interface{}) {
+	if !fun(ki, data) {
 		return
 	}
-	for _, child := range n.Children {
-		child.FunDown(fun, data)
+	for _, child := range ki.KiChildren() {
+		child.FunDown(child, fun, data)
 	}
 }
 
 // concurrent go function on given node and all the way down to its children, and so on..
-func (n *Node) GoFunDown(fun KiFun, data interface{}) {
-	go fun(n, data)
-	for _, child := range n.Children {
-		child.GoFunDown(fun, data)
+func (n *Node) GoFunDown(ki Ki, fun KiFun, data interface{}) {
+	go fun(ki, data)
+	for _, child := range ki.KiChildren() {
+		child.GoFunDown(child, fun, data)
 	}
 }
 
@@ -568,12 +684,12 @@ func (n *Node) UpdateCtr() *KiCtr {
 }
 
 func (n *Node) UpdateStart() {
-	n.FunDown(func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true }, nil)
+	n.FunDown(n, func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true }, nil)
 }
 
 func (n *Node) UpdateEnd(updtall bool) {
 	par_updt := false
-	n.FunDown(func(k Ki, d interface{}) bool {
+	n.FunDown(n, func(k Ki, d interface{}) bool {
 		par_updt := d.(*bool)      // did the parent already update?
 		if *(k.UpdateCtr()) == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if updtall {
