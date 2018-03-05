@@ -25,6 +25,7 @@ var KtHasNode = KiTypes.AddType(&HasNode{})
 
 type NodeEmbed struct {
 	Node
+	Ptr  KiPtr
 	Mbr1 string
 	Mbr2 int
 }
@@ -84,7 +85,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	if child.Path() != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
-	if reflect.TypeOf(child).Elem() != parent.ChildType.t {
+	if reflect.TypeOf(child).Elem() != parent.ChildType.T {
 		t.Errorf("child type != correct, was %T", child)
 	}
 }
@@ -200,6 +201,8 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	// schild2 :=
 	child2.AddNewChildNamed("subchild1")
 
+	parent.Ptr.Ptr = child2
+
 	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
 		t.Error(err)
@@ -220,8 +223,9 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	}
 }
 
-func NodeTestFun1(n Ki, d interface{}) {
+func NodeTestFun1(n Ki, d interface{}) bool {
 	fmt.Printf("node fun1 on: %v, data %v\n", n.KiUniqueName(), d)
+	return true
 }
 
 func TestNodeCallFun(t *testing.T) {
@@ -239,11 +243,67 @@ func TestNodeCallFun(t *testing.T) {
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
 
-	parent.FunDown(NodeTestFun1, "wow")
-	schild2.FunUp(NodeTestFun1, "wow")
-	schild2.FunUp(func(n Ki, d interface{}) {
+	parent.FunDown(NodeTestFun1, "fun down")
+	schild2.FunUp(NodeTestFun1, "fun up")
+	schild2.FunUp(func(n Ki, d interface{}) bool {
 		fmt.Printf("node anon fun on: %v, data %v\n", n.KiUniqueName(), d)
-	},
-		"woww")
+		return true
+	}, "fun up2")
 
+}
+
+func TestNodeUpdate(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	parent.SetChildType(reflect.TypeOf(parent))
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
+		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+	})
+	// child1 :=
+	parent.AddNewChildNamed("child1")
+	child2 := parent.AddNewChildNamed("child1")
+	// child3 :=
+	parent.UpdateStart()
+	parent.AddNewChildNamed("child1")
+	parent.UpdateEnd(false)
+
+	parent.FunDown(func(n Ki, d interface{}) bool {
+		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
+		return true
+	}, "upcnt")
+
+	child2.SetChildType(reflect.TypeOf(parent))
+	schild2 := child2.AddNewChildNamed("subchild1")
+
+	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
+		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+	})
+	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
+		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+	})
+
+	fmt.Print("\nnode update all starting\n")
+	child2.UpdateStart()
+	schild2.UpdateStart()
+	schild2.UpdateEnd(true)
+	child2.UpdateEnd(true)
+
+	// parent.FunDown(func(n Ki, d interface{}) bool {
+	// 	fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
+	// 	return true
+	// }, "upcnt")
+
+	fmt.Print("\nnode update top starting\n")
+	child2.UpdateStart()
+	schild2.UpdateStart()
+	schild2.UpdateEnd(false)
+	child2.UpdateEnd(false)
+
+	fmt.Print("\nfinal node counts should all be zero\n")
+	parent.FunDown(func(n Ki, d interface{}) bool {
+		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
+		return true
+	}, "upcnt")
 }

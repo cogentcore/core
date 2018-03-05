@@ -7,10 +7,11 @@
 package ki
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -37,7 +38,8 @@ type Node struct {
 	Parent     Ki     `json:"-"`
 	ChildType  KiType `desc:"default type of child to create"`
 	Children   KiSlice
-	NodeSig    Signal `json:"-", desc:"signal for node structure changes"`
+	NodeSig    Signal `json:"-", desc:"signal for node structure changes -- emits SignalType signals"`
+	Updating   KiCtr  `json:"-", desc:"updating counter used in UpdateStart / End calls"`
 	deleted    []Ki   `desc:"keeps track of deleted nodes until destroyed"`
 }
 
@@ -187,22 +189,25 @@ func (n *Node) SetParent(parent Ki) {
 		n.Parent.RemoveChild(n, false)
 	}
 	n.Parent = parent
+	if parent != nil {
+		n.Updating = *(parent.UpdateCtr()) // we need parent's update counter b/c they will end
+	}
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
 	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
 		return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
 	}
-	n.ChildType.t = t
+	n.ChildType.T = t
 	return nil
 }
 
-func (n *Node) AddChild(kid Ki) {
+func (n *Node) AddChildImpl(kid Ki) {
 	n.Children = append(n.Children, kid)
 	kid.SetParent(n)
 }
 
-func (n *Node) InsertChild(kid Ki, at int) {
+func (n *Node) InsertChildImpl(kid Ki, at int) {
 	at = mathutil.Min(at, len(n.Children))
 	// this avoids extra garbage collection
 	n.Children = append(n.Children, nil)
@@ -211,18 +216,36 @@ func (n *Node) InsertChild(kid Ki, at int) {
 	kid.SetParent(n)
 }
 
+func (n *Node) EmitAddChildSignal(kid Ki) {
+	if n.Updating == 0 {
+		n.NodeSig.Emit(n, SignalChildAdded, kid)
+	}
+}
+
+func (n *Node) AddChild(kid Ki) {
+	n.AddChildImpl(kid)
+	n.EmitAddChildSignal(kid)
+}
+
+func (n *Node) InsertChild(kid Ki, at int) {
+	n.InsertChildImpl(kid, at)
+	n.EmitAddChildSignal(kid)
+}
+
 func (n *Node) AddChildNamed(kid Ki, name string) {
-	n.AddChild(kid)
+	n.AddChildImpl(kid)
 	kid.SetName(name)
+	n.EmitAddChildSignal(kid)
 }
 
 func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
-	n.InsertChild(kid, at)
+	n.InsertChildImpl(kid, at)
 	kid.SetName(name)
+	n.EmitAddChildSignal(kid)
 }
 
-func (n *Node) AddNewChild() Ki {
-	typ := n.ChildType.t
+func (n *Node) MakeNewChild() Ki {
+	typ := n.ChildType.T
 	if typ == nil {
 		typ = reflect.TypeOf(n).Elem() // make us by default
 	}
@@ -230,31 +253,30 @@ func (n *Node) AddNewChild() Ki {
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 	kid, _ := nkid.(Ki)
 	// fmt.Printf("kid is new obj of type %T val: %+v\n", kid, kid)
+	return kid
+}
+
+func (n *Node) AddNewChild() Ki {
+	kid := n.MakeNewChild()
 	n.AddChild(kid)
 	return kid
 }
 
 func (n *Node) InsertNewChild(at int) Ki {
-	typ := n.ChildType.t
-	if typ == nil {
-		typ = reflect.TypeOf(n).Elem() // make us by default
-	}
-	nkid := reflect.New(typ).Interface()
-	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-	kid, _ := nkid.(Ki)
+	kid := n.MakeNewChild()
 	n.InsertChild(kid, at)
 	return kid
 }
 
 func (n *Node) AddNewChildNamed(name string) Ki {
-	kid := n.AddNewChild()
-	kid.SetName(name)
+	kid := n.MakeNewChild()
+	n.AddChildNamed(kid, name)
 	return kid
 }
 
 func (n *Node) InsertNewChildNamed(at int, name string) Ki {
-	kid := n.InsertNewChild(at)
-	kid.SetName(name)
+	kid := n.MakeNewChild()
+	n.InsertChildNamed(kid, at, name)
 	return kid
 }
 
@@ -461,12 +483,59 @@ func (n *Node) PathUnique() string {
 	return "." + n.UniqueName
 }
 
+func (n *Node) FindPathUnique(path string) Ki {
+	curn := Ki(n)
+	pels := strings.Split(path, ".")
+	for _, pe := range pels {
+		idx := curn.FindChildUniqueNameIndex(pe, 0)
+		if idx < 0 {
+			return nil
+		}
+		curn, _ = curn.KiChild(idx)
+	}
+	return curn
+}
+
+func (n *Node) SetKiPtrsFmPaths() {
+	n.FunDown(func(k Ki, d interface{}) bool {
+		top := d.(Ki)
+		v := reflect.ValueOf(k).Elem()
+		// fmt.Printf("v: %v\n", v.Type())
+		for i := 0; i < v.NumField(); i++ {
+			vf := v.Field(i)
+			// fmt.Printf("vf: %v\n", vf.Type())
+			if vf.CanInterface() {
+				kp, ok := (vf.Interface()).(KiPtr)
+				if ok {
+					kp.FindPtrFromPath(top)
+				}
+			}
+		}
+		return true
+	},
+		n)
+}
+
+func (n *Node) UnmarshalJSON(b []byte) error {
+	type Node2 Node
+	err := json.Unmarshal(b, (*Node2)(n))
+	if err != nil {
+		return nil
+	}
+	if n.IsTop() {
+		n.SetKiPtrsFmPaths()
+	}
+	return nil
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
 // call function on given node and all the way up to its parents, and so on..
 func (n *Node) FunUp(fun KiFun, data interface{}) {
-	fun(n, data)
+	if !fun(n, data) {
+		return
+	}
 	if n.Parent != nil {
 		n.Parent.FunUp(fun, data)
 	}
@@ -474,7 +543,9 @@ func (n *Node) FunUp(fun KiFun, data interface{}) {
 
 // call function on given node and all the way down to its children, and so on..
 func (n *Node) FunDown(fun KiFun, data interface{}) {
-	fun(n, data)
+	if !fun(n, data) {
+		return
+	}
 	for _, child := range n.Children {
 		child.FunDown(fun, data)
 	}
@@ -486,4 +557,44 @@ func (n *Node) GoFunDown(fun KiFun, data interface{}) {
 	for _, child := range n.Children {
 		child.GoFunDown(fun, data)
 	}
+}
+
+func (n *Node) NodeSignal() *Signal {
+	return &n.NodeSig
+}
+
+func (n *Node) UpdateCtr() *KiCtr {
+	return &n.Updating
+}
+
+func (n *Node) UpdateStart() {
+	n.FunDown(func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true }, nil)
+}
+
+func (n *Node) UpdateEnd(updtall bool) {
+	par_updt := false
+	n.FunDown(func(k Ki, d interface{}) bool {
+		par_updt := d.(*bool)      // did the parent already update?
+		if *(k.UpdateCtr()) == 1 { // we will go to 0 -- but don't do yet so !updtall works
+			if updtall {
+				*(k.UpdateCtr())--
+				k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+			} else {
+				if k.KiParent() == nil || (!*par_updt && *(k.KiParent().UpdateCtr()) == 0) {
+					*(k.UpdateCtr())--
+					k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+					*par_updt = true // we updated so nobody else can!
+				} else {
+					*(k.UpdateCtr())--
+				}
+			}
+		} else {
+			if *(k.UpdateCtr()) <= 0 {
+				log.Printf("KiNode UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+			} else {
+				*(k.UpdateCtr())--
+			}
+		}
+		return true
+	}, &par_updt)
 }

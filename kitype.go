@@ -14,24 +14,24 @@ import (
 
 // KiType provides JSON marshal / unmarshal with encoding of underlying type name
 type KiType struct {
-	t reflect.Type
+	T reflect.Type
 }
 
 // this saves type information for each object in a slice, and the unmarshal uses it to create
 // proper object types
 func (k KiType) MarshalJSON() ([]byte, error) {
-	if k.t == nil {
+	if k.T == nil {
 		b := []byte("null")
 		return b, nil
 	}
-	nm := "\"" + k.t.Name() + "\""
+	nm := "\"" + k.T.Name() + "\""
 	b := []byte(nm)
 	return b, nil
 }
 
 func (k *KiType) UnmarshalJSON(b []byte) error {
 	if bytes.Equal(b, []byte("null")) {
-		k.t = nil
+		k.T = nil
 		return nil
 	}
 	tn := string(bytes.Trim(bytes.TrimSpace(b), "\""))
@@ -40,6 +40,6 @@ func (k *KiType) UnmarshalJSON(b []byte) error {
 	if typ == nil {
 		return fmt.Errorf("KiType UnmarshalJSON: KiTypes type name not found: %v", tn)
 	}
-	k.t = typ
+	k.T = typ
 	return nil
 }

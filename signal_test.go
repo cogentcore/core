@@ -8,7 +8,7 @@ import (
 	"fmt"
 	//	"reflect"
 	"testing"
-	"time"
+	// "time"
 )
 
 type TestNode struct {
@@ -38,6 +38,6 @@ func TestSignalConnect(t *testing.T) {
 	parent.sig1.Connect(child1, Slot1)
 	parent.sig1.Connect(child2, Slot2)
 
-	parent.sig1.Emit(&parent, NoSignal, 1234)
-	time.Sleep(time.Second * 2)
+	parent.sig1.Emit(&parent, NilSignal, 1234)
+	// time.Sleep(time.Second * 2)
 }

@@ -20,8 +20,20 @@ The Ki provides the core functionality for the GoKi Tree functionality -- insipr
 NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
 */
 
-// function to call on ki objects walking the tree
-type KiFun func(node Ki, data interface{})
+// function to call on ki objects walking the tree -- bool rval = false means stop traversing
+type KiFun func(node Ki, data interface{}) bool
+
+// flags for basic Ki status
+type KiFlags int32
+
+const (
+	KiFlagsEmpty KiFlags = 0
+	KiDirty      KiFlags = 1 << iota
+	KiDeleted    KiFlags = 1 << iota
+)
+
+// counter flag for things that can be called redundantly
+type KiCtr int64
 
 type Ki interface {
 	KiParent() Ki
@@ -53,6 +65,9 @@ type Ki interface {
 	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type
 	SetChildType(t reflect.Type) error
 
+	// emit SignalChildAdded on NodeSignal
+	EmitAddChildSignal(kid Ki)
+
 	// add a new child at end of children list
 	AddChild(kid Ki)
 
@@ -65,16 +80,19 @@ type Ki interface {
 	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
 	InsertChildNamed(kid Ki, at int, name string)
 
-	// create a new child of ChildType and add at end of children list -- must have set ChildType first!
+	// create a new child of ChildType
+	MakeNewChild() Ki
+
+	// create a new child of ChildType and add at end of children list
 	AddNewChild() Ki
 
-	// create a new child of ChildType and add at given position in children list -- must have set ChildType first!
+	// create a new child of ChildType and add at given position in children list
 	InsertNewChild(at int) Ki
 
-	// create a new child of ChildType and add at end of children list, and give it a name -- must have set ChildType first!
+	// create a new child of ChildType and add at end of children list, and give it a name
 	AddNewChildNamed(name string) Ki
 
-	// create a new child of ChildType and add at given position in children list, and give it a name -- must have set ChildType first!
+	// create a new child of ChildType and add at given position in children list, and give it a name
 	InsertNewChildNamed(at int, name string) Ki
 
 	// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
@@ -110,17 +128,20 @@ type Ki interface {
 	// is this a terminal node in the tree?  i.e., has no children
 	IsLeaf() bool
 
-	// does this node have children (i.e., non-terminal)
-	HasChildren() bool
-
 	// is this the top of the tree (i.e., parent is nil)
 	IsTop() bool
+
+	// does this node have children (i.e., non-terminal)
+	HasChildren() bool
 
 	// report path to this node, all the way up to top-level parent
 	Path() string
 
 	// report path to this node using unique names, all the way up to top-level parent
 	PathUnique() string
+
+	// find Ki object at given unique path
+	FindPathUnique(path string) Ki
 
 	// call function on given node and all the way up to its parents, and so on..
 	FunUp(fun KiFun, data interface{})
@@ -130,6 +151,18 @@ type Ki interface {
 
 	// concurrent go function on given node and all the way down to its children, and so on..
 	GoFunDown(fun KiFun, data interface{})
+
+	// the main signal for this node that is used for update, child signals
+	NodeSignal() *Signal
+
+	// the update counter for this node
+	UpdateCtr() *KiCtr
+
+	// call this when starting to modify the tree (state or structure) -- increments an atomic update counter and automatically calls start update on all children -- can be called multiple times at multiple levels
+	UpdateStart()
+
+	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0 -- if updtall then always signal, else only if parent is not updating (i.e., this is the highest-level node that finished updating)
+	UpdateEnd(updtall bool)
 }
 
 // see node.go for struct implementing this interface

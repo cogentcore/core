@@ -19,8 +19,8 @@ import (
 type SignalType int64
 
 const (
-	NoSignal            SignalType = iota
-	SignalChildAdded    SignalType = iota
+	NilSignal           SignalType = iota
+	SignalChildAdded    SignalType = iota // data for signal is the added child
 	SignalChildRemoved  SignalType = iota
 	SignalChildrenReset SignalType = iota
 	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
@@ -85,7 +85,7 @@ func (sig *Signal) Disconnect(recv Ki, recvfun RecvFun) error {
 
 // Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
-	if sig == NoSignal && s.DefSig != NoSignal {
+	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
@@ -95,7 +95,7 @@ func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
 
 // EmitGo concurrent version -- sends the signal across all the connections to the receivers
 func (s *Signal) EmitGo(sender Ki, sig SignalType, data interface{}) {
-	if sig == NoSignal && s.DefSig != NoSignal {
+	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
