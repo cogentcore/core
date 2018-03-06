@@ -41,12 +41,12 @@ Other key issues with the Ki design / Go:
 */
 type Ki interface {
 	// unfortunately, Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a this pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls)
-	This() Ki
+	ThisKi() Ki
 
 	// Set the this -- done automatically in AddChild and InsertChild methods
 	SetThis(ki Ki)
 
-	// check that the this pointer is set and issue a warning to log if not -- returns false if not set
+	// check that the this pointer is set and issue a warning to log if not -- returns error if not set
 	ThisCheck() error
 
 	// Ki has strict one-parent, no-cycles structure -- see SetParent
@@ -62,7 +62,7 @@ type Ki interface {
 	// The user-defined name of the object, for finding elements, generating paths, io, etc
 	KiName() string
 
-	// A name that is guaranteed to be non-empty and unique within the children of this node -- important for generating unique paths
+	// A name that is guaranteed to be non-empty and unique within the children of this node, but starts with KiName or parents name if KiName is empty -- important for generating unique paths
 	KiUniqueName() string
 
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
@@ -84,22 +84,22 @@ type Ki interface {
 	SetProp(key string, val interface{})
 
 	// Get property value from key, safely -- if inherit, then check all parents too
-	GetProp(key string, inherit bool) interface{}
+	Prop(key string, inherit bool) interface{}
 
 	// Get property value from key, safely -- if inherit, then check all parents too -- as a bool -- false if not set or false -- error if key exists but is of a different type
-	GetPropBool(key string, inherit bool) (bool, error)
+	PropBool(key string, inherit bool) (bool, error)
 
 	// Get property value from key, safely -- if inherit, then check all parents too -- as an int -- 0 if not set -- error if key exists but is of a different type
-	GetPropInt(key string, inherit bool) (int, error)
+	PropInt(key string, inherit bool) (int, error)
 
 	// Get property value from key, safely -- if inherit, then check all parents too -- as a float -- 0 if not set -- error if key exists but is of a different type
-	GetPropFloat64(key string, inherit bool) (float64, error)
+	PropFloat64(key string, inherit bool) (float64, error)
 
 	// Get property value from key, safely -- if inherit, then check all parents too -- as a string -- "" if not set -- error if key exists but is of a different type
-	GetPropString(key string, inherit bool) (string, error)
+	PropString(key string, inherit bool) (string, error)
 
 	// Delete property key, safely
-	DelProp(key string)
+	DeleteProp(key string)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Parent / Child Functionality
@@ -113,7 +113,10 @@ type Ki interface {
 	// test if this node is the root node -- checks Properties for "root" bool = true
 	IsRoot() bool
 
-	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type
+	// get the root object of this tree
+	Root() Ki
+
+	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type, and errors if not
 	SetChildType(t reflect.Type) error
 
 	// emit SignalChildAdded on NodeSignal -- only if not currently updating
@@ -146,35 +149,38 @@ type Ki interface {
 	// create a new child of ChildType and add at given position in children list, and give it a name
 	InsertNewChildNamed(at int, name string) Ki
 
-	// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
+	// find index of child -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndex(kid Ki, start_idx int) int
 
-	// find index of child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildNameIndex(name string, start_idx int) int
+	// find index of child from name -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+	FindChildIndexByName(name string, start_idx int) int
 
-	// find index of child from unique name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildUniqueNameIndex(name string, start_idx int) int
+	// find index of child from unique name -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+	FindChildIndexByUniqueName(name string, start_idx int) int
+
+	// find index of child by type -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+	FindChildIndexByType(T reflect.Type, start_idx int) int
 
 	// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildName(name string, start_idx int) Ki
+	FindChildByName(name string, start_idx int) Ki
 
-	// emit SignalChildRemoved on NodeSignal -- only if not currently updating
-	EmitChildRemovedSignal(kid Ki)
+	// emit SignalChildDeleted on NodeSignal -- only if not currently updating
+	EmitChildDeletedSignal(kid Ki)
 
-	// Remove child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-	RemoveChildIndex(idx int, destroy bool)
+	// Delete child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	DeleteChildAtIndex(idx int, destroy bool)
 
-	// Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-	RemoveChild(child Ki, destroy bool)
+	// Delete child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	DeleteChild(child Ki, destroy bool)
 
-	// Remove child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-	RemoveChildName(name string, destroy bool) Ki
+	// Delete child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	DeleteChildByName(name string, destroy bool) Ki
 
-	// emit SignalChildrenReset on NodeSignal -- only if not currently updating
-	EmitChildrenResetSignal()
+	// emit SignalChildrenDeleted on NodeSignal -- only if not currently updating
+	EmitChildrenDeletedSignal()
 
-	// Remove all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
-	RemoveAllChildren(destroy bool)
+	// Delete all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
+	DeleteChildren(destroy bool)
 
 	// second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
 	DestroyDeleted()
@@ -192,14 +198,20 @@ type Ki interface {
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
 
-	// call function on given node and all the way up to its parents, and so on -- current ki obj passed as arg so that it can be operated on by reflect
+	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway)
 	FunUp(data interface{}, fun KiFun)
 
-	// call function on given node and all the way down to its children, and so on -- current ki obj passed as arg so that it can be operated on by reflect
+	// call function on given node and all the way down to its children, and so on -- sequentially all in current go routine -- does depth-first "natural" order: calls on node, then calls FunDown on all children
 	FunDown(data interface{}, fun KiFun)
 
-	// concurrent go function on given node and all the way down to its children, and so on  -- current ki obj passed as arg so that it can be operated on by reflect
+	// call function on children in a breadth-first manner -- calls on all the children, and then calls FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called!
+	FunDownBreadthFirst(data interface{}, fun KiFun)
+
+	// concurrent go function on given node and all the way down to its children, and so on -- does not wait for completion of the go routines -- returns immediately
 	GoFunDown(data interface{}, fun KiFun)
+
+	// concurrent go function on given node and all the way down to its children, and so on -- does wait for the completion of the go routines before returning
+	GoFunDownWait(data interface{}, fun KiFun)
 
 	// report path to this node, all the way up to top-level parent
 	Path() string

@@ -38,11 +38,11 @@ type Node struct {
 	Properties map[string]interface{}
 	Parent     Ki      `json:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType  KiType  `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Children   KiSlice `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Remove to ensure proper usage"`
+	Children   KiSlice `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
 	NodeSig    Signal  `json:"-",desc:"signal for node structure / state changes -- emits SignalType signals"`
 	Updating   AtomCtr `json:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	deleted    []Ki    `desc:"keeps track of deleted nodes until destroyed"`
-	this       Ki      `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	Deleted    []Ki    `json:"-",desc:"keeps track of deleted nodes until destroyed"`
+	This       Ki      `json:"-",desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -51,16 +51,16 @@ var KtNode = KiTypes.AddType(&Node{})
 //////////////////////////////////////////////////////////////////////////
 //  Basic Ki properties
 
-func (n *Node) This() Ki {
-	return n.this
+func (n *Node) ThisKi() Ki {
+	return n.This
 }
 
 func (n *Node) SetThis(ki Ki) {
-	n.this = ki
+	n.This = ki
 }
 
 func (n *Node) ThisCheck() error {
-	if n.this == nil {
+	if n.This == nil {
 		return fmt.Errorf("KiNode ThisCheck: node has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
 	}
 	return nil
@@ -153,7 +153,7 @@ func (n *Node) SetProp(key string, val interface{}) {
 	n.Properties[key] = val
 }
 
-func (n *Node) GetProp(key string, inherit bool) interface{} {
+func (n *Node) Prop(key string, inherit bool) interface{} {
 	if n.Properties != nil {
 		v, ok := n.Properties[key]
 		if ok {
@@ -163,58 +163,58 @@ func (n *Node) GetProp(key string, inherit bool) interface{} {
 	if !inherit || n.Parent == nil {
 		return nil
 	}
-	return n.Parent.GetProp(key, inherit)
+	return n.Parent.Prop(key, inherit)
 }
 
-func (n *Node) GetPropBool(key string, inherit bool) (bool, error) {
-	v := n.GetProp(key, inherit)
+func (n *Node) PropBool(key string, inherit bool) (bool, error) {
+	v := n.Prop(key, inherit)
 	if v == nil {
 		return false, nil
 	}
 	b, ok := v.(bool)
 	if !ok {
-		return false, fmt.Errorf("KiNode GetPropBool -- property %v exists but is not a bool, is: %T", key, v)
+		return false, fmt.Errorf("KiNode PropBool -- property %v exists but is not a bool, is: %T", key, v)
 	}
 	return b, nil
 }
 
-func (n *Node) GetPropInt(key string, inherit bool) (int, error) {
-	v := n.GetProp(key, inherit)
+func (n *Node) PropInt(key string, inherit bool) (int, error) {
+	v := n.Prop(key, inherit)
 	if v == nil {
 		return 0, nil
 	}
 	b, ok := v.(int)
 	if !ok {
-		return 0, fmt.Errorf("KiNode GetPropInt -- property %v exists but is not an int, is: %T", key, v)
+		return 0, fmt.Errorf("KiNode PropInt -- property %v exists but is not an int, is: %T", key, v)
 	}
 	return b, nil
 }
 
-func (n *Node) GetPropFloat64(key string, inherit bool) (float64, error) {
-	v := n.GetProp(key, inherit)
+func (n *Node) PropFloat64(key string, inherit bool) (float64, error) {
+	v := n.Prop(key, inherit)
 	if v == nil {
 		return 0, nil
 	}
 	b, ok := v.(float64)
 	if !ok {
-		return 0, fmt.Errorf("KiNode GetPropFloat64 -- property %v exists but is not a float64, is: %T", key, v)
+		return 0, fmt.Errorf("KiNode PropFloat64 -- property %v exists but is not a float64, is: %T", key, v)
 	}
 	return b, nil
 }
 
-func (n *Node) GetPropString(key string, inherit bool) (string, error) {
-	v := n.GetProp(key, inherit)
+func (n *Node) PropString(key string, inherit bool) (string, error) {
+	v := n.Prop(key, inherit)
 	if v == nil {
 		return "", nil
 	}
 	b, ok := v.(string)
 	if !ok {
-		return "", fmt.Errorf("KiNode GetPropString -- property %v exists but is not a string, is: %T", key, v)
+		return "", fmt.Errorf("KiNode PropString -- property %v exists but is not a string, is: %T", key, v)
 	}
 	return b, nil
 }
 
-func (n *Node) DelProp(key string) {
+func (n *Node) DeleteProp(key string) {
 	if n.Properties == nil {
 		return
 	}
@@ -227,12 +227,12 @@ func (n *Node) DelProp(key string) {
 // set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
 func (n *Node) SetParent(parent Ki) {
 	if n.Parent != nil {
-		n.Parent.RemoveChild(n, false)
+		n.Parent.DeleteChild(n, false)
 	}
 	n.Parent = parent
 	if parent != nil {
 		n.Updating.Set(parent.UpdateCtr().Value()) // we need parent's update counter b/c they will end
-		n.DelProp("root")                          // can't be root anymore!
+		n.DeleteProp("root")                       // can't be root anymore!
 	}
 }
 
@@ -242,8 +242,15 @@ func (n *Node) SetRoot(ths Ki) {
 }
 
 func (n *Node) IsRoot() bool {
-	b, _ := n.GetPropBool("root", false) // not inherit
+	b, _ := n.PropBool("root", false) // not inherit
 	return b
+}
+
+func (n *Node) Root() Ki {
+	if n.Parent == nil || n.IsRoot() {
+		return n.This
+	}
+	return n.Parent.Root()
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
@@ -260,7 +267,7 @@ func (n *Node) AddChildImpl(kid Ki) {
 	}
 	kid.SetThis(kid)
 	n.Children = append(n.Children, kid)
-	kid.SetParent(n.this)
+	kid.SetParent(n.This)
 }
 
 func (n *Node) InsertChildImpl(kid Ki, at int) {
@@ -273,12 +280,12 @@ func (n *Node) InsertChildImpl(kid Ki, at int) {
 	copy(n.Children[at+1:], n.Children[at:])
 	kid.SetThis(kid)
 	n.Children[at] = kid
-	kid.SetParent(n.this)
+	kid.SetParent(n.This)
 }
 
 func (n *Node) EmitChildAddedSignal(kid Ki) {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.this, SignalChildAdded, kid)
+		n.NodeSig.Emit(n.This, SignalChildAdded, kid)
 	}
 }
 
@@ -310,7 +317,7 @@ func (n *Node) MakeNewChild() Ki {
 	}
 	typ := n.ChildType.T
 	if typ == nil {
-		typ = reflect.TypeOf(n.this).Elem() // make us by default
+		typ = reflect.TypeOf(n.This).Elem() // make us by default
 	}
 	nkid := reflect.New(typ).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
@@ -343,7 +350,6 @@ func (n *Node) InsertNewChildNamed(at int, name string) Ki {
 	return kid
 }
 
-// find index of child -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
@@ -378,8 +384,7 @@ func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
 	return -1
 }
 
-// find index of child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (n *Node) FindChildNameIndex(name string, start_idx int) int {
+func (n *Node) FindChildIndexByName(name string, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
 			if child.KiName() == name {
@@ -413,8 +418,7 @@ func (n *Node) FindChildNameIndex(name string, start_idx int) int {
 	return -1
 }
 
-// find index of child from unique name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
+func (n *Node) FindChildIndexByUniqueName(name string, start_idx int) int {
 	if start_idx == 0 {
 		for idx, child := range n.Children {
 			if child.KiUniqueName() == name {
@@ -448,23 +452,55 @@ func (n *Node) FindChildUniqueNameIndex(name string, start_idx int) int {
 	return -1
 }
 
-// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-func (n *Node) FindChildName(name string, start_idx int) Ki {
-	idx := n.FindChildNameIndex(name, start_idx)
+func (n *Node) FindChildIndexByType(T reflect.Type, start_idx int) int {
+	// if start_idx == 0 {
+	// 	for idx, child := range n.Children {
+	// 		if child.KiUniqueName() == name {
+	// 			return idx
+	// 		}
+	// 	}
+	// } else {
+	// 	upi := start_idx + 1
+	// 	dni := start_idx
+	// 	upo := false
+	// 	sz := len(n.Children)
+	// 	for {
+	// 		if !upo && upi < sz {
+	// 			if n.Children[upi].KiUniqueName() == name {
+	// 				return upi
+	// 			}
+	// 			upi++
+	// 		} else {
+	// 			upo = true
+	// 		}
+	// 		if dni >= 0 {
+	// 			if n.Children[dni].KiUniqueName() == name {
+	// 				return dni
+	// 			}
+	// 			dni--
+	// 		} else if upo {
+	// 			break
+	// 		}
+	// 	}
+	// }
+	return -1
+}
+
+func (n *Node) FindChildByName(name string, start_idx int) Ki {
+	idx := n.FindChildIndexByName(name, start_idx)
 	if idx < 0 {
 		return nil
 	}
 	return n.Children[idx]
 }
 
-func (n *Node) EmitChildRemovedSignal(kid Ki) {
+func (n *Node) EmitChildDeletedSignal(kid Ki) {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.this, SignalChildRemoved, kid)
+		n.NodeSig.Emit(n.This, SignalChildDeleted, kid)
 	}
 }
 
-// Remove child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (n *Node) RemoveChildIndex(idx int, destroy bool) {
+func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 	child := n.Children[idx]
 	// this copy makes sure there are no memory leaks
 	copy(n.Children[idx:], n.Children[idx+1:])
@@ -472,72 +508,65 @@ func (n *Node) RemoveChildIndex(idx int, destroy bool) {
 	n.Children = n.Children[:len(n.Children)-1]
 	child.SetParent(nil)
 	if destroy {
-		n.deleted = append(n.deleted, child)
+		n.Deleted = append(n.Deleted, child)
 	}
-	n.EmitChildRemovedSignal(child)
+	n.EmitChildDeletedSignal(child)
 }
 
-// Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (n *Node) RemoveChild(child Ki, destroy bool) {
+func (n *Node) DeleteChild(child Ki, destroy bool) {
 	idx := n.FindChildIndex(child, 0)
 	if idx < 0 {
 		return
 	}
-	n.RemoveChildIndex(idx, destroy)
+	n.DeleteChildAtIndex(idx, destroy)
 }
 
-// Remove child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-func (n *Node) RemoveChildName(name string, destroy bool) Ki {
-	idx := n.FindChildNameIndex(name, 0)
+func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
+	idx := n.FindChildIndexByName(name, 0)
 	if idx < 0 {
 		return nil
 	}
 	child := n.Children[idx]
-	n.RemoveChildIndex(idx, destroy)
+	n.DeleteChildAtIndex(idx, destroy)
 	return child
 }
 
-func (n *Node) EmitChildrenResetSignal() {
+func (n *Node) EmitChildrenDeletedSignal() {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.this, SignalChildrenReset, nil)
+		n.NodeSig.Emit(n.This, SignalChildrenDeleted, nil)
 	}
 }
 
-// Remove all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
-func (n *Node) RemoveAllChildren(destroy bool) {
+func (n *Node) DeleteChildren(destroy bool) {
 	for _, child := range n.Children {
 		child.SetParent(nil)
 	}
 	if destroy {
-		n.deleted = append(n.deleted, n.Children...)
+		n.Deleted = append(n.Deleted, n.Children...)
 	}
 	n.Children = n.Children[:0] // preserves capacity of list
-	n.EmitChildrenResetSignal()
+	n.EmitChildrenDeletedSignal()
 }
 
-// second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
 func (n *Node) DestroyDeleted() {
-	for _, child := range n.deleted {
+	for _, child := range n.Deleted {
 		child.DestroyKi()
 	}
-	n.deleted = n.deleted[:0]
+	n.Deleted = n.Deleted[:0]
 }
 
-// remove all children and their childrens-children, etc
 func (n *Node) DestroyKi() {
 	for _, child := range n.Children {
 		child.DestroyKi()
 	}
-	n.RemoveAllChildren(true)
+	n.DeleteChildren(true)
 	n.DestroyDeleted()
 }
 
-// is this a terminal node in the tree?  i.e., has no children
 func (n *Node) IsLeaf() bool {
 	return len(n.Children) == 0
 }
 
-// does this node have children (i.e., non-terminal)
 func (n *Node) HasChildren() bool {
 	return len(n.Children) > 0
 }
@@ -545,9 +574,8 @@ func (n *Node) HasChildren() bool {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-// call function on given node and all the way up to its parents, and so on..
 func (n *Node) FunUp(data interface{}, fun KiFun) {
-	if !fun(n.this, data) { // false return means stop
+	if !fun(n.This, data) { // false return means stop
 		return
 	}
 	if n.KiParent() != nil {
@@ -555,9 +583,8 @@ func (n *Node) FunUp(data interface{}, fun KiFun) {
 	}
 }
 
-// call function on given node and all the way down to its children, and so on..
 func (n *Node) FunDown(data interface{}, fun KiFun) {
-	if !fun(n.this, data) { // false return means stop
+	if !fun(n.This, data) { // false return means stop
 		return
 	}
 	for _, child := range n.KiChildren() {
@@ -565,10 +592,27 @@ func (n *Node) FunDown(data interface{}, fun KiFun) {
 	}
 }
 
-// concurrent go function on given node and all the way down to its children, and so on..
+func (n *Node) FunDownBreadthFirst(data interface{}, fun KiFun) {
+	for _, child := range n.KiChildren() {
+		if !fun(child, data) { // false return means stop
+			return
+		}
+	}
+	for _, child := range n.KiChildren() {
+		child.FunDownBreadthFirst(data, fun)
+	}
+}
+
 func (n *Node) GoFunDown(data interface{}, fun KiFun) {
-	// todo: think about a channel here to coordinate
-	go fun(n.this, data)
+	go fun(n.This, data)
+	for _, child := range n.KiChildren() {
+		child.GoFunDown(data, fun)
+	}
+}
+
+func (n *Node) GoFunDownWait(data interface{}, fun KiFun) {
+	// todo: use channel or something to wait
+	go fun(n.This, data)
 	for _, child := range n.KiChildren() {
 		child.GoFunDown(data, fun)
 	}
@@ -599,7 +643,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if i <= 1 && curn.KiUniqueName() == pe {
 			continue
 		}
-		idx := curn.FindChildUniqueNameIndex(pe, 0)
+		idx := curn.FindChildIndexByUniqueName(pe, 0)
 		if idx < 0 {
 			return nil
 		}
@@ -663,15 +707,15 @@ func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 	}
 	if indent {
 		if UseJsonIter {
-			return jsoniter.MarshalIndent(n.this, "", " ")
+			return jsoniter.MarshalIndent(n.This, "", " ")
 		} else {
-			return json.MarshalIndent(n.this, "", " ")
+			return json.MarshalIndent(n.This, "", " ")
 		}
 	} else {
 		if UseJsonIter {
-			return jsoniter.Marshal(n.this)
+			return jsoniter.Marshal(n.This)
 		} else {
-			return json.Marshal(n.this)
+			return json.Marshal(n.This)
 		}
 	}
 }
@@ -682,9 +726,9 @@ func (n *Node) LoadJSON(b []byte) error {
 		return err
 	}
 	if UseJsonIter {
-		err = jsoniter.Unmarshal(b, n.this) // key use of this!
+		err = jsoniter.Unmarshal(b, n.This) // key use of this!
 	} else {
-		err = json.Unmarshal(b, n.this) // key use of this!
+		err = json.Unmarshal(b, n.This) // key use of this!
 	}
 	if err != nil {
 		return nil
@@ -694,7 +738,7 @@ func (n *Node) LoadJSON(b []byte) error {
 }
 
 func (n *Node) SetKiPtrsFmPaths() {
-	top := n.this
+	root := n.This
 	n.FunDown(nil, func(k Ki, d interface{}) bool {
 		v := reflect.ValueOf(k).Elem()
 		// fmt.Printf("v: %v\n", v.Type())
@@ -706,9 +750,9 @@ func (n *Node) SetKiPtrsFmPaths() {
 				if ok {
 					var pv Ki
 					if len(kp.Path) > 0 {
-						pv = top.FindPathUnique(kp.Path)
+						pv = root.FindPathUnique(kp.Path)
 						if pv == nil {
-							log.Printf("KiNode SetKiPtrsFmPaths: could not find path: %v in top obj: %v", kp.Path, top.KiName())
+							log.Printf("KiNode SetKiPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, root.KiName())
 						}
 						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
 					}

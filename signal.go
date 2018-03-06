@@ -17,12 +17,12 @@ import (
 type SignalType int64
 
 const (
-	NilSignal           SignalType = iota
-	SignalChildAdded    SignalType = iota // data for signal is the added child
-	SignalChildRemoved  SignalType = iota // data is removed child
-	SignalChildrenReset SignalType = iota // no data
-	SignalNodeUpdated   SignalType = iota // entire node updated
-	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
+	NilSignal             SignalType = iota
+	SignalChildAdded      SignalType = iota // data is the added child
+	SignalChildDeleted    SignalType = iota // data is deleted child
+	SignalChildrenDeleted SignalType = iota // no data
+	SignalNodeUpdated     SignalType = iota // entire node updated
+	SignalFieldUpdated    SignalType = iota // a field was updated -- data is name of field
 )
 
 // generates signaltype_string.go -- contrary to some docs, apparently need to run go generate manually

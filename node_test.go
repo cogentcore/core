@@ -116,33 +116,33 @@ func TestNodeUniqueNames(t *testing.T) {
 
 }
 
-func TestNodeRemoveChild(t *testing.T) {
+func TestNodeDeleteChild(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")
 	parent.KiNode.SetRoot(&parent.KiNode)
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
-	parent.KiNode.RemoveChild(&child.KiNode, true)
+	parent.KiNode.DeleteChild(&child.KiNode, true)
 	if len(parent.KiNode.Children) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
 	}
-	if len(parent.KiNode.deleted) != 1 {
-		t.Errorf("deleted length != 1, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Deleted) != 1 {
+		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Children))
 	}
 }
 
-func TestNodeRemoveChildName(t *testing.T) {
+func TestNodeDeleteChildName(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")
 	parent.KiNode.SetRoot(&parent.KiNode)
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
-	parent.KiNode.RemoveChildName("child1", true)
+	parent.KiNode.DeleteChildByName("child1", true)
 	if len(parent.KiNode.Children) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
 	}
-	if len(parent.KiNode.deleted) != 1 {
-		t.Errorf("deleted length != 1, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Deleted) != 1 {
+		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Children))
 	}
 }
 
@@ -160,7 +160,7 @@ func TestNodeFindName(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.FindChildNameIndex(nm, st)
+			idx := parent.FindChildIndexByName(nm, st)
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
@@ -182,7 +182,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.FindChildUniqueNameIndex(nm, st)
+			idx := parent.FindChildIndexByUniqueName(nm, st)
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
@@ -377,34 +377,34 @@ func TestProps(t *testing.T) {
 	schild2 := child2.AddNewChildNamed("subchild1")
 
 	parent.SetProp("intprop", 42)
-	pprop, err := parent.GetPropInt("intprop", false)
+	pprop, err := parent.PropInt("intprop", false)
 	if err != nil || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v, err %v\n", pprop, 42, err)
 	}
-	sprop, err := schild2.GetPropInt("intprop", true)
+	sprop, err := schild2.PropInt("intprop", true)
 	if err != nil || sprop != 42 {
 		t.Errorf("TestProps error -- sprop inherited %v != %v, err %v\n", sprop, 42, err)
 	}
-	sprop, err = schild2.GetPropInt("intprop", false)
+	sprop, err = schild2.PropInt("intprop", false)
 	if err != nil || sprop != 0 {
 		t.Errorf("TestProps error -- sprop not inherited %v != %v, err %v\n", sprop, 0, err)
 	}
 
 	parent.SetProp("floatprop", 42.0)
-	spropf, err := schild2.GetPropFloat64("floatprop", true)
+	spropf, err := schild2.PropFloat64("floatprop", true)
 	if err != nil || spropf != 42.0 {
 		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 42.0, err)
 	}
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprops, err := schild2.GetPropString("stringprop", true)
+	sprops, err := schild2.PropString("stringprop", true)
 	if err != nil || sprops != tstr {
 		t.Errorf("TestProps error -- sprops inherited %v != %v, err %v\n", sprops, tstr, err)
 	}
 
-	parent.DelProp("floatprop")
-	spropf, err = schild2.GetPropFloat64("floatprop", true)
+	parent.DeleteProp("floatprop")
+	spropf, err = schild2.PropFloat64("floatprop", true)
 	if err != nil || spropf != 0 {
 		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 0, err)
 	}
