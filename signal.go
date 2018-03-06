@@ -27,6 +27,7 @@ const (
 	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
 )
 
+// generates signaltype_string.go -- contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=SignalType
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
