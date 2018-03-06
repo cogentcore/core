@@ -6,7 +6,6 @@ package ki
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -213,7 +212,7 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
 
-	b, err := json.MarshalIndent(parent, "", "  ")
+	b, err := parent.SaveJSON(true)
 	if err != nil {
 		t.Error(err)
 		// } else {
@@ -222,12 +221,11 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 
 	tstload := NodeEmbed{}
 	tstload.SetRoot(&tstload)
-	err = json.Unmarshal(b, &tstload)
+	err = tstload.LoadJSON(b)
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstload.UnmarshalPost()
-		tstb, _ := json.MarshalIndent(tstload, "", "  ")
+		tstb, _ := tstload.SaveJSON(true)
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")

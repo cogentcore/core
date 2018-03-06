@@ -7,7 +7,7 @@
 package ki
 
 import (
-	//	"encoding/json"
+	"encoding/json"
 	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
@@ -57,6 +57,13 @@ func (n *Node) This() Ki {
 
 func (n *Node) SetThis(ki Ki) {
 	n.this = ki
+}
+
+func (n *Node) ThisCheck() error {
+	if n.this == nil {
+		return fmt.Errorf("KiNode ThisCheck: node has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	}
+	return nil
 }
 
 func (n *Node) KiParent() Ki {
@@ -247,8 +254,8 @@ func (n *Node) SetChildType(t reflect.Type) error {
 }
 
 func (n *Node) AddChildImpl(kid Ki) {
-	if n.this == nil {
-		log.Printf("KiNode AddChildImpl: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	if err := n.ThisCheck(); err != nil {
+		return
 	}
 	kid.SetThis(kid)
 	n.Children = append(n.Children, kid)
@@ -256,8 +263,8 @@ func (n *Node) AddChildImpl(kid Ki) {
 }
 
 func (n *Node) InsertChildImpl(kid Ki, at int) {
-	if n.this == nil {
-		log.Printf("KiNode AddChildImpl: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	if err := n.ThisCheck(); err != nil {
+		return
 	}
 	at = mathutil.Min(at, len(n.Children))
 	// this avoids extra garbage collection
@@ -297,8 +304,8 @@ func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 }
 
 func (n *Node) MakeNewChild() Ki {
-	if n.this == nil {
-		log.Printf("KiNode MakeNewChild: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	if err := n.ThisCheck(); err != nil {
+		return nil
 	}
 	typ := n.ChildType.T
 	if typ == nil {
@@ -653,6 +660,29 @@ func (n *Node) UpdateEnd(updtall bool) {
 //////////////////////////////////////////////////////////////////////////
 //  Marshal / Unmarshal support -- mostly in KiSlice
 
+func (n *Node) SaveJSON(indent bool) ([]byte, error) {
+	if err := n.ThisCheck(); err != nil {
+		return nil, err
+	}
+	if indent {
+		return json.MarshalIndent(n.this, "", " ")
+	} else {
+		return json.Marshal(n.this)
+	}
+}
+
+func (n *Node) LoadJSON(b []byte) error {
+	if err := n.ThisCheck(); err != nil {
+		return err
+	}
+	err := json.Unmarshal(b, n.this) // key use of this!
+	if err != nil {
+		return nil
+	}
+	n.UnmarshalPost()
+	return nil
+}
+
 func (n *Node) SetKiPtrsFmPaths() {
 	top := n.this
 	n.FunDown(nil, func(k Ki, d interface{}) bool {
@@ -693,18 +723,3 @@ func (n *Node) UnmarshalPost() {
 	n.ParentAllChildren()
 	n.SetKiPtrsFmPaths()
 }
-
-// func (n *Node) UnmarshalJSON(b []byte) error {
-// 	err := json.Unmarshal(b, n.this) // key use of this!
-// 	if err != nil {
-// 		return nil
-// 	}
-// 	// KiSlice creates children but can't set their parent -- we do that here..
-// 	for _, child := range n.KiChildren() {
-// 		child.SetParent(n)
-// 	}
-// 	if n.IsRoot() {
-// 		n.SetKiPtrsFmPaths()
-// 	}
-// 	return nil
-// }

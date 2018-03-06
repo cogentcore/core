@@ -46,6 +46,9 @@ type Ki interface {
 	// Set the this -- done automatically in AddChild and InsertChild methods
 	SetThis(ki Ki)
 
+	// check that the this pointer is set and issue a warning to log if not -- returns false if not set
+	ThisCheck() error
+
 	// Ki has strict one-parent, no-cycles structure -- see SetParent
 	KiParent() Ki
 
@@ -226,7 +229,13 @@ type Ki interface {
 	UpdateEnd(updtAll bool)
 
 	//////////////////////////////////////////////////////////////////////////
-	//  Marshal / Unmarshal support -- mostly in KiSlice
+	//  IO: Marshal / Unmarshal support -- see also KiSlice, KiPtr
+
+	// save the tree to a JSON-encoded byte string -- wraps MarshalJSON
+	SaveJSON(indent bool) ([]byte, error)
+
+	// load the tree from a JSON-encoded byte string -- wraps UnmarshalJSON and calls UnmarshalPost
+	LoadJSON(b []byte) error
 
 	// walk the tree down from current node and call FindPtrFromPath on all KiPtr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
 	SetKiPtrsFmPaths()
