@@ -352,3 +352,61 @@ func TestNodeUpdate(t *testing.T) {
 	}
 
 }
+
+func TestProps(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetName("par1")
+	parent.SetRoot(&parent)
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	parent.SetChildType(reflect.TypeOf(parent))
+
+	res := make([]string, 0, 10)
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
+	})
+	// child1 :=
+	parent.AddNewChildNamed("child1")
+	child2 := parent.AddNewChildNamed("child1")
+	// child3 :=
+	parent.UpdateStart()
+	parent.AddNewChildNamed("child1")
+	parent.UpdateEnd(false)
+
+	child2.SetChildType(reflect.TypeOf(parent))
+	schild2 := child2.AddNewChildNamed("subchild1")
+
+	parent.SetProp("intprop", 42)
+	pprop, err := parent.GetPropInt("intprop", false)
+	if err != nil || pprop != 42 {
+		t.Errorf("TestProps error -- pprop %v != %v, err %v\n", pprop, 42, err)
+	}
+	sprop, err := schild2.GetPropInt("intprop", true)
+	if err != nil || sprop != 42 {
+		t.Errorf("TestProps error -- sprop inherited %v != %v, err %v\n", sprop, 42, err)
+	}
+	sprop, err = schild2.GetPropInt("intprop", false)
+	if err != nil || sprop != 0 {
+		t.Errorf("TestProps error -- sprop not inherited %v != %v, err %v\n", sprop, 0, err)
+	}
+
+	parent.SetProp("floatprop", 42.0)
+	spropf, err := schild2.GetPropFloat64("floatprop", true)
+	if err != nil || spropf != 42.0 {
+		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 42.0, err)
+	}
+
+	tstr := "test string"
+	parent.SetProp("stringprop", tstr)
+	sprops, err := schild2.GetPropString("stringprop", true)
+	if err != nil || sprops != tstr {
+		t.Errorf("TestProps error -- sprops inherited %v != %v, err %v\n", sprops, tstr, err)
+	}
+
+	parent.DelProp("floatprop")
+	spropf, err = schild2.GetPropFloat64("floatprop", true)
+	if err != nil || spropf != 0 {
+		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 0, err)
+	}
+
+}

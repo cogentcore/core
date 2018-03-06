@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ki is the base element of GoKi Trees
-// Ki = Tree in Japanese, and "Key" in English
 package ki
 
 import (
@@ -11,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/json-iterator/go"
 	"reflect"
 	"strconv"
 )
@@ -18,7 +17,7 @@ import (
 // KiSlice provides JSON marshal / unmarshal with encoding of underlying types
 type KiSlice []Ki
 
-// this saves type information for each object in a slice, and the unmarshal uses it to create proper object types
+// MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
 func (k KiSlice) MarshalJSON() ([]byte, error) {
 	nk := len(k)
 	b := make([]byte, 0, nk*100+20)
@@ -40,7 +39,13 @@ func (k KiSlice) MarshalJSON() ([]byte, error) {
 	}
 	b = append(b, []byte("},")...)
 	for i, kid := range k {
-		kb, err := json.Marshal(kid)
+		var err error
+		var kb []byte
+		if UseJsonIter {
+			kb, err = jsoniter.Marshal(kid)
+		} else {
+			kb, err = json.Marshal(kid)
+		}
 		if err == nil {
 			b = append(b, []byte("{")...)
 			b = append(b, kb[1:len(kb)-1]...)
@@ -55,6 +60,7 @@ func (k KiSlice) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// UnmarshalJSON parses the length and type information for each object in the slice, creates the new slice with those elements, and then loads based on the remaining bytes which represent each element
 func (k *KiSlice) UnmarshalJSON(b []byte) error {
 	// fmt.Printf("json in: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
@@ -112,7 +118,11 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 
 	// fmt.Printf("loading:\n%v", string(cb))
 
-	err = json.Unmarshal(cb, &nwk)
+	if UseJsonIter {
+		err = jsoniter.Unmarshal(cb, &nwk)
+	} else {
+		err = json.Unmarshal(cb, &nwk)
+	}
 	if err != nil {
 		return err
 	}

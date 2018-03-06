@@ -4,10 +4,12 @@
 
 // Ki is the base element of GoKi Trees
 // Ki = Tree in Japanese, and "Key" in English
+
 package ki
 
 import (
 	"encoding/json"
+	"github.com/json-iterator/go"
 	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
@@ -18,20 +20,16 @@ import (
 	// "unsafe"
 )
 
-// todo
-// * KiPtr -- save as unique path, restore with one method that walks tree
-// * walk tree with fun
-// * property agg
-// * support signals for child add / remove
+// use this to switch between using standard json vs. faster jsoniter
+// right now jsoniter does not continue with the MarshalIndent beyond first level,
+// even when called specifically in the KiSlice code
+var UseJsonIter bool = false
+
+// todo:
 
 /*
-The Node implements the Ki interface and provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general -- provides core functionality:
-* Parent / Child Tree structure -- each Node can ONLY have one parent
-* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
-* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc
-* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
+The Node implements the Ki interface and provides the core functionality for the GoKi tree -- use the Node as an embedded struct or as a struct field -- the embedded version supports full JSON save / load
 */
-
 type Node struct {
 	Name       string
 	UniqueName string
@@ -39,10 +37,10 @@ type Node struct {
 	Parent     Ki     `json:"-"`
 	ChildType  KiType `desc:"default type of child to create"`
 	Children   KiSlice
-	NodeSig    Signal `json:"-", desc:"signal for node structure changes -- emits SignalType signals"`
-	Updating   KiCtr  `json:"-", desc:"updating counter used in UpdateStart / End calls"`
-	deleted    []Ki   `desc:"keeps track of deleted nodes until destroyed"`
-	this       Ki     `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object -- function receivers do not have this ability"`
+	NodeSig    Signal  `json:"-", desc:"signal for node structure changes -- emits SignalType signals"`
+	Updating   AtomCtr `json:"-", desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety"`
+	deleted    []Ki    `desc:"keeps track of deleted nodes until destroyed"`
+	this       Ki      `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object -- function receivers do not have this ability"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -166,52 +164,52 @@ func (n *Node) GetProp(key string, inherit bool) interface{} {
 	return n.Parent.GetProp(key, inherit)
 }
 
-func (n *Node) GetPropBool(key string, inherit bool) bool {
+func (n *Node) GetPropBool(key string, inherit bool) (bool, error) {
 	v := n.GetProp(key, inherit)
 	if v == nil {
-		return false
+		return false, nil
 	}
 	b, ok := v.(bool)
 	if !ok {
-		return false
+		return false, fmt.Errorf("KiNode GetPropBool -- property %v exists but is not a bool, is: %T", key, v)
 	}
-	return b
+	return b, nil
 }
 
-func (n *Node) GetPropInt64(key string, inherit bool) int64 {
+func (n *Node) GetPropInt(key string, inherit bool) (int, error) {
 	v := n.GetProp(key, inherit)
 	if v == nil {
-		return 0
+		return 0, nil
 	}
-	b, ok := v.(int64)
+	b, ok := v.(int)
 	if !ok {
-		return 0
+		return 0, fmt.Errorf("KiNode GetPropInt -- property %v exists but is not an int, is: %T", key, v)
 	}
-	return b
+	return b, nil
 }
 
-func (n *Node) GetPropFloat64(key string, inherit bool) float64 {
+func (n *Node) GetPropFloat64(key string, inherit bool) (float64, error) {
 	v := n.GetProp(key, inherit)
 	if v == nil {
-		return 0
+		return 0, nil
 	}
 	b, ok := v.(float64)
 	if !ok {
-		return 0
+		return 0, fmt.Errorf("KiNode GetPropFloat64 -- property %v exists but is not a float64, is: %T", key, v)
 	}
-	return b
+	return b, nil
 }
 
-func (n *Node) GetPropString(key string, inherit bool) string {
+func (n *Node) GetPropString(key string, inherit bool) (string, error) {
 	v := n.GetProp(key, inherit)
 	if v == nil {
-		return ""
+		return "", nil
 	}
 	b, ok := v.(string)
 	if !ok {
-		return ""
+		return "", fmt.Errorf("KiNode GetPropString -- property %v exists but is not a string, is: %T", key, v)
 	}
-	return b
+	return b, nil
 }
 
 func (n *Node) DelProp(key string) {
@@ -231,8 +229,8 @@ func (n *Node) SetParent(parent Ki) {
 	}
 	n.Parent = parent
 	if parent != nil {
-		n.Updating = *(parent.UpdateCtr()) // we need parent's update counter b/c they will end
-		n.DelProp("root")                  // can't be root anymore!
+		n.Updating.Set(parent.UpdateCtr().Value()) // we need parent's update counter b/c they will end
+		n.DelProp("root")                          // can't be root anymore!
 	}
 }
 
@@ -242,12 +240,13 @@ func (n *Node) SetRoot(ths Ki) {
 }
 
 func (n *Node) IsRoot() bool {
-	return n.GetPropBool("root", false) // not inherit
+	b, _ := n.GetPropBool("root", false) // not inherit
+	return b
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
 	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
-		return fmt.Errorf("Node SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
+		return fmt.Errorf("KiNode SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
 	}
 	n.ChildType.T = t
 	return nil
@@ -276,7 +275,7 @@ func (n *Node) InsertChildImpl(kid Ki, at int) {
 }
 
 func (n *Node) EmitChildAddedSignal(kid Ki) {
-	if n.Updating == 0 {
+	if n.Updating.Value() == 0 {
 		n.NodeSig.Emit(n.this, SignalChildAdded, kid)
 	}
 }
@@ -457,7 +456,7 @@ func (n *Node) FindChildName(name string, start_idx int) Ki {
 }
 
 func (n *Node) EmitChildRemovedSignal(kid Ki) {
-	if n.Updating == 0 {
+	if n.Updating.Value() == 0 {
 		n.NodeSig.Emit(n.this, SignalChildRemoved, kid)
 	}
 }
@@ -497,7 +496,7 @@ func (n *Node) RemoveChildName(name string, destroy bool) Ki {
 }
 
 func (n *Node) EmitChildrenResetSignal() {
-	if n.Updating == 0 {
+	if n.Updating.Value() == 0 {
 		n.NodeSig.Emit(n.this, SignalChildrenReset, nil)
 	}
 }
@@ -539,10 +538,6 @@ func (n *Node) IsLeaf() bool {
 // does this node have children (i.e., non-terminal)
 func (n *Node) HasChildren() bool {
 	return len(n.Children) > 0
-}
-
-func (n *Node) IsTop() bool {
-	return n.Parent == nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -621,36 +616,36 @@ func (n *Node) NodeSignal() *Signal {
 	return &n.NodeSig
 }
 
-func (n *Node) UpdateCtr() *KiCtr {
+func (n *Node) UpdateCtr() *AtomCtr {
 	return &n.Updating
 }
 
 func (n *Node) UpdateStart() {
-	n.FunDown(nil, func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true })
+	n.FunDown(nil, func(k Ki, d interface{}) bool { k.UpdateCtr().Inc(); return true })
 }
 
 func (n *Node) UpdateEnd(updtall bool) {
 	par_updt := false
 	n.FunDown(&par_updt, func(k Ki, d interface{}) bool {
-		par_updt := d.(*bool)      // did the parent already update?
-		if *(k.UpdateCtr()) == 1 { // we will go to 0 -- but don't do yet so !updtall works
+		par_updt := d.(*bool)           // did the parent already update?
+		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if updtall {
-				*(k.UpdateCtr())--
+				k.UpdateCtr().Dec()
 				k.NodeSignal().Emit(k, SignalNodeUpdated, d)
 			} else {
-				if k.KiParent() == nil || (!*par_updt && *(k.KiParent().UpdateCtr()) == 0) {
-					*(k.UpdateCtr())--
+				if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
+					k.UpdateCtr().Dec()
 					k.NodeSignal().Emit(k, SignalNodeUpdated, d)
 					*par_updt = true // we updated so nobody else can!
 				} else {
-					*(k.UpdateCtr())--
+					k.UpdateCtr().Dec()
 				}
 			}
 		} else {
-			if *(k.UpdateCtr()) <= 0 {
+			if k.UpdateCtr().Value() <= 0 {
 				log.Printf("KiNode UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
 			} else {
-				*(k.UpdateCtr())--
+				k.UpdateCtr().Dec()
 			}
 		}
 		return true
@@ -665,17 +660,30 @@ func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 		return nil, err
 	}
 	if indent {
-		return json.MarshalIndent(n.this, "", " ")
+		if UseJsonIter {
+			return jsoniter.MarshalIndent(n.this, "", " ")
+		} else {
+			return json.MarshalIndent(n.this, "", " ")
+		}
 	} else {
-		return json.Marshal(n.this)
+		if UseJsonIter {
+			return jsoniter.Marshal(n.this)
+		} else {
+			return json.Marshal(n.this)
+		}
 	}
 }
 
 func (n *Node) LoadJSON(b []byte) error {
-	if err := n.ThisCheck(); err != nil {
+	var err error
+	if err = n.ThisCheck(); err != nil {
 		return err
 	}
-	err := json.Unmarshal(b, n.this) // key use of this!
+	if UseJsonIter {
+		err = jsoniter.Unmarshal(b, n.this) // key use of this!
+	} else {
+		err = json.Unmarshal(b, n.this) // key use of this!
+	}
 	if err != nil {
 		return nil
 	}

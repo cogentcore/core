@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ki is the base element of GoKi Trees
-// Ki = Tree in Japanese, and "Key" in English
 package ki
 
 import (
@@ -19,22 +17,23 @@ type KiPtr struct {
 	Path string
 }
 
+// GetPath updates the Path field with the current path to the pointer
 func (k *KiPtr) GetPath() {
 	k.Path = k.Ptr.PathUnique()
 }
 
-func (k *KiPtr) FindPtrFromPath(top Ki) bool {
+// FindPtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil
+func (k *KiPtr) FindPtrFromPath(root Ki) bool {
 	// fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
 		return false
 	}
-	k.Ptr = top.FindPathUnique(k.Path)
+	k.Ptr = root.FindPathUnique(k.Path)
 	// fmt.Printf("found: %v\n", k.Ptr)
 	return k.Ptr != nil
 }
 
-// this saves type information for each object in a slice, and the unmarshal uses it to create
-// proper object types
+// MarshalJSON gets the current path and saves only the Path directly as value of this struct
 func (k KiPtr) MarshalJSON() ([]byte, error) {
 	if k.Ptr == nil {
 		// if true {
@@ -51,6 +50,7 @@ func (k KiPtr) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// UnarshalJSON loads the Path string directly from saved value -- KiNode must call SetKiPtrsFmPaths to actually update the pointers, based on the root object in the tree from which trees were generated, after all the initial loading has completed and the structure is all in place
 func (k *KiPtr) UnmarshalJSON(b []byte) error {
 	// fmt.Printf("attempt to load path: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {

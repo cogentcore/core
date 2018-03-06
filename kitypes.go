@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ki is the base element of GoKi Trees
-// Ki = Tree in Japanese, and "Key" in English
 package ki
 
 import (
@@ -11,15 +9,17 @@ import (
 	"reflect"
 )
 
-// map from type name to reflect.Type -- need to explicitly register each new type
-
+// TypeRegistry is a map from type name to reflect.Type -- need to explicitly register each new type by calling AddType in the process of creating a new global variable, as in:
+// 	var KtTypeName = KiTypes.AddType(&TypeName{})
+// 	where TypeName is the name of the type
 type TypeRegistry struct {
 	Types map[string]reflect.Type
 }
 
-// this is master registry of Ki types
+// KiTypes is master registry of types that embed Ki Nodes
 var KiTypes TypeRegistry
 
+// AddType adds a given type to the registry -- requires an empty object to grab type info from
 func (tr *TypeRegistry) AddType(obj interface{}) reflect.Type {
 	if tr.Types == nil {
 		tr.Types = make(map[string]reflect.Type)
@@ -31,6 +31,7 @@ func (tr *TypeRegistry) AddType(obj interface{}) reflect.Type {
 	return typ
 }
 
+// GetType finds a type based on its name -- returns nil if not found
 func (tr *TypeRegistry) GetType(name string) reflect.Type {
 	return tr.Types[name]
 }

@@ -2,30 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ki is the base element of GoKi Trees
-// Ki = Tree in Japanese, and "Key" in English
+/*
+	Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and "Key" in English -- powerful tree structures supporting scenegraphs, programs, parsing, etc.
+
+	The Node struct that implements the Ki interface, which
+	can be used as an embedded type (or a struct field) in other structs to provide
+	core tree functionality, including:
+		* Parent / Child Tree structure -- each Node can ONLY have one parent
+		* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
+		* Apply a function across nodes up or down a tree -- very flexible for tree walking
+		* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc -- including pointers which are saved using paths and automatically cached-out after loading
+		* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
+		* Robust updating state -- wrap updates in UpdateStart / End, and signals are blocked until the final end, at which point an update signal is sent -- works across levels
+		* Properties (as a string-keyed map) with property inheritance -- css anyone!?
+*/
 package ki
 
 import (
 	"reflect"
 )
-
-/*
-The Ki provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general -- provides core functionality:
-* Parent / Child Tree structure -- each Node can ONLY have one parent
-* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
-* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc
-* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
-
-NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix for basic items here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
-
-Other key issues with the Ki design / Go:
-* All interfaces are implicitly pointers: this is why you have to pass args with & address of
-* Any object that you need to reflect on MUST be passed as an arg, NOT as a receiver!  only args retain their true underlying type -- receivers are always just what they say they are.
-*/
-
-// function to call on ki objects walking the tree -- bool rval = false means stop traversing
-type KiFun func(node Ki, data interface{}) bool
 
 // flags for basic Ki status -- not using yet..
 // type KiFlags int32
@@ -36,9 +31,14 @@ type KiFun func(node Ki, data interface{}) bool
 // 	KiDeleted    KiFlags = 1 << iota
 // )
 
-// counter flag for things that can be called redundantly
-type KiCtr int64
+/*
+The Ki interface provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general.
 
+NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix for basic items here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
+
+Other key issues with the Ki design / Go:
+* All interfaces are implicitly pointers: this is why you have to pass args with & address of
+*/
 type Ki interface {
 	// unfortunately, Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a this pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls)
 	This() Ki
@@ -86,17 +86,17 @@ type Ki interface {
 	// Get property value from key, safely -- if inherit, then check all parents too
 	GetProp(key string, inherit bool) interface{}
 
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a bool -- false if not set or false
-	GetPropBool(key string, inherit bool) bool
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a bool -- false if not set or false -- error if key exists but is of a different type
+	GetPropBool(key string, inherit bool) (bool, error)
 
-	// Get property value from key, safely -- if inherit, then check all parents too -- as an int64 -- 0 if not set
-	GetPropInt64(key string, inherit bool) int64
+	// Get property value from key, safely -- if inherit, then check all parents too -- as an int -- 0 if not set -- error if key exists but is of a different type
+	GetPropInt(key string, inherit bool) (int, error)
 
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a float -- 0 if not set
-	GetPropFloat64(key string, inherit bool) float64
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a float -- 0 if not set -- error if key exists but is of a different type
+	GetPropFloat64(key string, inherit bool) (float64, error)
 
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a string -- "" if not set
-	GetPropString(key string, inherit bool) string
+	// Get property value from key, safely -- if inherit, then check all parents too -- as a string -- "" if not set -- error if key exists but is of a different type
+	GetPropString(key string, inherit bool) (string, error)
 
 	// Delete property key, safely
 	DelProp(key string)
@@ -219,8 +219,8 @@ type Ki interface {
 	// the main signal for this node that is used for update, child signals
 	NodeSignal() *Signal
 
-	// the update counter for this node
-	UpdateCtr() *KiCtr
+	// the update counter for this node -- uses atomic counter for thread safety
+	UpdateCtr() *AtomCtr
 
 	// call this when starting to modify the tree (state or structure) -- increments an atomic update counter and automatically calls start update on all children -- can be called multiple times at multiple levels
 	UpdateStart()
@@ -251,3 +251,6 @@ type Ki interface {
 
 // IMPORTANT: all types must initialize entry in KiTypes Registry:
 // var KtTypeName = KiTypes.AddType(&TypeName{})
+
+// function to call on ki objects walking the tree -- bool rval = false means stop traversing
+type KiFun func(node Ki, data interface{}) bool

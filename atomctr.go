@@ -8,8 +8,7 @@ import (
 	"sync/atomic"
 )
 
-// implements basic atomic int64 counter, used for update counter on Ki Node
-
+// AtomCtr implements basic atomic int64 counter, used e.g., for update counter on Ki Node
 type AtomCtr int64
 
 // increment counter
@@ -42,7 +41,7 @@ func (a *AtomCtr) Set(val int64) {
 	atomic.StoreInt64((*int64)(a), val)
 }
 
-// swap new value and return old
+// swap new value in and return old value
 func (a *AtomCtr) Swap(val int64) int64 {
 	return atomic.SwapInt64((*int64)(a), val)
 }

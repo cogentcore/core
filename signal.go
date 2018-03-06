@@ -10,12 +10,10 @@ import (
 	"reflect"
 )
 
-// this implemeents general signal passing between Ki objects, like Qt's Signal / Slot system
-
+// implements general signal passing between Ki objects, like Qt's Signal / Slot system
 // started from: github.com/tucnak/meta/
 
-// standard signals -- can extend by starting at iota + last signal here
-
+// SignalType provides standard signals -- can extend by starting at iota + last signal here
 type SignalType int64
 
 const (
@@ -39,6 +37,7 @@ type Signal struct {
 	Cons   []Connection
 }
 
+// Connection represents one connection between a signal and a receiving Ki and function to call
 type Connection struct {
 	// node that will receive the signal
 	Recv Ki
