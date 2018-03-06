@@ -28,19 +28,21 @@ var UseJsonIter bool = false
 // todo:
 
 /*
-The Node implements the Ki interface and provides the core functionality for the GoKi tree -- use the Node as an embedded struct or as a struct field -- the embedded version supports full JSON save / load
+The Node implements the Ki interface and provides the core functionality for the GoKi tree -- use the Node as an embedded struct or as a struct field -- the embedded version supports full JSON save / load.
+
+The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info -- add these to all your derived struct's fields.  See relevant docs for other such tags controlling a wide range of GUI and other functionality -- Ki makes extensive use of such tags.
 */
 type Node struct {
-	Name       string
-	UniqueName string
+	Name       string `desc:"user-supplied name of this node -- can be empty or non-unique"`
+	UniqueName string `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in KiPtr pointers"`
 	Properties map[string]interface{}
-	Parent     Ki     `json:"-"`
-	ChildType  KiType `desc:"default type of child to create"`
-	Children   KiSlice
-	NodeSig    Signal  `json:"-", desc:"signal for node structure changes -- emits SignalType signals"`
-	Updating   AtomCtr `json:"-", desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety"`
+	Parent     Ki      `json:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
+	ChildType  KiType  `desc:"default type of child to create -- if nil then same type as node itself is used"`
+	Children   KiSlice `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Remove to ensure proper usage"`
+	NodeSig    Signal  `json:"-",desc:"signal for node structure / state changes -- emits SignalType signals"`
+	Updating   AtomCtr `json:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
 	deleted    []Ki    `desc:"keeps track of deleted nodes until destroyed"`
-	this       Ki      `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object -- function receivers do not have this ability"`
+	this       Ki      `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json

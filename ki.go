@@ -32,7 +32,7 @@ import (
 // )
 
 /*
-The Ki interface provides the core functionality for the GoKi Tree functionality -- insipred by Qt QObject in specific and every other Tree everywhere in general.
+The Ki interface provides the core functionality for the GoKi tree -- insipred by Qt QObject in specific and every other Tree everywhere in general.
 
 NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix for basic items here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
 
