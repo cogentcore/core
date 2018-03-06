@@ -7,7 +7,7 @@
 package ki
 
 import (
-	"fmt"
+	// "fmt"
 	"reflect"
 )
 
@@ -27,7 +27,7 @@ func (tr *TypeRegistry) AddType(obj interface{}) reflect.Type {
 
 	typ := reflect.TypeOf(obj).Elem()
 	tr.Types[typ.Name()] = typ
-	fmt.Printf("added type: %v\n", typ.Name())
+	// fmt.Printf("added type: %v\n", typ.Name())
 	return typ
 }
 

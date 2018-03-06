@@ -236,11 +236,6 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 //////////////////////////////////////////
 //  function calling
 
-func NodeTestFun1(n Ki, d interface{}) bool {
-	fmt.Printf("node fun1 on: %v, data %v\n", n.KiUniqueName(), d)
-	return true
-}
-
 func TestNodeCallFun(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
@@ -257,13 +252,29 @@ func TestNodeCallFun(t *testing.T) {
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
 
-	parent.FunDown("fun_down", NodeTestFun1)
-	schild2.FunUp("fun up", NodeTestFun1)
-	schild2.FunUp("fun up2", func(n Ki, d interface{}) bool {
-		fmt.Printf("node anon fun on: %v, data %v\n", n.KiUniqueName(), d)
+	res := make([]string, 0, 10)
+	parent.FunDown("fun_down", func(k Ki, d interface{}) bool {
+		res = append(res, fmt.Sprintf("%v, %v", k.KiUniqueName(), d))
 		return true
 	})
+	// fmt.Printf("result: %v\n", res)
 
+	trg := []string{"par1, fun_down", "child1, fun_down", "child1_1, fun_down", "subchild1, fun_down", "child1_2, fun_down"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("FunDown error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
+
+	schild2.FunUp("fun_up", func(k Ki, d interface{}) bool {
+		res = append(res, fmt.Sprintf("%v, %v", k.KiUniqueName(), d))
+		return true
+	})
+	//	fmt.Printf("result: %v\n", res)
+
+	trg = []string{"subchild1, fun_up", "child1_1, fun_up", "par1, fun_up"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("FunUp error -- results: %v != target: %v\n", res, trg)
+	}
 }
 
 func TestNodeUpdate(t *testing.T) {
@@ -273,8 +284,10 @@ func TestNodeUpdate(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
+
+	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 	// child1 :=
 	parent.AddNewChildNamed("child1")
@@ -284,41 +297,58 @@ func TestNodeUpdate(t *testing.T) {
 	parent.AddNewChildNamed("child1")
 	parent.UpdateEnd(false)
 
-	// parent.FunDown("upcnt", func(n Ki, d interface{}) bool {
-	// 	fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
-	// 	return true
-	// })
-
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
 
+	// fmt.Printf("res: %v\n", res)
+	trg := []string{"par1 sig SignalChildAdded", "par1 sig SignalChildAdded", "par1 sig SignalNodeUpdated"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("Add child sigs error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
+
 	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		fmt.Printf("node %v was updated sig %v\n", s.KiName(), sig)
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 
-	fmt.Print("\nnode update all starting\n")
+	// fmt.Print("\nnode update all starting\n")
 	child2.UpdateStart()
 	schild2.UpdateStart()
 	schild2.UpdateEnd(true)
 	child2.UpdateEnd(true)
 
-	// parent.FunDown(func(n Ki, d interface{}) bool {
-	// 	fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
-	// 	return true
-	// }, "upcnt")
+	// fmt.Printf("res: %v\n", res)
+	trg = []string{"child1 sig SignalNodeUpdated", "subchild1 sig SignalNodeUpdated"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("update signal all error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
 
-	fmt.Print("\nnode update top starting\n")
+	// fmt.Print("\nnode update top starting\n")
 	child2.UpdateStart()
 	schild2.UpdateStart()
 	schild2.UpdateEnd(false)
 	child2.UpdateEnd(false)
 
-	fmt.Print("\nfinal node counts should all be zero\n")
+	// fmt.Printf("res: %v\n", res)
+	trg = []string{"child1 sig SignalNodeUpdated"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("update signal only top error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
+
 	parent.FunDown("upcnt", func(n Ki, d interface{}) bool {
-		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
+		res = append(res, fmt.Sprintf("%v %v", n.KiUniqueName(), *n.UpdateCtr()))
 		return true
 	})
+	// fmt.Printf("res: %v\n", res)
+
+	trg = []string{"par1 0", "child1 0", "child1_1 0", "subchild1 0", "child1_2 0"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("update counts error -- results: %v != target: %v\n", res, trg)
+	}
+
 }
