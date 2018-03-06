@@ -32,6 +32,7 @@ func Slot2(receiver, sender Ki, sig SignalType, data interface{}) {
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.SetName("par1")
+	parent.SetRoot(&parent)
 	child1 := parent.AddNewChildNamed("child1")
 	child2 := parent.AddNewChildNamed("child2")
 

@@ -21,10 +21,10 @@ type SignalType int64
 const (
 	NilSignal           SignalType = iota
 	SignalChildAdded    SignalType = iota // data for signal is the added child
-	SignalChildRemoved  SignalType = iota
-	SignalChildrenReset SignalType = iota
-	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
+	SignalChildRemoved  SignalType = iota // data is removed child
+	SignalChildrenReset SignalType = iota // no data
 	SignalNodeUpdated   SignalType = iota // entire node updated
+	SignalFieldUpdated  SignalType = iota // a field was updated -- data typically name of field
 )
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data

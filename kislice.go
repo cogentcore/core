@@ -18,8 +18,7 @@ import (
 // KiSlice provides JSON marshal / unmarshal with encoding of underlying types
 type KiSlice []Ki
 
-// this saves type information for each object in a slice, and the unmarshal uses it to create
-// proper object types
+// this saves type information for each object in a slice, and the unmarshal uses it to create proper object types
 func (k KiSlice) MarshalJSON() ([]byte, error) {
 	nk := len(k)
 	b := make([]byte, 0, nk*100+20)
@@ -103,6 +102,7 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 		if !ok {
 			return fmt.Errorf("KiSlice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
 		}
+		kid.SetThis(kid)
 		nwk = append(nwk, kid)
 	}
 

@@ -19,8 +19,6 @@ type HasNode struct {
 	Mbr2   int
 }
 
-func (t *HasNode) Ki() Ki { return &t.KiNode }
-
 var KtHasNode = KiTypes.AddType(&HasNode{})
 
 type NodeEmbed struct {
@@ -30,13 +28,12 @@ type NodeEmbed struct {
 	Mbr2 int
 }
 
-// func (t *NodeEmbed) Ki() Ki { return t }
-
 var KtNodeEmbed = KiTypes.AddType(&NodeEmbed{})
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")
+	parent.KiNode.SetRoot(&parent.KiNode)
 	child := HasNode{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
@@ -46,6 +43,9 @@ func TestNodeAddChild(t *testing.T) {
 	if len(parent.KiNode.Children) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.KiNode.Children))
 	}
+	if child.KiNode.KiParent() == nil {
+		t.Errorf("child parent is nil")
+	}
 	if child.KiNode.Path() != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", child.KiNode.Path())
 	}
@@ -54,7 +54,7 @@ func TestNodeAddChild(t *testing.T) {
 func TestNodeEmbedAddChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
-	parent.SetRoot()
+	parent.SetRoot(&parent)
 	child := NodeEmbed{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
@@ -73,7 +73,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	// nod := Node{}
 	parent := NodeEmbed{}
 	parent.SetName("par1")
-	parent.SetRoot()
+	parent.SetRoot(&parent)
 	// parent.SetChildType(reflect.TypeOf(nod))
 	err := parent.SetChildType(reflect.TypeOf(parent))
 	if err != nil {
@@ -94,6 +94,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 
 func TestNodeUniqueNames(t *testing.T) {
 	parent := HasNode{}
+	parent.KiNode.SetRoot(&parent.KiNode)
 	parent.KiNode.SetName("par1")
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
@@ -119,6 +120,7 @@ func TestNodeUniqueNames(t *testing.T) {
 func TestNodeRemoveChild(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")
+	parent.KiNode.SetRoot(&parent.KiNode)
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.RemoveChild(&child.KiNode, true)
@@ -133,6 +135,7 @@ func TestNodeRemoveChild(t *testing.T) {
 func TestNodeRemoveChildName(t *testing.T) {
 	parent := HasNode{}
 	parent.KiNode.SetName("par1")
+	parent.KiNode.SetRoot(&parent.KiNode)
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.RemoveChildName("child1", true)
@@ -146,10 +149,12 @@ func TestNodeRemoveChildName(t *testing.T) {
 
 func TestNodeFindName(t *testing.T) {
 	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
-	parent := NewNode()
+	parent := Node{}
+	parent.SetName("par")
+	parent.SetRoot(&parent)
 	for _, nm := range names {
-		child := NewNode()
-		parent.AddChildNamed(child, nm)
+		child := Node{}
+		parent.AddChildNamed(&child, nm)
 	}
 	if len(parent.Children) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Children))
@@ -166,10 +171,12 @@ func TestNodeFindName(t *testing.T) {
 
 func TestNodeFindNameUnique(t *testing.T) {
 	names := [...]string{"child", "child_1", "child_2", "child_3", "child_4", "child_5"}
-	parent := NewNode()
+	parent := Node{}
+	parent.SetName("par")
+	parent.SetRoot(&parent)
 	for range names {
-		child := NewNode()
-		parent.AddChildNamed(child, "child")
+		child := Node{}
+		parent.AddChildNamed(&child, "child")
 	}
 	if len(parent.Children) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Children))
@@ -190,7 +197,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeEmbedJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
-	parent.SetRoot()
+	parent.SetRoot(&parent)
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
@@ -209,23 +216,27 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	b, err := json.MarshalIndent(parent, "", "  ")
 	if err != nil {
 		t.Error(err)
-	} else {
-		fmt.Printf("json output: %v\n", string(b))
+		// } else {
+		// 	fmt.Printf("json output: %v\n", string(b))
 	}
 
 	tstload := NodeEmbed{}
+	tstload.SetRoot(&tstload)
 	err = json.Unmarshal(b, &tstload)
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstload.UnmarshalPost(&tstload)
+		tstload.UnmarshalPost()
 		tstb, _ := json.MarshalIndent(tstload, "", "  ")
-		fmt.Printf("test loaded json output: %v\n", string(tstb))
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
 }
+
+//////////////////////////////////////////
+//  function calling
 
 func NodeTestFun1(n Ki, d interface{}) bool {
 	fmt.Printf("node fun1 on: %v, data %v\n", n.KiUniqueName(), d)
@@ -235,6 +246,7 @@ func NodeTestFun1(n Ki, d interface{}) bool {
 func TestNodeCallFun(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
+	parent.SetRoot(&parent)
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
@@ -247,18 +259,19 @@ func TestNodeCallFun(t *testing.T) {
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
 
-	parent.FunDown(&parent, NodeTestFun1, "fun down")
-	schild2.FunUp(schild2, NodeTestFun1, "fun up")
-	schild2.FunUp(schild2, func(n Ki, d interface{}) bool {
+	parent.FunDown("fun_down", NodeTestFun1)
+	schild2.FunUp("fun up", NodeTestFun1)
+	schild2.FunUp("fun up2", func(n Ki, d interface{}) bool {
 		fmt.Printf("node anon fun on: %v, data %v\n", n.KiUniqueName(), d)
 		return true
-	}, "fun up2")
+	})
 
 }
 
 func TestNodeUpdate(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetName("par1")
+	parent.SetRoot(&parent)
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
@@ -273,10 +286,10 @@ func TestNodeUpdate(t *testing.T) {
 	parent.AddNewChildNamed("child1")
 	parent.UpdateEnd(false)
 
-	parent.FunDown(&parent, func(n Ki, d interface{}) bool {
-		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
-		return true
-	}, "upcnt")
+	// parent.FunDown("upcnt", func(n Ki, d interface{}) bool {
+	// 	fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
+	// 	return true
+	// })
 
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed("subchild1")
@@ -306,8 +319,8 @@ func TestNodeUpdate(t *testing.T) {
 	child2.UpdateEnd(false)
 
 	fmt.Print("\nfinal node counts should all be zero\n")
-	parent.FunDown(&parent, func(n Ki, d interface{}) bool {
+	parent.FunDown("upcnt", func(n Ki, d interface{}) bool {
 		fmt.Printf("node %v updt count %v\n", n.KiUniqueName(), *n.UpdateCtr())
 		return true
-	}, "upcnt")
+	})
 }

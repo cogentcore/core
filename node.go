@@ -7,7 +7,7 @@
 package ki
 
 import (
-	// "encoding/json"
+	//	"encoding/json"
 	//	"errors"
 	"fmt"
 	"github.com/cznic/mathutil"
@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	// "unsafe"
 )
 
 // todo
@@ -41,63 +42,22 @@ type Node struct {
 	NodeSig    Signal `json:"-", desc:"signal for node structure changes -- emits SignalType signals"`
 	Updating   KiCtr  `json:"-", desc:"updating counter used in UpdateStart / End calls"`
 	deleted    []Ki   `desc:"keeps track of deleted nodes until destroyed"`
+	this       Ki     `desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object -- function receivers do not have this ability"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KtNode = KiTypes.AddType(&Node{})
 
-func NewNode() *Node {
-	return &Node{}
-}
-
-// Kier interface
-func (n *Node) Ki() Ki { return n }
-
-// Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
-// func KiToNodePtr(ki Ki) (*Node, error) {
-// 	vp := reflect.New(reflect.TypeOf(ki))
-// 	vp.Elem().Set(reflect.ValueOf(ki))
-// 	rval, ok := vp.Interface().(*Node)
-// 	if !ok {
-// 		rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
-// 		if !ok {
-// 			return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
-// 		}
-// 		return *rval, nil
-// 	}
-// 	return rval, nil
-// }
-
-// above is unnec -- just convert directly..
-func KiToNodePtr(ki Ki) (*Node, error) {
-	rval, ok := ki.(*Node)
-	if !ok {
-		// rval, ok := ki.(**Node) // maybe we got a double-pointer
-		// if !ok {
-		return nil, fmt.Errorf("KiToNodePtr: Ki was not a Node type, is: %T", ki)
-		// }
-		// return *rval, nil
-	}
-	return rval, nil
-}
-
-// Return a pointer to the supplied Node struct via Ki -- from https://groups.google.com/forum/#!msg/Golang-Nuts/KB3_Yj3Ny4c/Ai8tz-nkBwAJ -- see InterfaceToStructPtr in ki.go for more generic version
-func ObjToNodePtr(obj interface{}) (*Node, error) {
-	vp := reflect.New(reflect.TypeOf(obj))
-	vp.Elem().Set(reflect.ValueOf(obj))
-	rval, ok := vp.Interface().(*Node)
-	if !ok {
-		// rval, ok := vp.Interface().(**Node) // maybe we got a double-pointer
-		// if !ok {
-		return nil, fmt.Errorf("KiToNodePtr: Obj was not a Node type, is: %T", obj)
-		// }
-		// return *rval, nil
-	}
-	return rval, nil
-}
-
 //////////////////////////////////////////////////////////////////////////
 //  Basic Ki properties
+
+func (n *Node) This() Ki {
+	return n.this
+}
+
+func (n *Node) SetThis(ki Ki) {
+	n.this = ki
+}
 
 func (n *Node) KiParent() Ki {
 	return n.Parent
@@ -111,12 +71,8 @@ func (n *Node) KiChild(idx int) (Ki, error) {
 	return n.Children[idx], nil
 }
 
-func (n *Node) KiChildren() []Ki {
-	kids := make([]Ki, len(n.Children))
-	for i, child := range n.Children {
-		kids[i] = child
-	}
-	return kids
+func (n *Node) KiChildren() KiSlice {
+	return n.Children
 }
 
 func (n *Node) KiName() string {
@@ -126,6 +82,58 @@ func (n *Node) KiName() string {
 func (n *Node) KiUniqueName() string {
 	return n.UniqueName
 }
+
+// set name and unique name, ensuring unique name is unique..
+func (n *Node) SetName(name string) {
+	n.Name = name
+	n.UniqueName = name
+	if n.Parent != nil {
+		n.Parent.UniquifyNames()
+	}
+}
+
+func (n *Node) SetUniqueName(name string) {
+	n.UniqueName = name
+}
+
+// make sure that the names are unique -- n^2 ish
+func (n *Node) UniquifyNames() {
+	for i, child := range n.Children {
+		if len(child.KiUniqueName()) == 0 {
+			if n.Parent != nil {
+				child.SetUniqueName(n.Parent.KiUniqueName())
+			} else {
+				child.SetUniqueName(fmt.Sprintf("c%04d", i))
+			}
+		}
+		for { // changed
+			changed := false
+			for j := i - 1; j >= 0; j-- { // check all prior
+				if child.KiUniqueName() == n.Children[j].KiUniqueName() {
+					if idx := strings.LastIndex(child.KiUniqueName(), "_"); idx >= 0 {
+						curnum, err := strconv.ParseInt(child.KiUniqueName()[idx+1:], 10, 64)
+						if err == nil { // it was a number
+							curnum++
+							child.SetUniqueName(child.KiUniqueName()[:idx+1] +
+								strconv.FormatInt(curnum, 10))
+							changed = true
+							break
+						}
+					}
+					child.SetUniqueName(child.KiUniqueName() + "_1")
+					changed = true
+					break
+				}
+			}
+			if !changed {
+				break
+			}
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Property interface with inheritance -- nodes can inherit props from parents
 
 func (n *Node) KiProperties() map[string]interface{} {
 	return n.Properties
@@ -209,55 +217,6 @@ func (n *Node) DelProp(key string) {
 //////////////////////////////////////////////////////////////////////////
 //  Parent / Child Functionality
 
-// set name and unique name, ensuring unique name is unique..
-func (n *Node) SetName(name string) {
-	n.Name = name
-	n.UniqueName = name
-	if n.Parent != nil {
-		n.Parent.UniquifyNames()
-	}
-}
-
-func (n *Node) SetUniqueName(name string) {
-	n.UniqueName = name
-}
-
-// make sure that the names are unique -- n^2 ish
-func (n *Node) UniquifyNames() {
-	for i, child := range n.Children {
-		if len(child.KiUniqueName()) == 0 {
-			if n.Parent != nil {
-				child.SetUniqueName(n.Parent.KiUniqueName())
-			} else {
-				child.SetUniqueName(fmt.Sprintf("c%04d", i))
-			}
-		}
-		for { // changed
-			changed := false
-			for j := i - 1; j >= 0; j-- { // check all prior
-				if child.KiUniqueName() == n.Children[j].KiUniqueName() {
-					if idx := strings.LastIndex(child.KiUniqueName(), "_"); idx >= 0 {
-						curnum, err := strconv.ParseInt(child.KiUniqueName()[idx+1:], 10, 64)
-						if err == nil { // it was a number
-							curnum++
-							child.SetUniqueName(child.KiUniqueName()[:idx+1] +
-								strconv.FormatInt(curnum, 10))
-							changed = true
-							break
-						}
-					}
-					child.SetUniqueName(child.KiUniqueName() + "_1")
-					changed = true
-					break
-				}
-			}
-			if !changed {
-				break
-			}
-		}
-	}
-}
-
 // set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
 func (n *Node) SetParent(parent Ki) {
 	if n.Parent != nil {
@@ -270,7 +229,8 @@ func (n *Node) SetParent(parent Ki) {
 	}
 }
 
-func (n *Node) SetRoot() {
+func (n *Node) SetRoot(ths Ki) {
+	n.SetThis(ths)
 	n.SetProp("root", true)
 }
 
@@ -287,51 +247,62 @@ func (n *Node) SetChildType(t reflect.Type) error {
 }
 
 func (n *Node) AddChildImpl(kid Ki) {
+	if n.this == nil {
+		log.Printf("KiNode AddChildImpl: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	}
+	kid.SetThis(kid)
 	n.Children = append(n.Children, kid)
-	kid.SetParent(n)
+	kid.SetParent(n.this)
 }
 
 func (n *Node) InsertChildImpl(kid Ki, at int) {
+	if n.this == nil {
+		log.Printf("KiNode AddChildImpl: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	}
 	at = mathutil.Min(at, len(n.Children))
 	// this avoids extra garbage collection
 	n.Children = append(n.Children, nil)
 	copy(n.Children[at+1:], n.Children[at:])
+	kid.SetThis(kid)
 	n.Children[at] = kid
-	kid.SetParent(n)
+	kid.SetParent(n.this)
 }
 
-func (n *Node) EmitAddChildSignal(kid Ki) {
+func (n *Node) EmitChildAddedSignal(kid Ki) {
 	if n.Updating == 0 {
-		n.NodeSig.Emit(n, SignalChildAdded, kid)
+		n.NodeSig.Emit(n.this, SignalChildAdded, kid)
 	}
 }
 
 func (n *Node) AddChild(kid Ki) {
 	n.AddChildImpl(kid)
-	n.EmitAddChildSignal(kid)
+	n.EmitChildAddedSignal(kid)
 }
 
 func (n *Node) InsertChild(kid Ki, at int) {
 	n.InsertChildImpl(kid, at)
-	n.EmitAddChildSignal(kid)
+	n.EmitChildAddedSignal(kid)
 }
 
 func (n *Node) AddChildNamed(kid Ki, name string) {
 	n.AddChildImpl(kid)
 	kid.SetName(name)
-	n.EmitAddChildSignal(kid)
+	n.EmitChildAddedSignal(kid)
 }
 
 func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 	n.InsertChildImpl(kid, at)
 	kid.SetName(name)
-	n.EmitAddChildSignal(kid)
+	n.EmitChildAddedSignal(kid)
 }
 
 func (n *Node) MakeNewChild() Ki {
+	if n.this == nil {
+		log.Printf("KiNode MakeNewChild: parent has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+	}
 	typ := n.ChildType.T
 	if typ == nil {
-		typ = reflect.TypeOf(n).Elem() // make us by default
+		typ = reflect.TypeOf(n.this).Elem() // make us by default
 	}
 	nkid := reflect.New(typ).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
@@ -478,6 +449,12 @@ func (n *Node) FindChildName(name string, start_idx int) Ki {
 	return n.Children[idx]
 }
 
+func (n *Node) EmitChildRemovedSignal(kid Ki) {
+	if n.Updating == 0 {
+		n.NodeSig.Emit(n.this, SignalChildRemoved, kid)
+	}
+}
+
 // Remove child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 func (n *Node) RemoveChildIndex(idx int, destroy bool) {
 	child := n.Children[idx]
@@ -489,6 +466,7 @@ func (n *Node) RemoveChildIndex(idx int, destroy bool) {
 	if destroy {
 		n.deleted = append(n.deleted, child)
 	}
+	n.EmitChildRemovedSignal(child)
 }
 
 // Remove child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
@@ -511,6 +489,12 @@ func (n *Node) RemoveChildName(name string, destroy bool) Ki {
 	return child
 }
 
+func (n *Node) EmitChildrenResetSignal() {
+	if n.Updating == 0 {
+		n.NodeSig.Emit(n.this, SignalChildrenReset, nil)
+	}
+}
+
 // Remove all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
 func (n *Node) RemoveAllChildren(destroy bool) {
 	for _, child := range n.Children {
@@ -519,7 +503,8 @@ func (n *Node) RemoveAllChildren(destroy bool) {
 	if destroy {
 		n.deleted = append(n.deleted, n.Children...)
 	}
-	n.Children = n.Children[:0]
+	n.Children = n.Children[:0] // preserves capacity of list
+	n.EmitChildrenResetSignal()
 }
 
 // second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
@@ -556,6 +541,35 @@ func (n *Node) IsTop() bool {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
+// call function on given node and all the way up to its parents, and so on..
+func (n *Node) FunUp(data interface{}, fun KiFun) {
+	if !fun(n.this, data) { // false return means stop
+		return
+	}
+	if n.KiParent() != nil {
+		n.KiParent().FunUp(data, fun)
+	}
+}
+
+// call function on given node and all the way down to its children, and so on..
+func (n *Node) FunDown(data interface{}, fun KiFun) {
+	if !fun(n.this, data) { // false return means stop
+		return
+	}
+	for _, child := range n.KiChildren() {
+		child.FunDown(data, fun)
+	}
+}
+
+// concurrent go function on given node and all the way down to its children, and so on..
+func (n *Node) GoFunDown(data interface{}, fun KiFun) {
+	// todo: think about a channel here to coordinate
+	go fun(n.this, data)
+	for _, child := range n.KiChildren() {
+		child.GoFunDown(data, fun)
+	}
+}
+
 func (n *Node) Path() string {
 	if n.Parent != nil {
 		return n.Parent.Path() + "." + n.Name
@@ -577,7 +591,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if len(pe) == 0 {
 			continue
 		}
-		fmt.Printf("pe: %v\n", pe)
+		// fmt.Printf("pe: %v\n", pe)
 		if i <= 1 && curn.KiUniqueName() == pe {
 			continue
 		}
@@ -590,90 +604,11 @@ func (n *Node) FindPathUnique(path string) Ki {
 	return curn
 }
 
-func (n *Node) SetKiPtrsFmPaths(ki Ki) {
-	top := ki
-	n.FunDown(ki, func(k Ki, d interface{}) bool {
-		v := reflect.ValueOf(k).Elem()
-		// fmt.Printf("v: %v\n", v.Type())
-		for i := 0; i < v.NumField(); i++ {
-			vf := v.Field(i)
-			// fmt.Printf("vf: %v\n", vf.Type())
-			if vf.CanInterface() {
-				kp, ok := (vf.Interface()).(KiPtr)
-				if ok {
-					kp.FindPtrFromPath(top)
-				}
-			}
-		}
-		return true
-	},
-		ki)
-}
-
-func (n *Node) ParentAllChildren() {
-	n.FunDown(n, func(k Ki, d interface{}) bool {
-		for _, child := range k.KiChildren() {
-			child.SetParent(k)
-		}
-		return true
-	},
-		n)
-}
-
-func (n *Node) UnmarshalPost(ki Ki) {
-	n.ParentAllChildren()
-	n.SetKiPtrsFmPaths(ki)
-}
-
-// following prevents true types from being used, due to receiver issue..
-//
-// func (n *Node) UnmarshalJSON(b []byte) error {
-// 	type Node2 Node // this trick allows us to call the default Unmarshal first
-// 	err := json.Unmarshal(b, (*Node2)(n))
-// 	if err != nil {
-// 		return nil
-// 	}
-// 	// KiSlice creates children but can't set their parent -- we do that here..
-// 	for _, child := range n.KiChildren() {
-// 		child.SetParent(n)
-// 	}
-// 	// if n.IsRoot() {
-// 	// 	n.SetKiPtrsFmPaths(n)
-// 	// }
-// 	return nil
-// }
-
-// NOTE: redundant ki Ki arg = Node receiver is needed because only args retain their true
-// underlying types, whereas the receiver is always just a Node -- but we need the
-// receiver to have this function within the Ki interface, so, a little bit of redundancy..
-
-// call function on given node and all the way up to its parents, and so on..
-func (n *Node) FunUp(ki Ki, fun KiFun, data interface{}) {
-	if !fun(ki, data) {
-		return
-	}
-	if ki.KiParent() != nil {
-		ki.KiParent().FunUp(ki.KiParent(), fun, data)
-	}
-}
-
-// call function on given node and all the way down to its children, and so on..
-func (n *Node) FunDown(ki Ki, fun KiFun, data interface{}) {
-	if !fun(ki, data) {
-		return
-	}
-	for _, child := range ki.KiChildren() {
-		child.FunDown(child, fun, data)
-	}
-}
-
-// concurrent go function on given node and all the way down to its children, and so on..
-func (n *Node) GoFunDown(ki Ki, fun KiFun, data interface{}) {
-	go fun(ki, data)
-	for _, child := range ki.KiChildren() {
-		child.GoFunDown(child, fun, data)
-	}
-}
+//////////////////////////////////////////////////////////////////////////
+//  State update signaling -- automatically consolidates all changes across
+//   levels so there is only one update at end (optionally per node or only
+//   at highest level)
+//   All modification starts with UpdateStart() and ends with UpdateEnd()
 
 func (n *Node) NodeSignal() *Signal {
 	return &n.NodeSig
@@ -684,12 +619,12 @@ func (n *Node) UpdateCtr() *KiCtr {
 }
 
 func (n *Node) UpdateStart() {
-	n.FunDown(n, func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true }, nil)
+	n.FunDown(nil, func(k Ki, d interface{}) bool { *(k.UpdateCtr())++; return true })
 }
 
 func (n *Node) UpdateEnd(updtall bool) {
 	par_updt := false
-	n.FunDown(n, func(k Ki, d interface{}) bool {
+	n.FunDown(&par_updt, func(k Ki, d interface{}) bool {
 		par_updt := d.(*bool)      // did the parent already update?
 		if *(k.UpdateCtr()) == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if updtall {
@@ -712,5 +647,64 @@ func (n *Node) UpdateEnd(updtall bool) {
 			}
 		}
 		return true
-	}, &par_updt)
+	})
 }
+
+//////////////////////////////////////////////////////////////////////////
+//  Marshal / Unmarshal support -- mostly in KiSlice
+
+func (n *Node) SetKiPtrsFmPaths() {
+	top := n.this
+	n.FunDown(nil, func(k Ki, d interface{}) bool {
+		v := reflect.ValueOf(k).Elem()
+		// fmt.Printf("v: %v\n", v.Type())
+		for i := 0; i < v.NumField(); i++ {
+			vf := v.Field(i)
+			// fmt.Printf("vf: %v\n", vf.Type())
+			if vf.CanInterface() {
+				kp, ok := (vf.Interface()).(KiPtr)
+				if ok {
+					var pv Ki
+					if len(kp.Path) > 0 {
+						pv = top.FindPathUnique(kp.Path)
+						if pv == nil {
+							log.Printf("KiNode SetKiPtrsFmPaths: could not find path: %v in top obj: %v", kp.Path, top.KiName())
+						}
+						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
+					}
+					// todo: should set Ptr to nil but can't seem to do that here -- complains when above set is called with pv = nil
+				}
+			}
+		}
+		return true
+	})
+}
+
+func (n *Node) ParentAllChildren() {
+	n.FunDown(nil, func(k Ki, d interface{}) bool {
+		for _, child := range k.KiChildren() {
+			child.SetParent(k)
+		}
+		return true
+	})
+}
+
+func (n *Node) UnmarshalPost() {
+	n.ParentAllChildren()
+	n.SetKiPtrsFmPaths()
+}
+
+// func (n *Node) UnmarshalJSON(b []byte) error {
+// 	err := json.Unmarshal(b, n.this) // key use of this!
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	// KiSlice creates children but can't set their parent -- we do that here..
+// 	for _, child := range n.KiChildren() {
+// 		child.SetParent(n)
+// 	}
+// 	if n.IsRoot() {
+// 		n.SetKiPtrsFmPaths()
+// 	}
+// 	return nil
+// }

@@ -8,7 +8,7 @@ package ki
 
 import (
 	"bytes"
-	"fmt"
+	// "fmt"
 )
 
 // key fact of Go: interface such as Ki is implicitly a pointer!
@@ -24,12 +24,12 @@ func (k *KiPtr) GetPath() {
 }
 
 func (k *KiPtr) FindPtrFromPath(top Ki) bool {
-	fmt.Printf("finding path: %v\n", k.Path)
+	// fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
 		return false
 	}
 	k.Ptr = top.FindPathUnique(k.Path)
-	fmt.Printf("found: %v\n", k.Ptr != nil)
+	// fmt.Printf("found: %v\n", k.Ptr)
 	return k.Ptr != nil
 }
 
@@ -47,7 +47,7 @@ func (k KiPtr) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte("\"")...)
 	b = append(b, []byte(k.Path)...)
 	b = append(b, []byte("\"")...)
-	fmt.Printf("json out: %v\n", string(b))
+	// fmt.Printf("json out: %v\n", string(b))
 	return b, nil
 }
 
@@ -59,6 +59,6 @@ func (k *KiPtr) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	k.Path = string(b)
-	fmt.Printf("loaded path: %v\n", k.Path)
+	// fmt.Printf("loaded path: %v\n", k.Path)
 	return nil
 }
