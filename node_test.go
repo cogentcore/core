@@ -31,8 +31,7 @@ var KtNodeEmbed = KiTypes.AddType(&NodeEmbed{})
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
-	parent.KiNode.SetName("par1")
-	parent.KiNode.SetRoot(&parent.KiNode)
+	parent.KiNode.SetThisName(&parent.KiNode, "par1")
 	child := HasNode{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
@@ -52,8 +51,7 @@ func TestNodeAddChild(t *testing.T) {
 
 func TestNodeEmbedAddChild(t *testing.T) {
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	child := NodeEmbed{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
@@ -71,14 +69,13 @@ func TestNodeEmbedAddChild(t *testing.T) {
 func TestNodeEmbedAddNewChild(t *testing.T) {
 	// nod := Node{}
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	// parent.SetChildType(reflect.TypeOf(nod))
 	err := parent.SetChildType(reflect.TypeOf(parent))
 	if err != nil {
 		t.Error(err)
 	}
-	child := parent.AddNewChild()
+	child := parent.AddNewChild(nil)
 	child.SetName("child1")
 	if len(parent.Children) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Children))
@@ -93,8 +90,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 
 func TestNodeUniqueNames(t *testing.T) {
 	parent := HasNode{}
-	parent.KiNode.SetRoot(&parent.KiNode)
-	parent.KiNode.SetName("par1")
+	parent.KiNode.SetThisName(&parent.KiNode, "par1")
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	child2 := HasNode{}
@@ -118,8 +114,7 @@ func TestNodeUniqueNames(t *testing.T) {
 
 func TestNodeDeleteChild(t *testing.T) {
 	parent := HasNode{}
-	parent.KiNode.SetName("par1")
-	parent.KiNode.SetRoot(&parent.KiNode)
+	parent.KiNode.SetThisName(&parent.KiNode, "par1")
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.DeleteChild(&child.KiNode, true)
@@ -133,8 +128,7 @@ func TestNodeDeleteChild(t *testing.T) {
 
 func TestNodeDeleteChildName(t *testing.T) {
 	parent := HasNode{}
-	parent.KiNode.SetName("par1")
-	parent.KiNode.SetRoot(&parent.KiNode)
+	parent.KiNode.SetThisName(&parent.KiNode, "par1")
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.DeleteChildByName("child1", true)
@@ -149,8 +143,7 @@ func TestNodeDeleteChildName(t *testing.T) {
 func TestNodeFindName(t *testing.T) {
 	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
 	parent := Node{}
-	parent.SetName("par")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par")
 	for _, nm := range names {
 		child := Node{}
 		parent.AddChildNamed(&child, nm)
@@ -171,8 +164,7 @@ func TestNodeFindName(t *testing.T) {
 func TestNodeFindNameUnique(t *testing.T) {
 	names := [...]string{"child", "child_1", "child_2", "child_3", "child_4", "child_5"}
 	parent := Node{}
-	parent.SetName("par")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par")
 	for range names {
 		child := Node{}
 		parent.AddChildNamed(&child, "child")
@@ -190,24 +182,40 @@ func TestNodeFindNameUnique(t *testing.T) {
 	}
 }
 
+func TestNodeFindType(t *testing.T) {
+	parent := Node{}
+	parent.SetThisName(&parent, "par")
+	netyp := reflect.TypeOf(NodeEmbed{})
+	hntyp := reflect.TypeOf(Node{})
+	parent.AddNewChildNamed(netyp, "child1")
+	parent.AddNewChildNamed(hntyp, "child2")
+	idx := parent.FindChildIndexByType(netyp)
+	if idx != 0 {
+		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
+	}
+	idx = parent.FindChildIndexByType(hntyp)
+	if idx != 1 {
+		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
+	}
+}
+
 //////////////////////////////////////////
 //  JSON I/O
 
 func TestNodeEmbedJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
 	// child1 :=
-	parent.AddNewChildNamed("child1")
-	var child2 *NodeEmbed = parent.AddNewChildNamed("child1").(*NodeEmbed)
+	parent.AddNewChildNamed(nil, "child1")
+	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	schild2 := child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
@@ -220,7 +228,7 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	}
 
 	tstload := NodeEmbed{}
-	tstload.SetRoot(&tstload)
+	tstload.SetThisName(&tstload, "")
 	err = tstload.LoadJSON(b)
 	if err != nil {
 		t.Error(err)
@@ -238,19 +246,18 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 
 func TestNodeCallFun(t *testing.T) {
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
 	// child1 :=
-	parent.AddNewChildNamed("child1")
-	child2 := parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1")
 	// child3 :=
-	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	schild2 := child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	res := make([]string, 0, 10)
 	parent.FunDown("fun_down", func(k Ki, d interface{}) bool {
@@ -279,8 +286,7 @@ func TestNodeCallFun(t *testing.T) {
 
 func TestNodeUpdate(t *testing.T) {
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
@@ -290,15 +296,15 @@ func TestNodeUpdate(t *testing.T) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 	// child1 :=
-	parent.AddNewChildNamed("child1")
-	child2 := parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1")
 	// child3 :=
 	parent.UpdateStart()
-	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
 	parent.UpdateEnd(false)
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	schild2 := child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
 	trg := []string{"par1 sig SignalChildAdded", "par1 sig SignalChildAdded", "par1 sig SignalNodeUpdated"}
@@ -355,8 +361,7 @@ func TestNodeUpdate(t *testing.T) {
 
 func TestProps(t *testing.T) {
 	parent := NodeEmbed{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
+	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	parent.SetChildType(reflect.TypeOf(parent))
@@ -366,15 +371,15 @@ func TestProps(t *testing.T) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 	// child1 :=
-	parent.AddNewChildNamed("child1")
-	child2 := parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1")
 	// child3 :=
 	parent.UpdateStart()
-	parent.AddNewChildNamed("child1")
+	parent.AddNewChildNamed(nil, "child1")
 	parent.UpdateEnd(false)
 
 	child2.SetChildType(reflect.TypeOf(parent))
-	schild2 := child2.AddNewChildNamed("subchild1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
 	pprop, err := parent.PropInt("intprop", false)

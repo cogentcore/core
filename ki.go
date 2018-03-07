@@ -49,10 +49,13 @@ type Ki interface {
 	// check that the this pointer is set and issue a warning to log if not -- returns error if not set
 	ThisCheck() error
 
-	// Ki has strict one-parent, no-cycles structure -- see SetParent
+	// IsType tests whether This underlying struct object is of the given type(s) -- Go does not support a notion of inheritance, so this must be an exact match to the type
+	IsType(t ...reflect.Type) bool
+
+	// Parent of this Ki -- Ki has strict one-parent, no-cycles structure -- see SetParent
 	KiParent() Ki
 
-	// get child at index, does range checking to avoid slice panic
+	// get child at index -- supports negative indexes to access from end of slice -- only errors if there are no children in list
 	KiChild(idx int) (Ki, error)
 
 	// get list of children -- can modify directly (e.g., sort, reorder) but add / remove should use existing methods to ensure proper tracking
@@ -68,17 +71,20 @@ type Ki interface {
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
 	SetName(name string)
 
+	// sets the This pointer to ki object, and the name of this node -- used for root nodes which don't otherwise have their This pointer set (typically happens in Add, Insert Child)
+	SetThisName(ki Ki, name string)
+
 	// sets the unique name of this node -- should generally only be used by UniquifyNames
 	SetUniqueName(name string)
 
 	// ensure all my children have unique, non-empty names -- duplicates are named sequentially _1, _2 etc, and empty names
 	UniquifyNames()
 
-	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree
-	KiProperties() map[string]interface{}
-
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
+
+	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree
+	KiProperties() map[string]interface{}
 
 	// Set given property key to value val -- initializes property map if nil
 	SetProp(key string, val interface{})
@@ -107,10 +113,7 @@ type Ki interface {
 	// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
 	SetParent(parent Ki)
 
-	// mark this node as the root node of the tree by adding "root" = true to Properties and calling SetThis which is why the arg is required -- essential to run this -- e.g., for properly triggering updates of pointers after JSON Unmarshal for example
-	SetRoot(this Ki)
-
-	// test if this node is the root node -- checks Properties for "root" bool = true
+	// test if this node is the root node -- checks Parent = nil
 	IsRoot() bool
 
 	// get the root object of this tree
@@ -134,20 +137,23 @@ type Ki interface {
 	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
 	InsertChildNamed(kid Ki, at int, name string)
 
-	// create a new child of ChildType
-	MakeNewChild() Ki
+	// create a new child of given type -- if nil, uses ChildType, then This type
+	MakeNewChild(typ reflect.Type) Ki
 
-	// create a new child of ChildType and add at end of children list
-	AddNewChild() Ki
+	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at end of children list
+	AddNewChild(typ reflect.Type) Ki
 
-	// create a new child of ChildType and add at given position in children list
-	InsertNewChild(at int) Ki
+	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at given position in children list
+	InsertNewChild(typ reflect.Type, at int) Ki
 
-	// create a new child of ChildType and add at end of children list, and give it a name
-	AddNewChildNamed(name string) Ki
+	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at end of children list, and give it a name
+	AddNewChildNamed(typ reflect.Type, name string) Ki
 
-	// create a new child of ChildType and add at given position in children list, and give it a name
-	InsertNewChildNamed(at int, name string) Ki
+	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at given position in children list, and give it a name
+	InsertNewChildNamed(typ reflect.Type, at int, name string) Ki
+
+	// find index of child based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+	FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int
 
 	// find index of child -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndex(kid Ki, start_idx int) int
@@ -158,11 +164,17 @@ type Ki interface {
 	// find index of child from unique name -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndexByUniqueName(name string, start_idx int) int
 
-	// find index of child by type -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildIndexByType(T reflect.Type, start_idx int) int
+	// find index of child by type (any of types given)
+	FindChildIndexByType(t ...reflect.Type) int
 
 	// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildByName(name string, start_idx int) Ki
+
+	// find parent by name -- returns nil if not found
+	FindParentByName(name string) Ki
+
+	// find parent by type (any of types given) -- returns nil if not found
+	FindParentByType(t ...reflect.Type) Ki
 
 	// emit SignalChildDeleted on NodeSignal -- only if not currently updating
 	EmitChildDeletedSignal(kid Ki)
@@ -265,4 +277,4 @@ type Ki interface {
 // var KtTypeName = KiTypes.AddType(&TypeName{})
 
 // function to call on ki objects walking the tree -- bool rval = false means stop traversing
-type KiFun func(node Ki, data interface{}) bool
+type KiFun func(ki Ki, data interface{}) bool

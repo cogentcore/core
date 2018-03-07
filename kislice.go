@@ -17,6 +17,112 @@ import (
 // KiSlice provides JSON marshal / unmarshal with encoding of underlying types
 type KiSlice []Ki
 
+// return a valid index given length of slice -- also supports access from the back of the slice using negative numbers -- -1 = last item, -2 = second to last, etc
+func (k *KiSlice) ValidIndex(idx int) (int, error) {
+	kl := len(*k)
+	if kl == 0 {
+		return 0, errors.New("KiSlice is empty -- no valid index")
+	}
+	if idx < 0 {
+		idx = kl + idx
+	}
+	if idx < 0 { // still?
+		idx = 0
+	}
+	if idx >= kl {
+		idx = kl - 1
+	}
+	return idx, nil
+}
+
+func (k *KiSlice) InsertKi(ki Ki, idx int) {
+	kl := len(*k)
+	if idx < 0 {
+		idx = kl + idx
+	}
+	if idx < 0 { // still?
+		idx = 0
+	}
+	if idx > kl { // last position allowed for insert
+		idx = kl
+	}
+	// this avoids extra garbage collection
+	*k = append(*k, nil)
+	if idx < kl {
+		copy((*k)[idx+1:], (*k)[idx:])
+	}
+	(*k)[idx] = ki
+}
+
+func (k *KiSlice) DeleteAtIndex(idx int) error {
+	idx, err := k.ValidIndex(idx)
+	if err != nil {
+		return err
+	}
+	// this copy makes sure there are no memory leaks
+	copy((*k)[idx:], (*k)[idx+1:])
+	(*k)[len(*k)-1] = nil
+	(*k) = (*k)[:len(*k)-1]
+	return nil
+}
+
+// find index of item based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+func (k *KiSlice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
+	sz := len(*k)
+	if sz == 0 {
+		return -1
+	}
+	if start_idx == 0 {
+		for idx, child := range *k {
+			if match(child) {
+				return idx
+			}
+		}
+	} else {
+		if start_idx >= sz {
+			start_idx = sz - 1
+		}
+		upi := start_idx + 1
+		dni := start_idx
+		upo := false
+		for {
+			if !upo && upi < sz {
+				if match((*k)[upi]) {
+					return upi
+				}
+				upi++
+			} else {
+				upo = true
+			}
+			if dni >= 0 {
+				if match((*k)[dni]) {
+					return dni
+				}
+				dni--
+			} else if upo {
+				break
+			}
+		}
+	}
+	return -1
+}
+
+func (k *KiSlice) FindIndex(kid Ki, start_idx int) int {
+	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch == kid })
+}
+
+func (k *KiSlice) FindIndexByName(name string, start_idx int) int {
+	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiName() == name })
+}
+
+func (k *KiSlice) FindIndexByUniqueName(name string, start_idx int) int {
+	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiUniqueName() == name })
+}
+
+func (k *KiSlice) FindIndexByType(t ...reflect.Type) int {
+	return k.FindIndexByFun(0, func(ch Ki) bool { return ch.IsType(t...) })
+}
+
 // MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
 func (k KiSlice) MarshalJSON() ([]byte, error) {
 	nk := len(k)

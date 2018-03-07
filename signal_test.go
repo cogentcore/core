@@ -21,10 +21,9 @@ var KtTestNode = KiTypes.AddType(&TestNode{})
 
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
-	parent.SetName("par1")
-	parent.SetRoot(&parent)
-	child1 := parent.AddNewChildNamed("child1")
-	child2 := parent.AddNewChildNamed("child2")
+	parent.SetThisName(&parent, "par1")
+	child1 := parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child2")
 
 	res := make([]string, 0, 10)
 	parent.sig1.Connect(child1, func(receiver, sender Ki, sig SignalType, data interface{}) {

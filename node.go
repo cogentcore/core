@@ -12,7 +12,7 @@ import (
 	"github.com/json-iterator/go"
 	//	"errors"
 	"fmt"
-	"github.com/cznic/mathutil"
+	// "github.com/cznic/mathutil"
 	"log"
 	"reflect"
 	"strconv"
@@ -61,9 +61,22 @@ func (n *Node) SetThis(ki Ki) {
 
 func (n *Node) ThisCheck() error {
 	if n.This == nil {
-		return fmt.Errorf("KiNode ThisCheck: node has null 'this' pointer -- must call SetRoot on root nodes!  Name: %v", n.Name)
+		return fmt.Errorf("KiNode ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!  Name: %v", n.Name)
 	}
 	return nil
+}
+
+func (n *Node) IsType(t ...reflect.Type) bool {
+	if err := n.ThisCheck(); err != nil {
+		return false
+	}
+	ttyp := reflect.TypeOf(n.This).Elem()
+	for _, typ := range t {
+		if typ == ttyp {
+			return true
+		}
+	}
+	return false
 }
 
 func (n *Node) KiParent() Ki {
@@ -71,9 +84,9 @@ func (n *Node) KiParent() Ki {
 }
 
 func (n *Node) KiChild(idx int) (Ki, error) {
-	// todo range checking?
-	if idx > len(n.Children) || idx < 0 {
-		return nil, fmt.Errorf("ki Node Child: index out of range: %d, n children: %d", idx, len(n.Children))
+	idx, err := n.Children.ValidIndex(idx)
+	if err != nil {
+		return nil, err
 	}
 	return n.Children[idx], nil
 }
@@ -97,6 +110,11 @@ func (n *Node) SetName(name string) {
 	if n.Parent != nil {
 		n.Parent.UniquifyNames()
 	}
+}
+
+func (n *Node) SetThisName(ki Ki, name string) {
+	n.SetThis(ki)
+	n.SetName(name)
 }
 
 func (n *Node) SetUniqueName(name string) {
@@ -236,18 +254,12 @@ func (n *Node) SetParent(parent Ki) {
 	}
 }
 
-func (n *Node) SetRoot(ths Ki) {
-	n.SetThis(ths)
-	n.SetProp("root", true)
-}
-
 func (n *Node) IsRoot() bool {
-	b, _ := n.PropBool("root", false) // not inherit
-	return b
+	return (n.Parent == nil)
 }
 
 func (n *Node) Root() Ki {
-	if n.Parent == nil || n.IsRoot() {
+	if n.IsRoot() {
 		return n.This
 	}
 	return n.Parent.Root()
@@ -274,12 +286,8 @@ func (n *Node) InsertChildImpl(kid Ki, at int) {
 	if err := n.ThisCheck(); err != nil {
 		return
 	}
-	at = mathutil.Min(at, len(n.Children))
-	// this avoids extra garbage collection
-	n.Children = append(n.Children, nil)
-	copy(n.Children[at+1:], n.Children[at:])
+	n.Children.InsertKi(kid, at)
 	kid.SetThis(kid)
-	n.Children[at] = kid
 	kid.SetParent(n.This)
 }
 
@@ -311,11 +319,14 @@ func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 	n.EmitChildAddedSignal(kid)
 }
 
-func (n *Node) MakeNewChild() Ki {
+func (n *Node) MakeNewChild(typ reflect.Type) Ki {
 	if err := n.ThisCheck(); err != nil {
+		log.Printf("KiNode MakeNewChild: %v\n", err)
 		return nil
 	}
-	typ := n.ChildType.T
+	if typ == nil {
+		typ = n.ChildType.T
+	}
 	if typ == nil {
 		typ = reflect.TypeOf(n.This).Elem() // make us by default
 	}
@@ -326,172 +337,76 @@ func (n *Node) MakeNewChild() Ki {
 	return kid
 }
 
-func (n *Node) AddNewChild() Ki {
-	kid := n.MakeNewChild()
+func (n *Node) AddNewChild(typ reflect.Type) Ki {
+	kid := n.MakeNewChild(typ)
 	n.AddChild(kid)
 	return kid
 }
 
-func (n *Node) InsertNewChild(at int) Ki {
-	kid := n.MakeNewChild()
+func (n *Node) InsertNewChild(typ reflect.Type, at int) Ki {
+	kid := n.MakeNewChild(typ)
 	n.InsertChild(kid, at)
 	return kid
 }
 
-func (n *Node) AddNewChildNamed(name string) Ki {
-	kid := n.MakeNewChild()
+func (n *Node) AddNewChildNamed(typ reflect.Type, name string) Ki {
+	kid := n.MakeNewChild(typ)
 	n.AddChildNamed(kid, name)
 	return kid
 }
 
-func (n *Node) InsertNewChildNamed(at int, name string) Ki {
-	kid := n.MakeNewChild()
+func (n *Node) InsertNewChildNamed(typ reflect.Type, at int, name string) Ki {
+	kid := n.MakeNewChild(typ)
 	n.InsertChildNamed(kid, at, name)
 	return kid
 }
 
+func (n *Node) FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int {
+	return n.Children.FindIndexByFun(start_idx, match)
+}
+
 func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
-	if start_idx == 0 {
-		for idx, child := range n.Children {
-			if child == kid {
-				return idx
-			}
-		}
-	} else {
-		upi := start_idx + 1
-		dni := start_idx
-		upo := false
-		sz := len(n.Children)
-		for {
-			if !upo && upi < sz {
-				if n.Children[upi] == kid {
-					return upi
-				}
-				upi++
-			} else {
-				upo = true
-			}
-			if dni >= 0 {
-				if n.Children[dni] == kid {
-					return dni
-				}
-				dni--
-			} else if upo {
-				break
-			}
-		}
-	}
-	return -1
+	return n.Children.FindIndex(kid, start_idx)
 }
 
 func (n *Node) FindChildIndexByName(name string, start_idx int) int {
-	if start_idx == 0 {
-		for idx, child := range n.Children {
-			if child.KiName() == name {
-				return idx
-			}
-		}
-	} else {
-		upi := start_idx + 1
-		dni := start_idx
-		upo := false
-		sz := len(n.Children)
-		for {
-			if !upo && upi < sz {
-				if n.Children[upi].KiName() == name {
-					return upi
-				}
-				upi++
-			} else {
-				upo = true
-			}
-			if dni >= 0 {
-				if n.Children[dni].KiName() == name {
-					return dni
-				}
-				dni--
-			} else if upo {
-				break
-			}
-		}
-	}
-	return -1
+	return n.Children.FindIndexByName(name, start_idx)
 }
 
 func (n *Node) FindChildIndexByUniqueName(name string, start_idx int) int {
-	if start_idx == 0 {
-		for idx, child := range n.Children {
-			if child.KiUniqueName() == name {
-				return idx
-			}
-		}
-	} else {
-		upi := start_idx + 1
-		dni := start_idx
-		upo := false
-		sz := len(n.Children)
-		for {
-			if !upo && upi < sz {
-				if n.Children[upi].KiUniqueName() == name {
-					return upi
-				}
-				upi++
-			} else {
-				upo = true
-			}
-			if dni >= 0 {
-				if n.Children[dni].KiUniqueName() == name {
-					return dni
-				}
-				dni--
-			} else if upo {
-				break
-			}
-		}
-	}
-	return -1
+	return n.Children.FindIndexByUniqueName(name, start_idx)
 }
 
-func (n *Node) FindChildIndexByType(T reflect.Type, start_idx int) int {
-	// if start_idx == 0 {
-	// 	for idx, child := range n.Children {
-	// 		if child.KiUniqueName() == name {
-	// 			return idx
-	// 		}
-	// 	}
-	// } else {
-	// 	upi := start_idx + 1
-	// 	dni := start_idx
-	// 	upo := false
-	// 	sz := len(n.Children)
-	// 	for {
-	// 		if !upo && upi < sz {
-	// 			if n.Children[upi].KiUniqueName() == name {
-	// 				return upi
-	// 			}
-	// 			upi++
-	// 		} else {
-	// 			upo = true
-	// 		}
-	// 		if dni >= 0 {
-	// 			if n.Children[dni].KiUniqueName() == name {
-	// 				return dni
-	// 			}
-	// 			dni--
-	// 		} else if upo {
-	// 			break
-	// 		}
-	// 	}
-	// }
-	return -1
+func (n *Node) FindChildIndexByType(t ...reflect.Type) int {
+	return n.Children.FindIndexByType(t...)
 }
 
 func (n *Node) FindChildByName(name string, start_idx int) Ki {
-	idx := n.FindChildIndexByName(name, start_idx)
+	idx := n.Children.FindIndexByName(name, start_idx)
 	if idx < 0 {
 		return nil
 	}
 	return n.Children[idx]
+}
+
+func (n *Node) FindParentByName(name string) Ki {
+	if n.KiName() == name {
+		return n.This
+	}
+	if n.IsRoot() {
+		return nil
+	}
+	return n.Parent.FindParentByName(name)
+}
+
+func (n *Node) FindParentByType(t ...reflect.Type) Ki {
+	if n.IsType(t...) {
+		return n.This
+	}
+	if n.IsRoot() {
+		return nil
+	}
+	return n.Parent.FindParentByType(t...)
 }
 
 func (n *Node) EmitChildDeletedSignal(kid Ki) {
@@ -501,11 +416,13 @@ func (n *Node) EmitChildDeletedSignal(kid Ki) {
 }
 
 func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
+	idx, err := n.Children.ValidIndex(idx)
+	if err != nil {
+		log.Print("KiNode DeleteChildAtIndex -- attempt to delete item in empty children slice")
+		return
+	}
 	child := n.Children[idx]
-	// this copy makes sure there are no memory leaks
-	copy(n.Children[idx:], n.Children[idx+1:])
-	n.Children[len(n.Children)-1] = nil
-	n.Children = n.Children[:len(n.Children)-1]
+	_ = n.Children.DeleteAtIndex(idx)
 	child.SetParent(nil)
 	if destroy {
 		n.Deleted = append(n.Deleted, child)
