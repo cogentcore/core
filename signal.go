@@ -18,11 +18,12 @@ type SignalType int64
 
 const (
 	NilSignal             SignalType = iota
-	SignalChildAdded      SignalType = iota // data is the added child
-	SignalChildDeleted    SignalType = iota // data is deleted child
-	SignalChildrenDeleted SignalType = iota // no data
-	SignalNodeUpdated     SignalType = iota // entire node updated
-	SignalFieldUpdated    SignalType = iota // a field was updated -- data is name of field
+	SignalChildAdded                 // data is the added child
+	SignalChildDeleted               // data is deleted child
+	SignalChildrenDeleted            // no data
+	SignalNodeUpdated                // entire node updated
+	SignalFieldUpdated               // a field was updated -- data is name of field
+	SignalTypeBaseN                  // number of base-level signal type consts -- this is start for any derived ones
 )
 
 // generates signaltype_string.go -- contrary to some docs, apparently need to run go generate manually

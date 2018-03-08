@@ -2,15 +2,27 @@
 
 package ki
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
-const _SignalType_name = "NilSignalSignalChildAddedSignalChildRemovedSignalChildrenResetSignalNodeUpdatedSignalFieldUpdated"
+const _SignalType_name = "NilSignalSignalChildAddedSignalChildDeletedSignalChildrenDeletedSignalNodeUpdatedSignalFieldUpdatedSignalTypeBaseN"
 
-var _SignalType_index = [...]uint8{0, 9, 25, 43, 62, 79, 97}
+var _SignalType_index = [...]uint8{0, 9, 25, 43, 64, 81, 99, 114}
 
 func (i SignalType) String() string {
 	if i < 0 || i >= SignalType(len(_SignalType_index)-1) {
 		return "SignalType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _SignalType_name[_SignalType_index[i]:_SignalType_index[i+1]]
+}
+
+func StringToSignalType(s string) (SignalType, error) {
+	for i := 0; i < len(_SignalType_index)-1; i++ {
+		if s == _SignalType_name[_SignalType_index[i]:_SignalType_index[i+1]] {
+			return SignalType(i), nil
+		}
+	}
+	return 0, fmt.Errorf("String %v is not a valid option for type SignalType", s)
 }

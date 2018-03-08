@@ -46,3 +46,23 @@ func TestSignalConnect(t *testing.T) {
 
 	// time.Sleep(time.Second * 2)
 }
+
+func TestSignalNameToInt(t *testing.T) {
+	for st := NilSignal; st < SignalTypeBaseN; st++ {
+		str := st.String()
+		stc, err := StringToSignalType(str)
+		if err != nil {
+			t.Error(err)
+		}
+		stnm := stc.String()
+		if stnm != str {
+			t.Errorf("could not convert from signal type name %v -- got: %v -- maybe need to run go generate?", str, stnm)
+		}
+	}
+
+	str := "SignalFieldUpdated"
+	st, _ := StringToSignalType(str)
+	if st.String() != str {
+		t.Errorf("could not convert from signal type name %v -- got: %v -- maybe need to run go generate?", str, st.String())
+	}
+}

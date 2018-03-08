@@ -61,7 +61,9 @@ func (n *Node) SetThis(ki Ki) {
 
 func (n *Node) ThisCheck() error {
 	if n.This == nil {
-		return fmt.Errorf("KiNode ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!  Name: %v", n.Name)
+		err := fmt.Errorf("KiNode %v ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!", n.PathUnique())
+		log.Print(err)
+		return err
 	}
 	return nil
 }
@@ -191,7 +193,9 @@ func (n *Node) PropBool(key string, inherit bool) (bool, error) {
 	}
 	b, ok := v.(bool)
 	if !ok {
-		return false, fmt.Errorf("KiNode PropBool -- property %v exists but is not a bool, is: %T", key, v)
+		err := fmt.Errorf("KiNode %v PropBool -- property %v exists but is not a bool, is: %T", n.PathUnique(), key, v)
+		log.Print(err)
+		return false, err
 	}
 	return b, nil
 }
@@ -203,7 +207,9 @@ func (n *Node) PropInt(key string, inherit bool) (int, error) {
 	}
 	b, ok := v.(int)
 	if !ok {
-		return 0, fmt.Errorf("KiNode PropInt -- property %v exists but is not an int, is: %T", key, v)
+		err := fmt.Errorf("KiNode %v PropInt -- property %v exists but is not an int, is: %T", n.PathUnique(), key, v)
+		log.Print(err)
+		return 0, err
 	}
 	return b, nil
 }
@@ -215,7 +221,9 @@ func (n *Node) PropFloat64(key string, inherit bool) (float64, error) {
 	}
 	b, ok := v.(float64)
 	if !ok {
-		return 0, fmt.Errorf("KiNode PropFloat64 -- property %v exists but is not a float64, is: %T", key, v)
+		err := fmt.Errorf("KiNode %v PropFloat64 -- property %v exists but is not a float64, is: %T", n.PathUnique(), key, v)
+		log.Print(err)
+		return 0, err
 	}
 	return b, nil
 }
@@ -227,7 +235,9 @@ func (n *Node) PropString(key string, inherit bool) (string, error) {
 	}
 	b, ok := v.(string)
 	if !ok {
-		return "", fmt.Errorf("KiNode PropString -- property %v exists but is not a string, is: %T", key, v)
+		err := fmt.Errorf("KiNode %v PropString -- property %v exists but is not a string, is: %T", n.PathUnique(), key, v)
+		log.Print(err)
+		return "", err
 	}
 	return b, nil
 }
@@ -267,7 +277,9 @@ func (n *Node) Root() Ki {
 
 func (n *Node) SetChildType(t reflect.Type) error {
 	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
-		return fmt.Errorf("KiNode SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", t.Name())
+		err := fmt.Errorf("KiNode %v SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", n.PathUnique(), t.Name())
+		log.Print(err)
+		return err
 	}
 	n.ChildType.T = t
 	return nil
@@ -321,7 +333,6 @@ func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
 
 func (n *Node) MakeNewChild(typ reflect.Type) Ki {
 	if err := n.ThisCheck(); err != nil {
-		log.Printf("KiNode MakeNewChild: %v\n", err)
 		return nil
 	}
 	if typ == nil {
