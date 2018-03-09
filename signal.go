@@ -6,8 +6,8 @@ package ki
 
 import (
 	"errors"
-	"fmt"
-	"reflect"
+	// "fmt"
+	// "reflect"
 )
 
 // implements general signal passing between Ki objects, like Qt's Signal / Slot system
@@ -66,24 +66,27 @@ func (sig *Signal) Connect(recv Ki, recvfun RecvFun) error {
 	return nil
 }
 
-// Disconnect receiver and signal
-func (sig *Signal) Disconnect(recv Ki, recvfun RecvFun) error {
-	if recv == nil {
-		return errors.New("ki Signal Disconnect: no recv node provided")
+// Find any existing signal connection
+func (sig *Signal) FindConnectionIndex(recv Ki, recvfun RecvFun) int {
+	for i, con := range sig.Cons {
+		if con.Recv == recv /* && con.Fun == recvfun */ {
+			return i
+		}
 	}
-	if recvfun == nil {
-		return errors.New("ki Signal Disconnect: no recv func provided")
-	}
+	return -1
+}
 
+// Disconnect receiver and function if they exist
+func (sig *Signal) Disconnect(recv Ki, recvfun RecvFun) bool {
 	for i, con := range sig.Cons {
 		if con.Recv == recv /* && con.Fun == recvfun */ {
 			// this copy makes sure there are no memory leaks
 			copy(sig.Cons[i:], sig.Cons[i+1:])
 			sig.Cons = sig.Cons[:len(sig.Cons)-1]
-			return nil
+			return true
 		}
 	}
-	return errors.New(fmt.Sprintf("ki Signal Disconnect: connection not found for node: %v func: %v", recv.KiName(), reflect.ValueOf(recvfun)))
+	return false
 }
 
 // Emit sends the signal across all the connections to the receivers -- sequential
