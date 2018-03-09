@@ -260,19 +260,19 @@ func TestNodeCallFun(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	res := make([]string, 0, 10)
-	parent.FunDown("fun_down", func(k Ki, d interface{}) bool {
-		res = append(res, fmt.Sprintf("%v, %v", k.KiUniqueName(), d))
+	parent.FunDown(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.KiUniqueName(), d, level))
 		return true
 	})
 	// fmt.Printf("result: %v\n", res)
 
-	trg := []string{"par1, fun_down", "child1, fun_down", "child1_1, fun_down", "subchild1, fun_down", "child1_2, fun_down"}
+	trg := []string{"par1, fun_down, lev 0", "child1, fun_down, lev 1", "child1_1, fun_down, lev 1", "subchild1, fun_down, lev 2", "child1_2, fun_down, lev 1"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FunDown error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
-	schild2.FunUp("fun_up", func(k Ki, d interface{}) bool {
+	schild2.FunUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v", k.KiUniqueName(), d))
 		return true
 	})
@@ -346,7 +346,7 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.FunDown("upcnt", func(n Ki, d interface{}) bool {
+	parent.FunDown(0, "upcnt", func(n Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.KiUniqueName(), *n.UpdateCtr()))
 		return true
 	})

@@ -210,20 +210,20 @@ type Ki interface {
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
 
-	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway)
-	FunUp(data interface{}, fun KiFun)
+	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function
+	FunUp(level int, data interface{}, fun KiFun)
 
-	// call function on given node and all the way down to its children, and so on -- sequentially all in current go routine -- does depth-first "natural" order: calls on node, then calls FunDown on all children
-	FunDown(data interface{}, fun KiFun)
+	// call function on given node and all the way down to its children, and so on -- sequentially all in current go routine -- does depth-first "natural" order: calls on node, then calls FunDown on all children (unless function returns false, in which case it returns immediately) -- level var is incremented after function is called on current node, and passed to the function, so it can do things based on the depth in the tree as necessary
+	FunDown(level int, data interface{}, fun KiFun)
 
 	// call function on children in a breadth-first manner -- calls on all the children, and then calls FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called!
-	FunDownBreadthFirst(data interface{}, fun KiFun)
+	FunDownBreadthFirst(level int, data interface{}, fun KiFun)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does not wait for completion of the go routines -- returns immediately
-	GoFunDown(data interface{}, fun KiFun)
+	GoFunDown(level int, data interface{}, fun KiFun)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does wait for the completion of the go routines before returning
-	GoFunDownWait(data interface{}, fun KiFun)
+	GoFunDownWait(level int, data interface{}, fun KiFun)
 
 	// report path to this node, all the way up to top-level parent
 	Path() string
@@ -276,5 +276,5 @@ type Ki interface {
 // IMPORTANT: all types must initialize entry in KiTypes Registry:
 // var KtTypeName = KiTypes.AddType(&TypeName{})
 
-// function to call on ki objects walking the tree -- bool rval = false means stop traversing
-type KiFun func(ki Ki, data interface{}) bool
+// function to call on ki objects walking the tree -- return bool = false means don't go down into next level (children)
+type KiFun func(ki Ki, level int, data interface{}) bool
