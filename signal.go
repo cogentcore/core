@@ -17,20 +17,34 @@ import (
 type SignalType int64
 
 const (
-	NilSignal             SignalType = iota
-	SignalChildAdded                 // data is the added child
-	SignalChildDeleted               // data is deleted child
-	SignalChildrenDeleted            // no data
-	SignalNodeUpdated                // entire node updated
-	SignalFieldUpdated               // a field was updated -- data is name of field
-	SignalTypeBaseN                  // number of base-level signal type consts -- this is start for any derived ones
+	NilSignal SignalType = iota
+	// data is the added child
+	SignalChildAdded
+	// data is deleted child
+	SignalChildDeleted
+	SignalChildrenDeleted
+	// entire node updated
+	SignalNodeUpdated
+	// a field was updated -- data is name of field
+	SignalFieldUpdated
+	// number of signal type consts -- add this to any other signal types passed
+	SignalTypeN
 )
 
-// generates signaltype_string.go -- contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=SignalType
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
 type RecvFun func(receiver, sender Ki, sig SignalType, data interface{})
+
+// use this to encode a custom signal type to not be confused with basic signals
+func SendCustomSignal(sig int64) SignalType {
+	return SignalType(sig + int64(SignalTypeN))
+}
+
+// use this to receive a custom signal type to not be confused with basic signals
+func RecvCustomSignal(sig int64) int64 {
+	return sig - int64(SignalTypeN)
+}
 
 // Signal -- add one of these for each signal a node can emit
 type Signal struct {
@@ -46,13 +60,17 @@ type Connection struct {
 	Fun RecvFun
 }
 
-// Connect attaches a new receiver to the signal -- error if not ok
+// Connect attaches a new receiver to the signal -- checks to make sure connection does not already exist -- error if not ok
 func (sig *Signal) Connect(recv Ki, fun RecvFun) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")
 	}
 	if fun == nil {
 		return errors.New("ki Signal Connect: no recv func provided")
+	}
+
+	if sig.FindConnectionIndex(recv, fun) >= 0 {
+		return nil
 	}
 
 	con := Connection{
@@ -120,5 +138,32 @@ func (s *Signal) EmitGo(sender Ki, sig SignalType, data interface{}) {
 	}
 	for _, con := range s.Cons {
 		go con.Fun(con.Recv, sender, sig, data)
+	}
+}
+
+// function type for filtering signals
+type SignalFilterFun func(ki Ki) bool
+
+// Emit Filtered calls function on each item only sends signal if function returns true
+func (s *Signal) EmitFiltered(sender Ki, sig SignalType, data interface{}, fun SignalFilterFun) {
+	if sig == NilSignal && s.DefSig != NilSignal {
+		sig = s.DefSig
+	}
+	for _, con := range s.Cons {
+		if fun(con.Recv) {
+			con.Fun(con.Recv, sender, sig, data)
+		}
+	}
+}
+
+// EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
+func (s *Signal) EmitGoFiltered(sender Ki, sig SignalType, data interface{}, fun SignalFilterFun) {
+	if sig == NilSignal && s.DefSig != NilSignal {
+		sig = s.DefSig
+	}
+	for _, con := range s.Cons {
+		if fun(con.Recv) {
+			go con.Fun(con.Recv, sender, sig, data)
+		}
 	}
 }

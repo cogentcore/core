@@ -26,10 +26,12 @@ https://golang.org/doc/effective_go.html#names
 * Above means that there can be conflicts for any interfaces that need to provide getter access to those fields.  bummer.  Using Ki prefix in those cases.
 * Delete instead of Remove
 
+# Struct structure
+
+* ALL Nodes need to be in Children of parent -- not e.g., as fields in a struct (unless they are definitely starting a new root at that point, in which case it is fine).  Use an InitNode kind of constructor to build default children that are then equivalent to fields -- always there, accessible by name, etc.  
+
 # TODO
 
-* Find*By* -- FindParentByType, FindChildByType / Name -- easy -- children need recursive
-* various new items added to ki.go
+* XML IO
 * add SetField, FieldValue generic methods -- thin wrappers around reflect
 * SetFieldRecursive -- apply to all children, no problem if not found
-

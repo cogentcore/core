@@ -49,7 +49,7 @@ func TestSignalConnect(t *testing.T) {
 }
 
 func TestSignalNameToInt(t *testing.T) {
-	for st := NilSignal; st < SignalTypeBaseN; st++ {
+	for st := NilSignal; st < SignalTypeN; st++ {
 		str := st.String()
 		stc, err := StringToSignalType(str)
 		if err != nil {
