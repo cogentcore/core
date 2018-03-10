@@ -21,9 +21,10 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	GiNode2D
-	ViewBox ViewBox2D `svg:"viewBox",desc:"viewbox within any parent Viewport2D"`
-	Paints  []*Paint
-	Pixels  *image.RGBA `desc:"pixels that we render into"`
+	ViewBox ViewBox2D   `svg:"viewBox",desc:"viewbox within any parent Viewport2D"`
+	Paints  []*Paint    `json:"-",desc:"paint stack for rendering"`
+	Pixels  *image.RGBA `json:"-",desc:"pixels that we render into"`
+	Backing *image.RGBA `json:"-",desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
 }
 
 // NewViewport2D creates a new image.RGBA with the specified width and height
@@ -42,8 +43,8 @@ func NewViewport2DForImage(im image.Image) *Viewport2D {
 // No copy is made.
 func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 	vp := &Viewport2D{
-		ViewBox: ViewBox2D{Size: Size2D{X: float64(im.Bounds().Size().X),
-			Y: float64(im.Bounds().Size().Y)}},
+		ViewBox: ViewBox2D{Size: image.Point{X: im.Bounds().Size().X,
+			Y: im.Bounds().Size().Y}},
 		Pixels: im,
 	}
 	vp.PushNewPaint()
@@ -95,13 +96,20 @@ func (vp *Viewport2D) HasNoStrokeOrFill() bool {
 	return (!pc.Stroke.On && !pc.Fill.On)
 }
 
-func (g *Viewport2D) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
+	r := vp.ViewBox.Bounds()
+	if vp.Backing != nil {
+		draw.Draw(parVp.Pixels, r, vp.Backing, image.ZP, draw.Src)
+	}
+	draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Src)
 }
 
-func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
-	parVp.DrawImage(vp.Pixels, int(vp.ViewBox.Min.X), int(vp.ViewBox.Min.Y))
-
+func (vp *Viewport2D) CopyBacking(parVp *Viewport2D) {
+	r := vp.ViewBox.Bounds()
+	if vp.Backing == nil {
+		vp.Backing = image.NewRGBA(vp.ViewBox.SizeRect())
+	}
+	draw.Draw(vp.Backing, r, parVp.Pixels, image.ZP, draw.Src)
 }
 
 func (vp *Viewport2D) DrawIntoWindow() {
@@ -115,19 +123,32 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	}
 }
 
+func (vp *Viewport2D) Node2D() *GiNode2D {
+	return &vp.GiNode2D
+}
+
+func (vp *Viewport2D) Node2DBBox(parVp *Viewport2D) image.Rectangle {
+	return vp.ViewBox.Bounds()
+}
+
 // viewport has a special render function that handles all the items below
 func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 	last_level := 0
 	vp.FunDown(last_level, vp, func(k ki.Ki, level int, d interface{}) bool {
-		if level == 0 || k == vp.This { // don't process us!
-			return true
-		}
-		gii, ok := (interface{}(k)).(GiNode2DI)
-		if !ok {
-			// error message already in InitNode2D
+		gii, ok := k.(GiNode2DI)
+		if !ok { // error message already in InitNode2D
 			return true
 		}
 		gi := gii.Node2D()
+		if k == vp.This {
+			bb := gii.Node2DBBox(parVp) // only update our bbox
+			if parVp != nil {
+				gi.WinBBox = bb.Add(image.Point{parVp.WinBBox.Min.X, parVp.WinBBox.Min.Y})
+			} else {
+				gi.WinBBox = bb
+			}
+			return true
+		}
 		disp := gi.PropDisplay()
 		if !disp { // go no further
 			return false
@@ -146,8 +167,10 @@ func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 				vp.PushNewPaint()
 			}
 			vp.SetPaintFromNode(gi)
-			gi.XForm = vp.CurPaint().XForm // cache current xform
-			cont = gii.Render2D(vp)        // if this is itself a vp, we need to stop
+			gi.XForm = vp.CurPaint().XForm // cache current xform -- not clear if needed
+			bb := gii.Node2DBBox(vp)       // only update our bbox
+			gi.WinBBox = bb.Add(image.Point{vp.WinBBox.Min.X, vp.WinBBox.Min.Y})
+			cont = gii.Render2D(vp) // if this is itself a vp, we need to stop
 			if gi.IsLeaf() {
 				vp.PopPaint()
 			}
@@ -157,6 +180,7 @@ func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 		return cont
 	})
 	if parVp != nil {
+		vp.CopyBacking(parVp) // full re-render is when we copy the backing
 		vp.DrawIntoParent(parVp)
 	} else { // top-level, try drawing into window
 		vp.DrawIntoWindow()
@@ -208,6 +232,18 @@ func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 
 //////////////////////////////////////////////////////////////////////////////////
 // Path Manipulation
+
+// get the bounding box for an element in pixel int coordinates
+func (vp *Viewport2D) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
+	pc := vp.CurPaint()
+	return pc.BoundingBox(minX, minY, maxX, maxY)
+}
+
+// get the bounding box for a slice of points
+func (vp *Viewport2D) BoundingBoxFromPoints(points []Point2D) image.Rectangle {
+	pc := vp.CurPaint()
+	return pc.BoundingBoxFromPoints(points)
+}
 
 // MoveTo starts a new subpath within the current path starting at the
 // specified point.

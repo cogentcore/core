@@ -19,7 +19,6 @@ const (
 	LineCapSquare
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=LineCap
 
 // the way in which lines are joined together: stroke-linejoin property in SVG
@@ -33,7 +32,6 @@ const (
 	LineJoinArcs // SVG2 -- not yet supported
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=LineJoin
 
 // PaintStroke contains all the properties specific to painting a line -- the svg elements define the corresponding SVG style attributes, which are processed in StrokeStyle

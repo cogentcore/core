@@ -60,7 +60,7 @@ func (pc *Paint) Defaults(bound image.Rectangle) {
 	pc.Stroke.Defaults()
 	pc.Fill.Defaults()
 	pc.Font.Defaults()
-	pc.XForm = Identity()
+	pc.XForm = Identity2D()
 	pc.Bounds = bound
 }
 
@@ -78,6 +78,37 @@ func (pc *Paint) SetFromNode(g *GiNode2D) {
 func (pc *Paint) TransformPoint(x, y float64) Point2D {
 	tx, ty := pc.XForm.TransformPoint(x, y)
 	return Point2D{tx, ty}
+}
+
+// get the bounding box for an element in pixel int coordinates
+func (pc *Paint) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
+	tx1, ty1 := pc.XForm.TransformPoint(minX, minY)
+	tx2, ty2 := pc.XForm.TransformPoint(maxX, maxY)
+	return image.Rect(int(tx1), int(ty1), int(tx2), int(ty2))
+}
+
+// get the bounding box for a slice of points
+func (pc *Paint) BoundingBoxFromPoints(points []Point2D) image.Rectangle {
+	sz := len(points)
+	if sz == 0 {
+		return image.Rectangle{}
+	}
+	tx, ty := pc.XForm.TransformPointToInt(points[0].X, points[0].Y)
+	bb := image.Rect(tx, ty, tx, ty)
+	for i := 1; i < sz; i++ {
+		tx, ty := pc.XForm.TransformPointToInt(points[i].X, points[i].Y)
+		if tx < bb.Min.X {
+			bb.Min.X = tx
+		} else if tx > bb.Max.X {
+			bb.Max.X = tx
+		}
+		if ty < bb.Min.Y {
+			bb.Min.Y = ty
+		} else if ty > bb.Max.Y {
+			bb.Max.Y = ty
+		}
+	}
+	return bb
 }
 
 // MoveTo starts a new subpath within the current path starting at the
@@ -570,7 +601,7 @@ func (pc *Paint) WordWrap(s string, w float64) []string {
 // Identity resets the current transformation matrix to the identity matrix.
 // This results in no translating, scaling, rotating, or shearing.
 func (pc *Paint) Identity() {
-	pc.XForm = Identity()
+	pc.XForm = Identity2D()
 }
 
 // Translate updates the current matrix with a translation.

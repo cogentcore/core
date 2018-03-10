@@ -49,7 +49,6 @@ const (
 	PaintImage // apparently not SVG-standard but we have it.
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=PaintServerType
 
 // todo: implement all the other types of paint servers

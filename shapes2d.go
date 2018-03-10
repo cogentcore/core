@@ -7,10 +7,15 @@ package gi
 import (
 	"github.com/rcoreilly/goki/ki"
 	// "fmt"
+	"image"
 )
 
 // NOTE: for all render2D calls, viewport render has already handled the SetPaintFromNode call,
 // and also managed disabled, visible status
+
+// todo: can we rename GiRect -> Rect without colliding with anything else??
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D rectangle, optionally with rounded corners
 type GiRect struct {
@@ -28,10 +33,12 @@ func (g *GiRect) Node2D() *GiNode2D {
 }
 
 func (g *GiRect) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
+}
+
+func (g *GiRect) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
 func (g *GiRect) Render2D(vp *Viewport2D) bool {
@@ -54,6 +61,8 @@ func (g *GiRect) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+
 // a 2D circle
 type GiCircle struct {
 	GiNode2D
@@ -64,15 +73,17 @@ type GiCircle struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KtGiCircle = ki.KiTypes.AddType(&GiCircle{})
 
+func (g *GiCircle) Node2D() *GiNode2D {
+	return &g.GiNode2D
+}
+
 func (g *GiCircle) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiCircle) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *GiCircle) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
 }
 
 func (g *GiCircle) Render2D(vp *Viewport2D) bool {
@@ -90,6 +101,8 @@ func (g *GiCircle) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+
 // a 2D ellipse
 type GiEllipse struct {
 	GiNode2D
@@ -105,10 +118,12 @@ func (g *GiEllipse) Node2D() *GiNode2D {
 }
 
 func (g *GiEllipse) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
+}
+
+func (g *GiEllipse) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 }
 
 func (g *GiEllipse) Render2D(vp *Viewport2D) bool {
@@ -126,6 +141,8 @@ func (g *GiEllipse) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+
 // a 2D line
 type GiLine struct {
 	GiNode2D
@@ -141,10 +158,12 @@ func (g *GiLine) Node2D() *GiNode2D {
 }
 
 func (g *GiLine) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
+}
+
+func (g *GiLine) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 }
 
 func (g *GiLine) Render2D(vp *Viewport2D) bool {
@@ -162,6 +181,8 @@ func (g *GiLine) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+
 // a 2D Polyline
 type GiPolyline struct {
 	GiNode2D
@@ -176,10 +197,12 @@ func (g *GiPolyline) Node2D() *GiNode2D {
 }
 
 func (g *GiPolyline) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
+}
+
+func (g *GiPolyline) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBoxFromPoints(g.Points)
 }
 
 func (g *GiPolyline) Render2D(vp *Viewport2D) bool {
@@ -200,6 +223,8 @@ func (g *GiPolyline) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+
 // a 2D Polygon
 type GiPolygon struct {
 	GiNode2D
@@ -214,10 +239,12 @@ func (g *GiPolygon) Node2D() *GiNode2D {
 }
 
 func (g *GiPolygon) InitNode2D(vp *Viewport2D) bool {
-	if g.NodeSig.FindConnectionIndex(vp.This, SignalViewport2D) < 0 {
-		g.NodeSig.Connect(vp.This, SignalViewport2D)
-	}
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
+}
+
+func (g *GiPolygon) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	return vp.BoundingBoxFromPoints(g.Points)
 }
 
 func (g *GiPolygon) Render2D(vp *Viewport2D) bool {
@@ -238,4 +265,6 @@ func (g *GiPolygon) Render2D(vp *Viewport2D) bool {
 	return true
 }
 
-// new in SVG2: mesh
+////////////////////////////////////////////////////////////////////////////////////////
+
+// todo: new in SVG2: mesh

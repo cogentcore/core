@@ -6,6 +6,7 @@ package gi
 
 import (
 	"golang.org/x/image/math/fixed"
+	"image"
 	"math"
 )
 
@@ -59,9 +60,7 @@ type XFormMatrix2D struct {
 	XX, YX, XY, YY, X0, Y0 float64
 }
 
-// todo: make these methods on the XForm to scope them
-
-func Identity() XFormMatrix2D {
+func Identity2D() XFormMatrix2D {
 	return XFormMatrix2D{
 		1, 0,
 		0, 1,
@@ -69,7 +68,7 @@ func Identity() XFormMatrix2D {
 	}
 }
 
-func Translate(x, y float64) XFormMatrix2D {
+func Translate2D(x, y float64) XFormMatrix2D {
 	return XFormMatrix2D{
 		1, 0,
 		0, 1,
@@ -77,7 +76,7 @@ func Translate(x, y float64) XFormMatrix2D {
 	}
 }
 
-func Scale(x, y float64) XFormMatrix2D {
+func Scale2D(x, y float64) XFormMatrix2D {
 	return XFormMatrix2D{
 		x, 0,
 		0, y,
@@ -85,7 +84,7 @@ func Scale(x, y float64) XFormMatrix2D {
 	}
 }
 
-func Rotate(angle float64) XFormMatrix2D {
+func Rotate2D(angle float64) XFormMatrix2D {
 	c := math.Cos(angle)
 	s := math.Sin(angle)
 	return XFormMatrix2D{
@@ -95,7 +94,7 @@ func Rotate(angle float64) XFormMatrix2D {
 	}
 }
 
-func Shear(x, y float64) XFormMatrix2D {
+func Shear2D(x, y float64) XFormMatrix2D {
 	return XFormMatrix2D{
 		1, y,
 		x, 1,
@@ -126,20 +125,26 @@ func (a XFormMatrix2D) TransformPoint(x, y float64) (tx, ty float64) {
 	return
 }
 
+func (a XFormMatrix2D) TransformPointToInt(x, y float64) (tx, ty int) {
+	tx = int(a.XX*x + a.XY*y + a.X0)
+	ty = int(a.YX*x + a.YY*y + a.Y0)
+	return
+}
+
 func (a XFormMatrix2D) Translate(x, y float64) XFormMatrix2D {
-	return Translate(x, y).Multiply(a)
+	return Translate2D(x, y).Multiply(a)
 }
 
 func (a XFormMatrix2D) Scale(x, y float64) XFormMatrix2D {
-	return Scale(x, y).Multiply(a)
+	return Scale2D(x, y).Multiply(a)
 }
 
 func (a XFormMatrix2D) Rotate(angle float64) XFormMatrix2D {
-	return Rotate(angle).Multiply(a)
+	return Rotate2D(angle).Multiply(a)
 }
 
 func (a XFormMatrix2D) Shear(x, y float64) XFormMatrix2D {
-	return Shear(x, y).Multiply(a)
+	return Shear2D(x, y).Multiply(a)
 }
 
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
@@ -165,7 +170,6 @@ const (
 	Slice ViewBoxMeetOrSlice = iota // the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=ViewBoxMeetOrSlice
 
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
@@ -174,11 +178,23 @@ type ViewBoxPreserveAspectRatio struct {
 	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice",desc:"how to scale the view box relative to the viewport"`
 }
 
-// ViewBox defines a region in 2D space
+// ViewBox defines a region in 2D bitmap image space -- it must ALWAYS be in terms of underlying pixels
 type ViewBox2D struct {
-	Min                 Point2D                    `svg:"{min-x,min-y}",desc:"offset or starting point in parent Viewport2D"`
-	Size                Size2D                     `svg:"{width,height}",desc:"size of viewbox within parent Viewport2D"`
+	Min                 image.Point                `svg:"{min-x,min-y}",desc:"offset or starting point in parent Viewport2D"`
+	Size                image.Point                `svg:"{width,height}",desc:"size of viewbox within parent Viewport2D"`
 	PreserveAspectRatio ViewBoxPreserveAspectRatio `svg:"preserveAspectRatio",desc:"how to scale the view box within parent Viewport2D"`
+}
+
+// todo: need to implement the viewbox preserve aspect ratio logic!
+
+// convert viewbox to bounds
+func (vb *ViewBox2D) Bounds() image.Rectangle {
+	return image.Rect(vb.Min.X, vb.Min.Y, vb.Min.X+vb.Size.X, vb.Min.Y+vb.Size.Y)
+}
+
+// convert viewbox to rect version of size
+func (vb *ViewBox2D) SizeRect() image.Rectangle {
+	return image.Rect(0, 0, vb.Size.X, vb.Size.Y)
 }
 
 ///////////////////////////////////////////////////////////

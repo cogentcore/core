@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "gopkg.in/go-playground/colors.v1"
+	"image"
 	"image/color"
 	"log"
 	"reflect"
@@ -32,6 +33,28 @@ import (
 // basic component node for GoGi
 type GiNode struct {
 	ki.Node
+	WinBBox image.Rectangle `json:"-",desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
+}
+
+// todo: try to avoid introducing this interface -- not clear if we need this has focus function etc -- would be true if focus is not always just equality with focus object
+
+// primary interface for all GiNode's -- note: need the interface for all virtual functions
+// type GiNodeI interface {
+// 	HasFocus(focus *GiNode)
+// }
+
+// func (g *GiNode) HasFocus(focus *GiNode) {
+// 	return g == focus
+// }
+
+func (g *GiNode) ReceiveEventType(et EventType, fun ki.RecvFun) {
+	wini := g.FindParentByType(reflect.TypeOf(Window{}))
+	if wini == nil {
+		log.Printf("GiNode %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
+		return
+	}
+	win := wini.(*Window)
+	win.ReceiveEventType(g.This, et, fun)
 }
 
 // standard css properties on nodes apply, including visible, etc.
@@ -40,18 +63,19 @@ type GiNode struct {
 type GiNode2D struct {
 	GiNode
 	z_index int           `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	XForm   XFormMatrix2D `desc:"the transform present when we were last rendered"`
+	XForm   XFormMatrix2D `json:"-",desc:"transform present when we were last rendered"`
 }
 
-// primary interface for all GiNode2D's
+// primary interface for all GiNode2D's -- note: need the interface for all virtual functions
 type GiNode2DI interface {
 	// initialize a node -- setup connections etc -- should be robust to being called repeatedly
 	InitNode2D(vp *Viewport2D) bool
+	// get the bounding box of this node relative to its parent viewport -- used in computing EventBBox, called during Render
+	Node2DBBox(vp *Viewport2D) image.Rectangle
 	// Render graphics into a 2D viewport -- return value indicates whether we should keep going down -- e.g., viewport cuts off there
 	Render2D(vp *Viewport2D) bool
-	// Get the GiNode2D representation of the object
+	// get a generic GiNode2D for our node -- not otherwise possible -- don't want to interface everything that a base node can do as that would be highly redundant
 	Node2D() *GiNode2D
-	// Initialize a new GiNode2D
 }
 
 // each node notifies its parent viewport whenever it changes, causing a re-render
@@ -69,7 +93,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig ki.SignalType, data interface{}) {
 	if sig == ki.SignalChildAdded {
 		vp.InitNode2D(parVp)
 	}
-	vp.RenderTopLevel()
+	vp.RenderTopLevel() // render as if we are top-level
 	if parVp == nil {
 		vp.DrawIntoWindow() // if no parent, we must be top-level
 	} else {

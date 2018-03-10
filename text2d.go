@@ -21,7 +21,6 @@ const (
 	TextAlignRight
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=TextAlign
 
 type PaintFont struct {

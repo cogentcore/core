@@ -16,7 +16,6 @@ const (
 	FillRuleEvenOdd
 )
 
-// contrary to some docs, apparently need to run go generate manually
 //go:generate stringer -type=FillRule
 
 // PaintFill contains all the properties specific to filling a region

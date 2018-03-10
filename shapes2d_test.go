@@ -22,7 +22,7 @@ func TestRect(t *testing.T) {
 	rect1.Size = Size2D{100, 100}
 	parent.Clear()
 	parent.RenderTopLevel()
-	parent.SavePNG("test_rect.png")
+	// parent.SavePNG("test_rect.png")
 }
 
 func TestShapesAll(t *testing.T) {
@@ -84,5 +84,5 @@ func TestShapesAll(t *testing.T) {
 	// parent.RenderTopLevel()
 	polygon1.UpdateStart()
 	polygon1.UpdateEnd(false) // only update highest
-	parent.SavePNG("test_shape_all.png")
+	// parent.SavePNG("test_shape_all.png")
 }
