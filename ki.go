@@ -170,6 +170,9 @@ type Ki interface {
 	// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildByName(name string, start_idx int) Ki
 
+	// find child from type (any of types given) -- returns nil if not found
+	FindChildByType(t ...reflect.Type) Ki
+
 	// find parent by name -- returns nil if not found
 	FindParentByName(name string) Ki
 

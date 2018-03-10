@@ -7,7 +7,7 @@ package ki
 import (
 	"errors"
 	// "fmt"
-	// "reflect"
+	"reflect"
 )
 
 // implements general signal passing between Ki objects, like Qt's Signal / Slot system
@@ -47,46 +47,60 @@ type Connection struct {
 }
 
 // Connect attaches a new receiver to the signal -- error if not ok
-func (sig *Signal) Connect(recv Ki, recvfun RecvFun) error {
+func (sig *Signal) Connect(recv Ki, fun RecvFun) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")
 	}
-	if recvfun == nil {
+	if fun == nil {
 		return errors.New("ki Signal Connect: no recv func provided")
 	}
 
 	con := Connection{
 		Recv: recv,
-		Fun:  recvfun,
+		Fun:  fun,
 	}
 	sig.Cons = append(sig.Cons, con)
 
-	// fmt.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(recvfun))
+	// fmt.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(fun))
 
 	return nil
 }
 
-// Find any existing signal connection
-func (sig *Signal) FindConnectionIndex(recv Ki, recvfun RecvFun) int {
+// Find any existing signal connection for given recv and fun
+func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFun) int {
+	rfref := reflect.ValueOf(fun).Pointer()
 	for i, con := range sig.Cons {
-		if con.Recv == recv /* && con.Fun == recvfun */ {
+		if con.Recv == recv && rfref == reflect.ValueOf(con.Fun).Pointer() {
 			return i
 		}
 	}
 	return -1
 }
 
-// Disconnect receiver and function if they exist
-func (sig *Signal) Disconnect(recv Ki, recvfun RecvFun) bool {
-	for i, con := range sig.Cons {
-		if con.Recv == recv /* && con.Fun == recvfun */ {
-			// this copy makes sure there are no memory leaks
-			copy(sig.Cons[i:], sig.Cons[i+1:])
-			sig.Cons = sig.Cons[:len(sig.Cons)-1]
-			return true
+// Disconnect all connections for receiver and/or function if they exist in our list -- can pass nil for either (or both) to match only on one or the other -- both nil means disconnect from all, but more efficient to use DisconnectAll
+func (sig *Signal) Disconnect(recv Ki, fun RecvFun) bool {
+	rfref := reflect.ValueOf(fun).Pointer()
+	sz := len(sig.Cons)
+	got := false
+	for i := sz - 1; i >= 0; i-- {
+		con := sig.Cons[i]
+		if recv != nil && con.Recv != recv {
+			continue
 		}
+		if fun != nil && rfref != reflect.ValueOf(con.Fun).Pointer() {
+			continue
+		}
+		// this copy makes sure there are no memory leaks
+		copy(sig.Cons[i:], sig.Cons[i+1:])
+		sig.Cons = sig.Cons[:len(sig.Cons)-1]
+		got = true
 	}
-	return false
+	return got
+}
+
+// Disconnect all connections
+func (sig *Signal) DisconnectAll(recv Ki, fun RecvFun) {
+	sig.Cons = sig.Cons[:0]
 }
 
 // Emit sends the signal across all the connections to the receivers -- sequential

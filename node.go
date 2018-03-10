@@ -400,6 +400,14 @@ func (n *Node) FindChildByName(name string, start_idx int) Ki {
 	return n.Children[idx]
 }
 
+func (n *Node) FindChildByType(t ...reflect.Type) Ki {
+	idx := n.Children.FindIndexByType(t...)
+	if idx < 0 {
+		return nil
+	}
+	return n.Children[idx]
+}
+
 func (n *Node) FindParentByName(name string) Ki {
 	if n.KiName() == name {
 		return n.This

@@ -34,6 +34,7 @@ func TestSignalConnect(t *testing.T) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
 			receiver.KiName(), sender.KiName(), sig, data))
 	})
+
 	parent.sig1.Emit(&parent, NilSignal, 1234)
 
 	// fmt.Printf("res: %v\n", res)
