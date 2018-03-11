@@ -46,7 +46,7 @@ type Node struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtNode = KiTypes.AddType(&Node{})
+var KiT_Node = KiTypes.AddType(&Node{})
 
 //////////////////////////////////////////////////////////////////////////
 //  Basic Ki properties
