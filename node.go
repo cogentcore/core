@@ -409,21 +409,21 @@ func (n *Node) FindChildByType(t ...reflect.Type) Ki {
 }
 
 func (n *Node) FindParentByName(name string) Ki {
-	if n.KiName() == name {
-		return n.This
-	}
 	if n.IsRoot() {
 		return nil
+	}
+	if n.Parent.KiName() == name {
+		return n.Parent
 	}
 	return n.Parent.FindParentByName(name)
 }
 
 func (n *Node) FindParentByType(t ...reflect.Type) Ki {
-	if n.IsType(t...) {
-		return n.This
-	}
 	if n.IsRoot() {
 		return nil
+	}
+	if n.Parent.IsType(t...) {
+		return n.Parent
 	}
 	return n.Parent.FindParentByType(t...)
 }
