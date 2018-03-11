@@ -63,6 +63,15 @@ func mainrun() {
 	line1.Start = gi.Point2D{100, 100}
 	line1.End = gi.Point2D{150, 200}
 
+	text1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Text2D{}), "text1").(*gi.Text2D)
+	text1.SetProp("stroke", "#000")
+	text1.SetProp("stroke-width", 1.0)
+	text1.SetProp("text-align", "left")
+	text1.SetProp("font-size", 32)
+	text1.Pos = gi.Point2D{200, 200}
+	text1.Size.X = 100
+	text1.Text = "this is test text!"
+
 	polyline1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Polyline{}), "polyline1").(*gi.Polyline)
 	polyline1.SetProp("stroke", "#888800")
 	polyline1.SetProp("stroke-width", 4.0)

@@ -15,16 +15,16 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// a 2D rectangle, optionally with rounded corners
+// 2D rectangle, optionally with rounded corners
 type Rect struct {
 	Node2DBase
 	Pos    Point2D `svg:"{x,y}",desc:"position of top-left corner"`
-	Size   Size2D  `svg:"{width,height}",desc:"size of viewbox within parent Viewport2D"`
+	Size   Size2D  `svg:"{width,height}",desc:"size of rectangle"`
 	Radius Point2D `svg:"{rx,ry}",desc:"radii for curved corners, as a proportion of width, height"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtRect = ki.KiTypes.AddType(&Rect{})
+var KiT_Rect = ki.KiTypes.AddType(&Rect{})
 
 func (g *Rect) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -65,7 +65,42 @@ func (g *Rect) Render2D(vp *Viewport2D) bool {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// a 2D circle
+// viewport fill fills entire viewport -- just a rect that automatically sets size to viewport
+type Viewport2DFill struct {
+	Rect
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Viewport2DFill = ki.KiTypes.AddType(&Viewport2DFill{})
+
+func (g *Viewport2DFill) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *Viewport2DFill) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Viewport2DFill) InitNode2D(vp *Viewport2D) bool {
+	g.Pos = Point2D{0, 0}
+	g.Size = Size2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
+	g.NodeSig.Connect(vp.This, SignalViewport2D)
+	return true
+}
+
+func (g *Viewport2DFill) Node2DBBox(vp *Viewport2D) image.Rectangle {
+	g.Pos = Point2D{0, 0}
+	g.Size = Size2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
+	return vp.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+}
+
+func (g *Viewport2DFill) Render2D(vp *Viewport2D) bool {
+	return g.Rect.Render2D(vp)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+// 2D circle
 type Circle struct {
 	Node2DBase
 	Pos    Point2D `svg:"{cx,cy}",desc:"position of the center of the circle"`
@@ -73,7 +108,7 @@ type Circle struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtCircle = ki.KiTypes.AddType(&Circle{})
+var KiT_Circle = ki.KiTypes.AddType(&Circle{})
 
 func (g *Circle) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -109,7 +144,7 @@ func (g *Circle) Render2D(vp *Viewport2D) bool {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// a 2D ellipse
+// 2D ellipse
 type Ellipse struct {
 	Node2DBase
 	Pos   Point2D `svg:"{cx,cy}",desc:"position of the center of the ellipse"`
@@ -117,7 +152,7 @@ type Ellipse struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtEllipse = ki.KiTypes.AddType(&Ellipse{})
+var KiT_Ellipse = ki.KiTypes.AddType(&Ellipse{})
 
 func (g *Ellipse) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -161,7 +196,7 @@ type Line struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtLine = ki.KiTypes.AddType(&Line{})
+var KiT_Line = ki.KiTypes.AddType(&Line{})
 
 func (g *Line) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -197,14 +232,14 @@ func (g *Line) Render2D(vp *Viewport2D) bool {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// a 2D Polyline
+// 2D Polyline
 type Polyline struct {
 	Node2DBase
 	Points []Point2D `svg:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtPolyline = ki.KiTypes.AddType(&Polyline{})
+var KiT_Polyline = ki.KiTypes.AddType(&Polyline{})
 
 func (g *Polyline) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -243,14 +278,14 @@ func (g *Polyline) Render2D(vp *Viewport2D) bool {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// a 2D Polygon
+// 2D Polygon
 type Polygon struct {
 	Node2DBase
 	Points []Point2D `svg:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtPolygon = ki.KiTypes.AddType(&Polygon{})
+var KiT_Polygon = ki.KiTypes.AddType(&Polygon{})
 
 func (g *Polygon) GiNode2D() *Node2DBase {
 	return &g.Node2DBase

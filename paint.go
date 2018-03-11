@@ -46,6 +46,8 @@ type Paint struct {
 	Stroke     PaintStroke
 	Fill       PaintFill
 	Font       PaintFont
+	TextLayout PaintTextLayout
+	// below are rendering state
 	StrokePath raster.Path
 	FillPath   raster.Path
 	Start      Point2D
@@ -60,6 +62,7 @@ func (pc *Paint) Defaults(bound image.Rectangle) {
 	pc.Stroke.Defaults()
 	pc.Fill.Defaults()
 	pc.Font.Defaults()
+	pc.TextLayout.Defaults()
 	pc.XForm = Identity2D()
 	pc.Bounds = bound
 }
@@ -68,6 +71,8 @@ func (pc *Paint) Defaults(bound image.Rectangle) {
 func (pc *Paint) SetFromNode(g *Node2DBase) {
 	pc.Stroke.SetFromNode(g)
 	pc.Fill.SetFromNode(g)
+	pc.Font.SetFromNode(g)
+	pc.TextLayout.SetFromNode(g)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -532,9 +537,21 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 	}
 }
 
-// DrawString draws the specified text at the specified point.
-func (pc *Paint) DrawString(im *image.RGBA, s string, x, y float64) {
-	pc.DrawStringAnchored(im, s, x, y, 0, 0)
+// DrawString according to current settings -- width is only needed for wrap case
+func (pc *Paint) DrawString(im *image.RGBA, s string, x, y, width float64) {
+	var ax, ay float64
+	switch pc.TextLayout.Align {
+	case TextAlignLeft:
+	case TextAlignCenter:
+		ax = 0.5 // todo: determine if font is horiz or vert..
+	case TextAlignRight:
+		ax = 1.0
+	}
+	if pc.TextLayout.Wrap {
+		pc.DrawStringAnchored(im, s, x, y, ax, ay)
+	} else {
+		pc.DrawStringWrapped(im, s, x, y, ax, ay, width, pc.TextLayout.Spacing.Y, pc.TextLayout.Align)
+	}
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.

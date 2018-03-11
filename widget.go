@@ -59,10 +59,11 @@ type PushButton struct {
 var KtPushButton = ki.KiTypes.AddType(&PushButton{})
 
 func (g *PushButton) InitNode2D(vp *Viewport2D) bool {
-	width := 20
-	height := 10
+	width := 60
+	height := 50
 	g.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
 	g.ViewBox.Size = image.Point{width, height}
+	g.ViewBox.Min = image.Point{20, 300}
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*AbstractButton)
@@ -78,8 +79,16 @@ func (g *PushButton) InitNode2D(vp *Viewport2D) bool {
 		rect1.SetProp("fill", "#008800")
 		rect1.SetProp("stroke", "#0000FF")
 		rect1.SetProp("stroke-width", 5.0)
-		rect1.Size = Size2D{20, 10}
-		// important: don't add until AFTER adding sub-node
+		rect1.Size = Size2D{float64(width), float64(height)}
+
+		text1 := g.AddNewChildNamed(reflect.TypeOf(Text2D{}), "text1").(*Text2D)
+		text1.SetProp("fill", "#000")
+		text1.SetProp("stroke", "#000")
+		text1.SetProp("stroke-width", 2.0)
+		text1.SetProp("text-align", "left")
+		text1.SetProp("font-size", 32)
+		text1.Size = Size2D{20, 10}
+		text1.Text = "Push Me"
 	}
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true

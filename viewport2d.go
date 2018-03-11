@@ -27,6 +27,9 @@ type Viewport2D struct {
 	Backing *image.RGBA `json:"-",desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
 }
 
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Viewport2D = ki.KiTypes.AddType(&Viewport2D{})
+
 // NewViewport2D creates a new image.RGBA with the specified width and height
 // and prepares a context for rendering onto that image.
 func NewViewport2D(width, height int) *Viewport2D {
@@ -501,9 +504,9 @@ func (vp *Viewport2D) FontHeight() float64 {
 }
 
 // DrawString draws the specified text at the specified point.
-func (vp *Viewport2D) DrawString(s string, x, y float64) {
+func (vp *Viewport2D) DrawString(s string, x, y, width float64) {
 	pc := vp.CurPaint()
-	pc.DrawString(vp.Pixels, s, x, y)
+	pc.DrawString(vp.Pixels, s, x, y, width)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.

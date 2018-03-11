@@ -36,6 +36,9 @@ type NodeBase struct {
 	WinBBox image.Rectangle `json:"-",desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
 }
 
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_NodeBase = ki.KiTypes.AddType(&NodeBase{})
+
 // todo: try to avoid introducing this interface -- not clear if we need this HasFocus function etc -- would be true if focus is not always just equality with focus object
 
 // primary interface for all Node's -- note: need the interface for all virtual functions
@@ -70,6 +73,9 @@ type Node2DBase struct {
 	z_index int           `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	XForm   XFormMatrix2D `json:"-",desc:"transform present when we were last rendered"`
 }
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Node2DBase = ki.KiTypes.AddType(&Node2DBase{})
 
 // primary interface for all Node2D nodes
 type Node2D interface {
@@ -139,6 +145,9 @@ type Node3DBase struct {
 	NodeBase
 }
 
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Node3DBase = ki.KiTypes.AddType(&Node3DBase{})
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Property checking
 
@@ -176,6 +185,25 @@ func (g *NodeBase) PropVisible() bool {
 		return v
 	}
 	return true
+}
+
+// check for the visible: none (false) property
+func (g *NodeBase) GiPropBool(name string) (bool, bool) {
+	p := g.Prop(name, false)
+	if p == nil {
+		return false, false
+	}
+	switch v := p.(type) {
+	case string:
+		if v == "none" || v == "false" || v == "off" {
+			return false, true
+		} else {
+			return true, true
+		}
+	case bool:
+		return v, true
+	}
+	return false, false
 }
 
 // process properties and any css style sheets (todo) to get a number property of the given name -- returns false if property has not been set

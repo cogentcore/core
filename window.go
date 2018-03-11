@@ -17,7 +17,7 @@ import (
 
 // todo: could have two subtypes of windows, one a native 3D with OpenGl etc.
 
-// Window provides an OS window using go.wde package
+// Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
 	Win           OSWindow              `json:"-",desc:"OS-specific window interface"`
@@ -25,6 +25,9 @@ type Window struct {
 	Focus         *NodeBase             `json:"-",desc:"node receiving keyboard events"`
 	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Window = ki.KiTypes.AddType(&Window{})
 
 // create a new window with given name and sizing
 func NewWindow(name string, width, height int) *Window {
