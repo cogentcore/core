@@ -74,9 +74,9 @@ const (
 )
 
 // interface for GUI events
-type EventI interface {
+type Event interface {
 	// get the type of event associated with given event
-	EventTyp() EventType
+	EventType() EventType
 	// does the event have window position where it takes place?
 	EventHasPos() bool
 	// position where event took place -- needed for sending events to the right place
@@ -85,14 +85,15 @@ type EventI interface {
 	EventOnFocus() bool
 }
 
-type Event int
+// base type for events -- todo: not quite sure what the function of this is
+type EventBase int
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Mouse Events
 
 // MouseEvent is used for data common to all mouse events, and should not appear as an event received by the caller program.
 type MouseEvent struct {
-	Event
+	EventBase
 	Where image.Point
 }
 
@@ -104,7 +105,7 @@ type MouseMovedEvent struct {
 	From image.Point
 }
 
-func (ev MouseMovedEvent) EventTyp() EventType {
+func (ev MouseMovedEvent) EventType() EventType {
 	return MouseMovedEventType
 }
 
@@ -121,7 +122,7 @@ func (ev MouseMovedEvent) EventOnFocus() bool {
 }
 
 // check for interface implementation
-var _ EventI = MouseMovedEvent{}
+var _ Event = MouseMovedEvent{}
 
 ////////////////////////////////////////////
 
@@ -134,7 +135,7 @@ type MouseButtonEvent struct {
 // MouseDownEvent is for when the mouse is clicked within the window.
 type MouseDownEvent MouseButtonEvent
 
-func (ev MouseDownEvent) EventTyp() EventType {
+func (ev MouseDownEvent) EventType() EventType {
 	return MouseDownEventType
 }
 
@@ -153,7 +154,7 @@ func (ev MouseDownEvent) EventOnFocus() bool {
 // MouseUpEvent is for when the mouse is unclicked within the window.
 type MouseUpEvent MouseButtonEvent
 
-func (ev MouseUpEvent) EventTyp() EventType {
+func (ev MouseUpEvent) EventType() EventType {
 	return MouseUpEventType
 }
 
@@ -177,7 +178,7 @@ type MouseDraggedEvent struct {
 	Which Button
 }
 
-func (ev MouseDraggedEvent) EventTyp() EventType {
+func (ev MouseDraggedEvent) EventType() EventType {
 	return MouseDraggedEventType
 }
 
@@ -194,7 +195,7 @@ func (ev MouseDraggedEvent) EventPos() image.Point {
 
 // GestureEvent is used to represents common elements of all gesture-based events
 type GestureEvent struct {
-	Event
+	EventBase
 	Where image.Point
 }
 
@@ -206,7 +207,7 @@ type MagnifyEvent struct {
 	Magnification float64 // the multiplicative scale factor
 }
 
-func (ev MagnifyEvent) EventTyp() EventType {
+func (ev MagnifyEvent) EventType() EventType {
 	return MagnifyEventType
 }
 
@@ -230,7 +231,7 @@ type RotateEvent struct {
 	Rotation float64 // measured in degrees; positive == clockwise
 }
 
-func (ev RotateEvent) EventTyp() EventType {
+func (ev RotateEvent) EventType() EventType {
 	return RotateEventType
 }
 
@@ -254,7 +255,7 @@ type ScrollEvent struct {
 	Delta image.Point
 }
 
-func (ev ScrollEvent) EventTyp() EventType {
+func (ev ScrollEvent) EventType() EventType {
 	return ScrollEventType
 }
 
@@ -283,7 +284,7 @@ type KeyEvent struct {
 // KeyDownEvent is for when a key is pressed.
 type KeyDownEvent KeyEvent
 
-func (ev KeyDownEvent) EventTyp() EventType {
+func (ev KeyDownEvent) EventType() EventType {
 	return KeyDownEventType
 }
 
@@ -302,7 +303,7 @@ func (ev KeyDownEvent) EventOnFocus() bool {
 // KeyUpEvent is for when a key is unpressed.
 type KeyUpEvent KeyEvent
 
-func (ev KeyUpEvent) EventTyp() EventType {
+func (ev KeyUpEvent) EventType() EventType {
 	return KeyUpEventType
 }
 
@@ -330,7 +331,7 @@ type KeyTypedEvent struct {
 	Chord string
 }
 
-func (ev KeyTypedEvent) EventTyp() EventType {
+func (ev KeyTypedEvent) EventType() EventType {
 	return KeyTypedEventType
 }
 
@@ -346,12 +347,15 @@ func (ev KeyTypedEvent) EventOnFocus() bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//   Window Events
+
 ////////////////////////////////////////////
 
 // MouseEnteredEvent is for when the mouse enters a window.
 type MouseEnteredEvent MouseMovedEvent
 
-func (ev MouseEnteredEvent) EventTyp() EventType {
+func (ev MouseEnteredEvent) EventType() EventType {
 	return MouseEnteredEventType
 }
 
@@ -370,7 +374,7 @@ func (ev MouseEnteredEvent) EventOnFocus() bool {
 // MouseExitedEvent is for when the mouse exits a window.
 type MouseExitedEvent MouseMovedEvent
 
-func (ev MouseExitedEvent) EventTyp() EventType {
+func (ev MouseExitedEvent) EventType() EventType {
 	return MouseExitedEventType
 }
 
@@ -388,10 +392,11 @@ func (ev MouseExitedEvent) EventOnFocus() bool {
 
 // ResizeEvent is for when the window changes size.
 type ResizeEvent struct {
+	EventBase
 	Width, Height int
 }
 
-func (ev ResizeEvent) EventTyp() EventType {
+func (ev ResizeEvent) EventType() EventType {
 	return ResizeEventType
 }
 
@@ -408,9 +413,11 @@ func (ev ResizeEvent) EventOnFocus() bool {
 }
 
 // CloseEvent is for when the window is closed.
-type CloseEvent struct{}
+type CloseEvent struct {
+	EventBase
+}
 
-func (ev CloseEvent) EventTyp() EventType {
+func (ev CloseEvent) EventType() EventType {
 	return CloseEventType
 }
 

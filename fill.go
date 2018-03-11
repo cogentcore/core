@@ -37,7 +37,7 @@ func (pf *PaintFill) Defaults() {
 // todo: figure out more elemental, generic de-stringer kind of thing
 
 // update the fill settings from the style info on the node
-func (pf *PaintFill) SetFromNode(g *GiNode2D) {
+func (pf *PaintFill) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 	// todo: need to be able to process colors!
 

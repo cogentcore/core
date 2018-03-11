@@ -10,7 +10,7 @@ import (
 
 // a 2D rectangle,
 type GiPath struct {
-	GiNode2D
+	Node2DBase
 }
 
 func (g *GiPath) Render(vp *Viewport2D) {

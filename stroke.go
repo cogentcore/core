@@ -59,7 +59,7 @@ func (ps *PaintStroke) Defaults() {
 // todo: figure out more elemental, generic de-stringer kind of thing
 
 // update the stroke settings from the style info on the node
-func (ps *PaintStroke) SetFromNode(g *GiNode2D) {
+func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 	if c, got := g.PropColor("stroke"); got { // todo: support url's to paint server elements!
 		if c == nil {

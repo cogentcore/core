@@ -13,35 +13,37 @@ import (
 // NOTE: for all render2D calls, viewport render has already handled the SetPaintFromNode call,
 // and also managed disabled, visible status
 
-// todo: can we rename GiRect -> Rect without colliding with anything else??
-
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D rectangle, optionally with rounded corners
-type GiRect struct {
-	GiNode2D
+type Rect struct {
+	Node2DBase
 	Pos    Point2D `svg:"{x,y}",desc:"position of top-left corner"`
 	Size   Size2D  `svg:"{width,height}",desc:"size of viewbox within parent Viewport2D"`
 	Radius Point2D `svg:"{rx,ry}",desc:"radii for curved corners, as a proportion of width, height"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiRect = ki.KiTypes.AddType(&GiRect{})
+var KtRect = ki.KiTypes.AddType(&Rect{})
 
-func (g *GiRect) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Rect) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiRect) InitNode2D(vp *Viewport2D) bool {
+func (g *Rect) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Rect) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiRect) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Rect) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
-func (g *GiRect) Render2D(vp *Viewport2D) bool {
+func (g *Rect) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}
@@ -64,29 +66,33 @@ func (g *GiRect) Render2D(vp *Viewport2D) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D circle
-type GiCircle struct {
-	GiNode2D
+type Circle struct {
+	Node2DBase
 	Pos    Point2D `svg:"{cx,cy}",desc:"position of the center of the circle"`
 	Radius float64 `svg:"r",desc:"radius of the circle"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiCircle = ki.KiTypes.AddType(&GiCircle{})
+var KtCircle = ki.KiTypes.AddType(&Circle{})
 
-func (g *GiCircle) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Circle) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiCircle) InitNode2D(vp *Viewport2D) bool {
+func (g *Circle) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Circle) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiCircle) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Circle) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
 }
 
-func (g *GiCircle) Render2D(vp *Viewport2D) bool {
+func (g *Circle) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}
@@ -104,29 +110,33 @@ func (g *GiCircle) Render2D(vp *Viewport2D) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D ellipse
-type GiEllipse struct {
-	GiNode2D
+type Ellipse struct {
+	Node2DBase
 	Pos   Point2D `svg:"{cx,cy}",desc:"position of the center of the ellipse"`
 	Radii Size2D  `svg:"{rx, ry}",desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiEllipse = ki.KiTypes.AddType(&GiEllipse{})
+var KtEllipse = ki.KiTypes.AddType(&Ellipse{})
 
-func (g *GiEllipse) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Ellipse) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiEllipse) InitNode2D(vp *Viewport2D) bool {
+func (g *Ellipse) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Ellipse) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiEllipse) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Ellipse) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 }
 
-func (g *GiEllipse) Render2D(vp *Viewport2D) bool {
+func (g *Ellipse) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}
@@ -144,29 +154,33 @@ func (g *GiEllipse) Render2D(vp *Viewport2D) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D line
-type GiLine struct {
-	GiNode2D
+type Line struct {
+	Node2DBase
 	Start Point2D `svg:"{x1,y1}",desc:"position of the start of the line"`
 	End   Point2D `svg:"{x2, y2}",desc:"position of the end of the line"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiLine = ki.KiTypes.AddType(&GiLine{})
+var KtLine = ki.KiTypes.AddType(&Line{})
 
-func (g *GiLine) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Line) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiLine) InitNode2D(vp *Viewport2D) bool {
+func (g *Line) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Line) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiLine) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Line) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 }
 
-func (g *GiLine) Render2D(vp *Viewport2D) bool {
+func (g *Line) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}
@@ -184,28 +198,32 @@ func (g *GiLine) Render2D(vp *Viewport2D) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D Polyline
-type GiPolyline struct {
-	GiNode2D
+type Polyline struct {
+	Node2DBase
 	Points []Point2D `svg:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiPolyline = ki.KiTypes.AddType(&GiPolyline{})
+var KtPolyline = ki.KiTypes.AddType(&Polyline{})
 
-func (g *GiPolyline) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Polyline) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiPolyline) InitNode2D(vp *Viewport2D) bool {
+func (g *Polyline) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Polyline) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiPolyline) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Polyline) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBoxFromPoints(g.Points)
 }
 
-func (g *GiPolyline) Render2D(vp *Viewport2D) bool {
+func (g *Polyline) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}
@@ -226,28 +244,32 @@ func (g *GiPolyline) Render2D(vp *Viewport2D) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // a 2D Polygon
-type GiPolygon struct {
-	GiNode2D
+type Polygon struct {
+	Node2DBase
 	Points []Point2D `svg:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KtGiPolygon = ki.KiTypes.AddType(&GiPolygon{})
+var KtPolygon = ki.KiTypes.AddType(&Polygon{})
 
-func (g *GiPolygon) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *Polygon) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
 }
 
-func (g *GiPolygon) InitNode2D(vp *Viewport2D) bool {
+func (g *Polygon) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Polygon) InitNode2D(vp *Viewport2D) bool {
 	g.NodeSig.Connect(vp.This, SignalViewport2D)
 	return true
 }
 
-func (g *GiPolygon) Node2DBBox(vp *Viewport2D) image.Rectangle {
+func (g *Polygon) Node2DBBox(vp *Viewport2D) image.Rectangle {
 	return vp.BoundingBoxFromPoints(g.Points)
 }
 
-func (g *GiPolygon) Render2D(vp *Viewport2D) bool {
+func (g *Polygon) Render2D(vp *Viewport2D) bool {
 	if vp.HasNoStrokeOrFill() {
 		return true
 	}

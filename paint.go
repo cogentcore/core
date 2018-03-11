@@ -65,7 +65,7 @@ func (pc *Paint) Defaults(bound image.Rectangle) {
 }
 
 // update the Paint Stroke and Fill from the properties of a given node -- because Paint stack captures all the relevant inheritance, this does NOT look for inherited properties
-func (pc *Paint) SetFromNode(g *GiNode2D) {
+func (pc *Paint) SetFromNode(g *Node2DBase) {
 	pc.Stroke.SetFromNode(g)
 	pc.Fill.SetFromNode(g)
 }

@@ -74,7 +74,7 @@ func (g *PushButton) InitNode2D(vp *Viewport2D) bool {
 		g.UpdateEnd(false)
 	})
 	if len(g.Children) == 0 {
-		rect1 := g.AddNewChildNamed(reflect.TypeOf(GiRect{}), "rect1").(*GiRect)
+		rect1 := g.AddNewChildNamed(reflect.TypeOf(Rect{}), "rect1").(*Rect)
 		rect1.SetProp("fill", "#008800")
 		rect1.SetProp("stroke", "#0000FF")
 		rect1.SetProp("stroke-width", 5.0)
@@ -85,8 +85,12 @@ func (g *PushButton) InitNode2D(vp *Viewport2D) bool {
 	return true
 }
 
-func (g *PushButton) Node2D() *GiNode2D {
-	return &g.GiNode2D
+func (g *PushButton) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *PushButton) GiViewport2D() *Viewport2D {
+	return &g.Viewport2D
 }
 
 func (g *PushButton) Node2DBBox(vp *Viewport2D) image.Rectangle {

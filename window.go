@@ -19,10 +19,10 @@ import (
 
 // Window provides an OS window using go.wde package
 type Window struct {
-	GiNode
+	NodeBase
 	Win           OSWindow              `json:"-",desc:"OS-specific window interface"`
 	EventSigs     [EventTypeN]ki.Signal `json:"-",desc:"signals for communicating each type of window (wde) event"`
-	Focus         *GiNode               `json:"-",desc:"node receiving keyboard events"`
+	Focus         *NodeBase             `json:"-",desc:"node receiving keyboard events"`
 	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
@@ -44,7 +44,7 @@ func NewWindow(name string, width, height int) *Window {
 func NewWindow2D(name string, width, height int) *Window {
 	win := NewWindow(name, width, height)
 	vp := NewViewport2D(width, height)
-	win.AddChild(vp)
+	win.AddChildNamed(vp, "WinVp")
 	return win
 }
 
@@ -85,23 +85,23 @@ func (w *Window) EventLoop() {
 			fmt.Println("stop event loop")
 		}
 		runtime.Gosched()
-		evi, ok := ei.(EventI)
+		evi, ok := ei.(Event)
 		if !ok {
-			log.Printf("GoGi Window: programmer error -- got a non-EventI -- event does not define all EventI interface methods\n")
+			log.Printf("GoGi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
 			continue
 		}
-		et := evi.EventTyp()
+		et := evi.EventType()
 		// fmt.Printf("got event type: %v\n", et)
 		if et < EventTypeN {
 			w.EventSigs[et].EmitFiltered(w.This, ki.SendCustomSignal(int64(et)), ei, func(k ki.Ki) bool {
-				gii, ok := k.(GiNode2DI)
+				gii, ok := k.(Node2D)
 				if ok {
-					gi := gii.Node2D()
+					gi := gii.GiNode2D()
 					if evi.EventOnFocus() {
-						return &(gi.GiNode) == w.Focus // todo: could use GiNodeI interface
+						return &(gi.NodeBase) == w.Focus // todo: could use GiNodeI interface
 					} else if evi.EventHasPos() {
 						pos := evi.EventPos()
-						fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
+						// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
 						return pos.In(gi.WinBBox)
 					} else {
 						return true
@@ -117,6 +117,7 @@ func (w *Window) EventLoop() {
 		if et == CloseEventType {
 			fmt.Println("close")
 			w.Win.Close()
+			StopBackendEventLoop()
 		}
 	}
 	fmt.Println("end of events")
@@ -154,7 +155,7 @@ recommended that your main function look like the the code below.
 
 	func main() {
 		go theRestOfYourProgram()
-		gi.Run()
+		gi.RunBackendEventLoop()
 	}
 
 gi.Run() will return when gi.Stop() is called.
@@ -174,7 +175,7 @@ or
 
 
 will register a backend with GoGi, allowing you to call
-gi.Run(), gi.Stop() and gi.NewOSWindow() without referring to the
+gi.RunBackendEventLoop(), gi.StopBackendEventLoop() and gi.NewOSWindow() without referring to the
 backend explicitly.
 
 If you pupt the registration import in a separate file filtered for
@@ -186,7 +187,7 @@ gi/win in a file named "gi_windows.go" and gi/cocoa in a
 file named "gi_darwin.go", the go tool will import the correct one.
 
 */
-func Run() {
+func RunBackendEventLoop() {
 	BackendRun()
 }
 
@@ -198,7 +199,7 @@ var BackendRun = func() {
 Call this when you want gi.Run() to return. Usually to allow your
 program to exit gracefully.
 */
-func Stop() {
+func StopBackendEventLoop() {
 	BackendStop()
 }
 

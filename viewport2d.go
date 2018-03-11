@@ -20,7 +20,7 @@ import (
 // Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
-	GiNode2D
+	Node2DBase
 	ViewBox ViewBox2D   `svg:"viewBox",desc:"viewbox within any parent Viewport2D"`
 	Paints  []*Paint    `json:"-",desc:"paint stack for rendering"`
 	Pixels  *image.RGBA `json:"-",desc:"pixels that we render into"`
@@ -50,6 +50,15 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 	vp.PushNewPaint()
 	return vp
 }
+
+// resize viewport, creating a new image (no point in trying to resize the image -- need to re-render) -- updates ViewBox
+func (vp *Viewport2D) Resize(width, heigth int) {
+	vp.UpdateStart()
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Main Rendering code
 
 // gets the current Paint at top of stack
 func (vp *Viewport2D) CurPaint() *Paint {
@@ -96,6 +105,7 @@ func (vp *Viewport2D) HasNoStrokeOrFill() bool {
 	return (!pc.Stroke.On && !pc.Fill.On)
 }
 
+// draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
 	if vp.Backing != nil {
@@ -104,6 +114,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Src)
 }
 
+// copy our backing image from parent -- called at right place in Render
 func (vp *Viewport2D) CopyBacking(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
 	if vp.Backing == nil {
@@ -123,8 +134,15 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	}
 }
 
-func (vp *Viewport2D) Node2D() *GiNode2D {
-	return &vp.GiNode2D
+////////////////////////////////////////////////////////////////////////////////////////
+// Node2D interface
+
+func (vp *Viewport2D) GiNode2D() *Node2DBase {
+	return &vp.Node2DBase
+}
+
+func (vp *Viewport2D) GiViewport2D() *Viewport2D {
+	return vp
 }
 
 func (vp *Viewport2D) Node2DBBox(parVp *Viewport2D) image.Rectangle {
@@ -135,11 +153,11 @@ func (vp *Viewport2D) Node2DBBox(parVp *Viewport2D) image.Rectangle {
 func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 	last_level := 0
 	vp.FunDown(last_level, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(GiNode2DI)
+		gii, ok := k.(Node2D)
 		if !ok { // error message already in InitNode2D
-			return true
+			return false // going into a different type of thing, bail
 		}
-		gi := gii.Node2D()
+		gi := gii.GiNode2D()
 		if k == vp.This {
 			bb := gii.Node2DBBox(parVp) // only update our bbox
 			if parVp != nil {
@@ -151,6 +169,7 @@ func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 		}
 		disp := gi.PropDisplay()
 		if !disp { // go no further
+			gi.ZeroWinBBox()
 			return false
 		}
 		// from here we need to update context
@@ -176,6 +195,7 @@ func (vp *Viewport2D) Render2D(parVp *Viewport2D) bool {
 			}
 		} else {
 			gi.XForm = vp.CurPaint().XForm // cache current xform even if not visible?  maybe nil?
+			gi.ZeroWinBBox()               // not visible
 		}
 		return cont
 	})
@@ -194,9 +214,10 @@ func (vp *Viewport2D) InitNode2D(parVp *Viewport2D) bool {
 		if level == 0 || k == vp.This { // don't process us!
 			return true
 		}
-		gii, ok := (interface{}(k)).(GiNode2DI)
+		gii, ok := (interface{}(k)).(Node2D)
 		if !ok {
-			log.Printf("GiNode %v in Viewport2D does NOT implement GiNode2DI interface -- it should!\n", k.PathUnique())
+			// todo: need to detect the thing that wraps a 3D node inside a 2D, and stop there
+			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
 			return true
 		}
 		cont := gii.InitNode2D(vp)
@@ -206,18 +227,15 @@ func (vp *Viewport2D) InitNode2D(parVp *Viewport2D) bool {
 	return false // we tell parent render to not continue down any further -- we just did it all
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+// Top-level API
+
 func (vp *Viewport2D) RenderTopLevel() {
 	vp.Render2D(nil) // we are the top
 }
 
 func (vp *Viewport2D) InitTopLevel() {
 	vp.InitNode2D(nil) // we are the top
-}
-
-// update the Paint Stroke and Fill from the properties of a given node -- because Paint stack captures all the relevant inheritance, this does NOT look for inherited properties
-func (vp *Viewport2D) SetPaintFromNode(g *GiNode2D) {
-	pc := vp.CurPaint()
-	pc.SetFromNode(g)
 }
 
 // SavePNG encodes the image as a PNG and writes it to disk.
@@ -231,7 +249,16 @@ func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 }
 
 //////////////////////////////////////////////////////////////////////////////////
+//                       Below are largely Paint wrappers
+
+//////////////////////////////////////////////////////////////////////////////////
 // Path Manipulation
+
+// update the Paint Stroke and Fill from the properties of a given node -- because Paint stack captures all the relevant inheritance, this does NOT look for inherited properties
+func (vp *Viewport2D) SetPaintFromNode(g *Node2DBase) {
+	pc := vp.CurPaint()
+	pc.SetFromNode(g)
+}
 
 // get the bounding box for an element in pixel int coordinates
 func (vp *Viewport2D) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
