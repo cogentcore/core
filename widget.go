@@ -36,7 +36,7 @@ const (
 	ButtonSignalTypeN
 )
 
-//go:generate stringer -type=EventType
+//go:generate stringer -type=ButtonSignalType
 
 // AbstractButton common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type AbstractButton struct {
@@ -59,8 +59,11 @@ type PushButton struct {
 var KtPushButton = ki.KiTypes.AddType(&PushButton{})
 
 func (g *PushButton) InitNode2D(vp *Viewport2D) bool {
-	g.ViewBox.Size = image.Point{20, 10}
-	g.ReceiveEventType(MouseUpEvent, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
+	width := 20
+	height := 10
+	g.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
+	g.ViewBox.Size = image.Point{width, height}
+	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*AbstractButton)
 		if !ok {

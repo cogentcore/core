@@ -5,64 +5,423 @@
 package gi
 
 import (
-	"github.com/skelterjohn/go.wde"
+	"image"
 	// "fmt"
 )
 
-// EventType determines which type of event is being sent
+/*
+   much of this is copied directly from https://github.com/skelterjohn/go.wde
+
+   Copyright 2012 the go.wde authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+// EventType determines which type of GUI event is being sent -- need this for indexing into
+// different event signalers based on event type, and sending event type in signals
 type EventType int64
 
 const (
-	MouseMovedEvent EventType = iota
-	MouseDownEvent
-	MouseUpEvent
-	MouseDraggedEvent
-	MagnifyEvent
-	RotateEvent
-	ScrollEvent
-	KeyDownEvent
-	KeyUpEvent
-	KeyTypedEvent
-	MouseEnteredEvent // entered window
-	MouseExitedEvent  // exited window
-	ResizeEvent
-	CloseEvent
+	// mouse events
+	MouseMovedEventType EventType = iota
+	MouseDownEventType
+	MouseUpEventType
+	MouseDraggedEventType
+
+	// gesture events
+	MagnifyEventType
+	RotateEventType
+	ScrollEventType
+
+	// key events
+	KeyDownEventType
+	KeyUpEventType
+	KeyTypedEventType
+
+	// window events -- todo: need iconfiy, etc events
+	MouseEnteredEventType
+	MouseExitedEventType
+	ResizeEventType
+	CloseEventType
+
+	// number of event types
 	EventTypeN
 )
 
 //go:generate stringer -type=EventType
 
-func EventTypeFromEvent(ei interface{}) EventType {
-	switch ei.(type) {
-	case wde.MouseMovedEvent:
-		return MouseMovedEvent
-	case wde.MouseDownEvent:
-		return MouseDownEvent
-	case wde.MouseUpEvent:
-		return MouseUpEvent
-	case wde.MouseDraggedEvent:
-		return MouseDraggedEvent
-	case wde.MouseEnteredEvent:
-		return MouseEnteredEvent
-	case wde.MouseExitedEvent:
-		return MouseExitedEvent
-	case wde.MagnifyEvent:
-		return MagnifyEvent
-	case wde.RotateEvent:
-		return RotateEvent
-	case wde.ScrollEvent:
-		return ScrollEvent
-	case wde.KeyDownEvent:
-		return KeyDownEvent
-	case wde.KeyUpEvent:
-		return KeyUpEvent
-	case wde.KeyTypedEvent:
-		return KeyTypedEvent
-	case wde.ResizeEvent:
-		return ResizeEvent
-	case wde.CloseEvent:
-		return CloseEvent
-	default:
-		return EventTypeN // not recognized..
-	}
+// buttons that can be pressed
+type Button int
+
+const (
+	LeftButton Button = 1 << iota
+	MiddleButton
+	RightButton
+	WheelUpButton
+	WheelDownButton
+	WheelLeftButton  // only supported by xgb/win backends atm
+	WheelRightButton // only supported by xgb/win backends atm
+)
+
+// interface for GUI events
+type EventI interface {
+	// get the type of event associated with given event
+	EventTyp() EventType
+	// does the event have window position where it takes place?
+	EventHasPos() bool
+	// position where event took place -- needed for sending events to the right place
+	EventPos() image.Point
+	// does the event operate only on focus item (e.g., keyboard events)
+	EventOnFocus() bool
+}
+
+type Event int
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   Mouse Events
+
+// MouseEvent is used for data common to all mouse events, and should not appear as an event received by the caller program.
+type MouseEvent struct {
+	Event
+	Where image.Point
+}
+
+////////////////////////////////////////////
+
+// MouseMovedEvent is for when the mouse moves within the window.
+type MouseMovedEvent struct {
+	MouseEvent
+	From image.Point
+}
+
+func (ev MouseMovedEvent) EventTyp() EventType {
+	return MouseMovedEventType
+}
+
+func (ev MouseMovedEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseMovedEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseMovedEvent) EventOnFocus() bool {
+	return false
+}
+
+// check for interface implementation
+var _ EventI = MouseMovedEvent{}
+
+////////////////////////////////////////////
+
+// MouseButtonEvent is used for data common to all mouse button events, and should not appear as an event received by the caller program.
+type MouseButtonEvent struct {
+	MouseEvent
+	Which Button
+}
+
+// MouseDownEvent is for when the mouse is clicked within the window.
+type MouseDownEvent MouseButtonEvent
+
+func (ev MouseDownEvent) EventTyp() EventType {
+	return MouseDownEventType
+}
+
+func (ev MouseDownEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseDownEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseDownEvent) EventOnFocus() bool {
+	return false
+}
+
+// MouseUpEvent is for when the mouse is unclicked within the window.
+type MouseUpEvent MouseButtonEvent
+
+func (ev MouseUpEvent) EventTyp() EventType {
+	return MouseUpEventType
+}
+
+func (ev MouseUpEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseUpEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseUpEvent) EventOnFocus() bool {
+	return false
+}
+
+////////////////////////////////////////////
+
+// MouseDraggedEvent is for when the mouse is moved while a button is pressed.
+type MouseDraggedEvent struct {
+	MouseMovedEvent
+	Which Button
+}
+
+func (ev MouseDraggedEvent) EventTyp() EventType {
+	return MouseDraggedEventType
+}
+
+func (ev MouseDraggedEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseDraggedEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   Gesture Events
+
+// GestureEvent is used to represents common elements of all gesture-based events
+type GestureEvent struct {
+	Event
+	Where image.Point
+}
+
+////////////////////////////////////////////
+
+// MagnifyEvent is used to represent a magnification gesture.
+type MagnifyEvent struct {
+	GestureEvent
+	Magnification float64 // the multiplicative scale factor
+}
+
+func (ev MagnifyEvent) EventTyp() EventType {
+	return MagnifyEventType
+}
+
+func (ev MagnifyEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MagnifyEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MagnifyEvent) EventOnFocus() bool {
+	return false
+}
+
+////////////////////////////////////////////
+
+// RotateEvent is used to represent a rotation gesture.
+type RotateEvent struct {
+	GestureEvent
+	Rotation float64 // measured in degrees; positive == clockwise
+}
+
+func (ev RotateEvent) EventTyp() EventType {
+	return RotateEventType
+}
+
+func (ev RotateEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev RotateEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev RotateEvent) EventOnFocus() bool {
+	return false
+}
+
+////////////////////////////////////////////
+
+// Scroll Event is used to represent a scrolling gesture.
+type ScrollEvent struct {
+	GestureEvent
+	Delta image.Point
+}
+
+func (ev ScrollEvent) EventTyp() EventType {
+	return ScrollEventType
+}
+
+func (ev ScrollEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev ScrollEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev ScrollEvent) EventOnFocus() bool {
+	return false
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   Key Events
+
+// KeyEvent is used for data common to all key events, and should not appear as an event received by the caller program.
+type KeyEvent struct {
+	Key string
+}
+
+////////////////////////////////////////////
+
+// KeyDownEvent is for when a key is pressed.
+type KeyDownEvent KeyEvent
+
+func (ev KeyDownEvent) EventTyp() EventType {
+	return KeyDownEventType
+}
+
+func (ev KeyDownEvent) EventHasPos() bool {
+	return false
+}
+
+func (ev KeyDownEvent) EventPos() image.Point {
+	return image.ZP
+}
+
+func (ev KeyDownEvent) EventOnFocus() bool {
+	return true
+}
+
+// KeyUpEvent is for when a key is unpressed.
+type KeyUpEvent KeyEvent
+
+func (ev KeyUpEvent) EventTyp() EventType {
+	return KeyUpEventType
+}
+
+func (ev KeyUpEvent) EventHasPos() bool {
+	return false
+}
+
+func (ev KeyUpEvent) EventPos() image.Point {
+	return image.ZP
+}
+
+func (ev KeyUpEvent) EventOnFocus() bool {
+	return true
+}
+
+// KeyTypedEvent is for when a key is typed.
+type KeyTypedEvent struct {
+	KeyEvent
+	// The glyph is the string corresponding to what the user wants to have typed in
+	// whatever data entry is active.
+	Glyph string
+	// The "+" joined set of keys (not glyphs) participating in the chord completed
+	// by this key event. The keys will be in a consistent order, no matter what
+	// order they are pressed in.
+	Chord string
+}
+
+func (ev KeyTypedEvent) EventTyp() EventType {
+	return KeyTypedEventType
+}
+
+func (ev KeyTypedEvent) EventHasPos() bool {
+	return false
+}
+
+func (ev KeyTypedEvent) EventPos() image.Point {
+	return image.ZP
+}
+
+func (ev KeyTypedEvent) EventOnFocus() bool {
+	return true
+}
+
+////////////////////////////////////////////
+
+// MouseEnteredEvent is for when the mouse enters a window.
+type MouseEnteredEvent MouseMovedEvent
+
+func (ev MouseEnteredEvent) EventTyp() EventType {
+	return MouseEnteredEventType
+}
+
+func (ev MouseEnteredEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseEnteredEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseEnteredEvent) EventOnFocus() bool {
+	return false
+}
+
+// MouseExitedEvent is for when the mouse exits a window.
+type MouseExitedEvent MouseMovedEvent
+
+func (ev MouseExitedEvent) EventTyp() EventType {
+	return MouseExitedEventType
+}
+
+func (ev MouseExitedEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseExitedEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseExitedEvent) EventOnFocus() bool {
+	return false
+}
+
+// ResizeEvent is for when the window changes size.
+type ResizeEvent struct {
+	Width, Height int
+}
+
+func (ev ResizeEvent) EventTyp() EventType {
+	return ResizeEventType
+}
+
+func (ev ResizeEvent) EventHasPos() bool {
+	return false
+}
+
+func (ev ResizeEvent) EventPos() image.Point {
+	return image.ZP
+}
+
+func (ev ResizeEvent) EventOnFocus() bool {
+	return false
+}
+
+// CloseEvent is for when the window is closed.
+type CloseEvent struct{}
+
+func (ev CloseEvent) EventTyp() EventType {
+	return CloseEventType
+}
+
+func (ev CloseEvent) EventHasPos() bool {
+	return false
+}
+
+func (ev CloseEvent) EventPos() image.Point {
+	return image.ZP
+}
+
+func (ev CloseEvent) EventOnFocus() bool {
+	return false
 }

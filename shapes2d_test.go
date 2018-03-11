@@ -84,5 +84,5 @@ func TestShapesAll(t *testing.T) {
 	// parent.RenderTopLevel()
 	polygon1.UpdateStart()
 	polygon1.UpdateEnd(false) // only update highest
-	// parent.SavePNG("test_shape_all.png")
+	parent.SavePNG("test_shape_all.png")
 }

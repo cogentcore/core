@@ -7,8 +7,7 @@ package main
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/gi"
-	"github.com/skelterjohn/go.wde"
-	_ "github.com/skelterjohn/go.wde/init"
+	_ "github.com/rcoreilly/goki/gi/init"
 	"math/rand"
 	"reflect"
 	// "runtime"
@@ -20,7 +19,7 @@ import (
 
 func main() {
 	go mainrun()
-	wde.Run() // this needs to run in main loop
+	gi.Run() // this needs to run in main loop
 }
 
 func mainrun() {
@@ -90,6 +89,9 @@ func mainrun() {
 	vp.InitTopLevel()
 	vp.Clear()
 	win.UpdateEnd(false)
+
+	polygon1.UpdateStart()
+	polygon1.UpdateEnd(false)
 
 	win.StartEventLoop()
 }
