@@ -510,34 +510,62 @@ func (n *Node) HasChildren() bool {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-func (n *Node) FunUp(level int, data interface{}, fun KiFun) {
+func (n *Node) FunUp(level int, data interface{}, fun KiFun) bool {
 	if !fun(n.This, level, data) { // false return means stop
-		return
+		return false
 	}
 	level++
 	if n.KiParent() != nil {
-		n.KiParent().FunUp(level, data, fun)
+		return n.KiParent().FunUp(level, data, fun)
 	}
+	return true
 }
 
-func (n *Node) FunDown(level int, data interface{}, fun KiFun) {
+func (n *Node) FunUpParent(level int, data interface{}, fun KiFun) bool {
+	if n.IsRoot() {
+		return true
+	}
+	if !fun(n.KiParent(), level, data) { // false return means stop
+		return false
+	}
+	level++
+	return n.KiParent().FunUpParent(level, data, fun)
+}
+
+func (n *Node) FunDownMeFirst(level int, data interface{}, fun KiFun) bool {
 	if !fun(n.This, level, data) { // false return means stop
-		return
+		return false
 	}
 	level++
 	for _, child := range n.KiChildren() {
-		child.FunDown(level, data, fun)
+		child.FunDownMeFirst(level, data, fun) // don't care about their return values
 	}
+	return true
+}
+
+func (n *Node) FunDownDepthFirst(level int, data interface{}, doChildTestFun KiFun, fun KiFun) {
+	level++
+	for _, child := range n.KiChildren() {
+		if doChildTestFun(n.This, level, data) { // test if we should run on this child
+			child.FunDownDepthFirst(level, data, doChildTestFun, fun)
+		}
+	}
+	level--
+	fun(n.This, level, data) // can't use the return value at this point
 }
 
 func (n *Node) FunDownBreadthFirst(level int, data interface{}, fun KiFun) {
+	dontMap := make(map[int]bool) // map of who NOT to process further -- default is false for map so reverse
 	level++
-	for _, child := range n.KiChildren() {
+	for i, child := range n.KiChildren() {
 		if !fun(child, level, data) { // false return means stop
-			return
+			dontMap[i] = true
 		}
 	}
-	for _, child := range n.KiChildren() {
+	for i, child := range n.KiChildren() {
+		if dontMap[i] {
+			continue
+		}
 		child.FunDownBreadthFirst(level, data, fun)
 	}
 }
@@ -608,29 +636,40 @@ func (n *Node) UpdateCtr() *AtomCtr {
 }
 
 func (n *Node) UpdateStart() {
-	n.FunDown(0, nil, func(k Ki, level int, d interface{}) bool { k.UpdateCtr().Inc(); return true })
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool { k.UpdateCtr().Inc(); return true })
 }
 
-func (n *Node) UpdateEnd(updtall bool) {
+func (n *Node) UpdateEnd() {
 	par_updt := false
-	n.FunDown(0, &par_updt, func(k Ki, level int, d interface{}) bool {
+	n.FunDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
 		par_updt := d.(*bool)           // did the parent already update?
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-			if updtall {
+			if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
 				k.UpdateCtr().Dec()
 				k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+				*par_updt = true // we updated so nobody else can!
 			} else {
-				if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
-					k.UpdateCtr().Dec()
-					k.NodeSignal().Emit(k, SignalNodeUpdated, d)
-					*par_updt = true // we updated so nobody else can!
-				} else {
-					k.UpdateCtr().Dec()
-				}
+				k.UpdateCtr().Dec()
 			}
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
 				log.Printf("KiNode UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+			} else {
+				k.UpdateCtr().Dec()
+			}
+		}
+		return true
+	})
+}
+
+func (n *Node) UpdateEndAll() {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
+			k.UpdateCtr().Dec()
+			k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+		} else {
+			if k.UpdateCtr().Value() <= 0 {
+				log.Printf("KiNode UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -680,7 +719,7 @@ func (n *Node) LoadJSON(b []byte) error {
 
 func (n *Node) SetKiPtrsFmPaths() {
 	root := n.This
-	n.FunDown(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		v := reflect.ValueOf(k).Elem()
 		// fmt.Printf("v: %v\n", v.Type())
 		for i := 0; i < v.NumField(); i++ {
@@ -706,7 +745,7 @@ func (n *Node) SetKiPtrsFmPaths() {
 }
 
 func (n *Node) ParentAllChildren() {
-	n.FunDown(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		for _, child := range k.KiChildren() {
 			child.SetParent(k)
 		}

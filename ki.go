@@ -213,13 +213,19 @@ type Ki interface {
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
 
-	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function
-	FunUp(level int, data interface{}, fun KiFun)
+	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
+	FunUp(level int, data interface{}, fun KiFun) bool
 
-	// call function on given node and all the way down to its children, and so on -- sequentially all in current go routine -- does depth-first "natural" order: calls on node, then calls FunDown on all children (unless function returns false, in which case it returns immediately) -- level var is incremented after function is called on current node, and passed to the function, so it can do things based on the depth in the tree as necessary
-	FunDown(level int, data interface{}, fun KiFun)
+	// call function on parent of node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
+	FunUpParent(level int, data interface{}, fun KiFun) bool
 
-	// call function on children in a breadth-first manner -- calls on all the children, and then calls FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called!
+	// call fun on this node (MeFirst) and then call FunDownMeFirst on all the children -- sequentially all in current go routine -- level var is incremented before calling children -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches continue -- i.e., if fun on current node returns false, then returns false and children are not processed further -- this is the fastest, most natural form of traversal
+	FunDownMeFirst(level int, data interface{}, fun KiFun) bool
+
+	// call FunDownDepthFirst on all children, then call fun on this node -- sequentially all in current go routine -- level var is incremented before calling children -- runs doChildTestFun on each child first to determine if it should process that child, and if that returns true, then it calls FunDownDepthFirst on that child
+	FunDownDepthFirst(level int, data interface{}, doChildTestFun KiFun, fun KiFun)
+
+	// call fun on all children, then call FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called -- level var is incremented before calling chlidren -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches can continue
 	FunDownBreadthFirst(level int, data interface{}, fun KiFun)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does not wait for completion of the go routines -- returns immediately
@@ -252,8 +258,11 @@ type Ki interface {
 	// call this when starting to modify the tree (state or structure) -- increments an atomic update counter and automatically calls start update on all children -- can be called multiple times at multiple levels
 	UpdateStart()
 
-	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0 -- if updtAll then always signal, else only if parent is not updating (i.e., this is the highest-level node that finished updating)
-	UpdateEnd(updtAll bool)
+	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0, only if parent is not current updating (i.e., this is the highest-level node that finished updating) -- see also UpdateEndAll
+	UpdateEnd()
+
+	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0 for ALL nodes that might have updated, even if my parent node is still updating -- this is less typically used
+	UpdateEndAll()
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: Marshal / Unmarshal support -- see also KiSlice, KiPtr
@@ -279,5 +288,5 @@ type Ki interface {
 // IMPORTANT: all types must initialize entry in KiTypes Registry:
 // var KiT_TypeName = KiTypes.AddType(&TypeName{})
 
-// function to call on ki objects walking the tree -- return bool = false means don't go down into next level (children)
+// function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type KiFun func(ki Ki, level int, data interface{}) bool

@@ -18,7 +18,7 @@ type HasNode struct {
 	Mbr2   int
 }
 
-var KtHasNode = KiTypes.AddType(&HasNode{})
+var KiT_HasNode = KiTypes.AddType(&HasNode{})
 
 type NodeEmbed struct {
 	Node
@@ -27,7 +27,7 @@ type NodeEmbed struct {
 	Mbr2 int
 }
 
-var KtNodeEmbed = KiTypes.AddType(&NodeEmbed{})
+var KiT_NodeEmbed = KiTypes.AddType(&NodeEmbed{})
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
@@ -185,17 +185,19 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.SetThisName(&parent, "par")
-	netyp := reflect.TypeOf(NodeEmbed{})
-	hntyp := reflect.TypeOf(Node{})
-	parent.AddNewChildNamed(netyp, "child1")
-	parent.AddNewChildNamed(hntyp, "child2")
-	idx := parent.FindChildIndexByType(netyp)
+	parent.AddNewChildNamed(KiT_NodeEmbed, "child1")
+	parent.AddNewChildNamed(KiT_Node, "child2")
+	idx := parent.FindChildIndexByType(KiT_NodeEmbed)
 	if idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx = parent.FindChildIndexByType(hntyp)
+	idx = parent.FindChildIndexByType(KiT_Node)
 	if idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
+	}
+	cn := parent.FindChildByType(KiT_Node)
+	if cn == nil {
+		t.Error("find child by type was nil")
 	}
 }
 
@@ -260,7 +262,7 @@ func TestNodeCallFun(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	res := make([]string, 0, 10)
-	parent.FunDown(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.KiUniqueName(), d, level))
 		return true
 	})
@@ -301,7 +303,7 @@ func TestNodeUpdate(t *testing.T) {
 	// child3 :=
 	parent.UpdateStart()
 	parent.AddNewChildNamed(nil, "child1")
-	parent.UpdateEnd(false)
+	parent.UpdateEnd()
 
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
@@ -323,8 +325,8 @@ func TestNodeUpdate(t *testing.T) {
 	// fmt.Print("\nnode update all starting\n")
 	child2.UpdateStart()
 	schild2.UpdateStart()
-	schild2.UpdateEnd(true)
-	child2.UpdateEnd(true)
+	schild2.UpdateEndAll()
+	child2.UpdateEndAll()
 
 	// fmt.Printf("res: %v\n", res)
 	trg = []string{"child1 sig SignalNodeUpdated", "subchild1 sig SignalNodeUpdated"}
@@ -336,8 +338,8 @@ func TestNodeUpdate(t *testing.T) {
 	// fmt.Print("\nnode update top starting\n")
 	child2.UpdateStart()
 	schild2.UpdateStart()
-	schild2.UpdateEnd(false)
-	child2.UpdateEnd(false)
+	schild2.UpdateEnd()
+	child2.UpdateEnd()
 
 	// fmt.Printf("res: %v\n", res)
 	trg = []string{"child1 sig SignalNodeUpdated"}
@@ -346,7 +348,7 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.FunDown(0, "upcnt", func(n Ki, level int, d interface{}) bool {
+	parent.FunDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.KiUniqueName(), *n.UpdateCtr()))
 		return true
 	})
@@ -376,7 +378,7 @@ func TestProps(t *testing.T) {
 	// child3 :=
 	parent.UpdateStart()
 	parent.AddNewChildNamed(nil, "child1")
-	parent.UpdateEnd(false)
+	parent.UpdateEnd()
 
 	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
