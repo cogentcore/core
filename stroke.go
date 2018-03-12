@@ -61,33 +61,33 @@ func (ps *PaintStroke) Defaults() {
 // update the stroke settings from the style info on the node
 func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
-	if c, got := g.PropColor("stroke"); got { // todo: support url's to paint server elements!
-		if c == nil {
+	if val, got := g.PropColor("stroke"); got { // todo: support url's to paint server elements!
+		if val == nil {
 			ps.On = false
 		} else {
 			ps.On = true
-			ps.Color = c // todo: only if color
-			ps.Server = NewSolidcolorPaintServer(c)
+			ps.Color = val // todo: only if color
+			ps.Server = NewSolidcolorPaintServer(val)
 		}
 	}
-	if c, got := g.PropColor("color"); got { // todo: support url's to paint server elements!
-		if c == nil {
+	if val, got := g.PropColor("color"); got { // todo: support url's to paint server elements!
+		if val == nil {
 			ps.On = false
 		} else {
 			ps.On = true
-			ps.Color = c // todo: only if color
-			ps.Server = NewSolidcolorPaintServer(c)
+			ps.Color = val // todo: only if color
+			ps.Server = NewSolidcolorPaintServer(val)
 		}
 	}
-	if w, got := g.PropLength("stroke-width"); got {
-		ps.Width = w
+	if val, got := g.PropLength("stroke-width"); got {
+		ps.Width = val
 	}
 	if _, got := g.PropNumber("stroke-opacity"); got {
 		// todo: need to set the color alpha according to value
 	}
-	if es, got := g.PropEnum("stroke-linecap"); got {
+	if val, got := g.PropEnum("stroke-linecap"); got {
 		var lc LineCap = -1
-		switch es { // first go through short-hand codes
+		switch val { // first go through short-hand codes
 		case "round":
 			lc = LineCapRound
 		case "butt":
@@ -96,7 +96,7 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			lc = LineCapSquare
 		}
 		if lc == -1 {
-			i, err := StringToLineCap(es) // stringer gen
+			i, err := StringToLineCap(val) // stringer gen
 			if err != nil {
 				ps.Cap = i
 			} else {
@@ -106,9 +106,9 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			ps.Cap = lc
 		}
 	}
-	if es, got := g.PropEnum("stroke-linejoin"); got {
+	if val, got := g.PropEnum("stroke-linejoin"); got {
 		var lc LineJoin = -1
-		switch es { // first go through short-hand codes
+		switch val { // first go through short-hand codes
 		case "miter":
 			lc = LineJoinMiter
 		case "miter-clip":
@@ -121,7 +121,7 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			lc = LineJoinArcs
 		}
 		if lc == -1 {
-			i, err := StringToLineJoin(es) // stringer gen
+			i, err := StringToLineJoin(val) // stringer gen
 			if err != nil {
 				ps.Join = i
 			} else {
@@ -131,7 +131,7 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			ps.Join = lc
 		}
 	}
-	if l, got := g.PropNumber("miter-limit"); got {
-		ps.MiterLimit = l
+	if val, got := g.PropNumber("miter-limit"); got {
+		ps.MiterLimit = val
 	}
 }

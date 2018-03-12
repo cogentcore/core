@@ -85,8 +85,6 @@ func (pt *PaintTextLayout) SetFromNode(g *Node2DBase) {
 // 2D Text
 type Text2D struct {
 	Node2DBase
-	Pos         Point2D  `svg:"{x,y}",desc:"position of left baseline "`
-	Size        Size2D   `svg:"{width,height}",desc:"size of overall text box -- width can be either entered or computed depending on wrapped"`
 	Text        string   `svg:"text",desc:"text string to render"`
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
@@ -113,17 +111,18 @@ func (g *Text2D) PaintProps2D() {
 	// }
 }
 
-func (g *Text2D) Layout2D() {
-	pc := &g.MyPaint
-
-	var w, h float64
-	// pre-wrap the text
-	if pc.TextLayout.Wrap {
-		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.TextLayout.Spacing.Y)
-	} else {
-		w, h = pc.MeasureString(g.Text)
+func (g *Text2D) Layout2D(iter int) {
+	if iter == 0 {
+		pc := &g.MyPaint
+		var w, h float64
+		// pre-wrap the text
+		if pc.TextLayout.Wrap {
+			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.TextLayout.Spacing.Y)
+		} else {
+			w, h = pc.MeasureString(g.Text)
+		}
+		g.Layout.AllocSize = Size2D{w, h}
 	}
-	g.Layout.AllocSize = Size2D{w, h}
 }
 
 func (g *Text2D) Node2DBBox() image.Rectangle {
@@ -131,6 +130,7 @@ func (g *Text2D) Node2DBBox() image.Rectangle {
 }
 
 func (g *Text2D) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	// fmt.Printf("rendering text %v\n", g.Text)
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render

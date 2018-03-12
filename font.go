@@ -27,6 +27,7 @@ type PaintFont struct {
 func (p *PaintFont) Defaults() {
 	p.FaceName = "Arial"
 	p.Points = 24
+	p.LoadFont("")
 }
 
 func (p *PaintFont) LoadFont(fallback string) {

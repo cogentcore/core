@@ -68,6 +68,8 @@ Rendering is done in 3 separate passes:
 
 type Node2DBase struct {
 	NodeBase
+	Pos      Point2D     `svg:"{x,y}",desc:"position -- used by most but not all nodes"`
+	Size     Size2D      `svg:"{width,height}",desc:"size spec from user -- if 0 then auto-size -- used by most but not all nodes"`
 	z_index  int         `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	MyPaint  Paint       `json:"-",desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
@@ -88,7 +90,7 @@ type Node2D interface {
 	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node -- before this call, PaintProps2DBase is called
 	PaintProps2D()
 	// Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
-	Layout2D()
+	Layout2D(iter int)
 	// get the bounding box of this node relative to its parent viewport -- used in computing WinBBox, must be called during Render
 	Node2DBBox() image.Rectangle
 	// Render2D: Final MeFirst rendering pass -- individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
@@ -114,6 +116,7 @@ func (g *Node2DBase) InitNode2DBase() {
 func (g *Node2DBase) PaintProps2DBase() {
 	gii, ok := g.This.(Node2D)
 	if g.Viewport == nil { // robust
+		fmt.Printf("in paintprops, initializing node %v\n", g.PathUnique())
 		g.InitNode2DBase()
 		if ok {
 			gii.InitNode2D()
@@ -121,6 +124,19 @@ func (g *Node2DBase) PaintProps2DBase() {
 	}
 	g.CopyParentPaint()
 	g.MyPaint.SetFromNode(g)
+	g.Layout.Reset() // start with a fresh layout
+	if val, got := g.PropLength("x"); got {
+		g.Pos.X = val
+	}
+	if val, got := g.PropLength("y"); got {
+		g.Pos.Y = val
+	}
+	if val, got := g.PropLength("width"); got {
+		g.Size.X = val
+	}
+	if val, got := g.PropLength("height"); got {
+		g.Size.Y = val
+	}
 }
 
 // find parent viewport -- uses GiViewport2D() method on Node2D interface
@@ -153,6 +169,13 @@ func (g *Node2DBase) CopyParentPaint() {
 	}
 }
 
+// get our bbox from Layout allocation
+func (g *Node2DBase) WinBBoxFromAlloc() image.Rectangle {
+	tp := g.MyPaint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
+	ts := g.MyPaint.TransformPoint(g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
+	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
+}
+
 // set our window-level BBox from vp and our bbox
 func (g *Node2DBase) SetWinBBox(bb image.Rectangle) {
 	if g.Viewport != nil {
@@ -160,6 +183,24 @@ func (g *Node2DBase) SetWinBBox(bb image.Rectangle) {
 	} else {
 		g.WinBBox = bb
 	}
+}
+
+// if a layout positioned us, then use that, otherwise use our user-specified pos, size
+// this should be called at start of Render2D for default kinds of objects that use
+// Pos, Size and Layout (e.g., widgets)
+func (g *Node2DBase) GeomFromLayout() {
+	// todo: there is kind of a mismatch here between layout-based geom and svg-based rendering with transforms..
+	// need to clarify that!  for now just grabbing position from parent..
+	g.Layout.UsePos(g.Pos)
+	g.Layout.UseSize(g.Size)
+	if g.Parent != nil {
+		gii, ok := g.Parent.(Node2D)
+		if ok {
+			pg := gii.GiNode2D()
+			g.Layout.AllocPos = g.Layout.AllocPos.Add(pg.Layout.AllocPos)
+		}
+	}
+	g.SetWinBBox(g.WinBBoxFromAlloc())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -41,28 +41,28 @@ func (pf *PaintFill) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 	// todo: need to be able to process colors!
 
-	if c, got := g.PropColor("fill"); got { // todo: support url to other paint server types
-		if c == nil {
+	if val, got := g.PropColor("fill"); got { // todo: support url to other paint server types
+		if val == nil {
 			pf.On = false
 		} else {
 			pf.On = true
-			pf.Color = c // todo: only if actually a color
-			pf.Server = NewSolidcolorPaintServer(c)
+			pf.Color = val // todo: only if actually a color
+			pf.Server = NewSolidcolorPaintServer(val)
 		}
 	}
 	if _, got := g.PropNumber("fill-opacity"); got {
 		// todo: need to set the color alpha according to value
 	}
-	if es, got := g.PropEnum("fill-rule"); got {
+	if val, got := g.PropEnum("fill-rule"); got {
 		var fr FillRule = -1
-		switch es {
+		switch val {
 		case "nonzero":
 			fr = FillRuleNonZero
 		case "evenodd":
 			fr = FillRuleEvenOdd
 		}
 		if fr == -1 {
-			i, err := StringToFillRule(es) // stringer gen
+			i, err := StringToFillRule(val) // stringer gen
 			if err != nil {
 				pf.Rule = i
 			} else {

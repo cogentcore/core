@@ -114,7 +114,10 @@ func (vp *Viewport2D) InitNode2D() {
 func (vp *Viewport2D) PaintProps2D() {
 }
 
-func (vp *Viewport2D) Layout2D() {
+func (vp *Viewport2D) Layout2D(iter int) {
+	if iter == 0 {
+		vp.Layout.AllocSize.SetFromPoint(vp.ViewBox.Size)
+	}
 }
 
 func (vp *Viewport2D) Node2DBBox() image.Rectangle {
@@ -200,6 +203,7 @@ func (vp *Viewport2D) PaintProps2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
 		gii, ok := k.(Node2D)
 		if !ok { // error message already in InitNode2D
+			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
 			return false // going into a different type of thing, bail
 		}
 		gi := gii.GiNode2D()
@@ -210,6 +214,8 @@ func (vp *Viewport2D) PaintProps2DRoot() {
 }
 
 func (vp *Viewport2D) Layout2DRoot() {
+	// todo: support multiple iterations if necc
+
 	// layout happens in depth-first manner -- requires two functions
 	vp.FunDownDepthFirst(0, vp,
 		func(k ki.Ki, level int, d interface{}) bool { // this is for testing whether to process node
@@ -232,7 +238,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 			if gi.MyPaint.Off { // off below this
 				return false
 			}
-			gii.Layout2D()
+			gii.Layout2D(0)
 			return true
 		})
 }

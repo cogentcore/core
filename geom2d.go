@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/math/fixed"
 	"image"
 	"math"
@@ -36,25 +37,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-func Max(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Min(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 type Point2D struct {
 	X, Y float64
 }
 
+var Point2DZero = Point2D{0, 0}
+
 type Size2D Point2D
+
+var Size2DZero = Size2D{0, 0}
+
+func (a Point2D) IsZero() bool {
+	return a.X == 0.0 && a.Y == 0.0
+}
+
+func (a Size2D) IsZero() bool {
+	return a.X == 0.0 && a.Y == 0.0
+}
 
 func (a Point2D) Fixed() fixed.Point26_6 {
 	return fixp(a.X, a.Y)
@@ -70,28 +69,28 @@ func (a Point2D) Interpolate(b Point2D, t float64) Point2D {
 	return Point2D{x, y}
 }
 
-func (a Point2D) Sum(b Point2D) Point2D {
+func (a Point2D) Add(b Point2D) Point2D {
 	return Point2D{a.X + b.X, a.Y + b.Y}
 }
 
 func (a Point2D) Max(b Point2D) Point2D {
-	return Point2D{Max(a.X, b.X), Max(a.Y, b.Y)}
+	return Point2D{ki.Max64(a.X, b.X), ki.Max64(a.Y, b.Y)}
 }
 
 func (a Point2D) Min(b Point2D) Point2D {
-	return Point2D{Min(a.X, b.X), Min(a.Y, b.Y)}
+	return Point2D{ki.Min64(a.X, b.X), ki.Min64(a.Y, b.Y)}
 }
 
-func (a Size2D) Sum(b Size2D) Size2D {
+func (a Size2D) Add(b Size2D) Size2D {
 	return Size2D{a.X + b.X, a.Y + b.Y}
 }
 
 func (a Size2D) Max(b Size2D) Size2D {
-	return Size2D{Max(a.X, b.X), Max(a.Y, b.Y)}
+	return Size2D{ki.Max64(a.X, b.X), ki.Max64(a.Y, b.Y)}
 }
 
 func (a Size2D) Min(b Size2D) Size2D {
-	return Size2D{Min(a.X, b.X), Min(a.Y, b.Y)}
+	return Size2D{ki.Min64(a.X, b.X), ki.Min64(a.Y, b.Y)}
 }
 
 func (a *Size2D) SetFromPoint(pt image.Point) {

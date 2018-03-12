@@ -5,7 +5,7 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	// "reflect"
@@ -63,22 +63,30 @@ const (
 
 //go:generate stringer -type=ButtonStates
 
-// AbstractButton common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
-type AbstractButton struct {
+// ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
+type ButtonBase struct {
 	WidgetBase
-	Text     string
-	Shortcut string
+	Radius   float64 `svg:"border-radius",desc:"radius for rounded buttons"`
+	Text     string  `svg:"text",desc:"label for the button"`
+	Shortcut string  `svg:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	State    ButtonStates
 	// todo: icon -- should be an svg
 	ButtonSig ki.Signal `json:"-",desc:"signal for button -- see ButtonSignalType for the types"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_AbstractButton = ki.KiTypes.AddType(&AbstractButton{})
+var KiT_ButtonBase = ki.KiTypes.AddType(&ButtonBase{})
+
+func (g *ButtonBase) PaintProps2DBase() {
+	if val, got := g.PropNumber("border-radius"); got {
+		g.Radius = val
+	}
+	// todo: default fill etc
+}
 
 // PushButton is a standard command button
 type PushButton struct {
-	AbstractButton
+	ButtonBase
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -99,35 +107,57 @@ func (g *PushButton) GiViewport2D() *Viewport2D {
 }
 
 func (g *PushButton) InitNode2D() {
-	// width := 60
-	// height := 50
-	// g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
-	// 	fmt.Printf("button %v pressed!\n", recv.PathUnique())
-	// 	ab, ok := recv.(*AbstractButton)
-	// 	if !ok {
-	// 		return
-	// 	}
-	// 	g.UpdateStart()
-	// 	ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
-	// 	g.UpdateEnd()
-	// })
+	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
+		fmt.Printf("button %v pressed!\n", recv.PathUnique())
+		ab, ok := recv.(*ButtonBase)
+		if !ok {
+			return
+		}
+		g.UpdateStart()
+		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+		g.UpdateEnd()
+	})
+	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
+		// todo: convert d to event, get key, check for shortcut, etc
+		fmt.Printf("key pressed on %v!\n", recv.PathUnique())
+		ab, ok := recv.(*ButtonBase)
+		if !ok {
+			return
+		}
+		g.UpdateStart()
+		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+		g.UpdateEnd()
+	})
 }
 
 func (g *PushButton) PaintProps2D() {
+
 }
 
-func (g *PushButton) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+func (g *PushButton) Layout2D(iter int) {
+	if iter == 0 {
+		pc := &g.MyPaint
+		var w, h float64
+		w, h = pc.MeasureString(g.Text)
+		if g.Size.X > 0 {
+			w = ki.Max64(g.Size.X, w)
+		}
+		if g.Size.Y > 0 {
+			h = ki.Max64(g.Size.Y, h)
+		}
+		g.Layout.AllocSize = Size2D{w, h}
+		g.SetWinBBox(g.Node2DBBox())
+	}
 }
 
 func (g *PushButton) Node2DBBox() image.Rectangle {
-	// todo:
-	return image.Rectangle{}
+	return g.WinBBoxFromAlloc()
 }
 
 // todo: need color brigher / darker functions
 
 func (g *PushButton) Render2D() {
+	g.GeomFromLayout()
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
 	} else {
@@ -140,16 +170,13 @@ func (g *PushButton) Render2D() {
 func (g *PushButton) Render2DDefaultStyle() {
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
-	// rad, got := g.PropNumber("border-radius")
-	// if !got {
-	// 	rad := 4.0
-	// }
-	// if rad == 0 {
-	// 	vp.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
-	// } else {
-	// 	vp.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, rad)
-	// }
+	if g.Radius == 0.0 {
+		pc.DrawRectangle(rs, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
+	} else {
+		pc.DrawRoundedRectangle(rs, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X, g.Layout.AllocSize.Y, g.Radius)
+	}
 	pc.FillStrokeClear(rs)
+	pc.DrawString(rs, g.Text, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X)
 }
 
 func (g *PushButton) CanReRender2D() bool {

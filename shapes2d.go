@@ -18,8 +18,6 @@ import (
 // 2D rectangle, optionally with rounded corners
 type Rect struct {
 	Node2DBase
-	Pos    Point2D `svg:"{x,y}",desc:"position of top-left corner"`
-	Size   Size2D  `svg:"{width,height}",desc:"size of rectangle"`
 	Radius Point2D `svg:"{rx,ry}",desc:"radii for curved corners, as a proportion of width, height"`
 }
 
@@ -44,8 +42,10 @@ func (g *Rect) PaintProps2D() {
 	}
 }
 
-func (g *Rect) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Rect) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Rect) Node2DBBox() image.Rectangle {
@@ -95,17 +95,17 @@ func (g *Viewport2DFill) GiViewport2D() *Viewport2D {
 
 func (g *Viewport2DFill) InitNode2D() {
 	vp := g.Viewport
-	g.Pos = Point2D{0, 0}
+	g.Pos = Point2DZero
 	g.Size = Size2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
 }
 
 func (g *Viewport2DFill) PaintProps2D() {
-	g.CopyParentPaint()
-	g.MyPaint.SetFromNode(&g.Node2DBase)
 }
 
-func (g *Viewport2DFill) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Viewport2DFill) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Viewport2DFill) Node2DBBox() image.Rectangle {
@@ -120,6 +120,9 @@ func (g *Viewport2DFill) Render2D() {
 func (g *Viewport2DFill) CanReRender2D() bool {
 	return false
 }
+
+// check for interface implementation
+var _ Node2D = &Viewport2DFill{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -151,8 +154,10 @@ func (g *Circle) PaintProps2D() {
 	}
 }
 
-func (g *Circle) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Circle) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Circle) Node2DBBox() image.Rectangle {
@@ -172,13 +177,15 @@ func (g *Circle) CanReRender2D() bool {
 	return false
 }
 
+// check for interface implementation
+var _ Node2D = &Circle{}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 // 2D ellipse
 type Ellipse struct {
 	Node2DBase
-	Pos   Point2D `svg:"{cx,cy}",desc:"position of the center of the ellipse"`
-	Radii Size2D  `svg:"{rx, ry}",desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Radii Size2D `svg:"{rx, ry}",desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -202,8 +209,10 @@ func (g *Ellipse) PaintProps2D() {
 	}
 }
 
-func (g *Ellipse) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Ellipse) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Ellipse) Node2DBBox() image.Rectangle {
@@ -221,6 +230,9 @@ func (g *Ellipse) Render2D() {
 func (g *Ellipse) CanReRender2D() bool {
 	return false
 }
+
+// check for interface implementation
+var _ Node2D = &Ellipse{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -252,8 +264,10 @@ func (g *Line) PaintProps2D() {
 	}
 }
 
-func (g *Line) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Line) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Line) Node2DBBox() image.Rectangle {
@@ -270,6 +284,9 @@ func (g *Line) Render2D() {
 func (g *Line) CanReRender2D() bool {
 	return false
 }
+
+// check for interface implementation
+var _ Node2D = &Line{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -300,8 +317,10 @@ func (g *Polyline) PaintProps2D() {
 	}
 }
 
-func (g *Polyline) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Polyline) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Polyline) Node2DBBox() image.Rectangle {
@@ -322,6 +341,9 @@ func (g *Polyline) Render2D() {
 func (g *Polyline) CanReRender2D() bool {
 	return false
 }
+
+// check for interface implementation
+var _ Node2D = &Polyline{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -352,8 +374,10 @@ func (g *Polygon) PaintProps2D() {
 	}
 }
 
-func (g *Polygon) Layout2D() {
-	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+func (g *Polygon) Layout2D(iter int) {
+	if iter == 0 {
+		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	}
 }
 
 func (g *Polygon) Node2DBBox() image.Rectangle {
@@ -374,6 +398,9 @@ func (g *Polygon) Render2D() {
 func (g *Polygon) CanReRender2D() bool {
 	return false
 }
+
+// check for interface implementation
+var _ Node2D = &Polygon{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

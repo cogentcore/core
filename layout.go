@@ -91,6 +91,26 @@ func (ld *LayoutData) Defaults() {
 	}
 }
 
+// called at start of layout process -- resets all values back to 0
+func (ld *LayoutData) Reset() {
+	ld.AllocPos = Point2DZero
+	ld.AllocSize = Size2DZero
+}
+
+// get the effective position to use: if layout allocated, use that, otherwise user pos
+func (ld *LayoutData) UsePos(userPos Point2D) {
+	if ld.AllocPos.IsZero() {
+		ld.AllocPos = userPos
+	}
+}
+
+// get the effective size to use: if layout allocated, use that, otherwise user pos
+func (ld *LayoutData) UseSize(userSize Size2D) {
+	if ld.AllocSize.IsZero() {
+		ld.AllocSize = userSize
+	}
+}
+
 // want is max across prefs and existing allocsize
 func (ld *LayoutData) WantSize() Size2D {
 	want := ld.Size.Want()
@@ -114,15 +134,30 @@ type RowLayout struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_RowLayout = ki.KiTypes.AddType(&RowLayout{})
 
+func (g *RowLayout) GiNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *RowLayout) GiViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *RowLayout) InitNode2D() {
+}
+
+func (g *RowLayout) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *RowLayout) PaintProps2D() {
+	g.PaintProps2DBase()
+}
+
 // need multiple iterations..
 func (rl *RowLayout) Layout2D(iter int) {
 	if len(rl.Children) == 0 {
 		rl.Layout.AllocSize = rl.Layout.Size.Min
 		return
-	}
-
-	if iter == 0 { // start out with nothing
-		rl.Layout.AllocSize = Size2D{0, 0}
 	}
 
 	// todo: need to include margins in all this!  do we use our margins or items?
@@ -137,9 +172,9 @@ func (rl *RowLayout) Layout2D(iter int) {
 		want := gi.Layout.WantSize()
 		need := gi.Layout.NeedSize()
 		min := gi.Layout.Size.Need() // ignoring current allocations
-		sumWant = sumWant.Sum(want)
-		sumNeed = sumNeed.Sum(need)
-		sumMin = sumMin.Sum(min)
+		sumWant = sumWant.Add(want)
+		sumNeed = sumNeed.Add(need)
+		sumMin = sumMin.Add(min)
 		maxWant = maxWant.Max(want)
 		maxNeed = maxNeed.Max(need)
 		maxMin = maxMin.Max(min)
@@ -204,3 +239,14 @@ func (rl *RowLayout) Layout2D(iter int) {
 		pos += gi.Layout.AllocSize.X
 	}
 }
+
+func (g *RowLayout) Render2D() {
+	g.GeomFromLayout()
+}
+
+func (g *RowLayout) CanReRender2D() bool {
+	return false
+}
+
+// check for interface implementation
+var _ Node2D = &RowLayout{}

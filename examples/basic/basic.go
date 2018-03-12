@@ -72,7 +72,21 @@ func mainrun() {
 	text1.Size.X = 100
 	text1.Text = "this is test text!"
 
-	vpfill.AddNewChildNamed(gi.KiT_PushButton, "push1")
+	// todo: no way to position the layout -- probably just add a default position to all nodes?
+	rlay := vpfill.AddNewChildNamed(gi.KiT_RowLayout, "rowlay").(*gi.RowLayout)
+	rlay.SetProp("x", 100)
+	rlay.SetProp("y", 500)
+	rlay.SetProp("stroke", "#000")    // todo need default prop vals
+	rlay.SetProp("stroke-width", 2.0) // todo need default prop vals
+	rlay.SetProp("fill", "#0000FF50")
+	rlay.SetProp("font-face", "Arial")
+	rlay.SetProp("font-size", 32)
+	rlay.SetProp("text-align", "center")
+	push1 := rlay.AddNewChildNamed(gi.KiT_PushButton, "push1").(*gi.PushButton)
+	push2 := rlay.AddNewChildNamed(gi.KiT_PushButton, "push2").(*gi.PushButton)
+
+	push1.Text = "Push 1"
+	push2.Text = "Push 2"
 
 	win.UpdateEnd()
 
