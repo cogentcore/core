@@ -115,8 +115,6 @@ func (vp *Viewport2D) PaintProps2D() {
 }
 
 func (vp *Viewport2D) Layout2D() {
-	// todo: we should get layout info and set our size??
-	vp.SetWinBBox(vp.Node2DBBox())
 }
 
 func (vp *Viewport2D) Node2DBBox() image.Rectangle {
@@ -124,6 +122,8 @@ func (vp *Viewport2D) Node2DBBox() image.Rectangle {
 }
 
 func (vp *Viewport2D) Render2D() {
+	// todo: we should get layout info and set our size??
+	vp.SetWinBBox(vp.Node2DBBox())
 	if vp.Viewport != nil {
 		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)

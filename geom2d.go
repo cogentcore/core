@@ -36,6 +36,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+func Max(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 type Point2D struct {
 	X, Y float64
 }
@@ -54,6 +68,35 @@ func (a Point2D) Interpolate(b Point2D, t float64) Point2D {
 	x := a.X + (b.X-a.X)*t
 	y := a.Y + (b.Y-a.Y)*t
 	return Point2D{x, y}
+}
+
+func (a Point2D) Sum(b Point2D) Point2D {
+	return Point2D{a.X + b.X, a.Y + b.Y}
+}
+
+func (a Point2D) Max(b Point2D) Point2D {
+	return Point2D{Max(a.X, b.X), Max(a.Y, b.Y)}
+}
+
+func (a Point2D) Min(b Point2D) Point2D {
+	return Point2D{Min(a.X, b.X), Min(a.Y, b.Y)}
+}
+
+func (a Size2D) Sum(b Size2D) Size2D {
+	return Size2D{a.X + b.X, a.Y + b.Y}
+}
+
+func (a Size2D) Max(b Size2D) Size2D {
+	return Size2D{Max(a.X, b.X), Max(a.Y, b.Y)}
+}
+
+func (a Size2D) Min(b Size2D) Size2D {
+	return Size2D{Min(a.X, b.X), Min(a.Y, b.Y)}
+}
+
+func (a *Size2D) SetFromPoint(pt image.Point) {
+	a.X = float64(pt.X)
+	a.Y = float64(pt.Y)
 }
 
 type XFormMatrix2D struct {

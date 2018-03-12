@@ -11,23 +11,13 @@ import (
 	// "reflect"
 )
 
-// Widget base type -- a widget handles event management and layout
+// Widget base type
 type WidgetBase struct {
 	Node2DBase
-	Layout LayoutData `desc:"all the layout information for this item"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_WidgetBase = ki.KiTypes.AddType(&WidgetBase{})
-
-func (w *WidgetBase) Defaults() {
-	w.Layout.Defaults()
-}
-
-// Widget interface -- handles layout infrastructure etc
-type Widget interface {
-	// does the layout for widgets -- resulting position and size are in Layout.AllocPos, .AllocSize -- terminal non-layout widgets can compute preferred sizes based on content at this stage
-}
 
 // Styling notes:
 // simple elemental widgets (buttons etc) have a DefaultStyle render method that incorporates

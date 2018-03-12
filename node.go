@@ -62,8 +62,8 @@ Base struct node for 2D rendering tree -- renders to a bitmap using Paint / View
 
 Rendering is done in 3 separate passes:
 	1. PaintProps: In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node.
-	2. Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
-	3. Render2D: Final MeFirst rendering pass -- also individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
+	2. Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).
+	3. Render2D: Final MeFirst rendering pass -- also individual nodes can optionally re-render directly depending on their type, without requiring a full re-render. WinBBox bounding box is computed at this stage.
 */
 
 type Node2DBase struct {
@@ -71,6 +71,7 @@ type Node2DBase struct {
 	z_index  int         `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	MyPaint  Paint       `json:"-",desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
+	Layout   LayoutData  `desc:"all the layout information for this item"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -106,6 +107,7 @@ func (g *Node2DBase) InitNode2DBase() {
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
 	}
 	g.MyPaint.Defaults()
+	g.Layout.Defaults() // doesn't overwrite
 }
 
 // handles all the basic infrastructure of setting Paint based on node -- PaintProps2D can do extras

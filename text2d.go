@@ -85,11 +85,10 @@ func (pt *PaintTextLayout) SetFromNode(g *Node2DBase) {
 // 2D Text
 type Text2D struct {
 	Node2DBase
-	Pos         Point2D    `svg:"{x,y}",desc:"position of left baseline "`
-	Size        Size2D     `svg:"{width,height}",desc:"size of overall text box -- width can be either entered or computed depending on wrapped"`
-	Text        string     `svg:"text",desc:"text string to render"`
-	Layout      LayoutData `desc:"text is layout aware, unlike most basic svg elements"`
-	WrappedText []string   `json:"-","desc:word-wrapped version of the string"`
+	Pos         Point2D  `svg:"{x,y}",desc:"position of left baseline "`
+	Size        Size2D   `svg:"{width,height}",desc:"size of overall text box -- width can be either entered or computed depending on wrapped"`
+	Text        string   `svg:"text",desc:"text string to render"`
+	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -115,20 +114,32 @@ func (g *Text2D) PaintProps2D() {
 }
 
 func (g *Text2D) Layout2D() {
-	// todo: here
-	// w, h := pc.MeasureString(s)
+	pc := &g.MyPaint
+
+	var w, h float64
+	// pre-wrap the text
+	if pc.TextLayout.Wrap {
+		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.TextLayout.Spacing.Y)
+	} else {
+		w, h = pc.MeasureString(g.Text)
+	}
+	g.Layout.AllocSize = Size2D{w, h}
 }
 
 func (g *Text2D) Node2DBBox() image.Rectangle {
-	// todo: need to update this!
-	return g.MyPaint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	return g.MyPaint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Layout.AllocSize.X, g.Pos.Y+g.Layout.AllocSize.Y)
 }
 
 func (g *Text2D) Render2D() {
 	// fmt.Printf("rendering text %v\n", g.Text)
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
-	pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.Size.X)
+	if pc.TextLayout.Wrap {
+		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X,
+			g.Layout.AllocSize.Y)
+	} else {
+		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X)
+	}
 }
 
 func (g *Text2D) CanReRender2D() bool {

@@ -581,6 +581,7 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 
 // DrawString according to current settings -- width is only needed for wrap case
 func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
+	// todo: vertical align too
 	var ax, ay float64
 	switch pc.TextLayout.Align {
 	case TextAlignLeft:
@@ -590,10 +591,22 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 		ax = 1.0
 	}
 	if pc.TextLayout.Wrap {
-		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
-	} else {
 		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextLayout.Spacing.Y, pc.TextLayout.Align)
+	} else {
+		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
 	}
+}
+
+func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float64) {
+	var ax, ay float64
+	switch pc.TextLayout.Align {
+	case TextAlignLeft:
+	case TextAlignCenter:
+		ax = 0.5 // todo: determine if font is horiz or vert..
+	case TextAlignRight:
+		ax = 1.0
+	}
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextLayout.Spacing.Y, pc.TextLayout.Align)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.
@@ -616,9 +629,11 @@ func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay floa
 // and then draws it at the specified anchor point using the given line
 // spacing and text alignment.
 func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineSpacing float64, align TextAlign) {
-	lines := pc.WordWrap(s, width)
-	h := float64(len(lines)) * pc.Font.Height * lineSpacing
-	h -= (lineSpacing - 1) * pc.Font.Height
+	lines, h := pc.MeasureStringWrapped(s, width, lineSpacing)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineSpacing, align)
+}
+
+func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineSpacing float64, align TextAlign) {
 	x -= ax * width
 	y -= ay * h
 	switch align {
@@ -638,6 +653,8 @@ func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, widt
 	}
 }
 
+// todo: all of these measurements are failing to take into account transforms -- maybe that's ok -- keep the font non-scaled?  maybe add an option for that actually..
+
 // MeasureString returns the rendered width and height of the specified text
 // given the current font face.
 func (pc *Paint) MeasureString(s string) (w, h float64) {
@@ -646,6 +663,13 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 	}
 	a := d.MeasureString(s)
 	return float64(a >> 6), pc.Font.Height
+}
+
+func (pc *Paint) MeasureStringWrapped(s string, width, lineSpacing float64) ([]string, float64) {
+	lines := pc.WordWrap(s, width)
+	h := float64(len(lines)) * pc.Font.Height * lineSpacing
+	h -= (lineSpacing - 1) * pc.Font.Height
+	return lines, h
 }
 
 // WordWrap wraps the specified string to the given max width and current

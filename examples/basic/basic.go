@@ -8,7 +8,7 @@ import (
 	// "fmt"
 	"github.com/rcoreilly/goki/gi"
 	_ "github.com/rcoreilly/goki/gi/init"
-	"math/rand"
+	// "math/rand"
 	// "reflect"
 	// "runtime"
 	// "sync"
@@ -23,8 +23,8 @@ func main() {
 }
 
 func mainrun() {
-	width := 400
-	height := 400
+	width := 800
+	height := 800
 	win := gi.NewWindow2D("test window", width, height)
 	win.UpdateStart()
 
@@ -45,14 +45,14 @@ func mainrun() {
 	circle1.SetProp("fill", "none")
 	circle1.SetProp("stroke", "#CC0000")
 	circle1.SetProp("stroke-width", 2.0)
-	circle1.Pos = gi.Point2D{200, 100}
+	circle1.Pos = gi.Point2D{400, 400}
 	circle1.Radius = 40
 
 	ellipse1 := circle1.AddNewChildNamed(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
 	ellipse1.SetProp("fill", "#55000055")
 	ellipse1.SetProp("stroke", "#880000")
 	ellipse1.SetProp("stroke-width", 2.0)
-	ellipse1.Pos = gi.Point2D{100, 100}
+	ellipse1.Pos = gi.Point2D{400, 200}
 	ellipse1.Radii = gi.Size2D{80, 20}
 
 	line1 := vpfill.AddNewChildNamed(gi.KiT_Line, "line1").(*gi.Line)
@@ -68,37 +68,16 @@ func mainrun() {
 	text1.SetProp("font-size", 32)
 	// text1.SetProp("font-face", "Times New Roman")
 	text1.SetProp("font-face", "Arial")
-	text1.Pos = gi.Point2D{200, 200}
+	text1.Pos = gi.Point2D{10, 600}
 	text1.Size.X = 100
 	text1.Text = "this is test text!"
-
-	polyline1 := vpfill.AddNewChildNamed(gi.KiT_Polyline, "polyline1").(*gi.Polyline)
-	polyline1.SetProp("stroke", "#888800")
-	polyline1.SetProp("stroke-width", 4.0)
-
-	for i := 0; i < 10; i++ {
-		x1 := rand.Float64() * float64(width)
-		y1 := rand.Float64() * float64(height)
-		polyline1.Points = append(polyline1.Points, gi.Point2D{x1, y1})
-	}
-
-	polygon1 := vpfill.AddNewChildNamed(gi.KiT_Polygon, "polygon1").(*gi.Polygon)
-	polygon1.SetProp("fill", "#55005555")
-	polygon1.SetProp("stroke", "#888800")
-	polygon1.SetProp("stroke-width", 4.0)
-
-	for i := 0; i < 10; i++ {
-		x1 := rand.Float64() * float64(width)
-		y1 := rand.Float64() * float64(height)
-		polygon1.Points = append(polygon1.Points, gi.Point2D{x1, y1})
-	}
 
 	vpfill.AddNewChildNamed(gi.KiT_PushButton, "push1")
 
 	win.UpdateEnd()
 
-	polygon1.UpdateStart()
-	polygon1.UpdateEnd()
+	text1.UpdateStart()
+	text1.UpdateEnd()
 
 	win.StartEventLoop()
 }

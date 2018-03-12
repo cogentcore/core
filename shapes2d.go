@@ -45,7 +45,7 @@ func (g *Rect) PaintProps2D() {
 }
 
 func (g *Rect) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Rect) Node2DBBox() image.Rectangle {
@@ -53,6 +53,7 @@ func (g *Rect) Node2DBBox() image.Rectangle {
 }
 
 func (g *Rect) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
@@ -104,7 +105,7 @@ func (g *Viewport2DFill) PaintProps2D() {
 }
 
 func (g *Viewport2DFill) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Viewport2DFill) Node2DBBox() image.Rectangle {
@@ -151,7 +152,7 @@ func (g *Circle) PaintProps2D() {
 }
 
 func (g *Circle) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Circle) Node2DBBox() image.Rectangle {
@@ -159,6 +160,7 @@ func (g *Circle) Node2DBBox() image.Rectangle {
 }
 
 func (g *Circle) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
@@ -201,7 +203,7 @@ func (g *Ellipse) PaintProps2D() {
 }
 
 func (g *Ellipse) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Ellipse) Node2DBBox() image.Rectangle {
@@ -209,6 +211,7 @@ func (g *Ellipse) Node2DBBox() image.Rectangle {
 }
 
 func (g *Ellipse) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
@@ -250,7 +253,7 @@ func (g *Line) PaintProps2D() {
 }
 
 func (g *Line) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Line) Node2DBBox() image.Rectangle {
@@ -298,7 +301,7 @@ func (g *Polyline) PaintProps2D() {
 }
 
 func (g *Polyline) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Polyline) Node2DBBox() image.Rectangle {
@@ -306,6 +309,7 @@ func (g *Polyline) Node2DBBox() image.Rectangle {
 }
 
 func (g *Polyline) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	if len(g.Points) < 2 {
@@ -349,7 +353,7 @@ func (g *Polygon) PaintProps2D() {
 }
 
 func (g *Polygon) Layout2D() {
-	g.SetWinBBox(g.Node2DBBox())
+	g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 }
 
 func (g *Polygon) Node2DBBox() image.Rectangle {
@@ -357,6 +361,7 @@ func (g *Polygon) Node2DBBox() image.Rectangle {
 }
 
 func (g *Polygon) Render2D() {
+	g.SetWinBBox(g.Node2DBBox())
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	if len(g.Points) < 2 {
