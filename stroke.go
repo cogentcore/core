@@ -37,7 +37,7 @@ const (
 // PaintStroke contains all the properties specific to painting a line -- the svg elements define the corresponding SVG style attributes, which are processed in StrokeStyle
 type PaintStroke struct {
 	On         bool        `desc:"is stroke active -- if property is none then false"`
-	Color      color.Color `desc:"default stroke color when such a color is needed -- Server could be anything"`
+	Color      Color       `desc:"default stroke color when such a color is needed -- Server could be anything"`
 	Server     PaintServer `svg:"stroke",desc:"paint server for the stroke -- if solid color, defines the stroke color"`
 	Width      float64     `svg:"stroke-width",desc:"line width"`
 	Dashes     []float64   `svg:"stroke-dasharray",desc:"dash pattern"`
@@ -66,7 +66,7 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			ps.On = false
 		} else {
 			ps.On = true
-			ps.Color = val // todo: only if color
+			ps.Color = *val
 			ps.Server = NewSolidcolorPaintServer(val)
 		}
 	}
@@ -75,7 +75,7 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			ps.On = false
 		} else {
 			ps.On = true
-			ps.Color = val // todo: only if color
+			ps.Color = *val
 			ps.Server = NewSolidcolorPaintServer(val)
 		}
 	}

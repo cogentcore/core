@@ -21,7 +21,7 @@ const (
 // PaintFill contains all the properties specific to filling a region
 type PaintFill struct {
 	On     bool        `desc:"is fill active -- if property is none then false"`
-	Color  color.Color `desc:"default fill color when such a color is needed -- Server could be anything"`
+	Color  Color       `desc:"default fill color when such a color is needed -- Server could be anything"`
 	Server PaintServer `svg:"fill",desc:"paint server for the fill -- if solid color, defines fill color"`
 	Rule   FillRule    `svg:"fill-rule",desc:"rule for how to fill more complex shapes with crossing lines"`
 }
@@ -29,8 +29,8 @@ type PaintFill struct {
 // initialize default values for paint fill
 func (pf *PaintFill) Defaults() {
 	pf.On = false // svg says fill is off by default
-	pf.Color = color.White
-	pf.Server = NewSolidcolorPaintServer(pf.Color)
+	pf.Color.SetColor(color.White)
+	pf.Server = NewSolidcolorPaintServer(&pf.Color)
 	pf.Rule = FillRuleNonZero
 }
 
@@ -46,7 +46,7 @@ func (pf *PaintFill) SetFromNode(g *Node2DBase) {
 			pf.On = false
 		} else {
 			pf.On = true
-			pf.Color = val // todo: only if actually a color
+			pf.Color = *val
 			pf.Server = NewSolidcolorPaintServer(val)
 		}
 	}

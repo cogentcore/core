@@ -78,7 +78,7 @@ func mainrun() {
 	rlay.SetProp("y", 500)
 	rlay.SetProp("stroke", "#000")    // todo need default prop vals
 	rlay.SetProp("stroke-width", 2.0) // todo need default prop vals
-	rlay.SetProp("fill", "#0000FF50")
+	rlay.SetProp("fill", "#00005050")
 	rlay.SetProp("font-face", "Arial")
 	rlay.SetProp("font-size", 32)
 	rlay.SetProp("text-align", "center")

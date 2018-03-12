@@ -47,6 +47,18 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * The SVG default coordinate system has 0,0 at the upper-left.  The default 3D coordinate system flips the Y axis so 0,0 is at the lower left effectively (actually it uses center-based coordinates so 0,0 is in the center of the image, effectively -- everything is defined by the camera anyway)
 
+* Widget-based layout is simple x,y offsets, and All 2D nodes obey that -- typically you want to add an SVGBox or SVGViewport node to encapsulate pure SVG-based rendering within an overall simple x,y framework
+
+* All nodes need to be layout aware and use layout geom when avail
+
+### TODO
+
+* Reminder: grep all todo: in code -- lots!
+* svg box, viewport
+* better unified color object with brighter / darker etc
+* default properties
+* focus -- default to tree
+
 ## 3D Design
 
 * keep all the elements separate: geometry, material, transform, etc.  Including shader programs.  Maximum combinatorial flexibility.  not clear if Qt3D really obeys this principle, but Inventor does, and probably other systems do to.

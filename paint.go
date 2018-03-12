@@ -389,13 +389,13 @@ func (pc *Paint) ResetClip(rs *RenderState) {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Paint) Clear(rs *RenderState) {
-	src := image.NewUniform(pc.Fill.Color)
+	src := image.NewUniform(&pc.Fill.Color)
 	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.ZP, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Paint) SetPixel(rs *RenderState, x, y int) {
-	rs.Image.Set(x, y, pc.Stroke.Color)
+	rs.Image.Set(x, y, &pc.Stroke.Color)
 }
 
 func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float64) {
@@ -546,7 +546,7 @@ func (pc *Paint) FontHeight() float64 {
 func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 	d := &font.Drawer{
 		Dst:  im,
-		Src:  image.NewUniform(pc.Stroke.Color),
+		Src:  image.NewUniform(&pc.Stroke.Color),
 		Face: pc.Font.Face,
 		Dot:  fixp(x, y),
 	}
