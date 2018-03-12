@@ -26,6 +26,7 @@ import (
 )
 
 func init() {
+	gi.FontLibrary.AddFontPaths("C:/Windows/Font")
 	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
 		w, err = NewOSWindow(width, height)
 		return

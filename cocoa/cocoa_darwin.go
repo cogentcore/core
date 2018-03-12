@@ -34,6 +34,7 @@ import (
 var tasks chan func()
 
 func init() {
+	gi.FontLibrary.AddFontPaths("/Library/Fonts")
 	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
 		w, err = NewWindow(width, height)
 		return

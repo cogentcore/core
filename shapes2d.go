@@ -34,36 +34,47 @@ func (g *Rect) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Rect) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Rect) InitNode2D() {
 }
 
-func (g *Rect) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
-}
-
-func (g *Rect) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
+func (g *Rect) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
 	}
+}
+
+func (g *Rect) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Rect) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+}
+
+func (g *Rect) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		vp.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		vp.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
+		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
 	}
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+	pc.FillStrokeClear(rs)
 }
 
+func (g *Rect) CanReRender2D() bool {
+	// todo: could optimize by checking for an opaque fill, and same bbox
+	return false
+}
+
+// check for interface implementation
+var _ Node2D = &Rect{}
+
 ////////////////////////////////////////////////////////////////////////////////////////
+
+// todo: for ViewportFill support an option to insert a HiDPI correction scaling factor at the top!
 
 // viewport fill fills entire viewport -- just a rect that automatically sets size to viewport
 type Viewport2DFill struct {
@@ -81,21 +92,32 @@ func (g *Viewport2DFill) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Viewport2DFill) InitNode2D(vp *Viewport2D) bool {
+func (g *Viewport2DFill) InitNode2D() {
+	vp := g.Viewport
 	g.Pos = Point2D{0, 0}
 	g.Size = Size2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
 }
 
-func (g *Viewport2DFill) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	g.Pos = Point2D{0, 0}
-	g.Size = Size2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
-	return vp.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+func (g *Viewport2DFill) PaintProps2D() {
+	g.CopyParentPaint()
+	g.MyPaint.SetFromNode(&g.Node2DBase)
 }
 
-func (g *Viewport2DFill) Render2D(vp *Viewport2D) bool {
-	return g.Rect.Render2D(vp)
+func (g *Viewport2DFill) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Viewport2DFill) Node2DBBox() image.Rectangle {
+	g.InitNode2D() // keep up-to-date -- cheap
+	return g.MyPaint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+}
+
+func (g *Viewport2DFill) Render2D() {
+	g.Rect.Render2D()
+}
+
+func (g *Viewport2DFill) CanReRender2D() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -118,28 +140,34 @@ func (g *Circle) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Circle) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Circle) InitNode2D() {
 }
 
-func (g *Circle) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+func (g *Circle) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	}
 }
 
-func (g *Circle) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
-	}
-	vp.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+func (g *Circle) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Circle) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+}
+
+func (g *Circle) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
+	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
+	pc.FillStrokeClear(rs)
+}
+
+func (g *Circle) CanReRender2D() bool {
+	// todo: could optimize by checking for an opaque fill, and same bbox
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -162,28 +190,33 @@ func (g *Ellipse) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Ellipse) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Ellipse) InitNode2D() {
 }
 
-func (g *Ellipse) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+func (g *Ellipse) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	}
 }
 
-func (g *Ellipse) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
-	}
-	vp.DrawEllipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+func (g *Ellipse) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Ellipse) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+}
+
+func (g *Ellipse) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
+	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+	pc.FillStrokeClear(rs)
+}
+
+func (g *Ellipse) CanReRender2D() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -206,28 +239,33 @@ func (g *Line) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Line) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Line) InitNode2D() {
 }
 
-func (g *Line) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+func (g *Line) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	}
 }
 
-func (g *Line) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
-	}
-	vp.DrawLine(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+func (g *Line) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Line) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+}
+
+func (g *Line) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
+	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
+	pc.FillStrokeClear(rs)
+}
+
+func (g *Line) CanReRender2D() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -249,31 +287,36 @@ func (g *Polyline) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Polyline) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Polyline) InitNode2D() {
 }
 
-func (g *Polyline) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBoxFromPoints(g.Points)
-}
-
-func (g *Polyline) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
+func (g *Polyline) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
+		pc.Off = true
 	}
+}
+
+func (g *Polyline) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Polyline) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Polyline) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
 	if len(g.Points) < 2 {
-		return true // todo: could issue warning but..
+		return
 	}
-	vp.DrawPolyline(g.Points)
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+	pc.DrawPolyline(rs, g.Points)
+	pc.FillStrokeClear(rs)
+}
+
+func (g *Polyline) CanReRender2D() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -295,31 +338,36 @@ func (g *Polygon) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Polygon) InitNode2D(vp *Viewport2D) bool {
-	g.NodeSig.Connect(vp.This, SignalViewport2D)
-	return true
+func (g *Polygon) InitNode2D() {
 }
 
-func (g *Polygon) Node2DBBox(vp *Viewport2D) image.Rectangle {
-	return vp.BoundingBoxFromPoints(g.Points)
-}
-
-func (g *Polygon) Render2D(vp *Viewport2D) bool {
-	if vp.HasNoStrokeOrFill() {
-		return true
+func (g *Polygon) PaintProps2D() {
+	pc := &g.MyPaint
+	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
+		pc.Off = true
 	}
+}
+
+func (g *Polygon) Layout2D() {
+	g.SetWinBBox(g.Node2DBBox())
+}
+
+func (g *Polygon) Node2DBBox() image.Rectangle {
+	return g.MyPaint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Polygon) Render2D() {
+	pc := &g.MyPaint
+	rs := &g.Viewport.Render
 	if len(g.Points) < 2 {
-		return true // todo: could issue warning but..
+		return
 	}
-	vp.DrawPolygon(g.Points)
-	if vp.HasFill() {
-		vp.FillPreserve()
-	}
-	if vp.HasStroke() {
-		vp.StrokePreserve()
-	}
-	vp.ClearPath()
-	return true
+	pc.DrawPolygon(rs, g.Points)
+	pc.FillStrokeClear(rs)
+}
+
+func (g *Polygon) CanReRender2D() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

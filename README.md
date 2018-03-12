@@ -23,6 +23,8 @@ GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/gi
 
 * Excellent rendering code on top of freetype rasterizer, does almost everything we need: https://github.com/fogleman/gg -- borrowed heavily from that!
 
+* Also incorporated this framework for getting windows and events: https://github.com/skelterjohn/go.wde
+
 The 2D Gi is based entirely on the SVG2 spec: https://www.w3.org/TR/SVG2/Overview.html, and renders directly to an Image struct (`Viewport2D`)
 
 The 3D Gi is based on TBD (will be impl later) and renders directly into a `Viewport3D` offscreen image buffer (OpenGL for now, but with generalization to Vulkan etc).
@@ -52,21 +54,35 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 # Links
 
+## SVG
+
 * SVG *text* generator in go: https://github.com/ajstarks/svgo
 * cairo wrapper in go: https://github.com/ungerik/go-cairo -- maybe needed for PDF generation from SVG?
 * https://github.com/jyotiska/go-webcolors -- need this for parsing colors
+
+## GUI
+
+* Shiny (not much progress recently, only works on android?):  https://github.com/golang/go/issues/11818 https://github.com/golang/exp/tree/master/shiny
+* Current plans for GUI based on OpenGL: https://docs.google.com/document/d/1mXev7TyEnvM4t33lnqoji-x7EqGByzh4RpE4OqEZck4
+* Window events: https://github.com/skelterjohn/go.wde
+* Mobile: https://github.com/golang/mobile/  https://github.com/golang/go/wiki/Mobile
+
+### Material design
+
+* https://github.com/dskinner/material -- uses simplex layout -- seems like a complicated area: https://arxiv.org/pdf/1401.1031.pdf
+
+* https://doc.qt.io/qt-5.10/qtquickcontrols2-material.html
+
+
+## Go graphics
+
 * https://golang.org/pkg/image/
 * https://godoc.org/golang.org/x/image/vector
 * https://godoc.org/github.com/golang/freetype/raster
 * https://github.com/fogleman/gg -- key lib using above -- 2D rendering!
 
-* Shiny (not much progress recently, only works on android?):  https://github.com/golang/go/issues/11818 https://github.com/golang/exp/tree/master/shiny
+## 3D
 
-* Current plans for GUI based on OpenGL: https://docs.google.com/document/d/1mXev7TyEnvM4t33lnqoji-x7EqGByzh4RpE4OqEZck4
-
-* Window events: https://github.com/skelterjohn/go.wde, Material gui https://github.com/skelterjohn/go.wde
-
-* scenegraphs / 3D game engines: 
-	+ https://github.com/g3n/engine
-	+ https://github.com/oakmound/oak
-	+ https://github.com/walesey/go-engine
+* https://github.com/g3n/engine
+* https://github.com/oakmound/oak
+* https://github.com/walesey/go-engine

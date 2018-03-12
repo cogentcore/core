@@ -9,7 +9,7 @@ import (
 	"github.com/rcoreilly/goki/gi"
 	_ "github.com/rcoreilly/goki/gi/init"
 	"math/rand"
-	"reflect"
+	// "reflect"
 	// "runtime"
 	// "sync"
 	// "time"
@@ -30,49 +30,49 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 
-	bg := vp.AddNewChildNamed(reflect.TypeOf(gi.Rect{}), "bg").(*gi.Rect)
-	bg.SetProp("fill", "#FFF")
-	bg.Pos = gi.Point2D{0, 00}
-	bg.Size = gi.Size2D{float64(width), float64(height)}
+	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
+	vpfill.SetProp("fill", "#FFF")
 
 	// rect1.SetProp("stroke-linejoin", "round")
-	rect1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Rect{}), "rect1").(*gi.Rect)
+	rect1 := vpfill.AddNewChildNamed(gi.KiT_Rect, "rect1").(*gi.Rect)
 	rect1.SetProp("fill", "#008800")
 	rect1.SetProp("stroke", "#0000FF")
 	rect1.SetProp("stroke-width", 5.0)
 	rect1.Pos = gi.Point2D{10, 10}
 	rect1.Size = gi.Size2D{100, 100}
 
-	circle1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Circle{}), "circle1").(*gi.Circle)
-	circle1.SetProp("fill", "none") // todo: need to process
+	circle1 := vpfill.AddNewChildNamed(gi.KiT_Circle, "circle1").(*gi.Circle)
+	circle1.SetProp("fill", "none")
 	circle1.SetProp("stroke", "#CC0000")
 	circle1.SetProp("stroke-width", 2.0)
 	circle1.Pos = gi.Point2D{200, 100}
 	circle1.Radius = 40
 
-	ellipse1 := circle1.AddNewChildNamed(reflect.TypeOf(gi.Ellipse{}), "ellipse1").(*gi.Ellipse)
+	ellipse1 := circle1.AddNewChildNamed(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
 	ellipse1.SetProp("fill", "#55000055")
 	ellipse1.SetProp("stroke", "#880000")
 	ellipse1.SetProp("stroke-width", 2.0)
 	ellipse1.Pos = gi.Point2D{100, 100}
 	ellipse1.Radii = gi.Size2D{80, 20}
 
-	line1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Line{}), "line1").(*gi.Line)
+	line1 := vpfill.AddNewChildNamed(gi.KiT_Line, "line1").(*gi.Line)
 	line1.SetProp("stroke", "#888800")
 	line1.SetProp("stroke-width", 5.0)
 	line1.Start = gi.Point2D{100, 100}
 	line1.End = gi.Point2D{150, 200}
 
-	text1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Text2D{}), "text1").(*gi.Text2D)
+	text1 := vpfill.AddNewChildNamed(gi.KiT_Text2D, "text1").(*gi.Text2D)
 	text1.SetProp("stroke", "#000")
 	text1.SetProp("stroke-width", 1.0)
 	text1.SetProp("text-align", "left")
 	text1.SetProp("font-size", 32)
+	// text1.SetProp("font-face", "Times New Roman")
+	text1.SetProp("font-face", "Arial")
 	text1.Pos = gi.Point2D{200, 200}
 	text1.Size.X = 100
 	text1.Text = "this is test text!"
 
-	polyline1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Polyline{}), "polyline1").(*gi.Polyline)
+	polyline1 := vpfill.AddNewChildNamed(gi.KiT_Polyline, "polyline1").(*gi.Polyline)
 	polyline1.SetProp("stroke", "#888800")
 	polyline1.SetProp("stroke-width", 4.0)
 
@@ -82,7 +82,7 @@ func mainrun() {
 		polyline1.Points = append(polyline1.Points, gi.Point2D{x1, y1})
 	}
 
-	polygon1 := bg.AddNewChildNamed(reflect.TypeOf(gi.Polygon{}), "polygon1").(*gi.Polygon)
+	polygon1 := vpfill.AddNewChildNamed(gi.KiT_Polygon, "polygon1").(*gi.Polygon)
 	polygon1.SetProp("fill", "#55005555")
 	polygon1.SetProp("stroke", "#888800")
 	polygon1.SetProp("stroke-width", 4.0)
@@ -93,14 +93,12 @@ func mainrun() {
 		polygon1.Points = append(polygon1.Points, gi.Point2D{x1, y1})
 	}
 
-	bg.AddNewChildNamed(reflect.TypeOf(gi.PushButton{}), "rect1")
+	vpfill.AddNewChildNamed(gi.KiT_PushButton, "push1")
 
-	vp.InitTopLevel()
-	vp.Clear()
-	win.UpdateEnd(false)
+	win.UpdateEnd()
 
 	polygon1.UpdateStart()
-	polygon1.UpdateEnd(false)
+	polygon1.UpdateEnd()
 
 	win.StartEventLoop()
 }

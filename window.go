@@ -40,6 +40,8 @@ func NewWindow(name string, width, height int) *Window {
 		return nil
 	}
 	win.Win.SetTitle(name)
+	// we signal ourselves!
+	win.NodeSig.Connect(win.This, SignalWindow)
 	return win
 }
 
@@ -48,6 +50,7 @@ func NewWindow2D(name string, width, height int) *Window {
 	win := NewWindow(name, width, height)
 	vp := NewViewport2D(width, height)
 	win.AddChildNamed(vp, "WinVp")
+	// vp.NodeSig.Connect(win.This, SignalWindow)
 	return win
 }
 
@@ -55,6 +58,26 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	vpi := w.FindChildByType(reflect.TypeOf(Viewport2D{}))
 	vp, _ := vpi.(*Viewport2D)
 	return vp
+}
+
+func SignalWindow(winki, node ki.Ki, sig ki.SignalType, data interface{}) {
+	win, ok := winki.(*Window) // will fail if not a window
+	if !ok {
+		return
+	}
+	vpki := win.FindChildByType(KiT_Viewport2D) // should be first one
+	if vpki == nil {
+		fmt.Print("vpki not found\n")
+		return
+	}
+	vp, ok := vpki.(*Viewport2D)
+	if !ok {
+		fmt.Print("vp not a vp\n")
+		return
+	}
+	fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), sig, node.PathUnique())
+
+	vp.Render2DRoot()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et EventType, fun ki.RecvFun) {

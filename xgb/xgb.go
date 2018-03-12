@@ -33,6 +33,7 @@ import (
 )
 
 func init() {
+	gi.FontLibrary.AddFontPaths("/usr/share/fonts/truetype")
 	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
 		w, err = NewOSWindow(width, height)
 		return

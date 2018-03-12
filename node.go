@@ -5,16 +5,13 @@
 /*
 	Package Gi (GoGi) provides a complete Graphical Interface based on GoKi Tree Node structs
 
-	The Node struct that implements the Ki interface, which
-	can be used as an embedded type (or a struct field) in other structs to provide
-	core tree functionality, including:
-		* Parent / Child Tree structure -- each Node can ONLY have one parent
-		* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
-		* Apply a function across nodes up or down a tree -- very flexible for tree walking
-		* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc -- including pointers which are saved using paths and automatically cached-out after loading
-		* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
-		* Robust updating state -- wrap updates in UpdateStart / End, and signals are blocked until the final end, at which point an update signal is sent -- works across levels
-		* Properties (as a string-keyed map) with property inheritance -- css anyone!?
+	2D and 3D scenegraphs supported, each rendering to respective Viewport2D or 3D
+	which in turn can be integrated within the other type of scenegraph.
+	Within 2D scenegraph, the following are supported
+		* SVG-based rendering nodes for basic shapes, paths, curves, arcs etc, with SVG / CSS properties
+		* Widget nodes for GUI actions (Buttons, etc), with support for full SVG-based rendering of styles, using Qt-based naming and functionality, including TreeView, TableView
+		* Layouts for placing widgets, based on QtQuick model
+
 */
 package gi
 
@@ -39,17 +36,7 @@ type NodeBase struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_NodeBase = ki.KiTypes.AddType(&NodeBase{})
 
-// todo: try to avoid introducing this interface -- not clear if we need this HasFocus function etc -- would be true if focus is not always just equality with focus object
-
-// primary interface for all Node's -- note: need the interface for all virtual functions
-// type Node interface {
-// 	HasFocus(focus *Node)
-// }
-
-// func (g *Node) HasFocus(focus *Node) {
-// 	return g == focus
-// }
-
+// register this node to receive a given type of GUI event signal from the parent window
 func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
 	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived types!
 	if wini == nil {
@@ -67,11 +54,23 @@ func (g *NodeBase) ZeroWinBBox() {
 
 // standard css properties on nodes apply, including visible, etc.
 
-// base struct node for 2D rendering tree -- renders to a bitmap using Paint / Viewport rendering functions
+////////////////////////////////////////////////////////////////////////////////////////
+// 2D
+
+/*
+Base struct node for 2D rendering tree -- renders to a bitmap using Paint / Viewport rendering functions
+
+Rendering is done in 3 separate passes:
+	1. PaintProps: In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node.
+	2. Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
+	3. Render2D: Final MeFirst rendering pass -- also individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
+*/
+
 type Node2DBase struct {
 	NodeBase
-	z_index int           `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	XForm   XFormMatrix2D `json:"-",desc:"transform present when we were last rendered"`
+	z_index  int         `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	MyPaint  Paint       `json:"-",desc:"full paint information for this node"`
+	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -83,21 +82,49 @@ type Node2D interface {
 	GiNode2D() *Node2DBase
 	// if this is a Viewport2D-derived node, get it as a Viewport2D, else return nil
 	GiViewport2D() *Viewport2D
-	// initialize a node -- setup connections etc -- should be robust to being called repeatedly
-	InitNode2D(vp *Viewport2D) bool
-	// get the bounding box of this node relative to its parent viewport -- used in computing EventBBox, called during Render
-	Node2DBBox(vp *Viewport2D) image.Rectangle
-	// Render graphics into a 2D viewport -- return value indicates whether we should keep going down -- e.g., viewport cuts off there
-	Render2D(vp *Viewport2D) bool
+	// initialize a node -- setup connections etc -- before this call, InitNodeBase is called to set basic inits including setting Viewport and connecting node signal to parent vp -- must be robust to being called repeatedly
+	InitNode2D()
+	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node -- before this call, PaintProps2DBase is called
+	PaintProps2D()
+	// Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
+	Layout2D()
+	// get the bounding box of this node relative to its parent viewport -- used in computing WinBBox, must be called during Render
+	Node2DBBox() image.Rectangle
+	// Render2D: Final MeFirst rendering pass -- individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
+	Render2D()
+	// Can this node re-render itself directly using cached data?  only for nodes that paint an opaque background first (e.g., widgets) -- optimizes local redraw when possible -- always true for sub-viewports
+	CanReRender2D() bool
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// 2D basic infrastructure code
+
+// handles basic node initialization -- InitNode2D can then do special things
+func (g *Node2DBase) InitNode2DBase() {
+	g.Viewport = g.FindViewportParent()
+	if g.Viewport != nil { // default for most cases -- delete connection of not
+		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
+	}
+	g.MyPaint.Defaults()
+}
+
+// handles all the basic infrastructure of setting Paint based on node -- PaintProps2D can do extras
+func (g *Node2DBase) PaintProps2DBase() {
+	gii, ok := g.This.(Node2D)
+	if g.Viewport == nil { // robust
+		g.InitNode2DBase()
+		if ok {
+			gii.InitNode2D()
+		}
+	}
+	g.CopyParentPaint()
+	g.MyPaint.SetFromNode(g)
 }
 
 // find parent viewport -- uses GiViewport2D() method on Node2D interface
 func (g *Node2DBase) FindViewportParent() *Viewport2D {
 	var parVp *Viewport2D
-	g.FunUp(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		if level == 0 { // skip us -- only parents
-			return true
-		}
+	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
@@ -112,33 +139,29 @@ func (g *Node2DBase) FindViewportParent() *Viewport2D {
 	return parVp
 }
 
-// each node notifies its parent viewport whenever it changes, causing a re-render
-func SignalViewport2D(vpki, node ki.Ki, sig ki.SignalType, data interface{}) {
-	gii, ok := vpki.(Node2D)
-	if !ok {
+// copy our paint from our parents -- called during PaintProps
+func (g *Node2DBase) CopyParentPaint() {
+	if g.Parent == nil {
 		return
 	}
-	vp := gii.GiViewport2D()
-	if vp == nil {
-		return
-	}
-	fmt.Printf("viewport: %v rendering due to signal: %v\n", vp.PathUnique(), sig)
-
-	parVp := vp.FindViewportParent()
-	if parVp == vp {
-		log.Printf("SignalViewport2D: ooops -- parent == me for viewport: %v\n", vp.PathUnique())
-		return
-	}
-	if sig == ki.SignalChildAdded {
-		vp.InitNode2D(parVp)
-	}
-	vp.RenderTopLevel() // render as if we are top-level
-	if parVp == nil {
-		vp.DrawIntoWindow() // if no parent, we must be top-level
-	} else {
-		vp.DrawIntoParent(parVp)
+	gii, ok := g.Parent.(Node2D)
+	if ok {
+		pg := gii.GiNode2D()
+		g.MyPaint = pg.MyPaint
 	}
 }
+
+// set our window-level BBox from vp and our bbox
+func (g *Node2DBase) SetWinBBox(bb image.Rectangle) {
+	if g.Viewport != nil {
+		g.WinBBox = bb.Add(image.Point{g.Viewport.WinBBox.Min.X, g.Viewport.WinBBox.Min.Y})
+	} else {
+		g.WinBBox = bb
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// 3D
 
 // basic component node for 3D rendering -- has a 3D transform
 type Node3DBase struct {
@@ -289,6 +312,8 @@ func ParseHexColor(x string) color.Color {
 
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
+
+// todo: use g.Viewport to get % lengths etc
 
 // process properties and any css style sheets (todo) to get a length property of the given name -- returns false if property has not been set -- automatically deals with units such as px, em etc
 func (g *Node2DBase) PropLength(name string) (float64, bool) {

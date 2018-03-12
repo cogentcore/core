@@ -70,6 +70,15 @@ func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
 			ps.Server = NewSolidcolorPaintServer(c)
 		}
 	}
+	if c, got := g.PropColor("color"); got { // todo: support url's to paint server elements!
+		if c == nil {
+			ps.On = false
+		} else {
+			ps.On = true
+			ps.Color = c // todo: only if color
+			ps.Server = NewSolidcolorPaintServer(c)
+		}
+	}
 	if w, got := g.PropLength("stroke-width"); got {
 		ps.Width = w
 	}
