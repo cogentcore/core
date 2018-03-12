@@ -290,3 +290,48 @@ type Ki interface {
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type KiFun func(ki Ki, level int, data interface{}) bool
+
+//////////////////////////////////////////////////////////////////////////////////
+// Additional useful stuff of very general use
+
+func Max64(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min64(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max32(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min32(a, b float32) float32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func MaxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
