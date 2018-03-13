@@ -28,7 +28,7 @@ import (
 	"os"
 )
 
-func buttonForDetail(detail xproto.Button) gi.Button {
+func buttonForDetail(detail xproto.Button) gi.MouseButton {
 	switch detail {
 	case 1:
 		return gi.LeftButton
@@ -52,7 +52,7 @@ func (w *OSWindow) handleEvents() {
 	var noX int32 = 1<<31 - 1
 	noX++
 	var lastX, lastY int32 = noX, 0
-	var button gi.Button
+	var button gi.MouseButton
 
 	downKeys := map[string]bool{}
 

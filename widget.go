@@ -49,15 +49,17 @@ const (
 type ButtonStates int32
 
 const (
-	// disabled -- not pressable
-	ButtonDisabled ButtonStates = iota
 	// normal state -- there but not being interacted with
-	ButtonNormal
-	// hover over state
+	ButtonNormal ButtonStates = iota
+	// disabled -- not pressable
+	ButtonDisabled
+	// mouse is hovering over the button
 	ButtonHover
 	// button is the focus -- will respond to keyboard input
 	ButtonFocus
 	// button is currently being pressed
+	ButtonPress
+	// total number of button states
 	ButtonStatesN
 )
 
@@ -66,9 +68,10 @@ const (
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
 	WidgetBase
-	Radius   float64 `svg:"border-radius",desc:"radius for rounded buttons"`
-	Text     string  `svg:"text",desc:"label for the button"`
-	Shortcut string  `svg:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	Radius   float64              `svg:"border-radius",desc:"radius for rounded buttons"`
+	Text     string               `svg:"text",desc:"label for the button"`
+	Shortcut string               `svg:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	Styles   [ButtonStatesN]Style `desc:"styles for the button, one for each state -- everything inherits from the first one which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State    ButtonStates
 	// todo: icon -- should be an svg
 	ButtonSig ki.Signal `json:"-",desc:"signal for button -- see ButtonSignalType for the types"`
@@ -78,35 +81,28 @@ type ButtonBase struct {
 var KiT_ButtonBase = ki.KiTypes.AddType(&ButtonBase{})
 
 func (g *ButtonBase) PaintProps2DBase() {
-	if val, got := g.PropNumber("border-radius"); got {
-		g.Radius = val
-	}
-	// todo: default fill etc
+	g.Radius = g.PropNumberDefault("border-radius", 4.0)
 }
 
-// PushButton is a standard command button
-type PushButton struct {
+///////////////////////////////////////////////////////////
+
+// Button is a standard command button -- PushButton in Qt Widgets, and Button in Qt Quick
+type Button struct {
 	ButtonBase
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_PushButton = ki.KiTypes.AddType(&PushButton{})
+var KiT_Button = ki.KiTypes.AddType(&Button{})
 
-// todo: support direct re-rendering option, where a background rect is painted then everything goes on top
-// only makes sense for opaque renders but much more efficient than managing images all over the place
-// parent vp can check this and directly re-render or not -- test for equality of bbox and xform!?
-
-// todo: not so clear about how geom / xform relates to sizing of image in a sub-viewport..
-
-func (g *PushButton) GiNode2D() *Node2DBase {
+func (g *Button) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *PushButton) GiViewport2D() *Viewport2D {
+func (g *Button) GiViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *PushButton) InitNode2D() {
+func (g *Button) InitNode2D() {
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*ButtonBase)
@@ -130,11 +126,15 @@ func (g *PushButton) InitNode2D() {
 	})
 }
 
-func (g *PushButton) PaintProps2D() {
-
+func (g *Button) DefaultStyle() {
+	// set all our default style info, before parsing user-set ones
 }
 
-func (g *PushButton) Layout2D(iter int) {
+func (g *Button) PaintProps2D() {
+	// todo: get all styling info -- due to diff between widgets and SVG, we need to call this explicitly here and cannot rely on base-case
+}
+
+func (g *Button) Layout2D(iter int) {
 	if iter == 0 {
 		pc := &g.MyPaint
 		var w, h float64
@@ -150,14 +150,14 @@ func (g *PushButton) Layout2D(iter int) {
 	}
 }
 
-func (g *PushButton) Node2DBBox() image.Rectangle {
+func (g *Button) Node2DBBox() image.Rectangle {
 	return g.WinBBoxFromAlloc()
 }
 
 // todo: need color brigher / darker functions
 
-func (g *PushButton) Render2D() {
-	g.GeomFromLayout()
+func (g *Button) Render2D() {
+	g.DefaultGeom()
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
 	} else {
@@ -167,7 +167,7 @@ func (g *PushButton) Render2D() {
 }
 
 // render using a default style if not otherwise styled
-func (g *PushButton) Render2DDefaultStyle() {
+func (g *Button) Render2DDefaultStyle() {
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
 	if g.Radius == 0.0 {
@@ -176,12 +176,12 @@ func (g *PushButton) Render2DDefaultStyle() {
 		pc.DrawRoundedRectangle(rs, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X, g.Layout.AllocSize.Y, g.Radius)
 	}
 	pc.FillStrokeClear(rs)
-	pc.DrawString(rs, g.Text, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X)
+	pc.DrawStringAnchored(rs, g.Text, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, 0.0, 0.9)
 }
 
-func (g *PushButton) CanReRender2D() bool {
+func (g *Button) CanReRender2D() bool {
 	return true
 }
 
 // check for interface implementation
-var _ Node2D = &PushButton{}
+var _ Node2D = &Button{}

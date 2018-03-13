@@ -51,12 +51,25 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * All nodes need to be layout aware and use layout geom when avail
 
+* Basic CSS styling is based on the Box model: https://www.w3schools.com/css/css_boxmodel.asp -- see also the Box shadow model https://www.w3schools.com/css/css3_shadows.asp -- general html spec: https://www.w3.org/TR/html5/index.html#contents -- better ref section of w3schools for css spec: https://www.w3schools.com/cssref/default.asp
+
 ### TODO
+
+Next:
+* PaintProps2D should just be an init-time call, or with a specific update signal -- add a Ki signal for Prop Updates, and trigger on that to update everyone below you.. -- check for empty style (add a flag?)
+
+* widgets really shouldn't inherit styles from parents -- indeed css ref shows that most props are NOT inherited.  SVG does inherit everything but widgets don't -- need to add a flag to each element that IS inherited so auto-parser can detect that..
+
+* default styles -- just init style objs prior to rendering -- button can set this
+
+* styles auto-parsing based on reflect and struct tags -- shouldn't be too hard
+
+* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc
+
+Soon:
 
 * Reminder: grep all todo: in code -- lots!
 * svg box, viewport
-* better unified color object with brighter / darker etc
-* default properties
 * focus -- default to tree
 
 ## 3D Design

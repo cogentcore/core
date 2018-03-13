@@ -13,40 +13,54 @@ import (
 	"unicode"
 )
 
-// todo: needs to include justify https://www.w3.org/TR/css-text-3/#text-align-property
-// how to align text
 type TextAlign int
 
 const (
 	TextAlignLeft TextAlign = iota
-	TextAlignCenter
 	TextAlignRight
+	TextAlignCenter
+	TextAlignJustify
 )
 
 //go:generate stringer -type=TextAlign
 
-// text layout information for painter
-type PaintTextLayout struct {
-	Wrap    bool      `svg:"word-wrap",desc:"wrap text within a given size specified in Size.X"`
-	Align   TextAlign `svg:"text-align",desc:"how to align text"`
-	Spacing Size2D    `svg:"{dx,dy}",desc:"spacing between characters and lines"`
+// all the style information associated with how to render text
+type TextStyle struct {
+	Align         TextAlign `xml:"text-align",desc:"how to align text"`
+	LineHeight    float64   `xml:"line-height",desc:"specified height of a line of text 0 = normal"`
+	LineSpacing   float64   `xml:"line-spacing",desc:"spacing between lines -- NOTE: line height is used instead of spacing in css / html"`
+	Indent        float64   `xml:"text-indent",desc:"how much to indent the first line in a paragraph"`
+	LetterSpacing float64   `xml:"letter-spacing",desc:"spacing between characters and lines"`
+	WordSpacing   float64   `xml:"word-spacing",desc:"extra space to add between words"`
+	WordWrap      bool      `xml:"word-wrap",desc:"wrap text within a given size"`
+	// todo:
+	// page-break options
+	// text-decoration-line -- underline, overline, line-through, -style, -color
+	// text-justify -- how to justify text
+	// text-overflow -- clip, ellipsis, string..
+	// text-shadow
+	// text-transform -- uppercase, lowercase, capitalize
+	// user-select -- can user select text?
+	// white-space -- what to do with white-space
+	// word-break
 }
 
-func (p *PaintTextLayout) Defaults() {
-	p.Wrap = false
+func (p *TextStyle) Defaults() {
+	p.WordWrap = false
 	p.Align = TextAlignLeft
-	p.Spacing = Size2D{1.0, 1.0}
+	p.LineSpacing = 1.0
+	p.LetterSpacing = 1.0
 }
 
 // update the font settings from the style info on the node
-func (pt *PaintTextLayout) SetFromNode(g *Node2DBase) {
+func (pt *TextStyle) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 
 	if wr, got := g.GiPropBool("word-wrap"); got { // gi version
-		pt.Wrap = wr
+		pt.WordWrap = wr
 	}
-	if sz, got := g.PropNumber("text-spacing"); got {
-		pt.Spacing.Y = sz
+	if sz, got := g.PropNumber("line-spacing"); got {
+		pt.LineSpacing = sz
 	}
 	if es, got := g.PropEnum("text-align"); got {
 		var al TextAlign = -1
@@ -85,7 +99,7 @@ func (pt *PaintTextLayout) SetFromNode(g *Node2DBase) {
 // 2D Text
 type Text2D struct {
 	Node2DBase
-	Text        string   `svg:"text",desc:"text string to render"`
+	Text        string   `xml:"text",desc:"text string to render"`
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
 
@@ -116,8 +130,8 @@ func (g *Text2D) Layout2D(iter int) {
 		pc := &g.MyPaint
 		var w, h float64
 		// pre-wrap the text
-		if pc.TextLayout.Wrap {
-			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.TextLayout.Spacing.Y)
+		if pc.Text.WordWrap { // todo: switch to LineHeight
+			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.Text.LineSpacing)
 		} else {
 			w, h = pc.MeasureString(g.Text)
 		}
@@ -134,7 +148,7 @@ func (g *Text2D) Render2D() {
 	// fmt.Printf("rendering text %v\n", g.Text)
 	pc := &g.MyPaint
 	rs := &g.Viewport.Render
-	if pc.TextLayout.Wrap {
+	if pc.Text.WordWrap {
 		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X,
 			g.Layout.AllocSize.Y)
 	} else {

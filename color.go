@@ -34,20 +34,28 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 	return c.Rgba.RGBA()
 }
 
+// check if color is the nil initial default color -- a = 0 means fully transparent black
+func (c *Color) IsNil() bool {
+	if c.Rgba.R == 0 && c.Rgba.G == 0 && c.Rgba.B == 0 && c.Rgba.A == 0 {
+		return true
+	}
+	return false
+}
+
 func (c *Color) SetColor(ci color.Color) {
 	var r, g, b, a uint32
 	r, g, b, a = ci.RGBA()
-	c.SetColorUInt32(r, g, b, a)
+	c.SetRGBAUInt32(r, g, b, a)
 }
 
-func (c *Color) SetColorUInt8(r, g, b, a uint8) {
+func (c *Color) SetRGBAUInt8(r, g, b, a uint8) {
 	c.Rgba.R = r
 	c.Rgba.G = g
 	c.Rgba.B = b
 	c.Rgba.A = a
 }
 
-func (c *Color) SetColorUInt32(r, g, b, a uint32) {
+func (c *Color) SetRGBAUInt32(r, g, b, a uint32) {
 	c.Rgba.R = uint8(r / 0x101) // convert back to uint8
 	c.Rgba.G = uint8(g / 0x101)
 	c.Rgba.B = uint8(b / 0x101)

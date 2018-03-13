@@ -27,7 +27,7 @@ import (
 	// "strings"
 )
 
-func getButton(b int) (which gi.Button) {
+func getButton(b int) (which gi.MouseButton) {
 	switch b {
 	case 0:
 		which = gi.LeftButton

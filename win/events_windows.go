@@ -28,7 +28,7 @@ const WDEM_UI_THREAD = w32.WM_APP
 
 type EventData struct {
 	lastX, lastY int
-	button       gi.Button
+	button       gi.MouseButton
 	noX          int
 	trackMouse   bool
 }
@@ -39,7 +39,7 @@ func (this *EventData) InitEventData() {
 	this.lastX = this.noX
 }
 
-func buttonForDetail(button uint32) gi.Button {
+func buttonForDetail(button uint32) gi.MouseButton {
 	switch button {
 	case w32.WM_LBUTTONDOWN, w32.WM_LBUTTONUP:
 		return gi.LeftButton
@@ -51,7 +51,7 @@ func buttonForDetail(button uint32) gi.Button {
 	return 0
 }
 
-func buttonForWheel(msg uint32, delta int16) gi.Button {
+func buttonForWheel(msg uint32, delta int16) gi.MouseButton {
 	if msg == w32.WM_MOUSEWHEEL {
 		if delta > 0 {
 			return gi.WheelUpButton

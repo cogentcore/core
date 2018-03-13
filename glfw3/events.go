@@ -26,7 +26,7 @@ import (
 
 var lastCursorPosition image.Point
 
-func getMouseButton(button glfw.MouseButton) gi.Button {
+func getMouseButton(button glfw.MouseButton) gi.MouseButton {
 	switch button {
 	case glfw.MouseButtonLeft:
 		return gi.LeftButton
@@ -65,7 +65,7 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 	}
 }
 
-func buttonForDetail(detail glfw.MouseButton) gi.Button {
+func buttonForDetail(detail glfw.MouseButton) gi.MouseButton {
 	switch detail {
 	case glfw.MouseButtonLeft:
 		return gi.LeftButton

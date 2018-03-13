@@ -61,10 +61,10 @@ const (
 //go:generate stringer -type=EventType
 
 // buttons that can be pressed
-type Button int
+type MouseButton int
 
 const (
-	LeftButton Button = 1 << iota
+	LeftButton MouseButton = 1 << iota
 	MiddleButton
 	RightButton
 	WheelUpButton
@@ -129,7 +129,7 @@ var _ Event = MouseMovedEvent{}
 // MouseButtonEvent is used for data common to all mouse button events, and should not appear as an event received by the caller program.
 type MouseButtonEvent struct {
 	MouseEvent
-	Which Button
+	Which MouseButton
 }
 
 // MouseDownEvent is for when the mouse is clicked within the window.
@@ -175,7 +175,7 @@ func (ev MouseUpEvent) EventOnFocus() bool {
 // MouseDraggedEvent is for when the mouse is moved while a button is pressed.
 type MouseDraggedEvent struct {
 	MouseMovedEvent
-	Which Button
+	Which MouseButton
 }
 
 func (ev MouseDraggedEvent) EventType() EventType {

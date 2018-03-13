@@ -16,7 +16,7 @@ import (
 )
 
 /*
-This is mostly just restructured version of: https://github.com/fogleman/gg
+This borrows very heavily from: https://github.com/fogleman/gg
 
 Copyright (C) 2016 Michael Fogleman
 
@@ -43,12 +43,12 @@ SOFTWARE.
 // painting onto an image -- image is always passed as an argument so it can be
 // applied to anything
 type Paint struct {
-	Off        bool `desc:"node and everything below it are off, non-rendering"`
-	Stroke     PaintStroke
-	Fill       PaintFill
-	Font       PaintFont
-	TextLayout PaintTextLayout
-	XForm      XFormMatrix2D
+	Off    bool `desc:"node and everything below it are off, non-rendering"`
+	Stroke PaintStroke
+	Fill   PaintFill
+	Font   FontStyle
+	Text   TextStyle
+	XForm  XFormMatrix2D
 }
 
 // update the Paint settings from the properties of a given node -- because Paint stack captures all the relevant inheritance, this does NOT look for inherited properties -- vp required for relative params
@@ -56,7 +56,7 @@ func (pc *Paint) SetFromNode(g *Node2DBase) {
 	pc.Stroke.SetFromNode(g)
 	pc.Fill.SetFromNode(g)
 	pc.Font.SetFromNode(g)
-	pc.TextLayout.SetFromNode(g)
+	pc.Text.SetFromNode(g)
 	disp := g.PropDisplay() // this is general to everything
 	vis := g.PropVisible()
 	if !disp || !vis {
@@ -70,7 +70,7 @@ func (pc *Paint) Defaults() {
 	pc.Stroke.Defaults()
 	pc.Fill.Defaults()
 	pc.Font.Defaults()
-	pc.TextLayout.Defaults()
+	pc.Text.Defaults()
 	pc.XForm = Identity2D()
 }
 
@@ -583,15 +583,16 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	// todo: vertical align too
 	var ax, ay float64
-	switch pc.TextLayout.Align {
+	switch pc.Text.Align {
 	case TextAlignLeft:
 	case TextAlignCenter:
 		ax = 0.5 // todo: determine if font is horiz or vert..
 	case TextAlignRight:
 		ax = 1.0
 	}
-	if pc.TextLayout.Wrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextLayout.Spacing.Y, pc.TextLayout.Align)
+	// todo: change LineSpacing -> LineHeight
+	if pc.Text.WordWrap {
+		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.LineSpacing, pc.Text.Align)
 	} else {
 		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
 	}
@@ -599,14 +600,14 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 
 func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float64) {
 	var ax, ay float64
-	switch pc.TextLayout.Align {
+	switch pc.Text.Align {
 	case TextAlignLeft:
 	case TextAlignCenter:
 		ax = 0.5 // todo: determine if font is horiz or vert..
 	case TextAlignRight:
 		ax = 1.0
 	}
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextLayout.Spacing.Y, pc.TextLayout.Align)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.LineSpacing, pc.Text.Align)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.

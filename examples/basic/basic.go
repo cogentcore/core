@@ -72,7 +72,6 @@ func mainrun() {
 	text1.Size.X = 100
 	text1.Text = "this is test text!"
 
-	// todo: no way to position the layout -- probably just add a default position to all nodes?
 	rlay := vpfill.AddNewChildNamed(gi.KiT_RowLayout, "rowlay").(*gi.RowLayout)
 	rlay.SetProp("x", 100)
 	rlay.SetProp("y", 500)
@@ -82,11 +81,11 @@ func mainrun() {
 	rlay.SetProp("font-face", "Arial")
 	rlay.SetProp("font-size", 32)
 	rlay.SetProp("text-align", "center")
-	push1 := rlay.AddNewChildNamed(gi.KiT_PushButton, "push1").(*gi.PushButton)
-	push2 := rlay.AddNewChildNamed(gi.KiT_PushButton, "push2").(*gi.PushButton)
+	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
+	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
 
-	push1.Text = "Push 1"
-	push2.Text = "Push 2"
+	button1.Text = "Button 1"
+	button2.Text = "Button 2"
 
 	win.UpdateEnd()
 

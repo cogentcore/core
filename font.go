@@ -16,21 +16,50 @@ import (
 	"strings"
 )
 
-// font information for painter
-type PaintFont struct {
-	Face     font.Face
-	Height   float64
-	FaceName string
-	Points   float64 // target points to use
+// styles of font: normal, italic, etc
+type FontStyles int32
+
+const (
+	NormalFont FontStyles = iota
+	Italic
+	Oblique
+)
+
+//go:generate stringer -type=FontStyles
+
+// styles of font: normal, italic, etc
+type FontWeights int32
+
+const (
+	NormalWeight FontWeights = iota
+	Bold
+	Bolder
+	Lighter
+	//	Weight100...900  todo: seriously?  400 = normal, 700 = bold
+)
+
+//go:generate stringer -type=FontWeights
+
+// todo: Variant = normal / small-caps
+
+// font style information -- used in Paint and in Style -- see style.go
+type FontStyle struct {
+	Face     font.Face `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
+	Height   float64   `desc:"actual computed total height of font"`
+	FaceName string    `desc:"name corresponding to Face"`
+	Points   float64   `desc:"specific point size of font to use -- used in getting Face"`
+	Family   []string  `xml:"family",desc:"font family -- ordered list of names from more general to more specific to use"`
+	// 	Size     todo: enum of diff sizes: medium, xx-small...xx-large, smaller, larger, etc
+	// todo: kerning
 }
 
-func (p *PaintFont) Defaults() {
+func (p *FontStyle) Defaults() {
 	p.FaceName = "Arial"
 	p.Points = 24
 	p.LoadFont("")
 }
 
-func (p *PaintFont) LoadFont(fallback string) {
+func (p *FontStyle) LoadFont(fallback string) {
 	face, err := FontLibrary.Font(p.FaceName, p.Points)
 	if err != nil {
 		log.Printf("%v\n", err)
@@ -39,7 +68,7 @@ func (p *PaintFont) LoadFont(fallback string) {
 				p.FaceName = fallback
 				p.LoadFont("") // try again
 			} else {
-				log.Printf("PaintFont LoadFont() -- Falling back on basicfont\n")
+				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
 				p.Face = basicfont.Face7x13
 			}
 		}
@@ -50,7 +79,7 @@ func (p *PaintFont) LoadFont(fallback string) {
 }
 
 // update the font settings from the style info on the node
-func (pf *PaintFont) SetFromNode(g *Node2DBase) {
+func (pf *FontStyle) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 
 	loadFont := false
@@ -64,6 +93,14 @@ func (pf *PaintFont) SetFromNode(g *Node2DBase) {
 		pf.Points = sz
 	}
 	if nm, got := g.PropEnum("font-face"); got {
+		if len(nm) != 0 {
+			if pf.FaceName != nm {
+				pf.FaceName = nm
+				loadFont = true
+			}
+		}
+	}
+	if nm, got := g.PropEnum("font-family"); got {
 		if len(nm) != 0 {
 			if pf.FaceName != nm {
 				pf.FaceName = nm
