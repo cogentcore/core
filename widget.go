@@ -20,10 +20,15 @@ type WidgetBase struct {
 var KiT_WidgetBase = ki.KiTypes.AddType(&WidgetBase{})
 
 // Styling notes:
-// simple elemental widgets (buttons etc) have a DefaultStyle render method that incorporates
-// property hints but is fairly generic, and alternatively support a (stack of) custom svg
-// code for rendering each state as appropriate
+// simple elemental widgets (buttons etc) have a DefaultRender method that renders based on
+// Style, with full css styling support -- code has built-in initial defaults for a default
+// style based on fusion style parameters on QML Qt Quick Controls
+
+// Alternatively they support custom svg code for rendering each state as appropriate in a Stack
 // more complex widgets such as a TreeView automatically render and don't support custom svg
+
+// WidgetBase supports full Box rendering model, so Button just calls these methods to render
+// -- base function needs to take a Style arg.
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Buttons
