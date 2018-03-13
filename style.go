@@ -188,6 +188,6 @@ func (s *Style) Defaults() {
 
 // this will recursively style obj, inheriting elements as appropriate from parent, based on
 // property map (name: value pairs)
-func StyleIt(obj interface{}, parent interface{}, props [string]interface{}) {
+func StyleIt(obj interface{}, parent interface{}, props map[string]interface{}) {
 
 }
