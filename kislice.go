@@ -204,7 +204,7 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 		ti := bytes.Index(fld, []byte("\"type\":"))
 		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
-		typ := KiTypes.GetType(tn)
+		typ := KiTypes.FindType(tn)
 		if typ == nil {
 			return fmt.Errorf("KiSlice UnmarshalJSON: KiTypes type name not found: %v", tn)
 		}

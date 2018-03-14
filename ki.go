@@ -286,7 +286,7 @@ type Ki interface {
 // see node.go for struct implementing this interface
 
 // IMPORTANT: all types must initialize entry in KiTypes Registry:
-// var KiT_TypeName = KiTypes.AddType(&TypeName{})
+// var KiT_TypeName = ki.KiTypes.AddType(&TypeName{})
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type KiFun func(ki Ki, level int, data interface{}) bool
