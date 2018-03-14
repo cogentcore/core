@@ -9,6 +9,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/math/fixed"
 	"log"
+	"strings"
 )
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of css-based viewport-dependent factors
@@ -28,14 +29,14 @@ type Unit int32
 const (
 	// percentage of surrounding contextual element
 	Pct Unit = iota
+	// font size of the root element -- fallback to 12pt by default
+	Rem
 	// font size of the element -- fallback to 12pt by default
 	Em
 	// x-height of the element's font -- fallback to 0.5em by default
 	Ex
 	// with of the '0' glyph in the element's font -- fallback to 0.5em by default
 	Ch
-	// font size of the root element -- fallback to 12pt by default
-	Rem
 	// 1% of the viewport's width
 	Vw
 	// 1% of the viewport's height
@@ -64,10 +65,10 @@ const (
 
 var UnitNames = [...]string{
 	Pct:  "pct",
+	Rem:  "rem",
 	Em:   "em",
 	Ex:   "ex",
 	Ch:   "ch",
-	Rem:  "rem",
 	Vw:   "vw",
 	Vh:   "vh",
 	Vmin: "vmin",
@@ -124,13 +125,13 @@ func (uc *UnitContext) ToDotsFactor(un Unit) float64 {
 	case Pct:
 		return uc.El
 	case Em:
-		return uc.DPI / (uc.FontEm * PtPerInch)
+		return uc.DPI / (PtPerInch / uc.FontEm)
 	case Ex:
-		return uc.DPI / (uc.FontEx * PtPerInch)
+		return uc.DPI / (PtPerInch / uc.FontEx)
 	case Ch:
-		return uc.DPI / (uc.FontCh * PtPerInch)
+		return uc.DPI / (PtPerInch / uc.FontCh)
 	case Rem:
-		return uc.DPI / (uc.FontRem * PtPerInch)
+		return uc.DPI / (PtPerInch / uc.FontRem)
 	case Vw:
 		return uc.VpW
 	case Vh:
@@ -192,6 +193,20 @@ func (v Value) String() string {
 
 // parse string into a value
 func StringToValue(str string) Value {
-	// todo fmt.Sscanf
-	return fmt.Sprintf("%f%s", v.Val, UnitNames[v.Un])
+	trstr := strings.TrimSpace(str)
+	var numstr string
+	var un Unit = Px // default to pixels
+	for i, nm := range UnitNames {
+		if idx := strings.LastIndex(trstr, nm); idx > 0 {
+			numstr = trstr[:idx]
+			un = Unit(i)
+			break
+		}
+	}
+	if len(numstr) == 0 { // no units
+		numstr = trstr
+	}
+	var val float64
+	fmt.Sscanf(numstr, "%g", &val)
+	return Value{val, un}
 }
