@@ -13,11 +13,13 @@ import (
 // implements general signal passing between Ki objects, like Qt's Signal / Slot system
 // started from: github.com/tucnak/meta/
 
-// SignalType provides standard signals -- can extend by starting at iota + last signal here
+// signal type can be used to convert to / from strings -- has a stringer for these values
 type SignalType int64
 
+// Standard signals -- can extend by starting at iota + last signal here
 const (
-	NilSignal SignalType = iota
+	// no signal --
+	NilSignal int64 = iota
 	// data is the added child
 	SignalChildAdded
 	// data is deleted child
@@ -27,6 +29,8 @@ const (
 	SignalNodeUpdated
 	// a field was updated -- data is name of field
 	SignalFieldUpdated
+	// a property was set -- data is name of property
+	SignaPropUpdated
 	// number of signal type consts -- add this to any other signal types passed
 	SignalTypeN
 )
@@ -34,21 +38,22 @@ const (
 //go:generate stringer -type=SignalType
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
-type RecvFun func(receiver, sender Ki, sig SignalType, data interface{})
+type RecvFun func(receiver, sender Ki, sig int64, data interface{})
 
 // use this to encode a custom signal type to not be confused with basic signals
-func SendCustomSignal(sig int64) SignalType {
-	return SignalType(sig + int64(SignalTypeN))
+func SendCustomSignal(sig int64) int64 {
+	return sig + SignalTypeN
 }
 
 // use this to receive a custom signal type to not be confused with basic signals
 func RecvCustomSignal(sig int64) int64 {
-	return sig - int64(SignalTypeN)
+	return sig - SignalTypeN
 }
 
 // Signal -- add one of these for each signal a node can emit
 type Signal struct {
-	DefSig SignalType
+	// default signal used if Emit gets a NilSignal
+	DefSig int64
 	Cons   []Connection
 }
 
@@ -122,7 +127,7 @@ func (sig *Signal) DisconnectAll(recv Ki, fun RecvFun) {
 }
 
 // Emit sends the signal across all the connections to the receivers -- sequential
-func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
+func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}
@@ -132,7 +137,7 @@ func (s *Signal) Emit(sender Ki, sig SignalType, data interface{}) {
 }
 
 // EmitGo concurrent version -- sends the signal across all the connections to the receivers
-func (s *Signal) EmitGo(sender Ki, sig SignalType, data interface{}) {
+func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}
@@ -145,7 +150,7 @@ func (s *Signal) EmitGo(sender Ki, sig SignalType, data interface{}) {
 type SignalFilterFun func(ki Ki) bool
 
 // Emit Filtered calls function on each item only sends signal if function returns true
-func (s *Signal) EmitFiltered(sender Ki, sig SignalType, data interface{}, fun SignalFilterFun) {
+func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
 	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}
@@ -157,7 +162,7 @@ func (s *Signal) EmitFiltered(sender Ki, sig SignalType, data interface{}, fun S
 }
 
 // EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
-func (s *Signal) EmitGoFiltered(sender Ki, sig SignalType, data interface{}, fun SignalFilterFun) {
+func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
 	if sig == NilSignal && s.DefSig != NilSignal {
 		sig = s.DefSig
 	}

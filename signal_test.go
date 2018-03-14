@@ -26,13 +26,13 @@ func TestSignalConnect(t *testing.T) {
 	child2 := parent.AddNewChildNamed(nil, "child2")
 
 	res := make([]string, 0, 10)
-	parent.sig1.Connect(child1, func(receiver, sender Ki, sig SignalType, data interface{}) {
+	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), sig, data))
+			receiver.KiName(), sender.KiName(), SignalType(sig), data))
 	})
-	parent.sig1.Connect(child2, func(receiver, sender Ki, sig SignalType, data interface{}) {
+	parent.sig1.Connect(child2, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), sig, data))
+			receiver.KiName(), sender.KiName(), SignalType(sig), data))
 	})
 
 	parent.sig1.Emit(&parent, NilSignal, 1234)
@@ -49,7 +49,8 @@ func TestSignalConnect(t *testing.T) {
 }
 
 func TestSignalNameToInt(t *testing.T) {
-	for st := NilSignal; st < SignalTypeN; st++ {
+	for i := NilSignal; i < SignalTypeN; i++ {
+		st := SignalType(i)
 		str := st.String()
 		stc, err := StringToSignalType(str)
 		if err != nil {

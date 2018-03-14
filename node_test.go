@@ -294,8 +294,8 @@ func TestNodeUpdate(t *testing.T) {
 	parent.SetChildType(reflect.TypeOf(parent))
 
 	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
 	})
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
@@ -315,11 +315,11 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
-	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
+	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
 	})
-	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
+	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
 	})
 
 	// fmt.Print("\nnode update all starting\n")
@@ -369,7 +369,7 @@ func TestProps(t *testing.T) {
 	parent.SetChildType(reflect.TypeOf(parent))
 
 	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig SignalType, d interface{}) {
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
 	})
 	// child1 :=

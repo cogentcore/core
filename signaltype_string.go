@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _SignalType_name = "NilSignalSignalChildAddedSignalChildDeletedSignalChildrenDeletedSignalNodeUpdatedSignalFieldUpdatedSignalTypeBaseN"
+const _SignalType_name = "NilSignalSignalChildAddedSignalChildDeletedSignalChildrenDeletedSignalNodeUpdatedSignalFieldUpdatedSignalPropUpdatedSignalTypeBaseN"
 
-var _SignalType_index = [...]uint8{0, 9, 25, 43, 64, 81, 99, 114}
+var _SignalType_index = [...]uint8{0, 9, 25, 43, 64, 81, 99, 114, 131}
 
 func (i SignalType) String() string {
 	if i < 0 || i >= SignalType(len(_SignalType_index)-1) {
