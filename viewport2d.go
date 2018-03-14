@@ -143,7 +143,7 @@ func (vp *Viewport2D) CanReRender2D() bool {
 //  Signal Handling
 
 // each node calls this signal method to notify its parent viewport whenever it changes, causing a re-render
-func SignalViewport2D(vpki, node ki.Ki, sig ki.SignalType, data interface{}) {
+func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	vpgi, ok := vpki.(Node2D)
 	if !ok {
 		return

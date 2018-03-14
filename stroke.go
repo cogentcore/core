@@ -34,8 +34,8 @@ const (
 
 //go:generate stringer -type=LineJoin
 
-// PaintStroke contains all the properties specific to painting a line -- the svg elements define the corresponding SVG style attributes, which are processed in StrokeStyle
-type PaintStroke struct {
+// StrokePaint contains all the properties specific to painting a line -- the svg elements define the corresponding SVG style attributes, which are processed in StrokeStyle
+type StrokePaint struct {
 	On         bool        `desc:"is stroke active -- if property is none then false"`
 	Color      Color       `desc:"default stroke color when such a color is needed -- Server could be anything"`
 	Server     PaintServer `svg:"stroke",desc:"paint server for the stroke -- if solid color, defines the stroke color"`
@@ -47,7 +47,7 @@ type PaintStroke struct {
 }
 
 // initialize default values for paint stroke
-func (ps *PaintStroke) Defaults() {
+func (ps *StrokePaint) Defaults() {
 	ps.On = false // svg says default is off
 	ps.Server = NewSolidcolorPaintServer(color.Black)
 	ps.Width = 1.0
@@ -59,7 +59,7 @@ func (ps *PaintStroke) Defaults() {
 // todo: figure out more elemental, generic de-stringer kind of thing
 
 // update the stroke settings from the style info on the node
-func (ps *PaintStroke) SetFromNode(g *Node2DBase) {
+func (ps *StrokePaint) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 	if val, got := g.PropColor("stroke"); got { // todo: support url's to paint server elements!
 		if val == nil {

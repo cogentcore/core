@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "math"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 )
@@ -35,6 +36,30 @@ const (
 )
 
 //go:generate stringer -type=AlignVertical
+
+// todo: for style
+// Align = layouts
+// Content -- enum of various options
+// Items -- similar enum -- combine
+// Self "
+// Flex -- flexbox -- https://www.w3schools.com/css/css3_flexbox.asp -- key to look at further for layout ideas
+// Overflow is key for layout: visible, hidden, scroll, auto
+// as is Position -- absolute, sticky, etc
+// Resize: user-resizability
+// vertical-align
+// z-index
+
+// style preferences on the layout of the element
+type LayoutStyle struct {
+	Width     units.Value   `xml:"width",desc:"specified size of element -- 0 if not specified"`
+	Height    units.Value   `xml:"height",desc:"specified size of element -- 0 if not specified"`
+	MaxWidth  units.Value   `xml:"max-width",desc:"specified maximum size of element -- 0 if not specified"`
+	MaxHeight units.Value   `xml:"max-height",desc:"specified maximum size of element -- 0 if not specified"`
+	MinWidth  units.Value   `xml:"min-width",desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
+	Offsets   []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
+	Margin    units.Value   `xml:"margin",desc:"outer-most transparent space around box element"`
+}
 
 // size preferences -- a value of 0 indicates no preference
 type SizePrefs struct {
@@ -70,7 +95,7 @@ func (m *Margins) SetMargin(marg float64) {
 	m.bottom = marg
 }
 
-// all the data needed to specify the layout of an item within a layout
+// all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs
 type LayoutData struct {
 	AlignH    AlignHorizontal `desc:"horizontal alignment"`
 	AlignV    AlignVertical   `desc:"vertical alignment"`

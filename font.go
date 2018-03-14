@@ -42,13 +42,17 @@ const (
 
 // todo: Variant = normal / small-caps
 
+// note: most of font information is inherited
+
+// todo: create FontPaint that has most of FontStyle
+
 // font style information -- used in Paint and in Style -- see style.go
 type FontStyle struct {
 	Face     font.Face `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
 	Height   float64   `desc:"actual computed total height of font"`
 	FaceName string    `desc:"name corresponding to Face"`
 	Points   float64   `desc:"specific point size of font to use -- used in getting Face"`
-	Family   []string  `xml:"family",desc:"font family -- ordered list of names from more general to more specific to use"`
+	Family   []string  `xml:"family",inherit:"true",desc:"font family -- ordered list of names from more general to more specific to use"`
 	// 	Size     todo: enum of diff sizes: medium, xx-small...xx-large, smaller, larger, etc
 	// todo: kerning
 }
@@ -148,18 +152,18 @@ func (fl *FontLib) Init() {
 	}
 }
 
-func (fl *FontLib) AddFontPaths(paths ...string) {
+func (fl *FontLib) AddFontPaths(paths ...string) bool {
 	fl.Init()
 	for _, p := range paths {
 		fl.FontPaths = append(fl.FontPaths, p)
 	}
-	fl.UpdateFontsAvail()
+	return fl.UpdateFontsAvail()
 }
 
-func (fl *FontLib) UpdateFontsAvail() {
+func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
 		log.Print("FontLib: no font paths -- need to add some\n")
-		return
+		return false
 	}
 	if len(fl.FontsAvail) > 0 {
 		fl.FontsAvail = make(map[string]string)
@@ -173,10 +177,6 @@ func (fl *FontLib) UpdateFontsAvail() {
 				fmt.Printf("FontLib: error accessing path %q: %v\n", p, err)
 				return err
 			}
-			// if info.IsDir() && info.Name() == subDirToSkip {
-			// 	fmt.Printf("skipping a dir without errors: %+v \n", info.Name())
-			// 	return filepath.SkipDir
-			// }
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
 				basefn := strings.TrimRight(fn, ext)
@@ -190,6 +190,7 @@ func (fl *FontLib) UpdateFontsAvail() {
 			fmt.Printf("FontLib: error walking the path %q: %v\n", p, err)
 		}
 	}
+	return len(fl.FontsAvail) > 0
 }
 
 // get a particular font

@@ -60,7 +60,7 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	return vp
 }
 
-func SignalWindow(winki, node ki.Ki, sig ki.SignalType, data interface{}) {
+func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	win, ok := winki.(*Window) // will fail if not a window
 	if !ok {
 		return

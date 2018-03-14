@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"log"
@@ -24,43 +25,71 @@ const (
 
 //go:generate stringer -type=TextAlign
 
+// note: most of these are inherited
+
 // all the style information associated with how to render text
 type TextStyle struct {
-	Align         TextAlign `xml:"text-align",desc:"how to align text"`
-	LineHeight    float64   `xml:"line-height",desc:"specified height of a line of text 0 = normal"`
-	LineSpacing   float64   `xml:"line-spacing",desc:"spacing between lines -- NOTE: line height is used instead of spacing in css / html"`
-	Indent        float64   `xml:"text-indent",desc:"how much to indent the first line in a paragraph"`
-	LetterSpacing float64   `xml:"letter-spacing",desc:"spacing between characters and lines"`
-	WordSpacing   float64   `xml:"word-spacing",desc:"extra space to add between words"`
-	WordWrap      bool      `xml:"word-wrap",desc:"wrap text within a given size"`
+	Align         TextAlign   `xml:"text-align",inherit:"true",desc:"how to align text"`
+	LineHeight    units.Value `xml:"line-height",inherit:"true",desc:"specified height of a line of text 0 = normal"`
+	LetterSpacing units.Value `xml:"letter-spacing",desc:"spacing between characters and lines"`
+	Indent        units.Value `xml:"text-indent",inherit:"true",desc:"how much to indent the first line in a paragraph"`
+	TabSize       units.Value `xml:"tab-size",inherit:"true",desc:"tab size"`
+	WordSpacing   units.Value `xml:"word-spacing",inherit:"true",desc:"extra space to add between words"`
+	WordWrap      bool        `xml:"word-wrap",inherit:"true",desc:"wrap text within a given size"`
 	// todo:
 	// page-break options
-	// text-decoration-line -- underline, overline, line-through, -style, -color
-	// text-justify -- how to justify text
+	// text-decoration-line -- underline, overline, line-through, -style, -color inherit
+	// text-justify ,inherit:"true" -- how to justify text
 	// text-overflow -- clip, ellipsis, string..
-	// text-shadow
-	// text-transform -- uppercase, lowercase, capitalize
+	// text-shadow ,inherit:"true"
+	// text-transform -- ,inherit:"true" uppercase, lowercase, capitalize
 	// user-select -- can user select text?
-	// white-space -- what to do with white-space
-	// word-break
+	// white-space -- what to do with white-space ,inherit:"true"
+	// word-break ,inherit:"true"
 }
 
 func (p *TextStyle) Defaults() {
 	p.WordWrap = false
 	p.Align = TextAlignLeft
-	p.LineSpacing = 1.0
-	p.LetterSpacing = 1.0
+}
+
+// actual text data used for painting
+type TextPaint struct {
+	Align         TextAlign `xml:"text-align",inherit:"true",desc:"how to align text"`
+	LineHeight    float64   `xml:"line-height",inherit:"true",desc:"specified height of a line of text 0 = normal"`
+	LetterSpacing float64   `xml:"letter-spacing",desc:"spacing between characters and lines"`
+	Indent        float64   `xml:"text-indent",inherit:"true",desc:"how much to indent the first line in a paragraph"`
+	TabSize       float64   `xml:"tab-size",inherit:"true",desc:"tab size"`
+	WordSpacing   float64   `xml:"word-spacing",inherit:"true",desc:"extra space to add between words"`
+	WordWrap      bool      `xml:"word-wrap",inherit:"true",desc:"wrap text within a given size"`
+	// todo:
+	// page-break options
+	// text-decoration-line -- underline, overline, line-through, -style, -color inherit
+	// text-justify ,inherit:"true" -- how to justify text
+	// text-overflow -- clip, ellipsis, string..
+	// text-shadow ,inherit:"true"
+	// text-transform -- ,inherit:"true" uppercase, lowercase, capitalize
+	// user-select -- can user select text?
+	// white-space -- what to do with white-space ,inherit:"true"
+	// word-break ,inherit:"true"
+}
+
+// todo: set from style --
+
+func (p *TextPaint) Defaults() {
+	p.WordWrap = false
+	p.Align = TextAlignLeft
 }
 
 // update the font settings from the style info on the node
-func (pt *TextStyle) SetFromNode(g *Node2DBase) {
+func (pt *TextPaint) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 
 	if wr, got := g.GiPropBool("word-wrap"); got { // gi version
 		pt.WordWrap = wr
 	}
 	if sz, got := g.PropNumber("line-spacing"); got {
-		pt.LineSpacing = sz
+		pt.LineHeight = sz
 	}
 	if es, got := g.PropEnum("text-align"); got {
 		var al TextAlign = -1
@@ -131,7 +160,7 @@ func (g *Text2D) Layout2D(iter int) {
 		var w, h float64
 		// pre-wrap the text
 		if pc.Text.WordWrap { // todo: switch to LineHeight
-			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.Text.LineSpacing)
+			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.Text.LineHeight)
 		} else {
 			w, h = pc.MeasureString(g.Text)
 		}

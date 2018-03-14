@@ -108,7 +108,7 @@ func (g *Button) GiViewport2D() *Viewport2D {
 }
 
 func (g *Button) InitNode2D() {
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
+	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*ButtonBase)
 		if !ok {
@@ -118,7 +118,7 @@ func (g *Button) InitNode2D() {
 		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
 		g.UpdateEnd()
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig ki.SignalType, d interface{}) {
+	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// todo: convert d to event, get key, check for shortcut, etc
 		fmt.Printf("key pressed on %v!\n", recv.PathUnique())
 		ab, ok := recv.(*ButtonBase)

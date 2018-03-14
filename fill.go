@@ -18,8 +18,8 @@ const (
 
 //go:generate stringer -type=FillRule
 
-// PaintFill contains all the properties specific to filling a region
-type PaintFill struct {
+// FillPaint contains all the properties specific to filling a region
+type FillPaint struct {
 	On     bool        `desc:"is fill active -- if property is none then false"`
 	Color  Color       `desc:"default fill color when such a color is needed -- Server could be anything"`
 	Server PaintServer `svg:"fill",desc:"paint server for the fill -- if solid color, defines fill color"`
@@ -27,7 +27,7 @@ type PaintFill struct {
 }
 
 // initialize default values for paint fill
-func (pf *PaintFill) Defaults() {
+func (pf *FillPaint) Defaults() {
 	pf.On = false // svg says fill is off by default
 	pf.Color.SetColor(color.White)
 	pf.Server = NewSolidcolorPaintServer(&pf.Color)
@@ -37,7 +37,7 @@ func (pf *PaintFill) Defaults() {
 // todo: figure out more elemental, generic de-stringer kind of thing
 
 // update the fill settings from the style info on the node
-func (pf *PaintFill) SetFromNode(g *Node2DBase) {
+func (pf *FillPaint) SetFromNode(g *Node2DBase) {
 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 	// todo: need to be able to process colors!
 

@@ -207,6 +207,6 @@ func StringToValue(str string) Value {
 		numstr = trstr
 	}
 	var val float64
-	fmt.Sscanf(numstr, "%g", &val)
+	fmt.Sscanf(strings.TrimSpace(numstr), "%g", &val)
 	return Value{val, un}
 }

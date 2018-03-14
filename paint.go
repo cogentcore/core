@@ -44,10 +44,10 @@ SOFTWARE.
 // applied to anything
 type Paint struct {
 	Off    bool `desc:"node and everything below it are off, non-rendering"`
-	Stroke PaintStroke
-	Fill   PaintFill
+	Stroke StrokePaint
+	Fill   FillPaint
 	Font   FontStyle
-	Text   TextStyle
+	Text   TextPaint
 	XForm  XFormMatrix2D
 }
 
@@ -592,7 +592,7 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	}
 	// todo: change LineSpacing -> LineHeight
 	if pc.Text.WordWrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.LineSpacing, pc.Text.Align)
+		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.LineHeight, pc.Text.Align)
 	} else {
 		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
 	}
@@ -607,7 +607,7 @@ func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, h
 	case TextAlignRight:
 		ax = 1.0
 	}
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.LineSpacing, pc.Text.Align)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.LineHeight, pc.Text.Align)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.
@@ -629,12 +629,12 @@ func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay floa
 // DrawStringWrapped word-wraps the specified string to the given max width
 // and then draws it at the specified anchor point using the given line
 // spacing and text alignment.
-func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineSpacing float64, align TextAlign) {
-	lines, h := pc.MeasureStringWrapped(s, width, lineSpacing)
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineSpacing, align)
+func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float64, align TextAlign) {
+	lines, h := pc.MeasureStringWrapped(s, width, lineHeight)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineHeight, align)
 }
 
-func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineSpacing float64, align TextAlign) {
+func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float64, align TextAlign) {
 	x -= ax * width
 	y -= ay * h
 	switch align {
@@ -650,7 +650,7 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 	ay = 1
 	for _, line := range lines {
 		pc.DrawStringAnchored(rs, line, x, y, ax, ay)
-		y += pc.Font.Height * lineSpacing
+		y += pc.Font.Height * lineHeight
 	}
 }
 
@@ -666,10 +666,10 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 	return float64(a >> 6), pc.Font.Height
 }
 
-func (pc *Paint) MeasureStringWrapped(s string, width, lineSpacing float64) ([]string, float64) {
+func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {
 	lines := pc.WordWrap(s, width)
-	h := float64(len(lines)) * pc.Font.Height * lineSpacing
-	h -= (lineSpacing - 1) * pc.Font.Height
+	h := float64(len(lines)) * pc.Font.Height * lineHeight
+	h -= (lineHeight - 1) * pc.Font.Height
 	return lines, h
 }
 
