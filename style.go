@@ -6,8 +6,8 @@ package gi
 
 import (
 	"fmt"
-	// "github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 	"log"
 	"reflect"
 )
@@ -77,6 +77,8 @@ const (
 
 //go:generate stringer -type=BoxSides
 
+var KiT_BoxSides = ki.KiEnums.AddEnumAltLowerRmPrefix(BoxTop, "Box", int64(BoxLeft))
+
 // how to draw the border
 type BorderDrawStyle int32
 
@@ -94,6 +96,8 @@ const (
 )
 
 //go:generate stringer -type=BorderDrawStyle
+
+var KiT_BorderDrawStyle = ki.KiEnums.AddEnumAltLowerRmPrefix(BorderSolid, "Border", int64(BorderHidden))
 
 // style parameters for shadows
 type ShadowStyle struct {
@@ -117,9 +121,9 @@ type BorderStyle struct {
 type Style struct {
 	IsSet         bool            `desc:"has this style been set from object values yet?"`
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
-	Border        []BorderStyle   `xml:"border",desc:"border around the box element -- can have separate ones for different sides"`
+	Border        BorderStyle     `xml:"border",desc:"border around the box element -- todo: can have separate ones for different sides"`
 	Shadow        ShadowStyle     `xml:"box-shadow",desc:"type of shadow to render around box"`
-	Padding       []units.Value   `xml:"padding",desc:"transparent space around central content of box -- if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	Padding       units.Value     `xml:"padding",desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
 	Font          FontStyle       `xml:"font",desc:"font parameters"`
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
 	Color         Color           `xml:"color",inherit:"true",desc:"text color"`
@@ -147,7 +151,7 @@ func StyleStruct(obj interface{}, parent interface{}, defs interface{}, props ma
 		log.Printf("gi.StyleStruct -- you must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
 		return
 	}
-	ot := reflect.TypeOf(obj).Elem()
+	ot := otp.Elem()
 	if ot.Kind() != reflect.Struct {
 		log.Printf("gi.StyleStruct -- only works on structs, not type: %v kind %v\n", ot, ot.Kind())
 		return
@@ -207,9 +211,9 @@ func StyleStruct(obj interface{}, parent interface{}, defs interface{}, props ma
 				if inh {
 					vf.Set(pf) // copy
 				}
-				StyleField(vf, pf, df, true, tagEff, props)
+				StyleField(sf, vf, pf, df, true, tagEff, props)
 			} else {
-				StyleField(vf, pf, df, false, tagEff, props)
+				StyleField(sf, vf, pf, df, false, tagEff, props)
 			}
 		}
 	}
@@ -217,10 +221,9 @@ func StyleStruct(obj interface{}, parent interface{}, defs interface{}, props ma
 
 // todo:
 // * need to be able to process entire chunks at a time: box-shadow: val val val
-// * deal with slices -- border
 // * deal with enums!
 
-func StyleField(vf reflect.Value, pf reflect.Value, df reflect.Value, hasPar bool, tag string, props map[string]interface{}) {
+func StyleField(sf reflect.StructField, vf reflect.Value, pf reflect.Value, df reflect.Value, hasPar bool, tag string, props map[string]interface{}) {
 	// fmt.Printf("StyleField %v tag: %v\n", vf, tag)
 	k := ""
 	prv := interface{}(nil)
@@ -253,7 +256,9 @@ func StyleField(vf reflect.Value, pf reflect.Value, df reflect.Value, hasPar boo
 		}
 	}
 
-	if vf.Kind() == reflect.Struct { // only a few types
+	vk := vf.Kind()
+
+	if vk == reflect.Struct { // only a few types
 		if vf.Type() == reflect.TypeOf(Color{}) {
 			vc := vf.Addr().Interface().(*Color)
 			err := vc.FromString(prstr)
@@ -267,9 +272,14 @@ func StyleField(vf reflect.Value, pf reflect.Value, df reflect.Value, hasPar boo
 				*vc = units.StringToValue(prstr)
 			} else { // assume Px as an implicit default
 				prvflt := reflect.ValueOf(prv).Convert(reflect.TypeOf(0.0)).Interface().(float64)
-				*vc = units.Value{prvflt, units.Px}
+				*vc = units.NewValue(prvflt, units.Px)
 			}
 			return
+		}
+	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
+		fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
+		if ki.KiEnums.FindEnum(sf.Type.Name()) != nil {
+			ki.KiEnums.SetEnumValueFromAltString(vf, prstr)
 		}
 	}
 

@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*
+	Package Units supports full range of CSS-style length units (em, px, dp, etc)
+
+	The unit is stored along with a value, and can be converted at a later point into
+	a raw display pixel value using the Context which contains all the necessary reference
+	values to perform the conversion.  Typically the unit value is parsed early from a style
+	and then converted later once the context is fully resolved.  The Value also holds the
+	converted value (Dots) so it can be used directly without further re-conversion.
+
+	'Dots' are used as term for underlying raw display pixels because "Pixel" and the px unit
+	are actually not conventionally used as raw display pixels in the current HiDPI
+	environment.  See https://developer.mozilla.org/en/docs/Web/CSS/length -- 1 px = 1/96 in
+	Also supporting dp = density-independent pixel = 1/160 in
+*/
 package units
 
 import (
@@ -13,6 +27,8 @@ import (
 )
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of css-based viewport-dependent factors
+
+//
 
 // standard conversion factors -- Px = DPI-independent pixel instead of actual "dot" raw pixel
 const (
@@ -83,9 +99,9 @@ var UnitNames = [...]string{
 	Dp:   "dp",
 }
 
-// UnitContext specifies everything about the current context necessary for converting the number
+// Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
-type UnitContext struct {
+type Context struct {
 	// dots-per-inch of the display
 	DPI float64
 	// point size of font (in points)
@@ -104,7 +120,7 @@ type UnitContext struct {
 	El float64
 }
 
-func (uc *UnitContext) Defaults() {
+func (uc *Context) Defaults() {
 	uc.DPI = PxPerInch // default
 	uc.FontEm = 12.0
 	uc.FontEx = 6.0
@@ -116,9 +132,9 @@ func (uc *UnitContext) Defaults() {
 }
 
 // factor needed to convert given unit into raw pixels (dots in DPI)
-func (uc *UnitContext) ToDotsFactor(un Unit) float64 {
+func (uc *Context) ToDotsFactor(un Unit) float64 {
 	if uc.DPI == 0 {
-		log.Printf("UnitContext was not initialized -- falling back on defaults\n")
+		log.Printf("Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
 	}
 	switch un {
@@ -161,29 +177,36 @@ func (uc *UnitContext) ToDotsFactor(un Unit) float64 {
 }
 
 // convert value in given units into raw display pixels (dots in DPI)
-func (uc *UnitContext) ToDots(val float64, un Unit) float64 {
+func (uc *Context) ToDots(val float64, un Unit) float64 {
 	return val * uc.ToDotsFactor(un)
 }
 
-// Value is a number and a unit.
+// Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
-	Val float64
-	Un  Unit
+	Val  float64
+	Un   Unit
+	Dots float64
 }
 
-// Convert value to raw display pixels (dots in DPI)
-func (v Value) ToDots(ctxt *UnitContext) float64 {
-	return ctxt.ToDots(v.Val, v.Un)
+// convenience for not having to specify the Dots member
+func NewValue(val float64, un Unit) Value {
+	return Value{val, un, 0.0}
+}
+
+// Convert value to raw display pixels (dots as in DPI), setting also the Dots field
+func (v *Value) ToDots(ctxt *Context) float64 {
+	v.Dots = ctxt.ToDots(v.Val, v.Un)
+	return v.Dots
 }
 
 // Convert value to raw display pixels (dots in DPI) in fixed-point 26.6 format for rendering
-func (v Value) ToDotsFixed(ctxt *UnitContext) fixed.Int26_6 {
-	return fixed.Int26_6(ctxt.ToDots(v.Val, v.Un))
+func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
+	return fixed.Int26_6(v.ToDots(ctxt))
 }
 
 // Convert converts value to the given units, given unit context
-func (v Value) Convert(to Unit, ctxt *UnitContext) Value {
-	return Value{v.ToDots(ctxt) / ctxt.ToDotsFactor(to), to}
+func (v Value) Convert(to Unit, ctxt *Context) Value {
+	return Value{v.ToDots(ctxt) / ctxt.ToDotsFactor(to), to, 0.0}
 }
 
 // String implements the fmt.Stringer interface.
@@ -194,11 +217,26 @@ func (v Value) String() string {
 // parse string into a value
 func StringToValue(str string) Value {
 	trstr := strings.TrimSpace(str)
+	sz := len(trstr)
+	if sz < 2 {
+		return NewValue(0, Px)
+	}
+	var ends [4]string
+	ends[0] = strings.ToLower(trstr[sz-1:])
+	ends[1] = strings.ToLower(trstr[sz-2:])
+	if sz > 3 {
+		ends[2] = strings.ToLower(trstr[sz-3:])
+	}
+	if sz > 4 {
+		ends[3] = strings.ToLower(trstr[sz-4:])
+	}
+
 	var numstr string
 	var un Unit = Px // default to pixels
 	for i, nm := range UnitNames {
-		if idx := strings.LastIndex(trstr, nm); idx > 0 {
-			numstr = trstr[:idx]
+		unsz := len(nm)
+		if ends[unsz-1] == nm {
+			numstr = trstr[:sz-unsz]
 			un = Unit(i)
 			break
 		}
@@ -208,5 +246,5 @@ func StringToValue(str string) Value {
 	}
 	var val float64
 	fmt.Sscanf(strings.TrimSpace(numstr), "%g", &val)
-	return Value{val, un}
+	return NewValue(val, un)
 }

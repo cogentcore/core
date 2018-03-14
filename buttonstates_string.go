@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _ButtonStates_name = "ButtonDisabledButtonNormalButtonHoverButtonFocusButtonStatesN"
+const _ButtonStates_name = "ButtonNormalButtonDisabledButtonHoverButtonFocusButtonPressButtonStatesN"
 
-var _ButtonStates_index = [...]uint8{0, 14, 26, 37, 48, 61}
+var _ButtonStates_index = [...]uint8{0, 12, 26, 37, 48, 59, 72}
 
 func (i ButtonStates) String() string {
 	if i < 0 || i >= ButtonStates(len(_ButtonStates_index)-1) {
