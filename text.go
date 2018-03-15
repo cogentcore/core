@@ -9,7 +9,7 @@ import (
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
-	"log"
+	// "log"
 	"strings"
 	"unicode"
 )
@@ -18,19 +18,22 @@ type TextAlign int
 
 const (
 	TextAlignLeft TextAlign = iota
-	TextAlignRight
 	TextAlignCenter
+	TextAlignRight
 	TextAlignJustify
+	TextAlignN
 )
 
 //go:generate stringer -type=TextAlign
+
+var KiT_TextAlign = ki.KiEnums.AddEnumAltLower(TextAlignLeft, "TextAlign", int64(TextAlignN))
 
 // note: most of these are inherited
 
 // all the style information associated with how to render text
 type TextStyle struct {
 	Align         TextAlign   `xml:"text-align",inherit:"true",desc:"how to align text"`
-	LineHeight    units.Value `xml:"line-height",inherit:"true",desc:"specified height of a line of text 0 = normal"`
+	LineHeight    float64     `xml:"line-height",inherit:"true",desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
 	LetterSpacing units.Value `xml:"letter-spacing",desc:"spacing between characters and lines"`
 	Indent        units.Value `xml:"text-indent",inherit:"true",desc:"how much to indent the first line in a paragraph"`
 	TabSize       units.Value `xml:"tab-size",inherit:"true",desc:"tab size"`
@@ -53,69 +56,16 @@ func (p *TextStyle) Defaults() {
 	p.Align = TextAlignLeft
 }
 
-// actual text data used for painting
-type TextPaint struct {
-	Align         TextAlign `xml:"text-align",inherit:"true",desc:"how to align text"`
-	LineHeight    float64   `xml:"line-height",inherit:"true",desc:"specified height of a line of text 0 = normal"`
-	LetterSpacing float64   `xml:"letter-spacing",desc:"spacing between characters and lines"`
-	Indent        float64   `xml:"text-indent",inherit:"true",desc:"how much to indent the first line in a paragraph"`
-	TabSize       float64   `xml:"tab-size",inherit:"true",desc:"tab size"`
-	WordSpacing   float64   `xml:"word-spacing",inherit:"true",desc:"extra space to add between words"`
-	WordWrap      bool      `xml:"word-wrap",inherit:"true",desc:"wrap text within a given size"`
-	// todo:
-	// page-break options
-	// text-decoration-line -- underline, overline, line-through, -style, -color inherit
-	// text-justify ,inherit:"true" -- how to justify text
-	// text-overflow -- clip, ellipsis, string..
-	// text-shadow ,inherit:"true"
-	// text-transform -- ,inherit:"true" uppercase, lowercase, capitalize
-	// user-select -- can user select text?
-	// white-space -- what to do with white-space ,inherit:"true"
-	// word-break ,inherit:"true"
+// any updates after generic xml-tag property setting?
+func (p *TextStyle) SetStylePost() {
 }
 
-// todo: set from style --
-
-func (p *TextPaint) Defaults() {
-	p.WordWrap = false
-	p.Align = TextAlignLeft
-}
-
-// update the font settings from the style info on the node
-func (pt *TextPaint) SetFromNode(g *Node2DBase) {
-	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
-
-	if wr, got := g.GiPropBool("word-wrap"); got { // gi version
-		pt.WordWrap = wr
+// effective line height (taking into account 0 value)
+func (p *TextStyle) EffLineHeight() float64 {
+	if p.LineHeight == 0 {
+		return 1.0
 	}
-	if sz, got := g.PropNumber("line-spacing"); got {
-		pt.LineHeight = sz
-	}
-	if es, got := g.PropEnum("text-align"); got {
-		var al TextAlign = -1
-		switch es { // first go through short-hand codes
-		case "left":
-			al = TextAlignLeft
-		case "start":
-			al = TextAlignLeft
-		case "center":
-			al = TextAlignCenter
-		case "right":
-			al = TextAlignRight
-		case "end":
-			al = TextAlignRight
-		}
-		if al == -1 {
-			i, err := StringToTextAlign(es) // stringer gen
-			if err != nil {
-				pt.Align = i
-			} else {
-				log.Print(err)
-			}
-		} else {
-			pt.Align = al
-		}
-	}
+	return p.LineHeight
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -128,6 +78,8 @@ func (pt *TextPaint) SetFromNode(g *Node2DBase) {
 // 2D Text
 type Text2D struct {
 	Node2DBase
+	Pos         Point2D  `xml:"{x,y}",desc:"position of the left, baseline of the text"`
+	Width       float64  `xml:"width",desc:"width of text to render if using word-wrapping"`
 	Text        string   `xml:"text",desc:"text string to render"`
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
@@ -147,20 +99,17 @@ func (g *Text2D) InitNode2D() {
 	g.Layout.Defaults()
 }
 
-func (g *Text2D) PaintProps2D() {
-	// pc := &g.MyPaint
-	// if pc.HasNoStrokeOrFill() || len(g.Text) == 0 {
-	// 	pc.Off = true
-	// }
+func (g *Text2D) Style2D() {
+	g.Style2DSVG()
 }
 
 func (g *Text2D) Layout2D(iter int) {
 	if iter == 0 {
-		pc := &g.MyPaint
+		pc := &g.Paint
 		var w, h float64
 		// pre-wrap the text
-		if pc.Text.WordWrap { // todo: switch to LineHeight
-			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Size.X, pc.Text.LineHeight)
+		if pc.Text.WordWrap {
+			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.Text.EffLineHeight())
 		} else {
 			w, h = pc.MeasureString(g.Text)
 		}
@@ -169,14 +118,15 @@ func (g *Text2D) Layout2D(iter int) {
 }
 
 func (g *Text2D) Node2DBBox() image.Rectangle {
-	return g.MyPaint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Layout.AllocSize.X, g.Pos.Y+g.Layout.AllocSize.Y)
+	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Layout.AllocSize.X, g.Pos.Y+g.Layout.AllocSize.Y)
 }
 
 func (g *Text2D) Render2D() {
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	// fmt.Printf("rendering text %v\n", g.Text)
-	pc := &g.MyPaint
-	rs := &g.Viewport.Render
 	if pc.Text.WordWrap {
 		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X,
 			g.Layout.AllocSize.Y)

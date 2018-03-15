@@ -42,36 +42,59 @@ func (c *Color) IsNil() bool {
 	return false
 }
 
+func (c *Color) SetToNil() {
+	c.Rgba.R = 0
+	c.Rgba.G = 0
+	c.Rgba.B = 0
+	c.Rgba.A = 0
+}
+
 func (c *Color) SetColor(ci color.Color) {
 	var r, g, b, a uint32
 	r, g, b, a = ci.RGBA()
-	c.SetRGBAUInt32(r, g, b, a)
+	c.SetUInt32(r, g, b, a)
 }
 
-func (c *Color) SetRGBAUInt8(r, g, b, a uint8) {
+func (c *Color) SetUInt8(r, g, b, a uint8) {
 	c.Rgba.R = r
 	c.Rgba.G = g
 	c.Rgba.B = b
 	c.Rgba.A = a
 }
 
-func (c *Color) SetRGBAUInt32(r, g, b, a uint32) {
+func (c *Color) SetUInt32(r, g, b, a uint32) {
 	c.Rgba.R = uint8(r / 0x101) // convert back to uint8
 	c.Rgba.G = uint8(g / 0x101)
 	c.Rgba.B = uint8(b / 0x101)
 	c.Rgba.A = uint8(a / 0x101)
 }
 
-func (c *Color) FromString(nm string) error {
-	if len(nm) == 0 {
-		err := fmt.Errorf("gi Color FromString: empty name")
-		log.Printf("%v\n", err)
-		return err
+func (c *Color) SetInt(r, g, b, a int) {
+	c.SetUInt32(uint32(r), uint32(g), uint32(b), uint32(a))
+}
+
+// from 0-1 normalized floating point numbers
+func (c *Color) SetFloat64(r, g, b, a float64) {
+	c.SetUInt8(uint8(r*255.0), uint8(g*255.0), uint8(b*255.0), uint8(a*255.0))
+}
+
+// from 0-1 normalized floating point numbers
+func (c *Color) SetFloat32(r, g, b, a float32) {
+	c.SetUInt8(uint8(r*255.0), uint8(g*255.0), uint8(b*255.0), uint8(a*255.0))
+}
+
+func (c *Color) SetFromString(nm string) error {
+	if len(nm) == 0 { // consider it null
+		c.SetToNil()
 	}
 	if nm[0] == '#' {
 		return c.ParseHex(nm)
 	} else {
 		low := strings.ToLower(nm)
+		if low == "none" || low == "off" {
+			c.SetToNil()
+			return nil
+		}
 		nc, ok := colornames.Map[low]
 		if !ok {
 			err := fmt.Errorf("gi Color FromString: name not found %v", nm)
@@ -86,7 +109,7 @@ func (c *Color) FromString(nm string) error {
 
 func ColorFromString(nm string) (Color, error) {
 	var c Color
-	err := c.FromString(nm)
+	err := c.SetFromString(nm)
 	return c, err
 }
 

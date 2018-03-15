@@ -28,13 +28,13 @@ func TestStyle(t *testing.T) {
 	p.Defaults()
 	d.Defaults()
 	p.Layout.Height = units.NewValue(42.0, units.In)
-	s.Shadow.VOffset = units.NewValue(22.0, units.Pc)
-	StyleStruct(&s, &p, &d, props, "")
+	s.BoxShadow.VOffset = units.NewValue(22.0, units.Pc)
+	s.SetStyle(&p, &d, props)
 
 	fmt.Printf("style width: %v\n", s.Layout.Width)
 	fmt.Printf("style height: %v\n", s.Layout.Height)
 	fmt.Printf("style color: %v\n", s.Color)
-	fmt.Printf("style box-shaodw.h-offset: %v\n", s.Shadow.HOffset)
-	fmt.Printf("style box-shaodw.v-offset: %v\n", s.Shadow.VOffset)
+	fmt.Printf("style box-shaodw.h-offset: %v\n", s.BoxShadow.HOffset)
+	fmt.Printf("style box-shaodw.v-offset: %v\n", s.BoxShadow.VOffset)
 	fmt.Printf("style border-style: %v\n", s.Border.Style)
 }

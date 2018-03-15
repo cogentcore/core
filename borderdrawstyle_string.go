@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _BorderDrawStyle_name = "BorderSolidBorderDottedBorderDashedBorderDoubleBorderGrooveBorderRidgeBorderInsetBorderOutsetBorderNoneBorderHidden"
+const _BorderDrawStyle_name = "BorderSolidBorderDottedBorderDashedBorderDoubleBorderGrooveBorderRidgeBorderInsetBorderOutsetBorderNoneBorderHiddenBorderN"
 
-var _BorderDrawStyle_index = [...]uint8{0, 11, 23, 35, 47, 59, 70, 81, 93, 103, 115}
+var _BorderDrawStyle_index = [...]uint8{0, 11, 23, 35, 47, 59, 70, 81, 93, 103, 115, 122}
 
 func (i BorderDrawStyle) String() string {
 	if i < 0 || i >= BorderDrawStyle(len(_BorderDrawStyle_index)-1) {

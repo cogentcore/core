@@ -14,28 +14,34 @@ import (
 // this is based on QtQuick layouts https://doc.qt.io/qt-5/qtquicklayouts-overview.html  https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html
 
 // horizontal alignment type -- how to align items in the horizontal dimension
-type AlignHorizontal int32
+type AlignHoriz int32
 
 const (
-	AlignLeft AlignHorizontal = iota
+	AlignLeft AlignHoriz = iota
 	AlignHCenter
 	AlignRight
 	AlignJustify
+	AlignHorizN
 )
 
-//go:generate stringer -type=AlignHorizontal
+//go:generate stringer -type=AlignHoriz
+
+var KiT_AlignHoriz = ki.KiEnums.AddEnumAltLower(AlignLeft, "Align", int64(AlignHorizN))
 
 // vertical alignment type -- how to align items in the vertical dimension
-type AlignVertical int32
+type AlignVert int32
 
 const (
-	AlignTop AlignVertical = iota
+	AlignTop AlignVert = iota
 	AlignVCenter
 	AlignBottom
 	AlignBaseline
+	AlignVertN
 )
 
-//go:generate stringer -type=AlignVertical
+var KiT_AlignVert = ki.KiEnums.AddEnumAltLower(AlignTop, "Align", int64(AlignVertN))
+
+//go:generate stringer -type=AlignVert
 
 // todo: for style
 // Align = layouts
@@ -51,6 +57,11 @@ const (
 
 // style preferences on the layout of the element
 type LayoutStyle struct {
+	z_index   int           `xml:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH    AlignHoriz    `xml:"align-horiz",desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV    AlignVert     `xml:"align-vert",desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX      units.Value   `xml:"x",desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY      units.Value   `xml:"y",desc:"vertical position -- often superceded by layout but otherwise used"`
 	Width     units.Value   `xml:"width",desc:"specified size of element -- 0 if not specified"`
 	Height    units.Value   `xml:"height",desc:"specified size of element -- 0 if not specified"`
 	MaxWidth  units.Value   `xml:"max-width",desc:"specified maximum size of element -- 0 if not specified"`
@@ -58,8 +69,18 @@ type LayoutStyle struct {
 	MinWidth  units.Value   `xml:"min-width",desc:"specified mimimum size of element -- 0 if not specified"`
 	MinHeight units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
 	Offsets   []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
-	Margin    units.Value   `xml:"margin",desc:"outer-most transparent space around box element"`
+	Margin    units.Value   `xml:"margin",desc:"outer-most transparent space around box element -- todo: can be specified per side"`
 }
+
+func (ld *LayoutStyle) Defaults() {
+
+}
+
+func (ld *LayoutStyle) SetStylePost() {
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Layout Data for actually computing the layout
 
 // size preferences -- a value of 0 indicates no preference
 type SizePrefs struct {
@@ -95,16 +116,16 @@ func (m *Margins) SetMargin(marg float64) {
 	m.bottom = marg
 }
 
-// all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs
+// all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs -- everything is concrete and specified here, whereas style may not be fully resolved
 type LayoutData struct {
-	AlignH    AlignHorizontal `desc:"horizontal alignment"`
-	AlignV    AlignVertical   `desc:"vertical alignment"`
-	Size      SizePrefs       `desc:"size constraints for this item"`
-	Margins   Margins         `desc:"margins around this item"`
-	GridPos   image.Point     `desc:"position within a grid"`
-	GridSpan  image.Point     `desc:"number of grid elements that we take up in each direction"`
-	AllocPos  Point2D         `desc:"allocated relative position of this item, by the parent layout"`
-	AllocSize Size2D          `desc:"allocated size of this item, by the parent layout"`
+	AlignH    AlignHoriz  `desc:"horizontal alignment"`
+	AlignV    AlignVert   `desc:"vertical alignment"`
+	Size      SizePrefs   `desc:"size constraints for this item -- from layout style"`
+	Margins   Margins     `desc:"margins around this item"`
+	GridPos   image.Point `desc:"position within a grid"`
+	GridSpan  image.Point `desc:"number of grid elements that we take up in each direction"`
+	AllocPos  Point2D     `desc:"allocated relative position of this item, by the parent layout"`
+	AllocSize Size2D      `desc:"allocated size of this item, by the parent layout"`
 }
 
 func (ld *LayoutData) Defaults() {
@@ -116,23 +137,32 @@ func (ld *LayoutData) Defaults() {
 	}
 }
 
+func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
+	ld.Reset()
+	ld.AlignH = ls.AlignH
+	ld.AlignV = ls.AlignV
+	ld.Size.Min = Size2D{ls.MinWidth.Dots, ls.MinHeight.Dots}
+	ld.Size.Pref = Size2D{ls.Width.Dots, ls.Height.Dots}
+	ld.Size.Max = Size2D{ls.MaxWidth.Dots, ls.MaxHeight.Dots}
+}
+
 // called at start of layout process -- resets all values back to 0
 func (ld *LayoutData) Reset() {
 	ld.AllocPos = Point2DZero
 	ld.AllocSize = Size2DZero
 }
 
-// get the effective position to use: if layout allocated, use that, otherwise user pos
-func (ld *LayoutData) UsePos(userPos Point2D) {
+// get the effective position to use: if layout allocated, use that, otherwise user pos via style
+func (ld *LayoutData) UsePos(ls *LayoutStyle) {
 	if ld.AllocPos.IsZero() {
-		ld.AllocPos = userPos
+		ld.AllocPos = Point2D{ls.PosX.Dots, ls.PosY.Dots}
 	}
 }
 
-// get the effective size to use: if layout allocated, use that, otherwise user pos
-func (ld *LayoutData) UseSize(userSize Size2D) {
+// get the effective size to use: if layout allocated, use that, otherwise user size via style
+func (ld *LayoutData) UseSize(ls *LayoutStyle) {
 	if ld.AllocSize.IsZero() {
-		ld.AllocSize = userSize
+		ld.AllocSize = Size2D{ls.Width.Dots, ls.Height.Dots}
 	}
 }
 
@@ -174,8 +204,8 @@ func (g *RowLayout) Node2DBBox() image.Rectangle {
 	return g.WinBBoxFromAlloc()
 }
 
-func (g *RowLayout) PaintProps2D() {
-	g.PaintProps2DBase()
+func (g *RowLayout) Style2D() {
+	g.Style2DWidget()
 }
 
 // need multiple iterations..
@@ -266,6 +296,11 @@ func (rl *RowLayout) Layout2D(iter int) {
 }
 
 func (g *RowLayout) Render2D() {
+	rs := &g.Viewport.Render
+	st := &g.Style
+	st.SetUnitContext(rs, 0)
+	// g.Layout.AllocPos.X = 100.0
+	// g.Layout.AllocPos.Y = 500.0
 	g.GeomFromLayout()
 }
 

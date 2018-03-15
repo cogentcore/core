@@ -63,6 +63,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 	vp.Render.Image = vp.Pixels
 	vp.ViewBox.Size = image.Point{width, height}
 	vp.UpdateEnd()
+	vp.FullRender2DRoot()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -109,9 +110,18 @@ func (vp *Viewport2D) GiViewport2D() *Viewport2D {
 }
 
 func (vp *Viewport2D) InitNode2D() {
+	vp.NodeSig.Connect(vp.This, func(vpki, vpa ki.Ki, sig int64, data interface{}) {
+		vp, ok := vpki.(*Viewport2D)
+		if !ok {
+			return
+		}
+		fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), sig, vpa.PathUnique())
+		vp.FullRender2DRoot()
+	})
 }
 
-func (vp *Viewport2D) PaintProps2D() {
+func (vp *Viewport2D) Style2D() {
+	vp.Style2DWidget()
 }
 
 func (vp *Viewport2D) Layout2D(iter int) {
@@ -161,13 +171,15 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	// todo: probably need better ways of telling how much re-rendering is needed
 	if sig == ki.SignalChildAdded {
 		vp.Init2DRoot()
+		vp.Style2DRoot()
 		vp.Render2DRoot()
 	} else {
 		if gii.CanReRender2D() {
 			gii.Render2D()
 			vp.Render2D() // redraw us
 		} else {
-			vp.Render2DRoot()
+			vp.Style2DFromNode(gii.GiNode2D()) // restyle only from affected node downward
+			vp.Render2DRoot()                  // need to re-render entirely..
 		}
 	}
 }
@@ -192,23 +204,41 @@ func (vp *Viewport2D) Init2DRoot() {
 }
 
 // full render of the tree
-func (vp *Viewport2D) Render2DRoot() {
-	vp.PaintProps2DRoot()
+func (vp *Viewport2D) FullRender2DRoot() {
+	vp.Init2DRoot()
+	vp.Style2DRoot()
 	vp.Layout2DRoot()
 	vp.RenderOnly2DRoot()
 }
 
-// generate
-func (vp *Viewport2D) PaintProps2DRoot() {
+// render of the tree -- after it has already been initialized and styled
+func (vp *Viewport2D) Render2DRoot() {
+	vp.Layout2DRoot()
+	vp.RenderOnly2DRoot()
+}
+
+// this only needs to be done on a structural update
+func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
+	gi.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+		gii, ok := k.(Node2D)
+		if !ok { // todo: error message already in InitNode2D
+			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
+			return false // going into a different type of thing, bail
+		}
+		gii.Style2D()
+		return true
+	})
+}
+
+// this only needs to be done on a structural update
+func (vp *Viewport2D) Style2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
 		gii, ok := k.(Node2D)
 		if !ok { // error message already in InitNode2D
 			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
 			return false // going into a different type of thing, bail
 		}
-		gi := gii.GiNode2D()
-		gi.PaintProps2DBase()
-		gii.PaintProps2D()
+		gii.Style2D()
 		return true
 	})
 }
@@ -224,7 +254,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 				return false
 			}
 			gi := gii.GiNode2D()
-			if gi.MyPaint.Off { // off below this
+			if gi.Paint.Off { // off below this
 				return false
 			}
 			return true
@@ -235,12 +265,28 @@ func (vp *Viewport2D) Layout2DRoot() {
 				return false
 			}
 			gi := gii.GiNode2D()
-			if gi.MyPaint.Off { // off below this
+			if gi.Paint.Off { // off below this
 				return false
 			}
 			gii.Layout2D(0)
 			return true
 		})
+
+	// second pass we add the parent positions after layout -- don't want to do that in
+	// render b/c then it doesn't work for local re-renders..
+	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+		gii, ok := k.(Node2D)
+		if !ok {
+			return false
+		}
+		gi := gii.GiNode2D()
+		if gi.Paint.Off { // off below this
+			return false
+		}
+		gi.AddParentPos()
+		return true
+	})
+
 }
 
 // just do the render only part -- not the full 3-pass version called in Render2DRoot
@@ -251,7 +297,7 @@ func (vp *Viewport2D) RenderOnly2DRoot() {
 			return false
 		}
 		gi := gii.GiNode2D()
-		if gi.MyPaint.Off { // off below this
+		if gi.Paint.Off { // off below this
 			return false
 		}
 		gii.Render2D()

@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _LineJoin_name = "LineJoinMiterLineJoinMiterClipLineJoinRoundLineJoinBevelLineJoinArcs"
+const _LineJoin_name = "LineJoinMiterLineJoinMiterClipLineJoinRoundLineJoinBevelLineJoinArcsLineJoinN"
 
-var _LineJoin_index = [...]uint8{0, 13, 30, 43, 56, 68}
+var _LineJoin_index = [...]uint8{0, 13, 30, 43, 56, 68, 77}
 
 func (i LineJoin) String() string {
 	if i < 0 || i >= LineJoin(len(_LineJoin_index)-1) {

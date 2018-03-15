@@ -10,7 +10,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
-	"reflect"
+	// "reflect"
 	"runtime"
 	"sync"
 )
@@ -55,9 +55,17 @@ func NewWindow2D(name string, width, height int) *Window {
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.FindChildByType(reflect.TypeOf(Viewport2D{}))
+	vpi := w.FindChildByType(KiT_Viewport2D)
 	vp, _ := vpi.(*Viewport2D)
 	return vp
+}
+
+func (w *Window) Resize(width, height int) {
+	vp := w.WinViewport2D()
+	if vp != nil {
+		fmt.Printf("resize to: %v, %v\n", width, height)
+		vp.Resize(width, height)
+	}
 }
 
 func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
@@ -77,7 +85,7 @@ func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	}
 	fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), sig, node.PathUnique())
 
-	vp.Render2DRoot()
+	vp.FullRender2DRoot()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et EventType, fun ki.RecvFun) {
@@ -144,6 +152,12 @@ func (w *Window) EventLoop() {
 			fmt.Println("close")
 			w.Win.Close()
 			StopBackendEventLoop()
+		}
+		if et == ResizeEventType {
+			rev, ok := evi.(ResizeEvent)
+			if ok {
+				w.Resize(rev.Width, rev.Height)
+			}
 		}
 	}
 	fmt.Println("end of events")

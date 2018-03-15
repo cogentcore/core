@@ -17,7 +17,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "gopkg.in/go-playground/colors.v1"
 	"image"
@@ -34,16 +34,14 @@ import (
 Base struct node for 2D rendering tree -- renders to a bitmap using Paint / Viewport rendering functions
 
 Rendering is done in 3 separate passes:
-	1. PaintProps: In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node.
+	1. Style2D: In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint (SVG) or Style (Widget) object for each Node.
 	2. Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).
 	3. Render2D: Final MeFirst rendering pass -- also individual nodes can optionally re-render directly depending on their type, without requiring a full re-render. Layout geom is incorporated and WinBBox bounding box computed at this stage.
 */
 type Node2DBase struct {
 	NodeBase
-	Pos      Point2D     `svg:"{x,y}",desc:"position -- used by most but not all nodes"`
-	Size     Size2D      `svg:"{width,height}",desc:"size spec from user -- if 0 then auto-size -- used by most but not all nodes"`
-	z_index  int         `svg:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	MyPaint  Paint       `json:"-",desc:"full paint information for this node"`
+	Style    Style       `desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	Paint    Paint       `json:"-",desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
 	Layout   LayoutData  `desc:"all the layout information for this item"`
 }
@@ -59,8 +57,8 @@ type Node2D interface {
 	GiViewport2D() *Viewport2D
 	// initialize a node -- setup connections etc -- before this call, InitNodeBase is called to set basic inits including setting Viewport and connecting node signal to parent vp -- must be robust to being called repeatedly
 	InitNode2D()
-	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into the Paint object for each Node -- before this call, PaintProps2DBase is called
-	PaintProps2D()
+	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style)
+	Style2D()
 	// Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
 	Layout2D(iter int)
 	// get the bounding box of this node relative to its parent viewport -- used in computing WinBBox, must be called during Render
@@ -91,35 +89,45 @@ func (g *Node2DBase) InitNode2DBase() {
 	if g.Viewport != nil { // default for most cases -- delete connection of not
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
 	}
-	g.MyPaint.Defaults()
+	g.Style.Defaults()
+	g.Paint.Defaults()
 	g.Layout.Defaults() // doesn't overwrite
 }
 
-// handles all the basic infrastructure of setting Paint based on node -- PaintProps2D can do extras
-func (g *Node2DBase) PaintProps2DBase() {
+// style the Paint values directly from node properties -- for SVG-style nodes
+func (g *Node2DBase) Style2DSVG() {
 	gii, ok := g.This.(Node2D)
 	if g.Viewport == nil { // robust
-		fmt.Printf("in paintprops, initializing node %v\n", g.PathUnique())
+		// fmt.Printf("in style, initializing node %v\n", g.PathUnique())
 		g.InitNode2DBase()
 		if ok {
 			gii.InitNode2D()
 		}
 	}
-	g.CopyParentPaint()
-	g.MyPaint.SetFromNode(g)
+	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
+	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProperties())
 	g.Layout.Reset() // start with a fresh layout
-	if val, got := g.PropLength("x"); got {
-		g.Pos.X = val
+
+}
+
+// style the Style values from node properties -- for Widget-style nodes
+func (g *Node2DBase) Style2DWidget() {
+	gii, ok := g.This.(Node2D)
+	if g.Viewport == nil { // robust
+		// fmt.Printf("in style, initializing node %v\n", g.PathUnique())
+		g.InitNode2DBase()
+		if ok {
+			gii.InitNode2D()
+		}
 	}
-	if val, got := g.PropLength("y"); got {
-		g.Pos.Y = val
+	pg := g.ParentNode2D()
+	if pg != nil {
+		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProperties())
+	} else {
+		g.Style.SetStyle(nil, &StyleDefault, g.KiProperties())
 	}
-	if val, got := g.PropLength("width"); got {
-		g.Size.X = val
-	}
-	if val, got := g.PropLength("height"); got {
-		g.Size.Y = val
-	}
+	g.Layout.SetFromStyle(&g.Style.Layout) // also does reset
+
 }
 
 // find parent viewport -- uses GiViewport2D() method on Node2D interface
@@ -140,18 +148,19 @@ func (g *Node2DBase) FindViewportParent() *Viewport2D {
 	return parVp
 }
 
-// copy our paint from our parents -- called during PaintProps
-func (g *Node2DBase) CopyParentPaint() {
+// copy our paint from our parents -- called during Style for SVG
+func (g *Node2DBase) CopyParentPaint() *Node2DBase {
 	pg := g.ParentNode2D()
 	if pg != nil {
-		g.MyPaint = pg.MyPaint
+		g.Paint = pg.Paint
 	}
+	return pg
 }
 
 // get our bbox from Layout allocation
 func (g *Node2DBase) WinBBoxFromAlloc() image.Rectangle {
-	tp := g.MyPaint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
-	ts := g.MyPaint.TransformPoint(g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
+	tp := g.Paint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
+	ts := g.Paint.TransformPoint(g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
@@ -175,9 +184,8 @@ func (g *Node2DBase) AddParentPos() {
 // if a layout positioned us, then use that, otherwise use our user-specified pos, size
 // this should be called at start of Render2D for all objects
 func (g *Node2DBase) GeomFromLayout() {
-	g.Layout.UsePos(g.Pos)
-	g.Layout.UseSize(g.Size)
-	g.AddParentPos()
+	g.Layout.UsePos(&g.Style.Layout)
+	g.Layout.UseSize(&g.Style.Layout)
 }
 
 func (g *Node2DBase) DefaultGeom() {

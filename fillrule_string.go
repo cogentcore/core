@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _FillRule_name = "FillRuleNonZeroFillRuleEvenOdd"
+const _FillRule_name = "FillRuleNonZeroFillRuleEvenOddFillRuleN"
 
-var _FillRule_index = [...]uint8{0, 15, 30}
+var _FillRule_index = [...]uint8{0, 15, 30, 39}
 
 func (i FillRule) String() string {
 	if i < 0 || i >= FillRule(len(_FillRule_index)-1) {

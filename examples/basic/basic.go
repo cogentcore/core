@@ -69,17 +69,12 @@ func mainrun() {
 	// text1.SetProp("font-face", "Times New Roman")
 	text1.SetProp("font-face", "Arial")
 	text1.Pos = gi.Point2D{10, 600}
-	text1.Size.X = 100
+	text1.Width = 100
 	text1.Text = "this is test text!"
 
 	rlay := vpfill.AddNewChildNamed(gi.KiT_RowLayout, "rowlay").(*gi.RowLayout)
 	rlay.SetProp("x", 100)
 	rlay.SetProp("y", 500)
-	rlay.SetProp("stroke", "#000")    // todo need default prop vals
-	rlay.SetProp("stroke-width", 2.0) // todo need default prop vals
-	rlay.SetProp("fill", "#00005050")
-	rlay.SetProp("font-face", "Arial")
-	rlay.SetProp("font-size", 32)
 	rlay.SetProp("text-align", "center")
 	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)

@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _FontStyles_name = "NormalFontItalicOblique"
+const _FontStyles_name = "FontNormalFontItalicFontObliqueFontStylesN"
 
-var _FontStyles_index = [...]uint8{0, 10, 16, 23}
+var _FontStyles_index = [...]uint8{0, 10, 20, 31, 42}
 
 func (i FontStyles) String() string {
 	if i < 0 || i >= FontStyles(len(_FontStyles_index)-1) {

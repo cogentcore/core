@@ -7,12 +7,14 @@ package gi
 import (
 	"errors"
 	"github.com/golang/freetype/raster"
+	"github.com/rcoreilly/goki/gi/units"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/image/math/fixed"
 	"image"
 	"math"
+	"reflect"
 )
 
 /*
@@ -43,27 +45,13 @@ SOFTWARE.
 // painting onto an image -- image is always passed as an argument so it can be
 // applied to anything
 type Paint struct {
-	Off    bool `desc:"node and everything below it are off, non-rendering"`
-	Stroke StrokePaint
-	Fill   FillPaint
-	Font   FontStyle
-	Text   TextPaint
-	XForm  XFormMatrix2D
-}
-
-// update the Paint settings from the properties of a given node -- because Paint stack captures all the relevant inheritance, this does NOT look for inherited properties -- vp required for relative params
-func (pc *Paint) SetFromNode(g *Node2DBase) {
-	pc.Stroke.SetFromNode(g)
-	pc.Fill.SetFromNode(g)
-	pc.Font.SetFromNode(g)
-	pc.Text.SetFromNode(g)
-	disp := g.PropDisplay() // this is general to everything
-	vis := g.PropVisible()
-	if !disp || !vis {
-		pc.Off = true
-	} else {
-		pc.Off = false
-	}
+	Off       bool          `desc:"node and everything below it are off, non-rendering"`
+	UnContext units.Context `desc:"units context -- parameters necessary for anchoring relative units"`
+	Stroke    StrokeStyle
+	Fill      FillStyle
+	Font      FontStyle
+	Text      TextStyle
+	XForm     XFormMatrix2D `xml:"-",json:"-",desc:"current transform"`
 }
 
 func (pc *Paint) Defaults() {
@@ -74,15 +62,56 @@ func (pc *Paint) Defaults() {
 	pc.XForm = Identity2D()
 }
 
-// The RenderState holds all the current rendering state information used while painting -- a viewport just has one of these
-type RenderState struct {
-	StrokePath raster.Path
-	FillPath   raster.Path
-	Start      Point2D
-	Current    Point2D
-	HasCurrent bool
-	Image      *image.RGBA // pointer to image to render into
-	Mask       *image.Alpha
+func NewPaint() Paint {
+	p := Paint{}
+	p.Defaults()
+	return p
+}
+
+// default style can be used when property specifies "default"
+var PaintDefault = NewPaint()
+
+// set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
+func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
+	// nil interface is special and != interface{} of a nil ptr!
+	pfi := interface{}(nil)
+	dfi := interface{}(nil)
+	if parent != nil {
+		pfi = interface{}(parent)
+	}
+	if defs != nil {
+		dfi = interface{}(defs)
+	}
+	WalkStyleStruct(pc, pfi, dfi, "", props, StyleField)
+	pc.Stroke.SetStylePost()
+	pc.Fill.SetStylePost()
+	pc.Font.SetStylePost()
+	pc.Text.SetStylePost()
+}
+
+// set the unit context based on size of viewport and parent element (from bbox)
+// and then cache everything out in terms of raw pixel dots for rendering -- call at start of
+// render
+func (pc *Paint) SetUnitContext(rs *RenderState, el float64) {
+	sz := rs.Image.Bounds().Size()
+	pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el)
+	pc.Font.SetUnitContext(&pc.UnContext)
+	pc.ToDots()
+}
+
+// call ToDots on all units.Value fields in the style (recursively) -- need to have set the
+// UnContext first -- only after layout at render time is that possible
+func (s *Paint) ToDots() {
+	valtyp := reflect.TypeOf(units.Value{})
+
+	WalkStyleStruct(s, nil, nil, "", nil,
+		func(sf reflect.StructField, vf, pf, df reflect.Value,
+			hasPar bool, tag string, props map[string]interface{}) {
+			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
+				uv := vf.Addr().Interface().(*units.Value)
+				uv.ToDots(&s.UnContext)
+			}
+		})
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +141,20 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 		pc.StrokePreserve(rs)
 	}
 	pc.ClearPath(rs)
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// RenderState
+
+// The RenderState holds all the current rendering state information used while painting -- a viewport just has one of these
+type RenderState struct {
+	StrokePath raster.Path
+	FillPath   raster.Path
+	Start      Point2D
+	Current    Point2D
+	HasCurrent bool
+	Image      *image.RGBA // pointer to image to render into
+	Mask       *image.Alpha
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -286,7 +329,7 @@ func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
 	sz := rs.Image.Bounds().Size()
 	r := raster.NewRasterizer(sz.X, sz.Y)
 	r.UseNonZeroWinding = true
-	r.AddStroke(path, fix(pc.Stroke.Width), pc.capper(), pc.joiner())
+	r.AddStroke(path, fix(pc.Stroke.Width.Dots), pc.capper(), pc.joiner())
 	r.Rasterize(painter)
 }
 
@@ -534,7 +577,6 @@ func (pc *Paint) LoadFontFace(path string, points float64) error {
 	face, err := FontLibrary.Font(path, points)
 	if err == nil {
 		pc.SetFontFace(face)
-		// pc.Font.Height = points * 72 / 96
 	}
 	return err
 }
@@ -577,8 +619,6 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 	}
 }
 
-// todo: measure string version of drawstring -- handles everythign
-
 // DrawString according to current settings -- width is only needed for wrap case
 func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	// todo: vertical align too
@@ -590,9 +630,8 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	case TextAlignRight:
 		ax = 1.0
 	}
-	// todo: change LineSpacing -> LineHeight
 	if pc.Text.WordWrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.LineHeight, pc.Text.Align)
+		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.EffLineHeight(), pc.Text.Align)
 	} else {
 		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
 	}
@@ -607,7 +646,7 @@ func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, h
 	case TextAlignRight:
 		ax = 1.0
 	}
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.LineHeight, pc.Text.Align)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.EffLineHeight(), pc.Text.Align)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.
@@ -659,6 +698,9 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 // MeasureString returns the rendered width and height of the specified text
 // given the current font face.
 func (pc *Paint) MeasureString(s string) (w, h float64) {
+	if pc.Font.Face == nil {
+		pc.Font.LoadFont(&pc.UnContext, "")
+	}
 	d := &font.Drawer{
 		Face: pc.Font.Face,
 	}

@@ -39,11 +39,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ## 2D Design
 
+* There are two main types of 2D nodes, which can be intermingled, but generally are segregated:
+	+ SVG rendering nodes that directly set properties on the Paint object and typically have their own geometry etc -- generally not put within a Layout etc -- convenient to put in an SVGBox or SVGViewport -- their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float64 values
+	+ Widget nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a Layout
+
 * Using the basic 64bit geom from fogleman/gg -- the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` did not have appropriate 2D rendering transforms etc.
 
 * Using 64bit floats for coordinates etc because the spec says you need those for the "high quality" transforms, and Go defaults to them, and it just makes life easier -- won't have so crazy many coords in 2D space as we might have in 3D, where 32bit makes more sense and optimizes GPU hardware.
-
-* SVG names use the lower-case starting camelCase convention, and often contain -'s, so we use a struct tag of svg: to map the UpperCase Go field names to their underlying SVG names for parsing etc.  E.g., use `"{min-x,min-y}"` to label the vector elements of the `Min Vec2` field.
 
 * The SVG default coordinate system has 0,0 at the upper-left.  The default 3D coordinate system flips the Y axis so 0,0 is at the lower left effectively (actually it uses center-based coordinates so 0,0 is in the center of the image, effectively -- everything is defined by the camera anyway)
 

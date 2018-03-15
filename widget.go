@@ -30,6 +30,40 @@ var KiT_WidgetBase = ki.KiTypes.AddType(&WidgetBase{})
 // WidgetBase supports full Box rendering model, so Button just calls these methods to render
 // -- base function needs to take a Style arg.
 
+func (g *WidgetBase) DrawBoxImpl(pos Point2D, sz Size2D, rad float64) {
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	if rad == 0.0 {
+		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+	} else {
+		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+	}
+	pc.FillStrokeClear(rs)
+}
+
+// draw standard box using current style
+func (g *WidgetBase) DrawStdBox() {
+	pc := &g.Paint
+	// rs := &g.Viewport.Render
+	st := &g.Style
+
+	pos := g.Layout.AllocPos
+	sz := g.Layout.AllocSize
+
+	// first do any shadow
+	if st.BoxShadow.HasShadow() {
+		spos := pos.Add(Point2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		pc.Stroke.SetColor(nil)
+		pc.Fill.SetColor(&st.BoxShadow.Color)
+		g.DrawBoxImpl(spos, sz, st.Border.Radius.Dots)
+	}
+	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
+	pc.Stroke.SetColor(&st.Border.Color)
+	pc.Stroke.Width = st.Border.Width
+	pc.Fill.SetColor(&st.Background.Color)
+	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Buttons
 
@@ -73,20 +107,20 @@ const (
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
 	WidgetBase
-	Radius   float64              `svg:"border-radius",desc:"radius for rounded buttons"`
-	Text     string               `svg:"text",desc:"label for the button"`
-	Shortcut string               `svg:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
-	Styles   [ButtonStatesN]Style `desc:"styles for the button, one for each state -- everything inherits from the first one which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State    ButtonStates
-	// todo: icon -- should be an svg
-	ButtonSig ki.Signal `json:"-",desc:"signal for button -- see ButtonSignalType for the types"`
+	Text        string               `xml:"text",desc:"label for the button"`
+	Shortcut    string               `xml:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	State       ButtonStates
+	ButtonSig   ki.Signal `json:"-",desc:"signal for button -- see ButtonSignalType for the types"`
+	// todo: icon -- should be an xml
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_ButtonBase = ki.KiTypes.AddType(&ButtonBase{})
 
-func (g *ButtonBase) PaintProps2DBase() {
-	g.Radius = g.PropNumberDefault("border-radius", 4.0)
+func (g *ButtonBase) SetButtonState(state ButtonStates) {
+	g.State = state
+	g.Style = g.StateStyles[state] // get relevant styles
 }
 
 ///////////////////////////////////////////////////////////
@@ -108,47 +142,138 @@ func (g *Button) GiViewport2D() *Viewport2D {
 }
 
 func (g *Button) InitNode2D() {
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		fmt.Printf("button %v pressed!\n", recv.PathUnique())
-		ab, ok := recv.(*ButtonBase)
+	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
+		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		g.UpdateStart()
+		ab.UpdateStart()
+		ab.SetButtonState(ButtonPress)
+		// ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+		ab.UpdateEnd()
+	})
+	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		fmt.Printf("button %v pressed!\n", recv.PathUnique())
+		ab, ok := recv.(*Button)
+		if !ok {
+			return
+		}
+		ab.UpdateStart()
+		ab.SetButtonState(ButtonNormal)
 		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
-		g.UpdateEnd()
+		ab.UpdateEnd()
+	})
+	g.ReceiveEventType(MouseMovedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
+		ab, ok := recv.(*Button)
+		if !ok {
+			return
+		}
+		if ab.State != ButtonHover {
+			ab.UpdateStart()
+			ab.SetButtonState(ButtonHover)
+			ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+			ab.UpdateEnd()
+		}
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// todo: convert d to event, get key, check for shortcut, etc
 		fmt.Printf("key pressed on %v!\n", recv.PathUnique())
-		ab, ok := recv.(*ButtonBase)
+		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		g.UpdateStart()
+		ab.UpdateStart()
+		ab.SetButtonState(ButtonFocus)
 		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
-		g.UpdateEnd()
+		ab.UpdateEnd()
 	})
 }
 
-func (g *Button) DefaultStyle() {
-	// set all our default style info, before parsing user-set ones
+var ButtonNormalProps = map[string]interface{}{
+	"border-width":        "4dp",
+	"border-radius":       "4dp",
+	"border-color":        "grey",
+	"border-style":        "solid",
+	"box-shadow.h-offset": "5dp",
+	"box-shadow.v-offset": "5dp",
+	"box-shadow.blur":     "5dp",
+	"box-shadow.color":    "grey",
+	// "font-family":         "Arial", // this is crashing
+	"font-size":        "24pt",
+	"text-align":       "center",
+	"color":            "black",
+	"background-color": "#00005050",
 }
 
-func (g *Button) PaintProps2D() {
-	// todo: get all styling info -- due to diff between widgets and SVG, we need to call this explicitly here and cannot rely on base-case
+var ButtonDisabledProps = map[string]interface{}{
+	"border-color":        "#BBB",
+	"box-shadow.h-offset": "0dp",
+	"box-shadow.v-offset": "0dp",
+	"box-shadow.blur":     "0dp",
+	"box-shadow.color":    "grey",
+	"color":               "#AAA",
+	"background-color":    "#DDD",
+}
+
+var ButtonHoverProps = map[string]interface{}{
+	"border-color":        "#0000FFFF",
+	"box-shadow.h-offset": "6dp",
+	"box-shadow.v-offset": "6dp",
+	"box-shadow.blur":     "6dp",
+	"color":               "black",
+	"background-color":    "#00008080",
+}
+
+var ButtonFocusProps = map[string]interface{}{
+	"border-color":        "#0000FFFF",
+	"box-shadow.h-offset": "6dp",
+	"box-shadow.v-offset": "6dp",
+	"box-shadow.blur":     "6dp",
+	// "color":               "black",
+	// "background-color":    "#00008080",
+}
+
+var ButtonPressProps = map[string]interface{}{
+	"border-color":        "#0000FFFF",
+	"box-shadow.h-offset": "0dp",
+	"box-shadow.v-offset": "0dp",
+	"box-shadow.blur":     "0dp",
+	"color":               "white",
+	"background-color":    "#000080FF",
+}
+
+func (g *Button) Style2D() {
+	// first do our normal default styles
+	g.Style.SetStyle(nil, &StyleDefault, ButtonNormalProps)
+	// then style with user props
+	g.Style2DWidget()
+	// now get styles for the different states
+	// todo: put in a loop
+	g.StateStyles[ButtonNormal] = g.Style
+	g.StateStyles[ButtonDisabled] = g.Style
+	g.StateStyles[ButtonDisabled].SetStyle(nil, &StyleDefault, ButtonDisabledProps)
+	g.StateStyles[ButtonHover] = g.Style
+	g.StateStyles[ButtonHover].SetStyle(nil, &StyleDefault, ButtonHoverProps)
+	g.StateStyles[ButtonFocus] = g.Style
+	g.StateStyles[ButtonFocus].SetStyle(nil, &StyleDefault, ButtonFocusProps)
+	g.StateStyles[ButtonPress] = g.Style
+	g.StateStyles[ButtonPress].SetStyle(nil, &StyleDefault, ButtonPressProps)
+	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
 func (g *Button) Layout2D(iter int) {
 	if iter == 0 {
-		pc := &g.MyPaint
+		st := &g.Style
+		pc := &g.Paint
 		var w, h float64
 		w, h = pc.MeasureString(g.Text)
-		if g.Size.X > 0 {
-			w = ki.Max64(g.Size.X, w)
+		if st.Layout.Width.Dots > 0 {
+			w = ki.Max64(st.Layout.Width.Dots, w)
 		}
-		if g.Size.Y > 0 {
-			h = ki.Max64(g.Size.Y, h)
+		if st.Layout.Height.Dots > 0 {
+			h = ki.Max64(st.Layout.Height.Dots, h)
 		}
 		g.Layout.AllocSize = Size2D{w, h}
 		g.SetWinBBox(g.Node2DBBox())
@@ -162,6 +287,12 @@ func (g *Button) Node2DBBox() image.Rectangle {
 // todo: need color brigher / darker functions
 
 func (g *Button) Render2D() {
+	rs := &g.Viewport.Render
+	st := &g.Style
+	st.SetUnitContext(rs, 0)
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].SetUnitContext(rs, 0)
+	}
 	g.DefaultGeom()
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
@@ -173,14 +304,13 @@ func (g *Button) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *Button) Render2DDefaultStyle() {
-	pc := &g.MyPaint
+	pc := &g.Paint
 	rs := &g.Viewport.Render
-	if g.Radius == 0.0 {
-		pc.DrawRectangle(rs, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
-	} else {
-		pc.DrawRoundedRectangle(rs, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, g.Layout.AllocSize.X, g.Layout.AllocSize.Y, g.Radius)
-	}
-	pc.FillStrokeClear(rs)
+	st := &g.Style
+	pc.Font = st.Font
+	pc.Text = st.Text
+	g.DrawStdBox()
+	pc.Stroke.SetColor(&st.Color) // ink color
 	pc.DrawStringAnchored(rs, g.Text, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, 0.0, 0.9)
 }
 

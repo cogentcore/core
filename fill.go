@@ -6,7 +6,8 @@ package gi
 
 import (
 	"image/color"
-	"log"
+	// "log"
+	"github.com/rcoreilly/goki/ki"
 )
 
 type FillRule int
@@ -14,60 +15,49 @@ type FillRule int
 const (
 	FillRuleNonZero FillRule = iota
 	FillRuleEvenOdd
+	FillRuleN
 )
 
 //go:generate stringer -type=FillRule
 
-// FillPaint contains all the properties specific to filling a region
-type FillPaint struct {
-	On     bool        `desc:"is fill active -- if property is none then false"`
-	Color  Color       `desc:"default fill color when such a color is needed -- Server could be anything"`
-	Server PaintServer `svg:"fill",desc:"paint server for the fill -- if solid color, defines fill color"`
-	Rule   FillRule    `svg:"fill-rule",desc:"rule for how to fill more complex shapes with crossing lines"`
+var KiT_FillRule = ki.KiEnums.AddEnumAltLower(FillRuleNonZero, "FillRule", int64(FillRuleN))
+
+// FillStyle contains all the properties specific to filling a region
+type FillStyle struct {
+	On      bool        `desc:"is fill active -- if property is none then false"`
+	Color   Color       `xml:"fill",desc:"default fill color when such a color is needed -- Server could be anything"`
+	Opacity float64     `xml:"fill-opacity",desc:"global alpha opacity / transparency factor"`
+	Server  PaintServer `desc:"paint server for the fill -- if solid color, defines fill color"`
+	Rule    FillRule    `xml:"fill-rule",desc:"rule for how to fill more complex shapes with crossing lines"`
 }
 
 // initialize default values for paint fill
-func (pf *FillPaint) Defaults() {
+func (pf *FillStyle) Defaults() {
 	pf.On = false // svg says fill is off by default
 	pf.Color.SetColor(color.White)
 	pf.Server = NewSolidcolorPaintServer(&pf.Color)
 	pf.Rule = FillRuleNonZero
+	pf.Opacity = 1.0
 }
 
-// todo: figure out more elemental, generic de-stringer kind of thing
-
-// update the fill settings from the style info on the node
-func (pf *FillPaint) SetFromNode(g *Node2DBase) {
-	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
-	// todo: need to be able to process colors!
-
-	if val, got := g.PropColor("fill"); got { // todo: support url to other paint server types
-		if val == nil {
-			pf.On = false
-		} else {
-			pf.On = true
-			pf.Color = *val
-			pf.Server = NewSolidcolorPaintServer(val)
-		}
+// need to do some updating after setting the style from user properties
+func (pf *FillStyle) SetStylePost() {
+	if pf.Color.IsNil() {
+		pf.On = false
+	} else {
+		pf.On = true
+		// for now -- todo: find a more efficient way of doing this, and only updating when necc
+		pf.Server = NewSolidcolorPaintServer(&pf.Color)
+		// todo: incorporate opacity
 	}
-	if _, got := g.PropNumber("fill-opacity"); got {
-		// todo: need to set the color alpha according to value
-	}
-	if val, got := g.PropEnum("fill-rule"); got {
-		var fr FillRule = -1
-		switch val {
-		case "nonzero":
-			fr = FillRuleNonZero
-		case "evenodd":
-			fr = FillRuleEvenOdd
-		}
-		if fr == -1 {
-			i, err := StringToFillRule(val) // stringer gen
-			if err != nil {
-				pf.Rule = i
-			} else {
-				log.Print(err)
-			}
-		}
+}
+
+func (pf *FillStyle) SetColor(cl *Color) {
+	if cl == nil || cl.IsNil() {
+		pf.On = false
+	} else {
+		pf.On = true
+		pf.Color = *cl
+		pf.Server = NewSolidcolorPaintServer(&pf.Color)
 	}
 }

@@ -7,6 +7,8 @@ package gi
 import (
 	"fmt"
 	"github.com/golang/freetype/truetype"
+	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"io/ioutil"
@@ -20,57 +22,68 @@ import (
 type FontStyles int32
 
 const (
-	NormalFont FontStyles = iota
-	Italic
-	Oblique
+	FontNormal FontStyles = iota
+	FontItalic
+	FontOblique
+	FontStylesN
 )
 
 //go:generate stringer -type=FontStyles
+
+var KiT_FontStyles = ki.KiEnums.AddEnumAltLower(FontNormal, "Font", int64(FontStylesN))
 
 // styles of font: normal, italic, etc
 type FontWeights int32
 
 const (
-	NormalWeight FontWeights = iota
-	Bold
-	Bolder
-	Lighter
+	WeightNormal FontWeights = iota
+	WeightBold
+	WeightBolder
+	WeightLighter
 	//	Weight100...900  todo: seriously?  400 = normal, 700 = bold
+	FontWeightsN
 )
 
 //go:generate stringer -type=FontWeights
+
+var KiT_FontWeights = ki.KiEnums.AddEnumAltLower(WeightNormal, "Weight", int64(FontWeightsN))
 
 // todo: Variant = normal / small-caps
 
 // note: most of font information is inherited
 
-// todo: create FontPaint that has most of FontStyle
-
 // font style information -- used in Paint and in Style -- see style.go
 type FontStyle struct {
-	Face     font.Face `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
-	Height   float64   `desc:"actual computed total height of font"`
-	FaceName string    `desc:"name corresponding to Face"`
-	Points   float64   `desc:"specific point size of font to use -- used in getting Face"`
-	Family   []string  `xml:"family",inherit:"true",desc:"font family -- ordered list of names from more general to more specific to use"`
-	// 	Size     todo: enum of diff sizes: medium, xx-small...xx-large, smaller, larger, etc
+	Face     font.Face   `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
+	Height   float64     `desc:"recommended line hieight of font in dots"`
+	FaceName string      `desc:"name corresponding to Face"`
+	Size     units.Value `xml:"size",desc:"size of font to render -- convert to points when getting font to use"`
+	Family   string      `xml:"family",inherit:"true",desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
+	Style    FontStyles  `xml:"style",inherit:"true","desc:"style -- normal, italic, etc"`
+	Weight   FontWeights `xml:"weight",inherit:"true","desc:"weight: normal, bold, etc"`
+	// todo: size also includes things like: medium, xx-small...xx-large, smaller, larger, etc
 	// todo: kerning
+	// todo: stretch -- css 3 -- not supported
 }
 
 func (p *FontStyle) Defaults() {
 	p.FaceName = "Arial"
-	p.Points = 24
-	p.LoadFont("")
+	p.Size = units.NewValue(24, units.Pt)
 }
 
-func (p *FontStyle) LoadFont(fallback string) {
-	face, err := FontLibrary.Font(p.FaceName, p.Points)
+// any updates after generic xml-tag property setting?
+func (p *FontStyle) SetStylePost() {
+}
+
+func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
+	pts := p.Size.Convert(units.Pt, ctxt) // this sets dots too..
+	face, err := FontLibrary.Font(p.FaceName, pts.Val)
 	if err != nil {
 		log.Printf("%v\n", err)
 		if p.Face == nil {
 			if fallback != "" {
 				p.FaceName = fallback
-				p.LoadFont("") // try again
+				p.LoadFont(ctxt, "") // try again
 			} else {
 				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
 				p.Face = basicfont.Face7x13
@@ -80,42 +93,52 @@ func (p *FontStyle) LoadFont(fallback string) {
 		p.Face = face
 	}
 	p.Height = float64(p.Face.Metrics().Height) / 64.0
+	// em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
+	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, p.Height, em)
+}
+
+func (p *FontStyle) SetUnitContext(ctxt *units.Context) {
+	// todo: could measure actual chars but just use defaults right now
+	if p.Face != nil {
+		em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
+		ctxt.SetFont(em, 0.5*em, 0.5*em, 12.0) // todo: rem!?  just using 12
+	}
 }
 
 // update the font settings from the style info on the node
-func (pf *FontStyle) SetFromNode(g *Node2DBase) {
-	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
+// func (pf *FontStyle) SetFromNode(g *Node2DBase) {
+// 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
 
-	loadFont := false
+// 	loadFont := false
 
-	prevFaceName := pf.FaceName
+// 	prevFaceName := pf.FaceName
 
-	if sz, got := g.PropNumber("font-size"); got {
-		if pf.Points != sz {
-			loadFont = true
-		}
-		pf.Points = sz
-	}
-	if nm, got := g.PropEnum("font-face"); got {
-		if len(nm) != 0 {
-			if pf.FaceName != nm {
-				pf.FaceName = nm
-				loadFont = true
-			}
-		}
-	}
-	if nm, got := g.PropEnum("font-family"); got {
-		if len(nm) != 0 {
-			if pf.FaceName != nm {
-				pf.FaceName = nm
-				loadFont = true
-			}
-		}
-	}
-	if loadFont {
-		pf.LoadFont(prevFaceName)
-	}
-}
+// 	if sz, got := g.PropNumber("font-size"); got {
+// 		if pf.Points != sz {
+// 			loadFont = true
+// 		}
+// 		pf.Points = sz
+// 	}
+// 	if nm, got := g.PropEnum("font-face"); got {
+// 		if len(nm) != 0 {
+// 			if pf.FaceName != nm {
+// 				pf.FaceName = nm
+// 				loadFont = true
+// 			}
+// 		}
+// 	}
+// 	if nm, got := g.PropEnum("font-family"); got {
+// 		if len(nm) != 0 {
+// 			if pf.FaceName != nm {
+// 				pf.FaceName = nm
+// 				loadFont = true
+// 			}
+// 		}
+// 	}
+// 	if loadFont {
+// 		pf.LoadFont(prevFaceName)
+// 	}
+// }
 
 func LoadFontFace(path string, points float64) (font.Face, error) {
 	fontBytes, err := ioutil.ReadFile(path)

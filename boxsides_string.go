@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _BoxSides_name = "BoxTopBoxRightBoxBottomBoxLeft"
+const _BoxSides_name = "BoxTopBoxRightBoxBottomBoxLeftBoxN"
 
-var _BoxSides_index = [...]uint8{0, 6, 14, 23, 30}
+var _BoxSides_index = [...]uint8{0, 6, 14, 23, 30, 34}
 
 func (i BoxSides) String() string {
 	if i < 0 || i >= BoxSides(len(_BoxSides_index)-1) {

@@ -131,6 +131,31 @@ func (uc *Context) Defaults() {
 	uc.El = uc.VpW
 }
 
+// set the context values
+func (uc *Context) Set(em, ex, ch, rem, vpw, vph, el float64) {
+	uc.SetSizes(vpw, vph, el)
+	uc.SetFont(em, ex, ch, rem)
+}
+
+// set the context values for non-font sizes -- el can be 0 and then defaults to vpw
+func (uc *Context) SetSizes(vpw, vph, el float64) {
+	uc.VpW = vpw
+	uc.VpH = vph
+	if el == 0 {
+		uc.El = vpw
+	} else {
+		uc.El = el
+	}
+}
+
+// set the context values for fonts
+func (uc *Context) SetFont(em, ex, ch, rem float64) {
+	uc.FontEm = em
+	uc.FontEx = ex
+	uc.FontCh = ch
+	uc.FontRem = rem
+}
+
 // factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) ToDotsFactor(un Unit) float64 {
 	if uc.DPI == 0 {
@@ -193,6 +218,11 @@ func NewValue(val float64, un Unit) Value {
 	return Value{val, un, 0.0}
 }
 
+func (v *Value) Set(val float64, un Unit) {
+	v.Val = val
+	v.Un = un
+}
+
 // Convert value to raw display pixels (dots as in DPI), setting also the Dots field
 func (v *Value) ToDots(ctxt *Context) float64 {
 	v.Dots = ctxt.ToDots(v.Val, v.Un)
@@ -205,21 +235,22 @@ func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
 }
 
 // Convert converts value to the given units, given unit context
-func (v Value) Convert(to Unit, ctxt *Context) Value {
+func (v *Value) Convert(to Unit, ctxt *Context) Value {
 	return Value{v.ToDots(ctxt) / ctxt.ToDotsFactor(to), to, 0.0}
 }
 
 // String implements the fmt.Stringer interface.
-func (v Value) String() string {
+func (v *Value) String() string {
 	return fmt.Sprintf("%f%s", v.Val, UnitNames[v.Un])
 }
 
 // parse string into a value
-func StringToValue(str string) Value {
+func (v *Value) SetFromString(str string) {
 	trstr := strings.TrimSpace(str)
 	sz := len(trstr)
 	if sz < 2 {
-		return NewValue(0, Px)
+		v.Set(0, Px)
+		return
 	}
 	var ends [4]string
 	ends[0] = strings.ToLower(trstr[sz-1:])
@@ -246,5 +277,11 @@ func StringToValue(str string) Value {
 	}
 	var val float64
 	fmt.Sscanf(strings.TrimSpace(numstr), "%g", &val)
-	return NewValue(val, un)
+	v.Set(val, un)
+}
+
+func StringToValue(str string) Value {
+	var v Value
+	v.SetFromString(str)
+	return v
 }

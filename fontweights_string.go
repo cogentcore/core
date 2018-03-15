@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _FontWeights_name = "NormalWeightBoldBolderLighter"
+const _FontWeights_name = "WeightNormalWeightBoldWeightBolderWeightLighterFontWeightsN"
 
-var _FontWeights_index = [...]uint8{0, 12, 16, 22, 29}
+var _FontWeights_index = [...]uint8{0, 12, 22, 34, 47, 59}
 
 func (i FontWeights) String() string {
 	if i < 0 || i >= FontWeights(len(_FontWeights_index)-1) {

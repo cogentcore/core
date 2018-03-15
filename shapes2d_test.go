@@ -22,7 +22,8 @@ func TestRect(t *testing.T) {
 	// rect1.SetProp("stroke-linejoin", "round")
 	rect1.Pos = Point2D{10, 10}
 	rect1.Size = Size2D{100, 100}
-	parent.Render2DRoot()
+
+	parent.FullRender2DRoot()
 	// parent.SavePNG("test_rect.png")
 }
 
@@ -82,6 +83,6 @@ func TestShapesAll(t *testing.T) {
 		polygon1.Points = append(polygon1.Points, Point2D{x1, y1})
 	}
 
-	parent.Render2DRoot()
+	parent.FullRender2DRoot()
 	parent.SavePNG("test_shape_all.png")
 }

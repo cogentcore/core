@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextAlign_name = "TextAlignLeftTextAlignRightTextAlignCenterTextAlignJustify"
+const _TextAlign_name = "TextAlignLeftTextAlignCenterTextAlignRightTextAlignJustifyTextAlignN"
 
-var _TextAlign_index = [...]uint8{0, 13, 27, 42, 58}
+var _TextAlign_index = [...]uint8{0, 13, 28, 42, 58, 68}
 
 func (i TextAlign) String() string {
 	if i < 0 || i >= TextAlign(len(_TextAlign_index)-1) {
