@@ -104,9 +104,13 @@ func (g *Node2DBase) Style2DSVG() {
 			gii.InitNode2D()
 		}
 	}
+	if g.Viewport == nil {
+		return
+	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProperties())
-	g.Layout.Reset() // start with a fresh layout
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0) // svn only has to set units here once
+	g.Layout.Reset()                              // start with a fresh layout
 
 }
 
@@ -120,14 +124,17 @@ func (g *Node2DBase) Style2DWidget() {
 			gii.InitNode2D()
 		}
 	}
+	if g.Viewport == nil {
+		return
+	}
 	pg := g.ParentNode2D()
 	if pg != nil {
 		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProperties())
 	} else {
 		g.Style.SetStyle(nil, &StyleDefault, g.KiProperties())
 	}
-	g.Layout.SetFromStyle(&g.Style.Layout) // also does reset
-
+	g.Style.SetUnitContext(&g.Viewport.Render, 0) // todo: test for use of el-relative
+	g.Layout.SetFromStyle(&g.Style.Layout)        // also does reset
 }
 
 // find parent viewport -- uses GiViewport2D() method on Node2D interface
@@ -181,14 +188,14 @@ func (g *Node2DBase) AddParentPos() {
 	}
 }
 
-// if a layout positioned us, then use that, otherwise use our user-specified pos, size
-// this should be called at start of Render2D for all objects
+// for widgets: if a layout positioned us, then use that, otherwise use our
+// user-specified pos, size this should be called in layout2d for iter > 0
 func (g *Node2DBase) GeomFromLayout() {
+	g.AddParentPos()
 	g.Layout.UsePos(&g.Style.Layout)
 	g.Layout.UseSize(&g.Style.Layout)
 }
 
 func (g *Node2DBase) DefaultGeom() {
-	g.GeomFromLayout()
 	g.SetWinBBox(g.WinBBoxFromAlloc())
 }

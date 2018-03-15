@@ -64,6 +64,8 @@ Next:
 
 * layout issue
 
+* add margins to button drawing
+
 * color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc
 
 Soon:

@@ -47,8 +47,8 @@ func (g *WidgetBase) DrawStdBox() {
 	// rs := &g.Viewport.Render
 	st := &g.Style
 
-	pos := g.Layout.AllocPos
-	sz := g.Layout.AllocSize
+	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots)
+	sz := g.Layout.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
@@ -191,75 +191,68 @@ func (g *Button) InitNode2D() {
 	})
 }
 
-var ButtonNormalProps = map[string]interface{}{
-	"border-width":        "4dp",
-	"border-radius":       "4dp",
-	"border-color":        "grey",
-	"border-style":        "solid",
-	"box-shadow.h-offset": "5dp",
-	"box-shadow.v-offset": "5dp",
-	"box-shadow.blur":     "5dp",
-	"box-shadow.color":    "grey",
-	// "font-family":         "Arial", // this is crashing
-	"font-size":        "24pt",
-	"text-align":       "center",
-	"color":            "black",
-	"background-color": "#00005050",
-}
+// todo: the shadow never decreases
 
-var ButtonDisabledProps = map[string]interface{}{
-	"border-color":        "#BBB",
-	"box-shadow.h-offset": "0dp",
-	"box-shadow.v-offset": "0dp",
-	"box-shadow.blur":     "0dp",
-	"box-shadow.color":    "grey",
-	"color":               "#AAA",
-	"background-color":    "#DDD",
-}
-
-var ButtonHoverProps = map[string]interface{}{
-	"border-color":        "#0000FFFF",
-	"box-shadow.h-offset": "6dp",
-	"box-shadow.v-offset": "6dp",
-	"box-shadow.blur":     "6dp",
-	"color":               "black",
-	"background-color":    "#00008080",
-}
-
-var ButtonFocusProps = map[string]interface{}{
-	"border-color":        "#0000FFFF",
-	"box-shadow.h-offset": "6dp",
-	"box-shadow.v-offset": "6dp",
-	"box-shadow.blur":     "6dp",
-	// "color":               "black",
-	// "background-color":    "#00008080",
-}
-
-var ButtonPressProps = map[string]interface{}{
-	"border-color":        "#0000FFFF",
-	"box-shadow.h-offset": "0dp",
-	"box-shadow.v-offset": "0dp",
-	"box-shadow.blur":     "0dp",
-	"color":               "white",
-	"background-color":    "#000080FF",
+var ButtonProps = []map[string]interface{}{
+	{
+		"border-width":        "1px",
+		"border-radius":       "4px",
+		"border-color":        "black",
+		"border-style":        "solid",
+		"padding":             "8px",
+		"margin":              "4px",
+		"box-shadow.h-offset": "4px",
+		"box-shadow.v-offset": "4px",
+		"box-shadow.blur":     "4px",
+		"box-shadow.color":    "grey",
+		// "font-family":         "Arial", // this is crashing
+		"font-size":        "24pt",
+		"text-align":       "center",
+		"color":            "black",
+		"background-color": "#AAF",
+	}, { // disabled
+		"border-color":        "#BBB",
+		"box-shadow.h-offset": "0px",
+		"box-shadow.v-offset": "0px",
+		"box-shadow.blur":     "0px",
+		"box-shadow.color":    "grey",
+		"color":               "#AAA",
+		"background-color":    "#DDD",
+	}, { // hover
+		// "border-color": "#AAF",
+		// "box-shadow.h-offset": "6px",
+		// "box-shadow.v-offset": "6px",
+		// "box-shadow.blur":     "6px",
+		"color":            "black",
+		"background-color": "#88F",
+	}, { // focus
+		"border-color": "#EEF",
+		// "box-shadow.h-offset": "6px",
+		// "box-shadow.v-offset": "6px",
+		// "box-shadow.blur":     "6px",
+		// "color":               "black",
+		// "background-color":    "#00008080",
+	}, { // press
+		"border-color":        "#DDF",
+		"box-shadow.h-offset": "0px",
+		"box-shadow.v-offset": "0px",
+		"box-shadow.blur":     "0px",
+		"color":               "white",
+		"background-color":    "#008",
+	},
 }
 
 func (g *Button) Style2D() {
 	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, ButtonNormalProps)
+	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
 	// then style with user props
 	g.Style2DWidget()
 	// now get styles for the different states
-	// todo: put in a loop
-	g.StateStyles[ButtonNormal] = g.Style
-	g.StateStyles[ButtonDisabled] = g.Style
-	g.StateStyles[ButtonDisabled].SetStyle(nil, &StyleDefault, ButtonDisabledProps)
-	g.StateStyles[ButtonHover] = g.Style
-	g.StateStyles[ButtonHover].SetStyle(nil, &StyleDefault, ButtonHoverProps)
-	g.StateStyles[ButtonFocus] = g.Style
-	g.StateStyles[ButtonFocus].SetStyle(nil, &StyleDefault, ButtonFocusProps)
-	g.StateStyles[ButtonPress] = g.Style
-	g.StateStyles[ButtonPress].SetStyle(nil, &StyleDefault, ButtonPressProps)
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i] = g.Style
+		g.StateStyles[i].SetStyle(nil, &StyleDefault, ButtonProps[i])
+		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
@@ -275,9 +268,22 @@ func (g *Button) Layout2D(iter int) {
 		if st.Layout.Height.Dots > 0 {
 			h = ki.Max64(st.Layout.Height.Dots, h)
 		}
+		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 		g.Layout.AllocSize = Size2D{w, h}
 		g.SetWinBBox(g.Node2DBBox())
+	} else {
+		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
 	}
+
+	// todo: test for use of parent-el relative units -- indicates whether multiple loops
+	// are required
+	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+	// now get styles for the different states
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+	}
+
 }
 
 func (g *Button) Node2DBBox() image.Rectangle {
@@ -287,13 +293,7 @@ func (g *Button) Node2DBBox() image.Rectangle {
 // todo: need color brigher / darker functions
 
 func (g *Button) Render2D() {
-	rs := &g.Viewport.Render
-	st := &g.Style
-	st.SetUnitContext(rs, 0)
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].SetUnitContext(rs, 0)
-	}
-	g.DefaultGeom()
+	g.DefaultGeom() // set win box from layout data
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
 	} else {
@@ -311,7 +311,11 @@ func (g *Button) Render2DDefaultStyle() {
 	pc.Text = st.Text
 	g.DrawStdBox()
 	pc.Stroke.SetColor(&st.Color) // ink color
-	pc.DrawStringAnchored(rs, g.Text, g.Layout.AllocPos.X, g.Layout.AllocPos.Y, 0.0, 0.9)
+
+	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
+	// sz := g.Layout.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+
+	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
 }
 
 func (g *Button) CanReRender2D() bool {

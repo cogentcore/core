@@ -283,7 +283,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 		if gi.Paint.Off { // off below this
 			return false
 		}
-		gi.AddParentPos()
+		gii.Layout2D(1) // todo: check for multiple iterations needed..
 		return true
 	})
 

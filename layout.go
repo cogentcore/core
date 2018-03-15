@@ -73,7 +73,10 @@ type LayoutStyle struct {
 }
 
 func (ld *LayoutStyle) Defaults() {
-
+	ld.MinWidth.Set(1.0, units.Em)
+	ld.MinHeight.Set(1.0, units.Em)
+	ld.Width.Set(1.0, units.Em)
+	ld.Height.Set(1.0, units.Em)
 }
 
 func (ld *LayoutStyle) SetStylePost() {
@@ -179,6 +182,11 @@ func (ld *LayoutData) NeedSize() Size2D {
 	need = need.Max(ld.AllocSize)
 	return need
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//    Specific layouts
+
+// todo: create a base type with all the core functions, specifics just call that
 
 // RowLayout arranges its elements in a horizontal fashion
 type RowLayout struct {
@@ -293,15 +301,16 @@ func (rl *RowLayout) Layout2D(iter int) {
 		gi.Layout.AllocPos.Y = 0 // todo: alignment
 		pos += gi.Layout.AllocSize.X
 	}
+
+	if iter > 0 {
+		rl.GeomFromLayout()
+	}
+	// todo: test if this is needed -- if there are any el-relative settings anyway
+	rl.Style.SetUnitContext(&rl.Viewport.Render, 0)
 }
 
 func (g *RowLayout) Render2D() {
-	rs := &g.Viewport.Render
-	st := &g.Style
-	st.SetUnitContext(rs, 0)
-	// g.Layout.AllocPos.X = 100.0
-	// g.Layout.AllocPos.Y = 500.0
-	g.GeomFromLayout()
+	g.DefaultGeom()
 }
 
 func (g *RowLayout) CanReRender2D() bool {

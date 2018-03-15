@@ -58,7 +58,6 @@ func (g *Rect) Node2DBBox() image.Rectangle {
 func (g *Rect) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
@@ -173,7 +172,6 @@ func (g *Circle) Node2DBBox() image.Rectangle {
 func (g *Circle) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
@@ -231,7 +229,6 @@ func (g *Ellipse) Node2DBBox() image.Rectangle {
 func (g *Ellipse) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
@@ -288,7 +285,7 @@ func (g *Line) Node2DBBox() image.Rectangle {
 func (g *Line) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
+	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.FillStrokeClear(rs)
 }
@@ -343,7 +340,6 @@ func (g *Polyline) Node2DBBox() image.Rectangle {
 func (g *Polyline) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	if len(g.Points) < 2 {
 		return
@@ -402,7 +398,6 @@ func (g *Polygon) Node2DBBox() image.Rectangle {
 func (g *Polygon) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	if len(g.Points) < 2 {
 		return

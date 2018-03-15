@@ -73,6 +73,10 @@ func (a Point2D) Add(b Point2D) Point2D {
 	return Point2D{a.X + b.X, a.Y + b.Y}
 }
 
+func (a Point2D) AddVal(val float64) Point2D {
+	return Point2D{a.X + val, a.Y + val}
+}
+
 func (a Point2D) Max(b Point2D) Point2D {
 	return Point2D{ki.Max64(a.X, b.X), ki.Max64(a.Y, b.Y)}
 }
@@ -83,6 +87,10 @@ func (a Point2D) Min(b Point2D) Point2D {
 
 func (a Size2D) Add(b Size2D) Size2D {
 	return Size2D{a.X + b.X, a.Y + b.Y}
+}
+
+func (a Size2D) AddVal(val float64) Size2D {
+	return Size2D{a.X + val, a.Y + val}
 }
 
 func (a Size2D) Max(b Size2D) Size2D {
