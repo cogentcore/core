@@ -79,6 +79,7 @@ func (tr *TypeRegistry) FindType(name string) reflect.Type {
 //   KiEnums EnumRegistry and Enum [de]stringification support
 
 // todo: suport bit-flag enums and composition of names as | of values, etc
+// add a EnumType struct to hold info about enums (bits, start / end, alt strings, etc
 
 // design notes: for methods that return string, not passing error b/c you can
 // easily check for null string, and registering errors in log for setter
@@ -93,7 +94,7 @@ func (tr *TypeRegistry) FindType(name string) reflect.Type {
 // var KiT_TypeName = ki.KiEnums.AddEnum(&TypeName{}, altStringMap)
 // where TypeName is the name of the type and altStringMap is nil or a map[int64]string of
 // alternative names for each enum value  OR:
-// var KiT_TypeName = ki.KiEnums.AddEnumAltLowerRmPrefix(&TypeName{}, "Prefix", MyEnumN)
+// var KiT_TypeName = ki.KiEnums.AddEnumAltLower(&TypeName{}, "Prefix", MyEnumN)
 // which automatically registers alternative names as lower-case versions of const names with
 // given prefix removed -- often what is used in e.g., json or xml kinds of formats
 type EnumRegistry struct {
@@ -123,8 +124,8 @@ func (tr *EnumRegistry) AddEnum(obj interface{}, alts map[int64]string) reflect.
 // AddType adds a given type to the registry -- requires an empty object to
 // grab type info from -- automatically initializes an alternative string map
 // based on the name with given prefix removed (e.g., a type name-based prefix)
-// and lower-cased -- also requires the last enum val -- assumes starts at 0
-func (tr *EnumRegistry) AddEnumAltLowerRmPrefix(obj interface{}, prefix string, lastVal int64) reflect.Type {
+// and lower-cased -- also requires the number of enums -- assumes starts at 0
+func (tr *EnumRegistry) AddEnumAltLower(obj interface{}, prefix string, n int64) reflect.Type {
 	if tr.Enums == nil {
 		tr.Enums = make(map[string]reflect.Type)
 		tr.AltStrings = make(map[string]map[int64]string)
@@ -132,7 +133,7 @@ func (tr *EnumRegistry) AddEnumAltLowerRmPrefix(obj interface{}, prefix string, 
 
 	typ := reflect.PtrTo(reflect.TypeOf(obj)).Elem()
 	alts := make(map[int64]string)
-	for i := int64(0); i <= lastVal; i++ {
+	for i := int64(0); i < n; i++ {
 		str := EnumInt64ToString(i, typ)
 		str = strings.ToLower(strings.TrimPrefix(str, prefix))
 		// fmt.Printf("adding enum: %v\n", str)
