@@ -79,7 +79,59 @@ func (tr *TypeRegistry) FindType(name string) reflect.Type {
 //   KiEnums EnumRegistry and Enum [de]stringification support
 
 // todo: suport bit-flag enums and composition of names as | of values, etc
-// add a EnumType struct to hold info about enums (bits, start / end, alt strings, etc
+
+// Bit flags are setup just using the ordinal count iota, and the only diff is the methods
+// which do 1 << flag when operating on them
+
+// set a bit value based on the ordinal flag value
+func SetBitFlag64(bits *int64, flag int) {
+	*bits |= 1 << uint32(flag)
+}
+
+// clear bit value based on the ordinal flag value
+func ClearBitFlag64(bits *int64, flag int) {
+	*bits = *bits & ^(1 << uint32(flag)) // note: ^ is unary bitwise negation, not ~ as in C
+}
+
+// toggle state of bit value based on the ordinal flag value -- returns new state
+func ToggleBitFlag64(bits *int64, flag int) bool {
+	if HasBitFlag64(*bits, flag) {
+		ClearBitFlag64(bits, flag)
+		return false
+	} else {
+		SetBitFlag64(bits, flag)
+		return true
+	}
+}
+
+// check if given bit value is set for given flag
+func HasBitFlag64(bits int64, flag int) bool {
+	return bits&(1<<uint32(flag)) != 0
+}
+
+// check if any of a set of flags are set
+func HasBitFlags64(bits int64, flags ...int) bool {
+	for _, flg := range flags {
+		if HasBitFlag64(bits, flg) {
+			return true
+		}
+	}
+	return false
+}
+
+// make a mask for checking multiple different flags
+func MakeBitMask64(flags ...int) int64 {
+	var mask int64
+	for _, flg := range flags {
+		SetBitFlag64(&mask, flg)
+	}
+	return mask
+}
+
+// check if any of the bits in mask are set
+func HasBitMask64(bits, mask int64) bool {
+	return bits&mask != 0
+}
 
 // design notes: for methods that return string, not passing error b/c you can
 // easily check for null string, and registering errors in log for setter
@@ -101,6 +153,8 @@ type EnumRegistry struct {
 	Enums map[string]reflect.Type
 	// optional alternative string map for enums -- e.g., lower-case, without prefixes etc -- can put multiple such alt strings in the one string with your own separator, in a predefined order, if necessary, and just call strings.Split on those and get the one you want
 	AltStrings map[string]map[int64]string
+	// properties that can be associated with each enum type -- e.g., "bits": true means that this enum should be used as bit flags, so the string rep of a value contains an or-list of names for each bit set, separated by |
+	Props map[string]interface{}
 }
 
 // KiEnums is master registry of enum types -- can also create your own package-specific ones
