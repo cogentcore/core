@@ -9,15 +9,16 @@ GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/gi
 
 # Code Map
 
-* `ginode.go` -- basic `GiNode`, `GiNode2D`, `3D` structs and interfaces -- all Gi nodes are of this type
+* `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
 * `geom2d.go` -- All 2D geometry: Point2D, Size2D, etc
 * `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg`
-	+ `stroke.go`, `fill.go` -- `PaintStroke` and `PaintFill` structs for stroke, fill settings
+	+ `stroke.go`, `fill.go` -- `StrokeStyle` and `FillStyle` structs for stroke, fill settings
+* `style.go` -- `Style` and associated structs for CSS-based `Widget` styling
 * `viewport2d.go` -- `Viewport2D` that has an `Image.RGBA` that `Paint` renders onto
-* `window.go` -- `Window` is the top-level window that uses `go.wde` to open a gui window
-* `shapes2d.go` -- All the basic 2D shapes: `GiRect`, `GiCircle` etc
-* `text2d.go` -- Font, text rendering nodes
-* `path.go` -- path-rendering nodes
+* `window.go` -- `Window` is the top-level window that uses (our own version of) `go.wde` to open a gui window and send events to nodes
+* `shapes2d.go` -- All the basic 2D SVG-based shapes: `Rect`, `Circle` etc
+* `font.go`, `text.go` -- `FontStyle`, `TextStyle`, `Text2D` node
+* `path.go` -- TBD: path-rendering nodes
 
 # Design notes
 
@@ -52,9 +53,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * Widget-based layout is simple x,y offsets, and All 2D nodes obey that -- typically you want to add an SVGBox or SVGViewport node to encapsulate pure SVG-based rendering within an overall simple x,y framework
 
-* All nodes need to be layout aware and use layout geom when avail
-
 * Basic CSS styling is based on the Box model: https://www.w3schools.com/css/css_boxmodel.asp -- see also the Box shadow model https://www.w3schools.com/css/css3_shadows.asp -- general html spec: https://www.w3.org/TR/html5/index.html#contents -- better ref section of w3schools for css spec: https://www.w3schools.com/cssref/default.asp
+
+* Widget views store state internally using a map or slice for the elements within their views.  e.g. NodeWidget
 
 ### TODO
 

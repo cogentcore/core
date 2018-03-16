@@ -61,7 +61,7 @@ const (
 
 //go:generate stringer -type=EventType
 
-var KiT_EventType = ki.KiEnums.AddEnum(MouseMovedEventType, nil)
+var KiT_EventType = ki.Enums.AddEnum(MouseMovedEventType, false, nil)
 
 // buttons that can be pressed
 type MouseButton int

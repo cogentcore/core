@@ -47,7 +47,7 @@ type Node2DBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Node2DBase = ki.KiTypes.AddType(&Node2DBase{})
+var KiT_Node2DBase = ki.Types.AddType(&Node2DBase{}, nil)
 
 // primary interface for all Node2D nodes
 type Node2D interface {
@@ -110,7 +110,7 @@ func (g *Node2DBase) Style2DSVG() {
 		return
 	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
-	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProperties())
+	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProps())
 	g.Paint.SetUnitContext(&g.Viewport.Render, 0) // svn only has to set units here once
 	g.Layout.Reset()                              // start with a fresh layout
 
@@ -131,9 +131,9 @@ func (g *Node2DBase) Style2DWidget() {
 	}
 	pg := g.ParentNode2D()
 	if pg != nil {
-		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProperties())
+		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProps())
 	} else {
-		g.Style.SetStyle(nil, &StyleDefault, g.KiProperties())
+		g.Style.SetStyle(nil, &StyleDefault, g.KiProps())
 	}
 	g.Style.SetUnitContext(&g.Viewport.Render, 0) // todo: test for use of el-relative
 	g.Layout.SetFromStyle(&g.Style.Layout)        // also does reset

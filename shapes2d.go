@@ -24,7 +24,7 @@ type Rect struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Rect = ki.KiTypes.AddType(&Rect{})
+var KiT_Rect = ki.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -89,7 +89,7 @@ type Viewport2DFill struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Viewport2DFill = ki.KiTypes.AddType(&Viewport2DFill{})
+var KiT_Viewport2DFill = ki.Types.AddType(&Viewport2DFill{}, nil)
 
 func (g *Viewport2DFill) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -144,7 +144,7 @@ type Circle struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Circle = ki.KiTypes.AddType(&Circle{})
+var KiT_Circle = ki.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -204,7 +204,7 @@ type Ellipse struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Ellipse = ki.KiTypes.AddType(&Ellipse{})
+var KiT_Ellipse = ki.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -263,7 +263,7 @@ type Line struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Line = ki.KiTypes.AddType(&Line{})
+var KiT_Line = ki.Types.AddType(&Line{}, nil)
 
 func (g *Line) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -321,7 +321,7 @@ type Polyline struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Polyline = ki.KiTypes.AddType(&Polyline{})
+var KiT_Polyline = ki.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -382,7 +382,7 @@ type Polygon struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Polygon = ki.KiTypes.AddType(&Polygon{})
+var KiT_Polygon = ki.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) GiNode2D() *Node2DBase {
 	return &g.Node2DBase

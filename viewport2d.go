@@ -28,7 +28,7 @@ type Viewport2D struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Viewport2D = ki.KiTypes.AddType(&Viewport2D{})
+var KiT_Viewport2D = ki.Types.AddType(&Viewport2D{}, nil)
 
 // NewViewport2D creates a new image.RGBA with the specified width and height
 // and prepares a context for rendering onto that image.

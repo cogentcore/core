@@ -26,7 +26,7 @@ const (
 
 //go:generate stringer -type=TextAlign
 
-var KiT_TextAlign = ki.KiEnums.AddEnumAltLower(TextAlignLeft, "TextAlign", int64(TextAlignN))
+var KiT_TextAlign = ki.Enums.AddEnumAltLower(TextAlignLeft, false, nil, "TextAlign", int64(TextAlignN))
 
 // note: most of these are inherited
 
@@ -85,7 +85,7 @@ type Text2D struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Text2D = ki.KiTypes.AddType(&Text2D{})
+var KiT_Text2D = ki.Types.AddType(&Text2D{}, nil)
 
 func (g *Text2D) GiNode2D() *Node2DBase {
 	return &g.Node2DBase

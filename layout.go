@@ -26,7 +26,7 @@ const (
 
 //go:generate stringer -type=AlignHoriz
 
-var KiT_AlignHoriz = ki.KiEnums.AddEnumAltLower(AlignLeft, "Align", int64(AlignHorizN))
+var KiT_AlignHoriz = ki.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignHorizN))
 
 // vertical alignment type -- how to align items in the vertical dimension
 type AlignVert int32
@@ -39,7 +39,7 @@ const (
 	AlignVertN
 )
 
-var KiT_AlignVert = ki.KiEnums.AddEnumAltLower(AlignTop, "Align", int64(AlignVertN))
+var KiT_AlignVert = ki.Enums.AddEnumAltLower(AlignTop, false, nil, "Align", int64(AlignVertN))
 
 //go:generate stringer -type=AlignVert
 
@@ -195,7 +195,7 @@ type RowLayout struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_RowLayout = ki.KiTypes.AddType(&RowLayout{})
+var KiT_RowLayout = ki.Types.AddType(&RowLayout{}, nil)
 
 func (g *RowLayout) GiNode2D() *Node2DBase {
 	return &g.Node2DBase

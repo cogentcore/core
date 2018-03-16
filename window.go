@@ -27,7 +27,7 @@ type Window struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Window = ki.KiTypes.AddType(&Window{})
+var KiT_Window = ki.Types.AddType(&Window{}, nil)
 
 // create a new window with given name and sizing
 func NewWindow(name string, width, height int) *Window {

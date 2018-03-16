@@ -78,7 +78,7 @@ const (
 
 //go:generate stringer -type=BoxSides
 
-var KiT_BoxSides = ki.KiEnums.AddEnumAltLower(BoxTop, "Box", int64(BoxN))
+var KiT_BoxSides = ki.Enums.AddEnumAltLower(BoxTop, false, nil, "Box", int64(BoxN))
 
 // how to draw the border
 type BorderDrawStyle int32
@@ -99,7 +99,7 @@ const (
 
 //go:generate stringer -type=BorderDrawStyle
 
-var KiT_BorderDrawStyle = ki.KiEnums.AddEnumAltLower(BorderSolid, "Border", int64(BorderN))
+var KiT_BorderDrawStyle = ki.Enums.AddEnumAltLower(BorderSolid, false, nil, "Border", int64(BorderN))
 
 // style parameters for borders
 type BorderStyle struct {
@@ -345,8 +345,8 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, t
 		return // no can do any struct otherwise
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
 		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
-		if ki.KiEnums.FindEnum(sf.Type.Name()) != nil {
-			ki.KiEnums.SetEnumValueFromAltString(vf, prstr)
+		if ki.Enums.FindEnum(sf.Type.Name()) != nil {
+			ki.Enums.SetEnumValueFromAltString(vf, prstr)
 		}
 		return
 	}

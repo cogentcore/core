@@ -42,7 +42,7 @@ const (
 
 //go:generate stringer -type=EventType
 
-var KiT_NodeFlags = ki.KiEnums.AddEnum(NodeFlagsNil, nil)
+var KiT_NodeFlags = ki.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
 
 // base struct node for GoGi
 type NodeBase struct {
@@ -52,7 +52,7 @@ type NodeBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_NodeBase = ki.KiTypes.AddType(&NodeBase{})
+var KiT_NodeBase = ki.Types.AddType(&NodeBase{}, nil)
 
 // todo: stop receiving events function..
 
@@ -90,4 +90,4 @@ type Node3DBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Node3DBase = ki.KiTypes.AddType(&Node3DBase{})
+var KiT_Node3DBase = ki.Types.AddType(&Node3DBase{}, nil)

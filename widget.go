@@ -17,7 +17,7 @@ type WidgetBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_WidgetBase = ki.KiTypes.AddType(&WidgetBase{})
+var KiT_WidgetBase = ki.Types.AddType(&WidgetBase{}, nil)
 
 // Styling notes:
 // simple elemental widgets (buttons etc) have a DefaultRender method that renders based on
@@ -116,7 +116,7 @@ type ButtonBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_ButtonBase = ki.KiTypes.AddType(&ButtonBase{})
+var KiT_ButtonBase = ki.Types.AddType(&ButtonBase{}, nil)
 
 // set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
@@ -137,7 +137,7 @@ type Button struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Button = ki.KiTypes.AddType(&Button{})
+var KiT_Button = ki.Types.AddType(&Button{}, nil)
 
 func (g *Button) GiNode2D() *Node2DBase {
 	return &g.Node2DBase
