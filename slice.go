@@ -14,14 +14,14 @@ import (
 	"strconv"
 )
 
-// KiSlice provides JSON marshal / unmarshal with encoding of underlying types
-type KiSlice []Ki
+// Slice provides JSON marshal / unmarshal with encoding of underlying types
+type Slice []Ki
 
 // return a valid index given length of slice -- also supports access from the back of the slice using negative numbers -- -1 = last item, -2 = second to last, etc
-func (k *KiSlice) ValidIndex(idx int) (int, error) {
+func (k *Slice) ValidIndex(idx int) (int, error) {
 	kl := len(*k)
 	if kl == 0 {
-		return 0, errors.New("KiSlice is empty -- no valid index")
+		return 0, errors.New("ki.Slice is empty -- no valid index")
 	}
 	if idx < 0 {
 		idx = kl + idx
@@ -35,7 +35,7 @@ func (k *KiSlice) ValidIndex(idx int) (int, error) {
 	return idx, nil
 }
 
-func (k *KiSlice) InsertKi(ki Ki, idx int) {
+func (k *Slice) InsertKi(ki Ki, idx int) {
 	kl := len(*k)
 	if idx < 0 {
 		idx = kl + idx
@@ -54,7 +54,7 @@ func (k *KiSlice) InsertKi(ki Ki, idx int) {
 	(*k)[idx] = ki
 }
 
-func (k *KiSlice) DeleteAtIndex(idx int) error {
+func (k *Slice) DeleteAtIndex(idx int) error {
 	idx, err := k.ValidIndex(idx)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (k *KiSlice) DeleteAtIndex(idx int) error {
 }
 
 // find index of item based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-func (k *KiSlice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
+func (k *Slice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
 	sz := len(*k)
 	if sz == 0 {
 		return -1
@@ -107,24 +107,24 @@ func (k *KiSlice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
 	return -1
 }
 
-func (k *KiSlice) FindIndex(kid Ki, start_idx int) int {
+func (k *Slice) FindIndex(kid Ki, start_idx int) int {
 	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch == kid })
 }
 
-func (k *KiSlice) FindIndexByName(name string, start_idx int) int {
+func (k *Slice) FindIndexByName(name string, start_idx int) int {
 	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiName() == name })
 }
 
-func (k *KiSlice) FindIndexByUniqueName(name string, start_idx int) int {
+func (k *Slice) FindIndexByUniqueName(name string, start_idx int) int {
 	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiUniqueName() == name })
 }
 
-func (k *KiSlice) FindIndexByType(t ...reflect.Type) int {
+func (k *Slice) FindIndexByType(t ...reflect.Type) int {
 	return k.FindIndexByFun(0, func(ch Ki) bool { return ch.IsType(t...) })
 }
 
 // MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
-func (k KiSlice) MarshalJSON() ([]byte, error) {
+func (k Slice) MarshalJSON() ([]byte, error) {
 	nk := len(k)
 	b := make([]byte, 0, nk*100+20)
 	if nk == 0 {
@@ -167,7 +167,7 @@ func (k KiSlice) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON parses the length and type information for each object in the slice, creates the new slice with those elements, and then loads based on the remaining bytes which represent each element
-func (k *KiSlice) UnmarshalJSON(b []byte) error {
+func (k *Slice) UnmarshalJSON(b []byte) error {
 	// fmt.Printf("json in: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
 		*k = nil
@@ -180,7 +180,7 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 	}
 	flds := bytes.Split(b[lb+1:rb], []byte(","))
 	if len(flds) == 0 {
-		return errors.New("KiSlice UnmarshalJSON: no child data found")
+		return errors.New("Slice UnmarshalJSON: no child data found")
 	}
 	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
 	ns := bytes.Index(flds[0], []byte("\"n\":"))
@@ -204,15 +204,15 @@ func (k *KiSlice) UnmarshalJSON(b []byte) error {
 		ti := bytes.Index(fld, []byte("\"type\":"))
 		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
-		typ := KiTypes.FindType(tn)
+		typ := Types.FindType(tn)
 		if typ == nil {
-			return fmt.Errorf("KiSlice UnmarshalJSON: KiTypes type name not found: %v", tn)
+			return fmt.Errorf("ki.Slice UnmarshalJSON: Types type name not found: %v", tn)
 		}
 		nkid := reflect.New(typ).Interface()
 		// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 		kid, ok := nkid.(Ki)
 		if !ok {
-			return fmt.Errorf("KiSlice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
+			return fmt.Errorf("ki.Slice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
 		}
 		kid.SetThis(kid)
 		nwk = append(nwk, kid)

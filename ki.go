@@ -3,18 +3,34 @@
 // license that can be found in the LICENSE file.
 
 /*
-	Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and "Key" in English -- powerful tree structures supporting scenegraphs, programs, parsing, etc.
+Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and "Key" in English -- powerful tree structures supporting scenegraphs, programs, parsing, etc.
 
-	The Node struct that implements the Ki interface, which
-	can be used as an embedded type (or a struct field) in other structs to provide
-	core tree functionality, including:
-		* Parent / Child Tree structure -- each Node can ONLY have one parent
-		* Paths for locating Nodes within the hierarchy -- key for many use-cases, including IO for pointers
-		* Apply a function across nodes up or down a tree -- very flexible for tree walking
-		* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc -- including pointers which are saved using paths and automatically cached-out after loading
-		* Event sending and receiving between Nodes (simlar to Qt Signals / Slots)
-		* Robust updating state -- wrap updates in UpdateStart / End, and signals are blocked until the final end, at which point an update signal is sent -- works across levels
-		* Properties (as a string-keyed map) with property inheritance -- css anyone!?
+The Node struct that implements the Ki interface, which
+can be used as an embedded type (or a struct field) in other structs to provide
+core tree functionality, including:
+
+	* Parent / Child Tree structure -- each Node can ONLY have one parent
+
+	* Paths for locating Nodes within the hierarchy -- key for many use-cases,
+      including IO for pointers
+
+	* Apply a function across nodes up or down a tree -- very flexible for tree walking
+
+	* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc --
+      including pointers which are saved using paths and automatically
+      cached-out after loading -- enums also bidirectionally convertable to
+      strings using enum type registry.
+
+	* Signal sending and receiving between Nodes (simlar to Qt Signals / Slots)
+
+	* Robust updating state -- wrap updates in UpdateStart / End, and signals
+      are blocked until the final end, at which point an update signal is sent
+      -- works across levels
+
+	* Properties (as a string-keyed map) with property inheritance --
+      including type-level properties and temporary properties used for
+      graphical views, etc
+
 */
 package ki
 
@@ -49,6 +65,9 @@ type Ki interface {
 	// check that the this pointer is set and issue a warning to log if not -- returns error if not set
 	ThisCheck() error
 
+	// Type returns the underlying struct type of this node (reflect.TypeOf(ThisKi).Elem())
+	Type() reflect.Type
+
 	// IsType tests whether This underlying struct object is of the given type(s) -- Go does not support a notion of inheritance, so this must be an exact match to the type
 	IsType(t ...reflect.Type) bool
 
@@ -59,7 +78,7 @@ type Ki interface {
 	KiChild(idx int) (Ki, error)
 
 	// get list of children -- can modify directly (e.g., sort, reorder) but add / remove should use existing methods to ensure proper tracking
-	KiChildren() KiSlice
+	KiChildren() Slice
 
 	// These allow generic GUI / Text / Path / etc representation of Trees
 	// The user-defined name of the object, for finding elements, generating paths, io, etc
@@ -83,26 +102,14 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
 
-	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree
-	KiProperties() map[string]interface{}
+	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree -- see type.go for convenience methods for converting interface{} to standard types
+	KiProps() map[string]interface{}
 
 	// Set given property key to value val -- initializes property map if nil
 	SetProp(key string, val interface{})
 
-	// Get property value from key, safely -- if inherit, then check all parents too
-	Prop(key string, inherit bool) interface{}
-
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a bool -- false if not set or false -- error if key exists but is of a different type
-	PropBool(key string, inherit bool) (bool, error)
-
-	// Get property value from key, safely -- if inherit, then check all parents too -- as an int -- 0 if not set -- error if key exists but is of a different type
-	PropInt(key string, inherit bool) (int, error)
-
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a float -- 0 if not set -- error if key exists but is of a different type
-	PropFloat64(key string, inherit bool) (float64, error)
-
-	// Get property value from key, safely -- if inherit, then check all parents too -- as a string -- "" if not set -- error if key exists but is of a different type
-	PropString(key string, inherit bool) (string, error)
+	// Get property value from key -- if inherit, then check all parents too -- if typ then check property on type as well
+	Prop(key string, inherit, typ bool) interface{}
 
 	// Delete property key, safely
 	DeleteProp(key string)
@@ -265,7 +272,7 @@ type Ki interface {
 	UpdateEndAll()
 
 	//////////////////////////////////////////////////////////////////////////
-	//  IO: Marshal / Unmarshal support -- see also KiSlice, KiPtr
+	//  IO: Marshal / Unmarshal support -- see also Slice, Ptr
 
 	// save the tree to a JSON-encoded byte string -- wraps MarshalJSON
 	SaveJSON(indent bool) ([]byte, error)
@@ -273,13 +280,13 @@ type Ki interface {
 	// load the tree from a JSON-encoded byte string -- wraps UnmarshalJSON and calls UnmarshalPost
 	LoadJSON(b []byte) error
 
-	// walk the tree down from current node and call FindPtrFromPath on all KiPtr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
-	SetKiPtrsFmPaths()
+	// walk the tree down from current node and call FindPtrFromPath on all Ptr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
+	SetPtrsFmPaths()
 
 	// walk the tree down from current node and call SetParent on all children -- needed after JSON Unmarshal, etc
 	ParentAllChildren()
 
-	// this must be called after an Unmarshal -- calls SetKiPtrsFmPaths and ParentAllChildren -- due to inability to reflect into receiver types, cannot do it automatically unfortunately
+	// this must be called after an Unmarshal -- calls SetPtrsFmPaths and ParentAllChildren -- due to inability to reflect into receiver types, cannot do it automatically unfortunately
 	UnmarshalPost()
 }
 
@@ -290,48 +297,3 @@ type Ki interface {
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type KiFun func(ki Ki, level int, data interface{}) bool
-
-//////////////////////////////////////////////////////////////////////////////////
-// Additional useful stuff of very general use
-
-func Max64(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Min64(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func Max32(a, b float32) float32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Min32(a, b float32) float32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func MaxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func MinInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

@@ -22,7 +22,7 @@ import (
 
 // use this to switch between using standard json vs. faster jsoniter
 // right now jsoniter does not continue with the MarshalIndent beyond first level,
-// even when called specifically in the KiSlice code
+// even when called specifically in the Slice code
 var UseJsonIter bool = false
 
 // todo:
@@ -34,22 +34,26 @@ The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info 
 */
 type Node struct {
 	Name       string `desc:"user-supplied name of this node -- can be empty or non-unique"`
-	UniqueName string `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in KiPtr pointers"`
-	Properties map[string]interface{}
-	Parent     Ki      `json:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
-	ChildType  KiType  `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Children   KiSlice `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
-	NodeSig    Signal  `json:"-",desc:"signal for node structure / state changes -- emits SignalType signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Updating   AtomCtr `json:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	Deleted    []Ki    `json:"-",desc:"keeps track of deleted nodes until destroyed"`
-	This       Ki      `json:"-",desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	UniqueName string `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Props      map[string]interface{}
+	Parent     Ki                     `json:"-",xml:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
+	ChildType  Type                   `desc:"default type of child to create -- if nil then same type as node itself is used"`
+	Children   Slice                  `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
+	NodeSig    Signal                 `json:"-",xml:"-",desc:"signal for node structure / state changes -- emits SignalType signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Updating   AtomCtr                `json:"-",xml:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
+	Deleted    []Ki                   `json:"-",xml:"-",desc:"keeps track of deleted nodes until destroyed"`
+	This       Ki                     `json:"-",xml:"-",desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	TmpProps   map[string]interface{} `json:"-",xml:"-",desc:"temporary properties that are not saved -- e.g., used by Gi views to store view properties"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Node = KiTypes.AddType(&Node{})
+// must register all new types so type names can be looked up by name -- also props
+var KiT_Node = Types.AddType(&Node{}, nil)
+
+// check for interface implementation
+var _ Ki = &Node{}
 
 //////////////////////////////////////////////////////////////////////////
-//  Basic Ki properties
+//  Basic Ki fields
 
 func (n *Node) ThisKi() Ki {
 	return n.This
@@ -68,11 +72,15 @@ func (n *Node) ThisCheck() error {
 	return nil
 }
 
+func (n *Node) Type() reflect.Type {
+	return reflect.TypeOf(n.This).Elem()
+}
+
 func (n *Node) IsType(t ...reflect.Type) bool {
 	if err := n.ThisCheck(); err != nil {
 		return false
 	}
-	ttyp := reflect.TypeOf(n.This).Elem()
+	ttyp := n.Type()
 	for _, typ := range t {
 		if typ == ttyp {
 			return true
@@ -93,7 +101,7 @@ func (n *Node) KiChild(idx int) (Ki, error) {
 	return n.Children[idx], nil
 }
 
-func (n *Node) KiChildren() KiSlice {
+func (n *Node) KiChildren() Slice {
 	return n.Children
 }
 
@@ -162,91 +170,41 @@ func (n *Node) UniquifyNames() {
 //////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
-func (n *Node) KiProperties() map[string]interface{} {
-	return n.Properties
+func (n *Node) KiProps() map[string]interface{} {
+	return n.Props
 }
 
 func (n *Node) SetProp(key string, val interface{}) {
-	if n.Properties == nil {
-		n.Properties = make(map[string]interface{})
+	if n.Props == nil {
+		n.Props = make(map[string]interface{})
 	}
-	n.Properties[key] = val
+	n.Props[key] = val
 }
 
-func (n *Node) Prop(key string, inherit bool) interface{} {
-	if n.Properties != nil {
-		v, ok := n.Properties[key]
+func (n *Node) Prop(key string, inherit, typ bool) interface{} {
+	if n.Props != nil {
+		v, ok := n.Props[key]
 		if ok {
 			return v
 		}
 	}
-	if !inherit || n.Parent == nil {
-		return nil
+	if inherit && n.Parent != nil {
+		pv := n.Parent.Prop(key, inherit, typ)
+		if pv != nil {
+			return pv
+		}
 	}
-	return n.Parent.Prop(key, inherit)
-}
-
-func (n *Node) PropBool(key string, inherit bool) (bool, error) {
-	v := n.Prop(key, inherit)
-	if v == nil {
-		return false, nil
+	if typ {
+		return Types.Prop(n.Type().Name(), key)
 	}
-	b, ok := v.(bool)
-	if !ok {
-		err := fmt.Errorf("KiNode %v PropBool -- property %v exists but is not a bool, is: %T", n.PathUnique(), key, v)
-		log.Print(err)
-		return false, err
-	}
-	return b, nil
-}
-
-func (n *Node) PropInt(key string, inherit bool) (int, error) {
-	v := n.Prop(key, inherit)
-	if v == nil {
-		return 0, nil
-	}
-	b, ok := v.(int)
-	if !ok {
-		err := fmt.Errorf("KiNode %v PropInt -- property %v exists but is not an int, is: %T", n.PathUnique(), key, v)
-		log.Print(err)
-		return 0, err
-	}
-	return b, nil
-}
-
-func (n *Node) PropFloat64(key string, inherit bool) (float64, error) {
-	v := n.Prop(key, inherit)
-	if v == nil {
-		return 0, nil
-	}
-	b, ok := v.(float64)
-	if !ok {
-		err := fmt.Errorf("KiNode %v PropFloat64 -- property %v exists but is not a float64, is: %T", n.PathUnique(), key, v)
-		log.Print(err)
-		return 0, err
-	}
-	return b, nil
-}
-
-func (n *Node) PropString(key string, inherit bool) (string, error) {
-	v := n.Prop(key, inherit)
-	if v == nil {
-		return "", nil
-	}
-	b, ok := v.(string)
-	if !ok {
-		err := fmt.Errorf("KiNode %v PropString -- property %v exists but is not a string, is: %T", n.PathUnique(), key, v)
-		log.Print(err)
-		return "", err
-	}
-	return b, nil
+	return nil
 }
 
 func (n *Node) DeleteProp(key string) {
-	if n.Properties == nil {
+	if n.Props == nil {
 		return
 	}
-	delete(n.Properties, key)
+	delete(n.Props, key)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -339,7 +297,7 @@ func (n *Node) MakeNewChild(typ reflect.Type) Ki {
 		typ = n.ChildType.T
 	}
 	if typ == nil {
-		typ = reflect.TypeOf(n.This).Elem() // make us by default
+		typ = n.Type() // make us by default
 	}
 	nkid := reflect.New(typ).Interface()
 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
@@ -679,7 +637,7 @@ func (n *Node) UpdateEndAll() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Marshal / Unmarshal support -- mostly in KiSlice
+//  Marshal / Unmarshal support -- mostly in Slice
 
 func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 	if err := n.ThisCheck(); err != nil {
@@ -717,7 +675,7 @@ func (n *Node) LoadJSON(b []byte) error {
 	return nil
 }
 
-func (n *Node) SetKiPtrsFmPaths() {
+func (n *Node) SetPtrsFmPaths() {
 	root := n.This
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		v := reflect.ValueOf(k).Elem()
@@ -726,13 +684,13 @@ func (n *Node) SetKiPtrsFmPaths() {
 			vf := v.Field(i)
 			// fmt.Printf("vf: %v\n", vf.Type())
 			if vf.CanInterface() {
-				kp, ok := (vf.Interface()).(KiPtr)
+				kp, ok := (vf.Interface()).(Ptr)
 				if ok {
 					var pv Ki
 					if len(kp.Path) > 0 {
 						pv = root.FindPathUnique(kp.Path)
 						if pv == nil {
-							log.Printf("KiNode SetKiPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, root.KiName())
+							log.Printf("KiNode SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, root.KiName())
 						}
 						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
 					}
@@ -755,5 +713,5 @@ func (n *Node) ParentAllChildren() {
 
 func (n *Node) UnmarshalPost() {
 	n.ParentAllChildren()
-	n.SetKiPtrsFmPaths()
+	n.SetPtrsFmPaths()
 }

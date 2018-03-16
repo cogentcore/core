@@ -18,16 +18,22 @@ type HasNode struct {
 	Mbr2   int
 }
 
-var KiT_HasNode = KiTypes.AddType(&HasNode{})
+var KiT_HasNode = Types.AddType(&HasNode{}, nil)
 
 type NodeEmbed struct {
 	Node
-	Ptr  KiPtr
+	Ptr  Ptr
 	Mbr1 string
 	Mbr2 int
 }
 
-var KiT_NodeEmbed = KiTypes.AddType(&NodeEmbed{})
+var NodeEmbedProps = map[string]interface{}{
+	"intprop":    -17,
+	"floatprop":  3.1415,
+	"stringprop": "type string",
+}
+
+var KiT_NodeEmbed = Types.AddType(&NodeEmbed{}, NodeEmbedProps)
 
 func TestNodeAddChild(t *testing.T) {
 	parent := HasNode{}
@@ -384,36 +390,41 @@ func TestProps(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
-	pprop, err := parent.PropInt("intprop", false)
-	if err != nil || pprop != 42 {
-		t.Errorf("TestProps error -- pprop %v != %v, err %v\n", pprop, 42, err)
+	pprop, ok := ToInt(parent.Prop("intprop", false, false))
+	if !ok || pprop != 42 {
+		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}
-	sprop, err := schild2.PropInt("intprop", true)
-	if err != nil || sprop != 42 {
-		t.Errorf("TestProps error -- sprop inherited %v != %v, err %v\n", sprop, 42, err)
+	sprop, ok := ToInt(schild2.Prop("intprop", true, false))
+	if !ok || sprop != 42 {
+		t.Errorf("TestProps error -- sprop inherited %v != %v\n", sprop, 42)
 	}
-	sprop, err = schild2.PropInt("intprop", false)
-	if err != nil || sprop != 0 {
-		t.Errorf("TestProps error -- sprop not inherited %v != %v, err %v\n", sprop, 0, err)
+	sprop, ok = ToInt(schild2.Prop("intprop", false, false))
+	if ok || sprop != 0 {
+		t.Errorf("TestProps error -- sprop not inherited %v != %v\n", sprop, 0)
 	}
 
 	parent.SetProp("floatprop", 42.0)
-	spropf, err := schild2.PropFloat64("floatprop", true)
-	if err != nil || spropf != 42.0 {
-		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 42.0, err)
+	spropf, ok := ToFloat(schild2.Prop("floatprop", true, false))
+	if !ok || spropf != 42.0 {
+		t.Errorf("TestProps error -- spropf inherited %v != %v\n", spropf, 42.0)
 	}
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprops, err := schild2.PropString("stringprop", true)
-	if err != nil || sprops != tstr {
-		t.Errorf("TestProps error -- sprops inherited %v != %v, err %v\n", sprops, tstr, err)
+	sprops, ok := ToString(schild2.Prop("stringprop", true, false))
+	if !ok || sprops != tstr {
+		t.Errorf("TestProps error -- sprops inherited %v != %v\n", sprops, tstr)
 	}
 
 	parent.DeleteProp("floatprop")
-	spropf, err = schild2.PropFloat64("floatprop", true)
-	if err != nil || spropf != 0 {
-		t.Errorf("TestProps error -- spropf inherited %v != %v, err %v\n", spropf, 0, err)
+	spropf, ok = ToFloat(schild2.Prop("floatprop", true, false))
+	if ok || spropf != 0 {
+		t.Errorf("TestProps error -- spropf inherited %v != %v\n", spropf, 0)
+	}
+
+	spropf, ok = ToFloat(parent.Prop("floatprop", true, true))
+	if !ok || spropf != 3.1415 {
+		t.Errorf("TestProps error -- spropf from type %v != %v\n", spropf, 3.1415)
 	}
 
 }

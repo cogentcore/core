@@ -9,16 +9,28 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
-// KiType provides JSON marshal / unmarshal with encoding of underlying type name
-type KiType struct {
+////////////////////////////////////////////////////////////////////////////////////////
+//   Type converter to / from type name
+
+// Type provides JSON marshal / unmarshal with encoding of underlying type name
+type Type struct {
 	T reflect.Type
 }
 
+// stringer interface
+func String(k Type) string {
+	if k.T == nil {
+		return "nil"
+	}
+	return k.T.Name()
+}
+
 // MarshalJSON saves only the type name
-func (k KiType) MarshalJSON() ([]byte, error) {
+func (k Type) MarshalJSON() ([]byte, error) {
 	if k.T == nil {
 		b := []byte("null")
 		return b, nil
@@ -28,45 +40,240 @@ func (k KiType) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
-// UnmarshalJSON loads the type name and looks it up in the KiTypes registry of type names
-func (k *KiType) UnmarshalJSON(b []byte) error {
+// UnmarshalJSON loads the type name and looks it up in the Types registry of type names
+func (k *Type) UnmarshalJSON(b []byte) error {
 	if bytes.Equal(b, []byte("null")) {
 		k.T = nil
 		return nil
 	}
 	tn := string(bytes.Trim(bytes.TrimSpace(b), "\""))
 	// fmt.Printf("loading type: %v", tn)
-	typ := KiTypes.FindType(tn)
+	typ := Types.FindType(tn)
 	if typ == nil {
-		return fmt.Errorf("KiType UnmarshalJSON: KiTypes type name not found: %v", tn)
+		return fmt.Errorf("Type UnmarshalJSON: Types type name not found: %v", tn)
 	}
 	k.T = typ
 	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//   KiTypes TypeRegistry
+//   Convenience functions for converting interface{} (e.g. properties) to given types
+//     uses the "ok" bool mechanism to report failure, and is as robust and general as possible
+//     WARNING: these violate many of the type-safety features of Go but OTOH give maximum
+//     robustness, appropriate for the world of end-user settable properties, and deal with
+//     most common-sense cases, e.g., string <-> number, etc.  nil values return !ok
+
+// robustly convert anything to a bool
+func ToBool(it interface{}) (bool, bool) {
+	if it == nil {
+		return false, false
+	}
+	v := reflect.ValueOf(it)
+	vk := v.Kind()
+	if vk == reflect.Ptr {
+		v = v.Elem()
+		vk = v.Kind()
+	}
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return (v.Int() != 0), true
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return (v.Uint() != 0), true
+	case vk == reflect.Bool:
+		return v.Bool(), true
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return (v.Float() != 0.0), true
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return (real(v.Complex()) != 0.0), true
+	case vk == reflect.String:
+		r, err := strconv.ParseBool(v.String())
+		if err != nil {
+			return false, false
+		}
+		return r, true
+	default:
+		return false, false
+	}
+}
+
+// robustly convert anything to an int64
+func ToInt(it interface{}) (int64, bool) {
+	if it == nil {
+		return 0, false
+	}
+	v := reflect.ValueOf(it)
+	vk := v.Kind()
+	if vk == reflect.Ptr {
+		v = v.Elem()
+		vk = v.Kind()
+	}
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return v.Int(), true
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return int64(v.Uint()), true
+	case vk == reflect.Bool:
+		if v.Bool() {
+			return 1, true
+		}
+		return 0, true
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return int64(v.Float()), true
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return int64(real(v.Complex())), true
+	case vk == reflect.String:
+		r, err := strconv.ParseInt(v.String(), 0, 64)
+		if err != nil {
+			return 0, false
+		}
+		return r, true
+	default:
+		return 0, false
+	}
+}
+
+// robustly convert anything to a Float64
+func ToFloat(it interface{}) (float64, bool) {
+	if it == nil {
+		return 0.0, false
+	}
+	v := reflect.ValueOf(it)
+	vk := v.Kind()
+	if vk == reflect.Ptr {
+		v = v.Elem()
+		vk = v.Kind()
+	}
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return float64(v.Int()), true
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return float64(v.Uint()), true
+	case vk == reflect.Bool:
+		if v.Bool() {
+			return 1.0, true
+		}
+		return 0.0, true
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return v.Float(), true
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return real(v.Complex()), true
+	case vk == reflect.String:
+		r, err := strconv.ParseFloat(v.String(), 64)
+		if err != nil {
+			return 0.0, false
+		}
+		return r, true
+	default:
+		return 0.0, false
+	}
+}
+
+// robustly convert anything to a String
+func ToString(it interface{}) (string, bool) {
+	if it == nil {
+		return "", false
+	}
+	v := reflect.ValueOf(it)
+	vk := v.Kind()
+	if vk == reflect.Ptr {
+		v = v.Elem()
+		vk = v.Kind()
+	}
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return strconv.FormatInt(v.Int(), 10), true
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return strconv.FormatUint(v.Uint(), 10), true
+	case vk == reflect.Bool:
+		return strconv.FormatBool(v.Bool()), true
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return strconv.FormatFloat(v.Float(), 'G', -1, 64), true
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		cv := v.Complex()
+		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
+		return rv, true
+	case vk == reflect.String: // todo: what about []byte?
+		return v.String(), true
+	default:
+		return "", false
+	}
+}
+
+// yep..
+func Max64(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min64(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max32(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func Min32(a, b float32) float32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func MaxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   Types TypeRegistry
 
 // TypeRegistry is a map from type name to reflect.Type -- need to explicitly register each new type by calling AddType in the process of creating a new global variable, as in:
-// 	var KiT_TypeName = ki.KiTypes.AddType(&TypeName{})
+// 	var KiT_TypeName = ki.Types.AddType(&TypeName{})
 // 	where TypeName is the name of the type -- note that it is ESSENTIAL to pass a pointer
 //  so that the type is considered addressable, even after we get Elem() of it
 type TypeRegistry struct {
+	// to get a type from its name
 	Types map[string]reflect.Type
+	// type properties -- nodes can get default properties from their types and then optionally override them with their own settings
+	Props map[string]map[string]interface{}
 }
 
-// KiTypes is master registry of types that embed Ki Nodes
-var KiTypes TypeRegistry
+// Types is master registry of types that embed Ki Nodes
+var Types TypeRegistry
 
-// AddType adds a given type to the registry -- requires an empty object to grab type info from
-func (tr *TypeRegistry) AddType(obj interface{}) reflect.Type {
+// AddType adds a given type to the registry -- requires an empty object to grab type info from -- must be passed as a pointer to ensure that it is an addressable, settable type -- also optional properties that can be associated with the type and accessible e.g. for view-specific properties etc
+func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) reflect.Type {
 	if tr.Types == nil {
 		tr.Types = make(map[string]reflect.Type)
+		tr.Props = make(map[string]map[string]interface{})
 	}
 
 	typ := reflect.TypeOf(obj).Elem()
-	tr.Types[typ.Name()] = typ
-	// fmt.Printf("added type: %v\n", typ.Name())
+	tn := typ.Name()
+	tr.Types[tn] = typ
+	// fmt.Printf("added type: %v\n", tn)
+	if props != nil {
+		// fmt.Printf("added props: %v\n", tn)
+		tr.Props[tn] = props
+	}
 	return typ
 }
 
@@ -75,8 +282,33 @@ func (tr *TypeRegistry) FindType(name string) reflect.Type {
 	return tr.Types[name]
 }
 
+// Properties returns properties for this type -- makes props map if not already made
+func (tr *TypeRegistry) Properties(typeName string) map[string]interface{} {
+	tp, ok := tr.Props[typeName]
+	if !ok {
+		tp = make(map[string]interface{})
+		tr.Props[typeName] = tp
+	}
+	return tp
+}
+
+// Prop safely finds a type property from type name and property key -- nil if not found
+func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
+	tp, ok := tr.Props[typeName]
+	if !ok {
+		// fmt.Printf("no props for type: %v\n", typeName)
+		return nil
+	}
+	p, ok := tp[propKey]
+	if !ok {
+		// fmt.Printf("no props for key: %v\n", propKey)
+		return nil
+	}
+	return p
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
-//   KiEnums EnumRegistry and Enum [de]stringification support
+//   EnumRegistry and Enum <-> string support
 
 // todo: suport bit-flag enums and composition of names as | of values, etc
 
@@ -143,62 +375,128 @@ func HasBitMask64(bits, mask int64) bool {
 // stringer that convert to / from strings -- need to explicitly register each
 // new type by calling AddEnum in the process of creating a new global
 // variable, as in:
-// var KiT_TypeName = ki.KiEnums.AddEnum(&TypeName{}, altStringMap)
-// where TypeName is the name of the type and altStringMap is nil or a map[int64]string of
-// alternative names for each enum value  OR:
-// var KiT_TypeName = ki.KiEnums.AddEnumAltLower(&TypeName{}, "Prefix", MyEnumN)
-// which automatically registers alternative names as lower-case versions of const names with
-// given prefix removed -- often what is used in e.g., json or xml kinds of formats
+// var KiT_TypeName = ki.Enums.AddEnum(&TypeName{}, bitFlag true/false,
+//    TypeNameProps (or nil))
+// where TypeName is the name of the type, see below for BitFlag, and
+// TypeNameProps is nil or a map[string]interface{} of properties, OR:
+// var KiT_TypeName = ki.Enums.AddEnumAltLower(&TypeName{}, bitFlag true/false,
+//    TypeNameProps, "Prefix", MyEnumN)
+// which automatically registers alternative names as lower-case versions of
+// const names with given prefix removed -- often what is used in e.g., json
+// or xml kinds of formats
+// special properties:
+// * "BitFlag": true -- each value represents a bit in a set of bit flags, so
+// the string rep of a value contains an or-list of names for each bit set,
+// separated by |
+// * "AltStrings": map[int64]string -- provides an alternative string mapping for
+// the enum values
 type EnumRegistry struct {
 	Enums map[string]reflect.Type
-	// optional alternative string map for enums -- e.g., lower-case, without prefixes etc -- can put multiple such alt strings in the one string with your own separator, in a predefined order, if necessary, and just call strings.Split on those and get the one you want
-	AltStrings map[string]map[int64]string
-	// properties that can be associated with each enum type -- e.g., "bits": true means that this enum should be used as bit flags, so the string rep of a value contains an or-list of names for each bit set, separated by |
-	Props map[string]interface{}
+	// properties that can be associated with each enum type -- e.g., "BitFlag": true  --  "AltStrings" : map[int64]string, or other custom settings
+	Props map[string]map[string]interface{}
 }
 
-// KiEnums is master registry of enum types -- can also create your own package-specific ones
-var KiEnums EnumRegistry
+// Enums is master registry of enum types -- can also create your own package-specific ones
+var Enums EnumRegistry
 
-// AddType adds a given type to the registry -- requires an empty object to
-// grab type info from -- if no alternative strings map, then just passs nil
-func (tr *EnumRegistry) AddEnum(obj interface{}, alts map[int64]string) reflect.Type {
+// AddEnum adds a given type to the registry -- requires an empty object to
+// grab type info from -- if bitFlag then sets BitFlag property, and each
+// value represents a bit in a set of bit flags, so the string rep of a value
+// contains an or-list of names for each bit set, separated by | -- can also
+// add additional properties
+func (tr *EnumRegistry) AddEnum(obj interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
 	if tr.Enums == nil {
 		tr.Enums = make(map[string]reflect.Type)
-		tr.AltStrings = make(map[string]map[int64]string)
+		tr.Props = make(map[string]map[string]interface{})
 	}
 
+	// get the pointer-to version and elem so it is a settable type!
 	typ := reflect.PtrTo(reflect.TypeOf(obj)).Elem()
-	tr.Enums[typ.Name()] = typ
-	tr.AltStrings[typ.Name()] = alts
-	// fmt.Printf("added enum: %v\n", typ.Name())
+	tn := typ.Name()
+	tr.Enums[tn] = typ
+	if props != nil {
+		tr.Props[tn] = props
+	}
+	if bitFlag {
+		tp := tr.Properties(tn)
+		tp["BitFlag"] = true
+	}
+	// fmt.Printf("added enum: %v\n", tn)
 	return typ
 }
 
-// AddType adds a given type to the registry -- requires an empty object to
-// grab type info from -- automatically initializes an alternative string map
+// AddEnumAltLower adds a given type to the registry -- requires an empty object to
+// grab type info from -- automatically initializes AltStrings alternative string map
 // based on the name with given prefix removed (e.g., a type name-based prefix)
 // and lower-cased -- also requires the number of enums -- assumes starts at 0
-func (tr *EnumRegistry) AddEnumAltLower(obj interface{}, prefix string, n int64) reflect.Type {
-	if tr.Enums == nil {
-		tr.Enums = make(map[string]reflect.Type)
-		tr.AltStrings = make(map[string]map[int64]string)
-	}
-
-	typ := reflect.PtrTo(reflect.TypeOf(obj)).Elem()
+func (tr *EnumRegistry) AddEnumAltLower(obj interface{}, bitFlag bool, props map[string]interface{}, prefix string, n int64) reflect.Type {
+	typ := tr.AddEnum(obj, bitFlag, props)
+	tn := typ.Name()
 	alts := make(map[int64]string)
+	tp := tr.Properties(tn)
+	tp["AltStrings"] = alts
 	for i := int64(0); i < n; i++ {
 		str := EnumInt64ToString(i, typ)
 		str = strings.ToLower(strings.TrimPrefix(str, prefix))
 		// fmt.Printf("adding enum: %v\n", str)
 		alts[i] = str
 	}
-	return tr.AddEnum(obj, alts)
+	return typ
 }
 
 // FindEnum finds an enum type based on its type name -- returns nil if not found
 func (tr *EnumRegistry) FindEnum(name string) reflect.Type {
 	return tr.Enums[name]
+}
+
+// Props returns properties for this type -- makes props map if not already made
+func (tr *EnumRegistry) Properties(enumName string) map[string]interface{} {
+	tp, ok := tr.Props[enumName]
+	if !ok {
+		tp = make(map[string]interface{})
+		tr.Props[enumName] = tp
+	}
+	return tp
+}
+
+// Prop safely finds an enum type property from enum type name and property key -- nil if not found
+func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
+	tp, ok := tr.Props[enumName]
+	if !ok {
+		// fmt.Printf("no props for enum type: %v\n", enumName)
+		return nil
+	}
+	p, ok := tp[propKey]
+	if !ok {
+		// fmt.Printf("no props for key: %v\n", propKey)
+		return nil
+	}
+	return p
+}
+
+// get optional alternative string map for enums -- e.g., lower-case, without
+// prefixes etc -- can put multiple such alt strings in the one string with
+// your own separator, in a predefined order, if necessary, and just call
+// strings.Split on those and get the one you want -- nil if not set
+func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
+	ps := tr.Prop(enumName, "AltStrings")
+	if ps == nil {
+		return nil
+	}
+	m, ok := ps.(map[int64]string)
+	if !ok {
+		log.Printf("ki.EnumRegistry AltStrings error: AltStrings property must be a map[int64]string type, is not -- is instead: %T\n", m)
+		return nil
+	}
+	return m
+}
+
+// check if this enum is for bit flags instead of mutually-exclusive int
+// values -- checks BitFlag property -- if true string rep of a value contains
+// an or-list of names for each bit set, separated by |
+func (tr *EnumRegistry) IsBitFlag(enumName string) bool {
+	b, _ := ToBool(tr.Prop(enumName, "BitFlag"))
+	return b
 }
 
 // EnumToInt64 converts an enum into an int64 using reflect -- just use int64(eval) when you
@@ -270,7 +568,7 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 		eval = reflect.ValueOf(eval).Elem() // deref the pointer
 	}
 	et := reflect.TypeOf(eval)
-	alts := tr.AltStrings[et.Name()]
+	alts := tr.AltStrings(et.Name())
 	if alts == nil {
 		log.Printf("ki.EnumToAltString: no alternative string map for type %v\n", et.Name())
 		return ""
@@ -283,7 +581,7 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 // Enum to alternative String value converts an int64 to corresponding
 // alternative string value, for given type name
 func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
-	alts := tr.AltStrings[typnm]
+	alts := tr.AltStrings(typnm)
 	if alts == nil {
 		log.Printf("ki.EnumInt64ToAltString: no alternative string map for type %v\n", typnm)
 		return ""
@@ -360,7 +658,7 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 		return err
 	}
 	et := etp.Elem()
-	alts := tr.AltStrings[et.Name()]
+	alts := tr.AltStrings(et.Name())
 	if alts == nil {
 		err := fmt.Errorf("ki.EnumFromAltString: no alternative string map for type %v\n", et.Name())
 		log.Printf("%v", err)
@@ -380,7 +678,7 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 // Set Enum from alternative String using a reflect.Value -- must pass a *pointer* to the enum item.
 func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string) error {
 	et := eval.Type()
-	alts := tr.AltStrings[et.Name()]
+	alts := tr.AltStrings(et.Name())
 	if alts == nil {
 		err := fmt.Errorf("ki.SetEnumValueFromAltString: no alternative string map for type %v\n", et.Name())
 		log.Printf("%v", err)

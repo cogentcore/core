@@ -17,7 +17,7 @@ type TestNode struct {
 	sig2 Signal
 }
 
-var KtTestNode = KiTypes.AddType(&TestNode{})
+var KtTestNode = Types.AddType(&TestNode{}, nil)
 
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
