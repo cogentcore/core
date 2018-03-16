@@ -19,21 +19,42 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
-	// "gopkg.in/go-playground/colors.v1"
 	"image"
 	"log"
 	"reflect"
 	// "strconv"
 )
 
+// node flags are bitflags for tracking common high-frequency GUI state,
+// mostly having to do with event processing -- use properties map for less
+// frequently used information
+type NodeFlags int32
+
+const (
+	NodeFlagsNil NodeFlags = iota
+	// can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style 'can-focus' property
+	CanFocus
+	// does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
+	HasFocus
+	// this indicates that the MouseEnteredEvent was previously registered on this node
+	MouseHasEntered
+)
+
+//go:generate stringer -type=EventType
+
+var KiT_NodeFlags = ki.KiEnums.AddEnum(NodeFlagsNil, nil)
+
 // base struct node for GoGi
 type NodeBase struct {
 	ki.Node
-	WinBBox image.Rectangle `json:"-",desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
+	NodeFlags int64           `desc:"bitwise flags set according to NodeFlags type"`
+	WinBBox   image.Rectangle `json:"-",desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_NodeBase = ki.KiTypes.AddType(&NodeBase{})
+
+// todo: stop receiving events function..
 
 // register this node to receive a given type of GUI event signal from the parent window
 func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
@@ -49,6 +70,11 @@ func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
 // zero-out the window bbox -- for nodes that are not visible
 func (g *NodeBase) ZeroWinBBox() {
 	g.WinBBox = image.ZR
+}
+
+// does the current node have keyboard focus
+func (g *NodeBase) HasFocus() bool {
+	return ki.HasBitFlag64(g.NodeFlags, int(HasFocus))
 }
 
 // standard css properties on nodes apply, including visible, etc.

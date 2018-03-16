@@ -140,6 +140,9 @@ func (g *Text2D) CanReRender2D() bool {
 	return false
 }
 
+func (g *Text2D) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &Text2D{}
 

@@ -317,5 +317,8 @@ func (g *RowLayout) CanReRender2D() bool {
 	return false
 }
 
+func (g *RowLayout) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &RowLayout{}

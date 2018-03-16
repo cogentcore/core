@@ -73,6 +73,9 @@ func (g *Rect) CanReRender2D() bool {
 	return false
 }
 
+func (g *Rect) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &Rect{}
 
@@ -123,6 +126,9 @@ func (g *Viewport2DFill) Render2D() {
 
 func (g *Viewport2DFill) CanReRender2D() bool {
 	return false // why bother
+}
+
+func (g *Viewport2DFill) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -182,6 +188,9 @@ func (g *Circle) CanReRender2D() bool {
 	return false
 }
 
+func (g *Circle) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &Circle{}
 
@@ -238,6 +247,9 @@ func (g *Ellipse) CanReRender2D() bool {
 	return false
 }
 
+func (g *Ellipse) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &Ellipse{}
 
@@ -292,6 +304,9 @@ func (g *Line) Render2D() {
 
 func (g *Line) CanReRender2D() bool {
 	return false
+}
+
+func (g *Line) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -352,6 +367,9 @@ func (g *Polyline) CanReRender2D() bool {
 	return false
 }
 
+func (g *Polyline) FocusChanged2D(gotFocus bool) {
+}
+
 // check for interface implementation
 var _ Node2D = &Polyline{}
 
@@ -408,6 +426,9 @@ func (g *Polygon) Render2D() {
 
 func (g *Polygon) CanReRender2D() bool {
 	return false
+}
+
+func (g *Polygon) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

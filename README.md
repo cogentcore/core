@@ -46,6 +46,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * Using the basic 64bit geom from fogleman/gg -- the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` did not have appropriate 2D rendering transforms etc.
 
 * Using 64bit floats for coordinates etc because the spec says you need those for the "high quality" transforms, and Go defaults to them, and it just makes life easier -- won't have so crazy many coords in 2D space as we might have in 3D, where 32bit makes more sense and optimizes GPU hardware.
+	+ shiny uses highly optimized rendering with either 32bit floats or ints -- later could look into it
 
 * The SVG default coordinate system has 0,0 at the upper-left.  The default 3D coordinate system flips the Y axis so 0,0 is at the lower left effectively (actually it uses center-based coordinates so 0,0 is in the center of the image, effectively -- everything is defined by the camera anyway)
 
@@ -62,11 +63,7 @@ Next:
 
 * style parsing crash on font-family
 
-* layout issue
-
-* add margins to button drawing
-
-* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc
+* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc -- key innovation over css: relative color transforms: lighterX darkerX that transform existing color -- great for styling widgets etc.
 
 Soon:
 
@@ -86,6 +83,7 @@ Soon:
 * SVG *text* generator in go: https://github.com/ajstarks/svgo
 * cairo wrapper in go: https://github.com/ungerik/go-cairo -- maybe needed for PDF generation from SVG?
 * https://github.com/jyotiska/go-webcolors -- need this for parsing colors
+* highly optimized vector rasterizer -- not clear about full scope but could potentially impl that later https://godoc.org/golang.org/x/image/vector
 
 ## GUI
 

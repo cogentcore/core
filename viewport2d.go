@@ -149,6 +149,9 @@ func (vp *Viewport2D) CanReRender2D() bool {
 	return true // always true for viewports
 }
 
+func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 

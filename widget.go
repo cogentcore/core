@@ -118,7 +118,13 @@ type ButtonBase struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_ButtonBase = ki.KiTypes.AddType(&ButtonBase{})
 
+// set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
+	// todo: process disabled state -- probably just deal with the property directly?
+	// it overrides any choice here and just sets state to disabled..
+	if state == ButtonNormal && g.HasFocus() {
+		state = ButtonFocus
+	}
 	g.State = state
 	g.Style = g.StateStyles[state] // get relevant styles
 }
@@ -150,7 +156,7 @@ func (g *Button) InitNode2D() {
 		}
 		ab.UpdateStart()
 		ab.SetButtonState(ButtonPress)
-		// ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+		// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
 		ab.UpdateEnd()
 	})
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -161,10 +167,10 @@ func (g *Button) InitNode2D() {
 		}
 		ab.UpdateStart()
 		ab.SetButtonState(ButtonNormal)
-		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+		ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
 		ab.UpdateEnd()
 	})
-	g.ReceiveEventType(MouseMovedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
@@ -173,21 +179,43 @@ func (g *Button) InitNode2D() {
 		if ab.State != ButtonHover {
 			ab.UpdateStart()
 			ab.SetButtonState(ButtonHover)
-			ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
+			// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
+			ab.UpdateEnd()
+		}
+	})
+	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
+		ab, ok := recv.(*Button)
+		if !ok {
+			return
+		}
+		if ab.State == ButtonHover {
+			ab.UpdateStart()
+			ab.SetButtonState(ButtonNormal)
+			// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
 			ab.UpdateEnd()
 		}
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// todo: convert d to event, get key, check for shortcut, etc
-		fmt.Printf("key pressed on %v!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		ab.UpdateStart()
-		ab.SetButtonState(ButtonFocus)
-		ab.ButtonSig.Emit(recv.ThisKi(), ki.SendCustomSignal(int64(ButtonPressed)), d)
-		ab.UpdateEnd()
+		kt, ok := d.(KeyTypedEvent)
+		if ok {
+			if kt.Key == "enter" || kt.Key == "space" || kt.Key == "return" {
+				fmt.Printf("button pressed on %v!\n", recv.PathUnique())
+				ab.UpdateStart()
+				ab.SetButtonState(ButtonPress)
+				ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
+				ab.UpdateEnd()
+				// todo: brief delay??
+				ab.UpdateStart()
+				ab.SetButtonState(ButtonNormal)
+				ab.UpdateEnd()
+			}
+		}
 	})
 }
 
@@ -204,12 +232,12 @@ var ButtonProps = []map[string]interface{}{
 		"box-shadow.h-offset": "4px",
 		"box-shadow.v-offset": "4px",
 		"box-shadow.blur":     "4px",
-		"box-shadow.color":    "grey",
+		"box-shadow.color":    "#CCC",
 		// "font-family":         "Arial", // this is crashing
 		"font-size":        "24pt",
 		"text-align":       "center",
 		"color":            "black",
-		"background-color": "#AAF",
+		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":        "#BBB",
 		"box-shadow.h-offset": "0px",
@@ -219,19 +247,10 @@ var ButtonProps = []map[string]interface{}{
 		"color":               "#AAA",
 		"background-color":    "#DDD",
 	}, { // hover
-		// "border-color": "#AAF",
-		// "box-shadow.h-offset": "6px",
-		// "box-shadow.v-offset": "6px",
-		// "box-shadow.blur":     "6px",
-		"color":            "black",
-		"background-color": "#88F",
+		"background-color": "#CCF", // todo "darker"
 	}, { // focus
-		"border-color": "#EEF",
-		// "box-shadow.h-offset": "6px",
-		// "box-shadow.v-offset": "6px",
-		// "box-shadow.blur":     "6px",
-		// "color":               "black",
-		// "background-color":    "#00008080",
+		"border-color":     "#EEF",
+		"box-shadow.color": "#BBF",
 	}, { // press
 		"border-color":        "#DDF",
 		"box-shadow.h-offset": "0px",
@@ -243,6 +262,8 @@ var ButtonProps = []map[string]interface{}{
 }
 
 func (g *Button) Style2D() {
+	// we can focus by default
+	ki.SetBitFlag64(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
 	// then style with user props
@@ -320,6 +341,16 @@ func (g *Button) Render2DDefaultStyle() {
 
 func (g *Button) CanReRender2D() bool {
 	return true
+}
+
+func (g *Button) FocusChanged2D(gotFocus bool) {
+	g.UpdateStart()
+	if gotFocus {
+		g.SetButtonState(ButtonFocus)
+	} else {
+		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+	}
+	g.UpdateEnd()
 }
 
 // check for interface implementation

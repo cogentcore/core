@@ -67,6 +67,8 @@ type Node2D interface {
 	Render2D()
 	// Can this node re-render itself directly using cached data?  only for nodes that paint an opaque background first (e.g., widgets) -- optimizes local redraw when possible -- always true for sub-viewports
 	CanReRender2D() bool
+	// function called on node when it gets or loses focus -- focus flag has current state too
+	FocusChanged2D(gotFocus bool)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

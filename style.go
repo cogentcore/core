@@ -126,6 +126,8 @@ func (s *ShadowStyle) HasShadow() bool {
 // all the CSS-based style elements -- used for widget-type objects
 type Style struct {
 	IsSet         bool            `desc:"has this style been set from object values yet?"`
+	Display       bool            `xml:display",desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool            `xml:visible",desc:"todo big enum of how to display item -- controls layout etc"`
 	UnContext     units.Context   `desc:"units context -- parameters necessary for anchoring relative units"`
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle     `xml:"border",desc:"border around the box element -- todo: can have separate ones for different sides"`
@@ -139,7 +141,6 @@ type Style struct {
 	Outline       BorderStyle     `xml:"outline",desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
 	PointerEvents bool            `xml:"pointer-events",desc:"does this element respond to pointer events -- default is true"`
 	// todo: also see above for more notes on missing style elements
-	// Display    bool            `xml:display",desc:"big enum of how to display item -- controls layout etc"`
 }
 
 func (s *Style) Defaults() {
@@ -178,6 +179,7 @@ func (s *Style) SetStyle(parent, defs *Style, props map[string]interface{}) {
 	s.Layout.SetStylePost()
 	s.Font.SetStylePost()
 	s.Text.SetStylePost()
+	s.IsSet = true
 }
 
 // set the unit context based on size of viewport and parent element (from bbox)
@@ -299,7 +301,7 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, t
 		// fmt.Printf("StyleField didn't find tag: %v\n", tag)
 		return
 	}
-	fmt.Printf("StyleField got tag: %v, value %v\n", tag, prv)
+	// fmt.Printf("StyleField got tag: %v, value %v\n", tag, prv)
 
 	prstr := ""
 	switch prtv := prv.(type) {

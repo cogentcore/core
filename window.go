@@ -22,7 +22,7 @@ type Window struct {
 	NodeBase
 	Win           OSWindow              `json:"-",desc:"OS-specific window interface"`
 	EventSigs     [EventTypeN]ki.Signal `json:"-",desc:"signals for communicating each type of window (wde) event"`
-	Focus         *NodeBase             `json:"-",desc:"node receiving keyboard events"`
+	Focus         ki.Ki                 `json:"-",desc:"node receiving keyboard events"`
 	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
@@ -108,10 +108,101 @@ func (w *Window) StartEventLoop() {
 	wg.Wait()
 }
 
+// send given event signal to all receivers that want it
+func (w *Window) SendEventSignal(ei interface{}) {
+	evi, ok := ei.(Event)
+	if !ok {
+		return
+	}
+	et := evi.EventType()
+	if et > EventTypeN || et < 0 {
+		return // can't handle other types of events here due to EventSigs[et] size
+	}
+	// fmt.Printf("got event type: %v\n", et)
+	// first just process all the events straight-up
+	w.EventSigs[et].EmitFiltered(w.This, int64(et), ei, func(k ki.Ki) bool {
+		gii, ok := k.(Node2D)
+		if ok {
+			gi := gii.GiNode2D()
+			if evi.EventOnFocus() {
+				if gi.This != w.Focus { // todo: could use GiNodeI interface
+					return false
+				}
+			} else if evi.EventHasPos() {
+				pos := evi.EventPos()
+				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
+				if !pos.In(gi.WinBBox) {
+					return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that
+				}
+			}
+		} else {
+			// todo: get a 3D
+			return false
+		}
+		return true
+	})
+}
+
+// process MouseMoved events for enter / exit status
+func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
+	evi, ok := ei.(Event)
+	if !ok {
+		return
+	}
+	pos := evi.EventPos()
+	var mene MouseEnteredEvent
+	mene.From = pos
+	var mexe MouseExitedEvent
+	mexe.From = pos
+	enex := []EventType{MouseEnteredEventType, MouseExitedEventType}
+	for _, ete := range enex {
+		nwei := interface{}(nil)
+		if ete == MouseEnteredEventType {
+			nwei = mene
+		} else {
+			nwei = mexe
+		}
+		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
+			gii, ok := k.(Node2D)
+			if ok {
+				gi := gii.GiNode2D()
+				in := pos.In(gi.WinBBox)
+				if in {
+					if ete == MouseEnteredEventType {
+						if ki.HasBitFlag64(gi.NodeFlags, int(MouseHasEntered)) {
+							return false // already in
+						}
+						ki.SetBitFlag64(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+					} else {
+						return false // don't send any exited events if in
+					}
+				} else { // mouse not in object
+					if ete == MouseExitedEventType {
+						if ki.HasBitFlag64(gi.NodeFlags, int(MouseHasEntered)) {
+							ki.ClearBitFlag64(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						} else {
+							return false // already out..
+						}
+					} else {
+						return false // don't send any exited events if in
+					}
+				}
+			} else {
+				// todo: 3D
+				return false
+			}
+			return true
+		})
+	}
+
+}
+
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
 	// todo: separate the inner and outer loops here?  not sure if events needs to be outside?
 	events := w.Win.EventChan()
+
+	lastResize := interface{}(nil)
 
 	for ei := range events {
 		if w.stopEventLoop {
@@ -119,48 +210,119 @@ func (w *Window) EventLoop() {
 			fmt.Println("stop event loop")
 		}
 		runtime.Gosched()
+
 		evi, ok := ei.(Event)
 		if !ok {
-			log.Printf("GoGi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
+			log.Printf("Gi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
 			continue
 		}
 		et := evi.EventType()
-		// fmt.Printf("got event type: %v\n", et)
-		if et < EventTypeN {
-			w.EventSigs[et].EmitFiltered(w.This, ki.SendCustomSignal(int64(et)), ei, func(k ki.Ki) bool {
-				gii, ok := k.(Node2D)
-				if ok {
-					gi := gii.GiNode2D()
-					if evi.EventOnFocus() {
-						return &(gi.NodeBase) == w.Focus // todo: could use GiNodeI interface
-					} else if evi.EventHasPos() {
-						pos := evi.EventPos()
-						// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
-						return pos.In(gi.WinBBox)
-					} else {
-						return true
-					}
-				} else {
-					// todo: get a 3D
-					return false
-				}
-				return true
-			})
+		if et > EventTypeN || et < 0 { // we don't handle other types of events here
+			continue
 		}
-		// todo: deal with resize event -- also what about iconify events!?
+		w.SendEventSignal(ei)
+		if et == MouseMovedEventType {
+			w.ProcessMouseMovedEvent(ei)
+		}
+		// todo: what about iconify events!?
 		if et == CloseEventType {
 			fmt.Println("close")
 			w.Win.Close()
+			// todo: only if last one..
 			StopBackendEventLoop()
 		}
 		if et == ResizeEventType {
-			rev, ok := evi.(ResizeEvent)
+			lastResize = ei
+		} else {
+			if lastResize != nil { // only do last one
+				rev, ok := lastResize.(ResizeEvent)
+				lastResize = nil
+				if ok {
+					w.Resize(rev.Width, rev.Height)
+				}
+			}
+		}
+		if et == KeyTypedEventType {
+			kt, ok := ei.(KeyTypedEvent)
 			if ok {
-				w.Resize(rev.Width, rev.Height)
+				if kt.Key == "tab" {
+					w.SetNextFocusItem()
+				}
+				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)
 			}
 		}
 	}
 	fmt.Println("end of events")
+}
+
+// set focus to given item -- returns true if focus changed
+func (w *Window) SetFocusItem(k ki.Ki) bool {
+	if w.Focus == k {
+		return false
+	}
+	if w.Focus != nil {
+		gii, ok := w.Focus.(Node2D) // todo: lots of stuff would be good to have generic Node
+		if ok {
+			gi := gii.GiNode2D()
+			ki.ClearBitFlag64(&gi.NodeFlags, int(HasFocus))
+			gii.FocusChanged2D(false)
+		}
+	}
+	w.Focus = k
+	if k == nil {
+		return true
+	}
+	gii, ok := k.(Node2D) // todo: lots of stuff would be good to have generic Node
+	if ok {
+		gi := gii.GiNode2D()
+		ki.SetBitFlag64(&gi.NodeFlags, int(HasFocus))
+		gii.FocusChanged2D(true)
+	}
+	return true
+}
+
+// set the focus on the next item that can accept focus -- returns true if a focus item found
+// todo: going the other direction is going to be tricky!
+func (w *Window) SetNextFocusItem() bool {
+	gotFocus := false
+	focusNext := false // get the next guy
+	if w.Focus == nil {
+		focusNext = true
+	}
+
+	for i := 0; i < 2; i++ {
+		w.FunDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+			if gotFocus {
+				return false
+			}
+			// todo: see about 3D guys
+			gii, ok := k.(Node2D)
+			if !ok {
+				return true
+			}
+			gi := gii.GiNode2D()
+			if gi.Paint.Off { // off below this
+				return false
+			}
+			if !ki.HasBitFlag64(gi.NodeFlags, int(CanFocus)) {
+				return true
+			}
+			if focusNext {
+				w.SetFocusItem(k)
+				gotFocus = true
+				return false // done
+			}
+			if w.Focus == k {
+				focusNext = true
+			}
+			return true
+		})
+		if gotFocus {
+			return true
+		}
+		focusNext = true // this time around, just get the first one
+	}
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

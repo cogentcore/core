@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"github.com/rcoreilly/goki/ki"
 	"image"
 	// "fmt"
 )
@@ -59,6 +60,8 @@ const (
 )
 
 //go:generate stringer -type=EventType
+
+var KiT_EventType = ki.KiEnums.AddEnum(MouseMovedEventType, nil)
 
 // buttons that can be pressed
 type MouseButton int
