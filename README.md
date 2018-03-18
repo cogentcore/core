@@ -39,6 +39,7 @@ https://golang.org/doc/effective_go.html#names
 
 * It is hard to remember, but important, that everything will be prefixed by the package name for users of the package, so *don't put a redundant prefix on anything*
 
+* Use `AsType()` for methods that give you that give you that concrete type from a struct (where it isn't a conversion, just selecting that view of it)
 
 ## Struct structure
 
