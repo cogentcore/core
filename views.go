@@ -338,10 +338,12 @@ func (g *NodeWidget) Render2D() {
 	st := &g.Style
 	pc.Font = st.Font
 	pc.Text = st.Text
+	pc.Stroke.SetColor(&st.Border.Color)
+	pc.Stroke.Width = st.Border.Width
+	pc.Fill.SetColor(&st.Background.Color)
 	// g.DrawStdBox()
 	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
-	fmt.Printf("size: %v\n", sz)
 	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
 
 	pc.Stroke.SetColor(&st.Color) // ink color
