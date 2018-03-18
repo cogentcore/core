@@ -84,10 +84,5 @@ func mainrun() {
 
 	win.UpdateEnd()
 
-	// text1.UpdateStart()
-	// text1.UpdateEnd()
-
-	win.SetNextFocusItem()
-
 	win.StartEventLoop()
 }

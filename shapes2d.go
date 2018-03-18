@@ -26,11 +26,11 @@ type Rect struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Rect = ki.Types.AddType(&Rect{}, nil)
 
-func (g *Rect) GiNode2D() *Node2DBase {
+func (g *Rect) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Rect) GiViewport2D() *Viewport2D {
+func (g *Rect) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -91,11 +91,11 @@ type Viewport2DFill struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Viewport2DFill = ki.Types.AddType(&Viewport2DFill{}, nil)
 
-func (g *Viewport2DFill) GiNode2D() *Node2DBase {
+func (g *Viewport2DFill) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Viewport2DFill) GiViewport2D() *Viewport2D {
+func (g *Viewport2DFill) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -146,11 +146,11 @@ type Circle struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Circle = ki.Types.AddType(&Circle{}, nil)
 
-func (g *Circle) GiNode2D() *Node2DBase {
+func (g *Circle) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Circle) GiViewport2D() *Viewport2D {
+func (g *Circle) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -206,11 +206,11 @@ type Ellipse struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Ellipse = ki.Types.AddType(&Ellipse{}, nil)
 
-func (g *Ellipse) GiNode2D() *Node2DBase {
+func (g *Ellipse) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Ellipse) GiViewport2D() *Viewport2D {
+func (g *Ellipse) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -265,11 +265,11 @@ type Line struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Line = ki.Types.AddType(&Line{}, nil)
 
-func (g *Line) GiNode2D() *Node2DBase {
+func (g *Line) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Line) GiViewport2D() *Viewport2D {
+func (g *Line) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -323,11 +323,11 @@ type Polyline struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Polyline = ki.Types.AddType(&Polyline{}, nil)
 
-func (g *Polyline) GiNode2D() *Node2DBase {
+func (g *Polyline) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Polyline) GiViewport2D() *Viewport2D {
+func (g *Polyline) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -384,11 +384,11 @@ type Polygon struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Polygon = ki.Types.AddType(&Polygon{}, nil)
 
-func (g *Polygon) GiNode2D() *Node2DBase {
+func (g *Polygon) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Polygon) GiViewport2D() *Viewport2D {
+func (g *Polygon) AsViewport2D() *Viewport2D {
 	return nil
 }
 

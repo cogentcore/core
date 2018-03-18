@@ -12,7 +12,7 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	"log"
+	// "log"
 	"os"
 	"reflect"
 )
@@ -101,11 +101,11 @@ func (vp *Viewport2D) DrawIntoWindow() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (vp *Viewport2D) GiNode2D() *Node2DBase {
+func (vp *Viewport2D) AsNode2D() *Node2DBase {
 	return &vp.Node2DBase
 }
 
-func (vp *Viewport2D) GiViewport2D() *Viewport2D {
+func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 	return vp
 }
 
@@ -161,15 +161,15 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if !ok {
 		return
 	}
-	vp := vpgi.GiViewport2D()
+	vp := vpgi.AsViewport2D()
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
-	gii, ok := node.(Node2D)
-	if !ok { // should not happen..
+	gii, gi := KiToNode2D(node)
+	if gii == nil { // should not happen
 		return
 	}
-	fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), sig, node.PathUnique())
+	fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.SignalType(sig), node.PathUnique())
 
 	// todo: probably need better ways of telling how much re-rendering is needed
 	if sig == ki.SignalChildAdded {
@@ -181,8 +181,8 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 			gii.Render2D()
 			vp.Render2D() // redraw us
 		} else {
-			vp.Style2DFromNode(gii.GiNode2D()) // restyle only from affected node downward
-			vp.Render2DRoot()                  // need to re-render entirely..
+			vp.Style2DFromNode(gi) // restyle only from affected node downward
+			vp.Render2DRoot()      // need to re-render entirely..
 		}
 	}
 }
@@ -193,13 +193,10 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 // initialize scene graph
 func (vp *Viewport2D) Init2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := (interface{}(k)).(Node2D)
-		if !ok {
-			// todo: need to detect the thing that wraps a 3D node inside a 2D, and stop there
-			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
+		gii, gi := KiToNode2D(k)
+		if gii == nil {
 			return false
 		}
-		gi := gii.GiNode2D()
 		gi.InitNode2DBase()
 		gii.InitNode2D()
 		return true
@@ -223,9 +220,8 @@ func (vp *Viewport2D) Render2DRoot() {
 // this only needs to be done on a structural update
 func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
 	gi.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok { // todo: error message already in InitNode2D
-			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
+		gii, _ := KiToNode2D(k)
+		if gii == nil {
 			return false // going into a different type of thing, bail
 		}
 		gii.Style2D()
@@ -236,9 +232,8 @@ func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
 // this only needs to be done on a structural update
 func (vp *Viewport2D) Style2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok { // error message already in InitNode2D
-			log.Printf("Node %v in Viewport2D does NOT implement Node2D interface -- it should!\n", k.PathUnique())
+		gii, _ := KiToNode2D(k)
+		if gii == nil {
 			return false // going into a different type of thing, bail
 		}
 		gii.Style2D()
@@ -252,22 +247,20 @@ func (vp *Viewport2D) Layout2DRoot() {
 	// layout happens in depth-first manner -- requires two functions
 	vp.FunDownDepthFirst(0, vp,
 		func(k ki.Ki, level int, d interface{}) bool { // this is for testing whether to process node
-			gii, ok := k.(Node2D)
-			if !ok {
+			_, gi := KiToNode2D(k)
+			if gi == nil {
 				return false
 			}
-			gi := gii.GiNode2D()
 			if gi.Paint.Off { // off below this
 				return false
 			}
 			return true
 		},
 		func(k ki.Ki, level int, d interface{}) bool {
-			gii, ok := k.(Node2D)
-			if !ok {
+			gii, gi := KiToNode2D(k)
+			if gi == nil {
 				return false
 			}
-			gi := gii.GiNode2D()
 			if gi.Paint.Off { // off below this
 				return false
 			}
@@ -278,11 +271,10 @@ func (vp *Viewport2D) Layout2DRoot() {
 	// second pass we add the parent positions after layout -- don't want to do that in
 	// render b/c then it doesn't work for local re-renders..
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok {
+		gii, gi := KiToNode2D(k)
+		if gi == nil {
 			return false
 		}
-		gi := gii.GiNode2D()
 		if gi.Paint.Off { // off below this
 			return false
 		}
@@ -295,11 +287,10 @@ func (vp *Viewport2D) Layout2DRoot() {
 // just do the render only part -- not the full 3-pass version called in Render2DRoot
 func (vp *Viewport2D) RenderOnly2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok {
+		gii, gi := KiToNode2D(k)
+		if gi == nil {
 			return false
 		}
-		gi := gii.GiNode2D()
 		if gi.Paint.Off { // off below this
 			return false
 		}

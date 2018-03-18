@@ -87,11 +87,11 @@ type Text2D struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Text2D = ki.Types.AddType(&Text2D{}, nil)
 
-func (g *Text2D) GiNode2D() *Node2DBase {
+func (g *Text2D) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Text2D) GiViewport2D() *Viewport2D {
+func (g *Text2D) AsViewport2D() *Viewport2D {
 	return nil
 }
 

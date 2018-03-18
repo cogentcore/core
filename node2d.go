@@ -52,9 +52,9 @@ var KiT_Node2DBase = ki.Types.AddType(&Node2DBase{}, nil)
 // primary interface for all Node2D nodes
 type Node2D interface {
 	// get a generic Node2DBase for our node -- not otherwise possible -- don't want to interface everything that a base node can do as that would be highly redundant
-	GiNode2D() *Node2DBase
+	AsNode2D() *Node2DBase
 	// if this is a Viewport2D-derived node, get it as a Viewport2D, else return nil
-	GiViewport2D() *Viewport2D
+	AsViewport2D() *Viewport2D
 	// initialize a node -- setup connections etc -- before this call, InitNodeBase is called to set basic inits including setting Viewport and connecting node signal to parent vp -- must be robust to being called repeatedly
 	InitNode2D()
 	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style)
@@ -74,15 +74,16 @@ type Node2D interface {
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
-func (g *Node2DBase) ParentNode2D() *Node2DBase {
-	if g.Parent == nil {
-		return nil
+// convert Ki to a Node2D interface and a Node2DBase obj -- nil if not
+func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
+	if k == nil {
+		return nil, nil
 	}
-	gii, ok := g.Parent.(Node2D)
+	gii, ok := k.(Node2D)
 	if ok {
-		return gii.GiNode2D()
+		return gii, gii.AsNode2D()
 	}
-	return nil
+	return nil, nil
 }
 
 // handles basic node initialization -- InitNode2D can then do special things
@@ -129,7 +130,7 @@ func (g *Node2DBase) Style2DWidget() {
 	if g.Viewport == nil {
 		return
 	}
-	pg := g.ParentNode2D()
+	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
 		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProps())
 	} else {
@@ -139,7 +140,7 @@ func (g *Node2DBase) Style2DWidget() {
 	g.Layout.SetFromStyle(&g.Style.Layout)        // also does reset
 }
 
-// find parent viewport -- uses GiViewport2D() method on Node2D interface
+// find parent viewport -- uses AsViewport2D() method on Node2D interface
 func (g *Node2DBase) FindViewportParent() *Viewport2D {
 	var parVp *Viewport2D
 	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -147,7 +148,7 @@ func (g *Node2DBase) FindViewportParent() *Viewport2D {
 		if !ok {
 			return false // don't keep going up
 		}
-		vp := gii.GiViewport2D()
+		vp := gii.AsViewport2D()
 		if vp != nil {
 			parVp = vp
 			return false // done
@@ -159,7 +160,7 @@ func (g *Node2DBase) FindViewportParent() *Viewport2D {
 
 // copy our paint from our parents -- called during Style for SVG
 func (g *Node2DBase) CopyParentPaint() *Node2DBase {
-	pg := g.ParentNode2D()
+	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
 		g.Paint = pg.Paint
 	}
@@ -184,7 +185,7 @@ func (g *Node2DBase) SetWinBBox(bb image.Rectangle) {
 
 // add the position of our parent to our layout position, to be called after getting geom from layout
 func (g *Node2DBase) AddParentPos() {
-	pg := g.ParentNode2D()
+	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
 		g.Layout.AllocPos = g.Layout.AllocPos.Add(pg.Layout.AllocPos)
 	}
@@ -200,4 +201,28 @@ func (g *Node2DBase) GeomFromLayout() {
 
 func (g *Node2DBase) DefaultGeom() {
 	g.SetWinBBox(g.WinBBoxFromAlloc())
+}
+
+// for basic aggregation over children -- sum of Layout.AllocSize for all children
+func (g *Node2DBase) SumOfChildWidths() float64 {
+	w := 0.0
+	for _, kid := range g.Children {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			w += gi.Layout.AllocSize.X
+		}
+	}
+	return w
+}
+
+// for basic aggregation over children -- sum of Layout.AllocSize for all children
+func (g *Node2DBase) SumOfChildHeights() float64 {
+	h := 0.0
+	for _, kid := range g.Children {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			h += gi.Layout.AllocSize.Y
+		}
+	}
+	return h
 }

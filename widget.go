@@ -67,7 +67,7 @@ func (g *WidgetBase) DrawStdBox() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Buttons
 
-// signals that buttons can send -- offset by SignalTypeBaseN when sent
+// signals that buttons can send
 type ButtonSignalType int64
 
 const (
@@ -96,8 +96,8 @@ const (
 	ButtonHover
 	// button is the focus -- will respond to keyboard input
 	ButtonFocus
-	// button is currently being pressed
-	ButtonPress
+	// button is currently being pressed down
+	ButtonDown
 	// total number of button states
 	ButtonStatesN
 )
@@ -129,6 +129,50 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	g.Style = g.StateStyles[state] // get relevant styles
 }
 
+// set the button in the down state -- mouse clicked down but not yet up --
+// emits ButtonPressed signal -- ButtonClicked is down and up
+func (g *ButtonBase) ButtonPressed() {
+	g.UpdateStart()
+	g.SetButtonState(ButtonDown)
+	g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
+	g.UpdateEnd()
+}
+
+// the button has just been released -- sends a released signal and returns
+// state to normal, and emits clicked signal if if it was previously in pressed state
+func (g *ButtonBase) ButtonReleased() {
+	wasPressed := (g.State == ButtonDown)
+	g.UpdateStart()
+	g.SetButtonState(ButtonNormal)
+	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	if wasPressed {
+		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+	}
+	g.UpdateEnd()
+}
+
+// button starting hover-- todo: keep track of time and popup a tooltip -- signal?
+func (g *ButtonBase) ButtonEnterHover() {
+	if g.State != ButtonHover {
+		g.UpdateStart()
+		g.SetButtonState(ButtonHover)
+		g.UpdateEnd()
+	}
+}
+
+// button exiting hover
+func (g *ButtonBase) ButtonExitHover() {
+	if g.State == ButtonHover {
+		g.UpdateStart()
+		if g.HasFocus() {
+			g.SetButtonState(ButtonFocus)
+		} else {
+			g.SetButtonState(ButtonNormal)
+		}
+		g.UpdateEnd()
+	}
+}
+
 ///////////////////////////////////////////////////////////
 
 // Button is a standard command button -- PushButton in Qt Widgets, and Button in Qt Quick
@@ -139,87 +183,59 @@ type Button struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Button = ki.Types.AddType(&Button{}, nil)
 
-func (g *Button) GiNode2D() *Node2DBase {
+func (g *Button) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *Button) GiViewport2D() *Viewport2D {
+func (g *Button) AsViewport2D() *Viewport2D {
 	return nil
 }
 
 func (g *Button) InitNode2D() {
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		ab.UpdateStart()
-		ab.SetButtonState(ButtonPress)
-		// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
-		ab.UpdateEnd()
+		ab.ButtonPressed()
 	})
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		ab.UpdateStart()
-		ab.SetButtonState(ButtonNormal)
-		ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
-		ab.UpdateEnd()
+		ab.ButtonReleased()
 	})
 	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		if ab.State != ButtonHover {
-			ab.UpdateStart()
-			ab.SetButtonState(ButtonHover)
-			// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
-			ab.UpdateEnd()
-		}
+		ab.ButtonEnterHover()
 	})
 	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
-		if ab.State == ButtonHover {
-			ab.UpdateStart()
-			ab.SetButtonState(ButtonNormal)
-			// ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
-			ab.UpdateEnd()
-		}
+		ab.ButtonExitHover()
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// todo: convert d to event, get key, check for shortcut, etc
 		ab, ok := recv.(*Button)
 		if !ok {
 			return
 		}
 		kt, ok := d.(KeyTypedEvent)
 		if ok {
+			// todo: register shortcuts with window, and generalize these keybindings
 			if kt.Key == "enter" || kt.Key == "space" || kt.Key == "return" {
-				fmt.Printf("button pressed on %v!\n", recv.PathUnique())
-				ab.UpdateStart()
-				ab.SetButtonState(ButtonPress)
-				ab.ButtonSig.Emit(recv.ThisKi(), int64(ButtonPressed), d)
-				ab.UpdateEnd()
+				ab.ButtonPressed()
 				// todo: brief delay??
-				ab.UpdateStart()
-				ab.SetButtonState(ButtonNormal)
-				ab.UpdateEnd()
+				ab.ButtonReleased()
 			}
 		}
 	})
 }
-
-// todo: the shadow never decreases
 
 var ButtonProps = []map[string]interface{}{
 	{
@@ -344,6 +360,7 @@ func (g *Button) CanReRender2D() bool {
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {
+	fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)

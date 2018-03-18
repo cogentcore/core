@@ -102,6 +102,11 @@ func (w *Window) StopEventLoop() {
 }
 
 func (w *Window) StartEventLoop() {
+	vp := w.WinViewport2D()
+	if vp != nil {
+		vp.FullRender2DRoot()
+	}
+	w.SetNextFocusItem()
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go w.EventLoop()
@@ -121,9 +126,8 @@ func (w *Window) SendEventSignal(ei interface{}) {
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
 	w.EventSigs[et].EmitFiltered(w.This, int64(et), ei, func(k ki.Ki) bool {
-		gii, ok := k.(Node2D)
-		if ok {
-			gi := gii.GiNode2D()
+		_, gi := KiToNode2D(k)
+		if gi != nil {
 			if evi.EventOnFocus() {
 				if gi.This != w.Focus { // todo: could use GiNodeI interface
 					return false
@@ -163,9 +167,8 @@ func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
 			nwei = mexe
 		}
 		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
-			gii, ok := k.(Node2D)
-			if ok {
-				gi := gii.GiNode2D()
+			_, gi := KiToNode2D(k)
+			if gi != nil {
 				in := pos.In(gi.WinBBox)
 				if in {
 					if ete == MouseEnteredEventType {
@@ -261,9 +264,8 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		return false
 	}
 	if w.Focus != nil {
-		gii, ok := w.Focus.(Node2D) // todo: lots of stuff would be good to have generic Node
-		if ok {
-			gi := gii.GiNode2D()
+		gii, gi := KiToNode2D(w.Focus)
+		if gi != nil {
 			ki.ClearBitFlag64(&gi.NodeFlags, int(HasFocus))
 			gii.FocusChanged2D(false)
 		}
@@ -272,9 +274,8 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if k == nil {
 		return true
 	}
-	gii, ok := k.(Node2D) // todo: lots of stuff would be good to have generic Node
-	if ok {
-		gi := gii.GiNode2D()
+	gii, gi := KiToNode2D(k)
+	if gi != nil {
 		ki.SetBitFlag64(&gi.NodeFlags, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
@@ -296,11 +297,10 @@ func (w *Window) SetNextFocusItem() bool {
 				return false
 			}
 			// todo: see about 3D guys
-			gii, ok := k.(Node2D)
-			if !ok {
+			_, gi := KiToNode2D(k)
+			if gi == nil {
 				return true
 			}
-			gi := gii.GiNode2D()
 			if gi.Paint.Off { // off below this
 				return false
 			}

@@ -197,11 +197,11 @@ type RowLayout struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_RowLayout = ki.Types.AddType(&RowLayout{}, nil)
 
-func (g *RowLayout) GiNode2D() *Node2DBase {
+func (g *RowLayout) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *RowLayout) GiViewport2D() *Viewport2D {
+func (g *RowLayout) AsViewport2D() *Viewport2D {
 	return nil
 }
 
@@ -227,11 +227,10 @@ func (rl *RowLayout) Layout2D(iter int) {
 
 	var sumWant, sumNeed, sumMin, maxWant, maxNeed, maxMin Size2D
 	for _, c := range rl.Children {
-		gii, ok := c.(Node2D)
-		if !ok {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
 			continue
 		}
-		gi := gii.GiNode2D()
 		want := gi.Layout.WantSize()
 		need := gi.Layout.NeedSize()
 		min := gi.Layout.Size.Need() // ignoring current allocations
@@ -281,11 +280,10 @@ func (rl *RowLayout) Layout2D(iter int) {
 	pos := 0.0
 	per := extra / float64(len(rl.Children))
 	for _, c := range rl.Children {
-		gii, ok := c.(Node2D)
-		if !ok {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
 			continue
 		}
-		gi := gii.GiNode2D()
 		want := gi.Layout.WantSize()
 		need := gi.Layout.NeedSize()
 		min := gi.Layout.Size.Need() // ignoring current allocations

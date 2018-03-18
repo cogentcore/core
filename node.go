@@ -38,6 +38,8 @@ const (
 	HasFocus
 	// this indicates that the MouseEnteredEvent was previously registered on this node
 	MouseHasEntered
+	// can extend node flags from here
+	NodeFlagsN
 )
 
 //go:generate stringer -type=EventType

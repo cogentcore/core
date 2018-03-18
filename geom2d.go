@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/math/fixed"
 	"image"
@@ -104,6 +105,14 @@ func (a Size2D) Min(b Size2D) Size2D {
 func (a *Size2D) SetFromPoint(pt image.Point) {
 	a.X = float64(pt.X)
 	a.Y = float64(pt.Y)
+}
+
+func (a Size2D) String() string {
+	return fmt.Sprintf("%v, %v", a.X, a.Y)
+}
+
+func (a Point2D) String() string {
+	return fmt.Sprintf("%v, %v", a.X, a.Y)
 }
 
 type XFormMatrix2D struct {
