@@ -36,10 +36,10 @@ SOFTWARE.
 */
 
 // PaintServers provide patterned colors for stroke and fill operations
-type PaintServerType int
+type PaintServers int
 
 const (
-	PaintSolidcolor PaintServerType = iota
+	PaintSolidcolor PaintServers = iota
 	PaintLinearGradient
 	PaintRadialGradient
 	PaintMeshGradient
@@ -49,7 +49,7 @@ const (
 	PaintImage // apparently not SVG-standard but we have it.
 )
 
-//go:generate stringer -type=PaintServerType
+//go:generate stringer -type=PaintServers
 
 // todo: implement all the other types of paint servers
 
@@ -66,7 +66,7 @@ const (
 
 type PaintServer interface {
 	ColorAt(x, y int) color.Color
-	ServerType() PaintServerType
+	ServerType() PaintServers
 }
 
 // Solid PaintServer
@@ -78,7 +78,7 @@ func (p *SolidcolorPaintServer) ColorAt(x, y int) color.Color {
 	return p.Color
 }
 
-func (p *SolidcolorPaintServer) ServerType() PaintServerType {
+func (p *SolidcolorPaintServer) ServerType() PaintServers {
 	return PaintSolidcolor
 }
 
@@ -113,7 +113,7 @@ func (p *ImagePaintServer) ColorAt(x, y int) color.Color {
 	return p.Image.At(x, y)
 }
 
-func (p *ImagePaintServer) ServerType() PaintServerType {
+func (p *ImagePaintServer) ServerType() PaintServers {
 	return PaintImage
 }
 

@@ -174,7 +174,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.SignalType(sig), node.PathUnique())
 
 	// todo: probably need better ways of telling how much re-rendering is needed
-	if sig == ki.SignalChildAdded {
+	if sig == int64(ki.NodeSignalChildAdded) {
 		vp.Init2DRoot()
 		vp.Style2DRoot()
 		vp.Render2DRoot()

@@ -61,6 +61,8 @@ const (
 	KeyFunctionsN
 )
 
+//go:generate stringer -type=KeyFunctions
+
 // todo: need to have multiple functions possible per key, depending on context?
 
 type KeyMap map[string]KeyFunctions
@@ -104,8 +106,6 @@ func KeyFun(key, chord string) KeyFunctions {
 	}
 	return kf
 }
-
-//go:generate stringer -type=NodeWidgetSignalType
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Basic Keys
