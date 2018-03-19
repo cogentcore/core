@@ -20,13 +20,13 @@ type NodeWidgetSignalType int64
 
 const (
 	// node was selected -- data is the node widget
-	NodeWidgetSelected NodeWidgetSignalType = iota
+	NodeSelected NodeWidgetSignalType = iota
 	// node widget unselected
-	NodeWidgetUnselected
+	NodeUnselected
 	// collapsed node widget was opened
-	NodeWidgetOpened
+	NodeOpened
 	// open node widget was collapsed -- children not visible
-	NodeWidgetCollapsed
+	NodeCollapsed
 	NodeWidgetSignalTypeN
 )
 
@@ -35,9 +35,11 @@ const (
 // these extend NodeBase NodeFlags
 const (
 	// node is collapsed
-	NodeCollapsed NodeFlags = NodeFlagsN + iota
+	NodeFlagCollapsed NodeFlags = NodeFlagsN + iota
 	// node is selected
-	NodeSelected
+	NodeFlagSelected
+	// a full re-render is required due to nature of update event -- otherwise default is local re-render
+	NodeFlagFullReRender
 )
 
 // mutually-exclusive button states -- determines appearance
@@ -107,7 +109,7 @@ func SrcNodeSignal(nwki, send ki.Ki, sig int64, data interface{}) {
 
 // is this node itself collapsed?
 func (g *NodeWidget) IsCollapsed() bool {
-	return ki.HasBitFlag64(g.NodeFlags, int(NodeCollapsed))
+	return ki.HasBitFlag64(g.NodeFlags, int(NodeFlagCollapsed))
 }
 
 // does this node have a collapsed parent? if so, don't render!
@@ -116,7 +118,7 @@ func (g *NodeWidget) HasCollapsedParent() bool {
 	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg != nil {
-			if ki.HasBitFlag64(pg.NodeFlags, int(NodeCollapsed)) {
+			if ki.HasBitFlag64(pg.NodeFlags, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
 			}
@@ -128,7 +130,7 @@ func (g *NodeWidget) HasCollapsedParent() bool {
 
 // is this node selected?
 func (g *NodeWidget) IsSelected() bool {
-	return ki.HasBitFlag64(g.NodeFlags, int(NodeSelected))
+	return ki.HasBitFlag64(g.NodeFlags, int(NodeFlagSelected))
 }
 
 func (g *NodeWidget) GetLabel() string {
@@ -146,8 +148,8 @@ func (g *NodeWidget) GetLabel() string {
 func (g *NodeWidget) SelectNode() {
 	if !g.IsSelected() {
 		g.UpdateStart()
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeSelected))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeWidgetSelected), nil)
+		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagSelected))
+		g.NodeWidgetSig.Emit(g.This, int64(NodeSelected), nil)
 		fmt.Printf("selected node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
@@ -156,8 +158,8 @@ func (g *NodeWidget) SelectNode() {
 func (g *NodeWidget) UnselectNode() {
 	if g.IsSelected() {
 		g.UpdateStart()
-		ki.ClearBitFlag64(&g.NodeFlags, int(NodeSelected))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeWidgetUnselected), nil)
+		ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagSelected))
+		g.NodeWidgetSig.Emit(g.This, int64(NodeUnselected), nil)
 		fmt.Printf("unselectednode: %v\n", g.Name)
 		g.UpdateEnd()
 	}
@@ -166,8 +168,9 @@ func (g *NodeWidget) UnselectNode() {
 func (g *NodeWidget) CollapseNode() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeCollapsed))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeWidgetCollapsed), nil)
+		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
+		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagCollapsed))
+		g.NodeWidgetSig.Emit(g.This, int64(NodeCollapsed), nil)
 		fmt.Printf("collapsed node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
@@ -176,8 +179,9 @@ func (g *NodeWidget) CollapseNode() {
 func (g *NodeWidget) OpenNode() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
-		ki.ClearBitFlag64(&g.NodeFlags, int(NodeCollapsed))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeWidgetOpened), nil)
+		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
+		ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagCollapsed))
+		g.NodeWidgetSig.Emit(g.This, int64(NodeOpened), nil)
 		fmt.Printf("opened node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
@@ -239,9 +243,9 @@ var NodeWidgetProps = []map[string]interface{}{
 		"color":            "black",
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
 	}, { // selected
-		"background-color": "#CCC", // todo: also
+		"background-color": "#CFC", // todo: also
 	}, { // focused
-		"background-color": "#DDD", // todo: also
+		"background-color": "#CCF", // todo: also
 	},
 }
 
@@ -263,12 +267,13 @@ func (g *NodeWidget) Style2D() {
 
 func (g *NodeWidget) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		st := &g.Style
 		pc := &g.Paint
 		var w, h float64
 
 		if g.HasCollapsedParent() {
-			// todo: could turn paint.off = true
+			// g.AllocSize
 			return // nothing
 		}
 
@@ -298,9 +303,8 @@ func (g *NodeWidget) Layout2D(iter int) {
 			}
 		}
 		g.Layout.AllocSize = Size2D{w, h}
-		g.SetWinBBox(g.Node2DBBox())
 	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
+		g.GeomFromLayout()
 	}
 
 	// todo: test for use of parent-el relative units -- indicates whether multiple loops
@@ -314,13 +318,18 @@ func (g *NodeWidget) Layout2D(iter int) {
 }
 
 func (g *NodeWidget) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+	// we have unusual situation of bbox != alloc
+	tp := g.Paint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
+	ts := g.Paint.TransformPoint(g.WidgetSize.X, g.WidgetSize.Y)
+	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
-// todo: need color brigher / darker functions
-
 func (g *NodeWidget) Render2D() {
-	g.DefaultGeom() // set win box from layout data
+	// g.DefaultGeom() // set win box from layout data
+
+	// reset for next update
+	ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
+
 	if g.HasCollapsedParent() {
 		return // nothing
 	}
@@ -352,12 +361,17 @@ func (g *NodeWidget) Render2D() {
 	// sz := g.Layout.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 	label := g.GetLabel()
+	fmt.Printf("rendering: %v\n", label)
 
 	pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9)
 }
 
 func (g *NodeWidget) CanReRender2D() bool {
-	return false // no!?
+	if ki.HasBitFlag64(g.NodeFlags, int(NodeFlagFullReRender)) {
+		return false
+	} else {
+		return true
+	}
 }
 
 func (g *NodeWidget) FocusChanged2D(gotFocus bool) {

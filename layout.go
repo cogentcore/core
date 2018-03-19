@@ -155,18 +155,10 @@ func (ld *LayoutData) Reset() {
 	ld.AllocSize = Size2DZero
 }
 
-// get the effective position to use: if layout allocated, use that, otherwise user pos via style
-func (ld *LayoutData) UsePos(ls *LayoutStyle) {
-	if ld.AllocPos.IsZero() {
-		ld.AllocPos = Point2D{ls.PosX.Dots, ls.PosY.Dots}
-	}
-}
-
-// get the effective size to use: if layout allocated, use that, otherwise user size via style
-func (ld *LayoutData) UseSize(ls *LayoutStyle) {
-	if ld.AllocSize.IsZero() {
-		ld.AllocSize = Size2D{ls.Width.Dots, ls.Height.Dots}
-	}
+// initialize layout allocations based on style settings -- can be overridden
+func (ld *LayoutData) InitFromStyle(ls *LayoutStyle) {
+	ld.AllocPos = Point2D{ls.PosX.Dots, ls.PosY.Dots}
+	ld.AllocSize = Size2D{ls.Width.Dots, ls.Height.Dots}
 }
 
 // want is max across prefs and existing allocsize
@@ -218,6 +210,13 @@ func (g *RowLayout) Style2D() {
 
 // need multiple iterations..
 func (rl *RowLayout) Layout2D(iter int) {
+
+	// todo: we're doing 2 iterations here..
+
+	if iter == 0 {
+		rl.InitLayout2D()
+	}
+
 	if len(rl.Children) == 0 {
 		rl.Layout.AllocSize = rl.Layout.Size.Min
 		return
@@ -308,7 +307,7 @@ func (rl *RowLayout) Layout2D(iter int) {
 }
 
 func (g *RowLayout) Render2D() {
-	g.DefaultGeom()
+
 }
 
 func (g *RowLayout) CanReRender2D() bool {

@@ -295,6 +295,7 @@ func (g *Button) Style2D() {
 
 func (g *Button) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		st := &g.Style
 		pc := &g.Paint
 		var w, h float64
@@ -308,7 +309,6 @@ func (g *Button) Layout2D(iter int) {
 		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 		g.Layout.AllocSize = Size2D{w, h}
-		g.SetWinBBox(g.Node2DBBox())
 	} else {
 		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
 	}
@@ -330,7 +330,7 @@ func (g *Button) Node2DBBox() image.Rectangle {
 // todo: need color brigher / darker functions
 
 func (g *Button) Render2D() {
-	g.DefaultGeom() // set win box from layout data
+	// g.DefaultGeom() // set win box from layout data
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
 	} else {

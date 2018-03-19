@@ -47,6 +47,7 @@ func (g *Rect) Style2D() {
 
 func (g *Rect) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -111,6 +112,7 @@ func (g *Viewport2DFill) Style2D() {
 
 func (g *Viewport2DFill) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -167,6 +169,7 @@ func (g *Circle) Style2D() {
 
 func (g *Circle) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -227,6 +230,7 @@ func (g *Ellipse) Style2D() {
 
 func (g *Ellipse) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -286,6 +290,7 @@ func (g *Line) Style2D() {
 
 func (g *Line) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -344,6 +349,7 @@ func (g *Polyline) Style2D() {
 
 func (g *Polyline) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }
@@ -405,6 +411,7 @@ func (g *Polygon) Style2D() {
 
 func (g *Polygon) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		g.Layout.AllocSize.SetFromPoint(g.Node2DBBox().Size())
 	}
 }

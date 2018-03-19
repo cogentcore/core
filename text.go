@@ -105,6 +105,7 @@ func (g *Text2D) Style2D() {
 
 func (g *Text2D) Layout2D(iter int) {
 	if iter == 0 {
+		g.InitLayout2D()
 		pc := &g.Paint
 		var w, h float64
 		// pre-wrap the text
@@ -114,6 +115,8 @@ func (g *Text2D) Layout2D(iter int) {
 			w, h = pc.MeasureString(g.Text)
 		}
 		g.Layout.AllocSize = Size2D{w, h}
+	} else {
+		g.GeomFromLayout()
 	}
 }
 

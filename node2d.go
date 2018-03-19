@@ -59,7 +59,7 @@ type Node2D interface {
 	InitNode2D()
 	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style)
 	Style2D()
-	// Layout2D: In a DepthFirst downward pass, layout is updated for each node, with Layout parent nodes arranging layout-aware child nodes according to their properties.  Text2D nodes are layout aware, but basic SVG nodes are not -- they must be incorporated into widget parents to obtain layout (e.g., Icon widget).  WinBBox bounding box is computed at this stage.
+	// Layout2D: Two iterations: 0: DepthFirst downward pass, each node first calls g.Layout.Reset(), then sets their LayoutSize according to their own intrinsic size parameters, and/or those of its children if it does Layout -- AllocPos *relative* positions can be set by Layouts. 1. MeFirst downward pass, each node typically calls GeomFromLayout which adds parent position to AllocPos, and also uses any Style.Layout params that might have been set (todo: this should happen earlier)
 	Layout2D(iter int)
 	// get the bounding box of this node relative to its parent viewport -- used in computing WinBBox, must be called during Render
 	Node2DBBox() image.Rectangle
@@ -113,8 +113,6 @@ func (g *Node2DBase) Style2DSVG() {
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProps())
 	g.Paint.SetUnitContext(&g.Viewport.Render, 0) // svn only has to set units here once
-	g.Layout.Reset()                              // start with a fresh layout
-
 }
 
 // style the Style values from node properties -- for Widget-style nodes
@@ -167,6 +165,11 @@ func (g *Node2DBase) CopyParentPaint() *Node2DBase {
 	return pg
 }
 
+func (g *Node2DBase) InitLayout2D() {
+	g.Layout.Reset()
+	g.Layout.InitFromStyle(&g.Style.Layout)
+}
+
 // get our bbox from Layout allocation
 func (g *Node2DBase) WinBBoxFromAlloc() image.Rectangle {
 	tp := g.Paint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
@@ -195,8 +198,8 @@ func (g *Node2DBase) AddParentPos() {
 // user-specified pos, size this should be called in layout2d for iter > 0
 func (g *Node2DBase) GeomFromLayout() {
 	g.AddParentPos()
-	g.Layout.UsePos(&g.Style.Layout)
-	g.Layout.UseSize(&g.Style.Layout)
+	gii, _ := KiToNode2D(g.This)
+	g.SetWinBBox(gii.Node2DBBox())
 }
 
 func (g *Node2DBase) DefaultGeom() {

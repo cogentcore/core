@@ -60,7 +60,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 ### TODO
 
 Next:
-* NodeWidget
+* NodeWidget -- need "Elements" or "Parts" for widgets with regions, styling, etc -- not a full child widget but just an element of a more complex widget.
+
 * text enter box
 * double-click!
 

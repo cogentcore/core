@@ -126,7 +126,11 @@ func (vp *Viewport2D) Style2D() {
 
 func (vp *Viewport2D) Layout2D(iter int) {
 	if iter == 0 {
+		vp.InitLayout2D()
 		vp.Layout.AllocSize.SetFromPoint(vp.ViewBox.Size)
+	} else {
+		vp.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
+		// todo: we now need to update our ViewBox based on Alloc values..
 	}
 }
 
@@ -135,8 +139,6 @@ func (vp *Viewport2D) Node2DBBox() image.Rectangle {
 }
 
 func (vp *Viewport2D) Render2D() {
-	// todo: we should get layout info and set our size??
-	vp.SetWinBBox(vp.Node2DBBox())
 	if vp.Viewport != nil {
 		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)
@@ -182,7 +184,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 			vp.Render2D() // redraw us
 		} else {
 			vp.Style2DFromNode(gi) // restyle only from affected node downward
-			vp.Render2DRoot()      // need to re-render entirely..
+			vp.ReRender2DRoot()    // need to re-render entirely..
 		}
 	}
 }
@@ -208,13 +210,14 @@ func (vp *Viewport2D) FullRender2DRoot() {
 	vp.Init2DRoot()
 	vp.Style2DRoot()
 	vp.Layout2DRoot()
-	vp.RenderOnly2DRoot()
+	vp.Render2DRoot()
 }
 
-// render of the tree -- after it has already been initialized and styled
-func (vp *Viewport2D) Render2DRoot() {
+// re-render of the tree -- after it has already been initialized and styled
+// -- does layout and render passes
+func (vp *Viewport2D) ReRender2DRoot() {
 	vp.Layout2DRoot()
-	vp.RenderOnly2DRoot()
+	vp.Render2DRoot()
 }
 
 // this only needs to be done on a structural update
@@ -241,6 +244,7 @@ func (vp *Viewport2D) Style2DRoot() {
 	})
 }
 
+// do the layout pass in 2 iterations
 func (vp *Viewport2D) Layout2DRoot() {
 	// todo: support multiple iterations if necc
 
@@ -284,16 +288,37 @@ func (vp *Viewport2D) Layout2DRoot() {
 
 }
 
-// just do the render only part -- not the full 3-pass version called in Render2DRoot
-func (vp *Viewport2D) RenderOnly2DRoot() {
+// do the render pass -- two iterations required (may need more later) --
+// first does all non-viewports, and second does all viewports, which must
+// come after all rendering done in them -- could add iter to method if
+// viewport actually needs to be called in first render pass??
+func (vp *Viewport2D) Render2DRoot() {
 	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
+		if gii.AsViewport2D() != nil { // skip viewports on first pass
+			return true
+		}
 		if gi.Paint.Off { // off below this
 			return false
 		}
+		gii.Render2D()
+		return true
+	})
+	// second pass ONLY process viewports
+	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+		gii, gi := KiToNode2D(k)
+		if gi == nil {
+			return false
+		}
+		if gii.AsViewport2D() == nil { // skip NON viewports on second pass
+			return true
+		}
+		// if gi.Paint.Off { // off below this
+		// 	return false
+		// }
 		gii.Render2D()
 		return true
 	})
