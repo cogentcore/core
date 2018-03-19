@@ -279,7 +279,7 @@ var ButtonProps = []map[string]interface{}{
 
 func (g *Button) Style2D() {
 	// we can focus by default
-	ki.SetBitFlag64(&g.NodeFlags, int(CanFocus))
+	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
 	// then style with user props
@@ -330,7 +330,6 @@ func (g *Button) Node2DBBox() image.Rectangle {
 // todo: need color brigher / darker functions
 
 func (g *Button) Render2D() {
-	// g.DefaultGeom() // set win box from layout data
 	if g.IsLeaf() {
 		g.Render2DDefaultStyle()
 	} else {

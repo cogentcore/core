@@ -202,10 +202,6 @@ func (g *Node2DBase) GeomFromLayout() {
 	g.SetWinBBox(gii.Node2DBBox())
 }
 
-func (g *Node2DBase) DefaultGeom() {
-	g.SetWinBBox(g.WinBBoxFromAlloc())
-}
-
 // for basic aggregation over children -- sum of Layout.AllocSize for all children
 func (g *Node2DBase) SumOfChildWidths() float64 {
 	w := 0.0

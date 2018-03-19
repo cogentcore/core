@@ -172,17 +172,17 @@ func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
 				in := pos.In(gi.WinBBox)
 				if in {
 					if ete == MouseEnteredEventType {
-						if ki.HasBitFlag64(gi.NodeFlags, int(MouseHasEntered)) {
+						if ki.HasBitFlag(gi.NodeFlags, int(MouseHasEntered)) {
 							return false // already in
 						}
-						ki.SetBitFlag64(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						ki.SetBitFlag(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
 					} else {
 						return false // don't send any exited events if in
 					}
 				} else { // mouse not in object
 					if ete == MouseExitedEventType {
-						if ki.HasBitFlag64(gi.NodeFlags, int(MouseHasEntered)) {
-							ki.ClearBitFlag64(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						if ki.HasBitFlag(gi.NodeFlags, int(MouseHasEntered)) {
+							ki.ClearBitFlag(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
 						} else {
 							return false // already out..
 						}
@@ -266,7 +266,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
-			ki.ClearBitFlag64(&gi.NodeFlags, int(HasFocus))
+			ki.ClearBitFlag(&gi.NodeFlags, int(HasFocus))
 			gii.FocusChanged2D(false)
 		}
 	}
@@ -276,7 +276,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	gii, gi := KiToNode2D(k)
 	if gi != nil {
-		ki.SetBitFlag64(&gi.NodeFlags, int(HasFocus))
+		ki.SetBitFlag(&gi.NodeFlags, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
 	return true
@@ -304,7 +304,7 @@ func (w *Window) SetNextFocusItem() bool {
 			if gi.Paint.Off { // off below this
 				return false
 			}
-			if !ki.HasBitFlag64(gi.NodeFlags, int(CanFocus)) {
+			if !ki.HasBitFlag(gi.NodeFlags, int(CanFocus)) {
 				return true
 			}
 			if focusNext {

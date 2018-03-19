@@ -194,7 +194,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 
 // initialize scene graph
 func (vp *Viewport2D) Init2DRoot() {
-	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gii == nil {
 			return false
@@ -222,7 +222,7 @@ func (vp *Viewport2D) ReRender2DRoot() {
 
 // this only needs to be done on a structural update
 func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
-	gi.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	gi.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false // going into a different type of thing, bail
@@ -234,7 +234,7 @@ func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
 
 // this only needs to be done on a structural update
 func (vp *Viewport2D) Style2DRoot() {
-	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false // going into a different type of thing, bail
@@ -274,7 +274,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 
 	// second pass we add the parent positions after layout -- don't want to do that in
 	// render b/c then it doesn't work for local re-renders..
-	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
@@ -293,7 +293,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 // come after all rendering done in them -- could add iter to method if
 // viewport actually needs to be called in first render pass??
 func (vp *Viewport2D) Render2DRoot() {
-	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
@@ -308,7 +308,7 @@ func (vp *Viewport2D) Render2DRoot() {
 		return true
 	})
 	// second pass ONLY process viewports
-	vp.FunDownMeFirst(0, vp, func(k ki.Ki, level int, d interface{}) bool {
+	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false

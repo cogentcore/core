@@ -40,6 +40,10 @@ const (
 	NodeFlagSelected
 	// a full re-render is required due to nature of update event -- otherwise default is local re-render
 	NodeFlagFullReRender
+	// the shift key was pressed, putting the selection mode into continous selection mode
+	NodeFlagContinuousSelect
+	// the ctrl / cmd key was pressed, putting the selection mode into continous selection mode
+	NodeFlagExtendSelect
 )
 
 // mutually-exclusive button states -- determines appearance
@@ -70,8 +74,12 @@ type NodeWidget struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_NodeWidget = ki.Types.AddType(&NodeWidget{}, nil)
 
-// important: do NOT assume kid is a NodeWidget unless absolutely necessary -- otherwise
-// treat as generic gi.Node or Node2D, so others could subclass -- can make interface if needed
+// todo: several functions require traversing tree -- this will require an
+// interface to allow others to implement different behavior -- for now just
+// explicitly checking for NodeWidget type
+
+//////////////////////////////////////////////////////////////////////////////
+//    End-User API
 
 // set the source node that we are viewing
 func (g *NodeWidget) SetSrcNode(k ki.Ki) {
@@ -107,9 +115,68 @@ func SrcNodeSignal(nwki, send ki.Ki, sig int64, data interface{}) {
 	// track changes in source node
 }
 
+// return a list of the currently-selected source nodes
+func (g *NodeWidget) SelectedSrcNodes() ki.Slice {
+	sn := make(ki.Slice, 0)
+	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false
+		}
+		if k.IsType(KiT_NodeWidget) {
+			nw := k.(*NodeWidget)
+			sn = append(sn, nw.SrcNode.Ptr)
+			return true
+		} else {
+			return false
+		}
+	})
+	return sn
+}
+
+// return a list of the currently-selected node widgets
+func (g *NodeWidget) SelectedNodeWidgets() []*NodeWidget {
+	sn := make([]*NodeWidget, 0)
+	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false
+		}
+		if k.IsType(KiT_NodeWidget) {
+			nw := k.(*NodeWidget)
+			sn = append(sn, nw)
+			return true
+		} else {
+			return false
+		}
+	})
+	return sn
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//    Implementation
+
+// root node of NodeWidget tree -- several properties stored there
+func (g *NodeWidget) RootNodeWidget() *NodeWidget {
+	rn := g
+	g.FunUp(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, pg := KiToNode2D(k)
+		if pg == nil {
+			return false
+		}
+		if k.IsType(KiT_NodeWidget) {
+			rn = k.(*NodeWidget)
+			return true
+		} else {
+			return false
+		}
+	})
+	return rn
+}
+
 // is this node itself collapsed?
 func (g *NodeWidget) IsCollapsed() bool {
-	return ki.HasBitFlag64(g.NodeFlags, int(NodeFlagCollapsed))
+	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagCollapsed))
 }
 
 // does this node have a collapsed parent? if so, don't render!
@@ -117,8 +184,11 @@ func (g *NodeWidget) HasCollapsedParent() bool {
 	pcol := false
 	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
-		if pg != nil {
-			if ki.HasBitFlag64(pg.NodeFlags, int(NodeFlagCollapsed)) {
+		if pg == nil {
+			return false
+		}
+		if k.IsType(KiT_NodeWidget) {
+			if ki.HasBitFlag(pg.NodeFlags, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
 			}
@@ -130,7 +200,7 @@ func (g *NodeWidget) HasCollapsedParent() bool {
 
 // is this node selected?
 func (g *NodeWidget) IsSelected() bool {
-	return ki.HasBitFlag64(g.NodeFlags, int(NodeFlagSelected))
+	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagSelected))
 }
 
 func (g *NodeWidget) GetLabel() string {
@@ -144,32 +214,71 @@ func (g *NodeWidget) GetLabel() string {
 	return label
 }
 
-// todo mutex unselect all other nodes
+// a select action has been received (e.g., a mouse click) -- translate into
+// selection updates
+func (g *NodeWidget) SelectNodeAction() {
+	rn := g.RootNodeWidget()
+	if ki.HasBitFlag(rn.NodeFlags, int(NodeFlagExtendSelect)) {
+		if g.IsSelected() {
+			g.UnselectNode()
+		} else {
+			g.SelectNode()
+		}
+	} else { // todo: continuous a bit trickier
+		if g.IsSelected() {
+			// nothing..
+		} else {
+			rn.UnselectAll()
+			g.SelectNode()
+		}
+	}
+}
+
 func (g *NodeWidget) SelectNode() {
 	if !g.IsSelected() {
 		g.UpdateStart()
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagSelected))
+		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagSelected))
+		g.GrabFocus() // focus always follows select  todo: option
 		g.NodeWidgetSig.Emit(g.This, int64(NodeSelected), nil)
 		fmt.Printf("selected node: %v\n", g.Name)
-		g.UpdateEnd()
+		g.UpdateEndAll() // grab focus means allow kids to update too
 	}
 }
 
 func (g *NodeWidget) UnselectNode() {
 	if g.IsSelected() {
 		g.UpdateStart()
-		ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagSelected))
+		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagSelected))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeUnselected), nil)
 		fmt.Printf("unselectednode: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
 
+// unselect everything below me -- call on Root to clear all
+func (g *NodeWidget) UnselectAll() {
+	g.UpdateStart()
+	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false
+		}
+		if k.IsType(KiT_NodeWidget) {
+			nw := k.(*NodeWidget)
+			nw.UnselectNode()
+			return true
+		} else {
+			return false
+		}
+	})
+	g.UpdateEndAll()
+}
+
 func (g *NodeWidget) CollapseNode() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagCollapsed))
+		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
+		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeCollapsed), nil)
 		fmt.Printf("collapsed node: %v\n", g.Name)
 		g.UpdateEnd()
@@ -179,13 +288,32 @@ func (g *NodeWidget) CollapseNode() {
 func (g *NodeWidget) OpenNode() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
-		ki.SetBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
-		ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagCollapsed))
+		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
+		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeOpened), nil)
 		fmt.Printf("opened node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
+
+func (g *NodeWidget) SetContinuousSelect() {
+	rn := g.RootNodeWidget()
+	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
+}
+
+func (g *NodeWidget) SetExtendSelect() {
+	rn := g.RootNodeWidget()
+	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
+}
+
+func (g *NodeWidget) ClearSelectMods() {
+	rn := g.RootNodeWidget()
+	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
+	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
+}
+
+////////////////////////////////////////////////////
+// Node2D interface
 
 func (g *NodeWidget) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -209,7 +337,7 @@ func (g *NodeWidget) InitNode2D() {
 		if !ok {
 			return
 		}
-		ab.SelectNode()
+		ab.SelectNodeAction()
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*NodeWidget)
@@ -221,13 +349,36 @@ func (g *NodeWidget) InitNode2D() {
 			fmt.Printf("node widget key: %v\n", kt.Key)
 			switch kt.Key {
 			case "enter", "space", "return":
-				ab.SelectNode()
+				ab.SelectNodeAction()
 			case "ctrl-f", "f", "right_arrow":
 				ab.OpenNode()
 			case "ctrl-b", "b", "left_arrow":
 				ab.CollapseNode()
 			}
 		}
+	})
+	g.ReceiveEventType(KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := recv.(*NodeWidget)
+		if !ok {
+			return
+		}
+		kt, ok := d.(KeyDownEvent)
+		if ok {
+			fmt.Printf("node widget key down: %v\n", kt.Key)
+			switch kt.Key {
+			case "left_shift", "right_shift":
+				ab.SetContinuousSelect()
+			case "left_super", "right_super": // todo: need different settings per OS
+				ab.SetExtendSelect()
+			}
+		}
+	})
+	g.ReceiveEventType(KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := recv.(*NodeWidget)
+		if !ok {
+			return
+		}
+		ab.ClearSelectMods()
 	})
 }
 
@@ -251,7 +402,7 @@ var NodeWidgetProps = []map[string]interface{}{
 
 func (g *NodeWidget) Style2D() {
 	// we can focus by default
-	ki.SetBitFlag64(&g.NodeFlags, int(CanFocus))
+	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, NodeWidgetProps[0])
 	// then style with user props
@@ -273,9 +424,10 @@ func (g *NodeWidget) Layout2D(iter int) {
 		var w, h float64
 
 		if g.HasCollapsedParent() {
-			// g.AllocSize
+			ki.ClearBitFlag(&g.NodeFlags, int(CanFocus))
 			return // nothing
 		}
+		ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 
 		label := g.GetLabel()
 
@@ -299,12 +451,19 @@ func (g *NodeWidget) Layout2D(iter int) {
 					gi.Layout.AllocPos.Y = h
 					gi.Layout.AllocPos.X = 20 // indent children -- todo: make a property
 					h += gi.Layout.AllocSize.Y
+					w = ki.Max64(w, gi.Layout.AllocPos.X+gi.Layout.AllocSize.X) // use max
 				}
 			}
 		}
 		g.Layout.AllocSize = Size2D{w, h}
+		g.WidgetSize.X = w // stretch
 	} else {
-		g.GeomFromLayout()
+		g.AddParentPos()
+		rn := g.RootNodeWidget()
+		g.Layout.AllocSize.X = rn.Layout.AllocSize.X - (g.Layout.AllocPos.X - rn.Layout.AllocPos.X)
+		g.WidgetSize.X = g.Layout.AllocSize.X
+		gii, _ := KiToNode2D(g.This)
+		g.SetWinBBox(gii.Node2DBBox())
 	}
 
 	// todo: test for use of parent-el relative units -- indicates whether multiple loops
@@ -325,10 +484,8 @@ func (g *NodeWidget) Node2DBBox() image.Rectangle {
 }
 
 func (g *NodeWidget) Render2D() {
-	// g.DefaultGeom() // set win box from layout data
-
 	// reset for next update
-	ki.ClearBitFlag64(&g.NodeFlags, int(NodeFlagFullReRender))
+	ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 
 	if g.HasCollapsedParent() {
 		return // nothing
@@ -361,13 +518,13 @@ func (g *NodeWidget) Render2D() {
 	// sz := g.Layout.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 	label := g.GetLabel()
-	fmt.Printf("rendering: %v\n", label)
+	// fmt.Printf("rendering: %v\n", label)
 
 	pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9)
 }
 
 func (g *NodeWidget) CanReRender2D() bool {
-	if ki.HasBitFlag64(g.NodeFlags, int(NodeFlagFullReRender)) {
+	if ki.HasBitFlag(g.NodeFlags, int(NodeFlagFullReRender)) {
 		return false
 	} else {
 		return true

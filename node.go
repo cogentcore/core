@@ -56,17 +56,23 @@ type NodeBase struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_NodeBase = ki.Types.AddType(&NodeBase{}, nil)
 
+func (g *NodeBase) ParentWindow() *Window {
+	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived -- need interface
+	if wini == nil {
+		log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
+		return nil
+	}
+	return wini.(*Window)
+}
+
 // todo: stop receiving events function..
 
 // register this node to receive a given type of GUI event signal from the parent window
 func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
-	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived types!
-	if wini == nil {
-		log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
-		return
+	win := g.ParentWindow()
+	if win != nil {
+		win.ReceiveEventType(g.This, et, fun)
 	}
-	win := wini.(*Window)
-	win.ReceiveEventType(g.This, et, fun)
 }
 
 // zero-out the window bbox -- for nodes that are not visible
@@ -76,7 +82,15 @@ func (g *NodeBase) ZeroWinBBox() {
 
 // does the current node have keyboard focus
 func (g *NodeBase) HasFocus() bool {
-	return ki.HasBitFlag64(g.NodeFlags, int(HasFocus))
+	return ki.HasBitFlag(g.NodeFlags, int(HasFocus))
+}
+
+// set node as focus node
+func (g *NodeBase) GrabFocus() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.SetFocusItem(g.This)
+	}
 }
 
 // standard css properties on nodes apply, including visible, etc.
