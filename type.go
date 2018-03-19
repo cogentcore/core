@@ -315,36 +315,42 @@ func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
 // Bit flags are setup just using the ordinal count iota, and the only diff is the methods
 // which do 1 << flag when operating on them
 
+// todo: can add a global debug level setting and test for overflow in bits --
+// or maybe better in the enum type registry constructor?
+// see also https://github.com/sirupsen/logrus
+
+// we assume 64bit bitflags by default -- 32 bit methods specifically marked
+
 // set a bit value based on the ordinal flag value
-func SetBitFlag64(bits *int64, flag int) {
+func SetBitFlag(bits *int64, flag int) {
 	*bits |= 1 << uint32(flag)
 }
 
 // clear bit value based on the ordinal flag value
-func ClearBitFlag64(bits *int64, flag int) {
+func ClearBitFlag(bits *int64, flag int) {
 	*bits = *bits & ^(1 << uint32(flag)) // note: ^ is unary bitwise negation, not ~ as in C
 }
 
 // toggle state of bit value based on the ordinal flag value -- returns new state
-func ToggleBitFlag64(bits *int64, flag int) bool {
-	if HasBitFlag64(*bits, flag) {
-		ClearBitFlag64(bits, flag)
+func ToggleBitFlag(bits *int64, flag int) bool {
+	if HasBitFlag(*bits, flag) {
+		ClearBitFlag(bits, flag)
 		return false
 	} else {
-		SetBitFlag64(bits, flag)
+		SetBitFlag(bits, flag)
 		return true
 	}
 }
 
 // check if given bit value is set for given flag
-func HasBitFlag64(bits int64, flag int) bool {
+func HasBitFlag(bits int64, flag int) bool {
 	return bits&(1<<uint32(flag)) != 0
 }
 
 // check if any of a set of flags are set
-func HasBitFlags64(bits int64, flags ...int) bool {
+func HasBitFlags(bits int64, flags ...int) bool {
 	for _, flg := range flags {
-		if HasBitFlag64(bits, flg) {
+		if HasBitFlag(bits, flg) {
 			return true
 		}
 	}
@@ -352,16 +358,69 @@ func HasBitFlags64(bits int64, flags ...int) bool {
 }
 
 // make a mask for checking multiple different flags
-func MakeBitMask64(flags ...int) int64 {
+func MakeBitMask(flags ...int) int64 {
 	var mask int64
 	for _, flg := range flags {
-		SetBitFlag64(&mask, flg)
+		SetBitFlag(&mask, flg)
 	}
 	return mask
 }
 
 // check if any of the bits in mask are set
-func HasBitMask64(bits, mask int64) bool {
+func HasBitMask(bits, mask int64) bool {
+	return bits&mask != 0
+}
+
+//////////////////////////////
+//   32 bit
+
+// set a bit value based on the ordinal flag value
+func SetBitFlag32(bits *int32, flag int) {
+	*bits |= 1 << uint32(flag)
+}
+
+// clear bit value based on the ordinal flag value
+func ClearBitFlag32(bits *int32, flag int) {
+	*bits = *bits & ^(1 << uint32(flag)) // note: ^ is unary bitwise negation, not ~ as in C
+}
+
+// toggle state of bit value based on the ordinal flag value -- returns new state
+func ToggleBitFlag32(bits *int32, flag int) bool {
+	if HasBitFlag32(*bits, flag) {
+		ClearBitFlag32(bits, flag)
+		return false
+	} else {
+		SetBitFlag32(bits, flag)
+		return true
+	}
+}
+
+// check if given bit value is set for given flag
+func HasBitFlag32(bits int32, flag int) bool {
+	return bits&(1<<uint32(flag)) != 0
+}
+
+// check if any of a set of flags are set
+func HasBitFlags32(bits int32, flags ...int) bool {
+	for _, flg := range flags {
+		if HasBitFlag32(bits, flg) {
+			return true
+		}
+	}
+	return false
+}
+
+// make a mask for checking multiple different flags
+func MakeBitMask32(flags ...int) int32 {
+	var mask int32
+	for _, flg := range flags {
+		SetBitFlag32(&mask, flg)
+	}
+	return mask
+}
+
+// check if any of the bits in mask are set
+func HasBitMask32(bits, mask int32) bool {
 	return bits&mask != 0
 }
 

@@ -60,3 +60,4 @@ https://golang.org/doc/effective_go.html#names
 * SetFieldRecursive -- apply to all children, no problem if not found
 * FindChildRecursive functions
 * Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user
+* port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus
