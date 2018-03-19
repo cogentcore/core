@@ -28,18 +28,18 @@ func TestSignalConnect(t *testing.T) {
 	res := make([]string, 0, 10)
 	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), SignalType(sig), data))
+			receiver.KiName(), sender.KiName(), NodeSignals(sig), data))
 	})
 	parent.sig1.Connect(child2, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), SignalType(sig), data))
+			receiver.KiName(), sender.KiName(), NodeSignals(sig), data))
 	})
 
-	parent.sig1.Emit(&parent, NilSignal, 1234)
+	parent.sig1.Emit(&parent, int64(NodeSignalNil), 1234)
 
 	// fmt.Printf("res: %v\n", res)
-	trg := []string{"recv: child1, sender: par1 sig: NilSignal data: 1234",
-		"recv: child2, sender: par1 sig: NilSignal data: 1234"}
+	trg := []string{"recv: child1, sender: par1 sig: NodeSignalNil data: 1234",
+		"recv: child2, sender: par1 sig: NodeSignalNil data: 1234"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("Add child sigs error -- results: %v != target: %v\n", res, trg)
 	}
@@ -49,10 +49,10 @@ func TestSignalConnect(t *testing.T) {
 }
 
 func TestSignalNameToInt(t *testing.T) {
-	for i := NilSignal; i < SignalTypeN; i++ {
-		st := SignalType(i)
+	for i := NodeSignalNil; i < NodeSignalsN; i++ {
+		st := NodeSignals(i)
 		str := st.String()
-		stc, err := StringToSignalType(str)
+		stc, err := StringToNodeSignals(str)
 		if err != nil {
 			t.Error(err)
 		}
@@ -62,8 +62,8 @@ func TestSignalNameToInt(t *testing.T) {
 		}
 	}
 
-	str := "SignalFieldUpdated"
-	st, _ := StringToSignalType(str)
+	str := "NodeSignalFieldUpdated"
+	st, _ := StringToNodeSignals(str)
 	if st.String() != str {
 		t.Errorf("could not convert from signal type name %v -- got: %v -- maybe need to run go generate?", str, st.String())
 	}

@@ -117,7 +117,7 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Parent / Child Functionality
 
-	// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
+	// just sets parent of node (and inherits update count from it, to keep consistent) -- does NOT remove from existing parent -- use Add / Insert / Delete Child functions properly move or delete nodes
 	SetParent(parent Ki)
 
 	// test if this node is the root node -- checks Parent = nil
@@ -129,13 +129,10 @@ type Ki interface {
 	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type, and errors if not
 	SetChildType(t reflect.Type) error
 
-	// emit SignalChildAdded on NodeSignal -- only if not currently updating
-	EmitChildAddedSignal(kid Ki)
-
-	// add a new child at end of children list
+	// add a new child at end of children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
 	AddChild(kid Ki)
 
-	// add a new child at given position in children list
+	// add a new child at given position in children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
 	InsertChild(kid Ki, at int)
 
 	// add a new child at end of children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
@@ -186,26 +183,23 @@ type Ki interface {
 	// find parent by type (any of types given) -- returns nil if not found
 	FindParentByType(t ...reflect.Type) Ki
 
-	// emit SignalChildDeleted on NodeSignal -- only if not currently updating
-	EmitChildDeletedSignal(kid Ki)
-
-	// Delete child at index -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	// Delete child at index -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChildAtIndex(idx int, destroy bool)
 
-	// Delete child node -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	// Delete child node -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChild(child Ki, destroy bool)
 
-	// Delete child node by name -- returns child -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
+	// Delete child node by name -- returns child -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChildByName(name string, destroy bool) Ki
-
-	// emit SignalChildrenDeleted on NodeSignal -- only if not currently updating
-	EmitChildrenDeletedSignal()
 
 	// Delete all children nodes -- destroy will add removed children to deleted list, to be destroyed later -- otherwise children remain intact but parent is nil -- could be inserted elsewhere, but you better have kept a slice of them before calling this
 	DeleteChildren(destroy bool)
 
 	// second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
 	DestroyDeleted()
+
+	// recursively call DestroyDeleted on all nodes under this one -- called automatically when UpdateEnd reaches 0 Updating count and the Update signal is sent
+	DestroyAllDeleted()
 
 	// remove all children and their childrens-children, etc
 	DestroyKi()
@@ -241,6 +235,9 @@ type Ki interface {
 	// concurrent go function on given node and all the way down to its children, and so on -- does wait for the completion of the go routines before returning
 	GoFunDownWait(level int, data interface{}, fun KiFun)
 
+	// call fun on previous node in the tree (previous child in my siblings, then parent, and so on)
+	FunPrev(level int, data interface{}, fun KiFun) bool
+
 	// report path to this node, all the way up to top-level parent
 	Path() string
 
@@ -265,10 +262,10 @@ type Ki interface {
 	// call this when starting to modify the tree (state or structure) -- increments an atomic update counter and automatically calls start update on all children -- can be called multiple times at multiple levels
 	UpdateStart()
 
-	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0, only if parent is not current updating (i.e., this is the highest-level node that finished updating) -- see also UpdateEndAll
+	// call this when done updating -- decrements update counter and emits NodeSignalUpdated when counter goes to 0, only if parent is not current updating (i.e., this is the highest-level node that finished updating) -- see also UpdateEndAll
 	UpdateEnd()
 
-	// call this when done updating -- decrements update counter and emits SignalNodeUpdated when counter goes to 0 for ALL nodes that might have updated, even if my parent node is still updating -- this is less typically used
+	// call this when done updating -- decrements update counter and emits NodeSignalUpdated when counter goes to 0 for ALL nodes that might have updated, even if my parent node is still updating -- this is less typically used
 	UpdateEndAll()
 
 	//////////////////////////////////////////////////////////////////////////

@@ -13,54 +13,62 @@ import (
 // Implements general signal passing between Ki objects, like Qt's Signal / Slot system
 // started from: github.com/tucnak/meta/
 
+// todo: Once I learn more about channels and concurrency, could add a channel
+// as an alternative method of sending signals too, perhaps
+
 // A receivier has to connect to a given signal on a sender to receive those
 // signals, when the signal is emitted.  To make more efficient use of signal
 // connections, we also support a signal type int64 that the receiver can
 // decode depending on the type of signal that it is receiving -- completely
-// up to the semantics of that particular signal -- for ki.Node, we have the
-// following signal types for signaling over a common NodeSig signal about
-// tree changes
+// up to the semantics of that particular signal -- be sure to reserve 0 for a
+// nil signal value -- if that is sent, then the signal's default signal is
+// exchanged instead
 
-// Once I learn more about channels and concurrency, could add a channel as an
-// alternative method of sending signals too, perhaps
-
-// this was used to generate stringer info for following signals
-type SignalType int64
+// signals that a Ki node sends about updates to the tree structure
+// using the NodeSignal (convert int64 to NodeSignals to get the stringer name)
+type NodeSignals int64
 
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (
-	// no signal --
-	NilSignal int64 = iota
-	// data is the added child
-	SignalChildAdded
-	// data is deleted child
-	SignalChildDeleted
-	SignalChildrenDeleted
-	// entire node updated
-	SignalNodeUpdated
+	// no signal
+	NodeSignalNil NodeSignals = iota
+	// node has just been added to a new parent -- only if no previous parent, else Moved
+	NodeSignalAdded
+	// node was moved in the tree, or to a new tree -- data is old parent
+	NodeSignalMoved
+	// node is being deleted from its parent -- still has parent set in case any cleanup is neede
+	NodeSignalDeleting
+	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too
+	NodeSignalDestroying
+	// entire node updated -- this could include multiple children added / deleted
+	NodeSignalUpdated
 	// a field was updated -- data is name of field
-	SignalFieldUpdated
+	NodeSignalFieldUpdated
 	// a property was set -- data is name of property
-	SignaPropUpdated
+	NodeSignaPropUpdated
+	// data is the added child
+	NodeSignalChildAdded
+	// data is deleted child
+	NodeSignalChildDeleted
+	// all children deleted -- no data
+	NodeSignalChildrenDeleted
 	// number of signal type consts -- add this to any other signal types passed
-	SignalTypeN
+	NodeSignalsN
 )
 
-//go:generate stringer -type=SignalType
-
-// note: don't register as Enum, as it isn't really
+//go:generate stringer -type=NodeSignals
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
 type RecvFun func(receiver, sender Ki, sig int64, data interface{})
 
 // use this to encode a custom signal type to be used over the ki.Node.NodeSig and not be confused with basic signals defined above
 func SendCustomNodeSignal(sig int64) int64 {
-	return sig + SignalTypeN
+	return sig + int64(NodeSignalsN)
 }
 
 // use this to encode a custom signal type to be used over the ki.Node.NodeSig and not be confused with basic signals defined above
 func RecvCustomNodeSignal(sig int64) int64 {
-	return sig - SignalTypeN
+	return sig - int64(NodeSignalsN)
 }
 
 // Signal -- add one of these for each signal a node can emit
@@ -146,7 +154,7 @@ func (sig *Signal) DisconnectAll(recv Ki, fun RecvFun) {
 
 // Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
-	if sig == NilSignal && s.DefSig != NilSignal {
+	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
@@ -156,7 +164,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 
 // EmitGo concurrent version -- sends the signal across all the connections to the receivers
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
-	if sig == NilSignal && s.DefSig != NilSignal {
+	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
@@ -169,7 +177,7 @@ type SignalFilterFun func(ki Ki) bool
 
 // Emit Filtered calls function on each item only sends signal if function returns true
 func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
-	if sig == NilSignal && s.DefSig != NilSignal {
+	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
@@ -181,7 +189,7 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun Signal
 
 // EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
-	if sig == NilSignal && s.DefSig != NilSignal {
+	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {

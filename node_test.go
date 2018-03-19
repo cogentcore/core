@@ -301,7 +301,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
 	})
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
@@ -315,17 +315,17 @@ func TestNodeUpdate(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
-	trg := []string{"par1 sig SignalChildAdded", "par1 sig SignalChildAdded", "par1 sig SignalNodeUpdated"}
+	trg := []string{"par1 sig NodeSignalChildAdded", "par1 sig NodeSignalChildAdded", "par1 sig NodeSignalUpdated"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("Add child sigs error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
 	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
 	})
 	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), SignalType(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
 	})
 
 	// fmt.Print("\nnode update all starting\n")
@@ -335,7 +335,7 @@ func TestNodeUpdate(t *testing.T) {
 	child2.UpdateEndAll()
 
 	// fmt.Printf("res: %v\n", res)
-	trg = []string{"child1 sig SignalNodeUpdated", "subchild1 sig SignalNodeUpdated"}
+	trg = []string{"child1 sig NodeSignalUpdated", "subchild1 sig NodeSignalUpdated"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("update signal all error -- results: %v != target: %v\n", res, trg)
 	}
@@ -348,7 +348,7 @@ func TestNodeUpdate(t *testing.T) {
 	child2.UpdateEnd()
 
 	// fmt.Printf("res: %v\n", res)
-	trg = []string{"child1 sig SignalNodeUpdated"}
+	trg = []string{"child1 sig NodeSignalUpdated"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("update signal only top error -- results: %v != target: %v\n", res, trg)
 	}

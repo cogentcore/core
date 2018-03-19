@@ -41,6 +41,14 @@ https://golang.org/doc/effective_go.html#names
 
 * Use `AsType()` for methods that give you that give you that concrete type from a struct (where it isn't a conversion, just selecting that view of it)
 
+### Enums (const int)
+
+* Use plural for enum type, instead of using a "Type" suffix -- e.g., `NodeSignals` instead of `NodeSignalType`, and in general use a consistent prefix for all enum values: NodeSignalAdded etc 
+
+* my version of stringer generates conversions back from string to given type
+
+* ki.EnumRegister (ki.AddEnum) -- see types.go -- adds a lot of important functionality to enums
+
 ## Struct structure
 
 * ALL Nodes need to be in Children of parent -- not e.g., as fields in a struct (unless they are definitely starting a new root at that point, in which case it is fine).  Use an InitNode kind of constructor to build default children that are then equivalent to fields -- always there, accessible by name, etc.
@@ -55,6 +63,7 @@ https://golang.org/doc/effective_go.html#names
 
 # TODO
 
+* Test node deleting, destroying etc signals
 * XML IO
 * add SetField, FieldValue generic methods -- thin wrappers around reflect
 * SetFieldRecursive -- apply to all children, no problem if not found

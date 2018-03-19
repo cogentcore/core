@@ -39,7 +39,7 @@ type Node struct {
 	Parent     Ki                     `json:"-",xml:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType  Type                   `desc:"default type of child to create -- if nil then same type as node itself is used"`
 	Children   Slice                  `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
-	NodeSig    Signal                 `json:"-",xml:"-",desc:"signal for node structure / state changes -- emits SignalType signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	NodeSig    Signal                 `json:"-",xml:"-",desc:"signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
 	Updating   AtomCtr                `json:"-",xml:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
 	Deleted    []Ki                   `json:"-",xml:"-",desc:"keeps track of deleted nodes until destroyed"`
 	This       Ki                     `json:"-",xml:"-",desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
@@ -210,15 +210,11 @@ func (n *Node) DeleteProp(key string) {
 //////////////////////////////////////////////////////////////////////////
 //  Parent / Child Functionality
 
-// set parent of node -- if parent is already set, then removes from that parent first -- nodes can ONLY have one parent -- only for true Tree structures, not DAG's or other such graphs that do not enforce a strict single-parent relationship
+// set parent of node -- does not remove from existing parent -- use Add / Insert / Delete
 func (n *Node) SetParent(parent Ki) {
-	if n.Parent != nil {
-		n.Parent.DeleteChild(n, false)
-	}
 	n.Parent = parent
 	if parent != nil {
 		n.Updating.Set(parent.UpdateCtr().Value()) // we need parent's update counter b/c they will end
-		n.DeleteProp("root")                       // can't be root anymore!
 	}
 }
 
@@ -249,21 +245,35 @@ func (n *Node) AddChildImpl(kid Ki) {
 	}
 	kid.SetThis(kid)
 	n.Children = append(n.Children, kid)
-	kid.SetParent(n.This)
+	oldPar := kid.KiParent()
+	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
+	if oldPar != nil {
+		oldPar.DeleteChild(kid, false)
+		kid.NodeSignal().Emit(kid, int64(NodeSignalMoved), oldPar)
+	} else {
+		kid.NodeSignal().Emit(kid, int64(NodeSignalAdded), nil)
+	}
 }
 
 func (n *Node) InsertChildImpl(kid Ki, at int) {
 	if err := n.ThisCheck(); err != nil {
 		return
 	}
-	n.Children.InsertKi(kid, at)
 	kid.SetThis(kid)
-	kid.SetParent(n.This)
+	n.Children.InsertKi(kid, at)
+	oldPar := kid.KiParent()
+	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
+	if oldPar != nil {
+		oldPar.DeleteChild(kid, false)
+		kid.NodeSignal().Emit(kid, int64(NodeSignalMoved), oldPar)
+	} else {
+		kid.NodeSignal().Emit(kid, int64(NodeSignalAdded), nil)
+	}
 }
 
 func (n *Node) EmitChildAddedSignal(kid Ki) {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, SignalChildAdded, kid)
+		n.NodeSig.Emit(n.This, int64(NodeSignalChildAdded), kid)
 	}
 }
 
@@ -388,7 +398,7 @@ func (n *Node) FindParentByType(t ...reflect.Type) Ki {
 
 func (n *Node) EmitChildDeletedSignal(kid Ki) {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, SignalChildDeleted, kid)
+		n.NodeSig.Emit(n.This, int64(NodeSignalChildDeleted), kid)
 	}
 }
 
@@ -399,8 +409,12 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 		return
 	}
 	child := n.Children[idx]
+	if child.KiParent() == n.This {
+		// only deleting if we are still parent -- change parent first to signal move
+		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
+		child.SetParent(nil)
+	}
 	_ = n.Children.DeleteAtIndex(idx)
-	child.SetParent(nil)
 	if destroy {
 		n.Deleted = append(n.Deleted, child)
 	}
@@ -427,7 +441,7 @@ func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
 
 func (n *Node) EmitChildrenDeletedSignal() {
 	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, SignalChildrenDeleted, nil)
+		n.NodeSig.Emit(n.This, int64(NodeSignalChildrenDeleted), nil)
 	}
 }
 
@@ -449,7 +463,15 @@ func (n *Node) DestroyDeleted() {
 	n.Deleted = n.Deleted[:0]
 }
 
+func (n *Node) DestroyAllDeleted() {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		k.DestroyDeleted()
+		return true
+	})
+}
+
 func (n *Node) DestroyKi() {
+	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	for _, child := range n.Children {
 		child.DestroyKi()
 	}
@@ -545,6 +567,10 @@ func (n *Node) GoFunDownWait(level int, data interface{}, fun KiFun) {
 	}
 }
 
+func (n *Node) FunPrev(level int, data interface{}, fun KiFun) bool {
+	return true
+}
+
 func (n *Node) Path() string {
 	if n.Parent != nil {
 		return n.Parent.Path() + "." + n.Name
@@ -585,6 +611,12 @@ func (n *Node) FindPathUnique(path string) Ki {
 //   at highest level)
 //   All modification starts with UpdateStart() and ends with UpdateEnd()
 
+// todo: send NodeSignalDestroying before destroying, etc
+// general logic: child added / deleted events are blocked by updating count
+// but NodeDeleted and NodeDestroying are NOT
+
+// after an UpdateEnd, DestroyDeleted is called
+
 func (n *Node) NodeSignal() *Signal {
 	return &n.NodeSig
 }
@@ -604,7 +636,8 @@ func (n *Node) UpdateEnd() {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
 				k.UpdateCtr().Dec()
-				k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), d)
+				k.DestroyAllDeleted()
 				*par_updt = true // we updated so nobody else can!
 			} else {
 				k.UpdateCtr().Dec()
@@ -624,7 +657,8 @@ func (n *Node) UpdateEndAll() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			k.UpdateCtr().Dec()
-			k.NodeSignal().Emit(k, SignalNodeUpdated, d)
+			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), d)
+			k.DestroyDeleted()
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
 				log.Printf("KiNode UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
