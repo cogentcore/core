@@ -248,7 +248,9 @@ func (w *Window) EventLoop() {
 		if et == KeyTypedEventType {
 			kt, ok := ei.(KeyTypedEvent)
 			if ok {
-				if kt.Key == "tab" {
+				kf := KeyFun(kt.Key, kt.Chord)
+				switch kf {
+				case KeyFocusNext: // todo: should we absorb this event or not?  if so, goes first..
 					w.SetNextFocusItem()
 				}
 				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)

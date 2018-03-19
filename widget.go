@@ -68,19 +68,19 @@ func (g *WidgetBase) DrawStdBox() {
 // Buttons
 
 // signals that buttons can send
-type ButtonSignalType int64
+type ButtonSignals int64
 
 const (
 	// main signal -- button pressed down and up
-	ButtonClicked ButtonSignalType = iota
+	ButtonClicked ButtonSignals = iota
 	// button pushed down but not yet up
 	ButtonPressed
 	ButtonReleased
 	ButtonToggled
-	ButtonSignalTypeN
+	ButtonSignalsN
 )
 
-//go:generate stringer -type=ButtonSignalType
+//go:generate stringer -type=ButtonSignals
 
 // https://ux.stackexchange.com/questions/84872/what-is-the-buttons-unpressed-and-unhovered-state-called
 
@@ -111,7 +111,7 @@ type ButtonBase struct {
 	Shortcut    string               `xml:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates
-	ButtonSig   ki.Signal `json:"-",desc:"signal for button -- see ButtonSignalType for the types"`
+	ButtonSig   ki.Signal `json:"-",desc:"signal for button -- see ButtonSignals for the types"`
 	// todo: icon -- should be an xml
 }
 
@@ -228,7 +228,8 @@ func (g *Button) InitNode2D() {
 		kt, ok := d.(KeyTypedEvent)
 		if ok {
 			// todo: register shortcuts with window, and generalize these keybindings
-			if kt.Key == "enter" || kt.Key == "space" || kt.Key == "return" {
+			kf := KeyFun(kt.Key, kt.Chord)
+			if kf == KeySelectItem {
 				ab.ButtonPressed()
 				// todo: brief delay??
 				ab.ButtonReleased()

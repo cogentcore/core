@@ -23,9 +23,92 @@ package gi
 */
 
 import (
+	// "fmt"
 	"sort"
 	"strings"
 )
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Mapping Keys to Functions
+
+// functions that keyboard events can perform in the gui
+type KeyFunctions int64
+
+const (
+	KeyNoFun KeyFunctions = iota
+	KeyMoveUp
+	KeyMoveDown
+	KeyMoveRight
+	KeyMoveLeft
+	KeyPageUp
+	KeyPageDown
+	KeyPageRight
+	KeyPageLeft
+	KeyFocusNext
+	KeyFocusPrev
+	KeySelectItem
+	KeyCancelSelect
+	KeyExtendSelect
+	KeySelectText
+	KeyEditItem
+	KeyCopy
+	KeyCut
+	KeyPaste
+	// either shift key
+	KeyShift
+	// the control key: command for mac, ctrl for others?
+	KeyCtrl
+	KeyFunctionsN
+)
+
+// todo: need to have multiple functions possible per key, depending on context?
+
+type KeyMap map[string]KeyFunctions
+
+// the default map has emacs-style navigation etc
+var DefaultKeyMap = KeyMap{
+	"up_arrow":           KeyMoveUp,
+	"control+p":          KeyMoveUp,
+	"down_arrow":         KeyMoveDown,
+	"control+n":          KeyMoveDown,
+	"right_arrow":        KeyMoveRight,
+	"control+f":          KeyMoveRight,
+	"left_arrow":         KeyMoveLeft,
+	"control+b":          KeyMoveLeft,
+	"tab":                KeyFocusNext,
+	"shift_tab":          KeyFocusPrev,
+	"space":              KeySelectItem,
+	"return":             KeySelectItem,
+	"control+g":          KeyCancelSelect,
+	"control+down_arrow": KeyExtendSelect,
+	"control+space":      KeySelectText,
+	"left_shift":         KeyShift,
+	"right_shift":        KeyShift,
+	"left_super":         KeyCtrl,
+	"right_super":        KeyCtrl,
+}
+
+// users can set this to an alternative map
+var ActiveKeyMap *KeyMap = &DefaultKeyMap
+
+// translate key string into a function
+func KeyFun(key, chord string) KeyFunctions {
+	kf := KeyNoFun
+	if key != "" {
+		kf = (*ActiveKeyMap)[key]
+		// fmt.Printf("key: %v = %v\n", key, kf)
+	}
+	if chord != "" {
+		kf = (*ActiveKeyMap)[chord]
+		// fmt.Printf("chord: %v = %v\n", chord, kf)
+	}
+	return kf
+}
+
+//go:generate stringer -type=NodeWidgetSignalType
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Basic Keys
 
 const (
 	KeyFunction     = "function"

@@ -16,21 +16,21 @@ import (
 //  Node Widget
 
 // signals that buttons can send
-type NodeWidgetSignalType int64
+type NodeWidgetSignals int64
 
 const (
 	// node was selected -- data is the node widget
-	NodeSelected NodeWidgetSignalType = iota
+	NodeSelected NodeWidgetSignals = iota
 	// node widget unselected
 	NodeUnselected
 	// collapsed node widget was opened
 	NodeOpened
 	// open node widget was collapsed -- children not visible
 	NodeCollapsed
-	NodeWidgetSignalTypeN
+	NodeWidgetSignalsN
 )
 
-//go:generate stringer -type=NodeWidgetSignalType
+//go:generate stringer -type=NodeWidgetSignals
 
 // these extend NodeBase NodeFlags
 const (
@@ -66,9 +66,10 @@ const (
 type NodeWidget struct {
 	WidgetBase
 	SrcNode       ki.Ptr                   `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	NodeWidgetSig ki.Signal                `json:"-",desc:"signal for node widget -- see NodeWidgetSignalType for the types"`
+	NodeWidgetSig ki.Signal                `json:"-",desc:"signal for node widget -- see NodeWidgetSignals for the types"`
 	StateStyles   [NodeWidgetStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize    Size2D                   `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	RootWidget    *NodeWidget              `json:"-",desc:"cached root widget"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -217,7 +218,7 @@ func (g *NodeWidget) GetLabel() string {
 // a select action has been received (e.g., a mouse click) -- translate into
 // selection updates
 func (g *NodeWidget) SelectNodeAction() {
-	rn := g.RootNodeWidget()
+	rn := g.RootWidget
 	if ki.HasBitFlag(rn.NodeFlags, int(NodeFlagExtendSelect)) {
 		if g.IsSelected() {
 			g.UnselectNode()
@@ -240,7 +241,7 @@ func (g *NodeWidget) SelectNode() {
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagSelected))
 		g.GrabFocus() // focus always follows select  todo: option
 		g.NodeWidgetSig.Emit(g.This, int64(NodeSelected), nil)
-		fmt.Printf("selected node: %v\n", g.Name)
+		// fmt.Printf("selected node: %v\n", g.Name)
 		g.UpdateEndAll() // grab focus means allow kids to update too
 	}
 }
@@ -250,7 +251,7 @@ func (g *NodeWidget) UnselectNode() {
 		g.UpdateStart()
 		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagSelected))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeUnselected), nil)
-		fmt.Printf("unselectednode: %v\n", g.Name)
+		// fmt.Printf("unselectednode: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
@@ -274,13 +275,18 @@ func (g *NodeWidget) UnselectAll() {
 	g.UpdateEndAll()
 }
 
+// unselect everything below me -- call on Root to clear all
+func (g *NodeWidget) RootUnselectAll() {
+	g.RootWidget.UnselectAll()
+}
+
 func (g *NodeWidget) CollapseNode() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeCollapsed), nil)
-		fmt.Printf("collapsed node: %v\n", g.Name)
+		// fmt.Printf("collapsed node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
@@ -291,23 +297,23 @@ func (g *NodeWidget) OpenNode() {
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.NodeWidgetSig.Emit(g.This, int64(NodeOpened), nil)
-		fmt.Printf("opened node: %v\n", g.Name)
+		// fmt.Printf("opened node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
 
 func (g *NodeWidget) SetContinuousSelect() {
-	rn := g.RootNodeWidget()
+	rn := g.RootWidget
 	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
 }
 
 func (g *NodeWidget) SetExtendSelect() {
-	rn := g.RootNodeWidget()
+	rn := g.RootWidget
 	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
 }
 
 func (g *NodeWidget) ClearSelectMods() {
-	rn := g.RootNodeWidget()
+	rn := g.RootWidget
 	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
 	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
 }
@@ -346,14 +352,18 @@ func (g *NodeWidget) InitNode2D() {
 		}
 		kt, ok := d.(KeyTypedEvent)
 		if ok {
-			fmt.Printf("node widget key: %v\n", kt.Key)
-			switch kt.Key {
-			case "enter", "space", "return":
+			// fmt.Printf("node widget key: %v\n", kt.Chord)
+			kf := KeyFun(kt.Key, kt.Chord)
+			switch kf {
+			case KeySelectItem:
 				ab.SelectNodeAction()
-			case "ctrl-f", "f", "right_arrow":
+			case KeyCancelSelect:
+				ab.RootUnselectAll()
+			case KeyMoveRight:
 				ab.OpenNode()
-			case "ctrl-b", "b", "left_arrow":
+			case KeyMoveLeft:
 				ab.CollapseNode()
+				// todo; move down / up -- selectnext / prev
 			}
 		}
 	})
@@ -364,11 +374,12 @@ func (g *NodeWidget) InitNode2D() {
 		}
 		kt, ok := d.(KeyDownEvent)
 		if ok {
-			fmt.Printf("node widget key down: %v\n", kt.Key)
-			switch kt.Key {
-			case "left_shift", "right_shift":
+			kf := KeyFun(kt.Key, "")
+			// fmt.Printf("node widget key down: %v\n", kt.Key)
+			switch kf {
+			case KeyShift:
 				ab.SetContinuousSelect()
-			case "left_super", "right_super": // todo: need different settings per OS
+			case KeyCtrl:
 				ab.SetExtendSelect()
 			}
 		}
@@ -418,6 +429,8 @@ func (g *NodeWidget) Style2D() {
 
 func (g *NodeWidget) Layout2D(iter int) {
 	if iter == 0 {
+		g.RootWidget = g.RootNodeWidget() // cache
+
 		g.InitLayout2D()
 		st := &g.Style
 		pc := &g.Paint
@@ -459,7 +472,7 @@ func (g *NodeWidget) Layout2D(iter int) {
 		g.WidgetSize.X = w // stretch
 	} else {
 		g.AddParentPos()
-		rn := g.RootNodeWidget()
+		rn := g.RootWidget
 		g.Layout.AllocSize.X = rn.Layout.AllocSize.X - (g.Layout.AllocPos.X - rn.Layout.AllocPos.X)
 		g.WidgetSize.X = g.Layout.AllocSize.X
 		gii, _ := KiToNode2D(g.This)

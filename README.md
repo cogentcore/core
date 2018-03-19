@@ -6,6 +6,7 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 
 GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/gi
 
+Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and type "make" to build the core OS-specific GUI C interface for windows and events -- speeds up subsequent `go build` steps significantly.
 
 # Code Map
 
