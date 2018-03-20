@@ -14,6 +14,7 @@ import (
 // Widget base type
 type WidgetBase struct {
 	Node2DBase
+	Controls WidgetBase `desc:"a separate tree of sub-widgets that implement discrete subcomponents of a widget -- positions are always relative to the parent widget"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json

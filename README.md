@@ -61,7 +61,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 ### TODO
 
 Next:
-* NodeWidget -- need "Elements" or "Parts" for widgets with regions, styling, etc -- not a full child widget but just an element of a more complex widget.
+* NodeWidget -- need "Elements" or "Parts" for widgets with regions, styling, etc -- not a full child widget but just an element of a more complex widget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
 
 * text enter box
 * double-click!
