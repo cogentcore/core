@@ -215,14 +215,11 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	parent.SetChildType(reflect.TypeOf(parent))
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
 	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChildNamed(nil, "child1")
-
-	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	parent.Ptr.Ptr = child2
@@ -257,14 +254,11 @@ func TestNodeCallFun(t *testing.T) {
 	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	parent.SetChildType(reflect.TypeOf(parent))
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
 	child2 := parent.AddNewChildNamed(nil, "child1")
 	// child3 :=
 	parent.AddNewChildNamed(nil, "child1")
-
-	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	res := make([]string, 0, 10)
@@ -297,7 +291,6 @@ func TestNodeUpdate(t *testing.T) {
 	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	parent.SetChildType(reflect.TypeOf(parent))
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
@@ -310,8 +303,6 @@ func TestNodeUpdate(t *testing.T) {
 	parent.UpdateStart()
 	parent.AddNewChildNamed(nil, "child1")
 	parent.UpdateEnd()
-
-	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
@@ -372,7 +363,6 @@ func TestProps(t *testing.T) {
 	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	parent.SetChildType(reflect.TypeOf(parent))
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
@@ -385,8 +375,6 @@ func TestProps(t *testing.T) {
 	parent.UpdateStart()
 	parent.AddNewChildNamed(nil, "child1")
 	parent.UpdateEnd()
-
-	child2.SetChildType(reflect.TypeOf(parent))
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
@@ -426,5 +414,79 @@ func TestProps(t *testing.T) {
 	if !ok || spropf != 3.1415 {
 		t.Errorf("TestProps error -- spropf from type %v != %v\n", spropf, 3.1415)
 	}
+
+}
+
+func TestTreeMod(t *testing.T) {
+	NodeSignalTrace = true
+	sigs := ""
+	NodeSignalTraceString = &sigs
+
+	tree1 := Node{}
+	tree1.SetThisName(&tree1, "tree1")
+	// child11 :=
+	tree1.AddNewChildNamed(nil, "child11")
+	child12 := tree1.AddNewChildNamed(nil, "child12")
+	// child13 :=
+	tree1.AddNewChildNamed(nil, "child13")
+	// schild12 :=
+	child12.AddNewChildNamed(nil, "subchild12")
+
+	tree2 := Node{}
+	tree2.SetThisName(&tree2, "tree2")
+	// child21 :=
+	tree2.AddNewChildNamed(nil, "child21")
+	child22 := tree2.AddNewChildNamed(nil, "child22")
+	// child23 :=
+	tree2.AddNewChildNamed(nil, "child23")
+	// schild22 :=
+	child22.AddNewChildNamed(nil, "subchild22")
+
+	// fmt.Printf("Setup Signals:\n%v", sigs)
+	sigs = ""
+
+	// fmt.Printf("#################################\n")
+
+	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
+	tree2.AddChild(child12)
+
+	// fmt.Printf("#################################\n")
+	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
+
+	mvsigs := `ki.Signal EmitGo from: tree1 sig: NodeSignalChildDeleted data: child12
+	subchild12
+
+ki.Signal EmitGo from: child12 sig: NodeSignalMoved data: tree1
+	child11
+	child13
+
+ki.Signal EmitGo from: tree2 sig: NodeSignalChildAdded data: child12
+	subchild12
+
+`
+	// fmt.Printf("Move Signals:\n%v", sigs)
+	if sigs != mvsigs {
+		t.Errorf("TestTreeMod child12 move signals not as expected: %v", sigs)
+	}
+	sigs = ""
+
+	tree2.UpdateStart()
+	tree2.DeleteChild(child12, true)
+	tree2.UpdateEnd()
+
+	// fmt.Printf("#################################\n")
+
+	delsigs := `ki.Signal EmitGo from: child12 sig: NodeSignalDeleting data: <nil>
+ki.Signal EmitGo from: tree2 sig: NodeSignalUpdated data: <nil>
+ki.Signal EmitGo from: child12 sig: NodeSignalDestroying data: <nil>
+ki.Signal EmitGo from: subchild12 sig: NodeSignalDeleting data: <nil>
+ki.Signal EmitGo from: subchild12 sig: NodeSignalDestroying data: <nil>
+`
+
+	// fmt.Printf("Delete Signals:\n%v", sigs)
+	if sigs != delsigs {
+		t.Errorf("TestTreeMod child12 move signals not as expected: %v", sigs)
+	}
+	sigs = ""
 
 }

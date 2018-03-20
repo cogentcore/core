@@ -130,16 +130,16 @@ type Ki interface {
 	SetChildType(t reflect.Type) error
 
 	// add a new child at end of children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
-	AddChild(kid Ki)
+	AddChild(kid Ki) error
 
 	// add a new child at given position in children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
-	InsertChild(kid Ki, at int)
+	InsertChild(kid Ki, at int) error
 
 	// add a new child at end of children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	AddChildNamed(kid Ki, name string)
+	AddChildNamed(kid Ki, name string) error
 
 	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	InsertChildNamed(kid Ki, at int, name string)
+	InsertChildNamed(kid Ki, at int, name string) error
 
 	// create a new child of given type -- if nil, uses ChildType, then This type
 	MakeNewChild(typ reflect.Type) Ki

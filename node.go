@@ -53,6 +53,22 @@ var KiT_Node = Types.AddType(&Node{}, nil)
 var _ Ki = &Node{}
 
 //////////////////////////////////////////////////////////////////////////
+//  Stringer
+
+// stringer interface -- basic indented tree representation
+func (n Node) String() string {
+	str := ""
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		for i := 0; i < level; i++ {
+			str += "\t"
+		}
+		str += k.KiName() + "\n"
+		return true
+	})
+	return str
+}
+
+//////////////////////////////////////////////////////////////////////////
 //  Basic Ki fields
 
 func (n *Node) ThisKi() Ki {
@@ -239,12 +255,22 @@ func (n *Node) SetChildType(t reflect.Type) error {
 	return nil
 }
 
-func (n *Node) AddChildImpl(kid Ki) {
-	if err := n.ThisCheck(); err != nil {
-		return
-	}
-	kid.SetThis(kid)
-	n.Children = append(n.Children, kid)
+// check if it is safe to add child -- it cannot be a parent of us -- prevent loops!
+func (n *Node) AddChildCheck(kid Ki) error {
+	var err error
+	n.FunUp(0, nil, func(k Ki, level int, d interface{}) bool {
+		if k == kid {
+			err = fmt.Errorf("KiNode Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", n.PathUnique())
+			log.Printf("%v", err)
+			return false
+		}
+		return true
+	})
+	return err
+}
+
+// after adding child -- signals etc
+func (n *Node) addChildImplPost(kid Ki) {
 	oldPar := kid.KiParent()
 	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
 	if oldPar != nil {
@@ -255,20 +281,30 @@ func (n *Node) AddChildImpl(kid Ki) {
 	}
 }
 
-func (n *Node) InsertChildImpl(kid Ki, at int) {
+func (n *Node) AddChildImpl(kid Ki) error {
 	if err := n.ThisCheck(); err != nil {
-		return
+		return err
 	}
 	kid.SetThis(kid)
-	n.Children.InsertKi(kid, at)
-	oldPar := kid.KiParent()
-	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
-	if oldPar != nil {
-		oldPar.DeleteChild(kid, false)
-		kid.NodeSignal().Emit(kid, int64(NodeSignalMoved), oldPar)
-	} else {
-		kid.NodeSignal().Emit(kid, int64(NodeSignalAdded), nil)
+	if err := n.AddChildCheck(kid); err != nil {
+		return err
 	}
+	n.Children = append(n.Children, kid)
+	n.addChildImplPost(kid)
+	return nil
+}
+
+func (n *Node) InsertChildImpl(kid Ki, at int) error {
+	if err := n.ThisCheck(); err != nil {
+		return err
+	}
+	kid.SetThis(kid)
+	if err := n.AddChildCheck(kid); err != nil {
+		return err
+	}
+	n.Children.InsertKi(kid, at)
+	n.addChildImplPost(kid)
+	return nil
 }
 
 func (n *Node) EmitChildAddedSignal(kid Ki) {
@@ -277,26 +313,30 @@ func (n *Node) EmitChildAddedSignal(kid Ki) {
 	}
 }
 
-func (n *Node) AddChild(kid Ki) {
-	n.AddChildImpl(kid)
+func (n *Node) AddChild(kid Ki) error {
+	err := n.AddChildImpl(kid)
 	n.EmitChildAddedSignal(kid)
+	return err
 }
 
-func (n *Node) InsertChild(kid Ki, at int) {
-	n.InsertChildImpl(kid, at)
+func (n *Node) InsertChild(kid Ki, at int) error {
+	err := n.InsertChildImpl(kid, at)
 	n.EmitChildAddedSignal(kid)
+	return err
 }
 
-func (n *Node) AddChildNamed(kid Ki, name string) {
-	n.AddChildImpl(kid)
+func (n *Node) AddChildNamed(kid Ki, name string) error {
+	err := n.AddChildImpl(kid)
 	kid.SetName(name)
 	n.EmitChildAddedSignal(kid)
+	return err
 }
 
-func (n *Node) InsertChildNamed(kid Ki, at int, name string) {
-	n.InsertChildImpl(kid, at)
+func (n *Node) InsertChildNamed(kid Ki, at int, name string) error {
+	err := n.InsertChildImpl(kid, at)
 	kid.SetName(name)
 	n.EmitChildAddedSignal(kid)
+	return err
 }
 
 func (n *Node) MakeNewChild(typ reflect.Type) Ki {
@@ -447,6 +487,7 @@ func (n *Node) EmitChildrenDeletedSignal() {
 
 func (n *Node) DeleteChildren(destroy bool) {
 	for _, child := range n.Children {
+		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 	}
 	if destroy {
@@ -472,11 +513,8 @@ func (n *Node) DestroyAllDeleted() {
 
 func (n *Node) DestroyKi() {
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
-	for _, child := range n.Children {
-		child.DestroyKi()
-	}
-	n.DeleteChildren(true)
-	n.DestroyDeleted()
+	n.DeleteChildren(true) // first delete all my children
+	n.DestroyDeleted()     // then destroy all those kids
 }
 
 func (n *Node) IsLeaf() bool {
@@ -636,7 +674,7 @@ func (n *Node) UpdateEnd() {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
 				k.UpdateCtr().Dec()
-				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), d)
+				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), nil)
 				k.DestroyAllDeleted()
 				*par_updt = true // we updated so nobody else can!
 			} else {
@@ -657,7 +695,7 @@ func (n *Node) UpdateEndAll() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			k.UpdateCtr().Dec()
-			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), d)
+			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), nil)
 			k.DestroyDeleted()
 		} else {
 			if k.UpdateCtr().Value() <= 0 {

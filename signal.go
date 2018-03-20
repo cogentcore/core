@@ -6,7 +6,7 @@ package ki
 
 import (
 	"errors"
-	// "fmt"
+	"fmt"
 	"reflect"
 )
 
@@ -57,6 +57,13 @@ const (
 )
 
 //go:generate stringer -type=NodeSignals
+
+// set this to true to automatically print out a trace of the
+var NodeSignalTrace bool = false
+
+// set this to a string to receive trace in a string that can be compared for testing
+// otherwise just goes to stdout
+var NodeSignalTraceString *string
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
 type RecvFun func(receiver, sender Ki, sig int64, data interface{})
@@ -152,10 +159,22 @@ func (sig *Signal) DisconnectAll(recv Ki, fun RecvFun) {
 	sig.Cons = sig.Cons[:0]
 }
 
+// record a trace of signal being emitted
+func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
+	if NodeSignalTraceString != nil {
+		*NodeSignalTraceString += fmt.Sprintf("ki.Signal EmitGo from: %v sig: %v data: %v\n", sender.KiName(), NodeSignals(sig), data)
+	} else {
+		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.PathUnique(), NodeSignals(sig), data)
+	}
+}
+
 // Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
+	}
+	if NodeSignalTrace {
+		s.EmitTrace(sender, sig, data)
 	}
 	for _, con := range s.Cons {
 		con.Fun(con.Recv, sender, sig, data)
@@ -166,6 +185,9 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
+	}
+	if NodeSignalTrace {
+		s.EmitTrace(sender, sig, data)
 	}
 	for _, con := range s.Cons {
 		go con.Fun(con.Recv, sender, sig, data)
