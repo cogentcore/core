@@ -1,7 +1,7 @@
 # ki
 Part of the GoKi Go language (golang) full strength tree structure system (ki = tree in Japanese)
 
-`package ki` -- core `Ki` interface (`ki.go`) and `Node` struct (`node.go`), plus other supporting players
+`package ki` -- core `Ki` interface (`ki.go`) and `Node` struct (`node.go`), plus other supporting players.
 
 GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/ki
 

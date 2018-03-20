@@ -15,6 +15,7 @@ import (
 	// "github.com/cznic/mathutil"
 	"log"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	// "unsafe"
@@ -509,10 +510,12 @@ func (n *Node) DestroyAllDeleted() {
 		k.DestroyDeleted()
 		return true
 	})
+	runtime.GC() // this is a great time to call the GC!
 }
 
 func (n *Node) DestroyKi() {
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
+	// todo: traverse struct and un-set all Ptr's!
 	n.DeleteChildren(true) // first delete all my children
 	n.DestroyDeleted()     // then destroy all those kids
 }

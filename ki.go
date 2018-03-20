@@ -31,6 +31,10 @@ core tree functionality, including:
       including type-level properties and temporary properties used for
       graphical views, etc
 
+	* Garbage collection is performed at optimized point at end of updates
+      after tree objects have been destroyed (and all pointers reset),
+      minimizing impact and need for unplanned GC interruptions.
+
 */
 package ki
 
