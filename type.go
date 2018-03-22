@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -199,20 +200,7 @@ func ToString(it interface{}) (string, bool) {
 	}
 }
 
-// yep..
-func Max64(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Min64(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
-}
+// math provides Max/Min for 64bit -- these are for specific subtypes
 
 func Max32(a, b float32) float32 {
 	if a > b {
@@ -240,6 +228,18 @@ func MinInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// minimum excluding 0
+func MinPos(a, b float64) float64 {
+	if a > 0.0 && b > 0.0 {
+		return math.Min(a, b)
+	} else if a > 0.0 {
+		return a
+	} else if b > 0.0 {
+		return b
+	}
+	return a
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
