@@ -2,18 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-	Package Gi (GoGi) provides a complete Graphical Interface based on GoKi Tree Node structs
-
-	2D and 3D scenegraphs supported, each rendering to respective Viewport2D or 3D
-	which in turn can be integrated within the other type of scenegraph.
-	Within 2D scenegraph, the following are supported
-		* SVG-based rendering nodes for basic shapes, paths, curves, arcs etc, with SVG / CSS properties
-		* Widget nodes for GUI actions (Buttons, etc), with support for full SVG-based rendering of styles, using Qt-based naming and functionality, including TreeView, TableView
-		* Layouts for placing widgets, based on QtQuick model
-		* Primary geometry is managed in terms of inherited position offsets from top-left,
-		  in a widget-like manner, but svg-based transforms also supported.
-*/
 package gi
 
 import (

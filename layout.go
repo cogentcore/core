@@ -206,7 +206,7 @@ const (
 type Layout struct {
 	Node2DBase
 	// type of layout to use
-	Layout Layouts
+	Lay Layouts
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -214,7 +214,7 @@ var KiT_Layout = ki.Types.AddType(&Layout{}, nil)
 
 // do we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
-	if (d == X && ly.Layout == LayoutRow) || (d == Y && ly.Layout == LayoutCol) {
+	if (d == X && ly.Lay == LayoutRow) || (d == Y && ly.Lay == LayoutCol) {
 		return true
 	}
 	return false
@@ -489,7 +489,7 @@ func (ly *Layout) Layout2D(iter int) {
 		ly.GatherSizes()
 	} else {
 		ly.AllocFromParent() // in case we didn't get anything
-		switch ly.Layout {
+		switch ly.Lay {
 		case LayoutRow:
 			ly.LayoutAll(X)
 			ly.LayoutSingle(Y)
@@ -559,16 +559,7 @@ func (g *Frame) Style2D() {
 }
 
 func (g *Frame) Layout2D(iter int) {
-	// todo:
-	// g.Layout.Layout2D(iter)
-	if iter == 0 {
-		g.InitLayout2D()
-	} else {
-		g.GeomFromLayout()
-	}
-	// todo: test for use of parent-el relative units -- indicates whether multiple loops
-	// are required
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+	g.Layout.Layout2D(iter) // use the layout version
 }
 
 func (g *Frame) Node2DBBox() image.Rectangle {
@@ -604,3 +595,109 @@ func (g *Frame) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &Frame{}
+
+///////////////////////////////////////////////////////////
+//    Stretch and Space -- dummy elements for layouts
+
+// Stretch adds an infinitely stretchy element for spacing out layouts
+// (max-size = -1) set the width / height property to determine how much it
+// takes relative to other stretchy elements
+type Stretch struct {
+	Node2DBase
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Stretch = ki.Types.AddType(&Stretch{}, nil)
+
+func (g *Stretch) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *Stretch) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Stretch) InitNode2D() {
+}
+
+var StretchProps = map[string]interface{}{
+	"max-width":  -1.0,
+	"max-height": -1.0,
+}
+
+func (g *Stretch) Style2D() {
+	// first do our normal default styles
+	g.Style.SetStyle(nil, &StyleDefault, StretchProps)
+	// then style with user props
+	g.Style2DWidget()
+}
+
+func (g *Stretch) Layout2D(iter int) {
+	g.BaseLayout2D(iter)
+}
+
+func (g *Stretch) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *Stretch) Render2D() {
+}
+
+func (g *Stretch) CanReRender2D() bool {
+	return true
+}
+
+func (g *Stretch) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &Stretch{}
+
+// Space adds an infinitely stretchy element for spacing out layouts
+// (max-size = -1) set the width / height property to determine how much it
+// takes relative to other stretchy elements
+type Space struct {
+	Node2DBase
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Space = ki.Types.AddType(&Space{}, nil)
+
+func (g *Space) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *Space) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Space) InitNode2D() {
+}
+
+func (g *Space) Style2D() {
+	// // first do our normal default styles
+	// g.Style.SetStyle(nil, &StyleDefault, SpaceProps)
+	// then style with user props
+	g.Style2DWidget()
+}
+
+func (g *Space) Layout2D(iter int) {
+	g.BaseLayout2D(iter)
+}
+
+func (g *Space) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *Space) Render2D() {
+}
+
+func (g *Space) CanReRender2D() bool {
+	return true
+}
+
+func (g *Space) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &Space{}

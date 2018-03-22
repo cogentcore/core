@@ -334,9 +334,12 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, t
 			return
 		} else if vt == reflect.TypeOf(units.Value{}) {
 			uv := vf.Addr().Interface().(*units.Value)
-			if prstr != "" {
-				uv.SetFromString(prstr)
-			} else { // assume Px as an implicit default
+			switch prtv := prv.(type) {
+			case string:
+				uv.SetFromString(prtv)
+			case units.Value:
+				*uv = prtv
+			default: // assume Px as an implicit default
 				prvflt := reflect.ValueOf(prv).Convert(reflect.TypeOf(0.0)).Interface().(float64)
 				uv.Set(prvflt, units.Px)
 			}

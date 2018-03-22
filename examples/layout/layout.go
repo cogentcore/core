@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/gi"
 	_ "github.com/rcoreilly/goki/gi/init"
+	"github.com/rcoreilly/goki/gi/units"
 	// "math/rand"
 	// "reflect"
 	// "runtime"
@@ -41,65 +42,71 @@ func mainrun() {
 	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF")
 
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "collay").(*gi.Layout)
-	vlay.Layout = gi.LayoutCol
+	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay.Lay = gi.LayoutCol
 
-	rlay := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay1").(*gi.Layout)
-	rlay.Layout = gi.LayoutRow
+	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1.Lay = gi.LayoutRow
 
-	rlay.SetProp("align-vert", "top")
-	// rlay.SetProp("align-horiz", "hjustify")
-	rlay.SetProp("align-horiz", "left")
-	rlay.SetProp("margin", 4.0)
-	rlay.SetProp("max-width", -1) // always stretch width
+	row1.SetProp("align-vert", "top")
+	// row1.SetProp("align-horiz", "hjustify")
+	row1.SetProp("align-horiz", "left")
+	row1.SetProp("margin", 4.0)
+	row1.SetProp("max-width", -1) // always stretch width
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := rlay.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row1.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
-		if i != 2 {
+		if i == 2 {
+			fr.SetFixedWidth(units.NewValue(20, units.Em))
+			spc := row1.AddNewChildNamed(gi.KiT_Space, "spc").(*gi.Space)
+			spc.SetFixedWidth(units.NewValue(4, units.Em))
+		} else {
 			fr.SetProp("max-width", -1) // spacer
 		}
 	}
 
-	rlay2 := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay2").(*gi.Layout)
-	rlay2.Layout = gi.LayoutRow
-	rlay2.SetProp("text-align", "center")
-	rlay2.SetProp("max-width", -1) // always stretch width
+	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
+	row2.Lay = gi.LayoutRow
+	row2.SetProp("text-align", "center")
+	row2.SetProp("max-width", -1) // always stretch width
 
-	rlay2.SetProp("align-vert", "vcenter")
-	// rlay2.SetProp("align-horiz", "hjustify")
-	rlay2.SetProp("align-horiz", "left")
-	rlay2.SetProp("margin", 4.0)
+	row2.SetProp("align-vert", "vcenter")
+	// row2.SetProp("align-horiz", "hjustify")
+	row2.SetProp("align-horiz", "left")
+	row2.SetProp("margin", 4.0)
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := rlay2.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row2.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
-		// fr.SetProp("max-width", -1) // spacer
+		if i == 2 {
+			row2.AddNewChildNamed(gi.KiT_Stretch, "str")
+		}
 	}
 
-	rlay3 := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay3").(*gi.Layout)
-	rlay3.Layout = gi.LayoutRow
-	rlay3.SetProp("text-align", "center")
-	// rlay3.SetProp("max-width", -1) // always stretch width
+	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
+	row3.Lay = gi.LayoutRow
+	row3.SetProp("text-align", "center")
+	// row3.SetProp("max-width", -1) // always stretch width
 
-	rlay3.SetProp("align-vert", "bottom")
-	rlay3.SetProp("align-horiz", "hjustify")
-	// rlay3.SetProp("align-horiz", "left")
-	rlay3.SetProp("margin", 4.0)
+	row3.SetProp("align-vert", "bottom")
+	row3.SetProp("align-horiz", "hjustify")
+	// row3.SetProp("align-horiz", "left")
+	row3.SetProp("margin", 4.0)
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := rlay3.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row3.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("min-height", sz.Y)

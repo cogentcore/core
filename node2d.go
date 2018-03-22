@@ -18,6 +18,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	// "gopkg.in/go-playground/colors.v1"
 	"image"
@@ -223,4 +224,30 @@ func (g *Node2DBase) SumOfChildHeights() float64 {
 		}
 	}
 	return h
+}
+
+// the basic Layout2D functions -- all widget-like nodes should do these steps
+// if nothing else
+func (g *Node2DBase) BaseLayout2D(iter int) {
+	if iter == 0 {
+		g.InitLayout2D()
+	} else {
+		g.GeomFromLayout()
+	}
+
+	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+}
+
+// set all width options (width, min-width, max-width) to a fixed width value
+func (g *Node2DBase) SetFixedWidth(val units.Value) {
+	g.SetProp("width", val)
+	g.SetProp("min-width", val)
+	g.SetProp("max-width", val)
+}
+
+// set all height options (height, min-height, max-height) to a fixed height value
+func (g *Node2DBase) SetFixedHeight(val units.Value) {
+	g.SetProp("height", val)
+	g.SetProp("min-height", val)
+	g.SetProp("max-height", val)
 }
