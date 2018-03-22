@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _AlignHoriz_name = "AlignLeftAlignHCenterAlignRightAlignJustifyAlignHorizN"
+const _AlignHoriz_name = "AlignLeftAlignHCenterAlignRightAlignHJustifyAlignHorizN"
 
-var _AlignHoriz_index = [...]uint8{0, 9, 21, 31, 43, 54}
+var _AlignHoriz_index = [...]uint8{0, 9, 21, 31, 44, 55}
 
 func (i AlignHoriz) String() string {
 	if i < 0 || i >= AlignHoriz(len(_AlignHoriz_index)-1) {

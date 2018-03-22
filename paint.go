@@ -150,8 +150,8 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 type RenderState struct {
 	StrokePath raster.Path
 	FillPath   raster.Path
-	Start      Point2D
-	Current    Point2D
+	Start      Vec2D
+	Current    Vec2D
 	HasCurrent bool
 	Image      *image.RGBA // pointer to image to render into
 	Mask       *image.Alpha
@@ -162,9 +162,9 @@ type RenderState struct {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(x, y float64) Point2D {
+func (pc *Paint) TransformPoint(x, y float64) Vec2D {
 	tx, ty := pc.XForm.TransformPoint(x, y)
-	return Point2D{tx, ty}
+	return Vec2D{tx, ty}
 }
 
 // get the bounding box for an element in pixel int coordinates
@@ -175,7 +175,7 @@ func (pc *Paint) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
 }
 
 // get the bounding box for a slice of points
-func (pc *Paint) BoundingBoxFromPoints(points []Point2D) image.Rectangle {
+func (pc *Paint) BoundingBoxFromPoints(points []Vec2D) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -446,7 +446,7 @@ func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float64) {
 	pc.LineTo(rs, x2, y2)
 }
 
-func (pc *Paint) DrawPolyline(rs *RenderState, points []Point2D) {
+func (pc *Paint) DrawPolyline(rs *RenderState, points []Vec2D) {
 	sz := len(points)
 	if sz < 2 {
 		return
@@ -457,7 +457,7 @@ func (pc *Paint) DrawPolyline(rs *RenderState, points []Point2D) {
 	}
 }
 
-func (pc *Paint) DrawPolygon(rs *RenderState, points []Point2D) {
+func (pc *Paint) DrawPolygon(rs *RenderState, points []Vec2D) {
 	pc.DrawPolyline(rs, points)
 	pc.ClosePath(rs)
 }
@@ -787,9 +787,9 @@ func (pc *Paint) InvertY(rs *RenderState) {
 ////////////////////////////////////////////////////////////////////////////////////
 // Internal -- might want to export these later depending
 
-func flattenPath(p raster.Path) [][]Point2D {
-	var result [][]Point2D
-	var path []Point2D
+func flattenPath(p raster.Path) [][]Vec2D {
+	var result [][]Vec2D
+	var path []Vec2D
 	var cx, cy float64
 	for i := 0; i < len(p); {
 		switch p[i] {
@@ -800,13 +800,13 @@ func flattenPath(p raster.Path) [][]Point2D {
 			}
 			x := unfix(p[i+1])
 			y := unfix(p[i+2])
-			path = append(path, Point2D{x, y})
+			path = append(path, Vec2D{x, y})
 			cx, cy = x, y
 			i += 4
 		case 1:
 			x := unfix(p[i+1])
 			y := unfix(p[i+2])
-			path = append(path, Point2D{x, y})
+			path = append(path, Vec2D{x, y})
 			cx, cy = x, y
 			i += 4
 		case 2:
@@ -839,8 +839,8 @@ func flattenPath(p raster.Path) [][]Point2D {
 	return result
 }
 
-func dashPath(paths [][]Point2D, dashes []float64) [][]Point2D {
-	var result [][]Point2D
+func dashPath(paths [][]Vec2D, dashes []float64) [][]Vec2D {
+	var result [][]Vec2D
 	if len(dashes) == 0 {
 		return paths
 	}
@@ -855,7 +855,7 @@ func dashPath(paths [][]Point2D, dashes []float64) [][]Point2D {
 		pathIndex := 1
 		dashIndex := 0
 		segmentLength := 0.0
-		var segment []Point2D
+		var segment []Vec2D
 		segment = append(segment, previous)
 		for pathIndex < len(path) {
 			dashLength := dashes[dashIndex]
@@ -888,7 +888,7 @@ func dashPath(paths [][]Point2D, dashes []float64) [][]Point2D {
 	return result
 }
 
-func rasterPath(paths [][]Point2D) raster.Path {
+func rasterPath(paths [][]Vec2D) raster.Path {
 	var result raster.Path
 	for _, path := range paths {
 		var previous fixed.Point26_6

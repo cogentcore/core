@@ -38,82 +38,241 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-type Point2D struct {
+// note: golang.org/x/image/math/f64 defines Vec2 as [2]float64
+// elabored then by https://godoc.org/github.com/go-gl/mathgl/mgl64
+// it is instead very convenient and clear to use .X .Y fields for 2D math
+// original gg package used Point2D but Vec2D is more general, e.g., for sizes etc
+// in go much better to use fewer types so only using Vec2D
+
+// dimensions
+type Dims2D int32
+
+const (
+	X Dims2D = iota
+	Y
+)
+
+var KiT_Dims2D = ki.Enums.AddEnumAltLower(X, false, nil, "", int64(Y)+1)
+
+//go:generate stringer -type=Dims2D
+
+// 2D vector -- a point or size in 2D
+type Vec2D struct {
 	X, Y float64
 }
 
-var Point2DZero = Point2D{0, 0}
+var Vec2DZero = Vec2D{0, 0}
 
-type Size2D Point2D
+// return value along given dimension
+func (a Vec2D) Dim(d Dims2D) float64 {
+	switch d {
+	case X:
+		return a.X
+	default:
+		return a.Y
+	}
+}
 
-var Size2DZero = Size2D{0, 0}
+// get the other dimension
+func OtherDim(d Dims2D) Dims2D {
+	switch d {
+	case X:
+		return Y
+	default:
+		return X
+	}
+}
 
-func (a Point2D) IsZero() bool {
+// set the value along a given dimension
+func (a *Vec2D) SetDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X = val
+	case Y:
+		a.Y = val
+	}
+}
+
+func (a Vec2D) IsZero() bool {
 	return a.X == 0.0 && a.Y == 0.0
 }
 
-func (a Size2D) IsZero() bool {
-	return a.X == 0.0 && a.Y == 0.0
-}
-
-func (a Point2D) Fixed() fixed.Point26_6 {
+func (a Vec2D) Fixed() fixed.Point26_6 {
 	return fixp(a.X, a.Y)
 }
 
-func (a Point2D) Distance(b Point2D) float64 {
-	return math.Hypot(a.X-b.X, a.Y-b.Y)
+func (a Vec2D) Add(b Vec2D) Vec2D {
+	return Vec2D{a.X + b.X, a.Y + b.Y}
 }
 
-func (a Point2D) Interpolate(b Point2D, t float64) Point2D {
-	x := a.X + (b.X-a.X)*t
-	y := a.Y + (b.Y-a.Y)*t
-	return Point2D{x, y}
+func (a Vec2D) AddVal(val float64) Vec2D {
+	return Vec2D{a.X + val, a.Y + val}
 }
 
-func (a Point2D) Add(b Point2D) Point2D {
-	return Point2D{a.X + b.X, a.Y + b.Y}
+func (a *Vec2D) SetAdd(b Vec2D) {
+	a.X += b.X
+	a.Y += b.Y
 }
 
-func (a Point2D) AddVal(val float64) Point2D {
-	return Point2D{a.X + val, a.Y + val}
+func (a *Vec2D) SetAddVal(val float64) {
+	a.X += val
+	a.Y += val
 }
 
-func (a Point2D) Max(b Point2D) Point2D {
-	return Point2D{ki.Max64(a.X, b.X), ki.Max64(a.Y, b.Y)}
+func (a Vec2D) Sub(b Vec2D) Vec2D {
+	return Vec2D{a.X - b.X, a.Y - b.Y}
 }
 
-func (a Point2D) Min(b Point2D) Point2D {
-	return Point2D{ki.Min64(a.X, b.X), ki.Min64(a.Y, b.Y)}
+func (a *Vec2D) SetSub(b Vec2D) {
+	a.X -= b.X
+	a.Y -= b.Y
 }
 
-func (a Size2D) Add(b Size2D) Size2D {
-	return Size2D{a.X + b.X, a.Y + b.Y}
+func (a *Vec2D) SetSubVal(val float64) {
+	a.X -= val
+	a.Y -= val
 }
 
-func (a Size2D) AddVal(val float64) Size2D {
-	return Size2D{a.X + val, a.Y + val}
+func (a Vec2D) SubVal(val float64) Vec2D {
+	return Vec2D{a.X - val, a.Y - val}
 }
 
-func (a Size2D) Max(b Size2D) Size2D {
-	return Size2D{ki.Max64(a.X, b.X), ki.Max64(a.Y, b.Y)}
+func (a Vec2D) Mul(b Vec2D) Vec2D {
+	return Vec2D{a.X * b.X, a.Y * b.Y}
 }
 
-func (a Size2D) Min(b Size2D) Size2D {
-	return Size2D{ki.Min64(a.X, b.X), ki.Min64(a.Y, b.Y)}
+func (a *Vec2D) SetMul(b Vec2D) {
+	a.X *= b.X
+	a.Y *= b.Y
 }
 
-func (a *Size2D) SetFromPoint(pt image.Point) {
+func (a Vec2D) MulVal(val float64) Vec2D {
+	return Vec2D{a.X * val, a.Y * val}
+}
+
+func (a *Vec2D) SetMulVal(val float64) {
+	a.X *= val
+	a.Y *= val
+}
+
+func (a Vec2D) Div(b Vec2D) Vec2D {
+	return Vec2D{a.X / b.X, a.Y / b.Y}
+}
+
+func (a *Vec2D) SetDiv(b Vec2D) {
+	a.X /= b.X
+	a.Y /= b.Y
+}
+
+func (a *Vec2D) SetDivlVal(val float64) {
+	a.X /= val
+	a.Y /= val
+}
+
+func (a Vec2D) DivVal(val float64) Vec2D {
+	return Vec2D{a.X / val, a.Y / val}
+}
+
+func (a Vec2D) Max(b Vec2D) Vec2D {
+	return Vec2D{math.Max(a.X, b.X), math.Max(a.Y, b.Y)}
+}
+
+func (a Vec2D) Min(b Vec2D) Vec2D {
+	return Vec2D{math.Min(a.X, b.X), math.Min(a.Y, b.Y)}
+}
+
+// minimum of all positive (> 0) numbers
+func (a Vec2D) MinPos(b Vec2D) Vec2D {
+	return Vec2D{ki.MinPos(a.X, b.X), ki.MinPos(a.Y, b.Y)}
+}
+
+// set to max of current vs. b
+func (a *Vec2D) SetMax(b Vec2D) {
+	a.X = math.Max(a.X, b.X)
+	a.Y = math.Max(a.Y, b.Y)
+}
+
+// set to min of current vs. b
+func (a *Vec2D) SetMin(b Vec2D) {
+	a.X = math.Min(a.X, b.X)
+	a.Y = math.Min(a.Y, b.Y)
+}
+
+// set to minpos of current vs. b
+func (a *Vec2D) SetMinPos(b Vec2D) {
+	a.X = ki.MinPos(a.X, b.X)
+	a.Y = ki.MinPos(a.Y, b.Y)
+}
+
+// set to max of current value and val
+func (a *Vec2D) SetMaxVal(val float64) {
+	a.X = math.Max(a.X, val)
+	a.Y = math.Max(a.Y, val)
+}
+
+// set to min of current value and val
+func (a *Vec2D) SetMinVal(val float64) {
+	a.X = math.Min(a.X, val)
+	a.Y = math.Min(a.Y, val)
+}
+
+// set to minpos of current value and val
+func (a *Vec2D) SetMinPosVal(val float64) {
+	a.X = ki.MinPos(a.X, val)
+	a.Y = ki.MinPos(a.Y, val)
+}
+
+// set the value along a given dimension to max of current val and new val
+func (a *Vec2D) SetMaxDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X = math.Max(a.X, val)
+	case Y:
+		a.Y = math.Max(a.Y, val)
+	}
+}
+
+// set the value along a given dimension to min of current val and new val
+func (a *Vec2D) SetMinDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X = math.Min(a.X, val)
+	case Y:
+		a.Y = math.Min(a.Y, val)
+	}
+}
+
+// set the value along a given dimension to min of current val and new val
+func (a *Vec2D) SetMinPosDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X = ki.MinPos(val, a.X)
+	case Y:
+		a.Y = ki.MinPos(val, a.Y)
+	}
+}
+
+func (a *Vec2D) SetFromPoint(pt image.Point) {
 	a.X = float64(pt.X)
 	a.Y = float64(pt.Y)
 }
 
-func (a Size2D) String() string {
+func (a Vec2D) Distance(b Vec2D) float64 {
+	return math.Hypot(a.X-b.X, a.Y-b.Y)
+}
+
+func (a Vec2D) Interpolate(b Vec2D, t float64) Vec2D {
+	x := a.X + (b.X-a.X)*t
+	y := a.Y + (b.Y-a.Y)*t
+	return Vec2D{x, y}
+}
+
+func (a Vec2D) String() string {
 	return fmt.Sprintf("%v, %v", a.X, a.Y)
 }
 
-func (a Point2D) String() string {
-	return fmt.Sprintf("%v, %v", a.X, a.Y)
-}
+////////////////////////////////////////////////////////////////////////////////////////
+// XFormMatrix2D
 
 type XFormMatrix2D struct {
 	XX, YX, XY, YY, X0, Y0 float64
@@ -210,14 +369,14 @@ func (a XFormMatrix2D) Shear(x, y float64) XFormMatrix2D {
 type ViewBoxAlign int32
 
 const (
-	None  ViewBoxAlign = 0                  // do not preserve uniform scaling
-	XMin  ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
-	XMid  ViewBoxAlign = 1 << iota          // align ViewBox.Min with midpoint values of Viewport
-	XMax  ViewBoxAlign = 1 << iota          // align ViewBox.Min+Size with maximum values of Viewport
+	None  ViewBoxAlign = 1 << iota          // do not preserve uniform scaling
+	XMin                                    // align ViewBox.Min with smallest values of Viewport
+	XMid                                    // align ViewBox.Min with midpoint values of Viewport
+	XMax                                    // align ViewBox.Min+Size with maximum values of Viewport
 	XMask ViewBoxAlign = XMin + XMid + XMax // mask for X values -- clear all X before setting new one
 	YMin  ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
-	YMid  ViewBoxAlign = 1 << iota          // align ViewBox.Min with midpoint values of Viewport
-	YMax  ViewBoxAlign = 1 << iota          // align ViewBox.Min+Size with maximum values of Viewport
+	YMid                                    // align ViewBox.Min with midpoint values of Viewport
+	YMax                                    // align ViewBox.Min+Size with maximum values of Viewport
 	YMask ViewBoxAlign = YMin + YMid + YMax // mask for Y values -- clear all Y before setting new one
 )
 

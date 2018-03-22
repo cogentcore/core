@@ -43,7 +43,7 @@ type Node2DBase struct {
 	Style    Style       `desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	Paint    Paint       `json:"-",desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
-	Layout   LayoutData  `desc:"all the layout information for this item"`
+	LayData  LayoutData  `desc:"all the layout information for this item"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -94,7 +94,7 @@ func (g *Node2DBase) InitNode2DBase() {
 	}
 	g.Style.Defaults()
 	g.Paint.Defaults()
-	g.Layout.Defaults() // doesn't overwrite
+	g.LayData.Defaults() // doesn't overwrite
 }
 
 // style the Paint values directly from node properties -- for SVG-style nodes
@@ -135,7 +135,7 @@ func (g *Node2DBase) Style2DWidget() {
 		g.Style.SetStyle(nil, &StyleDefault, g.KiProps())
 	}
 	g.Style.SetUnitContext(&g.Viewport.Render, 0) // todo: test for use of el-relative
-	g.Layout.SetFromStyle(&g.Style.Layout)        // also does reset
+	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
 }
 
 // find parent viewport -- uses AsViewport2D() method on Node2D interface
@@ -166,14 +166,13 @@ func (g *Node2DBase) CopyParentPaint() *Node2DBase {
 }
 
 func (g *Node2DBase) InitLayout2D() {
-	g.Layout.Reset()
-	g.Layout.InitFromStyle(&g.Style.Layout)
+	g.LayData.SetFromStyle(&g.Style.Layout)
 }
 
 // get our bbox from Layout allocation
 func (g *Node2DBase) WinBBoxFromAlloc() image.Rectangle {
-	tp := g.Paint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
-	ts := g.Paint.TransformPoint(g.Layout.AllocSize.X, g.Layout.AllocSize.Y)
+	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
+	ts := g.Paint.TransformPoint(g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
@@ -190,7 +189,7 @@ func (g *Node2DBase) SetWinBBox(bb image.Rectangle) {
 func (g *Node2DBase) AddParentPos() {
 	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
-		g.Layout.AllocPos = g.Layout.AllocPos.Add(pg.Layout.AllocPos)
+		g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
 	}
 }
 
@@ -208,7 +207,7 @@ func (g *Node2DBase) SumOfChildWidths() float64 {
 	for _, kid := range g.Children {
 		_, gi := KiToNode2D(kid)
 		if gi != nil {
-			w += gi.Layout.AllocSize.X
+			w += gi.LayData.AllocSize.X
 		}
 	}
 	return w
@@ -220,7 +219,7 @@ func (g *Node2DBase) SumOfChildHeights() float64 {
 	for _, kid := range g.Children {
 		_, gi := KiToNode2D(kid)
 		if gi != nil {
-			h += gi.Layout.AllocSize.Y
+			h += gi.LayData.AllocSize.Y
 		}
 	}
 	return h

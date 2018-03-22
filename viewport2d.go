@@ -127,7 +127,7 @@ func (vp *Viewport2D) Style2D() {
 func (vp *Viewport2D) Layout2D(iter int) {
 	if iter == 0 {
 		vp.InitLayout2D()
-		vp.Layout.AllocSize.SetFromPoint(vp.ViewBox.Size)
+		vp.LayData.AllocSize.SetFromPoint(vp.ViewBox.Size)
 	} else {
 		vp.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
 		// todo: we now need to update our ViewBox based on Alloc values..
@@ -180,7 +180,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		vp.Render2DRoot()
 	} else {
 		if gii.CanReRender2D() {
-			gii.Render2D()
+			vp.Render2DFromNode(gi)
 			vp.Render2D() // redraw us
 		} else {
 			vp.Style2DFromNode(gi) // restyle only from affected node downward
@@ -220,21 +220,24 @@ func (vp *Viewport2D) ReRender2DRoot() {
 	vp.Render2DRoot()
 }
 
-// this only needs to be done on a structural update
-func (vp *Viewport2D) Style2DFromNode(gi *Node2DBase) {
-	gi.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, _ := KiToNode2D(k)
-		if gii == nil {
-			return false // going into a different type of thing, bail
-		}
-		gii.Style2D()
-		return true
-	})
+// do the styling -- only from root
+func (vp *Viewport2D) Style2DRoot() {
+	vp.Style2DFromNode(&vp.Node2DBase)
+}
+
+// do the layout pass from root
+func (vp *Viewport2D) Layout2DRoot() {
+	vp.Layout2DFromNode(&vp.Node2DBase)
+}
+
+// do the render from root
+func (vp *Viewport2D) Render2DRoot() {
+	vp.Render2DFromNode(&vp.Node2DBase)
 }
 
 // this only needs to be done on a structural update
-func (vp *Viewport2D) Style2DRoot() {
-	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+func (vp *Viewport2D) Style2DFromNode(gn *Node2DBase) {
+	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false // going into a different type of thing, bail
@@ -245,11 +248,11 @@ func (vp *Viewport2D) Style2DRoot() {
 }
 
 // do the layout pass in 2 iterations
-func (vp *Viewport2D) Layout2DRoot() {
+func (vp *Viewport2D) Layout2DFromNode(gn *Node2DBase) {
 	// todo: support multiple iterations if necc
 
 	// layout happens in depth-first manner -- requires two functions
-	vp.FunDownDepthFirst(0, vp,
+	gn.FunDownDepthFirst(0, vp,
 		func(k ki.Ki, level int, d interface{}) bool { // this is for testing whether to process node
 			_, gi := KiToNode2D(k)
 			if gi == nil {
@@ -274,7 +277,7 @@ func (vp *Viewport2D) Layout2DRoot() {
 
 	// second pass we add the parent positions after layout -- don't want to do that in
 	// render b/c then it doesn't work for local re-renders..
-	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
@@ -292,8 +295,8 @@ func (vp *Viewport2D) Layout2DRoot() {
 // first does all non-viewports, and second does all viewports, which must
 // come after all rendering done in them -- could add iter to method if
 // viewport actually needs to be called in first render pass??
-func (vp *Viewport2D) Render2DRoot() {
-	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+func (vp *Viewport2D) Render2DFromNode(gn *Node2DBase) {
+	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
@@ -308,7 +311,7 @@ func (vp *Viewport2D) Render2DRoot() {
 		return true
 	})
 	// second pass ONLY process viewports
-	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gi == nil {
 			return false

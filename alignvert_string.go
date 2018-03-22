@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _AlignVert_name = "AlignTopAlignVCenterAlignBottomAlignBaselineAlignVertN"
+const _AlignVert_name = "AlignTopAlignVCenterAlignBottomAlignVJustifyAlignBaselineAlignVertN"
 
-var _AlignVert_index = [...]uint8{0, 8, 20, 31, 44, 54}
+var _AlignVert_index = [...]uint8{0, 8, 20, 31, 44, 57, 67}
 
 func (i AlignVert) String() string {
 	if i < 0 || i >= AlignVert(len(_AlignVert_index)-1) {

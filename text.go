@@ -78,7 +78,7 @@ func (p *TextStyle) EffLineHeight() float64 {
 // 2D Text
 type Text2D struct {
 	Node2DBase
-	Pos         Point2D  `xml:"{x,y}",desc:"position of the left, baseline of the text"`
+	Pos         Vec2D    `xml:"{x,y}",desc:"position of the left, baseline of the text"`
 	Width       float64  `xml:"width",desc:"width of text to render if using word-wrapping"`
 	Text        string   `xml:"text",desc:"text string to render"`
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
@@ -96,7 +96,7 @@ func (g *Text2D) AsViewport2D() *Viewport2D {
 }
 
 func (g *Text2D) InitNode2D() {
-	g.Layout.Defaults()
+	g.LayData.Defaults()
 }
 
 func (g *Text2D) Style2D() {
@@ -114,14 +114,14 @@ func (g *Text2D) Layout2D(iter int) {
 		} else {
 			w, h = pc.MeasureString(g.Text)
 		}
-		g.Layout.AllocSize = Size2D{w, h}
+		g.LayData.AllocSize = Vec2D{w, h}
 	} else {
 		g.GeomFromLayout()
 	}
 }
 
 func (g *Text2D) Node2DBBox() image.Rectangle {
-	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Layout.AllocSize.X, g.Pos.Y+g.Layout.AllocSize.Y)
+	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
 }
 
 func (g *Text2D) Render2D() {
@@ -131,10 +131,10 @@ func (g *Text2D) Render2D() {
 	g.SetWinBBox(g.Node2DBBox())
 	// fmt.Printf("rendering text %v\n", g.Text)
 	if pc.Text.WordWrap {
-		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X,
-			g.Layout.AllocSize.Y)
+		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
+			g.LayData.AllocSize.Y)
 	} else {
-		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.Layout.AllocSize.X)
+		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
 	}
 }
 

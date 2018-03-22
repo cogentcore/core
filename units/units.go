@@ -20,9 +20,9 @@ package units
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/math/fixed"
 	"log"
+	"math"
 	"strings"
 )
 
@@ -178,9 +178,9 @@ func (uc *Context) ToDotsFactor(un Unit) float64 {
 	case Vh:
 		return uc.VpH
 	case Vmin:
-		return ki.Min64(uc.VpW, uc.VpH)
+		return math.Min(uc.VpW, uc.VpH)
 	case Vmax:
-		return ki.Max64(uc.VpW, uc.VpH)
+		return math.Max(uc.VpW, uc.VpH)
 	case Cm:
 		return uc.DPI / CmPerInch
 	case Mm:

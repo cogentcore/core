@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
+	"math"
 	// "log"
 	// "reflect"
 )
@@ -68,7 +69,7 @@ type NodeWidget struct {
 	SrcNode       ki.Ptr                   `desc:"Ki Node that this widget is viewing in the tree -- the source"`
 	NodeWidgetSig ki.Signal                `json:"-",desc:"signal for node widget -- see NodeWidgetSignals for the types"`
 	StateStyles   [NodeWidgetStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize    Size2D                   `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	WidgetSize    Vec2D                    `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 	RootWidget    *NodeWidget              `json:"-",desc:"cached root widget"`
 }
 
@@ -446,35 +447,35 @@ func (g *NodeWidget) Layout2D(iter int) {
 
 		w, h = pc.MeasureString(label)
 		if st.Layout.Width.Dots > 0 {
-			w = ki.Max64(st.Layout.Width.Dots, w)
+			w = math.Max(st.Layout.Width.Dots, w)
 		}
 		if st.Layout.Height.Dots > 0 {
-			h = ki.Max64(st.Layout.Height.Dots, h)
+			h = math.Max(st.Layout.Height.Dots, h)
 		}
 		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 
-		g.WidgetSize = Size2D{w, h}
+		g.WidgetSize = Vec2D{w, h}
 
 		if !g.IsCollapsed() {
 			// we layout children under us
 			for _, kid := range g.Children {
 				_, gi := KiToNode2D(kid)
 				if gi != nil {
-					gi.Layout.AllocPos.Y = h
-					gi.Layout.AllocPos.X = 20 // indent children -- todo: make a property
-					h += gi.Layout.AllocSize.Y
-					w = ki.Max64(w, gi.Layout.AllocPos.X+gi.Layout.AllocSize.X) // use max
+					gi.LayData.AllocPos.Y = h
+					gi.LayData.AllocPos.X = 20 // indent children -- todo: make a property
+					h += gi.LayData.AllocSize.Y
+					w = math.Max(w, gi.LayData.AllocPos.X+gi.LayData.AllocSize.X) // use max
 				}
 			}
 		}
-		g.Layout.AllocSize = Size2D{w, h}
+		g.LayData.AllocSize = Vec2D{w, h}
 		g.WidgetSize.X = w // stretch
 	} else {
 		g.AddParentPos()
 		rn := g.RootWidget
-		g.Layout.AllocSize.X = rn.Layout.AllocSize.X - (g.Layout.AllocPos.X - rn.Layout.AllocPos.X)
-		g.WidgetSize.X = g.Layout.AllocSize.X
+		g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
+		g.WidgetSize.X = g.LayData.AllocSize.X
 		gii, _ := KiToNode2D(g.This)
 		g.SetWinBBox(gii.Node2DBBox())
 	}
@@ -491,7 +492,7 @@ func (g *NodeWidget) Layout2D(iter int) {
 
 func (g *NodeWidget) Node2DBBox() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := g.Paint.TransformPoint(g.Layout.AllocPos.X, g.Layout.AllocPos.Y)
+	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
 	ts := g.Paint.TransformPoint(g.WidgetSize.X, g.WidgetSize.Y)
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
@@ -521,14 +522,14 @@ func (g *NodeWidget) Render2D() {
 	pc.Stroke.Width = st.Border.Width
 	pc.Fill.SetColor(&st.Background.Color)
 	// g.DrawStdBox()
-	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots)
+	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
 
 	pc.Stroke.SetColor(&st.Color) // ink color
 
-	pos = g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-	// sz := g.Layout.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+	pos = g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
+	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 	label := g.GetLabel()
 	// fmt.Printf("rendering: %v\n", label)

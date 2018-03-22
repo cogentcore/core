@@ -8,13 +8,14 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
+	"math"
 	// "reflect"
 )
 
 // Widget base type
 type WidgetBase struct {
 	Node2DBase
-	Controls WidgetBase `desc:"a separate tree of sub-widgets that implement discrete subcomponents of a widget -- positions are always relative to the parent widget"`
+	Controls Layout `desc:"a separate tree of sub-widgets that implement discrete subcomponents of a widget -- positions are always relative to the parent widget"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -31,7 +32,7 @@ var KiT_WidgetBase = ki.Types.AddType(&WidgetBase{}, nil)
 // WidgetBase supports full Box rendering model, so Button just calls these methods to render
 // -- base function needs to take a Style arg.
 
-func (g *WidgetBase) DrawBoxImpl(pos Point2D, sz Size2D, rad float64) {
+func (g *WidgetBase) DrawBoxImpl(pos Vec2D, sz Vec2D, rad float64) {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	if rad == 0.0 {
@@ -48,12 +49,12 @@ func (g *WidgetBase) DrawStdBox() {
 	// rs := &g.Viewport.Render
 	st := &g.Style
 
-	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots)
-	sz := g.Layout.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
+	sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
-		spos := pos.Add(Point2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.Stroke.SetColor(nil)
 		pc.Fill.SetColor(&st.BoxShadow.Color)
 		g.DrawBoxImpl(spos, sz, st.Border.Radius.Dots)
@@ -303,14 +304,14 @@ func (g *Button) Layout2D(iter int) {
 		var w, h float64
 		w, h = pc.MeasureString(g.Text)
 		if st.Layout.Width.Dots > 0 {
-			w = ki.Max64(st.Layout.Width.Dots, w)
+			w = math.Max(st.Layout.Width.Dots, w)
 		}
 		if st.Layout.Height.Dots > 0 {
-			h = ki.Max64(st.Layout.Height.Dots, h)
+			h = math.Max(st.Layout.Height.Dots, h)
 		}
 		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		g.Layout.AllocSize = Size2D{w, h}
+		g.LayData.AllocSize = Vec2D{w, h}
 	} else {
 		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
 	}
@@ -350,8 +351,8 @@ func (g *Button) Render2DDefaultStyle() {
 	g.DrawStdBox()
 	pc.Stroke.SetColor(&st.Color) // ink color
 
-	pos := g.Layout.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-	// sz := g.Layout.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
+	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
 }
