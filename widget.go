@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"math"
@@ -362,7 +362,7 @@ func (g *Button) CanReRender2D() bool {
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {
-	fmt.Printf("focus changed %v\n", gotFocus)
+	// fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)

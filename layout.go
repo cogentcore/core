@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
@@ -239,9 +239,7 @@ func (ly *Layout) GatherSizes() {
 		if gi == nil {
 			continue
 		}
-		// fmt.Printf("child %v lay size alloc: %v\n", gi.Name, gi.LayData.AllocSize)
 		gi.LayData.UpdateSizes()
-		// fmt.Printf("child %v lay size need: %v pref: %v\n", gi.Name, gi.LayData.Size.Need, gi.LayData.Size.Pref)
 		sumNeed = sumNeed.Add(gi.LayData.Size.Need)
 		sumPref = sumPref.Add(gi.LayData.Size.Pref)
 		maxNeed = maxNeed.Max(gi.LayData.Size.Need)
@@ -257,12 +255,19 @@ func (ly *Layout) GatherSizes() {
 			ly.LayData.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
 		}
 	}
-	ly.LayData.Size.Need.SetAddVal(2.0 * ly.Style.Layout.Margin.Dots)
-	ly.LayData.Size.Pref.SetAddVal(2.0 * ly.Style.Layout.Margin.Dots)
+
+	marg := 2.0 * ly.Style.Layout.Margin.Dots
+
+	ly.LayData.Size.Need.SetAddVal(marg)
+	ly.LayData.Size.Pref.SetAddVal(marg)
 
 	// todo: something entirely different needed for grids..
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+
+	// todo: here we need to also deal with -1 max stretch to give full alloc
+	// in the "Max" dim if poss -- right now it is cutting that down based on
+	// Pref size of childs.
 }
 
 // in case we don't have any explicit allocsize set for us -- go up parents
@@ -272,6 +277,8 @@ func (ly *Layout) AllocFromParent() {
 		return
 	}
 
+	// todo: take into account position within parent size??
+
 	ly.FunUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg == nil {
@@ -279,49 +286,109 @@ func (ly *Layout) AllocFromParent() {
 		}
 		if !pg.LayData.AllocSize.IsZero() {
 			ly.LayData.AllocSize = pg.LayData.AllocSize
-			fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize,
-				pg.Name)
+			// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize,
+			// 	pg.Name)
 			return false
 		}
 		return true
 	})
 }
 
-// parent has now set our AllocSize -- we update AllocSize for our children
-// fixed layout case along either horiz or vert dim -- although
-// align horiz and vert are used here, they should just be cast from other if
-// dim == Y
-func (ly *Layout) LayoutFixed(dim Dims2D) {
+// calculations to layout a single-element dimension, returns pos and size
+func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz) (pos, size float64) {
+	usePref := true
+	targ := pref
+	extra := avail - targ
+	if extra < -0.1 { // not fitting in pref, go with min
+		usePref = false
+		targ = need
+		extra = avail - targ
+	}
+	extra = math.Max(extra, 0.0) // no negatives
+
+	stretchNeed := false // stretch relative to need
+	stretchMax := false  // only stretch Max = neg
+
+	if usePref && extra >= 0.0 { // have some stretch extra
+		if max < 0.0 {
+			stretchMax = true // only stretch those marked as infinitely stretchy
+		}
+	} else if extra >= 0.0 { // extra relative to Need
+		stretchNeed = true // stretch relative to need
+	}
+
+	pos = 0.0
+	size = need
+	if usePref {
+		size = pref
+	}
+	if stretchMax || stretchNeed {
+		size += extra
+	} else {
+		switch al {
+		case AlignLeft:
+			pos = 0.0
+		case AlignHCenter:
+			pos = 0.5 * extra
+		case AlignRight:
+			pos = extra
+		case AlignHJustify: // treat justify as stretch!
+			pos = 0.0
+			size += extra
+		}
+	}
+	return
+}
+
+// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutRow / Col
+func (ly *Layout) LayoutSingle(dim Dims2D) {
+	marg := 2.0 * ly.Style.Layout.Margin.Dots
+	avail := ly.LayData.AllocSize.Dim(dim) - marg
+	for _, c := range ly.Children {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
+			continue
+		}
+		al := gi.Style.Layout.AlignDim(dim)
+		pref := gi.LayData.Size.Pref.Dim(dim)
+		need := gi.LayData.Size.Need.Dim(dim)
+		max := gi.LayData.Size.Max.Dim(dim)
+		pos, size := ly.LayoutSingleImpl(avail, need, pref, max, al)
+		gi.LayData.AllocSize.SetDim(dim, size)
+		gi.LayData.AllocPos.SetDim(dim, pos)
+	}
+}
+
+// layout all children along given dim -- only affects that dim -- e.g., use
+// LayoutSingle for other dim
+func (ly *Layout) LayoutAll(dim Dims2D) {
 	sz := len(ly.Children)
 	if sz == 0 {
 		return
 	}
 
-	othDim := OtherDim(dim)
-	alDim := ly.Style.Layout.AlignDim(dim)
-
+	al := ly.Style.Layout.AlignDim(dim)
 	marg := 2.0 * ly.Style.Layout.Margin.Dots
+	avail := ly.LayData.AllocSize.Dim(dim) - marg
+	pref := ly.LayData.Size.Pref.Dim(dim) - marg
+	need := ly.LayData.Size.Need.Dim(dim) - marg
 
-	avail := ly.LayData.AllocSize.SubVal(marg)
-	targ := ly.LayData.Size.Pref.SubVal(marg)
-	usePref := [2]bool{true, true}
-	extra := avail.Sub(targ)
-	fmt.Printf("first extra: %v avail: \n", extra.Dim(dim))
-	for d := X; d <= Y; d++ {
-		if extra.Dim(d) < -0.1 { // not fitting in pref, go with min
-			usePref[d] = false
-			targ.SetDim(d, ly.LayData.Size.Need.Dim(d)-marg)
-			extra.SetDim(d, avail.Dim(d)-targ.Dim(d))
-		}
+	targ := pref
+	usePref := true
+	extra := avail - targ
+	if extra < -0.1 { // not fitting in pref, go with need
+		usePref = false
+		targ = need
+		extra = avail - targ
 	}
-	extra.SetMaxVal(0.0) // no negatives
+	extra = math.Max(extra, 0.0) // no negatives
 
-	extraPer := Vec2DZero
 	nstretch := 0
-	stretchNeed := false                       // stretch relative to need
-	stretchMax := false                        // only stretch Max = neg
-	addSpace := false                          // apply extra toward spacing -- for justify
-	if usePref[dim] && extra.Dim(dim) >= 0.0 { // have some stretch extra
+	stretchTot := 0.0
+	stretchNeed := false         // stretch relative to need
+	stretchMax := false          // only stretch Max = neg
+	addSpace := false            // apply extra toward spacing -- for justify
+	if usePref && extra >= 0.0 { // have some stretch extra
 		for _, c := range ly.Children {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
@@ -329,13 +396,13 @@ func (ly *Layout) LayoutFixed(dim Dims2D) {
 			}
 			if gi.LayData.Size.HasMaxStretch(dim) { // negative = stretch
 				nstretch++
+				stretchTot += gi.LayData.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
 			stretchMax = true // only stretch those marked as infinitely stretchy
-			extraPer.SetDim(dim, extra.Dim(dim)/float64(nstretch))
 		}
-	} else if extra.Dim(dim) >= 0.0 { // extra relative to Need
+	} else if extra >= 0.0 { // extra relative to Need
 		for _, c := range ly.Children {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
@@ -343,27 +410,27 @@ func (ly *Layout) LayoutFixed(dim Dims2D) {
 			}
 			if gi.LayData.Size.HasMaxStretch(dim) || gi.LayData.Size.CanStretchNeed(dim) {
 				nstretch++
+				stretchTot += gi.LayData.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
 			stretchNeed = true // stretch relative to need
-			extraPer.SetDim(dim, extra.Dim(dim)/float64(nstretch))
 		}
 	}
-	fmt.Printf("extra: %v, exper: %v, nstretch: %v, stretchMax: %v, stretchNeed: %v, alDim: %v\n", extra.Dim(dim), extraPer.Dim(dim), nstretch, stretchMax, stretchNeed, alDim)
 
-	if sz > 1 && extra.Dim(dim) > 0.0 && alDim == AlignHJustify && !stretchNeed && !stretchMax {
+	extraSpace := 0.0
+	if sz > 1 && extra > 0.0 && al == AlignHJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
-		extraPer.SetDim(dim, extra.Dim(dim)/float64(sz-1))
+		extraSpace = extra / float64(sz-1)
 	}
 
 	// now arrange everyone
-	pos := Vec2DZero.AddVal(ly.Style.Layout.Margin.Dots)
+	pos := ly.Style.Layout.Margin.Dots
 
 	// todo: need a direction setting too
-	if alDim == AlignRight && !stretchNeed && !stretchMax {
-		pos.SetDim(dim, extra.Dim(dim)) // start with all the extra space
+	if al == AlignRight && !stretchNeed && !stretchMax {
+		pos = extra
 	}
 
 	for i, c := range ly.Children {
@@ -371,50 +438,27 @@ func (ly *Layout) LayoutFixed(dim Dims2D) {
 		if gi == nil {
 			continue
 		}
-		fmt.Printf("child %v lay size need: %v pref: %v\n", gi.Name, gi.LayData.Size.Need, gi.LayData.Size.Pref)
-
-		base := gi.LayData.Size.Need
-		for d := X; d <= Y; d++ {
-			if usePref[d] {
-				base.SetDim(d, gi.LayData.Size.Pref.Dim(d))
-			} else if d != dim { // in other dim, use everything we've got
-				base.SetDim(d, avail.Dim(d))
-			}
+		size := gi.LayData.Size.Need.Dim(dim)
+		if usePref {
+			size = gi.LayData.Size.Pref.Dim(dim)
 		}
-		gi.LayData.AllocSize = base
 		if stretchMax { // negative = stretch
-			if gi.LayData.Size.HasMaxStretch(dim) {
-				gi.LayData.AllocSize.SetDim(dim, base.Dim(dim)+extraPer.Dim(dim))
+			if gi.LayData.Size.HasMaxStretch(dim) { // in proportion to pref
+				size += extra * (gi.LayData.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if stretchNeed {
 			if gi.LayData.Size.HasMaxStretch(dim) || gi.LayData.Size.CanStretchNeed(dim) {
-				gi.LayData.AllocSize.SetDim(dim, base.Dim(dim)+extraPer.Dim(dim))
+				size += extra * (gi.LayData.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if addSpace { // implies align justify
 			if i > 0 {
-				pos.SetDim(dim, pos.Dim(dim)+extraPer.Dim(dim))
+				pos += extraSpace
 			}
 		}
 
-		// position along the other dimension
-		// extra room for positioning
-		ex := avail.Dim(othDim) - gi.LayData.AllocSize.Dim(othDim)
-		ex = math.Max(ex, 0.0) // gt 0
-
-		switch gi.Style.Layout.AlignDim(othDim) {
-		case AlignLeft:
-			pos.SetDim(othDim, 0.0)
-		case AlignHCenter:
-			pos.SetDim(othDim, 0.5*ex)
-		case AlignRight:
-			pos.SetDim(othDim, ex)
-		case AlignHJustify: // nonsensical, just top / left
-			pos.SetDim(othDim, 0.0)
-		}
-
-		gi.LayData.AllocPos = pos
-		fmt.Printf("child %v lay size: %v pos: %v\n", gi.Name, gi.LayData.AllocSize, gi.LayData.AllocPos)
-		pos.SetDim(dim, pos.Dim(dim)+gi.LayData.AllocSize.Dim(dim))
+		gi.LayData.AllocSize.SetDim(dim, size)
+		gi.LayData.AllocPos.SetDim(dim, pos)
+		pos += size
 	}
 }
 
@@ -447,9 +491,11 @@ func (ly *Layout) Layout2D(iter int) {
 		ly.AllocFromParent() // in case we didn't get anything
 		switch ly.Layout {
 		case LayoutRow:
-			ly.LayoutFixed(X)
+			ly.LayoutAll(X)
+			ly.LayoutSingle(Y)
 		case LayoutCol:
-			ly.LayoutFixed(Y)
+			ly.LayoutAll(Y)
+			ly.LayoutSingle(X)
 		}
 		ly.GeomFromLayout()
 	}

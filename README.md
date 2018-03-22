@@ -61,7 +61,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 ### TODO
 
 Next:
-* NodeWidget -- need "Elements" or "Parts" for widgets with regions, styling, etc -- not a full child widget but just an element of a more complex widget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
+* in Layout: if you have 2 stacked horiz guys in a vert col, it lays out according to prefs of each -- just need to have a max = -1 on the layout itself and enforce that, so by default it takes up its max amount of space in other dimension.  not exactly sure about
+effects in terms of overall propagation for other layouts etc.  maybe just something you manually set for outer-most vlayout.
+* Layout flow types
+* Layout grid
+* WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
 
 * text enter box
 * double-click!

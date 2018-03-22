@@ -29,11 +29,11 @@ func mainrun() {
 	win.UpdateStart()
 
 	frsz := [5]gi.Vec2D{
-		{40, 100},
+		{20, 100},
 		{80, 20},
 		{60, 80},
-		{60, 120},
-		{100, 100},
+		{40, 120},
+		{150, 100},
 	}
 
 	vp := win.WinViewport2D()
@@ -43,18 +43,15 @@ func mainrun() {
 
 	vlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "collay").(*gi.Layout)
 	vlay.Layout = gi.LayoutCol
-	vlay.SetProp("x", 0)
-	vlay.SetProp("y", 0)
 
 	rlay := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay1").(*gi.Layout)
 	rlay.Layout = gi.LayoutRow
-	rlay.SetProp("x", 0)
-	rlay.SetProp("y", 10)
 
-	rlay.SetProp("align-vert", "vcenter")
+	rlay.SetProp("align-vert", "top")
 	// rlay.SetProp("align-horiz", "hjustify")
 	rlay.SetProp("align-horiz", "left")
 	rlay.SetProp("margin", 4.0)
+	rlay.SetProp("max-width", -1) // always stretch width
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
@@ -64,17 +61,18 @@ func mainrun() {
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
-		fr.SetProp("max-width", -1) // spacer
+		if i != 2 {
+			fr.SetProp("max-width", -1) // spacer
+		}
 	}
 
 	rlay2 := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay2").(*gi.Layout)
 	rlay2.Layout = gi.LayoutRow
-	rlay2.SetProp("x", 0)
-	rlay2.SetProp("y", 10)
 	rlay2.SetProp("text-align", "center")
+	rlay2.SetProp("max-width", -1) // always stretch width
 
-	//	rlay2.SetProp("align-vert", "vcenter")
-	rlay2.SetProp("align-horiz", "hjustify")
+	rlay2.SetProp("align-vert", "vcenter")
+	// rlay2.SetProp("align-horiz", "hjustify")
 	rlay2.SetProp("align-horiz", "left")
 	rlay2.SetProp("margin", 4.0)
 
@@ -83,6 +81,28 @@ func mainrun() {
 		fr := rlay2.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
+		fr.SetProp("align-vert", "inherit")
+		// fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("margin", "inherit")
+		// fr.SetProp("max-width", -1) // spacer
+	}
+
+	rlay3 := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay3").(*gi.Layout)
+	rlay3.Layout = gi.LayoutRow
+	rlay3.SetProp("text-align", "center")
+	// rlay3.SetProp("max-width", -1) // always stretch width
+
+	rlay3.SetProp("align-vert", "bottom")
+	rlay3.SetProp("align-horiz", "hjustify")
+	// rlay3.SetProp("align-horiz", "left")
+	rlay3.SetProp("margin", 4.0)
+
+	for i, sz := range frsz {
+		nm := fmt.Sprintf("fr%v", i)
+		fr := rlay3.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr.SetProp("width", sz.X)
+		fr.SetProp("height", sz.Y)
+		fr.SetProp("min-height", sz.Y)
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")

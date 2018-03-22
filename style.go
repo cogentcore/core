@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"log"
@@ -309,12 +309,12 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, t
 		prstr = prtv
 		if prtv == "inherit" && hasPar {
 			vf.Set(pf)
-			fmt.Printf("StyleField set tag: %v to inherited value: %v\n", tag, pf)
+			// fmt.Printf("StyleField set tag: %v to inherited value: %v\n", tag, pf)
 			return
 		}
 		if prtv == "initial" && hasPar {
 			vf.Set(df)
-			fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
+			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
 			return
 		}
 	}

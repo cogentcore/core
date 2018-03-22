@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "golang.org/x/image/font"
 	"image"
@@ -115,7 +115,7 @@ func (vp *Viewport2D) InitNode2D() {
 		if !ok {
 			return
 		}
-		fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), sig, vpa.PathUnique())
+		// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), vpa.PathUnique())
 		vp.FullRender2DRoot()
 	})
 }
