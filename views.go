@@ -6,7 +6,7 @@ package gi
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/gi/units"
+	// "github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"math"
@@ -628,6 +628,20 @@ func (g *TabWidget) SelectTabIndex(idx int) error {
 	return nil
 }
 
+// get tab frame for given index
+func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
+	tabstack := g.TabStackLayout()
+	tfk, err := tabstack.KiChild(idx)
+	if err != nil {
+		return nil
+	}
+	tf, ok := tfk.(*Frame)
+	if !ok {
+		return nil
+	}
+	return tf
+}
+
 // get the overal column layout for the tab widget
 func (g *TabWidget) TabColLayout() *Layout {
 	g.InitTabWidget()
@@ -717,11 +731,6 @@ func (g *TabWidget) InitTabs() {
 		tf.Lay = LayoutCol
 		tf.SetProp("max-width", -1.0) // stretch flex
 		tf.SetProp("max-height", -1.0)
-		// following just for testing:
-		spc := tf.AddNewChildNamed(KiT_Space, "spc").(*Space)
-		spc.SetFixedHeight(units.NewValue(5, units.Em))
-		lbl := tf.AddNewChildNamed(KiT_Label, "tst").(*Label)
-		lbl.Text = sk.KiUniqueName()
 		nm = "TabOf_" + sk.KiUniqueName()
 		tb := tabrow.AddNewChildNamed(KiT_Button, nm).(*Button) // todo make tab button
 		tb.Text = sk.KiName()

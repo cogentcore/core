@@ -54,6 +54,15 @@ func mainrun() {
 	tv1 := vpfill.AddNewChildNamed(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
 	tv1.SetSrcNode(&srctree)
 
+	for i, sk := range srctree.Children {
+		tf := tv1.TabFrameAtIndex(i)
+		lbl := tf.AddNewChildNamed(gi.KiT_Label, "tst").(*gi.Label)
+		lbl.Text = sk.KiUniqueName()
+		// note: these were set by default -- could override
+		// tf.SetProp("max-width", -1.0) // stretch flex
+		// tf.SetProp("max-height", -1.0)
+	}
+
 	win.UpdateEnd()
 
 	win.StartEventLoop()
