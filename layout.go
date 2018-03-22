@@ -189,6 +189,8 @@ const (
 	LayoutRowFlow
 	// arrange items vertically within a column, overflowing horizontally as needed
 	LayoutColFlow
+	// arrange items stacked on top of each other -- Top index indicates which to show -- overall size accommodates largest in each dimension
+	LayoutStacked
 	LayoutsN
 )
 
@@ -205,8 +207,8 @@ const (
 // layout, to determine left, right, center, justified)
 type Layout struct {
 	Node2DBase
-	// type of layout to use
-	Lay Layouts
+	Lay      Layouts `desc:"type of layout to use"`
+	StackTop ki.Ptr  `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -462,12 +464,29 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 }
 
+// convenience for LayoutStacked to show child node at a given index
+func (ly *Layout) ShowChildAtIndex(idx int) error {
+	ch, err := ly.KiChild(idx)
+	if err != nil {
+		return err
+	}
+	ly.StackTop.Ptr = ch
+	return nil
+}
+
+///////////////////////////////////////////////////
+//   Standard Node2D interface
+
 func (ly *Layout) AsNode2D() *Node2DBase {
 	return &ly.Node2DBase
 }
 
 func (ly *Layout) AsViewport2D() *Viewport2D {
 	return nil
+}
+
+func (ly *Layout) AsLayout2D() *Layout {
+	return ly
 }
 
 func (ly *Layout) InitNode2D() {
@@ -496,6 +515,9 @@ func (ly *Layout) Layout2D(iter int) {
 		case LayoutCol:
 			ly.LayoutAll(Y)
 			ly.LayoutSingle(X)
+		case LayoutStacked:
+			ly.LayoutSingle(X)
+			ly.LayoutSingle(Y)
 		}
 		ly.GeomFromLayout()
 	}
@@ -535,6 +557,10 @@ func (g *Frame) AsNode2D() *Node2DBase {
 
 func (g *Frame) AsViewport2D() *Viewport2D {
 	return nil
+}
+
+func (g *Frame) AsLayout2D() *Layout {
+	return &g.Layout
 }
 
 func (g *Frame) InitNode2D() {
@@ -617,6 +643,10 @@ func (g *Stretch) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Stretch) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Stretch) InitNode2D() {
 }
 
@@ -668,6 +698,10 @@ func (g *Space) AsNode2D() *Node2DBase {
 }
 
 func (g *Space) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Space) AsLayout2D() *Layout {
 	return nil
 }
 

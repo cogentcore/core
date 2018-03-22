@@ -34,6 +34,10 @@ func (g *Rect) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Rect) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Rect) InitNode2D() {
 }
 
@@ -100,6 +104,10 @@ func (g *Viewport2DFill) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Viewport2DFill) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Viewport2DFill) InitNode2D() {
 	vp := g.Viewport
 	g.Pos = Vec2DZero
@@ -153,6 +161,10 @@ func (g *Circle) AsNode2D() *Node2DBase {
 }
 
 func (g *Circle) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Circle) AsLayout2D() *Layout {
 	return nil
 }
 
@@ -217,6 +229,10 @@ func (g *Ellipse) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Ellipse) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Ellipse) InitNode2D() {
 }
 
@@ -274,6 +290,10 @@ func (g *Line) AsNode2D() *Node2DBase {
 }
 
 func (g *Line) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Line) AsLayout2D() *Layout {
 	return nil
 }
 
@@ -336,6 +356,10 @@ func (g *Polyline) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Polyline) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Polyline) InitNode2D() {
 }
 
@@ -395,6 +419,10 @@ func (g *Polygon) AsNode2D() *Node2DBase {
 }
 
 func (g *Polygon) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Polygon) AsLayout2D() *Layout {
 	return nil
 }
 

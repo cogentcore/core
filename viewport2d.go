@@ -109,6 +109,10 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 	return vp
 }
 
+func (g *Viewport2D) AsLayout2D() *Layout {
+	return nil
+}
+
 func (vp *Viewport2D) InitNode2D() {
 	vp.NodeSig.Connect(vp.This, func(vpki, vpa ki.Ki, sig int64, data interface{}) {
 		vp, ok := vpki.(*Viewport2D)
@@ -304,7 +308,7 @@ func (vp *Viewport2D) Render2DFromNode(gn *Node2DBase) {
 		if gii.AsViewport2D() != nil { // skip viewports on first pass
 			return true
 		}
-		if gi.Paint.Off { // off below this
+		if !gi.Render2DCheck() { // off below this
 			return false
 		}
 		gii.Render2D()
@@ -319,9 +323,6 @@ func (vp *Viewport2D) Render2DFromNode(gn *Node2DBase) {
 		if gii.AsViewport2D() == nil { // skip NON viewports on second pass
 			return true
 		}
-		// if gi.Paint.Off { // off below this
-		// 	return false
-		// }
 		gii.Render2D()
 		return true
 	})

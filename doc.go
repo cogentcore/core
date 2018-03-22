@@ -64,6 +64,11 @@ Controlling the layout involves the following style properties:
       extra space is allocated (only if there aren't any infinitely stretchy
       elements), e.g., right / left / center or justified.
 
+	* SetFixedWidth / Height method can be used to set all size params to the
+      same value, causing that item to be definitively sized.  This is
+      convenient for sizing the Space node which adds a fixed amount of space
+      (1em by default).
+
 Signals
 
 All widgets send appropriate signals about user actions -- Connect to those
@@ -87,7 +92,7 @@ StructWidget field / property editor of the selected node.
 The properties controlling the NodeWidget include:
 
 	* "collapsed" -- node starts out collapsed (default is open)
-    * "background-color" -- color of the background of node box
+	* "background-color" -- color of the background of node box
 	* "color" -- font color in rendering node label
 	* "read-only" -- do not display the editing menu actions
 

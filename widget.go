@@ -67,7 +67,112 @@ func (g *WidgetBase) DrawStdBox() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Label
+
+// Label is a widget for rendering text labels -- supports full widget model
+// including box rendering
+type Label struct {
+	WidgetBase
+	Text string `xml:"text",desc:"label to display"`
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_Label = ki.Types.AddType(&Label{}, nil)
+
+func (g *Label) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *Label) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Label) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *Label) InitNode2D() {
+
+}
+
+var LabelProps = map[string]interface{}{
+	"padding":    "2px",
+	"margin":     "2px",
+	"font-size":  "24pt",
+	"text-align": "left",
+	"color":      "black",
+}
+
+func (g *Label) Style2D() {
+	// first do our normal default styles
+	g.Style.SetStyle(nil, &StyleDefault, LabelProps)
+	// then style with user props
+	g.Style2DWidget()
+}
+
+func (g *Label) Layout2D(iter int) {
+	if iter == 0 {
+		g.InitLayout2D()
+		st := &g.Style
+		pc := &g.Paint
+		var w, h float64
+		w, h = pc.MeasureString(g.Text)
+		if st.Layout.Width.Dots > 0 {
+			w = math.Max(st.Layout.Width.Dots, w)
+		}
+		if st.Layout.Height.Dots > 0 {
+			h = math.Max(st.Layout.Height.Dots, h)
+		}
+		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+		g.LayData.AllocSize = Vec2D{w, h}
+	} else {
+		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
+	}
+	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+}
+
+func (g *Label) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *Label) Render2D() {
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	st := &g.Style
+	pc.Font = st.Font
+	pc.Text = st.Text
+	g.DrawStdBox()
+	pc.Stroke.SetColor(&st.Color) // ink color
+
+	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
+	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+
+	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
+}
+
+func (g *Label) CanReRender2D() bool {
+	return true
+}
+
+func (g *Label) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &Label{}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // Buttons
+
+// these extend NodeBase NodeFlags to hold button state
+const (
+	// button is selected
+	ButtonFlagSelected NodeFlags = NodeFlagsN + iota
+	// button is checkable -- enables display of check control
+	ButtonFlagCheckable
+	// button is checked
+	ButtonFlagChecked
+)
 
 // signals that buttons can send
 type ButtonSignals int64
@@ -78,6 +183,7 @@ const (
 	// button pushed down but not yet up
 	ButtonPressed
 	ButtonReleased
+	// toggled is for checked / unchecked state
 	ButtonToggled
 	ButtonSignalsN
 )
@@ -100,6 +206,8 @@ const (
 	ButtonFocus
 	// button is currently being pressed down
 	ButtonDown
+	// button has been selected -- maintains selected state
+	ButtonSelected
 	// total number of button states
 	ButtonStatesN
 )
@@ -120,11 +228,39 @@ type ButtonBase struct {
 // must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_ButtonBase = ki.Types.AddType(&ButtonBase{}, nil)
 
+// is this button selected?
+func (g *ButtonBase) IsSelected() bool {
+	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagSelected))
+}
+
+// is this button checkable
+func (g *ButtonBase) IsCheckable() bool {
+	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagCheckable))
+}
+
+// is this button checked
+func (g *ButtonBase) IsChecked() bool {
+	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagChecked))
+}
+
+// set the selected state of this button
+func (g *ButtonBase) SetSelected(sel bool) {
+	ki.SetBitFlagState(&g.NodeFlags, int(ButtonFlagSelected), sel)
+	g.SetButtonState(ButtonNormal) // update state
+}
+
+// set the checked state of this button
+func (g *ButtonBase) SetChecked(chk bool) {
+	ki.SetBitFlagState(&g.NodeFlags, int(ButtonFlagChecked), chk)
+}
+
 // set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	// todo: process disabled state -- probably just deal with the property directly?
 	// it overrides any choice here and just sets state to disabled..
-	if state == ButtonNormal && g.HasFocus() {
+	if state == ButtonNormal && g.IsSelected() {
+		state = ButtonSelected
+	} else if state == ButtonNormal && g.HasFocus() {
 		state = ButtonFocus
 	}
 	g.State = state
@@ -166,11 +302,7 @@ func (g *ButtonBase) ButtonEnterHover() {
 func (g *ButtonBase) ButtonExitHover() {
 	if g.State == ButtonHover {
 		g.UpdateStart()
-		if g.HasFocus() {
-			g.SetButtonState(ButtonFocus)
-		} else {
-			g.SetButtonState(ButtonNormal)
-		}
+		g.SetButtonState(ButtonNormal)
 		g.UpdateEnd()
 	}
 }
@@ -190,6 +322,10 @@ func (g *Button) AsNode2D() *Node2DBase {
 }
 
 func (g *Button) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Button) AsLayout2D() *Layout {
 	return nil
 }
 
@@ -258,25 +394,22 @@ var ButtonProps = []map[string]interface{}{
 		"color":            "black",
 		"background-color": "#EEF",
 	}, { // disabled
-		"border-color":        "#BBB",
-		"box-shadow.h-offset": "0px",
-		"box-shadow.v-offset": "0px",
-		"box-shadow.blur":     "0px",
-		"box-shadow.color":    "grey",
-		"color":               "#AAA",
-		"background-color":    "#DDD",
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
 	}, { // hover
 		"background-color": "#CCF", // todo "darker"
 	}, { // focus
 		"border-color":     "#EEF",
 		"box-shadow.color": "#BBF",
 	}, { // press
-		"border-color":        "#DDF",
-		"box-shadow.h-offset": "0px",
-		"box-shadow.v-offset": "0px",
-		"box-shadow.blur":     "0px",
-		"color":               "white",
-		"background-color":    "#008",
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	}, { // selected
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
 	},
 }
 
@@ -290,7 +423,9 @@ func (g *Button) Style2D() {
 	// now get styles for the different states
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
-		g.StateStyles[i].SetStyle(nil, &StyleDefault, ButtonProps[i])
+		if i > 0 {
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, ButtonProps[i])
+		}
 		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
@@ -327,6 +462,7 @@ func (g *Button) Layout2D(iter int) {
 }
 
 func (g *Button) Node2DBBox() image.Rectangle {
+	// fmt.Printf("button win box: %v\n", g.WinBBox)
 	return g.WinBBoxFromAlloc()
 }
 

@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"math"
@@ -33,7 +34,7 @@ const (
 
 //go:generate stringer -type=NodeWidgetSignals
 
-// these extend NodeBase NodeFlags
+// these extend NodeBase NodeFlags to hold NodeWidget state
 const (
 	// node is collapsed
 	NodeFlagCollapsed NodeFlags = NodeFlagsN + iota
@@ -63,7 +64,7 @@ const (
 //go:generate stringer -type=NodeWidgetStates
 
 // NodeWidget represents one node in the tree -- fully recursive -- creates
-//  sub-nodes etc
+//  sub-nodes
 type NodeWidget struct {
 	WidgetBase
 	SrcNode       ki.Ptr                   `desc:"Ki Node that this widget is viewing in the tree -- the source"`
@@ -330,6 +331,10 @@ func (g *NodeWidget) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *NodeWidget) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *NodeWidget) InitNode2D() {
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		_, ok := recv.(*NodeWidget)
@@ -554,3 +559,244 @@ func (g *NodeWidget) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &NodeWidget{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Tab Widget
+
+// signals that buttons can send
+type TabWidgetSignals int64
+
+const (
+	// node was selected -- data is the node widget
+	TabSelected TabWidgetSignals = iota
+	// node widget unselected
+	TabUnselected
+	// collapsed node widget was opened
+	TabOpened
+	// open node widget was collapsed -- children not visible
+	TabCollapsed
+	TabWidgetSignalsN
+)
+
+//go:generate stringer -type=TabWidgetSignals
+
+// todo: could have different positioning of the tabs?
+
+// TabWidget represents children of a source node as tabs with a stacked
+// layout of Frame widgets for each child in the source -- we create a
+// LayoutCol with a LayoutRow of tab buttons and then the LayoutStacked of
+// Frames
+type TabWidget struct {
+	WidgetBase
+	SrcNode      ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
+	TabWidgetSig ki.Signal `json:"-",desc:"signal for tab widget -- see TabWidgetSignals for the types"`
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_TabWidget = ki.Types.AddType(&TabWidget{}, nil)
+
+// set the source Ki Node that generates our tabs
+func (g *TabWidget) SetSrcNode(k ki.Ki) {
+	g.SrcNode.Ptr = k
+	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
+	nm := "TabViewOf_" + k.KiUniqueName()
+	if g.Name == "" {
+		g.SetName(nm)
+	}
+	g.InitTabWidget()
+}
+
+// todo: various other ways of selecting tabs..
+
+// select tab at given index
+func (g *TabWidget) SelectTabIndex(idx int) error {
+	tabrow := g.TabRowLayout()
+	tbk, err := tabrow.KiChild(idx)
+	if err != nil {
+		return err
+	}
+	tb, ok := tbk.(*Button)
+	if !ok {
+		return nil
+	}
+	g.UpdateStart()
+	g.UnselectAllTabButtons()
+	tb.SetSelected(true)
+	tabstack := g.TabStackLayout()
+	tabstack.ShowChildAtIndex(idx)
+	g.UpdateEnd()
+	return nil
+}
+
+// get the overal column layout for the tab widget
+func (g *TabWidget) TabColLayout() *Layout {
+	g.InitTabWidget()
+	ch, _ := g.KiChild(0)
+	return ch.(*Layout)
+}
+
+// get the row layout of tabs across the top of the tab widget
+func (g *TabWidget) TabRowLayout() *Layout {
+	tabcol := g.TabColLayout()
+	ch, _ := tabcol.KiChild(0)
+	return ch.(*Layout)
+}
+
+// get the stacked layout of tab frames
+func (g *TabWidget) TabStackLayout() *Layout {
+	tabcol := g.TabColLayout()
+	ch, _ := tabcol.KiChild(1)
+	return ch.(*Layout)
+}
+
+// unselect all tabs
+func (g *TabWidget) UnselectAllTabButtons() {
+	tabrow := g.TabRowLayout()
+	for _, tbk := range tabrow.Children {
+		tb, ok := tbk.(*Button)
+		if !ok {
+			continue
+		}
+		if tb.IsSelected() {
+			tb.UpdateStart()
+			tb.SetSelected(false)
+			tb.UpdateEnd()
+		}
+	}
+}
+
+func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
+	g, ok := recv.(*TabWidget)
+	if !ok {
+		return
+	}
+	if sig == int64(ButtonClicked) {
+		tb, ok := send.(*Button)
+		if !ok {
+			return
+		}
+		if !tb.IsSelected() {
+			tabrow := g.TabRowLayout()
+			butidx := tabrow.FindChildIndex(send, 0)
+			// fmt.Printf("selected tab: %v\n", butidx)
+			if butidx >= 0 {
+				g.SelectTabIndex(butidx)
+			}
+		}
+	}
+}
+
+var TabButtonProps = map[string]interface{}{
+	"border-width":        "1px",
+	"border-radius":       "0px",
+	"border-color":        "black",
+	"border-style":        "solid",
+	"padding":             "4px",
+	"margin":              "0px",
+	"box-shadow.h-offset": "0px",
+	"box-shadow.v-offset": "0px",
+	"box-shadow.blur":     "0px",
+	// "font-family":         "Arial", // this is crashing
+	"font-size":        "24pt",
+	"text-align":       "center",
+	"color":            "black",
+	"background-color": "#EEF",
+}
+
+// make the initial tab frames for src node
+func (g *TabWidget) InitTabs() {
+	tabrow := g.TabRowLayout()
+	tabstack := g.TabStackLayout()
+	if g.SrcNode.Ptr == nil {
+		return
+	}
+	skids := g.SrcNode.Ptr.KiChildren()
+	for _, sk := range skids {
+		nm := "TabFrameOf_" + sk.KiUniqueName()
+		tf := tabstack.AddNewChildNamed(KiT_Frame, nm).(*Frame)
+		tf.Lay = LayoutCol
+		tf.SetProp("max-width", -1.0) // stretch flex
+		tf.SetProp("max-height", -1.0)
+		// following just for testing:
+		spc := tf.AddNewChildNamed(KiT_Space, "spc").(*Space)
+		spc.SetFixedHeight(units.NewValue(5, units.Em))
+		lbl := tf.AddNewChildNamed(KiT_Label, "tst").(*Label)
+		lbl.Text = sk.KiUniqueName()
+		nm = "TabOf_" + sk.KiUniqueName()
+		tb := tabrow.AddNewChildNamed(KiT_Button, nm).(*Button) // todo make tab button
+		tb.Text = sk.KiName()
+		for key, val := range TabButtonProps {
+			tb.SetProp(key, val)
+		}
+		tb.ButtonSig.Connect(g.This, TabButtonClicked)
+	}
+	g.SelectTabIndex(0)
+}
+
+// todo: update tabs from changes
+
+// initialize the tab widget structure -- assumes it has been done if there is
+// already a child node
+func (g *TabWidget) InitTabWidget() {
+	if len(g.Children) == 1 {
+		return
+	}
+	g.UpdateStart()
+	tabcol := g.AddNewChildNamed(KiT_Layout, "TabCol").(*Layout)
+	tabcol.Lay = LayoutCol
+	tabrow := tabcol.AddNewChildNamed(KiT_Layout, "TabRow").(*Layout)
+	tabrow.Lay = LayoutRow
+	tabstack := tabcol.AddNewChildNamed(KiT_Layout, "TabStack").(*Layout)
+	tabstack.Lay = LayoutStacked
+	tabstack.SetProp("max-width", -1.0) // stretch flex
+	tabstack.SetProp("max-height", -1.0)
+	g.InitTabs()
+	g.UpdateEnd()
+}
+
+////////////////////////////////////////////////////
+// Node2D interface
+
+func (g *TabWidget) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *TabWidget) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *TabWidget) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *TabWidget) InitNode2D() {
+
+}
+
+func (g *TabWidget) Style2D() {
+	// // first do our normal default styles
+	// g.Style.SetStyle(nil, &StyleDefault, TabWidgetProps[0])
+	// then style with user props
+	g.Style2DWidget()
+}
+
+func (g *TabWidget) Layout2D(iter int) {
+	g.BaseLayout2D(iter)
+}
+
+func (g *TabWidget) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *TabWidget) Render2D() {
+}
+
+func (g *TabWidget) CanReRender2D() bool {
+	return true
+}
+
+func (g *TabWidget) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &TabWidget{}

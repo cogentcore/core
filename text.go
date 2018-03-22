@@ -95,6 +95,10 @@ func (g *Text2D) AsViewport2D() *Viewport2D {
 	return nil
 }
 
+func (g *Text2D) AsLayout2D() *Layout {
+	return nil
+}
+
 func (g *Text2D) InitNode2D() {
 	g.LayData.Defaults()
 }

@@ -73,7 +73,7 @@ func mainrun() {
 	text1.Text = "this is test text!"
 
 	rlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "rowlay").(*gi.Layout)
-	rlay.Layout = gi.LayoutRow
+	rlay.Lay = gi.LayoutRow
 	rlay.SetProp("x", 100)
 	rlay.SetProp("y", 500)
 	rlay.SetProp("text-align", "center")

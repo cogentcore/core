@@ -44,6 +44,8 @@ type Node2D interface {
 	AsNode2D() *Node2DBase
 	// if this is a Viewport2D-derived node, get it as a Viewport2D, else return nil
 	AsViewport2D() *Viewport2D
+	// if this is a Layout-derived node, get it as Layout, else return nil
+	AsLayout2D() *Layout
 	// initialize a node -- setup connections etc -- before this call, InitNodeBase is called to set basic inits including setting Viewport and connecting node signal to parent vp -- must be robust to being called repeatedly
 	InitNode2D()
 	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style)
@@ -238,4 +240,22 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 	g.SetProp("height", val)
 	g.SetProp("min-height", val)
 	g.SetProp("max-height", val)
+}
+
+// check if this node (and everything under it) should render -- checks
+// Paint.Off and also Layout.LayoutStacked for StackTop
+func (g *Node2DBase) Render2DCheck() bool {
+	if g.Paint.Off {
+		return false
+	}
+	pgi, _ := KiToNode2D(g.Parent)
+	if pgi != nil {
+		lp := pgi.AsLayout2D()
+		if lp != nil {
+			if lp.Lay == LayoutStacked && lp.StackTop.Ptr != g.This {
+				return false
+			}
+		}
+	}
+	return true
 }
