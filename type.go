@@ -326,6 +326,15 @@ func SetBitFlag(bits *int64, flag int) {
 	*bits |= 1 << uint32(flag)
 }
 
+// set or clear a bit value depending on state (on / off) based on the ordinal flag value
+func SetBitFlagState(bits *int64, flag int, state bool) {
+	if state {
+		SetBitFlag(bits, flag)
+	} else {
+		ClearBitFlag(bits, flag)
+	}
+}
+
 // clear bit value based on the ordinal flag value
 func ClearBitFlag(bits *int64, flag int) {
 	*bits = *bits & ^(1 << uint32(flag)) // note: ^ is unary bitwise negation, not ~ as in C
