@@ -361,13 +361,13 @@ func (g *NodeWidget) InitNode2D() {
 			// fmt.Printf("node widget key: %v\n", kt.Chord)
 			kf := KeyFun(kt.Key, kt.Chord)
 			switch kf {
-			case KeySelectItem:
+			case KeyFunSelectItem:
 				ab.SelectNodeAction()
-			case KeyCancelSelect:
+			case KeyFunCancelSelect:
 				ab.RootUnselectAll()
-			case KeyMoveRight:
+			case KeyFunMoveRight:
 				ab.OpenNode()
-			case KeyMoveLeft:
+			case KeyFunMoveLeft:
 				ab.CollapseNode()
 				// todo; move down / up -- selectnext / prev
 			}
@@ -383,9 +383,9 @@ func (g *NodeWidget) InitNode2D() {
 			kf := KeyFun(kt.Key, "")
 			// fmt.Printf("node widget key down: %v\n", kt.Key)
 			switch kf {
-			case KeyShift:
+			case KeyFunShift:
 				ab.SetContinuousSelect()
-			case KeyCtrl:
+			case KeyFunCtrl:
 				ab.SetExtendSelect()
 			}
 		}
@@ -521,17 +521,17 @@ func (g *NodeWidget) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	st := &g.Style
-	pc.Font = st.Font
-	pc.Text = st.Text
-	pc.Stroke.SetColor(&st.Border.Color)
-	pc.Stroke.Width = st.Border.Width
-	pc.Fill.SetColor(&st.Background.Color)
+	pc.FontStyle = st.Font
+	pc.TextStyle = st.Text
+	pc.StrokeStyle.SetColor(&st.Border.Color)
+	pc.StrokeStyle.Width = st.Border.Width
+	pc.FillStyle.SetColor(&st.Background.Color)
 	// g.DrawStdBox()
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
 
-	pc.Stroke.SetColor(&st.Color) // ink color
+	pc.StrokeStyle.SetColor(&st.Color) // ink color
 
 	pos = g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
 	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))

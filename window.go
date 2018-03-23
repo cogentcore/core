@@ -250,7 +250,7 @@ func (w *Window) EventLoop() {
 			if ok {
 				kf := KeyFun(kt.Key, kt.Chord)
 				switch kf {
-				case KeyFocusNext: // todo: should we absorb this event or not?  if so, goes first..
+				case KeyFunFocusNext: // todo: should we absorb this event or not?  if so, goes first..
 					w.SetNextFocusItem()
 				}
 				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)

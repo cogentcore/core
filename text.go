@@ -113,8 +113,8 @@ func (g *Text2D) Layout2D(iter int) {
 		pc := &g.Paint
 		var w, h float64
 		// pre-wrap the text
-		if pc.Text.WordWrap {
-			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.Text.EffLineHeight())
+		if pc.TextStyle.WordWrap {
+			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
 		} else {
 			w, h = pc.MeasureString(g.Text)
 		}
@@ -134,7 +134,7 @@ func (g *Text2D) Render2D() {
 	pc.SetUnitContext(rs, 0) // todo: not sure about el
 	g.SetWinBBox(g.Node2DBBox())
 	// fmt.Printf("rendering text %v\n", g.Text)
-	if pc.Text.WordWrap {
+	if pc.TextStyle.WordWrap {
 		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
 			g.LayData.AllocSize.Y)
 	} else {

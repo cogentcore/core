@@ -324,7 +324,7 @@ func (g *Line) Render2D() {
 	rs := &g.Viewport.Render
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.FillStrokeClear(rs)
+	pc.Stroke(rs)
 }
 
 func (g *Line) CanReRender2D() bool {

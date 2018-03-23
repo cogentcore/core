@@ -596,9 +596,9 @@ func (g *Frame) Render2D() {
 	pc := &g.Paint
 	st := &g.Style
 	rs := &g.Viewport.Render
-	pc.Stroke.SetColor(&st.Border.Color)
-	pc.Stroke.Width = st.Border.Width
-	pc.Fill.SetColor(&st.Background.Color)
+	pc.StrokeStyle.SetColor(&st.Border.Color)
+	pc.StrokeStyle.Width = st.Border.Width
+	pc.FillStyle.SetColor(&st.Background.Color)
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).SubVal(st.Border.Width.Dots)
 	sz := g.LayData.AllocSize.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(2.0 * st.Border.Width.Dots)
 	// pos := g.LayData.AllocPos

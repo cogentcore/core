@@ -61,6 +61,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 ### TODO
 
 Next:
+* why do we have units context on style and paint?  one is not getting initialized -- 
+doesn't make sense to have two.
 * check for Updating count > 0 somewhere -- going to be a common error
 * Layout flow types
 * Layout grid

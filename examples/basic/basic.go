@@ -77,9 +77,12 @@ func mainrun() {
 	rlay.SetProp("x", 100)
 	rlay.SetProp("y", 500)
 	rlay.SetProp("text-align", "center")
+	edit1 := rlay.AddNewChildNamed(gi.KiT_LineEdit, "edit1").(*gi.LineEdit)
 	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
 
+	edit1.Text = "Edit this text"
+	edit1.SetProp("min-width", "20em")
 	button1.Text = "Button 1"
 	button2.Text = "Button 2"
 

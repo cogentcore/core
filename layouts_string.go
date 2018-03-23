@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Layouts_name = "LayoutRowLayoutColLayoutGridLayoutRowFlowLayoutColFlowLayoutsN"
+const _Layouts_name = "LayoutRowLayoutColLayoutGridLayoutRowFlowLayoutColFlowLayoutStackedLayoutsN"
 
-var _Layouts_index = [...]uint8{0, 9, 18, 28, 41, 54, 62}
+var _Layouts_index = [...]uint8{0, 9, 18, 28, 41, 54, 67, 75}
 
 func (i Layouts) String() string {
 	if i < 0 || i >= Layouts(len(_Layouts_index)-1) {

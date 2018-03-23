@@ -198,6 +198,9 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				var ke gi.KeyUpEvent
 				ke.Key = keyMapping[int(e.data[1])]
 				delete(downKeys, ke.Key)
+				// for obscure reasons, keyboard remappers can end up having these stuck
+				delete(downKeys, "right_arrow")
+				delete(downKeys, "left_arrow")
 				ec <- ke
 			case C.GMDResize:
 				var re gi.ResizeEvent

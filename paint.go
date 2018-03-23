@@ -45,20 +45,20 @@ SOFTWARE.
 // painting onto an image -- image is always passed as an argument so it can be
 // applied to anything
 type Paint struct {
-	Off       bool          `desc:"node and everything below it are off, non-rendering"`
-	UnContext units.Context `desc:"units context -- parameters necessary for anchoring relative units"`
-	Stroke    StrokeStyle
-	Fill      FillStyle
-	Font      FontStyle
-	Text      TextStyle
-	XForm     XFormMatrix2D `xml:"-",json:"-",desc:"current transform"`
+	Off         bool          `desc:"node and everything below it are off, non-rendering"`
+	UnContext   units.Context `desc:"units context -- parameters necessary for anchoring relative units"`
+	StrokeStyle StrokeStyle
+	FillStyle   FillStyle
+	FontStyle   FontStyle
+	TextStyle   TextStyle
+	XForm       XFormMatrix2D `xml:"-",json:"-",desc:"current transform"`
 }
 
 func (pc *Paint) Defaults() {
-	pc.Stroke.Defaults()
-	pc.Fill.Defaults()
-	pc.Font.Defaults()
-	pc.Text.Defaults()
+	pc.StrokeStyle.Defaults()
+	pc.FillStyle.Defaults()
+	pc.FontStyle.Defaults()
+	pc.TextStyle.Defaults()
 	pc.XForm = Identity2D()
 }
 
@@ -83,19 +83,20 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
 		dfi = interface{}(defs)
 	}
 	WalkStyleStruct(pc, pfi, dfi, "", props, StyleField)
-	pc.Stroke.SetStylePost()
-	pc.Fill.SetStylePost()
-	pc.Font.SetStylePost()
-	pc.Text.SetStylePost()
+	pc.StrokeStyle.SetStylePost()
+	pc.FillStyle.SetStylePost()
+	pc.FontStyle.SetStylePost()
+	pc.TextStyle.SetStylePost()
 }
 
 // set the unit context based on size of viewport and parent element (from bbox)
 // and then cache everything out in terms of raw pixel dots for rendering -- call at start of
 // render
 func (pc *Paint) SetUnitContext(rs *RenderState, el float64) {
+	pc.UnContext.Defaults() // todo: need to get screen information and true dpi
 	sz := rs.Image.Bounds().Size()
 	pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el)
-	pc.Font.SetUnitContext(&pc.UnContext)
+	pc.FontStyle.SetUnitContext(&pc.UnContext)
 	pc.ToDots()
 }
 
@@ -119,17 +120,17 @@ func (s *Paint) ToDots() {
 
 // does the current Paint have an active stroke to render?
 func (pc *Paint) HasStroke() bool {
-	return pc.Stroke.On
+	return pc.StrokeStyle.On
 }
 
 // does the current Paint have an active fill to render?
 func (pc *Paint) HasFill() bool {
-	return pc.Fill.On
+	return pc.FillStyle.On
 }
 
 // does the current Paint not have either a stroke or fill?  in which case, often we just skip it
 func (pc *Paint) HasNoStrokeOrFill() bool {
-	return (!pc.Stroke.On && !pc.Fill.On)
+	return (!pc.StrokeStyle.On && !pc.FillStyle.On)
 }
 
 // convenience for final draw for shapes when done
@@ -296,7 +297,7 @@ func (pc *Paint) NewSubPath(rs *RenderState) {
 // Path Drawing
 
 func (pc *Paint) capper() raster.Capper {
-	switch pc.Stroke.Cap {
+	switch pc.StrokeStyle.Cap {
 	case LineCapButt:
 		return raster.ButtCapper
 	case LineCapRound:
@@ -308,7 +309,7 @@ func (pc *Paint) capper() raster.Capper {
 }
 
 func (pc *Paint) joiner() raster.Joiner {
-	switch pc.Stroke.Join {
+	switch pc.StrokeStyle.Join {
 	case LineJoinRound:
 		return raster.RoundJoiner
 	default: // all others for now.. -- todo: support more joiners!!??
@@ -319,8 +320,8 @@ func (pc *Paint) joiner() raster.Joiner {
 
 func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
 	path := rs.StrokePath
-	if len(pc.Stroke.Dashes) > 0 {
-		path = dashed(path, pc.Stroke.Dashes)
+	if len(pc.StrokeStyle.Dashes) > 0 {
+		path = dashed(path, pc.StrokeStyle.Dashes)
 	} else {
 		// TODO: this is a temporary workaround to remove tiny segments
 		// that result in rendering issues
@@ -329,7 +330,7 @@ func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
 	sz := rs.Image.Bounds().Size()
 	r := raster.NewRasterizer(sz.X, sz.Y)
 	r.UseNonZeroWinding = true
-	r.AddStroke(path, fix(pc.Stroke.Width.Dots), pc.capper(), pc.joiner())
+	r.AddStroke(path, fix(pc.StrokeStyle.Width.Dots), pc.capper(), pc.joiner())
 	r.Rasterize(painter)
 }
 
@@ -342,7 +343,7 @@ func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
 	}
 	sz := rs.Image.Bounds().Size()
 	r := raster.NewRasterizer(sz.X, sz.Y)
-	r.UseNonZeroWinding = (pc.Fill.Rule == FillRuleNonZero)
+	r.UseNonZeroWinding = (pc.FillStyle.Rule == FillRuleNonZero)
 	r.AddPath(path)
 	r.Rasterize(painter)
 }
@@ -351,14 +352,14 @@ func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Paint) StrokePreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.Stroke.Server)
+	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server)
 	pc.stroke(rs, painter)
 }
 
 // Stroke strokes the current path with the current color, line width,
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
-func (pc *Paint) StrokeImage(rs *RenderState) {
+func (pc *Paint) Stroke(rs *RenderState) {
 	pc.StrokePreserve(rs)
 	pc.ClearPath(rs)
 }
@@ -366,13 +367,13 @@ func (pc *Paint) StrokeImage(rs *RenderState) {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicity closed. The path is preserved after this operation.
 func (pc *Paint) FillPreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.Fill.Server)
+	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server)
 	pc.fill(rs, painter)
 }
 
 // Fill fills the current path with the current color. Open subpaths
 // are implicity closed. The path is cleared after this operation.
-func (pc *Paint) FillImage(rs *RenderState) {
+func (pc *Paint) Fill(rs *RenderState) {
 	pc.FillPreserve(rs)
 	pc.ClearPath(rs)
 }
@@ -432,13 +433,13 @@ func (pc *Paint) ResetClip(rs *RenderState) {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Paint) Clear(rs *RenderState) {
-	src := image.NewUniform(&pc.Fill.Color)
+	src := image.NewUniform(&pc.FillStyle.Color)
 	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.ZP, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Paint) SetPixel(rs *RenderState, x, y int) {
-	rs.Image.Set(x, y, &pc.Stroke.Color)
+	rs.Image.Set(x, y, &pc.StrokeStyle.Color)
 }
 
 func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float64) {
@@ -569,8 +570,8 @@ func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, 
 // Text Functions
 
 func (pc *Paint) SetFontFace(fontFace font.Face) {
-	pc.Font.Face = fontFace
-	pc.Font.Height = float64(fontFace.Metrics().Height) / 64.0
+	pc.FontStyle.Face = fontFace
+	pc.FontStyle.Height = float64(fontFace.Metrics().Height) / 64.0
 }
 
 func (pc *Paint) LoadFontFace(path string, points float64) error {
@@ -582,14 +583,14 @@ func (pc *Paint) LoadFontFace(path string, points float64) error {
 }
 
 func (pc *Paint) FontHeight() float64 {
-	return pc.Font.Height
+	return pc.FontStyle.Height
 }
 
 func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 	d := &font.Drawer{
 		Dst:  im,
-		Src:  image.NewUniform(&pc.Stroke.Color),
-		Face: pc.Font.Face,
+		Src:  image.NewUniform(&pc.StrokeStyle.Color),
+		Face: pc.FontStyle.Face,
 		Dot:  fixp(x, y),
 	}
 	// based on Drawer.DrawString() in golang.org/x/image/font/font.go
@@ -623,15 +624,15 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	// todo: vertical align too
 	var ax, ay float64
-	switch pc.Text.Align {
+	switch pc.TextStyle.Align {
 	case TextAlignLeft:
 	case TextAlignCenter:
 		ax = 0.5 // todo: determine if font is horiz or vert..
 	case TextAlignRight:
 		ax = 1.0
 	}
-	if pc.Text.WordWrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.Text.EffLineHeight(), pc.Text.Align)
+	if pc.TextStyle.WordWrap {
+		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextStyle.EffLineHeight(), pc.TextStyle.Align)
 	} else {
 		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
 	}
@@ -639,14 +640,14 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 
 func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float64) {
 	var ax, ay float64
-	switch pc.Text.Align {
+	switch pc.TextStyle.Align {
 	case TextAlignLeft:
 	case TextAlignCenter:
 		ax = 0.5 // todo: determine if font is horiz or vert..
 	case TextAlignRight:
 		ax = 1.0
 	}
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.Text.EffLineHeight(), pc.Text.Align)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextStyle.EffLineHeight(), pc.TextStyle.Align)
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.
@@ -689,7 +690,7 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 	ay = 1
 	for _, line := range lines {
 		pc.DrawStringAnchored(rs, line, x, y, ax, ay)
-		y += pc.Font.Height * lineHeight
+		y += pc.FontStyle.Height * lineHeight
 	}
 }
 
@@ -698,20 +699,20 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 // MeasureString returns the rendered width and height of the specified text
 // given the current font face.
 func (pc *Paint) MeasureString(s string) (w, h float64) {
-	if pc.Font.Face == nil {
-		pc.Font.LoadFont(&pc.UnContext, "")
+	if pc.FontStyle.Face == nil {
+		pc.FontStyle.LoadFont(&pc.UnContext, "")
 	}
 	d := &font.Drawer{
-		Face: pc.Font.Face,
+		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
-	return float64(a >> 6), pc.Font.Height
+	return float64(a >> 6), pc.FontStyle.Height
 }
 
 func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {
 	lines := pc.WordWrap(s, width)
-	h := float64(len(lines)) * pc.Font.Height * lineHeight
-	h -= (lineHeight - 1) * pc.Font.Height
+	h := float64(len(lines)) * pc.FontStyle.Height * lineHeight
+	h -= (lineHeight - 1) * pc.FontStyle.Height
 	return lines, h
 }
 

@@ -35,29 +35,33 @@ import (
 type KeyFunctions int64
 
 const (
-	KeyNoFun KeyFunctions = iota
-	KeyMoveUp
-	KeyMoveDown
-	KeyMoveRight
-	KeyMoveLeft
-	KeyPageUp
-	KeyPageDown
-	KeyPageRight
-	KeyPageLeft
-	KeyFocusNext
-	KeyFocusPrev
-	KeySelectItem
-	KeyCancelSelect
-	KeyExtendSelect
-	KeySelectText
-	KeyEditItem
-	KeyCopy
-	KeyCut
-	KeyPaste
+	KeyFunNil KeyFunctions = iota
+	KeyFunMoveUp
+	KeyFunMoveDown
+	KeyFunMoveRight
+	KeyFunMoveLeft
+	KeyFunPageUp
+	KeyFunPageDown
+	KeyFunPageRight
+	KeyFunPageLeft
+	KeyFunHome
+	KeyFunEnd
+	KeyFunFocusNext
+	KeyFunFocusPrev
+	KeyFunSelectItem
+	KeyFunCancelSelect
+	KeyFunExtendSelect
+	KeyFunSelectText
+	KeyFunEditItem
+	KeyFunCopy
+	KeyFunCut
+	KeyFunPaste
+	KeyFunBackspace
+	KeyFunDelete
 	// either shift key
-	KeyShift
+	KeyFunShift
 	// the control key: command for mac, ctrl for others?
-	KeyCtrl
+	KeyFunCtrl
 	KeyFunctionsN
 )
 
@@ -69,25 +73,36 @@ type KeyMap map[string]KeyFunctions
 
 // the default map has emacs-style navigation etc
 var DefaultKeyMap = KeyMap{
-	"up_arrow":           KeyMoveUp,
-	"control+p":          KeyMoveUp,
-	"down_arrow":         KeyMoveDown,
-	"control+n":          KeyMoveDown,
-	"right_arrow":        KeyMoveRight,
-	"control+f":          KeyMoveRight,
-	"left_arrow":         KeyMoveLeft,
-	"control+b":          KeyMoveLeft,
-	"tab":                KeyFocusNext,
-	"shift_tab":          KeyFocusPrev,
-	"space":              KeySelectItem,
-	"return":             KeySelectItem,
-	"control+g":          KeyCancelSelect,
-	"control+down_arrow": KeyExtendSelect,
-	"control+space":      KeySelectText,
-	"left_shift":         KeyShift,
-	"right_shift":        KeyShift,
-	"left_super":         KeyCtrl,
-	"right_super":        KeyCtrl,
+	"up_arrow":                 KeyFunMoveUp,
+	"control+p":                KeyFunMoveUp,
+	"down_arrow":               KeyFunMoveDown,
+	"control+n":                KeyFunMoveDown,
+	"right_arrow":              KeyFunMoveRight,
+	"control+f":                KeyFunMoveRight,
+	"left_arrow":               KeyFunMoveLeft,
+	"control+b":                KeyFunMoveLeft,
+	"home":                     KeyFunHome,
+	"kp_home":                  KeyFunHome,
+	"control+a":                KeyFunHome,
+	"super+control+left_arrow": KeyFunHome,
+	"end":                       KeyFunEnd,
+	"kp_end":                    KeyFunEnd,
+	"control+e":                 KeyFunEnd,
+	"super+control+right_arrow": KeyFunEnd,
+	"tab":                KeyFunFocusNext,
+	"shift_tab":          KeyFunFocusPrev,
+	"return":             KeyFunSelectItem,
+	"control+g":          KeyFunCancelSelect,
+	"control+down_arrow": KeyFunExtendSelect,
+	"control+space":      KeyFunSelectText,
+	"left_shift":         KeyFunShift,
+	"right_shift":        KeyFunShift,
+	"left_super":         KeyFunCtrl,
+	"right_super":        KeyFunCtrl,
+	"backspace":          KeyFunBackspace,
+	"delete":             KeyFunDelete,
+	"control+d":          KeyFunDelete,
+	"control+h":          KeyFunBackspace,
 }
 
 // users can set this to an alternative map
@@ -95,7 +110,7 @@ var ActiveKeyMap *KeyMap = &DefaultKeyMap
 
 // translate key string into a function
 func KeyFun(key, chord string) KeyFunctions {
-	kf := KeyNoFun
+	kf := KeyFunNil
 	if key != "" {
 		kf = (*ActiveKeyMap)[key]
 		// fmt.Printf("key: %v = %v\n", key, kf)
@@ -262,11 +277,13 @@ func (c ChordSorter) Less(i, j int) (less bool) {
 func ConstructChord(keys map[string]bool) (chord string) {
 	unikeys := map[string]bool{}
 	for key := range keys {
-		if strings.HasPrefix(key, "left_") && chordIndices[key[5:]] != 0 {
-			key = key[5:]
-		}
-		if strings.HasPrefix(key, "right_") && chordIndices[key[6:]] != 0 {
-			key = key[6:]
+		if !strings.HasSuffix(key, "_arrow") {
+			if strings.HasPrefix(key, "left_") && chordIndices[key[5:]] != 0 {
+				key = key[5:]
+			}
+			if strings.HasPrefix(key, "right_") && chordIndices[key[6:]] != 0 {
+				key = key[6:]
+			}
 		}
 		unikeys[key] = true
 	}
