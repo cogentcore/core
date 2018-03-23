@@ -56,7 +56,7 @@ void NSAppStop() {
     // In case NSAppStop is not called in response to a UI event, we need to trigger
     // a dummy event so the UI processing loop picks up the stop request.
     NSEvent* dummyEvent = [NSEvent
-        otherEventWithType: NSApplicationDefined
+        otherEventWithType: NSEventTypeApplicationDefined
                   location: NSZeroPoint
              modifierFlags: 0
                  timestamp: 0
@@ -77,7 +77,7 @@ GMDWindow openWindow() {
         return nil;
     }
     NSRect rect = NSMakeRect(0, 0, 200, 200); // initial size isn't important
-    int style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+    int style = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
     id window = [[[EventWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:NO] autorelease];
     [window makeKeyAndOrderFront:nil];
     [window setWindowController:gw];

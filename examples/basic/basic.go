@@ -74,17 +74,21 @@ func mainrun() {
 
 	rlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "rowlay").(*gi.Layout)
 	rlay.Lay = gi.LayoutRow
-	rlay.SetProp("x", 100)
+	rlay.SetProp("x", 10)
 	rlay.SetProp("y", 500)
 	rlay.SetProp("text-align", "center")
 	edit1 := rlay.AddNewChildNamed(gi.KiT_LineEdit, "edit1").(*gi.LineEdit)
 	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
+	slider1 := rlay.AddNewChildNamed(gi.KiT_Slider, "slider1").(*gi.Slider)
 
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
 	button1.Text = "Button 1"
 	button2.Text = "Button 2"
+	slider1.Horiz = true
+	slider1.SetProp("width", "20em")
+	slider1.SetValue(0.5)
 
 	win.UpdateEnd()
 

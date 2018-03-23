@@ -93,6 +93,7 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 		p.Face = face
 	}
 	p.Height = float64(p.Face.Metrics().Height) / 64.0
+	p.SetUnitContext(ctxt)
 	// em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
 	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, p.Height, em)
 }
@@ -101,7 +102,9 @@ func (p *FontStyle) SetUnitContext(ctxt *units.Context) {
 	// todo: could measure actual chars but just use defaults right now
 	if p.Face != nil {
 		em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
-		ctxt.SetFont(em, 0.5*em, 0.5*em, 12.0) // todo: rem!?  just using 12
+		ctxt.SetFont(em, 0.5*em, .9*em, 12.0) // todo: rem!?  just using 12
+		// fmt.Printf("em %v ex %v ch %v\n", em, 0.5*em, 0.9*em)
+		// order is ex, ch, rem -- using .75 for ch
 	}
 }
 

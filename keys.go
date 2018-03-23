@@ -49,6 +49,7 @@ const (
 	KeyFunFocusNext
 	KeyFunFocusPrev
 	KeyFunSelectItem
+	KeyFunAbort
 	KeyFunCancelSelect
 	KeyFunExtendSelect
 	KeyFunSelectText
@@ -81,6 +82,12 @@ var DefaultKeyMap = KeyMap{
 	"control+f":                KeyFunMoveRight,
 	"left_arrow":               KeyFunMoveLeft,
 	"control+b":                KeyFunMoveLeft,
+	"control+up_arrow":         KeyFunPageUp,
+	"control+u":                KeyFunPageUp,
+	"control+down_arrow":       KeyFunPageDown,
+	"control+v":                KeyFunPageDown,
+	"control+right_arrow":      KeyFunPageRight,
+	"control+left_arrow":       KeyFunPageLeft,
 	"home":                     KeyFunHome,
 	"kp_home":                  KeyFunHome,
 	"control+a":                KeyFunHome,
@@ -89,20 +96,21 @@ var DefaultKeyMap = KeyMap{
 	"kp_end":                    KeyFunEnd,
 	"control+e":                 KeyFunEnd,
 	"super+control+right_arrow": KeyFunEnd,
-	"tab":                KeyFunFocusNext,
-	"shift_tab":          KeyFunFocusPrev,
-	"return":             KeyFunSelectItem,
-	"control+g":          KeyFunCancelSelect,
-	"control+down_arrow": KeyFunExtendSelect,
-	"control+space":      KeyFunSelectText,
-	"left_shift":         KeyFunShift,
-	"right_shift":        KeyFunShift,
-	"left_super":         KeyFunCtrl,
-	"right_super":        KeyFunCtrl,
-	"backspace":          KeyFunBackspace,
-	"delete":             KeyFunDelete,
-	"control+d":          KeyFunDelete,
-	"control+h":          KeyFunBackspace,
+	"tab":       KeyFunFocusNext,
+	"shift_tab": KeyFunFocusPrev,
+	"return":    KeyFunSelectItem,
+	"escape":    KeyFunAbort,
+	"control+g": KeyFunCancelSelect,
+	// "control+down_arrow": KeyFunExtendSelect,
+	"control+space": KeyFunSelectText,
+	"left_shift":    KeyFunShift,
+	"right_shift":   KeyFunShift,
+	"left_super":    KeyFunCtrl,
+	"right_super":   KeyFunCtrl,
+	"backspace":     KeyFunBackspace,
+	"delete":        KeyFunDelete,
+	"control+d":     KeyFunDelete,
+	"control+h":     KeyFunBackspace,
 }
 
 // users can set this to an alternative map
@@ -120,6 +128,51 @@ func KeyFun(key, chord string) KeyFunctions {
 		// fmt.Printf("chord: %v = %v\n", chord, kf)
 	}
 	return kf
+}
+
+// todo: use some system-specific library that deals with diff keyboard types
+var PunctKeyShiftMap = map[string]string{
+	"-": "_",
+	"=": "+",
+	"[": "{",
+	"]": "}",
+	`\`: "|",
+	";": ":",
+	"'": "\"",
+	",": "<",
+	".": ">",
+	"/": "?",
+	"`": "~",
+	"1": "!",
+	"2": "@",
+	"3": "#",
+	"4": "$",
+	"5": "%",
+	"6": "^",
+	"7": "&",
+	"8": "*",
+	"9": "(",
+	"0": ")",
+}
+
+// translate key / chord into a letter -- handles shift etc
+func KeyToLetter(key, chord string) string {
+	// fmt.Printf("processing key: %v chord: %v\n", key, chord)
+	switch {
+	case key == "space":
+		return " "
+	case strings.HasPrefix(chord, "shift+"):
+		k := strings.TrimPrefix(chord, "shift+")
+		sk, ok := PunctKeyShiftMap[k]
+		if ok {
+			return sk
+		}
+		return strings.ToUpper(k)
+	case len(key) <= 3:
+		return key
+	}
+	// fmt.Printf("unhandled key: %v chord: %v\n", key, chord)
+	return ""
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -23,6 +23,7 @@ type Window struct {
 	Win           OSWindow              `json:"-",desc:"OS-specific window interface"`
 	EventSigs     [EventTypeN]ki.Signal `json:"-",desc:"signals for communicating each type of window (wde) event"`
 	Focus         ki.Ki                 `json:"-",desc:"node receiving keyboard events"`
+	Dragging      ki.Ki                 `json:"-",desc:"node receiving mouse dragging events"`
 	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
@@ -63,7 +64,7 @@ func (w *Window) WinViewport2D() *Viewport2D {
 func (w *Window) Resize(width, height int) {
 	vp := w.WinViewport2D()
 	if vp != nil {
-		fmt.Printf("resize to: %v, %v\n", width, height)
+		// fmt.Printf("resize to: %v, %v\n", width, height)
 		vp.Resize(width, height)
 	}
 }
@@ -83,7 +84,7 @@ func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 		fmt.Print("vp not a vp\n")
 		return
 	}
-	fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), sig, node.PathUnique())
+	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	vp.FullRender2DRoot()
 }
@@ -113,7 +114,11 @@ func (w *Window) StartEventLoop() {
 	wg.Wait()
 }
 
-// send given event signal to all receivers that want it
+// send given event signal to all receivers that want it -- note that because
+// there is a different EventSig for each event type, we are ONLY looking at
+// nodes that have registered to receive that type of event -- the further
+// filtering is just to ensure that they are in the right position to receive
+// the event (focus, etc)
 func (w *Window) SendEventSignal(ei interface{}) {
 	evi, ok := ei.(Event)
 	if !ok {
@@ -135,8 +140,31 @@ func (w *Window) SendEventSignal(ei interface{}) {
 			} else if evi.EventHasPos() {
 				pos := evi.EventPos()
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
-				if !pos.In(gi.WinBBox) {
-					return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that
+
+				// drag events start with node but can go beyond it..
+				_, ok := evi.(MouseDraggedEvent)
+				if ok {
+					if w.Dragging == gi.This {
+						return true // always send to current dragee
+					} else {
+						if pos.In(gi.WinBBox) {
+							w.Dragging = gi.This
+							ki.SetBitFlag(&gi.NodeFlags, int(NodeDragging))
+							return true
+						}
+						return false
+					}
+				} else {
+					if w.Dragging != nil {
+						_, dg := KiToNode2D(w.Dragging)
+						if dg != nil {
+							ki.ClearBitFlag(&dg.NodeFlags, int(NodeDragging))
+						}
+						w.Dragging = nil
+					}
+					if !pos.In(gi.WinBBox) {
+						return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that
+					}
 				}
 			}
 		} else {

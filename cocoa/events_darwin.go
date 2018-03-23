@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/gi"
 	"image"
-	// "strings"
+	"strings"
 )
 
 func getButton(b int) (which gi.MouseButton) {
@@ -198,9 +198,15 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				var ke gi.KeyUpEvent
 				ke.Key = keyMapping[int(e.data[1])]
 				delete(downKeys, ke.Key)
-				// for obscure reasons, keyboard remappers can end up having these stuck
-				delete(downKeys, "right_arrow")
-				delete(downKeys, "left_arrow")
+				// todo: getting stuck keys
+				for key, _ := range downKeys {
+					if !strings.HasSuffix(key, "_arrow") {
+						if strings.HasPrefix(key, "left_") || strings.HasPrefix(key, "right_") {
+							continue
+						}
+					}
+					delete(downKeys, key)
+				}
 				ec <- ke
 			case C.GMDResize:
 				var re gi.ResizeEvent

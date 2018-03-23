@@ -15,7 +15,7 @@
 
 @synthesize eventQ, lock, gw;
 
-- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag
+- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag
 {
     self = [super initWithContentRect:contentRect styleMask:aStyle backing:bufferingType defer:flag];
     if (self) {
@@ -204,15 +204,15 @@ static int sgn(CGFloat delta)
     GMDEvent e;
     e.data[1] = keycode;
     e.data[2] = [theEvent modifierFlags];
-    if ((keycode == 58 && (e.data[2] & NSAlternateKeyMask)) || 
-        (keycode == 61 && (e.data[2] & NSAlternateKeyMask)) || 
-        (keycode == 54 && (e.data[2] & NSCommandKeyMask)) || 
-        (keycode == 55 && (e.data[2] & NSCommandKeyMask)) || 
-        (keycode == 63 && (e.data[2] & NSFunctionKeyMask)) || 
-        (keycode == 59 && (e.data[2] & NSControlKeyMask)) || 
-        (keycode == 62 && (e.data[2] & NSControlKeyMask)) || 
-        (keycode == 60 && (e.data[2] & NSShiftKeyMask)) || 
-        (keycode == 56 && (e.data[2] & NSShiftKeyMask))) {
+    if ((keycode == 58 && (e.data[2] & NSEventModifierFlagOption)) || 
+        (keycode == 61 && (e.data[2] & NSEventModifierFlagOption)) || 
+        (keycode == 54 && (e.data[2] & NSEventModifierFlagCommand)) || 
+        (keycode == 55 && (e.data[2] & NSEventModifierFlagCommand)) || 
+        (keycode == 63 && (e.data[2] & NSEventModifierFlagFunction)) || 
+        (keycode == 59 && (e.data[2] & NSEventModifierFlagControl)) || 
+        (keycode == 62 && (e.data[2] & NSEventModifierFlagControl)) || 
+        (keycode == 60 && (e.data[2] & NSEventModifierFlagShift)) || 
+        (keycode == 56 && (e.data[2] & NSEventModifierFlagShift))) {
         e.kind = GMDKeyDown;
     } else if (keycode == 58 || keycode == 61 || keycode == 54 || keycode == 55 || keycode == 59 ||  keycode == 62 || keycode == 56 || keycode == 60 || keycode == 63) {
         e.kind = GMDKeyUp;

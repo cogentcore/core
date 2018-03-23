@@ -24,8 +24,10 @@ const (
 	CanFocus
 	// does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
 	HasFocus
-	// this indicates that the MouseEnteredEvent was previously registered on this node
+	// indicates that the MouseEnteredEvent was previously registered on this node
 	MouseHasEntered
+	// this node is currently dragging -- win.Dragging set to this node
+	NodeDragging
 	// can extend node flags from here
 	NodeFlagsN
 )
@@ -73,12 +75,22 @@ func (g *NodeBase) HasFocus() bool {
 	return ki.HasBitFlag(g.NodeFlags, int(HasFocus))
 }
 
+// is the current node currently receiving dragging events?  set by window
+func (g *NodeBase) IsDragging() bool {
+	return ki.HasBitFlag(g.NodeFlags, int(NodeDragging))
+}
+
 // set node as focus node
 func (g *NodeBase) GrabFocus() {
 	win := g.ParentWindow()
 	if win != nil {
 		win.SetFocusItem(g.This)
 	}
+}
+
+// translate a point in global pixel coords into relative position within node
+func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
+	return pt.Sub(g.WinBBox.Min)
 }
 
 // standard css properties on nodes apply, including visible, etc.
