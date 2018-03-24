@@ -287,6 +287,7 @@ func (g *Slider) AsLayout2D() *Layout {
 }
 
 func (g *Slider) InitNode2D() {
+	g.InitNode2DBase()
 	g.ReceiveEventType(MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*Slider)
 		if ok {
@@ -529,6 +530,7 @@ func (g *ScrollBar) AsLayout2D() *Layout {
 }
 
 func (g *ScrollBar) InitNode2D() {
+	g.InitNode2DBase()
 	g.ReceiveEventType(MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
@@ -655,7 +657,7 @@ func (g *ScrollBar) Layout2D(iter int) {
 			}
 		}
 	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
+		g.GeomFromLayout()
 		g.SizeFromAlloc()
 	}
 

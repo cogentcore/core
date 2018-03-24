@@ -336,6 +336,7 @@ func (g *TreeView) AsLayout2D() *Layout {
 }
 
 func (g *TreeView) InitNode2D() {
+	g.InitNode2DBase()
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		_, ok := recv.(*TreeView)
 		if !ok {
@@ -346,56 +347,52 @@ func (g *TreeView) InitNode2D() {
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*TreeView)
-		if !ok {
-			return
+		if ok {
+			ab.SelectNodeAction()
 		}
-		ab.SelectNodeAction()
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
-		if !ok {
-			return
-		}
-		kt, ok := d.(KeyTypedEvent)
 		if ok {
-			// fmt.Printf("TreeView key: %v\n", kt.Chord)
-			kf := KeyFun(kt.Key, kt.Chord)
-			switch kf {
-			case KeyFunSelectItem:
-				ab.SelectNodeAction()
-			case KeyFunCancelSelect:
-				ab.RootUnselectAll()
-			case KeyFunMoveRight:
-				ab.OpenNode()
-			case KeyFunMoveLeft:
-				ab.CollapseNode()
-				// todo; move down / up -- selectnext / prev
+			kt, ok := d.(KeyTypedEvent)
+			if ok {
+				// fmt.Printf("TreeView key: %v\n", kt.Chord)
+				kf := KeyFun(kt.Key, kt.Chord)
+				switch kf {
+				case KeyFunSelectItem:
+					ab.SelectNodeAction()
+				case KeyFunCancelSelect:
+					ab.RootUnselectAll()
+				case KeyFunMoveRight:
+					ab.OpenNode()
+				case KeyFunMoveLeft:
+					ab.CollapseNode()
+					// todo; move down / up -- selectnext / prev
+				}
 			}
 		}
 	})
 	g.ReceiveEventType(KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
-		if !ok {
-			return
-		}
-		kt, ok := d.(KeyDownEvent)
 		if ok {
-			kf := KeyFun(kt.Key, "")
-			// fmt.Printf("TreeView key down: %v\n", kt.Key)
-			switch kf {
-			case KeyFunShift:
-				ab.SetContinuousSelect()
-			case KeyFunCtrl:
-				ab.SetExtendSelect()
+			kt, ok := d.(KeyDownEvent)
+			if ok {
+				kf := KeyFun(kt.Key, "")
+				// fmt.Printf("TreeView key down: %v\n", kt.Key)
+				switch kf {
+				case KeyFunShift:
+					ab.SetContinuousSelect()
+				case KeyFunCtrl:
+					ab.SetExtendSelect()
+				}
 			}
 		}
 	})
 	g.ReceiveEventType(KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
-		if !ok {
-			return
+		if ok {
+			ab.ClearSelectMods()
 		}
-		ab.ClearSelectMods()
 	})
 }
 
@@ -779,7 +776,7 @@ func (g *TabWidget) AsLayout2D() *Layout {
 }
 
 func (g *TabWidget) InitNode2D() {
-
+	g.InitNode2DBase()
 }
 
 func (g *TabWidget) Style2D() {

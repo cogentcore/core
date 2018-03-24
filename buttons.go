@@ -180,8 +180,9 @@ func (g *Button) AsLayout2D() *Layout {
 }
 
 func (g *Button) InitNode2D() {
+	g.InitNode2DBase()
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button)
+		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
 			ab.ButtonPressed()
 		}

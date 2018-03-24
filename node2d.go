@@ -90,13 +90,9 @@ func (g *Node2DBase) InitNode2DBase() {
 
 // style the Paint values directly from node properties -- for SVG-style nodes
 func (g *Node2DBase) Style2DSVG() {
-	gii, ok := g.This.(Node2D)
+	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
-		// fmt.Printf("in style, initializing node %v\n", g.PathUnique())
-		g.InitNode2DBase()
-		if ok {
-			gii.InitNode2D()
-		}
+		gii.InitNode2D()
 	}
 	if g.Viewport == nil {
 		return
@@ -108,13 +104,9 @@ func (g *Node2DBase) Style2DSVG() {
 
 // style the Style values from node properties -- for Widget-style nodes
 func (g *Node2DBase) Style2DWidget() {
-	gii, ok := g.This.(Node2D)
+	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
-		// fmt.Printf("in style, initializing node %v\n", g.PathUnique())
-		g.InitNode2DBase()
-		if ok {
-			gii.InitNode2D()
-		}
+		gii.InitNode2D()
 	}
 	if g.Viewport == nil {
 		return

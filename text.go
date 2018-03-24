@@ -100,6 +100,7 @@ func (g *Text2D) AsLayout2D() *Layout {
 }
 
 func (g *Text2D) InitNode2D() {
+	g.InitNode2DBase()
 	g.LayData.Defaults()
 }
 

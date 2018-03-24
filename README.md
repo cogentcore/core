@@ -60,13 +60,19 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* set clipping: parent layout sets clipping zone data in child LayData
+  (excluding scrollbars) and generic function to set clipping to that if non-zero
+  GetGeomFromLayout etc auto-inherits the clip region all the way down
+  
+* also getting some capture from vertical scrollbar onto other buttons -- check window dragging code
+
+* need disconnection code in ki and a new interface fun to disconnect from events
+
 * keep scrollbars out of children -- events should go fine b/c registered!  no prob!
   just set parent -- new paradigm of field-based tree branches.. same for Controls
 
 * update increment threshold for scrollbar -- less frequent updates.
 
-* rename: sliders, buttons, NodeWidget -> TreeView, etc.
-  
 * fix scrolling issues per below, and look into scroll gestures, scrollwheel, etc.
 * tree view should work quite well -- put in a layout and test out..
 

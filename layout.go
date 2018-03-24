@@ -73,20 +73,21 @@ var KiT_Overflow = ki.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow"
 
 // style preferences on the layout of the element
 type LayoutStyle struct {
-	z_index   int           `xml:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH    AlignHoriz    `xml:"align-horiz",desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV    AlignVert     `xml:"align-vert",desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX      units.Value   `xml:"x",desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY      units.Value   `xml:"y",desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width     units.Value   `xml:"width",desc:"specified size of element -- 0 if not specified"`
-	Height    units.Value   `xml:"height",desc:"specified size of element -- 0 if not specified"`
-	MaxWidth  units.Value   `xml:"max-width",desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight units.Value   `xml:"max-height",desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth  units.Value   `xml:"min-width",desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
-	Offsets   []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
-	Margin    units.Value   `xml:"margin",desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Overflow  Overflow      `xml:"overflow",desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	z_index        int           `xml:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH         AlignHoriz    `xml:"align-horiz",desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV         AlignVert     `xml:"align-vert",desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX           units.Value   `xml:"x",desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY           units.Value   `xml:"y",desc:"vertical position -- often superceded by layout but otherwise used"`
+	Width          units.Value   `xml:"width",desc:"specified size of element -- 0 if not specified"`
+	Height         units.Value   `xml:"height",desc:"specified size of element -- 0 if not specified"`
+	MaxWidth       units.Value   `xml:"max-width",desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight      units.Value   `xml:"max-height",desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth       units.Value   `xml:"min-width",desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight      units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
+	Offsets        []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
+	Margin         units.Value   `xml:"margin",desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Overflow       Overflow      `xml:"overflow",desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	ScrollBarWidth units.Value   `xml:"scrollbar-width",desc:"width of a layout scrollbar"`
 }
 
 func (ls *LayoutStyle) Defaults() {
@@ -94,6 +95,7 @@ func (ls *LayoutStyle) Defaults() {
 	ls.MinHeight.Set(1.0, units.Em)
 	ls.Width.Set(1.0, units.Em)
 	ls.Height.Set(1.0, units.Em)
+	ls.ScrollBarWidth.Set(20.0, units.Px)
 }
 
 func (ls *LayoutStyle) SetStylePost() {
@@ -228,8 +230,8 @@ type Layout struct {
 	Lay       Layouts    `xml:"lay",desc:"type of layout to use"`
 	StackTop  ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D      `xml:"-",desc:"total max size of children as laid out"`
-	HScroll   *ScrollBar `xml:"-",desc:"horizontal scroll bar, added to children if needed, or removed"`
-	VScroll   *ScrollBar `xml:"-",desc:"vertical scroll bar, added to children if needed, or removed"`
+	HScroll   *ScrollBar `xml:"-",desc:"horizontal scroll bar -- we fully manage this as needed"`
+	VScroll   *ScrollBar `xml:"-",desc:"vertical scroll bar -- we fully manage this as needed"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -249,6 +251,20 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 //
 // second me-first pass: each layout allocates AllocSize for its children based on
 // aggregated size data, and so on down the tree
+
+// how much extra size we need in each dimension
+func (ly *Layout) ExtraSize() Vec2D {
+	lst := &ly.Style.Layout
+	var es Vec2D
+	es.SetVal(2.0 * lst.Margin.Dots)
+	if ly.HScroll != nil {
+		es.Y += lst.ScrollBarWidth.Dots
+	}
+	if ly.VScroll != nil {
+		es.X += lst.ScrollBarWidth.Dots
+	}
+	return es
+}
 
 // first pass: gather the size information from the children
 func (ly *Layout) GatherSizes() {
@@ -279,10 +295,9 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
-	marg := 2.0 * ly.Style.Layout.Margin.Dots
-
-	ly.LayData.Size.Need.SetAddVal(marg)
-	ly.LayData.Size.Pref.SetAddVal(marg)
+	es := ly.ExtraSize()
+	ly.LayData.Size.Need.SetAdd(es)
+	ly.LayData.Size.Pref.SetAdd(es)
 
 	// todo: something entirely different needed for grids..
 
@@ -365,8 +380,8 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz
 
 // layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutRow / Col
 func (ly *Layout) LayoutSingle(dim Dims2D) {
-	marg := 2.0 * ly.Style.Layout.Margin.Dots
-	avail := ly.LayData.AllocSize.Dim(dim) - marg
+	es := ly.ExtraSize()
+	avail := ly.LayData.AllocSize.Dim(dim) - es.Dim(dim)
 	for _, c := range ly.Children {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
@@ -391,7 +406,8 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	al := ly.Style.Layout.AlignDim(dim)
-	marg := 2.0 * ly.Style.Layout.Margin.Dots
+	es := ly.ExtraSize()
+	marg := es.Dim(dim)
 	avail := ly.LayData.AllocSize.Dim(dim) - marg
 	pref := ly.LayData.Size.Pref.Dim(dim) - marg
 	need := ly.LayData.Size.Need.Dim(dim) - marg
@@ -501,62 +517,100 @@ func (ly *Layout) FinalizeLayout() {
 
 func (ly *Layout) SetHScroll() {
 	if ly.HScroll == nil {
-		ly.HScroll = ly.AddNewChildNamed(KiT_ScrollBar, "LayHScroll").(*ScrollBar)
+		ly.HScroll = &ScrollBar{}
+		ly.HScroll.SetThisName(ly.HScroll, "Lay_HScroll")
+		ly.HScroll.SetParent(ly.This)
 		ly.HScroll.Horiz = true
 		ly.HScroll.InitNode2D()
-		ly.HScroll.Style2D()
+		ly.HScroll.Defaults()
 	}
-	hs := ly.HScroll
-	hs.SetFixedHeight(units.NewValue(20, units.Px))
-	hs.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Px))
-	hs.Defaults()
-	hs.Min = 0.0
-	hs.Max = ly.ChildSize.X
-	hs.Step = ly.Style.Font.Size.Dots // step by lines
-	hs.PageStep = 10.0 * hs.Step      // todo: more dynamic
-	hs.SetThumbValue(ly.LayData.AllocSize.X)
-	// fmt.Printf("Setting up HScroll: max: %v  thumb: %v sz: %v\n", hs.Max, hs.ThumbVal, hs.ThumbSize)
-	hs.Tracking = true
-	hs.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	sc := ly.HScroll
+	sc.SetFixedHeight(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
+	sc.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Px))
+	sc.Style2D()
+	sc.Min = 0.0
+	sc.Max = ly.ChildSize.X
+	sc.Step = ly.Style.Font.Size.Dots // step by lines
+	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
+	sc.ThumbVal = ly.LayData.AllocSize.X
+	// fmt.Printf("Setting up HScroll: max: %v  thumb: %v sz: %v\n", sc.Max, sc.ThumbVal, sc.ThumbSize)
+	sc.Tracking = true
+	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		// ss, _ := send.(*ScrollBar)
 		// fmt.Printf("HScroll to %v\n", ss.Value)
-		ly.UpdateStart()
-		ly.UpdateEnd()
+		li, _ := KiToNode2D(rec) // note: avoid using closures
+		ls := li.AsLayout2D()
+		ls.UpdateStart()
+		ls.UpdateEnd()
 	})
-	// hs.Layout2D(0)
-	// hs.Layout2D(1)
-	// hs.Render2D()
+}
+
+func (ly *Layout) LayoutScrolls() {
+	sw := ly.Style.Layout.ScrollBarWidth.Dots
+	if ly.HScroll != nil {
+		sc := ly.HScroll
+		sc.Layout2D(0)
+		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X
+		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sw
+		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
+		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
+		sc.LayData.AllocSize.Y = sw
+		sc.Layout2D(1)
+	}
+	if ly.VScroll != nil {
+		sc := ly.VScroll
+		sc.Layout2D(0)
+		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sw
+		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y
+		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
+		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
+		sc.LayData.AllocSize.X = sw
+		sc.Layout2D(1)
+	}
+}
+
+func (ly *Layout) RenderScrolls() {
+	if ly.HScroll != nil {
+		ly.HScroll.Render2D()
+	}
+	if ly.VScroll != nil {
+		ly.VScroll.Render2D()
+	}
 }
 
 func (ly *Layout) DeleteHScroll() {
 	if ly.HScroll == nil {
 		return
 	}
-	ly.DeleteChild(ly.HScroll.This, true)
+	// todo: disconnect from events, call pointer cut function on ki
 	ly.HScroll = nil
 }
 
 func (ly *Layout) SetVScroll() {
 	if ly.VScroll == nil {
-		ly.VScroll = ly.AddNewChildNamed(KiT_ScrollBar, "LayVScroll").(*ScrollBar)
+		ly.VScroll = &ScrollBar{}
+		ly.VScroll.SetThisName(ly.VScroll, "Lay_VScroll")
+		ly.VScroll.SetParent(ly.This)
 		ly.VScroll.InitNode2D()
-		ly.VScroll.Style2D()
+		ly.VScroll.Defaults()
 	}
-	hs := ly.VScroll
-	hs.SetFixedWidth(units.NewValue(20, units.Px))
-	hs.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
-	hs.Defaults()
-	hs.Min = 0.0
-	hs.Max = ly.ChildSize.Y
-	hs.Step = ly.Style.Font.Size.Dots // step by lines
-	hs.PageStep = 10.0 * hs.Step      // todo: more dynamic
-	hs.SetThumbValue(ly.LayData.AllocSize.Y)
-	hs.Tracking = true
-	hs.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	sc := ly.VScroll
+	sc.SetFixedWidth(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
+	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
+	sc.Style2D()
+	sc.Min = 0.0
+	sc.Max = ly.ChildSize.Y
+	sc.Step = ly.Style.Font.Size.Dots // step by lines
+	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
+	sc.ThumbVal = ly.LayData.AllocSize.Y
+	sc.Tracking = true
+	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		// ss, _ := send.(*ScrollBar)
 		// fmt.Printf("VScroll to %v\n", ss.Value)
-		ly.UpdateStart()
-		ly.UpdateEnd()
+		li, _ := KiToNode2D(rec) // note: avoid using closures
+		ls := li.AsLayout2D()
+		ls.UpdateStart()
+		ls.UpdateEnd()
 	})
 }
 
@@ -564,7 +618,7 @@ func (ly *Layout) DeleteVScroll() {
 	if ly.VScroll == nil {
 		return
 	}
-	ly.DeleteChild(ly.VScroll.This, true)
+	// todo: disconnect from events, call pointer cut function on ki
 	ly.VScroll = nil
 }
 
@@ -647,6 +701,7 @@ func (ly *Layout) AsLayout2D() *Layout {
 }
 
 func (ly *Layout) InitNode2D() {
+	ly.InitNode2DBase()
 }
 
 func (ly *Layout) Node2DBBox() image.Rectangle {
@@ -679,13 +734,14 @@ func (ly *Layout) Layout2D(iter int) {
 		ly.FinalizeLayout()
 		ly.GeomFromLayout()
 		ly.ManageOverflow()
+		ly.LayoutScrolls()
 	}
 	// todo: test if this is needed -- if there are any el-relative settings anyway
 	ly.Style.SetUnitContext(&ly.Viewport.Render, 0)
 }
 
 func (ly *Layout) Render2D() {
-
+	ly.RenderScrolls()
 }
 
 func (ly *Layout) CanReRender2D() bool {
@@ -723,6 +779,7 @@ func (g *Frame) AsLayout2D() *Layout {
 }
 
 func (g *Frame) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 var FrameProps = map[string]interface{}{
@@ -769,6 +826,8 @@ func (g *Frame) Render2D() {
 		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
 	}
 	pc.FillStrokeClear(rs)
+
+	g.Layout.Render2D()
 }
 
 func (g *Frame) CanReRender2D() bool {
@@ -807,6 +866,7 @@ func (g *Stretch) AsLayout2D() *Layout {
 }
 
 func (g *Stretch) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 var StretchProps = map[string]interface{}{
@@ -865,6 +925,7 @@ func (g *Space) AsLayout2D() *Layout {
 }
 
 func (g *Space) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Space) Style2D() {

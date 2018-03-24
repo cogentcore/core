@@ -93,6 +93,18 @@ func (a *Vec2D) SetDim(d Dims2D, val float64) {
 	}
 }
 
+// set values
+func (a *Vec2D) Set(x, y float64) {
+	a.X = x
+	a.Y = y
+}
+
+// set both dims to same value
+func (a *Vec2D) SetVal(val float64) {
+	a.X = val
+	a.Y = val
+}
+
 func (a Vec2D) IsZero() bool {
 	return a.X == 0.0 && a.Y == 0.0
 }

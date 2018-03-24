@@ -92,7 +92,7 @@ func (g *Label) AsLayout2D() *Layout {
 }
 
 func (g *Label) InitNode2D() {
-
+	g.InitNode2DBase()
 }
 
 var LabelProps = map[string]interface{}{
@@ -380,26 +380,27 @@ func (g *TextField) AsLayout2D() *Layout {
 }
 
 func (g *TextField) InitNode2D() {
+	g.InitNode2DBase()
 	g.EditText = g.Text
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		le, ok := recv.(*TextField)
+		tf, ok := recv.(*TextField)
 		if ok {
 			md, ok := d.(MouseDownEvent)
 			if ok {
-				if !le.HasFocus() {
-					le.GrabFocus()
+				if !tf.HasFocus() {
+					tf.GrabFocus()
 				}
-				pt := le.PointToRelPos(md.EventPos())
-				le.SetCursorFromPixel(float64(pt.X))
+				pt := tf.PointToRelPos(md.EventPos())
+				tf.SetCursorFromPixel(float64(pt.X))
 			}
 		}
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		le, ok := recv.(*TextField)
+		tf, ok := recv.(*TextField)
 		if ok {
 			kt, ok := d.(KeyTypedEvent)
 			if ok {
-				le.KeyInput(kt)
+				tf.KeyInput(kt)
 			}
 		}
 	})

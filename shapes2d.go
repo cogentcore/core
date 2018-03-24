@@ -39,6 +39,7 @@ func (g *Rect) AsLayout2D() *Layout {
 }
 
 func (g *Rect) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Rect) Style2D() {
@@ -109,6 +110,7 @@ func (g *Viewport2DFill) AsLayout2D() *Layout {
 }
 
 func (g *Viewport2DFill) InitNode2D() {
+	g.InitNode2DBase()
 	vp := g.Viewport
 	g.Pos = Vec2DZero
 	g.Size = Vec2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
@@ -234,6 +236,7 @@ func (g *Ellipse) AsLayout2D() *Layout {
 }
 
 func (g *Ellipse) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Ellipse) Style2D() {
@@ -298,6 +301,7 @@ func (g *Line) AsLayout2D() *Layout {
 }
 
 func (g *Line) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Line) Style2D() {
@@ -361,6 +365,7 @@ func (g *Polyline) AsLayout2D() *Layout {
 }
 
 func (g *Polyline) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Polyline) Style2D() {
@@ -427,6 +432,7 @@ func (g *Polygon) AsLayout2D() *Layout {
 }
 
 func (g *Polygon) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Polygon) Style2D() {

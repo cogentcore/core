@@ -114,13 +114,14 @@ func (g *Viewport2D) AsLayout2D() *Layout {
 }
 
 func (vp *Viewport2D) InitNode2D() {
-	vp.NodeSig.Connect(vp.This, func(vpki, vpa ki.Ki, sig int64, data interface{}) {
-		vp, ok := vpki.(*Viewport2D)
-		if !ok {
-			return
-		}
-		// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), vpa.PathUnique())
-		vp.FullRender2DRoot()
+	vp.InitNode2DBase()
+	// we update oursleves whenever any node update event happens
+	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
+		rvpi, _ := KiToNode2D(recvp)
+		rvp := rvpi.AsViewport2D()
+		// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+		// todo: don't re-render if deleting!
+		rvp.FullRender2DRoot()
 	})
 }
 
@@ -199,11 +200,10 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 // initialize scene graph
 func (vp *Viewport2D) Init2DRoot() {
 	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
+		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false
 		}
-		gi.InitNode2DBase()
 		gii.InitNode2D()
 		return true
 	})
