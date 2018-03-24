@@ -60,6 +60,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* fix scrolling issues per below, and look into scroll gestures, scrollwheel, etc.
+* tree view should work quite well -- put in a layout and test out..
+
 Next:
 * why do we have units context on style and paint?  one is not getting initialized -- 
 doesn't make sense to have two.
@@ -81,7 +84,6 @@ Soon:
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
-	+ ScrollBar / ScrollArea -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- the key impl is to change the parent offset depending on scroll position, and then to use WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient!
 	+ SplitView
 	+ Menu / MenuBar / MenuItem
 	+ ComboBox
@@ -102,6 +104,7 @@ Soon:
 	+ TreeView (NodeWidget) -- needs controls, menu, updating, dnd, clip, -- see about LI, UL lists..
 	+ TabWidget -- needs updating
 	+ Label -- done -- could make lots of H1, etc alts
+	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- the key impl is to change the parent offset depending on scroll position, and then to use WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient!  all working except perhaps too much re-rendering -- some kind of delta test on scrollbar emit values -- and vertical bar is not showing up in right place -- and not really sure why horiz is showing up where it is anyway.  Uses the overflow css setting -- auto is default.
 
 
 ## 3D Design
