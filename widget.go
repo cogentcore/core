@@ -925,13 +925,7 @@ func (g *Button) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Button{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Slider
-
-// // these extend NodeBase NodeFlags to hold slider state
-// const (
-// 	// slider is dragging
-// 	SliderFlagDragging NodeFlags = NodeFlagsN + iota
-// )
+// SliderBase -- basis for sliders
 
 // signals that sliders can send
 type SliderSignals int64
@@ -972,9 +966,9 @@ const (
 
 //go:generate stringer -type=SliderStates
 
-// todo: Snap options: never, always, on release
-
-// SliderBase has common slider functionality
+// SliderBase has common slider functionality -- two major modes: ValThumb =
+// false is a slider with a fixed-size thumb knob, while = true has a
+// thumb that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
 type SliderBase struct {
 	WidgetBase
 	Min         float64              `xml:"min",desc:"minimum value in range"`
@@ -983,8 +977,9 @@ type SliderBase struct {
 	PageStep    float64              `xml:"step",desc:"larger PageUp / Dn step size"`
 	Value       float64              `xml:"value",desc:"current value"`
 	Size        float64              `xml:"size",desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThumbSize   float64              `xml:"thumb-size",desc:"size of the thumb -- if PropThumb then this changes over time and is subtracted from Size in computing Value"`
-	PropThumb   bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ThumbSize   float64              `xml:"thumb-size",desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ThumbVal    float64              `xml:thumb-val",desc:"value that the thumb represents, in the same units"`
 	Pos         float64              `xml:"pos",desc:"logical position of the slider relative to Size"`
 	DragPos     float64              `xml:"-",desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float64              `xml:"vispos",desc:"visual position of the slider -- can be different from pos in a RTL environment"`
@@ -1023,7 +1018,7 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 func (g *SliderBase) SliderPressed(pos float64) {
 	g.UpdateStart()
 	g.SetSliderState(SliderDown)
-	g.SliderAtPos(pos)
+	g.SetSliderPos(pos)
 	g.SliderSig.Emit(g.This, int64(SliderPressed), g.Value)
 	// ki.SetBitFlag(&g.NodeFlags, int(SliderFlagDragging))
 	g.UpdateEnd()
@@ -1072,41 +1067,28 @@ func (g *SliderBase) SizeFromAlloc() {
 	} else {
 		g.Size = g.LayData.AllocSize.Y - 2.0*spc
 	}
-	if !g.PropThumb {
+	if !g.ValThumb {
 		g.Size -= g.ThumbSize + 2.0*st.Border.Width.Dots + 2.0
 	}
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
 }
 
-func (g *SliderBase) SliderAtPos(pos float64) {
+// set the position of the slider at the given position in pixels -- updates the corresponding Value
+func (g *SliderBase) SetSliderPos(pos float64) {
 	g.UpdateStart()
 	g.Pos = pos
-	if g.PropThumb {
-		effSz := g.Size - g.ThumbSize
-		if effSz <= 0.0 {
-			g.Pos = 0.0
-			g.DragPos = 0.0
-			g.Value = g.Min
-		} else {
-			g.Pos = math.Min(effSz, g.Pos)
-			g.Pos = math.Max(0, g.Pos)
-			g.Value = g.Min + (g.Max-g.Min)*(g.Pos/effSz)
-			g.DragPos = g.Pos
-			if g.Snap {
-				g.SnapValue()
-				g.UpdatePosFromValue()
-			}
-		}
-	} else {
-		g.Pos = math.Min(g.Size, g.Pos)
-		g.Pos = math.Max(0, g.Pos)
-		g.Value = g.Min + (g.Max-g.Min)*(g.Pos/g.Size)
-		g.DragPos = g.Pos
-		if g.Snap {
-			g.SnapValue()
-			g.UpdatePosFromValue()
-		}
+	g.Pos = math.Min(g.Size, g.Pos)
+	if g.ValThumb {
+		g.UpdateThumbValSize()
+		g.Pos = math.Min(g.Size-g.ThumbSize, g.Pos)
+	}
+	g.Pos = math.Max(0, g.Pos)
+	g.Value = g.Min + (g.Max-g.Min)*(g.Pos/g.Size)
+	g.DragPos = g.Pos
+	if g.Snap {
+		g.SnapValue()
+		g.UpdatePosFromValue()
 	}
 	if g.Tracking {
 		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
@@ -1117,30 +1099,26 @@ func (g *SliderBase) SliderAtPos(pos float64) {
 // slider moved along relevant axis
 func (g *SliderBase) SliderMoved(start, end float64) {
 	del := end - start
-	g.SliderAtPos(g.DragPos + del)
+	g.SetSliderPos(g.DragPos + del)
 }
 
 func (g *SliderBase) UpdatePosFromValue() {
 	if g.Size == 0.0 {
 		return
 	}
-	if g.PropThumb {
-		effSz := g.Size - g.ThumbSize
-		if effSz <= 0.0 {
-			g.Pos = 0.0
-			g.Value = g.Min
-		}
-		g.Pos = effSz * (g.Value - g.Min) / (g.Max - g.Min)
-
-	} else {
-		g.Pos = g.Size * (g.Value - g.Min) / (g.Max - g.Min)
+	if g.ValThumb {
+		g.UpdateThumbValSize()
 	}
+	g.Pos = g.Size * (g.Value - g.Min) / (g.Max - g.Min)
 }
 
 // set a value
 func (g *SliderBase) SetValue(val float64) {
 	g.UpdateStart()
 	g.Value = math.Min(val, g.Max)
+	if g.ValThumb {
+		g.Value = math.Min(g.Value, g.Max-g.ThumbVal)
+	}
 	g.Value = math.Max(g.Value, g.Min)
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
@@ -1148,15 +1126,51 @@ func (g *SliderBase) SetValue(val float64) {
 	g.UpdateEnd()
 }
 
-// slider moved along relevant axis
-func (g *SliderBase) SetThumbSizeByValue(val float64) {
-	g.ThumbSize = ((val - g.Min) / (g.Max - g.Min))
+func (g *SliderBase) SetThumbValue(val float64) {
+	g.UpdateStart()
+	g.ThumbVal = math.Min(val, g.Max)
+	g.ThumbVal = math.Max(g.ThumbVal, g.Min)
+	g.UpdateThumbValSize()
+	g.UpdateEnd()
+}
+
+// set thumb size as proportion of min / max (e.g., amount visible in
+// scrollbar) -- max's out to full size
+func (g *SliderBase) UpdateThumbValSize() {
+	g.ThumbSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
 	g.ThumbSize = math.Min(g.ThumbSize, 1.0)
 	g.ThumbSize = math.Max(g.ThumbSize, 0.0)
 	g.ThumbSize *= g.Size
 }
 
-///////////////////////////////////////////////////////////
+func (g *SliderBase) KeyInput(kt KeyTypedEvent) {
+	kf := KeyFun(kt.Key, kt.Chord)
+	switch kf {
+	case KeyFunMoveUp:
+		g.SetValue(g.Value - g.Step)
+	case KeyFunMoveLeft:
+		g.SetValue(g.Value - g.Step)
+	case KeyFunMoveDown:
+		g.SetValue(g.Value + g.Step)
+	case KeyFunMoveRight:
+		g.SetValue(g.Value + g.Step)
+	case KeyFunPageUp:
+		g.SetValue(g.Value - g.PageStep)
+	case KeyFunPageLeft:
+		g.SetValue(g.Value - g.PageStep)
+	case KeyFunPageDown:
+		g.SetValue(g.Value + g.PageStep)
+	case KeyFunPageRight:
+		g.SetValue(g.Value + g.PageStep)
+	case KeyFunHome:
+		g.SetValue(g.Min)
+	case KeyFunEnd:
+		g.SetValue(g.Max)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Slider
 
 // Slider is a standard value slider with a fixed-sized thumb knob
 type Slider struct {
@@ -1238,30 +1252,7 @@ func (g *Slider) InitNode2D() {
 		if ok {
 			kt, ok := d.(KeyTypedEvent)
 			if ok {
-				// todo: register shortcuts with window, and generalize these keybindings
-				kf := KeyFun(kt.Key, kt.Chord)
-				switch kf {
-				case KeyFunMoveUp:
-					sl.SetValue(g.Value - g.Step)
-				case KeyFunMoveLeft:
-					sl.SetValue(g.Value - g.Step)
-				case KeyFunMoveDown:
-					sl.SetValue(g.Value + g.Step)
-				case KeyFunMoveRight:
-					sl.SetValue(g.Value + g.Step)
-				case KeyFunPageUp:
-					sl.SetValue(g.Value - g.PageStep)
-				case KeyFunPageLeft:
-					sl.SetValue(g.Value - g.PageStep)
-				case KeyFunPageDown:
-					sl.SetValue(g.Value + g.PageStep)
-				case KeyFunPageRight:
-					sl.SetValue(g.Value + g.PageStep)
-				case KeyFunHome:
-					sl.SetValue(g.Min)
-				case KeyFunEnd:
-					sl.SetValue(g.Max)
-				}
+				sl.KeyInput(kt)
 			}
 		}
 	})
@@ -1297,13 +1288,9 @@ var SliderProps = []map[string]interface{}{
 }
 
 func (g *Slider) Style2D() {
-	// we can focus by default
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, SliderProps[SliderNormal])
-	// then style with user props
 	g.Style2DWidget()
-	// now get styles for the different states
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -1343,7 +1330,6 @@ func (g *Slider) Layout2D(iter int) {
 }
 
 func (g *Slider) Node2DBBox() image.Rectangle {
-	// fmt.Printf("slider win box: %v\n", g.WinBBox)
 	return g.WinBBoxFromAlloc()
 }
 
@@ -1423,3 +1409,237 @@ func (g *Slider) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &Slider{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  ScrollBar
+
+// ScrollBar has a proportional thumb size reflecting amount of content visible
+type ScrollBar struct {
+	SliderBase
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_ScrollBar = ki.Types.AddType(&ScrollBar{}, nil)
+
+func (g *ScrollBar) Defaults() { // todo: should just get these from props
+	g.ValThumb = true
+	g.ThumbSize = 20.0
+	g.Step = 0.1
+	g.PageStep = 0.2
+	g.Max = 1.0
+}
+
+func (g *ScrollBar) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *ScrollBar) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *ScrollBar) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *ScrollBar) InitNode2D() {
+	g.ReceiveEventType(MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			if sl.IsDragging() {
+				me := d.(MouseDraggedEvent)
+				st := sl.PointToRelPos(me.From)
+				ed := sl.PointToRelPos(me.Where)
+				if sl.Horiz {
+					sl.SliderMoved(float64(st.X), float64(ed.X))
+				} else {
+					sl.SliderMoved(float64(st.Y), float64(ed.Y))
+				}
+			}
+		}
+	})
+	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			me := d.(MouseDownEvent)
+			ed := sl.PointToRelPos(me.Where)
+			st := &sl.Style
+			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
+			if sl.Horiz {
+				sl.SliderPressed(float64(ed.X) - spc)
+			} else {
+				sl.SliderPressed(float64(ed.Y) - spc)
+			}
+		}
+	})
+	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			sl.SliderReleased()
+		}
+	})
+	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			sl.SliderEnterHover()
+		}
+	})
+	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			sl.SliderExitHover()
+		}
+	})
+	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl, ok := recv.(*ScrollBar)
+		if ok {
+			kt, ok := d.(KeyTypedEvent)
+			if ok {
+				sl.KeyInput(kt)
+			}
+		}
+	})
+}
+
+var ScrollBarProps = []map[string]interface{}{
+	{
+		"width":            "20px", // this is automatically applied depending on orientation
+		"border-width":     "1px",
+		"border-radius":    "4px",
+		"border-color":     "black",
+		"border-style":     "solid",
+		"padding":          "8px",
+		"margin":           "4px",
+		"background-color": "#EEF",
+	}, { // disabled
+		"border-color":     "#BBB",
+		"background-color": "#DDD",
+	}, { // hover
+		"background-color": "#CCF", // todo "darker"
+	}, { // focus
+		"border-color":     "#008",
+		"background.color": "#CCF",
+	}, { // press
+		"border-color":     "#000",
+		"background-color": "#DDF",
+	}, { // value fill
+		"border-color":     "#00F",
+		"background-color": "#00F",
+	}, { // overall box -- just white
+		"border-color":     "#FFF",
+		"background-color": "#FFF",
+	},
+}
+
+func (g *ScrollBar) Style2D() {
+	// we can focus by default
+	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	// first do our normal default styles
+	g.Style.SetStyle(nil, &StyleDefault, ScrollBarProps[SliderNormal])
+	// then style with user props
+	g.Style2DWidget()
+	// now get styles for the different states
+	for i := 0; i < int(SliderStatesN); i++ {
+		g.StateStyles[i] = g.Style
+		if i > 0 {
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, ScrollBarProps[i])
+		}
+		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+	}
+	// todo: how to get state-specific user prefs?  need an extra prefix..
+}
+
+func (g *ScrollBar) Layout2D(iter int) {
+	if iter == 0 {
+		g.InitLayout2D()
+		st := &g.Style
+		wd := st.Layout.Width.Dots // this is the width pref
+		if wd == 20.0 {            // if we have the default fixed vals
+			sz := wd + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
+			if g.Horiz {
+				st.Layout.Height = st.Layout.Width
+				st.Layout.MaxHeight = st.Layout.Width
+				g.LayData.AllocSize.Y = sz
+				st.Layout.Width.Val = 0     // reset
+				st.Layout.MaxWidth.Val = -1 // infinite stretch
+			} else {
+				st.Layout.MaxWidth = st.Layout.Width
+				g.LayData.AllocSize.X = sz
+				st.Layout.MaxHeight.Val = -1 // infinite stretch
+			}
+		}
+	} else {
+		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
+		g.SizeFromAlloc()
+	}
+
+	// todo: test for use of parent-el relative units -- indicates whether multiple loops
+	// are required
+	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+	// now get styles for the different states
+	for i := 0; i < int(SliderStatesN); i++ {
+		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+	}
+}
+
+func (g *ScrollBar) Node2DBBox() image.Rectangle {
+	return g.WinBBoxFromAlloc()
+}
+
+func (g *ScrollBar) Render2D() {
+	if g.IsLeaf() {
+		g.Render2DDefaultStyle()
+	} else {
+		// todo: manage stacked layout to select appropriate image based on state
+		return
+	}
+}
+
+// render using a default style if not otherwise styled
+func (g *ScrollBar) Render2DDefaultStyle() {
+	pc := &g.Paint
+	st := &g.Style
+	// rs := &g.Viewport.Render
+
+	// overall fill box
+	g.DrawStdBox(&g.StateStyles[SliderBox])
+
+	spc := st.Layout.Margin.Dots
+	pos := g.LayData.AllocPos.AddVal(spc)
+	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
+
+	pc.StrokeStyle.SetColor(&st.Border.Color)
+	pc.StrokeStyle.Width = st.Border.Width
+	pc.FillStyle.SetColor(&st.Background.Color)
+
+	if g.Horiz {
+		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
+		pos.X += g.Pos                                // start of thumb
+		sz.X = g.ThumbSize
+		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+	} else {
+		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		pos.Y += g.Pos
+		sz.Y = g.ThumbSize
+		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+	}
+}
+
+func (g *ScrollBar) CanReRender2D() bool {
+	return true
+}
+
+func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
+	// fmt.Printf("focus changed %v\n", gotFocus)
+	g.UpdateStart()
+	if gotFocus {
+		g.SetSliderState(SliderFocus)
+	} else {
+		g.SetSliderState(SliderNormal) // lose any hover state but whatever..
+	}
+	g.UpdateEnd()
+}
+
+// check for interface implementation
+var _ Node2D = &ScrollBar{}

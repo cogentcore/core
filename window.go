@@ -144,8 +144,8 @@ func (w *Window) SendEventSignal(ei interface{}) {
 				// drag events start with node but can go beyond it..
 				_, ok := evi.(MouseDraggedEvent)
 				if ok {
-					if w.Dragging == gi.This {
-						return true // always send to current dragee
+					if w.Dragging != nil {
+						return (w.Dragging == gi.This) // only dragger gets events
 					} else {
 						if pos.In(gi.WinBBox) {
 							w.Dragging = gi.This
@@ -161,6 +161,7 @@ func (w *Window) SendEventSignal(ei interface{}) {
 							ki.ClearBitFlag(&dg.NodeFlags, int(NodeDragging))
 						}
 						w.Dragging = nil
+						return true // send event just after dragging for sure
 					}
 					if !pos.In(gi.WinBBox) {
 						return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that

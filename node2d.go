@@ -252,9 +252,7 @@ func (g *Node2DBase) Render2DCheck() bool {
 	if pgi != nil {
 		lp := pgi.AsLayout2D()
 		if lp != nil {
-			if lp.Lay == LayoutStacked && lp.StackTop.Ptr != g.This {
-				return false
-			}
+			return lp.RenderChild(g)
 		}
 	}
 	return true

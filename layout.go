@@ -45,13 +45,27 @@ var KiT_AlignVert = ki.Enums.AddEnumAltLower(AlignTop, false, nil, "Align", int6
 
 //go:generate stringer -type=AlignVert
 
+// overflow type -- determines what happens when there is too much stuff in a layout
+type Overflow int32
+
+const (
+	OverflowAuto Overflow = iota
+	OverflowScroll
+	OverflowVisible
+	OverflowHidden
+	OverflowN
+)
+
+var KiT_Overflow = ki.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow", int64(OverflowN))
+
+//go:generate stringer -type=Overflow
+
 // todo: for style
 // Align = layouts
 // Content -- enum of various options
 // Items -- similar enum -- combine
 // Self "
 // Flex -- flexbox -- https://www.w3schools.com/css/css3_flexbox.asp -- key to look at further for layout ideas
-// Overflow is key for layout: visible, hidden, scroll, auto
 // as is Position -- absolute, sticky, etc
 // Resize: user-resizability
 // vertical-align
@@ -72,6 +86,7 @@ type LayoutStyle struct {
 	MinHeight units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
 	Offsets   []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
 	Margin    units.Value   `xml:"margin",desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Overflow  Overflow      `xml:"overflow",desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
 }
 
 func (ls *LayoutStyle) Defaults() {
@@ -127,14 +142,15 @@ func (m *Margins) SetMargin(marg float64) {
 	m.bottom = marg
 }
 
-// all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs -- everything is concrete and specified here, whereas style may not be fully resolved
+// LayoutData contains all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs -- everything is concrete and specified here, whereas style may not be fully resolved
 type LayoutData struct {
-	Size      SizePrefs   `desc:"size constraints for this item -- from layout style"`
-	Margins   Margins     `desc:"margins around this item"`
-	GridPos   image.Point `desc:"position within a grid"`
-	GridSpan  image.Point `desc:"number of grid elements that we take up in each direction"`
-	AllocPos  Vec2D       `desc:"allocated relative position of this item, by the parent layout"`
-	AllocSize Vec2D       `desc:"allocated size of this item, by the parent layout"`
+	Size         SizePrefs   `desc:"size constraints for this item -- from layout style"`
+	Margins      Margins     `desc:"margins around this item"`
+	GridPos      image.Point `desc:"position within a grid"`
+	GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
+	AllocPos     Vec2D       `desc:"allocated relative position of this item, by the parent layout"`
+	AllocSize    Vec2D       `desc:"allocated size of this item, by the parent layout"`
+	AllocPosOrig Vec2D       `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
 }
 
 func (ld *LayoutData) Defaults() {
@@ -161,6 +177,7 @@ func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 // called at start of layout process -- resets all values back to 0
 func (ld *LayoutData) Reset() {
 	ld.AllocPos = Vec2DZero
+	ld.AllocPosOrig = Vec2DZero
 	ld.AllocSize = Vec2DZero
 }
 
@@ -204,11 +221,15 @@ const (
 // take over responsibility for positioning.  The alignment is NOT inherited
 // by default so must be specified per child, except that the parent alignment
 // is used within the relevant dimension (e.g., align-horiz for a LayoutRow
-// layout, to determine left, right, center, justified)
+// layout, to determine left, right, center, justified).  Layouts
+// can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay      Layouts `desc:"type of layout to use"`
-	StackTop ki.Ptr  `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	Lay       Layouts    `xml:"lay",desc:"type of layout to use"`
+	StackTop  ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize Vec2D      `xml:"-",desc:"total max size of children as laid out"`
+	HScroll   *ScrollBar `xml:"-",desc:"horizontal scroll bar, added to children if needed, or removed"`
+	VScroll   *ScrollBar `xml:"-",desc:"vertical scroll bar, added to children if needed, or removed"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -464,6 +485,142 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 }
 
+// final pass through children to finalize the layout, capturing original
+// positions and computing summary size stats
+func (ly *Layout) FinalizeLayout() {
+	ly.ChildSize = Vec2DZero
+	for _, c := range ly.Children {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
+			continue
+		}
+		gi.LayData.AllocPosOrig = gi.LayData.AllocPos
+		ly.ChildSize.SetMax(gi.LayData.AllocPos.Add(gi.LayData.AllocSize))
+	}
+}
+
+func (ly *Layout) SetHScroll() {
+	if ly.HScroll == nil {
+		ly.HScroll = ly.AddNewChildNamed(KiT_ScrollBar, "LayHScroll").(*ScrollBar)
+		ly.HScroll.Horiz = true
+		ly.HScroll.InitNode2D()
+		ly.HScroll.Style2D()
+	}
+	hs := ly.HScroll
+	hs.SetFixedHeight(units.NewValue(20, units.Px))
+	hs.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Px))
+	hs.Defaults()
+	hs.Min = 0.0
+	hs.Max = ly.ChildSize.X
+	hs.Step = ly.Style.Font.Size.Dots // step by lines
+	hs.PageStep = 10.0 * hs.Step      // todo: more dynamic
+	hs.SetThumbValue(ly.LayData.AllocSize.X)
+	// fmt.Printf("Setting up HScroll: max: %v  thumb: %v sz: %v\n", hs.Max, hs.ThumbVal, hs.ThumbSize)
+	hs.Tracking = true
+	hs.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		// ss, _ := send.(*ScrollBar)
+		// fmt.Printf("HScroll to %v\n", ss.Value)
+		ly.UpdateStart()
+		ly.UpdateEnd()
+	})
+	// hs.Layout2D(0)
+	// hs.Layout2D(1)
+	// hs.Render2D()
+}
+
+func (ly *Layout) DeleteHScroll() {
+	if ly.HScroll == nil {
+		return
+	}
+	ly.DeleteChild(ly.HScroll.This, true)
+	ly.HScroll = nil
+}
+
+func (ly *Layout) SetVScroll() {
+	if ly.VScroll == nil {
+		ly.VScroll = ly.AddNewChildNamed(KiT_ScrollBar, "LayVScroll").(*ScrollBar)
+		ly.VScroll.InitNode2D()
+		ly.VScroll.Style2D()
+	}
+	hs := ly.VScroll
+	hs.SetFixedWidth(units.NewValue(20, units.Px))
+	hs.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
+	hs.Defaults()
+	hs.Min = 0.0
+	hs.Max = ly.ChildSize.Y
+	hs.Step = ly.Style.Font.Size.Dots // step by lines
+	hs.PageStep = 10.0 * hs.Step      // todo: more dynamic
+	hs.SetThumbValue(ly.LayData.AllocSize.Y)
+	hs.Tracking = true
+	hs.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		// ss, _ := send.(*ScrollBar)
+		// fmt.Printf("VScroll to %v\n", ss.Value)
+		ly.UpdateStart()
+		ly.UpdateEnd()
+	})
+}
+
+func (ly *Layout) DeleteVScroll() {
+	if ly.VScroll == nil {
+		return
+	}
+	ly.DeleteChild(ly.VScroll.This, true)
+	ly.VScroll = nil
+}
+
+func (ly *Layout) ManageOverflow() {
+	lst := &ly.Style.Layout
+	if lst.Overflow == OverflowVisible {
+		return
+	}
+	if ly.ChildSize.X > ly.LayData.AllocSize.X { // overflowing
+		if lst.Overflow != OverflowHidden {
+			ly.SetHScroll()
+		}
+	} else {
+		ly.DeleteHScroll()
+	}
+	if ly.ChildSize.Y > ly.LayData.AllocSize.Y { // overflowing
+		if lst.Overflow != OverflowHidden {
+			ly.SetVScroll()
+		}
+	} else {
+		ly.DeleteVScroll()
+	}
+}
+
+// all child nodes call this during their Render2DCheck() -- if we return
+// false, child is not rendered -- we can also update the AllocPos of the
+// child based on scrolling
+func (ly *Layout) RenderChild(gi *Node2DBase) bool {
+	// always display our scrollbars!
+	if ly.HScroll != nil && gi.This == ly.HScroll.This {
+		return true
+	}
+	if ly.VScroll != nil && gi.This == ly.VScroll.This {
+		return true
+	}
+	if ly.Lay == LayoutStacked && ly.StackTop.Ptr != gi.This {
+		return false
+	}
+	gi.LayData.AllocPos = gi.LayData.AllocPosOrig
+	if ly.HScroll != nil {
+		off := ly.HScroll.Value
+		gi.LayData.AllocPos.X -= off
+	}
+	if ly.VScroll != nil {
+		off := ly.VScroll.Value
+		gi.LayData.AllocPos.Y -= off
+	}
+	gi.GeomFromLayout()
+	if !gi.WinBBox.Overlaps(ly.WinBBox) { // out of view
+		return false
+	}
+	// todo: need appropriate clipping at this point!  proably put our bbox in
+	// the laydata of all the children, and they clip using that?
+	return true
+}
+
 // convenience for LayoutStacked to show child node at a given index
 func (ly *Layout) ShowChildAtIndex(idx int) error {
 	ch, err := ly.KiChild(idx)
@@ -519,7 +676,9 @@ func (ly *Layout) Layout2D(iter int) {
 			ly.LayoutSingle(X)
 			ly.LayoutSingle(Y)
 		}
+		ly.FinalizeLayout()
 		ly.GeomFromLayout()
+		ly.ManageOverflow()
 	}
 	// todo: test if this is needed -- if there are any el-relative settings anyway
 	ly.Style.SetUnitContext(&ly.Viewport.Render, 0)
@@ -530,7 +689,7 @@ func (ly *Layout) Render2D() {
 }
 
 func (ly *Layout) CanReRender2D() bool {
-	return false
+	return true
 }
 
 func (ly *Layout) FocusChanged2D(gotFocus bool) {
@@ -540,7 +699,7 @@ func (ly *Layout) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Layout{}
 
 ///////////////////////////////////////////////////////////
-//    Frame -- generic container
+//    Frame -- generic container that is also a Layout
 
 // Frame is a basic container for widgets -- a layout that renders the
 // standard box model

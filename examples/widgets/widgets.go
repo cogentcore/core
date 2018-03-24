@@ -47,10 +47,13 @@ func mainrun() {
 	spc := vlay.AddNewChildNamed(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
+	row1.AddNewChildNamed(gi.KiT_Stretch, "str1")
 	lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
 	lab1.Text = "This is a demonstration of the various GoGi Widgets"
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("align-horiz", "hcenter")
+	lab1.SetProp("text-align", "center")
+	row1.AddNewChildNamed(gi.KiT_Stretch, "str2")
 
 	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
 	row2.Lay = gi.LayoutRow
@@ -110,6 +113,31 @@ func mainrun() {
 
 	slider2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+	})
+
+	scrollbar1 := row3.AddNewChildNamed(gi.KiT_ScrollBar, "scrollbar1").(*gi.ScrollBar)
+	scrollbar1.Horiz = true
+	scrollbar1.SetProp("width", "20em")
+	scrollbar1.SetFixedHeight(units.NewValue(20, units.Px))
+	scrollbar1.Defaults()
+	scrollbar1.SetThumbValue(0.25)
+	scrollbar1.SetValue(0.25)
+	// scrollbar1.Snap = true
+	scrollbar1.Tracking = true
+
+	scrollbar2 := row3.AddNewChildNamed(gi.KiT_ScrollBar, "scrollbar2").(*gi.ScrollBar)
+	scrollbar2.Horiz = false
+	scrollbar2.SetProp("height", "10em")
+	scrollbar2.Defaults()
+	scrollbar2.SetThumbValue(0.1)
+	scrollbar2.SetValue(0.5)
+
+	scrollbar1.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+	})
+
+	scrollbar2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
 	})
 
 	win.UpdateEnd()
