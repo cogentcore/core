@@ -60,6 +60,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* keep scrollbars out of children -- events should go fine b/c registered!  no prob!
+  just set parent -- new paradigm of field-based tree branches.. same for Controls
+
+* update increment threshold for scrollbar -- less frequent updates.
+
+* rename: sliders, buttons, NodeWidget -> TreeView, etc.
+  
 * fix scrolling issues per below, and look into scroll gestures, scrollwheel, etc.
 * tree view should work quite well -- put in a layout and test out..
 

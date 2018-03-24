@@ -15,26 +15,26 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  Node Widget
+//  TreeView -- a widget that graphically represents / manipulates a Ki Tree
 
 // signals that buttons can send
-type NodeWidgetSignals int64
+type TreeViewSignals int64
 
 const (
-	// node was selected -- data is the node widget
-	NodeSelected NodeWidgetSignals = iota
-	// node widget unselected
+	// node was selected -- data is the TreeView widget
+	NodeSelected TreeViewSignals = iota
+	// TreeView unselected
 	NodeUnselected
-	// collapsed node widget was opened
+	// collapsed TreeView was opened
 	NodeOpened
-	// open node widget was collapsed -- children not visible
+	// open TreeView was collapsed -- children not visible
 	NodeCollapsed
-	NodeWidgetSignalsN
+	TreeViewSignalsN
 )
 
-//go:generate stringer -type=NodeWidgetSignals
+//go:generate stringer -type=TreeViewSignals
 
-// these extend NodeBase NodeFlags to hold NodeWidget state
+// these extend NodeBase NodeFlags to hold TreeView state
 const (
 	// node is collapsed
 	NodeFlagCollapsed NodeFlags = NodeFlagsN + iota
@@ -49,43 +49,43 @@ const (
 )
 
 // mutually-exclusive button states -- determines appearance
-type NodeWidgetStates int32
+type TreeViewStates int32
 
 const (
 	// normal state -- there but not being interacted with
-	NodeWidgetNormalState NodeWidgetStates = iota
+	TreeViewNormalState TreeViewStates = iota
 	// selected
-	NodeWidgetSelState
+	TreeViewSelState
 	// in focus -- will respond to keyboard input
-	NodeWidgetFocusState
-	NodeWidgetStatesN
+	TreeViewFocusState
+	TreeViewStatesN
 )
 
-//go:generate stringer -type=NodeWidgetStates
+//go:generate stringer -type=TreeViewStates
 
-// NodeWidget represents one node in the tree -- fully recursive -- creates
+// TreeView represents one node in the tree -- fully recursive -- creates
 //  sub-nodes
-type NodeWidget struct {
+type TreeView struct {
 	WidgetBase
-	SrcNode       ki.Ptr                   `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	NodeWidgetSig ki.Signal                `json:"-",desc:"signal for node widget -- see NodeWidgetSignals for the types"`
-	StateStyles   [NodeWidgetStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize    Vec2D                    `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	RootWidget    *NodeWidget              `json:"-",desc:"cached root widget"`
+	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	TreeViewSig ki.Signal              `json:"-",desc:"signal for TreeView -- see TreeViewSignals for the types"`
+	StateStyles [TreeViewStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	RootWidget  *TreeView              `json:"-",desc:"cached root widget"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_NodeWidget = ki.Types.AddType(&NodeWidget{}, nil)
+var KiT_TreeView = ki.Types.AddType(&TreeView{}, nil)
 
 // todo: several functions require traversing tree -- this will require an
 // interface to allow others to implement different behavior -- for now just
-// explicitly checking for NodeWidget type
+// explicitly checking for TreeView type
 
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
 
 // set the source node that we are viewing
-func (g *NodeWidget) SetSrcNode(k ki.Ki) {
+func (g *TreeView) SetSrcNode(k ki.Ki) {
 	g.UpdateStart()
 	if len(g.Children) > 0 {
 		g.DeleteChildren(true) // todo: later deal with destroyed
@@ -103,7 +103,7 @@ func (g *NodeWidget) SetSrcNode(k ki.Ki) {
 	}
 	for i, kid := range kids {
 		vki, _ := g.KiChild(i)
-		vk, ok := vki.(*NodeWidget)
+		vk, ok := vki.(*TreeView)
 		if !ok {
 			continue // shouldn't happen
 		}
@@ -119,15 +119,15 @@ func SrcNodeSignal(nwki, send ki.Ki, sig int64, data interface{}) {
 }
 
 // return a list of the currently-selected source nodes
-func (g *NodeWidget) SelectedSrcNodes() ki.Slice {
+func (g *TreeView) SelectedSrcNodes() ki.Slice {
 	sn := make(ki.Slice, 0)
 	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_NodeWidget) {
-			nw := k.(*NodeWidget)
+		if k.IsType(KiT_TreeView) {
+			nw := k.(*TreeView)
 			sn = append(sn, nw.SrcNode.Ptr)
 			return true
 		} else {
@@ -137,16 +137,16 @@ func (g *NodeWidget) SelectedSrcNodes() ki.Slice {
 	return sn
 }
 
-// return a list of the currently-selected node widgets
-func (g *NodeWidget) SelectedNodeWidgets() []*NodeWidget {
-	sn := make([]*NodeWidget, 0)
+// return a list of the currently-selected TreeViews
+func (g *TreeView) SelectedTreeViews() []*TreeView {
+	sn := make([]*TreeView, 0)
 	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_NodeWidget) {
-			nw := k.(*NodeWidget)
+		if k.IsType(KiT_TreeView) {
+			nw := k.(*TreeView)
 			sn = append(sn, nw)
 			return true
 		} else {
@@ -159,16 +159,16 @@ func (g *NodeWidget) SelectedNodeWidgets() []*NodeWidget {
 //////////////////////////////////////////////////////////////////////////////
 //    Implementation
 
-// root node of NodeWidget tree -- several properties stored there
-func (g *NodeWidget) RootNodeWidget() *NodeWidget {
+// root node of TreeView tree -- several properties stored there
+func (g *TreeView) RootTreeView() *TreeView {
 	rn := g
 	g.FunUp(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
-		if k.IsType(KiT_NodeWidget) {
-			rn = k.(*NodeWidget)
+		if k.IsType(KiT_TreeView) {
+			rn = k.(*TreeView)
 			return true
 		} else {
 			return false
@@ -178,19 +178,19 @@ func (g *NodeWidget) RootNodeWidget() *NodeWidget {
 }
 
 // is this node itself collapsed?
-func (g *NodeWidget) IsCollapsed() bool {
+func (g *TreeView) IsCollapsed() bool {
 	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagCollapsed))
 }
 
 // does this node have a collapsed parent? if so, don't render!
-func (g *NodeWidget) HasCollapsedParent() bool {
+func (g *TreeView) HasCollapsedParent() bool {
 	pcol := false
 	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
-		if k.IsType(KiT_NodeWidget) {
+		if k.IsType(KiT_TreeView) {
 			if ki.HasBitFlag(pg.NodeFlags, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
@@ -202,11 +202,11 @@ func (g *NodeWidget) HasCollapsedParent() bool {
 }
 
 // is this node selected?
-func (g *NodeWidget) IsSelected() bool {
+func (g *TreeView) IsSelected() bool {
 	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagSelected))
 }
 
-func (g *NodeWidget) GetLabel() string {
+func (g *TreeView) GetLabel() string {
 	label := ""
 	if g.IsCollapsed() { // todo: temp hack
 		label = "> "
@@ -219,7 +219,7 @@ func (g *NodeWidget) GetLabel() string {
 
 // a select action has been received (e.g., a mouse click) -- translate into
 // selection updates
-func (g *NodeWidget) SelectNodeAction() {
+func (g *TreeView) SelectNodeAction() {
 	rn := g.RootWidget
 	if ki.HasBitFlag(rn.NodeFlags, int(NodeFlagExtendSelect)) {
 		if g.IsSelected() {
@@ -237,37 +237,37 @@ func (g *NodeWidget) SelectNodeAction() {
 	}
 }
 
-func (g *NodeWidget) SelectNode() {
+func (g *TreeView) SelectNode() {
 	if !g.IsSelected() {
 		g.UpdateStart()
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagSelected))
 		g.GrabFocus() // focus always follows select  todo: option
-		g.NodeWidgetSig.Emit(g.This, int64(NodeSelected), nil)
+		g.TreeViewSig.Emit(g.This, int64(NodeSelected), nil)
 		// fmt.Printf("selected node: %v\n", g.Name)
 		g.UpdateEndAll() // grab focus means allow kids to update too
 	}
 }
 
-func (g *NodeWidget) UnselectNode() {
+func (g *TreeView) UnselectNode() {
 	if g.IsSelected() {
 		g.UpdateStart()
 		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagSelected))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeUnselected), nil)
+		g.TreeViewSig.Emit(g.This, int64(NodeUnselected), nil)
 		// fmt.Printf("unselectednode: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
 
 // unselect everything below me -- call on Root to clear all
-func (g *NodeWidget) UnselectAll() {
+func (g *TreeView) UnselectAll() {
 	g.UpdateStart()
 	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_NodeWidget) {
-			nw := k.(*NodeWidget)
+		if k.IsType(KiT_TreeView) {
+			nw := k.(*TreeView)
 			nw.UnselectNode()
 			return true
 		} else {
@@ -278,43 +278,43 @@ func (g *NodeWidget) UnselectAll() {
 }
 
 // unselect everything below me -- call on Root to clear all
-func (g *NodeWidget) RootUnselectAll() {
+func (g *TreeView) RootUnselectAll() {
 	g.RootWidget.UnselectAll()
 }
 
-func (g *NodeWidget) CollapseNode() {
+func (g *TreeView) CollapseNode() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeCollapsed), nil)
+		g.TreeViewSig.Emit(g.This, int64(NodeCollapsed), nil)
 		// fmt.Printf("collapsed node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
 
-func (g *NodeWidget) OpenNode() {
+func (g *TreeView) OpenNode() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
 		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
-		g.NodeWidgetSig.Emit(g.This, int64(NodeOpened), nil)
+		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
 		// fmt.Printf("opened node: %v\n", g.Name)
 		g.UpdateEnd()
 	}
 }
 
-func (g *NodeWidget) SetContinuousSelect() {
+func (g *TreeView) SetContinuousSelect() {
 	rn := g.RootWidget
 	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
 }
 
-func (g *NodeWidget) SetExtendSelect() {
+func (g *TreeView) SetExtendSelect() {
 	rn := g.RootWidget
 	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
 }
 
-func (g *NodeWidget) ClearSelectMods() {
+func (g *TreeView) ClearSelectMods() {
 	rn := g.RootWidget
 	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
 	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
@@ -323,21 +323,21 @@ func (g *NodeWidget) ClearSelectMods() {
 ////////////////////////////////////////////////////
 // Node2D interface
 
-func (g *NodeWidget) AsNode2D() *Node2DBase {
+func (g *TreeView) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *NodeWidget) AsViewport2D() *Viewport2D {
+func (g *TreeView) AsViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *NodeWidget) AsLayout2D() *Layout {
+func (g *TreeView) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *NodeWidget) InitNode2D() {
+func (g *TreeView) InitNode2D() {
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		_, ok := recv.(*NodeWidget)
+		_, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
@@ -345,20 +345,20 @@ func (g *NodeWidget) InitNode2D() {
 	})
 	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
-		ab, ok := recv.(*NodeWidget)
+		ab, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
 		ab.SelectNodeAction()
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*NodeWidget)
+		ab, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
 		kt, ok := d.(KeyTypedEvent)
 		if ok {
-			// fmt.Printf("node widget key: %v\n", kt.Chord)
+			// fmt.Printf("TreeView key: %v\n", kt.Chord)
 			kf := KeyFun(kt.Key, kt.Chord)
 			switch kf {
 			case KeyFunSelectItem:
@@ -374,14 +374,14 @@ func (g *NodeWidget) InitNode2D() {
 		}
 	})
 	g.ReceiveEventType(KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*NodeWidget)
+		ab, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
 		kt, ok := d.(KeyDownEvent)
 		if ok {
 			kf := KeyFun(kt.Key, "")
-			// fmt.Printf("node widget key down: %v\n", kt.Key)
+			// fmt.Printf("TreeView key down: %v\n", kt.Key)
 			switch kf {
 			case KeyFunShift:
 				ab.SetContinuousSelect()
@@ -391,7 +391,7 @@ func (g *NodeWidget) InitNode2D() {
 		}
 	})
 	g.ReceiveEventType(KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*NodeWidget)
+		ab, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
@@ -399,7 +399,7 @@ func (g *NodeWidget) InitNode2D() {
 	})
 }
 
-var NodeWidgetProps = []map[string]interface{}{
+var TreeViewProps = []map[string]interface{}{
 	{
 		"border-width":  "0px",
 		"border-radius": "0px",
@@ -417,25 +417,25 @@ var NodeWidgetProps = []map[string]interface{}{
 	},
 }
 
-func (g *NodeWidget) Style2D() {
+func (g *TreeView) Style2D() {
 	// we can focus by default
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, NodeWidgetProps[0])
+	g.Style.SetStyle(nil, &StyleDefault, TreeViewProps[0])
 	// then style with user props
 	g.Style2DWidget()
 	// now get styles for the different states
-	for i := 0; i < int(NodeWidgetStatesN); i++ {
+	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i] = g.Style
-		g.StateStyles[i].SetStyle(nil, &StyleDefault, NodeWidgetProps[i])
+		g.StateStyles[i].SetStyle(nil, &StyleDefault, TreeViewProps[i])
 		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
-func (g *NodeWidget) Layout2D(iter int) {
+func (g *TreeView) Layout2D(iter int) {
 	if iter == 0 {
-		g.RootWidget = g.RootNodeWidget() // cache
+		g.RootWidget = g.RootTreeView() // cache
 
 		g.InitLayout2D()
 		st := &g.Style
@@ -489,20 +489,20 @@ func (g *NodeWidget) Layout2D(iter int) {
 	// are required
 	g.Style.SetUnitContext(&g.Viewport.Render, 0)
 	// now get styles for the different states
-	for i := 0; i < int(NodeWidgetStatesN); i++ {
+	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
 	}
 
 }
 
-func (g *NodeWidget) Node2DBBox() image.Rectangle {
+func (g *TreeView) Node2DBBox() image.Rectangle {
 	// we have unusual situation of bbox != alloc
 	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
 	ts := g.Paint.TransformPoint(g.WidgetSize.X, g.WidgetSize.Y)
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
-func (g *NodeWidget) Render2D() {
+func (g *TreeView) Render2D() {
 	// reset for next update
 	ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 
@@ -511,11 +511,11 @@ func (g *NodeWidget) Render2D() {
 	}
 
 	if g.IsSelected() {
-		g.Style = g.StateStyles[NodeWidgetSelState]
+		g.Style = g.StateStyles[TreeViewSelState]
 	} else if g.HasFocus() {
-		g.Style = g.StateStyles[NodeWidgetFocusState]
+		g.Style = g.StateStyles[TreeViewFocusState]
 	} else {
-		g.Style = g.StateStyles[NodeWidgetNormalState]
+		g.Style = g.StateStyles[TreeViewNormalState]
 	}
 
 	pc := &g.Paint
@@ -542,7 +542,7 @@ func (g *NodeWidget) Render2D() {
 	pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9)
 }
 
-func (g *NodeWidget) CanReRender2D() bool {
+func (g *TreeView) CanReRender2D() bool {
 	if ki.HasBitFlag(g.NodeFlags, int(NodeFlagFullReRender)) {
 		return false
 	} else {
@@ -550,7 +550,7 @@ func (g *NodeWidget) CanReRender2D() bool {
 	}
 }
 
-func (g *NodeWidget) FocusChanged2D(gotFocus bool) {
+func (g *TreeView) FocusChanged2D(gotFocus bool) {
 	// todo: good to somehow indicate focus
 	// Qt does it by changing the color of the little toggle widget!  sheesh!
 	g.UpdateStart()
@@ -558,7 +558,7 @@ func (g *NodeWidget) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
-var _ Node2D = &NodeWidget{}
+var _ Node2D = &TreeView{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Tab Widget
@@ -567,13 +567,13 @@ var _ Node2D = &NodeWidget{}
 type TabWidgetSignals int64
 
 const (
-	// node was selected -- data is the node widget
+	// node was selected -- data is the tab widget
 	TabSelected TabWidgetSignals = iota
-	// node widget unselected
+	// tab widget unselected
 	TabUnselected
-	// collapsed node widget was opened
+	// collapsed tab widget was opened
 	TabOpened
-	// open node widget was collapsed -- children not visible
+	// open tab widget was collapsed -- children not visible
 	TabCollapsed
 	TabWidgetSignalsN
 )

@@ -54,7 +54,7 @@ func mainrun() {
 	// rlay.SetProp("y", 10)
 	// rlay.SetProp("text-align", "center")
 
-	tv1 := vpfill.AddNewChildNamed(gi.KiT_NodeWidget, "tv1").(*gi.NodeWidget)
+	tv1 := vpfill.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
 	tv1.SetProp("x", 10)
 	tv1.SetProp("y", 10)
 	tv1.SetSrcNode(&srctree)
