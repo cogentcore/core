@@ -155,7 +155,7 @@ func (sig *Signal) Disconnect(recv Ki, fun RecvFun) bool {
 }
 
 // Disconnect all connections
-func (sig *Signal) DisconnectAll(recv Ki, fun RecvFun) {
+func (sig *Signal) DisconnectAll() {
 	sig.Cons = sig.Cons[:0]
 }
 

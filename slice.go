@@ -60,9 +60,10 @@ func (k *Slice) DeleteAtIndex(idx int) error {
 		return err
 	}
 	// this copy makes sure there are no memory leaks
+	sz := len(*k)
 	copy((*k)[idx:], (*k)[idx+1:])
-	(*k)[len(*k)-1] = nil
-	(*k) = (*k)[:len(*k)-1]
+	(*k)[sz-1] = nil
+	(*k) = (*k)[:sz-1]
 	return nil
 }
 
