@@ -61,12 +61,18 @@ https://golang.org/doc/effective_go.html#names
 	
 * Anonymous embedding a type at the start of a struct gives transparent access to the embedded types (and so on for the embedded types of that type), so it *looks* like inheritance in C++, but critically those inherited methods are *not* virtual in any way, and you must explicitly convert a given "derived" type into its base type -- you cannot do something like: `bt := derived.(*BaseType)` to get the base type from a derived object -- it will just complain that derived is its actual type, not a base type.  Although this seems like a really easy thing to fix in Go that would support derived types, it would require an expensive dynamic (runtime) traversal of the reflect type info.  I will provide that method just for emergencies, but it is much better to provide an explicit interface method to provide this access.  Or provide access to everything you might need via the interface, but just giving the base struct is typically much easier.
 
+## Closures & anonymous functions
+
+It is very convenient to use anonymous functions directly in the `FunDown` (etc) and `Signal Connect` cases, but for performance reasons, it is important to be careful about capturing local variables from the parent function, thereby creating a *closure*, which creates a local stack to represent those variables.  In the case of FunDown / FunUp etc, the impact is minimized because the function is ONLY used during the lifetime of the outer function.  However, for `Signal Connect`, the function is itself saved and used later, so using a closure there creates extra memory overhead for each time the connection is created.  Thus, it is generally better to avoid capturing local variables in such functions -- typically all the relevant info can be made available in the recv, send, sig, and data args for the connection function.
+
 # TODO
+
+THIS IS KEY: for allowing more inheritance
+* Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user
 
 * Test node deleting, destroying etc signals
 * XML IO
 * add SetField, FieldValue generic methods -- thin wrappers around reflect
 * SetFieldRecursive -- apply to all children, no problem if not found
 * FindChildRecursive functions
-* Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user
 * port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus

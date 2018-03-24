@@ -259,9 +259,9 @@ func (n *Node) SetChildType(t reflect.Type) error {
 // check if it is safe to add child -- it cannot be a parent of us -- prevent loops!
 func (n *Node) AddChildCheck(kid Ki) error {
 	var err error
-	n.FunUp(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FunUp(0, n, func(k Ki, level int, d interface{}) bool {
 		if k == kid {
-			err = fmt.Errorf("KiNode Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", n.PathUnique())
+			err = fmt.Errorf("KiNode Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", (d.(Ki)).PathUnique())
 			log.Printf("%v", err)
 			return false
 		}
@@ -667,19 +667,22 @@ func (n *Node) UpdateCtr() *AtomCtr {
 }
 
 func (n *Node) UpdateStart() {
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool { k.UpdateCtr().Inc(); return true })
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		k.UpdateCtr().Inc()
+		return true
+	})
 }
 
 func (n *Node) UpdateEnd() {
 	par_updt := false
 	n.FunDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
-		par_updt := d.(*bool)           // did the parent already update?
+		par_up := d.(*bool)             // did the parent already update?
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-			if k.KiParent() == nil || (!*par_updt && k.KiParent().UpdateCtr().Value() == 0) {
+			if k.KiParent() == nil || (!*par_up && k.KiParent().UpdateCtr().Value() == 0) {
 				k.UpdateCtr().Dec()
 				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), nil)
 				k.DestroyAllDeleted()
-				*par_updt = true // we updated so nobody else can!
+				*par_up = true // we updated so nobody else can!
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -752,7 +755,7 @@ func (n *Node) LoadJSON(b []byte) error {
 
 func (n *Node) SetPtrsFmPaths() {
 	root := n.This
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
 		v := reflect.ValueOf(k).Elem()
 		// fmt.Printf("v: %v\n", v.Type())
 		for i := 0; i < v.NumField(); i++ {
@@ -763,9 +766,10 @@ func (n *Node) SetPtrsFmPaths() {
 				if ok {
 					var pv Ki
 					if len(kp.Path) > 0 {
-						pv = root.FindPathUnique(kp.Path)
+						rt := d.(Ki)
+						pv = rt.FindPathUnique(kp.Path)
 						if pv == nil {
-							log.Printf("KiNode SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, root.KiName())
+							log.Printf("KiNode SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, rt.KiName())
 						}
 						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
 					}
