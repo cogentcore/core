@@ -162,44 +162,44 @@ func (g *Label) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Label{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// LineEdit
+// TextField
 
 // signals that buttons can send
-type LineEditSignals int64
+type TextFieldSignals int64
 
 const (
 	// main signal -- return was pressed and an edit was completed -- data is the text
-	LineEditDone LineEditSignals = iota
-	LineEditSignalsN
+	TextFieldDone TextFieldSignals = iota
+	TextFieldSignalsN
 )
 
-//go:generate stringer -type=LineEditSignals
+//go:generate stringer -type=TextFieldSignals
 
-// LineEdit is a widget for editing a line of text
-type LineEdit struct {
+// TextField is a widget for editing a line of text
+type TextField struct {
 	WidgetBase
-	Text        string    `xml:"text",desc:"the last saved value of the text string being edited"`
-	EditText    string    `xml:"-",desc:"the live text string being edited, with latest modifications"`
-	StartPos    int       `xml:"start-pos",desc:"starting display position in the string"`
-	EndPos      int       `xml:"end-pos",desc:"ending display position in the string"`
-	CursorPos   int       `xml:"cursor-pos",desc:"current cursor position"`
-	CharWidth   int       `xml:"char-width",desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectMode  bool      `xml:"select-mode",desc:"if true, select text as cursor moves"`
-	LineEditSig ki.Signal `json:"-",desc:"signal for line edit -- see LineEditSignals for the types"`
-	StateStyles [2]Style  `desc:"normal style and focus style"`
+	Text         string    `xml:"text",desc:"the last saved value of the text string being edited"`
+	EditText     string    `xml:"-",desc:"the live text string being edited, with latest modifications"`
+	StartPos     int       `xml:"start-pos",desc:"starting display position in the string"`
+	EndPos       int       `xml:"end-pos",desc:"ending display position in the string"`
+	CursorPos    int       `xml:"cursor-pos",desc:"current cursor position"`
+	CharWidth    int       `xml:"char-width",desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectMode   bool      `xml:"select-mode",desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal `json:"-",desc:"signal for line edit -- see TextFieldSignals for the types"`
+	StateStyles  [2]Style  `desc:"normal style and focus style"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_LineEdit = ki.Types.AddType(&LineEdit{}, nil)
+var KiT_TextField = ki.Types.AddType(&TextField{}, nil)
 
 // done editing: return key pressed or out of focus
-func (g *LineEdit) EditDone() {
+func (g *TextField) EditDone() {
 	g.Text = g.EditText
-	g.LineEditSig.Emit(g.This, int64(LineEditDone), g.Text)
+	g.TextFieldSig.Emit(g.This, int64(TextFieldDone), g.Text)
 }
 
 // abort editing -- revert to last saved text
-func (g *LineEdit) RevertEdit() {
+func (g *TextField) RevertEdit() {
 	g.UpdateStart()
 	g.EditText = g.Text
 	g.StartPos = 0
@@ -207,7 +207,7 @@ func (g *LineEdit) RevertEdit() {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorForward(steps int) {
+func (g *TextField) CursorForward(steps int) {
 	g.UpdateStart()
 	g.CursorPos += steps
 	if g.CursorPos > len(g.EditText) {
@@ -220,7 +220,7 @@ func (g *LineEdit) CursorForward(steps int) {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorBackward(steps int) {
+func (g *TextField) CursorBackward(steps int) {
 	g.UpdateStart()
 	// todo: select mode
 	g.CursorPos -= steps
@@ -234,7 +234,7 @@ func (g *LineEdit) CursorBackward(steps int) {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorStart() {
+func (g *TextField) CursorStart() {
 	g.UpdateStart()
 	// todo: select mode
 	g.CursorPos = 0
@@ -243,7 +243,7 @@ func (g *LineEdit) CursorStart() {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorEnd() {
+func (g *TextField) CursorEnd() {
 	g.UpdateStart()
 	g.CursorPos = len(g.EditText)
 	g.EndPos = len(g.EditText) // try -- display will adjust
@@ -251,7 +251,7 @@ func (g *LineEdit) CursorEnd() {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorBackspace(steps int) {
+func (g *TextField) CursorBackspace(steps int) {
 	if g.CursorPos < steps {
 		steps = g.CursorPos
 	}
@@ -264,7 +264,7 @@ func (g *LineEdit) CursorBackspace(steps int) {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) CursorDelete(steps int) {
+func (g *TextField) CursorDelete(steps int) {
 	if g.CursorPos+steps > len(g.EditText) {
 		steps = len(g.EditText) - g.CursorPos
 	}
@@ -276,7 +276,7 @@ func (g *LineEdit) CursorDelete(steps int) {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) InsertAtCursor(str string) {
+func (g *TextField) InsertAtCursor(str string) {
 	g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + str + g.EditText[g.CursorPos:]
 	g.EndPos += len(str)
@@ -284,7 +284,7 @@ func (g *LineEdit) InsertAtCursor(str string) {
 	g.UpdateEnd()
 }
 
-func (g *LineEdit) KeyInput(kt KeyTypedEvent) {
+func (g *TextField) KeyInput(kt KeyTypedEvent) {
 	kf := KeyFun(kt.Key, kt.Chord)
 	switch kf {
 	case KeyFunSelectItem:
@@ -311,7 +311,7 @@ func (g *LineEdit) KeyInput(kt KeyTypedEvent) {
 	}
 }
 
-func (g *LineEdit) PixelToCursor(pixOff float64) int {
+func (g *TextField) PixelToCursor(pixOff float64) int {
 	pc := &g.Paint
 	st := &g.Style
 
@@ -358,7 +358,7 @@ func (g *LineEdit) PixelToCursor(pixOff float64) int {
 	return g.StartPos + c
 }
 
-func (g *LineEdit) SetCursorFromPixel(pixOff float64) {
+func (g *TextField) SetCursorFromPixel(pixOff float64) {
 	g.UpdateStart()
 	g.CursorPos = g.PixelToCursor(pixOff)
 	g.UpdateEnd()
@@ -367,22 +367,22 @@ func (g *LineEdit) SetCursorFromPixel(pixOff float64) {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (g *LineEdit) AsNode2D() *Node2DBase {
+func (g *TextField) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
-func (g *LineEdit) AsViewport2D() *Viewport2D {
+func (g *TextField) AsViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *LineEdit) AsLayout2D() *Layout {
+func (g *TextField) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *LineEdit) InitNode2D() {
+func (g *TextField) InitNode2D() {
 	g.EditText = g.Text
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		le, ok := recv.(*LineEdit)
+		le, ok := recv.(*TextField)
 		if ok {
 			md, ok := d.(MouseDownEvent)
 			if ok {
@@ -395,7 +395,7 @@ func (g *LineEdit) InitNode2D() {
 		}
 	})
 	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		le, ok := recv.(*LineEdit)
+		le, ok := recv.(*TextField)
 		if ok {
 			kt, ok := d.(KeyTypedEvent)
 			if ok {
@@ -405,7 +405,7 @@ func (g *LineEdit) InitNode2D() {
 	})
 }
 
-var LineEditProps = [2]map[string]interface{}{
+var TextFieldProps = [2]map[string]interface{}{
 	{ // normal
 		"border-width":     "1px",
 		"border-color":     "black",
@@ -421,18 +421,18 @@ var LineEditProps = [2]map[string]interface{}{
 	},
 }
 
-func (g *LineEdit) Style2D() {
+func (g *TextField) Style2D() {
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, LineEditProps[0])
+	g.Style.SetStyle(nil, &StyleDefault, TextFieldProps[0])
 	// then style with user props
 	g.Style2DWidget()
 	g.StateStyles[0] = g.Style
 	g.StateStyles[1] = g.Style
-	g.StateStyles[1].SetStyle(nil, &StyleDefault, LineEditProps[1])
+	g.StateStyles[1].SetStyle(nil, &StyleDefault, TextFieldProps[1])
 }
 
-func (g *LineEdit) Layout2D(iter int) {
+func (g *TextField) Layout2D(iter int) {
 	if iter == 0 {
 		g.EditText = g.Text
 		g.EndPos = len(g.EditText)
@@ -458,11 +458,11 @@ func (g *LineEdit) Layout2D(iter int) {
 	g.StateStyles[1].SetUnitContext(&g.Viewport.Render, 0)
 }
 
-func (g *LineEdit) Node2DBBox() image.Rectangle {
+func (g *TextField) Node2DBBox() image.Rectangle {
 	return g.WinBBoxFromAlloc()
 }
 
-func (g *LineEdit) RenderCursor() {
+func (g *TextField) RenderCursor() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	st := &g.Style
@@ -481,7 +481,7 @@ func (g *LineEdit) RenderCursor() {
 }
 
 // scroll the starting position to keep the cursor visible
-func (g *LineEdit) AutoScroll() {
+func (g *TextField) AutoScroll() {
 	pc := &g.Paint
 	st := &g.Style
 
@@ -535,7 +535,7 @@ func (g *LineEdit) AutoScroll() {
 	}
 }
 
-func (g *LineEdit) Render2D() {
+func (g *TextField) Render2D() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	if g.HasFocus() {
@@ -564,11 +564,11 @@ func (g *LineEdit) Render2D() {
 	}
 }
 
-func (g *LineEdit) CanReRender2D() bool {
+func (g *TextField) CanReRender2D() bool {
 	return true
 }
 
-func (g *LineEdit) FocusChanged2D(gotFocus bool) {
+func (g *TextField) FocusChanged2D(gotFocus bool) {
 	g.UpdateStart()
 	if !gotFocus {
 		g.EditDone() // lose focus
@@ -577,7 +577,7 @@ func (g *LineEdit) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
-var _ Node2D = &LineEdit{}
+var _ Node2D = &TextField{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Buttons

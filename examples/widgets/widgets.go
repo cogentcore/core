@@ -61,7 +61,7 @@ func mainrun() {
 
 	button1 := row2.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
-	edit1 := row2.AddNewChildNamed(gi.KiT_LineEdit, "edit1").(*gi.LineEdit)
+	edit1 := row2.AddNewChildNamed(gi.KiT_TextField, "edit1").(*gi.TextField)
 
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
@@ -71,8 +71,8 @@ func mainrun() {
 	button2.Text = "Button 2"
 	button2.SetProp("align-vert", "inherit")
 
-	edit1.LineEditSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.LineEditSignals(sig), send.KiName(), data)
+	edit1.TextFieldSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.KiName(), data)
 	})
 
 	button1.ButtonSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {

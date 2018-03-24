@@ -68,7 +68,6 @@ doesn't make sense to have two.
 * Layout grid
 * WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
 
-* text enter box
 * double-click!
 
 * style parsing crash on font-family
@@ -80,6 +79,30 @@ Soon:
 * Reminder: grep all todo: in code -- lots!
 * svg box, viewport
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
+
+* Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
+	+ ScrollBar / ScrollArea
+	+ SplitView
+	+ Menu / MenuBar / MenuItem
+	+ ComboBox
+	+ SpinBox
+	+ RadioButton, CheckBox
+	+ Dialog -- either overlay or additional window -- platform dependent
+	+ Toolbar / ToolButton / Action
+	+ ProgressBar  (based on slider?)
+	+ ToolTip
+	+ TextArea
+
+### TO-DONE (ish)
+
+* Widgets
+	+ Button -- needs alt styling through children?
+	+ Slider -- pretty done
+	+ TextField -- needs selection / clipboard, constraints
+	+ TreeView (NodeWidget) -- needs controls, menu, updating, dnd, clip, -- see about LI, UL lists..
+	+ TabWidget -- needs updating
+	+ Label -- done -- could make lots of H1, etc alts
+
 
 ## 3D Design
 
