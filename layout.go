@@ -536,6 +536,9 @@ func (ly *Layout) SetHScroll() {
 	// fmt.Printf("Setting up HScroll: max: %v  thumb: %v sz: %v\n", sc.Max, sc.ThumbVal, sc.ThumbSize)
 	sc.Tracking = true
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		if sig != int64(SliderValueChanged) {
+			return
+		}
 		// ss, _ := send.(*ScrollBar)
 		// fmt.Printf("HScroll to %v\n", ss.Value)
 		li, _ := KiToNode2D(rec) // note: avoid using closures
@@ -543,6 +546,63 @@ func (ly *Layout) SetHScroll() {
 		ls.UpdateStart()
 		ls.UpdateEnd()
 	})
+}
+
+func (ly *Layout) DeleteHScroll() {
+	if ly.HScroll == nil {
+		return
+	}
+	// todo: disconnect from events, call pointer cut function on ki
+	sc := ly.HScroll
+	sc.DisconnectAllEvents()
+	sc.SliderSig.DisconnectAll()
+	sc.NodeSig.DisconnectAll()
+	sc.DestroyKi()
+	ly.HScroll = nil
+}
+
+func (ly *Layout) SetVScroll() {
+	if ly.VScroll == nil {
+		ly.VScroll = &ScrollBar{}
+		ly.VScroll.SetThisName(ly.VScroll, "Lay_VScroll")
+		ly.VScroll.SetParent(ly.This)
+		ly.VScroll.InitNode2D()
+		ly.VScroll.Defaults()
+	}
+	sc := ly.VScroll
+	sc.SetFixedWidth(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
+	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
+	sc.Style2D()
+	sc.Min = 0.0
+	sc.Max = ly.ChildSize.Y
+	sc.Step = ly.Style.Font.Size.Dots // step by lines
+	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
+	sc.ThumbVal = ly.LayData.AllocSize.Y
+	sc.Tracking = true
+	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		if sig != int64(SliderValueChanged) {
+			return
+		}
+		// ss, _ := send.(*ScrollBar)
+		// fmt.Printf("VScroll to %v\n", ss.Value)
+		li, _ := KiToNode2D(rec) // note: avoid using closures
+		ls := li.AsLayout2D()
+		ls.UpdateStart()
+		ls.UpdateEnd()
+	})
+}
+
+func (ly *Layout) DeleteVScroll() {
+	if ly.VScroll == nil {
+		return
+	}
+	// todo: disconnect from events, call pointer cut function on ki
+	sc := ly.VScroll
+	sc.DisconnectAllEvents()
+	sc.SliderSig.DisconnectAll()
+	sc.NodeSig.DisconnectAll()
+	sc.DestroyKi()
+	ly.VScroll = nil
 }
 
 func (ly *Layout) LayoutScrolls() {
@@ -578,50 +638,6 @@ func (ly *Layout) RenderScrolls() {
 	}
 }
 
-func (ly *Layout) DeleteHScroll() {
-	if ly.HScroll == nil {
-		return
-	}
-	// todo: disconnect from events, call pointer cut function on ki
-	ly.HScroll = nil
-}
-
-func (ly *Layout) SetVScroll() {
-	if ly.VScroll == nil {
-		ly.VScroll = &ScrollBar{}
-		ly.VScroll.SetThisName(ly.VScroll, "Lay_VScroll")
-		ly.VScroll.SetParent(ly.This)
-		ly.VScroll.InitNode2D()
-		ly.VScroll.Defaults()
-	}
-	sc := ly.VScroll
-	sc.SetFixedWidth(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
-	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
-	sc.Style2D()
-	sc.Min = 0.0
-	sc.Max = ly.ChildSize.Y
-	sc.Step = ly.Style.Font.Size.Dots // step by lines
-	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
-	sc.ThumbVal = ly.LayData.AllocSize.Y
-	sc.Tracking = true
-	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		// ss, _ := send.(*ScrollBar)
-		// fmt.Printf("VScroll to %v\n", ss.Value)
-		li, _ := KiToNode2D(rec) // note: avoid using closures
-		ls := li.AsLayout2D()
-		ls.UpdateStart()
-		ls.UpdateEnd()
-	})
-}
-
-func (ly *Layout) DeleteVScroll() {
-	if ly.VScroll == nil {
-		return
-	}
-	// todo: disconnect from events, call pointer cut function on ki
-	ly.VScroll = nil
-}
-
 func (ly *Layout) ManageOverflow() {
 	lst := &ly.Style.Layout
 	if lst.Overflow == OverflowVisible {
@@ -643,20 +659,26 @@ func (ly *Layout) ManageOverflow() {
 	}
 }
 
-// all child nodes call this during their Render2DCheck() -- if we return
-// false, child is not rendered -- we can also update the AllocPos of the
-// child based on scrolling
-func (ly *Layout) RenderChild(gi *Node2DBase) bool {
-	// always display our scrollbars!
-	if ly.HScroll != nil && gi.This == ly.HScroll.This {
-		return true
+// what happens if I redefine the same function?
+func (ly *Layout) Render2DChildren() {
+	if ly.Lay == LayoutStacked {
+		if ly.StackTop.Ptr == nil {
+			return
+		}
+		gii, _ := KiToNode2D(ly.StackTop.Ptr)
+		ly.Render2DChild(gii)
+		return
 	}
-	if ly.VScroll != nil && gi.This == ly.VScroll.This {
-		return true
+	for _, kid := range ly.Children {
+		gii, _ := KiToNode2D(kid)
+		if gii != nil {
+			ly.Render2DChild(gii)
+		}
 	}
-	if ly.Lay == LayoutStacked && ly.StackTop.Ptr != gi.This {
-		return false
-	}
+}
+
+func (ly *Layout) Render2DChild(gii Node2D) {
+	gi := gii.AsNode2D()
 	gi.LayData.AllocPos = gi.LayData.AllocPosOrig
 	if ly.HScroll != nil {
 		off := ly.HScroll.Value
@@ -668,11 +690,9 @@ func (ly *Layout) RenderChild(gi *Node2DBase) bool {
 	}
 	gi.GeomFromLayout()
 	if !gi.WinBBox.Overlaps(ly.WinBBox) { // out of view
-		return false
+		return
 	}
-	// todo: need appropriate clipping at this point!  proably put our bbox in
-	// the laydata of all the children, and they clip using that?
-	return true
+	gii.Render2D()
 }
 
 // convenience for LayoutStacked to show child node at a given index
@@ -741,7 +761,20 @@ func (ly *Layout) Layout2D(iter int) {
 }
 
 func (ly *Layout) Render2D() {
+	pc := &ly.Paint
+	st := &ly.Style
+	rs := &ly.Viewport.Render
+	es := ly.ExtraSize()
+	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+	sz := ly.LayData.AllocSize.Sub(es)
+
 	ly.RenderScrolls()
+
+	rs.PushClip() // save any current clipping
+	pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+	pc.Clip(rs)
+	ly.Render2DChildren()
+	rs.PopClip()
 }
 
 func (ly *Layout) CanReRender2D() bool {
@@ -890,6 +923,7 @@ func (g *Stretch) Node2DBBox() image.Rectangle {
 }
 
 func (g *Stretch) Render2D() {
+	g.Render2DChildren()
 }
 
 func (g *Stretch) CanReRender2D() bool {
@@ -944,6 +978,7 @@ func (g *Space) Node2DBBox() image.Rectangle {
 }
 
 func (g *Space) Render2D() {
+	g.Render2DChildren()
 }
 
 func (g *Space) CanReRender2D() bool {

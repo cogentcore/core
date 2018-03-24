@@ -141,6 +141,7 @@ func (g *Text2D) Render2D() {
 	} else {
 		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
 	}
+	g.Render2DChildren()
 }
 
 func (g *Text2D) CanReRender2D() bool {

@@ -319,8 +319,9 @@ func (g *Button) Render2D() {
 		g.Render2DDefaultStyle()
 	} else {
 		// todo: manage stacked layout to select appropriate image based on state
-		return
+		// return
 	}
+	g.Render2DChildren()
 }
 
 // render using a default style if not otherwise styled

@@ -5,7 +5,7 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "golang.org/x/image/font"
 	"image"
@@ -143,7 +143,7 @@ func (vp *Viewport2D) Node2DBBox() image.Rectangle {
 	return vp.ViewBox.Bounds()
 }
 
-func (vp *Viewport2D) Render2D() {
+func (vp *Viewport2D) RenderViewport2D() {
 	if vp.Viewport != nil {
 		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)
@@ -152,12 +152,20 @@ func (vp *Viewport2D) Render2D() {
 	}
 }
 
+func (vp *Viewport2D) Render2D() {
+	vp.Render2DChildren() // we must do children first, then us!
+	vp.RenderViewport2D() // update our parent image
+}
+
 func (vp *Viewport2D) CanReRender2D() bool {
 	return true // always true for viewports
 }
 
 func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
 }
+
+// check for interface implementation
+var _ Node2D = &Viewport2D{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
@@ -172,11 +180,11 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
-	gii, gi := KiToNode2D(node)
+	gii, _ := KiToNode2D(node)
 	if gii == nil { // should not happen
 		return
 	}
-	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.SignalType(sig), node.PathUnique())
+	fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	// todo: probably need better ways of telling how much re-rendering is needed
 	if sig == int64(ki.NodeSignalChildAdded) {
@@ -185,11 +193,11 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		vp.Render2DRoot()
 	} else {
 		if gii.CanReRender2D() {
-			vp.Render2DFromNode(gi)
-			vp.Render2D() // redraw us
+			vp.Render2DFromNode(gii)
+			vp.RenderViewport2D() // redraw us
 		} else {
-			vp.Style2DFromNode(gi) // restyle only from affected node downward
-			vp.ReRender2DRoot()    // need to re-render entirely..
+			vp.Style2DFromNode(gii) // restyle only from affected node downward
+			vp.ReRender2DRoot()     // need to re-render entirely..
 		}
 	}
 }
@@ -226,21 +234,22 @@ func (vp *Viewport2D) ReRender2DRoot() {
 
 // do the styling -- only from root
 func (vp *Viewport2D) Style2DRoot() {
-	vp.Style2DFromNode(&vp.Node2DBase)
+	vp.Style2DFromNode(vp.This.(Node2D))
 }
 
 // do the layout pass from root
 func (vp *Viewport2D) Layout2DRoot() {
-	vp.Layout2DFromNode(&vp.Node2DBase)
+	vp.Layout2DFromNode(vp.This.(Node2D))
 }
 
 // do the render from root
 func (vp *Viewport2D) Render2DRoot() {
-	vp.Render2DFromNode(&vp.Node2DBase)
+	vp.Render2DFromNode(vp.This.(Node2D))
 }
 
 // this only needs to be done on a structural update
-func (vp *Viewport2D) Style2DFromNode(gn *Node2DBase) {
+func (vp *Viewport2D) Style2DFromNode(gni Node2D) {
+	gn := gni.AsNode2D()
 	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
@@ -251,28 +260,21 @@ func (vp *Viewport2D) Style2DFromNode(gn *Node2DBase) {
 	})
 }
 
-// do the layout pass in 2 iterations
-func (vp *Viewport2D) Layout2DFromNode(gn *Node2DBase) {
-	// todo: support multiple iterations if necc
-
+// do the layout pass in 2 iterations, first depth-first, then me-first
+func (vp *Viewport2D) Layout2DFromNode(gni Node2D) {
+	gn := gni.AsNode2D()
 	// layout happens in depth-first manner -- requires two functions
 	gn.FunDownDepthFirst(0, vp,
 		func(k ki.Ki, level int, d interface{}) bool { // this is for testing whether to process node
 			_, gi := KiToNode2D(k)
-			if gi == nil {
-				return false
-			}
-			if gi.Paint.Off { // off below this
+			if gi == nil || gi.Paint.Off {
 				return false
 			}
 			return true
 		},
 		func(k ki.Ki, level int, d interface{}) bool {
 			gii, gi := KiToNode2D(k)
-			if gi == nil {
-				return false
-			}
-			if gi.Paint.Off { // off below this
+			if gi == nil || gi.Paint.Off {
 				return false
 			}
 			gii.Layout2D(0)
@@ -283,10 +285,7 @@ func (vp *Viewport2D) Layout2DFromNode(gn *Node2DBase) {
 	// render b/c then it doesn't work for local re-renders..
 	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if gi.Paint.Off { // off below this
+		if gi == nil || gi.Paint.Off {
 			return false
 		}
 		gii.Layout2D(1) // todo: check for multiple iterations needed..
@@ -295,37 +294,11 @@ func (vp *Viewport2D) Layout2DFromNode(gn *Node2DBase) {
 
 }
 
-// do the render pass -- two iterations required (may need more later) --
-// first does all non-viewports, and second does all viewports, which must
-// come after all rendering done in them -- could add iter to method if
-// viewport actually needs to be called in first render pass??
-func (vp *Viewport2D) Render2DFromNode(gn *Node2DBase) {
-	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if gii.AsViewport2D() != nil { // skip viewports on first pass
-			return true
-		}
-		if !gi.Render2DCheck() { // off below this
-			return false
-		}
-		gii.Render2D()
-		return true
-	})
-	// second pass ONLY process viewports
-	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if gii.AsViewport2D() == nil { // skip NON viewports on second pass
-			return true
-		}
-		gii.Render2D()
-		return true
-	})
+// render just calls on parent node and it takes full responsibility for
+// managing the children -- this allows maximum flexibility for order etc of
+// rendering
+func (vp *Viewport2D) Render2DFromNode(gni Node2D) {
+	gni.Render2D()
 }
 
 // SavePNG encodes the image as a PNG and writes it to disk.

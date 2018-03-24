@@ -149,6 +149,7 @@ func (g *Label) Render2D() {
 	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
+	g.Render2DChildren()
 }
 
 func (g *Label) CanReRender2D() bool {
@@ -563,6 +564,7 @@ func (g *TextField) Render2D() {
 	if g.HasFocus() {
 		g.RenderCursor()
 	}
+	g.Render2DChildren()
 }
 
 func (g *TextField) CanReRender2D() bool {

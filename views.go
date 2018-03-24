@@ -537,6 +537,8 @@ func (g *TreeView) Render2D() {
 	// fmt.Printf("rendering: %v\n", label)
 
 	pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9)
+
+	g.Render2DChildren()
 }
 
 func (g *TreeView) CanReRender2D() bool {
@@ -795,6 +797,7 @@ func (g *TabWidget) Node2DBBox() image.Rectangle {
 }
 
 func (g *TabWidget) Render2D() {
+	g.Render2DChildren()
 }
 
 func (g *TabWidget) CanReRender2D() bool {

@@ -97,6 +97,13 @@ func (w *Window) ReceiveEventType(recv ki.Ki, et EventType, fun ki.RecvFun) {
 	w.EventSigs[et].Connect(recv, fun)
 }
 
+// disconnect node from all signals
+func (w *Window) DisconnectNode(recv ki.Ki) {
+	for _, es := range w.EventSigs {
+		es.Disconnect(recv, nil)
+	}
+}
+
 // tell the event loop to stop running
 func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true

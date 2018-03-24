@@ -55,13 +55,19 @@ func (g *NodeBase) ParentWindow() *Window {
 	return wini.(*Window)
 }
 
-// todo: stop receiving events function..
-
 // register this node to receive a given type of GUI event signal from the parent window
 func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
 	win := g.ParentWindow()
 	if win != nil {
 		win.ReceiveEventType(g.This, et, fun)
+	}
+}
+
+// disconnect node from all eventts
+func (g *NodeBase) DisconnectAllEvents() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.DisconnectNode(g.This)
 	}
 }
 

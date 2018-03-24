@@ -72,6 +72,7 @@ func (g *Rect) Render2D() {
 		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
 	}
 	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
 }
 
 func (g *Rect) CanReRender2D() bool {
@@ -171,6 +172,7 @@ func (g *Circle) AsLayout2D() *Layout {
 }
 
 func (g *Circle) InitNode2D() {
+	g.InitNode2DBase()
 }
 
 func (g *Circle) Style2D() {
@@ -198,6 +200,7 @@ func (g *Circle) Render2D() {
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
 }
 
 func (g *Circle) CanReRender2D() bool {
@@ -264,6 +267,7 @@ func (g *Ellipse) Render2D() {
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
 }
 
 func (g *Ellipse) CanReRender2D() bool {
@@ -329,6 +333,7 @@ func (g *Line) Render2D() {
 	g.SetWinBBox(g.Node2DBBox())
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
+	g.Render2DChildren()
 }
 
 func (g *Line) CanReRender2D() bool {
@@ -396,6 +401,7 @@ func (g *Polyline) Render2D() {
 	}
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
 }
 
 func (g *Polyline) CanReRender2D() bool {
@@ -463,6 +469,7 @@ func (g *Polygon) Render2D() {
 	}
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
 }
 
 func (g *Polygon) CanReRender2D() bool {

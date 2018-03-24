@@ -154,8 +154,32 @@ type RenderState struct {
 	Start      Vec2D
 	Current    Vec2D
 	HasCurrent bool
-	Image      *image.RGBA // pointer to image to render into
-	Mask       *image.Alpha
+	Image      *image.RGBA    // pointer to image to render into
+	Mask       *image.Alpha   // current mask
+	ClipStack  []*image.Alpha // stack of clips -- layouts push and pop these so children don't exceed bounds
+}
+
+// push current Mask onto the clip stack
+func (rs *RenderState) PushClip() {
+	if rs.Mask == nil {
+		return
+	}
+	if rs.ClipStack == nil {
+		rs.ClipStack = make([]*image.Alpha, 0, 10)
+	}
+	rs.ClipStack = append(rs.ClipStack, rs.Mask)
+}
+
+// pop Mask off the clip stack and set to current mask
+func (rs *RenderState) PopClip() {
+	if rs.ClipStack == nil || len(rs.ClipStack) == 0 {
+		rs.Mask = nil // implied
+		return
+	}
+	sz := len(rs.ClipStack)
+	rs.Mask = rs.ClipStack[sz-1]
+	rs.ClipStack[sz-1] = nil
+	rs.ClipStack = rs.ClipStack[:sz-1]
 }
 
 //////////////////////////////////////////////////////////////////////////////////

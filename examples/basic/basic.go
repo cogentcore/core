@@ -9,12 +9,6 @@ import (
 	"github.com/rcoreilly/goki/gi"
 	_ "github.com/rcoreilly/goki/gi/init"
 	// "math/rand"
-	// "reflect"
-	// "runtime"
-	// "sync"
-	// "time"
-	// "image"
-	// "image/draw"
 )
 
 func main() {
@@ -77,7 +71,7 @@ func mainrun() {
 	rlay.SetProp("x", 10)
 	rlay.SetProp("y", 500)
 	rlay.SetProp("text-align", "center")
-	edit1 := rlay.AddNewChildNamed(gi.KiT_LineEdit, "edit1").(*gi.LineEdit)
+	edit1 := rlay.AddNewChildNamed(gi.KiT_TextField, "edit1").(*gi.TextField)
 	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
 	slider1 := rlay.AddNewChildNamed(gi.KiT_Slider, "slider1").(*gi.Slider)

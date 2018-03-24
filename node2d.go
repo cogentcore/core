@@ -46,7 +46,7 @@ type Node2D interface {
 	AsViewport2D() *Viewport2D
 	// if this is a Layout-derived node, get it as Layout, else return nil
 	AsLayout2D() *Layout
-	// initialize a node -- setup connections etc -- before this call, InitNodeBase is called to set basic inits including setting Viewport and connecting node signal to parent vp -- must be robust to being called repeatedly
+	// initialize a node -- setup event receiving connections etc -- must call InitNodeBase as first step set basic inits including setting Viewport and connecting node signal to parent vp -- all code here must be robust to being called repeatedly
 	InitNode2D()
 	// In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style)
 	Style2D()
@@ -54,7 +54,7 @@ type Node2D interface {
 	Layout2D(iter int)
 	// get the bounding box of this node relative to its parent viewport -- used in computing WinBBox, must be called during Render
 	Node2DBBox() image.Rectangle
-	// Render2D: Final MeFirst rendering pass -- individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
+	// Render2D: Final rendering pass, each node is fully responsible for rendering its own children, to provide maximum flexibility (see Render2DChildren) -- individual nodes can optionally re-render directly depending on their type, without requiring a full re-render.
 	Render2D()
 	// Can this node re-render itself directly using cached data?  only for nodes that paint an opaque background first (e.g., widgets) -- optimizes local redraw when possible -- always true for sub-viewports
 	CanReRender2D() bool
@@ -234,18 +234,12 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 	g.SetProp("max-height", val)
 }
 
-// check if this node (and everything under it) should render -- checks
-// Paint.Off and also Layout.LayoutStacked for StackTop
-func (g *Node2DBase) Render2DCheck() bool {
-	if g.Paint.Off {
-		return false
-	}
-	pgi, _ := KiToNode2D(g.Parent)
-	if pgi != nil {
-		lp := pgi.AsLayout2D()
-		if lp != nil {
-			return lp.RenderChild(g)
+// call this to render all of node's children -- default call at end of Render2D()
+func (g *Node2DBase) Render2DChildren() {
+	for _, kid := range g.Children {
+		gii, _ := KiToNode2D(kid)
+		if gii != nil {
+			gii.Render2D()
 		}
 	}
-	return true
 }

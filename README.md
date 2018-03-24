@@ -60,6 +60,10 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* clip size off in layouts demo for frame
+* when nodes redraw on their own, they need to reinstate the clip somehow.. hmm.  find parent layout?
+* exclude lower right corner for scrollbars
+
 * set clipping: parent layout sets clipping zone data in child LayData
   (excluding scrollbars) and generic function to set clipping to that if non-zero
   GetGeomFromLayout etc auto-inherits the clip region all the way down
