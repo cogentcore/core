@@ -5,6 +5,7 @@
 package gi
 
 import (
+	// "fmt"
 	"image"
 	"image/color"
 
@@ -125,11 +126,12 @@ type serverPainter struct {
 	im   *image.RGBA
 	mask *image.Alpha
 	p    PaintServer
+	bnd  image.Rectangle
 }
 
 // Paint satisfies the Painter interface.
 func (r *serverPainter) Paint(ss []raster.Span, done bool) {
-	b := r.im.Bounds()
+	b := r.bnd //r.im.Bounds()
 	for _, s := range ss {
 		if s.Y < b.Min.Y {
 			continue
@@ -175,6 +177,11 @@ func (r *serverPainter) Paint(ss []raster.Span, done bool) {
 	}
 }
 
-func newPaintServerPainter(im *image.RGBA, mask *image.Alpha, p PaintServer) *serverPainter {
-	return &serverPainter{im, mask, p}
+func newPaintServerPainter(im *image.RGBA, mask *image.Alpha, p PaintServer, bnd image.Rectangle) *serverPainter {
+	if bnd.Empty() {
+		bnd = im.Bounds()
+		// } else {
+		// 	fmt.Printf("using bounds: %v\n", bnd)
+	}
+	return &serverPainter{im, mask, p, bnd}
 }

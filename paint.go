@@ -149,14 +149,16 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 
 // The RenderState holds all the current rendering state information used while painting -- a viewport just has one of these
 type RenderState struct {
-	StrokePath raster.Path
-	FillPath   raster.Path
-	Start      Vec2D
-	Current    Vec2D
-	HasCurrent bool
-	Image      *image.RGBA    // pointer to image to render into
-	Mask       *image.Alpha   // current mask
-	ClipStack  []*image.Alpha // stack of clips -- layouts push and pop these so children don't exceed bounds
+	StrokePath  raster.Path
+	FillPath    raster.Path
+	Start       Vec2D
+	Current     Vec2D
+	HasCurrent  bool
+	Image       *image.RGBA       // pointer to image to render into
+	Mask        *image.Alpha      // current mask
+	Bounds      image.Rectangle   // special boundaries to restrict drawing to -- much faster than clip
+	ClipStack   []*image.Alpha    // stack of clips -- layouts push and pop these so children don't exceed bounds
+	BoundsStack []image.Rectangle // stack of bounds -- layouts push and pop these so children don't exceed bounds
 }
 
 // push current Mask onto the clip stack
@@ -180,6 +182,25 @@ func (rs *RenderState) PopClip() {
 	rs.Mask = rs.ClipStack[sz-1]
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]
+}
+
+// push current bounds onto stack
+func (rs *RenderState) PushBounds() {
+	if rs.BoundsStack == nil {
+		rs.BoundsStack = make([]image.Rectangle, 0, 10)
+	}
+	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
+}
+
+// pop Mask off the bounds stack and set to current bounds
+func (rs *RenderState) PopBounds() {
+	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
+		rs.Bounds = rs.Image.Bounds()
+		return
+	}
+	sz := len(rs.BoundsStack)
+	rs.Bounds = rs.BoundsStack[sz-1]
+	rs.BoundsStack = rs.BoundsStack[:sz-1]
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +397,7 @@ func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Paint) StrokePreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server)
+	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server, rs.Bounds)
 	pc.stroke(rs, painter)
 }
 
@@ -391,7 +412,7 @@ func (pc *Paint) Stroke(rs *RenderState) {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicity closed. The path is preserved after this operation.
 func (pc *Paint) FillPreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server)
+	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server, rs.Bounds)
 	pc.fill(rs, painter)
 }
 

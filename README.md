@@ -60,22 +60,22 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* clip size off in layouts demo for frame
-* when nodes redraw on their own, they need to reinstate the clip somehow.. hmm.  find parent layout?
-* exclude lower right corner for scrollbars
+* Rendering with a clip mask in place is DRAMATICALLY slower.  Need to use a diff solution for keeping stuff from rendering outside the box. 
 
-* set clipping: parent layout sets clipping zone data in child LayData
-  (excluding scrollbars) and generic function to set clipping to that if non-zero
-  GetGeomFromLayout etc auto-inherits the clip region all the way down
-  
-* also getting some capture from vertical scrollbar onto other buttons -- check window dragging code
+In paintserver.go, this seems to be it:
 
-* need disconnection code in ki and a new interface fun to disconnect from events
+			ma := s.Alpha
+			if r.mask != nil {
+				ma = ma * uint32(r.mask.AlphaAt(x, y).A) / 255
+				if ma == 0 {
+					continue
+				}
+			}
 
-* keep scrollbars out of children -- events should go fine b/c registered!  no prob!
-  just set parent -- new paradigm of field-based tree branches.. same for Controls
+really not clear how that ends up being so slow.  another soln is to just add extra bounds.
 
-* update increment threshold for scrollbar -- less frequent updates.
+
+* need disconnection code in ki 
 
 * fix scrolling issues per below, and look into scroll gestures, scrollwheel, etc.
 * tree view should work quite well -- put in a layout and test out..
@@ -121,7 +121,9 @@ Soon:
 	+ TreeView (NodeWidget) -- needs controls, menu, updating, dnd, clip, -- see about LI, UL lists..
 	+ TabWidget -- needs updating
 	+ Label -- done -- could make lots of H1, etc alts
-	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- the key impl is to change the parent offset depending on scroll position, and then to use WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient!  all working except perhaps too much re-rendering -- some kind of delta test on scrollbar emit values -- and vertical bar is not showing up in right place -- and not really sure why horiz is showing up where it is anyway.  Uses the overflow css setting -- auto is default.
+	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient!  Except clipping seems a bit slow.
+
+* update increment threshold for scrollbar -- less frequent updates.
 
 
 ## 3D Design

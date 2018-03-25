@@ -29,10 +29,11 @@ Rendering is done in 3 separate passes:
 */
 type Node2DBase struct {
 	NodeBase
-	Style    Style       `desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	Paint    Paint       `json:"-",desc:"full paint information for this node"`
-	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
-	LayData  LayoutData  `desc:"all the layout information for this item"`
+	Style    Style           `desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	Paint    Paint           `json:"-",desc:"full paint information for this node"`
+	Viewport *Viewport2D     `json:"-",desc:"our viewport -- set in InitNode2D (Base typically) and used thereafter"`
+	Bounds   image.Rectangle `json:"-",desc:"Clipping boundary region that was active when this item was last rendered -- restored when this is the top-level re-render"`
+	LayData  LayoutData      `desc:"all the layout information for this item"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json

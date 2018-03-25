@@ -9,6 +9,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"math"
+	// "time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -63,6 +64,7 @@ type SliderBase struct {
 	Step        float64              `xml:"step",desc:"smallest step size to increment"`
 	PageStep    float64              `xml:"step",desc:"larger PageUp / Dn step size"`
 	Value       float64              `xml:"value",desc:"current value"`
+	EmitValue   float64              `xml:"value",desc:"previous emitted value - don't re-emit if it is the same"`
 	Size        float64              `xml:"size",desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
 	ThumbSize   float64              `xml:"thumb-size",desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
@@ -103,6 +105,7 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 // set the slider in the down state -- mouse clicked down but not yet up --
 // emits SliderPressed signal
 func (g *SliderBase) SliderPressed(pos float64) {
+	g.EmitValue = g.Min - 1.0 // invalid value
 	g.UpdateStart()
 	g.SetSliderState(SliderDown)
 	g.SetSliderPos(pos)
@@ -118,8 +121,9 @@ func (g *SliderBase) SliderReleased() {
 	g.UpdateStart()
 	g.SetSliderState(SliderNormal)
 	g.SliderSig.Emit(g.This, int64(SliderReleased), g.Value)
-	if wasPressed {
+	if wasPressed && g.Value != g.EmitValue {
 		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
+		g.EmitValue = g.Value
 	}
 	g.UpdateEnd()
 }
@@ -177,8 +181,9 @@ func (g *SliderBase) SetSliderPos(pos float64) {
 		g.SnapValue()
 		g.UpdatePosFromValue()
 	}
-	if g.Tracking {
+	if g.Tracking && g.Value != g.EmitValue {
 		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
+		g.EmitValue = g.Value
 	}
 	g.UpdateEnd()
 }

@@ -256,7 +256,7 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 func (ly *Layout) ExtraSize() Vec2D {
 	lst := &ly.Style.Layout
 	var es Vec2D
-	es.SetVal(2.0 * lst.Margin.Dots)
+	es.SetVal(2.0*lst.Margin.Dots + 2.0*ly.Style.Border.Width.Dots)
 	if ly.HScroll != nil {
 		es.Y += lst.ScrollBarWidth.Dots
 	}
@@ -355,7 +355,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz
 		stretchNeed = true // stretch relative to need
 	}
 
-	pos = 0.0
+	pos = ly.Style.Layout.Margin.Dots
 	size = need
 	if usePref {
 		size = pref
@@ -365,13 +365,11 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz
 	} else {
 		switch al {
 		case AlignLeft:
-			pos = 0.0
 		case AlignHCenter:
-			pos = 0.5 * extra
+			pos += 0.5 * extra
 		case AlignRight:
-			pos = extra
+			pos += extra
 		case AlignHJustify: // treat justify as stretch!
-			pos = 0.0
 			size += extra
 		}
 	}
@@ -614,6 +612,9 @@ func (ly *Layout) LayoutScrolls() {
 		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sw
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
+		if ly.VScroll != nil { // make room for V
+			sc.LayData.AllocSize.X -= sw
+		}
 		sc.LayData.AllocSize.Y = sw
 		sc.Layout2D(1)
 	}
@@ -624,6 +625,9 @@ func (ly *Layout) LayoutScrolls() {
 		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
+		if ly.HScroll != nil { // make room for H
+			sc.LayData.AllocSize.Y -= sw
+		}
 		sc.LayData.AllocSize.X = sw
 		sc.Layout2D(1)
 	}
@@ -659,7 +663,7 @@ func (ly *Layout) ManageOverflow() {
 	}
 }
 
-// what happens if I redefine the same function?
+// render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {
 		if ly.StackTop.Ptr == nil {
@@ -692,6 +696,7 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 	if !gi.WinBBox.Overlaps(ly.WinBBox) { // out of view
 		return
 	}
+	gi.Bounds = gi.Viewport.Render.Bounds // save mask for if they are re-rendered later
 	gii.Render2D()
 }
 
@@ -761,20 +766,22 @@ func (ly *Layout) Layout2D(iter int) {
 }
 
 func (ly *Layout) Render2D() {
-	pc := &ly.Paint
+	// fmt.Printf("lay render %v\n", ly.Name)
+	// pc := &ly.Paint
 	st := &ly.Style
 	rs := &ly.Viewport.Render
 	es := ly.ExtraSize()
-	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots) //.AddVal(st.Border.Width.Dots)
 	sz := ly.LayData.AllocSize.Sub(es)
 
 	ly.RenderScrolls()
 
-	rs.PushClip() // save any current clipping
-	pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-	pc.Clip(rs)
+	rs.PushBounds() // save any current bounds
+	rs.Bounds = image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
+	// pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+	// pc.Clip(rs)
 	ly.Render2DChildren()
-	rs.PopClip()
+	rs.PopBounds()
 }
 
 func (ly *Layout) CanReRender2D() bool {

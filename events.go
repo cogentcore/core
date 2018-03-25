@@ -8,6 +8,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	// "fmt"
+	"time"
 )
 
 /*
@@ -86,10 +87,14 @@ type Event interface {
 	EventPos() image.Point
 	// does the event operate only on focus item (e.g., keyboard events)
 	EventOnFocus() bool
+	// time at which the event was generated
+	EventTime() time.Time
 }
 
 // base type for events -- todo: not quite sure what the function of this is
-type EventBase int
+type EventBase struct {
+	Time time.Time
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Mouse Events
@@ -124,6 +129,10 @@ func (ev MouseMovedEvent) EventOnFocus() bool {
 	return false
 }
 
+func (ev MouseMovedEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 // check for interface implementation
 var _ Event = MouseMovedEvent{}
 
@@ -154,6 +163,10 @@ func (ev MouseDownEvent) EventOnFocus() bool {
 	return false
 }
 
+func (ev MouseDownEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 // MouseUpEvent is for when the mouse is unclicked within the window.
 type MouseUpEvent MouseButtonEvent
 
@@ -171,6 +184,10 @@ func (ev MouseUpEvent) EventPos() image.Point {
 
 func (ev MouseUpEvent) EventOnFocus() bool {
 	return false
+}
+
+func (ev MouseUpEvent) EventTime() time.Time {
+	return ev.Time
 }
 
 ////////////////////////////////////////////
@@ -191,6 +208,10 @@ func (ev MouseDraggedEvent) EventHasPos() bool {
 
 func (ev MouseDraggedEvent) EventPos() image.Point {
 	return ev.Where
+}
+
+func (ev MouseDraggedEvent) EventTime() time.Time {
+	return ev.Time
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +247,10 @@ func (ev MagnifyEvent) EventOnFocus() bool {
 	return false
 }
 
+func (ev MagnifyEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 ////////////////////////////////////////////
 
 // RotateEvent is used to represent a rotation gesture.
@@ -248,6 +273,10 @@ func (ev RotateEvent) EventPos() image.Point {
 
 func (ev RotateEvent) EventOnFocus() bool {
 	return false
+}
+
+func (ev RotateEvent) EventTime() time.Time {
+	return ev.Time
 }
 
 ////////////////////////////////////////////
@@ -274,11 +303,16 @@ func (ev ScrollEvent) EventOnFocus() bool {
 	return false
 }
 
+func (ev ScrollEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Key Events
 
 // KeyEvent is used for data common to all key events, and should not appear as an event received by the caller program.
 type KeyEvent struct {
+	EventBase
 	Key string
 }
 
@@ -303,6 +337,10 @@ func (ev KeyDownEvent) EventOnFocus() bool {
 	return true
 }
 
+func (ev KeyDownEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 // KeyUpEvent is for when a key is unpressed.
 type KeyUpEvent KeyEvent
 
@@ -320,6 +358,10 @@ func (ev KeyUpEvent) EventPos() image.Point {
 
 func (ev KeyUpEvent) EventOnFocus() bool {
 	return true
+}
+
+func (ev KeyUpEvent) EventTime() time.Time {
+	return ev.Time
 }
 
 // KeyTypedEvent is for when a key is typed.
@@ -350,12 +392,16 @@ func (ev KeyTypedEvent) EventOnFocus() bool {
 	return true
 }
 
+func (ev KeyTypedEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Window Events
 
 ////////////////////////////////////////////
 
-// MouseEnteredEvent is for when the mouse enters a window.
+// MouseEnteredEvent is for when the mouse enters a window, or a widget (computed by window)
 type MouseEnteredEvent MouseMovedEvent
 
 func (ev MouseEnteredEvent) EventType() EventType {
@@ -374,7 +420,11 @@ func (ev MouseEnteredEvent) EventOnFocus() bool {
 	return false
 }
 
-// MouseExitedEvent is for when the mouse exits a window.
+func (ev MouseEnteredEvent) EventTime() time.Time {
+	return ev.Time
+}
+
+// MouseExitedEvent is for when the mouse exits a window, or a widget (computed by window)a
 type MouseExitedEvent MouseMovedEvent
 
 func (ev MouseExitedEvent) EventType() EventType {
@@ -391,6 +441,10 @@ func (ev MouseExitedEvent) EventPos() image.Point {
 
 func (ev MouseExitedEvent) EventOnFocus() bool {
 	return false
+}
+
+func (ev MouseExitedEvent) EventTime() time.Time {
+	return ev.Time
 }
 
 // ResizeEvent is for when the window changes size.
@@ -415,6 +469,10 @@ func (ev ResizeEvent) EventOnFocus() bool {
 	return false
 }
 
+func (ev ResizeEvent) EventTime() time.Time {
+	return ev.Time
+}
+
 // CloseEvent is for when the window is closed.
 type CloseEvent struct {
 	EventBase
@@ -434,4 +492,8 @@ func (ev CloseEvent) EventPos() image.Point {
 
 func (ev CloseEvent) EventOnFocus() bool {
 	return false
+}
+
+func (ev CloseEvent) EventTime() time.Time {
+	return ev.Time
 }

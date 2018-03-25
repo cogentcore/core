@@ -13,6 +13,7 @@ import (
 	// "reflect"
 	"runtime"
 	"sync"
+	"time"
 )
 
 // todo: could have two subtypes of windows, one a native 3D with OpenGl etc.
@@ -24,6 +25,8 @@ type Window struct {
 	EventSigs     [EventTypeN]ki.Signal `json:"-",desc:"signals for communicating each type of window (wde) event"`
 	Focus         ki.Ki                 `json:"-",desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                 `json:"-",desc:"node receiving mouse dragging events"`
+	LastDrag      time.Time             `json:"-",desc:"time since last drag event"`
+	LastSentDrag  MouseDraggedEvent     `json:"-",desc:"last drag that we actually sent"`
 	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
@@ -135,6 +138,27 @@ func (w *Window) SendEventSignal(ei interface{}) {
 	if et > EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
+
+	if et == MouseDraggedEventType {
+		mde, ok := evi.(MouseDraggedEvent)
+		if ok {
+			if w.Dragging != nil {
+				td := time.Now().Sub(w.LastDrag)
+				// ed := time.Now().Sub(mde.Time)
+				// fmt.Printf("td %v  ed %v\n", td, ed)
+				if td < 10*time.Millisecond {
+					// fmt.Printf("skipping td %v\n", td)
+					return // too laggy, bail on sending this event
+				}
+				lsd := w.LastSentDrag
+				w.LastSentDrag = mde
+				mde.From = lsd.From
+				w.LastDrag = time.Now()
+				ei = mde // reset interface to us
+			}
+		}
+	}
+
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
 	w.EventSigs[et].EmitFiltered(w.This, int64(et), ei, func(k ki.Ki) bool {
@@ -149,26 +173,30 @@ func (w *Window) SendEventSignal(ei interface{}) {
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
 
 				// drag events start with node but can go beyond it..
-				_, ok := evi.(MouseDraggedEvent)
+				mde, ok := evi.(MouseDraggedEvent)
 				if ok {
-					if w.Dragging != nil {
-						return (w.Dragging == gi.This) // only dragger gets events
+					if w.Dragging == gi.This {
+						return true
+					} else if w.Dragging != nil {
+						return false
 					} else {
 						if pos.In(gi.WinBBox) {
+							w.LastDrag = time.Now()
 							w.Dragging = gi.This
+							w.LastSentDrag = mde
 							ki.SetBitFlag(&gi.NodeFlags, int(NodeDragging))
 							return true
 						}
 						return false
 					}
 				} else {
-					if w.Dragging != nil {
+					if w.Dragging == gi.This {
 						_, dg := KiToNode2D(w.Dragging)
 						if dg != nil {
 							ki.ClearBitFlag(&dg.NodeFlags, int(NodeDragging))
 						}
 						w.Dragging = nil
-						return true // send event just after dragging for sure
+						return true
 					}
 					if !pos.In(gi.WinBBox) {
 						return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that

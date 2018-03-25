@@ -25,6 +25,7 @@ import (
 	"github.com/rcoreilly/goki/gi"
 	"image"
 	"strings"
+	"time"
 )
 
 func getButton(b int) (which gi.MouseButton) {
@@ -69,6 +70,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mde.Where.Y = int(e.data[1])
 				mde.Which = getButton(int(e.data[2]))
 				lastXY = mde.Where
+				mde.Time = time.Now()
 				ec <- mde
 				suppressDrag = true
 			case C.GMDMouseUp:
@@ -77,6 +79,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mue.Where.Y = int(e.data[1])
 				mue.Which = getButton(int(e.data[2]))
 				lastXY = mue.Where
+				mue.Time = time.Now()
 				ec <- mue
 			case C.GMDMouseDragged:
 				if suppressDrag {
@@ -96,6 +99,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					mde.From = mde.Where
 				}
 				lastXY = mde.Where
+				mde.Time = time.Now()
 				ec <- mde
 			case C.GMDMouseMoved:
 				var mme gi.MouseMovedEvent
@@ -107,6 +111,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					mme.From = mme.Where
 				}
 				lastXY = mme.Where
+				mme.Time = time.Now()
 				ec <- mme
 			case C.GMDMouseEntered:
 				w.hasMouse = true
@@ -120,6 +125,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					me.From = me.Where
 				}
 				lastXY = me.Where
+				me.Time = time.Now()
 				ec <- me
 			case C.GMDMouseExited:
 				w.hasMouse = false
@@ -133,11 +139,13 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					me.From = me.Where
 				}
 				lastXY = me.Where
+				me.Time = time.Now()
 				ec <- me
 			case C.GMDMouseWheel:
 				var me gi.MouseEvent
 				me.Where.X = int(e.data[0])
 				me.Where.Y = int(e.data[1])
+				me.Time = time.Now()
 				// TODO e.data[2] contains horizontal scroll info; what do?
 				if e.data[3] != 0 {
 					button := gi.WheelUpButton
@@ -152,12 +160,14 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mge.Where.X = int(e.data[0])
 				mge.Where.Y = int(e.data[1])
 				mge.Magnification = 1 + float64(e.data[2])/65536
+				mge.Time = time.Now()
 				ec <- mge
 			case C.GMDRotate:
 				var rte gi.RotateEvent
 				rte.Where.X = int(e.data[0])
 				rte.Where.Y = int(e.data[1])
 				rte.Rotation = float64(e.data[2]) / 65536
+				rte.Time = time.Now()
 				ec <- rte
 			case C.GMDScroll:
 				var se gi.ScrollEvent
@@ -165,6 +175,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				se.Where.Y = int(e.data[1])
 				se.Delta.X = int(e.data[2])
 				se.Delta.Y = int(e.data[3])
+				se.Time = time.Now()
 				ec <- se
 			case C.GMDMainFocus:
 				// for some reason Cocoa resets the cursor to normal when the window
@@ -173,6 +184,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 			case C.GMDKeyDown:
 				var letter string
 				var ke gi.KeyEvent
+				ke.Time = time.Now()
 				keycode := int(e.data[1])
 
 				blankLetter := containsInt(blankLetterCodes, keycode)
@@ -197,6 +209,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 			case C.GMDKeyUp:
 				var ke gi.KeyUpEvent
 				ke.Key = keyMapping[int(e.data[1])]
+				ke.Time = time.Now()
 				delete(downKeys, ke.Key)
 				// todo: getting stuck keys
 				for key, _ := range downKeys {
@@ -212,9 +225,12 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				var re gi.ResizeEvent
 				re.Width = int(e.data[0])
 				re.Height = int(e.data[1])
+				re.Time = time.Now()
 				ec <- re
 			case C.GMDClose:
-				ec <- gi.CloseEvent{}
+				var ce gi.CloseEvent
+				ce.Time = time.Now()
+				ec <- ce
 				break eventloop
 				return
 			}

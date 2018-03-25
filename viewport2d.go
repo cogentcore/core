@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "golang.org/x/image/font"
 	"image"
@@ -184,7 +184,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if gii == nil { // should not happen
 		return
 	}
-	fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	// todo: probably need better ways of telling how much re-rendering is needed
 	if sig == int64(ki.NodeSignalChildAdded) {
@@ -193,8 +193,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		vp.Render2DRoot()
 	} else {
 		if gii.CanReRender2D() {
-			vp.Render2DFromNode(gii)
-			vp.RenderViewport2D() // redraw us
+			vp.ReRender2DNode(gii)
 		} else {
 			vp.Style2DFromNode(gii) // restyle only from affected node downward
 			vp.ReRender2DRoot()     // need to re-render entirely..
@@ -230,6 +229,22 @@ func (vp *Viewport2D) FullRender2DRoot() {
 func (vp *Viewport2D) ReRender2DRoot() {
 	vp.Layout2DRoot()
 	vp.Render2DRoot()
+}
+
+// re-render a specific node that has said it can re-render
+func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
+	gn := gni.AsNode2D()
+	popMask := false
+	if !gn.Bounds.Empty() {
+		popMask = true
+		vp.Render.PushBounds()
+		vp.Render.Bounds = gn.Bounds
+	}
+	vp.Render2DFromNode(gni)
+	if popMask {
+		vp.Render.PopBounds()
+	}
+	vp.RenderViewport2D()
 }
 
 // do the styling -- only from root
