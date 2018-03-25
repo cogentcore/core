@@ -18,9 +18,9 @@ import (
 // 2D rectangle, optionally with rounded corners
 type Rect struct {
 	Node2DBase
-	Pos    Vec2D `xml:"{x,y}",desc:"position of the top-left of the rectangle"`
-	Size   Vec2D `xml:"{width,height}",desc:"size of the rectangle"`
-	Radius Vec2D `xml:"{rx,ry}",desc:"radii for curved corners, as a proportion of width, height"`
+	Pos    Vec2D `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
+	Size   Vec2D `xml:"{width,height}" desc:"size of the rectangle"`
+	Radius Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -54,7 +54,10 @@ func (g *Rect) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Rect) Node2DBBox() image.Rectangle {
@@ -62,17 +65,20 @@ func (g *Rect) Node2DBBox() image.Rectangle {
 }
 
 func (g *Rect) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
-	} else {
-		// todo: only supports 1 radius right now -- easy to add another
-		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		if g.Radius.X == 0 && g.Radius.Y == 0 {
+			pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+		} else {
+			// todo: only supports 1 radius right now -- easy to add another
+			pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
+		}
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
 	}
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 func (g *Rect) CanReRender2D() bool {
@@ -125,7 +131,10 @@ func (g *Viewport2DFill) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Viewport2DFill) Node2DBBox() image.Rectangle {
@@ -152,8 +161,8 @@ var _ Node2D = &Viewport2DFill{}
 // 2D circle
 type Circle struct {
 	Node2DBase
-	Pos    Vec2D   `xml:"{cx,cy}",desc:"position of the center of the circle"`
-	Radius float64 `xml:"r",desc:"radius of the circle"`
+	Pos    Vec2D   `xml:"{cx,cy}" desc:"position of the center of the circle"`
+	Radius float64 `xml:"r" desc:"radius of the circle"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -187,7 +196,10 @@ func (g *Circle) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Circle) Node2DBBox() image.Rectangle {
@@ -195,12 +207,15 @@ func (g *Circle) Node2DBBox() image.Rectangle {
 }
 
 func (g *Circle) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *Circle) CanReRender2D() bool {
@@ -219,8 +234,8 @@ var _ Node2D = &Circle{}
 // 2D ellipse
 type Ellipse struct {
 	Node2DBase
-	Pos   Vec2D `xml:"{cx,cy}",desc:"position of the center of the ellipse"`
-	Radii Vec2D `xml:"{rx, ry}",desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Pos   Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
+	Radii Vec2D `xml:"{rx, ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -254,7 +269,10 @@ func (g *Ellipse) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Ellipse) Node2DBBox() image.Rectangle {
@@ -262,12 +280,15 @@ func (g *Ellipse) Node2DBBox() image.Rectangle {
 }
 
 func (g *Ellipse) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *Ellipse) CanReRender2D() bool {
@@ -285,8 +306,8 @@ var _ Node2D = &Ellipse{}
 // a 2D line
 type Line struct {
 	Node2DBase
-	Start Vec2D `xml:"{x1,y1}",desc:"position of the start of the line"`
-	End   Vec2D `xml:"{x2, y2}",desc:"position of the end of the line"`
+	Start Vec2D `xml:"{x1,y1}" desc:"position of the start of the line"`
+	End   Vec2D `xml:"{x2, y2}" desc:"position of the end of the line"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -320,7 +341,10 @@ func (g *Line) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Line) Node2DBBox() image.Rectangle {
@@ -328,12 +352,15 @@ func (g *Line) Node2DBBox() image.Rectangle {
 }
 
 func (g *Line) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.Stroke(rs)
-	g.Render2DChildren()
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
+		pc.Stroke(rs)
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *Line) CanReRender2D() bool {
@@ -351,7 +378,7 @@ var _ Node2D = &Line{}
 // 2D Polyline
 type Polyline struct {
 	Node2DBase
-	Points []Vec2D `xml:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
+	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -385,7 +412,10 @@ func (g *Polyline) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Polyline) Node2DBBox() image.Rectangle {
@@ -393,15 +423,18 @@ func (g *Polyline) Node2DBBox() image.Rectangle {
 }
 
 func (g *Polyline) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	if len(g.Points) < 2 {
-		return
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		if len(g.Points) < 2 {
+			return
+		}
+		pc.DrawPolyline(rs, g.Points)
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
 	}
-	pc.DrawPolyline(rs, g.Points)
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 func (g *Polyline) CanReRender2D() bool {
@@ -419,7 +452,7 @@ var _ Node2D = &Polyline{}
 // 2D Polygon
 type Polygon struct {
 	Node2DBase
-	Points []Vec2D `xml:"points",desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
+	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -453,7 +486,10 @@ func (g *Polygon) Layout2D(iter int) {
 	if iter == 0 {
 		g.InitLayout2D()
 		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
+	} else {
+		g.GeomFromLayout()
 	}
+	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
 }
 
 func (g *Polygon) Node2DBBox() image.Rectangle {
@@ -461,15 +497,18 @@ func (g *Polygon) Node2DBBox() image.Rectangle {
 }
 
 func (g *Polygon) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	g.SetWinBBox(g.Node2DBBox())
-	if len(g.Points) < 2 {
-		return
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		g.SetWinBBox(g.Node2DBBox())
+		if len(g.Points) < 2 {
+			return
+		}
+		pc.DrawPolygon(rs, g.Points)
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
 	}
-	pc.DrawPolygon(rs, g.Points)
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 func (g *Polygon) CanReRender2D() bool {

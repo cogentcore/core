@@ -67,11 +67,11 @@ const (
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
 	WidgetBase
-	Text        string               `xml:"text",desc:"label for the button"`
-	Shortcut    string               `xml:"shortcut",desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	Text        string               `xml:"text" desc:"label for the button"`
+	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates
-	ButtonSig   ki.Signal `json:"-",desc:"signal for button -- see ButtonSignals for the types"`
+	ButtonSig   ki.Signal `json:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	// todo: icon -- should be an xml
 }
 
@@ -237,6 +237,7 @@ var ButtonProps = []map[string]interface{}{
 		// "font-family":         "Arial", // this is crashing
 		"font-size":        "24pt",
 		"text-align":       "center",
+		"vertical-align":   "top",
 		"color":            "black",
 		"background-color": "#EEF",
 	}, { // disabled
@@ -315,13 +316,16 @@ func (g *Button) Node2DBBox() image.Rectangle {
 // todo: need color brigher / darker functions
 
 func (g *Button) Render2D() {
-	if g.IsLeaf() {
-		g.Render2DDefaultStyle()
-	} else {
-		// todo: manage stacked layout to select appropriate image based on state
-		// return
+	if g.PushBounds() {
+		if g.IsLeaf() {
+			g.Render2DDefaultStyle()
+		} else {
+			// todo: manage stacked layout to select appropriate image based on state
+			// return
+		}
+		g.Render2DChildren()
 	}
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled
@@ -335,9 +339,9 @@ func (g *Button) Render2DDefaultStyle() {
 	pc.StrokeStyle.SetColor(&st.Color) // ink color
 
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+	sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
-	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
+	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9, sz.X)
 }
 
 func (g *Button) CanReRender2D() bool {

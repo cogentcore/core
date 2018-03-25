@@ -68,10 +68,10 @@ const (
 type TreeView struct {
 	WidgetBase
 	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	TreeViewSig ki.Signal              `json:"-",desc:"signal for TreeView -- see TreeViewSignals for the types"`
+	TreeViewSig ki.Signal              `json:"-" desc:"signal for TreeView -- see TreeViewSignals for the types"`
 	StateStyles [TreeViewStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	RootWidget  *TreeView              `json:"-",desc:"cached root widget"`
+	RootWidget  *TreeView              `json:"-" desc:"cached root widget"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -500,45 +500,48 @@ func (g *TreeView) Node2DBBox() image.Rectangle {
 }
 
 func (g *TreeView) Render2D() {
-	// reset for next update
-	ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
+	if g.PushBounds() {
+		// reset for next update
+		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
 
-	if g.HasCollapsedParent() {
-		return // nothing
+		if g.HasCollapsedParent() {
+			return // nothing
+		}
+
+		if g.IsSelected() {
+			g.Style = g.StateStyles[TreeViewSelState]
+		} else if g.HasFocus() {
+			g.Style = g.StateStyles[TreeViewFocusState]
+		} else {
+			g.Style = g.StateStyles[TreeViewNormalState]
+		}
+
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		st := &g.Style
+		pc.FontStyle = st.Font
+		pc.TextStyle = st.Text
+		pc.StrokeStyle.SetColor(&st.Border.Color)
+		pc.StrokeStyle.Width = st.Border.Width
+		pc.FillStyle.SetColor(&st.Background.Color)
+		// g.DrawStdBox()
+		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
+		sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+
+		pc.StrokeStyle.SetColor(&st.Color) // ink color
+
+		pos = g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
+		// sz = g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+
+		label := g.GetLabel()
+		// fmt.Printf("rendering: %v\n", label)
+
+		pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9, sz.X)
+
+		g.Render2DChildren()
 	}
-
-	if g.IsSelected() {
-		g.Style = g.StateStyles[TreeViewSelState]
-	} else if g.HasFocus() {
-		g.Style = g.StateStyles[TreeViewFocusState]
-	} else {
-		g.Style = g.StateStyles[TreeViewNormalState]
-	}
-
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	st := &g.Style
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColor(&st.Background.Color)
-	// g.DrawStdBox()
-	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
-	sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
-	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
-
-	pc.StrokeStyle.SetColor(&st.Color) // ink color
-
-	pos = g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-	// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
-
-	label := g.GetLabel()
-	// fmt.Printf("rendering: %v\n", label)
-
-	pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9)
-
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 func (g *TreeView) CanReRender2D() bool {
@@ -588,7 +591,7 @@ const (
 type TabWidget struct {
 	WidgetBase
 	SrcNode      ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
-	TabWidgetSig ki.Signal `json:"-",desc:"signal for tab widget -- see TabWidgetSignals for the types"`
+	TabWidgetSig ki.Signal `json:"-" desc:"signal for tab widget -- see TabWidgetSignals for the types"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -797,7 +800,10 @@ func (g *TabWidget) Node2DBBox() image.Rectangle {
 }
 
 func (g *TabWidget) Render2D() {
-	g.Render2DChildren()
+	if g.PushBounds() {
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *TabWidget) CanReRender2D() bool {

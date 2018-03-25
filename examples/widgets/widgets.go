@@ -35,14 +35,12 @@ func mainrun() {
 	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	vlay.SetProp("max-width", -1) // always stretch width
-
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", "vcenter")
-	row1.SetProp("align-horiz", "hcenter")
+	row1.SetProp("align-vert", "middle")
+	row1.SetProp("align-horiz", "center")
 	row1.SetProp("margin", 4.0)
-	row1.SetProp("max-width", -1) // always stretch width
+	row1.SetProp("max-width", -1)
 
 	spc := vlay.AddNewChildNamed(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
@@ -51,16 +49,15 @@ func mainrun() {
 	lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
 	lab1.Text = "This is a demonstration of the various GoGi Widgets"
 	lab1.SetProp("max-width", -1)
-	lab1.SetProp("align-horiz", "hcenter")
 	lab1.SetProp("text-align", "center")
 	row1.AddNewChildNamed(gi.KiT_Stretch, "str2")
 
 	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
 	row2.Lay = gi.LayoutRow
-	row2.SetProp("align-vert", "vcenter")
+	row2.SetProp("align-vert", "center")
 	row2.SetProp("align-horiz", "left")
 	row2.SetProp("margin", 4.0)
-	row2.SetProp("max-width", -1) // always stretch width
+	row2.SetProp("max-width", -1)
 
 	button1 := row2.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
@@ -88,7 +85,7 @@ func mainrun() {
 
 	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
 	row3.Lay = gi.LayoutRow
-	row3.SetProp("align-vert", "vcenter")
+	row3.SetProp("align-vert", "center")
 	row3.SetProp("align-horiz", "left")
 	row3.SetProp("margin", 4.0)
 	row3.SetProp("max-width", -1) // always stretch width

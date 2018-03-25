@@ -49,7 +49,7 @@ func mainrun() {
 	row1.Lay = gi.LayoutRow
 
 	row1.SetProp("align-vert", "top")
-	// row1.SetProp("align-horiz", "hjustify")
+	// row1.SetProp("align-horiz", "justify")
 	row1.SetProp("align-horiz", "left")
 	row1.SetProp("margin", 4.0)
 	row1.SetProp("max-width", -1) // always stretch width
@@ -76,8 +76,8 @@ func mainrun() {
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
 
-	row2.SetProp("align-vert", "vcenter")
-	// row2.SetProp("align-horiz", "hjustify")
+	row2.SetProp("align-vert", "center")
+	// row2.SetProp("align-horiz", "justify")
 	row2.SetProp("align-horiz", "left")
 	row2.SetProp("margin", 4.0)
 
@@ -100,7 +100,7 @@ func mainrun() {
 	// row3.SetProp("max-width", -1) // always stretch width
 
 	row3.SetProp("align-vert", "bottom")
-	row3.SetProp("align-horiz", "hjustify")
+	row3.SetProp("align-horiz", "justify")
 	// row3.SetProp("align-horiz", "left")
 	row3.SetProp("margin", 4.0)
 

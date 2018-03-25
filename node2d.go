@@ -185,28 +185,21 @@ func (g *Node2DBase) GeomFromLayout() {
 	g.SetWinBBox(gii.Node2DBBox())
 }
 
-// for basic aggregation over children -- sum of Layout.AllocSize for all children
-func (g *Node2DBase) SumOfChildWidths() float64 {
-	w := 0.0
-	for _, kid := range g.Children {
-		_, gi := KiToNode2D(kid)
-		if gi != nil {
-			w += gi.LayData.AllocSize.X
-		}
-	}
-	return w
+// push our bounding-box bounds onto the bounds stack, automatically
+// intersecting with what is already there -- this limits our drawing to our
+// own bounding box, automatically -- must be called as first step in Render2D
+// returns whether the new bounds are empty or not -- if empty then don't render!
+func (g *Node2DBase) PushBounds() bool {
+	rs := &g.Viewport.Render
+	rs.PushBounds(g.WinBBox)
+	g.Bounds = rs.Bounds     // save for later re-rendering
+	return !g.Bounds.Empty() // don't render if this function returns false
 }
 
-// for basic aggregation over children -- sum of Layout.AllocSize for all children
-func (g *Node2DBase) SumOfChildHeights() float64 {
-	h := 0.0
-	for _, kid := range g.Children {
-		_, gi := KiToNode2D(kid)
-		if gi != nil {
-			h += gi.LayData.AllocSize.Y
-		}
-	}
-	return h
+// pop our bounding-box bounds -- last step in Render2D after rendering children
+func (g *Node2DBase) PopBounds() {
+	rs := &g.Viewport.Render
+	rs.PopBounds()
 }
 
 // the basic Layout2D functions -- all widget-like nodes should do these steps

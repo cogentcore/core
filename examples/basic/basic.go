@@ -27,15 +27,18 @@ func mainrun() {
 	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF")
 
+	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay.Lay = gi.LayoutCol
+
 	// rect1.SetProp("stroke-linejoin", "round")
-	rect1 := vpfill.AddNewChildNamed(gi.KiT_Rect, "rect1").(*gi.Rect)
+	rect1 := vlay.AddNewChildNamed(gi.KiT_Rect, "rect1").(*gi.Rect)
 	rect1.SetProp("fill", "#008800")
 	rect1.SetProp("stroke", "#0000FF")
 	rect1.SetProp("stroke-width", 5.0)
 	rect1.Pos = gi.Vec2D{10, 10}
 	rect1.Size = gi.Vec2D{100, 100}
 
-	circle1 := vpfill.AddNewChildNamed(gi.KiT_Circle, "circle1").(*gi.Circle)
+	circle1 := vlay.AddNewChildNamed(gi.KiT_Circle, "circle1").(*gi.Circle)
 	circle1.SetProp("fill", "none")
 	circle1.SetProp("stroke", "#CC0000")
 	circle1.SetProp("stroke-width", 2.0)
@@ -49,13 +52,13 @@ func mainrun() {
 	ellipse1.Pos = gi.Vec2D{400, 200}
 	ellipse1.Radii = gi.Vec2D{80, 20}
 
-	line1 := vpfill.AddNewChildNamed(gi.KiT_Line, "line1").(*gi.Line)
+	line1 := vlay.AddNewChildNamed(gi.KiT_Line, "line1").(*gi.Line)
 	line1.SetProp("stroke", "#888800")
 	line1.SetProp("stroke-width", 5.0)
 	line1.Start = gi.Vec2D{100, 100}
 	line1.End = gi.Vec2D{150, 200}
 
-	text1 := vpfill.AddNewChildNamed(gi.KiT_Text2D, "text1").(*gi.Text2D)
+	text1 := vlay.AddNewChildNamed(gi.KiT_Text2D, "text1").(*gi.Text2D)
 	text1.SetProp("stroke", "#000")
 	text1.SetProp("stroke-width", 1.0)
 	text1.SetProp("text-align", "left")
@@ -66,7 +69,7 @@ func mainrun() {
 	text1.Width = 100
 	text1.Text = "this is test text!"
 
-	rlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "rowlay").(*gi.Layout)
+	rlay := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay").(*gi.Layout)
 	rlay.Lay = gi.LayoutRow
 	rlay.SetProp("x", 10)
 	rlay.SetProp("y", 500)

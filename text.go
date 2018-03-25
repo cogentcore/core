@@ -14,46 +14,34 @@ import (
 	"unicode"
 )
 
-type TextAlign int
-
-const (
-	TextAlignLeft TextAlign = iota
-	TextAlignCenter
-	TextAlignRight
-	TextAlignJustify
-	TextAlignN
-)
-
-//go:generate stringer -type=TextAlign
-
-var KiT_TextAlign = ki.Enums.AddEnumAltLower(TextAlignLeft, false, nil, "TextAlign", int64(TextAlignN))
-
 // note: most of these are inherited
 
 // all the style information associated with how to render text
 type TextStyle struct {
-	Align         TextAlign   `xml:"text-align",inherit:"true",desc:"how to align text"`
-	LineHeight    float64     `xml:"line-height",inherit:"true",desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
-	LetterSpacing units.Value `xml:"letter-spacing",desc:"spacing between characters and lines"`
-	Indent        units.Value `xml:"text-indent",inherit:"true",desc:"how much to indent the first line in a paragraph"`
-	TabSize       units.Value `xml:"tab-size",inherit:"true",desc:"tab size"`
-	WordSpacing   units.Value `xml:"word-spacing",inherit:"true",desc:"extra space to add between words"`
-	WordWrap      bool        `xml:"word-wrap",inherit:"true",desc:"wrap text within a given size"`
+	Align         Align       `xml:"text-align" inherit:"true" desc:"how to align text"`
+	AlignV        Align       `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment of text -- copied from layout style AlignV"`
+	LineHeight    float64     `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
+	LetterSpacing units.Value `xml:"letter-spacing" desc:"spacing between characters and lines"`
+	Indent        units.Value `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
+	TabSize       units.Value `xml:"tab-size" inherit:"true" desc:"tab size"`
+	WordSpacing   units.Value `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
+	WordWrap      bool        `xml:"word-wrap" inherit:"true" desc:"wrap text within a given size"`
 	// todo:
 	// page-break options
 	// text-decoration-line -- underline, overline, line-through, -style, -color inherit
-	// text-justify ,inherit:"true" -- how to justify text
+	// text-justify  inherit:"true" -- how to justify text
 	// text-overflow -- clip, ellipsis, string..
-	// text-shadow ,inherit:"true"
-	// text-transform -- ,inherit:"true" uppercase, lowercase, capitalize
+	// text-shadow  inherit:"true"
+	// text-transform --  inherit:"true" uppercase, lowercase, capitalize
 	// user-select -- can user select text?
-	// white-space -- what to do with white-space ,inherit:"true"
-	// word-break ,inherit:"true"
+	// white-space -- what to do with white-space  inherit:"true"
+	// word-break  inherit:"true"
 }
 
 func (p *TextStyle) Defaults() {
 	p.WordWrap = false
-	p.Align = TextAlignLeft
+	p.Align = AlignLeft
+	p.AlignV = AlignBaseline
 }
 
 // any updates after generic xml-tag property setting?
@@ -68,6 +56,33 @@ func (p *TextStyle) EffLineHeight() float64 {
 	return p.LineHeight
 }
 
+// get basic text alignment factors for DrawString routines -- does not handle justified
+func (p *TextStyle) AlignFactors() (ax, ay float64) {
+	ax = 0.0
+	ay = 0.0
+	hal := p.Align
+	switch {
+	case IsAlignMiddle(hal):
+		ax = 0.5 // todo: determine if font is horiz or vert..
+	case IsAlignEnd(hal):
+		ax = 1.0
+	}
+	val := p.AlignV
+	switch {
+	case val == AlignSub:
+		ay = -0.1 // todo: fixme -- need actual font metrics
+	case val == AlignSuper:
+		ay = 0.8 // todo: fixme
+	case IsAlignStart(val):
+		ay = 0.9 // todo: need to find out actual baseline
+	case IsAlignMiddle(val):
+		ay = 0.5 // todo: determine if font is horiz or vert..
+	case IsAlignEnd(val):
+		ay = -0.1 // todo: need actual baseline
+	}
+	return
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Text2D Node
 
@@ -78,9 +93,9 @@ func (p *TextStyle) EffLineHeight() float64 {
 // 2D Text
 type Text2D struct {
 	Node2DBase
-	Pos         Vec2D    `xml:"{x,y}",desc:"position of the left, baseline of the text"`
-	Width       float64  `xml:"width",desc:"width of text to render if using word-wrapping"`
-	Text        string   `xml:"text",desc:"text string to render"`
+	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width       float64  `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text        string   `xml:"text" desc:"text string to render"`
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
 
@@ -130,18 +145,21 @@ func (g *Text2D) Node2DBBox() image.Rectangle {
 }
 
 func (g *Text2D) Render2D() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	pc.SetUnitContext(rs, 0) // todo: not sure about el
-	g.SetWinBBox(g.Node2DBBox())
-	// fmt.Printf("rendering text %v\n", g.Text)
-	if pc.TextStyle.WordWrap {
-		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
-			g.LayData.AllocSize.Y)
-	} else {
-		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		pc.SetUnitContext(rs, 0) // todo: not sure about el
+		g.SetWinBBox(g.Node2DBBox())
+		// fmt.Printf("rendering text %v\n", g.Text)
+		if pc.TextStyle.WordWrap {
+			pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
+				g.LayData.AllocSize.Y)
+		} else {
+			pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
+		}
+		g.Render2DChildren()
 	}
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 func (g *Text2D) CanReRender2D() bool {

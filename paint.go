@@ -6,6 +6,7 @@ package gi
 
 import (
 	"errors"
+	// "fmt"
 	"github.com/golang/freetype/raster"
 	"github.com/rcoreilly/goki/gi/units"
 	"golang.org/x/image/draw"
@@ -46,15 +47,18 @@ SOFTWARE.
 // applied to anything
 type Paint struct {
 	Off         bool          `desc:"node and everything below it are off, non-rendering"`
+	StyleSet    bool          `desc:"have the styles already been set?"`
 	UnContext   units.Context `desc:"units context -- parameters necessary for anchoring relative units"`
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
 	FontStyle   FontStyle
 	TextStyle   TextStyle
-	XForm       XFormMatrix2D `xml:"-",json:"-",desc:"current transform"`
+	XForm       XFormMatrix2D `xml:"-" json:"-" desc:"current transform"`
 }
 
 func (pc *Paint) Defaults() {
+	pc.Off = false
+	pc.StyleSet = false
 	pc.StrokeStyle.Defaults()
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
@@ -82,7 +86,8 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
 	if defs != nil {
 		dfi = interface{}(defs)
 	}
-	WalkStyleStruct(pc, pfi, dfi, "", props, StyleField)
+	inherit := !pc.StyleSet // we only inherit if not already set
+	WalkStyleStruct(pc, pfi, dfi, "", inherit, props, StyleField)
 	pc.StrokeStyle.SetStylePost()
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
@@ -105,9 +110,9 @@ func (pc *Paint) SetUnitContext(rs *RenderState, el float64) {
 func (s *Paint) ToDots() {
 	valtyp := reflect.TypeOf(units.Value{})
 
-	WalkStyleStruct(s, nil, nil, "", nil,
+	WalkStyleStruct(s, nil, nil, "", false, nil,
 		func(sf reflect.StructField, vf, pf, df reflect.Value,
-			hasPar bool, tag string, props map[string]interface{}) {
+			hasPar bool, tag string, inherit bool, props map[string]interface{}) {
 			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
 				uv := vf.Addr().Interface().(*units.Value)
 				uv.ToDots(&s.UnContext)
@@ -156,9 +161,35 @@ type RenderState struct {
 	HasCurrent  bool
 	Image       *image.RGBA       // pointer to image to render into
 	Mask        *image.Alpha      // current mask
-	Bounds      image.Rectangle   // special boundaries to restrict drawing to -- much faster than clip
-	ClipStack   []*image.Alpha    // stack of clips -- layouts push and pop these so children don't exceed bounds
-	BoundsStack []image.Rectangle // stack of bounds -- layouts push and pop these so children don't exceed bounds
+	Bounds      image.Rectangle   // boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
+	BoundsStack []image.Rectangle // stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
+	ClipStack   []*image.Alpha    // stack of clips, if needed
+}
+
+// push current bounds onto stack and add new bounds as intersection with existing
+// bounds, if non-empty
+func (rs *RenderState) PushBounds(b image.Rectangle) {
+	if rs.BoundsStack == nil {
+		rs.BoundsStack = make([]image.Rectangle, 0, 100)
+	}
+	if rs.Bounds.Empty() { // should be IsEmpty!
+		rs.Bounds = rs.Image.Bounds()
+	}
+	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
+	if !b.Empty() {
+		rs.Bounds = rs.Bounds.Intersect(b)
+	}
+}
+
+// pop Mask off the bounds stack and set to current bounds
+func (rs *RenderState) PopBounds() {
+	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
+		rs.Bounds = rs.Image.Bounds()
+		return
+	}
+	sz := len(rs.BoundsStack)
+	rs.Bounds = rs.BoundsStack[sz-1]
+	rs.BoundsStack = rs.BoundsStack[:sz-1]
 }
 
 // push current Mask onto the clip stack
@@ -184,25 +215,6 @@ func (rs *RenderState) PopClip() {
 	rs.ClipStack = rs.ClipStack[:sz-1]
 }
 
-// push current bounds onto stack
-func (rs *RenderState) PushBounds() {
-	if rs.BoundsStack == nil {
-		rs.BoundsStack = make([]image.Rectangle, 0, 10)
-	}
-	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-}
-
-// pop Mask off the bounds stack and set to current bounds
-func (rs *RenderState) PopBounds() {
-	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
-		rs.Bounds = rs.Image.Bounds()
-		return
-	}
-	sz := len(rs.BoundsStack)
-	rs.Bounds = rs.BoundsStack[sz-1]
-	rs.BoundsStack = rs.BoundsStack[:sz-1]
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 // Path Manipulation
 
@@ -215,8 +227,12 @@ func (pc *Paint) TransformPoint(x, y float64) Vec2D {
 
 // get the bounding box for an element in pixel int coordinates
 func (pc *Paint) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
-	tx1, ty1 := pc.XForm.TransformPoint(minX, minY)
-	tx2, ty2 := pc.XForm.TransformPoint(maxX, maxY)
+	sw := 0.0
+	if pc.HasStroke() {
+		sw = 0.5 * pc.StrokeStyle.Width.Dots
+	}
+	tx1, ty1 := pc.XForm.TransformPoint(minX-sw, minY-sw)
+	tx2, ty2 := pc.XForm.TransformPoint(maxX+sw, maxY+sw)
 	return image.Rect(int(tx1), int(ty1), int(tx2), int(ty2))
 }
 
@@ -432,7 +448,7 @@ func (pc *Paint) ClipPreserve(rs *RenderState) {
 	pc.fill(rs, painter)
 	if rs.Mask == nil {
 		rs.Mask = clip
-	} else {
+	} else { // todo: this one operation MASSIVELY slows down clip usage -- unclear why
 		mask := image.NewAlpha(rs.Image.Bounds())
 		draw.DrawMask(mask, mask.Bounds(), clip, image.ZP, rs.Mask, image.ZP, draw.Over)
 		rs.Mask = mask
@@ -631,7 +647,10 @@ func (pc *Paint) FontHeight() float64 {
 	return pc.FontStyle.Height
 }
 
-func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
+func (pc *Paint) drawString(im *image.RGBA, bounds image.Rectangle, s string, x, y float64) {
+	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
+		return
+	}
 	d := &font.Drawer{
 		Dst:  im,
 		Src:  image.NewUniform(&pc.StrokeStyle.Color),
@@ -651,6 +670,11 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 			// TODO: set prevC = '\ufffd'?
 			continue
 		}
+		nxt := d.Dot.X + advance
+		if nxt.Ceil() > bounds.Max.X || d.Dot.X.Floor() < bounds.Min.X {
+			d.Dot.X = nxt
+			continue
+		}
 		sr := dr.Sub(dr.Min)
 		transformer := draw.BiLinear
 		fx, fy := float64(dr.Min.X), float64(dr.Min.Y)
@@ -660,53 +684,45 @@ func (pc *Paint) drawString(im *image.RGBA, s string, x, y float64) {
 			SrcMask:  mask,
 			SrcMaskP: maskp,
 		})
-		d.Dot.X += advance
+		d.Dot.X = nxt
 		prevC = c
 	}
 }
 
-// DrawString according to current settings -- width is only needed for wrap case
+// DrawString according to current settings -- width is needed for alignment
+// -- if non-zero, then x position is for the left edge of the width box, and
+// alignment is WRT that width -- otherwise x position is as in
+// DrawStringAnchored
 func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
-	// todo: vertical align too
-	var ax, ay float64
-	switch pc.TextStyle.Align {
-	case TextAlignLeft:
-	case TextAlignCenter:
-		ax = 0.5 // todo: determine if font is horiz or vert..
-	case TextAlignRight:
-		ax = 1.0
+	ax, ay := pc.TextStyle.AlignFactors()
+	if width > 0.0 {
+		x += ax * width // re-offset for width
 	}
 	if pc.TextStyle.WordWrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextStyle.EffLineHeight(), pc.TextStyle.Align)
+		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextStyle.EffLineHeight())
 	} else {
-		pc.DrawStringAnchored(rs, s, x, y, ax, ay)
+		pc.DrawStringAnchored(rs, s, x, y, ax, ay, width)
 	}
 }
 
 func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float64) {
-	var ax, ay float64
-	switch pc.TextStyle.Align {
-	case TextAlignLeft:
-	case TextAlignCenter:
-		ax = 0.5 // todo: determine if font is horiz or vert..
-	case TextAlignRight:
-		ax = 1.0
-	}
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextStyle.EffLineHeight(), pc.TextStyle.Align)
+	ax, ay := pc.TextStyle.AlignFactors()
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextStyle.EffLineHeight())
 }
 
 // DrawStringAnchored draws the specified text at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // text. Use ax=0.5, ay=0.5 to center the text at the specified point.
-func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay float64) {
+func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, width float64) {
 	w, h := pc.MeasureString(s)
 	x -= ax * w
 	y += ay * h
+	// fmt.Printf("ds bounds: %v point x,y %v, %v\n", rs.Bounds, x, y)
 	if rs.Mask == nil {
-		pc.drawString(rs.Image, s, x, y)
+		pc.drawString(rs.Image, rs.Bounds, s, x, y)
 	} else {
 		im := image.NewRGBA(rs.Image.Bounds())
-		pc.drawString(im, s, x, y)
+		pc.drawString(im, rs.Bounds, s, x, y)
 		draw.DrawMask(rs.Image, rs.Image.Bounds(), im, image.ZP, rs.Mask, image.ZP, draw.Over)
 	}
 }
@@ -714,27 +730,18 @@ func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay floa
 // DrawStringWrapped word-wraps the specified string to the given max width
 // and then draws it at the specified anchor point using the given line
 // spacing and text alignment.
-func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float64, align TextAlign) {
+func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float64) {
 	lines, h := pc.MeasureStringWrapped(s, width, lineHeight)
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineHeight, align)
+	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineHeight)
 }
 
-func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float64, align TextAlign) {
+func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float64) {
 	x -= ax * width
 	y -= ay * h
-	switch align {
-	case TextAlignLeft:
-		ax = 0
-	case TextAlignCenter:
-		ax = 0.5
-		x += width / 2
-	case TextAlignRight:
-		ax = 1
-		x += width
-	}
-	ay = 1
+	ax, ay = pc.TextStyle.AlignFactors()
+	// ay = 1
 	for _, line := range lines {
-		pc.DrawStringAnchored(rs, line, x, y, ax, ay)
+		pc.DrawStringAnchored(rs, line, x, y, ax, ay, width)
 		y += pc.FontStyle.Height * lineHeight
 	}
 }

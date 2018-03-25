@@ -404,15 +404,15 @@ const (
 
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
 type ViewBoxPreserveAspectRatio struct {
-	Align       ViewBoxAlign       `svg:"align",desc:"how to align x,y coordinates within viewbox"`
-	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice",desc:"how to scale the view box relative to the viewport"`
+	Align       ViewBoxAlign       `svg:"align" desc:"how to align x,y coordinates within viewbox"`
+	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice" desc:"how to scale the view box relative to the viewport"`
 }
 
 // ViewBox defines a region in 2D bitmap image space -- it must ALWAYS be in terms of underlying pixels
 type ViewBox2D struct {
-	Min                 image.Point                `svg:"{min-x,min-y}",desc:"offset or starting point in parent Viewport2D"`
-	Size                image.Point                `svg:"{width,height}",desc:"size of viewbox within parent Viewport2D"`
-	PreserveAspectRatio ViewBoxPreserveAspectRatio `svg:"preserveAspectRatio",desc:"how to scale the view box within parent Viewport2D"`
+	Min                 image.Point                `svg:"{min-x,min-y}" desc:"offset or starting point in parent Viewport2D"`
+	Size                image.Point                `svg:"{width,height}" desc:"size of viewbox within parent Viewport2D"`
+	PreserveAspectRatio ViewBoxPreserveAspectRatio `svg:"preserveAspectRatio" desc:"how to scale the view box within parent Viewport2D"`
 }
 
 // todo: need to implement the viewbox preserve aspect ratio logic!

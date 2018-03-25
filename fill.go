@@ -25,10 +25,10 @@ var KiT_FillRule = ki.Enums.AddEnumAltLower(FillRuleNonZero, false, nil, "FillRu
 // FillStyle contains all the properties specific to filling a region
 type FillStyle struct {
 	On      bool        `desc:"is fill active -- if property is none then false"`
-	Color   Color       `xml:"fill",desc:"default fill color when such a color is needed -- Server could be anything"`
-	Opacity float64     `xml:"fill-opacity",desc:"global alpha opacity / transparency factor"`
+	Color   Color       `xml:"fill" desc:"default fill color when such a color is needed -- Server could be anything"`
+	Opacity float64     `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
 	Server  PaintServer `desc:"paint server for the fill -- if solid color, defines fill color"`
-	Rule    FillRule    `xml:"fill-rule",desc:"rule for how to fill more complex shapes with crossing lines"`
+	Rule    FillRule    `xml:"fill-rule" desc:"rule for how to fill more complex shapes with crossing lines"`
 }
 
 // initialize default values for paint fill

@@ -40,7 +40,7 @@ var KiT_NodeFlags = ki.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
 type NodeBase struct {
 	ki.Node
 	NodeFlags int64           `desc:"bitwise flags set according to NodeFlags type"`
-	WinBBox   image.Rectangle `json:"-",desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
+	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json

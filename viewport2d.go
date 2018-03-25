@@ -21,10 +21,10 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	Node2DBase
-	ViewBox ViewBox2D   `svg:"viewBox",desc:"viewbox within any parent Viewport2D"`
-	Render  RenderState `json:"-",desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-",desc:"pixels that we render into"`
-	Backing *image.RGBA `json:"-",desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
+	ViewBox ViewBox2D   `svg:"viewBox" desc:"viewbox within any parent Viewport2D"`
+	Render  RenderState `json:"-" desc:"render state for rendering"`
+	Pixels  *image.RGBA `json:"-" desc:"pixels that we render into"`
+	Backing *image.RGBA `json:"-" desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -152,9 +152,31 @@ func (vp *Viewport2D) RenderViewport2D() {
 	}
 }
 
+// we use our own render for these -- Viewport member is our parent!
+func (vp *Viewport2D) PushBounds() bool {
+	rs := &vp.Render
+	if vp.Viewport != nil {
+		rs.PushBounds(vp.WinBBox)
+		vp.Bounds = rs.Bounds // save for later re-rendering
+	} else {
+		rs.PushBounds(image.ZR)
+		rs.Bounds = vp.WinBBox
+		vp.Bounds = rs.Bounds
+	}
+	return !vp.Bounds.Empty() // don't render if this function returns false
+}
+
+func (vp *Viewport2D) PopBounds() {
+	rs := &vp.Render
+	rs.PopBounds()
+}
+
 func (vp *Viewport2D) Render2D() {
-	vp.Render2DChildren() // we must do children first, then us!
-	vp.RenderViewport2D() // update our parent image
+	if vp.PushBounds() {
+		vp.Render2DChildren() // we must do children first, then us!
+		vp.RenderViewport2D() // update our parent image
+	}
+	vp.PopBounds()
 }
 
 func (vp *Viewport2D) CanReRender2D() bool {
@@ -234,14 +256,14 @@ func (vp *Viewport2D) ReRender2DRoot() {
 // re-render a specific node that has said it can re-render
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
-	popMask := false
+	popBounds := false
 	if !gn.Bounds.Empty() {
-		popMask = true
-		vp.Render.PushBounds()
-		vp.Render.Bounds = gn.Bounds
+		popBounds = true
+		vp.Render.PushBounds(image.ZR) // don't intersect with existing
+		vp.Render.Bounds = gn.Bounds   // direct copy
 	}
 	vp.Render2DFromNode(gni)
-	if popMask {
+	if popBounds {
 		vp.Render.PopBounds()
 	}
 	vp.RenderViewport2D()

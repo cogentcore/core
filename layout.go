@@ -12,38 +12,52 @@ import (
 	"math"
 )
 
-// this is based on QtQuick layouts https://doc.qt.io/qt-5/qtquicklayouts-overview.html  https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html
-
-// horizontal alignment type -- how to align items in the horizontal dimension
-type AlignHoriz int32
+// all different types of alignment -- only some are applicable to different
+// contexts, but there is also so much overlap that it makes sense to have
+// them all in one list -- some are not standard CSS and used by layout
+type Align int32
 
 const (
-	AlignLeft AlignHoriz = iota
-	AlignHCenter
+	AlignLeft Align = iota
+	AlignTop
+	AlignCenter
+	// middle = vertical version of center
+	AlignMiddle
 	AlignRight
-	AlignHJustify
-	AlignHorizN
-)
-
-//go:generate stringer -type=AlignHoriz
-
-var KiT_AlignHoriz = ki.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignHorizN))
-
-// vertical alignment type -- how to align items in the vertical dimension -- must correspond with horizontal for layout
-type AlignVert int32
-
-const (
-	AlignTop AlignVert = iota
-	AlignVCenter
 	AlignBottom
-	AlignVJustify
 	AlignBaseline
-	AlignVertN
+	// same as CSS space-between
+	AlignJustify
+	AlignSpaceAround
+	AlignFlexStart
+	AlignFlexEnd
+	AlignTextTop
+	AlignTextBottom
+	// align to subscript
+	AlignSub
+	// align to superscript
+	AlignSuper
+	AlignN
 )
 
-var KiT_AlignVert = ki.Enums.AddEnumAltLower(AlignTop, false, nil, "Align", int64(AlignVertN))
+//go:generate stringer -type=Align
 
-//go:generate stringer -type=AlignVert
+var KiT_Align = ki.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignN))
+
+// is this a generalized alignment to start of container?
+func IsAlignStart(a Align) bool {
+	return (a == AlignLeft || a == AlignTop || a == AlignFlexStart || a == AlignTextTop)
+}
+
+// is this a generalized alignment to middle of container?
+func IsAlignMiddle(a Align) bool {
+	return (a == AlignCenter || a == AlignMiddle)
+}
+
+// is this a generalized alignment to end of container?
+func IsAlignEnd(a Align) bool {
+	return (a == AlignRight || a == AlignBottom || a == AlignFlexEnd || a == AlignTextBottom)
+}
 
 // overflow type -- determines what happens when there is too much stuff in a layout
 type Overflow int32
@@ -62,32 +76,39 @@ var KiT_Overflow = ki.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow"
 
 // todo: for style
 // Align = layouts
-// Content -- enum of various options
-// Items -- similar enum -- combine
-// Self "
 // Flex -- flexbox -- https://www.w3schools.com/css/css3_flexbox.asp -- key to look at further for layout ideas
 // as is Position -- absolute, sticky, etc
 // Resize: user-resizability
-// vertical-align
 // z-index
+
+// CSS vs. Layout alignment
+//
+// CSS has align-self, align-items (for a container, provides a default for
+// items) and align-content which only applies to lines in a flex layout (akin
+// to a flow layout) -- there is a presumed horizontal aspect to these, except
+// align-content, so they are subsumed in the AlignH parameter in this style.
+// Vertical-align works as expected, and Text.Align uses left/center/right
+//
+// LayoutRow, Col both allow explicit Top/Left Center/Middle, Right/Bottom alignment
+// along with Justify and SpaceAround -- they use IsAlign functions
 
 // style preferences on the layout of the element
 type LayoutStyle struct {
-	z_index        int           `xml:"z-index",desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH         AlignHoriz    `xml:"align-horiz",desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV         AlignVert     `xml:"align-vert",desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX           units.Value   `xml:"x",desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY           units.Value   `xml:"y",desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width          units.Value   `xml:"width",desc:"specified size of element -- 0 if not specified"`
-	Height         units.Value   `xml:"height",desc:"specified size of element -- 0 if not specified"`
-	MaxWidth       units.Value   `xml:"max-width",desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight      units.Value   `xml:"max-height",desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth       units.Value   `xml:"min-width",desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight      units.Value   `xml:"min-height",desc:"specified mimimum size of element -- 0 if not specified"`
-	Offsets        []units.Value `xml:"{top,right,bottom,left}",desc:"specified offsets for each side"`
-	Margin         units.Value   `xml:"margin",desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Overflow       Overflow      `xml:"overflow",desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
-	ScrollBarWidth units.Value   `xml:"scrollbar-width",desc:"width of a layout scrollbar"`
+	z_index        int           `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH         Align         `xml:"align-self" alt:"horiz-align,align-horiz" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV         Align         `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX           units.Value   `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY           units.Value   `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
+	Width          units.Value   `xml:"width" desc:"specified size of element -- 0 if not specified"`
+	Height         units.Value   `xml:"height" desc:"specified size of element -- 0 if not specified"`
+	MaxWidth       units.Value   `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight      units.Value   `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth       units.Value   `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight      units.Value   `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
+	Offsets        []units.Value `xml:"{top,right,bottom,left}" desc:"specified offsets for each side"`
+	Margin         units.Value   `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Overflow       Overflow      `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	ScrollBarWidth units.Value   `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
 }
 
 func (ls *LayoutStyle) Defaults() {
@@ -101,13 +122,13 @@ func (ls *LayoutStyle) Defaults() {
 func (ls *LayoutStyle) SetStylePost() {
 }
 
-// return the alignment for given dimension, using horiz terminology (top = left, etc)
-func (ls *LayoutStyle) AlignDim(d Dims2D) AlignHoriz {
+// return the alignment for given dimension
+func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
 	switch d {
 	case X:
 		return ls.AlignH
 	default:
-		return AlignHoriz(ls.AlignV)
+		return ls.AlignV
 	}
 }
 
@@ -227,11 +248,11 @@ const (
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay       Layouts    `xml:"lay",desc:"type of layout to use"`
+	Lay       Layouts    `xml:"lay" desc:"type of layout to use"`
 	StackTop  ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize Vec2D      `xml:"-",desc:"total max size of children as laid out"`
-	HScroll   *ScrollBar `xml:"-",desc:"horizontal scroll bar -- we fully manage this as needed"`
-	VScroll   *ScrollBar `xml:"-",desc:"vertical scroll bar -- we fully manage this as needed"`
+	ChildSize Vec2D      `xml:"-" desc:"total max size of children as laid out"`
+	HScroll   *ScrollBar `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
+	VScroll   *ScrollBar `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -308,32 +329,34 @@ func (ly *Layout) GatherSizes() {
 	// Pref size of childs.
 }
 
-// in case we don't have any explicit allocsize set for us -- go up parents
-// until we find one -- typically a viewport
+// if we are not a child of a layout, then get allocation from a parent obj that
+// has a layout size
 func (ly *Layout) AllocFromParent() {
-	if !ly.LayData.AllocSize.IsZero() {
+	if ly.Parent == nil {
 		return
 	}
-
-	// todo: take into account position within parent size??
-
-	ly.FunUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, pg := KiToNode2D(k)
-		if pg == nil {
-			return false
-		}
-		if !pg.LayData.AllocSize.IsZero() {
-			ly.LayData.AllocSize = pg.LayData.AllocSize
-			// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize,
-			// 	pg.Name)
-			return false
-		}
-		return true
-	})
+	pgi, _ := KiToNode2D(ly.Parent)
+	lyp := pgi.AsLayout2D()
+	if lyp == nil {
+		ly.FunUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
+			_, pg := KiToNode2D(k)
+			if pg == nil {
+				return false
+			}
+			if !pg.LayData.AllocSize.IsZero() {
+				ly.LayData.AllocPos = pg.LayData.AllocPos
+				ly.LayData.AllocSize = pg.LayData.AllocSize
+				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize,
+				// 	pg.Name)
+				return false
+			}
+			return true
+		})
+	}
 }
 
 // calculations to layout a single-element dimension, returns pos and size
-func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz) (pos, size float64) {
+func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (pos, size float64) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -363,13 +386,11 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al AlignHoriz
 	if stretchMax || stretchNeed {
 		size += extra
 	} else {
-		switch al {
-		case AlignLeft:
-		case AlignHCenter:
+		if IsAlignMiddle(al) {
 			pos += 0.5 * extra
-		case AlignRight:
+		} else if IsAlignEnd(al) {
 			pos += extra
-		case AlignHJustify: // treat justify as stretch!
+		} else if al == AlignJustify { // treat justify as stretch
 			size += extra
 		}
 	}
@@ -456,7 +477,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	extraSpace := 0.0
-	if sz > 1 && extra > 0.0 && al == AlignHJustify && !stretchNeed && !stretchMax {
+	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
 		extraSpace = extra / float64(sz-1)
@@ -466,9 +487,11 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	pos := ly.Style.Layout.Margin.Dots
 
 	// todo: need a direction setting too
-	if al == AlignRight && !stretchNeed && !stretchMax {
-		pos = extra
+	if IsAlignEnd(al) && !stretchNeed && !stretchMax {
+		pos += extra
 	}
+
+	// fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Name, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 
 	for i, c := range ly.Children {
 		_, gi := KiToNode2D(c)
@@ -495,6 +518,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPos.SetDim(dim, pos)
+		// fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Name, pos, size)
 		pos += size
 	}
 }
@@ -696,7 +720,6 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 	if !gi.WinBBox.Overlaps(ly.WinBBox) { // out of view
 		return
 	}
-	gi.Bounds = gi.Viewport.Render.Bounds // save mask for if they are re-rendered later
 	gii.Render2D()
 }
 
@@ -737,7 +760,6 @@ func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
 }
 
-// need multiple iterations?
 func (ly *Layout) Layout2D(iter int) {
 
 	if iter == 0 {
@@ -766,22 +788,22 @@ func (ly *Layout) Layout2D(iter int) {
 }
 
 func (ly *Layout) Render2D() {
-	// fmt.Printf("lay render %v\n", ly.Name)
-	// pc := &ly.Paint
-	st := &ly.Style
-	rs := &ly.Viewport.Render
-	es := ly.ExtraSize()
-	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots) //.AddVal(st.Border.Width.Dots)
-	sz := ly.LayData.AllocSize.Sub(es)
+	if ly.PushBounds() {
+		ly.RenderScrolls()
 
-	ly.RenderScrolls()
+		st := &ly.Style
+		rs := &ly.Viewport.Render
+		es := ly.ExtraSize()
 
-	rs.PushBounds() // save any current bounds
-	rs.Bounds = image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
-	// pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-	// pc.Clip(rs)
-	ly.Render2DChildren()
-	rs.PopBounds()
+		// now push bounds for interior of us
+		pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+		sz := ly.LayData.AllocSize.Sub(es)
+		nb := image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
+		rs.PushBounds(nb)
+		ly.Render2DChildren()
+		rs.PopBounds()
+	}
+	ly.PopBounds()
 }
 
 func (ly *Layout) CanReRender2D() bool {
@@ -849,25 +871,28 @@ func (g *Frame) Node2DBBox() image.Rectangle {
 }
 
 func (g *Frame) Render2D() {
-	pc := &g.Paint
-	st := &g.Style
-	rs := &g.Viewport.Render
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColor(&st.Background.Color)
-	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).SubVal(st.Border.Width.Dots)
-	sz := g.LayData.AllocSize.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(2.0 * st.Border.Width.Dots)
-	// pos := g.LayData.AllocPos
-	// sz := g.LayData.AllocSize
-	rad := st.Border.Radius.Dots
-	if rad == 0.0 {
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-	} else {
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-	}
-	pc.FillStrokeClear(rs)
+	if g.PushBounds() {
+		pc := &g.Paint
+		st := &g.Style
+		rs := &g.Viewport.Render
+		pc.StrokeStyle.SetColor(&st.Border.Color)
+		pc.StrokeStyle.Width = st.Border.Width
+		pc.FillStyle.SetColor(&st.Background.Color)
+		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
+		sz := g.LayData.AllocSize.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+		// pos := g.LayData.AllocPos
+		// sz := g.LayData.AllocSize
+		rad := st.Border.Radius.Dots
+		if rad == 0.0 {
+			pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+		} else {
+			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		}
+		pc.FillStrokeClear(rs)
 
-	g.Layout.Render2D()
+		g.Layout.Render2D()
+	}
+	g.PopBounds()
 }
 
 func (g *Frame) CanReRender2D() bool {
@@ -930,7 +955,10 @@ func (g *Stretch) Node2DBBox() image.Rectangle {
 }
 
 func (g *Stretch) Render2D() {
-	g.Render2DChildren()
+	if g.PushBounds() {
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *Stretch) CanReRender2D() bool {
@@ -985,7 +1013,10 @@ func (g *Space) Node2DBBox() image.Rectangle {
 }
 
 func (g *Space) Render2D() {
-	g.Render2DChildren()
+	if g.PushBounds() {
+		g.Render2DChildren()
+	}
+	g.PopBounds()
 }
 
 func (g *Space) CanReRender2D() bool {

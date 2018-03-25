@@ -21,13 +21,13 @@ import (
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Win           OSWindow              `json:"-",desc:"OS-specific window interface"`
-	EventSigs     [EventTypeN]ki.Signal `json:"-",desc:"signals for communicating each type of window (wde) event"`
-	Focus         ki.Ki                 `json:"-",desc:"node receiving keyboard events"`
-	Dragging      ki.Ki                 `json:"-",desc:"node receiving mouse dragging events"`
-	LastDrag      time.Time             `json:"-",desc:"time since last drag event"`
-	LastSentDrag  MouseDraggedEvent     `json:"-",desc:"last drag that we actually sent"`
-	stopEventLoop bool                  `json:"-",desc:"signal for communicating all user events (mouse, keyboard, etc)"`
+	Win           OSWindow              `json:"-" desc:"OS-specific window interface"`
+	EventSigs     [EventTypeN]ki.Signal `json:"-" desc:"signals for communicating each type of window (wde) event"`
+	Focus         ki.Ki                 `json:"-" desc:"node receiving keyboard events"`
+	Dragging      ki.Ki                 `json:"-" desc:"node receiving mouse dragging events"`
+	LastDrag      time.Time             `json:"-" desc:"time since last drag event"`
+	LastSentDrag  MouseDraggedEvent     `json:"-" desc:"last drag that we actually sent"`
+	stopEventLoop bool                  `json:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json

@@ -59,25 +59,25 @@ const (
 // thumb that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
 type SliderBase struct {
 	WidgetBase
-	Min         float64              `xml:"min",desc:"minimum value in range"`
-	Max         float64              `xml:"max",desc:"maximum value in range"`
-	Step        float64              `xml:"step",desc:"smallest step size to increment"`
-	PageStep    float64              `xml:"step",desc:"larger PageUp / Dn step size"`
-	Value       float64              `xml:"value",desc:"current value"`
-	EmitValue   float64              `xml:"value",desc:"previous emitted value - don't re-emit if it is the same"`
-	Size        float64              `xml:"size",desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThumbSize   float64              `xml:"thumb-size",desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	Min         float64              `xml:"min" desc:"minimum value in range"`
+	Max         float64              `xml:"max" desc:"maximum value in range"`
+	Step        float64              `xml:"step" desc:"smallest step size to increment"`
+	PageStep    float64              `xml:"step" desc:"larger PageUp / Dn step size"`
+	Value       float64              `xml:"value" desc:"current value"`
+	EmitValue   float64              `xml:"value" desc:"previous emitted value - don't re-emit if it is the same"`
+	Size        float64              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
+	ThumbSize   float64              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
-	ThumbVal    float64              `xml:thumb-val",desc:"value that the thumb represents, in the same units"`
-	Pos         float64              `xml:"pos",desc:"logical position of the slider relative to Size"`
-	DragPos     float64              `xml:"-",desc:"underlying drag position of slider -- not subject to snapping"`
-	VisPos      float64              `xml:"vispos",desc:"visual position of the slider -- can be different from pos in a RTL environment"`
-	Horiz       bool                 `xml:"horiz",desc:"true if horizontal, else vertical"`
-	Tracking    bool                 `xml:"tracking",desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end"`
-	Snap        bool                 `xml:"snap",desc:"snap the values to Step size increments"`
+	ThumbVal    float64              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
+	Pos         float64              `xml:"pos" desc:"logical position of the slider relative to Size"`
+	DragPos     float64              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
+	VisPos      float64              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
+	Horiz       bool                 `xml:"horiz" desc:"true if horizontal, else vertical"`
+	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end"`
+	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	StateStyles [SliderStatesN]Style `desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       SliderStates
-	SliderSig   ki.Signal `json:"-",desc:"signal for slider -- see SliderSignals for the types"`
+	SliderSig   ki.Signal `json:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
 }
 
@@ -427,13 +427,16 @@ func (g *Slider) Node2DBBox() image.Rectangle {
 }
 
 func (g *Slider) Render2D() {
-	if g.IsLeaf() {
-		g.Render2DDefaultStyle()
-	} else {
-		// todo: manage stacked layout to select appropriate image based on state
-		// return
+	if g.PushBounds() {
+		if g.IsLeaf() {
+			g.Render2DDefaultStyle()
+		} else {
+			// todo: manage stacked layout to select appropriate image based on state
+			// return
+		}
+		g.Render2DChildren()
 	}
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled
@@ -681,13 +684,16 @@ func (g *ScrollBar) Node2DBBox() image.Rectangle {
 }
 
 func (g *ScrollBar) Render2D() {
-	if g.IsLeaf() {
-		g.Render2DDefaultStyle()
-	} else {
-		// todo: manage stacked layout to select appropriate image based on state
-		// return
+	if g.PushBounds() {
+		if g.IsLeaf() {
+			g.Render2DDefaultStyle()
+		} else {
+			// todo: manage stacked layout to select appropriate image based on state
+			// return
+		}
+		g.Render2DChildren()
 	}
-	g.Render2DChildren()
+	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled

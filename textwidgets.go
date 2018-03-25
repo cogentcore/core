@@ -20,7 +20,7 @@ import (
 // including box rendering
 type Label struct {
 	WidgetBase
-	Text string `xml:"text",desc:"label to display"`
+	Text string `xml:"text" desc:"label to display"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -43,11 +43,10 @@ func (g *Label) InitNode2D() {
 }
 
 var LabelProps = map[string]interface{}{
-	"padding":    "2px",
-	"margin":     "2px",
-	"font-size":  "24pt",
-	"text-align": "left",
-	"color":      "black",
+	"padding":        "2px",
+	"margin":         "2px",
+	"font-size":      "24pt",
+	"vertical-align": "top",
 }
 
 func (g *Label) Style2D() {
@@ -94,9 +93,9 @@ func (g *Label) Render2D() {
 		pc.StrokeStyle.SetColor(&st.Color) // ink color
 
 		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+		sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
-		pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9)
+		pc.DrawString(rs, g.Text, pos.X, pos.Y, sz.X)
 		g.Render2DChildren()
 	}
 	g.PopBounds()
@@ -129,14 +128,14 @@ const (
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Text         string    `xml:"text",desc:"the last saved value of the text string being edited"`
-	EditText     string    `xml:"-",desc:"the live text string being edited, with latest modifications"`
-	StartPos     int       `xml:"start-pos",desc:"starting display position in the string"`
-	EndPos       int       `xml:"end-pos",desc:"ending display position in the string"`
-	CursorPos    int       `xml:"cursor-pos",desc:"current cursor position"`
-	CharWidth    int       `xml:"char-width",desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectMode   bool      `xml:"select-mode",desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal `json:"-",desc:"signal for line edit -- see TextFieldSignals for the types"`
+	Text         string    `xml:"text" desc:"the last saved value of the text string being edited"`
+	EditText     string    `xml:"-" desc:"the live text string being edited, with latest modifications"`
+	StartPos     int       `xml:"start-pos" desc:"starting display position in the string"`
+	EndPos       int       `xml:"end-pos" desc:"ending display position in the string"`
+	CursorPos    int       `xml:"cursor-pos" desc:"current cursor position"`
+	CharWidth    int       `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectMode   bool      `xml:"select-mode" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal `json:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles  [2]Style  `desc:"normal style and focus style"`
 }
 
@@ -227,6 +226,11 @@ func (g *TextField) CursorDelete(steps int) {
 	g.UpdateEnd()
 }
 
+func (g *TextField) CursorKill() {
+	steps := len(g.EditText) - g.CursorPos
+	g.CursorDelete(steps)
+}
+
 func (g *TextField) InsertAtCursor(str string) {
 	g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + str + g.EditText[g.CursorPos:]
@@ -250,6 +254,8 @@ func (g *TextField) KeyInput(kt KeyTypedEvent) {
 		g.CursorEnd()
 	case KeyFunBackspace:
 		g.CursorBackspace(1)
+	case KeyFunKill:
+		g.CursorKill()
 	case KeyFunDelete:
 		g.CursorDelete(1)
 	case KeyFunAbort:
@@ -366,6 +372,7 @@ var TextFieldProps = [2]map[string]interface{}{
 		"margin":           "1px",
 		"font-size":        "24pt",
 		"text-align":       "left",
+		"vertical-align":   "top",
 		"color":            "black",
 		"background-color": "#EEE",
 	}, { // focus
@@ -506,12 +513,12 @@ func (g *TextField) Render2D() {
 		g.AutoScroll()
 
 		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		// sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+		sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
 
 		cur := g.EditText[g.StartPos:g.EndPos]
 
 		// todo: find baseline etc -- need a better anchored call for top-aligned
-		pc.DrawStringAnchored(rs, cur, pos.X, pos.Y, 0.0, 0.9)
+		pc.DrawStringAnchored(rs, cur, pos.X, pos.Y, 0.0, 0.9, sz.X)
 		if g.HasFocus() {
 			g.RenderCursor()
 		}
