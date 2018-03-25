@@ -37,14 +37,14 @@ type Node struct {
 	Name       string `desc:"user-supplied name of this node -- can be empty or non-unique"`
 	UniqueName string `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
 	Props      map[string]interface{}
-	Parent     Ki                     `json:"-",xml:"-",desc:"parent of this node -- set automatically when this node is added as a child of parent"`
+	Parent     Ki                     `json:"-" xml:"-" desc:"parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType  Type                   `desc:"default type of child to create -- if nil then same type as node itself is used"`
 	Children   Slice                  `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
-	NodeSig    Signal                 `json:"-",xml:"-",desc:"signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Updating   AtomCtr                `json:"-",xml:"-",desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	Deleted    []Ki                   `json:"-",xml:"-",desc:"keeps track of deleted nodes until destroyed"`
-	This       Ki                     `json:"-",xml:"-",desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
-	TmpProps   map[string]interface{} `json:"-",xml:"-",desc:"temporary properties that are not saved -- e.g., used by Gi views to store view properties"`
+	NodeSig    Signal                 `json:"-" xml:"-" desc:"signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Updating   AtomCtr                `json:"-" xml:"-" desc:"updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
+	Deleted    []Ki                   `json:"-" xml:"-" desc:"keeps track of deleted nodes until destroyed"`
+	This       Ki                     `json:"-" xml:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	TmpProps   map[string]interface{} `json:"-" xml:"-" desc:"temporary properties that are not saved -- e.g., used by Gi views to store view properties"`
 }
 
 // must register all new types so type names can be looked up by name -- also props
