@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	// "math"
@@ -314,7 +314,6 @@ func (g *Button) Render2D() {
 func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
-	fmt.Printf("but text style: %+v\n", st.Text)
 	g.Render2DText(g.Text)
 }
 

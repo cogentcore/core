@@ -549,7 +549,6 @@ func (g *MenuButton) Render2D() {
 // render using a default style if not otherwise styled
 func (g *MenuButton) Render2DDefaultStyle() {
 	st := &g.Style
-	fmt.Printf("mnu but text style: %+v\n", st.Text)
 	g.RenderStdBox(st)
 	g.Render2DText(g.Text)
 

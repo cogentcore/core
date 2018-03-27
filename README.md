@@ -60,6 +60,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* something not quite right with BBoxes.
+* window needs a "focus vp" for popup viewports that grab focus
+
 * native UnmarshalXML is not going to be flexible enough to support effective
   parsing from SVG into corresponding nodes -- going to have to use pi parsing system.. 
   

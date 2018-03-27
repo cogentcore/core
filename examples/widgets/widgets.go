@@ -79,11 +79,8 @@ func mainrun() {
 
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
-	edit1.SetProp("align-vert", "inherit")
 	button1.Text = "Button 1"
-	button1.SetProp("align-vert", "inherit")
 	button2.Text = "Button 2"
-	button2.SetProp("align-vert", "inherit")
 
 	edit1.TextFieldSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.KiName(), data)

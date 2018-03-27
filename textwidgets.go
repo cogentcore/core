@@ -351,7 +351,7 @@ var TextFieldProps = [2]map[string]interface{}{
 		"margin":           "1px",
 		"font-size":        "24pt",
 		"text-align":       "left",
-		"vertical-align":   "center",
+		"vertical-align":   "top",
 		"color":            "black",
 		"background-color": "#EEE",
 	}, { // focus
