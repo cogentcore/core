@@ -6,6 +6,7 @@ package ki
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"math"
@@ -55,6 +56,63 @@ func (k *Type) UnmarshalJSON(b []byte) error {
 	}
 	k.T = typ
 	return nil
+}
+
+// MarshalXML saves only the type name
+func (k Type) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	tokens := []xml.Token{start}
+	if k.T == nil {
+		tokens = append(tokens, xml.CharData("null"))
+	} else {
+		tokens = append(tokens, xml.CharData(k.T.Name()))
+	}
+	tokens = append(tokens, xml.EndElement{start.Name})
+	for _, t := range tokens {
+		err := e.EncodeToken(t)
+		if err != nil {
+			return err
+		}
+	}
+	err := e.Flush()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UnmarshalXML loads the type name and looks it up in the Types registry of type names
+func (k *Type) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	t, err := d.Token()
+	if err != nil {
+		return err
+	}
+	ct, ok := t.(xml.CharData)
+	if ok {
+		tn := string(bytes.TrimSpace([]byte(ct)))
+		if tn == "null" {
+			k.T = nil
+		} else {
+			// fmt.Printf("loading type: %v\n", tn)
+			typ := Types.FindType(tn)
+			if typ == nil {
+				return fmt.Errorf("Type UnmarshalXML: Types type name not found: %v", tn)
+			}
+			k.T = typ
+		}
+		t, err := d.Token()
+		if err != nil {
+			return err
+		}
+		et, ok := t.(xml.EndElement)
+		if ok {
+			if et.Name != start.Name {
+				return fmt.Errorf("Type UnmarshalXML: EndElement: %v does not match StartElement: %v", et.Name, start.Name)
+			}
+			return nil
+		}
+		return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", et)
+	}
+	return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", ct)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

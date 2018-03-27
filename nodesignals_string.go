@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _NodeSignals_name = "NodeSignalNilNodeSignalAddedNodeSignalMovedNodeSignalDeletingNodeSignalDestroyingNodeSignalUpdatedNodeSignalFieldUpdatedNodeSignaPropUpdatedNodeSignalChildAddedNodeSignalChildDeletedNodeSignalChildrenDeletedNodeSignalsN"
+const _NodeSignals_name = "NodeSignalNilNodeSignalAddedNodeSignalMovedNodeSignalChildAddedNodeSignalChildDeletedNodeSignalChildrenDeletedNodeSignalUpdatedNodeSignalFieldUpdatedNodeSignalPropUpdatedNodeSignalDeletingNodeSignalDestroyingNodeSignalsN"
 
-var _NodeSignals_index = [...]uint8{0, 13, 28, 43, 61, 81, 98, 120, 140, 160, 182, 207, 219}
+var _NodeSignals_index = [...]uint8{0, 13, 28, 43, 63, 85, 110, 127, 149, 170, 188, 208, 220}
 
 func (i NodeSignals) String() string {
 	if i < 0 || i >= NodeSignals(len(_NodeSignals_index)-1) {

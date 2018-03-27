@@ -281,6 +281,12 @@ type Ki interface {
 	// load the tree from a JSON-encoded byte string -- wraps UnmarshalJSON and calls UnmarshalPost
 	LoadJSON(b []byte) error
 
+	// save the tree to an XML-encoded byte string
+	SaveXML(indent bool) ([]byte, error)
+
+	// load the tree from an XML-encoded byte string
+	LoadXML(b []byte) error
+
 	// walk the tree down from current node and call FindPtrFromPath on all Ptr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
 	SetPtrsFmPaths()
 

@@ -9,6 +9,7 @@ package ki
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"github.com/json-iterator/go"
 	//	"errors"
 	"fmt"
@@ -34,9 +35,9 @@ The Node implements the Ki interface and provides the core functionality for the
 The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info -- add these to all your derived struct's fields.  See relevant docs for other such tags controlling a wide range of GUI and other functionality -- Ki makes extensive use of such tags.
 */
 type Node struct {
-	Name       string `desc:"user-supplied name of this node -- can be empty or non-unique"`
-	UniqueName string `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Props      map[string]interface{}
+	Name       string                 `desc:"user-supplied name of this node -- can be empty or non-unique"`
+	UniqueName string                 `desc:"automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Props      map[string]interface{} `xml:"-" desc:"property map for arbitrary extensible properties, including style properties"`
 	Parent     Ki                     `json:"-" xml:"-" desc:"parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType  Type                   `desc:"default type of child to create -- if nil then same type as node itself is used"`
 	Children   Slice                  `desc:"list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
@@ -753,6 +754,30 @@ func (n *Node) LoadJSON(b []byte) error {
 	return nil
 }
 
+func (n *Node) SaveXML(indent bool) ([]byte, error) {
+	if err := n.ThisCheck(); err != nil {
+		return nil, err
+	}
+	if indent {
+		return xml.MarshalIndent(n.This, "", "  ")
+	} else {
+		return xml.Marshal(n.This)
+	}
+}
+
+func (n *Node) LoadXML(b []byte) error {
+	var err error
+	if err = n.ThisCheck(); err != nil {
+		return err
+	}
+	err = xml.Unmarshal(b, n.This) // key use of this!
+	if err != nil {
+		return nil
+	}
+	n.UnmarshalPost()
+	return nil
+}
+
 func (n *Node) SetPtrsFmPaths() {
 	root := n.This
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
@@ -784,7 +809,11 @@ func (n *Node) SetPtrsFmPaths() {
 func (n *Node) ParentAllChildren() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		for _, child := range k.KiChildren() {
-			child.SetParent(k)
+			if child != nil {
+				child.SetParent(k)
+			} else {
+				return false
+			}
 		}
 		return true
 	})

@@ -7,11 +7,14 @@ package ki
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/json-iterator/go"
+	"log"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // Slice provides JSON marshal / unmarshal with encoding of underlying types
@@ -235,4 +238,203 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 	}
 	*k = append(*k, nwk...)
 	return nil
+}
+
+// MarshalXML saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
+
+func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	tokens := []xml.Token{start}
+	nk := len(k)
+	nt := xml.StartElement{Name: xml.Name{"", "N"}}
+	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{nt.Name})
+	for _, kid := range k {
+		knm := reflect.TypeOf(kid).Elem().Name()
+		t := xml.StartElement{Name: xml.Name{"", "Type"}}
+		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{t.Name})
+	}
+	for _, t := range tokens {
+		err := e.EncodeToken(t)
+		if err != nil {
+			return err
+		}
+	}
+	err := e.Flush()
+	if err != nil {
+		return err
+	}
+	for _, kid := range k {
+		knm := reflect.TypeOf(kid).Elem().Name()
+		ct := xml.StartElement{Name: xml.Name{"", knm}}
+		err := e.EncodeElement(kid, ct)
+		if err != nil {
+			return err
+		}
+	}
+	err = e.EncodeToken(xml.EndElement{start.Name})
+	if err != nil {
+		return err
+	}
+	err = e.Flush()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// read a start element token
+func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
+	for {
+		var t xml.Token
+		t, err = d.Token()
+		if err != nil {
+			log.Printf("ki.DecodeXMLStartEl err %v\n", err)
+			return
+		}
+		switch tv := t.(type) {
+		case xml.StartElement:
+			start = tv
+			return
+		case xml.CharData: // actually passes the spaces and everything through here
+			continue
+		case xml.EndElement:
+			err = fmt.Errorf("ki.DecodeXMLStartEl: got unexpected EndElement\n")
+			log.Printf("%v", err)
+			return
+		default:
+			continue
+		}
+	}
+}
+
+// read an end element
+func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
+	for {
+		t, err := d.Token()
+		if err != nil {
+			log.Printf("ki.DecodeXMLEndEl err %v\n", err)
+			return err
+		}
+		switch tv := t.(type) {
+		case xml.EndElement:
+			if tv.Name != start.Name {
+				err = fmt.Errorf("ki.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
+				log.Printf("%v", err)
+				return err
+			}
+			return nil
+		case xml.CharData: // actually passes the spaces and everything through here
+			continue
+		case xml.StartElement:
+			err = fmt.Errorf("ki.DecodeXMLEndEl: got unexpected StartElement: %v\n", tv.Name)
+			log.Printf("%v", err)
+			return err
+		default:
+			continue
+		}
+	}
+}
+
+// read char data..
+func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
+	for {
+		var t xml.Token
+		t, err = d.Token()
+		if err != nil {
+			log.Printf("ki.DecodeXMLCharData err %v\n", err)
+			return
+		}
+		switch tv := t.(type) {
+		case xml.CharData:
+			val = string([]byte(tv))
+			return
+		case xml.StartElement:
+			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v\n", tv.Name)
+			log.Printf("%v", err)
+			return
+		case xml.EndElement:
+			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected EndElement: %v\n", tv.Name)
+			log.Printf("%v", err)
+			return
+		}
+	}
+}
+
+// read a start / chardata / end sequence of 3 elements, returning name, val
+func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
+	var st xml.StartElement
+	st, err = DecodeXMLStartEl(d)
+	if err != nil {
+		return
+	}
+	name = st.Name.Local
+	val, err = DecodeXMLCharData(d)
+	if err != nil {
+		return
+	}
+	err = DecodeXMLEndEl(d, st)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// UnmarshalJSON parses the length and type information for each object in the slice, creates the new slice with those elements, and then loads based on the remaining bytes which represent each element
+func (k *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	// for _, attr := range start.Attr {
+	// 	// todo: need to set the props from name / value -- don't have parent though!
+	// }
+	name, val, err := DecodeXMLCharEl(d)
+	if err != nil {
+		return err
+	}
+	if name == "N" {
+		n64, err := strconv.ParseInt(string(val), 10, 64)
+		if err != nil {
+			return err
+		}
+		n := int(n64)
+		if n == 0 {
+			return DecodeXMLEndEl(d, start)
+		}
+		// fmt.Printf("n parsed: %d from %v\n", n, string(val))
+		nwk := make([]Ki, 0, n) // allocate new slice
+
+		for i := 0; i < n; i++ {
+			name, val, err = DecodeXMLCharEl(d)
+			if name == "Type" {
+				tn := strings.TrimSpace(val)
+				// fmt.Printf("making type: %v\n", tn)
+				typ := Types.FindType(tn)
+				if typ == nil {
+					return fmt.Errorf("ki.Slice UnmarshalXML: Types type name not found: %v", tn)
+				}
+				nkid := reflect.New(typ).Interface()
+				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
+				kid, ok := nkid.(Ki)
+				if !ok {
+					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
+				}
+				kid.SetThis(kid)
+				nwk = append(nwk, kid)
+			}
+		}
+
+		for i := 0; i < n; i++ {
+			st, err := DecodeXMLStartEl(d)
+			if err != nil {
+				return err
+			}
+			// todo: could double-check st
+			err = d.DecodeElement(nwk[i], &st)
+			if err != nil {
+				log.Printf("%v", err)
+				return err
+			}
+		}
+		*k = append(*k, nwk...)
+		// } else {
+	}
+	// todo: in theory we could just parse a list of type names as tags, but for the "dump" format
+	// this is more robust.
+	return DecodeXMLEndEl(d, start) // final end
 }

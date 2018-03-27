@@ -210,7 +210,7 @@ func TestNodeFindType(t *testing.T) {
 //////////////////////////////////////////
 //  JSON I/O
 
-func TestNodeEmbedJSonSave(t *testing.T) {
+func TestNodeJSonSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.SetThisName(&parent, "par1")
 	parent.Mbr1 = "bloop"
@@ -242,6 +242,42 @@ func TestNodeEmbedJSonSave(t *testing.T) {
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
+		}
+	}
+}
+
+func TestNodeXMLSave(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetThisName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child1")
+	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+
+	parent.Ptr.Ptr = child2
+	child2.Ptr.Ptr = schild2
+
+	b, err := parent.SaveXML(true)
+	if err != nil {
+		t.Error(err)
+		// } else {
+		// 	fmt.Printf("xml output:\n%v\n", string(b))
+	}
+
+	tstload := NodeEmbed{}
+	tstload.SetThisName(&tstload, "")
+	err = tstload.LoadXML(b)
+	if err != nil {
+		t.Error(err)
+	} else {
+		tstb, _ := tstload.SaveXML(true)
+		// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd XML rep are not equivalent")
 		}
 	}
 }

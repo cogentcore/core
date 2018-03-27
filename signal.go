@@ -28,6 +28,13 @@ import (
 // using the NodeSignal (convert int64 to NodeSignals to get the stringer name)
 type NodeSignals int64
 
+// todo: consider supporting bit-flags on these node sigs, and keeping track
+// of all the mods that were made during an update -- otherwise this specific
+// info is typically lost and you just get a generic update -- could optimize
+// updates better by knowing the specific changes -- OR keep it simpler and
+// just have one update signal?  but need to not re-render for deleting, so
+// need that level of granularity..
+
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (
 	// no signal
@@ -37,33 +44,46 @@ const (
 	// node was moved in the tree, or to a new tree -- data is old parent
 	NodeSignalMoved
 	// node is being deleted from its parent -- still has parent set in case any cleanup is neede
-	NodeSignalDeleting
-	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too
-	NodeSignalDestroying
-	// entire node updated -- this could include multiple children added / deleted
-	NodeSignalUpdated
-	// a field was updated -- data is name of field
-	NodeSignalFieldUpdated
-	// a property was set -- data is name of property
-	NodeSignaPropUpdated
 	// data is the added child
 	NodeSignalChildAdded
 	// data is deleted child
 	NodeSignalChildDeleted
 	// all children deleted -- no data
 	NodeSignalChildrenDeleted
+	// entire node updated -- this could include multiple children added / deleted
+	NodeSignalUpdated
+	// a field was updated -- data is name of field
+	NodeSignalFieldUpdated
+	// a property was set -- data is name of property
+	NodeSignalPropUpdated
+	// node is being deleted from its parent children list
+	NodeSignalDeleting
+	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too
+	NodeSignalDestroying
 	// number of signal type consts -- add this to any other signal types passed
 	NodeSignalsN
 )
 
 //go:generate stringer -type=NodeSignals
 
-// set this to true to automatically print out a trace of the
+// set this to true to automatically print out a trace of the signals as they are sent
 var NodeSignalTrace bool = false
 
 // set this to a string to receive trace in a string that can be compared for testing
 // otherwise just goes to stdout
 var NodeSignalTraceString *string
+
+// classifies a set of node signals indicating that some major modification
+// was made to the structure of the tree, involving this node -- should
+// generally trigger a full rebuild
+func NodeSignalAnyMod(sig int64) bool {
+	return sig >= int64(NodeSignalAdded) && sig <= int64(NodeSignalChildrenDeleted)
+}
+
+// classifies a set of node signals indicating that some kind of update was made
+func NodeSignalAnyUpdate(sig int64) bool {
+	return sig >= int64(NodeSignalUpdated) && sig <= int64(NodeSignalPropUpdated)
+}
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
 type RecvFun func(receiver, sender Ki, sig int64, data interface{})
