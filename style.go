@@ -5,7 +5,7 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image/color"
@@ -189,9 +189,21 @@ func (s *Style) SetStyle(parent, defs *Style, props map[string]interface{}) {
 // set the unit context based on size of viewport and parent element (from bbox)
 // and then cache everything out in terms of raw pixel dots for rendering -- call at start of
 // render
-func (s *Style) SetUnitContext(rs *RenderState, el float64) {
-	sz := rs.Image.Bounds().Size()
-	s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el)
+func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
+	s.UnContext.Defaults() // todo: need to get screen information and true dpi
+	if vp != nil {
+		sz := vp.Render.Image.Bounds().Size()
+		s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+	}
+	s.Font.SetUnitContext(&s.UnContext)
+	s.ToDots()
+}
+
+// copy units context from another, update with our font info, and then cache
+// everything out in terms of raw pixel dots for rendering -- call at start of
+// render
+func (s *Style) CopyUnitContext(ctxt *units.Context) {
+	s.UnContext = *ctxt
 	s.Font.SetUnitContext(&s.UnContext)
 	s.ToDots()
 }
@@ -388,6 +400,8 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
 		if ki.Enums.FindEnum(sf.Type.Name()) != nil {
 			ki.Enums.SetEnumValueFromAltString(vf, prstr)
+		} else {
+			fmt.Printf("enum name not found %v for field %v\n", sf.Type.Name(), sf.Name)
 		}
 		return
 	}

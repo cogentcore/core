@@ -114,8 +114,8 @@ func (g *Text2D) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Text2D) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Text2D) Init2D() {
+	g.Init2DBase()
 	g.LayData.Defaults()
 }
 
@@ -123,24 +123,25 @@ func (g *Text2D) Style2D() {
 	g.Style2DSVG()
 }
 
-func (g *Text2D) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		pc := &g.Paint
-		var w, h float64
-		// pre-wrap the text
-		if pc.TextStyle.WordWrap {
-			g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
-		} else {
-			w, h = pc.MeasureString(g.Text)
-		}
-		g.LayData.AllocSize = Vec2D{w, h}
+func (g *Text2D) Size2D() {
+	g.InitLayout2D()
+	pc := &g.Paint
+	var w, h float64
+	// pre-wrap the text
+	if pc.TextStyle.WordWrap {
+		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
 	} else {
-		g.GeomFromLayout()
+		w, h = pc.MeasureString(g.Text)
 	}
+	g.LayData.AllocSize = Vec2D{w, h}
 }
 
-func (g *Text2D) Node2DBBox() image.Rectangle {
+func (g *Text2D) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Text2D) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
 }
 
@@ -148,8 +149,7 @@ func (g *Text2D) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		pc.SetUnitContext(rs, 0) // todo: not sure about el
-		g.SetWinBBox(g.Node2DBBox())
+		// pc.SetUnitContext(g.Viewport, Vec2DZero) // todo: not sure about el
 		// fmt.Printf("rendering text %v\n", g.Text)
 		if pc.TextStyle.WordWrap {
 			pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
@@ -158,8 +158,8 @@ func (g *Text2D) Render2D() {
 			pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
 		}
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Text2D) CanReRender2D() bool {

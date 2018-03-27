@@ -38,8 +38,8 @@ func (g *Rect) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Rect) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Rect) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Rect) Style2D() {
@@ -50,17 +50,17 @@ func (g *Rect) Style2D() {
 	}
 }
 
-func (g *Rect) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Rect) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Rect) Node2DBBox() image.Rectangle {
+func (g *Rect) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Rect) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
@@ -68,7 +68,6 @@ func (g *Rect) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		if g.Radius.X == 0 && g.Radius.Y == 0 {
 			pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 		} else {
@@ -77,8 +76,8 @@ func (g *Rect) Render2D() {
 		}
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Rect) CanReRender2D() bool {
@@ -116,8 +115,8 @@ func (g *Viewport2DFill) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Viewport2DFill) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Viewport2DFill) Init2D() {
+	g.Init2DBase()
 	vp := g.Viewport
 	g.Pos = Vec2DZero
 	g.Size = Vec2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
@@ -127,18 +126,18 @@ func (g *Viewport2DFill) Style2D() {
 	g.Style2DSVG()
 }
 
-func (g *Viewport2DFill) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Viewport2DFill) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Viewport2DFill) Node2DBBox() image.Rectangle {
-	g.InitNode2D() // keep up-to-date -- cheap
+func (g *Viewport2DFill) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Viewport2DFill) BBox2D() image.Rectangle {
+	g.Init2D() // keep up-to-date -- cheap
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
@@ -180,8 +179,8 @@ func (g *Circle) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Circle) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Circle) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Circle) Style2D() {
@@ -192,17 +191,17 @@ func (g *Circle) Style2D() {
 	}
 }
 
-func (g *Circle) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Circle) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Circle) Node2DBBox() image.Rectangle {
+func (g *Circle) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Circle) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
 }
 
@@ -210,12 +209,11 @@ func (g *Circle) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Circle) CanReRender2D() bool {
@@ -253,8 +251,8 @@ func (g *Ellipse) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Ellipse) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Ellipse) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Ellipse) Style2D() {
@@ -265,17 +263,17 @@ func (g *Ellipse) Style2D() {
 	}
 }
 
-func (g *Ellipse) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Ellipse) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Ellipse) Node2DBBox() image.Rectangle {
+func (g *Ellipse) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Ellipse) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 }
 
@@ -283,12 +281,11 @@ func (g *Ellipse) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Ellipse) CanReRender2D() bool {
@@ -325,8 +322,8 @@ func (g *Line) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Line) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Line) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Line) Style2D() {
@@ -337,17 +334,17 @@ func (g *Line) Style2D() {
 	}
 }
 
-func (g *Line) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Line) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Line) Node2DBBox() image.Rectangle {
+func (g *Line) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Line) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 }
 
@@ -355,12 +352,11 @@ func (g *Line) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 		pc.Stroke(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Line) CanReRender2D() bool {
@@ -396,8 +392,8 @@ func (g *Polyline) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Polyline) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Polyline) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Polyline) Style2D() {
@@ -408,17 +404,17 @@ func (g *Polyline) Style2D() {
 	}
 }
 
-func (g *Polyline) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Polyline) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Polyline) Node2DBBox() image.Rectangle {
+func (g *Polyline) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Polyline) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(g.Points)
 }
 
@@ -426,15 +422,14 @@ func (g *Polyline) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		if len(g.Points) < 2 {
 			return
 		}
 		pc.DrawPolyline(rs, g.Points)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Polyline) CanReRender2D() bool {
@@ -470,8 +465,8 @@ func (g *Polygon) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Polygon) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Polygon) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Polygon) Style2D() {
@@ -482,17 +477,17 @@ func (g *Polygon) Style2D() {
 	}
 }
 
-func (g *Polygon) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		g.LayData.AllocSize.SetFromPoint(g.Node2DBBox().Size())
-	} else {
-		g.GeomFromLayout()
-	}
-	g.Paint.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Polygon) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
 }
 
-func (g *Polygon) Node2DBBox() image.Rectangle {
+func (g *Polygon) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Polygon) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(g.Points)
 }
 
@@ -500,15 +495,14 @@ func (g *Polygon) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		g.SetWinBBox(g.Node2DBBox())
 		if len(g.Points) < 2 {
 			return
 		}
 		pc.DrawPolygon(rs, g.Points)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Polygon) CanReRender2D() bool {

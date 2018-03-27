@@ -40,7 +40,7 @@ func NewWindow(name string, width, height int) *Window {
 	var err error
 	win.Win, err = NewOSWindow(width, height)
 	if err != nil {
-		fmt.Printf("gogi NewWindow error: %v \n", err)
+		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
 	win.Win.SetTitle(name)
@@ -89,7 +89,7 @@ func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	}
 	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
-	vp.FullRender2DRoot()
+	vp.FullRender2DTree()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et EventType, fun ki.RecvFun) {
@@ -115,7 +115,7 @@ func (w *Window) StopEventLoop() {
 func (w *Window) StartEventLoop() {
 	vp := w.WinViewport2D()
 	if vp != nil {
-		vp.FullRender2DRoot()
+		vp.FullRender2DTree()
 	}
 	w.SetNextFocusItem()
 	var wg sync.WaitGroup

@@ -17,11 +17,19 @@ import (
 	"reflect"
 )
 
+// A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
+// rendering area even if it is itself a child of another Viewport.  This is
+// necessary for rendering onto the image that it provides.  This creates
+// challenges for managing the different geometries in a coherent way, e.g.,
+// events come through the Window in terms of the root VP coords.  Thus, nodes
+// require a  WinBBox for events and a VpBBox for their parent Viewport.
+
 // Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	Node2DBase
-	ViewBox ViewBox2D   `svg:"viewBox" desc:"viewbox within any parent Viewport2D"`
+	Fill    bool        `desc:"fill the viewport with background-color from style"`
+	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
 	Pixels  *image.RGBA `json:"-" desc:"pixels that we render into"`
 	Backing *image.RGBA `json:"-" desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
@@ -63,7 +71,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 	vp.Render.Image = vp.Pixels
 	vp.ViewBox.Size = image.Point{width, height}
 	vp.UpdateEnd()
-	vp.FullRender2DRoot()
+	vp.FullRender2DTree()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -113,15 +121,15 @@ func (g *Viewport2D) AsLayout2D() *Layout {
 	return nil
 }
 
-func (vp *Viewport2D) InitNode2D() {
-	vp.InitNode2DBase()
+func (vp *Viewport2D) Init2D() {
+	vp.Init2DBase()
 	// we update oursleves whenever any node update event happens
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()
 		// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
 		// todo: don't re-render if deleting!
-		rvp.FullRender2DRoot()
+		rvp.FullRender2DTree()
 	})
 }
 
@@ -129,18 +137,23 @@ func (vp *Viewport2D) Style2D() {
 	vp.Style2DWidget()
 }
 
-func (vp *Viewport2D) Layout2D(iter int) {
-	if iter == 0 {
-		vp.InitLayout2D()
-		vp.LayData.AllocSize.SetFromPoint(vp.ViewBox.Size)
-	} else {
-		vp.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
-		// todo: we now need to update our ViewBox based on Alloc values..
-	}
+func (vp *Viewport2D) Size2D() {
+	vp.InitLayout2D()
+	vp.LayData.AllocSize.SetFromPoint(vp.ViewBox.Size)
 }
 
-func (vp *Viewport2D) Node2DBBox() image.Rectangle {
-	return vp.ViewBox.Bounds()
+func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
+	// viewport ignores any parent parent bbox info!
+	psize := vp.AddParentPos()
+	vp.VpBBox = vp.Pixels.Bounds()
+	vp.SetWinBBox()                    // still add offsets
+	vp.Style.SetUnitContext(vp, psize) // update units with final layout
+	vp.Paint.SetUnitContext(vp, psize) // always update paint
+	vp.Layout2DChildren()
+}
+
+func (vp *Viewport2D) BBox2D() image.Rectangle {
+	return vp.Pixels.Bounds() // not sure about: ViewBox.Bounds()
 }
 
 func (vp *Viewport2D) RenderViewport2D() {
@@ -154,16 +167,12 @@ func (vp *Viewport2D) RenderViewport2D() {
 
 // we use our own render for these -- Viewport member is our parent!
 func (vp *Viewport2D) PushBounds() bool {
-	rs := &vp.Render
-	if vp.Viewport != nil {
-		rs.PushBounds(vp.WinBBox)
-		vp.Bounds = rs.Bounds // save for later re-rendering
-	} else {
-		rs.PushBounds(image.ZR)
-		rs.Bounds = vp.WinBBox
-		vp.Bounds = rs.Bounds
+	if vp.VpBBox.Empty() {
+		return false
 	}
-	return !vp.Bounds.Empty() // don't render if this function returns false
+	rs := &vp.Render
+	rs.PushBounds(vp.VpBBox)
+	return true
 }
 
 func (vp *Viewport2D) PopBounds() {
@@ -173,10 +182,17 @@ func (vp *Viewport2D) PopBounds() {
 
 func (vp *Viewport2D) Render2D() {
 	if vp.PushBounds() {
+		if vp.Fill {
+			pc := &vp.Paint
+			pc.FillStyle.SetColor(&vp.Style.Background.Color)
+			pc.StrokeStyle.SetColor(nil)
+			pc.DrawRectangle(&vp.Render, 0.0, 0.0, float64(vp.ViewBox.Size.X),
+				float64(vp.ViewBox.Size.Y))
+		}
 		vp.Render2DChildren() // we must do children first, then us!
 		vp.RenderViewport2D() // update our parent image
+		vp.PopBounds()
 	}
-	vp.PopBounds()
 }
 
 func (vp *Viewport2D) CanReRender2D() bool {
@@ -202,140 +218,34 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
-	gii, _ := KiToNode2D(node)
+	gii, gi := KiToNode2D(node)
 	if gii == nil { // should not happen
 		return
 	}
 	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	// todo: probably need better ways of telling how much re-rendering is needed
-	if sig == int64(ki.NodeSignalChildAdded) {
-		vp.Init2DRoot()
-		vp.Style2DRoot()
-		vp.Render2DRoot()
-	} else {
+	if ki.NodeSignalAnyMod(sig) {
+		vp.FullRender2DTree()
+	} else if ki.NodeSignalAnyUpdate(sig) {
 		if gii.CanReRender2D() {
 			vp.ReRender2DNode(gii)
 		} else {
-			vp.Style2DFromNode(gii) // restyle only from affected node downward
-			vp.ReRender2DRoot()     // need to re-render entirely..
+			gi.Style2DTree()    // restyle only from affected node downward
+			vp.ReRender2DTree() // need to re-render entirely from us
 		}
 	}
+	// don't do anything on deleting or destroying, and
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Root-level Viewport API -- does all the recursive calls
 
-// initialize scene graph
-func (vp *Viewport2D) Init2DRoot() {
-	vp.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, _ := KiToNode2D(k)
-		if gii == nil {
-			return false
-		}
-		gii.InitNode2D()
-		return true
-	})
-}
-
-// full render of the tree
-func (vp *Viewport2D) FullRender2DRoot() {
-	vp.Init2DRoot()
-	vp.Style2DRoot()
-	vp.Layout2DRoot()
-	vp.Render2DRoot()
-}
-
-// re-render of the tree -- after it has already been initialized and styled
-// -- does layout and render passes
-func (vp *Viewport2D) ReRender2DRoot() {
-	vp.Layout2DRoot()
-	vp.Render2DRoot()
-}
-
 // re-render a specific node that has said it can re-render
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
-	popBounds := false
-	if !gn.Bounds.Empty() {
-		popBounds = true
-		vp.Render.PushBounds(image.ZR) // don't intersect with existing
-		vp.Render.Bounds = gn.Bounds   // direct copy
-	}
-	vp.Render2DFromNode(gni)
-	if popBounds {
-		vp.Render.PopBounds()
-	}
+	gn.Render2DTree()
 	vp.RenderViewport2D()
-}
-
-// do the styling -- only from root
-func (vp *Viewport2D) Style2DRoot() {
-	vp.Style2DFromNode(vp.This.(Node2D))
-}
-
-// do the layout pass from root
-func (vp *Viewport2D) Layout2DRoot() {
-	vp.Layout2DFromNode(vp.This.(Node2D))
-}
-
-// do the render from root
-func (vp *Viewport2D) Render2DRoot() {
-	vp.Render2DFromNode(vp.This.(Node2D))
-}
-
-// this only needs to be done on a structural update
-func (vp *Viewport2D) Style2DFromNode(gni Node2D) {
-	gn := gni.AsNode2D()
-	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, _ := KiToNode2D(k)
-		if gii == nil {
-			return false // going into a different type of thing, bail
-		}
-		gii.Style2D()
-		return true
-	})
-}
-
-// do the layout pass in 2 iterations, first depth-first, then me-first
-func (vp *Viewport2D) Layout2DFromNode(gni Node2D) {
-	gn := gni.AsNode2D()
-	// layout happens in depth-first manner -- requires two functions
-	gn.FunDownDepthFirst(0, vp,
-		func(k ki.Ki, level int, d interface{}) bool { // this is for testing whether to process node
-			_, gi := KiToNode2D(k)
-			if gi == nil || gi.Paint.Off {
-				return false
-			}
-			return true
-		},
-		func(k ki.Ki, level int, d interface{}) bool {
-			gii, gi := KiToNode2D(k)
-			if gi == nil || gi.Paint.Off {
-				return false
-			}
-			gii.Layout2D(0)
-			return true
-		})
-
-	// second pass we add the parent positions after layout -- don't want to do that in
-	// render b/c then it doesn't work for local re-renders..
-	gn.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
-		if gi == nil || gi.Paint.Off {
-			return false
-		}
-		gii.Layout2D(1) // todo: check for multiple iterations needed..
-		return true
-	})
-
-}
-
-// render just calls on parent node and it takes full responsibility for
-// managing the children -- this allows maximum flexibility for order etc of
-// rendering
-func (vp *Viewport2D) Render2DFromNode(gni Node2D) {
-	gni.Render2D()
 }
 
 // SavePNG encodes the image as a PNG and writes it to disk.

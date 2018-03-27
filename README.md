@@ -60,29 +60,23 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* Rendering with a clip mask in place is DRAMATICALLY slower.  Need to use a diff solution for keeping stuff from rendering outside the box. 
+* native UnmarshalXML is not going to be flexible enough to support effective
+  parsing from SVG into corresponding nodes -- going to have to use pi parsing system.. 
+  
+* which means finishing graphical elements using simple hand-coded Icon's instead of parsing from file, until the tree view and property editor are usable, to then make the parsing workable.
 
-In paintserver.go, this seems to be it:
+* SVGBox, Icon, and XML parsing -- do this right to get icons for things, need for toggle on treeview -- svg box, viewport
 
-			ma := s.Alpha
-			if r.mask != nil {
-				ma = ma * uint32(r.mask.AlphaAt(x, y).A) / 255
-				if ma == 0 {
-					continue
-				}
-			}
-
-really not clear how that ends up being so slow.  another soln is to just add extra bounds.
+* first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
 
 
 * need disconnection code in ki 
 
-* fix scrolling issues per below, and look into scroll gestures, scrollwheel, etc.
+* look into scroll gestures, scrollwheel, etc.
 * tree view should work quite well -- put in a layout and test out..
 
 Next:
-* why do we have units context on style and paint?  one is not getting initialized -- 
-doesn't make sense to have two.
+* UnContext not getting initialized on either paint or style -- probably paint -- paint is used for svg while style is for widgets
 * check for Updating count > 0 somewhere -- going to be a common error
 * Layout flow types
 * Layout grid
@@ -97,8 +91,9 @@ doesn't make sense to have two.
 Soon:
 
 * Reminder: grep all todo: in code -- lots!
-* svg box, viewport
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
+
+* all builtin defaults should use units.Value and other raw values instead of strings
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ SplitView
@@ -121,9 +116,9 @@ Soon:
 	+ TreeView (NodeWidget) -- needs controls, menu, updating, dnd, clip, -- see about LI, UL lists..
 	+ TabWidget -- needs updating
 	+ Label -- done -- could make lots of H1, etc alts
-	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient!  Except clipping seems a bit slow.
+	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient! 
 
-* update increment threshold for scrollbar -- less frequent updates.
+* not needed now: update increment threshold for scrollbar -- less frequent updates.
 
 
 ## 3D Design

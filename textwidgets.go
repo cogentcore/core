@@ -38,8 +38,8 @@ func (g *Label) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Label) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Label) Init2D() {
+	g.Init2DBase()
 }
 
 var LabelProps = map[string]interface{}{
@@ -56,49 +56,28 @@ func (g *Label) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Label) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		st := &g.Style
-		pc := &g.Paint
-		var w, h float64
-		w, h = pc.MeasureString(g.Text)
-		if st.Layout.Width.Dots > 0 {
-			w = math.Max(st.Layout.Width.Dots, w)
-		}
-		if st.Layout.Height.Dots > 0 {
-			h = math.Max(st.Layout.Height.Dots, h)
-		}
-		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		g.LayData.AllocSize = Vec2D{w, h}
-	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
-	}
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
+func (g *Label) Size2D() {
+	g.InitLayout2D()
+	g.Size2DFromText(g.Text)
 }
 
-func (g *Label) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *Label) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+func (g *Label) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *Label) Render2D() {
 	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
 		st := &g.Style
-		pc.FontStyle = st.Font
-		pc.TextStyle = st.Text
-		g.DrawStdBox(st)
-		pc.StrokeStyle.SetColor(&st.Color) // ink color
-
-		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
-
-		pc.DrawString(rs, g.Text, pos.X, pos.Y, sz.X)
+		g.RenderStdBox(st)
+		g.Render2DText(g.Text)
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Label) CanReRender2D() bool {
@@ -336,8 +315,8 @@ func (g *TextField) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *TextField) InitNode2D() {
-	g.InitNode2DBase()
+func (g *TextField) Init2D() {
+	g.Init2DBase()
 	g.EditText = g.Text
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf, ok := recv.(*TextField)
@@ -372,7 +351,7 @@ var TextFieldProps = [2]map[string]interface{}{
 		"margin":           "1px",
 		"font-size":        "24pt",
 		"text-align":       "left",
-		"vertical-align":   "top",
+		"vertical-align":   "center",
 		"color":            "black",
 		"background-color": "#EEE",
 	}, { // focus
@@ -391,34 +370,22 @@ func (g *TextField) Style2D() {
 	g.StateStyles[1].SetStyle(nil, &StyleDefault, TextFieldProps[1])
 }
 
-func (g *TextField) Layout2D(iter int) {
-	if iter == 0 {
-		g.EditText = g.Text
-		g.EndPos = len(g.EditText)
-		g.InitLayout2D()
-		st := &g.Style
-		pc := &g.Paint
-		var w, h float64
-		w, h = pc.MeasureString(g.Text)
-		if st.Layout.Width.Dots > 0 {
-			w = math.Max(st.Layout.Width.Dots, w)
-		}
-		if st.Layout.Height.Dots > 0 {
-			h = math.Max(st.Layout.Height.Dots, h)
-		}
-		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		g.LayData.AllocSize = Vec2D{w, h}
-	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
-	}
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
-	g.StateStyles[0].SetUnitContext(&g.Viewport.Render, 0)
-	g.StateStyles[1].SetUnitContext(&g.Viewport.Render, 0)
+func (g *TextField) Size2D() {
+	g.EditText = g.Text
+	g.EndPos = len(g.EditText)
+	g.Size2DFromText(g.EditText)
 }
 
-func (g *TextField) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *TextField) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	for i := 0; i < 2; i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.Layout2DChildren()
+}
+
+func (g *TextField) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *TextField) RenderCursor() {
@@ -496,35 +463,21 @@ func (g *TextField) AutoScroll() {
 
 func (g *TextField) Render2D() {
 	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
+		g.AutoScroll()
 		if g.HasFocus() {
 			g.Style = g.StateStyles[1]
 		} else {
 			g.Style = g.StateStyles[0]
 		}
-		st := &g.Style
-		pc.FontStyle = st.Font
-		pc.TextStyle = st.Text
-		g.DrawStdBox(st)
-		pc.StrokeStyle.SetColor(&st.Color) // ink color
-
-		// keep everything in range
-		g.AutoScroll()
-
-		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
-
+		g.RenderStdBox(&g.Style)
 		cur := g.EditText[g.StartPos:g.EndPos]
-
-		// todo: find baseline etc -- need a better anchored call for top-aligned
-		pc.DrawStringAnchored(rs, cur, pos.X, pos.Y, 0.0, 0.9, sz.X)
+		g.Render2DText(cur)
 		if g.HasFocus() {
 			g.RenderCursor()
 		}
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *TextField) CanReRender2D() bool {

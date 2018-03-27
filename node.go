@@ -8,7 +8,7 @@ import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
-	"log"
+	// "log"
 	"reflect"
 	// "strconv"
 )
@@ -40,7 +40,8 @@ var KiT_NodeFlags = ki.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
 type NodeBase struct {
 	ki.Node
 	NodeFlags int64           `desc:"bitwise flags set according to NodeFlags type"`
-	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object -- need to project all the way up to that -- used e.g., for event filtering"`
+	VpBBox    image.Rectangle `json:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -49,7 +50,7 @@ var KiT_NodeBase = ki.Types.AddType(&NodeBase{}, nil)
 func (g *NodeBase) ParentWindow() *Window {
 	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived -- need interface
 	if wini == nil {
-		log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
+		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
 		return nil
 	}
 	return wini.(*Window)
@@ -69,11 +70,6 @@ func (g *NodeBase) DisconnectAllEvents() {
 	if win != nil {
 		win.DisconnectNode(g.This)
 	}
-}
-
-// zero-out the window bbox -- for nodes that are not visible
-func (g *NodeBase) ZeroWinBBox() {
-	g.WinBBox = image.ZR
 }
 
 // does the current node have keyboard focus

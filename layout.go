@@ -5,7 +5,7 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
@@ -346,8 +346,7 @@ func (ly *Layout) AllocFromParent() {
 			if !pg.LayData.AllocSize.IsZero() {
 				ly.LayData.AllocPos = pg.LayData.AllocPos
 				ly.LayData.AllocSize = pg.LayData.AllocSize
-				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize,
-				// 	pg.Name)
+				fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Name)
 				return false
 			}
 			return true
@@ -543,7 +542,7 @@ func (ly *Layout) SetHScroll() {
 		ly.HScroll.SetThisName(ly.HScroll, "Lay_HScroll")
 		ly.HScroll.SetParent(ly.This)
 		ly.HScroll.Horiz = true
-		ly.HScroll.InitNode2D()
+		ly.HScroll.Init2D()
 		ly.HScroll.Defaults()
 	}
 	sc := ly.HScroll
@@ -588,7 +587,7 @@ func (ly *Layout) SetVScroll() {
 		ly.VScroll = &ScrollBar{}
 		ly.VScroll.SetThisName(ly.VScroll, "Lay_VScroll")
 		ly.VScroll.SetParent(ly.This)
-		ly.VScroll.InitNode2D()
+		ly.VScroll.Init2D()
 		ly.VScroll.Defaults()
 	}
 	sc := ly.VScroll
@@ -631,7 +630,7 @@ func (ly *Layout) LayoutScrolls() {
 	sw := ly.Style.Layout.ScrollBarWidth.Dots
 	if ly.HScroll != nil {
 		sc := ly.HScroll
-		sc.Layout2D(0)
+		sc.Size2D()
 		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X
 		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sw
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
@@ -640,11 +639,11 @@ func (ly *Layout) LayoutScrolls() {
 			sc.LayData.AllocSize.X -= sw
 		}
 		sc.LayData.AllocSize.Y = sw
-		sc.Layout2D(1)
+		sc.Layout2D(ly.VpBBox)
 	}
 	if ly.VScroll != nil {
 		sc := ly.VScroll
-		sc.Layout2D(0)
+		sc.Size2D()
 		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sw
 		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
@@ -653,7 +652,7 @@ func (ly *Layout) LayoutScrolls() {
 			sc.LayData.AllocSize.Y -= sw
 		}
 		sc.LayData.AllocSize.X = sw
-		sc.Layout2D(1)
+		sc.Layout2D(ly.VpBBox)
 	}
 }
 
@@ -716,11 +715,8 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 		off := ly.VScroll.Value
 		gi.LayData.AllocPos.Y -= off
 	}
-	gi.GeomFromLayout()
-	if !gi.WinBBox.Overlaps(ly.WinBBox) { // out of view
-		return
-	}
-	gii.Render2D()
+	gi.ComputeBBox(ly.VpBBox)
+	gii.Render2D() // child will not render if bbox is empty
 }
 
 // convenience for LayoutStacked to show child node at a given index
@@ -744,66 +740,68 @@ func (ly *Layout) AsViewport2D() *Viewport2D {
 	return nil
 }
 
-func (ly *Layout) AsLayout2D() *Layout {
-	return ly
+func (g *Layout) AsLayout2D() *Layout {
+	return g
 }
 
-func (ly *Layout) InitNode2D() {
-	ly.InitNode2DBase()
+func (ly *Layout) Init2D() {
+	ly.Init2DBase()
 }
 
-func (ly *Layout) Node2DBBox() image.Rectangle {
-	return ly.WinBBoxFromAlloc()
+func (ly *Layout) BBox2D() image.Rectangle {
+	return ly.BBoxFromAlloc()
 }
 
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
 }
 
-func (ly *Layout) Layout2D(iter int) {
+func (ly *Layout) Size2D() {
+	ly.InitLayout2D()
+	ly.GatherSizes()
+}
 
-	if iter == 0 {
-		ly.InitLayout2D()
-		ly.GatherSizes()
-	} else {
-		ly.AllocFromParent() // in case we didn't get anything
-		switch ly.Lay {
-		case LayoutRow:
-			ly.LayoutAll(X)
-			ly.LayoutSingle(Y)
-		case LayoutCol:
-			ly.LayoutAll(Y)
-			ly.LayoutSingle(X)
-		case LayoutStacked:
-			ly.LayoutSingle(X)
-			ly.LayoutSingle(Y)
-		}
-		ly.FinalizeLayout()
-		ly.GeomFromLayout()
-		ly.ManageOverflow()
-		ly.LayoutScrolls()
+func (ly *Layout) Layout2D(parBBox image.Rectangle) {
+	ly.AllocFromParent()           // in case we didn't get anything
+	ly.Layout2DBase(parBBox, true) // init style
+	switch ly.Lay {
+	case LayoutRow:
+		ly.LayoutAll(X)
+		ly.LayoutSingle(Y)
+	case LayoutCol:
+		ly.LayoutAll(Y)
+		ly.LayoutSingle(X)
+	case LayoutStacked:
+		ly.LayoutSingle(X)
+		ly.LayoutSingle(Y)
 	}
-	// todo: test if this is needed -- if there are any el-relative settings anyway
-	ly.Style.SetUnitContext(&ly.Viewport.Render, 0)
+	ly.FinalizeLayout()
+	ly.ManageOverflow()
+	ly.LayoutScrolls()
+
+	st := &ly.Style
+	es := ly.ExtraSize()
+	// now push bounds for interior of us
+	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+	sz := ly.LayData.AllocSize.Sub(es)
+	nb := image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
+	// fmt.Printf("Lay %v push bounds %v\n", ly.Name, nb)
+
+	// layout the kids, using new bounds excluding scrollbars
+	for _, kid := range ly.Children {
+		gii, _ := KiToNode2D(kid)
+		if gii != nil {
+			gii.Layout2D(nb)
+		}
+	}
 }
 
 func (ly *Layout) Render2D() {
 	if ly.PushBounds() {
 		ly.RenderScrolls()
-
-		st := &ly.Style
-		rs := &ly.Viewport.Render
-		es := ly.ExtraSize()
-
-		// now push bounds for interior of us
-		pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
-		sz := ly.LayData.AllocSize.Sub(es)
-		nb := image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
-		rs.PushBounds(nb)
 		ly.Render2DChildren()
-		rs.PopBounds()
+		ly.PopBounds()
 	}
-	ly.PopBounds()
 }
 
 func (ly *Layout) CanReRender2D() bool {
@@ -840,8 +838,8 @@ func (g *Frame) AsLayout2D() *Layout {
 	return &g.Layout
 }
 
-func (g *Frame) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Frame) Init2D() {
+	g.Init2DBase()
 }
 
 var FrameProps = map[string]interface{}{
@@ -862,12 +860,16 @@ func (g *Frame) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Frame) Layout2D(iter int) {
-	g.Layout.Layout2D(iter) // use the layout version
+func (g *Frame) Size2D() {
+	g.Layout.Size2D()
 }
 
-func (g *Frame) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *Frame) Layout2D(parBBox image.Rectangle) {
+	g.Layout.Layout2D(parBBox)
+}
+
+func (g *Frame) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *Frame) Render2D() {
@@ -891,8 +893,8 @@ func (g *Frame) Render2D() {
 		pc.FillStrokeClear(rs)
 
 		g.Layout.Render2D()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Frame) CanReRender2D() bool {
@@ -930,8 +932,8 @@ func (g *Stretch) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Stretch) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Stretch) Init2D() {
+	g.Init2DBase()
 }
 
 var StretchProps = map[string]interface{}{
@@ -946,19 +948,24 @@ func (g *Stretch) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Stretch) Layout2D(iter int) {
-	g.BaseLayout2D(iter)
+func (g *Stretch) Size2D() {
+	g.InitLayout2D()
 }
 
-func (g *Stretch) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *Stretch) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+func (g *Stretch) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *Stretch) Render2D() {
 	if g.PushBounds() {
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Stretch) CanReRender2D() bool {
@@ -993,8 +1000,8 @@ func (g *Space) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Space) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Space) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *Space) Style2D() {
@@ -1004,19 +1011,24 @@ func (g *Space) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Space) Layout2D(iter int) {
-	g.BaseLayout2D(iter)
+func (g *Space) Size2D() {
+	g.InitLayout2D()
 }
 
-func (g *Space) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *Space) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+func (g *Space) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *Space) Render2D() {
 	if g.PushBounds() {
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *Space) CanReRender2D() bool {

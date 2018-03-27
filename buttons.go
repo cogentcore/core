@@ -5,10 +5,10 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/ki"
 	"image"
-	"math"
+	// "math"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@ const (
 	ButtonFlagCheckable
 	// button is checked
 	ButtonFlagChecked
+	ButtonFlagsN
 )
 
 // signals that buttons can send
@@ -70,8 +71,8 @@ type ButtonBase struct {
 	Text        string               `xml:"text" desc:"label for the button"`
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State       ButtonStates
-	ButtonSig   ki.Signal `json:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	ButtonSig   ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	// todo: icon -- should be an xml
 }
 
@@ -179,8 +180,8 @@ func (g *Button) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Button) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Button) Init2D() {
+	g.Init2DBase()
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
@@ -261,7 +262,6 @@ var ButtonProps = []map[string]interface{}{
 }
 
 func (g *Button) Style2D() {
-	// we can focus by default
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
@@ -273,44 +273,26 @@ func (g *Button) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, &StyleDefault, ButtonProps[i])
 		}
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
-func (g *Button) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		st := &g.Style
-		pc := &g.Paint
-		var w, h float64
-		w, h = pc.MeasureString(g.Text)
-		if st.Layout.Width.Dots > 0 {
-			w = math.Max(st.Layout.Width.Dots, w)
-		}
-		if st.Layout.Height.Dots > 0 {
-			h = math.Max(st.Layout.Height.Dots, h)
-		}
-		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		g.LayData.AllocSize = Vec2D{w, h}
-	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
-	}
-
-	// todo: test for use of parent-el relative units -- indicates whether multiple loops
-	// are required
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
-	// now get styles for the different states
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
-	}
-
+func (g *Button) Size2D() {
+	g.InitLayout2D()
+	g.Size2DFromText(g.Text)
 }
 
-func (g *Button) Node2DBBox() image.Rectangle {
-	// fmt.Printf("button win box: %v\n", g.WinBBox)
-	return g.WinBBoxFromAlloc()
+func (g *Button) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.Layout2DChildren()
+}
+
+func (g *Button) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 // todo: need color brigher / darker functions
@@ -324,24 +306,16 @@ func (g *Button) Render2D() {
 			// return
 		}
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled
 func (g *Button) Render2DDefaultStyle() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
 	st := &g.Style
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	g.DrawStdBox(st)
-	pc.StrokeStyle.SetColor(&st.Color) // ink color
-
-	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-	sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
-
-	pc.DrawStringAnchored(rs, g.Text, pos.X, pos.Y, 0.0, 0.9, sz.X)
+	g.RenderStdBox(st)
+	fmt.Printf("but text style: %+v\n", st.Text)
+	g.Render2DText(g.Text)
 }
 
 func (g *Button) CanReRender2D() bool {

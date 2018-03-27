@@ -97,10 +97,12 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
 // set the unit context based on size of viewport and parent element (from bbox)
 // and then cache everything out in terms of raw pixel dots for rendering -- call at start of
 // render
-func (pc *Paint) SetUnitContext(rs *RenderState, el float64) {
+func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.UnContext.Defaults() // todo: need to get screen information and true dpi
-	sz := rs.Image.Bounds().Size()
-	pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el)
+	if vp != nil {
+		sz := vp.Render.Image.Bounds().Size()
+		pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
 	pc.ToDots()
 }
@@ -166,19 +168,16 @@ type RenderState struct {
 	ClipStack   []*image.Alpha    // stack of clips, if needed
 }
 
-// push current bounds onto stack and add new bounds as intersection with existing
-// bounds, if non-empty
+// push current bounds onto stack and set new bounds
 func (rs *RenderState) PushBounds(b image.Rectangle) {
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
 	}
-	if rs.Bounds.Empty() { // should be IsEmpty!
+	if rs.Bounds.Empty() { // note: method name should be IsEmpty!
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	if !b.Empty() {
-		rs.Bounds = rs.Bounds.Intersect(b)
-	}
+	rs.Bounds = b
 }
 
 // pop Mask off the bounds stack and set to current bounds

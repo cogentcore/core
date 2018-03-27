@@ -335,8 +335,8 @@ func (g *TreeView) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *TreeView) InitNode2D() {
-	g.InitNode2DBase()
+func (g *TreeView) Init2D() {
+	g.Init2DBase()
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		_, ok := recv.(*TreeView)
 		if !ok {
@@ -425,74 +425,75 @@ func (g *TreeView) Style2D() {
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		g.StateStyles[i].SetStyle(nil, &StyleDefault, TreeViewProps[i])
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
-func (g *TreeView) Layout2D(iter int) {
-	if iter == 0 {
-		g.RootWidget = g.RootTreeView() // cache
+func (g *TreeView) Size2D() {
+	g.RootWidget = g.RootTreeView() // cache
 
-		g.InitLayout2D()
-		st := &g.Style
-		pc := &g.Paint
-		var w, h float64
+	g.InitLayout2D()
+	st := &g.Style
+	pc := &g.Paint
+	var w, h float64
 
-		if g.HasCollapsedParent() {
-			ki.ClearBitFlag(&g.NodeFlags, int(CanFocus))
-			return // nothing
-		}
-		ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	if g.HasCollapsedParent() {
+		ki.ClearBitFlag(&g.NodeFlags, int(CanFocus))
+		return // nothing
+	}
+	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
 
-		label := g.GetLabel()
+	label := g.GetLabel()
 
-		w, h = pc.MeasureString(label)
-		if st.Layout.Width.Dots > 0 {
-			w = math.Max(st.Layout.Width.Dots, w)
-		}
-		if st.Layout.Height.Dots > 0 {
-			h = math.Max(st.Layout.Height.Dots, h)
-		}
-		w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-		h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+	w, h = pc.MeasureString(label)
+	if st.Layout.Width.Dots > 0 {
+		w = math.Max(st.Layout.Width.Dots, w)
+	}
+	if st.Layout.Height.Dots > 0 {
+		h = math.Max(st.Layout.Height.Dots, h)
+	}
+	w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+	h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
 
-		g.WidgetSize = Vec2D{w, h}
+	g.WidgetSize = Vec2D{w, h}
 
-		if !g.IsCollapsed() {
-			// we layout children under us
-			for _, kid := range g.Children {
-				_, gi := KiToNode2D(kid)
-				if gi != nil {
-					gi.LayData.AllocPos.Y = h
-					gi.LayData.AllocPos.X = 20 // indent children -- todo: make a property
-					h += gi.LayData.AllocSize.Y
-					w = math.Max(w, gi.LayData.AllocPos.X+gi.LayData.AllocSize.X) // use max
-				}
+	if !g.IsCollapsed() {
+		// we layout children under us
+		for _, kid := range g.Children {
+			_, gi := KiToNode2D(kid)
+			if gi != nil {
+				gi.LayData.AllocPos.Y = h
+				gi.LayData.AllocPos.X = 20 // indent children -- todo: make a property
+				h += gi.LayData.AllocSize.Y
+				w = math.Max(w, gi.LayData.AllocPos.X+gi.LayData.AllocSize.X) // use max
 			}
 		}
-		g.LayData.AllocSize = Vec2D{w, h}
-		g.WidgetSize.X = w // stretch
-	} else {
-		g.AddParentPos()
-		rn := g.RootWidget
-		g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
-		g.WidgetSize.X = g.LayData.AllocSize.X
-		gii, _ := KiToNode2D(g.This)
-		g.SetWinBBox(gii.Node2DBBox())
 	}
-
-	// todo: test for use of parent-el relative units -- indicates whether multiple loops
-	// are required
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
-	// now get styles for the different states
-	for i := 0; i < int(TreeViewStatesN); i++ {
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
-	}
-
+	g.LayData.AllocSize = Vec2D{w, h}
+	g.WidgetSize.X = w // stretch
 }
 
-func (g *TreeView) Node2DBBox() image.Rectangle {
+func (g *TreeView) Layout2D(parBBox image.Rectangle) {
+	psize := g.AddParentPos()
+	rn := g.RootWidget
+	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
+	g.WidgetSize.X = g.LayData.AllocSize.X
+	gii := g.This.(Node2D)
+	g.VpBBox = parBBox.Intersect(gii.BBox2D())
+	g.SetWinBBox()
+	g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
+	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
+	for i := 0; i < int(TreeViewStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+
+	if !g.IsCollapsed() {
+		g.Layout2DChildren()
+	}
+}
+
+func (g *TreeView) BBox2D() image.Rectangle {
 	// we have unusual situation of bbox != alloc
 	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
 	ts := g.Paint.TransformPoint(g.WidgetSize.X, g.WidgetSize.Y)
@@ -524,10 +525,10 @@ func (g *TreeView) Render2D() {
 		pc.StrokeStyle.SetColor(&st.Border.Color)
 		pc.StrokeStyle.Width = st.Border.Width
 		pc.FillStyle.SetColor(&st.Background.Color)
-		// g.DrawStdBox()
+		// g.RenderStdBox()
 		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 		sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 
 		pc.StrokeStyle.SetColor(&st.Color) // ink color
 
@@ -540,8 +541,8 @@ func (g *TreeView) Render2D() {
 		pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9, sz.X)
 
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *TreeView) CanReRender2D() bool {
@@ -780,8 +781,8 @@ func (g *TabWidget) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *TabWidget) InitNode2D() {
-	g.InitNode2DBase()
+func (g *TabWidget) Init2D() {
+	g.Init2DBase()
 }
 
 func (g *TabWidget) Style2D() {
@@ -791,19 +792,24 @@ func (g *TabWidget) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *TabWidget) Layout2D(iter int) {
-	g.BaseLayout2D(iter)
+func (g *TabWidget) Size2D() {
+	g.InitLayout2D()
 }
 
-func (g *TabWidget) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *TabWidget) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+func (g *TabWidget) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *TabWidget) Render2D() {
 	if g.PushBounds() {
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 func (g *TabWidget) CanReRender2D() bool {

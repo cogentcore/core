@@ -28,11 +28,10 @@ func mainrun() {
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()
+	vp.SetProp("background-color", "#FFF")
+	vp.Fill = true
 
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
-	vpfill.SetProp("fill", "#FFF")
-
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
@@ -58,6 +57,21 @@ func mainrun() {
 	row2.SetProp("align-horiz", "left")
 	row2.SetProp("margin", 4.0)
 	row2.SetProp("max-width", -1)
+
+	mb1 := row2.AddNewChildNamed(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
+
+	mb1.Text = "Menu Button"
+	mb1.AddMenuText("Menu Item 1", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+	})
+
+	mb1.AddMenuText("Menu Item 2", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+	})
+
+	mb1.AddMenuText("Menu Item 3", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+	})
 
 	button1 := row2.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)

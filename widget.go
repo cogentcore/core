@@ -9,7 +9,7 @@ import (
 	// "github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	// "image"
-	// "math"
+	"math"
 	// "reflect"
 )
 
@@ -33,7 +33,7 @@ var KiT_WidgetBase = ki.Types.AddType(&WidgetBase{}, nil)
 // WidgetBase supports full Box rendering model, so Button just calls these methods to render
 // -- base function needs to take a Style arg.
 
-func (g *WidgetBase) DrawBoxImpl(pos Vec2D, sz Vec2D, rad float64) {
+func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float64) {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	if rad == 0.0 {
@@ -45,7 +45,7 @@ func (g *WidgetBase) DrawBoxImpl(pos Vec2D, sz Vec2D, rad float64) {
 }
 
 // draw standard box using given style
-func (g *WidgetBase) DrawStdBox(st *Style) {
+func (g *WidgetBase) RenderStdBox(st *Style) {
 	pc := &g.Paint
 	// rs := &g.Viewport.Render
 
@@ -57,11 +57,52 @@ func (g *WidgetBase) DrawStdBox(st *Style) {
 		spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(&st.BoxShadow.Color)
-		g.DrawBoxImpl(spos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(spos, sz, st.Border.Radius.Dots)
 	}
 	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
 	pc.FillStyle.SetColor(&st.Background.Color)
-	g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+}
+
+// measure given text string using current style
+func (g *WidgetBase) MeasureTextSize(txt string) (w, h float64) {
+	st := &g.Style
+	pc := &g.Paint
+	pc.FontStyle = st.Font
+	pc.TextStyle = st.Text
+	w, h = pc.MeasureString(txt)
+	return
+}
+
+// set our LayData.AllocSize from measured text size
+func (g *WidgetBase) Size2DFromText(txt string) {
+	st := &g.Style
+	w, h := g.MeasureTextSize(txt)
+	if st.Layout.Width.Dots > 0 {
+		w = math.Max(st.Layout.Width.Dots, w)
+	}
+	if st.Layout.Height.Dots > 0 {
+		h = math.Max(st.Layout.Height.Dots, h)
+	}
+	w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+	h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+	g.LayData.AllocSize = Vec2D{w, h}
+}
+
+// render a text string in standard box model (e.g., label for a button, etc)
+func (g *WidgetBase) Render2DText(txt string) {
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	st := &g.Style
+	pc.FontStyle = st.Font
+	pc.TextStyle = st.Text
+	pc.StrokeStyle.SetColor(&st.Color) // ink color
+
+	spc := st.Layout.Margin.Dots + st.Padding.Dots
+	pos := g.LayData.AllocPos.AddVal(spc)
+	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
+
+	pc.DrawString(rs, txt, pos.X, pos.Y, sz.X)
 }

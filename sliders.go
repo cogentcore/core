@@ -291,8 +291,8 @@ func (g *Slider) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Slider) InitNode2D() {
-	g.InitNode2DBase()
+func (g *Slider) Init2D() {
+	g.Init2DBase()
 	g.ReceiveEventType(MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*Slider)
 		if ok {
@@ -389,41 +389,37 @@ func (g *Slider) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, &StyleDefault, SliderProps[i])
 		}
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
-func (g *Slider) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		if g.ThumbSize == 0.0 {
-			g.Defaults()
-		}
-		st := &g.Style
-		// get at least thumbsize
-		sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
-		if g.Horiz {
-			g.LayData.AllocSize.Y = sz
-		} else {
-			g.LayData.AllocSize.X = sz
-		}
-	} else {
-		g.GeomFromLayout() // get our geom from layout -- always do this for widgets  iter > 0
-		g.SizeFromAlloc()
+func (g *Slider) Size2D() {
+	g.InitLayout2D()
+	if g.ThumbSize == 0.0 {
+		g.Defaults()
 	}
-
-	// todo: test for use of parent-el relative units -- indicates whether multiple loops
-	// are required
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
-	// now get styles for the different states
-	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+	st := &g.Style
+	// get at least thumbsize
+	sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
+	if g.Horiz {
+		g.LayData.AllocSize.Y = sz
+	} else {
+		g.LayData.AllocSize.X = sz
 	}
 }
 
-func (g *Slider) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *Slider) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	for i := 0; i < int(SliderStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.SizeFromAlloc()
+	g.Layout2DChildren()
+}
+
+func (g *Slider) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *Slider) Render2D() {
@@ -435,8 +431,8 @@ func (g *Slider) Render2D() {
 			// return
 		}
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled
@@ -446,7 +442,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	rs := &g.Viewport.Render
 
 	// overall fill box
-	g.DrawStdBox(&g.StateStyles[SliderBox])
+	g.RenderStdBox(&g.StateStyles[SliderBox])
 
 	// draw a 1/2 thumbsize box with a circular thumb
 	spc := st.Layout.Margin.Dots
@@ -466,10 +462,10 @@ func (g *Slider) Render2DDefaultStyle() {
 		sz.Y = g.ThumbSize - 2.0*st.Padding.Dots
 		ctr := pos.Y + 0.5*fullsz.Y
 		pos.Y = ctr - ht + st.Padding.Dots
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		sz.X = spc + g.Pos
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		pc.FillStyle.SetColor(&st.Background.Color)
 		pc.DrawCircle(rs, pos.X+sz.X, ctr, ht)
 		pc.FillStrokeClear(rs)
@@ -479,10 +475,10 @@ func (g *Slider) Render2DDefaultStyle() {
 		sz.X = g.ThumbSize - 2.0*st.Padding.Dots
 		ctr := pos.X + 0.5*fullsz.X
 		pos.X = ctr - ht + st.Padding.Dots
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		sz.Y = spc + g.Pos
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		pc.FillStyle.SetColor(&st.Background.Color)
 		pc.DrawCircle(rs, ctr, pos.Y+sz.Y, ht)
 		pc.FillStrokeClear(rs)
@@ -538,8 +534,8 @@ func (g *ScrollBar) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *ScrollBar) InitNode2D() {
-	g.InitNode2DBase()
+func (g *ScrollBar) Init2D() {
+	g.Init2DBase()
 	g.ReceiveEventType(MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
@@ -641,46 +637,42 @@ func (g *ScrollBar) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, &StyleDefault, ScrollBarProps[i])
 		}
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
-func (g *ScrollBar) Layout2D(iter int) {
-	if iter == 0 {
-		g.InitLayout2D()
-		st := &g.Style
-		wd := st.Layout.Width.Dots // this is the width pref
-		if wd == 20.0 {            // if we have the default fixed vals
-			sz := wd + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
-			if g.Horiz {
-				st.Layout.Height = st.Layout.Width
-				st.Layout.MaxHeight = st.Layout.Width
-				g.LayData.AllocSize.Y = sz
-				st.Layout.Width.Val = 0     // reset
-				st.Layout.MaxWidth.Val = -1 // infinite stretch
-			} else {
-				st.Layout.MaxWidth = st.Layout.Width
-				g.LayData.AllocSize.X = sz
-				st.Layout.MaxHeight.Val = -1 // infinite stretch
-			}
+func (g *ScrollBar) Size2D() {
+	g.InitLayout2D()
+	st := &g.Style
+	wd := st.Layout.Width.Dots // this is the width pref
+	if wd == 20.0 {            // if we have the default fixed vals
+		sz := wd + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
+		if g.Horiz {
+			st.Layout.Height = st.Layout.Width
+			st.Layout.MaxHeight = st.Layout.Width
+			g.LayData.AllocSize.Y = sz
+			st.Layout.Width.Val = 0     // reset
+			st.Layout.MaxWidth.Val = -1 // infinite stretch
+		} else {
+			st.Layout.MaxWidth = st.Layout.Width
+			g.LayData.AllocSize.X = sz
+			st.Layout.MaxHeight.Val = -1 // infinite stretch
 		}
-	} else {
-		g.GeomFromLayout()
-		g.SizeFromAlloc()
-	}
-
-	// todo: test for use of parent-el relative units -- indicates whether multiple loops
-	// are required
-	g.Style.SetUnitContext(&g.Viewport.Render, 0)
-	// now get styles for the different states
-	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].SetUnitContext(&g.Viewport.Render, 0)
 	}
 }
 
-func (g *ScrollBar) Node2DBBox() image.Rectangle {
-	return g.WinBBoxFromAlloc()
+func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	for i := 0; i < int(SliderStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.SizeFromAlloc()
+	g.Layout2DChildren()
+}
+
+func (g *ScrollBar) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
 }
 
 func (g *ScrollBar) Render2D() {
@@ -692,8 +684,8 @@ func (g *ScrollBar) Render2D() {
 			// return
 		}
 		g.Render2DChildren()
+		g.PopBounds()
 	}
-	g.PopBounds()
 }
 
 // render using a default style if not otherwise styled
@@ -703,7 +695,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	// rs := &g.Viewport.Render
 
 	// overall fill box
-	g.DrawStdBox(&g.StateStyles[SliderBox])
+	g.RenderStdBox(&g.StateStyles[SliderBox])
 
 	spc := st.Layout.Margin.Dots
 	pos := g.LayData.AllocPos.AddVal(spc)
@@ -714,17 +706,17 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	pc.FillStyle.SetColor(&st.Background.Color)
 
 	if g.Horiz {
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
-		pos.X += g.Pos                                // start of thumb
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
+		pos.X += g.Pos                                  // start of thumb
 		sz.X = g.ThumbSize
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 	} else {
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		pos.Y += g.Pos
 		sz.Y = g.ThumbSize
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.DrawBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 	}
 }
 

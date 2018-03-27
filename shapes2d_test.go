@@ -23,7 +23,7 @@ func TestRect(t *testing.T) {
 	rect1.Pos = Vec2D{10, 10}
 	rect1.Size = Vec2D{100, 100}
 
-	parent.FullRender2DRoot()
+	parent.FullRender2DTree()
 	// parent.SavePNG("test_rect.png")
 }
 
@@ -83,6 +83,6 @@ func TestShapesAll(t *testing.T) {
 		polygon1.Points = append(polygon1.Points, Vec2D{x1, y1})
 	}
 
-	parent.FullRender2DRoot()
+	parent.FullRender2DTree()
 	parent.SavePNG("test_shape_all.png")
 }

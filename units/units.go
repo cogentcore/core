@@ -116,8 +116,10 @@ type Context struct {
 	VpW float64
 	// viewport height in raw pixels
 	VpH float64
-	// surrounding contextual element in raw pixels
-	El float64
+	// width of surrounding contextual element in raw pixels
+	ElW float64
+	// height of surrounding contextual element in raw pixels
+	ElH float64
 }
 
 func (uc *Context) Defaults() {
@@ -128,23 +130,29 @@ func (uc *Context) Defaults() {
 	uc.FontRem = 12.0
 	uc.VpW = 800.0
 	uc.VpH = 600.0
-	uc.El = uc.VpW
+	uc.ElW = uc.VpW
+	uc.ElH = uc.VpH
 }
 
 // set the context values
-func (uc *Context) Set(em, ex, ch, rem, vpw, vph, el float64) {
-	uc.SetSizes(vpw, vph, el)
+func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float64) {
+	uc.SetSizes(vpw, vph, elw, elh)
 	uc.SetFont(em, ex, ch, rem)
 }
 
 // set the context values for non-font sizes -- el can be 0 and then defaults to vpw
-func (uc *Context) SetSizes(vpw, vph, el float64) {
+func (uc *Context) SetSizes(vpw, vph, elw, elh float64) {
 	uc.VpW = vpw
 	uc.VpH = vph
-	if el == 0 {
-		uc.El = vpw
+	if elw == 0 {
+		uc.ElW = vpw
 	} else {
-		uc.El = el
+		uc.ElW = elw
+	}
+	if elh == 0 {
+		uc.ElH = vph
+	} else {
+		uc.ElH = elh
 	}
 }
 
@@ -159,12 +167,12 @@ func (uc *Context) SetFont(em, ex, ch, rem float64) {
 // factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) ToDotsFactor(un Unit) float64 {
 	if uc.DPI == 0 {
-		log.Printf("Context was not initialized -- falling back on defaults\n")
+		log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
 	}
 	switch un {
 	case Pct:
-		return uc.El
+		return uc.ElW // todo: height should be in terms of Elh.. sheesh
 	case Em:
 		return uc.DPI / (PtPerInch / uc.FontEm)
 	case Ex:
