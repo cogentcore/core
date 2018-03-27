@@ -156,13 +156,9 @@ var ActionProps = []map[string]interface{}{
 }
 
 func (g *Action) Style2D() {
-	// we can focus by default
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ActionProps[ButtonNormal])
-	// then style with user props
 	g.Style2DWidget()
-	// now get styles for the different states
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -170,7 +166,6 @@ func (g *Action) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2D{})
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
 func (g *Action) Size2D() {
@@ -188,6 +183,10 @@ func (g *Action) Layout2D(parBBox image.Rectangle) {
 
 func (g *Action) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *Action) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 func (g *Action) Render2D() {
@@ -269,9 +268,7 @@ var SeparatorProps = map[string]interface{}{
 }
 
 func (g *Separator) Style2D() {
-	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, SeparatorProps)
-	// then style with user props
 	g.Style2DWidget()
 }
 
@@ -286,6 +283,10 @@ func (g *Separator) Layout2D(parBBox image.Rectangle) {
 
 func (g *Separator) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *Separator) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 func (g *Separator) Render2D() {
@@ -499,11 +500,8 @@ var MenuButtonProps = []map[string]interface{}{
 
 func (g *MenuButton) Style2D() {
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, MenuButtonProps[ButtonNormal])
-	// then style with user props
 	g.Style2DWidget()
-	// now get styles for the different states
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -529,6 +527,10 @@ func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
 
 func (g *MenuButton) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *MenuButton) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 // todo: need color brigher / darker functions

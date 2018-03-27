@@ -64,6 +64,10 @@ func (g *Rect) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
+func (g *Rect) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Rect) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
@@ -141,6 +145,10 @@ func (g *Viewport2DFill) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
+func (g *Viewport2DFill) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Viewport2DFill) Render2D() {
 	g.Rect.Render2D()
 }
@@ -203,6 +211,10 @@ func (g *Circle) Layout2D(parBBox image.Rectangle) {
 
 func (g *Circle) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+}
+
+func (g *Circle) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
 }
 
 func (g *Circle) Render2D() {
@@ -277,6 +289,10 @@ func (g *Ellipse) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 }
 
+func (g *Ellipse) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Ellipse) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
@@ -348,6 +364,10 @@ func (g *Line) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 }
 
+func (g *Line) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Line) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
@@ -416,6 +436,10 @@ func (g *Polyline) Layout2D(parBBox image.Rectangle) {
 
 func (g *Polyline) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Polyline) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
 }
 
 func (g *Polyline) Render2D() {
@@ -489,6 +513,10 @@ func (g *Polygon) Layout2D(parBBox image.Rectangle) {
 
 func (g *Polygon) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Polygon) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
 }
 
 func (g *Polygon) Render2D() {

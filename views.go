@@ -500,6 +500,10 @@ func (g *TreeView) BBox2D() image.Rectangle {
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
+func (g *TreeView) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
 func (g *TreeView) Render2D() {
 	if g.PushBounds() {
 		// reset for next update
@@ -803,6 +807,10 @@ func (g *TabWidget) Layout2D(parBBox image.Rectangle) {
 
 func (g *TabWidget) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *TabWidget) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 func (g *TabWidget) Render2D() {

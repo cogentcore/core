@@ -422,6 +422,10 @@ func (g *Slider) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Slider) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
 func (g *Slider) Render2D() {
 	if g.PushBounds() {
 		if g.IsLeaf() {
@@ -673,6 +677,10 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 
 func (g *ScrollBar) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *ScrollBar) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 func (g *ScrollBar) Render2D() {

@@ -145,6 +145,10 @@ func (g *Text2D) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
 }
 
+func (g *Text2D) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Text2D) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint

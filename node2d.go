@@ -77,8 +77,10 @@ type Node2D interface {
 	Size2D()
 	// Layout2D: MeFirst downward pass (each node calls on its children at appropriate point) with relevant parent BBox that the children are constrained to render within -- they then intersect this BBox with their own BBox (from BBox2D) -- typically just call Layout2DBase for default behavior -- and add parent position to AllocPos -- Layout does all its sizing and positioning of children in this pass, based on the Size2D data gathered bottom-up and constraints applied top-down from higher levels
 	Layout2D(parBBox image.Rectangle)
-	// compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
+	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
 	BBox2D() image.Rectangle
+	// ChildrenBBox2D: compute the bbox available to my children, adjusting for e.g., margins, padding taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
+	ChildrenBBox2D() image.Rectangle
 	// Render2D: Final rendering pass, each node is fully responsible for rendering its own children, to provide maximum flexibility (see Render2DChildren) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
 	Render2D()
 	// Can this node re-render itself directly using cached data?  only for nodes that paint an opaque background first (e.g., widgets) -- optimizes local redraw when possible -- always true for sub-viewports
@@ -237,6 +239,7 @@ func (g *Node2DBase) PushBounds() bool {
 	}
 	rs := &g.Viewport.Render
 	rs.PushBounds(g.VpBBox)
+	// fmt.Printf("node %v pushed bounds %v\n", g.Name, g.VpBBox)
 	return true
 }
 
@@ -352,12 +355,26 @@ func (g *Node2DBase) Render2DTree() {
 	g.This.(Node2D).Render2D() // important to use interface version to get interface!
 }
 
-// layout on all of node's children, using node's VpBBox -- default call at end of Layout2D
+// this provides a basic widget box-model subtraction of margin and padding to
+// children -- call in ChildrenBBox2D for most widgets
+func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
+	st := &g.Style
+	nb := g.VpBBox
+	spc := int(st.Layout.Margin.Dots + st.Padding.Dots)
+	nb.Min.X += spc
+	nb.Min.Y += spc
+	nb.Max.X -= spc
+	nb.Max.Y -= spc
+	return nb
+}
+
+// layout on all of node's children, giving them the ChildrenBBox2D -- default call at end of Layout2D
 func (g *Node2DBase) Layout2DChildren() {
+	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Children {
 		gii, _ := KiToNode2D(kid)
 		if gii != nil {
-			gii.Layout2D(g.VpBBox)
+			gii.Layout2D(cbb)
 		}
 	}
 }

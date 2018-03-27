@@ -263,11 +263,8 @@ var ButtonProps = []map[string]interface{}{
 
 func (g *Button) Style2D() {
 	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
-	// then style with user props
 	g.Style2DWidget()
-	// now get styles for the different states
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -293,6 +290,10 @@ func (g *Button) Layout2D(parBBox image.Rectangle) {
 
 func (g *Button) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *Button) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
 }
 
 // todo: need color brigher / darker functions
@@ -322,7 +323,6 @@ func (g *Button) CanReRender2D() bool {
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {
-	// fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)

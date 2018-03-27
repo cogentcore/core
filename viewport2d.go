@@ -156,6 +156,10 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	return vp.Pixels.Bounds() // not sure about: ViewBox.Bounds()
 }
 
+func (g *Viewport2D) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.Viewport != nil {
 		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing

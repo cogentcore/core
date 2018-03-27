@@ -715,8 +715,9 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 		off := ly.VScroll.Value
 		gi.LayData.AllocPos.Y -= off
 	}
-	gi.ComputeBBox(ly.VpBBox)
-	gii.Render2D() // child will not render if bbox is empty
+	cbb := ly.This.(Node2D).ChildrenBBox2D()
+	gi.ComputeBBox(cbb) // update kid's bbox based on scrolled position
+	gii.Render2D()      // child will not render if bbox is empty
 }
 
 // convenience for LayoutStacked to show child node at a given index
@@ -752,6 +753,18 @@ func (ly *Layout) BBox2D() image.Rectangle {
 	return ly.BBoxFromAlloc()
 }
 
+func (ly *Layout) ChildrenBBox2D() image.Rectangle {
+	lst := &ly.Style.Layout
+	cbb := ly.ChildrenBBox2DWidget()
+	if ly.HScroll != nil {
+		cbb.Max.Y -= int(lst.ScrollBarWidth.Dots)
+	}
+	if ly.VScroll != nil {
+		cbb.Max.X -= int(lst.ScrollBarWidth.Dots)
+	}
+	return cbb
+}
+
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
 }
@@ -778,22 +791,7 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	ly.FinalizeLayout()
 	ly.ManageOverflow()
 	ly.LayoutScrolls()
-
-	st := &ly.Style
-	es := ly.ExtraSize()
-	// now push bounds for interior of us
-	pos := ly.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
-	sz := ly.LayData.AllocSize.Sub(es)
-	nb := image.Rect(int(pos.X), int(pos.Y), int(pos.X+sz.X), int(pos.Y+sz.Y))
-	// fmt.Printf("Lay %v push bounds %v\n", ly.Name, nb)
-
-	// layout the kids, using new bounds excluding scrollbars
-	for _, kid := range ly.Children {
-		gii, _ := KiToNode2D(kid)
-		if gii != nil {
-			gii.Layout2D(nb)
-		}
-	}
+	ly.Layout2DChildren()
 }
 
 func (ly *Layout) Render2D() {
@@ -961,6 +959,10 @@ func (g *Stretch) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Stretch) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
 func (g *Stretch) Render2D() {
 	if g.PushBounds() {
 		g.Render2DChildren()
@@ -1022,6 +1024,10 @@ func (g *Space) Layout2D(parBBox image.Rectangle) {
 
 func (g *Space) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *Space) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
 }
 
 func (g *Space) Render2D() {
