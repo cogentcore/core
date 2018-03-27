@@ -821,6 +821,13 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 	return err
 }
 
+// Set Enum from int64 value
+func (tr *EnumRegistry) SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
+	evi := eval.Interface()
+	et := eval.Type()
+	return EnumFromInt64(&evi, ival, et)
+}
+
 // get a pointer and the enum itself as interface{}'s, based on the type
 // todo: can't seem to get this to work -- just replicate the code per below
 // func NewEnumFromType(typ reflect.Type) (interface{}, interface{}) {
