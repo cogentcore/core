@@ -36,10 +36,10 @@ func mainrun() {
 
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", "middle")
+	row1.SetProp("align-vert", gi.AlignMiddle)
 	row1.SetProp("align-horiz", "center")
-	row1.SetProp("margin", 4.0)
-	row1.SetProp("max-width", -1)
+	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	row1.SetStretchMaxWidth()
 
 	spc := vlay.AddNewChildNamed(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
@@ -55,8 +55,8 @@ func mainrun() {
 	row2.Lay = gi.LayoutRow
 	row2.SetProp("align-vert", "center")
 	row2.SetProp("align-horiz", "left")
-	row2.SetProp("margin", 4.0)
-	row2.SetProp("max-width", -1)
+	row2.SetProp("margin", 2.0)
+	row2.SetStretchMaxWidth()
 
 	mb1 := row2.AddNewChildNamed(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 
@@ -73,14 +73,19 @@ func mainrun() {
 		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
 	})
 
+	mb1.SetProp("align-vert", gi.AlignMiddle)
+
 	button1 := row2.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
 	edit1 := row2.AddNewChildNamed(gi.KiT_TextField, "edit1").(*gi.TextField)
 
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
+	edit1.SetProp("align-vert", gi.AlignMiddle)
 	button1.Text = "Button 1"
 	button2.Text = "Button 2"
+	button1.SetProp("align-vert", gi.AlignMiddle)
+	button2.SetProp("align-vert", gi.AlignMiddle)
 
 	edit1.TextFieldSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.KiName(), data)
@@ -98,12 +103,13 @@ func mainrun() {
 	row3.Lay = gi.LayoutRow
 	row3.SetProp("align-vert", "center")
 	row3.SetProp("align-horiz", "left")
-	row3.SetProp("margin", 4.0)
-	row3.SetProp("max-width", -1) // always stretch width
+	row3.SetProp("margin", 2.0)
+	row3.SetStretchMaxWidth()
+	// row3.SetStretchMaxHeight()
 
 	slider1 := row3.AddNewChildNamed(gi.KiT_Slider, "slider1").(*gi.Slider)
 	slider1.Horiz = true
-	slider1.SetProp("width", "20em")
+	slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	slider1.Defaults()
 	slider1.SetValue(0.5)
 	slider1.Snap = true
@@ -111,7 +117,8 @@ func mainrun() {
 
 	slider2 := row3.AddNewChildNamed(gi.KiT_Slider, "slider2").(*gi.Slider)
 	slider2.Horiz = false
-	slider2.SetProp("height", "10em")
+	slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
+	slider2.SetStretchMaxHeight()
 	slider2.Defaults()
 	slider2.SetValue(0.5)
 
@@ -125,7 +132,7 @@ func mainrun() {
 
 	scrollbar1 := row3.AddNewChildNamed(gi.KiT_ScrollBar, "scrollbar1").(*gi.ScrollBar)
 	scrollbar1.Horiz = true
-	scrollbar1.SetProp("width", "20em")
+	scrollbar1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	scrollbar1.SetFixedHeight(units.NewValue(20, units.Px))
 	scrollbar1.Defaults()
 	scrollbar1.SetThumbValue(0.25)
@@ -135,7 +142,8 @@ func mainrun() {
 
 	scrollbar2 := row3.AddNewChildNamed(gi.KiT_ScrollBar, "scrollbar2").(*gi.ScrollBar)
 	scrollbar2.Horiz = false
-	scrollbar2.SetProp("height", "10em")
+	scrollbar2.SetMinPrefHeight(units.NewValue(10, units.Em))
+	scrollbar2.SetStretchMaxHeight()
 	scrollbar2.Defaults()
 	scrollbar2.SetThumbValue(0.1)
 	scrollbar2.SetValue(0.5)

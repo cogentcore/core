@@ -316,6 +316,7 @@ func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DText(g.Text)
+	// fmt.Printf("button %v text-style: %v\n", g.Name, st.Text)
 }
 
 func (g *Button) CanReRender2D() bool {

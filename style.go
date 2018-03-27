@@ -398,12 +398,18 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 		return // no can do any struct otherwise
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
 		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
-		if ki.Enums.FindEnum(sf.Type.Name()) != nil {
-			ki.Enums.SetEnumValueFromAltString(vf, prstr)
+		if prstr != "" {
+			if ki.Enums.FindEnum(sf.Type.Name()) != nil {
+				ki.Enums.SetEnumValueFromAltString(vf, prstr)
+			} else {
+				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", sf.Type.Name(), sf.Name)
+			}
+			return
 		} else {
-			fmt.Printf("enum name not found %v for field %v\n", sf.Type.Name(), sf.Name)
+			// note: cannot use convert on const values apparently.. but this works
+			vf.Set(reflect.ValueOf(prv))
+			return
 		}
-		return
 	}
 
 	// otherwise just set directly based on type, using standard conversions

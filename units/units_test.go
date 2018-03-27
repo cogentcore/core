@@ -11,6 +11,7 @@ import (
 
 func TestValCvt(t *testing.T) {
 	var ctxt Context
+	ctxt.Defaults()
 	for un := Pct; un <= Dp; un++ {
 		v1 := NewValue(1.0, un)
 		s1 := fmt.Sprintf("%v = %v dots", v1, v1.ToDots(&ctxt))

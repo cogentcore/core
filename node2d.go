@@ -249,6 +249,28 @@ func (g *Node2DBase) PopBounds() {
 	rs.PopBounds()
 }
 
+// set minimum and preferred width -- will get at least this amount -- max unspecified
+func (g *Node2DBase) SetMinPrefWidth(val units.Value) {
+	g.SetProp("width", val)
+	g.SetProp("min-width", val)
+}
+
+// set minimum and preferred height-- will get at least this amount -- max unspecified
+func (g *Node2DBase) SetMinPrefHeight(val units.Value) {
+	g.SetProp("height", val)
+	g.SetProp("min-height", val)
+}
+
+// set stretchy max width -- can grow to take up avail room
+func (g *Node2DBase) SetStretchMaxWidth() {
+	g.SetProp("max-width", units.NewValue(-1, units.Px))
+}
+
+// set stretchy max height -- can grow to take up avail room
+func (g *Node2DBase) SetStretchMaxHeight() {
+	g.SetProp("max-height", units.NewValue(-1, units.Px))
+}
+
 // set all width options (width, min-width, max-width) to a fixed width value
 func (g *Node2DBase) SetFixedWidth(val units.Value) {
 	g.SetProp("width", val)

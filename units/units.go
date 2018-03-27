@@ -77,6 +77,8 @@ const (
 	Px
 	// density-independent pixels -- 1dp = 1/160th of 1in
 	Dp
+	// actual real display pixels -- generally only use internally
+	Dot
 )
 
 var UnitNames = [...]string{
@@ -97,6 +99,7 @@ var UnitNames = [...]string{
 	Pt:   "pt",
 	Px:   "px",
 	Dp:   "dp",
+	Dot:  "dot",
 }
 
 // Context specifies everything about the current context necessary for converting the number
@@ -112,13 +115,13 @@ type Context struct {
 	FontCh float64
 	// rem-size of font in points
 	FontRem float64
-	// viewport width in raw pixels
+	// viewport width in dots
 	VpW float64
-	// viewport height in raw pixels
+	// viewport height in dots
 	VpH float64
-	// width of surrounding contextual element in raw pixels
+	// width of surrounding contextual element in dots
 	ElW float64
-	// height of surrounding contextual element in raw pixels
+	// height of surrounding contextual element in dots
 	ElH float64
 }
 
@@ -205,6 +208,8 @@ func (uc *Context) ToDotsFactor(un Unit) float64 {
 		return uc.DPI / PxPerInch
 	case Dp:
 		return uc.DPI / DpPerInch
+	case Dot:
+		return 1.0
 	}
 	return uc.DPI
 }

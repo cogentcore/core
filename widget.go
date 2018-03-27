@@ -104,5 +104,10 @@ func (g *WidgetBase) Render2DText(txt string) {
 	pos := g.LayData.AllocPos.AddVal(spc)
 	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
 
+	// automatically compensate for alignment so top and middle = same thing
+	if IsAlignMiddle(st.Text.AlignV) {
+		pos.Y += 0.5 * sz.Y
+	}
+
 	pc.DrawString(rs, txt, pos.X, pos.Y, sz.X)
 }

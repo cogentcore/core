@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
@@ -116,7 +116,7 @@ func (ls *LayoutStyle) Defaults() {
 	ls.MinHeight.Set(1.0, units.Em)
 	ls.Width.Set(1.0, units.Em)
 	ls.Height.Set(1.0, units.Em)
-	ls.ScrollBarWidth.Set(20.0, units.Px)
+	ls.ScrollBarWidth.Set(16.0, units.Px)
 }
 
 func (ls *LayoutStyle) SetStylePost() {
@@ -346,7 +346,7 @@ func (ly *Layout) AllocFromParent() {
 			if !pg.LayData.AllocSize.IsZero() {
 				ly.LayData.AllocPos = pg.LayData.AllocPos
 				ly.LayData.AllocSize = pg.LayData.AllocSize
-				fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Name)
+				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Name)
 				return false
 			}
 			return true
@@ -545,23 +545,25 @@ func (ly *Layout) SetHScroll() {
 		ly.HScroll.Init2D()
 		ly.HScroll.Defaults()
 	}
+	lst := &ly.Style.Layout
 	sc := ly.HScroll
-	sc.SetFixedHeight(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
-	sc.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Px))
+	sc.SetFixedHeight(lst.ScrollBarWidth)
+	sc.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Dot))
 	sc.Style2D()
 	sc.Min = 0.0
-	sc.Max = ly.ChildSize.X
+	spc := lst.Margin.Dots + ly.Style.Padding.Dots
+	sc.Max = ly.ChildSize.X + spc
+	if ly.VScroll != nil {
+		sc.Max += ly.Style.Layout.ScrollBarWidth.Dots
+	}
 	sc.Step = ly.Style.Font.Size.Dots // step by lines
 	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
 	sc.ThumbVal = ly.LayData.AllocSize.X
-	// fmt.Printf("Setting up HScroll: max: %v  thumb: %v sz: %v\n", sc.Max, sc.ThumbVal, sc.ThumbSize)
 	sc.Tracking = true
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
-		// ss, _ := send.(*ScrollBar)
-		// fmt.Printf("HScroll to %v\n", ss.Value)
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
 		ls.UpdateStart()
@@ -590,12 +592,17 @@ func (ly *Layout) SetVScroll() {
 		ly.VScroll.Init2D()
 		ly.VScroll.Defaults()
 	}
+	lst := &ly.Style.Layout
 	sc := ly.VScroll
-	sc.SetFixedWidth(units.NewValue(ly.Style.Layout.ScrollBarWidth.Dots, units.Px))
-	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Px))
+	sc.SetFixedWidth(lst.ScrollBarWidth)
+	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Dot))
 	sc.Style2D()
 	sc.Min = 0.0
-	sc.Max = ly.ChildSize.Y
+	spc := lst.Margin.Dots + ly.Style.Padding.Dots
+	sc.Max = ly.ChildSize.Y + spc
+	if ly.HScroll != nil {
+		sc.Max += ly.Style.Layout.ScrollBarWidth.Dots
+	}
 	sc.Step = ly.Style.Font.Size.Dots // step by lines
 	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
 	sc.ThumbVal = ly.LayData.AllocSize.Y
@@ -604,8 +611,6 @@ func (ly *Layout) SetVScroll() {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
-		// ss, _ := send.(*ScrollBar)
-		// fmt.Printf("VScroll to %v\n", ss.Value)
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
 		ls.UpdateStart()

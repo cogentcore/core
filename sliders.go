@@ -605,8 +605,8 @@ var ScrollBarProps = []map[string]interface{}{
 		"border-radius":    "4px",
 		"border-color":     "black",
 		"border-style":     "solid",
-		"padding":          "8px",
-		"margin":           "4px",
+		"padding":          "2px",
+		"margin":           "2px",
 		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":     "#BBB",
