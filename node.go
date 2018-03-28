@@ -32,7 +32,7 @@ const (
 	NodeFlagsN
 )
 
-//go:generate stringer -type=EventType
+//go:generate stringer -type=NodeFlags
 
 var KiT_NodeFlags = ki.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
 
@@ -64,12 +64,25 @@ func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
 	}
 }
 
-// disconnect node from all eventts
+// disconnect node from all events - todo: need a more generic Ki version of this
 func (g *NodeBase) DisconnectAllEvents() {
 	win := g.ParentWindow()
 	if win != nil {
 		win.DisconnectNode(g.This)
 	}
+}
+
+// disconnect node from all events - todo: need a more generic Ki version of this
+func (g *NodeBase) DisconnectAllEventsTree() {
+	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false // going into a different type of thing, bail
+		}
+		gi.DisconnectAllEvents()
+		gi.NodeSig.DisconnectAll()
+		return true
+	})
 }
 
 // does the current node have keyboard focus

@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/rcoreilly/goki/ki"
 	// "golang.org/x/image/font"
 	"image"
@@ -123,12 +123,12 @@ func (g *Action) Init2D() {
 
 var ActionProps = []map[string]interface{}{
 	{
-		"border-width":  "1px",
-		"border-radius": "4px",
+		"border-width":  "0px",
+		"border-radius": "0px",
 		"border-color":  "black",
 		"border-style":  "solid",
 		"padding":       "2px",
-		"margin":        "4px",
+		"margin":        "0px",
 		// "font-family":         "Arial", // this is crashing
 		"font-size":        "20pt",
 		"text-align":       "center",
@@ -345,25 +345,28 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
 		lay.AddChild(acn.This)
-		fmt.Printf("added menu action %v\n", acn.Name)
 	}
 	lay.Init2DTree()
-	lay.Style2DTree()
-	lay.LayData.AllocSize = vp.LayData.AllocSize            // give it the whole vp initially
-	lay.Size2DTree()                                        // collect sizes
-	vpsz := lay.LayData.Size.Pref.Min(vp.LayData.AllocSize) // keep in bounds
+	lay.Style2DTree()                                        // sufficient to get sizes
+	lay.LayData.AllocSize = vp.LayData.AllocSize             // give it the whole vp initially
+	lay.Size2DTree()                                         // collect sizes
+	vpszf := lay.LayData.Size.Pref.Min(vp.LayData.AllocSize) // keep in bounds
 	// todo: more work needed here to optimally position box -- put in viewport
-	fmt.Printf("sz: %v\n", vpsz)
-	pvp := NewViewport2D(int(vpsz.X), int(vpsz.Y))
+	// fmt.Printf("sz: %v\n", vpsz)
+	vpsz := image.Point{int(vpszf.X), int(vpszf.Y)}
+	x = ki.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
+	y = ki.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
+	pvp := NewViewport2D(vpsz.X, vpsz.Y)
 	pvp.SetThisName(pvp, name+"PopupVP")
 	pvp.Fill = true
 	pvp.SetProp("background-color", "#FFF")
+	ki.SetBitFlag(&pvp.NodeFlags, int(ViewportFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
 	pvp.Style2D()
-	pvp.AddChild(lay.This) // this should trigger the update -- todo: bigger update than is needed -- need to be smarter about this -- e.g., if add child and data is viewport node then don't redo us
-	vp.AddChild(pvp.This)
-	vp.FullRender2DTree()
+	pvp.AddChild(lay.This)
+	vp.AddChild(pvp.This) // this should trigger the update -- todo: bigger update than is needed -- need to be smarter about this -- e.g., if add child and data is viewport node then don't redo us
+	pvp.PushAsPopup()
 	return pvp
 }
 
@@ -402,8 +405,8 @@ func (g *MenuButton) ButtonReleased(where image.Point) {
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
 	}
-	PopupMenu(g.Menu, where.X, where.Y, g.Viewport, g.Text)
 	g.UpdateEnd()
+	PopupMenu(g.Menu, where.X, where.Y, g.Viewport, g.Text)
 }
 
 func (g *MenuButton) AsNode2D() *Node2DBase {

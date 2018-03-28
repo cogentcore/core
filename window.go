@@ -21,13 +21,16 @@ import (
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Win           OSWindow              `json:"-" desc:"OS-specific window interface"`
-	EventSigs     [EventTypeN]ki.Signal `json:"-" desc:"signals for communicating each type of window (wde) event"`
-	Focus         ki.Ki                 `json:"-" desc:"node receiving keyboard events"`
-	Dragging      ki.Ki                 `json:"-" desc:"node receiving mouse dragging events"`
-	LastDrag      time.Time             `json:"-" desc:"time since last drag event"`
-	LastSentDrag  MouseDraggedEvent     `json:"-" desc:"last drag that we actually sent"`
-	stopEventLoop bool                  `json:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
+	Win           OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
+	EventSigs     [EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
+	Focus         ki.Ki                 `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	Dragging      ki.Ki                 `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
+	Popup         ki.Ki                 `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki               `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki               `jsom:"-" xml:"-" desc:"stack of focus"`
+	LastDrag      time.Time             `json:"-" xml:"-" desc:"time since last drag event"`
+	LastSentDrag  MouseDraggedEvent     `json:"-" xml:"-" desc:"last drag that we actually sent"`
+	stopEventLoop bool                  `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -129,11 +132,7 @@ func (w *Window) StartEventLoop() {
 // nodes that have registered to receive that type of event -- the further
 // filtering is just to ensure that they are in the right position to receive
 // the event (focus, etc)
-func (w *Window) SendEventSignal(ei interface{}) {
-	evi, ok := ei.(Event)
-	if !ok {
-		return
-	}
+func (w *Window) SendEventSignal(evi Event) {
 	et := evi.EventType()
 	if et > EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
@@ -154,16 +153,19 @@ func (w *Window) SendEventSignal(ei interface{}) {
 				w.LastSentDrag = mde
 				mde.From = lsd.From
 				w.LastDrag = time.Now()
-				ei = mde // reset interface to us
+				evi = mde // reset interface to us
 			}
 		}
 	}
 
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
-	w.EventSigs[et].EmitFiltered(w.This, int64(et), ei, func(k ki.Ki) bool {
+	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
 		_, gi := KiToNode2D(k)
 		if gi != nil {
+			if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events
+				return false
+			}
 			if evi.EventOnFocus() {
 				if gi.This != w.Focus { // todo: could use GiNodeI interface
 					return false
@@ -212,11 +214,7 @@ func (w *Window) SendEventSignal(ei interface{}) {
 }
 
 // process MouseMoved events for enter / exit status
-func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
-	evi, ok := ei.(Event)
-	if !ok {
-		return
-	}
+func (w *Window) ProcessMouseMovedEvent(evi Event) {
 	pos := evi.EventPos()
 	var mene MouseEnteredEvent
 	mene.From = pos
@@ -233,6 +231,9 @@ func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
 		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
 			_, gi := KiToNode2D(k)
 			if gi != nil {
+				if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events
+					return false
+				}
 				in := pos.In(gi.WinBBox)
 				if in {
 					if ete == MouseEnteredEventType {
@@ -264,6 +265,25 @@ func (w *Window) ProcessMouseMovedEvent(ei interface{}) {
 
 }
 
+// process Mouseup events during popup for possible closing of popup
+func (w *Window) PopupMouseUpEvent(evi Event) {
+	gii, gi := KiToNode2D(w.Popup)
+	if gi == nil {
+		return
+	}
+	vp := gii.AsViewport2D()
+	if vp == nil {
+		return
+	}
+	// pos := evi.EventPos()
+	if ki.HasBitFlag(vp.NodeFlags, int(ViewportFlagMenu)) {
+		// close on any mouse up event -- todo: need to consider submenus?
+		gi.DisconnectAllEventsTree()
+		w.PopPopup()
+		gi.DeleteMe(true) // destroy
+	}
+}
+
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
 	// todo: separate the inner and outer loops here?  not sure if events needs to be outside?
@@ -278,6 +298,8 @@ func (w *Window) EventLoop() {
 		}
 		runtime.Gosched()
 
+		curPop := w.Popup
+
 		evi, ok := ei.(Event)
 		if !ok {
 			log.Printf("Gi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
@@ -287,9 +309,14 @@ func (w *Window) EventLoop() {
 		if et > EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
-		w.SendEventSignal(ei)
+		w.SendEventSignal(evi)
 		if et == MouseMovedEventType {
-			w.ProcessMouseMovedEvent(ei)
+			w.ProcessMouseMovedEvent(evi)
+		}
+		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
+			if et == MouseUpEventType {
+				w.PopupMouseUpEvent(evi)
+			}
 		}
 		// todo: what about iconify events!?
 		if et == CloseEventType {
@@ -389,6 +416,49 @@ func (w *Window) SetNextFocusItem() bool {
 		focusNext = true // this time around, just get the first one
 	}
 	return false
+}
+
+// push current popup onto stack and set new popup
+func (w *Window) PushPopup(p ki.Ki) {
+	if w.PopupStack == nil {
+		w.PopupStack = make([]ki.Ki, 0, 50)
+	}
+	w.PopupStack = append(w.PopupStack, w.Popup)
+	w.Popup = p
+	w.PushFocus(p)
+	w.SetNextFocusItem()
+}
+
+// pop Mask off the popup stack and set to current popup
+func (w *Window) PopPopup() {
+	if w.PopupStack == nil || len(w.PopupStack) == 0 {
+		w.Popup = nil
+		return
+	}
+	sz := len(w.PopupStack)
+	w.Popup = w.PopupStack[sz-1]
+	w.PopupStack = w.PopupStack[:sz-1]
+	w.PopFocus() // always
+}
+
+// push current focus onto stack and set new focus
+func (w *Window) PushFocus(p ki.Ki) {
+	if w.FocusStack == nil {
+		w.FocusStack = make([]ki.Ki, 0, 50)
+	}
+	w.FocusStack = append(w.FocusStack, w.Focus)
+	w.Focus = p
+}
+
+// pop Mask off the focus stack and set to current focus
+func (w *Window) PopFocus() {
+	if w.FocusStack == nil || len(w.FocusStack) == 0 {
+		w.Focus = nil
+		return
+	}
+	sz := len(w.FocusStack)
+	w.Focus = w.FocusStack[sz-1]
+	w.FocusStack = w.FocusStack[:sz-1]
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

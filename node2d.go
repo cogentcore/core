@@ -5,7 +5,7 @@
 package gi
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	// "gopkg.in/go-playground/colors.v1"
@@ -108,6 +108,7 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 func (g *Node2DBase) Init2DBase() {
 	g.Viewport = g.FindViewportParent()
 	if g.Viewport != nil { // default for most cases -- delete connection of not
+		// fmt.Printf("node %v connect to viewport %v\n", g.Name, g.Viewport.Name)
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
 	}
 	g.Style.Defaults()
@@ -121,9 +122,6 @@ func (g *Node2DBase) Style2DSVG() {
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
-	if g.Viewport == nil {
-		return
-	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProps())
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero) // svn only has to set units here once
@@ -134,9 +132,6 @@ func (g *Node2DBase) Style2DWidget() {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
-	}
-	if g.Viewport == nil {
-		return
 	}
 	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
@@ -408,4 +403,18 @@ func (g *Node2DBase) Render2DChildren() {
 			gii.Render2D()
 		}
 	}
+}
+
+// report on all the bboxes for everything in the tree
+func (g *Node2DBase) BBoxReport() string {
+	rpt := ""
+	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		gii, gi := KiToNode2D(k)
+		if gii == nil {
+			return false // going into a different type of thing, bail
+		}
+		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", gi.Name, gi.VpBBox, gi.WinBBox)
+		return true
+	})
+	return rpt
 }

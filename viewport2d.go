@@ -12,9 +12,15 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	// "log"
+	"log"
 	"os"
 	"reflect"
+)
+
+// these extend NodeBase NodeFlags to hold viewport state
+const (
+	// viewport is serving as a popup menu -- affects how window processes clicks
+	ViewportFlagMenu NodeFlags = NodeFlagsN + iota
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
@@ -95,6 +101,7 @@ func (vp *Viewport2D) CopyBacking(parVp *Viewport2D) {
 	draw.Draw(vp.Backing, r, parVp.Pixels, image.ZP, draw.Src)
 }
 
+// todo: consider caching window pointer
 func (vp *Viewport2D) DrawIntoWindow() {
 	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
 	if wini != nil {
@@ -103,6 +110,16 @@ func (vp *Viewport2D) DrawIntoWindow() {
 		s := win.Win.Screen()
 		s.CopyRGBA(vp.Pixels, vp.Pixels.Bounds())
 		win.Win.FlushImage()
+	}
+}
+
+func (vp *Viewport2D) PushAsPopup() {
+	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
+	if wini != nil {
+		win := (wini).(*Window)
+		win.PushPopup(vp.This)
+	} else {
+		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
 	}
 }
 
@@ -146,7 +163,9 @@ func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
 	// viewport ignores any parent parent bbox info!
 	psize := vp.AddParentPos()
 	vp.VpBBox = vp.Pixels.Bounds()
-	vp.SetWinBBox()                    // still add offsets
+	vp.SetWinBBox() // this adds all PARENT offsets
+	// now we add our viewbox offsets
+	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
 	vp.Style.SetUnitContext(vp, psize) // update units with final layout
 	vp.Paint.SetUnitContext(vp, psize) // always update paint
 	vp.Layout2DChildren()
@@ -164,6 +183,7 @@ func (vp *Viewport2D) RenderViewport2D() {
 	if vp.Viewport != nil {
 		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)
+		vp.Viewport.RenderViewport2D() // and on up the chain
 	} else { // top-level, try drawing into window
 		vp.DrawIntoWindow()
 	}
@@ -188,10 +208,11 @@ func (vp *Viewport2D) Render2D() {
 	if vp.PushBounds() {
 		if vp.Fill {
 			pc := &vp.Paint
+			rs := &vp.Render
 			pc.FillStyle.SetColor(&vp.Style.Background.Color)
 			pc.StrokeStyle.SetColor(nil)
-			pc.DrawRectangle(&vp.Render, 0.0, 0.0, float64(vp.ViewBox.Size.X),
-				float64(vp.ViewBox.Size.Y))
+			pc.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			pc.FillStrokeClear(rs)
 		}
 		vp.Render2DChildren() // we must do children first, then us!
 		vp.RenderViewport2D() // update our parent image
