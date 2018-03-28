@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 	// "time"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 type TestNode struct {
@@ -17,7 +18,7 @@ type TestNode struct {
 	sig2 Signal
 }
 
-var KtTestNode = Types.AddType(&TestNode{}, nil)
+var KiTTestNode = kit.Types.AddType(&TestNode{}, nil)
 
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}

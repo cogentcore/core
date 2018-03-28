@@ -14,7 +14,8 @@
 // where the props is a map[string]interface{} of optional properties that can
 // be associated with the type -- this is used in the GoGi graphical interface
 // system for example to color objects of different types using the
-// background-color property.
+// background-color property.  KiT_TypeName variable can be conveniently used
+// wherever a reflect.Type of that type is needed.
 //
 // The kit.Type struct provides JSON and XML Marshal / Unmarshal functions for
 // saving / loading reflect.Type using registrered type names.
@@ -27,14 +28,9 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
-	"bytes"
-	"encoding/xml"
-	"fmt"
-	"log"
-	"math"
+	// "fmt"
+	// "log"
 	"reflect"
-	"strconv"
-	"strings"
 )
 
 // TypeRegistry is a map from type name to reflect.Type -- need to explicitly

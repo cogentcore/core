@@ -7,13 +7,9 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
 	"log"
-	"math"
 	"reflect"
-	"strconv"
 	"strings"
 )
 

@@ -3,16 +3,23 @@ Part of the GoKi Go language (golang) full strength tree structure system (ki = 
 
 `package ki` -- core `Ki` interface (`ki.go`) and `Node` struct (`node.go`), plus other supporting players.
 
-GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/ki
+[![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/ki)](https://goreportcard.com/report/github.com/rcoreilly/goki/ki)
+[![GoDoc](https://godoc.org/github.com/rcoreilly/goki/ki?status.svg)](http://godoc.org/github.com/rcoreilly/goki/ki)
 
 A Ki tree is recursively composed of Ki Node structs, in a one-Parent / multiple-Child structure.  The typical use is to embed Node in other structs that then implement specific tree-based functionality.  See other packages in GoKi for examples.
 
 # Code Map
 
+* `kit` package: `kit.Type` struct of `reflect.Type` that supports saving / loading of type information using `kit.Types` `TypeRegistry` -- provides name to type map for looking up types by name, and types can have default properties. `kit.Enums` `EnumRegistry` provides enum (const int) <-> string conversion, including `bitflag` enums.  Also has robust generic `ki.ToInt` `ki.ToFloat` etc converters from `interface{}` to specific type, for processing properties
+
+* `bitflag` package: simple bit flag setting, checking, and clearing methods that take bit position args as ints (from const int eunum iota's) and do the bit shifting from there
+
 * `ki.go` = `Ki` interface for all major tree node functionality
+
 * `ptr.go` = `ki.Ptr` struct that supports saving / loading of pointers using paths
+
 * `slice.go` = `ki.Slice []Ki` supports saving / loading of Ki objects in a slice, by recording the size and types of elements in the slice -- requires `ki.Types` type registry to lookup types by name
-* `type.go` = `ki.Type struct of reflect.Type` that supports saving / loading of type information using `ki.Types` `TypeRegistry` -- provides name to type map for looking up types by name, and types can have default properties. `ki.Enums EnumRegistry` provides enum (const int) <-> string conversion, including BitFlag enums.  Also has robust generic `ki.ToInt` `ki.ToFloat` etc converters from `interface{}` to specific type, for processing properties
+
 * `signal.go` = `Signal` that can call any number of functions with receiver Ki objects that have been previously `Connect`ed to the signal -- also supports signal type so the same signal sender can send different types of signals over the same connection -- used for signaling changes in tree structure, and more general tree updating signals.
 
 # Go Language (golang) Notes (esp for people coming from C++)

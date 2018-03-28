@@ -7,14 +7,10 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
-	"bytes"
-	"encoding/xml"
-	"fmt"
-	"log"
+	// "fmt"
 	"math"
 	"reflect"
 	"strconv"
-	"strings"
 )
 
 // Convenience functions for converting interface{} (e.g. properties) to given

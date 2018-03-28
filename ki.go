@@ -39,6 +39,7 @@ core tree functionality, including:
 package ki
 
 import (
+	"github.com/rcoreilly/goki/ki/atomctr"
 	"reflect"
 )
 
@@ -264,7 +265,7 @@ type Ki interface {
 	NodeSignal() *Signal
 
 	// the update counter for this node -- uses atomic counter for thread safety
-	UpdateCtr() *AtomCtr
+	UpdateCtr() *atomctr.Ctr
 
 	// call this when starting to modify the tree (state or structure) -- increments an atomic update counter and automatically calls start update on all children -- can be called multiple times at multiple levels
 	UpdateStart()
@@ -302,8 +303,8 @@ type Ki interface {
 
 // see node.go for struct implementing this interface
 
-// IMPORTANT: all types must initialize entry in KiTypes Registry:
-// var KiT_TypeName = ki.KiTypes.AddType(&TypeName{})
+// IMPORTANT: all types must initialize entry in package kit Types Registry:
+// var KiT_TypeName = kit.Types.AddType(&TypeName{})
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type KiFun func(ki Ki, level int, data interface{}) bool

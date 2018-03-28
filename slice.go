@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/json-iterator/go"
+	"github.com/rcoreilly/goki/ki/kit"
 	"log"
 	"reflect"
 	"strconv"
@@ -208,9 +209,9 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 		ti := bytes.Index(fld, []byte("\"type\":"))
 		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
-		typ := Types.FindType(tn)
+		typ := kit.Types.FindType(tn)
 		if typ == nil {
-			return fmt.Errorf("ki.Slice UnmarshalJSON: Types type name not found: %v", tn)
+			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
 		}
 		nkid := reflect.New(typ).Interface()
 		// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
@@ -240,8 +241,9 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// MarshalXML saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
+// todo: save N as an attr instead of a full element
 
+// MarshalXML saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
 func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	tokens := []xml.Token{start}
 	nk := len(k)
@@ -404,9 +406,9 @@ func (k *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			if name == "Type" {
 				tn := strings.TrimSpace(val)
 				// fmt.Printf("making type: %v\n", tn)
-				typ := Types.FindType(tn)
+				typ := kit.Types.FindType(tn)
 				if typ == nil {
-					return fmt.Errorf("ki.Slice UnmarshalXML: Types type name not found: %v", tn)
+					return fmt.Errorf("ki.Slice UnmarshalXML: kit.Types type name not found: %v", tn)
 				}
 				nkid := reflect.New(typ).Interface()
 				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)

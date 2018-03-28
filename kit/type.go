@@ -10,11 +10,8 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"log"
-	"math"
+	// "log"
 	"reflect"
-	"strconv"
-	"strings"
 )
 
 // Type provides JSON, XML marshal / unmarshal with encoding of underlying
@@ -57,6 +54,9 @@ func (k *Type) UnmarshalJSON(b []byte) error {
 	k.T = typ
 	return nil
 }
+
+// todo: try to save info as an attribute within a single element instead of
+// full start/end
 
 // MarshalXML saves only the type name
 func (k Type) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
