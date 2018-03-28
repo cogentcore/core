@@ -76,7 +76,7 @@ func (p *TextStyle) AlignFactors() (ax, ay float64) {
 	case IsAlignStart(val):
 		ay = 0.9 // todo: need to find out actual baseline
 	case IsAlignMiddle(val):
-		ay = 0.5 // todo: determine if font is horiz or vert..
+		ay = 0.45 // todo: determine if font is horiz or vert..
 	case IsAlignEnd(val):
 		ay = -0.1 // todo: need actual baseline
 	}

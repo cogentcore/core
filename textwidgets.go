@@ -255,7 +255,7 @@ func (g *TextField) PixelToCursor(pixOff float64) int {
 	pc := &g.Paint
 	st := &g.Style
 
-	spc := (st.Layout.Margin.Dots + st.Padding.Dots)
+	spc := st.BoxSpace()
 	px := pixOff - spc
 
 	if px <= 0 {
@@ -403,7 +403,7 @@ func (g *TextField) RenderCursor() {
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 
-	spc := (st.Layout.Margin.Dots + st.Padding.Dots)
+	spc := st.BoxSpace()
 
 	tocur := g.EditText[g.StartPos:g.CursorPos]
 	w, h := pc.MeasureString(tocur)
@@ -420,7 +420,7 @@ func (g *TextField) AutoScroll() {
 	st := &g.Style
 
 	sz := len(g.EditText)
-	spc := (st.Layout.Margin.Dots + st.Padding.Dots)
+	spc := st.BoxSpace()
 	maxw := g.LayData.AllocSize.X - 2.0*spc
 	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch))
 

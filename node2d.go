@@ -79,7 +79,7 @@ type Node2D interface {
 	Layout2D(parBBox image.Rectangle)
 	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
 	BBox2D() image.Rectangle
-	// ChildrenBBox2D: compute the bbox available to my children, adjusting for e.g., margins, padding taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
+	// ChildrenBBox2D: compute the bbox available to my children (content), adjusting for margins, border, padding (BoxSpace) taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
 	ChildrenBBox2D() image.Rectangle
 	// Render2D: Final rendering pass, each node is fully responsible for rendering its own children, to provide maximum flexibility (see Render2DChildren) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
 	Render2D()
@@ -181,8 +181,8 @@ func (g *Node2DBase) InitLayout2D() {
 
 // get our bbox from Layout allocation
 func (g *Node2DBase) BBoxFromAlloc() image.Rectangle {
-	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
-	ts := g.Paint.TransformPoint(g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
+	tp := g.LayData.AllocPos
+	ts := g.LayData.AllocSize
 	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
 }
 
@@ -380,9 +380,8 @@ func (g *Node2DBase) Render2DTree() {
 // this provides a basic widget box-model subtraction of margin and padding to
 // children -- call in ChildrenBBox2D for most widgets
 func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
-	st := &g.Style
 	nb := g.VpBBox
-	spc := int(st.Layout.Margin.Dots + st.Padding.Dots)
+	spc := int(g.Style.BoxSpace())
 	nb.Min.X += spc
 	nb.Min.Y += spc
 	nb.Max.X -= spc

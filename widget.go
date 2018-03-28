@@ -86,8 +86,9 @@ func (g *WidgetBase) Size2DFromText(txt string) {
 	if st.Layout.Height.Dots > 0 {
 		h = math.Max(st.Layout.Height.Dots, h)
 	}
-	w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-	h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
+	spc := st.BoxSpace()
+	w += 2.0 * spc
+	h += 2.0 * spc
 	g.LayData.AllocSize = Vec2D{w, h}
 }
 
@@ -100,7 +101,7 @@ func (g *WidgetBase) Render2DText(txt string) {
 	pc.TextStyle = st.Text
 	pc.StrokeStyle.SetColor(&st.Color) // ink color
 
-	spc := st.Layout.Margin.Dots + st.Padding.Dots
+	spc := st.BoxSpace()
 	pos := g.LayData.AllocPos.AddVal(spc)
 	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
 

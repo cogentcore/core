@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	// "github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"image"
 	"math"
@@ -151,15 +152,14 @@ func (g *SliderBase) SizeFromAlloc() {
 	if g.LayData.AllocSize.IsZero() {
 		return
 	}
-	st := &g.Style
-	spc := st.Layout.Margin.Dots
+	spc := g.Style.BoxSpace()
 	if g.Horiz {
 		g.Size = g.LayData.AllocSize.X - 2.0*spc
 	} else {
 		g.Size = g.LayData.AllocSize.Y - 2.0*spc
 	}
 	if !g.ValThumb {
-		g.Size -= g.ThumbSize + 2.0*st.Border.Width.Dots + 2.0
+		g.Size -= g.ThumbSize // half on each side
 	}
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
@@ -357,7 +357,7 @@ var SliderProps = []map[string]interface{}{
 		"border-radius":    "4px",
 		"border-color":     "black",
 		"border-style":     "solid",
-		"padding":          "8px",
+		"padding":          "6px",
 		"margin":           "4px",
 		"background-color": "#EEF",
 	}, { // disabled
@@ -400,8 +400,8 @@ func (g *Slider) Size2D() {
 		g.Defaults()
 	}
 	st := &g.Style
-	// get at least thumbsize
-	sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
+	// get at least thumbsize + margin + border.size
+	sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
 	if g.Horiz {
 		g.LayData.AllocSize.Y = sz
 	} else {
@@ -448,43 +448,58 @@ func (g *Slider) Render2DDefaultStyle() {
 	// overall fill box
 	g.RenderStdBox(&g.StateStyles[SliderBox])
 
-	// draw a 1/2 thumbsize box with a circular thumb
-	spc := st.Layout.Margin.Dots
-	pos := g.LayData.AllocPos.AddVal(spc)
-	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
-	fullsz := sz
-
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
 	pc.FillStyle.SetColor(&st.Background.Color)
 
+	// layout is as follows, for width dimension
+	// |      bw             bw     |
+	// |      | pad |  | pad |      |
+	// |  |        thumb         |  |
+	// |    spc    | | <- ctr
+	//
+	// for length: | spc | ht | <-start of slider
+
+	spc := st.BoxSpace()
+	pos := g.LayData.AllocPos
+	sz := g.LayData.AllocSize
+	bpos := pos // box pos
+	bsz := sz
+	tpos := pos // thumb pos
+
 	ht := 0.5 * g.ThumbSize
 
 	if g.Horiz {
-		pos.X += ht
-		sz.X -= g.ThumbSize
-		sz.Y = g.ThumbSize - 2.0*st.Padding.Dots
-		ctr := pos.Y + 0.5*fullsz.Y
-		pos.Y = ctr - ht + st.Padding.Dots
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-		sz.X = spc + g.Pos
+		bpos.Y += spc
+		bsz.Y -= 2.0 * spc
+		bpos.X += spc + ht
+		bsz.X -= 2.0 * (spc + ht)
+		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+
+		bsz.X = g.Pos
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+
+		tpos.X = bpos.X + g.Pos
+		tpos.Y += 0.5 * sz.Y // ctr
 		pc.FillStyle.SetColor(&st.Background.Color)
-		pc.DrawCircle(rs, pos.X+sz.X, ctr, ht)
+		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
 	} else {
-		pos.Y += ht
-		sz.Y -= g.ThumbSize
-		sz.X = g.ThumbSize - 2.0*st.Padding.Dots
-		ctr := pos.X + 0.5*fullsz.X
-		pos.X = ctr - ht + st.Padding.Dots
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-		sz.Y = spc + g.Pos
+		bpos.X += spc
+		bsz.X -= 2.0 * spc
+		bpos.Y += spc + ht
+		bsz.Y -= 2.0 * (spc + ht)
+		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+
+		bsz.Y = g.Pos
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+
+		tpos.Y = bpos.Y + g.Pos
+		tpos.X += 0.5 * sz.X // ctr
 		pc.FillStyle.SetColor(&st.Background.Color)
-		pc.DrawCircle(rs, ctr, pos.Y+sz.Y, ht)
+		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
 	}
 }
@@ -600,12 +615,13 @@ func (g *ScrollBar) Init2D() {
 
 var ScrollBarProps = []map[string]interface{}{
 	{
-		"width":            "20px", // this is automatically applied depending on orientation
+		"width":            "16px", // assumes vertical -- user needs to set!
+		"min-width":        "16px",
 		"border-width":     "1px",
 		"border-radius":    "4px",
 		"border-color":     "black",
 		"border-style":     "solid",
-		"padding":          "2px",
+		"padding":          "0px",
 		"margin":           "2px",
 		"background-color": "#EEF",
 	}, { // disabled
@@ -648,22 +664,21 @@ func (g *ScrollBar) Style2D() {
 
 func (g *ScrollBar) Size2D() {
 	g.InitLayout2D()
-	st := &g.Style
-	wd := st.Layout.Width.Dots // this is the width pref
-	if wd == 20.0 {            // if we have the default fixed vals
-		sz := wd + 2.0*(st.Layout.Margin.Dots+st.Padding.Dots)
-		if g.Horiz {
-			st.Layout.Height = st.Layout.Width
-			st.Layout.MaxHeight = st.Layout.Width
-			g.LayData.AllocSize.Y = sz
-			st.Layout.Width.Val = 0     // reset
-			st.Layout.MaxWidth.Val = -1 // infinite stretch
-		} else {
-			st.Layout.MaxWidth = st.Layout.Width
-			g.LayData.AllocSize.X = sz
-			st.Layout.MaxHeight.Val = -1 // infinite stretch
-		}
-	}
+	// st := &g.Style
+	// if we have the default fixed width vals, then update based on orientation
+	// if st.Layout.Width.Val == 12.0 && st.Layout.Width.Un == units.Px {
+	// 	if g.Horiz {
+	// 		st.Layout.Height = st.Layout.Width
+	// 		st.Layout.MaxHeight = st.Layout.Width
+	// 		g.LayData.AllocSize.Y = st.Layout.Width.Dots
+	// 		st.Layout.Width.Val = 0     // reset
+	// 		st.Layout.MaxWidth.Val = -1 // infinite stretch
+	// 	} else {
+	// 		st.Layout.MaxWidth = st.Layout.Width
+	// 		g.LayData.AllocSize.X = st.Layout.Width.Dots
+	// 		st.Layout.MaxHeight.Val = -1 // infinite stretch
+	// 	}
+	// }
 }
 
 func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
@@ -705,13 +720,14 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	// overall fill box
 	g.RenderStdBox(&g.StateStyles[SliderBox])
 
-	spc := st.Layout.Margin.Dots
-	pos := g.LayData.AllocPos.AddVal(spc)
-	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
-
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
 	pc.FillStyle.SetColor(&st.Background.Color)
+
+	// scrollbar is basic box in content size
+	spc := st.BoxSpace()
+	pos := g.LayData.AllocPos.AddVal(spc)
+	sz := g.LayData.AllocSize.SubVal(2.0 * spc)
 
 	if g.Horiz {
 		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box

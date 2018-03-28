@@ -299,8 +299,9 @@ func (g *Separator) Render2D() {
 		g.RenderStdBox(st)
 		pc.StrokeStyle.SetColor(&st.Color) // ink color
 
-		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		sz := g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
+		spc := st.BoxSpace()
+		pos := g.LayData.AllocPos.AddVal(spc)
+		sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
 
 		if g.Horiz {
 			pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)

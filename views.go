@@ -434,10 +434,6 @@ func (g *TreeView) Size2D() {
 	g.RootWidget = g.RootTreeView() // cache
 
 	g.InitLayout2D()
-	st := &g.Style
-	pc := &g.Paint
-	var w, h float64
-
 	if g.HasCollapsedParent() {
 		ki.ClearBitFlag(&g.NodeFlags, int(CanFocus))
 		return // nothing
@@ -446,17 +442,10 @@ func (g *TreeView) Size2D() {
 
 	label := g.GetLabel()
 
-	w, h = pc.MeasureString(label)
-	if st.Layout.Width.Dots > 0 {
-		w = math.Max(st.Layout.Width.Dots, w)
-	}
-	if st.Layout.Height.Dots > 0 {
-		h = math.Max(st.Layout.Height.Dots, h)
-	}
-	w += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-	h += 2.0*st.Padding.Dots + 2.0*st.Layout.Margin.Dots
-
-	g.WidgetSize = Vec2D{w, h}
+	g.Size2DFromText(label)
+	g.WidgetSize = g.LayData.AllocSize
+	h := g.WidgetSize.Y
+	w := g.WidgetSize.X
 
 	if !g.IsCollapsed() {
 		// we layout children under us
@@ -521,8 +510,8 @@ func (g *TreeView) Render2D() {
 			g.Style = g.StateStyles[TreeViewNormalState]
 		}
 
+		// note: this is std except using WidgetSize instead of AllocSize
 		pc := &g.Paint
-		rs := &g.Viewport.Render
 		st := &g.Style
 		pc.FontStyle = st.Font
 		pc.TextStyle = st.Text
@@ -534,15 +523,8 @@ func (g *TreeView) Render2D() {
 		sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 
-		pc.StrokeStyle.SetColor(&st.Color) // ink color
-
-		pos = g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Padding.Dots)
-		// sz = g.LayData.AllocSize.AddVal(-2.0 * (st.Layout.Margin.Dots + st.Padding.Dots))
-
 		label := g.GetLabel()
-		// fmt.Printf("rendering: %v\n", label)
-
-		pc.DrawStringAnchored(rs, label, pos.X, pos.Y, 0.0, 0.9, sz.X)
+		g.Render2DText(label)
 
 		g.Render2DChildren()
 		g.PopBounds()

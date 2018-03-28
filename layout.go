@@ -63,9 +63,13 @@ func IsAlignEnd(a Align) bool {
 type Overflow int32
 
 const (
+	// automatically add scrollbars as needed -- this is pretty much the only sensible option, and is the default here, but Visible is default in html
 	OverflowAuto Overflow = iota
+	// pretty much the same as auto -- we treat it as such
 	OverflowScroll
+	// make the overflow visible -- this is generally unsafe and not very feasible and will be ignored as long as possible -- currently falls back on auto, but could go to Hidden if that works better overall
 	OverflowVisible
+	// hide the overflow and don't present scrollbars (supported)
 	OverflowHidden
 	OverflowN
 )
@@ -107,6 +111,7 @@ type LayoutStyle struct {
 	MinHeight      units.Value   `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
 	Offsets        []units.Value `xml:"{top,right,bottom,left}" desc:"specified offsets for each side"`
 	Margin         units.Value   `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding        units.Value   `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
 	Overflow       Overflow      `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
 	ScrollBarWidth units.Value   `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
 }
@@ -248,11 +253,14 @@ const (
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay       Layouts    `xml:"lay" desc:"type of layout to use"`
-	StackTop  ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize Vec2D      `xml:"-" desc:"total max size of children as laid out"`
-	HScroll   *ScrollBar `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
-	VScroll   *ScrollBar `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
+	Lay        Layouts    `xml:"lay" desc:"type of layout to use"`
+	StackTop   ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize  Vec2D      `xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize  Vec2D      `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasHScroll bool       `desc:"horizontal scrollbar is used, at bottom of layout"`
+	HasVScroll bool       `desc:"vertical scrollbar is used, at right of layout"`
+	HScroll    *ScrollBar `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
+	VScroll    *ScrollBar `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
@@ -266,26 +274,12 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 	return false
 }
 
-// first depth-first pass: terminal concrete items compute their AllocSize
+// first depth-first Size2D pass: terminal concrete items compute their AllocSize
 // we focus on Need: Max(Min, AllocSize), and Want: Max(Pref, AllocSize) -- Max is
 // only used if we need to fill space, during final allocation
 //
-// second me-first pass: each layout allocates AllocSize for its children based on
-// aggregated size data, and so on down the tree
-
-// how much extra size we need in each dimension
-func (ly *Layout) ExtraSize() Vec2D {
-	lst := &ly.Style.Layout
-	var es Vec2D
-	es.SetVal(2.0*lst.Margin.Dots + 2.0*ly.Style.Border.Width.Dots)
-	if ly.HScroll != nil {
-		es.Y += lst.ScrollBarWidth.Dots
-	}
-	if ly.VScroll != nil {
-		es.X += lst.ScrollBarWidth.Dots
-	}
-	return es
-}
+// second me-first Layout2D pass: each layout allocates AllocSize for its
+// children based on aggregated size data, and so on down the tree
 
 // first pass: gather the size information from the children
 func (ly *Layout) GatherSizes() {
@@ -316,17 +310,13 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
-	es := ly.ExtraSize()
-	ly.LayData.Size.Need.SetAdd(es)
-	ly.LayData.Size.Pref.SetAdd(es)
+	spc := ly.Style.BoxSpace()
+	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
+	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
 	// todo: something entirely different needed for grids..
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
-
-	// todo: here we need to also deal with -1 max stretch to give full alloc
-	// in the "Max" dim if poss -- right now it is cutting that down based on
-	// Pref size of childs.
 }
 
 // if we are not a child of a layout, then get allocation from a parent obj that
@@ -377,7 +367,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 		stretchNeed = true // stretch relative to need
 	}
 
-	pos = ly.Style.Layout.Margin.Dots
+	pos = ly.Style.BoxSpace()
 	size = need
 	if usePref {
 		size = pref
@@ -398,8 +388,8 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 
 // layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutRow / Col
 func (ly *Layout) LayoutSingle(dim Dims2D) {
-	es := ly.ExtraSize()
-	avail := ly.LayData.AllocSize.Dim(dim) - es.Dim(dim)
+	spc := ly.Style.BoxSpace()
+	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Children {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
@@ -424,11 +414,10 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	al := ly.Style.Layout.AlignDim(dim)
-	es := ly.ExtraSize()
-	marg := es.Dim(dim)
-	avail := ly.LayData.AllocSize.Dim(dim) - marg
-	pref := ly.LayData.Size.Pref.Dim(dim) - marg
-	need := ly.LayData.Size.Need.Dim(dim) - marg
+	spc := ly.Style.BoxSpace()
+	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
+	pref := ly.LayData.Size.Pref.Dim(dim)
+	need := ly.LayData.Size.Need.Dim(dim)
 
 	targ := pref
 	usePref := true
@@ -483,7 +472,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	// now arrange everyone
-	pos := ly.Style.Layout.Margin.Dots
+	pos := spc
 
 	// todo: need a direction setting too
 	if IsAlignEnd(al) && !stretchNeed && !stretchMax {
@@ -536,6 +525,38 @@ func (ly *Layout) FinalizeLayout() {
 	}
 }
 
+// process any overflow according to overflow settings
+func (ly *Layout) ManageOverflow() {
+	spc := ly.Style.BoxSpace()
+	avail := ly.LayData.AllocSize.SubVal(spc)
+
+	ly.ExtraSize.SetVal(0.0)
+	ly.HasHScroll = false
+	ly.HasVScroll = false
+
+	if ly.Style.Layout.Overflow != OverflowHidden {
+		sbw := ly.Style.Layout.ScrollBarWidth.Dots
+		if ly.ChildSize.X > avail.X { // overflowing
+			ly.HasHScroll = true
+			ly.ExtraSize.Y += sbw
+		}
+		if ly.ChildSize.Y > avail.Y { // overflowing
+			ly.HasVScroll = true
+			ly.ExtraSize.X += sbw
+		}
+
+		if ly.HasHScroll {
+			ly.SetHScroll()
+			// } else {
+			// todo: probably don't need to delete hscroll - just keep around
+		}
+		if ly.HasVScroll {
+			ly.SetVScroll()
+		}
+		ly.LayoutScrolls()
+	}
+}
+
 func (ly *Layout) SetHScroll() {
 	if ly.HScroll == nil {
 		ly.HScroll = &ScrollBar{}
@@ -545,20 +566,16 @@ func (ly *Layout) SetHScroll() {
 		ly.HScroll.Init2D()
 		ly.HScroll.Defaults()
 	}
-	lst := &ly.Style.Layout
+	spc := ly.Style.BoxSpace()
 	sc := ly.HScroll
-	sc.SetFixedHeight(lst.ScrollBarWidth)
+	sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
 	sc.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Dot))
 	sc.Style2D()
 	sc.Min = 0.0
-	spc := lst.Margin.Dots + ly.Style.Padding.Dots
-	sc.Max = ly.ChildSize.X + spc
-	if ly.VScroll != nil {
-		sc.Max += ly.Style.Layout.ScrollBarWidth.Dots
-	}
-	sc.Step = ly.Style.Font.Size.Dots // step by lines
-	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
-	sc.ThumbVal = ly.LayData.AllocSize.X
+	sc.Max = ly.ChildSize.X + ly.ExtraSize.X // only scrollbar
+	sc.Step = ly.Style.Font.Size.Dots        // step by lines
+	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
+	sc.ThumbVal = ly.LayData.AllocSize.X - spc
 	sc.Tracking = true
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
@@ -592,20 +609,16 @@ func (ly *Layout) SetVScroll() {
 		ly.VScroll.Init2D()
 		ly.VScroll.Defaults()
 	}
-	lst := &ly.Style.Layout
+	spc := ly.Style.BoxSpace()
 	sc := ly.VScroll
-	sc.SetFixedWidth(lst.ScrollBarWidth)
+	sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
 	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Dot))
 	sc.Style2D()
 	sc.Min = 0.0
-	spc := lst.Margin.Dots + ly.Style.Padding.Dots
-	sc.Max = ly.ChildSize.Y + spc
-	if ly.HScroll != nil {
-		sc.Max += ly.Style.Layout.ScrollBarWidth.Dots
-	}
-	sc.Step = ly.Style.Font.Size.Dots // step by lines
-	sc.PageStep = 10.0 * sc.Step      // todo: more dynamic
-	sc.ThumbVal = ly.LayData.AllocSize.Y
+	sc.Max = ly.ChildSize.Y + ly.ExtraSize.Y // only scrollbar
+	sc.Step = ly.Style.Font.Size.Dots        // step by lines
+	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
+	sc.ThumbVal = ly.LayData.AllocSize.Y - spc
 	sc.Tracking = true
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
@@ -632,31 +645,31 @@ func (ly *Layout) DeleteVScroll() {
 }
 
 func (ly *Layout) LayoutScrolls() {
-	sw := ly.Style.Layout.ScrollBarWidth.Dots
+	sbw := ly.Style.Layout.ScrollBarWidth.Dots
 	if ly.HScroll != nil {
 		sc := ly.HScroll
 		sc.Size2D()
 		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X
-		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sw
+		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sbw - 2.0
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
-		if ly.VScroll != nil { // make room for V
-			sc.LayData.AllocSize.X -= sw
+		if ly.HasVScroll { // make room for V
+			sc.LayData.AllocSize.X -= sbw
 		}
-		sc.LayData.AllocSize.Y = sw
+		sc.LayData.AllocSize.Y = sbw
 		sc.Layout2D(ly.VpBBox)
 	}
 	if ly.VScroll != nil {
 		sc := ly.VScroll
 		sc.Size2D()
-		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sw
+		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sbw - 2.0
 		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
-		if ly.HScroll != nil { // make room for H
-			sc.LayData.AllocSize.Y -= sw
+		if ly.HasHScroll { // make room for H
+			sc.LayData.AllocSize.Y -= sbw
 		}
-		sc.LayData.AllocSize.X = sw
+		sc.LayData.AllocSize.X = sbw
 		sc.Layout2D(ly.VpBBox)
 	}
 }
@@ -667,27 +680,6 @@ func (ly *Layout) RenderScrolls() {
 	}
 	if ly.VScroll != nil {
 		ly.VScroll.Render2D()
-	}
-}
-
-func (ly *Layout) ManageOverflow() {
-	lst := &ly.Style.Layout
-	if lst.Overflow == OverflowVisible {
-		return
-	}
-	if ly.ChildSize.X > ly.LayData.AllocSize.X { // overflowing
-		if lst.Overflow != OverflowHidden {
-			ly.SetHScroll()
-		}
-	} else {
-		ly.DeleteHScroll()
-	}
-	if ly.ChildSize.Y > ly.LayData.AllocSize.Y { // overflowing
-		if lst.Overflow != OverflowHidden {
-			ly.SetVScroll()
-		}
-	} else {
-		ly.DeleteVScroll()
 	}
 }
 
@@ -759,15 +751,10 @@ func (ly *Layout) BBox2D() image.Rectangle {
 }
 
 func (ly *Layout) ChildrenBBox2D() image.Rectangle {
-	lst := &ly.Style.Layout
-	cbb := ly.ChildrenBBox2DWidget()
-	if ly.HScroll != nil {
-		cbb.Max.Y -= int(lst.ScrollBarWidth.Dots)
-	}
-	if ly.VScroll != nil {
-		cbb.Max.X -= int(lst.ScrollBarWidth.Dots)
-	}
-	return cbb
+	nb := ly.ChildrenBBox2DWidget()
+	nb.Max.X -= int(ly.ExtraSize.X)
+	nb.Max.Y -= int(ly.ExtraSize.Y)
+	return nb
 }
 
 func (ly *Layout) Style2D() {
@@ -795,7 +782,6 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	}
 	ly.FinalizeLayout()
 	ly.ManageOverflow()
-	ly.LayoutScrolls()
 	ly.Layout2DChildren()
 }
 

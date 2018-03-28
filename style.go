@@ -134,7 +134,6 @@ type Style struct {
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Padding       units.Value     `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
 	Font          FontStyle       `xml:"font" desc:"font parameters"`
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
 	Color         Color           `xml:"color" inherit:"true" desc:"text color"`
@@ -221,6 +220,13 @@ func (s *Style) ToDots() {
 				uv.ToDots(&s.UnContext)
 			}
 		})
+}
+
+// extra space around the central content in the box model, in dots -- todo:
+// must complicate this if we want different spacing on different sides
+// box outside-in: margin | border | padding | content
+func (s *Style) BoxSpace() float64 {
+	return s.Layout.Margin.Dots + s.Border.Width.Dots + s.Layout.Padding.Dots
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

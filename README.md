@@ -43,7 +43,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * There are two main types of 2D nodes, which can be intermingled, but generally are segregated:
 	+ SVG rendering nodes that directly set properties on the Paint object and typically have their own geometry etc -- generally not put within a Layout etc -- convenient to put in an SVGBox or SVGViewport -- their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float64 values
-	+ Widget nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a Layout
+	+ Widget nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a Layout -- they do NOT use Paint.Transform -- instead use units system with arbitrary DPI to transform sizes into actual rendered dots (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point)
 
 * Using the basic 64bit geom from fogleman/gg -- the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` did not have appropriate 2D rendering transforms etc.
 
@@ -60,7 +60,10 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* scroll needs to go further when there is another scrollbar.. not sure why though.
+* layout: 2 pass on need scroll bars then extra size then subtract extra size -- also just
+keep extra size as a field instead of recomputing all the time.
+
+* scrollbars are not centered -- all padding on top / left
 * window needs a "focus vp" for popup viewports that grab focus
 
 * native UnmarshalXML is not going to be flexible enough to support effective
