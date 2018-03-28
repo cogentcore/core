@@ -19,8 +19,10 @@ import (
 
 // these extend NodeBase NodeFlags to hold viewport state
 const (
+	// viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)
+	VpFlagMenu NodeFlags = NodeFlagsN + iota
 	// viewport is serving as a popup menu -- affects how window processes clicks
-	ViewportFlagMenu NodeFlags = NodeFlagsN + iota
+	VpFlagMenu
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)

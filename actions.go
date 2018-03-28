@@ -360,7 +360,8 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	pvp.SetThisName(pvp, name+"PopupVP")
 	pvp.Fill = true
 	pvp.SetProp("background-color", "#FFF")
-	ki.SetBitFlag(&pvp.NodeFlags, int(ViewportFlagMenu))
+	ki.SetBitFlag(&pvp.NodeFlags, int(VpFlagMenu))
+	ki.SetBitFlag(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
 	pvp.Style2D()
