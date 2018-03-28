@@ -10,10 +10,89 @@ import (
 	"image"
 )
 
-// NOTE: for all render2D calls, viewport render has already handled the SetPaintFromNode call,
-// and also managed disabled, visible status
+// shapes2d contains all the SVG-based objects for drawing shapes, paths, etc
 
 ////////////////////////////////////////////////////////////////////////////////////////
+//  SVGBox
+
+// A box for containing SVG drawing objects -- just a basic container node --
+// set its width, height, and it also provides an initial viewbox -- does not
+// do any layout of its children
+type SVGBox struct {
+	Node2DBase
+	Fill bool `desc:"fill the box with background-color from style"`
+	// todo: any properties??  background fill option?  probably that's good
+}
+
+// must register all new types so type names can be looked up by name -- e.g., for json
+var KiT_SVGBox = ki.Types.AddType(&SVGBox{}, nil)
+
+func (g *SVGBox) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *SVGBox) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *SVGBox) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *SVGBox) Init2D() {
+	g.Init2DBase()
+}
+
+func (g *SVGBox) Style2D() {
+	g.Style2DSVG()
+}
+
+func (g *SVGBox) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+}
+
+func (g *SVGBox) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // use layout styles
+	// g.Layout2DChildren() // we
+}
+
+func (g *SVGBox) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
+}
+
+func (g *SVGBox) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox // no margin, padding, etc
+}
+
+func (g *SVGBox) Render2D() {
+	if g.PushBounds() {
+		if vp.Fill {
+			pc := &vp.Paint
+			rs := &vp.Render
+			pc.FillStyle.SetColor(&vp.Style.Background.Color)
+			pc.StrokeStyle.SetColor(nil)
+			pc.DrawRectangle(rs, float64(g.VpBBox.Min.X), float64(g.VpBBox.Min.y), float64(g.VpBBox.Max.X-g.VpBBox.Min.X), float64(g.VpBBox.Max.Y-g.VpBBox.Min.Y))
+			pc.FillStrokeClear(rs)
+		}
+		g.Render2DChildren()
+		g.PopBounds()
+	}
+}
+
+func (g *SVGBox) CanReRender2D() bool {
+	// todo: could optimize by checking for an opaque fill, and same bbox
+	return false
+}
+
+func (g *SVGBox) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &SVGBox{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Rect
 
 // 2D rectangle, optionally with rounded corners
 type Rect struct {
@@ -96,6 +175,7 @@ func (g *Rect) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Rect{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Viewport2DFill
 
 // todo: for ViewportFill support an option to insert a HiDPI correction scaling factor at the top!
 
@@ -164,6 +244,7 @@ func (g *Viewport2DFill) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Viewport2DFill{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Circle
 
 // 2D circle
 type Circle struct {
@@ -240,6 +321,7 @@ func (g *Circle) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Circle{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Ellipse
 
 // 2D ellipse
 type Ellipse struct {
@@ -315,6 +397,7 @@ func (g *Ellipse) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Ellipse{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Line
 
 // a 2D line
 type Line struct {
@@ -390,6 +473,7 @@ func (g *Line) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Line{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Polyline
 
 // 2D Polyline
 type Polyline struct {
@@ -467,6 +551,7 @@ func (g *Polyline) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Polyline{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Polygon
 
 // 2D Polygon
 type Polygon struct {

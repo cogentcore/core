@@ -5,14 +5,13 @@
 package gi
 
 import (
-// "image"
+	"fmt"
+	"github.com/rcoreilly/goki/ki"
+	"image"
+	"image/draw"
+	"log"
+	// "reflect"
+	"runtime"
+	"sync"
+	"time"
 )
-
-// a 2D rectangle,
-type GiPath struct {
-	Node2DBase
-}
-
-func (g *GiPath) Render(vp *Viewport2D) {
-
-}
