@@ -98,48 +98,48 @@ func HasMask(bits, mask int64) bool {
 //   32 bit
 
 // set bit value(s) for ordinal bit position flags
-func Set(bits *int64, flags ...int) {
+func Set32(bits *int32, flags ...int) {
 	for _, f := range flags {
 		*bits |= 1 << uint32(f)
 	}
 }
 
 // set or clear bit value(s) depending on state (on / off) for ordinal bit position flags
-func SetState(bits *int64, state bool, flags ...int) {
+func SetState32(bits *int32, state bool, flags ...int) {
 	if state {
-		Set(bits, flags...)
+		Set32(bits, flags...)
 	} else {
-		Clear(bits, flags...)
+		Clear32(bits, flags...)
 	}
 }
 
 // clear bit value(s) for ordinal bit position flags
-func Clear(bits *int64, flags ...int) {
+func Clear32(bits *int32, flags ...int) {
 	for _, f := range flags {
 		*bits = *bits & ^(1 << uint32(f)) // note: ^ is unary bitwise negation, not ~ as in C
 	}
 }
 
 // toggle state of bit value(s) for ordinal bit position flags
-func Toggle(bits *int64, flags ...int) {
+func Toggle32(bits *int32, flags ...int) {
 	for _, f := range flags {
-		if Has(*bits, f) {
-			Clear(bits, f)
+		if Has32(*bits, f) {
+			Clear32(bits, f)
 		} else {
-			Set(bits, f)
+			Set32(bits, f)
 		}
 	}
 }
 
 // check if given bit value is set for ordinal bit position flag
-func Has(bits int64, flag int) bool {
+func Has32(bits int32, flag int) bool {
 	return bits&(1<<uint32(flag)) != 0
 }
 
 // check if any of a set of flags are set for ordinal bit position flags
-func HasAny(bits int64, flags ...int) bool {
+func HasAny32(bits int32, flags ...int) bool {
 	for _, f := range flags {
-		if Has(bits, f) {
+		if Has32(bits, f) {
 			return true
 		}
 	}
@@ -147,9 +147,9 @@ func HasAny(bits int64, flags ...int) bool {
 }
 
 // check if all of a set of flags are set for ordinal bit position flags
-func HasAll(bits int64, flags ...int) bool {
+func HasAll32(bits int32, flags ...int) bool {
 	for _, f := range flags {
-		if !Has(bits, f) {
+		if !Has32(bits, f) {
 			return false
 		}
 	}
@@ -157,15 +157,15 @@ func HasAll(bits int64, flags ...int) bool {
 }
 
 // make a mask for checking multiple different flags
-func Mask(flags ...int) int64 {
-	var mask int64
+func Mask32(flags ...int) int32 {
+	var mask int32
 	for _, f := range flags {
-		Set(&mask, f)
+		Set32(&mask, f)
 	}
 	return mask
 }
 
 // check if any of the bits in mask are set
-func HasMask(bits, mask int64) bool {
+func HasMask32(bits, mask int32) bool {
 	return bits&mask != 0
 }
