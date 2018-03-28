@@ -18,7 +18,6 @@ type SVG struct {
 	Viewport2D
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
 
 func (g *SVG) AsNode2D() *Node2DBase {

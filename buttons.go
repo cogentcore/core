@@ -78,7 +78,6 @@ type ButtonBase struct {
 	// todo: icon -- should be an xml
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, nil)
 
 // is this button selected?
@@ -167,7 +166,6 @@ type Button struct {
 	ButtonBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
 func (g *Button) AsNode2D() *Node2DBase {

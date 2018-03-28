@@ -44,7 +44,6 @@ type Viewport2D struct {
 	Backing *image.RGBA `json:"-" desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
 
 // NewViewport2D creates a new image.RGBA with the specified width and height

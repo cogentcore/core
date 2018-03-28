@@ -58,7 +58,6 @@ func (g *Action) ActionReleased() {
 	g.UpdateEnd()
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Action = kit.Types.AddType(&Action{}, nil)
 
 func (g *Action) SetAsMenu() {
@@ -241,7 +240,6 @@ type Separator struct {
 	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Separator = kit.Types.AddType(&Separator{}, nil)
 
 func (g *Separator) AsNode2D() *Node2DBase {
@@ -382,7 +380,6 @@ type MenuButton struct {
 	ButtonBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, nil)
 
 // add an action to the menu -- todo: shortcuts

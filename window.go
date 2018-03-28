@@ -35,7 +35,6 @@ type Window struct {
 	stopEventLoop bool                  `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
 // create a new window with given name and sizing

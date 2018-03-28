@@ -23,7 +23,6 @@ type Rect struct {
 	Radius Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) AsNode2D() *Node2DBase {
@@ -105,7 +104,6 @@ type Viewport2DFill struct {
 	Rect
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Viewport2DFill = kit.Types.AddType(&Viewport2DFill{}, nil)
 
 func (g *Viewport2DFill) AsNode2D() *Node2DBase {
@@ -174,7 +172,6 @@ type Circle struct {
 	Radius float64 `xml:"r" desc:"radius of the circle"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) AsNode2D() *Node2DBase {
@@ -251,7 +248,6 @@ type Ellipse struct {
 	Radii Vec2D `xml:"{rx, ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) AsNode2D() *Node2DBase {
@@ -327,7 +323,6 @@ type Line struct {
 	End   Vec2D `xml:"{x2, y2}" desc:"position of the end of the line"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) AsNode2D() *Node2DBase {
@@ -402,7 +397,6 @@ type Polyline struct {
 	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) AsNode2D() *Node2DBase {
@@ -480,7 +474,6 @@ type Polygon struct {
 	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) AsNode2D() *Node2DBase {

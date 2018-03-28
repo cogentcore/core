@@ -84,7 +84,6 @@ type SliderBase struct {
 	// todo: icon -- should be an xml
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, nil)
 
 // if snap is set, then snap the value to step sizes
@@ -271,7 +270,6 @@ type Slider struct {
 	SliderBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Slider = kit.Types.AddType(&Slider{}, nil)
 
 func (g *Slider) Defaults() { // todo: should just get these from props
@@ -532,7 +530,6 @@ type ScrollBar struct {
 	SliderBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, nil)
 
 func (g *ScrollBar) Defaults() { // todo: should just get these from props

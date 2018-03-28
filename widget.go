@@ -18,7 +18,6 @@ type WidgetBase struct {
 	Controls Layout `desc:"a separate tree of sub-widgets that implement discrete subcomponents of a widget -- positions are always relative to the parent widget"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, nil)
 
 // Styling notes:

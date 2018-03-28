@@ -76,7 +76,6 @@ type TreeView struct {
 	RootWidget  *TreeView              `json:"-" desc:"cached root widget"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
 // todo: several functions require traversing tree -- this will require an
@@ -583,7 +582,6 @@ type TabWidget struct {
 	TabWidgetSig ki.Signal `json:"-" desc:"signal for tab widget -- see TabWidgetSignals for the types"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
 
 // set the source Ki Node that generates our tabs

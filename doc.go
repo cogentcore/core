@@ -81,24 +81,24 @@ data, providing powerful GUI elements, with extensive property-based
 customization options.  They can easily provide the foundation for entire
 apps.
 
-NodeWidget
+TreeView
 
-The NodeWidget displays GoKi Node Trees, using a standard tree-browser with
+The TreeView displays GoKi Node Trees, using a standard tree-browser with
 collapse / open widgets and a menu for typical actions such as adding and
 deleting child nodes, along with full drag-n-drop and clipboard Copy/Cut/Paste
 functionality.  You can connect to the selection signal to e.g., display a
-StructWidget field / property editor of the selected node.
+StructView field / property editor of the selected node.
 
-The properties controlling the NodeWidget include:
+The properties controlling the TreeView include:
 
 	* "collapsed" -- node starts out collapsed (default is open)
 	* "background-color" -- color of the background of node box
 	* "color" -- font color in rendering node label
 	* "read-only" -- do not display the editing menu actions
 
-StructWidget
+StructView
 
-The StructWidget displays an arbitrary struct object, showing its fields and
+The StructView displays an arbitrary struct object, showing its fields and
 values, in an editable form, with type-appropriate widgets.
 
 */

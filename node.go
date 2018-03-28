@@ -46,7 +46,6 @@ type NodeBase struct {
 	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
 
 func (g *NodeBase) ParentWindow() *Window {
@@ -122,5 +121,4 @@ type Node3DBase struct {
 	NodeBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, nil)

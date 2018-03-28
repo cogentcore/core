@@ -11,6 +11,7 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 
 # Code Map
 
+* `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try
 * `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
 * `geom2d.go` -- All 2D geometry: Point2D, Size2D, etc
 * `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg`
@@ -20,7 +21,11 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 * `window.go` -- `Window` is the top-level window that uses (our own version of) `go.wde` to open a gui window and send events to nodes
 * `shapes2d.go` -- All the basic 2D SVG-based shapes: `Rect`, `Circle` etc
 * `font.go`, `text.go` -- `FontStyle`, `TextStyle`, `Text2D` node
-* `path.go` -- TBD: path-rendering nodes
+* `layout.go` -- main `Layout` object with various ways of arranging widget elements
+* `widget.go` -- `WidgetBase` for all widgets
+* `buttons.go` -- `ButtonBase`, `Button` and other basic command button types
+* `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
+* `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
 
 # Design notes
 
@@ -61,23 +66,20 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* layout: 2 pass on need scroll bars then extra size then subtract extra size -- also just
-keep extra size as a field instead of recomputing all the time.
+* need auto-disconnection code in ki, and closing popup should only destroy the Vp and layout, not the menu items -- delete them first then call destroy
+
+* WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
+
+* SVGBox, Icon, and XML parsing -- do this right to get icons for things, need for toggle on treeview -- svg box, viewport
 
 * scrollbars are not centered -- all padding on top / left
-* window needs a "focus vp" for popup viewports that grab focus
 
 * native UnmarshalXML is not going to be flexible enough to support effective
   parsing from SVG into corresponding nodes -- going to have to use pi parsing system.. 
   
 * which means finishing graphical elements using simple hand-coded Icon's instead of parsing from file, until the tree view and property editor are usable, to then make the parsing workable.
 
-* SVGBox, Icon, and XML parsing -- do this right to get icons for things, need for toggle on treeview -- svg box, viewport
-
 * first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
-
-
-* need disconnection code in ki 
 
 * look into scroll gestures, scrollwheel, etc.
 * tree view should work quite well -- put in a layout and test out..
@@ -87,7 +89,6 @@ Next:
 * check for Updating count > 0 somewhere -- going to be a common error
 * Layout flow types
 * Layout grid
-* WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
 
 * double-click!
 
@@ -104,7 +105,6 @@ Soon:
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ SplitView
-	+ Menu / MenuBar / MenuItem
 	+ ComboBox
 	+ SpinBox
 	+ RadioButton, CheckBox
@@ -117,6 +117,7 @@ Soon:
 ### TO-DONE (ish)
 
 * Widgets
+	+ Menu / MenuBar / MenuItem -- needs sub-menu support
 	+ Button -- needs alt styling through children?
 	+ Slider -- pretty done
 	+ TextField -- needs selection / clipboard, constraints

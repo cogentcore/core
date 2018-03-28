@@ -59,7 +59,6 @@ type Node2DBase struct {
 	LayData  LayoutData  `desc:"all the layout information for this item"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
 
 // primary interface for all Node2D nodes

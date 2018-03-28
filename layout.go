@@ -264,7 +264,6 @@ type Layout struct {
 	VScroll    *ScrollBar `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
 
 // do we sum up elements along given dimension?  else max
@@ -813,7 +812,6 @@ type Frame struct {
 	Layout
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Frame = kit.Types.AddType(&Frame{}, nil)
 
 func (g *Frame) AsNode2D() *Node2DBase {
@@ -907,7 +905,6 @@ type Stretch struct {
 	Node2DBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, nil)
 
 func (g *Stretch) AsNode2D() *Node2DBase {
@@ -979,7 +976,6 @@ type Space struct {
 	Node2DBase
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Space = kit.Types.AddType(&Space{}, nil)
 
 func (g *Space) AsNode2D() *Node2DBase {

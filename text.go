@@ -99,7 +99,6 @@ type Text2D struct {
 	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
 
 func (g *Text2D) AsNode2D() *Node2DBase {

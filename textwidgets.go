@@ -25,7 +25,6 @@ type Label struct {
 	Text string `xml:"text" desc:"label to display"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_Label = kit.Types.AddType(&Label{}, nil)
 
 func (g *Label) AsNode2D() *Node2DBase {
@@ -124,7 +123,6 @@ type TextField struct {
 	StateStyles  [2]Style  `desc:"normal style and focus style"`
 }
 
-// must register all new types so type names can be looked up by name -- e.g., for json
 var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
 
 // done editing: return key pressed or out of focus
