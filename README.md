@@ -74,12 +74,11 @@ It is very convenient to use anonymous functions directly in the `FunDown` (etc)
 
 # TODO
 
-THIS IS KEY: for allowing more inheritance
-* Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user -- just look for method of name "AsTypeName" and call that!
+* THIS IS KEY: for allowing more inheritance: Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user -- just look for method of name "AsTypeName" and call that!
 
 * method that walks fields and resets pointers to nil, and also resets any Signal connections -- called in destroyki -- in general somewhat challenging to deal with destruction..
 
-* XML IO
+* XML IO -- first pass done, but more should be in attr instead of full elements
 * add SetField, FieldValue generic methods -- thin wrappers around reflect
 * SetFieldRecursive -- apply to all children, no problem if not found
 * FindChildRecursive functions
