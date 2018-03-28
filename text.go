@@ -7,7 +7,7 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	// "log"
 	"strings"
@@ -100,7 +100,7 @@ type Text2D struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Text2D = ki.Types.AddType(&Text2D{}, nil)
+var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
 
 func (g *Text2D) AsNode2D() *Node2DBase {
 	return &g.Node2DBase

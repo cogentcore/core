@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	// "github.com/rcoreilly/goki/ki"
 	// "reflect"
 	"github.com/rcoreilly/goki/gi/units"
 	"testing"

@@ -7,6 +7,8 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	// "log"
 	"reflect"
@@ -34,7 +36,7 @@ const (
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = ki.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
+var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
 
 // base struct node for GoGi
 type NodeBase struct {
@@ -45,7 +47,7 @@ type NodeBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_NodeBase = ki.Types.AddType(&NodeBase{}, nil)
+var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
 
 func (g *NodeBase) ParentWindow() *Window {
 	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived -- need interface
@@ -87,12 +89,12 @@ func (g *NodeBase) DisconnectAllEventsTree() {
 
 // does the current node have keyboard focus
 func (g *NodeBase) HasFocus() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(HasFocus))
+	return bitflag.Has(g.NodeFlags, int(HasFocus))
 }
 
 // is the current node currently receiving dragging events?  set by window
 func (g *NodeBase) IsDragging() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(NodeDragging))
+	return bitflag.Has(g.NodeFlags, int(NodeDragging))
 }
 
 // set node as focus node
@@ -121,4 +123,4 @@ type Node3DBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Node3DBase = ki.Types.AddType(&Node3DBase{}, nil)
+var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, nil)

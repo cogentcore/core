@@ -7,7 +7,7 @@ package gi
 import (
 	"image/color"
 	// "log"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 type FillRule int
@@ -20,7 +20,7 @@ const (
 
 //go:generate stringer -type=FillRule
 
-var KiT_FillRule = ki.Enums.AddEnumAltLower(FillRuleNonZero, false, nil, "FillRule", int64(FillRuleN))
+var KiT_FillRule = kit.Enums.AddEnumAltLower(FillRuleNonZero, false, nil, "FillRule", int64(FillRuleN))
 
 // FillStyle contains all the properties specific to filling a region
 type FillStyle struct {

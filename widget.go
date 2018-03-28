@@ -6,8 +6,7 @@ package gi
 
 import (
 	// "fmt"
-	// "github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	// "image"
 	"math"
 	// "reflect"
@@ -20,7 +19,7 @@ type WidgetBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_WidgetBase = ki.Types.AddType(&WidgetBase{}, nil)
+var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, nil)
 
 // Styling notes:
 // simple elemental widgets (buttons etc) have a DefaultRender method that renders based on

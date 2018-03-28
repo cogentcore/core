@@ -7,6 +7,7 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	// "golang.org/x/image/font"
 	"image"
 	"image/draw"
@@ -20,7 +21,7 @@ import (
 // these extend NodeBase NodeFlags to hold viewport state
 const (
 	// viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)
-	VpFlagMenu NodeFlags = NodeFlagsN + iota
+	VpFlagPopup NodeFlags = NodeFlagsN + iota
 	// viewport is serving as a popup menu -- affects how window processes clicks
 	VpFlagMenu
 )
@@ -44,7 +45,7 @@ type Viewport2D struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Viewport2D = ki.Types.AddType(&Viewport2D{}, nil)
+var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
 
 // NewViewport2D creates a new image.RGBA with the specified width and height
 // and prepares a context for rendering onto that image.

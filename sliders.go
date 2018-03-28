@@ -8,6 +8,8 @@ import (
 	// "fmt"
 	// "github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"math"
 	// "time"
@@ -83,7 +85,7 @@ type SliderBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_SliderBase = ki.Types.AddType(&SliderBase{}, nil)
+var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, nil)
 
 // if snap is set, then snap the value to step sizes
 func (g *SliderBase) SnapValue() {
@@ -111,7 +113,7 @@ func (g *SliderBase) SliderPressed(pos float64) {
 	g.SetSliderState(SliderDown)
 	g.SetSliderPos(pos)
 	g.SliderSig.Emit(g.This, int64(SliderPressed), g.Value)
-	// ki.SetBitFlag(&g.NodeFlags, int(SliderFlagDragging))
+	// bitflag.Set(&g.NodeFlags, int(SliderFlagDragging))
 	g.UpdateEnd()
 }
 
@@ -270,7 +272,7 @@ type Slider struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Slider = ki.Types.AddType(&Slider{}, nil)
+var KiT_Slider = kit.Types.AddType(&Slider{}, nil)
 
 func (g *Slider) Defaults() { // todo: should just get these from props
 	g.ThumbSize = 25.0
@@ -381,7 +383,7 @@ var SliderProps = []map[string]interface{}{
 }
 
 func (g *Slider) Style2D() {
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style.SetStyle(nil, &StyleDefault, SliderProps[SliderNormal])
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
@@ -531,7 +533,7 @@ type ScrollBar struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_ScrollBar = ki.Types.AddType(&ScrollBar{}, nil)
+var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, nil)
 
 func (g *ScrollBar) Defaults() { // todo: should just get these from props
 	g.ValThumb = true
@@ -646,7 +648,7 @@ var ScrollBarProps = []map[string]interface{}{
 
 func (g *ScrollBar) Style2D() {
 	// we can focus by default
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, ScrollBarProps[SliderNormal])
 	// then style with user props

@@ -8,6 +8,8 @@ import (
 	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"math"
 	// "reflect"
@@ -24,7 +26,7 @@ type Label struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Label = ki.Types.AddType(&Label{}, nil)
+var KiT_Label = kit.Types.AddType(&Label{}, nil)
 
 func (g *Label) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -123,7 +125,7 @@ type TextField struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_TextField = ki.Types.AddType(&TextField{}, nil)
+var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
 
 // done editing: return key pressed or out of focus
 func (g *TextField) EditDone() {
@@ -161,7 +163,7 @@ func (g *TextField) CursorBackward(steps int) {
 		g.CursorPos = 0
 	}
 	if g.CursorPos <= g.StartPos {
-		dec := ki.MinInt(g.StartPos, 8)
+		dec := kit.MinInt(g.StartPos, 8)
 		g.StartPos -= dec
 	}
 	g.UpdateEnd()
@@ -172,7 +174,7 @@ func (g *TextField) CursorStart() {
 	// todo: select mode
 	g.CursorPos = 0
 	g.StartPos = 0
-	g.EndPos = ki.MinInt(len(g.EditText), g.StartPos+g.CharWidth)
+	g.EndPos = kit.MinInt(len(g.EditText), g.StartPos+g.CharWidth)
 	g.UpdateEnd()
 }
 
@@ -180,7 +182,7 @@ func (g *TextField) CursorEnd() {
 	g.UpdateStart()
 	g.CursorPos = len(g.EditText)
 	g.EndPos = len(g.EditText) // try -- display will adjust
-	g.StartPos = ki.MaxInt(0, g.EndPos-g.CharWidth)
+	g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	g.UpdateEnd()
 }
 
@@ -364,7 +366,7 @@ var TextFieldProps = [2]map[string]interface{}{
 }
 
 func (g *TextField) Style2D() {
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, TextFieldProps[0])
 	// then style with user props
@@ -428,7 +430,7 @@ func (g *TextField) AutoScroll() {
 		g.EndPos = sz
 	}
 	if g.StartPos >= g.EndPos {
-		g.StartPos = ki.MaxInt(0, g.EndPos-g.CharWidth)
+		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	}
 
 	tocur := g.EditText[g.StartPos:g.CursorPos]
@@ -441,9 +443,9 @@ func (g *TextField) AutoScroll() {
 		g.EndPos += inc
 	}
 	// keep sane
-	g.EndPos = ki.MinInt(len(g.EditText), g.EndPos)
+	g.EndPos = kit.MinInt(len(g.EditText), g.EndPos)
 	if g.StartPos > g.EndPos {
-		g.StartPos = ki.MaxInt(0, g.EndPos-g.CharWidth)
+		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	}
 
 	// now make sure text fits -- iteratively for 10 tries..
@@ -463,9 +465,9 @@ func (g *TextField) AutoScroll() {
 		}
 	}
 	// keep sane
-	g.EndPos = ki.MinInt(len(g.EditText), g.EndPos)
+	g.EndPos = kit.MinInt(len(g.EditText), g.EndPos)
 	if g.StartPos > g.EndPos {
-		g.StartPos = ki.MaxInt(0, g.EndPos-g.CharWidth)
+		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	}
 }
 

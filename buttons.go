@@ -7,6 +7,8 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	// "math"
 )
@@ -77,32 +79,32 @@ type ButtonBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_ButtonBase = ki.Types.AddType(&ButtonBase{}, nil)
+var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, nil)
 
 // is this button selected?
 func (g *ButtonBase) IsSelected() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagSelected))
+	return bitflag.Has(g.NodeFlags, int(ButtonFlagSelected))
 }
 
 // is this button checkable
 func (g *ButtonBase) IsCheckable() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagCheckable))
+	return bitflag.Has(g.NodeFlags, int(ButtonFlagCheckable))
 }
 
 // is this button checked
 func (g *ButtonBase) IsChecked() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(ButtonFlagChecked))
+	return bitflag.Has(g.NodeFlags, int(ButtonFlagChecked))
 }
 
 // set the selected state of this button
 func (g *ButtonBase) SetSelected(sel bool) {
-	ki.SetBitFlagState(&g.NodeFlags, int(ButtonFlagSelected), sel)
+	bitflag.SetState(&g.NodeFlags, sel, int(ButtonFlagSelected))
 	g.SetButtonState(ButtonNormal) // update state
 }
 
 // set the checked state of this button
 func (g *ButtonBase) SetChecked(chk bool) {
-	ki.SetBitFlagState(&g.NodeFlags, int(ButtonFlagChecked), chk)
+	bitflag.SetState(&g.NodeFlags, chk, int(ButtonFlagChecked))
 }
 
 // set the button state to target
@@ -166,7 +168,7 @@ type Button struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Button = ki.Types.AddType(&Button{}, nil)
+var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
 func (g *Button) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -262,7 +264,7 @@ var ButtonProps = []map[string]interface{}{
 }
 
 func (g *Button) Style2D() {
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {

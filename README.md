@@ -4,7 +4,8 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 
 `package gi` -- scenegraph based 2D and 3D GUI / graphics interface (Gi) in Go
 
-GoDoc documentation: https://godoc.org/github.com/rcoreilly/goki/gi
+[![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/gi)](https://goreportcard.com/report/github.com/rcoreilly/goki/gi)
+[![GoDoc](https://godoc.org/github.com/rcoreilly/goki/gi?status.svg)](http://godoc.org/github.com/rcoreilly/goki/gi)
 
 Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and type "make" to build the core OS-specific GUI C interface for windows and events -- speeds up subsequent `go build` steps significantly.
 

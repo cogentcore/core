@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	// "fmt"
 	"image"
 )
@@ -24,7 +24,7 @@ type Rect struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Rect = ki.Types.AddType(&Rect{}, nil)
+var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -106,7 +106,7 @@ type Viewport2DFill struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Viewport2DFill = ki.Types.AddType(&Viewport2DFill{}, nil)
+var KiT_Viewport2DFill = kit.Types.AddType(&Viewport2DFill{}, nil)
 
 func (g *Viewport2DFill) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -175,7 +175,7 @@ type Circle struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Circle = ki.Types.AddType(&Circle{}, nil)
+var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -252,7 +252,7 @@ type Ellipse struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Ellipse = ki.Types.AddType(&Ellipse{}, nil)
+var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -328,7 +328,7 @@ type Line struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Line = ki.Types.AddType(&Line{}, nil)
+var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -403,7 +403,7 @@ type Polyline struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Polyline = ki.Types.AddType(&Polyline{}, nil)
+var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -481,7 +481,7 @@ type Polygon struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Polygon = ki.Types.AddType(&Polygon{}, nil)
+var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) AsNode2D() *Node2DBase {
 	return &g.Node2DBase

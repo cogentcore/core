@@ -6,7 +6,7 @@ package gi
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	"golang.org/x/image/math/fixed"
 	"image"
 	"math"
@@ -52,7 +52,7 @@ const (
 	Y
 )
 
-var KiT_Dims2D = ki.Enums.AddEnumAltLower(X, false, nil, "", int64(Y)+1)
+var KiT_Dims2D = kit.Enums.AddEnumAltLower(X, false, nil, "", int64(Y)+1)
 
 //go:generate stringer -type=Dims2D
 
@@ -195,7 +195,7 @@ func (a Vec2D) Min(b Vec2D) Vec2D {
 
 // minimum of all positive (> 0) numbers
 func (a Vec2D) MinPos(b Vec2D) Vec2D {
-	return Vec2D{ki.MinPos(a.X, b.X), ki.MinPos(a.Y, b.Y)}
+	return Vec2D{kit.MinPos(a.X, b.X), kit.MinPos(a.Y, b.Y)}
 }
 
 // set to max of current vs. b
@@ -212,8 +212,8 @@ func (a *Vec2D) SetMin(b Vec2D) {
 
 // set to minpos of current vs. b
 func (a *Vec2D) SetMinPos(b Vec2D) {
-	a.X = ki.MinPos(a.X, b.X)
-	a.Y = ki.MinPos(a.Y, b.Y)
+	a.X = kit.MinPos(a.X, b.X)
+	a.Y = kit.MinPos(a.Y, b.Y)
 }
 
 // set to max of current value and val
@@ -230,8 +230,8 @@ func (a *Vec2D) SetMinVal(val float64) {
 
 // set to minpos of current value and val
 func (a *Vec2D) SetMinPosVal(val float64) {
-	a.X = ki.MinPos(a.X, val)
-	a.Y = ki.MinPos(a.Y, val)
+	a.X = kit.MinPos(a.X, val)
+	a.Y = kit.MinPos(a.Y, val)
 }
 
 // set the value along a given dimension to max of current val and new val
@@ -258,9 +258,9 @@ func (a *Vec2D) SetMinDim(d Dims2D, val float64) {
 func (a *Vec2D) SetMinPosDim(d Dims2D, val float64) {
 	switch d {
 	case X:
-		a.X = ki.MinPos(val, a.X)
+		a.X = kit.MinPos(val, a.X)
 	case Y:
-		a.Y = ki.MinPos(val, a.Y)
+		a.Y = kit.MinPos(val, a.Y)
 	}
 }
 

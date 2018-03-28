@@ -7,6 +7,8 @@ package gi
 import (
 	"fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"image/draw"
 	"log"
@@ -34,7 +36,7 @@ type Window struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Window = ki.Types.AddType(&Window{}, nil)
+var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
 // create a new window with given name and sizing
 func NewWindow(name string, width, height int) *Window {
@@ -186,7 +188,7 @@ func (w *Window) SendEventSignal(evi Event) {
 							w.LastDrag = time.Now()
 							w.Dragging = gi.This
 							w.LastSentDrag = mde
-							ki.SetBitFlag(&gi.NodeFlags, int(NodeDragging))
+							bitflag.Set(&gi.NodeFlags, int(NodeDragging))
 							return true
 						}
 						return false
@@ -195,7 +197,7 @@ func (w *Window) SendEventSignal(evi Event) {
 					if w.Dragging == gi.This {
 						_, dg := KiToNode2D(w.Dragging)
 						if dg != nil {
-							ki.ClearBitFlag(&dg.NodeFlags, int(NodeDragging))
+							bitflag.Clear(&dg.NodeFlags, int(NodeDragging))
 						}
 						w.Dragging = nil
 						return true
@@ -237,17 +239,17 @@ func (w *Window) ProcessMouseMovedEvent(evi Event) {
 				in := pos.In(gi.WinBBox)
 				if in {
 					if ete == MouseEnteredEventType {
-						if ki.HasBitFlag(gi.NodeFlags, int(MouseHasEntered)) {
+						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
 							return false // already in
 						}
-						ki.SetBitFlag(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						bitflag.Set(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
 					} else {
 						return false // don't send any exited events if in
 					}
 				} else { // mouse not in object
 					if ete == MouseExitedEventType {
-						if ki.HasBitFlag(gi.NodeFlags, int(MouseHasEntered)) {
-							ki.ClearBitFlag(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
+							bitflag.Clear(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
 						} else {
 							return false // already out..
 						}
@@ -276,7 +278,7 @@ func (w *Window) PopupMouseUpEvent(evi Event) {
 		return
 	}
 	// pos := evi.EventPos()
-	if ki.HasBitFlag(vp.NodeFlags, int(ViewportFlagMenu)) {
+	if bitflag.Has(vp.NodeFlags, int(VpFlagMenu)) {
 		// close on any mouse up event -- todo: need to consider submenus?
 		gi.DisconnectAllEventsTree()
 		w.PopPopup()
@@ -359,7 +361,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
-			ki.ClearBitFlag(&gi.NodeFlags, int(HasFocus))
+			bitflag.Clear(&gi.NodeFlags, int(HasFocus))
 			gii.FocusChanged2D(false)
 		}
 	}
@@ -369,7 +371,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	gii, gi := KiToNode2D(k)
 	if gi != nil {
-		ki.SetBitFlag(&gi.NodeFlags, int(HasFocus))
+		bitflag.Set(&gi.NodeFlags, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
 	return true
@@ -397,7 +399,7 @@ func (w *Window) SetNextFocusItem() bool {
 			if gi.Paint.Off { // off below this
 				return false
 			}
-			if !ki.HasBitFlag(gi.NodeFlags, int(CanFocus)) {
+			if !bitflag.Has(gi.NodeFlags, int(CanFocus)) {
 				return true
 			}
 			if focusNext {

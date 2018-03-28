@@ -5,13 +5,14 @@
 package gi
 
 import (
-	"fmt"
-	"github.com/rcoreilly/goki/ki"
-	"image"
-	"image/draw"
-	"log"
-	// "reflect"
-	"runtime"
-	"sync"
-	"time"
+// "fmt"
+// "github.com/rcoreilly/goki/ki"
+// "image"
+// "image/draw"
+// "log"
+// "sync"
+// "time"
 )
+
+// an icon is an SVG with perhaps some extra functionality like auto read /
+// write from file or byte array

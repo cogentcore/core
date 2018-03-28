@@ -8,6 +8,8 @@ import (
 	"fmt"
 	// "github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"math"
 	// "log"
@@ -75,7 +77,7 @@ type TreeView struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_TreeView = ki.Types.AddType(&TreeView{}, nil)
+var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
 // todo: several functions require traversing tree -- this will require an
 // interface to allow others to implement different behavior -- for now just
@@ -179,7 +181,7 @@ func (g *TreeView) RootTreeView() *TreeView {
 
 // is this node itself collapsed?
 func (g *TreeView) IsCollapsed() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagCollapsed))
+	return bitflag.Has(g.NodeFlags, int(NodeFlagCollapsed))
 }
 
 // does this node have a collapsed parent? if so, don't render!
@@ -191,7 +193,7 @@ func (g *TreeView) HasCollapsedParent() bool {
 			return false
 		}
 		if k.IsType(KiT_TreeView) {
-			if ki.HasBitFlag(pg.NodeFlags, int(NodeFlagCollapsed)) {
+			if bitflag.Has(pg.NodeFlags, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
 			}
@@ -203,7 +205,7 @@ func (g *TreeView) HasCollapsedParent() bool {
 
 // is this node selected?
 func (g *TreeView) IsSelected() bool {
-	return ki.HasBitFlag(g.NodeFlags, int(NodeFlagSelected))
+	return bitflag.Has(g.NodeFlags, int(NodeFlagSelected))
 }
 
 func (g *TreeView) GetLabel() string {
@@ -221,7 +223,7 @@ func (g *TreeView) GetLabel() string {
 // selection updates
 func (g *TreeView) SelectNodeAction() {
 	rn := g.RootWidget
-	if ki.HasBitFlag(rn.NodeFlags, int(NodeFlagExtendSelect)) {
+	if bitflag.Has(rn.NodeFlags, int(NodeFlagExtendSelect)) {
 		if g.IsSelected() {
 			g.UnselectNode()
 		} else {
@@ -240,7 +242,7 @@ func (g *TreeView) SelectNodeAction() {
 func (g *TreeView) SelectNode() {
 	if !g.IsSelected() {
 		g.UpdateStart()
-		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagSelected))
+		bitflag.Set(&g.NodeFlags, int(NodeFlagSelected))
 		g.GrabFocus() // focus always follows select  todo: option
 		g.TreeViewSig.Emit(g.This, int64(NodeSelected), nil)
 		// fmt.Printf("selected node: %v\n", g.Name)
@@ -251,7 +253,7 @@ func (g *TreeView) SelectNode() {
 func (g *TreeView) UnselectNode() {
 	if g.IsSelected() {
 		g.UpdateStart()
-		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagSelected))
+		bitflag.Clear(&g.NodeFlags, int(NodeFlagSelected))
 		g.TreeViewSig.Emit(g.This, int64(NodeUnselected), nil)
 		// fmt.Printf("unselectednode: %v\n", g.Name)
 		g.UpdateEnd()
@@ -285,8 +287,8 @@ func (g *TreeView) RootUnselectAll() {
 func (g *TreeView) CollapseNode() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
-		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
-		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
+		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Set(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeCollapsed), nil)
 		// fmt.Printf("collapsed node: %v\n", g.Name)
 		g.UpdateEnd()
@@ -296,8 +298,8 @@ func (g *TreeView) CollapseNode() {
 func (g *TreeView) OpenNode() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
-		ki.SetBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
-		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagCollapsed))
+		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Clear(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
 		// fmt.Printf("opened node: %v\n", g.Name)
 		g.UpdateEnd()
@@ -306,18 +308,18 @@ func (g *TreeView) OpenNode() {
 
 func (g *TreeView) SetContinuousSelect() {
 	rn := g.RootWidget
-	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
+	bitflag.Set(&rn.NodeFlags, int(NodeFlagContinuousSelect))
 }
 
 func (g *TreeView) SetExtendSelect() {
 	rn := g.RootWidget
-	ki.SetBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
+	bitflag.Set(&rn.NodeFlags, int(NodeFlagExtendSelect))
 }
 
 func (g *TreeView) ClearSelectMods() {
 	rn := g.RootWidget
-	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagContinuousSelect))
-	ki.ClearBitFlag(&rn.NodeFlags, int(NodeFlagExtendSelect))
+	bitflag.Clear(&rn.NodeFlags, int(NodeFlagContinuousSelect))
+	bitflag.Clear(&rn.NodeFlags, int(NodeFlagExtendSelect))
 }
 
 ////////////////////////////////////////////////////
@@ -416,7 +418,7 @@ var TreeViewProps = []map[string]interface{}{
 
 func (g *TreeView) Style2D() {
 	// we can focus by default
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	// first do our normal default styles
 	g.Style.SetStyle(nil, &StyleDefault, TreeViewProps[0])
 	// then style with user props
@@ -435,10 +437,10 @@ func (g *TreeView) Size2D() {
 
 	g.InitLayout2D()
 	if g.HasCollapsedParent() {
-		ki.ClearBitFlag(&g.NodeFlags, int(CanFocus))
+		bitflag.Clear(&g.NodeFlags, int(CanFocus))
 		return // nothing
 	}
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 
 	label := g.GetLabel()
 
@@ -496,7 +498,7 @@ func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 func (g *TreeView) Render2D() {
 	if g.PushBounds() {
 		// reset for next update
-		ki.ClearBitFlag(&g.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Clear(&g.NodeFlags, int(NodeFlagFullReRender))
 
 		if g.HasCollapsedParent() {
 			return // nothing
@@ -532,7 +534,7 @@ func (g *TreeView) Render2D() {
 }
 
 func (g *TreeView) CanReRender2D() bool {
-	if ki.HasBitFlag(g.NodeFlags, int(NodeFlagFullReRender)) {
+	if bitflag.Has(g.NodeFlags, int(NodeFlagFullReRender)) {
 		return false
 	} else {
 		return true
@@ -582,7 +584,7 @@ type TabWidget struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_TabWidget = ki.Types.AddType(&TabWidget{}, nil)
+var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
 
 // set the source Ki Node that generates our tabs
 func (g *TabWidget) SetSrcNode(k ki.Ki) {

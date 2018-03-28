@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	// "gopkg.in/go-playground/colors.v1"
 	"image"
 	// "log"
@@ -59,7 +60,7 @@ type Node2DBase struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Node2DBase = ki.Types.AddType(&Node2DBase{}, nil)
+var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
 
 // primary interface for all Node2D nodes
 type Node2D interface {

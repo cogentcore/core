@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	// "fmt"
 	"image"
 )
@@ -19,14 +19,14 @@ type SVG struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_SVG = ki.Types.AddType(&SVG{}, nil)
+var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
 
 func (g *SVG) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
 func (g *SVG) AsViewport2D() *Viewport2D {
-	return nil
+	return &g.Viewport2D
 }
 
 func (g *SVG) AsLayout2D() *Layout {
@@ -38,6 +38,9 @@ func (g *SVG) Init2D() {
 }
 
 func (g *SVG) Style2D() {
+	// todo: check parentage, set flags to indicate if it is an svg-encapsulated svg
+	// or not -- if not, use Widget styling
+	g.Style2DSVG()
 	g.Style2DSVG()
 }
 
@@ -61,12 +64,12 @@ func (g *SVG) ChildrenBBox2D() image.Rectangle {
 
 func (g *SVG) Render2D() {
 	if g.PushBounds() {
-		if vp.Fill {
-			pc := &vp.Paint
-			rs := &vp.Render
-			pc.FillStyle.SetColor(&vp.Style.Background.Color)
+		if g.Fill {
+			pc := &g.Paint
+			rs := &g.Render
+			pc.FillStyle.SetColor(&g.Style.Background.Color)
 			pc.StrokeStyle.SetColor(nil)
-			pc.DrawRectangle(rs, float64(g.VpBBox.Min.X), float64(g.VpBBox.Min.y), float64(g.VpBBox.Max.X-g.VpBBox.Min.X), float64(g.VpBBox.Max.Y-g.VpBBox.Min.Y))
+			pc.DrawRectangle(rs, float64(g.VpBBox.Min.X), float64(g.VpBBox.Min.Y), float64(g.VpBBox.Max.X-g.VpBBox.Min.X), float64(g.VpBBox.Max.Y-g.VpBBox.Min.Y))
 			pc.FillStrokeClear(rs)
 		}
 		g.Render2DChildren()

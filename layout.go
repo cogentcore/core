@@ -8,6 +8,7 @@ import (
 	// "fmt"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"math"
 )
@@ -42,7 +43,7 @@ const (
 
 //go:generate stringer -type=Align
 
-var KiT_Align = ki.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignN))
+var KiT_Align = kit.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignN))
 
 // is this a generalized alignment to start of container?
 func IsAlignStart(a Align) bool {
@@ -74,7 +75,7 @@ const (
 	OverflowN
 )
 
-var KiT_Overflow = ki.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow", int64(OverflowN))
+var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow", int64(OverflowN))
 
 //go:generate stringer -type=Overflow
 
@@ -264,7 +265,7 @@ type Layout struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Layout = ki.Types.AddType(&Layout{}, nil)
+var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
 
 // do we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
@@ -813,7 +814,7 @@ type Frame struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Frame = ki.Types.AddType(&Frame{}, nil)
+var KiT_Frame = kit.Types.AddType(&Frame{}, nil)
 
 func (g *Frame) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -907,7 +908,7 @@ type Stretch struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Stretch = ki.Types.AddType(&Stretch{}, nil)
+var KiT_Stretch = kit.Types.AddType(&Stretch{}, nil)
 
 func (g *Stretch) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -979,7 +980,7 @@ type Space struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Space = ki.Types.AddType(&Space{}, nil)
+var KiT_Space = kit.Types.AddType(&Space{}, nil)
 
 func (g *Space) AsNode2D() *Node2DBase {
 	return &g.Node2DBase

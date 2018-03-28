@@ -7,6 +7,9 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
+
 	// "golang.org/x/image/font"
 	"image"
 	"log"
@@ -56,14 +59,14 @@ func (g *Action) ActionReleased() {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Action = ki.Types.AddType(&Action{}, nil)
+var KiT_Action = kit.Types.AddType(&Action{}, nil)
 
 func (g *Action) SetAsMenu() {
-	ki.SetBitFlag(&g.NodeFlags, int(ActionFlagMenu))
+	bitflag.Set(&g.NodeFlags, int(ActionFlagMenu))
 }
 
 func (g *Action) SetAsButton() {
-	ki.ClearBitFlag(&g.NodeFlags, int(ActionFlagMenu))
+	bitflag.Clear(&g.NodeFlags, int(ActionFlagMenu))
 }
 
 func (g *Action) AsNode2D() *Node2DBase {
@@ -156,7 +159,7 @@ var ActionProps = []map[string]interface{}{
 }
 
 func (g *Action) Style2D() {
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style.SetStyle(nil, &StyleDefault, ActionProps[ButtonNormal])
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -239,7 +242,7 @@ type Separator struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_Separator = ki.Types.AddType(&Separator{}, nil)
+var KiT_Separator = kit.Types.AddType(&Separator{}, nil)
 
 func (g *Separator) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
@@ -354,14 +357,14 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	// todo: more work needed here to optimally position box -- put in viewport
 	// fmt.Printf("sz: %v\n", vpsz)
 	vpsz := image.Point{int(vpszf.X), int(vpszf.Y)}
-	x = ki.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
-	y = ki.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
+	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
+	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp := NewViewport2D(vpsz.X, vpsz.Y)
 	pvp.SetThisName(pvp, name+"PopupVP")
 	pvp.Fill = true
 	pvp.SetProp("background-color", "#FFF")
-	ki.SetBitFlag(&pvp.NodeFlags, int(VpFlagMenu))
-	ki.SetBitFlag(&pvp.NodeFlags, int(VpFlagMenu))
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
 	pvp.Style2D()
@@ -380,7 +383,7 @@ type MenuButton struct {
 }
 
 // must register all new types so type names can be looked up by name -- e.g., for json
-var KiT_MenuButton = ki.Types.AddType(&MenuButton{}, nil)
+var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, nil)
 
 // add an action to the menu -- todo: shortcuts
 func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFun) *Action {
@@ -504,7 +507,7 @@ var MenuButtonProps = []map[string]interface{}{
 }
 
 func (g *MenuButton) Style2D() {
-	ki.SetBitFlag(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style.SetStyle(nil, &StyleDefault, MenuButtonProps[ButtonNormal])
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
