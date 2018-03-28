@@ -499,6 +499,17 @@ func (n *Node) DeleteChildren(destroy bool) {
 	n.EmitChildrenDeletedSignal()
 }
 
+func (n *Node) DeleteMe(destroy bool) {
+	if n.Parent == nil {
+		// todo: error?
+		if destroy {
+			n.DestroyKi()
+		}
+	} else {
+		n.Parent.DeleteChild(n.This, destroy)
+	}
+}
+
 func (n *Node) DestroyDeleted() {
 	for _, child := range n.Deleted {
 		child.DestroyKi()
