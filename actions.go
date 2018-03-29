@@ -348,19 +348,15 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 		lay.AddChild(acn.This)
 	}
 	lay.Init2DTree()
-	lay.Style2DTree()                                        // sufficient to get sizes
-	lay.LayData.AllocSize = vp.LayData.AllocSize             // give it the whole vp initially
-	lay.Size2DTree()                                         // collect sizes
-	vpszf := lay.LayData.Size.Pref.Min(vp.LayData.AllocSize) // keep in bounds
-	// todo: more work needed here to optimally position box -- put in viewport
-	// fmt.Printf("sz: %v\n", vpsz)
-	vpsz := image.Point{int(vpszf.X), int(vpszf.Y)}
+	lay.Style2DTree()                            // sufficient to get sizes
+	lay.LayData.AllocSize = vp.LayData.AllocSize // give it the whole vp initially
+	lay.Size2DTree()                             // collect sizes
+	vpsz := lay.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp := NewViewport2D(vpsz.X, vpsz.Y)
 	pvp.SetThisName(pvp, name+"PopupVP")
 	pvp.Fill = true
-	pvp.SetProp("background-color", "#FFF")
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}

@@ -44,6 +44,9 @@ SOFTWARE.
 // original gg package used Point2D but Vec2D is more general, e.g., for sizes etc
 // in go much better to use fewer types so only using Vec2D
 
+// could break this out as separate package, but no advantage in package-based
+// naming
+
 // dimensions
 type Dims2D int32
 
@@ -62,6 +65,10 @@ type Vec2D struct {
 }
 
 var Vec2DZero = Vec2D{0, 0}
+
+func NewVec2D(x, y float64) Vec2D {
+	return Vec2D{x, y}
+}
 
 // return value along given dimension
 func (a Vec2D) Dim(d Dims2D) float64 {
@@ -264,9 +271,13 @@ func (a *Vec2D) SetMinPosDim(d Dims2D, val float64) {
 	}
 }
 
-func (a *Vec2D) SetFromPoint(pt image.Point) {
+func (a *Vec2D) SetPoint(pt image.Point) {
 	a.X = float64(pt.X)
 	a.Y = float64(pt.Y)
+}
+
+func (a Vec2D) ToPoint() image.Point {
+	return image.Point{int(a.X), int(a.Y)}
 }
 
 func (a Vec2D) Distance(b Vec2D) float64 {

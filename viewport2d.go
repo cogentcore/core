@@ -24,6 +24,8 @@ const (
 	VpFlagPopup NodeFlags = NodeFlagsN + iota
 	// viewport is serving as a popup menu -- affects how window processes clicks
 	VpFlagMenu
+	// this viewport is an SVG viewport -- determines the styling that it uses
+	VpFlagSVG
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
@@ -62,7 +64,7 @@ func NewViewport2DForImage(im image.Image) *Viewport2D {
 // No copy is made.
 func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 	vp := &Viewport2D{
-		ViewBox: ViewBox2D{Size: image.Point{im.Bounds().Size().X, im.Bounds().Size().Y}},
+		ViewBox: ViewBox2D{Size: im.Bounds().Size()},
 		Pixels:  im,
 	}
 	vp.Render.Image = vp.Pixels
@@ -158,7 +160,13 @@ func (vp *Viewport2D) Style2D() {
 
 func (vp *Viewport2D) Size2D() {
 	vp.InitLayout2D()
-	vp.LayData.AllocSize.SetFromPoint(vp.ViewBox.Size)
+	// we listen to x,y styling for positioning within parent vp, if non-zero
+	pos := vp.Style.Layout.PosDots().ToPoint()
+	if pos != image.ZP {
+		vp.ViewBox.Min = pos
+	}
+	// note: size must be set already previously..
+	vp.LayData.AllocSize.SetPoint(vp.ViewBox.Size)
 }
 
 func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
@@ -174,11 +182,11 @@ func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
 }
 
 func (vp *Viewport2D) BBox2D() image.Rectangle {
-	return vp.Pixels.Bounds() // not sure about: ViewBox.Bounds()
+	return vp.Pixels.Bounds()
 }
 
-func (g *Viewport2D) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
+func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
+	return vp.VpBBox
 }
 
 func (vp *Viewport2D) RenderViewport2D() {
@@ -195,6 +203,13 @@ func (vp *Viewport2D) RenderViewport2D() {
 func (vp *Viewport2D) PushBounds() bool {
 	if vp.VpBBox.Empty() {
 		return false
+	}
+	// if we are completely invisible, no point in rendering..
+	if vp.Viewport != nil {
+		wbi := vp.WinBBox.Intersect(vp.Viewport.WinBBox)
+		if wbi.Empty() {
+			return false
+		}
 	}
 	rs := &vp.Render
 	rs.PushBounds(vp.VpBBox)

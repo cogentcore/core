@@ -184,7 +184,7 @@ func (g *Node2DBase) BBoxFromAlloc() image.Rectangle {
 // set our window-level BBox from vp and our bbox
 func (g *Node2DBase) SetWinBBox() {
 	if g.Viewport != nil {
-		g.WinBBox = g.VpBBox.Add(image.Point{g.Viewport.WinBBox.Min.X, g.Viewport.WinBBox.Min.Y})
+		g.WinBBox = g.VpBBox.Add(g.Viewport.WinBBox.Min)
 	} else {
 		g.WinBBox = g.VpBBox
 	}

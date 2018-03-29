@@ -156,6 +156,20 @@ func mainrun() {
 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
 	})
 
+	row4 := vlay.AddNewChildNamed(gi.KiT_Layout, "row4").(*gi.Layout)
+	row4.Lay = gi.LayoutRow
+	row4.SetProp("align-vert", "center")
+	row4.SetProp("align-horiz", "left")
+	row4.SetProp("margin", 2.0)
+	row4.SetStretchMaxWidth()
+	// row4.SetStretchMaxHeight()
+
+	wdicon, ok := (*gi.DefaultIconSet)["widget-down-wedge"]
+
+	if ok {
+		row4.AddChild(wdicon.This)
+	}
+
 	win.UpdateEnd()
 
 	win.StartEventLoop()

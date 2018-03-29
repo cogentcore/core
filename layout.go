@@ -138,6 +138,26 @@ func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
 	}
 }
 
+// position settings, in dots
+func (ls *LayoutStyle) PosDots() Vec2D {
+	return NewVec2D(ls.PosX.Dots, ls.PosY.Dots)
+}
+
+// size settings, in dots
+func (ls *LayoutStyle) SizeDots() Vec2D {
+	return NewVec2D(ls.Width.Dots, ls.Height.Dots)
+}
+
+// size max settings, in dots
+func (ls *LayoutStyle) MaxSizeDots() Vec2D {
+	return NewVec2D(ls.MaxWidth.Dots, ls.MaxHeight.Dots)
+}
+
+// size min settings, in dots
+func (ls *LayoutStyle) MinSizeDots() Vec2D {
+	return NewVec2D(ls.MinWidth.Dots, ls.MinHeight.Dots)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Layout Data for actually computing the layout
 
@@ -194,12 +214,12 @@ func (ld *LayoutData) Defaults() {
 func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 	ld.Reset()
 	// these are layout hints:
-	ld.Size.Need = Vec2D{ls.MinWidth.Dots, ls.MinHeight.Dots}
-	ld.Size.Pref = Vec2D{ls.Width.Dots, ls.Height.Dots}
-	ld.Size.Max = Vec2D{ls.MaxWidth.Dots, ls.MaxHeight.Dots}
+	ld.Size.Need = ls.MinSizeDots()
+	ld.Size.Pref = ls.SizeDots()
+	ld.Size.Max = ls.MaxSizeDots()
 
 	// this is an actual initial desired setting
-	ld.AllocPos = Vec2D{ls.PosX.Dots, ls.PosY.Dots}
+	ld.AllocPos = ls.PosDots()
 	// not setting size, so we can keep that as a separate constraint
 }
 

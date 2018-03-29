@@ -8,6 +8,9 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 	// "fmt"
 	"image"
+	"strconv"
+	"strings"
+	"unicode"
 )
 
 // shapes2d contains all the SVG-based objects for drawing shapes, paths, etc
@@ -51,7 +54,7 @@ func (g *Rect) Style2D() {
 
 func (g *Rect) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Rect) Layout2D(parBBox image.Rectangle) {
@@ -131,7 +134,7 @@ func (g *Viewport2DFill) Style2D() {
 
 func (g *Viewport2DFill) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Viewport2DFill) Layout2D(parBBox image.Rectangle) {
@@ -200,7 +203,7 @@ func (g *Circle) Style2D() {
 
 func (g *Circle) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Circle) Layout2D(parBBox image.Rectangle) {
@@ -276,7 +279,7 @@ func (g *Ellipse) Style2D() {
 
 func (g *Ellipse) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Ellipse) Layout2D(parBBox image.Rectangle) {
@@ -351,7 +354,7 @@ func (g *Line) Style2D() {
 
 func (g *Line) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Line) Layout2D(parBBox image.Rectangle) {
@@ -425,7 +428,7 @@ func (g *Polyline) Style2D() {
 
 func (g *Polyline) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Polyline) Layout2D(parBBox image.Rectangle) {
@@ -502,7 +505,7 @@ func (g *Polygon) Style2D() {
 
 func (g *Polygon) Size2D() {
 	g.InitLayout2D()
-	g.LayData.AllocSize.SetFromPoint(g.BBox2D().Size())
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
 }
 
 func (g *Polygon) Layout2D(parBBox image.Rectangle) {
@@ -543,5 +546,455 @@ func (g *Polygon) FocusChanged2D(gotFocus bool) {
 var _ Node2D = &Polygon{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Path
+
+// the commands within the path SVG drawing data type
+type PathCmds byte
+
+const (
+	// move pen, abs coords
+	PcM PathCmds = iota
+	// move pen, rel coords
+	Pcm
+	// lineto, abs
+	PcL
+	// lineto, rel
+	Pcl
+	// horizontal lineto, abs
+	PcH
+	// relative lineto, rel
+	Pch
+	// vertical lineto, abs
+	PcV
+	// vertical lineto, rel
+	Pcv
+	// Bezier curveto, abs
+	PcC
+	// Bezier curveto, rel
+	Pcc
+	// smooth Bezier curveto, abs
+	PcS
+	// smooth Bezier curveto, rel
+	Pcs
+	// quadratic Bezier curveto, abs
+	PcQ
+	// quadratic Bezier curveto, rel
+	Pcq
+	// smooth quadratic Bezier curveto, abs
+	PcT
+	// smooth quadratic Bezier curveto, rel
+	Pct
+	// elliptical arc, abs
+	PcA
+	// elliptical arc, rel
+	Pca
+	// close path
+	PcZ
+	// close path
+	Pcz
+)
+
+// to encode the data, we use 32-bit floats which are converted into int32 for
+// path commands, which contain the number of data points following the path
+// command to interpret as numbers, in the lower and upper 2 bytes of the
+// converted int32 number we don't need that many bits, but keeping 32-bit
+// alignment is probably good and really these things don't need to be crazy
+// compact as it is unlikely to make a relevant diff in size or perf to pack
+// down further
+type PathData float32
+
+// decode path data as a command and a number of subsequent values for that command
+func (pd PathData) Cmd() (PathCmds, int) {
+	iv := int32(pd)
+	cmd := PathCmds(iv & 0xFF)   // only the lowest byte for cmd
+	n := int((iv & 0xFF00) >> 8) // extract the n from next highest byte
+	return cmd, n
+}
+
+// encode command and n into PathData
+func (pc PathCmds) EncCmd(n int) PathData {
+	nb := int32(n << 8) // n up-shifted
+	pd := PathData(int32(pc) | nb)
+	return pd
+}
+
+// 2D Path
+type Path struct {
+	Node2DBase
+	Data []PathData `xml:"d" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+}
+
+var KiT_Path = kit.Types.AddType(&Path{}, nil)
+
+func (g *Path) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *Path) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Path) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *Path) Init2D() {
+	g.Init2DBase()
+}
+
+func (g *Path) Style2D() {
+	g.Style2DSVG()
+	pc := &g.Paint
+	if pc.HasNoStrokeOrFill() || len(g.Data) < 2 {
+		pc.Off = true
+	}
+}
+
+func (g *Path) Size2D() {
+	g.InitLayout2D()
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
+}
+
+func (g *Path) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+}
+
+func (g *Path) BBox2D() image.Rectangle {
+	// hmm -- this is somewhat expensive -- probably better to compute earlier and save?
+	return image.ZR
+	// return g.Paint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Path) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
+// get the next path data element, incrementing the index -- ++ not an
+// expression so its clunky -- hopefully this is inlined..
+func NextPathData(data []PathData, i *int) PathData {
+	pd := data[*i]
+	(*i)++
+	return pd
+}
+
+// this traverses the path data and renders it using paint and render state --
+// we assume all the data has been validated and that n's are sufficient, etc
+func RenderPathData(data []PathData, pc *Paint, rs *RenderState) {
+	sz := len(data)
+	if sz == 0 {
+		return
+	}
+	var cx, cy, x1, y1, x2, y2 PathData
+	for i := 0; i < sz; {
+		cmd, n := NextPathData(data, &i).Cmd()
+		i++
+		switch cmd {
+		case PcM:
+			cx = NextPathData(data, &i)
+			cy = NextPathData(data, &i)
+			pc.MoveTo(rs, float64(cx), float64(cy))
+			for np := 1; np < n/2; np++ {
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case Pcm:
+			cx += NextPathData(data, &i)
+			cy += NextPathData(data, &i)
+			pc.MoveTo(rs, float64(cx), float64(cy))
+			for np := 1; np < n/2; np++ {
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case PcL:
+			for np := 0; np < n/2; np++ {
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case Pcl:
+			for np := 0; np < n/2; np++ {
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case PcH:
+			for np := 0; np < n; np++ {
+				cx = NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case Pch:
+			for np := 0; np < n; np++ {
+				cx += NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case PcV:
+			for np := 0; np < n; np++ {
+				cy = NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case Pcv:
+			for np := 0; np < n; np++ {
+				cy += NextPathData(data, &i)
+				pc.LineTo(rs, float64(cx), float64(cy))
+			}
+		case PcC:
+			for np := 0; np < n/6; np++ {
+				x1 = NextPathData(data, &i)
+				y1 = NextPathData(data, &i)
+				x2 = NextPathData(data, &i)
+				y2 = NextPathData(data, &i)
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+			}
+		case Pcc:
+			for np := 0; np < n/6; np++ {
+				x1 = cx + NextPathData(data, &i)
+				y1 = cy + NextPathData(data, &i)
+				x2 = cx + NextPathData(data, &i)
+				y2 = cy + NextPathData(data, &i)
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+			}
+		case PcS:
+			for np := 0; np < n/4; np++ {
+				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
+				y1 = 2*cy - y2
+				x2 = NextPathData(data, &i)
+				y2 = NextPathData(data, &i)
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+			}
+		case Pcs:
+			for np := 0; np < n/4; np++ {
+				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
+				y1 = 2*cy - y2
+				x2 = cx + NextPathData(data, &i)
+				y2 = cy + NextPathData(data, &i)
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+			}
+		case PcQ:
+			for np := 0; np < n/4; np++ {
+				x1 = NextPathData(data, &i)
+				y1 = NextPathData(data, &i)
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+			}
+		case Pcq:
+			for np := 0; np < n/4; np++ {
+				x1 = cx + NextPathData(data, &i)
+				y1 = cy + NextPathData(data, &i)
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+			}
+		case PcT:
+			for np := 0; np < n/2; np++ {
+				x1 = 2*cx - x1 // this is a reflection
+				y1 = 2*cy - y1
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+			}
+		case Pct:
+			for np := 0; np < n/2; np++ {
+				x1 = 2*cx - x1 // this is a reflection
+				y1 = 2*cy - y1
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+			}
+		case PcA:
+			for np := 0; np < n/7; np++ {
+				rx := NextPathData(data, &i)
+				ry := NextPathData(data, &i)
+				ang := NextPathData(data, &i)
+				_ = NextPathData(data, &i) // large-arc-flag
+				_ = NextPathData(data, &i) // sweep-flag
+				cx = NextPathData(data, &i)
+				cy = NextPathData(data, &i)
+				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
+				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
+			}
+		case Pca:
+			for np := 0; np < n/7; np++ {
+				rx := NextPathData(data, &i)
+				ry := NextPathData(data, &i)
+				ang := NextPathData(data, &i)
+				_ = NextPathData(data, &i) // large-arc-flag
+				_ = NextPathData(data, &i) // sweep-flag
+				cx += NextPathData(data, &i)
+				cy += NextPathData(data, &i)
+				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
+				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
+			}
+		case PcZ:
+			pc.ClosePath(rs)
+		case Pcz:
+			pc.ClosePath(rs)
+		}
+	}
+}
+
+func ParsePathData(d string) []PathData {
+	dt := strings.Replace(d, ",", " ", -1) // replace commas with spaces
+	ds := strings.Fields(dt)               // split by whitespace
+	pd := make([]PathData, 0, 20)
+	sz := len(ds)
+	cmd := PcM
+	cmdIdx := 0 // last command index
+	for i := 0; i < sz; {
+		cf := ds[i]
+		c := cf[0]
+		mn := 0 // minimum n associated with current cmd
+		switch c {
+		case 'M':
+			cmd = PcM
+			mn = 2
+		case 'm':
+			cmd = Pcm
+			mn = 2
+		case 'L':
+			cmd = PcL
+			mn = 2
+		case 'l':
+			cmd = Pcl
+			mn = 2
+		case 'H':
+			cmd = PcH
+			mn = 1
+		case 'h':
+			cmd = Pch
+			mn = 1
+		case 'V':
+			cmd = PcV
+			mn = 1
+		case 'v':
+			cmd = Pcv
+			mn = 1
+		case 'C':
+			cmd = PcC
+			mn = 6
+		case 'c':
+			cmd = Pcc
+			mn = 6
+		case 'S':
+			cmd = PcS
+			mn = 4
+		case 's':
+			cmd = Pcs
+			mn = 4
+		case 'Q':
+			cmd = PcQ
+			mn = 4
+		case 'q':
+			cmd = Pcq
+			mn = 4
+		case 'T':
+			cmd = PcT
+			mn = 2
+		case 't':
+			cmd = Pct
+			mn = 2
+		case 'A':
+			cmd = PcA
+			mn = 7
+		case 'a':
+			cmd = Pca
+			mn = 7
+		case 'Z':
+			cmd = PcZ
+			mn = 0
+		case 'z':
+			cmd = Pcz
+			mn = 0
+		}
+		pc := cmd.EncCmd(mn) // start with mn
+		cmdIdx = len(pd)
+		pd = append(pd, pc) // push on
+
+		if mn == 0 {
+			continue
+		}
+
+		if len(cf) > 1 {
+			cf = cf[1:]
+		} else {
+			i++
+			cf = ds[i]
+		}
+		vl, _ := strconv.ParseFloat(cf, 32)
+		pd = append(pd, PathData(vl)) // push on
+
+		// get rest of numbers
+		for np := 1; np < mn; np++ {
+			i++
+			cf = ds[i]
+			vl, _ := strconv.ParseFloat(cf, 32)
+			pd = append(pd, PathData(vl)) // push on
+		}
+		if i >= sz {
+			break
+		}
+
+		ntot := mn
+		for {
+			i++
+			cf = ds[i]
+			if unicode.IsLetter(rune(cf[0])) {
+				break
+			}
+			ntot += mn
+			for np := 0; np < mn; np++ {
+				i++
+				cf = ds[i]
+				vl, _ := strconv.ParseFloat(cf, 32)
+				pd = append(pd, PathData(vl)) // push on
+			}
+			if i >= sz {
+				break
+			}
+		}
+		if ntot > mn {
+			pc = cmd.EncCmd(ntot)
+			pd[cmdIdx] = pc
+		}
+	}
+	return pd
+}
+
+func (g *Path) Render2D() {
+	if g.PushBounds() {
+		pc := &g.Paint
+		rs := &g.Viewport.Render
+		if len(g.Data) < 2 {
+			return
+		}
+		RenderPathData(g.Data, pc, rs)
+		pc.FillStrokeClear(rs)
+		g.Render2DChildren()
+		g.PopBounds()
+	}
+}
+
+func (g *Path) CanReRender2D() bool {
+	return false
+}
+
+func (g *Path) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &Path{}
 
 // todo: new in SVG2: mesh

@@ -67,6 +67,10 @@ type BackgroundStyle struct {
 	// Size
 }
 
+func (b *BackgroundStyle) Defaults() {
+	b.Color.SetColor(color.White)
+}
+
 // sides of a box -- some properties can be specified per each side (e.g., border) or not
 type BoxSides int32
 
@@ -152,6 +156,7 @@ func (s *Style) Defaults() {
 	s.Outline.Style = BorderNone
 	s.PointerEvents = true
 	s.Color.SetColor(color.Black)
+	s.Background.Defaults()
 	s.Layout.Defaults()
 	s.Font.Defaults()
 	s.Text.Defaults()

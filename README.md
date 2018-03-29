@@ -145,6 +145,7 @@ Soon:
 
 ## GUI
 
+* qt quick controls https://doc.qt.io/qt-5.10/qtquickcontrols2-differences.html
 * Shiny (not much progress recently, only works on android?):  https://github.com/golang/go/issues/11818 https://github.com/golang/exp/tree/master/shiny
 * Current plans for GUI based on OpenGL: https://docs.google.com/document/d/1mXev7TyEnvM4t33lnqoji-x7EqGByzh4RpE4OqEZck4
 * Window events: https://github.com/skelterjohn/go.wde
