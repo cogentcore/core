@@ -24,6 +24,8 @@ A Ki tree is recursively composed of Ki Node structs, in a one-Parent / multiple
 
 # Go Language (golang) Notes (esp for people coming from C++)
 
+general summary: https://github.com/golang/go/wiki/GoForCPPProgrammers
+
 ## Naming Conventions
 
 https://golang.org/doc/effective_go.html#names
@@ -71,6 +73,20 @@ https://golang.org/doc/effective_go.html#names
 ## Closures & anonymous functions
 
 It is very convenient to use anonymous functions directly in the `FunDown` (etc) and `Signal Connect` cases, but for performance reasons, it is important to be careful about capturing local variables from the parent function, thereby creating a *closure*, which creates a local stack to represent those variables.  In the case of FunDown / FunUp etc, the impact is minimized because the function is ONLY used during the lifetime of the outer function.  However, for `Signal Connect`, the function is itself saved and used later, so using a closure there creates extra memory overhead for each time the connection is created.  Thus, it is generally better to avoid capturing local variables in such functions -- typically all the relevant info can be made available in the recv, send, sig, and data args for the connection function.
+
+## Notes on things that would perhaps be nice to change about Go..
+
+As the docs state, you really have to use it for a while to appreciate all of the design decisions in the language, so these are very preliminary and subject to later reconsideration.. 
+
+* Reference arg type -- the receiver arg (the "this" pointer in C++) has
+  automagical ability to either be a pointer or a value depending on the
+  function declaration, but other args do NOT have this flexibility.  It means
+  that the caller has to do a little bit of extra work adding a & or not where
+  necessary.  The counter-argument is presumably that this means that the
+  caller KNOWS that by passing a pointer, the value of the arg will be
+  changed, and that is probably a good thing.  The same point could be made
+  for the receiver arg, but there I suppose the syntax would have been a bit
+  clunky and confusing.
 
 # TODO
 
