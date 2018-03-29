@@ -90,7 +90,10 @@ As the docs state, you really have to use it for a while to appreciate all of th
 
 # TODO
 
+* Clone and Copy (deep) methods
+
 * THIS IS KEY: for allowing more inheritance: Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user -- just look for method of name "AsTypeName" and call that!
+	+ also need this inheritance info for iterating over all derived types of a given type
 
 * method that walks fields and resets pointers to nil, and also resets any Signal connections -- called in destroyki -- in general somewhat challenging to deal with destruction..
 

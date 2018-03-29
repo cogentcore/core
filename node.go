@@ -234,7 +234,11 @@ func (n *Node) DeleteProp(key string) {
 func (n *Node) SetParent(parent Ki) {
 	n.Parent = parent
 	if parent != nil {
-		n.Updating.Set(parent.UpdateCtr().Value()) // we need parent's update counter b/c they will end
+		upc := parent.UpdateCtr().Value() // we need parent's update counter b/c they will end
+		n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			k.UpdateCtr().Set(upc)
+			return true
+		})
 	}
 }
 
