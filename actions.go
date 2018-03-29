@@ -368,11 +368,11 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
+	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
 	pvp.Style2D()
 	pvp.AddChild(lay.This)
-	vp.AddChild(pvp.This) // this should trigger the update -- todo: bigger update than is needed -- need to be smarter about this -- e.g., if add child and data is viewport node then don't redo us
-	pvp.PushAsPopup()
+	vp.PushPopup(pvp)
 	return pvp
 }
 

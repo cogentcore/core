@@ -45,16 +45,17 @@ func mainrun() {
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()
+	vp.Fill = true
 
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
-	vpfill.SetProp("fill", "#FFF")
+	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay.Lay = gi.LayoutCol
 
-	// rlay := vpfill.AddNewChildNamed(gi.KiT_RowLayout, "rowlay").(*gi.RowLayout)
-	// rlay.SetProp("x", 10)
-	// rlay.SetProp("y", 10)
-	// rlay.SetProp("text-align", "center")
+	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1.Lay = gi.LayoutRow
+	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	// row1.SetStretchMaxWidth()
 
-	tv1 := vpfill.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
+	tv1 := row1.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
 	tv1.SetProp("x", 10)
 	tv1.SetProp("y", 10)
 	tv1.SetSrcNode(&srctree)

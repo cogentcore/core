@@ -277,11 +277,9 @@ func (w *Window) PopupMouseUpEvent(evi Event) {
 		return
 	}
 	// pos := evi.EventPos()
-	if bitflag.Has(vp.NodeFlags, int(VpFlagMenu)) {
-		// close on any mouse up event -- todo: need to consider submenus?
-		gi.DisconnectAllEventsTree()
+	if vp.IsMenu() {
+		vp.DeletePopup()
 		w.PopPopup()
-		gi.DeleteMe(true) // destroy
 	}
 }
 

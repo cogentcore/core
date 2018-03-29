@@ -406,6 +406,7 @@ var TreeViewProps = []map[string]interface{}{
 		// "font-family":         "Arial", // this is crashing
 		"font-size":        "24pt", // todo: need to get dpi!
 		"text-align":       "left",
+		"vertical-align":   "top",
 		"color":            "black",
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
 	}, { // selected
@@ -430,6 +431,9 @@ func (g *TreeView) Style2D() {
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
+
+// TreeView is tricky for alloc because it is both a layout of its children but has to
+// maintain its own bbox for its own widget.
 
 func (g *TreeView) Size2D() {
 	g.RootWidget = g.RootTreeView() // cache
@@ -465,15 +469,9 @@ func (g *TreeView) Size2D() {
 }
 
 func (g *TreeView) Layout2D(parBBox image.Rectangle) {
-	psize := g.AddParentPos()
-	rn := g.RootWidget
-	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
-	g.WidgetSize.X = g.LayData.AllocSize.X
-	gii := g.This.(Node2D)
-	g.VpBBox = parBBox.Intersect(gii.BBox2D())
-	g.SetWinBBox()
-	g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
-	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
+	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
+	g.Style.SetUnitContext(g.Viewport, psize)       // update units with final layout
+	g.Paint.SetUnitContext(g.Viewport, psize)       // always update paint
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -491,11 +489,26 @@ func (g *TreeView) BBox2D() image.Rectangle {
 }
 
 func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+	psize := g.AddParentPos()
+	rn := g.RootWidget
+	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
+	g.WidgetSize.X = g.LayData.AllocSize.X
+	gii := g.This.(Node2D)
+	g.VpBBox = parBBox.Intersect(gii.BBox2D())
+	g.SetWinBBox()
+
+	// todo: need to compute on all kids too!
+
+	return psize
 }
 
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
+	ar := g.BBoxFromAlloc() // need to use allocated size which includes children
+	if g.Parent != nil {    // use parents children bbox to determine where we can draw
+		pgi, _ := KiToNode2D(g.Parent)
+		ar = ar.Intersect(pgi.ChildrenBBox2D())
+	}
+	return ar
 }
 
 func (g *TreeView) Render2D() {

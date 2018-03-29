@@ -25,6 +25,8 @@ const (
 	VpFlagPopup NodeFlags = NodeFlagsN + iota
 	// viewport is serving as a popup menu -- affects how window processes clicks
 	VpFlagMenu
+	// if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)
+	VpFlagPopupDestroyAll
 	// this viewport is an SVG viewport -- determines the styling that it uses
 	VpFlagSVG
 )
@@ -139,13 +141,51 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	}
 }
 
+// push a viewport as popup of this viewport -- sets window popup and adds as a child
+func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
+	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
+	if wini != nil {
+		win := (wini).(*Window)
+		win.PushPopup(pvp.This)
+	} else {
+		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
+	}
+	vp.AddChild(pvp.This)
+}
+
 func (vp *Viewport2D) PushAsPopup() {
 	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
+	bitflag.Set(&vp.NodeFlags, int(VpFlagPopup))
 	if wini != nil {
 		win := (wini).(*Window)
 		win.PushPopup(vp.This)
 	} else {
 		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
+	}
+}
+
+// this is called by window when a popup is deleted -- it destroys the vp and
+// its main layout, see VpFlagPopupDestroyAll for whether children are destroyed
+func (vp *Viewport2D) DeletePopup() {
+	vp.DisconnectAllEventsTree()
+	par := vp.Parent
+	if par != nil {
+		par.UpdateStart()
+	}
+	if !bitflag.Has(vp.NodeFlags, int(VpFlagPopupDestroyAll)) {
+		if len(vp.Children) == 1 { // look for a typical layout as our first child
+			kc, _ := vp.KiChild(0)
+			cli, _ := KiToNode2D(kc)
+			ly := cli.AsLayout2D()
+			if ly != nil {
+				ly.DeleteChildren(false) // do NOT destroy children -- just delete them
+			}
+		}
+	}
+	vp.DeleteMe(true) // destroy!
+	if par != nil {
+		par.UpdateEnd()
 	}
 }
 

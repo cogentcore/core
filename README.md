@@ -66,11 +66,12 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* need auto-disconnection code in ki, and closing popup should only destroy the Vp and layout, not the menu items -- delete them first then call destroy
+* test path rendering
+* property-based xforms for svg
+
+* need auto-disconnection code in ki
 
 * WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
-
-* SVGBox, Icon, and XML parsing -- do this right to get icons for things, need for toggle on treeview -- svg box, viewport
 
 * scrollbars are not centered -- all padding on top / left
 
