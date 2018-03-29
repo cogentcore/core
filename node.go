@@ -507,7 +507,6 @@ func (n *Node) DeleteChildren(destroy bool) {
 
 func (n *Node) DeleteMe(destroy bool) {
 	if n.Parent == nil {
-		// todo: error?
 		if destroy {
 			n.DestroyKi()
 		}
