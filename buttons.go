@@ -292,6 +292,10 @@ func (g *Button) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Button) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Button) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }

@@ -195,7 +195,7 @@ func (s *Style) SetStyle(parent, defs *Style, props map[string]interface{}) {
 // render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	s.UnContext.Defaults() // todo: need to get screen information and true dpi
-	if vp != nil {
+	if vp != nil && vp.Render.Image != nil {
 		sz := vp.Render.Image.Bounds().Size()
 		s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
 	}

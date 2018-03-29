@@ -141,7 +141,12 @@ func (g *Text2D) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Text2D) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
+}
+
+func (g *Text2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Text2D) ChildrenBBox2D() image.Rectangle {

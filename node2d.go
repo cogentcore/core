@@ -79,6 +79,8 @@ type Node2D interface {
 	Layout2D(parBBox image.Rectangle)
 	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
 	BBox2D() image.Rectangle
+	// Compute VpBBox and WinBBox for node, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code
+	ComputeBBox2D(parBBox image.Rectangle) Vec2D
 	// ChildrenBBox2D: compute the bbox available to my children (content), adjusting for margins, border, padding (BoxSpace) taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
 	ChildrenBBox2D() image.Rectangle
 	// Render2D: Final rendering pass, each node is fully responsible for rendering its own children, to provide maximum flexibility (see Render2DChildren) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
@@ -203,9 +205,9 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 	return Vec2DZero
 }
 
-// ComputeBBox -- computes the VpBBox and WinBBox for node -- returns parent
+// ComputeBBox2DBase -- computes the VpBBox and WinBBox for node -- returns parent
 // size from AddParentPos
-func (g *Node2DBase) ComputeBBox(parBBox image.Rectangle) Vec2D {
+func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle) Vec2D {
 	psize := g.AddParentPos()
 	gii := g.This.(Node2D)
 	g.VpBBox = parBBox.Intersect(gii.BBox2D())
@@ -215,7 +217,7 @@ func (g *Node2DBase) ComputeBBox(parBBox image.Rectangle) Vec2D {
 
 // basic Layout2D functions -- good for most cases
 func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
-	psize := g.ComputeBBox(parBBox)
+	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
 	if initStyle {
 		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}

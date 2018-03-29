@@ -422,6 +422,10 @@ func (g *Slider) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Slider) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Slider) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
@@ -663,21 +667,6 @@ func (g *ScrollBar) Style2D() {
 
 func (g *ScrollBar) Size2D() {
 	g.InitLayout2D()
-	// st := &g.Style
-	// if we have the default fixed width vals, then update based on orientation
-	// if st.Layout.Width.Val == 12.0 && st.Layout.Width.Un == units.Px {
-	// 	if g.Horiz {
-	// 		st.Layout.Height = st.Layout.Width
-	// 		st.Layout.MaxHeight = st.Layout.Width
-	// 		g.LayData.AllocSize.Y = st.Layout.Width.Dots
-	// 		st.Layout.Width.Val = 0     // reset
-	// 		st.Layout.MaxWidth.Val = -1 // infinite stretch
-	// 	} else {
-	// 		st.Layout.MaxWidth = st.Layout.Width
-	// 		g.LayData.AllocSize.X = st.Layout.Width.Dots
-	// 		st.Layout.MaxHeight.Val = -1 // infinite stretch
-	// 	}
-	// }
 }
 
 func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
@@ -691,6 +680,10 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 
 func (g *ScrollBar) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *ScrollBar) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *ScrollBar) ChildrenBBox2D() image.Rectangle {

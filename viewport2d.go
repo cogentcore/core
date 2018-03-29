@@ -7,6 +7,7 @@ package gi
 import (
 	// "fmt"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 	// "golang.org/x/image/font"
 	"image"
@@ -67,21 +68,35 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 		ViewBox: ViewBox2D{Size: im.Bounds().Size()},
 		Pixels:  im,
 	}
+	vp.Render.Defaults()
 	vp.Render.Image = vp.Pixels
 	return vp
 }
 
 // resize viewport, creating a new image (no point in trying to resize the image -- need to re-render) -- updates ViewBox Size too -- triggers update -- wrap in other UpdateStart/End calls as appropriate
 func (vp *Viewport2D) Resize(width, height int) {
-	if vp.Pixels.Bounds().Size().X == width && vp.Pixels.Bounds().Size().Y == height {
+	if vp.Pixels != nil && vp.Pixels.Bounds().Size().X == width && vp.Pixels.Bounds().Size().Y == height {
 		return // already good
 	}
 	vp.UpdateStart()
 	vp.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
+	vp.Render.Defaults()
 	vp.Render.Image = vp.Pixels
 	vp.ViewBox.Size = image.Point{width, height}
 	vp.UpdateEnd()
 	vp.FullRender2DTree()
+}
+
+func (vp *Viewport2D) IsPopup() bool {
+	return bitflag.Has(vp.NodeFlags, int(VpFlagPopup))
+}
+
+func (vp *Viewport2D) IsMenu() bool {
+	return bitflag.Has(vp.NodeFlags, int(VpFlagMenu))
+}
+
+func (vp *Viewport2D) IsSVG() bool {
+	return bitflag.Has(vp.NodeFlags, int(VpFlagSVG))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +105,17 @@ func (vp *Viewport2D) Resize(width, height int) {
 // draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
-	if vp.Backing != nil {
-		draw.Draw(parVp.Pixels, r, vp.Backing, image.ZP, draw.Src)
+	sp := image.ZP
+	if !vp.IsPopup() && vp.Parent != nil { // use parents children bbox to determine where we can draw
+		pgi, _ := KiToNode2D(vp.Parent)
+		nr := r.Intersect(pgi.ChildrenBBox2D())
+		sp = nr.Min.Sub(r.Min)
+		r = nr
 	}
-	draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Src)
+	if vp.Backing != nil {
+		draw.Draw(parVp.Pixels, r, vp.Backing, sp, draw.Src)
+	}
+	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
 }
 
 // copy our backing image from parent -- called at right place in Render
@@ -160,29 +182,46 @@ func (vp *Viewport2D) Style2D() {
 
 func (vp *Viewport2D) Size2D() {
 	vp.InitLayout2D()
-	// we listen to x,y styling for positioning within parent vp, if non-zero
+	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
 	pos := vp.Style.Layout.PosDots().ToPoint()
 	if pos != image.ZP {
 		vp.ViewBox.Min = pos
 	}
-	// note: size must be set already previously..
-	vp.LayData.AllocSize.SetPoint(vp.ViewBox.Size)
+	if vp.ViewBox.Size != image.ZP {
+		vp.LayData.AllocSize.SetPoint(vp.ViewBox.Size)
+	}
 }
 
 func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
-	// viewport ignores any parent parent bbox info!
-	psize := vp.AddParentPos()
-	vp.VpBBox = vp.Pixels.Bounds()
-	vp.SetWinBBox() // this adds all PARENT offsets
-	// now we add our viewbox offsets
-	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
-	vp.Style.SetUnitContext(vp, psize) // update units with final layout
-	vp.Paint.SetUnitContext(vp, psize) // always update paint
+	psize := vp.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
+	vp.Style.SetUnitContext(vp, psize)               // update units with final layout
+	vp.Paint.SetUnitContext(vp, psize)               // always update paint
 	vp.Layout2DChildren()
 }
 
 func (vp *Viewport2D) BBox2D() image.Rectangle {
 	return vp.Pixels.Bounds()
+}
+
+func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	// viewport ignores any parent parent bbox info!
+	psize := vp.AddParentPos()
+	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
+		if !vp.LayData.AllocSize.IsZero() {
+			asz := vp.LayData.AllocSize.ToPoint()
+			vp.Resize(asz.X, asz.Y)
+			// fmt.Printf("vp %v resized to %v\n", vp.Name, asz)
+		} else if vp.Pixels == nil {
+			vp.Resize(64, 64) // gotta have something..
+		}
+	}
+	vp.VpBBox = vp.Pixels.Bounds()
+	vp.SetWinBBox()    // this adds all PARENT offsets
+	if !vp.IsPopup() { // non-popups use allocated positions
+		vp.ViewBox.Min = vp.LayData.AllocPos.ToPoint()
+	}
+	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
+	return psize
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
@@ -208,6 +247,7 @@ func (vp *Viewport2D) PushBounds() bool {
 	if vp.Viewport != nil {
 		wbi := vp.WinBBox.Intersect(vp.Viewport.WinBBox)
 		if wbi.Empty() {
+			// fmt.Printf("not rendering vp %v bc empty winbox -- ours: %v par: %v\n", vp.Name, vp.WinBBox, vp.Viewport.WinBBox)
 			return false
 		}
 	}

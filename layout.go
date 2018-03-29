@@ -733,8 +733,8 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 		gi.LayData.AllocPos.Y -= off
 	}
 	cbb := ly.This.(Node2D).ChildrenBBox2D()
-	gi.ComputeBBox(cbb) // update kid's bbox based on scrolled position
-	gii.Render2D()      // child will not render if bbox is empty
+	gii.ComputeBBox2D(cbb) // update kid's bbox based on scrolled position
+	gii.Render2D()         // child will not render if bbox is empty
 }
 
 // convenience for LayoutStacked to show child node at a given index
@@ -768,6 +768,10 @@ func (ly *Layout) Init2D() {
 
 func (ly *Layout) BBox2D() image.Rectangle {
 	return ly.BBoxFromAlloc()
+}
+
+func (ly *Layout) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return ly.ComputeBBox2DBase(parBBox)
 }
 
 func (ly *Layout) ChildrenBBox2D() image.Rectangle {
@@ -880,6 +884,10 @@ func (g *Frame) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Frame) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Frame) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
@@ -968,6 +976,10 @@ func (g *Stretch) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Stretch) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Stretch) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
 }
@@ -1032,6 +1044,10 @@ func (g *Space) Layout2D(parBBox image.Rectangle) {
 
 func (g *Space) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *Space) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Space) ChildrenBBox2D() image.Rectangle {

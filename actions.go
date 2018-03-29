@@ -187,6 +187,10 @@ func (g *Action) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Action) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Action) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
@@ -286,6 +290,10 @@ func (g *Separator) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Separator) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Separator) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
@@ -357,7 +365,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	pvp := NewViewport2D(vpsz.X, vpsz.Y)
 	pvp.SetThisName(pvp, name+"PopupVP")
 	pvp.Fill = true
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
@@ -528,6 +536,10 @@ func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
 
 func (g *MenuButton) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *MenuButton) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *MenuButton) ChildrenBBox2D() image.Rectangle {

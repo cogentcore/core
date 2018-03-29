@@ -5,9 +5,9 @@
 package gi
 
 import (
+	// "fmt"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "fmt"
 	"image"
 )
 
@@ -57,13 +57,30 @@ func (vp *SVG) BBox2D() image.Rectangle {
 	return vp.Viewport2D.BBox2D()
 }
 
+func (vp *SVG) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return vp.Viewport2D.ComputeBBox2D(parBBox)
+}
+
 func (vp *SVG) ChildrenBBox2D() image.Rectangle {
 	return vp.VpBBox // no margin, padding, etc
 }
 
 func (vp *SVG) Render2D() {
-	// todo: do we need to set a new transform even?  nope?
-	vp.Viewport2D.Render2D()
+	if vp.PushBounds() {
+		pc := &vp.Paint
+		rs := &vp.Render
+		if vp.Fill {
+			pc.FillStyle.SetColor(&vp.Style.Background.Color)
+			pc.StrokeStyle.SetColor(nil)
+			pc.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			pc.FillStrokeClear(rs)
+		}
+		rs.PushXForm(pc.XForm)
+		vp.Render2DChildren() // we must do children first, then us!
+		vp.RenderViewport2D() // update our parent image
+		vp.PopBounds()
+		rs.PopXForm()
+	}
 }
 
 func (vp *SVG) CanReRender2D() bool {

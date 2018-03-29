@@ -167,7 +167,11 @@ func mainrun() {
 	wdicon, ok := (*gi.DefaultIconSet)["widget-down-wedge"]
 
 	if ok {
+		fmt.Printf("setting prefs\n")
+		wdicon.SetMinPrefWidth(units.NewValue(100, units.Px))
+		wdicon.SetMinPrefHeight(units.NewValue(100, units.Px))
 		row4.AddChild(wdicon.This)
+		// todo: copy wdicon first!
 	}
 
 	win.UpdateEnd()

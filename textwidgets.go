@@ -71,6 +71,10 @@ func (g *Label) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
+func (g *Label) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
+}
+
 func (g *Label) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
@@ -390,6 +394,10 @@ func (g *TextField) Layout2D(parBBox image.Rectangle) {
 
 func (g *TextField) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *TextField) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *TextField) ChildrenBBox2D() image.Rectangle {

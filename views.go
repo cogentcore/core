@@ -485,9 +485,13 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 
 func (g *TreeView) BBox2D() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := g.Paint.TransformPoint(g.LayData.AllocPos.X, g.LayData.AllocPos.Y)
-	ts := g.Paint.TransformPoint(g.WidgetSize.X, g.WidgetSize.Y)
-	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
+	tp := g.LayData.AllocPos.ToPoint()
+	ts := g.WidgetSize.ToPoint()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+}
+
+func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
@@ -789,6 +793,10 @@ func (g *TabWidget) Layout2D(parBBox image.Rectangle) {
 
 func (g *TabWidget) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
+}
+
+func (g *TabWidget) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *TabWidget) ChildrenBBox2D() image.Rectangle {

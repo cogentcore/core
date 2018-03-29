@@ -5,8 +5,8 @@
 package gi
 
 import (
-	"github.com/rcoreilly/goki/ki/kit"
 	// "fmt"
+	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"strconv"
 	"strings"
@@ -63,7 +63,12 @@ func (g *Rect) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Rect) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+}
+
+func (g *Rect) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Rect) ChildrenBBox2D() image.Rectangle {
@@ -74,6 +79,7 @@ func (g *Rect) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
+		rs.PushXForm(pc.XForm)
 		if g.Radius.X == 0 && g.Radius.Y == 0 {
 			pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 		} else {
@@ -83,6 +89,7 @@ func (g *Rect) Render2D() {
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -144,7 +151,12 @@ func (g *Viewport2DFill) Layout2D(parBBox image.Rectangle) {
 
 func (g *Viewport2DFill) BBox2D() image.Rectangle {
 	g.Init2D() // keep up-to-date -- cheap
-	return g.Paint.BoundingBox(g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+}
+
+func (g *Viewport2DFill) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Viewport2DFill) ChildrenBBox2D() image.Rectangle {
@@ -212,7 +224,12 @@ func (g *Circle) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Circle) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBox(g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+}
+
+func (g *Circle) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Circle) ChildrenBBox2D() image.Rectangle {
@@ -223,10 +240,12 @@ func (g *Circle) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
+		rs.PushXForm(pc.XForm)
 		pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -288,7 +307,12 @@ func (g *Ellipse) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Ellipse) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBox(g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+}
+
+func (g *Ellipse) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Ellipse) ChildrenBBox2D() image.Rectangle {
@@ -299,10 +323,12 @@ func (g *Ellipse) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
+		rs.PushXForm(pc.XForm)
 		pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -363,7 +389,12 @@ func (g *Line) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Line) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBox(g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+}
+
+func (g *Line) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Line) ChildrenBBox2D() image.Rectangle {
@@ -374,10 +405,12 @@ func (g *Line) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
+		rs.PushXForm(pc.XForm)
 		pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 		pc.Stroke(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -437,7 +470,12 @@ func (g *Polyline) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Polyline) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBoxFromPoints(g.Points)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
+}
+
+func (g *Polyline) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Polyline) ChildrenBBox2D() image.Rectangle {
@@ -445,16 +483,18 @@ func (g *Polyline) ChildrenBBox2D() image.Rectangle {
 }
 
 func (g *Polyline) Render2D() {
+	if len(g.Points) < 2 {
+		return
+	}
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		if len(g.Points) < 2 {
-			return
-		}
+		rs.PushXForm(pc.XForm)
 		pc.DrawPolyline(rs, g.Points)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -514,7 +554,12 @@ func (g *Polygon) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Polygon) BBox2D() image.Rectangle {
-	return g.Paint.BoundingBoxFromPoints(g.Points)
+	rs := &g.Viewport.Render
+	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
+}
+
+func (g *Polygon) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Polygon) ChildrenBBox2D() image.Rectangle {
@@ -522,16 +567,18 @@ func (g *Polygon) ChildrenBBox2D() image.Rectangle {
 }
 
 func (g *Polygon) Render2D() {
+	if len(g.Points) < 2 {
+		return
+	}
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		if len(g.Points) < 2 {
-			return
-		}
+		rs.PushXForm(pc.XForm)
 		pc.DrawPolygon(rs, g.Points)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 
@@ -662,8 +709,13 @@ func (g *Path) Layout2D(parBBox image.Rectangle) {
 
 func (g *Path) BBox2D() image.Rectangle {
 	// hmm -- this is somewhat expensive -- probably better to compute earlier and save?
-	return image.ZR
+	// psz := g.Viewport.VpBBox.Size()
+	return image.Rect(0, 0, 100, 100)
 	// return g.Paint.BoundingBoxFromPoints(g.Points)
+}
+
+func (g *Path) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Path) ChildrenBBox2D() image.Rectangle {
@@ -688,7 +740,6 @@ func RenderPathData(data []PathData, pc *Paint, rs *RenderState) {
 	var cx, cy, x1, y1, x2, y2 PathData
 	for i := 0; i < sz; {
 		cmd, n := NextPathData(data, &i).Cmd()
-		i++
 		switch cmd {
 		case PcM:
 			cx = NextPathData(data, &i)
@@ -924,6 +975,9 @@ func ParsePathData(d string) []PathData {
 		pd = append(pd, pc) // push on
 
 		if mn == 0 {
+			if i >= sz-1 {
+				break
+			}
 			continue
 		}
 
@@ -943,7 +997,7 @@ func ParsePathData(d string) []PathData {
 			vl, _ := strconv.ParseFloat(cf, 32)
 			pd = append(pd, PathData(vl)) // push on
 		}
-		if i >= sz {
+		if i >= sz-1 {
 			break
 		}
 
@@ -954,14 +1008,15 @@ func ParsePathData(d string) []PathData {
 			if unicode.IsLetter(rune(cf[0])) {
 				break
 			}
-			ntot += mn
+			i--
 			for np := 0; np < mn; np++ {
 				i++
 				cf = ds[i]
 				vl, _ := strconv.ParseFloat(cf, 32)
 				pd = append(pd, PathData(vl)) // push on
 			}
-			if i >= sz {
+			ntot += mn
+			if i >= sz-1 {
 				break
 			}
 		}
@@ -974,16 +1029,18 @@ func ParsePathData(d string) []PathData {
 }
 
 func (g *Path) Render2D() {
+	if len(g.Data) < 2 {
+		return
+	}
 	if g.PushBounds() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
-		if len(g.Data) < 2 {
-			return
-		}
+		rs.PushXForm(pc.XForm)
 		RenderPathData(g.Data, pc, rs)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()
+		rs.PopXForm()
 	}
 }
 

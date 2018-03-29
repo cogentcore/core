@@ -53,7 +53,7 @@ type Paint struct {
 	FillStyle   FillStyle
 	FontStyle   FontStyle
 	TextStyle   TextStyle
-	XForm       XFormMatrix2D `xml:"-" json:"-" desc:"current transform"`
+	XForm       XFormMatrix2D `xml:"-" json:"-" desc:"our additions to transform -- pushed to render state"`
 }
 
 func (pc *Paint) Defaults() {
@@ -99,7 +99,7 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
 // render
 func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.UnContext.Defaults() // todo: need to get screen information and true dpi
-	if vp != nil {
+	if vp != nil && vp.Render.Image != nil {
 		sz := vp.Render.Image.Bounds().Size()
 		pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
 	}
@@ -156,16 +156,42 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 
 // The RenderState holds all the current rendering state information used while painting -- a viewport just has one of these
 type RenderState struct {
-	StrokePath  raster.Path
-	FillPath    raster.Path
-	Start       Vec2D
-	Current     Vec2D
-	HasCurrent  bool
-	Image       *image.RGBA       // pointer to image to render into
-	Mask        *image.Alpha      // current mask
-	Bounds      image.Rectangle   // boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
-	BoundsStack []image.Rectangle // stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
-	ClipStack   []*image.Alpha    // stack of clips, if needed
+	XForm       XFormMatrix2D     `desc:"current transform"`
+	StrokePath  raster.Path       `desc:"current stroke path"`
+	FillPath    raster.Path       `desc:"current fill path"`
+	Start       Vec2D             `desc:"starting point, for close path"`
+	Current     Vec2D             `desc:"current point"`
+	HasCurrent  bool              `desc:"is current point current?"`
+	Image       *image.RGBA       `desc:"pointer to image to render into"`
+	Mask        *image.Alpha      `desc:"current mask"`
+	Bounds      image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
+	XFormStack  []XFormMatrix2D   `desc:"stack of transforms"`
+	BoundsStack []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
+	ClipStack   []*image.Alpha    `desc:"stack of clips, if needed"`
+}
+
+func (rs *RenderState) Defaults() {
+	rs.XForm = Identity2D()
+}
+
+// push current xform onto stack and apply new xform on top of it
+func (rs *RenderState) PushXForm(xf XFormMatrix2D) {
+	if rs.XFormStack == nil {
+		rs.XFormStack = make([]XFormMatrix2D, 0, 100)
+	}
+	rs.XFormStack = append(rs.XFormStack, rs.XForm)
+	rs.XForm = rs.XForm.Multiply(xf)
+}
+
+// pop xform off the stack and set to current xform
+func (rs *RenderState) PopXForm() {
+	if rs.XFormStack == nil || len(rs.XFormStack) == 0 {
+		rs.XForm = Identity2D()
+		return
+	}
+	sz := len(rs.XFormStack)
+	rs.XForm = rs.XFormStack[sz-1]
+	rs.XFormStack = rs.XFormStack[:sz-1]
 }
 
 // push current bounds onto stack and set new bounds
@@ -180,7 +206,7 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 	rs.Bounds = b
 }
 
-// pop Mask off the bounds stack and set to current bounds
+// pop bounds off the stack and set to current bounds
 func (rs *RenderState) PopBounds() {
 	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
 		rs.Bounds = rs.Image.Bounds()
@@ -219,32 +245,32 @@ func (rs *RenderState) PopClip() {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(x, y float64) Vec2D {
-	tx, ty := pc.XForm.TransformPoint(x, y)
+func (pc *Paint) TransformPoint(rs *RenderState, x, y float64) Vec2D {
+	tx, ty := rs.XForm.TransformPoint(x, y)
 	return Vec2D{tx, ty}
 }
 
 // get the bounding box for an element in pixel int coordinates
-func (pc *Paint) BoundingBox(minX, minY, maxX, maxY float64) image.Rectangle {
+func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float64) image.Rectangle {
 	sw := 0.0
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeStyle.Width.Dots
 	}
-	tx1, ty1 := pc.XForm.TransformPoint(minX-sw, minY-sw)
-	tx2, ty2 := pc.XForm.TransformPoint(maxX+sw, maxY+sw)
+	tx1, ty1 := rs.XForm.TransformPoint(minX-sw, minY-sw)
+	tx2, ty2 := rs.XForm.TransformPoint(maxX+sw, maxY+sw)
 	return image.Rect(int(tx1), int(ty1), int(tx2), int(ty2))
 }
 
 // get the bounding box for a slice of points
-func (pc *Paint) BoundingBoxFromPoints(points []Vec2D) image.Rectangle {
+func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
 	}
-	tx, ty := pc.XForm.TransformPointToInt(points[0].X, points[0].Y)
+	tx, ty := rs.XForm.TransformPointToInt(points[0].X, points[0].Y)
 	bb := image.Rect(tx, ty, tx, ty)
 	for i := 1; i < sz; i++ {
-		tx, ty := pc.XForm.TransformPointToInt(points[i].X, points[i].Y)
+		tx, ty := rs.XForm.TransformPointToInt(points[i].X, points[i].Y)
 		if tx < bb.Min.X {
 			bb.Min.X = tx
 		} else if tx > bb.Max.X {
@@ -265,7 +291,7 @@ func (pc *Paint) MoveTo(rs *RenderState, x, y float64) {
 	if rs.HasCurrent {
 		rs.FillPath.Add1(rs.Start.Fixed())
 	}
-	p := pc.TransformPoint(x, y)
+	p := pc.TransformPoint(rs, x, y)
 	rs.StrokePath.Start(p.Fixed())
 	rs.FillPath.Start(p.Fixed())
 	rs.Start = p
@@ -279,7 +305,7 @@ func (pc *Paint) LineTo(rs *RenderState, x, y float64) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x, y)
 	} else {
-		p := pc.TransformPoint(x, y)
+		p := pc.TransformPoint(rs, x, y)
 		rs.StrokePath.Add1(p.Fixed())
 		rs.FillPath.Add1(p.Fixed())
 		rs.Current = p
@@ -293,8 +319,8 @@ func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float64) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
-	p1 := pc.TransformPoint(x1, y1)
-	p2 := pc.TransformPoint(x2, y2)
+	p1 := pc.TransformPoint(rs, x1, y1)
+	p2 := pc.TransformPoint(rs, x2, y2)
 	rs.StrokePath.Add2(p1.Fixed(), p2.Fixed())
 	rs.FillPath.Add2(p1.Fixed(), p2.Fixed())
 	rs.Current = p2
@@ -309,9 +335,9 @@ func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float64) {
 		pc.MoveTo(rs, x1, y1)
 	}
 	x0, y0 := rs.Current.X, rs.Current.Y
-	x1, y1 = pc.XForm.TransformPoint(x1, y1)
-	x2, y2 = pc.XForm.TransformPoint(x2, y2)
-	x3, y3 = pc.XForm.TransformPoint(x3, y3)
+	x1, y1 = rs.XForm.TransformPoint(x1, y1)
+	x2, y2 = rs.XForm.TransformPoint(x2, y2)
+	x3, y3 = rs.XForm.TransformPoint(x3, y3)
 	points := CubicBezier(x0, y0, x1, y1, x2, y2, x3, y3)
 	previous := rs.Current.Fixed()
 	for _, p := range points[1:] {
@@ -614,7 +640,7 @@ func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, 
 	y -= int(ay * float64(s.Y))
 	transformer := draw.BiLinear
 	fx, fy := float64(x), float64(y)
-	m := pc.XForm.Translate(fx, fy)
+	m := rs.XForm.Translate(fx, fy)
 	s2d := f64.Aff3{m.XX, m.XY, m.X0, m.YX, m.YY, m.Y0}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
@@ -646,7 +672,7 @@ func (pc *Paint) FontHeight() float64 {
 	return pc.FontStyle.Height
 }
 
-func (pc *Paint) drawString(im *image.RGBA, bounds image.Rectangle, s string, x, y float64) {
+func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectangle, s string, x, y float64) {
 	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
 		return
 	}
@@ -677,7 +703,7 @@ func (pc *Paint) drawString(im *image.RGBA, bounds image.Rectangle, s string, x,
 		sr := dr.Sub(dr.Min)
 		transformer := draw.BiLinear
 		fx, fy := float64(dr.Min.X), float64(dr.Min.Y)
-		m := pc.XForm.Translate(fx, fy)
+		m := rs.XForm.Translate(fx, fy)
 		s2d := f64.Aff3{m.XX, m.XY, m.X0, m.YX, m.YY, m.Y0}
 		transformer.Transform(d.Dst, s2d, d.Src, sr, draw.Over, &draw.Options{
 			SrcMask:  mask,
@@ -718,10 +744,10 @@ func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, wid
 	y += ay * h
 	// fmt.Printf("ds bounds: %v point x,y %v, %v\n", rs.Bounds, x, y)
 	if rs.Mask == nil {
-		pc.drawString(rs.Image, rs.Bounds, s, x, y)
+		pc.drawString(rs, rs.Image, rs.Bounds, s, x, y)
 	} else {
 		im := image.NewRGBA(rs.Image.Bounds())
-		pc.drawString(im, rs.Bounds, s, x, y)
+		pc.drawString(rs, im, rs.Bounds, s, x, y)
 		draw.DrawMask(rs.Image, rs.Image.Bounds(), im, image.ZP, rs.Mask, image.ZP, draw.Over)
 	}
 }

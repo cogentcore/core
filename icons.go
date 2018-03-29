@@ -71,6 +71,10 @@ func (vp *Icon) BBox2D() image.Rectangle {
 	return vp.SVG.BBox2D()
 }
 
+func (vp *Icon) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+	return vp.SVG.ComputeBBox2D(parBBox)
+}
+
 func (vp *Icon) ChildrenBBox2D() image.Rectangle {
 	return vp.SVG.ChildrenBBox2D()
 }
@@ -81,6 +85,7 @@ func (vp *Icon) Render2D() {
 	pc := &vp.Paint
 	vps := Vec2D{}
 	vps.SetPoint(vp.ViewBox.Size)
+	pc.Identity()
 	pc.Scale(vps.X, vps.Y)
 	vp.SVG.Render2D()
 }
@@ -170,7 +175,7 @@ var StdIconNames = [IconContextsN][]string{
 }
 
 // an IconSet is a collection of icons styled in the same themes - lookup by name
-type IconSet map[string]Icon
+type IconSet map[string]*Icon
 
 // the default icon set is loaded by default
 var DefaultIconSet *IconSet = MakeDefaultIcons()
@@ -178,12 +183,13 @@ var DefaultIconSet *IconSet = MakeDefaultIcons()
 // the current icon set can be set to any icon set
 var CurIconSet *IconSet = DefaultIconSet
 
+// note: icons must use a normalized 0-1 coordinate system!
 func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
 	wd := Icon{}
 	wd.SetThisName(&wd, "widget-down-wedge")
 	p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
 	p.Data = ParsePathData("M 0 0 1 0 .5 1 Z")
-	iset[wd.Name] = wd
+	iset[wd.Name] = &wd
 	return &iset
 }
