@@ -45,10 +45,10 @@ func TestNodeAddChild(t *testing.T) {
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
 	parent.KiNode.AddChild(&child.KiNode)
 	child.KiNode.SetName("child1")
-	if len(parent.KiNode.Children) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Kids) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.KiNode.Kids))
 	}
-	if child.KiNode.KiParent() == nil {
+	if child.KiNode.Parent() == nil {
 		t.Errorf("child parent is nil")
 	}
 	if child.KiNode.Path() != ".par1.child1" {
@@ -65,8 +65,8 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
 	parent.AddChild(&child)
 	child.SetName("child1")
-	if len(parent.Children) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.Children))
+	if len(parent.Kids) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
 	if child.Path() != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
@@ -84,8 +84,8 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	}
 	child := parent.AddNewChild(nil)
 	child.SetName("child1")
-	if len(parent.Children) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.Children))
+	if len(parent.Kids) != 1 {
+		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
 	if child.Path() != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
@@ -104,8 +104,8 @@ func TestNodeUniqueNames(t *testing.T) {
 	parent.KiNode.AddChildNamed(&child2.KiNode, "child1")
 	child3 := HasNode{}
 	parent.KiNode.AddChildNamed(&child3.KiNode, "child1")
-	if len(parent.KiNode.Children) != 3 {
-		t.Errorf("Children length != 3, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Kids) != 3 {
+		t.Errorf("Children length != 3, was %d", len(parent.KiNode.Kids))
 	}
 	if pth := child.KiNode.PathUnique(); pth != ".par1.child1" {
 		t.Errorf("child path != correct, was %v", pth)
@@ -125,11 +125,11 @@ func TestNodeDeleteChild(t *testing.T) {
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.DeleteChild(&child.KiNode, true)
-	if len(parent.KiNode.Children) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Kids) != 0 {
+		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Kids))
 	}
 	if len(parent.KiNode.Deleted) != 1 {
-		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Children))
+		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Kids))
 	}
 }
 
@@ -139,11 +139,11 @@ func TestNodeDeleteChildName(t *testing.T) {
 	child := HasNode{}
 	parent.KiNode.AddChildNamed(&child.KiNode, "child1")
 	parent.KiNode.DeleteChildByName("child1", true)
-	if len(parent.KiNode.Children) != 0 {
-		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Children))
+	if len(parent.KiNode.Kids) != 0 {
+		t.Errorf("Children length != 0, was %d", len(parent.KiNode.Kids))
 	}
 	if len(parent.KiNode.Deleted) != 1 {
-		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Children))
+		t.Errorf("Deleted length != 1, was %d", len(parent.KiNode.Kids))
 	}
 }
 
@@ -155,8 +155,8 @@ func TestNodeFindName(t *testing.T) {
 		child := Node{}
 		parent.AddChildNamed(&child, nm)
 	}
-	if len(parent.Children) != len(names) {
-		t.Errorf("Children length != n, was %d", len(parent.Children))
+	if len(parent.Kids) != len(names) {
+		t.Errorf("Children length != n, was %d", len(parent.Kids))
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
@@ -176,8 +176,8 @@ func TestNodeFindNameUnique(t *testing.T) {
 		child := Node{}
 		parent.AddChildNamed(&child, "child")
 	}
-	if len(parent.Children) != len(names) {
-		t.Errorf("Children length != n, was %d", len(parent.Children))
+	if len(parent.Kids) != len(names) {
+		t.Errorf("Children length != n, was %d", len(parent.Kids))
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
@@ -223,13 +223,13 @@ func TestNodeMove(t *testing.T) {
 	// child4 :=
 	parent.AddNewChildNamed(nil, "child3")
 
-	bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
+	bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 	parent.MoveChild(3, 1)
-	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Children)
+	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Kids)
 	parent.MoveChild(0, 3)
-	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Children)
+	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Kids)
 	parent.MoveChild(1, 2)
-	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Children)
+	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Kids)
 
 	bft := `mv before:
 [child0
@@ -298,11 +298,11 @@ func TestNodeConfig(t *testing.T) {
 		{KiT_NodeEmbed, "child1"},
 	}
 
-	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
+	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 
 	parent.ConfigChildren(config1)
 
-	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Children)
+	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
 	// config2 := kit.TypeAndNameList{
 	// 	{KiT_NodeEmbed, "child4"},
@@ -321,7 +321,7 @@ func TestNodeConfig(t *testing.T) {
 	// parent.ConfigChildren(config2)
 	parent.ConfigChildren(config3)
 
-	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Children)
+	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 
 	cf1t := `config1:
 [child2
@@ -439,7 +439,7 @@ func TestNodeCallFun(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
-		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.KiUniqueName(), d, level))
+		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
 		return true
 	})
 	// fmt.Printf("result: %v\n", res)
@@ -451,7 +451,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	schild2.FunUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
-		res = append(res, fmt.Sprintf("%v, %v", k.KiUniqueName(), d))
+		res = append(res, fmt.Sprintf("%v, %v", k.UniqueName(), d))
 		return true
 	})
 	//	fmt.Printf("result: %v\n", res)
@@ -470,7 +470,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
@@ -489,10 +489,10 @@ func TestNodeUpdate(t *testing.T) {
 	res = res[:0]
 
 	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
 	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), NodeSignals(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
 
 	// fmt.Print("\nnode update all starting\n")
@@ -522,7 +522,7 @@ func TestNodeUpdate(t *testing.T) {
 	res = res[:0]
 
 	parent.FunDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
-		res = append(res, fmt.Sprintf("%v %v", n.KiUniqueName(), *n.UpdateCtr()))
+		res = append(res, fmt.Sprintf("%v %v", n.UniqueName(), *n.UpdateCtr()))
 		return true
 	})
 	// fmt.Printf("res: %v\n", res)
@@ -542,7 +542,7 @@ func TestProps(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.KiName(), sig))
+		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), sig))
 	})
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")

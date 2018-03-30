@@ -182,7 +182,7 @@ func (sig *Signal) DisconnectAll() {
 // record a trace of signal being emitted
 func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 	if NodeSignalTraceString != nil {
-		*NodeSignalTraceString += fmt.Sprintf("ki.Signal EmitGo from: %v sig: %v data: %v\n", sender.KiName(), NodeSignals(sig), data)
+		*NodeSignalTraceString += fmt.Sprintf("ki.Signal EmitGo from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
 	} else {
 		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.PathUnique(), NodeSignals(sig), data)
 	}

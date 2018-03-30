@@ -44,54 +44,41 @@ import (
 	"reflect"
 )
 
-// flags for basic Ki status -- not using yet..
-// type KiFlags int32
-
-// const (
-// 	KiFlagsEmpty KiFlags = 0
-// 	KiDirty      KiFlags = 1 << iota
-// 	KiDeleted    KiFlags = 1 << iota
-// )
-
 /*
 The Ki interface provides the core functionality for the GoKi tree -- insipred by Qt QObject in specific and every other Tree everywhere in general.
 
-NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we need to use Ki prefix for basic items here so your fields can be more normal looking.  Assuming more regular access to fields of the struct than those in the interface.
+NOTE: The inability to have a field and a method of the same name makes it so you either have to use private fields in a struct that implements this interface (lowercase) or we have to use different names in the struct vs. interface.  We want to export and use the direct fields, which are easy to use, so we have different synonyms.
 
 Other key issues with the Ki design / Go:
 * All interfaces are implicitly pointers: this is why you have to pass args with & address of
 */
 type Ki interface {
-	// unfortunately, Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a this pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls)
-	ThisKi() Ki
-
-	// Set the this -- done automatically in AddChild and InsertChild methods
+	// Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a This interface pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls) -- just pass a pointer to the object here (automatically set when a Child is added)
 	SetThis(ki Ki)
 
 	// check that the this pointer is set and issue a warning to log if not -- returns error if not set
 	ThisCheck() error
 
-	// Type returns the underlying struct type of this node (reflect.TypeOf(ThisKi).Elem())
+	// Type returns the underlying struct type of this node (reflect.TypeOf(This).Elem())
 	Type() reflect.Type
 
 	// IsType tests whether This underlying struct object is of the given type(s) -- Go does not support a notion of inheritance, so this must be an exact match to the type
 	IsType(t ...reflect.Type) bool
 
-	// Parent of this Ki -- Ki has strict one-parent, no-cycles structure -- see SetParent
-	KiParent() Ki
+	// Parent (Node.Par) of this Ki -- Ki has strict one-parent, no-cycles structure -- see SetParent
+	Parent() Ki
 
-	// get child at index -- supports negative indexes to access from end of slice -- only errors if there are no children in list
-	KiChild(idx int) (Ki, error)
+	// child at index -- supports negative indexes to access from end of slice -- only errors if there are no children in list
+	Child(idx int) (Ki, error)
 
-	// get list of children -- can modify directly (e.g., sort, reorder) but add / remove should use existing methods to ensure proper tracking
-	KiChildren() Slice
+	// list of children (Node.Kids) -- can modify directly (e.g., sort, reorder) but add / remove should use existing methods to ensure proper tracking
+	Children() Slice
 
-	// These allow generic GUI / Text / Path / etc representation of Trees
-	// The user-defined name of the object, for finding elements, generating paths, io, etc
-	KiName() string
+	// Name (Node.Nm) is a user-defined name of the object, for finding elements, generating paths, IO, etc -- allows generic GUI / Text / Path / etc representation of Trees
+	Name() string
 
-	// A name that is guaranteed to be non-empty and unique within the children of this node, but starts with KiName or parents name if KiName is empty -- important for generating unique paths
-	KiUniqueName() string
+	// A name (Node.UniqueNm) that is guaranteed to be non-empty and unique within the children of this node, but starts with Name or parents name if Name is empty -- important for generating unique paths
+	UniqueName() string
 
 	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
 	SetName(name string)
@@ -108,8 +95,8 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
 
-	// Properties tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree -- see type.go for convenience methods for converting interface{} to standard types
-	KiProps() map[string]interface{}
+	// Properties (Node.Props) tell GUI or other frameworks operating on Trees about special features of each node -- functions below support inheritance up Tree -- see type.go for convenience methods for converting interface{} to standard types
+	Properties() map[string]interface{}
 
 	// Set given property key to value val -- initializes property map if nil
 	SetProp(key string, val interface{})
@@ -221,7 +208,7 @@ type Ki interface {
 	DestroyAllDeleted()
 
 	// remove all children and their childrens-children, etc
-	DestroyKi()
+	Destroy()
 
 	// is this a terminal node in the tree?  i.e., has no children
 	IsLeaf() bool
@@ -234,28 +221,28 @@ type Ki interface {
 	//   note: always put functions last -- looks better for inline functions
 
 	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
-	FunUp(level int, data interface{}, fun KiFun) bool
+	FunUp(level int, data interface{}, fun Fun) bool
 
 	// call function on parent of node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
-	FunUpParent(level int, data interface{}, fun KiFun) bool
+	FunUpParent(level int, data interface{}, fun Fun) bool
 
 	// call fun on this node (MeFirst) and then call FunDownMeFirst on all the children -- sequentially all in current go routine -- level var is incremented before calling children -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches continue -- i.e., if fun on current node returns false, then returns false and children are not processed further -- this is the fastest, most natural form of traversal
-	FunDownMeFirst(level int, data interface{}, fun KiFun) bool
+	FunDownMeFirst(level int, data interface{}, fun Fun) bool
 
 	// call FunDownDepthFirst on all children, then call fun on this node -- sequentially all in current go routine -- level var is incremented before calling children -- runs doChildTestFun on each child first to determine if it should process that child, and if that returns true, then it calls FunDownDepthFirst on that child
-	FunDownDepthFirst(level int, data interface{}, doChildTestFun KiFun, fun KiFun)
+	FunDownDepthFirst(level int, data interface{}, doChildTestFun Fun, fun Fun)
 
 	// call fun on all children, then call FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called -- level var is incremented before calling chlidren -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches can continue
-	FunDownBreadthFirst(level int, data interface{}, fun KiFun)
+	FunDownBreadthFirst(level int, data interface{}, fun Fun)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does not wait for completion of the go routines -- returns immediately
-	GoFunDown(level int, data interface{}, fun KiFun)
+	GoFunDown(level int, data interface{}, fun Fun)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does wait for the completion of the go routines before returning
-	GoFunDownWait(level int, data interface{}, fun KiFun)
+	GoFunDownWait(level int, data interface{}, fun Fun)
 
 	// call fun on previous node in the tree (previous child in my siblings, then parent, and so on)
-	FunPrev(level int, data interface{}, fun KiFun) bool
+	FunPrev(level int, data interface{}, fun Fun) bool
 
 	// report path to this node, all the way up to top-level parent
 	Path() string
@@ -318,4 +305,4 @@ type Ki interface {
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
-type KiFun func(ki Ki, level int, data interface{}) bool
+type Fun func(ki Ki, level int, data interface{}) bool

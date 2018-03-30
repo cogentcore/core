@@ -136,11 +136,11 @@ func (k *Slice) FindIndex(kid Ki, start_idx int) int {
 }
 
 func (k *Slice) FindIndexByName(name string, start_idx int) int {
-	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiName() == name })
+	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.Name() == name })
 }
 
 func (k *Slice) FindIndexByUniqueName(name string, start_idx int) int {
-	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.KiUniqueName() == name })
+	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.UniqueName() == name })
 }
 
 func (k *Slice) FindIndexByType(t ...reflect.Type) int {

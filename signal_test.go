@@ -29,11 +29,11 @@ func TestSignalConnect(t *testing.T) {
 	res := make([]string, 0, 10)
 	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), NodeSignals(sig), data))
+			receiver.Name(), sender.Name(), NodeSignals(sig), data))
 	})
 	parent.sig1.Connect(child2, func(receiver, sender Ki, sig int64, data interface{}) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
-			receiver.KiName(), sender.KiName(), NodeSignals(sig), data))
+			receiver.Name(), sender.Name(), NodeSignals(sig), data))
 	})
 
 	parent.sig1.Emit(&parent, int64(NodeSignalNil), 1234)
