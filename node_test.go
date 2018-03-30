@@ -208,6 +208,145 @@ func TestNodeFindType(t *testing.T) {
 	}
 }
 
+func TestNodeMove(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetThisName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child0")
+	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child2")
+	//schild2 :=
+	child2.AddNewChildNamed(nil, "subchild1")
+	// child4 :=
+	parent.AddNewChildNamed(nil, "child3")
+
+	bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
+	parent.MoveChild(3, 1)
+	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Children)
+	parent.MoveChild(0, 3)
+	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Children)
+	parent.MoveChild(1, 2)
+	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Children)
+
+	bft := `mv before:
+[child0
+ child1
+	subchild1
+ child2
+ child3
+]
+`
+	if bf != bft {
+		t.Errorf("move error\n%v !=\n%v", bf, bft)
+	}
+	a31t := `mv 3 -> 1:
+[child0
+ child3
+ child1
+	subchild1
+ child2
+]
+`
+	if a31 != a31t {
+		t.Errorf("move error\n%v !=\n%v", a31, a31t)
+	}
+	a03t := `mv 0 -> 3:
+[child3
+ child1
+	subchild1
+ child2
+ child0
+]
+`
+	if a03 != a03t {
+		t.Errorf("move error\n%v !=\n%v", a03, a03t)
+	}
+	a12t := `mv 1 -> 2:
+[child3
+ child2
+ child1
+	subchild1
+ child0
+]
+`
+	if a12 != a12t {
+		t.Errorf("move error\n%v !=\n%v", a12, a12t)
+	}
+}
+
+func TestNodeConfig(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.SetThisName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child0")
+	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child2")
+	//schild2 :=
+	child2.AddNewChildNamed(nil, "subchild1")
+	// child4 :=
+	parent.AddNewChildNamed(nil, "child3")
+
+	config1 := kit.TypeAndNameList{
+		{KiT_NodeEmbed, "child2"},
+		{KiT_NodeEmbed, "child3"},
+		{KiT_NodeEmbed, "child1"},
+	}
+
+	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
+
+	parent.ConfigChildren(config1)
+
+	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Children)
+
+	// config2 := kit.TypeAndNameList{
+	// 	{KiT_NodeEmbed, "child4"},
+	// 	{KiT_Node, "child1"}, // note: changing this to Node type removes child1.subchild1
+	// 	{KiT_NodeEmbed, "child5"},
+	// 	{KiT_NodeEmbed, "child3"},
+	// 	{KiT_NodeEmbed, "child6"},
+	// }
+
+	config3 := kit.TypeAndNameList{}
+	err := config3.SetFromString("{NodeEmbed, child4}, {Node, child1}, {NodeEmbed, child5}, {NodeEmbed, child3}, {NodeEmbed, child6}")
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	// parent.ConfigChildren(config2)
+	parent.ConfigChildren(config3)
+
+	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Children)
+
+	cf1t := `config1:
+[child2
+ child3
+ child1
+	subchild1
+]
+`
+	if cf1 != cf1t {
+		t.Errorf("config error\n%v !=\n%v", cf1, cf1t)
+	}
+
+	cf2t := `config2:
+[child4
+ child1
+ child5
+ child3
+ child6
+]
+`
+	if cf2 != cf2t {
+		t.Errorf("config error\n%v !=\n%v", cf2, cf2t)
+	}
+}
+
 //////////////////////////////////////////
 //  JSON I/O
 

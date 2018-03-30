@@ -39,7 +39,7 @@ func (k *Slice) ValidIndex(idx int) (int, error) {
 	return idx, nil
 }
 
-func (k *Slice) InsertKi(ki Ki, idx int) {
+func (k *Slice) Insert(ki Ki, idx int) {
 	kl := len(*k)
 	if idx < 0 {
 		idx = kl + idx
@@ -68,6 +68,25 @@ func (k *Slice) DeleteAtIndex(idx int) error {
 	copy((*k)[idx:], (*k)[idx+1:])
 	(*k)[sz-1] = nil
 	(*k) = (*k)[:sz-1]
+	return nil
+}
+
+func (k *Slice) Move(from, to int) error {
+	var err error
+	from, err = k.ValidIndex(from)
+	if err != nil {
+		return err
+	}
+	to, err = k.ValidIndex(to)
+	if err != nil {
+		return err
+	}
+	if from == to {
+		return nil
+	}
+	ki := (*k)[from]
+	k.DeleteAtIndex(from)
+	k.Insert(ki, to)
 	return nil
 }
 

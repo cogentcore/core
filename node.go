@@ -310,7 +310,7 @@ func (n *Node) InsertChildImpl(kid Ki, at int) error {
 	if err := n.AddChildCheck(kid); err != nil {
 		return err
 	}
-	n.Children.InsertKi(kid, at)
+	n.Children.Insert(kid, at)
 	n.addChildImplPost(kid)
 	return nil
 }
@@ -387,6 +387,44 @@ func (n *Node) InsertNewChildNamed(typ reflect.Type, at int, name string) Ki {
 	n.InsertChildNamed(kid, at, name)
 	return kid
 }
+
+func (n *Node) MoveChild(from, to int) error {
+	return n.Children.Move(from, to)
+}
+
+func (n *Node) ConfigChildren(config kit.TypeAndNameList) {
+	n.UpdateStart()
+	// fist make a map for looking up the indexes of the names
+	nm := make(map[string]int)
+	for i, tn := range config {
+		nm[tn.Name] = i
+	}
+	// first remove any children not in the config
+	sz := len(n.Children)
+	for i := sz - 1; i >= 0; i-- {
+		kid := n.Children[i]
+		ti, ok := nm[kid.KiName()]
+		if !ok {
+			n.DeleteChildAtIndex(i, true) // assume destroy
+		} else if !kid.IsType(config[ti].Type) {
+			n.DeleteChildAtIndex(i, true) // assume destroy
+		}
+	}
+	// next add and move items as needed -- in order so guaranteed
+	for i, tn := range config {
+		kidx := n.FindChildIndexByName(tn.Name, i)
+		if kidx < 0 {
+			n.InsertNewChildNamed(tn.Type, i, tn.Name)
+		} else {
+			if kidx != i {
+				n.Children.Move(kidx, i)
+			}
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Finding
 
 func (n *Node) FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int {
 	return n.Children.FindIndexByFun(start_idx, match)

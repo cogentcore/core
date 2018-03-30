@@ -40,6 +40,7 @@ package ki
 
 import (
 	"github.com/rcoreilly/goki/ki/atomctr"
+	"github.com/rcoreilly/goki/ki/kit"
 	"reflect"
 )
 
@@ -160,6 +161,16 @@ type Ki interface {
 
 	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at given position in children list, and give it a name
 	InsertNewChildNamed(typ reflect.Type, at int, name string) Ki
+
+	// move child from one position to another in the list of children (see also Slice method)
+	MoveChild(from, to int) error
+
+	// configure children according to given list of type-and-name's --
+	// attempts to have minimal impact relative to existing items that fit the
+	// type and name constraints (they are moved into the corresponding
+	// positions), and any extra children are removed, and new ones added, to
+	// match the specified config
+	ConfigChildren(config kit.TypeAndNameList)
 
 	// find index of child based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int
