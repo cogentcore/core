@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -83,34 +84,34 @@ func (g *Action) AsLayout2D() *Layout {
 
 func (g *Action) Init2D() {
 	g.Init2DBase()
-	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Action) // note: will fail for any derived classes..
 		if ok {
 			ab.ButtonPressed()
 		}
 	})
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Action)
 		if ok {
 			ab.ActionReleased()
 		}
 	})
-	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Action)
 		if ok {
 			ab.ButtonEnterHover()
 		}
 	})
-	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Action)
 		if ok {
 			ab.ButtonExitHover()
 		}
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Action)
 		if ok {
-			kt, ok := d.(KeyTypedEvent)
+			kt, ok := d.(oswin.KeyTypedEvent)
 			if ok {
 				// todo: register shortcuts with window, and generalize these keybindings
 				kf := KeyFun(kt.Key, kt.Chord)
@@ -429,34 +430,34 @@ func (g *MenuButton) AsLayout2D() *Layout {
 
 func (g *MenuButton) Init2D() {
 	g.Init2DBase()
-	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*MenuButton) // note: will fail for any derived classes..
 		if ok {
 			ab.ButtonPressed()
 		}
 	})
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*MenuButton)
 		if ok {
-			ab.ButtonReleased(d.(MouseUpEvent).Where)
+			ab.ButtonReleased(d.(oswin.MouseUpEvent).Where)
 		}
 	})
-	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*MenuButton)
 		if ok {
 			ab.ButtonEnterHover()
 		}
 	})
-	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*MenuButton)
 		if ok {
 			ab.ButtonExitHover()
 		}
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*MenuButton)
 		if ok {
-			kt, ok := d.(KeyTypedEvent)
+			kt, ok := d.(oswin.KeyTypedEvent)
 			if ok {
 				// todo: register shortcuts with window, and generalize these keybindings
 				kf := KeyFun(kt.Key, kt.Chord)

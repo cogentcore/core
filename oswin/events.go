@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package oswin
 
 import (
-	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	// "fmt"
 	"time"
@@ -61,8 +60,6 @@ const (
 )
 
 //go:generate stringer -type=EventType
-
-var KiT_EventType = kit.Enums.AddEnum(MouseMovedEventType, false, nil)
 
 // buttons that can be pressed
 type MouseButton int

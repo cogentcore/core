@@ -6,11 +6,10 @@ package gi
 
 import (
 	"fmt"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
-	"image/draw"
 	"log"
 	// "reflect"
 	"runtime"
@@ -23,16 +22,16 @@ import (
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Win           OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
-	EventSigs     [EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
-	Focus         ki.Ki                 `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	Dragging      ki.Ki                 `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
-	Popup         ki.Ki                 `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki               `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki               `jsom:"-" xml:"-" desc:"stack of focus"`
-	LastDrag      time.Time             `json:"-" xml:"-" desc:"time since last drag event"`
-	LastSentDrag  MouseDraggedEvent     `json:"-" xml:"-" desc:"last drag that we actually sent"`
-	stopEventLoop bool                  `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
+	Win           oswin.OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
+	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
+	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
+	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
+	LastDrag      time.Time                   `json:"-" xml:"-" desc:"time since last drag event"`
+	LastSentDrag  oswin.MouseDraggedEvent     `json:"-" xml:"-" desc:"last drag that we actually sent"`
+	stopEventLoop bool                        `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -42,7 +41,7 @@ func NewWindow(name string, width, height int) *Window {
 	win := &Window{}
 	win.SetThisName(win, name)
 	var err error
-	win.Win, err = NewOSWindow(width, height)
+	win.Win, err = oswin.NewOSWindow(width, height)
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
@@ -96,8 +95,8 @@ func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	vp.FullRender2DTree()
 }
 
-func (w *Window) ReceiveEventType(recv ki.Ki, et EventType, fun ki.RecvFun) {
-	if et >= EventTypeN {
+func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFun) {
+	if et >= oswin.EventTypeN {
 		log.Printf("Window ReceiveEventType type: %v is not a known event type\n", et)
 		return
 	}
@@ -133,14 +132,14 @@ func (w *Window) StartEventLoop() {
 // nodes that have registered to receive that type of event -- the further
 // filtering is just to ensure that they are in the right position to receive
 // the event (focus, etc)
-func (w *Window) SendEventSignal(evi Event) {
+func (w *Window) SendEventSignal(evi oswin.Event) {
 	et := evi.EventType()
-	if et > EventTypeN || et < 0 {
+	if et > oswin.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
-	if et == MouseDraggedEventType {
-		mde, ok := evi.(MouseDraggedEvent)
+	if et == oswin.MouseDraggedEventType {
+		mde, ok := evi.(oswin.MouseDraggedEvent)
 		if ok {
 			if w.Dragging != nil {
 				td := time.Now().Sub(w.LastDrag)
@@ -176,7 +175,7 @@ func (w *Window) SendEventSignal(evi Event) {
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
 
 				// drag events start with node but can go beyond it..
-				mde, ok := evi.(MouseDraggedEvent)
+				mde, ok := evi.(oswin.MouseDraggedEvent)
 				if ok {
 					if w.Dragging == gi.This {
 						return true
@@ -215,16 +214,16 @@ func (w *Window) SendEventSignal(evi Event) {
 }
 
 // process MouseMoved events for enter / exit status
-func (w *Window) ProcessMouseMovedEvent(evi Event) {
+func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 	pos := evi.EventPos()
-	var mene MouseEnteredEvent
+	var mene oswin.MouseEnteredEvent
 	mene.From = pos
-	var mexe MouseExitedEvent
+	var mexe oswin.MouseExitedEvent
 	mexe.From = pos
-	enex := []EventType{MouseEnteredEventType, MouseExitedEventType}
+	enex := []oswin.EventType{oswin.MouseEnteredEventType, oswin.MouseExitedEventType}
 	for _, ete := range enex {
 		nwei := interface{}(nil)
-		if ete == MouseEnteredEventType {
+		if ete == oswin.MouseEnteredEventType {
 			nwei = mene
 		} else {
 			nwei = mexe
@@ -237,7 +236,7 @@ func (w *Window) ProcessMouseMovedEvent(evi Event) {
 				}
 				in := pos.In(gi.WinBBox)
 				if in {
-					if ete == MouseEnteredEventType {
+					if ete == oswin.MouseEnteredEventType {
 						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
 							return false // already in
 						}
@@ -246,7 +245,7 @@ func (w *Window) ProcessMouseMovedEvent(evi Event) {
 						return false // don't send any exited events if in
 					}
 				} else { // mouse not in object
-					if ete == MouseExitedEventType {
+					if ete == oswin.MouseExitedEventType {
 						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
 							bitflag.Clear(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
 						} else {
@@ -267,7 +266,7 @@ func (w *Window) ProcessMouseMovedEvent(evi Event) {
 }
 
 // process Mouseup events during popup for possible closing of popup
-func (w *Window) PopupMouseUpEvent(evi Event) {
+func (w *Window) PopupMouseUpEvent(evi oswin.Event) {
 	gii, gi := KiToNode2D(w.Popup)
 	if gi == nil {
 		return
@@ -299,44 +298,44 @@ func (w *Window) EventLoop() {
 
 		curPop := w.Popup
 
-		evi, ok := ei.(Event)
+		evi, ok := ei.(oswin.Event)
 		if !ok {
 			log.Printf("Gi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
 			continue
 		}
 		et := evi.EventType()
-		if et > EventTypeN || et < 0 { // we don't handle other types of events here
+		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
 		w.SendEventSignal(evi)
-		if et == MouseMovedEventType {
+		if et == oswin.MouseMovedEventType {
 			w.ProcessMouseMovedEvent(evi)
 		}
 		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
-			if et == MouseUpEventType {
+			if et == oswin.MouseUpEventType {
 				w.PopupMouseUpEvent(evi)
 			}
 		}
 		// todo: what about iconify events!?
-		if et == CloseEventType {
+		if et == oswin.CloseEventType {
 			fmt.Println("close")
 			w.Win.Close()
 			// todo: only if last one..
-			StopBackendEventLoop()
+			oswin.StopBackendEventLoop()
 		}
-		if et == ResizeEventType {
+		if et == oswin.ResizeEventType {
 			lastResize = ei
 		} else {
 			if lastResize != nil { // only do last one
-				rev, ok := lastResize.(ResizeEvent)
+				rev, ok := lastResize.(oswin.ResizeEvent)
 				lastResize = nil
 				if ok {
 					w.Resize(rev.Width, rev.Height)
 				}
 			}
 		}
-		if et == KeyTypedEventType {
-			kt, ok := ei.(KeyTypedEvent)
+		if et == oswin.KeyTypedEventType {
+			kt, ok := ei.(oswin.KeyTypedEvent)
 			if ok {
 				kf := KeyFun(kt.Key, kt.Chord)
 				switch kf {
@@ -458,99 +457,4 @@ func (w *Window) PopFocus() {
 	sz := len(w.FocusStack)
 	w.Focus = w.FocusStack[sz-1]
 	w.FocusStack = w.FocusStack[:sz-1]
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// OS-specific window
-
-// general interface into the operating-specific window structure
-type OSWindow interface {
-	SetTitle(title string)
-	SetSize(width, height int)
-	Size() (width, height int)
-	LockSize(lock bool)
-	Show()
-	Screen() (im WinImage)
-	FlushImage(bounds ...image.Rectangle)
-	EventChan() (events <-chan interface{})
-	Close() (err error)
-	SetCursor(cursor Cursor)
-}
-
-// window image
-type WinImage interface {
-	draw.Image
-	// CopyRGBA() copies the source image to this image, translating
-	// the source image to the provided bounds.
-	CopyRGBA(src *image.RGBA, bounds image.Rectangle)
-}
-
-/*
-Some wde backends (cocoa) require that this function be called in the
-main thread. To make your code as cross-platform as possible, it is
-recommended that your main function look like the the code below.
-
-	func main() {
-		go theRestOfYourProgram()
-		gi.RunBackendEventLoop()
-	}
-
-gi.Run() will return when gi.Stop() is called.
-
-For this to work, you must import one of the gi backends. For
-instance,
-
-	import _ "github.com/rcoreilly/goki/gi/xgb"
-
-or
-
-	import _ "github.com/rcoreilly/goki/gi/win"
-
-or
-
-	import _ "github.com/rcoreilly/goki/gi/cocoa"
-
-
-will register a backend with GoGi, allowing you to call
-gi.RunBackendEventLoop(), gi.StopBackendEventLoop() and gi.NewOSWindow() without referring to the
-backend explicitly.
-
-If you pupt the registration import in a separate file filtered for
-the correct platform, your project will work on all three major
-platforms without configuration.
-
-That is, if you import gi/xgb in a file named "gi_linux.go",
-gi/win in a file named "gi_windows.go" and gi/cocoa in a
-file named "gi_darwin.go", the go tool will import the correct one.
-
-*/
-func RunBackendEventLoop() {
-	BackendRun()
-}
-
-var BackendRun = func() {
-	panic("no gi backend imported")
-}
-
-/*
-Call this when you want gi.Run() to return. Usually to allow your
-program to exit gracefully.
-*/
-func StopBackendEventLoop() {
-	BackendStop()
-}
-
-var BackendStop = func() {
-	panic("no gi backend imported")
-}
-
-/*
-Create a new OS window with the specified width and height.
-*/
-func NewOSWindow(width, height int) (OSWindow, error) {
-	return BackendNewWindow(width, height)
-}
-
-var BackendNewWindow = func(width, height int) (OSWindow, error) {
-	panic("no gi backend imported")
 }

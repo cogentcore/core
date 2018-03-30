@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -187,34 +188,34 @@ func (g *Button) AsLayout2D() *Layout {
 func (g *Button) Init2D() {
 	g.Init2DBase()
 	g.Init2DParts()
-	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
 			ab.ButtonPressed()
 		}
 	})
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button)
 		if ok {
 			ab.ButtonReleased()
 		}
 	})
-	g.ReceiveEventType(MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button)
 		if ok {
 			ab.ButtonEnterHover()
 		}
 	})
-	g.ReceiveEventType(MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button)
 		if ok {
 			ab.ButtonExitHover()
 		}
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button)
 		if ok {
-			kt, ok := d.(KeyTypedEvent)
+			kt, ok := d.(oswin.KeyTypedEvent)
 			if ok {
 				// todo: register shortcuts with window, and generalize these keybindings
 				kf := KeyFun(kt.Key, kt.Chord)
@@ -285,12 +286,12 @@ func (g *Button) ConfigParts() {
 	}
 	g.Parts.ConfigChildren(config)
 	if icIdx >= 0 {
-		kc, _ := g.Parts.KiChild(icIdx)
+		kc, _ := g.Parts.Child(icIdx)
 		ici, _ := KiToNode2D(kc)
 		*(ici.(*Icon)) = *g.Icon
 	}
 	if txIdx >= 0 {
-		kc, _ := g.Parts.KiChild(txIdx)
+		kc, _ := g.Parts.Child(txIdx)
 		lbi, lbl := KiToNode2D(kc)
 		lbl.SetProp("margin", units.NewValue(0, units.Px))
 		lbl.SetProp("padding", units.NewValue(0, units.Px))

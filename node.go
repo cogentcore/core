@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -60,7 +61,7 @@ func (g *NodeBase) ParentWindow() *Window {
 }
 
 // register this node to receive a given type of GUI event signal from the parent window
-func (g *NodeBase) ReceiveEventType(et EventType, fun ki.RecvFun) {
+func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFun) {
 	win := g.ParentWindow()
 	if win != nil {
 		win.ReceiveEventType(g.This, et, fun)

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	// "github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -88,22 +89,22 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 // set the source node that we are viewing
 func (g *TreeView) SetSrcNode(k ki.Ki) {
 	g.UpdateStart()
-	if len(g.Children) > 0 {
+	if len(g.Kids) > 0 {
 		g.DeleteChildren(true) // todo: later deal with destroyed
 	}
 	g.SrcNode.Ptr = k
 	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
-	nm := "ViewOf_" + k.KiUniqueName()
-	if g.Name != nm {
+	nm := "ViewOf_" + k.UniqueName()
+	if g.Nm != nm {
 		g.SetName(nm)
 	}
-	kids := k.KiChildren()
+	kids := k.Children()
 	// breadth first -- first make all our kids, then have them make their kids
 	for _, kid := range kids {
-		g.AddNewChildNamed(nil, "ViewOf_"+kid.KiUniqueName()) // our name is view of ki unique name
+		g.AddNewChildNamed(nil, "ViewOf_"+kid.UniqueName()) // our name is view of ki unique name
 	}
 	for i, kid := range kids {
-		vki, _ := g.KiChild(i)
+		vki, _ := g.Child(i)
 		vk, ok := vki.(*TreeView)
 		if !ok {
 			continue // shouldn't happen
@@ -214,7 +215,7 @@ func (g *TreeView) GetLabel() string {
 	} else {
 		label = "v "
 	}
-	label += g.SrcNode.Ptr.KiName()
+	label += g.SrcNode.Ptr.Name()
 	return label
 }
 
@@ -338,24 +339,24 @@ func (g *TreeView) AsLayout2D() *Layout {
 
 func (g *TreeView) Init2D() {
 	g.Init2DBase()
-	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		_, ok := recv.(*TreeView)
 		if !ok {
 			return
 		}
 		// todo: specifically on down?  needed this for emergent
 	})
-	g.ReceiveEventType(MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		fmt.Printf("button %v pressed!\n", recv.PathUnique())
 		ab, ok := recv.(*TreeView)
 		if ok {
 			ab.SelectNodeAction()
 		}
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
 		if ok {
-			kt, ok := d.(KeyTypedEvent)
+			kt, ok := d.(oswin.KeyTypedEvent)
 			if ok {
 				// fmt.Printf("TreeView key: %v\n", kt.Chord)
 				kf := KeyFun(kt.Key, kt.Chord)
@@ -373,10 +374,10 @@ func (g *TreeView) Init2D() {
 			}
 		}
 	})
-	g.ReceiveEventType(KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
 		if ok {
-			kt, ok := d.(KeyDownEvent)
+			kt, ok := d.(oswin.KeyDownEvent)
 			if ok {
 				kf := KeyFun(kt.Key, "")
 				// fmt.Printf("TreeView key down: %v\n", kt.Key)
@@ -389,7 +390,7 @@ func (g *TreeView) Init2D() {
 			}
 		}
 	})
-	g.ReceiveEventType(KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
 		if ok {
 			ab.ClearSelectMods()
@@ -454,7 +455,7 @@ func (g *TreeView) Size2D() {
 
 	if !g.IsCollapsed() {
 		// we layout children under us
-		for _, kid := range g.Children {
+		for _, kid := range g.Kids {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				gi.LayData.AllocPos.Y = h
@@ -505,7 +506,7 @@ func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 	ar := g.BBoxFromAlloc() // need to use allocated size which includes children
 	if g.Parent != nil {    // use parents children bbox to determine where we can draw
-		pgi, _ := KiToNode2D(g.Parent)
+		pgi, _ := KiToNode2D(g.Par)
 		ar = ar.Intersect(pgi.ChildrenBBox2D())
 	}
 	return ar
@@ -605,8 +606,8 @@ var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
 func (g *TabWidget) SetSrcNode(k ki.Ki) {
 	g.SrcNode.Ptr = k
 	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
-	nm := "TabViewOf_" + k.KiUniqueName()
-	if g.Name == "" {
+	nm := "TabViewOf_" + k.UniqueName()
+	if g.Nm == "" {
 		g.SetName(nm)
 	}
 	g.InitTabWidget()
@@ -617,7 +618,7 @@ func (g *TabWidget) SetSrcNode(k ki.Ki) {
 // select tab at given index
 func (g *TabWidget) SelectTabIndex(idx int) error {
 	tabrow := g.TabRowLayout()
-	tbk, err := tabrow.KiChild(idx)
+	tbk, err := tabrow.Child(idx)
 	if err != nil {
 		return err
 	}
@@ -637,7 +638,7 @@ func (g *TabWidget) SelectTabIndex(idx int) error {
 // get tab frame for given index
 func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
 	tabstack := g.TabStackLayout()
-	tfk, err := tabstack.KiChild(idx)
+	tfk, err := tabstack.Child(idx)
 	if err != nil {
 		return nil
 	}
@@ -651,28 +652,28 @@ func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
 // get the overal column layout for the tab widget
 func (g *TabWidget) TabColLayout() *Layout {
 	g.InitTabWidget()
-	ch, _ := g.KiChild(0)
+	ch, _ := g.Child(0)
 	return ch.(*Layout)
 }
 
 // get the row layout of tabs across the top of the tab widget
 func (g *TabWidget) TabRowLayout() *Layout {
 	tabcol := g.TabColLayout()
-	ch, _ := tabcol.KiChild(0)
+	ch, _ := tabcol.Child(0)
 	return ch.(*Layout)
 }
 
 // get the stacked layout of tab frames
 func (g *TabWidget) TabStackLayout() *Layout {
 	tabcol := g.TabColLayout()
-	ch, _ := tabcol.KiChild(1)
+	ch, _ := tabcol.Child(1)
 	return ch.(*Layout)
 }
 
 // unselect all tabs
 func (g *TabWidget) UnselectAllTabButtons() {
 	tabrow := g.TabRowLayout()
-	for _, tbk := range tabrow.Children {
+	for _, tbk := range tabrow.Kids {
 		tb, ok := tbk.(*Button)
 		if !ok {
 			continue
@@ -730,16 +731,16 @@ func (g *TabWidget) InitTabs() {
 	if g.SrcNode.Ptr == nil {
 		return
 	}
-	skids := g.SrcNode.Ptr.KiChildren()
+	skids := g.SrcNode.Ptr.Children()
 	for _, sk := range skids {
-		nm := "TabFrameOf_" + sk.KiUniqueName()
+		nm := "TabFrameOf_" + sk.UniqueName()
 		tf := tabstack.AddNewChildNamed(KiT_Frame, nm).(*Frame)
 		tf.Lay = LayoutCol
 		tf.SetProp("max-width", -1.0) // stretch flex
 		tf.SetProp("max-height", -1.0)
-		nm = "TabOf_" + sk.KiUniqueName()
+		nm = "TabOf_" + sk.UniqueName()
 		tb := tabrow.AddNewChildNamed(KiT_Button, nm).(*Button) // todo make tab button
-		tb.Text = sk.KiName()
+		tb.Text = sk.Name()
 		for key, val := range TabButtonProps {
 			tb.SetProp(key, val)
 		}
@@ -753,7 +754,7 @@ func (g *TabWidget) InitTabs() {
 // initialize the tab widget structure -- assumes it has been done if there is
 // already a child node
 func (g *TabWidget) InitTabWidget() {
-	if len(g.Children) == 1 {
+	if len(g.Kids) == 1 {
 		return
 	}
 	g.UpdateStart()

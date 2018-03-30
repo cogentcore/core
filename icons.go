@@ -190,6 +190,6 @@ func MakeDefaultIcons() *IconSet {
 	wd.SetThisName(&wd, "widget-down-wedge")
 	p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
 	p.Data = ParsePathData("M 0 0 1 0 .5 1 Z")
-	iset[wd.Name] = &wd
+	iset[wd.Nm] = &wd
 	return &iset
 }

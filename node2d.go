@@ -125,7 +125,7 @@ func (g *Node2DBase) Style2DSVG() {
 		gii.Init2D()
 	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
-	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.KiProps())
+	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero) // svn only has to set units here once
 }
 
@@ -135,11 +135,11 @@ func (g *Node2DBase) Style2DWidget() {
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
-	_, pg := KiToNode2D(g.Parent)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
-		g.Style.SetStyle(&pg.Style, &StyleDefault, g.KiProps())
+		g.Style.SetStyle(&pg.Style, &StyleDefault, g.Properties())
 	} else {
-		g.Style.SetStyle(nil, &StyleDefault, g.KiProps())
+		g.Style.SetStyle(nil, &StyleDefault, g.Properties())
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
@@ -165,7 +165,7 @@ func (g *Node2DBase) FindViewportParent() *Viewport2D {
 
 // copy our paint from our parents -- called during Style for SVG
 func (g *Node2DBase) CopyParentPaint() *Node2DBase {
-	_, pg := KiToNode2D(g.Parent)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		g.Paint = pg.Paint
 	}
@@ -197,7 +197,7 @@ func (g *Node2DBase) SetWinBBox() {
 // cached out at this stage also returns the size of the parent for setting
 // units context relative to parent objects
 func (g *Node2DBase) AddParentPos() Vec2D {
-	_, pg := KiToNode2D(g.Parent)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		if !g.IsStructField() {
 			g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
@@ -292,7 +292,7 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 // full render of the tree
 func (g *Node2DBase) FullRender2DTree() {
 	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Parent)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
@@ -307,7 +307,7 @@ func (g *Node2DBase) FullRender2DTree() {
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
 	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Parent)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
@@ -392,7 +392,7 @@ func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
 // layout on all of node's children, giving them the ChildrenBBox2D -- default call at end of Layout2D
 func (g *Node2DBase) Layout2DChildren() {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
-	for _, kid := range g.Children {
+	for _, kid := range g.Kids {
 		gii, _ := KiToNode2D(kid)
 		if gii != nil {
 			gii.Layout2D(cbb)
@@ -402,7 +402,7 @@ func (g *Node2DBase) Layout2DChildren() {
 
 // render all of node's children -- default call at end of Render2D()
 func (g *Node2DBase) Render2DChildren() {
-	for _, kid := range g.Children {
+	for _, kid := range g.Kids {
 		gii, _ := KiToNode2D(kid)
 		if gii != nil {
 			gii.Render2D()

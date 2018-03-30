@@ -303,12 +303,12 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 
 // first pass: gather the size information from the children
 func (ly *Layout) GatherSizes() {
-	if len(ly.Children) == 0 {
+	if len(ly.Kids) == 0 {
 		return
 	}
 
 	var sumPref, sumNeed, maxPref, maxNeed Vec2D
-	for _, c := range ly.Children {
+	for _, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
 			continue
@@ -345,7 +345,7 @@ func (ly *Layout) AllocFromParent() {
 	if ly.Parent == nil {
 		return
 	}
-	pgi, _ := KiToNode2D(ly.Parent)
+	pgi, _ := KiToNode2D(ly.Par)
 	lyp := pgi.AsLayout2D()
 	if lyp == nil {
 		ly.FunUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -410,7 +410,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 func (ly *Layout) LayoutSingle(dim Dims2D) {
 	spc := ly.Style.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
-	for _, c := range ly.Children {
+	for _, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
 			continue
@@ -428,7 +428,7 @@ func (ly *Layout) LayoutSingle(dim Dims2D) {
 // layout all children along given dim -- only affects that dim -- e.g., use
 // LayoutSingle for other dim
 func (ly *Layout) LayoutAll(dim Dims2D) {
-	sz := len(ly.Children)
+	sz := len(ly.Kids)
 	if sz == 0 {
 		return
 	}
@@ -455,7 +455,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	stretchMax := false          // only stretch Max = neg
 	addSpace := false            // apply extra toward spacing -- for justify
 	if usePref && extra >= 0.0 { // have some stretch extra
-		for _, c := range ly.Children {
+		for _, c := range ly.Kids {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
 				continue
@@ -469,7 +469,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 			stretchMax = true // only stretch those marked as infinitely stretchy
 		}
 	} else if extra >= 0.0 { // extra relative to Need
-		for _, c := range ly.Children {
+		for _, c := range ly.Kids {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
 				continue
@@ -501,7 +501,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 	// fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Name, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 
-	for i, c := range ly.Children {
+	for i, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
 			continue
@@ -535,7 +535,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 // positions and computing summary size stats
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
-	for _, c := range ly.Children {
+	for _, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
 			continue
@@ -617,7 +617,7 @@ func (ly *Layout) DeleteHScroll() {
 	sc.DisconnectAllEvents()
 	sc.SliderSig.DisconnectAll()
 	sc.NodeSig.DisconnectAll()
-	sc.DestroyKi()
+	sc.Destroy()
 	ly.HScroll = nil
 }
 
@@ -660,7 +660,7 @@ func (ly *Layout) DeleteVScroll() {
 	sc.DisconnectAllEvents()
 	sc.SliderSig.DisconnectAll()
 	sc.NodeSig.DisconnectAll()
-	sc.DestroyKi()
+	sc.Destroy()
 	ly.VScroll = nil
 }
 
@@ -713,7 +713,7 @@ func (ly *Layout) Render2DChildren() {
 		ly.Render2DChild(gii)
 		return
 	}
-	for _, kid := range ly.Children {
+	for _, kid := range ly.Kids {
 		gii, _ := KiToNode2D(kid)
 		if gii != nil {
 			ly.Render2DChild(gii)
@@ -739,7 +739,7 @@ func (ly *Layout) Render2DChild(gii Node2D) {
 
 // convenience for LayoutStacked to show child node at a given index
 func (ly *Layout) ShowChildAtIndex(idx int) error {
-	ch, err := ly.KiChild(idx)
+	ch, err := ly.Child(idx)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -226,7 +227,7 @@ func (g *TextField) InsertAtCursor(str string) {
 	g.UpdateEnd()
 }
 
-func (g *TextField) KeyInput(kt KeyTypedEvent) {
+func (g *TextField) KeyInput(kt oswin.KeyTypedEvent) {
 	kf := KeyFun(kt.Key, kt.Chord)
 	switch kf {
 	case KeyFunSelectItem:
@@ -248,7 +249,7 @@ func (g *TextField) KeyInput(kt KeyTypedEvent) {
 	case KeyFunAbort:
 		g.RevertEdit()
 	case KeyFunNil:
-		k := KeyToLetter(kt.Key, kt.Chord)
+		k := oswin.KeyToLetter(kt.Key, kt.Chord)
 		if k != "" {
 			g.InsertAtCursor(k)
 		}
@@ -326,10 +327,10 @@ func (g *TextField) AsLayout2D() *Layout {
 func (g *TextField) Init2D() {
 	g.Init2DBase()
 	g.EditText = g.Text
-	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf, ok := recv.(*TextField)
 		if ok {
-			md, ok := d.(MouseDownEvent)
+			md, ok := d.(oswin.MouseDownEvent)
 			if ok {
 				if !tf.HasFocus() {
 					tf.GrabFocus()
@@ -339,10 +340,10 @@ func (g *TextField) Init2D() {
 			}
 		}
 	})
-	g.ReceiveEventType(KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf, ok := recv.(*TextField)
 		if ok {
-			kt, ok := d.(KeyTypedEvent)
+			kt, ok := d.(oswin.KeyTypedEvent)
 			if ok {
 				tf.KeyInput(kt)
 			}

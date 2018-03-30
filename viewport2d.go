@@ -108,8 +108,8 @@ func (vp *Viewport2D) IsSVG() bool {
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
-	if !vp.IsPopup() && vp.Parent != nil { // use parents children bbox to determine where we can draw
-		pgi, _ := KiToNode2D(vp.Parent)
+	if !vp.IsPopup() && vp.Par != nil { // use parents children bbox to determine where we can draw
+		pgi, _ := KiToNode2D(vp.Par)
 		nr := r.Intersect(pgi.ChildrenBBox2D())
 		sp = nr.Min.Sub(r.Min)
 		r = nr
@@ -169,13 +169,13 @@ func (vp *Viewport2D) PushAsPopup() {
 // its main layout, see VpFlagPopupDestroyAll for whether children are destroyed
 func (vp *Viewport2D) DeletePopup() {
 	vp.DisconnectAllEventsTree()
-	par := vp.Parent
+	par := vp.Par
 	if par != nil {
 		par.UpdateStart()
 	}
 	if !bitflag.Has(vp.NodeFlags, int(VpFlagPopupDestroyAll)) {
-		if len(vp.Children) == 1 { // look for a typical layout as our first child
-			kc, _ := vp.KiChild(0)
+		if len(vp.Kids) == 1 { // look for a typical layout as our first child
+			kc, _ := vp.Child(0)
 			cli, _ := KiToNode2D(kc)
 			ly := cli.AsLayout2D()
 			if ly != nil {
