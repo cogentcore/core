@@ -19,7 +19,7 @@ package win
 import (
 	"fmt"
 	"github.com/AllenDang/w32"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
 func (wnd *OSWindow) checkKeyState() {
@@ -36,10 +36,10 @@ func (wnd *OSWindow) checkKeyState() {
 			if isDown != wasDown {
 				if isDown {
 					wnd.keysDown[key] = true
-					wnd.events <- gi.KeyDownEvent(gi.KeyEvent{key})
+					wnd.events <- oswin.KeyDownEvent(oswin.KeyEvent{key})
 				} else {
 					delete(wnd.keysDown, key)
-					wnd.events <- gi.KeyUpEvent(gi.KeyEvent{key})
+					wnd.events <- oswin.KeyUpEvent(oswin.KeyEvent{key})
 				}
 			}
 		}
@@ -49,7 +49,7 @@ func (wnd *OSWindow) checkKeyState() {
 
 func (wnd *OSWindow) constructChord() string {
 	wnd.checkKeyState()
-	return gi.ConstructChord(wnd.keysDown)
+	return oswin.ConstructChord(wnd.keysDown)
 }
 
 func keyFromVirtualKeyCode(vk uintptr) string {
@@ -62,145 +62,145 @@ func keyFromVirtualKeyCode(vk uintptr) string {
 	}
 	switch vk {
 	case w32.VK_BACK:
-		return gi.KeyBackspace
+		return oswin.KeyBackspace
 	case w32.VK_TAB:
-		return gi.KeyTab
+		return oswin.KeyTab
 	case w32.VK_RETURN:
-		return gi.KeyReturn
+		return oswin.KeyReturn
 	case w32.VK_SHIFT:
-		return gi.KeyLeftShift
+		return oswin.KeyLeftShift
 	case w32.VK_CONTROL:
-		return gi.KeyLeftControl
+		return oswin.KeyLeftControl
 	case w32.VK_MENU:
-		return gi.KeyLeftAlt
+		return oswin.KeyLeftAlt
 	case w32.VK_CAPITAL:
-		return gi.KeyCapsLock
+		return oswin.KeyCapsLock
 	case w32.VK_ESCAPE:
-		return gi.KeyEscape
+		return oswin.KeyEscape
 	case w32.VK_SPACE:
-		return gi.KeySpace
+		return oswin.KeySpace
 	case w32.VK_PRIOR:
-		return gi.KeyPrior
+		return oswin.KeyPrior
 	case w32.VK_NEXT:
-		return gi.KeyNext
+		return oswin.KeyNext
 	case w32.VK_END:
-		return gi.KeyEnd
+		return oswin.KeyEnd
 	case w32.VK_HOME:
-		return gi.KeyHome
+		return oswin.KeyHome
 	case w32.VK_LEFT:
-		return gi.KeyLeftArrow
+		return oswin.KeyLeftArrow
 	case w32.VK_UP:
-		return gi.KeyUpArrow
+		return oswin.KeyUpArrow
 	case w32.VK_RIGHT:
-		return gi.KeyRightArrow
+		return oswin.KeyRightArrow
 	case w32.VK_DOWN:
-		return gi.KeyDownArrow
+		return oswin.KeyDownArrow
 	case w32.VK_INSERT:
-		return gi.KeyInsert
+		return oswin.KeyInsert
 	case w32.VK_DELETE:
-		return gi.KeyDelete
+		return oswin.KeyDelete
 	case w32.VK_LWIN:
-		return gi.KeyLeftSuper
+		return oswin.KeyLeftSuper
 	case w32.VK_RWIN:
-		return gi.KeyRightSuper
+		return oswin.KeyRightSuper
 	case w32.VK_NUMPAD0:
-		return gi.Key0
+		return oswin.Key0
 	case w32.VK_NUMPAD1:
-		return gi.Key1
+		return oswin.Key1
 	case w32.VK_NUMPAD2:
-		return gi.Key2
+		return oswin.Key2
 	case w32.VK_NUMPAD3:
-		return gi.Key3
+		return oswin.Key3
 	case w32.VK_NUMPAD4:
-		return gi.Key4
+		return oswin.Key4
 	case w32.VK_NUMPAD5:
-		return gi.Key5
+		return oswin.Key5
 	case w32.VK_NUMPAD6:
-		return gi.Key6
+		return oswin.Key6
 	case w32.VK_NUMPAD7:
-		return gi.Key7
+		return oswin.Key7
 	case w32.VK_NUMPAD8:
-		return gi.Key8
+		return oswin.Key8
 	case w32.VK_NUMPAD9:
-		return gi.Key9
+		return oswin.Key9
 	case w32.VK_MULTIPLY:
-		return gi.KeyPadStar
+		return oswin.KeyPadStar
 	case w32.VK_ADD:
-		return gi.KeyPadPlus
+		return oswin.KeyPadPlus
 	case w32.VK_SUBTRACT:
-		return gi.KeyPadMinus
+		return oswin.KeyPadMinus
 	case w32.VK_DECIMAL:
-		return gi.KeyPadDot
+		return oswin.KeyPadDot
 	case w32.VK_DIVIDE:
-		return gi.KeyPadSlash
+		return oswin.KeyPadSlash
 	case w32.VK_F1:
-		return gi.KeyF1
+		return oswin.KeyF1
 	case w32.VK_F2:
-		return gi.KeyF2
+		return oswin.KeyF2
 	case w32.VK_F3:
-		return gi.KeyF3
+		return oswin.KeyF3
 	case w32.VK_F4:
-		return gi.KeyF4
+		return oswin.KeyF4
 	case w32.VK_F5:
-		return gi.KeyF5
+		return oswin.KeyF5
 	case w32.VK_F6:
-		return gi.KeyF6
+		return oswin.KeyF6
 	case w32.VK_F7:
-		return gi.KeyF7
+		return oswin.KeyF7
 	case w32.VK_F8:
-		return gi.KeyF8
+		return oswin.KeyF8
 	case w32.VK_F9:
-		return gi.KeyF9
+		return oswin.KeyF9
 	case w32.VK_F10:
-		return gi.KeyF10
+		return oswin.KeyF10
 	case w32.VK_F11:
-		return gi.KeyF11
+		return oswin.KeyF11
 	case w32.VK_F12:
-		return gi.KeyF12
+		return oswin.KeyF12
 	case w32.VK_F13:
-		return gi.KeyF13
+		return oswin.KeyF13
 	case w32.VK_F14:
-		return gi.KeyF14
+		return oswin.KeyF14
 	case w32.VK_F15:
-		return gi.KeyF15
+		return oswin.KeyF15
 	case w32.VK_F16:
-		return gi.KeyF16
+		return oswin.KeyF16
 	case w32.VK_NUMLOCK:
-		return gi.KeyNumlock
+		return oswin.KeyNumlock
 	case w32.VK_LSHIFT:
-		return gi.KeyLeftShift
+		return oswin.KeyLeftShift
 	case w32.VK_RSHIFT:
-		return gi.KeyRightShift
+		return oswin.KeyRightShift
 	case w32.VK_LCONTROL:
-		return gi.KeyLeftControl
+		return oswin.KeyLeftControl
 	case w32.VK_RCONTROL:
-		return gi.KeyRightControl
+		return oswin.KeyRightControl
 	case w32.VK_LMENU:
-		return gi.KeyLeftAlt
+		return oswin.KeyLeftAlt
 	case w32.VK_RMENU:
-		return gi.KeyRightAlt
+		return oswin.KeyRightAlt
 	case w32.VK_OEM_1:
-		return gi.KeySemicolon
+		return oswin.KeySemicolon
 	case w32.VK_OEM_PLUS:
-		return gi.KeyEqual
+		return oswin.KeyEqual
 	case w32.VK_OEM_COMMA:
-		return gi.KeyComma
+		return oswin.KeyComma
 	case w32.VK_OEM_MINUS:
-		return gi.KeyMinus
+		return oswin.KeyMinus
 	case w32.VK_OEM_PERIOD:
-		return gi.KeyPeriod
+		return oswin.KeyPeriod
 	case w32.VK_OEM_2:
-		return gi.KeySlash
+		return oswin.KeySlash
 	case w32.VK_OEM_3:
-		return gi.KeyBackTick
+		return oswin.KeyBackTick
 	case w32.VK_OEM_4:
-		return gi.KeyLeftBracket
+		return oswin.KeyLeftBracket
 	case w32.VK_OEM_5:
-		return gi.KeyBackslash
+		return oswin.KeyBackslash
 	case w32.VK_OEM_6:
-		return gi.KeyRightBracket
+		return oswin.KeyRightBracket
 	case w32.VK_OEM_7:
-		return gi.KeyQuote
+		return oswin.KeyQuote
 
 	// the rest lack gi constants. the first few are xgb compatible
 	case w32.VK_PAUSE:

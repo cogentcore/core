@@ -19,23 +19,23 @@ package win
 import (
 	"errors"
 	"github.com/AllenDang/w32"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"runtime"
 	"unsafe"
 )
 
 func init() {
-	gi.FontLibrary.AddFontPaths("C:/Windows/Font")
-	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
+	oswin.FontLibrary.AddFontPaths("C:/Windows/Font")
+	oswin.BackendNewWindow = func(width, height int) (w oswin.OSWindow, err error) {
 		w, err = NewOSWindow(width, height)
 		return
 	}
 	ch := make(chan struct{}, 1)
-	gi.BackendRun = func() {
+	oswin.BackendRun = func() {
 		<-ch
 	}
-	gi.BackendStop = func() {
+	oswin.BackendStop = func() {
 		ch <- struct{}{}
 	}
 }
@@ -56,7 +56,7 @@ type OSWindow struct {
 	keysDown  map[string]bool
 	keysStale bool // if true, keysDown may not reflect reality
 
-	cursor gi.Cursor // most recently set cursor
+	cursor oswin.Cursor // most recently set cursor
 
 	uiTasks chan func()
 }
@@ -162,7 +162,7 @@ func (this *OSWindow) Show() {
 	w32.ShowWindow(this.hwnd, w32.SW_SHOWDEFAULT)
 }
 
-func (this *OSWindow) Screen() gi.WinImage {
+func (this *OSWindow) Screen() oswin.WinImage {
 	return this.buffer
 }
 

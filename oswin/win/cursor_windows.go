@@ -18,36 +18,36 @@ package win
 
 import (
 	"github.com/AllenDang/w32"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
-var cursorCache map[gi.Cursor]w32.HCURSOR
-var cursorIDC map[gi.Cursor]uint16
+var cursorCache map[oswin.Cursor]w32.HCURSOR
+var cursorIDC map[oswin.Cursor]uint16
 
 func init() {
-	cursorCache = make(map[gi.Cursor]w32.HCURSOR)
+	cursorCache = make(map[oswin.Cursor]w32.HCURSOR)
 
-	cursorIDC = map[gi.Cursor]uint16{
-		gi.NormalCursor:     w32.IDC_ARROW,
-		gi.ResizeNCursor:    w32.IDC_SIZENS,
-		gi.ResizeSCursor:    w32.IDC_SIZENS,
-		gi.ResizeNSCursor:   w32.IDC_SIZENS,
-		gi.ResizeECursor:    w32.IDC_SIZEWE,
-		gi.ResizeWCursor:    w32.IDC_SIZEWE,
-		gi.ResizeEWCursor:   w32.IDC_SIZEWE,
-		gi.ResizeNECursor:   w32.IDC_SIZENESW,
-		gi.ResizeSWCursor:   w32.IDC_SIZENESW,
-		gi.ResizeNWCursor:   w32.IDC_SIZENWSE,
-		gi.ResizeSECursor:   w32.IDC_SIZENWSE,
-		gi.CrosshairCursor:  w32.IDC_CROSS,
-		gi.IBeamCursor:      w32.IDC_IBEAM,
-		gi.GrabHoverCursor:  w32.IDC_HAND,
-		gi.GrabActiveCursor: w32.IDC_HAND,
-		gi.NotAllowedCursor: w32.IDC_NO,
+	cursorIDC = map[oswin.Cursor]uint16{
+		oswin.NormalCursor:     w32.IDC_ARROW,
+		oswin.ResizeNCursor:    w32.IDC_SIZENS,
+		oswin.ResizeSCursor:    w32.IDC_SIZENS,
+		oswin.ResizeNSCursor:   w32.IDC_SIZENS,
+		oswin.ResizeECursor:    w32.IDC_SIZEWE,
+		oswin.ResizeWCursor:    w32.IDC_SIZEWE,
+		oswin.ResizeEWCursor:   w32.IDC_SIZEWE,
+		oswin.ResizeNECursor:   w32.IDC_SIZENESW,
+		oswin.ResizeSWCursor:   w32.IDC_SIZENESW,
+		oswin.ResizeNWCursor:   w32.IDC_SIZENWSE,
+		oswin.ResizeSECursor:   w32.IDC_SIZENWSE,
+		oswin.CrosshairCursor:  w32.IDC_CROSS,
+		oswin.IBeamCursor:      w32.IDC_IBEAM,
+		oswin.GrabHoverCursor:  w32.IDC_HAND,
+		oswin.GrabActiveCursor: w32.IDC_HAND,
+		oswin.NotAllowedCursor: w32.IDC_NO,
 	}
 }
 
-func (w *OSWindow) SetCursor(cursor gi.Cursor) {
+func (w *OSWindow) SetCursor(cursor oswin.Cursor) {
 	if w.cursor != cursor {
 		w.cursor = cursor
 		handle := cursorHandle(cursor)
@@ -60,13 +60,13 @@ func (w *OSWindow) SetCursor(cursor gi.Cursor) {
 // restores current cursor. must be called from UI(event) thread.
 func (w *OSWindow) restoreCursor() {
 	cursor := w.cursor
-	if cursor == gi.NoneCursor {
-		cursor = gi.NormalCursor
+	if cursor == oswin.NoneCursor {
+		cursor = oswin.NormalCursor
 	}
 	w32.SetCursor(cursorHandle(cursor))
 }
 
-func cursorHandle(id gi.Cursor) w32.HCURSOR {
+func cursorHandle(id oswin.Cursor) w32.HCURSOR {
 	h, ok := cursorCache[id]
 	if !ok {
 		idc, ok := cursorIDC[id]

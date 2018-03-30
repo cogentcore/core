@@ -18,7 +18,7 @@ package glfw3
 
 import (
 	glfw "github.com/grd/glfw3"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"math"
 	"time"
@@ -26,14 +26,14 @@ import (
 
 var lastCursorPosition image.Point
 
-func getMouseButton(button glfw.MouseButton) gi.MouseButton {
+func getMouseButton(button glfw.MouseButton) oswin.MouseButton {
 	switch button {
 	case glfw.MouseButtonLeft:
-		return gi.LeftButton
+		return oswin.LeftButton
 	case glfw.MouseButtonMiddle:
-		return gi.MiddleButton
+		return oswin.MiddleButton
 	case glfw.MouseButtonRight:
-		return gi.RightButton
+		return oswin.RightButton
 	}
 	return 0
 }
@@ -44,7 +44,7 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 	switch action {
 
 	case glfw.Release:
-		var bue gi.MouseUpEvent
+		var bue oswin.MouseUpEvent
 		bue.Which = getMouseButton(button)
 		x, y := w.GetCursorPosition()
 		bue.Where.X = int(math.Floor(x))
@@ -54,7 +54,7 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 		}
 
 	case glfw.Press:
-		var bde gi.MouseDownEvent
+		var bde oswin.MouseDownEvent
 		bde.Which = getMouseButton(button)
 		x, y := w.GetCursorPosition()
 		bde.Where.X = int(math.Floor(x))
@@ -65,21 +65,21 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 	}
 }
 
-func buttonForDetail(detail glfw.MouseButton) gi.MouseButton {
+func buttonForDetail(detail glfw.MouseButton) oswin.MouseButton {
 	switch detail {
 	case glfw.MouseButtonLeft:
-		return gi.LeftButton
+		return oswin.LeftButton
 	case glfw.MouseButtonMiddle:
-		return gi.MiddleButton
+		return oswin.MiddleButton
 	case glfw.MouseButtonRight:
-		return gi.RightButton
+		return oswin.RightButton
 		//
 		// Mouse wheel button Up and Down are not implemented (yet).
 		//
 		// case 4:
-		//	return gi.WheelUpButton
+		//	return oswin.WheelUpButton
 		// case 5:
-		//	return gi.WheelDownButton
+		//	return oswin.WheelDownButton
 	}
 	return 0
 }
@@ -88,13 +88,13 @@ func cursorEnterCallback(w *glfw.Window, entered bool) {
 	var event interface{}
 
 	if entered {
-		var ene gi.MouseEnteredEvent
+		var ene oswin.MouseEnteredEvent
 		x, y := w.GetCursorPosition()
 		ene.Where.X = int(math.Floor(x))
 		ene.Where.Y = int(math.Floor(y))
 		event = ene
 	} else {
-		var exe gi.MouseExitedEvent
+		var exe oswin.MouseExitedEvent
 		x, y := w.GetCursorPosition()
 		exe.Where.X = int(math.Floor(x))
 		exe.Where.Y = int(math.Floor(y))
@@ -109,7 +109,7 @@ func cursorEnterCallback(w *glfw.Window, entered bool) {
 func cursorPositionCallback(w *glfw.Window, xpos float64, ypos float64) {
 	cursorPosition := image.Point{int(xpos), int(ypos)}
 	if ws, ok := windowMap[w.C()]; ok {
-		var event gi.MouseMovedEvent
+		var event oswin.MouseMovedEvent
 		event.From = lastCursorPosition
 		event.Where = cursorPosition
 		ws.events <- event
@@ -118,7 +118,7 @@ func cursorPositionCallback(w *glfw.Window, xpos float64, ypos float64) {
 }
 
 func framebufferSizeCallback(w *glfw.Window, width int, height int) {
-	event := gi.ResizeEvent{width, height}
+	event := oswin.ResizeEvent{width, height}
 	if ws, ok := windowMap[w.C()]; ok {
 		ws.buffer.RGBA = image.NewRGBA(image.Rect(0, 0, width, height))
 		ws.events <- event
@@ -137,7 +137,7 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 
 	case glfw.Press:
 		var letter string
-		var ke gi.KeyEvent
+		var ke oswin.KeyEvent
 
 		blankLetter := containsInt(blankLetterCodes, key)
 		if !blankLetter {
@@ -146,9 +146,9 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 
 		ke.Key = keyMapping[key]
 
-		ws.events <- gi.KeyDownEvent(ke)
+		ws.events <- oswin.KeyDownEvent(ke)
 
-		kte := gi.KeyTypedEvent{
+		kte := oswin.KeyTypedEvent{
 			KeyEvent: ke,
 			Chord:    constructChord(key, mods),
 			Glyph:    letter,
@@ -164,9 +164,9 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 			letter = string(key)
 		}
 
-		ke := gi.KeyEvent{keyMapping[key]}
+		ke := oswin.KeyEvent{keyMapping[key]}
 
-		kte := gi.KeyTypedEvent{
+		kte := oswin.KeyTypedEvent{
 			KeyEvent: ke,
 			Chord:    constructChord(key, mods),
 			Glyph:    letter,
@@ -175,7 +175,7 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 		keyChan <- keyType{ws, kte}
 
 	case glfw.Release:
-		var ke gi.KeyUpEvent
+		var ke oswin.KeyUpEvent
 		ke.Key = keyMapping[key]
 		ws.events <- ke
 	}
@@ -192,7 +192,7 @@ func characterCallback(w *glfw.Window, char rune) {
 
 type keyType struct {
 	window *OSWindow
-	ke     gi.KeyTypedEvent
+	ke     oswin.KeyTypedEvent
 }
 
 type characterType struct {

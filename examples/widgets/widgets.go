@@ -7,14 +7,15 @@ package main
 import (
 	"fmt"
 	"github.com/rcoreilly/goki/gi"
-	_ "github.com/rcoreilly/goki/gi/init"
+	"github.com/rcoreilly/goki/gi/oswin"
+	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )
 
 func main() {
 	go mainrun()
-	gi.RunBackendEventLoop() // this needs to run in main loop
+	oswin.RunBackendEventLoop() // this needs to run in main loop
 }
 
 func mainrun() {
@@ -62,15 +63,15 @@ func mainrun() {
 
 	mb1.Text = "Menu Button"
 	mb1.AddMenuText("Menu Item 1", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
 	})
 
 	mb1.AddMenuText("Menu Item 2", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
 	})
 
 	mb1.AddMenuText("Menu Item 3", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.KiName())
+		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
 	})
 
 	mb1.SetProp("align-vert", gi.AlignMiddle)
@@ -88,15 +89,15 @@ func mainrun() {
 	button2.SetProp("align-vert", gi.AlignMiddle)
 
 	edit1.TextFieldSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.KiName(), data)
+		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
 
 	button1.ButtonSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.KiName())
+		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 	})
 
 	button2.ButtonSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.KiName())
+		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 	})
 
 	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
@@ -123,11 +124,11 @@ func mainrun() {
 	slider2.SetValue(0.5)
 
 	slider1.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
 	slider2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
 	scrollbar1 := row3.AddNewChildNamed(gi.KiT_ScrollBar, "scrollbar1").(*gi.ScrollBar)
@@ -149,11 +150,11 @@ func mainrun() {
 	scrollbar2.SetValue(0.5)
 
 	scrollbar1.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
 	scrollbar2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.KiName(), data)
+		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
 	row4 := vlay.AddNewChildNamed(gi.KiT_Layout, "row4").(*gi.Layout)

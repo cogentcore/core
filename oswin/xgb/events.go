@@ -23,27 +23,27 @@ import (
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"os"
 )
 
-func buttonForDetail(detail xproto.Button) gi.MouseButton {
+func buttonForDetail(detail xproto.Button) oswin.MouseButton {
 	switch detail {
 	case 1:
-		return gi.LeftButton
+		return oswin.LeftButton
 	case 2:
-		return gi.MiddleButton
+		return oswin.MiddleButton
 	case 3:
-		return gi.RightButton
+		return oswin.RightButton
 	case 4:
-		return gi.WheelUpButton
+		return oswin.WheelUpButton
 	case 5:
-		return gi.WheelDownButton
+		return oswin.WheelDownButton
 	case 6:
-		return gi.WheelLeftButton
+		return oswin.WheelLeftButton
 	case 7:
-		return gi.WheelRightButton
+		return oswin.WheelRightButton
 	}
 	return 0
 }
@@ -52,7 +52,7 @@ func (w *OSWindow) handleEvents() {
 	var noX int32 = 1<<31 - 1
 	noX++
 	var lastX, lastY int32 = noX, 0
-	var button gi.MouseButton
+	var button oswin.MouseButton
 
 	downKeys := map[string]bool{}
 
@@ -68,7 +68,7 @@ func (w *OSWindow) handleEvents() {
 
 		case xproto.ButtonPressEvent:
 			button = button | buttonForDetail(e.Detail)
-			var bpe gi.MouseDownEvent
+			var bpe oswin.MouseDownEvent
 			bpe.Which = buttonForDetail(e.Detail)
 			bpe.Where.X = int(e.EventX)
 			bpe.Where.Y = int(e.EventY)
@@ -78,7 +78,7 @@ func (w *OSWindow) handleEvents() {
 
 		case xproto.ButtonReleaseEvent:
 			button = button & ^buttonForDetail(e.Detail)
-			var bue gi.MouseUpEvent
+			var bue oswin.MouseUpEvent
 			bue.Which = buttonForDetail(e.Detail)
 			bue.Where.X = int(e.EventX)
 			bue.Where.Y = int(e.EventY)
@@ -87,7 +87,7 @@ func (w *OSWindow) handleEvents() {
 			w.events <- bue
 
 		case xproto.LeaveNotifyEvent:
-			var wee gi.MouseExitedEvent
+			var wee oswin.MouseExitedEvent
 			wee.Where.X = int(e.EventX)
 			wee.Where.Y = int(e.EventY)
 			if lastX != noX {
@@ -101,7 +101,7 @@ func (w *OSWindow) handleEvents() {
 			lastY = int32(e.EventY)
 			w.events <- wee
 		case xproto.EnterNotifyEvent:
-			var wee gi.MouseEnteredEvent
+			var wee oswin.MouseEnteredEvent
 			wee.Where.X = int(e.EventX)
 			wee.Where.Y = int(e.EventY)
 			if lastX != noX {
@@ -116,7 +116,7 @@ func (w *OSWindow) handleEvents() {
 			w.events <- wee
 
 		case xproto.MotionNotifyEvent:
-			var mme gi.MouseMovedEvent
+			var mme oswin.MouseMovedEvent
 			mme.Where.X = int(e.EventX)
 			mme.Where.Y = int(e.EventY)
 			if lastX != noX {
@@ -131,27 +131,27 @@ func (w *OSWindow) handleEvents() {
 			if button == 0 {
 				w.events <- mme
 			} else {
-				var mde gi.MouseDraggedEvent
+				var mde oswin.MouseDraggedEvent
 				mde.MouseMovedEvent = mme
 				mde.Which = button
 				w.events <- mde
 			}
 
 		case xproto.KeyPressEvent:
-			var ke gi.KeyEvent
+			var ke oswin.KeyEvent
 			code := keybind.LookupString(w.xu, e.State, e.Detail)
 			ke.Key = keyForCode(code)
-			w.events <- gi.KeyDownEvent(ke)
+			w.events <- oswin.KeyDownEvent(ke)
 			downKeys[ke.Key] = true
-			kpe := gi.KeyTypedEvent{
+			kpe := oswin.KeyTypedEvent{
 				KeyEvent: ke,
 				Glyph:    letterForCode(code),
-				Chord:    gi.ConstructChord(downKeys),
+				Chord:    oswin.ConstructChord(downKeys),
 			}
 			w.events <- kpe
 
 		case xproto.KeyReleaseEvent:
-			var ke gi.KeyUpEvent
+			var ke oswin.KeyUpEvent
 			ke.Key = keyForCode(keybind.LookupString(w.xu, e.State, e.Detail))
 			delete(downKeys, ke.Key)
 			w.events <- ke
@@ -171,7 +171,7 @@ func (w *OSWindow) handleEvents() {
 			/* remove keys that are no longer pressed */
 			for key := range downKeys {
 				if _, ok := newDownKeys[key]; !ok {
-					var ke gi.KeyUpEvent
+					var ke oswin.KeyUpEvent
 					ke.Key = key
 					delete(downKeys, key)
 					w.events <- ke
@@ -180,7 +180,7 @@ func (w *OSWindow) handleEvents() {
 			/* add keys that are newly pressed */
 			for key := range newDownKeys {
 				if _, ok := downKeys[key]; !ok {
-					var ke gi.KeyDownEvent
+					var ke oswin.KeyDownEvent
 					ke.Key = key
 					downKeys[key] = true
 					w.events <- ke
@@ -188,7 +188,7 @@ func (w *OSWindow) handleEvents() {
 			}
 
 		case xproto.ConfigureNotifyEvent:
-			var re gi.ResizeEvent
+			var re oswin.ResizeEvent
 			re.Width = int(e.Width)
 			re.Height = int(e.Height)
 			if re.Width != w.width || re.Height != w.height {
@@ -204,7 +204,7 @@ func (w *OSWindow) handleEvents() {
 
 		case xproto.ClientMessageEvent:
 			if icccm.IsDeleteProtocol(w.xu, xevent.ClientMessageEvent{&e}) {
-				w.events <- gi.CloseEvent{}
+				w.events <- oswin.CloseEvent{}
 			}
 		case xproto.DestroyNotifyEvent:
 		case xproto.ReparentNotifyEvent:

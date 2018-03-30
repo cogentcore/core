@@ -18,7 +18,7 @@ package win
 
 import (
 	"github.com/AllenDang/w32"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"syscall"
 	"unsafe"
@@ -28,7 +28,7 @@ const WDEM_UI_THREAD = w32.WM_APP
 
 type EventData struct {
 	lastX, lastY int
-	button       gi.MouseButton
+	button       oswin.MouseButton
 	noX          int
 	trackMouse   bool
 }
@@ -39,30 +39,30 @@ func (this *EventData) InitEventData() {
 	this.lastX = this.noX
 }
 
-func buttonForDetail(button uint32) gi.MouseButton {
+func buttonForDetail(button uint32) oswin.MouseButton {
 	switch button {
 	case w32.WM_LBUTTONDOWN, w32.WM_LBUTTONUP:
-		return gi.LeftButton
+		return oswin.LeftButton
 	case w32.WM_RBUTTONDOWN, w32.WM_RBUTTONUP:
-		return gi.RightButton
+		return oswin.RightButton
 	case w32.WM_MBUTTONDOWN, w32.WM_MBUTTONUP:
-		return gi.MiddleButton
+		return oswin.MiddleButton
 	}
 	return 0
 }
 
-func buttonForWheel(msg uint32, delta int16) gi.MouseButton {
+func buttonForWheel(msg uint32, delta int16) oswin.MouseButton {
 	if msg == w32.WM_MOUSEWHEEL {
 		if delta > 0 {
-			return gi.WheelUpButton
+			return oswin.WheelUpButton
 		} else if delta < 0 {
-			return gi.WheelDownButton
+			return oswin.WheelDownButton
 		}
 	} else if msg == w32.WM_MOUSEHWHEEL {
 		if delta > 0 {
-			return gi.WheelRightButton
+			return oswin.WheelRightButton
 		} else if delta < 0 {
-			return gi.WheelLeftButton
+			return oswin.WheelLeftButton
 		}
 	}
 	return 0
@@ -92,7 +92,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 
 	case w32.WM_LBUTTONDOWN, w32.WM_RBUTTONDOWN, w32.WM_MBUTTONDOWN:
 		wnd.button = wnd.button | buttonForDetail(msg)
-		var bpe gi.MouseDownEvent
+		var bpe oswin.MouseDownEvent
 		bpe.Which = buttonForDetail(msg)
 		bpe.Where.X = int(lparam) & 0xFFFF
 		bpe.Where.Y = int(lparam>>16) & 0xFFFF
@@ -102,7 +102,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 
 	case w32.WM_LBUTTONUP, w32.WM_RBUTTONUP, w32.WM_MBUTTONUP:
 		wnd.button = wnd.button & ^buttonForDetail(msg)
-		var bpe gi.MouseUpEvent
+		var bpe oswin.MouseUpEvent
 		bpe.Which = buttonForDetail(msg)
 		bpe.Where.X = int(lparam) & 0xFFFF
 		bpe.Where.Y = int(lparam>>16) & 0xFFFF
@@ -111,7 +111,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		wnd.events <- bpe
 
 	case w32.WM_MOUSEWHEEL, w32.WM_MOUSEHWHEEL:
-		var me gi.MouseEvent
+		var me oswin.MouseEvent
 		screenX := int(lparam) & 0xFFFF
 		screenY := int(lparam>>16) & 0xFFFF
 		me.Where.X, me.Where.Y, _ = w32.ScreenToClient(wnd.hwnd, screenX, screenY)
@@ -119,11 +119,11 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		button := buttonForWheel(msg, delta)
 		wnd.lastX = me.Where.X
 		wnd.lastX = me.Where.Y
-		wnd.events <- gi.MouseDownEvent{me, button}
-		wnd.events <- gi.MouseUpEvent{me, button}
+		wnd.events <- oswin.MouseDownEvent{me, button}
+		wnd.events <- oswin.MouseUpEvent{me, button}
 
 	case w32.WM_MOUSEMOVE:
-		var mme gi.MouseMovedEvent
+		var mme oswin.MouseMovedEvent
 		mme.Where.X = int(lparam) & 0xFFFF
 		mme.Where.Y = int(lparam>>16) & 0xFFFF
 		if wnd.lastX != wnd.noX {
@@ -145,12 +145,12 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 			w32.TrackMouseEvent(&tme)
 			wnd.trackMouse = true
 			wnd.restoreCursor()
-			wnd.events <- gi.MouseEnteredEvent(mme)
+			wnd.events <- oswin.MouseEnteredEvent(mme)
 		} else {
 			if wnd.button == 0 {
 				wnd.events <- mme
 			} else {
-				var mde gi.MouseDraggedEvent
+				var mde oswin.MouseDraggedEvent
 				mde.MouseMovedEvent = mme
 				mde.Which = wnd.button
 				wnd.events <- mde
@@ -160,7 +160,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 	case w32.WM_MOUSELEAVE:
 		wnd.trackMouse = false
 
-		var wee gi.MouseExitedEvent
+		var wee oswin.MouseExitedEvent
 		// TODO: get real position
 		wee.Where.Y = wnd.lastX
 		wee.Where.X = wnd.lastY
@@ -171,10 +171,10 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		wnd.keyDown = keyFromVirtualKeyCode(wparam)
 		wnd.keysDown[wnd.keyDown] = true
 		wnd.checkKeyState()
-		wnd.events <- gi.KeyDownEvent{wnd.keyDown}
+		wnd.events <- oswin.KeyDownEvent{wnd.keyDown}
 		if translatable == 0 {
-			kpe := gi.KeyTypedEvent{
-				gi.KeyEvent{wnd.keyDown},
+			kpe := oswin.KeyTypedEvent{
+				oswin.KeyEvent{wnd.keyDown},
 				"",
 				wnd.constructChord(),
 			}
@@ -182,8 +182,8 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		}
 	case w32.WM_SYSCHAR, w32.WM_CHAR:
 		glyph := syscall.UTF16ToString([]uint16{uint16(wparam)})
-		kpe := gi.KeyTypedEvent{
-			gi.KeyEvent{wnd.keyDown},
+		kpe := oswin.KeyTypedEvent{
+			oswin.KeyEvent{wnd.keyDown},
 			glyph,
 			wnd.constructChord(),
 		}
@@ -192,7 +192,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		keyUp := keyFromVirtualKeyCode(wparam)
 		delete(wnd.keysDown, keyUp)
 		wnd.checkKeyState()
-		wnd.events <- gi.KeyUpEvent{
+		wnd.events <- oswin.KeyUpEvent{
 			keyUp,
 		}
 
@@ -200,7 +200,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		width := int(lparam) & 0xFFFF
 		height := int(lparam>>16) & 0xFFFF
 		wnd.buffer = NewDIB(image.Rect(0, 0, width, height))
-		wnd.events <- gi.ResizeEvent{width, height}
+		wnd.events <- oswin.ResizeEvent{width, height}
 		rc = w32.DefWindowProc(hwnd, msg, wparam, lparam)
 
 	case w32.WM_PAINT:
@@ -212,7 +212,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		f()
 
 	case w32.WM_CLOSE:
-		wnd.events <- gi.CloseEvent{}
+		wnd.events <- oswin.CloseEvent{}
 
 	case w32.WM_DESTROY:
 		w32.PostQuitMessage(0)

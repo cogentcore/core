@@ -20,48 +20,48 @@ package cocoa
 import "C"
 
 import (
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"unsafe"
 )
 
-var cursors map[gi.Cursor]unsafe.Pointer
+var cursors map[oswin.Cursor]unsafe.Pointer
 
 func init() {
 	C.initMacCursor()
 
-	cursors = map[gi.Cursor]unsafe.Pointer{
-		gi.NoneCursor:     nil,
-		gi.NormalCursor:   C.cursors.arrow,
-		gi.ResizeNCursor:  C.cursors.resizeUp,
-		gi.ResizeECursor:  C.cursors.resizeRight,
-		gi.ResizeSCursor:  C.cursors.resizeDown,
-		gi.ResizeWCursor:  C.cursors.resizeLeft,
-		gi.ResizeEWCursor: C.cursors.resizeLeftRight,
-		gi.ResizeNSCursor: C.cursors.resizeUpDown,
+	cursors = map[oswin.Cursor]unsafe.Pointer{
+		oswin.NoneCursor:     nil,
+		oswin.NormalCursor:   C.cursors.arrow,
+		oswin.ResizeNCursor:  C.cursors.resizeUp,
+		oswin.ResizeECursor:  C.cursors.resizeRight,
+		oswin.ResizeSCursor:  C.cursors.resizeDown,
+		oswin.ResizeWCursor:  C.cursors.resizeLeft,
+		oswin.ResizeEWCursor: C.cursors.resizeLeftRight,
+		oswin.ResizeNSCursor: C.cursors.resizeUpDown,
 
 		// might be able to improve the diagonal arrow cursors:
 		// http://stackoverflow.com/questions/10733228/native-osx-lion-resize-cursor-for-custom-nswindow-or-nsview
-		gi.ResizeNECursor: C.cursors.pointingHand,
-		gi.ResizeSECursor: C.cursors.pointingHand,
-		gi.ResizeSWCursor: C.cursors.pointingHand,
-		gi.ResizeNWCursor: C.cursors.pointingHand,
+		oswin.ResizeNECursor: C.cursors.pointingHand,
+		oswin.ResizeSECursor: C.cursors.pointingHand,
+		oswin.ResizeSWCursor: C.cursors.pointingHand,
+		oswin.ResizeNWCursor: C.cursors.pointingHand,
 
-		gi.CrosshairCursor:  C.cursors.crosshair,
-		gi.IBeamCursor:      C.cursors.IBeam,
-		gi.GrabHoverCursor:  C.cursors.openHand,
-		gi.GrabActiveCursor: C.cursors.closedHand,
-		gi.NotAllowedCursor: C.cursors.operationNotAllowed,
+		oswin.CrosshairCursor:  C.cursors.crosshair,
+		oswin.IBeamCursor:      C.cursors.IBeam,
+		oswin.GrabHoverCursor:  C.cursors.openHand,
+		oswin.GrabActiveCursor: C.cursors.closedHand,
+		oswin.NotAllowedCursor: C.cursors.operationNotAllowed,
 	}
 }
 
-func setCursor(c gi.Cursor) {
+func setCursor(c oswin.Cursor) {
 	nscursor := cursors[c]
 	if nscursor != nil {
 		C.setCursor(nscursor)
 	}
 }
 
-func (w *OSWindow) SetCursor(cursor gi.Cursor) {
+func (w *OSWindow) SetCursor(cursor oswin.Cursor) {
 	if w.cursor == cursor {
 		return
 	}

@@ -20,22 +20,22 @@ import (
 	//	"fmt"
 	"github.com/go-gl/gl"
 	glfw "github.com/grd/glfw3"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"os"
 )
 
 func init() {
-	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
+	oswin.BackendNewWindow = func(width, height int) (w oswin.OSWindow, err error) {
 		var window *OSWindow
 		window, err = NewOSWindow(width, height)
 		w = window
 		return
 	}
 
-	gi.BackendRun = glfw.Main
+	oswin.BackendRun = glfw.Main
 
-	gi.BackendStop = func() {
+	oswin.BackendStop = func() {
 		glfw.Terminate()
 		os.Exit(0)
 	}
@@ -96,7 +96,7 @@ func (w *OSWindow) SetTitle(title string) {
 	w.win.SetTitle(title)
 }
 
-func (w *OSWindow) SetCursor(cursor gi.Cursor) {
+func (w *OSWindow) SetCursor(cursor oswin.Cursor) {
 	// TODO
 }
 
@@ -123,7 +123,7 @@ func (w *OSWindow) Show() {
 	w.win.Show()
 }
 
-func (w *OSWindow) Screen() gi.WinImage {
+func (w *OSWindow) Screen() oswin.WinImage {
 	return w.buffer
 }
 
@@ -151,7 +151,7 @@ func (w *OSWindow) checkShouldClose() {
 	go func() {
 		for {
 			if w.win.ShouldClose() {
-				var cev gi.CloseEvent
+				var cev oswin.CloseEvent
 				w.events <- cev
 				break
 			}

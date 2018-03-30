@@ -24,7 +24,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"image/draw"
 	"runtime"
@@ -34,13 +34,13 @@ import (
 var tasks chan func()
 
 func init() {
-	gi.FontLibrary.AddFontPaths("/Library/Fonts")
-	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
+	// oswin.FontLibrary.AddFontPaths("/Library/Fonts")
+	oswin.BackendNewWindow = func(width, height int) (w oswin.OSWindow, err error) {
 		w, err = NewWindow(width, height)
 		return
 	}
-	gi.BackendRun = Run
-	gi.BackendStop = Stop
+	oswin.BackendRun = Run
+	oswin.BackendStop = Stop
 	runtime.LockOSThread()
 	C.initMacDraw()
 	tasks = make(chan func(), 16)
@@ -59,8 +59,8 @@ type OSWindow struct {
 	im WinImage
 	ec chan interface{}
 
-	cursor   gi.Cursor // current cursor
-	hasMouse bool      // is mouse cursor over window?
+	cursor   oswin.Cursor // current cursor
+	hasMouse bool         // is mouse cursor over window?
 }
 
 func NewWindow(width, height int) (w *OSWindow, err error) {
@@ -112,7 +112,7 @@ func (w *OSWindow) Show() {
 	})
 }
 
-func (w *OSWindow) resizeBuffer(width, height int) (im gi.WinImage) {
+func (w *OSWindow) resizeBuffer(width, height int) (im oswin.WinImage) {
 	onMainThread(func() {
 		ci := C.getWindowScreen(w.cw)
 
@@ -130,7 +130,7 @@ func (w *OSWindow) resizeBuffer(width, height int) (im gi.WinImage) {
 	return
 }
 
-func (w *OSWindow) Screen() (im gi.WinImage) {
+func (w *OSWindow) Screen() (im oswin.WinImage) {
 	width, height := w.Size()
 	var imw, imh int
 	if w.im.RGBA == nil {

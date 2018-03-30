@@ -26,23 +26,23 @@ import (
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/xgraphics"
 	"github.com/BurntSushi/xgbutil/xwindow"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"os"
 	"sync"
 )
 
 func init() {
-	gi.FontLibrary.AddFontPaths("/usr/share/fonts/truetype")
-	gi.BackendNewWindow = func(width, height int) (w gi.OSWindow, err error) {
+	oswin.FontLibrary.AddFontPaths("/usr/share/fonts/truetype")
+	oswin.BackendNewWindow = func(width, height int) (w oswin.OSWindow, err error) {
 		w, err = NewOSWindow(width, height)
 		return
 	}
 	ch := make(chan struct{}, 1)
-	gi.BackendRun = func() {
+	oswin.BackendRun = func() {
 		<-ch
 	}
-	gi.BackendStop = func() {
+	oswin.BackendStop = func() {
 		ch <- struct{}{}
 	}
 }
@@ -66,7 +66,7 @@ type OSWindow struct {
 	width, height int
 	lockedSize    bool
 	closed        bool
-	cursor        gi.Cursor // most recently set cursor
+	cursor        oswin.Cursor // most recently set cursor
 
 	events chan interface{}
 }
@@ -176,7 +176,7 @@ func (w *OSWindow) Show() {
 	w.win.Map()
 }
 
-func (w *OSWindow) Screen() (im gi.WinImage) {
+func (w *OSWindow) Screen() (im oswin.aWinImage) {
 	if w.closed {
 		return
 	}

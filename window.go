@@ -38,6 +38,7 @@ var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
 // create a new window with given name and sizing
 func NewWindow(name string, width, height int) *Window {
+	FontLibrary.AddFontPaths("/Library/Fonts")
 	win := &Window{}
 	win.SetThisName(win, name)
 	var err error

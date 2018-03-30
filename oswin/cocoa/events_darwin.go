@@ -22,20 +22,20 @@ import "C"
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/gi"
+	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"strings"
 	"time"
 )
 
-func getButton(b int) (which gi.MouseButton) {
+func getButton(b int) (which oswin.MouseButton) {
 	switch b {
 	case 0:
-		which = gi.LeftButton
+		which = oswin.LeftButton
 	case 1:
-		which = gi.RightButton
+		which = oswin.RightButton
 	case 2:
-		which = gi.MiddleButton
+		which = oswin.MiddleButton
 	}
 	return
 }
@@ -65,7 +65,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 			case C.GMDNoop:
 				continue
 			case C.GMDMouseDown:
-				var mde gi.MouseDownEvent
+				var mde oswin.MouseDownEvent
 				mde.Where.X = int(e.data[0])
 				mde.Where.Y = int(e.data[1])
 				mde.Which = getButton(int(e.data[2]))
@@ -74,7 +74,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				ec <- mde
 				suppressDrag = true
 			case C.GMDMouseUp:
-				var mue gi.MouseUpEvent
+				var mue oswin.MouseUpEvent
 				mue.Where.X = int(e.data[0])
 				mue.Where.Y = int(e.data[1])
 				mue.Which = getButton(int(e.data[2]))
@@ -89,7 +89,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					suppressDrag = false
 					continue
 				}
-				var mde gi.MouseDraggedEvent
+				var mde oswin.MouseDraggedEvent
 				mde.Where.X = int(e.data[0])
 				mde.Where.Y = int(e.data[1])
 				mde.Which = getButton(int(e.data[2]))
@@ -102,7 +102,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mde.Time = time.Now()
 				ec <- mde
 			case C.GMDMouseMoved:
-				var mme gi.MouseMovedEvent
+				var mme oswin.MouseMovedEvent
 				mme.Where.X = int(e.data[0])
 				mme.Where.Y = int(e.data[1])
 				if lastXY != noXY {
@@ -116,7 +116,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 			case C.GMDMouseEntered:
 				w.hasMouse = true
 				setCursor(w.cursor)
-				var me gi.MouseEnteredEvent
+				var me oswin.MouseEnteredEvent
 				me.Where.X = int(e.data[0])
 				me.Where.Y = int(e.data[1])
 				if lastXY != noXY {
@@ -129,8 +129,8 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				ec <- me
 			case C.GMDMouseExited:
 				w.hasMouse = false
-				setCursor(gi.NormalCursor)
-				var me gi.MouseExitedEvent
+				setCursor(oswin.NormalCursor)
+				var me oswin.MouseExitedEvent
 				me.Where.X = int(e.data[0])
 				me.Where.Y = int(e.data[1])
 				if lastXY != noXY {
@@ -142,35 +142,35 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				me.Time = time.Now()
 				ec <- me
 			case C.GMDMouseWheel:
-				var me gi.MouseEvent
+				var me oswin.MouseEvent
 				me.Where.X = int(e.data[0])
 				me.Where.Y = int(e.data[1])
 				me.Time = time.Now()
 				// TODO e.data[2] contains horizontal scroll info; what do?
 				if e.data[3] != 0 {
-					button := gi.WheelUpButton
+					button := oswin.WheelUpButton
 					if e.data[3] == -1 {
-						button = gi.WheelDownButton
+						button = oswin.WheelDownButton
 					}
-					ec <- gi.MouseDownEvent{me, button}
-					ec <- gi.MouseUpEvent{me, button}
+					ec <- oswin.MouseDownEvent{me, button}
+					ec <- oswin.MouseUpEvent{me, button}
 				}
 			case C.GMDMagnify:
-				var mge gi.MagnifyEvent
+				var mge oswin.MagnifyEvent
 				mge.Where.X = int(e.data[0])
 				mge.Where.Y = int(e.data[1])
 				mge.Magnification = 1 + float64(e.data[2])/65536
 				mge.Time = time.Now()
 				ec <- mge
 			case C.GMDRotate:
-				var rte gi.RotateEvent
+				var rte oswin.RotateEvent
 				rte.Where.X = int(e.data[0])
 				rte.Where.Y = int(e.data[1])
 				rte.Rotation = float64(e.data[2]) / 65536
 				rte.Time = time.Now()
 				ec <- rte
 			case C.GMDScroll:
-				var se gi.ScrollEvent
+				var se oswin.ScrollEvent
 				se.Where.X = int(e.data[0])
 				se.Where.Y = int(e.data[1])
 				se.Delta.X = int(e.data[2])
@@ -183,7 +183,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				setCursor(w.cursor)
 			case C.GMDKeyDown:
 				var letter string
-				var ke gi.KeyEvent
+				var ke oswin.KeyEvent
 				ke.Time = time.Now()
 				keycode := int(e.data[1])
 
@@ -195,19 +195,19 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				ke.Key = keyMapping[keycode]
 
 				if !downKeys[ke.Key] {
-					ec <- gi.KeyDownEvent(ke)
+					ec <- oswin.KeyDownEvent(ke)
 				}
 
 				downKeys[ke.Key] = true
 
-				ec <- gi.KeyTypedEvent{
+				ec <- oswin.KeyTypedEvent{
 					KeyEvent: ke,
-					Chord:    gi.ConstructChord(downKeys),
+					Chord:    oswin.ConstructChord(downKeys),
 					Glyph:    letter,
 				}
 
 			case C.GMDKeyUp:
-				var ke gi.KeyUpEvent
+				var ke oswin.KeyUpEvent
 				ke.Key = keyMapping[int(e.data[1])]
 				ke.Time = time.Now()
 				delete(downKeys, ke.Key)
@@ -222,13 +222,13 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				}
 				ec <- ke
 			case C.GMDResize:
-				var re gi.ResizeEvent
+				var re oswin.ResizeEvent
 				re.Width = int(e.data[0])
 				re.Height = int(e.data[1])
 				re.Time = time.Now()
 				ec <- re
 			case C.GMDClose:
-				var ce gi.CloseEvent
+				var ce oswin.CloseEvent
 				ce.Time = time.Now()
 				ec <- ce
 				break eventloop
