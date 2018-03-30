@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -70,7 +71,8 @@ const (
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
 	WidgetBase
-	Text        string               `xml:"text" desc:"label for the button"`
+	Text        string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
+	Icon        *Icon                `xml:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
@@ -161,7 +163,9 @@ func (g *ButtonBase) ButtonExitHover() {
 
 ///////////////////////////////////////////////////////////
 
-// Button is a standard command button -- PushButton in Qt Widgets, and Button in Qt Quick
+// Button is a standard command button -- PushButton in Qt Widgets, and Button
+// in Qt Quick -- by default it puts the icon to the left and the text to the
+// right
 type Button struct {
 	ButtonBase
 }
@@ -182,6 +186,7 @@ func (g *Button) AsLayout2D() *Layout {
 
 func (g *Button) Init2D() {
 	g.Init2DBase()
+	g.Init2DParts()
 	g.ReceiveEventType(MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
@@ -225,20 +230,20 @@ func (g *Button) Init2D() {
 
 var ButtonProps = []map[string]interface{}{
 	{
-		"border-width":        "1px",
-		"border-radius":       "4px",
+		"border-width":        units.NewValue(1, units.Px),
+		"border-radius":       units.NewValue(4, units.Px),
 		"border-color":        "black",
 		"border-style":        "solid",
-		"padding":             "8px",
-		"margin":              "4px",
-		"box-shadow.h-offset": "4px",
-		"box-shadow.v-offset": "4px",
-		"box-shadow.blur":     "4px",
+		"padding":             units.NewValue(4, units.Px),
+		"margin":              units.NewValue(4, units.Px),
+		"box-shadow.h-offset": units.NewValue(4, units.Px),
+		"box-shadow.v-offset": units.NewValue(4, units.Px),
+		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 		// "font-family":         "Arial", // this is crashing
-		"font-size":        "24pt",
-		"text-align":       "center",
-		"vertical-align":   "top",
+		"font-size":        units.NewValue(24, units.Pt),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignTop,
 		"color":            "black",
 		"background-color": "#EEF",
 	}, { // disabled
@@ -261,7 +266,41 @@ var ButtonProps = []map[string]interface{}{
 	},
 }
 
+func (g *Button) ConfigParts() {
+	// todo: add some styles for button layout
+	g.Parts.Lay = LayoutRow
+	config := kit.TypeAndNameList{}
+	icIdx := -1
+	txIdx := -1
+	if g.Icon != nil {
+		config.Add(KiT_Icon, "Icon")
+		icIdx = 0
+		if g.Text != "" {
+			config.Add(KiT_Space, "Space")
+		}
+	}
+	if g.Text != "" {
+		txIdx = len(config)
+		config.Add(KiT_Label, "Text")
+	}
+	g.Parts.ConfigChildren(config)
+	if icIdx >= 0 {
+		kc, _ := g.Parts.KiChild(icIdx)
+		ici, _ := KiToNode2D(kc)
+		*(ici.(*Icon)) = *g.Icon
+	}
+	if txIdx >= 0 {
+		kc, _ := g.Parts.KiChild(txIdx)
+		lbi, lbl := KiToNode2D(kc)
+		lbl.SetProp("margin", units.NewValue(0, units.Px))
+		lbl.SetProp("padding", units.NewValue(0, units.Px))
+		lbl.SetProp("background-color", "none")
+		(lbi.(*Label)).Text = g.Text
+	}
+}
+
 func (g *Button) Style2D() {
+	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
 	g.Style2DWidget()
@@ -273,15 +312,18 @@ func (g *Button) Style2D() {
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
+	// and #icon, #text for children in the controls..
+	g.Style2DParts()
 }
 
 func (g *Button) Size2D() {
 	g.InitLayout2D()
-	g.Size2DFromText(g.Text)
+	g.Size2DParts(true) // get our size from parts
 }
 
 func (g *Button) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)      // todo: do we get anything from here?
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -319,7 +361,7 @@ func (g *Button) Render2D() {
 func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
-	g.Render2DText(g.Text)
+	g.Render2DParts()
 	// fmt.Printf("button %v text-style: %v\n", g.Name, st.Text)
 }
 

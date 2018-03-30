@@ -18,6 +18,8 @@ type Color struct {
 	Rgba color.RGBA
 }
 
+var NilColor Color
+
 func (c *Color) RGBA() (r, g, b, a uint32) {
 	return c.Rgba.RGBA()
 }

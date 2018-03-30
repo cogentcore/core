@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -471,20 +472,20 @@ func (g *MenuButton) Init2D() {
 
 var MenuButtonProps = []map[string]interface{}{
 	{
-		"border-width":        "1px",
-		"border-radius":       "4px",
+		"border-width":        units.NewValue(1, units.Px),
+		"border-radius":       units.NewValue(4, units.Px),
 		"border-color":        "black",
 		"border-style":        "solid",
-		"padding":             "8px",
-		"margin":              "4px",
-		"box-shadow.h-offset": "4px",
-		"box-shadow.v-offset": "4px",
-		"box-shadow.blur":     "4px",
+		"padding":             units.NewValue(4, units.Px),
+		"margin":              units.NewValue(4, units.Px),
+		"box-shadow.h-offset": units.NewValue(4, units.Px),
+		"box-shadow.v-offset": units.NewValue(4, units.Px),
+		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 		// "font-family":         "Arial", // this is crashing
-		"font-size":        "24pt",
-		"text-align":       "center",
-		"vertical-align":   "top",
+		"font-size":        units.NewValue(24, units.Pt),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignTop,
 		"color":            "black",
 		"background-color": "#EEF",
 	}, { // disabled

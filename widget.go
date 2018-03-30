@@ -6,8 +6,9 @@ package gi
 
 import (
 	// "fmt"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "image"
+	"image"
 	"math"
 	// "reflect"
 )
@@ -15,7 +16,7 @@ import (
 // Widget base type -- manages control elements and provides standard box model rendering
 type WidgetBase struct {
 	Node2DBase
-	Controls Layout `desc:"a separate tree of sub-widgets that implement discrete subcomponents of a widget -- positions are always relative to the parent widget"`
+	Parts Layout `desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, nil)
@@ -90,6 +91,12 @@ func (g *WidgetBase) Size2DFromText(txt string) {
 	g.LayData.AllocSize = Vec2D{w, h}
 }
 
+// add space to existing AllocSize
+func (g *WidgetBase) Size2DAddSpace() {
+	spc := g.Style.BoxSpace()
+	g.LayData.AllocSize.SetAddVal(2.0 * spc)
+}
+
 // render a text string in standard box model (e.g., label for a button, etc)
 func (g *WidgetBase) Render2DText(txt string) {
 	pc := &g.Paint
@@ -109,4 +116,40 @@ func (g *WidgetBase) Render2DText(txt string) {
 	}
 
 	pc.DrawString(rs, txt, pos.X, pos.Y, sz.X)
+}
+
+///////////////////////////////////////////////////////////////////
+//  Standard methods to call on the Parts
+
+func (g *WidgetBase) Init2DParts() {
+	if g.Parts.This == nil {
+		g.Parts.SetThisName(&g.Parts, "Parts")
+		g.Parts.SetParent(g.This)
+		g.Parts.Init2DTree()
+	}
+	bitflag.Set(&g.Parts.NodeFlags, int(IsStructField)) // key for e.g., not adding parent pos
+}
+
+func (g *WidgetBase) Style2DParts() {
+	g.Parts.Style2DTree()
+}
+
+func (g *WidgetBase) Size2DParts(getSize bool) {
+	g.Parts.Size2DTree()
+	if getSize {
+		g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
+		g.Size2DAddSpace()
+	}
+}
+
+func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
+	g.Parts.LayData = g.LayData // mi data es su data..
+	spc := g.Style.BoxSpace()
+	g.Parts.Layout2DTree(parBBox)
+
+	g.Parts.LayData.AllocPos.SetAddVal(spc)
+}
+
+func (g *WidgetBase) Render2DParts() {
+	g.Parts.Render2DTree()
 }

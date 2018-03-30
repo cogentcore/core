@@ -291,7 +291,7 @@ func (a Vec2D) Interpolate(b Vec2D, t float64) Vec2D {
 }
 
 func (a Vec2D) String() string {
-	return fmt.Sprintf("%v, %v", a.X, a.Y)
+	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

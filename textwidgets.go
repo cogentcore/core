@@ -44,10 +44,10 @@ func (g *Label) Init2D() {
 }
 
 var LabelProps = map[string]interface{}{
-	"padding":        "2px",
-	"margin":         "2px",
-	"font-size":      "24pt",
-	"vertical-align": "top",
+	"padding":        units.NewValue(2, units.Px),
+	"margin":         units.NewValue(2, units.Px),
+	"font-size":      units.NewValue(24, units.Pt),
+	"vertical-align": AlignTop,
 }
 
 func (g *Label) Style2D() {

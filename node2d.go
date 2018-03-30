@@ -199,7 +199,9 @@ func (g *Node2DBase) SetWinBBox() {
 func (g *Node2DBase) AddParentPos() Vec2D {
 	_, pg := KiToNode2D(g.Parent)
 	if pg != nil {
-		g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
+		if !g.IsStructField() {
+			g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
+		}
 		return pg.LayData.AllocSize
 	}
 	return Vec2DZero
@@ -210,7 +212,8 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle) Vec2D {
 	psize := g.AddParentPos()
 	gii := g.This.(Node2D)
-	g.VpBBox = parBBox.Intersect(gii.BBox2D())
+	bb := gii.BBox2D()
+	g.VpBBox = parBBox.Intersect(bb)
 	g.SetWinBBox()
 	return psize
 }

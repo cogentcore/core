@@ -30,6 +30,8 @@ const (
 	MouseHasEntered
 	// this node is currently dragging -- win.Dragging set to this node
 	NodeDragging
+	// node is a field on a struct instead of a child in the main tree (e.g., Widget.Parts) -- affects e.g., adding parent positions, etc
+	IsStructField
 	// can extend node flags from here
 	NodeFlagsN
 )
@@ -102,6 +104,11 @@ func (g *NodeBase) GrabFocus() {
 	if win != nil {
 		win.SetFocusItem(g.This)
 	}
+}
+
+// is this node a field on a structure instead of child in tree?
+func (g *NodeBase) IsStructField() bool {
+	return bitflag.Has(g.NodeFlags, int(IsStructField))
 }
 
 // translate a point in global pixel coords into relative position within node
