@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusMouseHasEnteredNodeDraggingButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuNodeFlagExtendSelect"
+const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusMouseHasEnteredNodeDraggingIsStructFieldButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuNodeFlagExtendSelect"
 
-var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 43, 55, 73, 92, 109, 123, 143}
+var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 43, 55, 68, 86, 105, 122, 136, 156}
 
 func (i NodeFlags) String() string {
 	if i < 0 || i >= NodeFlags(len(_NodeFlags_index)-1) {
