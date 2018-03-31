@@ -130,6 +130,11 @@ func (g *WidgetBase) Init2DParts() {
 	bitflag.Set(&g.Parts.NodeFlags, int(IsStructField)) // key for e.g., not adding parent pos
 }
 
+func (g *WidgetBase) Init2DWidget() {
+	g.Init2DBase()
+	g.Init2DParts()
+}
+
 func (g *WidgetBase) Style2DParts() {
 	g.Parts.Style2DTree()
 }
@@ -142,12 +147,30 @@ func (g *WidgetBase) Size2DParts(getSize bool) {
 	}
 }
 
+func (g *WidgetBase) Size2DWidget() {
+	g.InitLayout2D()
+	g.Size2DParts(true) // get our size from parts
+}
+
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
-	g.Parts.LayData = g.LayData // mi data es su data..
 	spc := g.Style.BoxSpace()
+	g.Parts.LayData = g.LayData
+	g.Parts.LayData.AllocPos.SetAddVal(spc)
 	g.Parts.Layout2DTree(parBBox)
 
-	g.Parts.LayData.AllocPos.SetAddVal(spc)
+}
+
+func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
+}
+
+func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) Vec2D {
+	psize := g.ComputeBBox2DBase(parBBox)
+	spc := g.Style.BoxSpace()
+	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
+	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
+	return psize
 }
 
 func (g *WidgetBase) Render2DParts() {

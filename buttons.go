@@ -186,8 +186,7 @@ func (g *Button) AsLayout2D() *Layout {
 }
 
 func (g *Button) Init2D() {
-	g.Init2DBase()
-	g.Init2DParts()
+	g.Init2DWidget()
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
@@ -318,13 +317,11 @@ func (g *Button) Style2D() {
 }
 
 func (g *Button) Size2D() {
-	g.InitLayout2D()
-	g.Size2DParts(true) // get our size from parts
+	g.Size2DWidget()
 }
 
 func (g *Button) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)      // todo: do we get anything from here?
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -336,7 +333,7 @@ func (g *Button) BBox2D() image.Rectangle {
 }
 
 func (g *Button) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+	return g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Button) ChildrenBBox2D() image.Rectangle {
