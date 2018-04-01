@@ -953,11 +953,13 @@ func (n *Node) Disconnect() {
 		case fieldVal.Kind() == reflect.Ptr:
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 		case fieldVal.Type() == KiT_Signal:
-			fs := fieldVal.Interface().(*Signal)
-			fs.DisconnectAll()
+			if fs, ok := fieldVal.Addr().Interface().(*Signal); ok {
+				fs.DisconnectAll()
+			}
 		case fieldVal.Type() == KiT_Ptr:
-			fs := fieldVal.Interface().(*Ptr)
-			fs.Reset()
+			if pt, ok := fieldVal.Addr().Interface().(*Ptr); ok {
+				pt.Reset()
+			}
 		}
 	})
 }
@@ -1050,8 +1052,8 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 		} else {
 			switch {
 			case sf.Type().Implements(kiType):
-				sfk := sf.Interface().(Ki)
-				tfk := tf.Interface().(Ki)
+				sfk := sf.Addr().Interface().(Ki)
+				tfk := tf.Addr().Interface().(Ki)
 				tfk.CopyFrom(sfk)
 			case f.Type == KiT_Signal: // todo: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):

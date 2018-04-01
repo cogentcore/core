@@ -57,12 +57,12 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		vf := v.Field(i)
-		vfi := vf.Interface()
+		vfi := vf.Interface() // todo: check for interfaceablity etc
 		if vfi == nil || vfi == stru {
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			FlatFieldsValueFun(vfi, fun)
+			FlatFieldsValueFun(vf.Addr().Interface(), fun) // key to take addr here so next level is addressable
 		} else {
 			fun(vfi, typ, f, vf)
 		}
@@ -97,7 +97,7 @@ func EmbededStruct(stru interface{}, embed reflect.Type) interface{} {
 			if f.Type == embed {
 				return vf.Interface()
 			}
-			rv := EmbededStruct(vf.Interface(), embed)
+			rv := EmbededStruct(vf.Addr().Interface(), embed)
 			if rv != nil {
 				return rv
 			}
