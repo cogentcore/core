@@ -42,7 +42,7 @@ func TestNodeAddChild(t *testing.T) {
 	if child.Parent() == nil {
 		t.Errorf("child parent is nil")
 	}
-	if child.Path() != ".par1.child1" {
+	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
 }
@@ -59,7 +59,7 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
-	if child.Path() != ".par1.child1" {
+	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
 }
@@ -78,7 +78,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
-	if child.Path() != ".par1.child1" {
+	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
 	if reflect.TypeOf(child).Elem() != parent.ChildType.T {
@@ -98,13 +98,13 @@ func TestNodeUniqueNames(t *testing.T) {
 	if len(parent.Kids) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.Kids))
 	}
-	if pth := child.PathUnique(); pth != ".par1.child1" {
+	if pth := child.PathUnique(); pth != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", pth)
 	}
-	if pth := child2.PathUnique(); pth != ".par1.child1_1" {
+	if pth := child2.PathUnique(); pth != "/par1/child1_1" {
 		t.Errorf("child2 path != correct, was %v", pth)
 	}
-	if pth := child3.PathUnique(); pth != ".par1.child1_2" {
+	if pth := child3.PathUnique(); pth != "/par1/child1_2" {
 		t.Errorf("child3 path != correct, was %v", pth)
 	}
 

@@ -82,11 +82,9 @@ func (n Node) String() string {
 func (n *Node) Init(this Ki) {
 	n.This = this
 	n.FunFields(0, n.This, func(fk Ki, level int, d interface{}) bool {
-		if fk != n.This { // todo: this shouldn't be able to happen in the first place..
-			bitflag.Set(fk.Flags(), int(IsField))
-			fk.InitName(fk, fk.Name())
-			fk.SetParent(d.(Ki))
-		}
+		bitflag.Set(fk.Flags(), int(IsField))
+		fk.InitName(fk, fk.Name())
+		fk.SetParent(d.(Ki))
 		return true
 	})
 }
@@ -711,7 +709,7 @@ func (n *Node) Destroy() {
 func (n *Node) FunFields(level int, data interface{}, fun Fun) {
 	kiType := KiType()
 	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if field.Type.Implements(kiType) && fieldVal.Interface() != nil {
+		if field.Type.Implements(kiType) && field.Name != "Par" && field.Name != "This" {
 			fk := fieldVal.Interface().(Ki)
 			fun(fk, level, data)
 		}
