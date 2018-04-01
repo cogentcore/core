@@ -33,9 +33,9 @@ import (
 	"reflect"
 )
 
-// TypeRegistry is a map from type name to reflect.Type -- need to explicitly
-// register each new type by calling AddType in the process of creating a new
-// global variable, as in:
+// TypeRegistry is a map from type name (package path + "." + type name) to
+// reflect.Type -- need to explicitly register each new type by calling
+// AddType in the process of creating a new global variable, as in:
 //
 // var KiT_TypeName = ki.Types.AddType(&TypeName{}, [props|nil])
 //
@@ -56,6 +56,12 @@ type TypeRegistry struct {
 // Types is master registry of types that embed Ki Nodes
 var Types TypeRegistry
 
+// the full package-qualified type name -- this is what is used for encoding
+// type names in the registry
+func FullTypeName(typ reflect.Type) string {
+	return typ.PkgPath() + "." + typ.Name()
+}
+
 // AddType adds a given type to the registry -- requires an empty object to grab type info from -- must be passed as a pointer to ensure that it is an addressable, settable type -- also optional properties that can be associated with the type and accessible e.g. for view-specific properties etc
 func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) reflect.Type {
 	if tr.Types == nil {
@@ -64,7 +70,7 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	}
 
 	typ := reflect.TypeOf(obj).Elem()
-	tn := typ.Name()
+	tn := FullTypeName(typ)
 	tr.Types[tn] = typ
 	// fmt.Printf("added type: %v\n", tn)
 	if props != nil {
@@ -74,7 +80,8 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	return typ
 }
 
-// FindType finds a type based on its name -- returns nil if not found
+// FindType finds a type based on its name (package path + "." + type name) --
+// returns nil if not found
 func (tr *TypeRegistry) FindType(name string) reflect.Type {
 	return tr.Types[name]
 }

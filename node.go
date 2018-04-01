@@ -8,10 +8,14 @@
 package ki
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
+	"github.com/jinzhu/copier"
 	"github.com/json-iterator/go"
 	"github.com/rcoreilly/goki/ki/atomctr"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 	//	"errors"
 	"fmt"
@@ -37,16 +41,17 @@ The Node implements the Ki interface and provides the core functionality for the
 The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info -- add these to all your derived struct's fields.  See relevant docs for other such tags controlling a wide range of GUI and other functionality -- Ki makes extensive use of such tags.
 */
 type Node struct {
-	Nm        string                 `desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm  string                 `desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Props     map[string]interface{} `xml:"-" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par       Ki                     `json:"-" xml:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	Nm        string                 `copy:"-" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm  string                 `copy:"-" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag      int64                  `copy:"-" json:"-" xml:"-" desc:"bit flags for internal node state"`
+	Props     map[string]interface{} `copy:"-" xml:"-" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par       Ki                     `copy:"-" json:"-" xml:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType kit.Type               `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Kids      Slice                  `desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use KiNode methods to Add / Delete to ensure proper usage"`
-	NodeSig   Signal                 `json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Updating  atomctr.Ctr            `json:"-" xml:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	Deleted   []Ki                   `json:"-" xml:"-" desc:"keeps track of deleted nodes until destroyed"`
-	This      Ki                     `json:"-" xml:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	Kids      Slice                  `copy:"-" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	NodeSig   Signal                 `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Updating  atomctr.Ctr            `copy:"-" json:"-" xml:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
+	Deleted   []Ki                   `copy:"-" json:"-" xml:"-" desc:"keeps track of deleted nodes until destroyed"`
+	This      Ki                     `copy:"-" json:"-" xml:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -74,13 +79,26 @@ func (n Node) String() string {
 //////////////////////////////////////////////////////////////////////////
 //  Basic Ki fields
 
-func (n *Node) SetThis(ki Ki) {
-	n.This = ki
+func (n *Node) Init(this Ki) {
+	n.This = this
+	n.FunFields(0, n.This, func(fk Ki, level int, d interface{}) bool {
+		if fk != n.This { // todo: this shouldn't be able to happen in the first place..
+			bitflag.Set(fk.Flags(), int(IsField))
+			fk.InitName(fk, fk.Name())
+			fk.SetParent(d.(Ki))
+		}
+		return true
+	})
+}
+
+func (n *Node) InitName(ki Ki, name string) {
+	n.Init(ki)
+	n.SetName(name)
 }
 
 func (n *Node) ThisCheck() error {
 	if n.This == nil {
-		err := fmt.Errorf("KiNode %v ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!", n.PathUnique())
+		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!", n.PathUnique())
 		log.Print(err)
 		return err
 	}
@@ -137,9 +155,8 @@ func (n *Node) SetName(name string) {
 	}
 }
 
-func (n *Node) SetThisName(ki Ki, name string) {
-	n.SetThis(ki)
-	n.SetName(name)
+func (n *Node) SetNameRaw(name string) {
+	n.Nm = name
 }
 
 func (n *Node) SetUniqueName(name string) {
@@ -183,6 +200,17 @@ func (n *Node) UniquifyNames() {
 }
 
 //////////////////////////////////////////////////////////////////////////
+//  Flags
+
+func (n *Node) Flags() *int64 {
+	return &n.Flag
+}
+
+func (n *Node) IsField() bool {
+	return bitflag.Has(n.Flag, int(IsField))
+}
+
+//////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
 func (n *Node) Properties() map[string]interface{} {
@@ -210,7 +238,7 @@ func (n *Node) Prop(key string, inherit, typ bool) interface{} {
 		}
 	}
 	if typ {
-		return kit.Types.Prop(n.Type().Name(), key)
+		return kit.Types.Prop(kit.FullTypeName(n.Type()), key)
 	}
 	return nil
 }
@@ -220,6 +248,46 @@ func (n *Node) DeleteProp(key string) {
 		return
 	}
 	delete(n.Props, key)
+}
+
+func (n *Node) DeleteAllProps(cap int) {
+	if n.Props != nil {
+		n.Props = make(map[string]interface{}, cap)
+	}
+}
+
+func init() {
+	gob.Register(map[string]interface{}{})
+}
+
+func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
+	if from.Properties() == nil {
+		return nil
+	}
+	if n.Props == nil {
+		n.Props = make(map[string]interface{})
+	}
+	fmP := from.Properties()
+	if deep {
+		// code from https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
+		var buf bytes.Buffer
+		enc := gob.NewEncoder(&buf)
+		dec := gob.NewDecoder(&buf)
+		err := enc.Encode(fmP)
+		if err != nil {
+			return err
+		}
+		err = dec.Decode(&n.Props)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		for k, v := range fmP {
+			n.Props[k] = v
+		}
+	}
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -248,9 +316,13 @@ func (n *Node) Root() Ki {
 	return n.Par.Root()
 }
 
+func (n *Node) HasChildren() bool {
+	return len(n.Kids) > 0
+}
+
 func (n *Node) SetChildType(t reflect.Type) error {
 	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
-		err := fmt.Errorf("KiNode %v SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", n.PathUnique(), t.Name())
+		err := fmt.Errorf("Ki Node %v SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", n.PathUnique(), t.Name())
 		log.Print(err)
 		return err
 	}
@@ -263,7 +335,7 @@ func (n *Node) AddChildCheck(kid Ki) error {
 	var err error
 	n.FunUp(0, n, func(k Ki, level int, d interface{}) bool {
 		if k == kid {
-			err = fmt.Errorf("KiNode Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", (d.(Ki)).PathUnique())
+			err = fmt.Errorf("Ki Node Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", (d.(Ki)).PathUnique())
 			log.Printf("%v", err)
 			return false
 		}
@@ -278,9 +350,9 @@ func (n *Node) addChildImplPost(kid Ki) {
 	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
 	if oldPar != nil {
 		oldPar.DeleteChild(kid, false)
-		kid.NodeSignal().Emit(kid, int64(NodeSignalMoved), oldPar)
+		bitflag.Set(kid.Flags(), int(ChildMoved))
 	} else {
-		kid.NodeSignal().Emit(kid, int64(NodeSignalAdded), nil)
+		bitflag.Set(kid.Flags(), int(ChildAdded))
 	}
 }
 
@@ -288,10 +360,10 @@ func (n *Node) AddChildImpl(kid Ki) error {
 	if err := n.ThisCheck(); err != nil {
 		return err
 	}
-	kid.SetThis(kid)
 	if err := n.AddChildCheck(kid); err != nil {
 		return err
 	}
+	kid.Init(kid)
 	n.Kids = append(n.Kids, kid)
 	n.addChildImplPost(kid)
 	return nil
@@ -301,48 +373,70 @@ func (n *Node) InsertChildImpl(kid Ki, at int) error {
 	if err := n.ThisCheck(); err != nil {
 		return err
 	}
-	kid.SetThis(kid)
 	if err := n.AddChildCheck(kid); err != nil {
 		return err
 	}
+	kid.Init(kid)
 	n.Kids.Insert(kid, at)
 	n.addChildImplPost(kid)
 	return nil
 }
 
-func (n *Node) EmitChildAddedSignal(kid Ki) {
-	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, int64(NodeSignalChildAdded), kid)
-	}
-}
-
 func (n *Node) AddChild(kid Ki) error {
+	n.UpdateStart()
 	err := n.AddChildImpl(kid)
-	n.EmitChildAddedSignal(kid)
+	if err == nil {
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return err
 }
 
 func (n *Node) InsertChild(kid Ki, at int) error {
+	n.UpdateStart()
 	err := n.InsertChildImpl(kid, at)
-	n.EmitChildAddedSignal(kid)
+	if err == nil {
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return err
 }
 
 func (n *Node) AddChildNamed(kid Ki, name string) error {
+	n.UpdateStart()
 	err := n.AddChildImpl(kid)
-	kid.SetName(name)
-	n.EmitChildAddedSignal(kid)
+	if err == nil {
+		kid.SetName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return err
 }
 
 func (n *Node) InsertChildNamed(kid Ki, at int, name string) error {
+	n.UpdateStart()
 	err := n.InsertChildImpl(kid, at)
-	kid.SetName(name)
-	n.EmitChildAddedSignal(kid)
+	if err == nil {
+		kid.SetName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return err
 }
 
-func (n *Node) MakeNewChild(typ reflect.Type) Ki {
+func (n *Node) InsertChildNamedUnique(kid Ki, at int, name string) error {
+	n.UpdateStart()
+	err := n.InsertChildImpl(kid, at)
+	if err == nil {
+		kid.SetNameRaw(name)
+		kid.SetUniqueName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
+	return err
+}
+
+func (n *Node) MakeNew(typ reflect.Type) Ki {
 	if err := n.ThisCheck(); err != nil {
 		return nil
 	}
@@ -353,41 +447,51 @@ func (n *Node) MakeNewChild(typ reflect.Type) Ki {
 		typ = n.Type() // make us by default
 	}
 	nkid := reflect.New(typ).Interface()
-	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 	kid, _ := nkid.(Ki)
-	// fmt.Printf("kid is new obj of type %T val: %+v\n", kid, kid)
 	return kid
 }
 
 func (n *Node) AddNewChild(typ reflect.Type) Ki {
-	kid := n.MakeNewChild(typ)
+	kid := n.MakeNew(typ)
 	n.AddChild(kid)
 	return kid
 }
 
 func (n *Node) InsertNewChild(typ reflect.Type, at int) Ki {
-	kid := n.MakeNewChild(typ)
+	kid := n.MakeNew(typ)
 	n.InsertChild(kid, at)
 	return kid
 }
 
 func (n *Node) AddNewChildNamed(typ reflect.Type, name string) Ki {
-	kid := n.MakeNewChild(typ)
+	kid := n.MakeNew(typ)
 	n.AddChildNamed(kid, name)
 	return kid
 }
 
 func (n *Node) InsertNewChildNamed(typ reflect.Type, at int, name string) Ki {
-	kid := n.MakeNewChild(typ)
+	kid := n.MakeNew(typ)
 	n.InsertChildNamed(kid, at, name)
 	return kid
 }
 
-func (n *Node) MoveChild(from, to int) error {
-	return n.Kids.Move(from, to)
+func (n *Node) InsertNewChildNamedUnique(typ reflect.Type, at int, name string) Ki {
+	kid := n.MakeNew(typ)
+	n.InsertChildNamedUnique(kid, at, name)
+	return kid
 }
 
-func (n *Node) ConfigChildren(config kit.TypeAndNameList) {
+func (n *Node) MoveChild(from, to int) error {
+	n.UpdateStart()
+	err := n.Kids.Move(from, to)
+	if err == nil {
+		bitflag.Set(&n.Flag, int(ChildMoved))
+	}
+	n.UpdateEnd()
+	return err
+}
+
+func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) {
 	n.UpdateStart()
 	// fist make a map for looking up the indexes of the names
 	nm := make(map[string]int)
@@ -398,7 +502,13 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList) {
 	sz := len(n.Kids)
 	for i := sz - 1; i >= 0; i-- {
 		kid := n.Kids[i]
-		ti, ok := nm[kid.Name()]
+		var knm string
+		if uniqNm {
+			knm = kid.UniqueName()
+		} else {
+			knm = kid.Name()
+		}
+		ti, ok := nm[knm]
 		if !ok {
 			n.DeleteChildAtIndex(i, true) // assume destroy
 		} else if !kid.IsType(config[ti].Type) {
@@ -407,15 +517,25 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList) {
 	}
 	// next add and move items as needed -- in order so guaranteed
 	for i, tn := range config {
-		kidx := n.FindChildIndexByName(tn.Name, i)
+		var kidx int
+		if uniqNm {
+			kidx = n.FindChildIndexByUniqueName(tn.Name, i)
+		} else {
+			kidx = n.FindChildIndexByName(tn.Name, i)
+		}
 		if kidx < 0 {
-			n.InsertNewChildNamed(tn.Type, i, tn.Name)
+			if uniqNm {
+				n.InsertNewChildNamedUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
+			} else {
+				n.InsertNewChildNamed(tn.Type, i, tn.Name)
+			}
 		} else {
 			if kidx != i {
 				n.Kids.Move(kidx, i)
 			}
 		}
 	}
+	n.UpdateEnd()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -477,21 +597,37 @@ func (n *Node) FindParentByType(t ...reflect.Type) Ki {
 	return n.Par.FindParentByType(t...)
 }
 
-func (n *Node) EmitChildDeletedSignal(kid Ki) {
-	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, int64(NodeSignalChildDeleted), kid)
+func (n *Node) FindFieldByName(name string) Ki {
+	v := reflect.ValueOf(n.This).Elem()
+	f := v.FieldByName(name)
+	if !f.IsValid() {
+		return nil
 	}
+	if !f.Type().Implements(KiType()) {
+		return nil
+	}
+	fk := f.Interface().(Ki)
+	return fk
 }
+
+//////////////////////////////////////////////////////////////////////////
+//  Deleting
 
 func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 	idx, err := n.Kids.ValidIndex(idx)
 	if err != nil {
-		log.Print("KiNode DeleteChildAtIndex -- attempt to delete item in empty children slice")
+		log.Print("Ki Node DeleteChildAtIndex -- attempt to delete item in empty children slice")
 		return
 	}
 	child := n.Kids[idx]
+	n.UpdateStart()
+	bitflag.Set(&n.Flag, int(ChildDeleted))
 	if child.Parent() == n.This {
-		// only deleting if we are still parent -- change parent first to signal move
+		// only deleting if we are still parent -- change parent first to
+		// signal move delete is always sent live to affected node without
+		// update blocking note: children of child etc will not send a signal
+		// at this point -- only later at destroy -- up to this parent to
+		// manage all that
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 	}
@@ -499,7 +635,8 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 	if destroy {
 		n.Deleted = append(n.Deleted, child)
 	}
-	n.EmitChildDeletedSignal(child)
+	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
+	n.UpdateEnd()
 }
 
 func (n *Node) DeleteChild(child Ki, destroy bool) {
@@ -520,22 +657,19 @@ func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
 	return child
 }
 
-func (n *Node) EmitChildrenDeletedSignal() {
-	if n.Updating.Value() == 0 {
-		n.NodeSig.Emit(n.This, int64(NodeSignalChildrenDeleted), nil)
-	}
-}
-
 func (n *Node) DeleteChildren(destroy bool) {
+	n.UpdateStart()
+	bitflag.Set(&n.Flag, int(ChildrenDeleted))
 	for _, child := range n.Kids {
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
+		child.UpdateReset()
 	}
 	if destroy {
 		n.Deleted = append(n.Deleted, n.Kids...)
 	}
 	n.Kids = n.Kids[:0] // preserves capacity of list
-	n.EmitChildrenDeletedSignal()
+	n.UpdateEnd()
 }
 
 func (n *Node) DeleteMe(destroy bool) {
@@ -565,21 +699,34 @@ func (n *Node) DestroyAllDeleted() {
 
 func (n *Node) Destroy() {
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
+	n.DisconnectAll()
 	// todo: traverse struct and un-set all Ptr's!
 	n.DeleteChildren(true) // first delete all my children
 	n.DestroyDeleted()     // then destroy all those kids
 }
 
-func (n *Node) IsLeaf() bool {
-	return len(n.Kids) == 0
-}
-
-func (n *Node) HasChildren() bool {
-	return len(n.Kids) > 0
-}
-
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
+
+func (n *Node) FunFields(level int, data interface{}, fun Fun) {
+	kiType := KiType()
+	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		if field.Type.Implements(kiType) && fieldVal.Interface() != nil {
+			fk := fieldVal.Interface().(Ki)
+			fun(fk, level, data)
+		}
+	})
+}
+
+func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
+	kiType := KiType()
+	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		if field.Type.Implements(kiType) {
+			fk := fieldVal.Interface().(Ki)
+			go fun(fk, level, data)
+		}
+	})
+}
 
 func (n *Node) FunUp(level int, data interface{}, fun Fun) bool {
 	if !fun(n.This, level, data) { // false return means stop
@@ -608,6 +755,7 @@ func (n *Node) FunDownMeFirst(level int, data interface{}, fun Fun) bool {
 		return false
 	}
 	level++
+	n.FunFields(level, data, fun)
 	for _, child := range n.Children() {
 		child.FunDownMeFirst(level, data, fun) // don't care about their return values
 	}
@@ -621,6 +769,7 @@ func (n *Node) FunDownDepthFirst(level int, data interface{}, doChildTestFun Fun
 			child.FunDownDepthFirst(level, data, doChildTestFun, fun)
 		}
 	}
+	n.FunFields(level, data, fun)
 	level--
 	fun(n.This, level, data) // can't use the return value at this point
 }
@@ -631,6 +780,8 @@ func (n *Node) FunDownBreadthFirst(level int, data interface{}, fun Fun) {
 	for i, child := range n.Children() {
 		if !fun(child, level, data) { // false return means stop
 			dontMap[i] = true
+		} else {
+			child.FunFields(level+1, data, fun)
 		}
 	}
 	for i, child := range n.Children() {
@@ -644,6 +795,7 @@ func (n *Node) FunDownBreadthFirst(level int, data interface{}, fun Fun) {
 func (n *Node) GoFunDown(level int, data interface{}, fun Fun) {
 	go fun(n.This, level, data)
 	level++
+	n.GoFunFields(level, data, fun)
 	for _, child := range n.Children() {
 		child.GoFunDown(level, data, fun)
 	}
@@ -653,6 +805,7 @@ func (n *Node) GoFunDownWait(level int, data interface{}, fun Fun) {
 	// todo: use channel or something to wait
 	go fun(n.This, level, data)
 	level++
+	n.GoFunFields(level, data, fun)
 	for _, child := range n.Children() {
 		child.GoFunDown(level, data, fun)
 	}
@@ -664,21 +817,29 @@ func (n *Node) FunPrev(level int, data interface{}, fun Fun) bool {
 
 func (n *Node) Path() string {
 	if n.Par != nil {
-		return n.Par.Path() + "." + n.Nm
+		if n.IsField() {
+			return n.Par.Path() + "." + n.Nm
+		} else {
+			return n.Par.Path() + "/" + n.Nm
+		}
 	}
-	return "." + n.Nm
+	return "/" + n.Nm
 }
 
 func (n *Node) PathUnique() string {
 	if n.Par != nil {
-		return n.Par.PathUnique() + "." + n.UniqueNm
+		if n.IsField() {
+			return n.Par.PathUnique() + "." + n.UniqueNm
+		} else {
+			return n.Par.PathUnique() + "/" + n.UniqueNm
+		}
 	}
-	return "." + n.UniqueNm
+	return "/" + n.UniqueNm
 }
 
 func (n *Node) FindPathUnique(path string) Ki {
 	curn := Ki(n)
-	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), ".")
+	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
 	for i, pe := range pels {
 		if len(pe) == 0 {
 			continue
@@ -687,11 +848,29 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if i <= 1 && curn.UniqueName() == pe {
 			continue
 		}
-		idx := curn.FindChildIndexByUniqueName(pe, 0)
-		if idx < 0 {
-			return nil
+		if strings.Contains(pe, ".") { // has fields
+			fels := strings.Split(pe, ".")
+			// find the child first, then the fields
+			idx := curn.FindChildIndexByUniqueName(fels[0], 0)
+			if idx < 0 {
+				return nil
+			}
+			curn, _ = curn.Child(idx)
+			for i := 1; i < len(fels); i++ {
+				fe := fels[i]
+				fk := curn.FindFieldByName(fe)
+				if fk == nil {
+					return nil
+				}
+				curn = fk
+			}
+		} else {
+			idx := curn.FindChildIndexByUniqueName(pe, 0)
+			if idx < 0 {
+				return nil
+			}
+			curn, _ = curn.Child(idx)
 		}
-		curn, _ = curn.Child(idx)
 	}
 	return curn
 }
@@ -701,10 +880,6 @@ func (n *Node) FindPathUnique(path string) Ki {
 //   levels so there is only one update at end (optionally per node or only
 //   at highest level)
 //   All modification starts with UpdateStart() and ends with UpdateEnd()
-
-// todo: send NodeSignalDestroying before destroying, etc
-// general logic: child added / deleted events are blocked by updating count
-// but NodeDeleted and NodeDestroying are NOT
 
 // after an UpdateEnd, DestroyDeleted is called
 
@@ -718,6 +893,9 @@ func (n *Node) UpdateCtr() *atomctr.Ctr {
 
 func (n *Node) UpdateStart() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		if k.UpdateCtr().Value() == 0 { // clear at start of update
+			bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
+		}
 		k.UpdateCtr().Inc()
 		return true
 	})
@@ -730,7 +908,7 @@ func (n *Node) UpdateEnd() {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
 				k.UpdateCtr().Dec()
-				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), nil)
+				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
 				k.DestroyAllDeleted()
 				*par_up = true // we updated so nobody else can!
 			} else {
@@ -738,7 +916,7 @@ func (n *Node) UpdateEnd() {
 			}
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
-				log.Printf("KiNode UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -751,11 +929,11 @@ func (n *Node) UpdateEndAll() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			k.UpdateCtr().Dec()
-			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), nil)
+			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
 			k.DestroyDeleted()
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
-				log.Printf("KiNode UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -764,8 +942,198 @@ func (n *Node) UpdateEndAll() {
 	})
 }
 
+func (n *Node) UpdateReset() {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		k.UpdateCtr().Set(0)
+		return true
+	})
+}
+
+func (n *Node) Disconnect() {
+	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		switch {
+		case fieldVal.Kind() == reflect.Ptr:
+			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
+		case fieldVal.Type() == KiT_Signal:
+			fs := fieldVal.Interface().(*Signal)
+			fs.DisconnectAll()
+		case fieldVal.Type() == KiT_Ptr:
+			fs := fieldVal.Interface().(*Ptr)
+			fs.Reset()
+		}
+	})
+}
+
+func (n *Node) DisconnectAll() {
+	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		k.Disconnect()
+		return true
+	})
+}
+
 //////////////////////////////////////////////////////////////////////////
-//  Marshal / Unmarshal support -- mostly in Slice
+//  Deep Copy / Clone
+
+// note: we use the copy from direction as the receiver is modifed whereas the
+// from is not and assignment is typically in same direction
+
+func (n *Node) CopyFrom(from Ki) error {
+	if from == nil {
+		err := fmt.Errorf("Ki Node CopyFrom into %v -- null 'from' source\n", n.PathUnique())
+		log.Print(err)
+		return err
+	}
+	mypath := n.PathUnique()
+	fmpath := from.PathUnique()
+	if n.Type() != from.Type() {
+		err := fmt.Errorf("Ki Node Copy to %v from %v -- must have same types, but %v != %v\n", mypath, fmpath, n.Type().Name(), from.Type().Name())
+		log.Print(err)
+		return err
+	}
+	n.UpdateStart()
+	bitflag.Set(&n.Flag, int(NodeCopied))
+	sameTree := (n.Root() == from.Root())
+	from.GetPtrPaths()
+	err := n.CopyFromRaw(from)
+	n.DestroyAllDeleted() // in case we deleted some kiddos
+	if err != nil {
+		n.UpdateEnd()
+		return err
+	}
+	if sameTree {
+		n.UpdatePtrPaths(fmpath, mypath, true)
+	}
+	n.SetPtrsFmPaths()
+	n.UpdateEnd()
+	return nil
+}
+
+func (n *Node) Clone() Ki {
+	nki := n.MakeNew(n.Type())
+	nki.CopyFrom(n.This)
+	return nki
+}
+
+// use ConfigChildren to recreate source children
+func (n *Node) CopyMakeChildrenFrom(from Ki) {
+	sz := len(from.Children())
+	if sz > 0 {
+		cfg := make(kit.TypeAndNameList, sz)
+		for i, kid := range from.Children() {
+			cfg[i].Type = kid.Type()
+			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
+		}
+		n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
+		for i, kid := range from.Children() {
+			mkid, _ := n.Child(i)
+			mkid.SetNameRaw(kid.Name()) // restore orig user-names
+		}
+	} else {
+		n.DeleteChildren(true)
+	}
+}
+
+// copy from primary fields of from to to, recursively following anonymous embedded structs
+func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
+	kiType := KiType()
+	tv := kit.NonPtrValue(reflect.ValueOf(to))
+	sv := kit.NonPtrValue(reflect.ValueOf(from))
+	typ := tv.Type()
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		ctag := f.Tag.Get("copy")
+		if ctag == "-" {
+			continue
+		}
+		tf := tv.Field(i)
+		sf := sv.Field(i)
+		if f.Type.Kind() == reflect.Struct && f.Anonymous {
+			n.CopyFieldsFrom(tf.Interface(), sf.Interface())
+		} else {
+			switch {
+			case sf.Type().Implements(kiType):
+				sfk := sf.Interface().(Ki)
+				tfk := tf.Interface().(Ki)
+				tfk.CopyFrom(sfk)
+			case f.Type == KiT_Signal: // todo: don't copy signals by default
+			case sf.Type().AssignableTo(tf.Type()):
+				tf.Set(sf)
+			default:
+				// use copier https://github.com/jinzhu/copier which handles as much as possible..
+				copier.Copy(tf.Interface(), sf.Interface())
+			}
+		}
+
+	}
+}
+
+func (n *Node) CopyFromRaw(from Ki) error {
+	n.CopyMakeChildrenFrom(from)
+	n.DeleteAllProps(len(from.Properties())) // start off fresh, allocated to size of from
+	n.CopyPropsFrom(from, false)             // use shallow props copy by default
+	n.CopyFieldsFrom(n.This, from)
+	for i, kid := range n.Kids {
+		fmk, _ := from.Child(i)
+		kid.CopyFromRaw(fmk)
+	}
+	return nil
+}
+
+func (n *Node) GetPtrPaths() {
+	root := n.This
+	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+			if fieldVal.CanInterface() {
+				vfi := fieldVal.Interface()
+				switch vfv := vfi.(type) {
+				case Ptr:
+					vfv.GetPath()
+					fmt.Printf("got path %v on field %v\n", vfv.Path, field.Name)
+					// case Signal:
+					// 	vfv.GetPaths()
+				}
+			}
+		})
+		return true
+	})
+}
+
+func (n *Node) SetPtrsFmPaths() {
+	root := n.Root()
+	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+			if fieldVal.CanInterface() {
+				vfi := fieldVal.Interface()
+				switch vfv := vfi.(type) {
+				case Ptr:
+					if !vfv.FindPtrFmPath(root) {
+						log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", vfv.Path, root.Name())
+					}
+				}
+			}
+		})
+		return true
+	})
+}
+
+func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
+	root := n.Root()
+	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+			if fieldVal.CanInterface() {
+				vfi := fieldVal.Interface()
+				switch vfv := vfi.(type) {
+				case Ptr:
+					vfv.UpdatePath(oldPath, newPath, startOnly)
+				}
+			}
+		})
+		return true
+	})
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  IO Marshal / Unmarshal support -- mostly in Slice
 
 func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 	if err := n.ThisCheck(); err != nil {
@@ -827,33 +1195,33 @@ func (n *Node) LoadXML(b []byte) error {
 	return nil
 }
 
-func (n *Node) SetPtrsFmPaths() {
-	root := n.This
-	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		v := reflect.ValueOf(k).Elem()
-		// fmt.Printf("v: %v\n", v.Type())
-		for i := 0; i < v.NumField(); i++ {
-			vf := v.Field(i)
-			// fmt.Printf("vf: %v\n", vf.Type())
-			if vf.CanInterface() {
-				kp, ok := (vf.Interface()).(Ptr)
-				if ok {
-					var pv Ki
-					if len(kp.Path) > 0 {
-						rt := d.(Ki)
-						pv = rt.FindPathUnique(kp.Path)
-						if pv == nil {
-							log.Printf("KiNode SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, rt.Name())
-						}
-						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
-					}
-					// todo: should set Ptr to nil but can't seem to do that here -- complains when above set is called with pv = nil
-				}
-			}
-		}
-		return true
-	})
-}
+// func (n *Node) SetPtrsFmPaths() {
+// 	root := n.This
+// 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+// 		v := reflect.ValueOf(k).Elem()
+// 		// fmt.Printf("v: %v\n", v.Type())
+// 		for i := 0; i < v.NumField(); i++ {
+// 			vf := v.Field(i)
+// 			// fmt.Printf("vf: %v\n", vf.Type())
+// 			if vf.CanInterface() {
+// 				kp, ok := (vf.Interface()).(Ptr)
+// 				if ok {
+// 					var pv Ki
+// 					if len(kp.Path) > 0 {
+// 						rt := d.(Ki)
+// 						pv = rt.FindPathUnique(kp.Path)
+// 						if pv == nil {
+// 							log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, rt.Name())
+// 						}
+// 						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
+// 					}
+// 					// todo: should set Ptr to nil but can't seem to do that here -- complains when above set is called with pv = nil
+// 				}
+// 			}
+// 		}
+// 		return true
+// 	})
+// }
 
 func (n *Node) ParentAllChildren() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {

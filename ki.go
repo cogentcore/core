@@ -2,40 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and "Key" in English -- powerful tree structures supporting scenegraphs, programs, parsing, etc.
-
-The Node struct that implements the Ki interface, which
-can be used as an embedded type (or a struct field) in other structs to provide
-core tree functionality, including:
-
-	* Parent / Child Tree structure -- each Node can ONLY have one parent
-
-	* Paths for locating Nodes within the hierarchy -- key for many use-cases,
-      including IO for pointers
-
-	* Apply a function across nodes up or down a tree -- very flexible for tree walking
-
-	* Generalized I/O -- can Save and Load the Tree as JSON, XML, etc --
-      including pointers which are saved using paths and automatically
-      cached-out after loading -- enums also bidirectionally convertable to
-      strings using enum type registry.
-
-	* Signal sending and receiving between Nodes (simlar to Qt Signals / Slots)
-
-	* Robust updating state -- wrap updates in UpdateStart / End, and signals
-      are blocked until the final end, at which point an update signal is sent
-      -- works across levels
-
-	* Properties (as a string-keyed map) with property inheritance --
-      including type-level properties and temporary properties used for
-      graphical views, etc
-
-	* Garbage collection is performed at optimized point at end of updates
-      after tree objects have been destroyed (and all pointers reset),
-      minimizing impact and need for unplanned GC interruptions.
-
-*/
 package ki
 
 import (
@@ -43,6 +9,42 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 	"reflect"
 )
+
+// bit flags for efficient core state of nodes -- see bitflag package for
+// using these ordinal values to manipulate bit flag field
+type Flags int32
+
+const (
+	// this node is a field in its parent node, not a child in children
+	IsField Flags = iota
+	// following flags record what happened to a given node since the last
+	// Update signal -- these are cleared at first UpdateStart and valid after
+	// UpdateEnd -- these should be coordinated with NodeSignals in signal.go
+
+	// node was added to new parent
+	NodeAdded
+	// node was copied from other node
+	NodeCopied
+	// node was moved in the tree, or to a new tree
+	NodeMoved
+	// one or more new children were added to the node
+	ChildAdded
+	// one or more children were moved within the node
+	ChildMoved
+	// one or more children were deleted from the node
+	ChildDeleted
+	// all children were deleted
+	ChildrenDeleted
+	// total number of flags used by base Ki Node -- can extend from here up to 64 bits
+	FlagsN
+
+	// Mask for all the update flags
+	UpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+)
+
+//go:generate stringer -type=Flags
+
+var KiT_Flags = kit.Enums.AddEnum(IsField, true, nil) // true = bitflags
 
 /*
 The Ki interface provides the core functionality for the GoKi tree -- insipred by Qt QObject in specific and every other Tree everywhere in general.
@@ -53,8 +55,11 @@ Other key issues with the Ki design / Go:
 * All interfaces are implicitly pointers: this is why you have to pass args with & address of
 */
 type Ki interface {
-	// Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a This interface pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls) -- just pass a pointer to the object here (automatically set when a Child is added)
-	SetThis(ki Ki)
+	// Initialize the node -- automatically called during Add/Insert Child -- sets the This pointer for this node as a Ki interface (pass pointer to node as this arg) -- Go cannot always access the true underlying type for structs using embedded Ki objects (when these objs are receivers to methods) so we need a This interface pointer that guarantees access to the Ki interface in a way that always reveals the underlying type (e.g., in reflect calls).  Calls Init on Ki fields within struct, sets their names to the field name, and sets us as their parent.
+	Init(this Ki)
+
+	// init this node and set its name -- used for root nodes which don't otherwise have their This pointer set (typically happens in Add, Insert Child)
+	InitName(this Ki, name string)
 
 	// check that the this pointer is set and issue a warning to log if not -- returns error if not set
 	ThisCheck() error
@@ -80,17 +85,27 @@ type Ki interface {
 	// A name (Node.UniqueNm) that is guaranteed to be non-empty and unique within the children of this node, but starts with Name or parents name if Name is empty -- important for generating unique paths
 	UniqueName() string
 
-	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node
+	// sets the name of this node, and its unique name based on this name, such that all names are unique within list of siblings of this node (somewhat expensive but important, unless you definitely know that the names are unique)
 	SetName(name string)
 
-	// sets the This pointer to ki object, and the name of this node -- used for root nodes which don't otherwise have their This pointer set (typically happens in Add, Insert Child)
-	SetThisName(ki Ki, name string)
+	// just set the name and don't update the unique name -- only use if also
+	// setting unique names in some other way
+	SetNameRaw(name string)
 
 	// sets the unique name of this node -- should generally only be used by UniquifyNames
 	SetUniqueName(name string)
 
 	// ensure all my children have unique, non-empty names -- duplicates are named sequentially _1, _2 etc, and empty names
 	UniquifyNames()
+
+	//////////////////////////////////////////////////////////////////////////
+	//  Flags
+
+	// the flags for this node -- use bitflag package to manipulate flags
+	Flags() *int64
+
+	// is this a field on a parent struct, as opposed to a child?
+	IsField() bool
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
@@ -107,6 +122,12 @@ type Ki interface {
 	// Delete property key, safely
 	DeleteProp(key string)
 
+	// Delete all properties on this node -- just makes a new Props map -- can specify the capacity of the new map (0 is ok -- always grows automatically anyway)
+	DeleteAllProps(cap int)
+
+	// copy our properties from another node -- if deep then does a deep copy -- otherwise copied map just points to same values in the original map (and we don't reset our map first -- call DeleteAllProps to do that -- deep copy uses gob encode / decode -- usually not needed
+	CopyPropsFrom(from Ki, deep bool) error
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Parent / Child Functionality
 
@@ -118,6 +139,9 @@ type Ki interface {
 
 	// get the root object of this tree
 	Root() Ki
+
+	// does this node have children (i.e., non-terminal)
+	HasChildren() bool
 
 	// set the ChildType to create using *NewChild routines, and for the gui -- ensures that it is a Ki type, and errors if not
 	SetChildType(t reflect.Type) error
@@ -134,8 +158,11 @@ type Ki interface {
 	// add a new child at given position in children list, and give it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
 	InsertChildNamed(kid Ki, at int, name string) error
 
+	// add a child at given position in children list, and give it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
+	InsertChildNamedUnique(kid Ki, at int, name string) error
+
 	// create a new child of given type -- if nil, uses ChildType, then This type
-	MakeNewChild(typ reflect.Type) Ki
+	MakeNew(typ reflect.Type) Ki
 
 	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at end of children list
 	AddNewChild(typ reflect.Type) Ki
@@ -149,6 +176,9 @@ type Ki interface {
 	// create a new child of given type -- if nil, uses ChildType, then This type -- and add at given position in children list, and give it a name
 	InsertNewChildNamed(typ reflect.Type, at int, name string) Ki
 
+	// add a new child at given position in children list, and give it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
+	InsertNewChildNamedUnique(typ reflect.Type, at int, name string) Ki
+
 	// move child from one position to another in the list of children (see also Slice method)
 	MoveChild(from, to int) error
 
@@ -156,8 +186,9 @@ type Ki interface {
 	// attempts to have minimal impact relative to existing items that fit the
 	// type and name constraints (they are moved into the corresponding
 	// positions), and any extra children are removed, and new ones added, to
-	// match the specified config
-	ConfigChildren(config kit.TypeAndNameList)
+	// match the specified config.  If uniqNm, then names represent
+	// UniqueNames (this results in Name == UniqueName for created children)
+	ConfigChildren(config kit.TypeAndNameList, uniqNm bool)
 
 	// find index of child based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int
@@ -186,6 +217,9 @@ type Ki interface {
 	// find parent by type (any of types given) -- returns nil if not found
 	FindParentByType(t ...reflect.Type) Ki
 
+	// find field Ki element by name -- returns nil if not found
+	FindFieldByName(name string) Ki
+
 	// Delete child at index -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChildAtIndex(idx int, destroy bool)
 
@@ -207,18 +241,18 @@ type Ki interface {
 	// recursively call DestroyDeleted on all nodes under this one -- called automatically when UpdateEnd reaches 0 Updating count and the Update signal is sent
 	DestroyAllDeleted()
 
-	// remove all children and their childrens-children, etc
+	// call DisconnectAll and remove all children and their childrens-children, etc
 	Destroy()
-
-	// is this a terminal node in the tree?  i.e., has no children
-	IsLeaf() bool
-
-	// does this node have children (i.e., non-terminal)
-	HasChildren() bool
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
+
+	// call function on all Ki fields within this node
+	FunFields(level int, data interface{}, fun Fun)
+
+	// concurrent go function call function on all Ki fields within this node
+	GoFunFields(level int, data interface{}, fun Fun)
 
 	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
 	FunUp(level int, data interface{}, fun Fun) bool
@@ -274,6 +308,63 @@ type Ki interface {
 	// call this when done updating -- decrements update counter and emits NodeSignalUpdated when counter goes to 0 for ALL nodes that might have updated, even if my parent node is still updating -- this is less typically used
 	UpdateEndAll()
 
+	// reset update counters to 0 -- in case they are out-of-sync due to more
+	// complex tree maninpulations -- only call at a known point of
+	// non-updating..
+	UpdateReset()
+
+	// disconnect node -- reset all ptrs to nil, and DisconnectAll() signals
+	// -- e.g., for freeing up all connnections so node can be destroyed and
+	// making GC easier
+	Disconnect()
+
+	// disconnect all the way from me down the tree
+	DisconnectAll()
+
+	//////////////////////////////////////////////////////////////////////////
+	//  Deep Copy of Trees
+
+	// The Ki copy function recreates the entire tree in the copy, duplicating
+	// children etc.  It is very efficient by using the ConfigChildren method
+	// which attempts to preserve any existing nodes in the destination if
+	// they have the same name and type -- so a copy from a source to a target
+	// that only differ minimally will be minimally destructive.  Only copies
+	// to same types are supported.  Pointers (Ptr) are copied by saving the
+	// current UniquePath and then SetPtrsFmPaths is called -- no other Ki
+	// point.  Signal connections are NOT copied (todo: revisit)a.  No other
+	// Ki pointers are copied, and the field tag copy:"-" can be added for any
+	// other fields that should not be copied (unexported, lower-case fields
+	// are not copyable).
+	//
+	// When nodes are copied from one place to another within the same overall
+	// tree, paths are updated so that pointers to items within the copied
+	// sub-tree are updated to the new location there (i.e., the path to the
+	// old loation is replaced with that of the new destination location),
+	// whereas paths outside of the copied location are not changed and point
+	// as before.  See also MoveTo function for moving nodes to other parts of
+	// the tree.  Sequence of functions is: GetPtrPaths on from, CopyFromRaw,
+	// UpdtPtrPaths, then SetPtrsFmPaths
+	CopyFrom(from Ki) error
+
+	// clone (create and return a deep copy) of the tree from this node down.
+	// Any pointers within the cloned tree will correctly point within the new
+	// cloned tree (see Copy info)
+	Clone() Ki
+
+	// raw copy that just does the deep copy and doesn't do anything with pointers
+	CopyFromRaw(from Ki) error
+
+	// get all Ptr paths -- walk the tree down from current node and call GetPath on all Ptr fields -- this is called prior to copying / moving
+	GetPtrPaths()
+
+	// update Ptr (and Signal) paths replacing any occurrence of oldPath with
+	// newPath, optionally only at the start of the path (typically true) --
+	// for all nodes down from this one
+	UpdatePtrPaths(oldPath, newPath string, startOnly bool)
+
+	// walk the tree down from current node and call FindPtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to recover pointers after entire structure is in place -- see UnmarshalPost
+	SetPtrsFmPaths()
+
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: Marshal / Unmarshal support -- see also Slice, Ptr
 
@@ -289,9 +380,6 @@ type Ki interface {
 	// load the tree from an XML-encoded byte string
 	LoadXML(b []byte) error
 
-	// walk the tree down from current node and call FindPtrFromPath on all Ptr fields found -- must be called after UnmarshalJSON to recover pointers after entire structure is in place -- see UnmarshalPost
-	SetPtrsFmPaths()
-
 	// walk the tree down from current node and call SetParent on all children -- needed after JSON Unmarshal, etc
 	ParentAllChildren()
 
@@ -306,3 +394,8 @@ type Ki interface {
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type Fun func(ki Ki, level int, data interface{}) bool
+
+// a Ki reflect.Type, suitable for checking for Type.Implements
+func KiType() reflect.Type {
+	return reflect.TypeOf((*Ki)(nil)).Elem()
+}

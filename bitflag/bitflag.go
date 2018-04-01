@@ -60,7 +60,7 @@ func Has(bits int64, flag int) bool {
 	return bits&(1<<uint32(flag)) != 0
 }
 
-// check if any of a set of flags are set for ordinal bit position flags
+// check if any of a set of flags are set for ordinal bit position flags (logical OR)
 func HasAny(bits int64, flags ...int) bool {
 	for _, f := range flags {
 		if Has(bits, f) {
@@ -70,7 +70,7 @@ func HasAny(bits int64, flags ...int) bool {
 	return false
 }
 
-// check if all of a set of flags are set for ordinal bit position flags
+// check if all of a set of flags are set for ordinal bit position flags (logical AND)
 func HasAll(bits int64, flags ...int) bool {
 	for _, f := range flags {
 		if !Has(bits, f) {
@@ -92,6 +92,11 @@ func Mask(flags ...int) int64 {
 // check if any of the bits in mask are set
 func HasMask(bits, mask int64) bool {
 	return bits&mask != 0
+}
+
+// clear all of the bits in the mask
+func ClearMask(bits *int64, mask int64) {
+	*bits = *bits & ^mask
 }
 
 //////////////////////////////
@@ -168,4 +173,9 @@ func Mask32(flags ...int) int32 {
 // check if any of the bits in mask are set
 func HasMask32(bits, mask int32) bool {
 	return bits&mask != 0
+}
+
+// clear all of the bits in the mask
+func ClearMask32(bits *int32, mask int32) {
+	*bits = *bits & ^mask
 }

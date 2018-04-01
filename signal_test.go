@@ -22,7 +22,7 @@ var KiTTestNode = kit.Types.AddType(&TestNode{}, nil)
 
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
-	parent.SetThisName(&parent, "par1")
+	parent.InitName(&parent, "par1")
 	child1 := parent.AddNewChildNamed(nil, "child1")
 	child2 := parent.AddNewChildNamed(nil, "child2")
 

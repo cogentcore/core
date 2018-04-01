@@ -8,14 +8,24 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/rcoreilly/goki/ki/kit"
+	"strings"
 )
 
 // key fact of Go: interface such as Ki is implicitly a pointer!
 
 // Ptr provides JSON marshal / unmarshal via saved PathUnique
 type Ptr struct {
-	Ptr  Ki `json:"-"`
+	Ptr  Ki `json:"-" xml:"-"`
 	Path string
+}
+
+var KiT_Ptr = kit.Types.AddType(&Ptr{}, nil)
+
+// reset the pointer to nil, and the path to empty
+func (k *Ptr) Reset() {
+	k.Ptr = nil
+	k.Path = ""
 }
 
 // GetPath updates the Path field with the current path to the pointer
@@ -24,14 +34,26 @@ func (k *Ptr) GetPath() {
 }
 
 // FindPtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil
-func (k *Ptr) FindPtrFromPath(root Ki) bool {
+func (k *Ptr) FindPtrFmPath(root Ki) bool {
 	// fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
-		return false
+		k.Ptr = nil
+		return true
 	}
 	k.Ptr = root.FindPathUnique(k.Path)
 	// fmt.Printf("found: %v\n", k.Ptr)
 	return k.Ptr != nil
+}
+
+// UpdatePath replaces any occurrence of oldPath with newPath, optionally only at the start of the path (typically true)
+func (k *Ptr) UpdatePath(oldPath, newPath string, startOnly bool) {
+	if startOnly {
+		if strings.HasPrefix(k.Path, oldPath) {
+			k.Path = newPath + strings.TrimPrefix(k.Path, oldPath)
+		}
+	} else {
+		k.Path = strings.Replace(k.Path, oldPath, newPath, 1) // only do 1 replacement
+	}
 }
 
 // MarshalJSON gets the current path and saves only the Path directly as value of this struct

@@ -66,9 +66,11 @@ https://golang.org/doc/effective_go.html#names
 
 * In C++ terms, an interface in go creates a virtual table -- anytime you need virtual functions, you must create an interface.
 	+ WARNING: you need to define the *entire* interface for *each* type that implements it -- there is *no inheritance* in Go!  Thus, it is important to keep interfaces small!  Or, in the case of `Ki` / `Node`, only have one struct that implements it.
-	+ An interface is the *only* way to create an equivalence class of types -- otherwise Go is strict about dealing with each struct in terms of the actual type it is, *even if it embeds a common base type*
+	+ An interface is the *only* way to create an equivalence class of types -- otherwise Go is strict about dealing with each struct in terms of the actual type it is, *even if it embeds a common base type*.
 	
-* Anonymous embedding a type at the start of a struct gives transparent access to the embedded types (and so on for the embedded types of that type), so it *looks* like inheritance in C++, but critically those inherited methods are *not* virtual in any way, and you must explicitly convert a given "derived" type into its base type -- you cannot do something like: `bt := derived.(*BaseType)` to get the base type from a derived object -- it will just complain that derived is its actual type, not a base type.  Although this seems like a really easy thing to fix in Go that would support derived types, it would require an expensive dynamic (runtime) traversal of the reflect type info.  I will provide that method just for emergencies, but it is much better to provide an explicit interface method to provide this access.  Or provide access to everything you might need via the interface, but just giving the base struct is typically much easier.
+* Anonymous embedding a type at the start of a struct gives transparent access to the embedded types (and so on for the embedded types of that type), so it *looks* like inheritance in C++, but critically those inherited methods are *not* virtual in any way, and you must explicitly convert a given "derived" type into its base type -- you cannot do something like: `bt := derived.(*BaseType)` to get the base type from a derived object -- it will just complain that derived is its actual type, not a base type.  Although this seems like a really easy thing to fix in Go that would support derived types, it would require an expensive dynamic (runtime) traversal of the reflect type info.  Those methods are avail in package `kit` as `TypeEmbeds` to check if one type embeds another, and `EmbededStruct` to get an embedded struct out of a struct that embeds it (at any level of depth).  In general it is much better to provide an explicit interface method to provide access to embedded structs that serve as base-types for a given level of functionality.  Or provide access to everything you might need via the interface, but just giving the base struct is typically much easier.
+
+* Although the derived types have direct access to members and methods of embedded types, at any level of depth of embedding, the `reflect` system presents each embedded type as a *single field* as it is declared in the actual code.  Thus, you have to recursively traverse these embedded structs -- methods to flatten these field lists out by calling a given function on each field in turn are provided in `kit embed.go`: `FlatFieldsTypeFun` and `FlatFieldsValueFun`
 
 ## Closures & anonymous functions
 
@@ -89,13 +91,6 @@ As the docs state, you really have to use it for a while to appreciate all of th
   clunky and confusing.
 
 # TODO
-
-* Clone and Copy (deep) methods
-
-* THIS IS KEY: for allowing more inheritance: Write the generic function that gets an embedded "inherited" type from a derived type, using reflect and returning `interface{}` -- which can then be cast to that type by user -- just look for method of name "AsTypeName" and call that!
-	+ also need this inheritance info for iterating over all derived types of a given type
-
-* method that walks fields and resets pointers to nil, and also resets any Signal connections -- called in destroyki -- in general somewhat challenging to deal with destruction..
 
 * XML IO -- first pass done, but more should be in attr instead of full elements
 * add SetField, FieldValue generic methods -- thin wrappers around reflect

@@ -7,6 +7,7 @@ package ki
 import (
 	"errors"
 	"fmt"
+	"github.com/rcoreilly/goki/ki/kit"
 	"reflect"
 )
 
@@ -24,41 +25,25 @@ import (
 // nil signal value -- if that is sent, then the signal's default signal is
 // exchanged instead
 
-// signals that a Ki node sends about updates to the tree structure
-// using the NodeSignal (convert int64 to NodeSignals to get the stringer name)
+// NodeSignals are signals that a Ki node sends about updates to the tree
+// structure using the NodeSignal (convert sig int64 to NodeSignals to get the
+// stringer name).
 type NodeSignals int64
-
-// todo: consider supporting bit-flags on these node sigs, and keeping track
-// of all the mods that were made during an update -- otherwise this specific
-// info is typically lost and you just get a generic update -- could optimize
-// updates better by knowing the specific changes -- OR keep it simpler and
-// just have one update signal?  but need to not re-render for deleting, so
-// need that level of granularity..
 
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (
 	// no signal
 	NodeSignalNil NodeSignals = iota
-	// node has just been added to a new parent -- only if no previous parent, else Moved
-	NodeSignalAdded
-	// node was moved in the tree, or to a new tree -- data is old parent
-	NodeSignalMoved
-	// node is being deleted from its parent -- still has parent set in case any cleanup is neede
-	// data is the added child
-	NodeSignalChildAdded
-	// data is deleted child
-	NodeSignalChildDeleted
-	// all children deleted -- no data
-	NodeSignalChildrenDeleted
-	// entire node updated -- this could include multiple children added / deleted
+	// node was updated -- see the node Flags field for the specific changes
+	// that occured during the update -- data is those flags too
 	NodeSignalUpdated
 	// a field was updated -- data is name of field
 	NodeSignalFieldUpdated
 	// a property was set -- data is name of property
 	NodeSignalPropUpdated
-	// node is being deleted from its parent children list
+	// node is being deleted from its parent children list -- not blocked by updating status and delivered immediately
 	NodeSignalDeleting
-	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too
+	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too -- not blocked by updating status and delivered immediately
 	NodeSignalDestroying
 	// number of signal type consts -- add this to any other signal types passed
 	NodeSignalsN
@@ -72,13 +57,6 @@ var NodeSignalTrace bool = false
 // set this to a string to receive trace in a string that can be compared for testing
 // otherwise just goes to stdout
 var NodeSignalTraceString *string
-
-// classifies a set of node signals indicating that some major modification
-// was made to the structure of the tree, involving this node -- should
-// generally trigger a full rebuild
-func NodeSignalAnyMod(sig int64) bool {
-	return sig >= int64(NodeSignalAdded) && sig <= int64(NodeSignalChildrenDeleted)
-}
 
 // classifies a set of node signals indicating that some kind of update was made
 func NodeSignalAnyUpdate(sig int64) bool {
@@ -105,12 +83,16 @@ type Signal struct {
 	Cons   []Connection
 }
 
+var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
+
 // Connection represents one connection between a signal and a receiving Ki and function to call
 type Connection struct {
 	// node that will receive the signal
 	Recv Ki
 	// function on the receiver node that will receive the signal
 	Fun RecvFun
+	// todo: path to Recv node (PathUnique), used for copying / moving nodes -- not copying yet
+	// RecvPath string
 }
 
 // send the signal over this connection

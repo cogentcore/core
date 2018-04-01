@@ -12,7 +12,6 @@ import (
 	"fmt"
 	// "log"
 	"reflect"
-	"strings"
 )
 
 // Type provides JSON, XML marshal / unmarshal with encoding of underlying
@@ -21,12 +20,17 @@ type Type struct {
 	T reflect.Type
 }
 
+// the full name of the type: package name + "." + type name
+func (k Type) FullTypeName() string {
+	return FullTypeName(k.T)
+}
+
 // stringer interface
 func String(k Type) string {
 	if k.T == nil {
 		return "nil"
 	}
-	return k.T.Name()
+	return FullTypeName(k.T)
 }
 
 // MarshalJSON saves only the type name
@@ -35,7 +39,7 @@ func (k Type) MarshalJSON() ([]byte, error) {
 		b := []byte("null")
 		return b, nil
 	}
-	nm := "\"" + k.T.Name() + "\""
+	nm := "\"" + k.FullTypeName() + "\""
 	b := []byte(nm)
 	return b, nil
 }
@@ -65,7 +69,7 @@ func (k Type) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if k.T == nil {
 		tokens = append(tokens, xml.CharData("null"))
 	} else {
-		tokens = append(tokens, xml.CharData(k.T.Name()))
+		tokens = append(tokens, xml.CharData(k.FullTypeName()))
 	}
 	tokens = append(tokens, xml.EndElement{start.Name})
 	for _, t := range tokens {
@@ -114,39 +118,4 @@ func (k *Type) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", et)
 	}
 	return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", ct)
-}
-
-// a type and a name -- useful for specifying configurations of children in Ki
-// nodes, and various other use-cases
-type TypeAndName struct {
-	Type reflect.Type
-	Name string
-}
-
-// list of type-and-names -- can be created from a string spec
-type TypeAndNameList []TypeAndName
-
-// construct a type-and-name list from a list of type name pairs, space separated -- can include any json-like { } , [ ] formatting which is all stripped away and just the pairs of names are used
-func (t *TypeAndNameList) SetFromString(str string) error {
-	str = strings.Replace(str, ",", " ", -1)
-	str = strings.Replace(str, "{", " ", -1)
-	str = strings.Replace(str, "}", " ", -1)
-	str = strings.Replace(str, "[", " ", -1)
-	str = strings.Replace(str, "]", " ", -1)
-	ds := strings.Fields(str) // split by whitespace
-	sz := len(ds)
-	for i := 0; i < sz; i += 2 {
-		tn := ds[i]
-		nm := ds[i+1]
-		typ := Types.FindType(tn)
-		if typ == nil {
-			return fmt.Errorf("TypeAndNameList SetFromString: Types type name not found: %v", tn)
-		}
-		(*t) = append(*t, TypeAndName{typ, nm})
-	}
-	return nil
-}
-
-func (t *TypeAndNameList) Add(typ reflect.Type, nm string) {
-	(*t) = append(*t, TypeAndName{typ, nm})
 }

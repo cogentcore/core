@@ -238,7 +238,7 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 		if !ok {
 			return fmt.Errorf("ki.Slice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
 		}
-		kid.SetThis(kid)
+		kid.Init(kid)
 		nwk = append(nwk, kid)
 	}
 
@@ -435,7 +435,7 @@ func (k *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 				if !ok {
 					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
 				}
-				kid.SetThis(kid)
+				kid.Init(kid)
 				nwk = append(nwk, kid)
 			}
 		}

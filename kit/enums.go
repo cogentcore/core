@@ -73,7 +73,7 @@ func (tr *EnumRegistry) AddEnum(obj interface{}, bitFlag bool, props map[string]
 
 	// get the pointer-to version and elem so it is a settable type!
 	typ := reflect.PtrTo(reflect.TypeOf(obj)).Elem()
-	tn := typ.Name()
+	tn := FullTypeName(typ)
 	tr.Enums[tn] = typ
 	if props != nil {
 		tr.Props[tn] = props
@@ -92,7 +92,7 @@ func (tr *EnumRegistry) AddEnum(obj interface{}, bitFlag bool, props map[string]
 // and lower-cased -- also requires the number of enums -- assumes starts at 0
 func (tr *EnumRegistry) AddEnumAltLower(obj interface{}, bitFlag bool, props map[string]interface{}, prefix string, n int64) reflect.Type {
 	typ := tr.AddEnum(obj, bitFlag, props)
-	tn := typ.Name()
+	tn := FullTypeName(typ)
 	alts := make(map[int64]string)
 	tp := tr.Properties(tn)
 	tp["AltStrings"] = alts
@@ -229,9 +229,10 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 		eval = reflect.ValueOf(eval).Elem() // deref the pointer
 	}
 	et := reflect.TypeOf(eval)
-	alts := tr.AltStrings(et.Name())
+	tn := FullTypeName(et)
+	alts := tr.AltStrings(tn)
 	if alts == nil {
-		log.Printf("ki.EnumToAltString: no alternative string map for type %v\n", et.Name())
+		log.Printf("ki.EnumToAltString: no alternative string map for type %v\n", tn)
 		return ""
 	}
 	// convert to int64 for lookup
@@ -319,9 +320,10 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 		return err
 	}
 	et := etp.Elem()
-	alts := tr.AltStrings(et.Name())
+	tn := FullTypeName(et)
+	alts := tr.AltStrings(tn)
 	if alts == nil {
-		err := fmt.Errorf("ki.EnumFromAltString: no alternative string map for type %v\n", et.Name())
+		err := fmt.Errorf("ki.EnumFromAltString: no alternative string map for type %v\n", tn)
 		log.Printf("%v", err)
 		return err
 	}
@@ -331,7 +333,7 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 			return nil
 		}
 	}
-	err := fmt.Errorf("ki.EnumFromAltString: string: %v not found in alt list of strings for type%v\n", str, et.Name())
+	err := fmt.Errorf("ki.EnumFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
 	log.Printf("%v", err)
 	return err
 }
@@ -339,9 +341,10 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 // Set Enum from alternative String using a reflect.Value -- must pass a *pointer* to the enum item.
 func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string) error {
 	et := eval.Type()
-	alts := tr.AltStrings(et.Name())
+	tn := FullTypeName(et)
+	alts := tr.AltStrings(tn)
 	if alts == nil {
-		err := fmt.Errorf("ki.SetEnumValueFromAltString: no alternative string map for type %v\n", et.Name())
+		err := fmt.Errorf("ki.SetEnumValueFromAltString: no alternative string map for type %v\n", tn)
 		log.Printf("%v", err)
 		return err
 	}
@@ -351,7 +354,7 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 			return nil
 		}
 	}
-	err := fmt.Errorf("ki.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, et.Name())
+	err := fmt.Errorf("ki.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
 	log.Printf("%v", err)
 	return err
 }
