@@ -173,6 +173,22 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
+// set the text and update button
+func (g *Button) SetText(txt string) {
+	g.UpdateStart()
+	g.Text = txt
+	g.ConfigParts()
+	g.UpdateEnd()
+}
+
+// set the Icon (could be nil) and update button
+func (g *Button) SetIcon(ic *Icon) {
+	g.UpdateStart()
+	g.Icon = ic
+	g.ConfigParts()
+	g.UpdateEnd()
+}
+
 func (g *Button) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
@@ -321,6 +337,7 @@ func (g *Button) Size2D() {
 }
 
 func (g *Button) Layout2D(parBBox image.Rectangle) {
+	g.ConfigParts()
 	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
