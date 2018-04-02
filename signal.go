@@ -7,8 +7,9 @@ package ki
 import (
 	"errors"
 	"fmt"
-	"github.com/rcoreilly/goki/ki/kit"
 	"reflect"
+
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // Implements general signal passing between Ki objects, like Qt's Signal / Slot system
@@ -164,7 +165,7 @@ func (sig *Signal) DisconnectAll() {
 // record a trace of signal being emitted
 func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 	if NodeSignalTraceString != nil {
-		*NodeSignalTraceString += fmt.Sprintf("ki.Signal EmitGo from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
+		*NodeSignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
 	} else {
 		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.PathUnique(), NodeSignals(sig), data)
 	}

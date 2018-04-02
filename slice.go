@@ -160,7 +160,7 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte(",")...)
 	for i, kid := range k {
 		b = append(b, []byte("\"type\":\"")...)
-		knm := reflect.TypeOf(kid).Elem().Name()
+		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
 		b = append(b, []byte(knm)...)
 		b = append(b, []byte("\"")...)
 		if i < nk-1 {
@@ -269,7 +269,7 @@ func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	nt := xml.StartElement{Name: xml.Name{"", "N"}}
 	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{nt.Name})
 	for _, kid := range k {
-		knm := reflect.TypeOf(kid).Elem().Name()
+		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
 		t := xml.StartElement{Name: xml.Name{"", "Type"}}
 		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{t.Name})
 	}

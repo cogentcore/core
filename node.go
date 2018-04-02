@@ -12,20 +12,19 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/jinzhu/copier"
-	"github.com/json-iterator/go"
-	"github.com/rcoreilly/goki/ki/atomctr"
-	"github.com/rcoreilly/goki/ki/bitflag"
-	"github.com/rcoreilly/goki/ki/kit"
-	//	"errors"
 	"fmt"
-	// "github.com/cznic/mathutil"
+
 	"log"
 	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
-	// "unsafe"
+
+	"github.com/jinzhu/copier"
+	"github.com/json-iterator/go"
+	"github.com/rcoreilly/goki/ki/atomctr"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // use this to switch between using standard json vs. faster jsoniter
@@ -81,11 +80,16 @@ func (n Node) String() string {
 
 func (n *Node) Init(this Ki) {
 	n.This = this
-	n.FunFields(0, n.This, func(fk Ki, level int, d interface{}) bool {
-		bitflag.Set(fk.Flags(), int(IsField))
-		fk.InitName(fk, fk.Name())
-		fk.SetParent(d.(Ki))
-		return true
+	// we need to call this directly instead of FunFields because we need the field name
+	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+			fk := fieldVal.Addr().Interface().(Ki)
+			if fk != nil {
+				bitflag.Set(fk.Flags(), int(IsField))
+				fk.InitName(fk, field.Name)
+				fk.SetParent(n.This)
+			}
+		}
 	})
 }
 
@@ -206,6 +210,14 @@ func (n *Node) Flags() *int64 {
 
 func (n *Node) IsField() bool {
 	return bitflag.Has(n.Flag, int(IsField))
+}
+
+func (n *Node) IsDeleted() bool {
+	return bitflag.Has(n.Flag, int(NodeDeleted))
+}
+
+func (n *Node) IsDestroyed() bool {
+	return bitflag.Has(n.Flag, int(NodeDestroyed))
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -696,6 +708,7 @@ func (n *Node) DestroyAllDeleted() {
 }
 
 func (n *Node) Destroy() {
+	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	n.DisconnectAll()
 	// todo: traverse struct and un-set all Ptr's!
@@ -706,22 +719,52 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
+// Node version of this function from kit/embeds.go
+func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value)) {
+	v := kit.NonPtrValue(reflect.ValueOf(stru))
+	typ := v.Type()
+	if typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
+		return
+	}
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		vf := v.Field(i)
+		if !vf.CanInterface() {
+			continue
+		}
+		vfi := vf.Interface() // todo: check for interfaceablity etc
+		if vfi == nil || vfi == stru {
+			continue
+		}
+		if f.Type.Kind() == reflect.Struct && f.Anonymous && f.Type != KiT_Node {
+			FlatFieldsValueFun(vf.Addr().Interface(), fun) // key to take addr here so next level is addressable
+		} else {
+			fun(vfi, typ, f, vf)
+		}
+	}
+}
+
 func (n *Node) FunFields(level int, data interface{}, fun Fun) {
-	kiType := KiType()
-	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if field.Type.Implements(kiType) && field.Name != "Par" && field.Name != "This" {
-			fk := fieldVal.Interface().(Ki)
-			fun(fk, level, data)
+	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+			// note: Type.Implements(Ki) does NOT report true for types that embed Node
+			fk := fieldVal.Addr().Interface().(Ki)
+			if fk != nil {
+				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
+				fun(fk, level, data)
+			}
 		}
 	})
 }
 
 func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
-	kiType := KiType()
-	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if field.Type.Implements(kiType) {
-			fk := fieldVal.Interface().(Ki)
-			go fun(fk, level, data)
+	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+			fk := fieldVal.Addr().Interface().(Ki)
+			if fk != nil {
+				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
+				go fun(fk, level, data)
+			}
 		}
 	})
 }
@@ -890,6 +933,9 @@ func (n *Node) UpdateCtr() *atomctr.Ctr {
 }
 
 func (n *Node) UpdateStart() {
+	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
+		return
+	}
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 0 { // clear at start of update
 			bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
@@ -900,6 +946,9 @@ func (n *Node) UpdateStart() {
 }
 
 func (n *Node) UpdateEnd() {
+	if n.IsDestroyed() || n.IsDeleted() {
+		return
+	}
 	par_updt := false
 	n.FunDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
 		par_up := d.(*bool)             // did the parent already update?
@@ -914,7 +963,9 @@ func (n *Node) UpdateEnd() {
 			}
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
-				log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				if !k.IsDestroyed() && !k.IsDeleted() {
+					log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				}
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -924,6 +975,9 @@ func (n *Node) UpdateEnd() {
 }
 
 func (n *Node) UpdateEndAll() {
+	if n.IsDestroyed() || n.IsDeleted() {
+		return
+	}
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			k.UpdateCtr().Dec()
@@ -931,7 +985,9 @@ func (n *Node) UpdateEndAll() {
 			k.DestroyDeleted()
 		} else {
 			if k.UpdateCtr().Value() <= 0 {
-				log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				if !k.IsDestroyed() && !k.IsDeleted() {
+					log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+				}
 			} else {
 				k.UpdateCtr().Dec()
 			}
@@ -948,7 +1004,8 @@ func (n *Node) UpdateReset() {
 }
 
 func (n *Node) Disconnect() {
-	kit.FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+	n.NodeSig.DisconnectAll()
+	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 		switch {
 		case fieldVal.Kind() == reflect.Ptr:
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
@@ -1035,7 +1092,6 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 
 // copy from primary fields of from to to, recursively following anonymous embedded structs
 func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
-	kiType := KiType()
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
 	sv := kit.NonPtrValue(reflect.ValueOf(from))
 	typ := tv.Type()
@@ -1048,19 +1104,21 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 		tf := tv.Field(i)
 		sf := sv.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			n.CopyFieldsFrom(tf.Interface(), sf.Interface())
+			n.CopyFieldsFrom(tf.Addr().Interface(), sf.Addr().Interface())
 		} else {
 			switch {
-			case sf.Type().Implements(kiType):
+			case sf.Kind() == reflect.Struct && kit.TypeEmbeds(sf.Type(), KiT_Node):
 				sfk := sf.Addr().Interface().(Ki)
 				tfk := tf.Addr().Interface().(Ki)
-				tfk.CopyFrom(sfk)
+				if tfk != nil && sfk != nil {
+					tfk.CopyFrom(sfk)
+				}
 			case f.Type == KiT_Signal: // todo: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
-				tf.Set(sf)
+				tf.Addr().Set(sf)
 			default:
 				// use copier https://github.com/jinzhu/copier which handles as much as possible..
-				copier.Copy(tf.Interface(), sf.Interface())
+				copier.Copy(tf.Addr().Interface(), sf.Addr().Interface())
 			}
 		}
 
@@ -1082,14 +1140,14 @@ func (n *Node) CopyFromRaw(from Ki) error {
 func (n *Node) GetPtrPaths() {
 	root := n.This
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Interface()
+				vfi := fieldVal.Addr().Interface()
 				switch vfv := vfi.(type) {
-				case Ptr:
+				case *Ptr:
 					vfv.GetPath()
 					fmt.Printf("got path %v on field %v\n", vfv.Path, field.Name)
-					// case Signal:
+					// case *Signal:
 					// 	vfv.GetPaths()
 				}
 			}
@@ -1101,11 +1159,11 @@ func (n *Node) GetPtrPaths() {
 func (n *Node) SetPtrsFmPaths() {
 	root := n.Root()
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Interface()
+				vfi := fieldVal.Addr().Interface()
 				switch vfv := vfi.(type) {
-				case Ptr:
+				case *Ptr:
 					if !vfv.FindPtrFmPath(root) {
 						log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", vfv.Path, root.Name())
 					}
@@ -1119,11 +1177,11 @@ func (n *Node) SetPtrsFmPaths() {
 func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
 	root := n.Root()
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		kit.FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Interface()
+				vfi := fieldVal.Addr().Interface()
 				switch vfv := vfi.(type) {
-				case Ptr:
+				case *Ptr:
 					vfv.UpdatePath(oldPath, newPath, startOnly)
 				}
 			}
@@ -1194,34 +1252,6 @@ func (n *Node) LoadXML(b []byte) error {
 	n.UnmarshalPost()
 	return nil
 }
-
-// func (n *Node) SetPtrsFmPaths() {
-// 	root := n.This
-// 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-// 		v := reflect.ValueOf(k).Elem()
-// 		// fmt.Printf("v: %v\n", v.Type())
-// 		for i := 0; i < v.NumField(); i++ {
-// 			vf := v.Field(i)
-// 			// fmt.Printf("vf: %v\n", vf.Type())
-// 			if vf.CanInterface() {
-// 				kp, ok := (vf.Interface()).(Ptr)
-// 				if ok {
-// 					var pv Ki
-// 					if len(kp.Path) > 0 {
-// 						rt := d.(Ki)
-// 						pv = rt.FindPathUnique(kp.Path)
-// 						if pv == nil {
-// 							log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", kp.Path, rt.Name())
-// 						}
-// 						vf.FieldByName("Ptr").Set(reflect.ValueOf(pv))
-// 					}
-// 					// todo: should set Ptr to nil but can't seem to do that here -- complains when above set is called with pv = nil
-// 				}
-// 			}
-// 		}
-// 		return true
-// 	})
-// }
 
 func (n *Node) ParentAllChildren() {
 	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {

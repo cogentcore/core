@@ -11,14 +11,14 @@ import (
 	"log"
 	"reflect"
 	"strings"
+
+	"github.com/rcoreilly/goki/ki/bitflag"
 )
 
 // design notes: for methods that return string, not passing error b/c you can
 // easily check for null string, and registering errors in log for setter
 // methods, returning error and also logging so it is safe to ignore err if
 // you don't care
-
-// todo: suport bit-flag enums and composition of names as | of values, etc
 
 // Bit flags are setup just using the ordinal count iota, and the only diff is
 // the methods which do 1 << flag when operating on them
@@ -30,14 +30,16 @@ import (
 // new type by calling AddEnum in the process of creating a new global
 // variable, as in:
 //
-// var KiT_TypeName = ki.Enums.AddEnum(&TypeName{}, bitFlag true/false,
+// var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
 //    TypeNameProps (or nil))
 //
-// where TypeName is the name of the type, see below for BitFlag, and
-// TypeNameProps is nil or a map[string]interface{} of properties, OR:
+// where MyEnum is the name of the type, MyEnumN is the enum value
+// representing the number of defined enums (always good practice to define
+// this value, for ease of extension by others), and TypeNameProps is nil or a
+// map[string]interface{} of properties, OR:
 //
-// var KiT_TypeName = ki.Enums.AddEnumAltLower(&TypeName{}, bitFlag true/false,
-//    TypeNameProps, "Prefix", MyEnumN)
+// var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
+//    TypeNameProps, "Prefix")
 //
 // which automatically registers alternative names as lower-case versions of
 // const names with given prefix removed -- often what is used in e.g., json
@@ -45,12 +47,16 @@ import (
 //
 // special properties:
 //
+// * "N": max value of enum defined -- number of enum entries (assuming
+// ordinal, which is all that is currently supported here)
+//
 // * "BitFlag": true -- each value represents a bit in a set of bit flags, so
 // the string rep of a value contains an or-list of names for each bit set,
 // separated by |
 //
 // * "AltStrings": map[int64]string -- provides an alternative string mapping for
 // the enum values
+//
 type EnumRegistry struct {
 	Enums map[string]reflect.Type
 	// properties that can be associated with each enum type -- e.g., "BitFlag": true  --  "AltStrings" : map[int64]string, or other custom settings
@@ -60,38 +66,43 @@ type EnumRegistry struct {
 // Enums is master registry of enum types -- can also create your own package-specific ones
 var Enums EnumRegistry
 
-// AddEnum adds a given type to the registry -- requires an empty object to
-// grab type info from -- if bitFlag then sets BitFlag property, and each
-// value represents a bit in a set of bit flags, so the string rep of a value
-// contains an or-list of names for each bit set, separated by | -- can also
-// add additional properties
-func (tr *EnumRegistry) AddEnum(obj interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
+// AddEnum adds a given type to the registry -- requires the N value to set N
+// from and grab type info from -- if bitFlag then sets BitFlag property, and
+// each value represents a bit in a set of bit flags, so the string rep of a
+// value contains an or-list of names for each bit set, separated by | -- can
+// also add additional properties
+func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
 	if tr.Enums == nil {
 		tr.Enums = make(map[string]reflect.Type)
 		tr.Props = make(map[string]map[string]interface{})
 	}
 
 	// get the pointer-to version and elem so it is a settable type!
-	typ := reflect.PtrTo(reflect.TypeOf(obj)).Elem()
+	typ := reflect.PtrTo(reflect.TypeOf(en)).Elem()
+	n := EnumToInt64(en)
 	tn := FullTypeName(typ)
 	tr.Enums[tn] = typ
 	if props != nil {
 		tr.Props[tn] = props
 	}
+	tp := tr.Properties(tn)
+	tp["N"] = n
 	if bitFlag {
 		tp := tr.Properties(tn)
 		tp["BitFlag"] = true
 	}
-	// fmt.Printf("added enum: %v\n", tn)
+	// fmt.Printf("added enum: %v with n: %v\n", tn, n)
 	return typ
 }
 
-// AddEnumAltLower adds a given type to the registry -- requires an empty object to
-// grab type info from -- automatically initializes AltStrings alternative string map
-// based on the name with given prefix removed (e.g., a type name-based prefix)
-// and lower-cased -- also requires the number of enums -- assumes starts at 0
-func (tr *EnumRegistry) AddEnumAltLower(obj interface{}, bitFlag bool, props map[string]interface{}, prefix string, n int64) reflect.Type {
-	typ := tr.AddEnum(obj, bitFlag, props)
+// AddEnumAltLower adds a given type to the registry -- requires the N value
+// to set N from and grab type info from -- automatically initializes
+// AltStrings alternative string map based on the name with given prefix
+// removed (e.g., a type name-based prefix) and lower-cased -- also requires
+// the number of enums -- assumes starts at 0
+func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
+	typ := tr.AddEnum(en, bitFlag, props)
+	n := EnumToInt64(en)
 	tn := FullTypeName(typ)
 	alts := make(map[int64]string)
 	tp := tr.Properties(tn)
@@ -146,28 +157,34 @@ func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
 	}
 	m, ok := ps.(map[int64]string)
 	if !ok {
-		log.Printf("ki.EnumRegistry AltStrings error: AltStrings property must be a map[int64]string type, is not -- is instead: %T\n", m)
+		log.Printf("kit.EnumRegistry AltStrings error: AltStrings property must be a map[int64]string type, is not -- is instead: %T\n", m)
 		return nil
 	}
 	return m
 }
 
+// number of defined enum values
+func (tr *EnumRegistry) NVals(eval interface{}) int64 {
+	typ := reflect.TypeOf(eval)
+	n, _ := ToInt(tr.Prop(FullTypeName(typ), "N"))
+	return n
+}
+
 // check if this enum is for bit flags instead of mutually-exclusive int
 // values -- checks BitFlag property -- if true string rep of a value contains
 // an or-list of names for each bit set, separated by |
-func (tr *EnumRegistry) IsBitFlag(enumName string) bool {
-	b, _ := ToBool(tr.Prop(enumName, "BitFlag"))
+func (tr *EnumRegistry) IsBitFlag(eval interface{}) bool {
+	tn := FullTypeName(reflect.TypeOf(eval))
+	b, _ := ToBool(tr.Prop(tn, "BitFlag"))
 	return b
 }
 
 // EnumToInt64 converts an enum into an int64 using reflect -- just use int64(eval) when you
 // have the enum in hand -- this is when you just have a generic item
 func EnumToInt64(eval interface{}) int64 {
-	if reflect.TypeOf(eval).Kind() == reflect.Ptr {
-		eval = reflect.ValueOf(eval).Elem() // deref the pointer
-	}
+	ev := NonPtrValue(reflect.ValueOf(eval))
 	var ival int64
-	reflect.ValueOf(&ival).Elem().Set(reflect.ValueOf(eval).Convert(reflect.TypeOf(ival)))
+	reflect.ValueOf(&ival).Elem().Set(ev.Convert(reflect.TypeOf(ival)))
 	return ival
 }
 
@@ -175,7 +192,7 @@ func EnumToInt64(eval interface{}) int64 {
 // of the enum as well -- can't get it from the interface{} reliably
 func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 	if reflect.TypeOf(eval).Kind() != reflect.Ptr {
-		err := fmt.Errorf("ki.EnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
+		err := fmt.Errorf("kit.EnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
 		log.Printf("%v", err)
 		return err
 	}
@@ -196,17 +213,35 @@ func EnumInt64ToString(ival int64, typ reflect.Type) string {
 }
 
 // Enum to String converts an enum value to its corresponding string value --
-// you could just call fmt.Sprintf("%v") too but this is slightly faster
+// you could just call fmt.Sprintf("%v") too but this is slightly faster, and
+// it also works for bitflags which regular stringer does not
 func EnumToString(eval interface{}) string {
-	if reflect.TypeOf(eval).Kind() == reflect.Ptr {
-		eval = reflect.ValueOf(eval).Elem() // deref the pointer
-	}
 	strer, ok := eval.(fmt.Stringer) // will fail if not impl
 	if !ok {
-		log.Printf("ki.EnumToString: fmt.Stringer interface not supported by type %v\n", reflect.TypeOf(eval).Name())
+		log.Printf("kit.EnumToString: fmt.Stringer interface not supported by type %v\n", reflect.TypeOf(eval).Name())
 		return ""
 	}
 	return strer.String()
+}
+
+// BitFlags To String -- convert an int64 of bit flags into a string
+// representation of the bits that are set -- en is number of defined bits,
+// and also provides the type name for looking up strings
+func BitFlagsToString(bflg int64, en interface{}) string {
+	et := reflect.PtrTo(reflect.TypeOf(en)).Elem()
+	n := int(EnumToInt64(en))
+	str := ""
+	for i := 0; i < n; i++ {
+		if bitflag.Has(bflg, i) {
+			evs := EnumInt64ToString(int64(i), et)
+			if str == "" {
+				str = evs
+			} else {
+				str += "|" + evs
+			}
+		}
+	}
+	return str
 }
 
 // note: convenience methods b/c it is easier to find on registry type
@@ -232,7 +267,7 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 	tn := FullTypeName(et)
 	alts := tr.AltStrings(tn)
 	if alts == nil {
-		log.Printf("ki.EnumToAltString: no alternative string map for type %v\n", tn)
+		log.Printf("kit.EnumToAltString: no alternative string map for type %v\n", tn)
 		return ""
 	}
 	// convert to int64 for lookup
@@ -245,7 +280,7 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 	alts := tr.AltStrings(typnm)
 	if alts == nil {
-		log.Printf("ki.EnumInt64ToAltString: no alternative string map for type %v\n", typnm)
+		log.Printf("kit.EnumInt64ToAltString: no alternative string map for type %v\n", typnm)
 		return ""
 	}
 	return alts[ival]
@@ -257,7 +292,7 @@ func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 func SetEnumFromString(eptr interface{}, str string) error {
 	etp := reflect.TypeOf(eptr)
 	if etp.Kind() != reflect.Ptr {
-		err := fmt.Errorf("ki.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		err := fmt.Errorf("kit.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
 		log.Printf("%v", err)
 		return err
 	}
@@ -266,7 +301,7 @@ func SetEnumFromString(eptr interface{}, str string) error {
 	methnm := "StringTo" + et.Name()
 	meth := sv.MethodByName(methnm)
 	if meth.IsNil() {
-		err := fmt.Errorf("ki.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
+		err := fmt.Errorf("kit.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
 		log.Printf("%v", err)
 		return err
 	}
@@ -293,7 +328,7 @@ func SetEnumValueFromString(eval reflect.Value, str string) error {
 	methnm := "StringTo" + et.Name()
 	meth := sv.MethodByName(methnm)
 	if meth.IsNil() {
-		err := fmt.Errorf("ki.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
+		err := fmt.Errorf("kit.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
 		log.Printf("%v", err)
 		return err
 	}
@@ -315,7 +350,7 @@ func (tr *EnumRegistry) SetEnumValueFromString(eval reflect.Value, str string) e
 func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error {
 	etp := reflect.TypeOf(eptr)
 	if etp.Kind() != reflect.Ptr {
-		err := fmt.Errorf("ki.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		err := fmt.Errorf("kit.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
 		log.Printf("%v", err)
 		return err
 	}
@@ -323,7 +358,7 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 	tn := FullTypeName(et)
 	alts := tr.AltStrings(tn)
 	if alts == nil {
-		err := fmt.Errorf("ki.EnumFromAltString: no alternative string map for type %v\n", tn)
+		err := fmt.Errorf("kit.EnumFromAltString: no alternative string map for type %v\n", tn)
 		log.Printf("%v", err)
 		return err
 	}
@@ -333,7 +368,7 @@ func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error
 			return nil
 		}
 	}
-	err := fmt.Errorf("ki.EnumFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
+	err := fmt.Errorf("kit.EnumFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
 	log.Printf("%v", err)
 	return err
 }
@@ -344,7 +379,7 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 	tn := FullTypeName(et)
 	alts := tr.AltStrings(tn)
 	if alts == nil {
-		err := fmt.Errorf("ki.SetEnumValueFromAltString: no alternative string map for type %v\n", tn)
+		err := fmt.Errorf("kit.SetEnumValueFromAltString: no alternative string map for type %v\n", tn)
 		log.Printf("%v", err)
 		return err
 	}
@@ -354,7 +389,7 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 			return nil
 		}
 	}
-	err := fmt.Errorf("ki.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
+	err := fmt.Errorf("kit.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
 	log.Printf("%v", err)
 	return err
 }

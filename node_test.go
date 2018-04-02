@@ -7,9 +7,10 @@ package ki
 import (
 	"bytes"
 	"fmt"
-	"github.com/rcoreilly/goki/ki/kit"
 	"reflect"
 	"testing"
+
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 type NodeEmbed struct {
@@ -26,6 +27,13 @@ var NodeEmbedProps = map[string]interface{}{
 }
 
 var KiT_NodeEmbed = kit.Types.AddType(&NodeEmbed{}, NodeEmbedProps)
+
+type NodeWithField struct {
+	NodeEmbed
+	Field1 NodeEmbed
+}
+
+var KiT_NodeWithField = kit.Types.AddType(&NodeWithField{}, nil)
 
 func TestNodeAddChild(t *testing.T) {
 	parent := NodeEmbed{}
@@ -119,8 +127,8 @@ func TestNodeDeleteChild(t *testing.T) {
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
 	}
-	if len(parent.Deleted) != 1 {
-		t.Errorf("Deleted length != 1, was %d", len(parent.Kids))
+	if len(parent.Deleted) != 0 { // note: even though using destroy, UpdateEnd does destroy
+		t.Errorf("Deleted length != 0, was %d", len(parent.Kids))
 	}
 }
 
@@ -133,8 +141,8 @@ func TestNodeDeleteChildName(t *testing.T) {
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
 	}
-	if len(parent.Deleted) != 1 {
-		t.Errorf("Deleted length != 1, was %d", len(parent.Kids))
+	if len(parent.Deleted) != 0 {
+		t.Errorf("Deleted length != 0, was %d", len(parent.Kids))
 	}
 }
 
@@ -304,7 +312,10 @@ func TestNodeConfig(t *testing.T) {
 	// }
 
 	config3 := kit.TypeAndNameList{}
-	err := config3.SetFromString("{NodeEmbed, child4}, {Node, child1}, {NodeEmbed, child5}, {NodeEmbed, child3}, {NodeEmbed, child6}")
+	// fmt.Printf("NodeEmbed type name: %v\n", kit.FullTypeName(KiT_NodeEmbed))
+	netn := kit.FullTypeName(KiT_NodeEmbed)
+	ntn := kit.FullTypeName(KiT_Node)
+	err := config3.SetFromString("{" + netn + ", child4}, {" + ntn + ", child1}, {" + netn + ", child5}, {" + netn + ", child3}, {" + netn + ", child6}")
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -461,7 +472,8 @@ func TestNodeUpdate(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
+		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig),
+			kit.BitFlagsToString(*(s.Flags()), FlagsN)))
 	})
 	// child1 :=
 	parent.AddNewChildNamed(nil, "child1")
@@ -473,7 +485,7 @@ func TestNodeUpdate(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
-	trg := []string{"par1 sig NodeSignalChildAdded", "par1 sig NodeSignalChildAdded", "par1 sig NodeSignalUpdated"}
+	trg := []string{"par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("Add child sigs error -- results: %v != target: %v\n", res, trg)
 	}
@@ -620,20 +632,12 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal EmitGo from: tree1 sig: NodeSignalChildDeleted data: child12
-	subchild12
-
-ki.Signal EmitGo from: child12 sig: NodeSignalMoved data: tree1
-	child11
-	child13
-
-ki.Signal EmitGo from: tree2 sig: NodeSignalChildAdded data: child12
-	subchild12
-
+	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 256
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 64
 `
 	// fmt.Printf("Move Signals:\n%v", sigs)
 	if sigs != mvsigs {
-		t.Errorf("TestTreeMod child12 move signals not as expected: %v", sigs)
+		t.Errorf("TestTreeMod child12 move signals:\n%v\nnot as expected:\n%v\n", sigs, mvsigs)
 	}
 	sigs = ""
 
@@ -643,17 +647,22 @@ ki.Signal EmitGo from: tree2 sig: NodeSignalChildAdded data: child12
 
 	// fmt.Printf("#################################\n")
 
-	delsigs := `ki.Signal EmitGo from: child12 sig: NodeSignalDeleting data: <nil>
-ki.Signal EmitGo from: tree2 sig: NodeSignalUpdated data: <nil>
-ki.Signal EmitGo from: child12 sig: NodeSignalDestroying data: <nil>
-ki.Signal EmitGo from: subchild12 sig: NodeSignalDeleting data: <nil>
-ki.Signal EmitGo from: subchild12 sig: NodeSignalDestroying data: <nil>
+	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 256
+ki.Signal Emit from: child12 sig: NodeSignalDestroying data: <nil>
+ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
+ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
 `
 
 	// fmt.Printf("Delete Signals:\n%v", sigs)
 	if sigs != delsigs {
-		t.Errorf("TestTreeMod child12 move signals not as expected: %v", sigs)
+		t.Errorf("TestTreeMod child12 move signals:\n%v\nnot as expected:\n%v\n", sigs, delsigs)
 	}
 	sigs = ""
 
+}
+
+func TestNodeField(t *testing.T) {
+	parent := NodeWithField{}
+	parent.InitName(&parent, "par1")
 }

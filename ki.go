@@ -5,9 +5,10 @@
 package ki
 
 import (
+	"reflect"
+
 	"github.com/rcoreilly/goki/ki/atomctr"
 	"github.com/rcoreilly/goki/ki/kit"
-	"reflect"
 )
 
 // bit flags for efficient core state of nodes -- see bitflag package for
@@ -27,6 +28,10 @@ const (
 	NodeCopied
 	// node was moved in the tree, or to a new tree
 	NodeMoved
+	// this node has been deleted
+	NodeDeleted
+	// this node has been destroyed -- do not trigger any more update signals on it
+	NodeDestroyed
 	// one or more new children were added to the node
 	ChildAdded
 	// one or more children were moved within the node
@@ -38,13 +43,13 @@ const (
 	// total number of flags used by base Ki Node -- can extend from here up to 64 bits
 	FlagsN
 
-	// Mask for all the update flags
-	UpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+	// Mask for all the update flags -- destroyed is excluded b/c otherwise it would get cleared
+	UpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(NodeDeleted)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
 )
 
 //go:generate stringer -type=Flags
 
-var KiT_Flags = kit.Enums.AddEnum(IsField, true, nil) // true = bitflags
+var KiT_Flags = kit.Enums.AddEnum(FlagsN, true, nil) // true = bitflags
 
 /*
 The Ki interface provides the core functionality for the GoKi tree -- insipred by Qt QObject in specific and every other Tree everywhere in general.
@@ -106,6 +111,12 @@ type Ki interface {
 
 	// is this a field on a parent struct, as opposed to a child?
 	IsField() bool
+
+	// has this node just been deleted (within last update cycle?)
+	IsDeleted() bool
+
+	// is this node destroyed?
+	IsDestroyed() bool
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
