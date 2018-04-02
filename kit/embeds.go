@@ -7,13 +7,15 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
+	"log"
 	"reflect"
 )
 
 // This file contains helpful functions for dealing with embedded structs, in
-// the reflect system
+// the reflect system, including basic functions for guaranteed access to
+// pointer and non-pointer types and values
 
-// get the non-pointer underlying type
+// the non-pointer underlying type
 func NonPtrType(typ reflect.Type) reflect.Type {
 	for typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
@@ -21,7 +23,7 @@ func NonPtrType(typ reflect.Type) reflect.Type {
 	return typ
 }
 
-// get the pointer to underlying type
+// the pointer to underlying type
 func PtrType(typ reflect.Type) reflect.Type {
 	for typ.Kind() != reflect.Ptr {
 		typ = reflect.PtrTo(typ)
@@ -29,7 +31,7 @@ func PtrType(typ reflect.Type) reflect.Type {
 	return typ
 }
 
-// get the non-pointer underlying value
+// the non-pointer underlying value
 func NonPtrValue(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Ptr { // todo: could also look for slice here
 		v = v.Elem()
@@ -37,42 +39,170 @@ func NonPtrValue(v reflect.Value) reflect.Value {
 	return v
 }
 
+// the pointer version (Addr()) of the underlying value
+func PtrValue(v reflect.Value) reflect.Value {
+	for v.Kind() != reflect.Ptr { // todo: could also look for slice here
+		v = v.Addr()
+	}
+	return v
+}
+
+// the non-pointer value of an interface
+func NonPtrInterface(el interface{}) interface{} {
+	v := reflect.ValueOf(el)
+	for v.Kind() == reflect.Ptr { // todo: could also look for slice here
+		v = v.Elem()
+	}
+	return v.Interface()
+}
+
 // call a function on all the the primary fields of a given struct type,
 // including those on anonymous embedded structs that this struct has, passing
 // the current (embedded) type and StructField -- effectively flattens the
-// reflect field list
-func FlatFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField)) {
+// reflect field list -- if fun returns false then iteration stops -- overall
+// rval is false if iteration was stopped or there was an error (logged), true
+// otherwise
+func FlatFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
+	if typ.Kind() != reflect.Struct {
+		log.Printf("kit.FlatFieldsTypeFun: Must call on a struct type, not: %v\n", typ)
+		return false
+	}
+	rval := true
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			FlatFieldsTypeFun(f.Type, fun)
+			rval = FlatFieldsTypeFun(f.Type, fun) // no err here
+			if !rval {
+				break
+			}
 		} else {
-			fun(typ, f)
+			rval = fun(typ, f)
+			if !rval {
+				break
+			}
 		}
 	}
+	return rval
 }
 
-// call a function on all the the primary fields of a given struct value
-// including those on anonymous embedded structs that this struct has, passing
-// the current (embedded) type and StructField -- effectively flattens the
-// reflect field list
-func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value)) {
-	v := NonPtrValue(reflect.ValueOf(stru))
+// call a function on all the the primary fields of a given struct value (must
+// pass a pointer to the struct) including those on anonymous embedded structs
+// that this struct has, passing the current (embedded) type and StructField
+// -- effectively flattens the reflect field list
+func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+	vv := reflect.ValueOf(stru)
+	if stru == nil || vv.Kind() != reflect.Ptr {
+		log.Printf("kit.FlatFieldsValueFun: must pass a non-nil pointer to the struct: %v\n", stru)
+		return false
+	}
+	v := NonPtrValue(vv)
 	typ := v.Type()
+	rval := true
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		vf := v.Field(i)
-		vfi := vf.Interface() // todo: check for interfaceablity etc
+		if !vf.CanInterface() {
+			continue
+		}
+		vfi := vf.Interface()
 		if vfi == nil || vfi == stru {
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			FlatFieldsValueFun(vf.Addr().Interface(), fun) // key to take addr here so next level is addressable
+			// key to take addr here so next level is addressable
+			rval = FlatFieldsValueFun(PtrValue(vf).Interface(), fun)
+			if !rval {
+				break
+			}
 		} else {
-			fun(vfi, typ, f, vf)
+			rval = fun(vfi, typ, f, vf)
+			if !rval {
+				break
+			}
 		}
 	}
+	return rval
+}
+
+// a slice list of all the StructField type information for fields of given type and any embedded types -- returns nil on error (logged)
+func FlatFields(typ reflect.Type) []reflect.StructField {
+	ff := make([]reflect.StructField, 0)
+	err := FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+		ff = append(ff, field)
+		return true
+	})
+	if err {
+		return nil
+	}
+	return ff
+}
+
+// a slice list of all the field reflect.Value's for fields of given struct (must pass a pointer to the struct) and any of its embedded structs -- returns nil on error (logged)
+func FlatFieldVals(stru interface{}) []reflect.Value {
+	ff := make([]reflect.Value, 0)
+	err := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		ff = append(ff, fieldVal)
+		return true
+	})
+	if err {
+		return nil
+	}
+	return ff
+}
+
+// a slice list of all the field interface{} values *as pointers to the field value* (i.e., calling Addr() on the Field Value) for fields of given struct (must pass a pointer to the struct) and any of its embedded structs -- returns nil on error (logged)
+func FlatFieldInterfaces(stru interface{}) []interface{} {
+	ff := make([]interface{}, 0)
+	err := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		ff = append(ff, PtrValue(fieldVal).Interface())
+		return true
+	})
+	if err {
+		return nil
+	}
+	return ff
+}
+
+// todo: is this already in reflect??
+
+// find field in type or embedded structs within type, by name
+func FindFlatFieldByName(typ reflect.Type, nm string) reflect.StructField {
+	ff := reflect.StructField{}
+	FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+		if field.Name == nm {
+			ff = field
+			return false // stop iterating
+		}
+		return true
+	})
+	return ff
+}
+
+// find field in object and embedded objects, by name, returning reflect.Value of field
+func FindFlatFieldValueByName(stru interface{}, nm string) reflect.Value {
+	ff := reflect.Value{}
+	FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if field.Name == nm {
+			ff = fieldVal
+			return false // stop iterating
+		}
+		return true
+	})
+	return ff
+}
+
+// find field in object and embedded objects, by name, returning interface{} to pointer of field
+func FindFlatFieldInterfaceByName(stru interface{}, nm string) interface{} {
+	ff := interface{}(nil)
+	FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if field.Name == nm {
+			ff = PtrValue(fieldVal).Interface()
+			return false // stop iterating
+		}
+		return true
+	})
+	return ff
 }
 
 // checks if given type embeds another type, at any level of recursive embedding
@@ -100,10 +230,11 @@ func EmbededStruct(stru interface{}, embed reflect.Type) interface{} {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous { // anon only avail on StructField fm typ
 			vf := v.Field(i)
+			vfpi := PtrValue(vf).Interface()
 			if f.Type == embed {
-				return vf.Interface()
+				return vfpi
 			}
-			rv := EmbededStruct(vf.Addr().Interface(), embed)
+			rv := EmbededStruct(vfpi, embed)
 			if rv != nil {
 				return rv
 			}

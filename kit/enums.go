@@ -78,7 +78,7 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 	}
 
 	// get the pointer-to version and elem so it is a settable type!
-	typ := reflect.PtrTo(reflect.TypeOf(en)).Elem()
+	typ := PtrType(reflect.TypeOf(en)).Elem()
 	n := EnumToInt64(en)
 	tn := FullTypeName(typ)
 	tr.Enums[tn] = typ
@@ -203,7 +203,7 @@ func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 // First convert an int64 to enum of given type, and then convert to string value
 func EnumInt64ToString(ival int64, typ reflect.Type) string {
 	// evpi, evi := NewEnumFromType(typ) // note: same code, but works here and not in fun..
-	evnp := reflect.New(reflect.PtrTo(typ))
+	evnp := reflect.New(PtrType(typ))
 	evpi := evnp.Interface()
 	evn := reflect.New(typ)
 	evi := evn.Interface()
@@ -228,7 +228,7 @@ func EnumToString(eval interface{}) string {
 // representation of the bits that are set -- en is number of defined bits,
 // and also provides the type name for looking up strings
 func BitFlagsToString(bflg int64, en interface{}) string {
-	et := reflect.PtrTo(reflect.TypeOf(en)).Elem()
+	et := PtrType(reflect.TypeOf(en)).Elem()
 	n := int(EnumToInt64(en))
 	str := ""
 	for i := 0; i < n; i++ {

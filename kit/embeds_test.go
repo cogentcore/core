@@ -48,8 +48,12 @@ func TestTypeEmbeds(t *testing.T) {
 	c := C{}
 	d := D{}
 
-	c.Mbr1 = "a string"
-	c.Mbr2 = 42
+	c.Mbr1 = "mbr1 string"
+	c.Mbr2 = 2
+	c.Mbr3 = "mbr3 string"
+	c.Mbr4 = 4
+	c.Mbr5 = "mbr5 string"
+	c.Mbr6 = 6
 
 	b_in_a := TypeEmbeds(reflect.TypeOf(a), reflect.TypeOf(b))
 	// fmt.Printf("A embeds B: %v\n", b_in_a)
@@ -78,7 +82,7 @@ func TestTypeEmbeds(t *testing.T) {
 	ca := EmbededStruct(&c, reflect.TypeOf(a))
 	cas := fmt.Sprintf("%+v", ca)
 
-	cat := "{Mbr1:a string Mbr2:42}"
+	cat := "&{Mbr1:mbr1 string Mbr2:2}"
 
 	if cas != cat {
 		t.Errorf("Didn't get proper embedded members of C from At: %v != %v\n", cas, cat)
@@ -91,4 +95,31 @@ func TestTypeEmbeds(t *testing.T) {
 	// FlatFieldsValueFun(c, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 	// 	fmt.Printf("typ: %v, field: %v val: %v\n", typ, field, fieldVal)
 	// })
+
+	// note: these test the above TypeFun and ValueFun
+
+	ff := FlatFields(reflect.TypeOf(c))
+	ffs := fmt.Sprintf("%v", ff)
+	fft := `[{Mbr1  string  0 [0] false} {Mbr2  int  16 [1] false} {Mbr3  string  24 [1] false} {Mbr4  int  40 [2] false} {Mbr5  string  48 [1] false} {Mbr6  int  64 [2] false}]`
+	if ffs != fft {
+		t.Errorf("Didn't get proper flat field list of C: %v != %v\n", ffs, fft)
+	}
+
+	ffv := FlatFieldVals(&c)
+	ffvs := fmt.Sprintf("%v", ffv)
+	ffvt := `[mbr1 string <int Value> mbr3 string <int Value> mbr5 string <int Value>]`
+	if ffvs != ffvt {
+		t.Errorf("Didn't get proper flat field value list of C: %v != %v\n", ffvs, ffvt)
+	}
+
+	ffi := FlatFieldInterfaces(&c)
+	ffis := ""
+	for _, fi := range ffi {
+		ffis += fmt.Sprintf("%v,", NonPtrInterface(fi))
+	}
+	ffit := `mbr1 string,2,mbr3 string,4,mbr5 string,6,`
+	if ffis != ffit {
+		t.Errorf("Didn't get proper flat field interface list of C: %v != %v\n", ffis, ffit)
+	}
+
 }

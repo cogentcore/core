@@ -84,7 +84,7 @@ func (n *Node) Init(this Ki) {
 	// we need to call this directly instead of FunFields because we need the field name
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := fieldVal.Addr().Interface().(Ki)
+			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
 				bitflag.Set(fk.Flags(), int(IsField))
 				fk.InitName(fk, field.Name)
@@ -738,7 +738,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous && kit.PtrType(f.Type) != KiT_Node {
-			FlatFieldsValueFun(vf.Addr().Interface(), fun) // key to take addr here so next level is addressable
+			FlatFieldsValueFun(kit.PtrValue(vf).Interface(), fun) // key to take addr here so next level is addressable
 		} else {
 			fun(vfi, typ, f, vf)
 		}
@@ -750,7 +750,7 @@ func (n *Node) FunFields(level int, data interface{}, fun Fun) {
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			// note: Type.Implements(Ki) does NOT report true for types that embed Node
-			fk := fieldVal.Addr().Interface().(Ki)
+			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
 				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
 				fun(fk, level, data)
@@ -763,7 +763,7 @@ func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
 	kitype := KiType()
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := fieldVal.Addr().Interface().(Ki)
+			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
 				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
 				go fun(fk, level, data)
@@ -1013,11 +1013,11 @@ func (n *Node) Disconnect() {
 		case fieldVal.Kind() == reflect.Ptr:
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 		case fieldVal.Type() == KiT_Signal:
-			if fs, ok := fieldVal.Addr().Interface().(*Signal); ok {
+			if fs, ok := kit.PtrValue(fieldVal).Interface().(*Signal); ok {
 				fs.DisconnectAll()
 			}
 		case fieldVal.Type() == KiT_Ptr:
-			if pt, ok := fieldVal.Addr().Interface().(*Ptr); ok {
+			if pt, ok := kit.PtrValue(fieldVal).Interface().(*Ptr); ok {
 				pt.Reset()
 			}
 		}
@@ -1107,22 +1107,24 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 		}
 		tf := tv.Field(i)
 		sf := sv.Field(i)
+		tfpi := kit.PtrValue(tf).Interface()
+		sfpi := kit.PtrValue(sf).Interface()
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			n.CopyFieldsFrom(tf.Addr().Interface(), sf.Addr().Interface())
+			n.CopyFieldsFrom(tfpi, sfpi)
 		} else {
 			switch {
 			case sf.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(sf.Type(), kitype):
-				sfk := sf.Addr().Interface().(Ki)
-				tfk := tf.Addr().Interface().(Ki)
+				sfk := sfpi.(Ki)
+				tfk := tfpi.(Ki)
 				if tfk != nil && sfk != nil {
 					tfk.CopyFrom(sfk)
 				}
 			case f.Type == KiT_Signal: // todo: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
-				tf.Addr().Set(sf)
+				kit.PtrValue(tf).Set(sf)
 			default:
 				// use copier https://github.com/jinzhu/copier which handles as much as possible..
-				copier.Copy(tf.Addr().Interface(), sf.Addr().Interface())
+				copier.Copy(tfpi, sfpi)
 			}
 		}
 
@@ -1146,7 +1148,7 @@ func (n *Node) GetPtrPaths() {
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
 		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Addr().Interface()
+				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
 				case *Ptr:
 					vfv.GetPath()
@@ -1165,7 +1167,7 @@ func (n *Node) SetPtrsFmPaths() {
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
 		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Addr().Interface()
+				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
 				case *Ptr:
 					if !vfv.FindPtrFmPath(root) {
@@ -1183,7 +1185,7 @@ func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
 	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
 		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 			if fieldVal.CanInterface() {
-				vfi := fieldVal.Addr().Interface()
+				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
 				case *Ptr:
 					vfv.UpdatePath(oldPath, newPath, startOnly)
