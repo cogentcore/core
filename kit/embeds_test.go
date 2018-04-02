@@ -15,6 +15,16 @@ type A struct {
 	Mbr2 int
 }
 
+type AIf interface {
+	AFun() bool
+}
+
+func (a *A) AFun() bool {
+	return true
+}
+
+var _ AIf = &A{}
+
 type B struct {
 	A
 	Mbr3 string
@@ -27,10 +37,16 @@ type C struct {
 	Mbr6 int
 }
 
+type D struct {
+	Mbr5 string
+	Mbr6 int
+}
+
 func TestTypeEmbeds(t *testing.T) {
 	a := A{}
 	b := B{}
 	c := C{}
+	d := D{}
 
 	c.Mbr1 = "a string"
 	c.Mbr2 = 42
@@ -44,8 +60,19 @@ func TestTypeEmbeds(t *testing.T) {
 	a_in_c := TypeEmbeds(reflect.TypeOf(c), reflect.TypeOf(a))
 	// fmt.Printf("C embeds A: %v\n", a_in_c)
 
-	if b_in_a != false || a_in_b != true || a_in_c != true {
-		t.Errorf("something wrong in TypeEmbeds: should have false, true, true, is: %v %v %v\n", b_in_a, a_in_b, a_in_c)
+	aiftype := reflect.TypeOf((*AIf)(nil)).Elem()
+
+	// note: MUST use pointer for checking implements for pointer receivers!
+	// fmt.Printf("a implements Aif %v\n", reflect.TypeOf(&a).Implements(aiftype))
+
+	aif_in_c := EmbeddedTypeImplements(reflect.TypeOf(c), aiftype)
+	// fmt.Printf("C implements AIf: %v\n", aif_in_c)
+
+	aif_in_d := EmbeddedTypeImplements(reflect.TypeOf(d), aiftype)
+	// fmt.Printf("D implements AIf: %v\n", aif_in_d)
+
+	if b_in_a != false || a_in_b != true || a_in_c != true || aif_in_c != true || aif_in_d != false {
+		t.Errorf("something wrong in TypeEmbeds: should have false, true, true, true, false is: %v %v %v %v %v\n", b_in_a, a_in_b, a_in_c, aif_in_c, aif_in_d)
 	}
 
 	ca := EmbededStruct(&c, reflect.TypeOf(a))

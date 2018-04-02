@@ -79,10 +79,11 @@ func (n Node) String() string {
 //  Basic Ki fields
 
 func (n *Node) Init(this Ki) {
+	kitype := KiType()
 	n.This = this
 	// we need to call this directly instead of FunFields because we need the field name
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			fk := fieldVal.Addr().Interface().(Ki)
 			if fk != nil {
 				bitflag.Set(fk.Flags(), int(IsField))
@@ -736,7 +737,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 		if vfi == nil || vfi == stru {
 			continue
 		}
-		if f.Type.Kind() == reflect.Struct && f.Anonymous && f.Type != KiT_Node {
+		if f.Type.Kind() == reflect.Struct && f.Anonymous && kit.PtrType(f.Type) != KiT_Node {
 			FlatFieldsValueFun(vf.Addr().Interface(), fun) // key to take addr here so next level is addressable
 		} else {
 			fun(vfi, typ, f, vf)
@@ -745,8 +746,9 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 }
 
 func (n *Node) FunFields(level int, data interface{}, fun Fun) {
+	kitype := KiType()
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			// note: Type.Implements(Ki) does NOT report true for types that embed Node
 			fk := fieldVal.Addr().Interface().(Ki)
 			if fk != nil {
@@ -758,8 +760,9 @@ func (n *Node) FunFields(level int, data interface{}, fun Fun) {
 }
 
 func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
+	kitype := KiType()
 	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
-		if fieldVal.Kind() == reflect.Struct && kit.TypeEmbeds(field.Type, KiT_Node) {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			fk := fieldVal.Addr().Interface().(Ki)
 			if fk != nil {
 				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
@@ -774,7 +777,7 @@ func (n *Node) FunUp(level int, data interface{}, fun Fun) bool {
 		return false
 	}
 	level++
-	if n.Parent() != nil {
+	if n.Parent() != nil && n.Parent() != n.This { // prevent loops
 		return n.Parent().FunUp(level, data, fun)
 	}
 	return true
@@ -1092,6 +1095,7 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 
 // copy from primary fields of from to to, recursively following anonymous embedded structs
 func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
+	kitype := KiType()
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
 	sv := kit.NonPtrValue(reflect.ValueOf(from))
 	typ := tv.Type()
@@ -1107,7 +1111,7 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 			n.CopyFieldsFrom(tf.Addr().Interface(), sf.Addr().Interface())
 		} else {
 			switch {
-			case sf.Kind() == reflect.Struct && kit.TypeEmbeds(sf.Type(), KiT_Node):
+			case sf.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(sf.Type(), kitype):
 				sfk := sf.Addr().Interface().(Ki)
 				tfk := tf.Addr().Interface().(Ki)
 				if tfk != nil && sfk != nil {

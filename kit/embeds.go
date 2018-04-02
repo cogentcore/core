@@ -7,8 +7,6 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
-	// "fmt"
-	// "log"
 	"reflect"
 )
 
@@ -19,6 +17,14 @@ import (
 func NonPtrType(typ reflect.Type) reflect.Type {
 	for typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
+	}
+	return typ
+}
+
+// get the pointer to underlying type
+func PtrType(typ reflect.Type) reflect.Type {
+	for typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
 	}
 	return typ
 }
@@ -104,4 +110,28 @@ func EmbededStruct(stru interface{}, embed reflect.Type) interface{} {
 		}
 	}
 	return nil
+}
+
+// checks if given type implements given interface, or it embeds a type that does so
+func EmbeddedTypeImplements(typ, iface reflect.Type) bool {
+	if typ.Implements(iface) {
+		return true
+	}
+	if reflect.PtrTo(typ).Implements(iface) { // typically need the pointer type to impl
+		return true
+	}
+	typ = NonPtrType(typ)
+	if typ.Implements(iface) { // try it all possible ways..
+		return true
+	}
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		if f.Type.Kind() == reflect.Struct && f.Anonymous {
+			rv := EmbeddedTypeImplements(f.Type, iface)
+			if rv {
+				return true
+			}
+		}
+	}
+	return false
 }
