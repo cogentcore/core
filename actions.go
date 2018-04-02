@@ -199,7 +199,7 @@ func (g *Action) ChildrenBBox2D() image.Rectangle {
 
 func (g *Action) Render2D() {
 	if g.PushBounds() {
-		if g.IsLeaf() {
+		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
 			// todo: manage stacked layout to select appropriate image based on state
@@ -351,7 +351,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 		return nil
 	}
 	lay := Layout{}
-	lay.SetThisName(&lay, name+"Menu")
+	lay.InitName(&lay, name+"Menu")
 	lay.Lay = LayoutCol
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
@@ -365,7 +365,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp := NewViewport2D(vpsz.X, vpsz.Y)
-	pvp.SetThisName(pvp, name+"PopupVP")
+	pvp.InitName(pvp, name+"PopupVP")
 	pvp.Fill = true
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
@@ -394,7 +394,7 @@ func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFun) *Actio
 		g.Menu = make(Menu, 0, 10)
 	}
 	ac := Action{}
-	ac.SetThisName(&ac, txt)
+	ac.InitName(&ac, txt)
 	ac.Text = txt
 	ac.SetAsMenu()
 	g.Menu = append(g.Menu, ac.This.(Node2D))
@@ -552,7 +552,7 @@ func (g *MenuButton) ChildrenBBox2D() image.Rectangle {
 
 func (g *MenuButton) Render2D() {
 	if g.PushBounds() {
-		if g.IsLeaf() {
+		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
 			// todo: manage stacked layout to select appropriate image based on state

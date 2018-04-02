@@ -6,11 +6,13 @@ package gi
 
 import (
 	// "fmt"
+
+	"image"
+	"math"
+
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
-	"math"
 )
 
 // all different types of alignment -- only some are applicable to different
@@ -43,7 +45,7 @@ const (
 
 //go:generate stringer -type=Align
 
-var KiT_Align = kit.Enums.AddEnumAltLower(AlignLeft, false, nil, "Align", int64(AlignN))
+var KiT_Align = kit.Enums.AddEnumAltLower(AlignN, false, nil, "Align")
 
 // is this a generalized alignment to start of container?
 func IsAlignStart(a Align) bool {
@@ -75,7 +77,7 @@ const (
 	OverflowN
 )
 
-var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowAuto, false, nil, "Overflow", int64(OverflowN))
+var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, false, nil, "Overflow")
 
 //go:generate stringer -type=Overflow
 
@@ -342,7 +344,7 @@ func (ly *Layout) GatherSizes() {
 // if we are not a child of a layout, then get allocation from a parent obj that
 // has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Parent == nil {
+	if ly.Par == nil {
 		return
 	}
 	pgi, _ := KiToNode2D(ly.Par)
@@ -580,7 +582,7 @@ func (ly *Layout) ManageOverflow() {
 func (ly *Layout) SetHScroll() {
 	if ly.HScroll == nil {
 		ly.HScroll = &ScrollBar{}
-		ly.HScroll.SetThisName(ly.HScroll, "Lay_HScroll")
+		ly.HScroll.InitName(ly.HScroll, "Lay_HScroll")
 		ly.HScroll.SetParent(ly.This)
 		ly.HScroll.Horiz = true
 		ly.HScroll.Init2D()
@@ -624,7 +626,7 @@ func (ly *Layout) DeleteHScroll() {
 func (ly *Layout) SetVScroll() {
 	if ly.VScroll == nil {
 		ly.VScroll = &ScrollBar{}
-		ly.VScroll.SetThisName(ly.VScroll, "Lay_VScroll")
+		ly.VScroll.InitName(ly.VScroll, "Lay_VScroll")
 		ly.VScroll.SetParent(ly.This)
 		ly.VScroll.Init2D()
 		ly.VScroll.Defaults()
@@ -786,6 +788,9 @@ func (ly *Layout) Style2D() {
 }
 
 func (ly *Layout) Size2D() {
+	// if ly.IsField() {
+	// 	fmt.Printf("Layout Size2D on field: %v\n", ly.Name())
+	// }
 	ly.InitLayout2D()
 	ly.GatherSizes()
 }

@@ -6,12 +6,13 @@ package gi
 
 import (
 	// "fmt"
+	"image"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
 	// "math"
 )
 
@@ -299,7 +300,7 @@ func (g *Button) ConfigParts() {
 		txIdx = len(config)
 		config.Add(KiT_Label, "Text")
 	}
-	g.Parts.ConfigChildren(config)
+	g.Parts.ConfigChildren(config, false) // not unique names
 	if icIdx >= 0 {
 		kc, _ := g.Parts.Child(icIdx)
 		ici, _ := KiToNode2D(kc)
@@ -329,7 +330,6 @@ func (g *Button) Style2D() {
 	}
 	// todo: how to get state-specific user prefs?  need an extra prefix..
 	// and #icon, #text for children in the controls..
-	g.Style2DParts()
 }
 
 func (g *Button) Size2D() {
@@ -361,7 +361,7 @@ func (g *Button) ChildrenBBox2D() image.Rectangle {
 
 func (g *Button) Render2D() {
 	if g.PushBounds() {
-		if g.IsLeaf() {
+		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
 			// todo: manage stacked layout to select appropriate image based on state

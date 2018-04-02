@@ -20,7 +20,7 @@ const (
 
 //go:generate stringer -type=FillRule
 
-var KiT_FillRule = kit.Enums.AddEnumAltLower(FillRuleNonZero, false, nil, "FillRule", int64(FillRuleN))
+var KiT_FillRule = kit.Enums.AddEnumAltLower(FillRuleN, false, nil, "FillRule")
 
 // FillStyle contains all the properties specific to filling a region
 type FillStyle struct {

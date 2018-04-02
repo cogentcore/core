@@ -6,10 +6,11 @@ package gi
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/ki/kit"
-	"golang.org/x/image/math/fixed"
 	"image"
 	"math"
+
+	"github.com/rcoreilly/goki/ki/kit"
+	"golang.org/x/image/math/fixed"
 )
 
 // SVG default coordinates are such that 0,0 is upper-left!
@@ -53,9 +54,10 @@ type Dims2D int32
 const (
 	X Dims2D = iota
 	Y
+	Dims2DN
 )
 
-var KiT_Dims2D = kit.Enums.AddEnumAltLower(X, false, nil, "", int64(Y)+1)
+var KiT_Dims2D = kit.Enums.AddEnumAltLower(Dims2DN, false, nil, "")
 
 //go:generate stringer -type=Dims2D
 

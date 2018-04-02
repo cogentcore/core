@@ -6,11 +6,12 @@ package gi
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"log"
 	// "reflect"
 	"runtime"
 	"sync"
@@ -40,7 +41,7 @@ var KiT_Window = kit.Types.AddType(&Window{}, nil)
 func NewWindow(name string, width, height int) *Window {
 	FontLibrary.AddFontPaths("/Library/Fonts")
 	win := &Window{}
-	win.SetThisName(win, name)
+	win.InitName(win, name)
 	var err error
 	win.Win, err = oswin.NewOSWindow(width, height)
 	if err != nil {

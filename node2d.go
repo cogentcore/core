@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -199,7 +200,7 @@ func (g *Node2DBase) SetWinBBox() {
 func (g *Node2DBase) AddParentPos() Vec2D {
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
-		if !g.IsStructField() {
+		if !g.IsField() {
 			g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
 		}
 		return pg.LayData.AllocSize
@@ -418,7 +419,7 @@ func (g *Node2DBase) BBoxReport() string {
 		if gii == nil {
 			return false // going into a different type of thing, bail
 		}
-		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", gi.Name, gi.VpBBox, gi.WinBBox)
+		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", gi.Nm, gi.VpBBox, gi.WinBBox)
 		return true
 	})
 	return rpt

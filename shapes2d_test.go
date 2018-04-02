@@ -11,7 +11,7 @@ import (
 
 func TestRect(t *testing.T) {
 	parent := NewViewport2D(400, 400)
-	parent.SetThisName(parent, "vp1")
+	parent.InitName(parent, "vp1")
 	vpfill := parent.AddNewChildNamed(KiT_Viewport2DFill, "vpfill").(*Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF")
 
@@ -31,7 +31,7 @@ func TestShapesAll(t *testing.T) {
 	width := 400
 	height := 400
 	parent := NewViewport2D(width, height)
-	parent.SetThisName(parent, "vp1")
+	parent.InitName(parent, "vp1")
 	vpfill := parent.AddNewChildNamed(KiT_Viewport2DFill, "vpfill").(*Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF")
 

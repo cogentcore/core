@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	_ "github.com/rcoreilly/goki/gi/oswin/init"
@@ -22,8 +23,8 @@ func mainrun() {
 	width := 800
 	height := 800
 
-	recv := ki.Node{}               // receiver for events
-	recv.SetThisName(&recv, "recv") // this is essential for root objects not owned by other Ki tree nodes
+	recv := ki.Node{}            // receiver for events
+	recv.InitName(&recv, "recv") // this is essential for root objects not owned by other Ki tree nodes
 
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
 	win.UpdateStart()
@@ -173,7 +174,7 @@ func mainrun() {
 		// todo: need a copy function:
 		// ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name).(*gi.Icon)
 		// *ico = *wdicon
-		// ico.SetThisName(ico, wdicon.Name)
+		// ico.InitName(ico, wdicon.Name)
 		// ico.SetParent(row4)
 		row4.AddChild(wdicon.This)
 	}

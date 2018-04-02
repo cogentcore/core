@@ -346,10 +346,18 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	}
 	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
-	// todo: probably need better ways of telling how much re-rendering is needed
-	if ki.NodeSignalAnyMod(sig) {
+	fullRend := false
+	if ki.NodeSignalAnyUpdate(sig) {
+		// todo: probably need better ways of telling how much re-rendering is needed
+		bitflag.HasMask(*(node.Flags()), ki.UpdateFlagsMask)
+
+	} else {
+		fullRend = true
+	}
+
+	if fullRend {
 		vp.FullRender2DTree()
-	} else if ki.NodeSignalAnyUpdate(sig) {
+	} else {
 		if gii.CanReRender2D() {
 			vp.ReRender2DNode(gii)
 		} else {

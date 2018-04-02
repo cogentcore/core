@@ -7,12 +7,13 @@ package gi
 import (
 	// "fmt"
 	// "github.com/rcoreilly/goki/gi/units"
+	"image"
+	"math"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
-	"math"
 	// "time"
 )
 
@@ -433,7 +434,7 @@ func (g *Slider) ChildrenBBox2D() image.Rectangle {
 
 func (g *Slider) Render2D() {
 	if g.PushBounds() {
-		if g.IsLeaf() {
+		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
 			// todo: manage stacked layout to select appropriate image based on state
@@ -693,7 +694,7 @@ func (g *ScrollBar) ChildrenBBox2D() image.Rectangle {
 
 func (g *ScrollBar) Render2D() {
 	if g.PushBounds() {
-		if g.IsLeaf() {
+		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
 			// todo: manage stacked layout to select appropriate image based on state

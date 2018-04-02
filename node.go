@@ -6,11 +6,12 @@ package gi
 
 import (
 	// "fmt"
+	"image"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
 	// "log"
 	"reflect"
 	// "strconv"
@@ -31,15 +32,13 @@ const (
 	MouseHasEntered
 	// this node is currently dragging -- win.Dragging set to this node
 	NodeDragging
-	// node is a field on a struct instead of a child in the main tree (e.g., Widget.Parts) -- affects e.g., adding parent positions, etc
-	IsStructField
 	// can extend node flags from here
 	NodeFlagsN
 )
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsNil, true, nil) // true = bitflags
+var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 
 // base struct node for GoGi
 type NodeBase struct {
@@ -105,11 +104,6 @@ func (g *NodeBase) GrabFocus() {
 	if win != nil {
 		win.SetFocusItem(g.This)
 	}
-}
-
-// is this node a field on a structure instead of child in tree?
-func (g *NodeBase) IsStructField() bool {
-	return bitflag.Has(g.NodeFlags, int(IsStructField))
 }
 
 // translate a point in global pixel coords into relative position within node

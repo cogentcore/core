@@ -6,16 +6,17 @@ package gi
 
 import (
 	"fmt"
-	"github.com/golang/freetype/truetype"
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki/kit"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/golang/freetype/truetype"
+	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki/kit"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
 )
 
 // styles of font: normal, italic, etc
@@ -30,7 +31,7 @@ const (
 
 //go:generate stringer -type=FontStyles
 
-var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontNormal, false, nil, "Font", int64(FontStylesN))
+var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, nil, "Font")
 
 // styles of font: normal, italic, etc
 type FontWeights int32
@@ -46,7 +47,7 @@ const (
 
 //go:generate stringer -type=FontWeights
 
-var KiT_FontWeights = kit.Enums.AddEnumAltLower(WeightNormal, false, nil, "Weight", int64(FontWeightsN))
+var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, nil, "Weight")
 
 // todo: Variant = normal / small-caps
 

@@ -6,8 +6,9 @@ package gi
 
 import (
 	// "fmt"
-	"github.com/rcoreilly/goki/ki/kit"
 	"image"
+
+	"github.com/rcoreilly/goki/ki/kit"
 	// "image/draw"
 	// "log"
 	// "sync"
@@ -139,7 +140,7 @@ const (
 
 //go:generate stringer -type=IconContexts
 
-var KiT_IconContexts = kit.Enums.AddEnum(ActionIcons, false, nil)
+var KiT_IconContexts = kit.Enums.AddEnum(IconContextsN, false, nil)
 
 // list of standard icon names that we expect to find in an IconSet
 var StdIconNames = [IconContextsN][]string{
@@ -187,7 +188,7 @@ var CurIconSet *IconSet = DefaultIconSet
 func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
 	wd := Icon{}
-	wd.SetThisName(&wd, "widget-down-wedge")
+	wd.InitName(&wd, "widget-down-wedge")
 	p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
 	p.Data = ParsePathData("M 0 0 1 0 .5 1 Z")
 	iset[wd.Nm] = &wd

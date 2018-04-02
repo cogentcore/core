@@ -7,12 +7,13 @@ package gi
 import (
 	"fmt"
 	// "github.com/rcoreilly/goki/gi/units"
+	"image"
+	"math"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
-	"math"
 	// "log"
 	// "reflect"
 )
@@ -505,7 +506,7 @@ func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 	ar := g.BBoxFromAlloc() // need to use allocated size which includes children
-	if g.Parent != nil {    // use parents children bbox to determine where we can draw
+	if g.Par != nil {       // use parents children bbox to determine where we can draw
 		pgi, _ := KiToNode2D(g.Par)
 		ar = ar.Intersect(pgi.ChildrenBBox2D())
 	}

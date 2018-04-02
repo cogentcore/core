@@ -6,10 +6,10 @@ package gi
 
 import (
 	// "fmt"
-	"github.com/rcoreilly/goki/ki/bitflag"
-	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"math"
+
+	"github.com/rcoreilly/goki/ki/kit"
 	// "reflect"
 )
 
@@ -119,37 +119,22 @@ func (g *WidgetBase) Render2DText(txt string) {
 }
 
 ///////////////////////////////////////////////////////////////////
-//  Standard methods to call on the Parts
-
-func (g *WidgetBase) Init2DParts() {
-	if g.Parts.This == nil {
-		g.Parts.SetThisName(&g.Parts, "Parts")
-		g.Parts.SetParent(g.This)
-		g.Parts.Init2DTree()
-	}
-	bitflag.Set(&g.Parts.NodeFlags, int(IsStructField)) // key for e.g., not adding parent pos
-}
+// Standard methods to call on the Parts -- standard FunDownMeFirst etc operate
+// automaticaly on Field structs such as Parts -- custom calls only needed for
+// manually-recursive traversal in Layout and Render
 
 func (g *WidgetBase) Init2DWidget() {
 	g.Init2DBase()
-	g.Init2DParts()
 }
 
-func (g *WidgetBase) Style2DParts() {
-	g.Parts.Style2DTree()
-}
-
-func (g *WidgetBase) Size2DParts(getSize bool) {
-	g.Parts.Size2DTree()
-	if getSize {
-		g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
-		g.Size2DAddSpace()
-	}
+func (g *WidgetBase) SizeFromParts() {
+	g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
+	g.Size2DAddSpace()
 }
 
 func (g *WidgetBase) Size2DWidget() {
 	g.InitLayout2D()
-	g.Size2DParts(true) // get our size from parts
+	g.SizeFromParts() // get our size from parts
 }
 
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {

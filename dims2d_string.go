@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Dims2D_name = "XY"
+const _Dims2D_name = "XYDims2DN"
 
-var _Dims2D_index = [...]uint8{0, 1, 2}
+var _Dims2D_index = [...]uint8{0, 1, 2, 9}
 
 func (i Dims2D) String() string {
 	if i < 0 || i >= Dims2D(len(_Dims2D_index)-1) {
