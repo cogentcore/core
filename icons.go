@@ -56,8 +56,18 @@ func (vp *Icon) Init2D() {
 	vp.SVG.Init2D()
 }
 
+var IconProps = []map[string]interface{}{
+	{ // widget props
+		"background-color": "transparent", // todo: color.Transparent
+	}, { // paint props
+		"fill":   "blue",
+		"stroke": "black",
+	},
+}
+
 func (vp *Icon) Style2D() {
-	vp.SVG.Style2D()
+	vp.Style.SetStyle(nil, &StyleDefault, IconProps[0])
+	vp.Paint.SetStyle(nil, &PaintDefault, IconProps[1])
 }
 
 func (vp *Icon) Size2D() {

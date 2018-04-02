@@ -788,9 +788,6 @@ func (ly *Layout) Style2D() {
 }
 
 func (ly *Layout) Size2D() {
-	// if ly.IsField() {
-	// 	fmt.Printf("Layout Size2D on field: %v\n", ly.Name())
-	// }
 	ly.InitLayout2D()
 	ly.GatherSizes()
 }
