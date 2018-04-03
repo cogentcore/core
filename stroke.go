@@ -5,12 +5,10 @@
 package gi
 
 import (
-	// "fmt"
 	"image/color"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "log"
 )
 
 // end-cap of a line: stroke-linecap property in SVG

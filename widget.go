@@ -5,12 +5,10 @@
 package gi
 
 import (
-	// "fmt"
 	"image"
 	"math"
 
 	"github.com/rcoreilly/goki/ki/kit"
-	// "reflect"
 )
 
 // Widget base type -- manages control elements and provides standard box model rendering

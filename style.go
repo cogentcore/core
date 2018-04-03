@@ -274,7 +274,7 @@ func WalkStyleStruct(obj interface{}, parent interface{}, defs interface{}, oute
 		}
 		ft := sf.Type
 		// note: need Addrs() to pass pointers to fields, not fields themselves
-		// fmt.Printf("processing field named: %v\n", sf.Name)
+		// fmt.Printf("processing field named: %v\n", sf.Nm)
 		vf := vo.Field(i)
 		vfi := vf.Addr().Interface()
 		var pf reflect.Value

@@ -5,13 +5,12 @@
 package gi
 
 import (
-	// "fmt"
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki/kit"
 	"image"
-	// "log"
 	"strings"
 	"unicode"
+
+	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // note: most of these are inherited

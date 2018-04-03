@@ -5,8 +5,6 @@
 package gi
 
 import (
-	// "fmt"
-	// "github.com/rcoreilly/goki/gi/units"
 	"image"
 	"math"
 
@@ -14,7 +12,6 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

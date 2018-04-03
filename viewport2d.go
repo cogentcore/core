@@ -5,11 +5,7 @@
 package gi
 
 import (
-	// "fmt"
-	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
-	"github.com/rcoreilly/goki/ki/kit"
-	// "golang.org/x/image/font"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -17,6 +13,10 @@ import (
 	"log"
 	"os"
 	"reflect"
+
+	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // these extend NodeBase NodeFlags to hold viewport state
@@ -78,6 +78,7 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 // resize viewport, creating a new image (no point in trying to resize the image -- need to re-render) -- updates ViewBox Size too -- triggers update -- wrap in other UpdateStart/End calls as appropriate
 func (vp *Viewport2D) Resize(width, height int) {
 	if vp.Pixels != nil && vp.Pixels.Bounds().Size().X == width && vp.Pixels.Bounds().Size().Y == height {
+		fmt.Printf("vp %v already size %v, %v\n", vp.Nm, width, height)
 		return // already good
 	}
 	vp.UpdateStart()
@@ -227,7 +228,7 @@ func (vp *Viewport2D) Size2D() {
 	if pos != image.ZP {
 		vp.ViewBox.Min = pos
 	}
-	if vp.ViewBox.Size != image.ZP {
+	if !vp.IsSVG() && vp.ViewBox.Size != image.ZP {
 		vp.LayData.AllocSize.SetPoint(vp.ViewBox.Size)
 	}
 }
@@ -248,9 +249,9 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 	psize := vp.AddParentPos()
 	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
 		if !vp.LayData.AllocSize.IsZero() {
-			asz := vp.LayData.AllocSize.ToPoint()
+			asz := vp.LayData.AllocSize.ToPointCeil()
 			vp.Resize(asz.X, asz.Y)
-			// fmt.Printf("vp %v resized to %v\n", vp.Name, asz)
+			fmt.Printf("vp %v resized to %v\n", vp.Nm, asz)
 		} else if vp.Pixels == nil {
 			vp.Resize(64, 64) // gotta have something..
 		}
@@ -258,7 +259,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 	vp.VpBBox = vp.Pixels.Bounds()
 	vp.SetWinBBox()    // this adds all PARENT offsets
 	if !vp.IsPopup() { // non-popups use allocated positions
-		vp.ViewBox.Min = vp.LayData.AllocPos.ToPoint()
+		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
 	}
 	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
 	return psize
@@ -287,7 +288,7 @@ func (vp *Viewport2D) PushBounds() bool {
 	if vp.Viewport != nil {
 		wbi := vp.WinBBox.Intersect(vp.Viewport.WinBBox)
 		if wbi.Empty() {
-			// fmt.Printf("not rendering vp %v bc empty winbox -- ours: %v par: %v\n", vp.Name, vp.WinBBox, vp.Viewport.WinBBox)
+			// fmt.Printf("not rendering vp %v bc empty winbox -- ours: %v par: %v\n", vp.Nm, vp.WinBBox, vp.Viewport.WinBBox)
 			return false
 		}
 	}
@@ -347,10 +348,14 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	fullRend := false
-	if ki.NodeSignalAnyUpdate(sig) {
-		// todo: probably need better ways of telling how much re-rendering is needed
-		bitflag.HasMask(*(node.Flags()), ki.UpdateFlagsMask)
-
+	if sig == int64(ki.NodeSignalUpdated) {
+		vlupdt := bitflag.HasMask(*(node.Flags()), ki.ValUpdateFlagsMask)
+		strupdt := bitflag.HasMask(*(node.Flags()), ki.StruUpdateFlagsMask)
+		if vlupdt && !strupdt {
+			fullRend = false
+		} else if strupdt {
+			fullRend = true
+		}
 	} else {
 		fullRend = true
 	}

@@ -5,7 +5,6 @@
 package gi
 
 import (
-	// "fmt"
 	"image"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -13,7 +12,6 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "math"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +72,7 @@ const (
 type ButtonBase struct {
 	WidgetBase
 	Text        string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon        *Icon                `xml:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
+	Icon        *Icon                `desc:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
@@ -185,7 +183,7 @@ func (g *Button) SetText(txt string) {
 // set the Icon (could be nil) and update button
 func (g *Button) SetIcon(ic *Icon) {
 	g.UpdateStart()
-	g.Icon = ic
+	g.Icon = ic // this is jut the pointer
 	g.ConfigParts()
 	g.UpdateEnd()
 }
@@ -204,6 +202,7 @@ func (g *Button) AsLayout2D() *Layout {
 
 func (g *Button) Init2D() {
 	g.Init2DWidget()
+	g.ConfigParts()
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*Button) // note: will fail for any derived classes..
 		if ok {
@@ -304,7 +303,10 @@ func (g *Button) ConfigParts() {
 	if icIdx >= 0 {
 		kc, _ := g.Parts.Child(icIdx)
 		ici, _ := KiToNode2D(kc)
-		*(ici.(*Icon)) = *g.Icon
+		ic := ici.(*Icon)
+		if !ic.HasChildren() {
+			ic.CopyFrom(g.Icon.This)
+		}
 	}
 	if txIdx >= 0 {
 		kc, _ := g.Parts.Child(txIdx)
@@ -377,7 +379,7 @@ func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-	// fmt.Printf("button %v text-style: %v\n", g.Name, st.Text)
+	// fmt.Printf("button %v text-style: %v\n", g.Nm, st.Text)
 }
 
 func (g *Button) CanReRender2D() bool {

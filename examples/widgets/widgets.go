@@ -29,6 +29,14 @@ func mainrun() {
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
 	win.UpdateStart()
 
+	// icnm := "widget-down-wedge"
+	// wdicon, ok := (*gi.DefaultIconSet)[icnm]
+
+	// if !ok {
+	// 	fmt.Printf("Could not find icon: %v\n", icnm)
+	// 	return // bail
+	// }
+
 	vp := win.WinViewport2D()
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
@@ -84,8 +92,9 @@ func mainrun() {
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
 	edit1.SetProp("align-vert", gi.AlignMiddle)
-	button1.Text = "Button 1"
-	button2.Text = "Button 2"
+	button1.SetText("Button 1")
+	// button1.SetIcon(wdicon)
+	button2.SetText("Button 2")
 	button1.SetProp("align-vert", gi.AlignMiddle)
 	button2.SetProp("align-vert", gi.AlignMiddle)
 
@@ -166,18 +175,10 @@ func mainrun() {
 	row4.SetStretchMaxWidth()
 	// row4.SetStretchMaxHeight()
 
-	wdicon, ok := (*gi.DefaultIconSet)["widget-down-wedge"]
-
-	if ok {
-		wdicon.SetMinPrefWidth(units.NewValue(100, units.Px))
-		wdicon.SetMinPrefHeight(units.NewValue(100, units.Px))
-		// todo: need a copy function:
-		// ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name).(*gi.Icon)
-		// *ico = *wdicon
-		// ico.InitName(ico, wdicon.Name)
-		// ico.SetParent(row4)
-		row4.AddChild(wdicon.This)
-	}
+	// ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name()).(*gi.Icon)
+	// ico.CopyFrom(wdicon)
+	// ico.SetMinPrefWidth(units.NewValue(100, units.Px))
+	// ico.SetMinPrefHeight(units.NewValue(100, units.Px))
 
 	win.UpdateEnd()
 

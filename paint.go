@@ -6,16 +6,16 @@ package gi
 
 import (
 	"errors"
-	// "fmt"
+	"image"
+	"math"
+	"reflect"
+
 	"github.com/golang/freetype/raster"
 	"github.com/rcoreilly/goki/gi/units"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/image/math/fixed"
-	"image"
-	"math"
-	"reflect"
 )
 
 /*
@@ -783,7 +783,7 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
-	return float64(a >> 6), pc.FontStyle.Height
+	return math.Ceil(float64(a>>6)) + 1.0, pc.FontStyle.Height
 }
 
 func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {

@@ -5,8 +5,6 @@
 package gi
 
 import (
-	// "fmt"
-
 	"image"
 	"math"
 
@@ -358,7 +356,7 @@ func (ly *Layout) AllocFromParent() {
 			if !pg.LayData.AllocSize.IsZero() {
 				ly.LayData.AllocPos = pg.LayData.AllocPos
 				ly.LayData.AllocSize = pg.LayData.AllocSize
-				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Name)
+				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Nm)
 				return false
 			}
 			return true
@@ -501,7 +499,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		pos += extra
 	}
 
-	// fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Name, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+	// fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 
 	for i, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
@@ -528,7 +526,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPos.SetDim(dim, pos)
-		// fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Name, pos, size)
+		// fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Nm, pos, size)
 		pos += size
 	}
 }

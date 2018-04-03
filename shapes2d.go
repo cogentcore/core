@@ -5,12 +5,12 @@
 package gi
 
 import (
-	// "fmt"
-	"github.com/rcoreilly/goki/ki/kit"
 	"image"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // shapes2d contains all the SVG-based objects for drawing shapes, paths, etc

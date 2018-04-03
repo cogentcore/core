@@ -5,15 +5,14 @@
 package gi
 
 import (
-	// "fmt"
+	"image"
+	"math"
+
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
-	"math"
-	// "reflect"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

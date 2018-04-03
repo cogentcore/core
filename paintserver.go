@@ -5,7 +5,6 @@
 package gi
 
 import (
-	// "fmt"
 	"image"
 	"image/color"
 

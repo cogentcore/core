@@ -5,16 +5,13 @@
 package gi
 
 import (
-	// "fmt"
 	"image"
+	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "log"
-	"reflect"
-	// "strconv"
 )
 
 // node flags are bitflags for tracking common high-frequency GUI state,

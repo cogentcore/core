@@ -5,14 +5,9 @@
 package gi
 
 import (
-	// "fmt"
 	"image"
 
 	"github.com/rcoreilly/goki/ki/kit"
-	// "image/draw"
-	// "log"
-	// "sync"
-	// "time"
 )
 
 // Qt has different icon states -- seems over-complicated -- just use a map of icons
@@ -53,12 +48,13 @@ func (vp *Icon) AsLayout2D() *Layout {
 }
 
 func (vp *Icon) Init2D() {
+	vp.Fill = true
 	vp.SVG.Init2D()
 }
 
 var IconProps = []map[string]interface{}{
 	{ // widget props
-		"background-color": "transparent", // todo: color.Transparent
+		"background-color": "white", // todo: color.Transparent
 	}, { // paint props
 		"fill":   "blue",
 		"stroke": "black",

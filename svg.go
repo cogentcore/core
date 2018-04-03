@@ -5,10 +5,10 @@
 package gi
 
 import (
-	// "fmt"
+	"image"
+
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	"image"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

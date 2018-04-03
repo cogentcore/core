@@ -6,16 +6,11 @@ package gi
 
 import (
 	"fmt"
+	"image"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "gopkg.in/go-playground/colors.v1"
-	"image"
-	// "log"
-	// "reflect"
-	// "strconv"
-	// "strings"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +106,7 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 func (g *Node2DBase) Init2DBase() {
 	g.Viewport = g.FindViewportParent()
 	if g.Viewport != nil { // default for most cases -- delete connection of not
-		// fmt.Printf("node %v connect to viewport %v\n", g.Name, g.Viewport.Name)
+		// fmt.Printf("node %v connect to viewport %v\n", g.Nm, g.Viewport.Nm)
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
 	}
 	g.Style.Defaults()
@@ -179,9 +174,9 @@ func (g *Node2DBase) InitLayout2D() {
 
 // get our bbox from Layout allocation
 func (g *Node2DBase) BBoxFromAlloc() image.Rectangle {
-	tp := g.LayData.AllocPos
-	ts := g.LayData.AllocSize
-	return image.Rect(int(tp.X), int(tp.Y), int(tp.X+ts.X), int(tp.Y+ts.Y))
+	tp := g.LayData.AllocPos.ToPointFloor()
+	ts := g.LayData.AllocSize.ToPointCeil()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
 // set our window-level BBox from vp and our bbox
@@ -240,7 +235,7 @@ func (g *Node2DBase) PushBounds() bool {
 	}
 	rs := &g.Viewport.Render
 	rs.PushBounds(g.VpBBox)
-	// fmt.Printf("node %v pushed bounds %v\n", g.Name, g.VpBBox)
+	// fmt.Printf("node %v pushed bounds %v\n", g.Nm, g.VpBBox)
 	return true
 }
 
@@ -351,6 +346,7 @@ func (g *Node2DBase) Size2DTree() {
 			// this is for testing whether to process node
 			_, gi := KiToNode2D(k)
 			if gi == nil || gi.Paint.Off {
+				fmt.Printf("bailing depth first size on %v\n", gi.PathUnique())
 				return false
 			}
 			return true
@@ -361,6 +357,7 @@ func (g *Node2DBase) Size2DTree() {
 			if gi == nil || gi.Paint.Off {
 				return false
 			}
+			// fmt.Printf("sizing: %v\n", gi.PathUnique())
 			gii.Size2D()
 			return true
 		})

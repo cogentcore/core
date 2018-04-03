@@ -282,6 +282,18 @@ func (a Vec2D) ToPoint() image.Point {
 	return image.Point{int(a.X), int(a.Y)}
 }
 
+func (a Vec2D) ToPointCeil() image.Point {
+	return image.Point{int(math.Ceil(a.X)), int(math.Ceil(a.Y))}
+}
+
+func (a Vec2D) ToPointFloor() image.Point {
+	return image.Point{int(math.Floor(a.X)), int(math.Floor(a.Y))}
+}
+
+func (a Vec2D) ToPointRound() image.Point {
+	return image.Point{int(math.Round(a.X)), int(math.Round(a.Y))}
+}
+
 func (a Vec2D) Distance(b Vec2D) float64 {
 	return math.Hypot(a.X-b.X, a.Y-b.Y)
 }

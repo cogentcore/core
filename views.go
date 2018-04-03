@@ -246,7 +246,7 @@ func (g *TreeView) SelectNode() {
 		bitflag.Set(&g.NodeFlags, int(NodeFlagSelected))
 		g.GrabFocus() // focus always follows select  todo: option
 		g.TreeViewSig.Emit(g.This, int64(NodeSelected), nil)
-		// fmt.Printf("selected node: %v\n", g.Name)
+		// fmt.Printf("selected node: %v\n", g.Nm)
 		g.UpdateEndAll() // grab focus means allow kids to update too
 	}
 }
@@ -256,7 +256,7 @@ func (g *TreeView) UnselectNode() {
 		g.UpdateStart()
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagSelected))
 		g.TreeViewSig.Emit(g.This, int64(NodeUnselected), nil)
-		// fmt.Printf("unselectednode: %v\n", g.Name)
+		// fmt.Printf("unselectednode: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -291,7 +291,7 @@ func (g *TreeView) CollapseNode() {
 		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
 		bitflag.Set(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeCollapsed), nil)
-		// fmt.Printf("collapsed node: %v\n", g.Name)
+		// fmt.Printf("collapsed node: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -302,7 +302,7 @@ func (g *TreeView) OpenNode() {
 		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
-		// fmt.Printf("opened node: %v\n", g.Name)
+		// fmt.Printf("opened node: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -485,8 +485,8 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 
 func (g *TreeView) BBox2D() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := g.LayData.AllocPos.ToPoint()
-	ts := g.WidgetSize.ToPoint()
+	tp := g.LayData.AllocPos.ToPointFloor()
+	ts := g.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
