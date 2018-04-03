@@ -69,10 +69,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * test path rendering
 * property-based xforms for svg
 
-* need auto-disconnection code in ki
-
-* WidgetBase-- has Controls = Layout -- add to NodeWidget. -- Qt calls them "subcontrols" -- e.g., http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
-
 * scrollbars are not centered -- all padding on top / left
 
 * native UnmarshalXML is not going to be flexible enough to support effective
