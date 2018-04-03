@@ -93,7 +93,5 @@ As the docs state, you really have to use it for a while to appreciate all of th
 # TODO
 
 * XML IO -- first pass done, but more should be in attr instead of full elements
-* add SetField, FieldValue generic methods -- thin wrappers around reflect
-* SetFieldRecursive -- apply to all children, no problem if not found
-* FindChildRecursive functions
+* FindChildRecursive functions?
 * port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus
