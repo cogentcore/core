@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -77,16 +76,18 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 
 // resize viewport, creating a new image (no point in trying to resize the image -- need to re-render) -- updates ViewBox Size too -- triggers update -- wrap in other UpdateStart/End calls as appropriate
 func (vp *Viewport2D) Resize(width, height int) {
-	if vp.Pixels != nil && vp.Pixels.Bounds().Size().X == width && vp.Pixels.Bounds().Size().Y == height {
-		fmt.Printf("vp %v already size %v, %v\n", vp.Nm, width, height)
-		return // already good
+	nwsz := image.Point{width, height}
+	if vp.Pixels != nil {
+		ib := vp.Pixels.Bounds().Size()
+		if ib == nwsz {
+			vp.ViewBox.Size = nwsz // make sure
+			return                 // already good
+		}
 	}
-	vp.UpdateStart()
 	vp.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
 	vp.Render.Defaults()
+	vp.ViewBox.Size = nwsz // make sure
 	vp.Render.Image = vp.Pixels
-	vp.ViewBox.Size = image.Point{width, height}
-	vp.UpdateEnd()
 	vp.FullRender2DTree()
 }
 
@@ -115,9 +116,9 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		sp = nr.Min.Sub(r.Min)
 		r = nr
 	}
-	if vp.Backing != nil {
-		draw.Draw(parVp.Pixels, r, vp.Backing, sp, draw.Src)
-	}
+	// if vp.Backing != nil {
+	// 	draw.Draw(parVp.Pixels, r, vp.Backing, sp, draw.Src)
+	// }
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
 }
 
@@ -218,7 +219,7 @@ func (vp *Viewport2D) Init2D() {
 }
 
 func (vp *Viewport2D) Style2D() {
-	vp.Style2DWidget()
+	vp.Style2DWidget(nil)
 }
 
 func (vp *Viewport2D) Size2D() {
@@ -251,7 +252,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 		if !vp.LayData.AllocSize.IsZero() {
 			asz := vp.LayData.AllocSize.ToPointCeil()
 			vp.Resize(asz.X, asz.Y)
-			fmt.Printf("vp %v resized to %v\n", vp.Nm, asz)
+			// fmt.Printf("vp %v resized to %v\n", vp.Nm, asz)
 		} else if vp.Pixels == nil {
 			vp.Resize(64, 64) // gotta have something..
 		}
@@ -271,9 +272,11 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.Viewport != nil {
-		vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
+		// vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)
-		vp.Viewport.RenderViewport2D() // and on up the chain
+		if vp.IsPopup() {
+			vp.Viewport.RenderViewport2D() // and on up the chain
+		}
 	} else { // top-level, try drawing into window
 		vp.DrawIntoWindow()
 	}
@@ -345,7 +348,6 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if gii == nil { // should not happen
 		return
 	}
-	// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 
 	fullRend := false
 	if sig == int64(ki.NodeSignalUpdated) {
@@ -360,6 +362,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		fullRend = true
 	}
 
+	// fmt.Printf("viewport: %v rendering full %v due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, ki.NodeSignals(sig), node.PathUnique())
 	if fullRend {
 		vp.FullRender2DTree()
 	} else {

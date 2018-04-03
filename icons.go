@@ -48,13 +48,13 @@ func (vp *Icon) AsLayout2D() *Layout {
 }
 
 func (vp *Icon) Init2D() {
-	vp.Fill = true
 	vp.SVG.Init2D()
+	vp.Fill = true
 }
 
 var IconProps = []map[string]interface{}{
 	{ // widget props
-		"background-color": "white", // todo: color.Transparent
+		"background-color": "transparent",
 	}, { // paint props
 		"fill":   "blue",
 		"stroke": "black",
@@ -62,8 +62,8 @@ var IconProps = []map[string]interface{}{
 }
 
 func (vp *Icon) Style2D() {
-	vp.Style.SetStyle(nil, &StyleDefault, IconProps[0])
-	vp.Paint.SetStyle(nil, &PaintDefault, IconProps[1])
+	vp.Style2DWidget(IconProps[0])
+	vp.Style2DSVG(IconProps[1])
 }
 
 func (vp *Icon) Size2D() {

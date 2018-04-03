@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+
 	"golang.org/x/image/colornames"
 	// "gopkg.in/go-playground/colors.v1"
 	"image/color"
@@ -81,17 +82,22 @@ func (c *Color) SetFromString(nm string) error {
 		return c.ParseHex(nm)
 	} else {
 		low := strings.ToLower(nm)
-		if low == "none" || low == "off" {
+		switch low {
+		case "none", "off":
 			c.SetToNil()
 			return nil
-		}
-		nc, ok := colornames.Map[low]
-		if !ok {
-			err := fmt.Errorf("gi Color FromString: name not found %v", nm)
-			log.Printf("%v\n", err)
-			return err
-		} else {
-			c.Rgba = nc
+		case "transparent":
+			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
+			return nil
+		default:
+			nc, ok := colornames.Map[low]
+			if !ok {
+				err := fmt.Errorf("gi Color FromString: name not found %v", nm)
+				log.Printf("%v\n", err)
+				return err
+			} else {
+				c.Rgba = nc
+			}
 		}
 	}
 	return nil

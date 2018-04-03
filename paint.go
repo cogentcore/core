@@ -92,6 +92,7 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
 	pc.TextStyle.SetStylePost()
+	pc.StyleSet = true
 }
 
 // set the unit context based on size of viewport and parent element (from bbox)
@@ -783,7 +784,7 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
-	return math.Ceil(float64(a>>6)) + 1.0, pc.FontStyle.Height
+	return math.Ceil(float64(a>>6)) + 2.0, pc.FontStyle.Height
 }
 
 func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {

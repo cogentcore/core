@@ -29,13 +29,13 @@ func mainrun() {
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
 	win.UpdateStart()
 
-	// icnm := "widget-down-wedge"
-	// wdicon, ok := (*gi.DefaultIconSet)[icnm]
+	icnm := "widget-down-wedge"
+	wdicon, ok := (*gi.DefaultIconSet)[icnm]
 
-	// if !ok {
-	// 	fmt.Printf("Could not find icon: %v\n", icnm)
-	// 	return // bail
-	// }
+	if !ok {
+		fmt.Printf("Could not find icon: %v\n", icnm)
+		return // bail
+	}
 
 	vp := win.WinViewport2D()
 	vp.SetProp("background-color", "#FFF")
@@ -55,10 +55,10 @@ func mainrun() {
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	row1.AddNewChildNamed(gi.KiT_Stretch, "str1")
-	lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "This is a demonstration of the various GoGi Widgets"
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
+	// lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
+	// lab1.Text = "This is a demonstration of the various GoGi Widgets"
+	// lab1.SetProp("max-width", -1)
+	// lab1.SetProp("text-align", "center")
 	row1.AddNewChildNamed(gi.KiT_Stretch, "str2")
 
 	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
@@ -92,8 +92,8 @@ func mainrun() {
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")
 	edit1.SetProp("align-vert", gi.AlignMiddle)
-	button1.SetText("Button 1")
-	// button1.SetIcon(wdicon)
+	// button1.SetText("Button 1")
+	button1.SetIcon(wdicon)
 	button2.SetText("Button 2")
 	button1.SetProp("align-vert", gi.AlignMiddle)
 	button2.SetProp("align-vert", gi.AlignMiddle)
@@ -175,10 +175,13 @@ func mainrun() {
 	row4.SetStretchMaxWidth()
 	// row4.SetStretchMaxHeight()
 
-	// ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name()).(*gi.Icon)
-	// ico.CopyFrom(wdicon)
-	// ico.SetMinPrefWidth(units.NewValue(100, units.Px))
-	// ico.SetMinPrefHeight(units.NewValue(100, units.Px))
+	ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name()).(*gi.Icon)
+	ico.CopyFrom(wdicon)
+	ico.SetMinPrefWidth(units.NewValue(100, units.Px))
+	ico.SetMinPrefHeight(units.NewValue(100, units.Px))
+	ico.SetProp("background-color", "transparent")
+	ico.SetProp("fill", "blue")
+	ico.SetProp("stroke", "black")
 
 	win.UpdateEnd()
 

@@ -114,27 +114,40 @@ func (g *Node2DBase) Init2DBase() {
 	g.LayData.Defaults() // doesn't overwrite
 }
 
-// style the Paint values directly from node properties -- for SVG-style nodes
-func (g *Node2DBase) Style2DSVG() {
+// style the Paint values directly from node properties and optional base-level defaults -- for SVG-style nodes
+func (g *Node2DBase) Style2DSVG(baseProps map[string]interface{}) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
+	g.Paint.StyleSet = false  // this is always first call, restart
+	if baseProps != nil {
+		g.Paint.SetStyle(&pg.Paint, &PaintDefault, baseProps)
+	}
+	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
+
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero) // svn only has to set units here once
 }
 
-// style the Style values from node properties -- for Widget-style nodes
-func (g *Node2DBase) Style2DWidget() {
+// style the Style values from node properties and optional base-level defautls -- for Widget-style nodes
+func (g *Node2DBase) Style2DWidget(baseProps map[string]interface{}) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 	_, pg := KiToNode2D(g.Par)
+	g.Style.IsSet = false // this is always first call, restart
 	if pg != nil {
+		if baseProps != nil {
+			g.Style.SetStyle(&pg.Style, &StyleDefault, baseProps)
+		}
 		g.Style.SetStyle(&pg.Style, &StyleDefault, g.Properties())
 	} else {
+		if baseProps != nil {
+			g.Style.SetStyle(nil, &StyleDefault, baseProps)
+		}
 		g.Style.SetStyle(nil, &StyleDefault, g.Properties())
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative

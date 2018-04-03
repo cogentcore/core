@@ -41,8 +41,8 @@ func (vp *SVG) Init2D() {
 
 func (vp *SVG) Style2D() {
 	// we use both forms of styling -- need width, height, pos from widget..
-	vp.Style2DSVG()
-	vp.Style2DWidget()
+	vp.Style2DSVG(nil)
+	vp.Style2DWidget(nil)
 }
 
 func (vp *SVG) Size2D() {
@@ -70,10 +70,12 @@ func (vp *SVG) Render2D() {
 		pc := &vp.Paint
 		rs := &vp.Render
 		if vp.Fill {
-			pc.FillStyle.SetColor(&vp.Style.Background.Color)
-			pc.StrokeStyle.SetColor(nil)
-			pc.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
-			pc.FillStrokeClear(rs)
+			var tmp = Paint{}
+			tmp = vp.Paint
+			tmp.FillStyle.SetColor(&vp.Style.Background.Color)
+			tmp.StrokeStyle.SetColor(nil)
+			tmp.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			tmp.FillStrokeClear(rs)
 		}
 		rs.PushXForm(pc.XForm)
 		vp.Render2DChildren() // we must do children first, then us!

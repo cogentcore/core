@@ -45,7 +45,7 @@ func (g *Rect) Init2D() {
 }
 
 func (g *Rect) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
@@ -136,7 +136,7 @@ func (g *Viewport2DFill) Init2D() {
 }
 
 func (g *Viewport2DFill) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 }
 
 func (g *Viewport2DFill) Size2D() {
@@ -206,7 +206,7 @@ func (g *Circle) Init2D() {
 }
 
 func (g *Circle) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
@@ -289,7 +289,7 @@ func (g *Ellipse) Init2D() {
 }
 
 func (g *Ellipse) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
@@ -371,7 +371,7 @@ func (g *Line) Init2D() {
 }
 
 func (g *Line) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
@@ -452,7 +452,7 @@ func (g *Polyline) Init2D() {
 }
 
 func (g *Polyline) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
 		pc.Off = true
@@ -536,7 +536,7 @@ func (g *Polygon) Init2D() {
 }
 
 func (g *Polygon) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
 		pc.Off = true
@@ -690,7 +690,7 @@ func (g *Path) Init2D() {
 }
 
 func (g *Path) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() || len(g.Data) < 2 {
 		pc.Off = true

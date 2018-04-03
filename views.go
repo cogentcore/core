@@ -419,13 +419,8 @@ var TreeViewProps = []map[string]interface{}{
 }
 
 func (g *TreeView) Style2D() {
-	// we can focus by default
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, TreeViewProps[0])
-	// then style with user props
-	g.Style2DWidget()
-	// now get styles for the different states
+	g.Style2DWidget(TreeViewProps[0])
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		g.StateStyles[i].SetStyle(nil, &StyleDefault, TreeViewProps[i])
@@ -791,10 +786,7 @@ func (g *TabWidget) Init2D() {
 }
 
 func (g *TabWidget) Style2D() {
-	// // first do our normal default styles
-	// g.Style.SetStyle(nil, &StyleDefault, TabWidgetProps[0])
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(nil)
 }
 
 func (g *TabWidget) Size2D() {

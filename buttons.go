@@ -321,8 +321,7 @@ func (g *Button) ConfigParts() {
 func (g *Button) Style2D() {
 	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	g.Style.SetStyle(nil, &StyleDefault, ButtonProps[ButtonNormal])
-	g.Style2DWidget()
+	g.Style2DWidget(ButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {

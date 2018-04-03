@@ -381,8 +381,7 @@ var SliderProps = []map[string]interface{}{
 
 func (g *Slider) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	g.Style.SetStyle(nil, &StyleDefault, SliderProps[SliderNormal])
-	g.Style2DWidget()
+	g.Style2DWidget(SliderProps[SliderNormal])
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -647,13 +646,8 @@ var ScrollBarProps = []map[string]interface{}{
 }
 
 func (g *ScrollBar) Style2D() {
-	// we can focus by default
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, ScrollBarProps[SliderNormal])
-	// then style with user props
-	g.Style2DWidget()
-	// now get styles for the different states
+	g.Style2DWidget(ScrollBarProps[SliderNormal])
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {

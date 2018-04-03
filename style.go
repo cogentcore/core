@@ -389,9 +389,14 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 	if vk == reflect.Struct { // only a few types
 		if vt == reflect.TypeOf(Color{}) {
 			vc := vf.Addr().Interface().(*Color)
-			err := vc.SetFromString(prstr)
-			if err != nil {
-				log.Printf("StyleField: %v\n", err)
+			switch prtv := prv.(type) {
+			case string:
+				err := vc.SetFromString(prtv)
+				if err != nil {
+					log.Printf("StyleField: %v\n", err)
+				}
+			case color.Color:
+				vc.SetColor(prtv)
 			}
 			return
 		} else if vt == reflect.TypeOf(units.Value{}) {

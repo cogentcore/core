@@ -615,8 +615,6 @@ func (ly *Layout) DeleteHScroll() {
 	// todo: disconnect from events, call pointer cut function on ki
 	sc := ly.HScroll
 	sc.DisconnectAllEvents()
-	sc.SliderSig.DisconnectAll()
-	sc.NodeSig.DisconnectAll()
 	sc.Destroy()
 	ly.HScroll = nil
 }
@@ -658,15 +656,13 @@ func (ly *Layout) DeleteVScroll() {
 	// todo: disconnect from events, call pointer cut function on ki
 	sc := ly.VScroll
 	sc.DisconnectAllEvents()
-	sc.SliderSig.DisconnectAll()
-	sc.NodeSig.DisconnectAll()
 	sc.Destroy()
 	ly.VScroll = nil
 }
 
 func (ly *Layout) LayoutScrolls() {
 	sbw := ly.Style.Layout.ScrollBarWidth.Dots
-	if ly.HScroll != nil {
+	if ly.HasHScroll {
 		sc := ly.HScroll
 		sc.Size2D()
 		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X
@@ -679,7 +675,7 @@ func (ly *Layout) LayoutScrolls() {
 		sc.LayData.AllocSize.Y = sbw
 		sc.Layout2D(ly.VpBBox)
 	}
-	if ly.VScroll != nil {
+	if ly.HasVScroll {
 		sc := ly.VScroll
 		sc.Size2D()
 		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sbw - 2.0
@@ -695,10 +691,10 @@ func (ly *Layout) LayoutScrolls() {
 }
 
 func (ly *Layout) RenderScrolls() {
-	if ly.HScroll != nil {
+	if ly.HasHScroll {
 		ly.HScroll.Render2D()
 	}
-	if ly.VScroll != nil {
+	if ly.HasVScroll {
 		ly.VScroll.Render2D()
 	}
 }
@@ -724,11 +720,11 @@ func (ly *Layout) Render2DChildren() {
 func (ly *Layout) Render2DChild(gii Node2D) {
 	gi := gii.AsNode2D()
 	gi.LayData.AllocPos = gi.LayData.AllocPosOrig
-	if ly.HScroll != nil {
+	if ly.HasHScroll {
 		off := ly.HScroll.Value
 		gi.LayData.AllocPos.X -= off
 	}
-	if ly.VScroll != nil {
+	if ly.HasVScroll {
 		off := ly.VScroll.Value
 		gi.LayData.AllocPos.Y -= off
 	}
@@ -782,7 +778,7 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 }
 
 func (ly *Layout) Style2D() {
-	ly.Style2DWidget()
+	ly.Style2DWidget(nil)
 }
 
 func (ly *Layout) Size2D() {
@@ -866,10 +862,7 @@ var FrameProps = map[string]interface{}{
 }
 
 func (g *Frame) Style2D() {
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, FrameProps)
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(FrameProps)
 }
 
 func (g *Frame) Size2D() {
@@ -957,10 +950,7 @@ var StretchProps = map[string]interface{}{
 }
 
 func (g *Stretch) Style2D() {
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, StretchProps)
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(StretchProps)
 }
 
 func (g *Stretch) Size2D() {
@@ -1027,10 +1017,7 @@ func (g *Space) Init2D() {
 }
 
 func (g *Space) Style2D() {
-	// // first do our normal default styles
-	// g.Style.SetStyle(nil, &StyleDefault, SpaceProps)
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(nil)
 }
 
 func (g *Space) Size2D() {

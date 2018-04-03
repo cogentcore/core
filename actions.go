@@ -161,8 +161,7 @@ var ActionProps = []map[string]interface{}{
 
 func (g *Action) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	g.Style.SetStyle(nil, &StyleDefault, ActionProps[ButtonNormal])
-	g.Style2DWidget()
+	g.Style2DWidget(ActionProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -275,8 +274,7 @@ var SeparatorProps = map[string]interface{}{
 }
 
 func (g *Separator) Style2D() {
-	g.Style.SetStyle(nil, &StyleDefault, SeparatorProps)
-	g.Style2DWidget()
+	g.Style2DWidget(SeparatorProps)
 }
 
 func (g *Separator) Size2D() {
@@ -511,8 +509,7 @@ var MenuButtonProps = []map[string]interface{}{
 
 func (g *MenuButton) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	g.Style.SetStyle(nil, &StyleDefault, MenuButtonProps[ButtonNormal])
-	g.Style2DWidget()
+	g.Style2DWidget(MenuButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {

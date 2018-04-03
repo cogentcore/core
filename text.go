@@ -118,7 +118,7 @@ func (g *Text2D) Init2D() {
 }
 
 func (g *Text2D) Style2D() {
-	g.Style2DSVG()
+	g.Style2DSVG(nil)
 }
 
 func (g *Text2D) Size2D() {

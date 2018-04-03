@@ -51,10 +51,7 @@ var LabelProps = map[string]interface{}{
 }
 
 func (g *Label) Style2D() {
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, LabelProps)
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(LabelProps)
 }
 
 func (g *Label) Size2D() {
@@ -369,10 +366,7 @@ var TextFieldProps = [2]map[string]interface{}{
 
 func (g *TextField) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-	// first do our normal default styles
-	g.Style.SetStyle(nil, &StyleDefault, TextFieldProps[0])
-	// then style with user props
-	g.Style2DWidget()
+	g.Style2DWidget(TextFieldProps[0])
 	g.StateStyles[0] = g.Style
 	g.StateStyles[1] = g.Style
 	g.StateStyles[1].SetStyle(nil, &StyleDefault, TextFieldProps[1])
