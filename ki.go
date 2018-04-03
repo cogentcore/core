@@ -211,8 +211,9 @@ type Ki interface {
 	// type and name constraints (they are moved into the corresponding
 	// positions), and any extra children are removed, and new ones added, to
 	// match the specified config.  If uniqNm, then names represent
-	// UniqueNames (this results in Name == UniqueName for created children)
-	ConfigChildren(config kit.TypeAndNameList, uniqNm bool)
+	// UniqueNames (this results in Name == UniqueName for created children).
+	// Returns whether any changes were made
+	ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool
 
 	// find index of child based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
 	FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int

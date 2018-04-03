@@ -510,9 +510,9 @@ func (n *Node) MoveChild(from, to int) error {
 	return err
 }
 
-func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) {
-	n.UpdateStart()
-	// fist make a map for looking up the indexes of the names
+func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
+	didUpdt := false
+	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
 	for i, tn := range config {
 		nm[tn.Name] = i
@@ -529,8 +529,16 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) {
 		}
 		ti, ok := nm[knm]
 		if !ok {
+			if !didUpdt {
+				didUpdt = true
+				n.UpdateStart()
+			}
 			n.DeleteChildAtIndex(i, true) // assume destroy
 		} else if !kid.IsType(config[ti].Type) {
+			if !didUpdt {
+				didUpdt = true
+				n.UpdateStart()
+			}
 			n.DeleteChildAtIndex(i, true) // assume destroy
 		}
 	}
@@ -543,6 +551,10 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) {
 			kidx = n.FindChildIndexByName(tn.Name, i)
 		}
 		if kidx < 0 {
+			if !didUpdt {
+				didUpdt = true
+				n.UpdateStart()
+			}
 			if uniqNm {
 				n.InsertNewChildNamedUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
 			} else {
@@ -550,11 +562,18 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) {
 			}
 		} else {
 			if kidx != i {
+				if !didUpdt {
+					didUpdt = true
+					n.UpdateStart()
+				}
 				n.Kids.Move(kidx, i)
 			}
 		}
 	}
-	n.UpdateEnd()
+	if didUpdt {
+		n.UpdateEnd()
+	}
+	return didUpdt
 }
 
 //////////////////////////////////////////////////////////////////////////
