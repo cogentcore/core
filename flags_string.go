@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Flags_name = "IsFieldNodeAddedNodeCopiedNodeMovedNodeDeletedNodeDestroyedChildAddedChildMovedChildDeletedChildrenDeletedFlagsN"
+const _Flags_name = "IsFieldNodeAddedNodeCopiedNodeMovedNodeDeletedNodeDestroyedChildAddedChildMovedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
 
-var _Flags_index = [...]uint8{0, 7, 16, 26, 35, 46, 59, 69, 79, 91, 106, 112}
+var _Flags_index = [...]uint8{0, 7, 16, 26, 35, 46, 59, 69, 79, 91, 106, 118, 129, 135}
 
 func (i Flags) String() string {
 	if i < 0 || i >= Flags(len(_Flags_index)-1) {

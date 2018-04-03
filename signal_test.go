@@ -63,7 +63,7 @@ func TestSignalNameToInt(t *testing.T) {
 		}
 	}
 
-	str := "NodeSignalFieldUpdated"
+	str := "NodeSignalUpdated"
 	st, _ := StringToNodeSignals(str)
 	if st.String() != str {
 		t.Errorf("could not convert from signal type name %v -- got: %v -- maybe need to run go generate?", str, st.String())

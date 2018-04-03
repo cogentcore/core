@@ -38,10 +38,6 @@ const (
 	// node was updated -- see the node Flags field for the specific changes
 	// that occured during the update -- data is those flags too
 	NodeSignalUpdated
-	// a field was updated -- data is name of field
-	NodeSignalFieldUpdated
-	// a property was set -- data is name of property
-	NodeSignalPropUpdated
 	// node is being deleted from its parent children list -- not blocked by updating status and delivered immediately
 	NodeSignalDeleting
 	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too -- not blocked by updating status and delivered immediately
@@ -58,11 +54,6 @@ var NodeSignalTrace bool = false
 // set this to a string to receive trace in a string that can be compared for testing
 // otherwise just goes to stdout
 var NodeSignalTraceString *string
-
-// classifies a set of node signals indicating that some kind of update was made
-func NodeSignalAnyUpdate(sig int64) bool {
-	return sig >= int64(NodeSignalUpdated) && sig <= int64(NodeSignalPropUpdated)
-}
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
 type RecvFun func(receiver, sender Ki, sig int64, data interface{})

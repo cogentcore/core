@@ -42,18 +42,22 @@ type D struct {
 	Mbr6 int
 }
 
-func TestTypeEmbeds(t *testing.T) {
-	a := A{}
-	b := B{}
-	c := C{}
-	d := D{}
+var a = A{}
+var b = B{}
+var c = C{}
+var d = D{}
 
+func InitC() {
 	c.Mbr1 = "mbr1 string"
 	c.Mbr2 = 2
 	c.Mbr3 = "mbr3 string"
 	c.Mbr4 = 4
 	c.Mbr5 = "mbr5 string"
 	c.Mbr6 = 6
+}
+
+func TestTypeEmbeds(t *testing.T) {
+	InitC()
 
 	b_in_a := TypeEmbeds(reflect.TypeOf(a), reflect.TypeOf(b))
 	// fmt.Printf("A embeds B: %v\n", b_in_a)
@@ -78,6 +82,10 @@ func TestTypeEmbeds(t *testing.T) {
 	if b_in_a != false || a_in_b != true || a_in_c != true || aif_in_c != true || aif_in_d != false {
 		t.Errorf("something wrong in TypeEmbeds: should have false, true, true, true, false is: %v %v %v %v %v\n", b_in_a, a_in_b, a_in_c, aif_in_c, aif_in_d)
 	}
+}
+
+func TestEmbededStruct(t *testing.T) {
+	InitC()
 
 	ca := EmbededStruct(&c, reflect.TypeOf(a))
 	cas := fmt.Sprintf("%+v", ca)
@@ -87,6 +95,10 @@ func TestTypeEmbeds(t *testing.T) {
 	if cas != cat {
 		t.Errorf("Didn't get proper embedded members of C from At: %v != %v\n", cas, cat)
 	}
+}
+
+func TestFlatFields(t *testing.T) {
+	InitC()
 
 	// FlatFieldsTypeFun(reflect.TypeOf(c), func(typ reflect.Type, field reflect.StructField) {
 	// 	fmt.Printf("typ: %v, field: %v\n", typ, field)
@@ -120,6 +132,38 @@ func TestTypeEmbeds(t *testing.T) {
 	ffit := `mbr1 string,2,mbr3 string,4,mbr5 string,6,`
 	if ffis != ffit {
 		t.Errorf("Didn't get proper flat field interface list of C: %v != %v\n", ffis, ffit)
+	}
+}
+
+func TestFlatFieldsByName(t *testing.T) {
+	InitC()
+
+	fif, _ := FlatFieldByName(reflect.TypeOf(c), "Mbr3")
+	fifs := fmt.Sprintf("%v", fif)
+	fift := `{Mbr3  string  24 [0 1] false}`
+	if fifs != fift {
+		t.Errorf("Didn't get proper find flat field by name: %v != %v\n", fifs, fift)
+	}
+
+	fifn, _ := FlatFieldByName(reflect.TypeOf(c), "Mbr31")
+	fifns := fmt.Sprintf("%v", fifn)
+	fifnt := `{  <nil>  0 [] false}`
+	if fifns != fifnt {
+		t.Errorf("Didn't get proper nil find flat field by name: %v != %v\n", fifns, fifnt)
+	}
+
+	fifv := FlatFieldValueByName(&c, "Mbr4")
+	fifvs := fmt.Sprintf("%v", fifv)
+	fifvt := `4`
+	if fifvs != fifvt {
+		t.Errorf("Didn't get proper find flat field value by name: %v != %v\n", fifvs, fifvt)
+	}
+
+	fifi := FlatFieldInterfaceByName(&c, "Mbr2")
+	fifis := fmt.Sprintf("%v", NonPtrInterface(fifi))
+	fifit := `2`
+	if fifis != fifit {
+		t.Errorf("Didn't get proper find flat field value by name: %v != %v\n", fifis, fifit)
 	}
 
 }

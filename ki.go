@@ -40,11 +40,21 @@ const (
 	ChildDeleted
 	// all children were deleted
 	ChildrenDeleted
+	// a field was updated
+	FieldUpdated
+	// a property was set
+	PropUpdated
 	// total number of flags used by base Ki Node -- can extend from here up to 64 bits
 	FlagsN
 
+	// Mask for structural changes update flags
+	StruUpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(NodeDeleted)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+
+	// Mask for non-structural, value-only changes update flags
+	ValUpdateFlagsMask = (1 << uint32(FieldUpdated)) | (1 << uint32(PropUpdated))
+
 	// Mask for all the update flags -- destroyed is excluded b/c otherwise it would get cleared
-	UpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(NodeDeleted)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+	UpdateFlagsMask = StruUpdateFlagsMask | ValUpdateFlagsMask
 )
 
 //go:generate stringer -type=Flags
@@ -126,6 +136,9 @@ type Ki interface {
 
 	// Set given property key to value val -- initializes property map if nil
 	SetProp(key string, val interface{})
+
+	// Set given property key to value val, with update notification (wrapped in UpdateStart/End)
+	SetPropUpdate(key string, val interface{})
 
 	// Get property value from key -- if inherit, then check all parents too -- if typ then check property on type as well
 	Prop(key string, inherit, typ bool) interface{}
@@ -229,7 +242,7 @@ type Ki interface {
 	FindParentByType(t ...reflect.Type) Ki
 
 	// find field Ki element by name -- returns nil if not found
-	FindFieldByName(name string) Ki
+	FindKiFieldByName(name string) Ki
 
 	// Delete child at index -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChildAtIndex(idx int, destroy bool)
@@ -331,6 +344,21 @@ type Ki interface {
 
 	// disconnect all the way from me down the tree
 	DisconnectAll()
+
+	//////////////////////////////////////////////////////////////////////////
+	//  Field Value setting with notification
+
+	// set given field name to given value, using very robust conversion routines to e.g., convert from strings to numbers, and vice-versa, automatically -- returns true if successfully set -- wrapped in UpdateStart / End and sets the FieldUpdated flag
+	SetField(field string, val interface{}) bool
+
+	// set given field name to given value, all the way down the tree from me -- wrapped in UpdateStart / End
+	SetFieldDown(field string, val interface{})
+
+	// set given field name to given value, all the way up the tree from me -- wrapped in UpdateStart / End
+	SetFieldUp(field string, val interface{})
+
+	// get field value by name -- returns nil if not found
+	FieldByName(field string) interface{}
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees

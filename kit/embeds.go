@@ -128,11 +128,11 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 // a slice list of all the StructField type information for fields of given type and any embedded types -- returns nil on error (logged)
 func FlatFields(typ reflect.Type) []reflect.StructField {
 	ff := make([]reflect.StructField, 0)
-	err := FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+	falseErr := FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
 		ff = append(ff, field)
 		return true
 	})
-	if err {
+	if falseErr == false {
 		return nil
 	}
 	return ff
@@ -141,11 +141,11 @@ func FlatFields(typ reflect.Type) []reflect.StructField {
 // a slice list of all the field reflect.Value's for fields of given struct (must pass a pointer to the struct) and any of its embedded structs -- returns nil on error (logged)
 func FlatFieldVals(stru interface{}) []reflect.Value {
 	ff := make([]reflect.Value, 0)
-	err := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	falseErr := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, fieldVal)
 		return true
 	})
-	if err {
+	if falseErr == false {
 		return nil
 	}
 	return ff
@@ -154,55 +154,39 @@ func FlatFieldVals(stru interface{}) []reflect.Value {
 // a slice list of all the field interface{} values *as pointers to the field value* (i.e., calling Addr() on the Field Value) for fields of given struct (must pass a pointer to the struct) and any of its embedded structs -- returns nil on error (logged)
 func FlatFieldInterfaces(stru interface{}) []interface{} {
 	ff := make([]interface{}, 0)
-	err := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	falseErr := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, PtrValue(fieldVal).Interface())
 		return true
 	})
-	if err {
+	if falseErr == false {
 		return nil
 	}
 	return ff
 }
 
-// todo: is this already in reflect??
-
-// find field in type or embedded structs within type, by name
-func FindFlatFieldByName(typ reflect.Type, nm string) reflect.StructField {
-	ff := reflect.StructField{}
-	FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
-		if field.Name == nm {
-			ff = field
-			return false // stop iterating
-		}
-		return true
-	})
-	return ff
+// find field in type or embedded structs within type, by name -- native function already does flat version, so this is just for reference and consistency
+func FlatFieldByName(typ reflect.Type, nm string) (reflect.StructField, bool) {
+	return typ.FieldByName(nm)
 }
 
-// find field in object and embedded objects, by name, returning reflect.Value of field
-func FindFlatFieldValueByName(stru interface{}, nm string) reflect.Value {
-	ff := reflect.Value{}
-	FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if field.Name == nm {
-			ff = fieldVal
-			return false // stop iterating
-		}
-		return true
-	})
-	return ff
+// find field in object and embedded objects, by name, returning reflect.Value of field -- native version of Value function already does flat find, so this just provides a convenient wrapper
+func FlatFieldValueByName(stru interface{}, nm string) reflect.Value {
+	vv := reflect.ValueOf(stru)
+	if stru == nil || vv.Kind() != reflect.Ptr {
+		log.Printf("kit.FlatFieldsValueFun: must pass a non-nil pointer to the struct: %v\n", stru)
+		return reflect.Value{}
+	}
+	v := NonPtrValue(vv)
+	return v.FieldByName(nm)
 }
 
-// find field in object and embedded objects, by name, returning interface{} to pointer of field
-func FindFlatFieldInterfaceByName(stru interface{}, nm string) interface{} {
-	ff := interface{}(nil)
-	FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if field.Name == nm {
-			ff = PtrValue(fieldVal).Interface()
-			return false // stop iterating
-		}
-		return true
-	})
-	return ff
+// find field in object and embedded objects, by name, returning interface{} to pointer of field, or nil if not found
+func FlatFieldInterfaceByName(stru interface{}, nm string) interface{} {
+	ff := FlatFieldValueByName(stru, nm)
+	if !ff.IsValid() {
+		return nil
+	}
+	return PtrValue(ff).Interface()
 }
 
 // checks if given type embeds another type, at any level of recursive embedding

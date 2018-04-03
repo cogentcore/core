@@ -8,8 +8,9 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/rcoreilly/goki/ki/kit"
 	"strings"
+
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // key fact of Go: interface such as Ki is implicitly a pointer!
@@ -30,7 +31,11 @@ func (k *Ptr) Reset() {
 
 // GetPath updates the Path field with the current path to the pointer
 func (k *Ptr) GetPath() {
-	k.Path = k.Ptr.PathUnique()
+	if k.Ptr != nil {
+		k.Path = k.Ptr.PathUnique()
+	} else {
+		k.Path = ""
+	}
 }
 
 // FindPtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil

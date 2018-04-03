@@ -8,6 +8,7 @@ package kit
 
 import (
 	// "fmt"
+	"log"
 	"math"
 	"reflect"
 	"strconv"
@@ -27,12 +28,8 @@ func ToBool(it interface{}) (bool, bool) {
 	if it == nil {
 		return false, false
 	}
-	v := reflect.ValueOf(it)
+	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
-	if vk == reflect.Ptr {
-		v = v.Elem()
-		vk = v.Kind()
-	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return (v.Int() != 0), true
@@ -60,12 +57,8 @@ func ToInt(it interface{}) (int64, bool) {
 	if it == nil {
 		return 0, false
 	}
-	v := reflect.ValueOf(it)
+	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
-	if vk == reflect.Ptr {
-		v = v.Elem()
-		vk = v.Kind()
-	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return v.Int(), true
@@ -96,12 +89,8 @@ func ToFloat(it interface{}) (float64, bool) {
 	if it == nil {
 		return 0.0, false
 	}
-	v := reflect.ValueOf(it)
+	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
-	if vk == reflect.Ptr {
-		v = v.Elem()
-		vk = v.Kind()
-	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return float64(v.Int()), true
@@ -132,12 +121,8 @@ func ToString(it interface{}) (string, bool) {
 	if it == nil {
 		return "", false
 	}
-	v := reflect.ValueOf(it)
+	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
-	if vk == reflect.Ptr {
-		v = v.Elem()
-		vk = v.Kind()
-	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return strconv.FormatInt(v.Int(), 10), true
@@ -156,6 +141,67 @@ func ToString(it interface{}) (string, bool) {
 	default:
 		return "", false
 	}
+}
+
+// robustly set the to value from the from value -- to must be a pointer-to --
+// only for basic field values -- use copier package for more complex cases
+func SetRobust(to, from interface{}) bool {
+	if to == nil {
+		return false
+	}
+	v := reflect.ValueOf(to)
+	vnp := NonPtrValue(v)
+	typ := vnp.Type()
+	vp := PtrValue(v)
+	vk := vnp.Kind()
+	if !vp.Elem().CanSet() {
+		log.Printf("ki.SetRobust 'to' cannot be set -- must be a variable or field, not a const or tmp or other value that cannot be set.  Value info: %v\n", vp)
+		return false
+	}
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		fm, ok := ToInt(from)
+		if ok {
+			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+			return true
+		}
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		fm, ok := ToInt(from)
+		if ok {
+			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+			return true
+		}
+	case vk == reflect.Bool:
+		fm, ok := ToBool(from)
+		if ok {
+			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+			return true
+		}
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		fm, ok := ToFloat(from)
+		if ok {
+			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+			return true
+		}
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		// cv := v.Complex()
+		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
+		// return rv, true
+	case vk == reflect.String: // todo: what about []byte?
+		fm, ok := ToString(from)
+		if ok {
+			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+			return true
+		}
+	}
+
+	fv := reflect.ValueOf(from)
+	// Just set it if possible to assign
+	if fv.Type().AssignableTo(typ) {
+		vp.Elem().Set(fv)
+		return true
+	}
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

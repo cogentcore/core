@@ -7,6 +7,7 @@ package ki
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"testing"
 
@@ -34,6 +35,14 @@ type NodeWithField struct {
 }
 
 var KiT_NodeWithField = kit.Types.AddType(&NodeWithField{}, nil)
+
+type NodeField2 struct {
+	NodeWithField
+	Field2    NodeEmbed
+	PtrIgnore *NodeEmbed
+}
+
+var KiT_NodeField2 = kit.Types.AddType(&NodeField2{}, nil)
 
 func TestNodeAddChild(t *testing.T) {
 	parent := NodeEmbed{}
@@ -662,7 +671,151 @@ ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
 
 }
 
-func TestNodeField(t *testing.T) {
+func TestNodeFieldFun(t *testing.T) {
 	parent := NodeWithField{}
 	parent.InitName(&parent, "par1")
+	res := make([]string, 0, 10)
+	parent.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
+		return true
+	})
+	// fmt.Printf("node field fun result: %v\n", res)
+
+	trg := []string{"par1, fun_down, lev 0", "Field1, fun_down, lev 1"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
+
+	par2 := NodeField2{}
+	par2.InitName(&par2, "par2")
+	par2.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
+		return true
+	})
+	// fmt.Printf("node field fun result: %v\n", res)
+	trg = []string{"par2, fun_down, lev 0", "Field1, fun_down, lev 1", "Field2, fun_down, lev 1"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+	}
+	res = res[:0]
+
+	par2.AddNewChildNamed(nil, "child0")
+	child1 := par2.AddNewChildNamed(nil, "child1")
+	child1.AddNewChildNamed(nil, "subchild0")
+	child1.AddNewChildNamed(nil, "subchild1")
+
+	par2.FunDownDepthFirst(0, "fun_down_depth", func(k Ki, level int, d interface{}) bool {
+		return true
+	},
+		func(k Ki, level int, d interface{}) bool {
+			res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
+			return true
+		})
+	// fmt.Printf("node field fun result: %v\n", res)
+	// trg = []string{"par2, fun_down, lev 0", "Field1, fun_down, lev 1", "Field2, fun_down, lev 1"}
+	// if !reflect.DeepEqual(res, trg) {
+	// 	t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+	// }
+	res = res[:0]
+}
+
+func TestNodeFieldJSonSave(t *testing.T) {
+	parent := NodeField2{}
+	parent.InitName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+
+	parent.Ptr.Ptr = &child2.Field1
+	child2.Ptr.Ptr = &schild2.Field2
+
+	b, err := parent.SaveJSON(true)
+	if err != nil {
+		t.Error(err)
+		// } else {
+		// 	fmt.Printf("json output: %v\n", string(b))
+	}
+
+	tstload := NodeField2{}
+	tstload.InitName(&tstload, "")
+	err = tstload.LoadJSON(b)
+	if err != nil {
+		t.Error(err)
+	} else {
+		tstb, _ := tstload.SaveJSON(true)
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd json rep are not equivalent")
+			ioutil.WriteFile("/tmp/jsonout1", b, 0644)
+			ioutil.WriteFile("/tmp/jsonout2", tstb, 0644)
+		}
+	}
+}
+
+func TestNodeFieldSet(t *testing.T) {
+	parent := NodeField2{}
+	parent.InitName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+
+	parent.Ptr.Ptr = &child2.Field1
+	child2.Ptr.Ptr = &schild2.Field2
+
+	ts := "child2 is nice"
+	ok := child2.SetField("Mbr1", ts)
+	fs := kit.NonPtrInterface(child2.FieldByName("Mbr1"))
+	if !ok || fs != ts {
+		t.Errorf("Set field error: %+v != %+v, ok: %v\n", fs, ts, ok)
+	}
+
+	ts = "45.21"
+	ok = child2.SetField("Mbr1", 45.21)
+	fs = kit.NonPtrInterface(child2.FieldByName("Mbr1"))
+	if !ok || fs != ts {
+		t.Errorf("Set field error: %+v != %+v, ok: %v\n", fs, ts, ok)
+	}
+}
+
+func TestClone(t *testing.T) {
+	parent := NodeField2{}
+	parent.InitName(&parent, "par1")
+	parent.Mbr1 = "bloop"
+	parent.Mbr2 = 32
+	// child1 :=
+	parent.AddNewChildNamed(nil, "child1")
+	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	// child3 :=
+	parent.AddNewChildNamed(nil, "child1")
+	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+
+	parent.Ptr.Ptr = &child2.Field1
+	child2.Ptr.Ptr = &schild2.Field2
+
+	b, err := parent.SaveJSON(true)
+	if err != nil {
+		t.Error(err)
+		// } else {
+		// 	fmt.Printf("json output: %v\n", string(b))
+	}
+
+	tstload := parent.Clone()
+	tstb, _ := tstload.SaveJSON(true)
+	// fmt.Printf("test loaded json output: %v\n", string(tstb))
+	if !bytes.Equal(tstb, b) {
+		t.Error("original and unmarshal'd json rep are not equivalent")
+		ioutil.WriteFile("/tmp/jsonout1", b, 0644)
+		ioutil.WriteFile("/tmp/jsonout2", tstb, 0644)
+	}
 }
