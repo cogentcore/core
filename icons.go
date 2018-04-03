@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -190,13 +191,50 @@ var DefaultIconSet *IconSet = MakeDefaultIcons()
 // the current icon set can be set to any icon set
 var CurIconSet *IconSet = DefaultIconSet
 
+// main function to get icon by name -- looks in CurIconSet and falls back to DefaultIconSet if not found there -- logs a message and returns nil if not found
+func IconByName(name string) *Icon {
+	ic, ok := (*CurIconSet)[name]
+	if !ok {
+		ic, ok = (*DefaultIconSet)[name]
+		if !ok {
+			log.Printf("gi.IconByName: unable to find icon name in either CurIconSet or DefaultIconSet: %v\n", name)
+
+			return nil
+		}
+	}
+	return ic
+}
+
 // note: icons must use a normalized 0-1 coordinate system!
 func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
-	wd := Icon{}
-	wd.InitName(&wd, "widget-down-wedge")
-	p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
-	p.Data = ParsePathData("M 0 0 1 0 .5 1 Z")
-	iset[wd.Nm] = &wd
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-down-wedge")
+		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p.Data = ParsePathData("M 0.05 0.05 .95 0.05 .5 .95 Z")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-up-wedge")
+		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p.Data = ParsePathData("M 0.05 0.95 .95 0.95 .5 .05 Z")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-left-wedge")
+		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p.Data = ParsePathData("M 0.95 0.05 .95 0.95 .05 .5 Z")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-right-wedge")
+		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p.Data = ParsePathData("M 0.05 0.05 .05 0.95 .95 .5 Z")
+		iset[wd.Nm] = &wd
+	}
 	return &iset
 }

@@ -6,7 +6,8 @@ package gi
 
 import (
 	// "fmt"
-	"github.com/rcoreilly/goki/gi/oswin"
+	"image/color"
+
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -48,7 +49,16 @@ type Action struct {
 	ActionSig ki.Signal `json:"-" xml:"-" desc:"signal for action -- very simple -- Action triggered"`
 }
 
-func (g *Action) ActionReleased() {
+var KiT_Action = kit.Types.AddType(&Action{}, nil)
+
+// ButtonWidget interface
+
+func (g *Action) ButtonAsBase() *ButtonBase {
+	return &(g.ButtonBase)
+}
+
+// trigger action signal
+func (g *Action) ButtonRelease() {
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.SetButtonState(ButtonNormal)
@@ -60,10 +70,22 @@ func (g *Action) ActionReleased() {
 	g.UpdateEnd()
 }
 
-var KiT_Action = kit.Types.AddType(&Action{}, nil)
+// set the text and update button
+func (g *Action) SetText(txt string) {
+	SetButtonText(g, txt)
+}
+
+// set the Icon (could be nil) and update button
+func (g *Action) SetIcon(ic *Icon) {
+	SetButtonIcon(g, ic)
+}
 
 func (g *Action) SetAsMenu() {
 	bitflag.Set(&g.NodeFlags, int(ActionFlagMenu))
+}
+
+func (g *Action) IsMenu() bool {
+	return bitflag.Has(g.NodeFlags, int(ActionFlagMenu))
 }
 
 func (g *Action) SetAsButton() {
@@ -83,61 +105,24 @@ func (g *Action) AsLayout2D() *Layout {
 }
 
 func (g *Action) Init2D() {
-	g.Init2DBase()
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Action) // note: will fail for any derived classes..
-		if ok {
-			ab.ButtonPressed()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Action)
-		if ok {
-			ab.ActionReleased()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Action)
-		if ok {
-			ab.ButtonEnterHover()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Action)
-		if ok {
-			ab.ButtonExitHover()
-		}
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Action)
-		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				// todo: register shortcuts with window, and generalize these keybindings
-				kf := KeyFun(kt.Key, kt.Chord)
-				if kf == KeyFunSelectItem || kt.Key == "space" {
-					ab.ButtonPressed()
-					// todo: brief delay??
-					ab.ButtonReleased()
-				}
-			}
-		}
-	})
+	g.Init2DWidget()
+	g.ConfigParts()
+	Init2DButtonEvents(g)
 }
 
 var ActionProps = []map[string]interface{}{
 	{
-		"border-width":  "0px",
-		"border-radius": "0px",
-		"border-color":  "black",
-		"border-style":  "solid",
-		"padding":       "2px",
-		"margin":        "0px",
+		"border-width":  units.NewValue(0, units.Px),
+		"border-radius": units.NewValue(0, units.Px),
+		"border-color":  color.Black,
+		"border-style":  BorderSolid,
+		"padding":       units.NewValue(2, units.Px),
+		"margin":        units.NewValue(0, units.Px),
 		// "font-family":         "Arial", // this is crashing
-		"font-size":        "20pt",
-		"text-align":       "center",
-		"vertical-align":   "top",
-		"color":            "black",
+		"font-size":        units.NewValue(20, units.Pt),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignTop,
+		"color":            color.Black,
 		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -159,7 +144,41 @@ var ActionProps = []map[string]interface{}{
 	},
 }
 
+func (g *Action) ConfigPartsButton() {
+	config, icIdx, txIdx := g.ConfigPartsIconText()
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconText(icIdx, txIdx)
+}
+
+func (g *Action) ConfigPartsMenu() {
+	config, icIdx, txIdx := g.ConfigPartsIconText()
+	wrIdx := -1
+	if len(g.Kids) > 0 { // include a right-wedge for sub-menu
+		config.Add(KiT_Stretch, "WRStr")
+		wrIdx = len(config)
+		config.Add(KiT_Icon, "WidgR")
+	}
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconText(icIdx, txIdx)
+	if wrIdx >= 0 {
+		kc, _ := g.Parts.Child(wrIdx)
+		ic := kc.(*Icon)
+		if !ic.HasChildren() {
+			ic.CopyFrom(IconByName("widget-right-wedge"))
+		}
+	}
+}
+
+func (g *Action) ConfigParts() {
+	if g.IsMenu() {
+		g.ConfigPartsMenu()
+	} else {
+		g.ConfigPartsButton()
+	}
+}
+
 func (g *Action) Style2D() {
+	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(ActionProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -172,12 +191,12 @@ func (g *Action) Style2D() {
 }
 
 func (g *Action) Size2D() {
-	g.InitLayout2D()
-	g.Size2DFromText(g.Text)
+	g.Size2DWidget()
 }
 
 func (g *Action) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.ConfigParts()
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -189,7 +208,7 @@ func (g *Action) BBox2D() image.Rectangle {
 }
 
 func (g *Action) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+	return g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Action) ChildrenBBox2D() image.Rectangle {
@@ -201,22 +220,17 @@ func (g *Action) Render2D() {
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
+			g.Render2DChildren()
 		}
-		g.Render2DChildren()
 		g.PopBounds()
 	}
 }
 
-// render using a default style if not otherwise styled
+// render using a default style if no children
 func (g *Action) Render2DDefaultStyle() {
-	if g.PushBounds() {
-		st := &g.Style
-		g.RenderStdBox(st)
-		g.Render2DText(g.Text)
-		g.PopBounds()
-	}
+	st := &g.Style
+	g.RenderStdBox(st)
+	g.Render2DParts()
 }
 
 func (g *Action) CanReRender2D() bool {
@@ -260,16 +274,15 @@ func (g *Separator) AsLayout2D() *Layout {
 }
 
 func (g *Separator) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 }
 
 var SeparatorProps = map[string]interface{}{
-	"padding":      "2px",
-	"margin":       "2px",
-	"font-size":    "24pt",
-	"align-vert":   "center",
-	"align-horiz":  "center",
-	"stroke-width": "2px",
+	"padding":      units.NewValue(2, units.Px),
+	"margin":       units.NewValue(2, units.Px),
+	"align-vert":   AlignCenter,
+	"align-horiz":  AlignCenter,
+	"stroke-width": units.NewValue(2, units.Px),
 	// todo: dotted
 }
 
@@ -278,11 +291,11 @@ func (g *Separator) Style2D() {
 }
 
 func (g *Separator) Size2D() {
-	g.InitLayout2D()
+	g.Size2DWidget()
 }
 
 func (g *Separator) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	g.Layout2DChildren()
 }
 
@@ -378,13 +391,44 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 
 ///////////////////////////////////////////////////////////
 
-// MenuButton is a standard command button -- PushMenuButton in Qt Widgets, and MenuButton in Qt Quick
+// MenuButton pops up a menu
 type MenuButton struct {
-	Menu Menu
 	ButtonBase
+	Menu Menu
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, nil)
+
+// ButtonWidget interface
+
+func (g *MenuButton) ButtonAsBase() *ButtonBase {
+	return &(g.ButtonBase)
+}
+
+func (g *MenuButton) ButtonRelease() {
+	wasPressed := (g.State == ButtonDown)
+	g.UpdateStart()
+	g.SetButtonState(ButtonNormal)
+	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	if wasPressed {
+		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+	}
+	g.UpdateEnd()
+	pos := g.WinBBox.Max // todo: find location of down wedge?
+	pos.Y -= 10
+	pos.X -= 10
+	PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)
+}
+
+// set the text and update button
+func (g *MenuButton) SetText(txt string) {
+	SetButtonText(g, txt)
+}
+
+// set the Icon (could be nil) and update button
+func (g *MenuButton) SetIcon(ic *Icon) {
+	SetButtonIcon(g, ic)
+}
 
 // add an action to the menu -- todo: shortcuts
 func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFun) *Action {
@@ -402,18 +446,6 @@ func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFun) *Actio
 	return &ac
 }
 
-func (g *MenuButton) ButtonReleased(where image.Point) {
-	wasPressed := (g.State == ButtonDown)
-	g.UpdateStart()
-	g.SetButtonState(ButtonNormal)
-	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
-	if wasPressed {
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
-	}
-	g.UpdateEnd()
-	PopupMenu(g.Menu, where.X, where.Y, g.Viewport, g.Text)
-}
-
 func (g *MenuButton) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
@@ -427,54 +459,17 @@ func (g *MenuButton) AsLayout2D() *Layout {
 }
 
 func (g *MenuButton) Init2D() {
-	g.Init2DBase()
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*MenuButton) // note: will fail for any derived classes..
-		if ok {
-			ab.ButtonPressed()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*MenuButton)
-		if ok {
-			ab.ButtonReleased(d.(oswin.MouseUpEvent).Where)
-		}
-	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*MenuButton)
-		if ok {
-			ab.ButtonEnterHover()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*MenuButton)
-		if ok {
-			ab.ButtonExitHover()
-		}
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*MenuButton)
-		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				// todo: register shortcuts with window, and generalize these keybindings
-				kf := KeyFun(kt.Key, kt.Chord)
-				if kf == KeyFunSelectItem || kt.Key == "space" {
-					ab.ButtonPressed()
-					// todo: brief delay??
-					ab.ButtonReleased(image.ZP)
-				}
-			}
-		}
-	})
+	g.Init2DWidget()
+	g.ConfigParts()
+	Init2DButtonEvents(g)
 }
 
 var MenuButtonProps = []map[string]interface{}{
 	{
 		"border-width":        units.NewValue(1, units.Px),
 		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        "black",
-		"border-style":        "solid",
+		"border-color":        color.Black,
+		"border-style":        BorderSolid,
 		"padding":             units.NewValue(4, units.Px),
 		"margin":              units.NewValue(4, units.Px),
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
@@ -485,7 +480,7 @@ var MenuButtonProps = []map[string]interface{}{
 		"font-size":        units.NewValue(24, units.Pt),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
-		"color":            "black",
+		"color":            color.Black,
 		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -507,7 +502,22 @@ var MenuButtonProps = []map[string]interface{}{
 	},
 }
 
+func (g *MenuButton) ConfigParts() {
+	config, icIdx, txIdx := g.ConfigPartsIconText()
+	config.Add(KiT_Stretch, "WRStr")
+	wrIdx := len(config)
+	config.Add(KiT_Icon, "WidgR")
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconText(icIdx, txIdx)
+	kc, _ := g.Parts.Child(wrIdx)
+	ic := kc.(*Icon)
+	if !ic.HasChildren() {
+		ic.CopyFrom(IconByName("widget-down-wedge"))
+	}
+}
+
 func (g *MenuButton) Style2D() {
+	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(MenuButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -521,12 +531,12 @@ func (g *MenuButton) Style2D() {
 }
 
 func (g *MenuButton) Size2D() {
-	g.InitLayout2D()
-	g.Size2DFromText(g.Text)
+	g.Size2DWidget()
 }
 
 func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.ConfigParts()
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -538,7 +548,7 @@ func (g *MenuButton) BBox2D() image.Rectangle {
 }
 
 func (g *MenuButton) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+	return g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *MenuButton) ChildrenBBox2D() image.Rectangle {
@@ -552,10 +562,8 @@ func (g *MenuButton) Render2D() {
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
+			g.Render2DChildren()
 		}
-		g.Render2DChildren()
 		g.PopBounds()
 	}
 }
@@ -564,8 +572,7 @@ func (g *MenuButton) Render2D() {
 func (g *MenuButton) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
-	g.Render2DText(g.Text)
-
+	g.Render2DParts()
 }
 
 func (g *MenuButton) CanReRender2D() bool {

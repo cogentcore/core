@@ -5,36 +5,26 @@
 package main
 
 import (
-	// "fmt"
 	"github.com/rcoreilly/goki/gi"
-	_ "github.com/rcoreilly/goki/gi/init"
+	"github.com/rcoreilly/goki/gi/oswin"
+	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/ki"
-	// "math/rand"
-	"reflect"
-	// "runtime"
-	// "sync"
-	// "time"
-	// "image"
-	// "image/draw"
 )
 
 func main() {
 	go mainrun()
-	gi.RunBackendEventLoop() // this needs to run in main loop
+	oswin.RunBackendEventLoop() // this needs to run in main loop
 }
 
 func mainrun() {
 	// a source tree to view
 	srctree := ki.Node{}
-	srctree.SetThisName(&srctree, "par1")
-	srctree.SetChildType(reflect.TypeOf(srctree))
+	srctree.InitName(&srctree, "par1")
 	// child1 :=
 	srctree.AddNewChildNamed(nil, "child1")
 	child2 := srctree.AddNewChildNamed(nil, "child2")
 	// child3 :=
 	srctree.AddNewChildNamed(nil, "child3")
-
-	child2.SetChildType(reflect.TypeOf(srctree))
 	// schild2 :=
 	child2.AddNewChildNamed(nil, "subchild1")
 
@@ -44,20 +34,19 @@ func mainrun() {
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()
+	vp.SetProp("background-color", "#FFF")
+	vp.Fill = true
 
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
-	vpfill.SetProp("fill", "#FFF")
-
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "vlay").(*gi.Layout)
+	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	tv1 := vpfill.AddNewChildNamed(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
+	tv1 := vlay.AddNewChildNamed(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
 	tv1.SetSrcNode(&srctree)
 
-	for i, sk := range srctree.Children {
+	for i, sk := range srctree.Kids {
 		tf := tv1.TabFrameAtIndex(i)
 		lbl := tf.AddNewChildNamed(gi.KiT_Label, "tst").(*gi.Label)
-		lbl.Text = sk.KiUniqueName()
+		lbl.Text = sk.UniqueName()
 		// note: these were set by default -- could override
 		// tf.SetProp("max-width", -1.0) // stretch flex
 		// tf.SetProp("max-height", -1.0)

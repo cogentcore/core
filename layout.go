@@ -608,11 +608,11 @@ func (ly *Layout) SetHScroll() {
 	})
 }
 
+// todo: we are leaking the scrollbars..
 func (ly *Layout) DeleteHScroll() {
 	if ly.HScroll == nil {
 		return
 	}
-	// todo: disconnect from events, call pointer cut function on ki
 	sc := ly.HScroll
 	sc.DisconnectAllEvents()
 	sc.Destroy()
@@ -653,11 +653,17 @@ func (ly *Layout) DeleteVScroll() {
 	if ly.VScroll == nil {
 		return
 	}
-	// todo: disconnect from events, call pointer cut function on ki
 	sc := ly.VScroll
 	sc.DisconnectAllEvents()
-	sc.Destroy()
+	sc.Destroy() // this resets all signals and connections
 	ly.VScroll = nil
+}
+
+func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
+	sc.LayData.AllocPos = Vec2DZero
+	sc.LayData.AllocSize = Vec2DZero
+	sc.VpBBox = image.ZR
+	sc.WinBBox = image.ZR
 }
 
 func (ly *Layout) LayoutScrolls() {
@@ -674,6 +680,10 @@ func (ly *Layout) LayoutScrolls() {
 		}
 		sc.LayData.AllocSize.Y = sbw
 		sc.Layout2D(ly.VpBBox)
+	} else {
+		if ly.HScroll != nil {
+			ly.DeactivateScroll(ly.HScroll)
+		}
 	}
 	if ly.HasVScroll {
 		sc := ly.VScroll
@@ -687,6 +697,10 @@ func (ly *Layout) LayoutScrolls() {
 		}
 		sc.LayData.AllocSize.X = sbw
 		sc.Layout2D(ly.VpBBox)
+	} else {
+		if ly.VScroll != nil {
+			ly.DeactivateScroll(ly.VScroll)
+		}
 	}
 }
 

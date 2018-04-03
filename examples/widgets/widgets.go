@@ -23,6 +23,9 @@ func mainrun() {
 	width := 800
 	height := 800
 
+	// turn this on to see a trace of the rendering
+	// gi.Render2DTrace = true
+
 	recv := ki.Node{}            // receiver for events
 	recv.InitName(&recv, "recv") // this is essential for root objects not owned by other Ki tree nodes
 
@@ -30,12 +33,7 @@ func mainrun() {
 	win.UpdateStart()
 
 	icnm := "widget-down-wedge"
-	wdicon, ok := (*gi.DefaultIconSet)[icnm]
-
-	if !ok {
-		fmt.Printf("Could not find icon: %v\n", icnm)
-		return // bail
-	}
+	wdicon := gi.IconByName(icnm)
 
 	vp := win.WinViewport2D()
 	vp.SetProp("background-color", "#FFF")
@@ -55,10 +53,10 @@ func mainrun() {
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	row1.AddNewChildNamed(gi.KiT_Stretch, "str1")
-	// lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
-	// lab1.Text = "This is a demonstration of the various GoGi Widgets"
-	// lab1.SetProp("max-width", -1)
-	// lab1.SetProp("text-align", "center")
+	lab1 := row1.AddNewChildNamed(gi.KiT_Label, "lab1").(*gi.Label)
+	lab1.Text = "This is a demonstration of the various GoGi Widgets"
+	lab1.SetProp("max-width", -1)
+	lab1.SetProp("text-align", "center")
 	row1.AddNewChildNamed(gi.KiT_Stretch, "str2")
 
 	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
@@ -70,7 +68,7 @@ func mainrun() {
 
 	mb1 := row2.AddNewChildNamed(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 
-	mb1.Text = "Menu Button"
+	mb1.SetText("Menu Button")
 	mb1.AddMenuText("Menu Item 1", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
 	})

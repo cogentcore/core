@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
@@ -161,6 +162,120 @@ func (g *ButtonBase) ButtonExitHover() {
 	}
 }
 
+// standard config of icon and text left-to right in a row
+func (g *ButtonBase) ConfigPartsIconText() (config kit.TypeAndNameList, icIdx, txIdx int) {
+	// todo: add some styles for button layout
+	g.Parts.Lay = LayoutRow
+	config = kit.TypeAndNameList{} // note: slice is already a pointer
+	icIdx = -1
+	txIdx = -1
+	if g.Icon != nil {
+		config.Add(KiT_Icon, "Icon")
+		icIdx = 0
+		if g.Text != "" {
+			config.Add(KiT_Space, "Space")
+		}
+	}
+	if g.Text != "" {
+		txIdx = len(config)
+		config.Add(KiT_Label, "Text")
+	}
+	return
+}
+
+// set the icon and text values in parts
+func (g *ButtonBase) ConfigPartsSetIconText(icIdx, txIdx int) {
+	if icIdx >= 0 {
+		kc, _ := g.Parts.Child(icIdx)
+		ic := kc.(*Icon)
+		if !ic.HasChildren() || ic.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
+			ic.CopyFrom(g.Icon.This)
+			ic.UniqueNm = g.Icon.UniqueNm
+		}
+	}
+	if txIdx >= 0 {
+		kc, _ := g.Parts.Child(txIdx)
+		lbl := kc.(*Label)
+		lbl.SetProp("margin", units.NewValue(0, units.Px))
+		lbl.SetProp("padding", units.NewValue(0, units.Px))
+		lbl.SetProp("background-color", "none")
+		lbl.Text = g.Text
+	}
+}
+
+// interface for button widgets -- can extend as needed
+type ButtonWidget interface {
+	// get the button base for most basic functions -- reduces interface size
+	ButtonAsBase() *ButtonBase
+	// called for release of button -- this is where buttons actually differ in functionality
+	ButtonRelease()
+	// configure the parts of the button
+	ConfigParts()
+}
+
+// set the text and update button
+func SetButtonText(bw ButtonWidget, txt string) {
+	g := bw.ButtonAsBase()
+	g.UpdateStart()
+	g.Text = txt
+	bw.ConfigParts()
+	g.UpdateEnd()
+}
+
+// set the Icon (could be nil) and update button
+func SetButtonIcon(bw ButtonWidget, ic *Icon) {
+	g := bw.ButtonAsBase()
+	g.UpdateStart()
+	g.Icon = ic // this is jut the pointer
+	bw.ConfigParts()
+	g.UpdateEnd()
+}
+
+// handles all the basic button events
+func Init2DButtonEvents(bw ButtonWidget) {
+	g := bw.ButtonAsBase()
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := (interface{})(recv).(ButtonWidget)
+		if ok {
+			ab.ButtonAsBase().ButtonPressed()
+		}
+	})
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := (interface{})(recv).(ButtonWidget)
+		if ok {
+			ab.ButtonRelease() // special one
+		}
+	})
+	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := (interface{})(recv).(ButtonWidget)
+		if ok {
+			ab.ButtonAsBase().ButtonEnterHover()
+		}
+	})
+	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := (interface{})(recv).(ButtonWidget)
+		if ok {
+			ab.ButtonAsBase().ButtonExitHover()
+		}
+	})
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ab, ok := (interface{})(recv).(ButtonWidget)
+		if ok {
+			bb := ab.ButtonAsBase()
+			kt, ok := d.(oswin.KeyTypedEvent)
+			if ok {
+				// todo: register shortcuts with window, and generalize these keybindings
+				kf := KeyFun(kt.Key, kt.Chord)
+				if kf == KeyFunSelectItem || kt.Key == "space" {
+					bb.ButtonPressed()
+					// todo: brief delay??
+					ab.ButtonRelease() // special one
+				}
+			}
+		}
+	})
+}
+
 ///////////////////////////////////////////////////////////
 
 // Button is a standard command button -- PushButton in Qt Widgets, and Button
@@ -172,20 +287,24 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
+// ButtonWidget interface
+
+func (g *Button) ButtonAsBase() *ButtonBase {
+	return &(g.ButtonBase)
+}
+
+func (g *Button) ButtonRelease() {
+	g.ButtonReleased() // do base
+}
+
 // set the text and update button
 func (g *Button) SetText(txt string) {
-	g.UpdateStart()
-	g.Text = txt
-	g.ConfigParts()
-	g.UpdateEnd()
+	SetButtonText(g, txt)
 }
 
 // set the Icon (could be nil) and update button
 func (g *Button) SetIcon(ic *Icon) {
-	g.UpdateStart()
-	g.Icon = ic // this is jut the pointer
-	g.ConfigParts()
-	g.UpdateEnd()
+	SetButtonIcon(g, ic)
 }
 
 func (g *Button) AsNode2D() *Node2DBase {
@@ -203,53 +322,15 @@ func (g *Button) AsLayout2D() *Layout {
 func (g *Button) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button) // note: will fail for any derived classes..
-		if ok {
-			ab.ButtonPressed()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button)
-		if ok {
-			ab.ButtonReleased()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button)
-		if ok {
-			ab.ButtonEnterHover()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button)
-		if ok {
-			ab.ButtonExitHover()
-		}
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*Button)
-		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				// todo: register shortcuts with window, and generalize these keybindings
-				kf := KeyFun(kt.Key, kt.Chord)
-				if kf == KeyFunSelectItem || kt.Key == "space" {
-					ab.ButtonPressed()
-					// todo: brief delay??
-					ab.ButtonReleased()
-				}
-			}
-		}
-	})
+	Init2DButtonEvents(g)
 }
 
 var ButtonProps = []map[string]interface{}{
 	{
 		"border-width":        units.NewValue(1, units.Px),
 		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        "black",
-		"border-style":        "solid",
+		"border-color":        color.Black,
+		"border-style":        BorderSolid,
 		"padding":             units.NewValue(4, units.Px),
 		"margin":              units.NewValue(4, units.Px),
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
@@ -260,7 +341,7 @@ var ButtonProps = []map[string]interface{}{
 		"font-size":        units.NewValue(24, units.Pt),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
-		"color":            "black",
+		"color":            color.Black,
 		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -283,39 +364,9 @@ var ButtonProps = []map[string]interface{}{
 }
 
 func (g *Button) ConfigParts() {
-	// todo: add some styles for button layout
-	g.Parts.Lay = LayoutRow
-	config := kit.TypeAndNameList{}
-	icIdx := -1
-	txIdx := -1
-	if g.Icon != nil {
-		config.Add(KiT_Icon, "Icon")
-		icIdx = 0
-		if g.Text != "" {
-			config.Add(KiT_Space, "Space")
-		}
-	}
-	if g.Text != "" {
-		txIdx = len(config)
-		config.Add(KiT_Label, "Text")
-	}
+	config, icIdx, txIdx := g.ConfigPartsIconText()
 	g.Parts.ConfigChildren(config, false) // not unique names
-	if icIdx >= 0 {
-		kc, _ := g.Parts.Child(icIdx)
-		ici, _ := KiToNode2D(kc)
-		ic := ici.(*Icon)
-		if !ic.HasChildren() {
-			ic.CopyFrom(g.Icon.This)
-		}
-	}
-	if txIdx >= 0 {
-		kc, _ := g.Parts.Child(txIdx)
-		lbi, lbl := KiToNode2D(kc)
-		lbl.SetProp("margin", units.NewValue(0, units.Px))
-		lbl.SetProp("padding", units.NewValue(0, units.Px))
-		lbl.SetProp("background-color", "none")
-		(lbi.(*Label)).Text = g.Text
-	}
+	g.ConfigPartsSetIconText(icIdx, txIdx)
 }
 
 func (g *Button) Style2D() {
@@ -365,20 +416,17 @@ func (g *Button) Render2D() {
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
+			g.Render2DChildren()
 		}
-		g.Render2DChildren()
 		g.PopBounds()
 	}
 }
 
-// render using a default style if not otherwise styled
+// render using a default style if no children
 func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-	// fmt.Printf("button %v text-style: %v\n", g.Nm, st.Text)
 }
 
 func (g *Button) CanReRender2D() bool {

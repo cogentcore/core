@@ -5,37 +5,26 @@
 package main
 
 import (
-	// "fmt"
 	"github.com/rcoreilly/goki/gi"
-	_ "github.com/rcoreilly/goki/gi/init"
+	"github.com/rcoreilly/goki/gi/oswin"
+	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/ki"
-	// "math/rand"
-	"reflect"
-	// "runtime"
-	// "sync"
-	// "time"
-	// "image"
-	// "image/draw"
 )
 
 func main() {
 	go mainrun()
-	gi.RunBackendEventLoop() // this needs to run in main loop
+	oswin.RunBackendEventLoop() // this needs to run in main loop
 }
 
 func mainrun() {
-
 	// a source tree to view
 	srctree := ki.Node{}
-	srctree.SetThisName(&srctree, "par1")
-	srctree.SetChildType(reflect.TypeOf(srctree))
+	srctree.InitName(&srctree, "par1")
 	// child1 :=
 	srctree.AddNewChildNamed(nil, "child1")
 	child2 := srctree.AddNewChildNamed(nil, "child2")
 	// child3 :=
 	srctree.AddNewChildNamed(nil, "child3")
-
-	child2.SetChildType(reflect.TypeOf(srctree))
 	// schild2 :=
 	child2.AddNewChildNamed(nil, "subchild1")
 
@@ -45,6 +34,7 @@ func mainrun() {
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()
+	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
 	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
@@ -56,8 +46,6 @@ func mainrun() {
 	// row1.SetStretchMaxWidth()
 
 	tv1 := row1.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
-	tv1.SetProp("x", 10)
-	tv1.SetProp("y", 10)
 	tv1.SetSrcNode(&srctree)
 
 	win.UpdateEnd()

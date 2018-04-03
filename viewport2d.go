@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -297,6 +298,9 @@ func (vp *Viewport2D) PushBounds() bool {
 	}
 	rs := &vp.Render
 	rs.PushBounds(vp.VpBBox)
+	if Render2DTrace {
+		fmt.Printf("Rendering: %v at %v\n", vp.PathUnique(), vp.VpBBox)
+	}
 	return true
 }
 

@@ -17,7 +17,6 @@ import (
 // 2D  Nodes
 
 /*
-
 Base struct node for 2D rendering tree -- renders to a bitmap using Paint
 rendering functions operating on the RenderState in the parent Viewport
 
@@ -56,6 +55,9 @@ type Node2DBase struct {
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
+
+// set this variable to true to obtain a trace of the nodes rendering (just printfs to stdout)
+var Render2DTrace bool = false
 
 // primary interface for all Node2D nodes
 type Node2D interface {
@@ -248,7 +250,9 @@ func (g *Node2DBase) PushBounds() bool {
 	}
 	rs := &g.Viewport.Render
 	rs.PushBounds(g.VpBBox)
-	// fmt.Printf("node %v pushed bounds %v\n", g.Nm, g.VpBBox)
+	if Render2DTrace {
+		fmt.Printf("Rendering: %v at %v\n", g.PathUnique(), g.VpBBox)
+	}
 	return true
 }
 
