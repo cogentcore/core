@@ -727,42 +727,15 @@ func (ly *Layout) Render2DChildren() {
 			return
 		}
 		gii, _ := KiToNode2D(ly.StackTop.Ptr)
-		ly.Render2DChild(gii)
+		gii.Render2D()
 		return
 	}
 	for _, kid := range ly.Kids {
 		gii, _ := KiToNode2D(kid)
 		if gii != nil {
-			ly.Render2DChild(gii)
+			gii.Render2D()
 		}
 	}
-}
-
-// todo: this is not a great mechanism here -- it depends on US calling ComputeBBox on the
-// child -- not encapsulated -- need an official concept of an extra offset that
-// gets propagated down the tree
-
-// need to allow for multiple such levels -- appropriately recursive, etc.
-
-// then cleanup the ComputeBBox2D stuff -- there are too many such calls and
-// it is confusing the snaking around of all these things..
-
-// also, the layout of treeview parts is not working correctly -- need to figure that out too
-
-func (ly *Layout) Render2DChild(gii Node2D) {
-	gi := gii.AsNode2D()
-	gi.LayData.AllocPos = gi.LayData.AllocPosOrig
-	if ly.HasHScroll {
-		off := ly.HScroll.Value
-		gi.LayData.AllocPos.X -= off
-	}
-	if ly.HasVScroll {
-		off := ly.VScroll.Value
-		gi.LayData.AllocPos.Y -= off
-	}
-	cbb := ly.This.(Node2D).ChildrenBBox2D()
-	gii.ComputeBBox2D(cbb) // update kid's bbox based on scrolled position
-	gii.Render2D()         // child will not render if bbox is empty
 }
 
 // convenience for LayoutStacked to show child node at a given index
@@ -798,8 +771,8 @@ func (ly *Layout) BBox2D() image.Rectangle {
 	return ly.BBoxFromAlloc()
 }
 
-func (ly *Layout) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return ly.ComputeBBox2DBase(parBBox)
+func (ly *Layout) ComputeBBox2D(parBBox image.Rectangle) {
+	ly.ComputeBBox2DBase(parBBox)
 }
 
 func (ly *Layout) ChildrenBBox2D() image.Rectangle {
@@ -834,7 +807,31 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	}
 	ly.FinalizeLayout()
 	ly.ManageOverflow()
-	ly.Layout2DChildren()
+	ly.Layout2DChildren() // layout done with canonical positions
+
+	delta := ly.Move2DDelta(Vec2DZero)
+	if !delta.IsZero() {
+		ly.Move2DChildren(delta) // move is a separate step
+	}
+}
+
+// we add our own offset here
+func (ly *Layout) Move2DDelta(delta Vec2D) Vec2D {
+	if ly.HasHScroll {
+		off := ly.HScroll.Value
+		delta.X -= off
+	}
+	if ly.HasVScroll {
+		off := ly.VScroll.Value
+		delta.Y -= off
+	}
+	return delta
+}
+
+func (ly *Layout) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	ly.Move2DBase(delta, parBBox)
+	delta = ly.Move2DDelta(delta) // add our offset
+	ly.Move2DChildren(delta)
 }
 
 func (ly *Layout) Render2D() {
@@ -845,8 +842,10 @@ func (ly *Layout) Render2D() {
 	}
 }
 
-func (ly *Layout) CanReRender2D() bool {
-	return true
+func (ly *Layout) ReRender2D() (node Node2D, layout bool) {
+	node = ly.This.(Node2D)
+	layout = true
+	return
 }
 
 func (ly *Layout) FocusChanged2D(gotFocus bool) {
@@ -906,11 +905,15 @@ func (g *Frame) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Frame) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
+	return g.Layout.BBox2D()
 }
 
-func (g *Frame) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Frame) ComputeBBox2D(parBBox image.Rectangle) {
+	g.Layout.ComputeBBox2D(parBBox)
+}
+
+func (g *Frame) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Layout.Move2D(delta, parBBox)
 }
 
 func (g *Frame) Render2D() {
@@ -938,8 +941,10 @@ func (g *Frame) Render2D() {
 	}
 }
 
-func (g *Frame) CanReRender2D() bool {
-	return true
+func (g *Frame) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = true
+	return
 }
 
 func (g *Frame) FocusChanged2D(gotFocus bool) {
@@ -998,12 +1003,17 @@ func (g *Stretch) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Stretch) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Stretch) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Stretch) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Stretch) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Stretch) Render2D() {
@@ -1013,8 +1023,10 @@ func (g *Stretch) Render2D() {
 	}
 }
 
-func (g *Stretch) CanReRender2D() bool {
-	return true
+func (g *Stretch) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Stretch) FocusChanged2D(gotFocus bool) {
@@ -1068,12 +1080,17 @@ func (g *Space) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Space) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Space) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Space) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Space) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Space) Render2D() {
@@ -1083,8 +1100,10 @@ func (g *Space) Render2D() {
 	}
 }
 
-func (g *Space) CanReRender2D() bool {
-	return true
+func (g *Space) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Space) FocusChanged2D(gotFocus bool) {

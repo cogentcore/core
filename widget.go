@@ -139,13 +139,15 @@ func (g *WidgetBase) Size2DWidget() {
 	g.SizeFromParts() // get our size from parts
 }
 
+// todo: parts are allocated within the box space, but we don't strictly enforce the
+// ChildrenBBox2D on them?
+
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData = g.LayData
 	g.Parts.LayData.AllocPos.SetAddVal(spc)
 	g.Parts.LayData.AllocSize.SetAddVal(-2.0 * spc)
 	g.Parts.Layout2DTree(parBBox)
-
 }
 
 func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
@@ -153,13 +155,17 @@ func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
 	g.Layout2DParts(parBBox)
 }
 
-func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) Vec2D {
-	psize := g.ComputeBBox2DBase(parBBox)
+func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
-	return psize
+}
+
+func (g *WidgetBase) Move2DWidget(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Parts.This.(Node2D).Move2D(delta, parBBox)
 }
 
 func (g *WidgetBase) Render2DParts() {

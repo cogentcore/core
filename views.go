@@ -569,10 +569,11 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 	if g.HasCollapsedParent() {
 		return
 	}
+	psize := g.AddParentPos()
 	g.ConfigParts()
-	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface -- this updates
-	g.Style.SetUnitContext(g.Viewport, psize)       // update units with final layout
-	g.Paint.SetUnitContext(g.Viewport, psize)       // always update paint
+	g.This.(Node2D).ComputeBBox2D(parBBox)    // important to use interface version to get interface -- this updates
+	g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
+	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -593,8 +594,7 @@ func (g *TreeView) BBox2D() image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	psize := g.AddParentPos()
+func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) {
 	rn := g.RootWidget
 	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
 	g.WidgetSize.X = g.LayData.AllocSize.X
@@ -606,17 +606,6 @@ func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
-
-	// del := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig)
-
-	// for _, kid := range g.Kids {
-	// 	_, gi := KiToNode2D(kid)
-	// 	if gi != nil {
-	// 		gi.LayData.AllocPos.SetAdd(del)
-	// 	}
-	// }
-
-	return psize
 }
 
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
@@ -626,6 +615,11 @@ func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 		ar = ar.Intersect(pgi.ChildrenBBox2D())
 	}
 	return ar
+}
+
+func (g *TreeView) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *TreeView) Render2D() {
@@ -662,12 +656,15 @@ func (g *TreeView) Render2D() {
 	}
 }
 
-func (g *TreeView) CanReRender2D() bool {
+func (g *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(g.NodeFlags, int(NodeFlagFullReRender)) {
-		return false
+		node = g.RootWidget.This.(Node2D)
+		layout = true
 	} else {
-		return true
+		node = g.This.(Node2D)
+		layout = false
 	}
+	return
 }
 
 func (g *TreeView) FocusChanged2D(gotFocus bool) {
@@ -896,7 +893,7 @@ func (g *TabWidget) AsLayout2D() *Layout {
 }
 
 func (g *TabWidget) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 }
 
 func (g *TabWidget) Style2D() {
@@ -908,7 +905,7 @@ func (g *TabWidget) Size2D() {
 }
 
 func (g *TabWidget) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	g.Layout2DChildren()
 }
 
@@ -916,8 +913,13 @@ func (g *TabWidget) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *TabWidget) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *TabWidget) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
+}
+
+func (g *TabWidget) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *TabWidget) ChildrenBBox2D() image.Rectangle {
@@ -931,8 +933,10 @@ func (g *TabWidget) Render2D() {
 	}
 }
 
-func (g *TabWidget) CanReRender2D() bool {
-	return true
+func (g *TabWidget) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *TabWidget) FocusChanged2D(gotFocus bool) {

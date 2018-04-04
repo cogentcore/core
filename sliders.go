@@ -291,7 +291,7 @@ func (g *Slider) AsLayout2D() *Layout {
 }
 
 func (g *Slider) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*Slider)
 		if ok {
@@ -408,7 +408,7 @@ func (g *Slider) Size2D() {
 }
 
 func (g *Slider) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -420,12 +420,17 @@ func (g *Slider) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Slider) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Slider) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Slider) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *Slider) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Slider) Render2D() {
@@ -506,8 +511,10 @@ func (g *Slider) Render2DDefaultStyle() {
 	}
 }
 
-func (g *Slider) CanReRender2D() bool {
-	return true
+func (g *Slider) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
@@ -555,7 +562,7 @@ func (g *ScrollBar) AsLayout2D() *Layout {
 }
 
 func (g *ScrollBar) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
@@ -663,7 +670,7 @@ func (g *ScrollBar) Size2D() {
 }
 
 func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -675,12 +682,17 @@ func (g *ScrollBar) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *ScrollBar) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *ScrollBar) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *ScrollBar) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *ScrollBar) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *ScrollBar) Render2D() {
@@ -729,8 +741,10 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	}
 }
 
-func (g *ScrollBar) CanReRender2D() bool {
-	return true
+func (g *ScrollBar) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {

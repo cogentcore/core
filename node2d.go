@@ -75,16 +75,18 @@ type Node2D interface {
 	Size2D()
 	// Layout2D: MeFirst downward pass (each node calls on its children at appropriate point) with relevant parent BBox that the children are constrained to render within -- they then intersect this BBox with their own BBox (from BBox2D) -- typically just call Layout2DBase for default behavior -- and add parent position to AllocPos -- Layout does all its sizing and positioning of children in this pass, based on the Size2D data gathered bottom-up and constraints applied top-down from higher levels
 	Layout2D(parBBox image.Rectangle)
+	// Move2D: optional MeFirst downward pass to move all elements by given delta -- used for scrolling -- the layout pass assigns canonical positions, saved in AllocPosOrig, and this adds the given delta to that AllocPosOrig -- each node must then call ComputeBBox2D to update its bounding box information given the new position
+	Move2D(delta Vec2D, parBBox image.Rectangle)
 	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
 	BBox2D() image.Rectangle
-	// Compute VpBBox and WinBBox for node, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code
-	ComputeBBox2D(parBBox image.Rectangle) Vec2D
+	// Compute VpBBox and WinBBox for node, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code -- called during Layout and Move
+	ComputeBBox2D(parBBox image.Rectangle)
 	// ChildrenBBox2D: compute the bbox available to my children (content), adjusting for margins, border, padding (BoxSpace) taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
 	ChildrenBBox2D() image.Rectangle
-	// Render2D: Final rendering pass, each node is fully responsible for rendering its own children, to provide maximum flexibility (see Render2DChildren) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
+	// Render2D: Final rendering pass, each node is fully responsible for calling Render2D on its own children, to provide maximum flexibility (see Render2DChildren for default impl) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
 	Render2D()
-	// Can this node re-render itself directly using cached data?  only for nodes that paint an opaque background first (e.g., widgets) -- optimizes local redraw when possible -- always true for sub-viewports
-	CanReRender2D() bool
+	// ReRender2D: returns the node that should be re-rendered when an Update signal is received for a given node, and whether a new layout pass from that node down is needed) -- can be the node itself, any of its parents or children, or nil to indicate that a full re-render is necessary.  For re-rendering to work, an opaque background should be painted first
+	ReRender2D() (node Node2D, layout bool)
 	// function called on node when it gets or loses focus -- focus flag has current state too
 	FocusChanged2D(gotFocus bool)
 }
@@ -211,33 +213,36 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		if !g.IsField() {
-			g.LayData.AllocPos = g.LayData.AllocPos.Add(pg.LayData.AllocPos)
+			g.LayData.AllocPos.SetAdd(pg.LayData.AllocPos)
 		}
 		return pg.LayData.AllocSize
 	}
 	return Vec2DZero
 }
 
-// ComputeBBox2DBase -- computes the VpBBox and WinBBox for node -- returns parent
-// size from AddParentPos
-func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle) Vec2D {
-	psize := g.AddParentPos()
-	gii := g.This.(Node2D)
-	bb := gii.BBox2D()
+// ComputeBBox2DBase -- computes the VpBBox and WinBBox for node
+func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle) {
+	bb := g.This.(Node2D).BBox2D()
 	g.VpBBox = parBBox.Intersect(bb)
 	g.SetWinBBox()
-	return psize
 }
 
 // basic Layout2D functions -- good for most cases
 func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
-	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
+	psize := g.AddParentPos()
+	g.LayData.AllocPosOrig = g.LayData.AllocPos
 	if initStyle {
 		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}
 	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
 	// note: if other styles are maintained, they also need to be updated!
-	// also Layout2DChildren must be called after this!
+	g.This.(Node2D).ComputeBBox2D(parBBox)
+	// typically Layout2DChildren must be called after this!
+}
+
+func (g *Node2DBase) Move2DBase(delta Vec2D, parBBox image.Rectangle) {
+	g.LayData.AllocPos = g.LayData.AllocPosOrig.Add(delta)
+	g.This.(Node2D).ComputeBBox2D(parBBox)
 }
 
 // if non-empty, push our bounding-box bounds onto the bounds stack -- this
@@ -415,6 +420,17 @@ func (g *Node2DBase) Layout2DChildren() {
 	}
 }
 
+// move all of node's children, giving them the ChildrenBBox2D -- default call at end of Move2D
+func (g *Node2DBase) Move2DChildren(delta Vec2D) {
+	cbb := g.This.(Node2D).ChildrenBBox2D()
+	for _, kid := range g.Kids {
+		gii, _ := KiToNode2D(kid)
+		if gii != nil {
+			gii.Move2D(delta, cbb)
+		}
+	}
+}
+
 // render all of node's children -- default call at end of Render2D()
 func (g *Node2DBase) Render2DChildren() {
 	for _, kid := range g.Kids {
@@ -437,4 +453,12 @@ func (g *Node2DBase) BBoxReport() string {
 		return true
 	})
 	return rpt
+}
+
+func (g *Node2DBase) ParentSVG() *SVG {
+	svgi := g.FindParentByType(KiT_SVG) // todo: will not work for derived -- use derived opt
+	if svgi == nil {
+		return nil
+	}
+	return svgi.(*SVG)
 }

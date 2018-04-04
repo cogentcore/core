@@ -325,8 +325,10 @@ func (g *Button) ConfigParts() {
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ButtonProps[ButtonNormal])
 }
 
+// todo: add PartsNeedUpdate to check if text, icon are diff, and call update in render.
+//
+
 func (g *Button) Style2D() {
-	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(ButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -336,6 +338,7 @@ func (g *Button) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
+	g.ConfigParts()
 }
 
 func (g *Button) Size2D() {
@@ -344,7 +347,7 @@ func (g *Button) Size2D() {
 
 func (g *Button) Layout2D(parBBox image.Rectangle) {
 	g.ConfigParts()
-	g.Layout2DWidget(parBBox)
+	g.Layout2DWidget(parBBox) // lays out parts
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -355,12 +358,17 @@ func (g *Button) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Button) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DWidget(parBBox)
+func (g *Button) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Button) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *Button) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
 }
 
 // todo: need color brigher / darker functions
@@ -383,8 +391,10 @@ func (g *Button) Render2DDefaultStyle() {
 	g.Render2DParts()
 }
 
-func (g *Button) CanReRender2D() bool {
-	return true
+func (g *Button) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {

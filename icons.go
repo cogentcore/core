@@ -79,12 +79,17 @@ func (vp *Icon) BBox2D() image.Rectangle {
 	return vp.SVG.BBox2D()
 }
 
-func (vp *Icon) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return vp.SVG.ComputeBBox2D(parBBox)
+func (vp *Icon) ComputeBBox2D(parBBox image.Rectangle) {
+	vp.SVG.ComputeBBox2D(parBBox)
 }
 
 func (vp *Icon) ChildrenBBox2D() image.Rectangle {
 	return vp.SVG.ChildrenBBox2D()
+}
+
+func (g *Icon) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (vp *Icon) Render2D() {
@@ -98,8 +103,10 @@ func (vp *Icon) Render2D() {
 	vp.SVG.Render2D()
 }
 
-func (vp *Icon) CanReRender2D() bool {
-	return true
+func (vp *Icon) ReRender2D() (node Node2D, layout bool) {
+	node = vp.This.(Node2D)
+	layout = false
+	return
 }
 
 func (vp *Icon) FocusChanged2D(gotFocus bool) {

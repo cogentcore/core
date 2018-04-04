@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
@@ -48,7 +47,7 @@ type NodeBase struct {
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
 
 func (g *NodeBase) ParentWindow() *Window {
-	wini := g.FindParentByType(reflect.TypeOf(Window{})) // todo: will not work for derived -- need interface
+	wini := g.FindParentByType(KiT_Window) // todo: will not work for derived -- need interface
 	if wini == nil {
 		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
 		return nil

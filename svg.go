@@ -57,12 +57,17 @@ func (vp *SVG) BBox2D() image.Rectangle {
 	return vp.Viewport2D.BBox2D()
 }
 
-func (vp *SVG) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return vp.Viewport2D.ComputeBBox2D(parBBox)
+func (vp *SVG) ComputeBBox2D(parBBox image.Rectangle) {
+	vp.Viewport2D.ComputeBBox2D(parBBox)
 }
 
 func (vp *SVG) ChildrenBBox2D() image.Rectangle {
 	return vp.VpBBox // no margin, padding, etc
+}
+
+func (vp *SVG) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	vp.Move2DBase(delta, parBBox)
+	vp.Move2DChildren(delta)
 }
 
 func (vp *SVG) Render2D() {
@@ -85,8 +90,10 @@ func (vp *SVG) Render2D() {
 	}
 }
 
-func (vp *SVG) CanReRender2D() bool {
-	return true
+func (vp *SVG) ReRender2D() (node Node2D, layout bool) {
+	node = vp.This.(Node2D)
+	layout = false
+	return
 }
 
 func (vp *SVG) FocusChanged2D(gotFocus bool) {

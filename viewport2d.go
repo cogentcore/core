@@ -236,9 +236,11 @@ func (vp *Viewport2D) Size2D() {
 }
 
 func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
-	psize := vp.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
-	vp.Style.SetUnitContext(vp, psize)               // update units with final layout
-	vp.Paint.SetUnitContext(vp, psize)               // always update paint
+	// todo: this is just base right?
+	psize := vp.AddParentPos()
+	vp.Style.SetUnitContext(vp, psize)      // update units with final layout
+	vp.Paint.SetUnitContext(vp, psize)      // always update paint
+	vp.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
 	vp.Layout2DChildren()
 }
 
@@ -246,9 +248,8 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	return vp.Pixels.Bounds()
 }
 
-func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
+func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) {
 	// viewport ignores any parent parent bbox info!
-	psize := vp.AddParentPos()
 	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
 		if !vp.LayData.AllocSize.IsZero() {
 			asz := vp.LayData.AllocSize.ToPointCeil()
@@ -264,7 +265,6 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
 	}
 	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
-	return psize
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
@@ -309,6 +309,12 @@ func (vp *Viewport2D) PopBounds() {
 	rs.PopBounds()
 }
 
+func (vp *Viewport2D) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	// todo: might need to do something special here!?
+	vp.Move2DBase(delta, parBBox)
+	vp.Move2DChildren(delta)
+}
+
 func (vp *Viewport2D) Render2D() {
 	if vp.PushBounds() {
 		if vp.Fill {
@@ -325,8 +331,10 @@ func (vp *Viewport2D) Render2D() {
 	}
 }
 
-func (vp *Viewport2D) CanReRender2D() bool {
-	return true // always true for viewports
+func (vp *Viewport2D) ReRender2D() (node Node2D, layout bool) {
+	node = vp.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
@@ -366,14 +374,19 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		fullRend = true
 	}
 
-	if Render2DTrace {
-		fmt.Printf("viewport: %v rendering full: %v, re: %v, due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, gii.CanReRender2D(), ki.NodeSignals(sig), node.PathUnique())
-	}
+	// if Render2DTrace {
+	// 	fmt.Printf("viewport: %v rendering full: %v, re: %v, due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, gii.CanReRender2D(), ki.NodeSignals(sig), node.PathUnique())
+	// }
 	if fullRend {
 		vp.FullRender2DTree()
 	} else {
-		if gii.CanReRender2D() {
-			vp.ReRender2DNode(gii)
+		rr, layout := gii.ReRender2D()
+		if rr != nil {
+			if layout {
+				rr.Layout2D(vp.VpBBox) // todo!!!
+			}
+			// todo: layout
+			vp.ReRender2DNode(rr)
 		} else {
 			gi.Style2DTree()    // restyle only from affected node downward
 			vp.ReRender2DTree() // need to re-render entirely from us

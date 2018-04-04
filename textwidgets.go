@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -40,7 +41,7 @@ func (g *Label) AsLayout2D() *Layout {
 }
 
 func (g *Label) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 }
 
 var LabelProps = map[string]interface{}{
@@ -60,7 +61,7 @@ func (g *Label) Size2D() {
 }
 
 func (g *Label) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	g.Layout2DChildren()
 }
 
@@ -68,12 +69,17 @@ func (g *Label) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Label) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Label) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Label) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *Label) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
 }
 
 func (g *Label) Render2D() {
@@ -86,8 +92,10 @@ func (g *Label) Render2D() {
 	}
 }
 
-func (g *Label) CanReRender2D() bool {
-	return true
+func (g *Label) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Label) FocusChanged2D(gotFocus bool) {
@@ -321,7 +329,7 @@ func (g *TextField) AsLayout2D() *Layout {
 }
 
 func (g *TextField) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
 	g.EditText = g.Text
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
@@ -341,18 +349,17 @@ func (g *TextField) Init2D() {
 
 var TextFieldProps = [2]map[string]interface{}{
 	{ // normal
-		"border-width":     "1px",
-		"border-color":     "black",
+		"border-width":     units.NewValue(1, units.Px),
+		"border-color":     color.Black,
 		"border-style":     "solid",
-		"padding":          "4px",
-		"margin":           "1px",
-		"font-size":        "24pt",
-		"text-align":       "left",
-		"vertical-align":   "top",
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(1, units.Px),
+		"text-align":       AlignLeft,
+		"vertical-align":   AlignTop,
 		"color":            "black",
 		"background-color": "#EEE",
 	}, { // focus
-		"background-color": "#FFF",
+		"background-color": color.White,
 	},
 }
 
@@ -371,7 +378,7 @@ func (g *TextField) Size2D() {
 }
 
 func (g *TextField) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DWidget(parBBox)
 	for i := 0; i < 2; i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -382,8 +389,8 @@ func (g *TextField) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *TextField) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *TextField) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *TextField) ChildrenBBox2D() image.Rectangle {
@@ -463,6 +470,11 @@ func (g *TextField) AutoScroll() {
 	}
 }
 
+func (g *TextField) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
+}
+
 func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
@@ -482,8 +494,10 @@ func (g *TextField) Render2D() {
 	}
 }
 
-func (g *TextField) CanReRender2D() bool {
-	return true
+func (g *TextField) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *TextField) FocusChanged2D(gotFocus bool) {

@@ -67,12 +67,17 @@ func (g *Rect) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
-func (g *Rect) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Rect) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Rect) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Rect) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Rect) Render2D() {
@@ -93,9 +98,15 @@ func (g *Rect) Render2D() {
 	}
 }
 
-func (g *Rect) CanReRender2D() bool {
-	// todo: could optimize by checking for an opaque fill, and same bbox
-	return false
+func (g *Rect) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Rect) FocusChanged2D(gotFocus bool) {
@@ -155,20 +166,27 @@ func (g *Viewport2DFill) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
-func (g *Viewport2DFill) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Viewport2DFill) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Viewport2DFill) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
 }
 
+func (g *Viewport2DFill) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
 func (g *Viewport2DFill) Render2D() {
 	g.Rect.Render2D()
 }
 
-func (g *Viewport2DFill) CanReRender2D() bool {
-	return false // why bother
+func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Viewport2DFill) FocusChanged2D(gotFocus bool) {
@@ -228,12 +246,17 @@ func (g *Circle) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
 }
 
-func (g *Circle) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Circle) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Circle) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Circle) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Circle) Render2D() {
@@ -249,9 +272,15 @@ func (g *Circle) Render2D() {
 	}
 }
 
-func (g *Circle) CanReRender2D() bool {
-	// todo: could optimize by checking for an opaque fill, and same bbox
-	return false
+func (g *Circle) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Circle) FocusChanged2D(gotFocus bool) {
@@ -311,12 +340,17 @@ func (g *Ellipse) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 }
 
-func (g *Ellipse) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Ellipse) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Ellipse) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Ellipse) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Ellipse) Render2D() {
@@ -332,8 +366,15 @@ func (g *Ellipse) Render2D() {
 	}
 }
 
-func (g *Ellipse) CanReRender2D() bool {
-	return false
+func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Ellipse) FocusChanged2D(gotFocus bool) {
@@ -393,12 +434,17 @@ func (g *Line) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 }
 
-func (g *Line) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Line) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Line) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Line) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Line) Render2D() {
@@ -414,8 +460,15 @@ func (g *Line) Render2D() {
 	}
 }
 
-func (g *Line) CanReRender2D() bool {
-	return false
+func (g *Line) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Line) FocusChanged2D(gotFocus bool) {
@@ -474,12 +527,17 @@ func (g *Polyline) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
 }
 
-func (g *Polyline) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Polyline) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Polyline) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Polyline) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Polyline) Render2D() {
@@ -498,8 +556,15 @@ func (g *Polyline) Render2D() {
 	}
 }
 
-func (g *Polyline) CanReRender2D() bool {
-	return false
+func (g *Polyline) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Polyline) FocusChanged2D(gotFocus bool) {
@@ -558,12 +623,17 @@ func (g *Polygon) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
 }
 
-func (g *Polygon) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Polygon) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Polygon) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Polygon) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
 }
 
 func (g *Polygon) Render2D() {
@@ -582,8 +652,15 @@ func (g *Polygon) Render2D() {
 	}
 }
 
-func (g *Polygon) CanReRender2D() bool {
-	return false
+func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Polygon) FocusChanged2D(gotFocus bool) {
@@ -714,8 +791,8 @@ func (g *Path) BBox2D() image.Rectangle {
 	// return g.Paint.BoundingBoxFromPoints(g.Points)
 }
 
-func (g *Path) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Path) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Path) ChildrenBBox2D() image.Rectangle {
@@ -1028,6 +1105,11 @@ func ParsePathData(d string) []PathData {
 	return pd
 }
 
+func (g *Path) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
 func (g *Path) Render2D() {
 	if len(g.Data) < 2 {
 		return
@@ -1044,8 +1126,15 @@ func (g *Path) Render2D() {
 	}
 }
 
-func (g *Path) CanReRender2D() bool {
-	return false
+func (g *Path) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Path) FocusChanged2D(gotFocus bool) {

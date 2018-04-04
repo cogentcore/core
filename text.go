@@ -144,12 +144,17 @@ func (g *Text2D) BBox2D() image.Rectangle {
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
 }
 
-func (g *Text2D) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Text2D) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Text2D) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
+}
+
+func (g *Text2D) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
 }
 
 func (g *Text2D) Render2D() {
@@ -169,9 +174,15 @@ func (g *Text2D) Render2D() {
 	}
 }
 
-func (g *Text2D) CanReRender2D() bool {
-	// todo: could optimize by checking for an opaque fill, and same bbox
-	return false
+func (g *Text2D) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
 }
 
 func (g *Text2D) FocusChanged2D(gotFocus bool) {

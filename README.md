@@ -66,6 +66,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* FindByType functions should take a bool arg for finding any derived type of that as well -- can then use the kit.EmbeddedStruct to get the obj of that type..
+
+* move2d
+* PartsNeedUpdate, add to render for all items
+* layout trace
+* ??
+
 * test path rendering
 * property-based xforms for svg
 

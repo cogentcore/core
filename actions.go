@@ -196,7 +196,6 @@ func (g *Action) ConfigParts() {
 }
 
 func (g *Action) Style2D() {
-	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(ActionProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -206,6 +205,7 @@ func (g *Action) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2D{})
 	}
+	g.ConfigParts()
 }
 
 func (g *Action) Size2D() {
@@ -221,12 +221,17 @@ func (g *Action) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
+func (g *Action) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
+}
+
 func (g *Action) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Action) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DWidget(parBBox)
+func (g *Action) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *Action) ChildrenBBox2D() image.Rectangle {
@@ -251,8 +256,10 @@ func (g *Action) Render2DDefaultStyle() {
 	g.Render2DParts()
 }
 
-func (g *Action) CanReRender2D() bool {
-	return true
+func (g *Action) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Action) FocusChanged2D(gotFocus bool) {
@@ -321,12 +328,17 @@ func (g *Separator) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Separator) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DBase(parBBox)
+func (g *Separator) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
 }
 
 func (g *Separator) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *Separator) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
 }
 
 func (g *Separator) Render2D() {
@@ -353,8 +365,10 @@ func (g *Separator) Render2D() {
 	}
 }
 
-func (g *Separator) CanReRender2D() bool {
-	return true
+func (g *Separator) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Separator) FocusChanged2D(gotFocus bool) {
@@ -565,7 +579,6 @@ func (g *MenuButton) ConfigParts() {
 }
 
 func (g *MenuButton) Style2D() {
-	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(MenuButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -575,7 +588,7 @@ func (g *MenuButton) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
+	g.ConfigParts()
 }
 
 func (g *MenuButton) Size2D() {
@@ -595,12 +608,17 @@ func (g *MenuButton) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *MenuButton) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
-	return g.ComputeBBox2DWidget(parBBox)
+func (g *MenuButton) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *MenuButton) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
+}
+
+func (g *MenuButton) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
 }
 
 // todo: need color brigher / darker functions
@@ -623,8 +641,10 @@ func (g *MenuButton) Render2DDefaultStyle() {
 	g.Render2DParts()
 }
 
-func (g *MenuButton) CanReRender2D() bool {
-	return true
+func (g *MenuButton) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *MenuButton) FocusChanged2D(gotFocus bool) {
