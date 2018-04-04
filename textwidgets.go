@@ -324,26 +324,18 @@ func (g *TextField) Init2D() {
 	g.Init2DBase()
 	g.EditText = g.Text
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tf, ok := recv.(*TextField)
-		if ok {
-			md, ok := d.(oswin.MouseDownEvent)
-			if ok {
-				if !tf.HasFocus() {
-					tf.GrabFocus()
-				}
-				pt := tf.PointToRelPos(md.EventPos())
-				tf.SetCursorFromPixel(float64(pt.X))
-			}
+		tf := recv.(*TextField)
+		md := d.(oswin.MouseDownEvent)
+		if !tf.HasFocus() {
+			tf.GrabFocus()
 		}
+		pt := tf.PointToRelPos(md.EventPos())
+		tf.SetCursorFromPixel(float64(pt.X))
 	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tf, ok := recv.(*TextField)
-		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				tf.KeyInput(kt)
-			}
-		}
+		tf := recv.(*TextField)
+		kt := d.(oswin.KeyTypedEvent)
+		tf.KeyInput(kt)
 	})
 }
 

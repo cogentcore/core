@@ -124,9 +124,11 @@ func (g *TreeView) SetSrcNode(k ki.Ki) {
 }
 
 // function for receiving node signals from our SrcNode
-func SrcNodeSignal(nwki, send ki.Ki, sig int64, data interface{}) {
-	// todo: need a *node* deleted signal!  and children etc
-	// track changes in source node
+func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
+	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v\n", tvki.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data)
+	if bitflag.Has(*send.Flags(), int(ki.ChildAdded)) {
+		// basically we have the full sync problem here -- doesn't really help to know that there were additions -- just need to find the new nodes!
+	}
 }
 
 // return a list of the currently-selected source nodes
@@ -248,7 +250,7 @@ func (g *TreeView) SelectNode() {
 		g.GrabFocus() // focus always follows select  todo: option
 		g.TreeViewSig.Emit(g.This, int64(NodeSelected), nil)
 		// fmt.Printf("selected node: %v\n", g.Nm)
-		g.UpdateEndAll() // grab focus means allow kids to update too
+		g.UpdateEnd()
 	}
 }
 
@@ -278,7 +280,7 @@ func (g *TreeView) UnselectAll() {
 			return false
 		}
 	})
-	g.UpdateEndAll()
+	g.UpdateEnd()
 }
 
 // unselect everything below me -- call on Root to clear all
@@ -314,6 +316,18 @@ func (g *TreeView) ToggleCollapse() {
 	} else {
 		g.Collapse()
 	}
+}
+
+func (g *TreeView) InsertAfter() {
+	if g.IsField() {
+		fmt.Printf("cannot insert after fields\n") // todo: dialog, disable menu
+	}
+	par := g.SrcNode.Ptr.Parent()
+	if par == nil {
+		fmt.Printf("no parent to insert in\n") // todo: dialog
+	}
+	myidx := par.FindChildIndex(g.This, 0)
+	par.InsertNewChild(nil, myidx+1)
 }
 
 func (g *TreeView) SetContinuousSelect() {
@@ -357,7 +371,7 @@ func (g *TreeView) ConfigParts() {
 	config.Add(KiT_Action, "Branch")
 	config.Add(KiT_Space, "Space")
 	config.Add(KiT_Label, "Label")
-	config.Add(KiT_Space, "Stretch")
+	config.Add(KiT_Space, "Stretch") // todo: stretch not working
 	config.Add(KiT_MenuButton, "Menu")
 	updt := g.Parts.ConfigChildren(config, false) // not unique names
 
@@ -384,6 +398,18 @@ func (g *TreeView) ConfigParts() {
 	lbl.Text = g.Label()
 	if updt {
 		g.PartStyleProps(lbl.This, TreeViewProps[0])
+		// lbl.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// 	_, ok := recv.(*TreeView)
+		// 	if !ok {
+		// 		return
+		// 	}
+		// 	// todo: specifically on down?  needed this for emergent
+		// })
+		lbl.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+			lb, _ := recv.(*Label)
+			tv := lb.Parent().Parent().(*TreeView)
+			tv.SelectNodeAction()
+		})
 	}
 
 	mbk, _ := g.Parts.Child(tvMenuIdx)
@@ -392,8 +418,9 @@ func (g *TreeView) ConfigParts() {
 		mb.Text = "..."
 		g.PartStyleProps(mb.This, TreeViewProps[0])
 
-		mb.AddMenuText("Insert After", g.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-			fmt.Printf("Received menu action signal: %v from menu action: %v\n", ActionSignals(sig), send.Name())
+		mb.AddMenuText("Insert After", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.(*TreeView)
+			tv.InsertAfter()
 		})
 	}
 }
@@ -401,62 +428,38 @@ func (g *TreeView) ConfigParts() {
 func (g *TreeView) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		_, ok := recv.(*TreeView)
-		if !ok {
-			return
-		}
-		// todo: specifically on down?  needed this for emergent
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// ab, ok := recv.(*TreeView)
-		// if ok {
-		// 	// // todo: need to exclude this for sub-presses within this
-		// 	// ab.SelectNodeAction()
-		// }
-	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*TreeView)
-		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				// fmt.Printf("TreeView key: %v\n", kt.Chord)
-				kf := KeyFun(kt.Key, kt.Chord)
-				switch kf {
-				case KeyFunSelectItem:
-					ab.SelectNodeAction()
-				case KeyFunCancelSelect:
-					ab.RootUnselectAll()
-				case KeyFunMoveRight:
-					ab.Expand()
-				case KeyFunMoveLeft:
-					ab.Collapse()
-					// todo; move down / up -- selectnext / prev
-				}
-			}
+		ab := recv.(*TreeView)
+		kt := d.(oswin.KeyTypedEvent)
+		// fmt.Printf("TreeView key: %v\n", kt.Chord)
+		kf := KeyFun(kt.Key, kt.Chord)
+		switch kf {
+		case KeyFunSelectItem:
+			ab.SelectNodeAction()
+		case KeyFunCancelSelect:
+			ab.RootUnselectAll()
+		case KeyFunMoveRight:
+			ab.Expand()
+		case KeyFunMoveLeft:
+			ab.Collapse()
+			// todo; move down / up -- selectnext / prev
 		}
 	})
 	g.ReceiveEventType(oswin.KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*TreeView)
-		if ok {
-			kt, ok := d.(oswin.KeyDownEvent)
-			if ok {
-				kf := KeyFun(kt.Key, "")
-				// fmt.Printf("TreeView key down: %v\n", kt.Key)
-				switch kf {
-				case KeyFunShift:
-					ab.SetContinuousSelect()
-				case KeyFunCtrl:
-					ab.SetExtendSelect()
-				}
-			}
+		ab := recv.(*TreeView)
+		kt := d.(oswin.KeyDownEvent)
+		kf := KeyFun(kt.Key, "")
+		// fmt.Printf("TreeView key down: %v\n", kt.Key)
+		switch kf {
+		case KeyFunShift:
+			ab.SetContinuousSelect()
+		case KeyFunCtrl:
+			ab.SetExtendSelect()
 		}
 	})
 	g.ReceiveEventType(oswin.KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := recv.(*TreeView)
-		if ok {
-			ab.ClearSelectMods()
-		}
+		ab := recv.(*TreeView)
+		ab.ClearSelectMods()
 	})
 }
 
@@ -518,7 +521,6 @@ func (g *TreeView) Style2D() {
 		g.StateStyles[i].SetStyle(nil, &StyleDefault, TreeViewProps[i])
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -568,7 +570,7 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 		return
 	}
 	g.ConfigParts()
-	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
+	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface -- this updates
 	g.Style.SetUnitContext(g.Viewport, psize)       // update units with final layout
 	g.Paint.SetUnitContext(g.Viewport, psize)       // always update paint
 	for i := 0; i < int(TreeViewStatesN); i++ {
@@ -576,6 +578,8 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 	}
 
 	g.Layout2DParts(parBBox)
+
+	g.LayData.AllocPosOrig = g.LayData.AllocPos // record
 
 	if !g.IsCollapsed() {
 		g.Layout2DChildren()
@@ -603,7 +607,14 @@ func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
 
-	// todo: need to compute on all kids too!
+	// del := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig)
+
+	// for _, kid := range g.Kids {
+	// 	_, gi := KiToNode2D(kid)
+	// 	if gi != nil {
+	// 		gi.LayData.AllocPos.SetAdd(del)
+	// 	}
+	// }
 
 	return psize
 }

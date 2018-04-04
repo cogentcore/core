@@ -194,43 +194,31 @@ func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 func Init2DButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := (interface{})(recv).(ButtonWidget)
-		if ok {
-			ab.ButtonAsBase().ButtonPressed()
-		}
+		ab := (interface{})(recv).(ButtonWidget)
+		ab.ButtonAsBase().ButtonPressed()
 	})
 	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := (interface{})(recv).(ButtonWidget)
-		if ok {
-			ab.ButtonRelease() // special one
-		}
+		ab := (interface{})(recv).(ButtonWidget)
+		ab.ButtonRelease() // special one
 	})
 	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := (interface{})(recv).(ButtonWidget)
-		if ok {
-			ab.ButtonAsBase().ButtonEnterHover()
-		}
+		ab := (interface{})(recv).(ButtonWidget)
+		ab.ButtonAsBase().ButtonEnterHover()
 	})
 	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := (interface{})(recv).(ButtonWidget)
-		if ok {
-			ab.ButtonAsBase().ButtonExitHover()
-		}
+		ab := (interface{})(recv).(ButtonWidget)
+		ab.ButtonAsBase().ButtonExitHover()
 	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab, ok := (interface{})(recv).(ButtonWidget)
-		if ok {
-			bb := ab.ButtonAsBase()
-			kt, ok := d.(oswin.KeyTypedEvent)
-			if ok {
-				// todo: register shortcuts with window, and generalize these keybindings
-				kf := KeyFun(kt.Key, kt.Chord)
-				if kf == KeyFunSelectItem || kt.Key == "space" {
-					bb.ButtonPressed()
-					// todo: brief delay??
-					ab.ButtonRelease() // special one
-				}
-			}
+		ab := (interface{})(recv).(ButtonWidget)
+		bb := ab.ButtonAsBase()
+		kt := d.(oswin.KeyTypedEvent)
+		// todo: register shortcuts with window, and generalize these keybindings
+		kf := KeyFun(kt.Key, kt.Chord)
+		if kf == KeyFunSelectItem || kt.Key == "space" {
+			bb.ButtonPressed()
+			// todo: brief delay??
+			ab.ButtonRelease() // special one
 		}
 	})
 }

@@ -738,6 +738,17 @@ func (ly *Layout) Render2DChildren() {
 	}
 }
 
+// todo: this is not a great mechanism here -- it depends on US calling ComputeBBox on the
+// child -- not encapsulated -- need an official concept of an extra offset that
+// gets propagated down the tree
+
+// need to allow for multiple such levels -- appropriately recursive, etc.
+
+// then cleanup the ComputeBBox2D stuff -- there are too many such calls and
+// it is confusing the snaking around of all these things..
+
+// also, the layout of treeview parts is not working correctly -- need to figure that out too
+
 func (ly *Layout) Render2DChild(gii Node2D) {
 	gi := gii.AsNode2D()
 	gi.LayData.AllocPos = gi.LayData.AllocPosOrig
