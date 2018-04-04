@@ -140,7 +140,7 @@ type Ki interface {
 	// Set given property key to value val, with update notification (wrapped in UpdateStart/End)
 	SetPropUpdate(key string, val interface{})
 
-	// Get property value from key -- if inherit, then check all parents too -- if typ then check property on type as well
+	// Get property value from key -- if inherit, then check all parents too -- if typ then check property on type as well -- returns nil if not set
 	Prop(key string, inherit, typ bool) interface{}
 
 	// Delete property key, safely
@@ -161,8 +161,11 @@ type Ki interface {
 	// test if this node is the root node -- checks Parent = nil
 	IsRoot() bool
 
-	// get the root object of this tree
+	// the root object of this tree (the node with a nil parent)
 	Root() Ki
+
+	// the field root object for this node -- the node that owns the branch of the tree rooted in one of its fields -- the first non-Field parent node after the first Field parent node -- can be nil if no such thing exists for this node
+	FieldRoot() Ki
 
 	// does this node have children (i.e., non-terminal)
 	HasChildren() bool
@@ -303,13 +306,19 @@ type Ki interface {
 	// call fun on previous node in the tree (previous child in my siblings, then parent, and so on)
 	FunPrev(level int, data interface{}, fun Fun) bool
 
-	// report path to this node, all the way up to top-level parent
+	// path to this node from Root(), using regular user-given Name's (may be empty or non-unique) -- only use for informational purposes
 	Path() string
 
-	// report path to this node using unique names, all the way up to top-level parent
+	// path to this node from Root(), using unique names -- suitable for reliably finding this node
 	PathUnique() string
 
-	// find Ki object at given unique path
+	// path to this node from given parent node, using regular user-given Name's (may be empty or non-unique) -- only use for informational purposes
+	PathFrom(par Ki) string
+
+	// path to this node from given parent node, using unique names -- suitable for reliably finding this node
+	PathFromUnique(par Ki) string
+
+	// find Ki object at given unique path, starting from this node (e.g., Root()) -- returns nil if not found
 	FindPathUnique(path string) Ki
 
 	//////////////////////////////////////////////////////////////////////////

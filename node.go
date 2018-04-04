@@ -335,6 +335,26 @@ func (n *Node) Root() Ki {
 	return n.Par.Root()
 }
 
+func (n *Node) FieldRoot() Ki {
+	var root Ki
+	gotField := false
+	n.FunUpParent(0, n, func(k Ki, level int, d interface{}) bool {
+		if !gotField {
+			if k.IsField() {
+				gotField = true
+			}
+			return true
+		} else {
+			if !k.IsField() {
+				root = k
+				return false
+			}
+		}
+		return true
+	})
+	return root
+}
+
 func (n *Node) HasChildren() bool {
 	return len(n.Kids) > 0
 }
@@ -926,6 +946,28 @@ func (n *Node) PathUnique() string {
 		}
 	}
 	return "/" + n.UniqueNm
+}
+
+func (n *Node) PathFrom(par Ki) string {
+	if n.Par != nil && n.Par != par {
+		if n.IsField() {
+			return n.Par.PathFrom(par) + "." + n.Nm
+		} else {
+			return n.Par.PathFrom(par) + "/" + n.Nm
+		}
+	}
+	return "/" + n.Nm
+}
+
+func (n *Node) PathFromUnique(par Ki) string {
+	if n.Par != nil && n.Par != par {
+		if n.IsField() {
+			return n.Par.PathFromUnique(par) + "." + n.Nm
+		} else {
+			return n.Par.PathFromUnique(par) + "/" + n.Nm
+		}
+	}
+	return "/" + n.Nm
 }
 
 func (n *Node) FindPathUnique(path string) Ki {
