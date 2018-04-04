@@ -6,6 +6,7 @@ package gi
 
 import (
 	// "fmt"
+
 	"image/color"
 
 	"github.com/rcoreilly/goki/gi/units"
@@ -112,18 +113,34 @@ func (g *Action) Init2D() {
 
 var ActionProps = []map[string]interface{}{
 	{
-		"border-width":  units.NewValue(0, units.Px),
-		"border-radius": units.NewValue(0, units.Px),
-		"border-color":  color.Black,
-		"border-style":  BorderSolid,
-		"padding":       units.NewValue(2, units.Px),
-		"margin":        units.NewValue(0, units.Px),
-		// "font-family":         "Arial", // this is crashing
-		"font-size":        units.NewValue(20, units.Pt),
+		"border-width":     units.NewValue(0, units.Px),
+		"border-radius":    units.NewValue(0, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(2, units.Px),
+		"margin":           units.NewValue(0, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"color":            color.Black,
 		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignMiddle,
+		},
 	}, { // disabled
 		"border-color":     "#BBB",
 		"color":            "#AAA",
@@ -145,26 +162,27 @@ var ActionProps = []map[string]interface{}{
 }
 
 func (g *Action) ConfigPartsButton() {
-	config, icIdx, txIdx := g.ConfigPartsIconText()
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconText(icIdx, txIdx)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
 }
 
 func (g *Action) ConfigPartsMenu() {
-	config, icIdx, txIdx := g.ConfigPartsIconText()
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
-	if len(g.Kids) > 0 { // include a right-wedge for sub-menu
-		config.Add(KiT_Stretch, "WRStr")
+	if len(g.Kids) > 0 { // include a right-wedge indicator for sub-menu
+		config.Add(KiT_Space, "InStretch") // todo: stretch
 		wrIdx = len(config)
-		config.Add(KiT_Icon, "WidgR")
+		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconText(icIdx, txIdx)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
 	if wrIdx >= 0 {
 		kc, _ := g.Parts.Child(wrIdx)
 		ic := kc.(*Icon)
 		if !ic.HasChildren() {
 			ic.CopyFrom(IconByName("widget-right-wedge"))
+			g.PartStyleProps(ic.This, ActionProps[ButtonNormal])
 		}
 	}
 }
@@ -464,6 +482,9 @@ func (g *MenuButton) Init2D() {
 	Init2DButtonEvents(g)
 }
 
+// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-the-qpushbutton-s-menu-indicator-sub-control
+// menu-indicator
+
 var MenuButtonProps = []map[string]interface{}{
 	{
 		"border-width":        units.NewValue(1, units.Px),
@@ -476,12 +497,28 @@ var MenuButtonProps = []map[string]interface{}{
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
-		// "font-family":         "Arial", // this is crashing
-		"font-size":        units.NewValue(24, units.Pt),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
-		"color":            color.Black,
-		"background-color": "#EEF",
+		"text-align":          AlignCenter,
+		"vertical-align":      AlignTop,
+		"color":               color.Black,
+		"background-color":    "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignMiddle,
+		},
 	}, { // disabled
 		"border-color":     "#BBB",
 		"color":            "#AAA",
@@ -503,16 +540,27 @@ var MenuButtonProps = []map[string]interface{}{
 }
 
 func (g *MenuButton) ConfigParts() {
-	config, icIdx, txIdx := g.ConfigPartsIconText()
-	config.Add(KiT_Stretch, "WRStr")
-	wrIdx := len(config)
-	config.Add(KiT_Icon, "WidgR")
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	wrIdx := -1
+	icnm, ok := kit.ToString(g.Prop("indicator", false, false))
+	if !ok || icnm == "" {
+		icnm = "widget-down-wedge"
+	}
+	if icnm != "none" {
+		config.Add(KiT_Space, "InSpace")
+		wrIdx = len(config)
+		config.Add(KiT_Icon, "Indicator")
+	}
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconText(icIdx, txIdx)
-	kc, _ := g.Parts.Child(wrIdx)
-	ic := kc.(*Icon)
-	if !ic.HasChildren() {
-		ic.CopyFrom(IconByName("widget-down-wedge"))
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, MenuButtonProps[ButtonNormal])
+	if wrIdx >= 0 {
+		kc, _ := g.Parts.Child(wrIdx)
+		ic := kc.(*Icon)
+		if !ic.HasChildren() || ic.UniqueNm != icnm {
+			ic.CopyFrom(IconByName(icnm))
+			ic.UniqueNm = icnm
+			g.PartStyleProps(ic.This, MenuButtonProps[ButtonNormal])
+		}
 	}
 }
 

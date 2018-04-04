@@ -6,16 +6,15 @@ package gi
 
 import (
 	"fmt"
-	// "github.com/rcoreilly/goki/gi/units"
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "log"
-	// "reflect"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +65,15 @@ const (
 )
 
 //go:generate stringer -type=TreeViewStates
+
+// internal indexes for accessing elements of the widget
+const (
+	tvBranchIdx = iota
+	tvSpaceIdx
+	tvLabelIdx
+	tvStretchIdx
+	tvMenuIdx
+)
 
 // TreeView represents one node in the tree -- fully recursive -- creates
 //  sub-nodes
@@ -209,15 +217,8 @@ func (g *TreeView) IsSelected() bool {
 	return bitflag.Has(g.NodeFlags, int(NodeFlagSelected))
 }
 
-func (g *TreeView) GetLabel() string {
-	label := ""
-	if g.IsCollapsed() { // todo: temp hack
-		label = "> "
-	} else {
-		label = "v "
-	}
-	label += g.SrcNode.Ptr.Name()
-	return label
+func (g *TreeView) Label() string {
+	return g.SrcNode.Ptr.Name()
 }
 
 // a select action has been received (e.g., a mouse click) -- translate into
@@ -285,7 +286,7 @@ func (g *TreeView) RootUnselectAll() {
 	g.RootWidget.UnselectAll()
 }
 
-func (g *TreeView) CollapseNode() {
+func (g *TreeView) Collapse() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
 		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
@@ -296,14 +297,22 @@ func (g *TreeView) CollapseNode() {
 	}
 }
 
-func (g *TreeView) OpenNode() {
+func (g *TreeView) Expand() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
 		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
-		// fmt.Printf("opened node: %v\n", g.Nm)
+		// fmt.Printf("expanded node: %v\n", g.Nm)
 		g.UpdateEnd()
+	}
+}
+
+func (g *TreeView) ToggleCollapse() {
+	if g.IsCollapsed() {
+		g.Expand()
+	} else {
+		g.Collapse()
 	}
 }
 
@@ -338,8 +347,60 @@ func (g *TreeView) AsLayout2D() *Layout {
 	return nil
 }
 
+// qt calls the open / close thing a "branch"
+// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
+
+func (g *TreeView) ConfigParts() {
+	// todo: add some styles for button layout
+	g.Parts.Lay = LayoutRow
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config.Add(KiT_Action, "Branch")
+	config.Add(KiT_Space, "Space")
+	config.Add(KiT_Label, "Label")
+	config.Add(KiT_Space, "Stretch")
+	config.Add(KiT_MenuButton, "Menu")
+	updt := g.Parts.ConfigChildren(config, false) // not unique names
+
+	// todo: create a toggle button widget that has 2 different states with icons pre-loaded
+	wbk, _ := g.Parts.Child(tvBranchIdx)
+	wb := wbk.(*Action)
+	if g.IsCollapsed() {
+		wb.Icon = IconByName("widget-right-wedge")
+	} else {
+		wb.Icon = IconByName("widget-down-wedge")
+	}
+	if updt {
+		g.PartStyleProps(wb.This, TreeViewProps[0])
+		wb.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv, ok := recv.(*TreeView)
+			if ok {
+				tv.ToggleCollapse()
+			}
+		})
+	}
+
+	lbk, _ := g.Parts.Child(tvLabelIdx)
+	lbl := lbk.(*Label)
+	lbl.Text = g.Label()
+	if updt {
+		g.PartStyleProps(lbl.This, TreeViewProps[0])
+	}
+
+	mbk, _ := g.Parts.Child(tvMenuIdx)
+	mb := mbk.(*MenuButton)
+	if updt {
+		mb.Text = "..."
+		g.PartStyleProps(mb.This, TreeViewProps[0])
+
+		mb.AddMenuText("Insert After", g.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received menu action signal: %v from menu action: %v\n", ActionSignals(sig), send.Name())
+		})
+	}
+}
+
 func (g *TreeView) Init2D() {
-	g.Init2DBase()
+	g.Init2DWidget()
+	g.ConfigParts()
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		_, ok := recv.(*TreeView)
 		if !ok {
@@ -348,11 +409,11 @@ func (g *TreeView) Init2D() {
 		// todo: specifically on down?  needed this for emergent
 	})
 	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		fmt.Printf("button %v pressed!\n", recv.PathUnique())
-		ab, ok := recv.(*TreeView)
-		if ok {
-			ab.SelectNodeAction()
-		}
+		// ab, ok := recv.(*TreeView)
+		// if ok {
+		// 	// // todo: need to exclude this for sub-presses within this
+		// 	// ab.SelectNodeAction()
+		// }
 	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab, ok := recv.(*TreeView)
@@ -367,9 +428,9 @@ func (g *TreeView) Init2D() {
 				case KeyFunCancelSelect:
 					ab.RootUnselectAll()
 				case KeyFunMoveRight:
-					ab.OpenNode()
+					ab.Expand()
 				case KeyFunMoveLeft:
-					ab.CollapseNode()
+					ab.Collapse()
 					// todo; move down / up -- selectnext / prev
 				}
 			}
@@ -401,16 +462,43 @@ func (g *TreeView) Init2D() {
 
 var TreeViewProps = []map[string]interface{}{
 	{
-		"border-width":  "0px",
-		"border-radius": "0px",
-		"padding":       "1px",
-		"margin":        "1px",
-		// "font-family":         "Arial", // this is crashing
-		"font-size":        "24pt", // todo: need to get dpi!
-		"text-align":       "left",
-		"vertical-align":   "top",
-		"color":            "black",
+		"border-width":     units.NewValue(0, units.Px),
+		"border-radius":    units.NewValue(0, units.Px),
+		"padding":          units.NewValue(1, units.Px),
+		"margin":           units.NewValue(1, units.Px),
+		"text-align":       AlignLeft,
+		"vertical-align":   AlignTop,
+		"color":            color.Black,
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
+		"#branch": map[string]interface{}{
+			// "width":   units.NewValue(1, units.Em),
+			// "height":  units.NewValue(1, units.Em),
+			"vertical-align": AlignTop,
+			"margin":         units.NewValue(2, units.Px),
+			"padding":        units.NewValue(2, units.Px),
+			"#icon": map[string]interface{}{
+				"width":   units.NewValue(1.5, units.Ex),
+				"height":  units.NewValue(1.5, units.Ex),
+				"margin":  units.NewValue(2, units.Px),
+				"padding": units.NewValue(2, units.Px),
+			},
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#menu": map[string]interface{}{
+			"border-width":        units.NewValue(0, units.Px),
+			"border-radius":       units.NewValue(0, units.Px),
+			"border-color":        "none",
+			"padding":             units.NewValue(2, units.Px),
+			"margin":              units.NewValue(0, units.Px),
+			"box-shadow.h-offset": units.NewValue(0, units.Px),
+			"box-shadow.v-offset": units.NewValue(0, units.Px),
+			"box-shadow.blur":     units.NewValue(0, units.Px),
+			"indicator":           "none",
+		},
 	}, { // selected
 		"background-color": "#CFC", // todo: also
 	}, { // focused
@@ -419,6 +507,10 @@ var TreeViewProps = []map[string]interface{}{
 }
 
 func (g *TreeView) Style2D() {
+	if g.HasCollapsedParent() {
+		return
+	}
+	g.ConfigParts()
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(TreeViewProps[0])
 	for i := 0; i < int(TreeViewStatesN); i++ {
@@ -441,10 +533,7 @@ func (g *TreeView) Size2D() {
 		return // nothing
 	}
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
-
-	label := g.GetLabel()
-
-	g.Size2DFromText(label)
+	g.SizeFromParts() // get our size from parts
 	g.WidgetSize = g.LayData.AllocSize
 	h := g.WidgetSize.Y
 	w := g.WidgetSize.X
@@ -465,13 +554,28 @@ func (g *TreeView) Size2D() {
 	g.WidgetSize.X = w // stretch
 }
 
+func (g *TreeView) Layout2DParts(parBBox image.Rectangle) {
+	spc := g.Style.BoxSpace()
+	g.Parts.LayData = g.LayData
+	g.Parts.LayData.AllocPos.SetAddVal(spc)
+	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
+	g.Parts.Layout2DTree(parBBox)
+
+}
+
 func (g *TreeView) Layout2D(parBBox image.Rectangle) {
+	if g.HasCollapsedParent() {
+		return
+	}
+	g.ConfigParts()
 	psize := g.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
 	g.Style.SetUnitContext(g.Viewport, psize)       // update units with final layout
 	g.Paint.SetUnitContext(g.Viewport, psize)       // always update paint
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
+
+	g.Layout2DParts(parBBox)
 
 	if !g.IsCollapsed() {
 		g.Layout2DChildren()
@@ -494,6 +598,11 @@ func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) Vec2D {
 	g.VpBBox = parBBox.Intersect(gii.BBox2D())
 	g.SetWinBBox()
 
+	spc := g.Style.BoxSpace()
+	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
+	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
+	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
+
 	// todo: need to compute on all kids too!
 
 	return psize
@@ -509,13 +618,12 @@ func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 }
 
 func (g *TreeView) Render2D() {
+	if g.HasCollapsedParent() {
+		return // nothing
+	}
 	if g.PushBounds() {
 		// reset for next update
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagFullReRender))
-
-		if g.HasCollapsedParent() {
-			return // nothing
-		}
 
 		if g.IsSelected() {
 			g.Style = g.StateStyles[TreeViewSelState]
@@ -537,10 +645,7 @@ func (g *TreeView) Render2D() {
 		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 		sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-
-		label := g.GetLabel()
-		g.Render2DText(label)
-
+		g.Render2DParts()
 		g.Render2DChildren()
 		g.PopBounds()
 	}
@@ -713,11 +818,9 @@ var TabButtonProps = map[string]interface{}{
 	"box-shadow.h-offset": "0px",
 	"box-shadow.v-offset": "0px",
 	"box-shadow.blur":     "0px",
-	// "font-family":         "Arial", // this is crashing
-	"font-size":        "24pt",
-	"text-align":       "center",
-	"color":            "black",
-	"background-color": "#EEF",
+	"text-align":          "center",
+	"color":               "black",
+	"background-color":    "#EEF",
 }
 
 // make the initial tab frames for src node

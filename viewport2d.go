@@ -366,7 +366,9 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		fullRend = true
 	}
 
-	// fmt.Printf("viewport: %v rendering full %v due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, ki.NodeSignals(sig), node.PathUnique())
+	if Render2DTrace {
+		fmt.Printf("viewport: %v rendering full: %v, re: %v, due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, gii.CanReRender2D(), ki.NodeSignals(sig), node.PathUnique())
+	}
 	if fullRend {
 		vp.FullRender2DTree()
 	} else {

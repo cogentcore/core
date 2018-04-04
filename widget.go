@@ -7,7 +7,9 @@ package gi
 import (
 	"image"
 	"math"
+	"strings"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -117,9 +119,11 @@ func (g *WidgetBase) Render2DText(txt string) {
 }
 
 ///////////////////////////////////////////////////////////////////
-// Standard methods to call on the Parts -- standard FunDownMeFirst etc operate
-// automaticaly on Field structs such as Parts -- custom calls only needed for
-// manually-recursive traversal in Layout and Render
+// Standard methods to call on the Parts
+
+// standard FunDownMeFirst etc operate automaticaly on Field structs such as
+// Parts -- custom calls only needed for manually-recursive traversal in
+// Layout and Render
 
 func (g *WidgetBase) Init2DWidget() {
 	g.Init2DBase()
@@ -139,6 +143,7 @@ func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData = g.LayData
 	g.Parts.LayData.AllocPos.SetAddVal(spc)
+	g.Parts.LayData.AllocSize.SetAddVal(-2.0 * spc)
 	g.Parts.Layout2DTree(parBBox)
 
 }
@@ -152,10 +157,83 @@ func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) Vec2D {
 	psize := g.ComputeBBox2DBase(parBBox)
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
+	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
 	return psize
 }
 
 func (g *WidgetBase) Render2DParts() {
 	g.Parts.Render2DTree()
+}
+
+///////////////////////////////////////////////////////////////////
+// ConfigParts building-blocks
+
+// get the style properties for a child in parts based on its name -- only
+// call this when new parts were created -- name of properties is #partname
+// (lower cased) and it should contain a map[string]interface{} which is then
+// added to the part's props
+func (g *WidgetBase) PartStyleProps(part ki.Ki, props map[string]interface{}) {
+	stynm := "#" + strings.ToLower(part.Name())
+	pp := g.Prop(stynm, false, false)
+	if pp == nil {
+		if props != nil {
+			ok := false
+			pp, ok = props[stynm]
+			if !ok {
+				return
+			}
+		} else {
+			return
+		}
+	}
+	pmap, ok := pp.(map[string]interface{})
+	if !ok {
+		return
+	}
+	for key, val := range pmap {
+		part.SetProp(key, val)
+	}
+}
+
+// standard config of icon and label left-to right in a row, based on whether items are nil or empty
+func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
+	// todo: add some styles for button layout
+	g.Parts.Lay = LayoutRow
+	config = kit.TypeAndNameList{} // note: slice is already a pointer
+	icIdx = -1
+	lbIdx = -1
+	if icn != nil {
+		config.Add(KiT_Icon, "Icon")
+		icIdx = 0
+		if txt != "" {
+			config.Add(KiT_Space, "Space")
+		}
+	}
+	if txt != "" {
+		lbIdx = len(config)
+		config.Add(KiT_Label, "Label")
+	}
+	return
+}
+
+// set the icon and text values in parts, and get part style props, using given props if not set in object props
+func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int, props map[string]interface{}) {
+	if icIdx >= 0 {
+		kc, _ := g.Parts.Child(icIdx)
+		ic := kc.(*Icon)
+		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
+			ic.CopyFrom(icn.This)
+			ic.UniqueNm = icn.UniqueNm
+			g.PartStyleProps(ic.This, props)
+		}
+	}
+	if lbIdx >= 0 {
+		kc, _ := g.Parts.Child(lbIdx)
+		lbl := kc.(*Label)
+		if lbl.Text != txt {
+			g.PartStyleProps(lbl.This, props)
+			lbl.Text = txt
+		}
+	}
 }

@@ -28,6 +28,9 @@ func mainrun() {
 	// schild2 :=
 	child2.AddNewChildNamed(nil, "subchild1")
 
+	// turn this on to see a trace of the rendering
+	// gi.Render2DTrace = true
+
 	width := 800
 	height := 800
 	win := gi.NewWindow2D("test window", width, height)

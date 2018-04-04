@@ -118,10 +118,8 @@ type LayoutStyle struct {
 }
 
 func (ls *LayoutStyle) Defaults() {
-	ls.MinWidth.Set(1.0, units.Em)
-	ls.MinHeight.Set(1.0, units.Em)
-	ls.Width.Set(1.0, units.Em)
-	ls.Height.Set(1.0, units.Em)
+	ls.MinWidth.Set(2.0, units.Px)
+	ls.MinHeight.Set(2.0, units.Px)
 	ls.ScrollBarWidth.Set(16.0, units.Px)
 }
 
@@ -379,11 +377,11 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 	stretchNeed := false // stretch relative to need
 	stretchMax := false  // only stretch Max = neg
 
-	if usePref && extra >= 0.0 { // have some stretch extra
+	if usePref && extra > 0.0 { // have some stretch extra
 		if max < 0.0 {
 			stretchMax = true // only stretch those marked as infinitely stretchy
 		}
-	} else if extra >= 0.0 { // extra relative to Need
+	} else if extra > 0.0 { // extra relative to Need
 		stretchNeed = true // stretch relative to need
 	}
 
@@ -403,6 +401,11 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 			size += extra
 		}
 	}
+
+	// if ly.IsField() {
+	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, pos: %v size: %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, pos, size)
+	// }
+
 	return
 }
 
@@ -451,10 +454,10 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 	nstretch := 0
 	stretchTot := 0.0
-	stretchNeed := false         // stretch relative to need
-	stretchMax := false          // only stretch Max = neg
-	addSpace := false            // apply extra toward spacing -- for justify
-	if usePref && extra >= 0.0 { // have some stretch extra
+	stretchNeed := false        // stretch relative to need
+	stretchMax := false         // only stretch Max = neg
+	addSpace := false           // apply extra toward spacing -- for justify
+	if usePref && extra > 0.0 { // have some stretch extra
 		for _, c := range ly.Kids {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
@@ -468,7 +471,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		if nstretch > 0 {
 			stretchMax = true // only stretch those marked as infinitely stretchy
 		}
-	} else if extra >= 0.0 { // extra relative to Need
+	} else if extra > 0.0 { // extra relative to Need
 		for _, c := range ly.Kids {
 			_, gi := KiToNode2D(c)
 			if gi == nil {
@@ -499,7 +502,9 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		pos += extra
 	}
 
-	// fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+	// if ly.IsField() {
+	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+	// }
 
 	for i, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
@@ -526,7 +531,9 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPos.SetDim(dim, pos)
-		// fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Nm, pos, size)
+		// if ly.IsField() {
+		// 	fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Nm, pos, size)
+		// }
 		pos += size
 	}
 }
@@ -1005,9 +1012,7 @@ func (g *Stretch) FocusChanged2D(gotFocus bool) {
 // check for interface implementation
 var _ Node2D = &Stretch{}
 
-// Space adds an infinitely stretchy element for spacing out layouts
-// (max-size = -1) set the width / height property to determine how much it
-// takes relative to other stretchy elements
+// Space adds a fixed sized (1 em by default) blank space to a layout -- set width / height property to change
 type Space struct {
 	Node2DBase
 }
@@ -1030,8 +1035,13 @@ func (g *Space) Init2D() {
 	g.Init2DBase()
 }
 
+var SpaceProps = map[string]interface{}{
+	"width":  units.NewValue(1, units.Em),
+	"height": units.NewValue(1, units.Em),
+}
+
 func (g *Space) Style2D() {
-	g.Style2DWidget(nil)
+	g.Style2DWidget(SpaceProps)
 }
 
 func (g *Space) Size2D() {

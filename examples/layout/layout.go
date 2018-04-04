@@ -6,21 +6,16 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/rcoreilly/goki/gi"
-	_ "github.com/rcoreilly/goki/gi/init"
+	"github.com/rcoreilly/goki/gi/oswin"
+	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/gi/units"
-	// "math/rand"
-	// "reflect"
-	// "runtime"
-	// "sync"
-	// "time"
-	// "image"
-	// "image/draw"
 )
 
 func main() {
 	go mainrun()
-	gi.RunBackendEventLoop() // this needs to run in main loop
+	oswin.RunBackendEventLoop() // this needs to run in main loop
 }
 
 func mainrun() {
@@ -38,11 +33,10 @@ func mainrun() {
 	}
 
 	vp := win.WinViewport2D()
+	vp.SetProp("background-color", "#FFF")
+	vp.Fill = true
 
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
-	vpfill.SetProp("fill", "#FFF")
-
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)

@@ -162,47 +162,6 @@ func (g *ButtonBase) ButtonExitHover() {
 	}
 }
 
-// standard config of icon and text left-to right in a row
-func (g *ButtonBase) ConfigPartsIconText() (config kit.TypeAndNameList, icIdx, txIdx int) {
-	// todo: add some styles for button layout
-	g.Parts.Lay = LayoutRow
-	config = kit.TypeAndNameList{} // note: slice is already a pointer
-	icIdx = -1
-	txIdx = -1
-	if g.Icon != nil {
-		config.Add(KiT_Icon, "Icon")
-		icIdx = 0
-		if g.Text != "" {
-			config.Add(KiT_Space, "Space")
-		}
-	}
-	if g.Text != "" {
-		txIdx = len(config)
-		config.Add(KiT_Label, "Text")
-	}
-	return
-}
-
-// set the icon and text values in parts
-func (g *ButtonBase) ConfigPartsSetIconText(icIdx, txIdx int) {
-	if icIdx >= 0 {
-		kc, _ := g.Parts.Child(icIdx)
-		ic := kc.(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
-			ic.CopyFrom(g.Icon.This)
-			ic.UniqueNm = g.Icon.UniqueNm
-		}
-	}
-	if txIdx >= 0 {
-		kc, _ := g.Parts.Child(txIdx)
-		lbl := kc.(*Label)
-		lbl.SetProp("margin", units.NewValue(0, units.Px))
-		lbl.SetProp("padding", units.NewValue(0, units.Px))
-		lbl.SetProp("background-color", "none")
-		lbl.Text = g.Text
-	}
-}
-
 // interface for button widgets -- can extend as needed
 type ButtonWidget interface {
 	// get the button base for most basic functions -- reduces interface size
@@ -337,12 +296,21 @@ var ButtonProps = []map[string]interface{}{
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
-		// "font-family":         "Arial", // this is crashing
-		"font-size":        units.NewValue(24, units.Pt),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
-		"color":            color.Black,
-		"background-color": "#EEF",
+		"text-align":          AlignCenter,
+		"vertical-align":      AlignTop,
+		"color":               color.Black,
+		"background-color":    "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
 	}, { // disabled
 		"border-color":     "#BBB",
 		"color":            "#AAA",
@@ -364,9 +332,9 @@ var ButtonProps = []map[string]interface{}{
 }
 
 func (g *Button) ConfigParts() {
-	config, icIdx, txIdx := g.ConfigPartsIconText()
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconText(icIdx, txIdx)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ButtonProps[ButtonNormal])
 }
 
 func (g *Button) Style2D() {
@@ -380,8 +348,6 @@ func (g *Button) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
-	// and #icon, #text for children in the controls..
 }
 
 func (g *Button) Size2D() {
