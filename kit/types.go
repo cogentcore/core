@@ -91,9 +91,9 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	return typ
 }
 
-// FindType finds a type based on its name (package path + "." + type name) --
+// Type finds a type based on its name (package path + "." + type name) --
 // returns nil if not found
-func (tr *TypeRegistry) FindType(name string) reflect.Type {
+func (tr *TypeRegistry) Type(name string) reflect.Type {
 	if typ, ok := tr.Types[name]; ok {
 		return typ
 	}

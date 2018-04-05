@@ -168,7 +168,7 @@ func TestNodeFindName(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.FindChildIndexByName(nm, st)
+			idx := parent.ChildIndexByName(nm, st)
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
@@ -189,7 +189,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.FindChildIndexByUniqueName(nm, st)
+			idx := parent.ChildIndexByUniqueName(nm, st)
 			if idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
@@ -202,15 +202,15 @@ func TestNodeFindType(t *testing.T) {
 	parent.InitName(&parent, "par")
 	parent.AddNewChildNamed(KiT_NodeEmbed, "child1")
 	parent.AddNewChildNamed(KiT_Node, "child2")
-	idx := parent.FindChildIndexByType(KiT_NodeEmbed)
+	idx := parent.ChildIndexByType(KiT_NodeEmbed, false)
 	if idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx = parent.FindChildIndexByType(KiT_Node)
+	idx = parent.ChildIndexByType(KiT_Node, false)
 	if idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	cn := parent.FindChildByType(KiT_Node)
+	cn := parent.ChildByType(KiT_Node, false)
 	if cn == nil {
 		t.Error("find child by type was nil")
 	}
@@ -449,7 +449,7 @@ func TestNodeCallFun(t *testing.T) {
 	schild2 := child2.AddNewChildNamed(nil, "subchild1")
 
 	res := make([]string, 0, 10)
-	parent.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
 		return true
 	})
@@ -457,11 +457,11 @@ func TestNodeCallFun(t *testing.T) {
 
 	trg := []string{"par1, fun_down, lev 0", "child1, fun_down, lev 1", "child1_1, fun_down, lev 1", "subchild1, fun_down, lev 2", "child1_2, fun_down, lev 1"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("FunDown error -- results: %v != target: %v\n", res, trg)
+		t.Errorf("FuncDown error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
-	schild2.FunUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
+	schild2.FuncUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v", k.UniqueName(), d))
 		return true
 	})
@@ -469,7 +469,7 @@ func TestNodeCallFun(t *testing.T) {
 
 	trg = []string{"subchild1, fun_up", "child1_1, fun_up", "par1, fun_up"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("FunUp error -- results: %v != target: %v\n", res, trg)
+		t.Errorf("FuncUp error -- results: %v != target: %v\n", res, trg)
 	}
 }
 
@@ -533,7 +533,7 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.FunDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.UniqueName(), *n.UpdateCtr()))
 		return true
 	})
@@ -671,11 +671,11 @@ ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
 
 }
 
-func TestNodeFieldFun(t *testing.T) {
+func TestNodeFieldFunc(t *testing.T) {
 	parent := NodeWithField{}
 	parent.InitName(&parent, "par1")
 	res := make([]string, 0, 10)
-	parent.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
 		return true
 	})
@@ -683,20 +683,20 @@ func TestNodeFieldFun(t *testing.T) {
 
 	trg := []string{"par1, fun_down, lev 0", "Field1, fun_down, lev 1"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+		t.Errorf("NodeWithField FuncDown error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
 	par2 := NodeField2{}
 	par2.InitName(&par2, "par2")
-	par2.FunDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v, lev %v", k.UniqueName(), d, level))
 		return true
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"par2, fun_down, lev 0", "Field1, fun_down, lev 1", "Field2, fun_down, lev 1"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+		t.Errorf("NodeWithField FuncDown error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
@@ -705,7 +705,7 @@ func TestNodeFieldFun(t *testing.T) {
 	child1.AddNewChildNamed(nil, "subchild0")
 	child1.AddNewChildNamed(nil, "subchild1")
 
-	par2.FunDownDepthFirst(0, "fun_down_depth", func(k Ki, level int, d interface{}) bool {
+	par2.FuncDownDepthFirst(0, "fun_down_depth", func(k Ki, level int, d interface{}) bool {
 		return true
 	},
 		func(k Ki, level int, d interface{}) bool {
@@ -715,7 +715,7 @@ func TestNodeFieldFun(t *testing.T) {
 	// fmt.Printf("node field fun result: %v\n", res)
 	// trg = []string{"par2, fun_down, lev 0", "Field1, fun_down, lev 1", "Field2, fun_down, lev 1"}
 	// if !reflect.DeepEqual(res, trg) {
-	// 	t.Errorf("NodeWithField FunDown error -- results: %v != target: %v\n", res, trg)
+	// 	t.Errorf("NodeWithField FuncDown error -- results: %v != target: %v\n", res, trg)
 	// }
 	res = res[:0]
 }

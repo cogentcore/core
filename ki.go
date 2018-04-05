@@ -82,8 +82,11 @@ type Ki interface {
 	// Type returns the underlying struct type of this node (reflect.TypeOf(This).Elem())
 	Type() reflect.Type
 
-	// IsType tests whether This underlying struct object is of the given type(s) -- Go does not support a notion of inheritance, so this must be an exact match to the type
-	IsType(t ...reflect.Type) bool
+	// TypeEmbeds tests whether this node is of the given type, or it embeds that type at any level of anonymous embedding -- use EmbeddedStruct to get the embedded struct of that type from this node
+	TypeEmbeds(t reflect.Type) bool
+
+	// EmbeddedStruct returns the embedded struct of given type from this node (or nil if it does not embed that type, or the type is not a Ki type -- see kit.EmbeddedStruct for a generic interface{} version
+	EmbeddedStruct(t reflect.Type) Ki
 
 	// Parent (Node.Par) of this Ki -- Ki has strict one-parent, no-cycles structure -- see SetParent
 	Parent() Ki
@@ -218,35 +221,35 @@ type Ki interface {
 	// Returns whether any changes were made
 	ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool
 
-	// find index of child based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int
+	// returns index of child based on match function (true for match, false for not) -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByFunc(start_idx int, match func(ki Ki) bool) int
 
-	// find index of child -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildIndex(kid Ki, start_idx int) int
+	// returns index of child -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndex(kid Ki, start_idx int) int
 
-	// find index of child from name -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildIndexByName(name string, start_idx int) int
+	// returns index of child from name -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByName(name string, start_idx int) int
 
-	// find index of child from unique name -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildIndexByUniqueName(name string, start_idx int) int
+	// returns index of child from unique name -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByUniqueName(name string, start_idx int) int
 
-	// find index of child by type (any of types given)
-	FindChildIndexByType(t ...reflect.Type) int
+	// returns index of child by type -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding
+	ChildIndexByType(t reflect.Type, embeds bool) int
 
-	// find child from name -- start_idx arg allows for optimized find if you have an idea where it might be -- can be key speedup for large lists
-	FindChildByName(name string, start_idx int) Ki
+	// returns child from name -- start_idx arg allows for optimized search if you have an idea where it might be -- can be key speedup for large lists
+	ChildByName(name string, start_idx int) Ki
 
-	// find child from type (any of types given) -- returns nil if not found
-	FindChildByType(t ...reflect.Type) Ki
+	// returns child from type (any of types given) -- returns nil if not found -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding
+	ChildByType(t reflect.Type, embeds bool) Ki
 
-	// find parent by name -- returns nil if not found
-	FindParentByName(name string) Ki
+	// returns parent by name -- returns nil if not found
+	ParentByName(name string) Ki
 
-	// find parent by type (any of types given) -- returns nil if not found
-	FindParentByType(t ...reflect.Type) Ki
+	// returns parent by type (any of types given) -- returns nil if not found -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding
+	ParentByType(t reflect.Type, embeds bool) Ki
 
-	// find field Ki element by name -- returns nil if not found
-	FindKiFieldByName(name string) Ki
+	// returns field Ki element by name -- returns nil if not found
+	KiFieldByName(name string) Ki
 
 	// Delete child at index -- if child's parent = this node, then will call SetParent(nil), so to transfer to another list, set new parent first -- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
 	DeleteChildAtIndex(idx int, destroy bool)
@@ -277,34 +280,31 @@ type Ki interface {
 	//   note: always put functions last -- looks better for inline functions
 
 	// call function on all Ki fields within this node
-	FunFields(level int, data interface{}, fun Fun)
+	FuncFields(level int, data interface{}, fun Func)
 
 	// concurrent go function call function on all Ki fields within this node
-	GoFunFields(level int, data interface{}, fun Fun)
+	GoFuncFields(level int, data interface{}, fun Func)
 
 	// call function on given node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
-	FunUp(level int, data interface{}, fun Fun) bool
+	FuncUp(level int, data interface{}, fun Func) bool
 
 	// call function on parent of node and all the way up to its parents, and so on -- sequentially all in current go routine (generally necessary for going up, which is typicaly quite fast anyway) -- level is incremented after each step (starts at 0, goes up), and passed to function -- returns false if fun aborts with false, else true
-	FunUpParent(level int, data interface{}, fun Fun) bool
+	FuncUpParent(level int, data interface{}, fun Func) bool
 
-	// call fun on this node (MeFirst) and then call FunDownMeFirst on all the children -- sequentially all in current go routine -- level var is incremented before calling children -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches continue -- i.e., if fun on current node returns false, then returns false and children are not processed further -- this is the fastest, most natural form of traversal
-	FunDownMeFirst(level int, data interface{}, fun Fun) bool
+	// call fun on this node (MeFirst) and then call FuncDownMeFirst on all the children -- sequentially all in current go routine -- level var is incremented before calling children -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches continue -- i.e., if fun on current node returns false, then returns false and children are not processed further -- this is the fastest, most natural form of traversal
+	FuncDownMeFirst(level int, data interface{}, fun Func) bool
 
-	// call FunDownDepthFirst on all children, then call fun on this node -- sequentially all in current go routine -- level var is incremented before calling children -- runs doChildTestFun on each child first to determine if it should process that child, and if that returns true, then it calls FunDownDepthFirst on that child
-	FunDownDepthFirst(level int, data interface{}, doChildTestFun Fun, fun Fun)
+	// call FuncDownDepthFirst on all children, then call fun on this node -- sequentially all in current go routine -- level var is incremented before calling children -- runs doChildTestFunc on each child first to determine if it should process that child, and if that returns true, then it calls FuncDownDepthFirst on that child
+	FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func)
 
-	// call fun on all children, then call FunDownBreadthFirst on all the children -- does NOT call on first node where method is first called -- level var is incremented before calling chlidren -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches can continue
-	FunDownBreadthFirst(level int, data interface{}, fun Fun)
+	// call fun on all children, then call FuncDownBreadthFirst on all the children -- does NOT call on first node where method is first called -- level var is incremented before calling chlidren -- if fun returns false then any further traversal of that branch of the tree is aborted, but other branches can continue
+	FuncDownBreadthFirst(level int, data interface{}, fun Func)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does not wait for completion of the go routines -- returns immediately
-	GoFunDown(level int, data interface{}, fun Fun)
+	GoFuncDown(level int, data interface{}, fun Func)
 
 	// concurrent go function on given node and all the way down to its children, and so on -- does wait for the completion of the go routines before returning
-	GoFunDownWait(level int, data interface{}, fun Fun)
-
-	// call fun on previous node in the tree (previous child in my siblings, then parent, and so on)
-	FunPrev(level int, data interface{}, fun Fun) bool
+	GoFuncDownWait(level int, data interface{}, fun Func)
 
 	// path to this node from Root(), using regular user-given Name's (may be empty or non-unique) -- only use for informational purposes
 	Path() string
@@ -411,7 +411,7 @@ type Ki interface {
 	// for all nodes down from this one
 	UpdatePtrPaths(oldPath, newPath string, startOnly bool)
 
-	// walk the tree down from current node and call FindPtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to recover pointers after entire structure is in place -- see UnmarshalPost
+	// walk the tree down from current node and call PtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to recover pointers after entire structure is in place -- see UnmarshalPost
 	SetPtrsFmPaths()
 
 	//////////////////////////////////////////////////////////////////////////
@@ -442,7 +442,7 @@ type Ki interface {
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
 
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
-type Fun func(ki Ki, level int, data interface{}) bool
+type Func func(ki Ki, level int, data interface{}) bool
 
 // a Ki reflect.Type, suitable for checking for Type.Implements
 func KiType() reflect.Type {

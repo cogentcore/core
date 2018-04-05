@@ -56,7 +56,7 @@ var NodeSignalTrace bool = false
 var NodeSignalTraceString *string
 
 // Receiver function type on receiver node -- gets the sending node and arbitrary additional data
-type RecvFun func(receiver, sender Ki, sig int64, data interface{})
+type RecvFunc func(receiver, sender Ki, sig int64, data interface{})
 
 // use this to encode a custom signal type to be used over the ki.Node.NodeSig and not be confused with basic signals defined above
 func SendCustomNodeSignal(sig int64) int64 {
@@ -82,18 +82,18 @@ type Connection struct {
 	// node that will receive the signal
 	Recv Ki
 	// function on the receiver node that will receive the signal
-	Fun RecvFun
+	Func RecvFunc
 	// todo: path to Recv node (PathUnique), used for copying / moving nodes -- not copying yet
 	// RecvPath string
 }
 
 // send the signal over this connection
 func (con *Connection) SendSig(sender Ki, sig int64, data interface{}) {
-	con.Fun(con.Recv, sender, sig, data)
+	con.Func(con.Recv, sender, sig, data)
 }
 
 // Connect attaches a new receiver to the signal -- checks to make sure connection does not already exist -- error if not ok
-func (sig *Signal) Connect(recv Ki, fun RecvFun) error {
+func (sig *Signal) Connect(recv Ki, fun RecvFunc) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")
 	}
@@ -105,10 +105,7 @@ func (sig *Signal) Connect(recv Ki, fun RecvFun) error {
 		return nil
 	}
 
-	con := Connection{
-		Recv: recv,
-		Fun:  fun,
-	}
+	con := Connection{recv, fun}
 	sig.Cons = append(sig.Cons, con)
 
 	// fmt.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(fun))
@@ -117,10 +114,10 @@ func (sig *Signal) Connect(recv Ki, fun RecvFun) error {
 }
 
 // Find any existing signal connection for given recv and fun
-func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFun) int {
+func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFunc) int {
 	rfref := reflect.ValueOf(fun).Pointer()
 	for i, con := range sig.Cons {
-		if con.Recv == recv && rfref == reflect.ValueOf(con.Fun).Pointer() {
+		if con.Recv == recv && rfref == reflect.ValueOf(con.Func).Pointer() {
 			return i
 		}
 	}
@@ -128,7 +125,7 @@ func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFun) int {
 }
 
 // Disconnect all connections for receiver and/or function if they exist in our list -- can pass nil for either (or both) to match only on one or the other -- both nil means disconnect from all, but more efficient to use DisconnectAll
-func (sig *Signal) Disconnect(recv Ki, fun RecvFun) bool {
+func (sig *Signal) Disconnect(recv Ki, fun RecvFunc) bool {
 	rfref := reflect.ValueOf(fun).Pointer()
 	sz := len(sig.Cons)
 	got := false
@@ -137,7 +134,7 @@ func (sig *Signal) Disconnect(recv Ki, fun RecvFun) bool {
 		if recv != nil && con.Recv != recv {
 			continue
 		}
-		if fun != nil && rfref != reflect.ValueOf(con.Fun).Pointer() {
+		if fun != nil && rfref != reflect.ValueOf(con.Func).Pointer() {
 			continue
 		}
 		// this copy makes sure there are no memory leaks
@@ -171,7 +168,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 		s.EmitTrace(sender, sig, data)
 	}
 	for _, con := range s.Cons {
-		con.Fun(con.Recv, sender, sig, data)
+		con.Func(con.Recv, sender, sig, data)
 	}
 }
 
@@ -184,33 +181,33 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 		s.EmitTrace(sender, sig, data)
 	}
 	for _, con := range s.Cons {
-		go con.Fun(con.Recv, sender, sig, data)
+		go con.Func(con.Recv, sender, sig, data)
 	}
 }
 
 // function type for filtering signals
-type SignalFilterFun func(ki Ki) bool
+type SignalFilterFunc func(ki Ki) bool
 
 // Emit Filtered calls function on each item only sends signal if function returns true
-func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
+func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
 		if fun(con.Recv) {
-			con.Fun(con.Recv, sender, sig, data)
+			con.Func(con.Recv, sender, sig, data)
 		}
 	}
 }
 
 // EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
-func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFun) {
+func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	for _, con := range s.Cons {
 		if fun(con.Recv) {
-			go con.Fun(con.Recv, sender, sig, data)
+			go con.Func(con.Recv, sender, sig, data)
 		}
 	}
 }

@@ -10,12 +10,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/json-iterator/go"
-	"github.com/rcoreilly/goki/ki/kit"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/json-iterator/go"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // Slice provides JSON marshal / unmarshal with encoding of underlying types
@@ -91,11 +92,12 @@ func (k *Slice) Move(from, to int) error {
 }
 
 // find index of item based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-func (k *Slice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
+func (k *Slice) IndexByFunc(start_idx int, match func(ki Ki) bool) int {
 	sz := len(*k)
 	if sz == 0 {
 		return -1
 	}
+	// todo: benchmark setting start_idx = sz / 2 here..
 	if start_idx == 0 {
 		for idx, child := range *k {
 			if match(child) {
@@ -131,20 +133,24 @@ func (k *Slice) FindIndexByFun(start_idx int, match func(ki Ki) bool) int {
 	return -1
 }
 
-func (k *Slice) FindIndex(kid Ki, start_idx int) int {
-	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch == kid })
+func (k *Slice) Index(kid Ki, start_idx int) int {
+	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch == kid })
 }
 
-func (k *Slice) FindIndexByName(name string, start_idx int) int {
-	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.Name() == name })
+func (k *Slice) IndexByName(name string, start_idx int) int {
+	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-func (k *Slice) FindIndexByUniqueName(name string, start_idx int) int {
-	return k.FindIndexByFun(start_idx, func(ch Ki) bool { return ch.UniqueName() == name })
+func (k *Slice) IndexByUniqueName(name string, start_idx int) int {
+	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch.UniqueName() == name })
 }
 
-func (k *Slice) FindIndexByType(t ...reflect.Type) int {
-	return k.FindIndexByFun(0, func(ch Ki) bool { return ch.IsType(t...) })
+func (k *Slice) IndexByType(t reflect.Type, embeds bool) int {
+	if embeds {
+		return k.IndexByFunc(0, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+	} else {
+		return k.IndexByFunc(0, func(ch Ki) bool { return ch.Type() == t })
+	}
 }
 
 // MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
@@ -228,7 +234,7 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 		ti := bytes.Index(fld, []byte("\"type\":"))
 		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
-		typ := kit.Types.FindType(tn)
+		typ := kit.Types.Type(tn)
 		if typ == nil {
 			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
 		}
@@ -425,7 +431,7 @@ func (k *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			if name == "Type" {
 				tn := strings.TrimSpace(val)
 				// fmt.Printf("making type: %v\n", tn)
-				typ := kit.Types.FindType(tn)
+				typ := kit.Types.Type(tn)
 				if typ == nil {
 					return fmt.Errorf("ki.Slice UnmarshalXML: kit.Types type name not found: %v", tn)
 				}

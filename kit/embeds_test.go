@@ -59,6 +59,9 @@ func InitC() {
 func TestTypeEmbeds(t *testing.T) {
 	InitC()
 
+	a_in_a := TypeEmbeds(reflect.TypeOf(a), reflect.TypeOf(a))
+	// fmt.Printf("A embeds A: %v\n", a_in_a)
+
 	b_in_a := TypeEmbeds(reflect.TypeOf(a), reflect.TypeOf(b))
 	// fmt.Printf("A embeds B: %v\n", b_in_a)
 
@@ -79,21 +82,26 @@ func TestTypeEmbeds(t *testing.T) {
 	aif_in_d := EmbeddedTypeImplements(reflect.TypeOf(d), aiftype)
 	// fmt.Printf("D implements AIf: %v\n", aif_in_d)
 
-	if b_in_a != false || a_in_b != true || a_in_c != true || aif_in_c != true || aif_in_d != false {
-		t.Errorf("something wrong in TypeEmbeds: should have false, true, true, true, false is: %v %v %v %v %v\n", b_in_a, a_in_b, a_in_c, aif_in_c, aif_in_d)
+	if a_in_a != true || b_in_a != false || a_in_b != true || a_in_c != true || aif_in_c != true || aif_in_d != false {
+		t.Errorf("something wrong in TypeEmbeds: should have: true, false, true, true, true, false is: %v %v %v %v %v %v\n", a_in_a, b_in_a, a_in_b, a_in_c, aif_in_c, aif_in_d)
 	}
 }
 
-func TestEmbededStruct(t *testing.T) {
+func TestEmbeddedStruct(t *testing.T) {
 	InitC()
 
-	ca := EmbededStruct(&c, reflect.TypeOf(a))
+	aa := EmbeddedStruct(&a, reflect.TypeOf(a))
+	aas := fmt.Sprintf("%+v", aa)
+	aat := "&{Mbr1: Mbr2:0}"
+	if aas != aat {
+		t.Errorf("Didn't get proper embedded members of A from A: %v != %v\n", aas, aat)
+	}
+
+	ca := EmbeddedStruct(&c, reflect.TypeOf(a))
 	cas := fmt.Sprintf("%+v", ca)
-
 	cat := "&{Mbr1:mbr1 string Mbr2:2}"
-
 	if cas != cat {
-		t.Errorf("Didn't get proper embedded members of C from At: %v != %v\n", cas, cat)
+		t.Errorf("Didn't get proper embedded members of C from A: %v != %v\n", cas, cat)
 	}
 }
 

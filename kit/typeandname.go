@@ -35,7 +35,7 @@ func (t *TypeAndNameList) SetFromString(str string) error {
 	for i := 0; i < sz; i += 2 {
 		tn := ds[i]
 		nm := ds[i+1]
-		typ := Types.FindType(tn)
+		typ := Types.Type(tn)
 		if typ == nil {
 			return fmt.Errorf("TypeAndNameList SetFromString: Types type name not found: %v", tn)
 		}

@@ -65,7 +65,7 @@ var _ Ki = &Node{}
 // stringer interface -- basic indented tree representation
 func (n Node) String() string {
 	str := ""
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		for i := 0; i < level; i++ {
 			str += "\t"
 		}
@@ -81,8 +81,8 @@ func (n Node) String() string {
 func (n *Node) Init(this Ki) {
 	kitype := KiType()
 	n.This = this
-	// we need to call this directly instead of FunFields because we need the field name
-	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	// we need to call this directly instead of FuncFields because we need the field name
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
@@ -113,17 +113,21 @@ func (n *Node) Type() reflect.Type {
 	return reflect.TypeOf(n.This).Elem()
 }
 
-func (n *Node) IsType(t ...reflect.Type) bool {
-	if err := n.ThisCheck(); err != nil {
-		return false
-	}
-	ttyp := n.Type()
-	for _, typ := range t {
-		if typ == ttyp {
-			return true
+func (n *Node) TypeEmbeds(t reflect.Type) bool {
+	return kit.TypeEmbeds(n.Type(), t)
+}
+
+func (n *Node) EmbeddedStruct(t reflect.Type) Ki {
+	es := kit.EmbeddedStruct(n.This, t)
+	if es != nil {
+		k, ok := es.(Ki)
+		if ok {
+			return k
 		}
+		log.Printf("ki.EmbeddedStruct on: %v embedded struct is not a Ki type -- use kit.EmbeddedStruct for a more general version\n", n.PathUnique())
+		return nil
 	}
-	return false
+	return nil
 }
 
 func (n *Node) Parent() Ki {
@@ -317,7 +321,7 @@ func (n *Node) SetParent(parent Ki) {
 	n.Par = parent
 	if parent != nil {
 		upc := parent.UpdateCtr().Value() // we need parent's update counter b/c they will end
-		n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.UpdateCtr().Set(upc)
 			return true
 		})
@@ -338,7 +342,7 @@ func (n *Node) Root() Ki {
 func (n *Node) FieldRoot() Ki {
 	var root Ki
 	gotField := false
-	n.FunUpParent(0, n, func(k Ki, level int, d interface{}) bool {
+	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
 		if !gotField {
 			if k.IsField() {
 				gotField = true
@@ -372,7 +376,7 @@ func (n *Node) SetChildType(t reflect.Type) error {
 // check if it is safe to add child -- it cannot be a parent of us -- prevent loops!
 func (n *Node) AddChildCheck(kid Ki) error {
 	var err error
-	n.FunUp(0, n, func(k Ki, level int, d interface{}) bool {
+	n.FuncUp(0, n, func(k Ki, level int, d interface{}) bool {
 		if k == kid {
 			err = fmt.Errorf("Ki Node Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", (d.(Ki)).PathUnique())
 			log.Printf("%v", err)
@@ -554,7 +558,7 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 				n.UpdateStart()
 			}
 			n.DeleteChildAtIndex(i, true) // assume destroy
-		} else if !kid.IsType(config[ti].Type) {
+		} else if kid.Type() != config[ti].Type {
 			if !didUpdt {
 				didUpdt = true
 				n.UpdateStart()
@@ -566,9 +570,9 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 	for i, tn := range config {
 		var kidx int
 		if uniqNm {
-			kidx = n.FindChildIndexByUniqueName(tn.Name, i)
+			kidx = n.ChildIndexByUniqueName(tn.Name, i)
 		} else {
-			kidx = n.FindChildIndexByName(tn.Name, i)
+			kidx = n.ChildIndexByName(tn.Name, i)
 		}
 		if kidx < 0 {
 			if !didUpdt {
@@ -597,65 +601,71 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Finding
+//  Find child / parent by..
 
-func (n *Node) FindChildIndexByFun(start_idx int, match func(ki Ki) bool) int {
-	return n.Kids.FindIndexByFun(start_idx, match)
+func (n *Node) ChildIndexByFunc(start_idx int, match func(ki Ki) bool) int {
+	return n.Kids.IndexByFunc(start_idx, match)
 }
 
-func (n *Node) FindChildIndex(kid Ki, start_idx int) int {
-	return n.Kids.FindIndex(kid, start_idx)
+func (n *Node) ChildIndex(kid Ki, start_idx int) int {
+	return n.Kids.Index(kid, start_idx)
 }
 
-func (n *Node) FindChildIndexByName(name string, start_idx int) int {
-	return n.Kids.FindIndexByName(name, start_idx)
+func (n *Node) ChildIndexByName(name string, start_idx int) int {
+	return n.Kids.IndexByName(name, start_idx)
 }
 
-func (n *Node) FindChildIndexByUniqueName(name string, start_idx int) int {
-	return n.Kids.FindIndexByUniqueName(name, start_idx)
+func (n *Node) ChildIndexByUniqueName(name string, start_idx int) int {
+	return n.Kids.IndexByUniqueName(name, start_idx)
 }
 
-func (n *Node) FindChildIndexByType(t ...reflect.Type) int {
-	return n.Kids.FindIndexByType(t...)
+func (n *Node) ChildIndexByType(t reflect.Type, embeds bool) int {
+	return n.Kids.IndexByType(t, embeds)
 }
 
-func (n *Node) FindChildByName(name string, start_idx int) Ki {
-	idx := n.Kids.FindIndexByName(name, start_idx)
+func (n *Node) ChildByName(name string, start_idx int) Ki {
+	idx := n.Kids.IndexByName(name, start_idx)
 	if idx < 0 {
 		return nil
 	}
 	return n.Kids[idx]
 }
 
-func (n *Node) FindChildByType(t ...reflect.Type) Ki {
-	idx := n.Kids.FindIndexByType(t...)
+func (n *Node) ChildByType(t reflect.Type, embeds bool) Ki {
+	idx := n.Kids.IndexByType(t, embeds)
 	if idx < 0 {
 		return nil
 	}
 	return n.Kids[idx]
 }
 
-func (n *Node) FindParentByName(name string) Ki {
+func (n *Node) ParentByName(name string) Ki {
 	if n.IsRoot() {
 		return nil
 	}
 	if n.Par.Name() == name {
 		return n.Par
 	}
-	return n.Par.FindParentByName(name)
+	return n.Par.ParentByName(name)
 }
 
-func (n *Node) FindParentByType(t ...reflect.Type) Ki {
+func (n *Node) ParentByType(t reflect.Type, embeds bool) Ki {
 	if n.IsRoot() {
 		return nil
 	}
-	if n.Par.IsType(t...) {
-		return n.Par
+	if embeds {
+		if n.Par.TypeEmbeds(t) {
+			return n.Par
+		}
+	} else {
+		if n.Par.Type() == t {
+			return n.Par
+		}
 	}
-	return n.Par.FindParentByType(t...)
+	return n.Par.ParentByType(t, embeds)
 }
 
-func (n *Node) FindKiFieldByName(name string) Ki {
+func (n *Node) KiFieldByName(name string) Ki {
 	v := reflect.ValueOf(n.This).Elem()
 	f := v.FieldByName(name)
 	if !f.IsValid() {
@@ -697,7 +707,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 }
 
 func (n *Node) DeleteChild(child Ki, destroy bool) {
-	idx := n.FindChildIndex(child, 0)
+	idx := n.ChildIndex(child, 0)
 	if idx < 0 {
 		return
 	}
@@ -705,7 +715,7 @@ func (n *Node) DeleteChild(child Ki, destroy bool) {
 }
 
 func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
-	idx := n.FindChildIndexByName(name, 0)
+	idx := n.ChildIndexByName(name, 0)
 	if idx < 0 {
 		return nil
 	}
@@ -747,7 +757,7 @@ func (n *Node) DestroyDeleted() {
 }
 
 func (n *Node) DestroyAllDeleted() {
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.DestroyDeleted()
 		return true
 	})
@@ -767,7 +777,7 @@ func (n *Node) Destroy() {
 //  Tree walking and state updating
 
 // Node version of this function from kit/embeds.go
-func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
 	if typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
@@ -785,7 +795,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous && kit.PtrType(f.Type) != KiT_Node {
-			rval = FlatFieldsValueFun(kit.PtrValue(vf).Interface(), fun)
+			rval = FlatFieldsValueFunc(kit.PtrValue(vf).Interface(), fun)
 			if !rval {
 				break
 			}
@@ -799,9 +809,9 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 	return rval
 }
 
-func (n *Node) FunFields(level int, data interface{}, fun Fun) {
+func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 	kitype := KiType()
-	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
@@ -812,9 +822,9 @@ func (n *Node) FunFields(level int, data interface{}, fun Fun) {
 	})
 }
 
-func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
+func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
 	kitype := KiType()
-	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			fk := kit.PtrValue(fieldVal).Interface().(Ki)
 			if fk != nil {
@@ -826,18 +836,18 @@ func (n *Node) GoFunFields(level int, data interface{}, fun Fun) {
 	})
 }
 
-func (n *Node) FunUp(level int, data interface{}, fun Fun) bool {
+func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
 	if !fun(n.This, level, data) { // false return means stop
 		return false
 	}
 	level++
 	if n.Parent() != nil && n.Parent() != n.This { // prevent loops
-		return n.Parent().FunUp(level, data, fun)
+		return n.Parent().FuncUp(level, data, fun)
 	}
 	return true
 }
 
-func (n *Node) FunUpParent(level int, data interface{}, fun Fun) bool {
+func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
 	if n.IsRoot() {
 		return true
 	}
@@ -845,34 +855,34 @@ func (n *Node) FunUpParent(level int, data interface{}, fun Fun) bool {
 		return false
 	}
 	level++
-	return n.Parent().FunUpParent(level, data, fun)
+	return n.Parent().FuncUpParent(level, data, fun)
 }
 
-func (n *Node) FunDownMeFirst(level int, data interface{}, fun Fun) bool {
+func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
 	if !fun(n.This, level, data) { // false return means stop
 		return false
 	}
 	level++
-	n.FunFields(level, data, func(k Ki, level int, d interface{}) bool {
-		k.FunDownMeFirst(level, data, fun)
+	n.FuncFields(level, data, func(k Ki, level int, d interface{}) bool {
+		k.FuncDownMeFirst(level, data, fun)
 		return true
 	})
 	for _, child := range n.Children() {
-		child.FunDownMeFirst(level, data, fun) // don't care about their return values
+		child.FuncDownMeFirst(level, data, fun) // don't care about their return values
 	}
 	return true
 }
 
-func (n *Node) FunDownDepthFirst(level int, data interface{}, doChildTestFun Fun, fun Fun) {
+func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func) {
 	level++
 	for _, child := range n.Children() {
-		if doChildTestFun(n.This, level, data) { // test if we should run on this child
-			child.FunDownDepthFirst(level, data, doChildTestFun, fun)
+		if doChildTestFunc(n.This, level, data) { // test if we should run on this child
+			child.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
 		}
 	}
-	n.FunFields(level, data, func(k Ki, level int, d interface{}) bool {
-		if doChildTestFun(k, level, data) { // test if we should run on this child
-			k.FunDownDepthFirst(level, data, doChildTestFun, fun)
+	n.FuncFields(level, data, func(k Ki, level int, d interface{}) bool {
+		if doChildTestFunc(k, level, data) { // test if we should run on this child
+			k.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
 		}
 		fun(k, level, data)
 		return true
@@ -881,15 +891,15 @@ func (n *Node) FunDownDepthFirst(level int, data interface{}, doChildTestFun Fun
 	fun(n.This, level, data) // can't use the return value at this point
 }
 
-func (n *Node) FunDownBreadthFirst(level int, data interface{}, fun Fun) {
+func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 	dontMap := make(map[int]bool) // map of who NOT to process further -- default is false for map so reverse
 	level++
 	for i, child := range n.Children() {
 		if !fun(child, level, data) { // false return means stop
 			dontMap[i] = true
 		} else {
-			child.FunFields(level+1, data, func(k Ki, level int, d interface{}) bool {
-				k.FunDownBreadthFirst(level+1, data, fun)
+			child.FuncFields(level+1, data, func(k Ki, level int, d interface{}) bool {
+				k.FuncDownBreadthFirst(level+1, data, fun)
 				fun(k, level+1, data)
 				return true
 			})
@@ -899,31 +909,27 @@ func (n *Node) FunDownBreadthFirst(level int, data interface{}, fun Fun) {
 		if dontMap[i] {
 			continue
 		}
-		child.FunDownBreadthFirst(level, data, fun)
+		child.FuncDownBreadthFirst(level, data, fun)
 	}
 }
 
-func (n *Node) GoFunDown(level int, data interface{}, fun Fun) {
+func (n *Node) GoFuncDown(level int, data interface{}, fun Func) {
 	go fun(n.This, level, data)
 	level++
-	n.GoFunFields(level, data, fun)
+	n.GoFuncFields(level, data, fun)
 	for _, child := range n.Children() {
-		child.GoFunDown(level, data, fun)
+		child.GoFuncDown(level, data, fun)
 	}
 }
 
-func (n *Node) GoFunDownWait(level int, data interface{}, fun Fun) {
+func (n *Node) GoFuncDownWait(level int, data interface{}, fun Func) {
 	// todo: use channel or something to wait
 	go fun(n.This, level, data)
 	level++
-	n.GoFunFields(level, data, fun)
+	n.GoFuncFields(level, data, fun)
 	for _, child := range n.Children() {
-		child.GoFunDown(level, data, fun)
+		child.GoFuncDown(level, data, fun)
 	}
-}
-
-func (n *Node) FunPrev(level int, data interface{}, fun Fun) bool {
-	return true
 }
 
 func (n *Node) Path() string {
@@ -984,21 +990,21 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if strings.Contains(pe, ".") { // has fields
 			fels := strings.Split(pe, ".")
 			// find the child first, then the fields
-			idx := curn.FindChildIndexByUniqueName(fels[0], 0)
+			idx := curn.ChildIndexByUniqueName(fels[0], 0)
 			if idx < 0 {
 				return nil
 			}
 			curn, _ = curn.Child(idx)
 			for i := 1; i < len(fels); i++ {
 				fe := fels[i]
-				fk := curn.FindKiFieldByName(fe)
+				fk := curn.KiFieldByName(fe)
 				if fk == nil {
 					return nil
 				}
 				curn = fk
 			}
 		} else {
-			idx := curn.FindChildIndexByUniqueName(pe, 0)
+			idx := curn.ChildIndexByUniqueName(pe, 0)
 			if idx < 0 {
 				return nil
 			}
@@ -1028,7 +1034,7 @@ func (n *Node) UpdateStart() {
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
 		return
 	}
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 0 { // clear at start of update
 			bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
 		}
@@ -1042,7 +1048,7 @@ func (n *Node) UpdateEnd() {
 		return
 	}
 	par_updt := false
-	n.FunDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
 		par_up := d.(*bool)             // did the parent already update?
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
@@ -1070,7 +1076,7 @@ func (n *Node) UpdateEndAll() {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
 			k.UpdateCtr().Dec()
 			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
@@ -1089,7 +1095,7 @@ func (n *Node) UpdateEndAll() {
 }
 
 func (n *Node) UpdateReset() {
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.UpdateCtr().Set(0)
 		return true
 	})
@@ -1097,7 +1103,7 @@ func (n *Node) UpdateReset() {
 
 func (n *Node) Disconnect() {
 	n.NodeSig.DisconnectAll()
-	FlatFieldsValueFun(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		switch {
 		case fieldVal.Kind() == reflect.Ptr:
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
@@ -1115,7 +1121,7 @@ func (n *Node) Disconnect() {
 }
 
 func (n *Node) DisconnectAll() {
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.Disconnect()
 		return true
 	})
@@ -1141,7 +1147,7 @@ func (n *Node) SetField(field string, val interface{}) bool {
 
 func (n *Node) SetFieldDown(field string, val interface{}) {
 	n.UpdateStart()
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.SetField(field, val)
 		return true
 	})
@@ -1150,7 +1156,7 @@ func (n *Node) SetFieldDown(field string, val interface{}) {
 
 func (n *Node) SetFieldUp(field string, val interface{}) {
 	n.UpdateStart()
-	n.FunUp(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncUp(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.SetField(field, val)
 		return true
 	})
@@ -1277,8 +1283,8 @@ func (n *Node) CopyFromRaw(from Ki) error {
 
 func (n *Node) GetPtrPaths() {
 	root := n.This
-	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			if fieldVal.CanInterface() {
 				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
@@ -1296,13 +1302,13 @@ func (n *Node) GetPtrPaths() {
 
 func (n *Node) SetPtrsFmPaths() {
 	root := n.Root()
-	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			if fieldVal.CanInterface() {
 				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
 				case *Ptr:
-					if !vfv.FindPtrFmPath(root) {
+					if !vfv.PtrFmPath(root) {
 						log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", vfv.Path, root.Name())
 					}
 				}
@@ -1315,8 +1321,8 @@ func (n *Node) SetPtrsFmPaths() {
 
 func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
 	root := n.Root()
-	n.FunDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFun(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
+		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			if fieldVal.CanInterface() {
 				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
@@ -1396,7 +1402,7 @@ func (n *Node) LoadXML(b []byte) error {
 }
 
 func (n *Node) ParentAllChildren() {
-	n.FunDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		for _, child := range k.Children() {
 			if child != nil {
 				child.SetParent(k)

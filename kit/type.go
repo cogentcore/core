@@ -52,7 +52,7 @@ func (k *Type) UnmarshalJSON(b []byte) error {
 	}
 	tn := string(bytes.Trim(bytes.TrimSpace(b), "\""))
 	// fmt.Printf("loading type: %v", tn)
-	typ := Types.FindType(tn)
+	typ := Types.Type(tn)
 	if typ == nil {
 		return fmt.Errorf("Type UnmarshalJSON: Types type name not found: %v", tn)
 	}
@@ -98,7 +98,7 @@ func (k *Type) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			k.T = nil
 		} else {
 			// fmt.Printf("loading type: %v\n", tn)
-			typ := Types.FindType(tn)
+			typ := Types.Type(tn)
 			if typ == nil {
 				return fmt.Errorf("Type UnmarshalXML: Types type name not found: %v", tn)
 			}

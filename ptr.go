@@ -38,8 +38,8 @@ func (k *Ptr) GetPath() {
 	}
 }
 
-// FindPtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil
-func (k *Ptr) FindPtrFmPath(root Ki) bool {
+// PtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil
+func (k *Ptr) PtrFmPath(root Ki) bool {
 	// fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
 		k.Ptr = nil

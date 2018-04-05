@@ -189,10 +189,13 @@ func FlatFieldInterfaceByName(stru interface{}, nm string) interface{} {
 	return PtrValue(ff).Interface()
 }
 
-// checks if given type embeds another type, at any level of recursive embedding
+// checks if given type embeds another type, at any level of recursive embedding (including being the type itself)
 func TypeEmbeds(typ, embed reflect.Type) bool {
 	typ = NonPtrType(typ)
 	embed = NonPtrType(embed)
+	if typ == embed {
+		return true
+	}
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
@@ -207,9 +210,12 @@ func TypeEmbeds(typ, embed reflect.Type) bool {
 }
 
 // return the embedded struct of given type within given struct
-func EmbededStruct(stru interface{}, embed reflect.Type) interface{} {
+func EmbeddedStruct(stru interface{}, embed reflect.Type) interface{} {
 	v := NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
+	if typ == embed {
+		return PtrValue(v).Interface()
+	}
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous { // anon only avail on StructField fm typ
@@ -218,7 +224,7 @@ func EmbededStruct(stru interface{}, embed reflect.Type) interface{} {
 			if f.Type == embed {
 				return vfpi
 			}
-			rv := EmbededStruct(vfpi, embed)
+			rv := EmbeddedStruct(vfpi, embed)
 			if rv != nil {
 				return rv
 			}
