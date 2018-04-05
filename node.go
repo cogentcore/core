@@ -603,36 +603,36 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 //////////////////////////////////////////////////////////////////////////
 //  Find child / parent by..
 
-func (n *Node) ChildIndexByFunc(start_idx int, match func(ki Ki) bool) int {
-	return n.Kids.IndexByFunc(start_idx, match)
+func (n *Node) ChildIndexByFunc(startIdx int, match func(ki Ki) bool) int {
+	return n.Kids.IndexByFunc(startIdx, match)
 }
 
-func (n *Node) ChildIndex(kid Ki, start_idx int) int {
-	return n.Kids.Index(kid, start_idx)
+func (n *Node) ChildIndex(kid Ki, startIdx int) int {
+	return n.Kids.Index(kid, startIdx)
 }
 
-func (n *Node) ChildIndexByName(name string, start_idx int) int {
-	return n.Kids.IndexByName(name, start_idx)
+func (n *Node) ChildIndexByName(name string, startIdx int) int {
+	return n.Kids.IndexByName(name, startIdx)
 }
 
-func (n *Node) ChildIndexByUniqueName(name string, start_idx int) int {
-	return n.Kids.IndexByUniqueName(name, start_idx)
+func (n *Node) ChildIndexByUniqueName(name string, startIdx int) int {
+	return n.Kids.IndexByUniqueName(name, startIdx)
 }
 
-func (n *Node) ChildIndexByType(t reflect.Type, embeds bool) int {
-	return n.Kids.IndexByType(t, embeds)
+func (n *Node) ChildIndexByType(t reflect.Type, embeds bool, startIdx int) int {
+	return n.Kids.IndexByType(t, embeds, startIdx)
 }
 
-func (n *Node) ChildByName(name string, start_idx int) Ki {
-	idx := n.Kids.IndexByName(name, start_idx)
+func (n *Node) ChildByName(name string, startIdx int) Ki {
+	idx := n.Kids.IndexByName(name, startIdx)
 	if idx < 0 {
 		return nil
 	}
 	return n.Kids[idx]
 }
 
-func (n *Node) ChildByType(t reflect.Type, embeds bool) Ki {
-	idx := n.Kids.IndexByType(t, embeds)
+func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
+	idx := n.Kids.IndexByType(t, embeds, startIdx)
 	if idx < 0 {
 		return nil
 	}

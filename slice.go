@@ -40,6 +40,7 @@ func (k *Slice) ValidIndex(idx int) (int, error) {
 	return idx, nil
 }
 
+// Insert item at index
 func (k *Slice) Insert(ki Ki, idx int) {
 	kl := len(*k)
 	if idx < 0 {
@@ -59,6 +60,7 @@ func (k *Slice) Insert(ki Ki, idx int) {
 	(*k)[idx] = ki
 }
 
+// Delete item at index -- does not do any further management deleted item -- optimized version for avoiding memory leaks
 func (k *Slice) DeleteAtIndex(idx int) error {
 	idx, err := k.ValidIndex(idx)
 	if err != nil {
@@ -72,6 +74,7 @@ func (k *Slice) DeleteAtIndex(idx int) error {
 	return nil
 }
 
+// Move element from one position to another
 func (k *Slice) Move(from, to int) error {
 	var err error
 	from, err = k.ValidIndex(from)
@@ -91,25 +94,25 @@ func (k *Slice) Move(from, to int) error {
 	return nil
 }
 
-// find index of item based on match function (true for find, false for not) -- start_idx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
-func (k *Slice) IndexByFunc(start_idx int, match func(ki Ki) bool) int {
+// find index of item based on match function (true for find, false for not) -- startIdx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) int {
 	sz := len(*k)
 	if sz == 0 {
 		return -1
 	}
-	// todo: benchmark setting start_idx = sz / 2 here..
-	if start_idx == 0 {
+	// todo: benchmark setting startIdx = sz / 2 here..
+	if startIdx == 0 {
 		for idx, child := range *k {
 			if match(child) {
 				return idx
 			}
 		}
 	} else {
-		if start_idx >= sz {
-			start_idx = sz - 1
+		if startIdx >= sz {
+			startIdx = sz - 1
 		}
-		upi := start_idx + 1
-		dni := start_idx
+		upi := startIdx + 1
+		dni := startIdx
 		upo := false
 		for {
 			if !upo && upi < sz {
@@ -133,24 +136,76 @@ func (k *Slice) IndexByFunc(start_idx int, match func(ki Ki) bool) int {
 	return -1
 }
 
-func (k *Slice) Index(kid Ki, start_idx int) int {
-	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch == kid })
+// Index returns index of element in list or -1 if not there
+func (k *Slice) Index(kid Ki, startIdx int) int {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
 }
 
-func (k *Slice) IndexByName(name string, start_idx int) int {
-	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch.Name() == name })
+// IndexByName returns index of first element that has given name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+func (k *Slice) IndexByName(name string, startIdx int) int {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-func (k *Slice) IndexByUniqueName(name string, start_idx int) int {
-	return k.IndexByFunc(start_idx, func(ch Ki) bool { return ch.UniqueName() == name })
+// IndexByUniqueName returns index of first element that has given unique name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+func (k *Slice) IndexByUniqueName(name string, startIdx int) int {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
 }
 
-func (k *Slice) IndexByType(t reflect.Type, embeds bool) int {
+// IndexByType returns index of element that either is that type or embeds that type -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) int {
 	if embeds {
-		return k.IndexByFunc(0, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
 	} else {
-		return k.IndexByFunc(0, func(ch Ki) bool { return ch.Type() == t })
+		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
 	}
+}
+
+// return a kit.TypeAndNameList of elements in the slice -- useful for Ki ConfigChildren
+func (k *Slice) TypeAndNames() kit.TypeAndNameList {
+	if len(*k) == 0 {
+		return nil
+	}
+	tn := make(kit.TypeAndNameList, len(*k))
+	for _, kid := range *k {
+		tn.Add(kid.Type(), kid.Name())
+	}
+	return tn
+}
+
+// return a kit.TypeAndNameList of elements in the slice using UniqueNames -- useful for Ki ConfigChildren
+func (k *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
+	if len(*k) == 0 {
+		return nil
+	}
+	tn := make(kit.TypeAndNameList, len(*k))
+	for _, kid := range *k {
+		tn.Add(kid.Type(), kid.UniqueName())
+	}
+	return tn
+}
+
+// return a Name to Index map for faster lookup when needing to do a lot of name lookups on same fixed slice
+func (k *Slice) NameToIndexMap() map[string]int {
+	if len(*k) == 0 {
+		return nil
+	}
+	nim := make(map[string]int, len(*k))
+	for i, kid := range *k {
+		nim[kid.Name()] = i
+	}
+	return nim
+}
+
+// return a UniqueName to Index map for faster lookup when needing to do a lot of name lookups on same fixed slice
+func (k *Slice) UniqueNameToIndexMap() map[string]int {
+	if len(*k) == 0 {
+		return nil
+	}
+	nim := make(map[string]int, len(*k))
+	for i, kid := range *k {
+		nim[kid.UniqueName()] = i
+	}
+	return nim
 }
 
 // MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them

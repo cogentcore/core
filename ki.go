@@ -47,8 +47,14 @@ const (
 	// total number of flags used by base Ki Node -- can extend from here up to 64 bits
 	FlagsN
 
+	// Mask for node updates
+	NodeUpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved))
+
+	// Mask for child updates
+	ChildUpdateFlagsMask = (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+
 	// Mask for structural changes update flags
-	StruUpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved)) | (1 << uint32(NodeDeleted)) | (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+	StruUpdateFlagsMask = NodeUpdateFlagsMask | ChildUpdateFlagsMask | (1 << uint32(NodeDeleted))
 
 	// Mask for non-structural, value-only changes update flags
 	ValUpdateFlagsMask = (1 << uint32(FieldUpdated)) | (1 << uint32(PropUpdated))
@@ -221,26 +227,26 @@ type Ki interface {
 	// Returns whether any changes were made
 	ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool
 
-	// returns index of child based on match function (true for match, false for not) -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
-	ChildIndexByFunc(start_idx int, match func(ki Ki) bool) int
+	// returns index of child based on match function (true for match, false for not) -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByFunc(startIdx int, match func(ki Ki) bool) int
 
-	// returns index of child -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
-	ChildIndex(kid Ki, start_idx int) int
+	// returns index of child -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndex(kid Ki, startIdx int) int
 
-	// returns index of child from name -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
-	ChildIndexByName(name string, start_idx int) int
+	// returns index of child from name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByName(name string, startIdx int) int
 
-	// returns index of child from unique name -- start_idx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
-	ChildIndexByUniqueName(name string, start_idx int) int
+	// returns index of child from unique name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByUniqueName(name string, startIdx int) int
 
-	// returns index of child by type -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding
-	ChildIndexByType(t reflect.Type, embeds bool) int
+	// returns index of child by type -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildIndexByType(t reflect.Type, embeds bool, startIdx int) int
 
-	// returns child from name -- start_idx arg allows for optimized search if you have an idea where it might be -- can be key speedup for large lists
-	ChildByName(name string, start_idx int) Ki
+	// returns child from name -- startIdx arg allows for optimized search if you have an idea where it might be -- can be key speedup for large lists
+	ChildByName(name string, startIdx int) Ki
 
-	// returns child from type (any of types given) -- returns nil if not found -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding
-	ChildByType(t reflect.Type, embeds bool) Ki
+	// returns child from type (any of types given) -- returns nil if not found -- if embeds is true, then it looks for any type that embeds the given type at any level of anonymous embedding -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+	ChildByType(t reflect.Type, embeds bool, startIdx int) Ki
 
 	// returns parent by name -- returns nil if not found
 	ParentByName(name string) Ki
