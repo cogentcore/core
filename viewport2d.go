@@ -167,7 +167,10 @@ func (vp *Viewport2D) PushAsPopup() {
 // this is called by window when a popup is deleted -- it destroys the vp and
 // its main layout, see VpFlagPopupDestroyAll for whether children are destroyed
 func (vp *Viewport2D) DeletePopup() {
-	vp.DisconnectAllEventsTree()
+	win := vp.ParentWindow()
+	if win != nil {
+		vp.DisconnectAllEventsTree(win)
+	}
 	par := vp.Par
 	if par != nil {
 		par.UpdateStart()

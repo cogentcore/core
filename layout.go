@@ -627,7 +627,10 @@ func (ly *Layout) DeleteHScroll() {
 		return
 	}
 	sc := ly.HScroll
-	sc.DisconnectAllEvents()
+	win := ly.ParentWindow()
+	if win != nil {
+		sc.DisconnectAllEvents(win)
+	}
 	sc.Destroy()
 	ly.HScroll = nil
 }
@@ -667,7 +670,10 @@ func (ly *Layout) DeleteVScroll() {
 		return
 	}
 	sc := ly.VScroll
-	sc.DisconnectAllEvents()
+	win := ly.ParentWindow()
+	if win != nil {
+		sc.DisconnectAllEvents(win)
+	}
 	sc.Destroy() // this resets all signals and connections
 	ly.VScroll = nil
 }

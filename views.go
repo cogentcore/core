@@ -117,8 +117,17 @@ func (g *TreeView) SyncToSrc() {
 	for _, skid := range skids {
 		tnl.Add(typ, "ViewOf_"+skid.UniqueName())
 	}
-	// 	updt :=
-	g.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
+	updt := g.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
+	if updt {
+		win := g.ParentWindow()
+		if win != nil {
+			for _, vki := range g.Deleted {
+				vk := vki.(*TreeView)
+				fmt.Printf("disconnecting %v\n", vk.Nm)
+				vk.DisconnectAllEventsTree(win)
+			}
+		}
+	}
 	for i, vki := range g.Kids {
 		vk := vki.(*TreeView)
 		skid, _ := sk.Child(i)

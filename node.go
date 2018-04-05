@@ -63,22 +63,19 @@ func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
 	}
 }
 
-// disconnect node from all events - todo: need a more generic Ki version of this
-func (g *NodeBase) DisconnectAllEvents() {
-	win := g.ParentWindow()
-	if win != nil {
-		win.DisconnectNode(g.This)
-	}
+// disconnect node from all events
+func (g *NodeBase) DisconnectAllEvents(win *Window) {
+	win.DisconnectNode(g.This)
 }
 
 // disconnect node from all events - todo: need a more generic Ki version of this
-func (g *NodeBase) DisconnectAllEventsTree() {
+func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false // going into a different type of thing, bail
 		}
-		gi.DisconnectAllEvents()
+		gi.DisconnectAllEvents(win)
 		gi.NodeSig.DisconnectAll()
 		return true
 	})
