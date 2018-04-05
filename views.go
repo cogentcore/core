@@ -542,14 +542,12 @@ var TreeViewProps = []map[string]interface{}{
 		"color":            color.Black,
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
 		"#branch": map[string]interface{}{
-			// "width":   units.NewValue(1, units.Em),
-			// "height":  units.NewValue(1, units.Em),
 			"vertical-align": AlignBottom,
-			"margin":         units.NewValue(2, units.Px),
-			"padding":        units.NewValue(2, units.Px),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
 			"#icon": map[string]interface{}{
-				"width":   units.NewValue(1.5, units.Ex),
-				"height":  units.NewValue(1.5, units.Ex),
+				"width":   units.NewValue(.8, units.Em),
+				"height":  units.NewValue(.8, units.Em),
 				"margin":  units.NewValue(2, units.Px),
 				"padding": units.NewValue(2, units.Px),
 			},

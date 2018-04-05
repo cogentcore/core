@@ -69,7 +69,7 @@ type FontStyle struct {
 
 func (p *FontStyle) Defaults() {
 	p.FaceName = "Arial"
-	p.Size = units.NewValue(24, units.Pt)
+	p.Size = units.NewValue(14, units.Pt)
 }
 
 // any updates after generic xml-tag property setting?

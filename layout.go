@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/rcoreilly/goki/gi/units"
@@ -616,8 +617,8 @@ func (ly *Layout) SetHScroll() {
 		}
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
-		ls.UpdateStart()
-		ls.UpdateEnd()
+		ls.Move2DTree()
+		ls.Render2DTree()
 	})
 }
 
@@ -660,8 +661,8 @@ func (ly *Layout) SetVScroll() {
 		}
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
-		ls.UpdateStart()
-		ls.UpdateEnd()
+		ls.Move2DTree()
+		ls.Render2DTree()
 	})
 }
 
@@ -894,14 +895,14 @@ func (g *Frame) Init2D() {
 }
 
 var FrameProps = map[string]interface{}{
-	"border-width":     "1px",
-	"border-radius":    "0px",
-	"border-color":     "black",
-	"border-style":     "solid",
-	"padding":          "2px",
-	"margin":           "2px",
-	"color":            "black",
-	"background-color": "#FFF",
+	"border-width":     units.NewValue(2, units.Px),
+	"border-radius":    units.NewValue(0, units.Px),
+	"border-color":     color.Black,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"color":            color.Black,
+	"background-color": color.White,
 }
 
 func (g *Frame) Style2D() {

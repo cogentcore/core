@@ -372,6 +372,17 @@ func (g *Node2DBase) Layout2DTree() {
 	g.This.(Node2D).Layout2D(parBBox) // important to use interface version to get interface!
 }
 
+// move2d pass -- each node iterates over children for maximum control -- this starts with parent VpBBox and current delta -- can be called de novo
+func (g *Node2DBase) Move2DTree() {
+	parBBox := image.ZR
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		parBBox = pg.VpBBox
+	}
+	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig)
+	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
+}
+
 // render just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering

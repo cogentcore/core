@@ -67,6 +67,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* deleting nodes in tree view -- something not getting disconnected..
+* do render / layout tracing to see what is going on with updates -- seems like too many during scrolling.  regular interaction seems fine. 
+* think about adding a parent of TreeView nodes that can manage the full space -- needs to remember the last size of the tree and clear that after a resize somehow.  could be a generally good function for all widgets.. 
+
+
+* add dialog to prompt for type of object to make?
+
+* add inspector in a different panel.. :)
+
 * PartsNeedUpdate, add to render for all items
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 * for focus prev -- need to generate a slice going forward of all tree elements and then just go backward in it.. no other way.  Also check for visibility in focus movement.
