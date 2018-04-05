@@ -30,10 +30,11 @@ func mainrun() {
 
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
+	// gi.Layout2DTrace = true
 
 	width := 800
 	height := 800
-	win := gi.NewWindow2D("test window", width, height)
+	win := gi.NewWindow2D("TreeView Window", width, height)
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()

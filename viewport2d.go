@@ -353,6 +353,10 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		return
 	}
 
+	if Render2DTrace {
+		fmt.Printf("Render: %v Viewport2D rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+	}
+
 	fullRend := false
 	if sig == int64(ki.NodeSignalUpdated) {
 		vlupdt := bitflag.HasMask(*(node.Flags()), ki.ValUpdateFlagsMask)
@@ -366,20 +370,26 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		fullRend = true
 	}
 
-	// if Render2DTrace {
-	// 	fmt.Printf("viewport: %v rendering full: %v, re: %v, due to signal: %v from node: %v\n", vp.PathUnique(), fullRend, gii.CanReRender2D(), ki.NodeSignals(sig), node.PathUnique())
-	// }
 	if fullRend {
+		if Render2DTrace {
+			fmt.Printf("Render: %v Viewport2D FullRender2DTree (structural changes)\n", vp.PathUnique())
+		}
 		vp.FullRender2DTree()
 	} else {
 		rr, layout := gii.ReRender2D()
 		if rr != nil {
-			if layout {
-				rr.Layout2D(vp.VpBBox) // todo!!!
+			rrn := rr.AsNode2D()
+			if Render2DTrace {
+				fmt.Printf("Render: %v Viewport2D ReRender2D on %v, layout: %v\n", vp.PathUnique(), rrn.PathUnique(), layout)
 			}
-			// todo: layout
+			if layout {
+				rrn.Layout2DTree()
+			}
 			vp.ReRender2DNode(rr)
 		} else {
+			if Render2DTrace {
+				fmt.Printf("Render: %v Viewport2D ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+			}
 			gi.Style2DTree()    // restyle only from affected node downward
 			vp.ReRender2DTree() // need to re-render entirely from us
 		}

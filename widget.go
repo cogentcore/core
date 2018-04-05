@@ -150,7 +150,7 @@ func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
-	g.Parts.Layout2DTree(parBBox)
+	g.Parts.Layout2D(parBBox)
 }
 
 func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
@@ -160,9 +160,6 @@ func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
 
 func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) {
 	g.ComputeBBox2DBase(parBBox)
-	// spc := g.Style.BoxSpace()
-	// g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
-	// g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
 }
 

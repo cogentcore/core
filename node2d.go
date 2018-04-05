@@ -297,28 +297,18 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 
 // full render of the tree
 func (g *Node2DBase) FullRender2DTree() {
-	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		parBBox = pg.VpBBox
-	}
 	g.Init2DTree()
 	g.Style2DTree()
 	g.Size2DTree()
-	g.Layout2DTree(parBBox)
+	g.Layout2DTree()
 	g.Render2DTree()
 }
 
 // re-render of the tree -- after it has already been initialized and styled
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
-	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		parBBox = pg.VpBBox
-	}
 	g.Size2DTree()
-	g.Layout2DTree(parBBox)
+	g.Layout2DTree()
 	g.Render2DTree()
 }
 
@@ -372,8 +362,13 @@ func (g *Node2DBase) Size2DTree() {
 		})
 }
 
-// layout pass -- each node iterates over children for maximum control -- must
-func (g *Node2DBase) Layout2DTree(parBBox image.Rectangle) {
+// layout pass -- each node iterates over children for maximum control -- this starts with parent VpBBox -- can be called de novo
+func (g *Node2DBase) Layout2DTree() {
+	parBBox := image.ZR
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		parBBox = pg.VpBBox
+	}
 	g.This.(Node2D).Layout2D(parBBox) // important to use interface version to get interface!
 }
 

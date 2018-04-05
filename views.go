@@ -372,7 +372,7 @@ func (g *TreeView) ConfigParts() {
 	config.Add(KiT_Action, "Branch")
 	config.Add(KiT_Space, "Space")
 	config.Add(KiT_Label, "Label")
-	config.Add(KiT_Space, "Stretch") // todo: stretch not working
+	config.Add(KiT_Stretch, "Stretch")
 	config.Add(KiT_MenuButton, "Menu")
 	updt := g.Parts.ConfigChildren(config, false) // not unique names
 
@@ -477,7 +477,7 @@ var TreeViewProps = []map[string]interface{}{
 		"#branch": map[string]interface{}{
 			// "width":   units.NewValue(1, units.Em),
 			// "height":  units.NewValue(1, units.Em),
-			"vertical-align": AlignTop,
+			"vertical-align": AlignBottom,
 			"margin":         units.NewValue(2, units.Px),
 			"padding":        units.NewValue(2, units.Px),
 			"#icon": map[string]interface{}{
@@ -546,10 +546,8 @@ func (g *TreeView) Size2D() {
 		for _, kid := range g.Kids {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
-				gi.LayData.AllocPos.Y = h
-				gi.LayData.AllocPos.X = 20 // indent children -- todo: make a property
 				h += gi.LayData.AllocSize.Y
-				w = math.Max(w, gi.LayData.AllocPos.X+gi.LayData.AllocSize.X) // use max
+				w = math.Max(w, 20+gi.LayData.AllocSize.X) // 20 = indent, use max
 			}
 		}
 	}
@@ -559,31 +557,48 @@ func (g *TreeView) Size2D() {
 
 func (g *TreeView) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
-	g.Parts.LayData = g.LayData
-	g.Parts.LayData.AllocPos.SetAddVal(spc)
+	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
-	g.Parts.Layout2DTree(parBBox)
-
+	g.Parts.Layout2D(parBBox)
 }
 
 func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 	if g.HasCollapsedParent() {
 		return
 	}
-	psize := g.AddParentPos()
 	g.ConfigParts()
-	g.This.(Node2D).ComputeBBox2D(parBBox)    // important to use interface version to get interface -- this updates
+
+	psize := g.AddParentPos() // have to add our pos first before computing below:
+
+	rn := g.RootWidget
+	// our alloc size is root's size minus our total indentation
+	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
+	g.WidgetSize.X = g.LayData.AllocSize.X
+
+	g.LayData.AllocPosOrig = g.LayData.AllocPos
 	g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
 	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
+	g.This.(Node2D).ComputeBBox2D(parBBox)
+
+	if Layout2DTrace {
+		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", g.PathUnique(), g.WidgetSize.X, rn.LayData.AllocSize.X, g.LayData.AllocPos.X, rn.LayData.AllocPos.X)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
+	}
+
+	g.Layout2DParts(parBBox) // use OUR version
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
-
-	g.Layout2DParts(parBBox)
-
-	g.LayData.AllocPosOrig = g.LayData.AllocPos // record
-
+	h := g.WidgetSize.Y
 	if !g.IsCollapsed() {
+		for _, kid := range g.Kids {
+			_, gi := KiToNode2D(kid)
+			if gi != nil {
+				gi.LayData.AllocPos.Y = h
+				gi.LayData.AllocPos.X = 20 // indent
+				h += gi.LayData.AllocSize.Y
+			}
+		}
 		g.Layout2DChildren()
 	}
 }
@@ -596,17 +611,7 @@ func (g *TreeView) BBox2D() image.Rectangle {
 }
 
 func (g *TreeView) ComputeBBox2D(parBBox image.Rectangle) {
-	rn := g.RootWidget
-	g.LayData.AllocSize.X = rn.LayData.AllocSize.X - (g.LayData.AllocPos.X - rn.LayData.AllocPos.X)
-	g.WidgetSize.X = g.LayData.AllocSize.X
-	gii := g.This.(Node2D)
-	g.VpBBox = parBBox.Intersect(gii.BBox2D())
-	g.SetWinBBox()
-
-	spc := g.Style.BoxSpace()
-	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
-	g.Parts.LayData.AllocSize = g.WidgetSize.AddVal(-2.0 * spc)
-	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
+	g.ComputeBBox2DWidget(parBBox)
 }
 
 func (g *TreeView) ChildrenBBox2D() image.Rectangle {
@@ -652,21 +657,26 @@ func (g *TreeView) Render2D() {
 		sz := g.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		g.Render2DParts()
-		g.Render2DChildren()
 		g.PopBounds()
 	}
+	// we always have to render our kids b/c we could be out of scope but they could be in!
+	g.Render2DChildren()
 }
 
 func (g *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(g.NodeFlags, int(NodeFlagFullReRender)) {
-		rwly := g.RootWidget.ParentLayout()
-		if rwly != nil {
-			node = rwly.This.(Node2D)
-			layout = true
-		} else {
-			node = g.RootWidget.This.(Node2D)
-			layout = false
-		}
+		// dynamic re-rendering doesn't work b/c we don't clear out the full space we
+		// used to take!
+		// rwly := g.RootWidget.ParentLayout()
+		// if rwly != nil {
+		// 	node = rwly.This.(Node2D)
+		// 	layout = true
+		// } else {
+		// node = g.RootWidget.This.(Node2D)
+		// layout = false
+		// }
+		node = nil
+		layout = false
 	} else {
 		node = g.This.(Node2D)
 		layout = false
