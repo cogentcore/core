@@ -96,38 +96,45 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 //    End-User API
 
 // set the source node that we are viewing
-func (g *TreeView) SetSrcNode(k ki.Ki) {
+func (g *TreeView) SetSrcNode(sk ki.Ki) {
+	g.SrcNode.Ptr = sk
+	sk.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
+	g.SyncToSrc()
+}
+
+// sync with the source tree
+func (g *TreeView) SyncToSrc() {
 	g.UpdateStart()
-	if len(g.Kids) > 0 {
-		g.DeleteChildren(true) // todo: later deal with destroyed
-	}
-	g.SrcNode.Ptr = k
-	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
-	nm := "ViewOf_" + k.UniqueName()
+	bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+	sk := g.SrcNode.Ptr
+	nm := "ViewOf_" + sk.UniqueName()
 	if g.Nm != nm {
 		g.SetName(nm)
 	}
-	kids := k.Children()
-	// breadth first -- first make all our kids, then have them make their kids
-	for _, kid := range kids {
-		g.AddNewChildNamed(nil, "ViewOf_"+kid.UniqueName()) // our name is view of ki unique name
+	skids := sk.Children()
+	tnl := make(kit.TypeAndNameList, 0, len(skids))
+	typ := g.This.Type() // always make our type
+	for _, skid := range skids {
+		tnl.Add(typ, "ViewOf_"+skid.UniqueName())
 	}
-	for i, kid := range kids {
-		vki, _ := g.Child(i)
-		vk, ok := vki.(*TreeView)
-		if !ok {
-			continue // shouldn't happen
+	// 	updt :=
+	g.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
+	for i, vki := range g.Kids {
+		vk := vki.(*TreeView)
+		skid, _ := sk.Child(i)
+		if vk.SrcNode.Ptr != skid {
+			vk.SetSrcNode(skid)
 		}
-		vk.SetSrcNode(kid)
 	}
 	g.UpdateEnd()
 }
 
 // function for receiving node signals from our SrcNode
 func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
-	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v\n", tvki.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data)
-	if bitflag.Has(*send.Flags(), int(ki.ChildAdded)) {
-		// basically we have the full sync problem here -- doesn't really help to know that there were additions -- just need to find the new nodes!
+	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
+	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data)
+	if bitflag.HasMask(*send.Flags(), int64(ki.ChildUpdateFlagsMask)) {
+		tv.SyncToSrc()
 	}
 }
 
@@ -319,16 +326,55 @@ func (g *TreeView) ToggleCollapse() {
 	}
 }
 
-func (g *TreeView) InsertAfter() {
+// insert a new node in the source tree
+func (g *TreeView) SrcInsertAfter() {
 	if g.IsField() {
 		fmt.Printf("cannot insert after fields\n") // todo: dialog, disable menu
+		return
 	}
-	par := g.SrcNode.Ptr.Parent()
+	sk := g.SrcNode.Ptr
+	par := sk.Parent()
 	if par == nil {
 		fmt.Printf("no parent to insert in\n") // todo: dialog
+		return
 	}
-	myidx := par.ChildIndex(g.This, 0)
-	par.InsertNewChild(nil, myidx+1)
+	myidx := par.ChildIndex(sk, 0)
+	nm := fmt.Sprintf("NewItem%v", myidx+1)
+	par.InsertNewChildNamed(nil, myidx+1, nm)
+}
+
+// insert a new node in the source tree
+func (g *TreeView) SrcInsertBefore() {
+	if g.IsField() {
+		fmt.Printf("cannot insert after fields\n") // todo: dialog, disable menu
+		return
+	}
+	sk := g.SrcNode.Ptr
+	par := sk.Parent()
+	if par == nil {
+		fmt.Printf("no parent to insert in\n") // todo: dialog
+		return
+	}
+	myidx := par.ChildIndex(sk, 0)
+	nm := fmt.Sprintf("NewItem%v", myidx)
+	par.InsertNewChildNamed(nil, myidx, nm)
+}
+
+// insert a new node in the source tree
+func (g *TreeView) SrcAddChild() {
+	sk := g.SrcNode.Ptr
+	nm := fmt.Sprintf("NewItem%v", len(sk.Children()))
+	sk.AddNewChildNamed(nil, nm)
+}
+
+// delete me in source tree
+func (g *TreeView) SrcDeleteMe() {
+	if g.IsField() {
+		fmt.Printf("cannot delete fields\n") // todo: dialog, disable menu
+		return
+	}
+	sk := g.SrcNode.Ptr
+	sk.DeleteMe(true)
 }
 
 func (g *TreeView) SetContinuousSelect() {
@@ -419,9 +465,21 @@ func (g *TreeView) ConfigParts() {
 		mb.Text = "..."
 		g.PartStyleProps(mb.This, TreeViewProps[0])
 
+		mb.AddMenuText("Add Child", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.(*TreeView)
+			tv.SrcAddChild()
+		})
+		mb.AddMenuText("Insert Before", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.(*TreeView)
+			tv.SrcInsertBefore()
+		})
 		mb.AddMenuText("Insert After", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
-			tv.InsertAfter()
+			tv.SrcInsertAfter()
+		})
+		mb.AddMenuText("Delete", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.(*TreeView)
+			tv.SrcDeleteMe()
 		})
 	}
 }

@@ -63,7 +63,7 @@ func NewWindow2D(name string, width, height int) *Window {
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.ChildByType(KiT_Viewport2D, true)
+	vpi := w.ChildByType(KiT_Viewport2D, true, 0)
 	vp, _ := vpi.EmbeddedStruct(KiT_Viewport2D).(*Viewport2D)
 	return vp
 }

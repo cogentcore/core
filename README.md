@@ -13,7 +13,7 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 
 * `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try
 * `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
-* `geom2d.go` -- All 2D geometry: Point2D, Size2D, etc
+* `geom2d.go` -- `Vec2D` is main geom type used for 2D, plus transform matrix
 * `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg`
 	+ `stroke.go`, `fill.go` -- `StrokeStyle` and `FillStyle` structs for stroke, fill settings
 * `style.go` -- `Style` and associated structs for CSS-based `Widget` styling
@@ -26,6 +26,7 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 * `buttons.go` -- `ButtonBase`, `Button` and other basic command button types
 * `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
+* `views.go` -- `TreeView` widget shows a graphical view of a tree, `TabView` widget for tabbed panels.  Todo: `StructView` for editing structs
 
 # Design notes
 
@@ -66,14 +67,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* FindByType functions should take a bool arg for finding any derived type of that as well -- can then use the kit.EmbeddedStruct to get the obj of that type..
-
-* move2d
 * PartsNeedUpdate, add to render for all items
-* layout trace
-* ??
+* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
+* for focus prev -- need to generate a slice going forward of all tree elements and then just go backward in it.. no other way.  Also check for visibility in focus movement.
 
-* test path rendering
+* test SVG path rendering 
 * property-based xforms for svg
 
 * scrollbars are not centered -- all padding on top / left
