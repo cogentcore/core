@@ -59,6 +59,9 @@ var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
 // set this variable to true to obtain a trace of the nodes rendering (just printfs to stdout)
 var Render2DTrace bool = false
 
+// set this variable to true to obtain a trace of all layouts (just printfs to stdout)
+var Layout2DTrace bool = false
+
 // primary interface for all Node2D nodes
 type Node2D interface {
 	// get a generic Node2DBase for our node -- not otherwise possible -- don't want to interface everything that a base node can do as that would be highly redundant
@@ -108,7 +111,7 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 
 // handles basic node initialization -- Init2D can then do special things
 func (g *Node2DBase) Init2DBase() {
-	g.Viewport = g.FindViewportParent()
+	g.Viewport = g.ParentViewport()
 	if g.Viewport != nil { // default for most cases -- delete connection of not
 		// fmt.Printf("node %v connect to viewport %v\n", g.Nm, g.Viewport.Nm)
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
@@ -156,24 +159,6 @@ func (g *Node2DBase) Style2DWidget(baseProps map[string]interface{}) {
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
-}
-
-// find parent viewport -- uses AsViewport2D() method on Node2D interface
-func (g *Node2DBase) FindViewportParent() *Viewport2D {
-	var parVp *Viewport2D
-	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok {
-			return false // don't keep going up
-		}
-		vp := gii.AsViewport2D()
-		if vp != nil {
-			parVp = vp
-			return false // done
-		}
-		return true
-	})
-	return parVp
 }
 
 // copy our paint from our parents -- called during Style for SVG
@@ -238,6 +223,9 @@ func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 	// note: if other styles are maintained, they also need to be updated!
 	g.This.(Node2D).ComputeBBox2D(parBBox)
 	// typically Layout2DChildren must be called after this!
+	if Layout2DTrace {
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
+	}
 }
 
 func (g *Node2DBase) Move2DBase(delta Vec2D, parBBox image.Rectangle) {
@@ -338,7 +326,7 @@ func (g *Node2DBase) ReRender2DTree() {
 // done once but must be robust to repeated calls -- use a flag if necessary
 // -- needed after structural updates to ensure all nodes are updated
 func (g *Node2DBase) Init2DTree() {
-	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false
@@ -351,7 +339,7 @@ func (g *Node2DBase) Init2DTree() {
 // style scene graph tree from node it is called on -- only needs to be
 // done after a structural update in case inherited options changed
 func (g *Node2DBase) Style2DTree() {
-	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
 			return false // going into a different type of thing, bail
@@ -363,7 +351,7 @@ func (g *Node2DBase) Style2DTree() {
 
 // do the sizing as a depth-first pass
 func (g *Node2DBase) Size2DTree() {
-	g.FunDownDepthFirst(0, g.This,
+	g.FuncDownDepthFirst(0, g.This,
 		func(k ki.Ki, level int, d interface{}) bool {
 			// this is for testing whether to process node
 			_, gi := KiToNode2D(k)
@@ -379,7 +367,6 @@ func (g *Node2DBase) Size2DTree() {
 			if gi == nil || gi.Paint.Off {
 				return false
 			}
-			// fmt.Printf("sizing: %v\n", gi.PathUnique())
 			gii.Size2D()
 			return true
 		})
@@ -444,7 +431,7 @@ func (g *Node2DBase) Render2DChildren() {
 // report on all the bboxes for everything in the tree
 func (g *Node2DBase) BBoxReport() string {
 	rpt := ""
-	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gii == nil {
 			return false // going into a different type of thing, bail
@@ -455,10 +442,48 @@ func (g *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
+// find parent viewport -- uses AsViewport2D() method on Node2D interface
+func (g *Node2DBase) ParentViewport() *Viewport2D {
+	var parVp *Viewport2D
+	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		gii, ok := k.(Node2D)
+		if !ok {
+			return false // don't keep going up
+		}
+		vp := gii.AsViewport2D()
+		if vp != nil {
+			parVp = vp
+			return false // done
+		}
+		return true
+	})
+	return parVp
+}
+
 func (g *Node2DBase) ParentSVG() *SVG {
-	svgi := g.FindParentByType(KiT_SVG) // todo: will not work for derived -- use derived opt
-	if svgi == nil {
-		return nil
+	pvp := g.ParentViewport()
+	for pvp != nil {
+		if pvp.IsSVG() {
+			return pvp.This.(*SVG)
+		}
+		pvp = pvp.ParentViewport()
 	}
-	return svgi.(*SVG)
+	return nil
+}
+
+func (g *Node2DBase) ParentLayout() *Layout {
+	var parLy *Layout
+	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		gii, ok := k.(Node2D)
+		if !ok {
+			return false // don't keep going up
+		}
+		ly := gii.AsLayout2D()
+		if ly != nil {
+			parLy = ly
+			return false // done
+		}
+		return true
+	})
+	return parLy
 }

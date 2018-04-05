@@ -59,13 +59,12 @@ func NewWindow2D(name string, width, height int) *Window {
 	win := NewWindow(name, width, height)
 	vp := NewViewport2D(width, height)
 	win.AddChildNamed(vp, "WinVp")
-	// vp.NodeSig.Connect(win.This, SignalWindow)
 	return win
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.FindChildByType(KiT_Viewport2D)
-	vp, _ := vpi.(*Viewport2D)
+	vpi := w.ChildByType(KiT_Viewport2D, true)
+	vp, _ := vpi.EmbeddedStruct(KiT_Viewport2D).(*Viewport2D)
 	return vp
 }
 
@@ -78,26 +77,13 @@ func (w *Window) Resize(width, height int) {
 }
 
 func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
-	win, ok := winki.(*Window) // will fail if not a window
-	if !ok {
-		return
-	}
-	vpki := win.FindChildByType(KiT_Viewport2D) // should be first one
-	if vpki == nil {
-		fmt.Print("vpki not found\n")
-		return
-	}
-	vp, ok := vpki.(*Viewport2D)
-	if !ok {
-		fmt.Print("vp not a vp\n")
-		return
-	}
+	win := winki.EmbeddedStruct(KiT_Window).(*Window)
+	vp := win.WinViewport2D()
 	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
-
 	vp.FullRender2DTree()
 }
 
-func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFun) {
+func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
 	if et >= oswin.EventTypeN {
 		log.Printf("Window ReceiveEventType type: %v is not a known event type\n", et)
 		return
@@ -385,7 +371,7 @@ func (w *Window) SetNextFocusItem() bool {
 	}
 
 	for i := 0; i < 2; i++ {
-		w.FunDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		w.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
 			if gotFocus {
 				return false
 			}

@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"math"
 
@@ -335,18 +336,21 @@ func (ly *Layout) GatherSizes() {
 	// todo: something entirely different needed for grids..
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	if Layout2DTrace {
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
+	}
 }
 
 // if we are not a child of a layout, then get allocation from a parent obj that
 // has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Par == nil {
+	if ly.Par == nil || !ly.LayData.AllocSize.IsZero() {
 		return
 	}
 	pgi, _ := KiToNode2D(ly.Par)
 	lyp := pgi.AsLayout2D()
 	if lyp == nil {
-		ly.FunUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
+		ly.FuncUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
 			_, pg := KiToNode2D(k)
 			if pg == nil {
 				return false
@@ -354,7 +358,9 @@ func (ly *Layout) AllocFromParent() {
 			if !pg.LayData.AllocSize.IsZero() {
 				ly.LayData.AllocPos = pg.LayData.AllocPos
 				ly.LayData.AllocSize = pg.LayData.AllocSize
-				// fmt.Printf("layout got parent alloc: %v from %v\n", ly.LayData.AllocSize, pg.Nm)
+				if Layout2DTrace {
+					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayData.AllocSize, pg.PathUnique())
+				}
 				return false
 			}
 			return true
@@ -502,9 +508,9 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		pos += extra
 	}
 
-	// if ly.IsField() {
-	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
-	// }
+	if Layout2DTrace {
+		fmt.Printf("Layout: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+	}
 
 	for i, c := range ly.Kids {
 		_, gi := KiToNode2D(c)

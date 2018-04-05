@@ -47,16 +47,16 @@ type NodeBase struct {
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
 
 func (g *NodeBase) ParentWindow() *Window {
-	wini := g.FindParentByType(KiT_Window) // todo: will not work for derived -- need interface
+	wini := g.ParentByType(KiT_Window, true)
 	if wini == nil {
 		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
 		return nil
 	}
-	return wini.(*Window)
+	return wini.EmbeddedStruct(KiT_Window).(*Window)
 }
 
 // register this node to receive a given type of GUI event signal from the parent window
-func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFun) {
+func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
 	win := g.ParentWindow()
 	if win != nil {
 		win.ReceiveEventType(g.This, et, fun)
@@ -73,7 +73,7 @@ func (g *NodeBase) DisconnectAllEvents() {
 
 // disconnect node from all events - todo: need a more generic Ki version of this
 func (g *NodeBase) DisconnectAllEventsTree() {
-	g.FunDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false // going into a different type of thing, bail

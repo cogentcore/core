@@ -463,7 +463,7 @@ func (g *MenuButton) SetIcon(ic *Icon) {
 }
 
 // add an action to the menu -- todo: shortcuts
-func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFun) *Action {
+func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	if g.Menu == nil {
 		g.Menu = make(Menu, 0, 10)
 	}
@@ -512,7 +512,7 @@ var MenuButtonProps = []map[string]interface{}{
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 		"text-align":          AlignCenter,
-		"vertical-align":      AlignTop,
+		"vertical-align":      AlignMiddle,
 		"color":               color.Black,
 		"background-color":    "#EEF",
 		"#icon": map[string]interface{}{
@@ -531,7 +531,7 @@ var MenuButtonProps = []map[string]interface{}{
 			"height":         units.NewValue(1.5, units.Ex),
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignMiddle,
+			"vertical-align": AlignBottom,
 		},
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -561,7 +561,7 @@ func (g *MenuButton) ConfigParts() {
 		icnm = "widget-down-wedge"
 	}
 	if icnm != "none" {
-		config.Add(KiT_Space, "InSpace")
+		config.Add(KiT_Space, "InStretch")
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}

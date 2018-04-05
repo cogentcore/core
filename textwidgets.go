@@ -425,6 +425,7 @@ func (g *TextField) AutoScroll() {
 	maxw := g.LayData.AllocSize.X - 2.0*spc
 	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch))
 
+	g.CursorPos = kit.MinInt(g.CursorPos, sz)
 	if g.EndPos == 0 || g.EndPos > sz { // not init
 		g.EndPos = sz
 	}

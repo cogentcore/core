@@ -12,7 +12,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -134,9 +133,8 @@ func (vp *Viewport2D) CopyBacking(parVp *Viewport2D) {
 
 // todo: consider caching window pointer
 func (vp *Viewport2D) DrawIntoWindow() {
-	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
-	if wini != nil {
-		win := (wini).(*Window)
+	win := vp.ParentWindow()
+	if win != nil {
 		// width, height := win.Win.Size() // todo: update size of our window
 		s := win.Win.Screen()
 		s.CopyRGBA(vp.Pixels, vp.Pixels.Bounds())
@@ -146,10 +144,9 @@ func (vp *Viewport2D) DrawIntoWindow() {
 
 // push a viewport as popup of this viewport -- sets window popup and adds as a child
 func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
-	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
+	win := vp.ParentWindow()
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
-	if wini != nil {
-		win := (wini).(*Window)
+	if win != nil {
 		win.PushPopup(pvp.This)
 	} else {
 		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
@@ -158,10 +155,9 @@ func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
 }
 
 func (vp *Viewport2D) PushAsPopup() {
-	wini := vp.FindParentByType(reflect.TypeOf(Window{}))
+	win := vp.ParentWindow()
 	bitflag.Set(&vp.NodeFlags, int(VpFlagPopup))
-	if wini != nil {
-		win := (wini).(*Window)
+	if win != nil {
 		win.PushPopup(vp.This)
 	} else {
 		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
@@ -236,11 +232,7 @@ func (vp *Viewport2D) Size2D() {
 }
 
 func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
-	// todo: this is just base right?
-	psize := vp.AddParentPos()
-	vp.Style.SetUnitContext(vp, psize)      // update units with final layout
-	vp.Paint.SetUnitContext(vp, psize)      // always update paint
-	vp.This.(Node2D).ComputeBBox2D(parBBox) // important to use interface version to get interface!
+	vp.Layout2DBase(parBBox, true)
 	vp.Layout2DChildren()
 }
 

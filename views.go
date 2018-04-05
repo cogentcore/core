@@ -134,13 +134,13 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 // return a list of the currently-selected source nodes
 func (g *TreeView) SelectedSrcNodes() ki.Slice {
 	sn := make(ki.Slice, 0)
-	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_TreeView) {
-			nw := k.(*TreeView)
+		if k.TypeEmbeds(KiT_TreeView) {
+			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sn = append(sn, nw.SrcNode.Ptr)
 			return true
 		} else {
@@ -153,13 +153,13 @@ func (g *TreeView) SelectedSrcNodes() ki.Slice {
 // return a list of the currently-selected TreeViews
 func (g *TreeView) SelectedTreeViews() []*TreeView {
 	sn := make([]*TreeView, 0)
-	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_TreeView) {
-			nw := k.(*TreeView)
+		if k.TypeEmbeds(KiT_TreeView) {
+			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sn = append(sn, nw)
 			return true
 		} else {
@@ -175,13 +175,13 @@ func (g *TreeView) SelectedTreeViews() []*TreeView {
 // root node of TreeView tree -- several properties stored there
 func (g *TreeView) RootTreeView() *TreeView {
 	rn := g
-	g.FunUp(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncUp(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
-		if k.IsType(KiT_TreeView) {
-			rn = k.(*TreeView)
+		if k.TypeEmbeds(KiT_TreeView) {
+			rn = k.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			return true
 		} else {
 			return false
@@ -198,12 +198,13 @@ func (g *TreeView) IsCollapsed() bool {
 // does this node have a collapsed parent? if so, don't render!
 func (g *TreeView) HasCollapsedParent() bool {
 	pcol := false
-	g.FunUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
-		if k.IsType(KiT_TreeView) {
+		if pg.TypeEmbeds(KiT_TreeView) {
+			// nw := pg.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if bitflag.Has(pg.NodeFlags, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
@@ -267,13 +268,13 @@ func (g *TreeView) UnselectNode() {
 // unselect everything below me -- call on Root to clear all
 func (g *TreeView) UnselectAll() {
 	g.UpdateStart()
-	g.FunDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return false
 		}
-		if k.IsType(KiT_TreeView) {
-			nw := k.(*TreeView)
+		if k.TypeEmbeds(KiT_TreeView) {
+			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			nw.UnselectNode()
 			return true
 		} else {
@@ -326,7 +327,7 @@ func (g *TreeView) InsertAfter() {
 	if par == nil {
 		fmt.Printf("no parent to insert in\n") // todo: dialog
 	}
-	myidx := par.FindChildIndex(g.This, 0)
+	myidx := par.ChildIndex(g.This, 0)
 	par.InsertNewChild(nil, myidx+1)
 }
 
@@ -658,8 +659,14 @@ func (g *TreeView) Render2D() {
 
 func (g *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(g.NodeFlags, int(NodeFlagFullReRender)) {
-		node = g.RootWidget.This.(Node2D)
-		layout = true
+		rwly := g.RootWidget.ParentLayout()
+		if rwly != nil {
+			node = rwly.This.(Node2D)
+			layout = true
+		} else {
+			node = g.RootWidget.This.(Node2D)
+			layout = false
+		}
 	} else {
 		node = g.This.(Node2D)
 		layout = false
@@ -807,7 +814,7 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 		}
 		if !tb.IsSelected() {
 			tabrow := g.TabRowLayout()
-			butidx := tabrow.FindChildIndex(send, 0)
+			butidx := tabrow.ChildIndex(send, 0)
 			// fmt.Printf("selected tab: %v\n", butidx)
 			if butidx >= 0 {
 				g.SelectTabIndex(butidx)

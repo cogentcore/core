@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"math"
 	"strings"
@@ -132,6 +133,9 @@ func (g *WidgetBase) Init2DWidget() {
 func (g *WidgetBase) SizeFromParts() {
 	g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
 	g.Size2DAddSpace()
+	if Layout2DTrace {
+		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", g.PathUnique(), g.LayData.AllocSize, g.Parts.LayData.Size.Pref)
+	}
 }
 
 func (g *WidgetBase) Size2DWidget() {
@@ -144,9 +148,8 @@ func (g *WidgetBase) Size2DWidget() {
 
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
-	g.Parts.LayData = g.LayData
-	g.Parts.LayData.AllocPos.SetAddVal(spc)
-	g.Parts.LayData.AllocSize.SetAddVal(-2.0 * spc)
+	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
+	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.Layout2DTree(parBBox)
 }
 
@@ -157,9 +160,9 @@ func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
 
 func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) {
 	g.ComputeBBox2DBase(parBBox)
-	spc := g.Style.BoxSpace()
-	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
-	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
+	// spc := g.Style.BoxSpace()
+	// g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
+	// g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
 }
 
