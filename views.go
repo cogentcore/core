@@ -106,7 +106,6 @@ func (g *TreeView) SetSrcNode(sk ki.Ki) {
 // sync with the source tree
 func (g *TreeView) SyncToSrc() {
 	g.UpdateStart()
-	bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
 	sk := g.SrcNode.Ptr
 	nm := "ViewOf_" + sk.UniqueName()
 	if g.Nm != nm {
@@ -120,11 +119,11 @@ func (g *TreeView) SyncToSrc() {
 	}
 	updt := g.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
 	if updt {
+		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
 		win := g.ParentWindow()
 		if win != nil {
 			for _, vki := range g.Deleted {
 				vk := vki.(*TreeView)
-				fmt.Printf("disconnecting %v\n", vk.Nm)
 				vk.DisconnectAllEventsTree(win)
 			}
 		}
@@ -142,7 +141,7 @@ func (g *TreeView) SyncToSrc() {
 // function for receiving node signals from our SrcNode
 func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data)
+	// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data)
 	if bitflag.HasMask(*send.Flags(), int64(ki.ChildUpdateFlagsMask)) {
 		tv.SyncToSrc()
 	}
@@ -284,7 +283,6 @@ func (g *TreeView) Unselect() {
 
 // unselect everything below me -- call on Root to clear all
 func (g *TreeView) UnselectAll() {
-	g.UpdateStart()
 	g.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
@@ -298,7 +296,6 @@ func (g *TreeView) UnselectAll() {
 			return false
 		}
 	})
-	g.UpdateEnd()
 }
 
 // unselect everything below me -- call on Root to clear all
@@ -379,7 +376,9 @@ func (g *TreeView) MoveToLastChild() {
 func (g *TreeView) Collapse() {
 	if !g.IsCollapsed() {
 		g.UpdateStart()
-		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		if g.HasChildren() {
+			bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		}
 		bitflag.Set(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeCollapsed), nil)
 		// fmt.Printf("collapsed node: %v\n", g.Nm)
@@ -390,7 +389,9 @@ func (g *TreeView) Collapse() {
 func (g *TreeView) Expand() {
 	if g.IsCollapsed() {
 		g.UpdateStart()
-		bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		if g.HasChildren() {
+			bitflag.Set(&g.NodeFlags, int(NodeFlagFullReRender))
+		}
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
 		// fmt.Printf("expanded node: %v\n", g.Nm)
@@ -701,10 +702,8 @@ func (g *TreeView) Size2D() {
 
 	g.InitLayout2D()
 	if g.HasCollapsedParent() {
-		bitflag.Clear(&g.NodeFlags, int(CanFocus))
 		return // nothing
 	}
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.SizeFromParts() // get our size from parts
 	g.WidgetSize = g.LayData.AllocSize
 	h := g.WidgetSize.Y
@@ -834,6 +833,7 @@ func (g *TreeView) Render2D() {
 
 func (g *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(g.NodeFlags, int(NodeFlagFullReRender)) {
+		// todo: this can be fixed by adding a previous size to layout and it can clear that
 		// dynamic re-rendering doesn't work b/c we don't clear out the full space we
 		// used to take!
 		// rwly := g.RootWidget.ParentLayout()

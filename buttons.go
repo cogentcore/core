@@ -194,18 +194,22 @@ func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 func Init2DButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
 		ab := (interface{})(recv).(ButtonWidget)
 		ab.ButtonAsBase().ButtonPressed()
 	})
 	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
 		ab := (interface{})(recv).(ButtonWidget)
 		ab.ButtonRelease() // special one
 	})
 	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
 		ab := (interface{})(recv).(ButtonWidget)
 		ab.ButtonAsBase().ButtonEnterHover()
 	})
 	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
 		ab := (interface{})(recv).(ButtonWidget)
 		ab.ButtonAsBase().ButtonExitHover()
 	})
@@ -216,10 +220,10 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		// todo: register shortcuts with window, and generalize these keybindings
 		kf := KeyFun(kt.Key, kt.Chord)
 		if kf == KeyFunSelectItem || kt.Key == "space" {
+			kt.SetProcessed()
 			bb.ButtonPressed()
 			// todo: brief delay??
 			ab.ButtonRelease() // special one
-			kt.SetProcessed()
 		}
 	})
 }

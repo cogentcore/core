@@ -399,6 +399,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	lay.Lay = LayoutCol
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
+		acn.UpdateReset() // could have some leftovers from before
 		lay.AddChild(acn.This)
 	}
 	lay.Init2DTree()
@@ -415,10 +416,13 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
-	pvp.Init2D() // todo: these are here for later smarter updates -- redundant now
-	pvp.Style2D()
+	win := vp.ParentWindow()
+	win.PushPopup(pvp)
+	pvp.UpdateStart()
 	pvp.AddChild(lay.This)
-	vp.PushPopup(pvp)
+	pvp.Init2DTree() // do an explicit init to get connected to window and viewport properly
+	pvp.Style2DTree()
+	pvp.UpdateEnd()
 	return pvp
 }
 
@@ -427,7 +431,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 // MenuButton pops up a menu
 type MenuButton struct {
 	ButtonBase
-	Menu Menu
+	Menu Menu `desc:"the menu items for this menu"`
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, nil)
@@ -439,6 +443,10 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 }
 
 func (g *MenuButton) ButtonRelease() {
+	win := g.Viewport.ParentWindow()
+	if win.Popup != nil {
+		return
+	}
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.SetButtonState(ButtonNormal)

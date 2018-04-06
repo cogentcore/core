@@ -240,25 +240,85 @@ func (g *SliderBase) KeyInput(kt *oswin.KeyTypedEvent) {
 	switch kf {
 	case KeyFunMoveUp:
 		g.SetValue(g.Value - g.Step)
+		kt.SetProcessed()
 	case KeyFunMoveLeft:
 		g.SetValue(g.Value - g.Step)
+		kt.SetProcessed()
 	case KeyFunMoveDown:
 		g.SetValue(g.Value + g.Step)
+		kt.SetProcessed()
 	case KeyFunMoveRight:
 		g.SetValue(g.Value + g.Step)
+		kt.SetProcessed()
 	case KeyFunPageUp:
 		g.SetValue(g.Value - g.PageStep)
+		kt.SetProcessed()
 	case KeyFunPageLeft:
 		g.SetValue(g.Value - g.PageStep)
+		kt.SetProcessed()
 	case KeyFunPageDown:
 		g.SetValue(g.Value + g.PageStep)
+		kt.SetProcessed()
 	case KeyFunPageRight:
 		g.SetValue(g.Value + g.PageStep)
+		kt.SetProcessed()
 	case KeyFunHome:
 		g.SetValue(g.Min)
+		kt.SetProcessed()
 	case KeyFunEnd:
 		g.SetValue(g.Max)
+		kt.SetProcessed()
 	}
+}
+
+func (g *SliderBase) Init2DSlider() {
+	g.Init2DWidget()
+	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsDragging() {
+			me := d.(*oswin.MouseDraggedEvent)
+			st := sl.PointToRelPos(me.From)
+			ed := sl.PointToRelPos(me.Where)
+			if sl.Horiz {
+				sl.SliderMoved(float64(st.X), float64(ed.X))
+			} else {
+				sl.SliderMoved(float64(st.Y), float64(ed.Y))
+			}
+		}
+	})
+	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		me := d.(*oswin.MouseDownEvent)
+		ed := sl.PointToRelPos(me.Where)
+		st := &sl.Style
+		spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
+		if sl.Horiz {
+			sl.SliderPressed(float64(ed.X) - spc)
+		} else {
+			sl.SliderPressed(float64(ed.Y) - spc)
+		}
+	})
+	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl.SliderReleased()
+	})
+	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl.SliderEnterHover()
+	})
+	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		(d.(oswin.Event)).SetProcessed()
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl.SliderExitHover()
+	})
+	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl.KeyInput(d.(*oswin.KeyTypedEvent))
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -291,63 +351,7 @@ func (g *Slider) AsLayout2D() *Layout {
 }
 
 func (g *Slider) Init2D() {
-	g.Init2DWidget()
-	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			if sl.IsDragging() {
-				me := d.(*oswin.MouseDraggedEvent)
-				st := sl.PointToRelPos(me.From)
-				ed := sl.PointToRelPos(me.Where)
-				if sl.Horiz {
-					sl.SliderMoved(float64(st.X), float64(ed.X))
-				} else {
-					sl.SliderMoved(float64(st.Y), float64(ed.Y))
-				}
-			}
-		}
-	})
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			me := d.(*oswin.MouseDownEvent)
-			ed := sl.PointToRelPos(me.Where)
-			st := &sl.Style
-			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
-			if sl.Horiz {
-				sl.SliderPressed(float64(ed.X) - spc)
-			} else {
-				sl.SliderPressed(float64(ed.Y) - spc)
-			}
-		}
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			sl.SliderReleased()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			sl.SliderEnterHover()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			sl.SliderExitHover()
-		}
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*Slider)
-		if ok {
-			kt, ok := d.(*oswin.KeyTypedEvent)
-			if ok {
-				sl.KeyInput(kt)
-			}
-		}
-	})
+	g.Init2DSlider()
 }
 
 var SliderProps = []map[string]interface{}{
@@ -562,63 +566,7 @@ func (g *ScrollBar) AsLayout2D() *Layout {
 }
 
 func (g *ScrollBar) Init2D() {
-	g.Init2DWidget()
-	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			if sl.IsDragging() {
-				me := d.(*oswin.MouseDraggedEvent)
-				st := sl.PointToRelPos(me.From)
-				ed := sl.PointToRelPos(me.Where)
-				if sl.Horiz {
-					sl.SliderMoved(float64(st.X), float64(ed.X))
-				} else {
-					sl.SliderMoved(float64(st.Y), float64(ed.Y))
-				}
-			}
-		}
-	})
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			me := d.(*oswin.MouseDownEvent)
-			ed := sl.PointToRelPos(me.Where)
-			st := &sl.Style
-			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
-			if sl.Horiz {
-				sl.SliderPressed(float64(ed.X) - spc)
-			} else {
-				sl.SliderPressed(float64(ed.Y) - spc)
-			}
-		}
-	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			sl.SliderReleased()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			sl.SliderEnterHover()
-		}
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			sl.SliderExitHover()
-		}
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl, ok := recv.(*ScrollBar)
-		if ok {
-			kt, ok := d.(*oswin.KeyTypedEvent)
-			if ok {
-				sl.KeyInput(kt)
-			}
-		}
-	})
+	g.Init2DSlider()
 }
 
 var ScrollBarProps = []map[string]interface{}{

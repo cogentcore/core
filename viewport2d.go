@@ -45,7 +45,7 @@ type Viewport2D struct {
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
 	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into"`
-	LastPix *image.RGBA `json:"-" desc:"copy of last set of pixels that were rendered"`
+	LastPix *image.RGBA `json:"-" desc:"optional copy of last set of pixels that were rendered"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
@@ -70,9 +70,6 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 	}
 	vp.Render.Defaults()
 	vp.Render.Image = vp.Pixels
-	if vp.LastPix == nil || vp.LastPix.Bounds() != vp.Pixels.Bounds() {
-		vp.LastPix = image.NewRGBA(vp.Pixels.Bounds())
-	}
 	return vp
 }
 
@@ -87,7 +84,6 @@ func (vp *Viewport2D) Resize(width, height int) {
 		}
 	}
 	vp.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
-	vp.LastPix = image.NewRGBA(image.Rect(0, 0, width, height))
 	vp.Render.Defaults()
 	vp.ViewBox.Size = nwsz // make sure
 	vp.Render.Image = vp.Pixels
@@ -111,11 +107,17 @@ func (vp *Viewport2D) IsSVG() bool {
 
 // save our pixels into LastPix
 func (vp *Viewport2D) SavePixels() {
+	if vp.LastPix == nil || vp.LastPix.Bounds() != vp.Pixels.Bounds() {
+		vp.LastPix = image.NewRGBA(vp.Pixels.Bounds())
+	}
 	copy(vp.LastPix.Pix, vp.Pixels.Pix)
 }
 
 // restore last saved pixels into active pixels
 func (vp *Viewport2D) RestorePixels() {
+	if vp.LastPix == nil {
+		return
+	}
 	copy(vp.Pixels.Pix, vp.LastPix.Pix)
 }
 
@@ -123,17 +125,13 @@ func (vp *Viewport2D) RestorePixels() {
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
-	if !vp.IsPopup() && vp.Par != nil { // use parents children bbox to determine where we can draw
+	if vp.Par != nil { // use parents children bbox to determine where we can draw
 		pgi, _ := KiToNode2D(vp.Par)
 		nr := r.Intersect(pgi.ChildrenBBox2D())
 		sp = nr.Min.Sub(r.Min)
 		r = nr
 	}
-	if vp.IsPopup() {
-		parVp.RestorePixels() // parent is frozen -- restore its last saved pixels
-	}
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
-	// vp.SavePixels() // todo: not sure if we want this overhead all the time
 }
 
 // todo: consider caching window pointer
@@ -141,37 +139,35 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	win := vp.ParentWindow()
 	if win != nil {
 		// width, height := win.Win.Size() // todo: update size of our window
-		s := win.Win.Screen()
+		s := win.OSWin.Screen()
 		s.CopyRGBA(vp.Pixels, vp.Pixels.Bounds())
-		win.Win.FlushImage()
+		win.OSWin.FlushImage()
 		if win.Popup == nil { //  only save if not doing a popup
 			vp.SavePixels()
 		}
 	}
 }
 
-// push a new a viewport as popup of this parent viewport -- sets window popup and adds as a child of the parent viewport -- this should always be called on the window's master viewport
-func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
-	win := vp.ParentWindow()
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
-	if win != nil {
-		win.PushPopup(pvp.This)
-	} else {
-		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
+// draw a popup into window viewport
+func (vp *Viewport2D) DrawPopup() {
+	win, ok := vp.Par.(*Window)
+	if !ok {
+		return
 	}
-	vp.UpdateStart() // note: we start updating here, but don't end until popup goes away
-	vp.AddChild(pvp.This)
-	pvp.UpdateEnd() // we unblock the child but don't unblock the parent
+	parVp := win.Viewport
+	r := vp.ViewBox.Bounds()
+	sp := image.ZP
+	parVp.RestorePixels() // parent is frozen -- restore its last saved pixels
+	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
+	parVp.DrawIntoWindow()
 }
 
-// Delete this viewport which is currently a popup within this is called by window when a popup is deleted -- it destroys the vp and
-// its main layout, see VpFlagPopupDestroyAll for whether children are destroyed
+// Delete this viewport -- has already been disconnected from window events
+// and parent is nil -- called by window when a popup is deleted -- it
+// destroys the vp and its main layout, see VpFlagPopupDestroyAll for whether
+// children are destroyed
 func (vp *Viewport2D) DeletePopup() {
-	win := vp.ParentWindow()
-	if win != nil {
-		vp.DisconnectAllEventsTree(win)
-	}
-	par := vp.Par.(*Viewport2D) // this should be parent viewport
+	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	if !bitflag.Has(vp.NodeFlags, int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
@@ -182,15 +178,7 @@ func (vp *Viewport2D) DeletePopup() {
 			}
 		}
 	}
-	vp.Delete(true) // destroy the popup
-	if par != nil {
-		par.UpdateEnd()
-		// actually, the popup could have changed things, so we cannot do this:
-		// no need for a re-render -- just restore previous pixels -- make this a fun
-		// par.UpdateReset()
-		// par.RestorePixels()
-		// par.DrawIntoWindow()
-	}
+	vp.Destroy() // nuke everything else in us
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -269,12 +257,11 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 }
 
 func (vp *Viewport2D) RenderViewport2D() {
-	if vp.Viewport != nil {
+	if vp.IsPopup() { // popup has a parent that is the window
+		vp.DrawPopup()
+	} else if vp.Viewport != nil {
 		vp.DrawIntoParent(vp.Viewport)
-		if vp.IsPopup() {
-			vp.Viewport.RenderViewport2D() // and on up the chain
-		}
-	} else { // top-level, try drawing into window
+	} else {
 		vp.DrawIntoWindow()
 	}
 }

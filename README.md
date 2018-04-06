@@ -67,13 +67,23 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* add dialog to prompt for type, name, and number of objects to make -- need full dialog infrastructure from that..  first do within-window dialog and later look into separate window dialogs.
+
+* combobox, with enum populator, and type populator, to choose type of object to make -- ideally this would actually be a table with type and some info about the type (chooser in emergent) but combobox will work for now and is needed.
+
+* then need grid layout
+
+* then can do StructView using grid layout -- keeps labels aligned with rows.
+    + read-only
+	+ inline
+	+ condshow / edit
+	+ how to manage the "factory" / delegation of different edits for different types?  just build in inheritance and support for basic types and then there is no issue -- i.e., it is all custom and styles can be used for options?  probably that's best..
+
 * styles for different button states are not propagating into the parts
 * PartsNeedUpdate, add to render for all items
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 
 * add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  
-
-* add dialog to prompt for type of object to make?
 
 * add inspector in a different window :)
 

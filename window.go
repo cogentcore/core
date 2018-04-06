@@ -13,7 +13,7 @@ import (
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 	// "reflect"
-	"runtime"
+
 	"sync"
 	"time"
 )
@@ -23,7 +23,8 @@ import (
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Win           oswin.OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
+	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	OSWin         oswin.OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
@@ -43,12 +44,12 @@ func NewWindow(name string, width, height int) *Window {
 	win := &Window{}
 	win.InitName(win, name)
 	var err error
-	win.Win, err = oswin.NewOSWindow(width, height)
+	win.OSWin, err = oswin.NewOSWindow(width, height)
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	win.Win.SetTitle(name)
+	win.OSWin.SetTitle(name)
 	// we signal ourselves!
 	win.NodeSig.Connect(win.This, SignalWindow)
 	return win
@@ -59,6 +60,7 @@ func NewWindow2D(name string, width, height int) *Window {
 	win := NewWindow(name, width, height)
 	vp := NewViewport2D(width, height)
 	win.AddChildNamed(vp, "WinVp")
+	win.Viewport = vp
 	return win
 }
 
@@ -69,18 +71,15 @@ func (w *Window) WinViewport2D() *Viewport2D {
 }
 
 func (w *Window) Resize(width, height int) {
-	vp := w.WinViewport2D()
-	if vp != nil {
-		// fmt.Printf("resize to: %v, %v\n", width, height)
-		vp.Resize(width, height)
-	}
+	w.Viewport.Resize(width, height)
 }
 
 func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.EmbeddedStruct(KiT_Window).(*Window)
-	vp := win.WinViewport2D()
 	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
-	vp.FullRender2DTree()
+	if win.Viewport != nil {
+		win.Viewport.FullRender2DTree()
+	}
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
@@ -104,10 +103,7 @@ func (w *Window) StopEventLoop() {
 }
 
 func (w *Window) StartEventLoop() {
-	vp := w.WinViewport2D()
-	if vp != nil {
-		vp.FullRender2DTree()
-	}
+	w.Viewport.FullRender2DTree()
 	w.SetNextFocusItem()
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -221,9 +217,9 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 	for _, ete := range enex {
 		nwei := interface{}(nil)
 		if ete == oswin.MouseEnteredEventType {
-			nwei = mene
+			nwei = &mene
 		} else {
-			nwei = mexe
+			nwei = &mexe
 		}
 		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
@@ -265,43 +261,27 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 
 }
 
-// cancel all types of popup -- escape pressed
-func (w *Window) PopupCancel(evi oswin.Event) {
+// process Mouseup events during popup for possible closing of popup -- returns true if popup should be deleted
+func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
 	gii, gi := KiToNode2D(w.Popup)
 	if gi == nil {
-		return
+		return false
 	}
 	vp := gii.AsViewport2D()
 	if vp == nil {
-		return
-	}
-	// todo: for non-menu, do some kind of cancel function instead?
-	vp.DeletePopup()
-	w.PopPopup()
-	evi.SetProcessed()
-}
-
-// process Mouseup events during popup for possible closing of popup
-func (w *Window) PopupMouseUpEvent(evi oswin.Event) {
-	gii, gi := KiToNode2D(w.Popup)
-	if gi == nil {
-		return
-	}
-	vp := gii.AsViewport2D()
-	if vp == nil {
-		return
+		return false
 	}
 	// pos := evi.EventPos()
 	if vp.IsMenu() {
-		vp.DeletePopup()
-		w.PopPopup()
+		return true
 	}
+	return false
 }
 
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
 	// todo: separate the inner and outer loops here?  not sure if events needs to be outside?
-	events := w.Win.EventChan()
+	events := w.OSWin.EventChan()
 
 	lastResize := interface{}(nil)
 
@@ -310,9 +290,11 @@ func (w *Window) EventLoop() {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
 		}
-		runtime.Gosched()
+		// this is bad: need to keep it sequential here!
+		// runtime.Gosched()
 
 		curPop := w.Popup
+		delPop := false // if true, delete this popup after event loop
 
 		evi, ok := ei.(oswin.Event)
 		if !ok {
@@ -323,10 +305,15 @@ func (w *Window) EventLoop() {
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
+		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
+			if et == oswin.MouseUpEventType {
+				delPop = w.PopupMouseUpEvent(evi) // popup before processing event
+			}
+		}
 		// todo: what about iconify events!?
 		if et == oswin.CloseEventType {
 			fmt.Println("close")
-			w.Win.Close()
+			w.OSWin.Close()
 			// todo: only if last one..
 			oswin.StopBackendEventLoop()
 			evi.SetProcessed()
@@ -356,23 +343,30 @@ func (w *Window) EventLoop() {
 					kt.SetProcessed()
 				case KeyFunAbort:
 					if w.Popup != nil && w.Popup == curPop {
-						w.PopupCancel(evi)
+						delPop = true
+						kt.SetProcessed()
 					}
 				}
 				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)
 			}
 		}
 
+		if delPop {
+			w.DisconnectNode(w.Popup)
+			w.Popup.SetParent(nil)     // don't redraw the popup anymore
+			w.Viewport.RestorePixels() // revert prior to processing events
+			w.Viewport.DrawIntoWindow()
+		}
+
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
-			if et == oswin.MouseMovedEventType {
+			if !delPop && et == oswin.MouseMovedEventType {
 				w.ProcessMouseMovedEvent(evi)
 			}
 		}
-		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
-			if et == oswin.MouseUpEventType {
-				w.PopupMouseUpEvent(evi)
-			}
+
+		if delPop {
+			w.PopPopup(curPop)
 		}
 	}
 	fmt.Println("end of events")
@@ -410,15 +404,15 @@ func (w *Window) SetNextFocusItem() bool {
 		focusNext = true
 	}
 
+	focRoot := w.Viewport
+	if w.Popup != nil {
+		focRoot = w.Popup.(*Viewport2D)
+	}
+
 	for i := 0; i < 2; i++ {
-		w.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
 			if gotFocus {
 				return false
-			}
-			if w.Popup != nil {
-				if !k.HasParent(w.Popup) {
-					return true
-				}
 			}
 			// todo: see about 3D guys
 			_, gi := KiToNode2D(k)
@@ -432,7 +426,7 @@ func (w *Window) SetNextFocusItem() bool {
 				focusNext = true
 				return true
 			}
-			if !bitflag.Has(gi.NodeFlags, int(CanFocus)) {
+			if !bitflag.Has(gi.NodeFlags, int(CanFocus)) || gi.VpBBox.Empty() {
 				return true
 			}
 			if focusNext {
@@ -460,14 +454,14 @@ func (w *Window) SetPrevFocusItem() bool {
 	gotFocus := false
 	var prevItem ki.Ki
 
-	w.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+	focRoot := w.Viewport
+	if w.Popup != nil {
+		focRoot = w.Popup.(*Viewport2D)
+	}
+
+	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
 		if gotFocus {
 			return false
-		}
-		if w.Popup != nil {
-			if !k.HasParent(w.Popup) {
-				return true
-			}
 		}
 		// todo: see about 3D guys
 		_, gi := KiToNode2D(k)
@@ -481,7 +475,7 @@ func (w *Window) SetPrevFocusItem() bool {
 			gotFocus = true
 			return false
 		}
-		if !bitflag.Has(gi.NodeFlags, int(CanFocus)) {
+		if !bitflag.Has(gi.NodeFlags, int(CanFocus)) || gi.VpBBox.Empty() {
 			return true
 		}
 		prevItem = k
@@ -496,25 +490,31 @@ func (w *Window) SetPrevFocusItem() bool {
 }
 
 // push current popup onto stack and set new popup
-func (w *Window) PushPopup(p ki.Ki) {
+func (w *Window) PushPopup(pvp *Viewport2D) {
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
+	pvp.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
-	w.Popup = p
-	w.PushFocus(p)
+	w.Popup = pvp.This
+	w.PushFocus(pvp.This)
 	w.SetNextFocusItem()
 }
 
-// pop Mask off the popup stack and set to current popup
-func (w *Window) PopPopup() {
+// pop current popup off the popup stack and set to current popup
+func (w *Window) PopPopup(pvpk ki.Ki) {
+	pvp := pvpk.(*Viewport2D)
+	if pvp != nil {
+		pvp.DeletePopup()
+	}
 	if w.PopupStack == nil || len(w.PopupStack) == 0 {
 		w.Popup = nil
-		return
+	} else {
+		sz := len(w.PopupStack)
+		w.Popup = w.PopupStack[sz-1]
+		w.PopupStack = w.PopupStack[:sz-1]
 	}
-	sz := len(w.PopupStack)
-	w.Popup = w.PopupStack[sz-1]
-	w.PopupStack = w.PopupStack[:sz-1]
 	w.PopFocus() // always
 }
 
