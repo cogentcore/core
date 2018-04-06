@@ -270,7 +270,7 @@ type Ki interface {
 	DeleteChildren(destroy bool)
 
 	// Delete this node from its parent children list-- destroy will add removed child to deleted list, to be destroyed later -- otherwise child remains intact but parent is nil -- could be inserted elsewhere
-	DeleteMe(destroy bool)
+	Delete(destroy bool)
 
 	// second-pass actually delete all previously-removed children: causes them to remove all their children and then destroy them
 	DestroyDeleted()

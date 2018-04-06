@@ -695,6 +695,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 		// update blocking note: children of child etc will not send a signal
 		// at this point -- only later at destroy -- up to this parent to
 		// manage all that
+		bitflag.Set(child.Flags(), int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 	}
@@ -728,6 +729,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 	n.UpdateStart()
 	bitflag.Set(&n.Flag, int(ChildrenDeleted))
 	for _, child := range n.Kids {
+		bitflag.Set(child.Flags(), int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 		child.UpdateReset()
@@ -739,7 +741,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 	n.UpdateEnd()
 }
 
-func (n *Node) DeleteMe(destroy bool) {
+func (n *Node) Delete(destroy bool) {
 	if n.Par == nil {
 		if destroy {
 			n.Destroy()

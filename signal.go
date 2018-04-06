@@ -161,26 +161,48 @@ func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 
 // Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
+	if sender.IsDestroyed() { // dead nodes don't talk..
+		return
+	}
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	if NodeSignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	for _, con := range s.Cons {
+	deleted := 0 // using this construct from https://stackoverflow.com/questions/20545743/delete-entries-from-a-slice-while-iterating-over-it-in-go
+	for i := range s.Cons {
+		j := i - deleted
+		con := s.Cons[j]
+		if con.Recv.IsDestroyed() {
+			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
+			deleted++
+			continue
+		}
 		con.Func(con.Recv, sender, sig, data)
 	}
 }
 
 // EmitGo concurrent version -- sends the signal across all the connections to the receivers
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
+	if sender.IsDestroyed() { // dead nodes don't talk..
+		return
+	}
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
 	if NodeSignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	for _, con := range s.Cons {
+	deleted := 0
+	for i := range s.Cons {
+		j := i - deleted
+		con := s.Cons[j]
+		if con.Recv.IsDestroyed() {
+			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
+			deleted++
+			continue
+		}
 		go con.Func(con.Recv, sender, sig, data)
 	}
 }
@@ -193,7 +215,15 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun Signal
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
-	for _, con := range s.Cons {
+	deleted := 0
+	for i := range s.Cons {
+		j := i - deleted
+		con := s.Cons[j]
+		if con.Recv.IsDestroyed() {
+			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
+			deleted++
+			continue
+		}
 		if fun(con.Recv) {
 			con.Func(con.Recv, sender, sig, data)
 		}
@@ -205,7 +235,15 @@ func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun Sign
 	if sig == 0 && s.DefSig != 0 {
 		sig = s.DefSig
 	}
-	for _, con := range s.Cons {
+	deleted := 0
+	for i := range s.Cons {
+		j := i - deleted
+		con := s.Cons[j]
+		if con.Recv.IsDestroyed() {
+			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
+			deleted++
+			continue
+		}
 		if fun(con.Recv) {
 			go con.Func(con.Recv, sender, sig, data)
 		}
