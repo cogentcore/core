@@ -149,6 +149,9 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
 	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
+		if k.IsDeleted() { // destroyed is filtered upstream
+			return false
+		}
 		_, gi := KiToNode2D(k)
 		if gi != nil {
 			if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events
@@ -217,6 +220,9 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 			nwei = mexe
 		}
 		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
+			if k.IsDeleted() { // destroyed is filtered upstream
+				return false
+			}
 			_, gi := KiToNode2D(k)
 			if gi != nil {
 				if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events

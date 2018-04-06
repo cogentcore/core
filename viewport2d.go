@@ -185,7 +185,7 @@ func (vp *Viewport2D) DeletePopup() {
 			}
 		}
 	}
-	vp.DeleteMe(true) // destroy!
+	vp.Delete(true) // destroy!
 	if par != nil {
 		par.UpdateEnd()
 	}
@@ -353,6 +353,13 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	}
 	gii, gi := KiToNode2D(node)
 	if gii == nil { // should not happen
+		return
+	}
+	if gi.IsDeleted() || gi.IsDestroyed() { // skip these for sure
+		return
+	}
+	if gi.UpdateCtr().Value() > 0 {
+		log.Printf("ERROR SignalViewport2D updating node %v with Updating counter: %v\n", gi.PathUnique(), gi.UpdateCtr())
 		return
 	}
 

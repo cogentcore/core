@@ -377,13 +377,30 @@ func (g *TreeView) SrcAddChild() {
 }
 
 // delete me in source tree
-func (g *TreeView) SrcDeleteMe() {
+func (g *TreeView) SrcDelete() {
 	if g.IsField() {
 		fmt.Printf("cannot delete fields\n") // todo: dialog, disable menu
 		return
 	}
 	sk := g.SrcNode.Ptr
-	sk.DeleteMe(true)
+	sk.Delete(true)
+}
+
+// duplicate item in source tree, add after
+func (g *TreeView) SrcDuplicate() {
+	if g.IsField() {
+		fmt.Printf("cannot delete fields\n") // todo: dialog, disable menu
+		return
+	}
+	sk := g.SrcNode.Ptr
+	par := sk.Parent()
+	if par == nil {
+		fmt.Printf("no parent to insert in\n") // todo: dialog
+		return
+	}
+	myidx := par.ChildIndex(sk, 0)
+	nm := fmt.Sprintf("NewItem%v", myidx+1)
+	par.InsertChildNamed(sk.Clone(), myidx+1, nm)
 }
 
 func (g *TreeView) SetContinuousSelect() {
@@ -474,6 +491,7 @@ func (g *TreeView) ConfigParts() {
 		mb.Text = "..."
 		g.PartStyleProps(mb.This, TreeViewProps[0])
 
+		// todo: shortcuts!
 		mb.AddMenuText("Add Child", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcAddChild()
@@ -486,9 +504,13 @@ func (g *TreeView) ConfigParts() {
 			tv := recv.(*TreeView)
 			tv.SrcInsertAfter()
 		})
+		mb.AddMenuText("Duplicate", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.(*TreeView)
+			tv.SrcDuplicate()
+		})
 		mb.AddMenuText("Delete", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
-			tv.SrcDeleteMe()
+			tv.SrcDelete()
 		})
 	}
 }
@@ -546,8 +568,8 @@ var TreeViewProps = []map[string]interface{}{
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
 			"#icon": map[string]interface{}{
-				"width":   units.NewValue(.8, units.Em),
-				"height":  units.NewValue(.8, units.Em),
+				"width":   units.NewValue(.5, units.Em),
+				"height":  units.NewValue(.5, units.Em),
 				"margin":  units.NewValue(2, units.Px),
 				"padding": units.NewValue(2, units.Px),
 			},
