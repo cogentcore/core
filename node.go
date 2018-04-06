@@ -51,6 +51,7 @@ type Node struct {
 	Updating  atomctr.Ctr            `copy:"-" json:"-" xml:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
 	Deleted   []Ki                   `copy:"-" json:"-" xml:"-" desc:"keeps track of deleted nodes until destroyed"`
 	This      Ki                     `copy:"-" json:"-" xml:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	index     int                    `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -118,6 +119,9 @@ func (n *Node) TypeEmbeds(t reflect.Type) bool {
 }
 
 func (n *Node) EmbeddedStruct(t reflect.Type) Ki {
+	if n == nil {
+		return nil
+	}
 	es := kit.EmbeddedStruct(n.This, t)
 	if es != nil {
 		k, ok := es.(Ki)
@@ -134,16 +138,28 @@ func (n *Node) Parent() Ki {
 	return n.Par
 }
 
-func (n *Node) Child(idx int) (Ki, error) {
-	idx, err := n.Kids.ValidIndex(idx)
-	if err != nil {
-		return nil, err
-	}
-	return n.Kids[idx], nil
+func (n *Node) HasParent(par Ki) bool {
+	gotPar := false
+	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
+		if k == par {
+			gotPar = true
+			return false
+		}
+		return true
+	})
+	return gotPar
+}
+
+func (n *Node) Child(idx int) Ki {
+	return n.Kids.Elem(idx)
 }
 
 func (n *Node) Children() Slice {
 	return n.Kids
+}
+
+func (n *Node) IsValidIndex(idx int) bool {
+	return n.Kids.IsValidIndex(idx)
 }
 
 func (n *Node) Name() string {
@@ -361,6 +377,14 @@ func (n *Node) FieldRoot() Ki {
 
 func (n *Node) HasChildren() bool {
 	return len(n.Kids) > 0
+}
+
+func (n *Node) Index() int {
+	if n.Par == nil {
+		return -1
+	}
+	n.index = n.Par.ChildIndex(n.This, n.index) // very fast if index is close..
+	return n.index
 }
 
 func (n *Node) SetChildType(t reflect.Type) error {
@@ -767,8 +791,8 @@ func (n *Node) DestroyAllDeleted() {
 }
 
 func (n *Node) Destroy() {
-	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
+	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.DisconnectAll()
 	// todo: traverse struct and un-set all Ptr's!
 	n.DeleteChildren(true) // first delete all my children
@@ -996,7 +1020,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 			if idx < 0 {
 				return nil
 			}
-			curn, _ = curn.Child(idx)
+			curn = curn.Children()[idx]
 			for i := 1; i < len(fels); i++ {
 				fe := fels[i]
 				fk := curn.KiFieldByName(fe)
@@ -1010,7 +1034,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 			if idx < 0 {
 				return nil
 			}
-			curn, _ = curn.Child(idx)
+			curn = curn.Children()[idx]
 		}
 	}
 	return curn
@@ -1224,7 +1248,7 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 		}
 		n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
 		for i, kid := range from.Children() {
-			mkid, _ := n.Child(i)
+			mkid := n.Kids[i]
 			mkid.SetNameRaw(kid.Name()) // restore orig user-names
 		}
 	} else {
@@ -1240,11 +1264,14 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 	typ := tv.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
+		tf := tv.Field(i)
+		if !tf.CanInterface() {
+			continue
+		}
 		ctag := f.Tag.Get("copy")
 		if ctag == "-" {
 			continue
 		}
-		tf := tv.Field(i)
 		sf := sv.Field(i)
 		tfpi := kit.PtrValue(tf).Interface()
 		sfpi := kit.PtrValue(sf).Interface()
@@ -1277,7 +1304,7 @@ func (n *Node) CopyFromRaw(from Ki) error {
 	n.CopyPropsFrom(from, false)             // use shallow props copy by default
 	n.CopyFieldsFrom(n.This, from)
 	for i, kid := range n.Kids {
-		fmk, _ := from.Child(i)
+		fmk := from.Children()[i]
 		kid.CopyFromRaw(fmk)
 	}
 	return nil

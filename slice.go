@@ -22,9 +22,9 @@ import (
 // Slice provides JSON marshal / unmarshal with encoding of underlying types
 type Slice []Ki
 
-// return a valid index given length of slice -- also supports access from the back of the slice using negative numbers -- -1 = last item, -2 = second to last, etc
-func (k *Slice) ValidIndex(idx int) (int, error) {
-	kl := len(*k)
+// ValidIndex returns a valid index given length of slice -- also supports access from the back of the slice using negative numbers -- -1 = last item, -2 = second to last, etc
+func (k Slice) ValidIndex(idx int) (int, error) {
+	kl := len(k)
 	if kl == 0 {
 		return 0, errors.New("ki.Slice is empty -- no valid index")
 	}
@@ -32,12 +32,26 @@ func (k *Slice) ValidIndex(idx int) (int, error) {
 		idx = kl + idx
 	}
 	if idx < 0 { // still?
-		idx = 0
+		return 0, fmt.Errorf("ki.Slice negative index: %v from back of list of children went past start of list, length: %v\n", idx, kl)
 	}
 	if idx >= kl {
-		idx = kl - 1
+		return 0, fmt.Errorf("ki.Slice index: %v exceeds length of list: %v\n", idx, kl)
 	}
 	return idx, nil
+}
+
+// IsValidIndex checks whether the given index is a valid index into slice, within range of 0..len-1 -- see ValidIndex for version that transforms negative numbers into indicies from end of slice, and has explicit error messages
+func (k Slice) IsValidIndex(idx int) bool {
+	return idx >= 0 && idx < len(k)
+}
+
+// Elem returns element at index, using ValidIndex supporting negative indexing from back of list -- returns nil if index is invalid -- use ValidIndex or IsValidIndex directly to test if unsure
+func (k *Slice) Elem(idx int) Ki {
+	idx, err := k.ValidIndex(idx)
+	if err != nil {
+		return nil
+	}
+	return (*k)[idx]
 }
 
 // Insert item at index

@@ -202,15 +202,15 @@ func TestNodeFindType(t *testing.T) {
 	parent.InitName(&parent, "par")
 	parent.AddNewChildNamed(KiT_NodeEmbed, "child1")
 	parent.AddNewChildNamed(KiT_Node, "child2")
-	idx := parent.ChildIndexByType(KiT_NodeEmbed, false)
+	idx := parent.ChildIndexByType(KiT_NodeEmbed, false, 0)
 	if idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx = parent.ChildIndexByType(KiT_Node, false)
+	idx = parent.ChildIndexByType(KiT_Node, false, 0)
 	if idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	cn := parent.ChildByType(KiT_Node, false)
+	cn := parent.ChildByType(KiT_Node, false, 0)
 	if cn == nil {
 		t.Error("find child by type was nil")
 	}
@@ -665,7 +665,7 @@ ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
 
 	// fmt.Printf("Delete Signals:\n%v", sigs)
 	if sigs != delsigs {
-		t.Errorf("TestTreeMod child12 move signals:\n%v\nnot as expected:\n%v\n", sigs, delsigs)
+		t.Errorf("TestTreeMod child12 delete signals:\n%v\nnot as expected:\n%v\n", sigs, delsigs)
 	}
 	sigs = ""
 

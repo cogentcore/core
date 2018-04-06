@@ -72,6 +72,10 @@ https://golang.org/doc/effective_go.html#names
 
 * Although the derived types have direct access to members and methods of embedded types, at any level of depth of embedding, the `reflect` system presents each embedded type as a *single field* as it is declared in the actual code.  Thus, you have to recursively traverse these embedded structs -- methods to flatten these field lists out by calling a given function on each field in turn are provided in `kit embed.go`: `FlatFieldsTypeFun` and `FlatFieldsValueFun`
 
+## interface{} type: universal Variant
+
+Go makes extensive use of the `interface{}` type which is effectively a built-in universal Variant type in Qt http://doc.qt.io/qt-5/qvariant.html -- you use type switches or conversions or the reflect system to figure out what kind of thing it actually is -- extremely powerful yet not very dangerous it seems. 
+
 ## Closures & anonymous functions
 
 It is very convenient to use anonymous functions directly in the `FunDown` (etc) and `Signal Connect` cases, but for performance reasons, it is important to be careful about capturing local variables from the parent function, thereby creating a *closure*, which creates a local stack to represent those variables.  In the case of FunDown / FunUp etc, the impact is minimized because the function is ONLY used during the lifetime of the outer function.  However, for `Signal Connect`, the function is itself saved and used later, so using a closure there creates extra memory overhead for each time the connection is created.  Thus, it is generally better to avoid capturing local variables in such functions -- typically all the relevant info can be made available in the recv, send, sig, and data args for the connection function.
