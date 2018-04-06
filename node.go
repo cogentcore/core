@@ -81,19 +81,22 @@ func (n Node) String() string {
 
 func (n *Node) Init(this Ki) {
 	kitype := KiType()
-	n.This = this
-	// we need to call this directly instead of FuncFields because we need the field name
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := kit.PtrValue(fieldVal).Interface().(Ki)
-			if fk != nil {
-				bitflag.Set(fk.Flags(), int(IsField))
-				fk.InitName(fk, field.Name)
-				fk.SetParent(n.This)
+	bitflag.ClearMask(n.Flags(), int64(UpdateFlagsMask))
+	if n.This != this {
+		n.This = this
+		// we need to call this directly instead of FuncFields because we need the field name
+		FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+			if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
+				fk := kit.PtrValue(fieldVal).Interface().(Ki)
+				if fk != nil {
+					bitflag.Set(fk.Flags(), int(IsField))
+					fk.InitName(fk, field.Name)
+					fk.SetParent(n.This)
+				}
 			}
-		}
-		return true
-	})
+			return true
+		})
+	}
 }
 
 func (n *Node) InitName(ki Ki, name string) {
