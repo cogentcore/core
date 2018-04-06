@@ -29,8 +29,8 @@ func mainrun() {
 	child2.AddNewChildNamed(nil, "subchild1")
 
 	// turn this on to see a trace of the rendering
-	// gi.Render2DTrace = true
-	// gi.Layout2DTrace = true
+	gi.Render2DTrace = true
+	gi.Layout2DTrace = true
 
 	width := 800
 	height := 800

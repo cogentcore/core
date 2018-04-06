@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
@@ -291,7 +292,7 @@ func (w *Window) EventLoop() {
 			fmt.Println("stop event loop")
 		}
 		// this is bad: need to keep it sequential here!
-		// runtime.Gosched()
+		runtime.Gosched()
 
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop

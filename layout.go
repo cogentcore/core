@@ -561,6 +561,9 @@ func (ly *Layout) FinalizeLayout() {
 
 // process any overflow according to overflow settings
 func (ly *Layout) ManageOverflow() {
+	if len(ly.Kids) == 0 {
+		return
+	}
 	spc := ly.Style.BoxSpace()
 	avail := ly.LayData.AllocSize.SubVal(spc)
 
