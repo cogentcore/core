@@ -74,7 +74,7 @@ var DefaultKeyMap = KeyMap{
 	"control+e":                 KeyFunEnd,
 	"super+control+right_arrow": KeyFunEnd,
 	"tab":       KeyFunFocusNext,
-	"shift_tab": KeyFunFocusPrev,
+	"shift+tab": KeyFunFocusPrev,
 	"return":    KeyFunSelectItem,
 	"escape":    KeyFunAbort,
 	"control+g": KeyFunCancelSelect,

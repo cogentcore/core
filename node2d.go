@@ -244,7 +244,7 @@ func (g *Node2DBase) PushBounds() bool {
 	rs := &g.Viewport.Render
 	rs.PushBounds(g.VpBBox)
 	if Render2DTrace {
-		fmt.Printf("Rendering: %v at %v\n", g.PathUnique(), g.VpBBox)
+		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
 	}
 	return true
 }

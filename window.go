@@ -121,35 +121,41 @@ func (w *Window) StartEventLoop() {
 // filtering is just to ensure that they are in the right position to receive
 // the event (focus, etc)
 func (w *Window) SendEventSignal(evi oswin.Event) {
+	if evi.IsProcessed() { // someone took care of it
+		return
+	}
 	et := evi.EventType()
 	if et > oswin.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
-	if et == oswin.MouseDraggedEventType {
-		mde, ok := evi.(oswin.MouseDraggedEvent)
-		if ok {
-			if w.Dragging != nil {
-				td := time.Now().Sub(w.LastDrag)
-				// ed := time.Now().Sub(mde.Time)
-				// fmt.Printf("td %v  ed %v\n", td, ed)
-				if td < 10*time.Millisecond {
-					// fmt.Printf("skipping td %v\n", td)
-					return // too laggy, bail on sending this event
-				}
-				lsd := w.LastSentDrag
-				w.LastSentDrag = mde
-				mde.From = lsd.From
-				w.LastDrag = time.Now()
-				evi = mde // reset interface to us
-			}
-		}
-	}
+	// if et == oswin.MouseDraggedEventType {
+	// 	mde, ok := evi.(*oswin.MouseDraggedEvent)
+	// 	if ok {
+	// 		if w.Dragging != nil {
+	// 			// td := time.Now().Sub(w.LastDrag)
+	// 			// ed := time.Now().Sub(mde.Time)
+	// 			// fmt.Printf("td %v  ed %v\n", td, ed)
+	// 			// if td < 10*time.Millisecond {
+	// 			// 	// fmt.Printf("skipping td %v\n", td)
+	// 			// 	return // too laggy, bail on sending this event
+	// 			// }
+	// 			// lsd := w.LastSentDrag
+	// 			// w.LastSentDrag = *mde
+	// 			// mde.From = lsd.From
+	// 			// w.LastDrag = time.Now()
+	// 			// // evi = mde // reset interface to us
+	// 		}
+	// 	}
+	// }
 
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
 	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
+			return false
+		}
+		if evi.IsProcessed() { // someone took care of it
 			return false
 		}
 		_, gi := KiToNode2D(k)
@@ -166,7 +172,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
 
 				// drag events start with node but can go beyond it..
-				mde, ok := evi.(oswin.MouseDraggedEvent)
+				mde, ok := evi.(*oswin.MouseDraggedEvent)
 				if ok {
 					if w.Dragging == gi.This {
 						return true
@@ -176,7 +182,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 						if pos.In(gi.WinBBox) {
 							w.LastDrag = time.Now()
 							w.Dragging = gi.This
-							w.LastSentDrag = mde
+							w.LastSentDrag = *mde
 							bitflag.Set(&gi.NodeFlags, int(NodeDragging))
 							return true
 						}
@@ -259,6 +265,22 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 
 }
 
+// cancel all types of popup -- escape pressed
+func (w *Window) PopupCancel(evi oswin.Event) {
+	gii, gi := KiToNode2D(w.Popup)
+	if gi == nil {
+		return
+	}
+	vp := gii.AsViewport2D()
+	if vp == nil {
+		return
+	}
+	// todo: for non-menu, do some kind of cancel function instead?
+	vp.DeletePopup()
+	w.PopPopup()
+	evi.SetProcessed()
+}
+
 // process Mouseup events during popup for possible closing of popup
 func (w *Window) PopupMouseUpEvent(evi oswin.Event) {
 	gii, gi := KiToNode2D(w.Popup)
@@ -301,27 +323,20 @@ func (w *Window) EventLoop() {
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
-		w.SendEventSignal(evi)
-		if et == oswin.MouseMovedEventType {
-			w.ProcessMouseMovedEvent(evi)
-		}
-		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
-			if et == oswin.MouseUpEventType {
-				w.PopupMouseUpEvent(evi)
-			}
-		}
 		// todo: what about iconify events!?
 		if et == oswin.CloseEventType {
 			fmt.Println("close")
 			w.Win.Close()
 			// todo: only if last one..
 			oswin.StopBackendEventLoop()
+			evi.SetProcessed()
 		}
 		if et == oswin.ResizeEventType {
 			lastResize = ei
+			evi.SetProcessed()
 		} else {
 			if lastResize != nil { // only do last one
-				rev, ok := lastResize.(oswin.ResizeEvent)
+				rev, ok := lastResize.(*oswin.ResizeEvent)
 				lastResize = nil
 				if ok {
 					w.Resize(rev.Width, rev.Height)
@@ -329,14 +344,34 @@ func (w *Window) EventLoop() {
 			}
 		}
 		if et == oswin.KeyTypedEventType {
-			kt, ok := ei.(oswin.KeyTypedEvent)
+			kt, ok := ei.(*oswin.KeyTypedEvent)
 			if ok {
 				kf := KeyFun(kt.Key, kt.Chord)
 				switch kf {
-				case KeyFunFocusNext: // todo: should we absorb this event or not?  if so, goes first..
+				case KeyFunFocusNext:
 					w.SetNextFocusItem()
+					kt.SetProcessed()
+				case KeyFunFocusPrev:
+					w.SetPrevFocusItem()
+					kt.SetProcessed()
+				case KeyFunAbort:
+					if w.Popup != nil && w.Popup == curPop {
+						w.PopupCancel(evi)
+					}
 				}
 				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)
+			}
+		}
+
+		if !evi.IsProcessed() {
+			w.SendEventSignal(evi)
+			if et == oswin.MouseMovedEventType {
+				w.ProcessMouseMovedEvent(evi)
+			}
+		}
+		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
+			if et == oswin.MouseUpEventType {
+				w.PopupMouseUpEvent(evi)
 			}
 		}
 	}
@@ -368,7 +403,6 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 }
 
 // set the focus on the next item that can accept focus -- returns true if a focus item found
-// todo: going the other direction is going to be tricky!
 func (w *Window) SetNextFocusItem() bool {
 	gotFocus := false
 	focusNext := false // get the next guy
@@ -381,6 +415,11 @@ func (w *Window) SetNextFocusItem() bool {
 			if gotFocus {
 				return false
 			}
+			if w.Popup != nil {
+				if !k.HasParent(w.Popup) {
+					return true
+				}
+			}
 			// todo: see about 3D guys
 			_, gi := KiToNode2D(k)
 			if gi == nil {
@@ -388,6 +427,10 @@ func (w *Window) SetNextFocusItem() bool {
 			}
 			if gi.Paint.Off { // off below this
 				return false
+			}
+			if w.Focus == k { // current focus can be a non-can-focus item
+				focusNext = true
+				return true
 			}
 			if !bitflag.Has(gi.NodeFlags, int(CanFocus)) {
 				return true
@@ -397,9 +440,6 @@ func (w *Window) SetNextFocusItem() bool {
 				gotFocus = true
 				return false // done
 			}
-			if w.Focus == k {
-				focusNext = true
-			}
 			return true
 		})
 		if gotFocus {
@@ -408,6 +448,51 @@ func (w *Window) SetNextFocusItem() bool {
 		focusNext = true // this time around, just get the first one
 	}
 	return false
+}
+
+// set the focus on the previous item
+func (w *Window) SetPrevFocusItem() bool {
+	if w.Focus == nil { // must have a current item here
+		w.SetNextFocusItem()
+		return false
+	}
+
+	gotFocus := false
+	var prevItem ki.Ki
+
+	w.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		if gotFocus {
+			return false
+		}
+		if w.Popup != nil {
+			if !k.HasParent(w.Popup) {
+				return true
+			}
+		}
+		// todo: see about 3D guys
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return true
+		}
+		if gi.Paint.Off { // off below this
+			return false
+		}
+		if w.Focus == k {
+			gotFocus = true
+			return false
+		}
+		if !bitflag.Has(gi.NodeFlags, int(CanFocus)) {
+			return true
+		}
+		prevItem = k
+		return true
+	})
+	if gotFocus && prevItem != nil {
+		w.SetFocusItem(prevItem)
+	} else {
+		w.SetNextFocusItem()
+	}
+	return true
 }
 
 // push current popup onto stack and set new popup

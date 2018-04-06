@@ -230,7 +230,7 @@ func (g *TextField) InsertAtCursor(str string) {
 	g.UpdateEnd()
 }
 
-func (g *TextField) KeyInput(kt oswin.KeyTypedEvent) {
+func (g *TextField) KeyInput(kt *oswin.KeyTypedEvent) {
 	kf := KeyFun(kt.Key, kt.Chord)
 	switch kf {
 	case KeyFunSelectItem:
@@ -332,17 +332,19 @@ func (g *TextField) Init2D() {
 	g.EditText = g.Text
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
-		md := d.(oswin.MouseDownEvent)
+		md := d.(*oswin.MouseDownEvent)
 		if !tf.HasFocus() {
 			tf.GrabFocus()
 		}
 		pt := tf.PointToRelPos(md.EventPos())
 		tf.SetCursorFromPixel(float64(pt.X))
+		md.SetProcessed()
 	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
-		kt := d.(oswin.KeyTypedEvent)
+		kt := d.(*oswin.KeyTypedEvent)
 		tf.KeyInput(kt)
+		kt.SetProcessed()
 	})
 }
 

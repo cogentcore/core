@@ -44,14 +44,13 @@ type Viewport2D struct {
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" desc:"pixels that we render into"`
-	Backing *image.RGBA `json:"-" desc:"if non-nil, this is what goes behind our image -- copied from our region in parent image -- allows us to re-render cleanly into parent, even with transparency"`
+	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into"`
+	LastPix *image.RGBA `json:"-" desc:"copy of last set of pixels that were rendered"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
 
 // NewViewport2D creates a new image.RGBA with the specified width and height
-// and prepares a context for rendering onto that image.
 func NewViewport2D(width, height int) *Viewport2D {
 	return NewViewport2DForRGBA(image.NewRGBA(image.Rect(0, 0, width, height)))
 }
@@ -71,6 +70,9 @@ func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
 	}
 	vp.Render.Defaults()
 	vp.Render.Image = vp.Pixels
+	if vp.LastPix == nil || vp.LastPix.Bounds() != vp.Pixels.Bounds() {
+		vp.LastPix = image.NewRGBA(vp.Pixels.Bounds())
+	}
 	return vp
 }
 
@@ -85,6 +87,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 		}
 	}
 	vp.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
+	vp.LastPix = image.NewRGBA(image.Rect(0, 0, width, height))
 	vp.Render.Defaults()
 	vp.ViewBox.Size = nwsz // make sure
 	vp.Render.Image = vp.Pixels
@@ -106,6 +109,16 @@ func (vp *Viewport2D) IsSVG() bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Main Rendering code
 
+// save our pixels into LastPix
+func (vp *Viewport2D) SavePixels() {
+	copy(vp.LastPix.Pix, vp.Pixels.Pix)
+}
+
+// restore last saved pixels into active pixels
+func (vp *Viewport2D) RestorePixels() {
+	copy(vp.Pixels.Pix, vp.LastPix.Pix)
+}
+
 // draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
@@ -116,19 +129,11 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		sp = nr.Min.Sub(r.Min)
 		r = nr
 	}
-	// if vp.Backing != nil {
-	// 	draw.Draw(parVp.Pixels, r, vp.Backing, sp, draw.Src)
-	// }
-	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
-}
-
-// copy our backing image from parent -- called at right place in Render
-func (vp *Viewport2D) CopyBacking(parVp *Viewport2D) {
-	r := vp.ViewBox.Bounds()
-	if vp.Backing == nil {
-		vp.Backing = image.NewRGBA(vp.ViewBox.SizeRect())
+	if vp.IsPopup() {
+		parVp.RestorePixels() // parent is frozen -- restore its last saved pixels
 	}
-	draw.Draw(vp.Backing, r, parVp.Pixels, image.ZP, draw.Src)
+	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
+	// vp.SavePixels() // todo: not sure if we want this overhead all the time
 }
 
 // todo: consider caching window pointer
@@ -139,10 +144,13 @@ func (vp *Viewport2D) DrawIntoWindow() {
 		s := win.Win.Screen()
 		s.CopyRGBA(vp.Pixels, vp.Pixels.Bounds())
 		win.Win.FlushImage()
+		if win.Popup == nil { //  only save if not doing a popup
+			vp.SavePixels()
+		}
 	}
 }
 
-// push a viewport as popup of this viewport -- sets window popup and adds as a child
+// push a new a viewport as popup of this parent viewport -- sets window popup and adds as a child of the parent viewport -- this should always be called on the window's master viewport
 func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
 	win := vp.ParentWindow()
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
@@ -151,43 +159,37 @@ func (vp *Viewport2D) PushPopup(pvp *Viewport2D) {
 	} else {
 		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
 	}
+	vp.UpdateStart() // note: we start updating here, but don't end until popup goes away
 	vp.AddChild(pvp.This)
+	pvp.UpdateEnd() // we unblock the child but don't unblock the parent
 }
 
-func (vp *Viewport2D) PushAsPopup() {
-	win := vp.ParentWindow()
-	bitflag.Set(&vp.NodeFlags, int(VpFlagPopup))
-	if win != nil {
-		win.PushPopup(vp.This)
-	} else {
-		log.Printf("gi.PushAsPopup -- could not find parent window for vp %v\n", vp.PathUnique())
-	}
-}
-
-// this is called by window when a popup is deleted -- it destroys the vp and
+// Delete this viewport which is currently a popup within this is called by window when a popup is deleted -- it destroys the vp and
 // its main layout, see VpFlagPopupDestroyAll for whether children are destroyed
 func (vp *Viewport2D) DeletePopup() {
 	win := vp.ParentWindow()
 	if win != nil {
 		vp.DisconnectAllEventsTree(win)
 	}
-	par := vp.Par
-	if par != nil {
-		par.UpdateStart()
-	}
+	par := vp.Par.(*Viewport2D) // this should be parent viewport
 	if !bitflag.Has(vp.NodeFlags, int(VpFlagPopupDestroyAll)) {
-		if len(vp.Kids) == 1 { // look for a typical layout as our first child
-			kc, _ := vp.Child(0)
-			cli, _ := KiToNode2D(kc)
+		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
+		if len(vp.Kids) == 1 {
+			cli, _ := KiToNode2D(vp.Child(0))
 			ly := cli.AsLayout2D()
 			if ly != nil {
 				ly.DeleteChildren(false) // do NOT destroy children -- just delete them
 			}
 		}
 	}
-	vp.Delete(true) // destroy!
+	vp.Delete(true) // destroy the popup
 	if par != nil {
 		par.UpdateEnd()
+		// actually, the popup could have changed things, so we cannot do this:
+		// no need for a re-render -- just restore previous pixels -- make this a fun
+		// par.UpdateReset()
+		// par.RestorePixels()
+		// par.DrawIntoWindow()
 	}
 }
 
@@ -268,7 +270,6 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.Viewport != nil {
-		// vp.CopyBacking(vp.Viewport) // full re-render is when we copy the backing
 		vp.DrawIntoParent(vp.Viewport)
 		if vp.IsPopup() {
 			vp.Viewport.RenderViewport2D() // and on up the chain
@@ -294,7 +295,7 @@ func (vp *Viewport2D) PushBounds() bool {
 	rs := &vp.Render
 	rs.PushBounds(vp.VpBBox)
 	if Render2DTrace {
-		fmt.Printf("Rendering: %v at %v\n", vp.PathUnique(), vp.VpBBox)
+		fmt.Printf("Render: %v at %v\n", vp.PathUnique(), vp.VpBBox)
 	}
 	return true
 }

@@ -235,7 +235,7 @@ func (g *SliderBase) UpdateThumbValSize() {
 	g.ThumbSize *= g.Size
 }
 
-func (g *SliderBase) KeyInput(kt oswin.KeyTypedEvent) {
+func (g *SliderBase) KeyInput(kt *oswin.KeyTypedEvent) {
 	kf := KeyFun(kt.Key, kt.Chord)
 	switch kf {
 	case KeyFunMoveUp:
@@ -296,7 +296,7 @@ func (g *Slider) Init2D() {
 		sl, ok := recv.(*Slider)
 		if ok {
 			if sl.IsDragging() {
-				me := d.(oswin.MouseDraggedEvent)
+				me := d.(*oswin.MouseDraggedEvent)
 				st := sl.PointToRelPos(me.From)
 				ed := sl.PointToRelPos(me.Where)
 				if sl.Horiz {
@@ -310,7 +310,7 @@ func (g *Slider) Init2D() {
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*Slider)
 		if ok {
-			me := d.(oswin.MouseDownEvent)
+			me := d.(*oswin.MouseDownEvent)
 			ed := sl.PointToRelPos(me.Where)
 			st := &sl.Style
 			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
@@ -342,7 +342,7 @@ func (g *Slider) Init2D() {
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*Slider)
 		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
+			kt, ok := d.(*oswin.KeyTypedEvent)
 			if ok {
 				sl.KeyInput(kt)
 			}
@@ -567,7 +567,7 @@ func (g *ScrollBar) Init2D() {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
 			if sl.IsDragging() {
-				me := d.(oswin.MouseDraggedEvent)
+				me := d.(*oswin.MouseDraggedEvent)
 				st := sl.PointToRelPos(me.From)
 				ed := sl.PointToRelPos(me.Where)
 				if sl.Horiz {
@@ -581,7 +581,7 @@ func (g *ScrollBar) Init2D() {
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
-			me := d.(oswin.MouseDownEvent)
+			me := d.(*oswin.MouseDownEvent)
 			ed := sl.PointToRelPos(me.Where)
 			st := &sl.Style
 			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
@@ -613,7 +613,7 @@ func (g *ScrollBar) Init2D() {
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl, ok := recv.(*ScrollBar)
 		if ok {
-			kt, ok := d.(oswin.KeyTypedEvent)
+			kt, ok := d.(*oswin.KeyTypedEvent)
 			if ok {
 				sl.KeyInput(kt)
 			}

@@ -18,14 +18,15 @@ package xgb
 
 import (
 	"fmt"
+	"image"
+	"os"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil/icccm"
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
 	"github.com/rcoreilly/goki/gi/oswin"
-	"image"
-	"os"
 )
 
 func buttonForDetail(detail xproto.Button) oswin.MouseButton {
@@ -74,7 +75,7 @@ func (w *OSWindow) handleEvents() {
 			bpe.Where.Y = int(e.EventY)
 			lastX = int32(e.EventX)
 			lastY = int32(e.EventY)
-			w.events <- bpe
+			w.events <- &bpe
 
 		case xproto.ButtonReleaseEvent:
 			button = button & ^buttonForDetail(e.Detail)
@@ -84,7 +85,7 @@ func (w *OSWindow) handleEvents() {
 			bue.Where.Y = int(e.EventY)
 			lastX = int32(e.EventX)
 			lastY = int32(e.EventY)
-			w.events <- bue
+			w.events <- &bue
 
 		case xproto.LeaveNotifyEvent:
 			var wee oswin.MouseExitedEvent
@@ -99,7 +100,7 @@ func (w *OSWindow) handleEvents() {
 			}
 			lastX = int32(e.EventX)
 			lastY = int32(e.EventY)
-			w.events <- wee
+			w.events <- &wee
 		case xproto.EnterNotifyEvent:
 			var wee oswin.MouseEnteredEvent
 			wee.Where.X = int(e.EventX)
@@ -113,7 +114,7 @@ func (w *OSWindow) handleEvents() {
 			}
 			lastX = int32(e.EventX)
 			lastY = int32(e.EventY)
-			w.events <- wee
+			w.events <- &wee
 
 		case xproto.MotionNotifyEvent:
 			var mme oswin.MouseMovedEvent
@@ -129,32 +130,32 @@ func (w *OSWindow) handleEvents() {
 			lastX = int32(e.EventX)
 			lastY = int32(e.EventY)
 			if button == 0 {
-				w.events <- mme
+				w.events <- &mme
 			} else {
 				var mde oswin.MouseDraggedEvent
 				mde.MouseMovedEvent = mme
 				mde.Which = button
-				w.events <- mde
+				w.events <- &mde
 			}
 
 		case xproto.KeyPressEvent:
 			var ke oswin.KeyEvent
 			code := keybind.LookupString(w.xu, e.State, e.Detail)
 			ke.Key = keyForCode(code)
-			w.events <- oswin.KeyDownEvent(ke)
+			w.events <- &oswin.KeyDownEvent(ke)
 			downKeys[ke.Key] = true
 			kpe := oswin.KeyTypedEvent{
 				KeyEvent: ke,
 				Glyph:    letterForCode(code),
 				Chord:    oswin.ConstructChord(downKeys),
 			}
-			w.events <- kpe
+			w.events <- &kpe
 
 		case xproto.KeyReleaseEvent:
 			var ke oswin.KeyUpEvent
 			ke.Key = keyForCode(keybind.LookupString(w.xu, e.State, e.Detail))
 			delete(downKeys, ke.Key)
-			w.events <- ke
+			w.events <- &ke
 
 		case xproto.KeymapNotifyEvent:
 			newDownKeys := make(map[string]bool)
@@ -174,7 +175,7 @@ func (w *OSWindow) handleEvents() {
 					var ke oswin.KeyUpEvent
 					ke.Key = key
 					delete(downKeys, key)
-					w.events <- ke
+					w.events <- &ke
 				}
 			}
 			/* add keys that are newly pressed */
@@ -183,7 +184,7 @@ func (w *OSWindow) handleEvents() {
 					var ke oswin.KeyDownEvent
 					ke.Key = key
 					downKeys[key] = true
-					w.events <- ke
+					w.events <- &ke
 				}
 			}
 
@@ -199,12 +200,12 @@ func (w *OSWindow) handleEvents() {
 				w.buffer = xgraphics.New(w.xu, image.Rect(0, 0, re.Width, re.Height))
 				w.bufferLck.Unlock()
 
-				w.events <- re
+				w.events <- &re
 			}
 
 		case xproto.ClientMessageEvent:
 			if icccm.IsDeleteProtocol(w.xu, xevent.ClientMessageEvent{&e}) {
-				w.events <- oswin.CloseEvent{}
+				w.events <- &oswin.CloseEvent{}
 			}
 		case xproto.DestroyNotifyEvent:
 		case xproto.ReparentNotifyEvent:

@@ -86,11 +86,16 @@ type Event interface {
 	EventOnFocus() bool
 	// time at which the event was generated
 	EventTime() time.Time
+	// has this event already been processed?
+	IsProcessed() bool
+	// mark as having been processed
+	SetProcessed()
 }
 
-// base type for events -- todo: not quite sure what the function of this is
+// base type for events -- records time and whether event has been processed by a receiver of the event -- in which case it is skipped
 type EventBase struct {
-	Time time.Time
+	Processed bool
+	Time      time.Time
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -130,8 +135,16 @@ func (ev MouseMovedEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev MouseMovedEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseMovedEvent) SetProcessed() {
+	ev.Processed = true
+}
+
 // check for interface implementation
-var _ Event = MouseMovedEvent{}
+var _ Event = &MouseMovedEvent{}
 
 ////////////////////////////////////////////
 
@@ -164,6 +177,17 @@ func (ev MouseDownEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev MouseDownEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseDownEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MouseDownEvent{}
+
 // MouseUpEvent is for when the mouse is unclicked within the window.
 type MouseUpEvent MouseButtonEvent
 
@@ -186,6 +210,17 @@ func (ev MouseUpEvent) EventOnFocus() bool {
 func (ev MouseUpEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev MouseUpEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseUpEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MouseUpEvent{}
 
 ////////////////////////////////////////////
 
@@ -210,6 +245,17 @@ func (ev MouseDraggedEvent) EventPos() image.Point {
 func (ev MouseDraggedEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev MouseDraggedEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseDraggedEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MouseDraggedEvent{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Gesture Events
@@ -248,6 +294,17 @@ func (ev MagnifyEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev MagnifyEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MagnifyEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MagnifyEvent{}
+
 ////////////////////////////////////////////
 
 // RotateEvent is used to represent a rotation gesture.
@@ -276,6 +333,17 @@ func (ev RotateEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev RotateEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *RotateEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &RotateEvent{}
+
 ////////////////////////////////////////////
 
 // Scroll Event is used to represent a scrolling gesture.
@@ -303,6 +371,17 @@ func (ev ScrollEvent) EventOnFocus() bool {
 func (ev ScrollEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev ScrollEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *ScrollEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &ScrollEvent{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Key Events
@@ -338,6 +417,17 @@ func (ev KeyDownEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev KeyDownEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *KeyDownEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &KeyDownEvent{}
+
 // KeyUpEvent is for when a key is unpressed.
 type KeyUpEvent KeyEvent
 
@@ -360,6 +450,17 @@ func (ev KeyUpEvent) EventOnFocus() bool {
 func (ev KeyUpEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev KeyUpEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *KeyUpEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &KeyUpEvent{}
 
 // KeyTypedEvent is for when a key is typed.
 type KeyTypedEvent struct {
@@ -393,6 +494,17 @@ func (ev KeyTypedEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev KeyTypedEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *KeyTypedEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &KeyTypedEvent{}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Window Events
 
@@ -421,6 +533,17 @@ func (ev MouseEnteredEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev MouseEnteredEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseEnteredEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MouseEnteredEvent{}
+
 // MouseExitedEvent is for when the mouse exits a window, or a widget (computed by window)a
 type MouseExitedEvent MouseMovedEvent
 
@@ -443,6 +566,17 @@ func (ev MouseExitedEvent) EventOnFocus() bool {
 func (ev MouseExitedEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev MouseExitedEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *MouseExitedEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &MouseExitedEvent{}
 
 // ResizeEvent is for when the window changes size.
 type ResizeEvent struct {
@@ -470,6 +604,17 @@ func (ev ResizeEvent) EventTime() time.Time {
 	return ev.Time
 }
 
+func (ev ResizeEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *ResizeEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &ResizeEvent{}
+
 // CloseEvent is for when the window is closed.
 type CloseEvent struct {
 	EventBase
@@ -494,3 +639,14 @@ func (ev CloseEvent) EventOnFocus() bool {
 func (ev CloseEvent) EventTime() time.Time {
 	return ev.Time
 }
+
+func (ev CloseEvent) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *CloseEvent) SetProcessed() {
+	ev.Processed = true
+}
+
+// check for interface implementation
+var _ Event = &CloseEvent{}

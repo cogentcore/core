@@ -212,13 +212,14 @@ func Init2DButtonEvents(bw ButtonWidget) {
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab := (interface{})(recv).(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		kt := d.(oswin.KeyTypedEvent)
+		kt := d.(*oswin.KeyTypedEvent)
 		// todo: register shortcuts with window, and generalize these keybindings
 		kf := KeyFun(kt.Key, kt.Chord)
 		if kf == KeyFunSelectItem || kt.Key == "space" {
 			bb.ButtonPressed()
 			// todo: brief delay??
 			ab.ButtonRelease() // special one
+			kt.SetProcessed()
 		}
 	})
 }

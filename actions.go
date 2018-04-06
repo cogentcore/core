@@ -148,11 +148,13 @@ var ActionProps = []map[string]interface{}{
 	}, { // hover
 		"background-color": "#CCF", // todo "darker"
 	}, { // focus
-		"border-color":     "#EEF",
-		"box-shadow.color": "#BBF",
+		"background-color": "#DDF",
 	}, { // press
-		"border-color":     "#DDF",
-		"color":            "white",
+		"border-color": "#BBF",
+		"color":        color.White, // todo: this is no longer working for label
+		"#label": map[string]interface{}{
+			"color": color.White,
+		},
 		"background-color": "#008",
 	}, { // selected
 		"border-color":     "#DDF",
@@ -178,8 +180,7 @@ func (g *Action) ConfigPartsMenu() {
 	g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
 	if wrIdx >= 0 {
-		kc, _ := g.Parts.Child(wrIdx)
-		ic := kc.(*Icon)
+		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
 			ic.CopyFrom(IconByName("widget-right-wedge"))
 			g.PartStyleProps(ic.This, ActionProps[ButtonNormal])
@@ -568,8 +569,7 @@ func (g *MenuButton) ConfigParts() {
 	g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, MenuButtonProps[ButtonNormal])
 	if wrIdx >= 0 {
-		kc, _ := g.Parts.Child(wrIdx)
-		ic := kc.(*Icon)
+		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFrom(IconByName(icnm))
 			ic.UniqueNm = icnm

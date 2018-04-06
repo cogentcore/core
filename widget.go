@@ -226,8 +226,7 @@ func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.Typ
 // set the icon and text values in parts, and get part style props, using given props if not set in object props
 func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int, props map[string]interface{}) {
 	if icIdx >= 0 {
-		kc, _ := g.Parts.Child(icIdx)
-		ic := kc.(*Icon)
+		ic := g.Parts.Child(icIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
 			ic.CopyFrom(icn.This)
 			ic.UniqueNm = icn.UniqueNm
@@ -235,8 +234,7 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 		}
 	}
 	if lbIdx >= 0 {
-		kc, _ := g.Parts.Child(lbIdx)
-		lbl := kc.(*Label)
+		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
 			g.PartStyleProps(lbl.This, props)
 			lbl.Text = txt

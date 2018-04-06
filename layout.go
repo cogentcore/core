@@ -618,7 +618,7 @@ func (ly *Layout) SetHScroll() {
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
 		ls.Move2DTree()
-		ls.Render2DTree()
+		ls.Viewport.ReRender2DNode(li)
 	})
 }
 
@@ -662,7 +662,7 @@ func (ly *Layout) SetVScroll() {
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
 		ls.Move2DTree()
-		ls.Render2DTree()
+		ls.Viewport.ReRender2DNode(li)
 	})
 }
 
@@ -753,11 +753,11 @@ func (ly *Layout) Render2DChildren() {
 
 // convenience for LayoutStacked to show child node at a given index
 func (ly *Layout) ShowChildAtIndex(idx int) error {
-	ch, err := ly.Child(idx)
+	idx, err := ly.Kids.ValidIndex(idx)
 	if err != nil {
 		return err
 	}
-	ly.StackTop.Ptr = ch
+	ly.StackTop.Ptr = ly.Child(idx)
 	return nil
 }
 

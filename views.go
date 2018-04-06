@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 	"math"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -130,7 +131,7 @@ func (g *TreeView) SyncToSrc() {
 	}
 	for i, vki := range g.Kids {
 		vk := vki.(*TreeView)
-		skid, _ := sk.Child(i)
+		skid := sk.Children()[i]
 		if vk.SrcNode.Ptr != skid {
 			vk.SetSrcNode(skid)
 		}
@@ -242,25 +243,25 @@ func (g *TreeView) Label() string {
 
 // a select action has been received (e.g., a mouse click) -- translate into
 // selection updates
-func (g *TreeView) SelectNodeAction() {
+func (g *TreeView) SelectAction() {
 	rn := g.RootWidget
 	if bitflag.Has(rn.NodeFlags, int(NodeFlagExtendSelect)) {
 		if g.IsSelected() {
-			g.UnselectNode()
+			g.Unselect()
 		} else {
-			g.SelectNode()
+			g.Select()
 		}
 	} else { // todo: continuous a bit trickier
 		if g.IsSelected() {
 			// nothing..
 		} else {
 			rn.UnselectAll()
-			g.SelectNode()
+			g.Select()
 		}
 	}
 }
 
-func (g *TreeView) SelectNode() {
+func (g *TreeView) Select() {
 	if !g.IsSelected() {
 		g.UpdateStart()
 		bitflag.Set(&g.NodeFlags, int(NodeFlagSelected))
@@ -271,7 +272,7 @@ func (g *TreeView) SelectNode() {
 	}
 }
 
-func (g *TreeView) UnselectNode() {
+func (g *TreeView) Unselect() {
 	if g.IsSelected() {
 		g.UpdateStart()
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagSelected))
@@ -291,7 +292,7 @@ func (g *TreeView) UnselectAll() {
 		}
 		if k.TypeEmbeds(KiT_TreeView) {
 			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			nw.UnselectNode()
+			nw.Unselect()
 			return true
 		} else {
 			return false
@@ -303,6 +304,76 @@ func (g *TreeView) UnselectAll() {
 // unselect everything below me -- call on Root to clear all
 func (g *TreeView) RootUnselectAll() {
 	g.RootWidget.UnselectAll()
+}
+
+func (g *TreeView) MoveDown() {
+	if g.Par == nil {
+		return
+	}
+	if g.IsCollapsed() || !g.HasChildren() { // next sibling
+		g.MoveDownSibling()
+	} else {
+		if g.HasChildren() {
+			nn := g.Child(0).EmbeddedStruct(KiT_TreeView).(*TreeView)
+			if nn != nil {
+				nn.SelectAction()
+			}
+		}
+	}
+}
+
+// move down only to siblings, not down into children
+func (g *TreeView) MoveDownSibling() {
+	if g.Par == nil {
+		return
+	}
+	if g == g.RootWidget {
+		return
+	}
+	myidx := g.Index()
+	if myidx < len(g.Par.Children())-1 {
+		nn := g.Par.Child(myidx + 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if nn != nil {
+			nn.SelectAction()
+		}
+	} else {
+		g.Par.(*TreeView).MoveDownSibling() // try up
+	}
+}
+
+func (g *TreeView) MoveUp() {
+	if g.Par == nil || g == g.RootWidget {
+		return
+	}
+	myidx := g.Index()
+	if myidx > 0 {
+		nn := g.Par.Child(myidx - 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if nn != nil {
+			nn.MoveToLastChild()
+		}
+	} else {
+		if g.Par != nil {
+			nn := g.Par.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			if nn != nil {
+				nn.SelectAction()
+			}
+		}
+	}
+}
+
+// move up to the last child under me
+func (g *TreeView) MoveToLastChild() {
+	if g.Par == nil || g == g.RootWidget {
+		return
+	}
+	if !g.IsCollapsed() && g.HasChildren() {
+		nn := g.Child(-1).EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if nn != nil {
+			nn.MoveToLastChild()
+		}
+	} else {
+		g.SelectAction()
+	}
 }
 
 func (g *TreeView) Collapse() {
@@ -347,7 +418,7 @@ func (g *TreeView) SrcInsertAfter() {
 		fmt.Printf("no parent to insert in\n") // todo: dialog
 		return
 	}
-	myidx := par.ChildIndex(sk, 0)
+	myidx := sk.Index()
 	nm := fmt.Sprintf("NewItem%v", myidx+1)
 	par.InsertNewChildNamed(nil, myidx+1, nm)
 }
@@ -364,7 +435,7 @@ func (g *TreeView) SrcInsertBefore() {
 		fmt.Printf("no parent to insert in\n") // todo: dialog
 		return
 	}
-	myidx := par.ChildIndex(sk, 0)
+	myidx := sk.Index()
 	nm := fmt.Sprintf("NewItem%v", myidx)
 	par.InsertNewChildNamed(nil, myidx, nm)
 }
@@ -398,7 +469,7 @@ func (g *TreeView) SrcDuplicate() {
 		fmt.Printf("no parent to insert in\n") // todo: dialog
 		return
 	}
-	myidx := par.ChildIndex(sk, 0)
+	myidx := sk.Index()
 	nm := fmt.Sprintf("NewItem%v", myidx+1)
 	par.InsertChildNamed(sk.Clone(), myidx+1, nm)
 }
@@ -449,8 +520,7 @@ func (g *TreeView) ConfigParts() {
 	updt := g.Parts.ConfigChildren(config, false) // not unique names
 
 	// todo: create a toggle button widget that has 2 different states with icons pre-loaded
-	wbk, _ := g.Parts.Child(tvBranchIdx)
-	wb := wbk.(*Action)
+	wb := g.Parts.Child(tvBranchIdx).(*Action)
 	if g.IsCollapsed() {
 		wb.Icon = IconByName("widget-right-wedge")
 	} else {
@@ -466,8 +536,7 @@ func (g *TreeView) ConfigParts() {
 		})
 	}
 
-	lbk, _ := g.Parts.Child(tvLabelIdx)
-	lbl := lbk.(*Label)
+	lbl := g.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = g.Label()
 	if updt {
 		g.PartStyleProps(lbl.This, TreeViewProps[0])
@@ -481,12 +550,11 @@ func (g *TreeView) ConfigParts() {
 		lbl.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
 			tv := lb.Parent().Parent().(*TreeView)
-			tv.SelectNodeAction()
+			tv.SelectAction()
 		})
 	}
 
-	mbk, _ := g.Parts.Child(tvMenuIdx)
-	mb := mbk.(*MenuButton)
+	mb := g.Parts.Child(tvMenuIdx).(*MenuButton)
 	if updt {
 		mb.Text = "..."
 		g.PartStyleProps(mb.This, TreeViewProps[0])
@@ -520,31 +588,42 @@ func (g *TreeView) Init2D() {
 	g.ConfigParts()
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab := recv.(*TreeView)
-		kt := d.(oswin.KeyTypedEvent)
+		kt := d.(*oswin.KeyTypedEvent)
 		// fmt.Printf("TreeView key: %v\n", kt.Chord)
 		kf := KeyFun(kt.Key, kt.Chord)
 		switch kf {
 		case KeyFunSelectItem:
-			ab.SelectNodeAction()
+			ab.SelectAction()
+			kt.SetProcessed()
 		case KeyFunCancelSelect:
 			ab.RootUnselectAll()
+			kt.SetProcessed()
 		case KeyFunMoveRight:
 			ab.Expand()
+			kt.SetProcessed()
 		case KeyFunMoveLeft:
 			ab.Collapse()
-			// todo; move down / up -- selectnext / prev
+			kt.SetProcessed()
+		case KeyFunMoveDown:
+			ab.MoveDown()
+			kt.SetProcessed()
+		case KeyFunMoveUp:
+			ab.MoveUp()
+			kt.SetProcessed()
 		}
 	})
 	g.ReceiveEventType(oswin.KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab := recv.(*TreeView)
-		kt := d.(oswin.KeyDownEvent)
+		kt := d.(*oswin.KeyDownEvent)
 		kf := KeyFun(kt.Key, "")
 		// fmt.Printf("TreeView key down: %v\n", kt.Key)
 		switch kf {
 		case KeyFunShift:
 			ab.SetContinuousSelect()
+			kt.SetProcessed()
 		case KeyFunCtrl:
 			ab.SetExtendSelect()
+			kt.SetProcessed()
 		}
 	})
 	g.ReceiveEventType(oswin.KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -564,15 +643,18 @@ var TreeViewProps = []map[string]interface{}{
 		"color":            color.Black,
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
 		"#branch": map[string]interface{}{
-			"vertical-align": AlignBottom,
+			"vertical-align": AlignMiddle,
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
 			"#icon": map[string]interface{}{
-				"width":   units.NewValue(.5, units.Em),
-				"height":  units.NewValue(.5, units.Em),
-				"margin":  units.NewValue(2, units.Px),
-				"padding": units.NewValue(2, units.Px),
+				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
+				"height":  units.NewValue(.8, units.Em),
+				"margin":  units.NewValue(0, units.Px),
+				"padding": units.NewValue(0, units.Px),
 			},
+		},
+		"#space": map[string]interface{}{
+			"width": units.NewValue(.5, units.Em),
 		},
 		"#label": map[string]interface{}{
 			"margin":           units.NewValue(0, units.Px),
@@ -651,7 +733,7 @@ func (g *TreeView) Layout2DParts(parBBox image.Rectangle) {
 
 func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 	if g.HasCollapsedParent() {
-		return
+		g.LayData.AllocPos.X = -1000000 // put it very far off screen..
 	}
 	g.ConfigParts()
 
@@ -686,8 +768,8 @@ func (g *TreeView) Layout2D(parBBox image.Rectangle) {
 				h += gi.LayData.AllocSize.Y
 			}
 		}
-		g.Layout2DChildren()
 	}
+	g.Layout2DChildren()
 }
 
 func (g *TreeView) BBox2D() image.Rectangle {
@@ -831,10 +913,11 @@ func (g *TabWidget) SetSrcNode(k ki.Ki) {
 // select tab at given index
 func (g *TabWidget) SelectTabIndex(idx int) error {
 	tabrow := g.TabRowLayout()
-	tbk, err := tabrow.Child(idx)
+	idx, err := tabrow.Children().ValidIndex(idx)
 	if err != nil {
 		return err
 	}
+	tbk := tabrow.Child(idx)
 	tb, ok := tbk.(*Button)
 	if !ok {
 		return nil
@@ -851,10 +934,12 @@ func (g *TabWidget) SelectTabIndex(idx int) error {
 // get tab frame for given index
 func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
 	tabstack := g.TabStackLayout()
-	tfk, err := tabstack.Child(idx)
+	idx, err := tabstack.Children().ValidIndex(idx)
 	if err != nil {
+		log.Printf("%v", err)
 		return nil
 	}
+	tfk := tabstack.Child(idx)
 	tf, ok := tfk.(*Frame)
 	if !ok {
 		return nil
@@ -865,22 +950,19 @@ func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
 // get the overal column layout for the tab widget
 func (g *TabWidget) TabColLayout() *Layout {
 	g.InitTabWidget()
-	ch, _ := g.Child(0)
-	return ch.(*Layout)
+	return g.Child(0).(*Layout)
 }
 
 // get the row layout of tabs across the top of the tab widget
 func (g *TabWidget) TabRowLayout() *Layout {
 	tabcol := g.TabColLayout()
-	ch, _ := tabcol.Child(0)
-	return ch.(*Layout)
+	return tabcol.Child(0).(*Layout)
 }
 
 // get the stacked layout of tab frames
 func (g *TabWidget) TabStackLayout() *Layout {
 	tabcol := g.TabColLayout()
-	ch, _ := tabcol.Child(1)
-	return ch.(*Layout)
+	return tabcol.Child(1).(*Layout)
 }
 
 // unselect all tabs

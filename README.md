@@ -67,23 +67,18 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* deleting nodes in tree view -- something not getting disconnected..
-* do render / layout tracing to see what is going on with updates -- seems like too many during scrolling.  regular interaction seems fine. 
-* think about adding a parent of TreeView nodes that can manage the full space -- needs to remember the last size of the tree and clear that after a resize somehow.  could be a generally good function for all widgets.. 
+* styles for different button states are not propagating into the parts
+* PartsNeedUpdate, add to render for all items
+* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 
+* add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  
 
 * add dialog to prompt for type of object to make?
 
-* add inspector in a different panel.. :)
-
-* PartsNeedUpdate, add to render for all items
-* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
-* for focus prev -- need to generate a slice going forward of all tree elements and then just go backward in it.. no other way.  Also check for visibility in focus movement.
+* add inspector in a different window :)
 
 * test SVG path rendering 
 * property-based xforms for svg
-
-* scrollbars are not centered -- all padding on top / left
 
 * native UnmarshalXML is not going to be flexible enough to support effective
   parsing from SVG into corresponding nodes -- going to have to use pi parsing system.. 

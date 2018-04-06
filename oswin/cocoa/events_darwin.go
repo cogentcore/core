@@ -22,10 +22,11 @@ import "C"
 
 import (
 	"fmt"
-	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"strings"
 	"time"
+
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
 func getButton(b int) (which oswin.MouseButton) {
@@ -71,7 +72,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mde.Which = getButton(int(e.data[2]))
 				lastXY = mde.Where
 				mde.Time = time.Now()
-				ec <- mde
+				ec <- &mde
 				suppressDrag = true
 			case C.GMDMouseUp:
 				var mue oswin.MouseUpEvent
@@ -80,7 +81,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mue.Which = getButton(int(e.data[2]))
 				lastXY = mue.Where
 				mue.Time = time.Now()
-				ec <- mue
+				ec <- &mue
 			case C.GMDMouseDragged:
 				if suppressDrag {
 					/* Cocoa emits a drag event immediately after a mouse down.
@@ -100,7 +101,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				}
 				lastXY = mde.Where
 				mde.Time = time.Now()
-				ec <- mde
+				ec <- &mde
 			case C.GMDMouseMoved:
 				var mme oswin.MouseMovedEvent
 				mme.Where.X = int(e.data[0])
@@ -112,7 +113,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				}
 				lastXY = mme.Where
 				mme.Time = time.Now()
-				ec <- mme
+				ec <- &mme
 			case C.GMDMouseEntered:
 				w.hasMouse = true
 				setCursor(w.cursor)
@@ -126,7 +127,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				}
 				lastXY = me.Where
 				me.Time = time.Now()
-				ec <- me
+				ec <- &me
 			case C.GMDMouseExited:
 				w.hasMouse = false
 				setCursor(oswin.NormalCursor)
@@ -140,7 +141,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				}
 				lastXY = me.Where
 				me.Time = time.Now()
-				ec <- me
+				ec <- &me
 			case C.GMDMouseWheel:
 				var me oswin.MouseEvent
 				me.Where.X = int(e.data[0])
@@ -152,8 +153,8 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					if e.data[3] == -1 {
 						button = oswin.WheelDownButton
 					}
-					ec <- oswin.MouseDownEvent{me, button}
-					ec <- oswin.MouseUpEvent{me, button}
+					ec <- &oswin.MouseDownEvent{me, button}
+					ec <- &oswin.MouseUpEvent{me, button}
 				}
 			case C.GMDMagnify:
 				var mge oswin.MagnifyEvent
@@ -161,14 +162,14 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				mge.Where.Y = int(e.data[1])
 				mge.Magnification = 1 + float64(e.data[2])/65536
 				mge.Time = time.Now()
-				ec <- mge
+				ec <- &mge
 			case C.GMDRotate:
 				var rte oswin.RotateEvent
 				rte.Where.X = int(e.data[0])
 				rte.Where.Y = int(e.data[1])
 				rte.Rotation = float64(e.data[2]) / 65536
 				rte.Time = time.Now()
-				ec <- rte
+				ec <- &rte
 			case C.GMDScroll:
 				var se oswin.ScrollEvent
 				se.Where.X = int(e.data[0])
@@ -176,7 +177,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				se.Delta.X = int(e.data[2])
 				se.Delta.Y = int(e.data[3])
 				se.Time = time.Now()
-				ec <- se
+				ec <- &se
 			case C.GMDMainFocus:
 				// for some reason Cocoa resets the cursor to normal when the window
 				// becomes the "main" window, so we have to set it back to what we want
@@ -195,12 +196,13 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				ke.Key = keyMapping[keycode]
 
 				if !downKeys[ke.Key] {
-					ec <- oswin.KeyDownEvent(ke)
+					kde := oswin.KeyDownEvent(ke)
+					ec <- &kde
 				}
 
 				downKeys[ke.Key] = true
 
-				ec <- oswin.KeyTypedEvent{
+				ec <- &oswin.KeyTypedEvent{
 					KeyEvent: ke,
 					Chord:    oswin.ConstructChord(downKeys),
 					Glyph:    letter,
@@ -220,17 +222,17 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 					}
 					delete(downKeys, key)
 				}
-				ec <- ke
+				ec <- &ke
 			case C.GMDResize:
 				var re oswin.ResizeEvent
 				re.Width = int(e.data[0])
 				re.Height = int(e.data[1])
 				re.Time = time.Now()
-				ec <- re
+				ec <- &re
 			case C.GMDClose:
 				var ce oswin.CloseEvent
 				ce.Time = time.Now()
-				ec <- ce
+				ec <- &ce
 				break eventloop
 				return
 			}

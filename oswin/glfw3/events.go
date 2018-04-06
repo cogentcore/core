@@ -17,11 +17,12 @@
 package glfw3
 
 import (
-	glfw "github.com/grd/glfw3"
-	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"math"
 	"time"
+
+	glfw "github.com/grd/glfw3"
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
 var lastCursorPosition image.Point
@@ -50,7 +51,7 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 		bue.Where.X = int(math.Floor(x))
 		bue.Where.Y = int(math.Floor(y))
 		if ws, ok := windowMap[w.C()]; ok {
-			ws.events <- bue
+			ws.events <- &bue
 		}
 
 	case glfw.Press:
@@ -60,7 +61,7 @@ func mouseButtonCallback(w *glfw.Window, button glfw.MouseButton,
 		bde.Where.X = int(math.Floor(x))
 		bde.Where.Y = int(math.Floor(y))
 		if ws, ok := windowMap[w.C()]; ok {
-			ws.events <- bde
+			ws.events <- &bde
 		}
 	}
 }
@@ -102,7 +103,7 @@ func cursorEnterCallback(w *glfw.Window, entered bool) {
 	}
 
 	if ws, ok := windowMap[w.C()]; ok {
-		ws.events <- event
+		ws.events <- &event
 	}
 }
 
@@ -112,7 +113,7 @@ func cursorPositionCallback(w *glfw.Window, xpos float64, ypos float64) {
 		var event oswin.MouseMovedEvent
 		event.From = lastCursorPosition
 		event.Where = cursorPosition
-		ws.events <- event
+		ws.events <- &event
 	}
 	lastCursorPosition = cursorPosition
 }
@@ -121,7 +122,7 @@ func framebufferSizeCallback(w *glfw.Window, width int, height int) {
 	event := oswin.ResizeEvent{width, height}
 	if ws, ok := windowMap[w.C()]; ok {
 		ws.buffer.RGBA = image.NewRGBA(image.Rect(0, 0, width, height))
-		ws.events <- event
+		ws.events <- &event
 	}
 }
 
@@ -146,7 +147,7 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 
 		ke.Key = keyMapping[key]
 
-		ws.events <- oswin.KeyDownEvent(ke)
+		ws.events <- &oswin.KeyDownEvent(ke)
 
 		kte := oswin.KeyTypedEvent{
 			KeyEvent: ke,
@@ -154,7 +155,7 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 			Glyph:    letter,
 		}
 
-		keyChan <- keyType{ws, kte}
+		keyChan <- &keyType{ws, kte}
 
 	case glfw.Repeat:
 		var letter string
@@ -172,12 +173,12 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int,
 			Glyph:    letter,
 		}
 
-		keyChan <- keyType{ws, kte}
+		keyChan <- &keyType{ws, kte}
 
 	case glfw.Release:
 		var ke oswin.KeyUpEvent
 		ke.Key = keyMapping[key]
-		ws.events <- ke
+		ws.events <- &ke
 	}
 
 }
@@ -187,7 +188,7 @@ func characterCallback(w *glfw.Window, char rune) {
 	if ws == nil {
 		return
 	}
-	characterChan <- characterType{ws, char}
+	characterChan <- &characterType{ws, char}
 }
 
 type keyType struct {
@@ -211,13 +212,13 @@ func setGlyph() {
 
 		select {
 		case newKey := <-keyChan:
-			key.window.events <- key.ke
-			keyChan <- newKey
+			key.window.events <- &key.ke
+			keyChan <- &newKey
 		case ch := <-characterChan:
 			key.ke.Glyph = string(ch.char)
-			key.window.events <- key.ke
+			key.window.events <- &key.ke
 		case <-time.After(10 * time.Millisecond):
-			key.window.events <- key.ke
+			key.window.events <- &key.ke
 		}
 	}
 }

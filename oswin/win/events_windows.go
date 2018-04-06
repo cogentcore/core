@@ -17,11 +17,12 @@
 package win
 
 import (
-	"github.com/AllenDang/w32"
-	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"syscall"
 	"unsafe"
+
+	"github.com/AllenDang/w32"
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
 const WDEM_UI_THREAD = w32.WM_APP
@@ -98,7 +99,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		bpe.Where.Y = int(lparam>>16) & 0xFFFF
 		wnd.lastX = bpe.Where.X
 		wnd.lastY = bpe.Where.Y
-		wnd.events <- bpe
+		wnd.events <- &bpe
 
 	case w32.WM_LBUTTONUP, w32.WM_RBUTTONUP, w32.WM_MBUTTONUP:
 		wnd.button = wnd.button & ^buttonForDetail(msg)
@@ -108,7 +109,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		bpe.Where.Y = int(lparam>>16) & 0xFFFF
 		wnd.lastX = bpe.Where.X
 		wnd.lastY = bpe.Where.Y
-		wnd.events <- bpe
+		wnd.events <- &bpe
 
 	case w32.WM_MOUSEWHEEL, w32.WM_MOUSEHWHEEL:
 		var me oswin.MouseEvent
@@ -119,8 +120,8 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		button := buttonForWheel(msg, delta)
 		wnd.lastX = me.Where.X
 		wnd.lastX = me.Where.Y
-		wnd.events <- oswin.MouseDownEvent{me, button}
-		wnd.events <- oswin.MouseUpEvent{me, button}
+		wnd.events <- &oswin.MouseDownEvent{me, button}
+		wnd.events <- &oswin.MouseUpEvent{me, button}
 
 	case w32.WM_MOUSEMOVE:
 		var mme oswin.MouseMovedEvent
@@ -145,15 +146,15 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 			w32.TrackMouseEvent(&tme)
 			wnd.trackMouse = true
 			wnd.restoreCursor()
-			wnd.events <- oswin.MouseEnteredEvent(mme)
+			wnd.events <- &oswin.MouseEnteredEvent(mme)
 		} else {
 			if wnd.button == 0 {
-				wnd.events <- mme
+				wnd.events <- &mme
 			} else {
 				var mde oswin.MouseDraggedEvent
 				mde.MouseMovedEvent = mme
 				mde.Which = wnd.button
-				wnd.events <- mde
+				wnd.events <- &mde
 			}
 		}
 
@@ -164,21 +165,21 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		// TODO: get real position
 		wee.Where.Y = wnd.lastX
 		wee.Where.X = wnd.lastY
-		wnd.events <- wee
+		wnd.events <- &wee
 
 	case w32.WM_SYSKEYDOWN, w32.WM_KEYDOWN:
 		translatable := w32.MapVirtualKeyEx(uint(wparam), w32.MAPVK_VK_TO_CHAR, w32.HKL(0))
 		wnd.keyDown = keyFromVirtualKeyCode(wparam)
 		wnd.keysDown[wnd.keyDown] = true
 		wnd.checkKeyState()
-		wnd.events <- oswin.KeyDownEvent{wnd.keyDown}
+		wnd.events <- &oswin.KeyDownEvent{wnd.keyDown}
 		if translatable == 0 {
 			kpe := oswin.KeyTypedEvent{
 				oswin.KeyEvent{wnd.keyDown},
 				"",
 				wnd.constructChord(),
 			}
-			wnd.events <- kpe
+			wnd.events <- &kpe
 		}
 	case w32.WM_SYSCHAR, w32.WM_CHAR:
 		glyph := syscall.UTF16ToString([]uint16{uint16(wparam)})
@@ -187,12 +188,12 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 			glyph,
 			wnd.constructChord(),
 		}
-		wnd.events <- kpe
+		wnd.events <- &kpe
 	case w32.WM_SYSKEYUP, w32.WM_KEYUP:
 		keyUp := keyFromVirtualKeyCode(wparam)
 		delete(wnd.keysDown, keyUp)
 		wnd.checkKeyState()
-		wnd.events <- oswin.KeyUpEvent{
+		wnd.events <- &oswin.KeyUpEvent{
 			keyUp,
 		}
 
@@ -200,7 +201,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		width := int(lparam) & 0xFFFF
 		height := int(lparam>>16) & 0xFFFF
 		wnd.buffer = NewDIB(image.Rect(0, 0, width, height))
-		wnd.events <- oswin.ResizeEvent{width, height}
+		wnd.events <- &oswin.ResizeEvent{width, height}
 		rc = w32.DefWindowProc(hwnd, msg, wparam, lparam)
 
 	case w32.WM_PAINT:
@@ -212,7 +213,7 @@ func WndProc(hwnd w32.HWND, msg uint32, wparam, lparam uintptr) uintptr {
 		f()
 
 	case w32.WM_CLOSE:
-		wnd.events <- oswin.CloseEvent{}
+		wnd.events <- &oswin.CloseEvent{}
 
 	case w32.WM_DESTROY:
 		w32.PostQuitMessage(0)
