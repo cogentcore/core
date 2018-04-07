@@ -8,11 +8,21 @@ package kit
 
 import (
 	// "fmt"
+	"fmt"
 	"log"
 	"math"
 	"reflect"
 	"strconv"
 )
+
+// Sel implements the "mute" function from here
+// http://blog.vladimirvivien.com/2014/03/hacking-go-filter-values-from-multi.html
+// provides a way to select a particular return value in a single expression,
+// without having a separate assignment in between -- I just call it "Sel" as
+// I'm unlikely to remember how to type a mu
+func Sel(a ...interface{}) []interface{} {
+	return a
+}
 
 // Convenience functions for converting interface{} (e.g. properties) to given
 // types uses the "ok" bool mechanism to report failure -- are as robust and
@@ -116,31 +126,13 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// robustly convert anything to a String
+// robustly convert anything to a String -- just calls Stringer -- for completeness
 func ToString(it interface{}) (string, bool) {
-	if it == nil {
+	strer, ok := it.(fmt.Stringer) // will fail if not impl
+	if !ok {
 		return "", false
 	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return strconv.FormatInt(v.Int(), 10), true
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return strconv.FormatUint(v.Uint(), 10), true
-	case vk == reflect.Bool:
-		return strconv.FormatBool(v.Bool()), true
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'G', -1, 64), true
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		cv := v.Complex()
-		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
-		return rv, true
-	case vk == reflect.String: // todo: what about []byte?
-		return v.String(), true
-	default:
-		return "", false
-	}
+	return strer.String(), true
 }
 
 // robustly set the to value from the from value -- to must be a pointer-to --

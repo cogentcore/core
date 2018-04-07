@@ -10,7 +10,7 @@ A Ki tree is recursively composed of Ki Node structs, in a one-Parent / multiple
 
 # Code Map
 
-* `kit` package: `kit.Type` struct of `reflect.Type` that supports saving / loading of type information using `kit.Types` `TypeRegistry` -- provides name to type map for looking up types by name, and types can have default properties. `kit.Enums` `EnumRegistry` provides enum (const int) <-> string conversion, including `bitflag` enums.  Also has robust generic `ki.ToInt` `ki.ToFloat` etc converters from `interface{}` to specific type, for processing properties
+* `kit` package: `kit.Type` struct of `reflect.Type` that supports saving / loading of type information using `kit.Types` `TypeRegistry` -- provides name to type map for looking up types by name, and types can have default properties. `kit.Enums` `EnumRegistry` provides enum (const int) <-> string conversion, including `bitflag` enums.  Also has robust generic `ki.ToInt` `ki.ToFloat` etc converters from `interface{}` to specific type, for processing properties, and several utilties in `embeds.go` for managing embedded structure types (e.g., ``TypeEmbeds` checks if one type embeds another, and `EmbeddedStruct` returns the embedded struct from a given struct, providing flexible access to elements of an embedded type hierarchy -- there are also methods for navigating the flattened list of all embedded fields within a struct).
 
 * `bitflag` package: simple bit flag setting, checking, and clearing methods that take bit position args as ints (from const int eunum iota's) and do the bit shifting from there
 
@@ -54,13 +54,13 @@ https://golang.org/doc/effective_go.html#names
 
 * Use plural for enum type, instead of using a "Type" suffix -- e.g., `NodeSignals` instead of `NodeSignalType`, and in general use a consistent prefix for all enum values: NodeSignalAdded etc 
 
-* my version of stringer generates conversions back from string to given type
+* my version of gp generate stringer utility generates conversions back from string to given type: https://github.com/rcoreilly/stringer
 
-* ki.EnumRegister (ki.AddEnum) -- see types.go -- adds a lot of important functionality to enums
+* ki.EnumRegister (kit.AddEnum) -- see kit/types.go -- adds a lot of important functionality to enums
 
 ## Struct structure
 
-* ALL Nodes need to be in Children of parent -- not e.g., as fields in a struct (unless they are definitely starting a new root at that point, in which case it is fine).  Use an InitNode kind of constructor to build default children that are then equivalent to fields -- always there, accessible by name, etc.
+* Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.
 
 ## Interfaces, Embedded types
 
@@ -68,9 +68,14 @@ https://golang.org/doc/effective_go.html#names
 	+ WARNING: you need to define the *entire* interface for *each* type that implements it -- there is *no inheritance* in Go!  Thus, it is important to keep interfaces small!  Or, in the case of `Ki` / `Node`, only have one struct that implements it.
 	+ An interface is the *only* way to create an equivalence class of types -- otherwise Go is strict about dealing with each struct in terms of the actual type it is, *even if it embeds a common base type*.
 	
-* Anonymous embedding a type at the start of a struct gives transparent access to the embedded types (and so on for the embedded types of that type), so it *looks* like inheritance in C++, but critically those inherited methods are *not* virtual in any way, and you must explicitly convert a given "derived" type into its base type -- you cannot do something like: `bt := derived.(*BaseType)` to get the base type from a derived object -- it will just complain that derived is its actual type, not a base type.  Although this seems like a really easy thing to fix in Go that would support derived types, it would require an expensive dynamic (runtime) traversal of the reflect type info.  Those methods are avail in package `kit` as `TypeEmbeds` to check if one type embeds another, and `EmbededStruct` to get an embedded struct out of a struct that embeds it (at any level of depth).  In general it is much better to provide an explicit interface method to provide access to embedded structs that serve as base-types for a given level of functionality.  Or provide access to everything you might need via the interface, but just giving the base struct is typically much easier.
+* Anonymous embedding a type at the start of a struct gives transparent access to the embedded types (and so on for the embedded types of that type), so it *looks* like inheritance in C++, but critically those inherited methods are *not* virtual in any way, and you must explicitly convert a given "derived" type into its base type -- you cannot do something like: `bt := derived.(*BaseType)` to get the base type from a derived object -- it will just complain that derived is its actual type, not a base type.  Although this seems like a really easy thing to fix in Go that would support derived types, it would require a (little bit expensive) dynamic (runtime) traversal of the reflect type info.  Those methods are avail in package `kit` as `TypeEmbeds` to check if one type embeds another, and `EmbededStruct` to get an embedded struct out of a struct that embeds it (at any level of depth).  In general it is much better to provide an explicit interface method to provide access to embedded structs that serve as base-types for a given level of functionality.  Or provide access to everything you might need via the interface, but just giving the base struct is typically much easier.
 
 * Although the derived types have direct access to members and methods of embedded types, at any level of depth of embedding, the `reflect` system presents each embedded type as a *single field* as it is declared in the actual code.  Thus, you have to recursively traverse these embedded structs -- methods to flatten these field lists out by calling a given function on each field in turn are provided in `kit embed.go`: `FlatFieldsTypeFun` and `FlatFieldsValueFun`
+
+* The Ki / Node framework may be seen as antithetical to the Go way of doing things, and it is at first glance more similar to C++ paradigms where a common base type is used to provide a comprehensive set of common functionality (e.g., the QObject in Qt).  However, Go also makes extensive use of special base types with considerable special, powerful functionality, in the form of slices and maps.  A Tree is likewise a kind of universal container object, and the only way to provide an appropriate general interface for it is by embedding a base type with the relevant functionality.
+	+ You still have all the critical Go interface mix-and-match power: Any number of polymorphic interfaces can be implemented on top of the basic Ki tree structure, and multiple different anonymous embedded types can be used, so there is still none of the C++ rigidity and awkwardness of dealing with multiple inheritance, etc.
+	+ The Ki interface itself is NOT designed to be implemented more than once -- there should be no reason to do so -- and all of the functionality that it does implement is fully interdependent and would not be sensibly separated into smaller interfaces.  Every attempt was made to separate out dissociable elements such as the `Ptr`, `Slice`, and `Signal`, and all the separate more general-purpose type management functionality in `kit`
+	+ The `Node` object maintains its own Ki interface pointer in the `This` field -- another seeming C++ throwback, which has turned out to be absolutely essential to getting the whole enterprise to work.  First, an interface type is automatically a pointer, so even though it is declared as a `Ki` type, it is automatically a pointer to the struct.  Most importantly, this Ki pointer retains the true underlying identity of the struct, in whatever context it is being used -- by contrast, when you call any method with a specific receiver type, the struct becomes only that type, and loses all memory of its "true" underlying type.  For example, if you try to call another interface-based function within a given receiver-defined function, you'll *only* get the interface function for that specific type, not the one for the "true" underlying type.  Therefore, you need to call `ob.This.Function()` to get the one defined for the full type of the object.  This is probably the functionality most people would expect, especially coming from the world of C++ virtual functions.
 
 ## interface{} type: universal Variant
 
@@ -78,7 +83,7 @@ Go makes extensive use of the `interface{}` type which is effectively a built-in
 
 ## Closures & anonymous functions
 
-It is very convenient to use anonymous functions directly in the `FunDown` (etc) and `Signal Connect` cases, but for performance reasons, it is important to be careful about capturing local variables from the parent function, thereby creating a *closure*, which creates a local stack to represent those variables.  In the case of FunDown / FunUp etc, the impact is minimized because the function is ONLY used during the lifetime of the outer function.  However, for `Signal Connect`, the function is itself saved and used later, so using a closure there creates extra memory overhead for each time the connection is created.  Thus, it is generally better to avoid capturing local variables in such functions -- typically all the relevant info can be made available in the recv, send, sig, and data args for the connection function.
+It is very convenient to use anonymous functions directly in the `FuncDown` (etc) and `Signal Connect` cases, but for performance reasons, it is important to be careful about capturing local variables from the parent function, thereby creating a *closure*, which creates a local stack to represent those variables.  In the case of FunDown / FunUp etc, the impact is minimized because the function is ONLY used during the lifetime of the outer function.  However, for `Signal Connect`, the function is itself saved and used later, so using a closure there creates extra memory overhead for each time the connection is created.  Thus, it is generally better to avoid capturing local variables in such functions -- typically all the relevant info can be made available in the recv, send, sig, and data args for the connection function.
 
 ## Notes on things that would perhaps be nice to change about Go..
 
@@ -96,6 +101,7 @@ As the docs state, you really have to use it for a while to appreciate all of th
 
 # TODO
 
+* what about Kind == reflect.Interface fields in structs -- should they be set to zero?  probably..
 * XML IO -- first pass done, but more should be in attr instead of full elements
 * FindChildRecursive functions?
 * port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus

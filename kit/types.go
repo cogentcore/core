@@ -41,6 +41,7 @@ package kit
 import (
 	// "fmt"
 	// "log"
+	"log"
 	"reflect"
 )
 
@@ -123,4 +124,33 @@ func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
 		return nil
 	}
 	return p
+}
+
+// AllImplementersOf returns a list of all registered types that implement the given interface type at any level of embedding -- must pass a type constructed like this: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
+func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type) []reflect.Type {
+	if iface.Kind() != reflect.Interface {
+		log.Printf("kit.TypeRegistry AllImplementersOf -- type is not an interface: %v\n", iface)
+		return nil
+	}
+	tl := make([]reflect.Type, 0)
+	for _, typ := range tr.Types {
+		if EmbeddedTypeImplements(typ, iface) {
+			tl = append(tl, typ)
+		}
+	}
+	return tl
+}
+
+// AllEmbedsOf returns a list of all registered types that embed (inherit from in C++ terminology) the given type -- inclusive determines whether the type itself is included in list
+func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive bool) []reflect.Type {
+	tl := make([]reflect.Type, 0)
+	for _, typ := range tr.Types {
+		if !inclusive && typ == embed {
+			continue
+		}
+		if TypeEmbeds(typ, embed) {
+			tl = append(tl, typ)
+		}
+	}
+	return tl
 }

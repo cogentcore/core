@@ -797,9 +797,16 @@ func (n *Node) Destroy() {
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.DisconnectAll()
-	// todo: traverse struct and un-set all Ptr's!
 	n.DeleteChildren(true) // first delete all my children
 	n.DestroyDeleted()     // then destroy all those kids
+	// extra step to delete all the slices and maps -- super friendly to GC :)
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
+			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
+		}
+		return true
+	})
+	n.This = nil // last gasp: lose our own sense of self..
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1134,6 +1141,10 @@ func (n *Node) Disconnect() {
 	n.NodeSig.DisconnectAll()
 	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		switch {
+		case fieldVal.Kind() == reflect.Interface:
+			if field.Name != "This" { // reserve that for last step in Destroy
+				fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
+			}
 		case fieldVal.Kind() == reflect.Ptr:
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 		case fieldVal.Type() == KiT_Signal:
