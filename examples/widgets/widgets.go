@@ -6,12 +6,14 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 func main() {
@@ -27,8 +29,8 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
-	recv := ki.Node{}            // receiver for events
-	recv.InitName(&recv, "recv") // this is essential for root objects not owned by other Ki tree nodes
+	rec := ki.Node{}          // receiver for events
+	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
 	win.UpdateStart()
@@ -70,16 +72,16 @@ func mainrun() {
 	mb1 := row2.AddNewChildNamed(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 
 	mb1.SetText("Menu Button")
-	mb1.AddMenuText("Menu Item 1", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
+	mb1.AddMenuText("Menu Item 1", rec.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mb1.AddMenuText("Menu Item 2", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
+	mb1.AddMenuText("Menu Item 2", rec.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mb1.AddMenuText("Menu Item 3", recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action signal: %v from menu action: %v\n", gi.ActionSignals(sig), send.Name())
+	mb1.AddMenuText("Menu Item 3", rec.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
 	mb1.SetProp("align-vert", gi.AlignMiddle)
@@ -97,16 +99,17 @@ func mainrun() {
 	button1.SetProp("align-vert", gi.AlignMiddle)
 	button2.SetProp("align-vert", gi.AlignMiddle)
 
-	edit1.TextFieldSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
 
-	button1.ButtonSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 	})
 
-	button2.ButtonSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+		gi.PromptDialog(vp, "This is a prompt", "Do you want to continue now?", true, true)
 	})
 
 	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
@@ -132,11 +135,11 @@ func mainrun() {
 	slider2.Defaults()
 	slider2.SetValue(0.5)
 
-	slider1.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	slider1.SliderSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
-	slider2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	slider2.SliderSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
@@ -158,11 +161,11 @@ func mainrun() {
 	scrollbar2.SetThumbValue(0.1)
 	scrollbar2.SetValue(0.5)
 
-	scrollbar1.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	scrollbar1.SliderSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
-	scrollbar2.SliderSig.Connect(recv.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	scrollbar2.SliderSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 	})
 
@@ -173,6 +176,12 @@ func mainrun() {
 	row4.SetProp("margin", 2.0)
 	row4.SetStretchMaxWidth()
 	// row4.SetStretchMaxHeight()
+
+	cb := row4.AddNewChildNamed(gi.KiT_ComboBox, "combobox").(*gi.ComboBox)
+	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem()), true)
+	cb.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
+	})
 
 	ico := row4.AddNewChildNamed(gi.KiT_Icon, wdicon.Name()).(*gi.Icon)
 	ico.CopyFrom(wdicon)

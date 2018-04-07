@@ -31,23 +31,13 @@ const (
 	ActionFlagMenu NodeFlags = ButtonFlagsN + iota
 )
 
-// signals that buttons can send
-type ActionSignals int64
-
-const (
-	// action just sends one signal: triggered -- use ButtonSig for more detailed ones
-	ActionTriggered ActionSignals = iota
-	ActionSignalsN
-)
-
-//go:generate stringer -type=ActionSignals
-
 // Action is a button widget that can display a text label and / or an icon and / or
 // a keyboard shortcut -- this is what is put in menus and toolbars
 // todo: need icon
 type Action struct {
 	ButtonBase
-	ActionSig ki.Signal `json:"-" xml:"-" desc:"signal for action -- very simple -- Action triggered"`
+	Data      interface{} `desc:"optional data that is sent with the ActionSig when it is emitted"`
+	ActionSig ki.Signal   `desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 }
 
 var KiT_Action = kit.Types.AddType(&Action{}, nil)
@@ -65,8 +55,8 @@ func (g *Action) ButtonRelease() {
 	g.SetButtonState(ButtonNormal)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
-		g.ActionSig.Emit(g.This, int64(ActionTriggered), nil)
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+		g.ActionSig.Emit(g.This, 0, g.Data)
+		g.ButtonSig.Emit(g.This, int64(ButtonClicked), g.Data)
 	}
 	g.UpdateEnd()
 }
@@ -159,7 +149,7 @@ var ActionProps = []map[string]interface{}{
 	}, { // selected
 		"border-color":     "#DDF",
 		"color":            "white",
-		"background-color": "#00F",
+		"background-color": "#88F",
 	},
 }
 
@@ -196,6 +186,13 @@ func (g *Action) ConfigParts() {
 	}
 }
 
+func (g *Action) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+		return
+	}
+	g.ConfigParts()
+}
+
 func (g *Action) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
 	g.Style2DWidget(ActionProps[ButtonNormal])
@@ -214,7 +211,7 @@ func (g *Action) Size2D() {
 }
 
 func (g *Action) Layout2D(parBBox image.Rectangle) {
-	g.ConfigParts()
+	g.ConfigPartsIfNeeded()
 	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
@@ -241,6 +238,7 @@ func (g *Action) ChildrenBBox2D() image.Rectangle {
 
 func (g *Action) Render2D() {
 	if g.PushBounds() {
+		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
@@ -417,7 +415,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	win := vp.ParentWindow()
-	win.PushPopup(pvp)
+	win.PushPopup(pvp.This)
 	pvp.UpdateStart()
 	pvp.AddChild(lay.This)
 	pvp.Init2DTree() // do an explicit init to get connected to window and viewport properly
@@ -426,9 +424,9 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	return pvp
 }
 
-///////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////////////
 // MenuButton pops up a menu
+
 type MenuButton struct {
 	ButtonBase
 	Menu Menu `desc:"the menu items for this menu"`
@@ -455,9 +453,14 @@ func (g *MenuButton) ButtonRelease() {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
 	}
 	g.UpdateEnd()
-	pos := g.WinBBox.Max // todo: find location of down wedge?
-	pos.Y -= 10
-	pos.X -= 10
+	pos := g.WinBBox.Max
+	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
+	if indic != nil {
+		pos = indic.WinBBox.Min
+	} else {
+		pos.Y -= 10
+		pos.X -= 10
+	}
 	PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)
 }
 
@@ -472,13 +475,14 @@ func (g *MenuButton) SetIcon(ic *Icon) {
 }
 
 // add an action to the menu -- todo: shortcuts
-func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
 	if g.Menu == nil {
 		g.Menu = make(Menu, 0, 10)
 	}
 	ac := Action{}
 	ac.InitName(&ac, txt)
 	ac.Text = txt
+	ac.Data = data
 	ac.SetAsMenu()
 	g.Menu = append(g.Menu, ac.This.(Node2D))
 	if sigTo != nil && fun != nil {
@@ -584,6 +588,13 @@ func (g *MenuButton) ConfigParts() {
 			g.PartStyleProps(ic.This, MenuButtonProps[ButtonNormal])
 		}
 	}
+}
+
+func (g *MenuButton) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+		return
+	}
+	g.ConfigParts()
 }
 
 func (g *MenuButton) Style2D() {

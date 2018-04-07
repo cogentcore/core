@@ -353,10 +353,7 @@ func (w *Window) EventLoop() {
 		}
 
 		if delPop {
-			w.DisconnectNode(w.Popup)
-			w.Popup.SetParent(nil)     // don't redraw the popup anymore
-			w.Viewport.RestorePixels() // revert prior to processing events
-			w.Viewport.DrawIntoWindow()
+			w.DisconnectPopup(w.Popup)
 		}
 
 		if !evi.IsProcessed() {
@@ -405,9 +402,9 @@ func (w *Window) SetNextFocusItem() bool {
 		focusNext = true
 	}
 
-	focRoot := w.Viewport
+	focRoot := w.Viewport.This
 	if w.Popup != nil {
-		focRoot = w.Popup.(*Viewport2D)
+		focRoot = w.Popup
 	}
 
 	for i := 0; i < 2; i++ {
@@ -455,9 +452,9 @@ func (w *Window) SetPrevFocusItem() bool {
 	gotFocus := false
 	var prevItem ki.Ki
 
-	focRoot := w.Viewport
+	focRoot := w.Viewport.This
 	if w.Popup != nil {
-		focRoot = w.Popup.(*Viewport2D)
+		focRoot = w.Popup
 	}
 
 	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
@@ -491,23 +488,43 @@ func (w *Window) SetPrevFocusItem() bool {
 }
 
 // push current popup onto stack and set new popup
-func (w *Window) PushPopup(pvp *Viewport2D) {
+func (w *Window) PushPopup(pop ki.Ki) {
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
-	pvp.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
+	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
-	w.Popup = pvp.This
-	w.PushFocus(pvp.This)
+	w.Popup = pop
+	w.PushFocus(pop)
 	w.SetNextFocusItem()
+}
+
+// disconnect given popup -- typically the current one
+func (w *Window) DisconnectPopup(pop ki.Ki) {
+	w.DisconnectNode(pop)
+	pop.SetParent(nil)         // don't redraw the popup anymore
+	w.Viewport.RestorePixels() // revert prior to processing events
+	w.Viewport.DrawIntoWindow()
+}
+
+// close given popup -- must be the current one -- returns false if not
+func (w *Window) ClosePopup(pop ki.Ki) bool {
+	if pop != w.Popup {
+		return false
+	}
+	w.DisconnectPopup(pop)
+	w.PopPopup(pop)
+	return true
 }
 
 // pop current popup off the popup stack and set to current popup
 func (w *Window) PopPopup(pvpk ki.Ki) {
-	pvp := pvpk.(*Viewport2D)
-	if pvp != nil {
-		pvp.DeletePopup()
+	gii, ok := pvpk.(Node2D)
+	if ok {
+		pvp := gii.AsViewport2D()
+		if pvp != nil {
+			pvp.DeletePopup()
+		}
 	}
 	if w.PopupStack == nil || len(w.PopupStack) == 0 {
 		w.Popup = nil

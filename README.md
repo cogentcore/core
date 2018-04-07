@@ -77,10 +77,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
     + read-only
 	+ inline
 	+ condshow / edit
-	+ how to manage the "factory" / delegation of different edits for different types?  just build in inheritance and support for basic types and then there is no issue -- i.e., it is all custom and styles can be used for options?  probably that's best..
+	+ use "Stringer" paradigm for interface for getting UI elements for different types -- anyone can define them!  returns a Widget and with parts etc can embed anything in anything..  Widgeter interface: Widget() Widget method, SetWidget(widg) to configure it for a given thing, and ReadWidget(widg) to get value back..
+	
+	how to manage the "factory" / delegation of different edits for different types?  just build in inheritance and support for basic types and then there is no issue -- i.e., it is all custom and styles can be used for options?  probably that's best..
 
 * styles for different button states are not propagating into the parts
-* PartsNeedUpdate, add to render for all items
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 
 * add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  

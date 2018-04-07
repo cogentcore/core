@@ -561,27 +561,32 @@ func (g *TreeView) ConfigParts() {
 		g.PartStyleProps(mb.This, TreeViewProps[0])
 
 		// todo: shortcuts!
-		mb.AddMenuText("Add Child", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mb.AddMenuText("Add Child", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcAddChild()
 		})
-		mb.AddMenuText("Insert Before", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mb.AddMenuText("Insert Before", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcInsertBefore()
 		})
-		mb.AddMenuText("Insert After", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mb.AddMenuText("Insert After", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcInsertAfter()
 		})
-		mb.AddMenuText("Duplicate", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mb.AddMenuText("Duplicate", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcDuplicate()
 		})
-		mb.AddMenuText("Delete", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mb.AddMenuText("Delete", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tv := recv.(*TreeView)
 			tv.SrcDelete()
 		})
 	}
+}
+
+func (g *TreeView) ConfigPartsIfNeeded() {
+	lbl := g.Parts.Child(tvLabelIdx).(*Label)
+	lbl.Text = g.Label()
 }
 
 func (g *TreeView) Init2D() {
@@ -801,6 +806,7 @@ func (g *TreeView) Render2D() {
 		return // nothing
 	}
 	if g.PushBounds() {
+		g.ConfigPartsIfNeeded()
 		// reset for next update
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagFullReRender))
 

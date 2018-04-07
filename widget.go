@@ -241,3 +241,37 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 		}
 	}
 }
+
+// check if parts need to be updated -- for ConfigPartsIfNeeded
+func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
+	if icn != nil {
+		ick := g.Parts.ChildByName("Icon", 0)
+		if ick == nil {
+			return true
+		}
+		ic := ick.(*Icon)
+		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm {
+			return true
+		}
+	} else {
+		ic := g.Parts.ChildByName("Icon", 0)
+		if ic != nil {
+			return true
+		}
+	}
+	if txt != "" {
+		lbl := g.Parts.ChildByName("Label", 2)
+		if lbl == nil {
+			return true
+		}
+		if lbl.(*Label).Text != txt {
+			return true
+		}
+	} else {
+		lbl := g.Parts.ChildByName("Label", 2)
+		if lbl != nil {
+			return true
+		}
+	}
+	return false
+}

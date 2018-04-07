@@ -5,9 +5,11 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
+	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
@@ -512,3 +514,329 @@ func (g *TextField) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &TextField{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ComboBox for selecting items from a list
+
+type ComboBox struct {
+	ButtonBase
+	Editable  bool          `desc:"provide a text field for editing the value, or just a button for selecting items?"`
+	CurVal    interface{}   `desc:"current selected value"`
+	CurIndex  int           `desc:"current index in list of possible items"`
+	Items     []interface{} `desc:"items available for selection"`
+	ItemsMenu Menu          `desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	ComboSig  ki.Signal     `desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+}
+
+var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, nil)
+
+// ButtonWidget interface
+
+func (g *ComboBox) ButtonAsBase() *ButtonBase {
+	return &(g.ButtonBase)
+}
+
+func (g *ComboBox) ButtonRelease() {
+	win := g.Viewport.ParentWindow()
+	if win.Popup != nil {
+		return
+	}
+	wasPressed := (g.State == ButtonDown)
+	g.UpdateStart()
+	g.MakeItemsMenu()
+	g.SetButtonState(ButtonNormal)
+	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	if wasPressed {
+		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+	}
+	g.UpdateEnd()
+	pos := g.WinBBox.Max
+	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
+	if indic != nil {
+		pos = indic.WinBBox.Min
+	} else {
+		pos.Y -= 10
+		pos.X -= 10
+	}
+	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
+}
+
+// MakeItems makes sure the Items list is made, and if not, or reset is true, creates one with the given capacity
+func (g *ComboBox) MakeItems(reset bool, capacity int) {
+	if g.Items == nil || reset {
+		g.Items = make([]interface{}, 0, capacity)
+	}
+}
+
+// ItemsFromTypes sets the Items list from a list of types -- see e.g., AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then set current item to the first item in the list
+func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst bool) {
+	sz := len(tl)
+	g.Items = make([]interface{}, sz)
+	for i, typ := range tl {
+		g.Items[i] = typ
+	}
+	if setFirst {
+		g.SetCurIndex(0)
+	}
+}
+
+// FindItem finds an item on list of items and returns its index
+func (g *ComboBox) FindItem(it interface{}) int {
+	if g.Items == nil {
+		return -1
+	}
+	for i, v := range g.Items {
+		if v == it {
+			return i
+		}
+	}
+	return -1
+}
+
+// SetCurVal sets the current value (CurVal) and the corresponding CurIndex for that item on the current Items list (-1 if not found) -- returns that index -- and sets the text to the string value of that value (using standard Stringer string conversion)
+func (g *ComboBox) SetCurVal(it interface{}) int {
+	g.CurVal = it
+	g.CurIndex = g.FindItem(it)
+	g.SetText(kit.Sel(kit.ToString(it))[0].(string))
+	return g.CurIndex
+}
+
+// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal for that item on the current Items list (-1 if not found) -- returns value -- and sets the text to the string value of that value (using standard Stringer string conversion)
+func (g *ComboBox) SetCurIndex(idx int) interface{} {
+	g.CurIndex = idx
+	if idx < 0 || idx >= len(g.Items) {
+		g.CurVal = nil
+		g.SetText(fmt.Sprintf("idx %v > len", idx))
+	} else {
+		g.CurVal = g.Items[idx]
+		g.SetText(kit.Sel(kit.ToString(g.CurVal))[0].(string))
+	}
+	return g.CurVal
+}
+
+// SelectItem selects a given item and emits the index as the ComboSig signal and the selected item as the data
+func (g *ComboBox) SelectItem(idx int) {
+	g.SetCurIndex(idx)
+	g.ComboSig.Emit(g.This, int64(g.CurIndex), g.CurVal)
+}
+
+// set the text and update button -- does NOT change the currently-selected value or index
+func (g *ComboBox) SetText(txt string) {
+	SetButtonText(g, txt)
+}
+
+// set the Icon (could be nil) and update button
+func (g *ComboBox) SetIcon(ic *Icon) {
+	SetButtonIcon(g, ic)
+}
+
+// make menu of all the items
+func (g *ComboBox) MakeItemsMenu() {
+	if g.ItemsMenu == nil {
+		g.ItemsMenu = make(Menu, 0, len(g.Items))
+	}
+	sz := len(g.ItemsMenu)
+	for i, it := range g.Items {
+		var ac *Action
+		if sz > i {
+			ac = g.ItemsMenu[i].(*Action)
+		} else {
+			ac = &Action{}
+			ac.Init(ac)
+			g.ItemsMenu = append(g.ItemsMenu, ac.This.(Node2D))
+		}
+		txt, _ := kit.ToString(it)
+		nm := fmt.Sprintf("Item_%v", i)
+		ac.SetName(nm)
+		ac.Text = txt
+		ac.Data = i // index is the data
+		ac.SetSelected(i == g.CurIndex)
+		ac.SetAsMenu()
+		ac.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			idx := data.(int)
+			cb := recv.(*ComboBox)
+			cb.SelectItem(idx)
+		})
+	}
+}
+
+func (g *ComboBox) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *ComboBox) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *ComboBox) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *ComboBox) Init2D() {
+	g.Init2DWidget()
+	g.ConfigParts()
+	Init2DButtonEvents(g)
+}
+
+var ComboBoxProps = []map[string]interface{}{
+	{
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(4, units.Px),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignMiddle,
+		"color":            color.Black,
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignBottom,
+		},
+	}, { // disabled
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	}, { // hover
+		"background-color": "#CCF", // todo "darker"
+	}, { // focus
+		"border-color":     "#EEF",
+		"box-shadow.color": "#BBF",
+	}, { // press
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	}, { // selected
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
+
+func (g *ComboBox) ConfigParts() {
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	wrIdx := -1
+	icnm, ok := kit.ToString(g.Prop("indicator", false, false))
+	if !ok || icnm == "" {
+		icnm = "widget-down-wedge"
+	}
+	if icnm != "none" {
+		config.Add(KiT_Space, "InStretch")
+		wrIdx = len(config)
+		config.Add(KiT_Icon, "Indicator")
+	}
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ComboBoxProps[ButtonNormal])
+	if wrIdx >= 0 {
+		ic := g.Parts.Child(wrIdx).(*Icon)
+		if !ic.HasChildren() || ic.UniqueNm != icnm {
+			ic.CopyFrom(IconByName(icnm))
+			ic.UniqueNm = icnm
+			g.PartStyleProps(ic.This, ComboBoxProps[ButtonNormal])
+		}
+	}
+}
+
+func (g *ComboBox) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+		return
+	}
+	g.ConfigParts()
+}
+
+func (g *ComboBox) Style2D() {
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	g.Style2DWidget(ComboBoxProps[ButtonNormal])
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i] = g.Style
+		if i > 0 {
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, ComboBoxProps[i])
+		}
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
+	}
+	g.ConfigParts()
+}
+
+func (g *ComboBox) Size2D() {
+	g.Size2DWidget()
+}
+
+func (g *ComboBox) Layout2D(parBBox image.Rectangle) {
+	g.ConfigParts()
+	g.Layout2DWidget(parBBox)
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.Layout2DChildren()
+}
+
+func (g *ComboBox) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
+}
+
+func (g *ComboBox) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
+}
+
+func (g *ComboBox) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
+func (g *ComboBox) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox) // moves parts
+	g.Move2DChildren(delta)
+}
+
+// todo: need color brigher / darker functions
+
+func (g *ComboBox) Render2D() {
+	if g.PushBounds() {
+		if !g.HasChildren() {
+			g.Render2DDefaultStyle()
+		} else {
+			g.Render2DChildren()
+		}
+		g.PopBounds()
+	}
+}
+
+// render using a default style if not otherwise styled
+func (g *ComboBox) Render2DDefaultStyle() {
+	st := &g.Style
+	g.RenderStdBox(st)
+	g.Render2DParts()
+}
+
+func (g *ComboBox) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
+}
+
+func (g *ComboBox) FocusChanged2D(gotFocus bool) {
+	g.UpdateStart()
+	if gotFocus {
+		g.SetButtonState(ButtonFocus)
+	} else {
+		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+	}
+	g.UpdateEnd()
+}
+
+// check for interface implementation
+var _ Node2D = &ComboBox{}

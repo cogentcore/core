@@ -937,14 +937,34 @@ func (g *Frame) Render2D() {
 		pc := &g.Paint
 		st := &g.Style
 		rs := &g.Viewport.Render
+		// first draw a background rectangle in our full area
+		pc.StrokeStyle.SetColor(nil)
+		pc.FillStyle.SetColor(&st.Background.Color)
+		pos := g.LayData.AllocPos
+		sz := g.LayData.AllocSize
+		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+		pc.FillStrokeClear(rs)
+
+		rad := st.Border.Radius.Dots
+		pos = pos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
+		sz = sz.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+
+		// then any shadow
+		if st.BoxShadow.HasShadow() {
+			spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+			pc.StrokeStyle.SetColor(nil)
+			pc.FillStyle.SetColor(&st.BoxShadow.Color)
+			if rad == 0.0 {
+				pc.DrawRectangle(rs, spos.X, spos.Y, sz.X, sz.Y)
+			} else {
+				pc.DrawRoundedRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, rad)
+			}
+			pc.FillStrokeClear(rs)
+		}
+
+		pc.FillStyle.SetColor(&st.Background.Color)
 		pc.StrokeStyle.SetColor(&st.Border.Color)
 		pc.StrokeStyle.Width = st.Border.Width
-		pc.FillStyle.SetColor(&st.Background.Color)
-		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
-		sz := g.LayData.AllocSize.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
-		// pos := g.LayData.AllocPos
-		// sz := g.LayData.AllocSize
-		rad := st.Border.Radius.Dots
 		if rad == 0.0 {
 			pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
 		} else {

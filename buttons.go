@@ -77,8 +77,7 @@ type ButtonBase struct {
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig   ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
-	// todo: icon -- should be an xml
+	ButtonSig   ki.Signal            `desc:"signal for button -- see ButtonSignals for the types"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, nil)
@@ -168,8 +167,10 @@ type ButtonWidget interface {
 	ButtonAsBase() *ButtonBase
 	// called for release of button -- this is where buttons actually differ in functionality
 	ButtonRelease()
-	// configure the parts of the button
+	// configure the parts of the button -- called during init and style
 	ConfigParts()
+	// configure the parts of the button, only if needed -- called during layout and render
+	ConfigPartsIfNeeded()
 }
 
 // set the text and update button
@@ -330,8 +331,12 @@ func (g *Button) ConfigParts() {
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ButtonProps[ButtonNormal])
 }
 
-// todo: add PartsNeedUpdate to check if text, icon are diff, and call update in render.
-//
+func (g *Button) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+		return
+	}
+	g.ConfigParts()
+}
 
 func (g *Button) Style2D() {
 	bitflag.Set(&g.NodeFlags, int(CanFocus))
@@ -351,7 +356,7 @@ func (g *Button) Size2D() {
 }
 
 func (g *Button) Layout2D(parBBox image.Rectangle) {
-	g.ConfigParts()
+	g.ConfigPartsIfNeeded()
 	g.Layout2DWidget(parBBox) // lays out parts
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
@@ -380,6 +385,7 @@ func (g *Button) Move2D(delta Vec2D, parBBox image.Rectangle) {
 
 func (g *Button) Render2D() {
 	if g.PushBounds() {
+		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {

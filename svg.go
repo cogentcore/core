@@ -35,7 +35,7 @@ func (vp *SVG) AsLayout2D() *Layout {
 }
 
 func (vp *SVG) Init2D() {
-	vp.Init2DBase()
+	vp.Viewport2D.Init2D()
 	bitflag.Set(&vp.NodeFlags, int(VpFlagSVG)) // we are an svg type
 }
 
