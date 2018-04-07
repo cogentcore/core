@@ -297,6 +297,10 @@ func (w *Window) EventLoop() {
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
 
+		// if curPop != nil {
+		// 	fmt.Printf("curpop: %v\n", curPop.Name())
+		// }
+
 		evi, ok := ei.(oswin.Event)
 		if !ok {
 			log.Printf("Gi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
@@ -306,9 +310,12 @@ func (w *Window) EventLoop() {
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
-		if w.Popup != nil && w.Popup == curPop { // special processing of events during popups
+		if w.Popup != nil {
 			if et == oswin.MouseUpEventType {
 				delPop = w.PopupMouseUpEvent(evi) // popup before processing event
+				// if curPop != nil {
+				// 	fmt.Printf("curpop: %v delpop: %v\n", curPop.Name(), delPop)
+				// }
 			}
 		}
 		// todo: what about iconify events!?
@@ -353,7 +360,8 @@ func (w *Window) EventLoop() {
 		}
 
 		if delPop {
-			w.DisconnectPopup(w.Popup)
+			// fmt.Printf("delpop disconnecting curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
+			w.DisconnectPopup(curPop)
 		}
 
 		if !evi.IsProcessed() {
@@ -364,6 +372,7 @@ func (w *Window) EventLoop() {
 		}
 
 		if delPop {
+			// fmt.Printf("delpop poping curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
 			w.PopPopup(curPop)
 		}
 	}
@@ -518,22 +527,33 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 }
 
 // pop current popup off the popup stack and set to current popup
-func (w *Window) PopPopup(pvpk ki.Ki) {
-	gii, ok := pvpk.(Node2D)
+func (w *Window) PopPopup(pop ki.Ki) {
+	gii, ok := pop.(Node2D)
 	if ok {
 		pvp := gii.AsViewport2D()
 		if pvp != nil {
 			pvp.DeletePopup()
 		}
 	}
-	if w.PopupStack == nil || len(w.PopupStack) == 0 {
-		w.Popup = nil
+	sz := len(w.PopupStack)
+	if w.Popup == pop {
+		if w.PopupStack == nil || sz == 0 {
+			w.Popup = nil
+		} else {
+			w.Popup = w.PopupStack[sz-1]
+			w.PopupStack = w.PopupStack[:sz-1]
+		}
+		w.PopFocus()
 	} else {
-		sz := len(w.PopupStack)
-		w.Popup = w.PopupStack[sz-1]
-		w.PopupStack = w.PopupStack[:sz-1]
+		for i := sz - 1; i >= 0; i-- {
+			pp := w.PopupStack[i]
+			if pp == pop {
+				w.PopupStack = w.PopupStack[:i+copy(w.PopupStack[i:], w.PopupStack[i+1:])]
+				break
+			}
+		}
+		// do nothing
 	}
-	w.PopFocus() // always
 }
 
 // push current focus onto stack and set new focus
