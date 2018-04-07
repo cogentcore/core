@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
@@ -266,7 +267,6 @@ func (g *TreeView) Select() {
 		bitflag.Set(&g.NodeFlags, int(NodeFlagSelected))
 		g.GrabFocus() // focus always follows select  todo: option
 		g.TreeViewSig.Emit(g.This, int64(NodeSelected), nil)
-		// fmt.Printf("selected node: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -276,7 +276,6 @@ func (g *TreeView) Unselect() {
 		g.UpdateStart()
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagSelected))
 		g.TreeViewSig.Emit(g.This, int64(NodeUnselected), nil)
-		// fmt.Printf("unselectednode: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -381,7 +380,6 @@ func (g *TreeView) Collapse() {
 		}
 		bitflag.Set(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeCollapsed), nil)
-		// fmt.Printf("collapsed node: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -394,7 +392,6 @@ func (g *TreeView) Expand() {
 		}
 		bitflag.Clear(&g.NodeFlags, int(NodeFlagCollapsed))
 		g.TreeViewSig.Emit(g.This, int64(NodeOpened), nil)
-		// fmt.Printf("expanded node: %v\n", g.Nm)
 		g.UpdateEnd()
 	}
 }
@@ -410,13 +407,14 @@ func (g *TreeView) ToggleCollapse() {
 // insert a new node in the source tree
 func (g *TreeView) SrcInsertAfter() {
 	if g.IsField() {
-		fmt.Printf("cannot insert after fields\n") // todo: dialog, disable menu
+		// todo: disable menu!
+		PromptDialog(g.Viewport, "TreeView Insert After", "Cannot insert after fields", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		fmt.Printf("no parent to insert in\n") // todo: dialog
+		PromptDialog(g.Viewport, "TreeView Insert After", "Cannot insert after the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
@@ -426,19 +424,30 @@ func (g *TreeView) SrcInsertAfter() {
 
 // insert a new node in the source tree
 func (g *TreeView) SrcInsertBefore() {
+	ttl := "TreeView Insert Before"
 	if g.IsField() {
-		fmt.Printf("cannot insert after fields\n") // todo: dialog, disable menu
+		PromptDialog(g.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		fmt.Printf("no parent to insert in\n") // todo: dialog
+		PromptDialog(g.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
-	nm := fmt.Sprintf("NewItem%v", myidx)
-	par.InsertNewChildNamed(nil, myidx, nm)
+
+	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(DialogAccepted) {
+			tv, _ := recv.(*TreeView)
+			dlg, _ := send.(*Dialog)
+			n, typ := NewKiDialogValues(dlg)
+			for i := 0; i < n; i++ {
+				nm := fmt.Sprintf("New%v_%v", typ.Name(), myidx+i)
+				tv.Par.InsertNewChildNamed(typ, myidx, nm)
+			}
+		}
+	})
 }
 
 // insert a new node in the source tree
@@ -451,7 +460,11 @@ func (g *TreeView) SrcAddChild() {
 // delete me in source tree
 func (g *TreeView) SrcDelete() {
 	if g.IsField() {
-		fmt.Printf("cannot delete fields\n") // todo: dialog, disable menu
+		PromptDialog(g.Viewport, "TreeView Delete", "Cannot delete fields", true, false, nil, nil)
+		return
+	}
+	if g.RootWidget.This == g.This {
+		PromptDialog(g.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
@@ -461,13 +474,13 @@ func (g *TreeView) SrcDelete() {
 // duplicate item in source tree, add after
 func (g *TreeView) SrcDuplicate() {
 	if g.IsField() {
-		fmt.Printf("cannot delete fields\n") // todo: dialog, disable menu
+		PromptDialog(g.Viewport, "TreeView Duplicate", "Cannot delete fields", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		fmt.Printf("no parent to insert in\n") // todo: dialog
+		PromptDialog(g.Viewport, "TreeView Duplicate", "Cannot duplicate the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
@@ -510,7 +523,6 @@ func (g *TreeView) AsLayout2D() *Layout {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
 func (g *TreeView) ConfigParts() {
-	// todo: add some styles for button layout
 	g.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	config.Add(KiT_Action, "Branch")
@@ -530,10 +542,8 @@ func (g *TreeView) ConfigParts() {
 	if updt {
 		g.PartStyleProps(wb.This, TreeViewProps[0])
 		wb.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv, ok := recv.(*TreeView)
-			if ok {
-				tv.ToggleCollapse()
-			}
+			tv, _ := recv.(*TreeView)
+			tv.ToggleCollapse()
 		})
 	}
 

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"strings"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
@@ -159,6 +160,33 @@ func (g *Node2DBase) Style2DWidget(baseProps map[string]interface{}) {
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
+}
+
+// get the style properties for a child in parts (or any other child) based on
+// its name -- only call this when new parts were created -- name of
+// properties is #partname (lower cased) and it should contain a
+// map[string]interface{} which is then added to the part's props
+func (g *Node2DBase) PartStyleProps(part ki.Ki, props map[string]interface{}) {
+	stynm := "#" + strings.ToLower(part.Name())
+	pp := g.Prop(stynm, false, false)
+	if pp == nil {
+		if props != nil {
+			ok := false
+			pp, ok = props[stynm]
+			if !ok {
+				return
+			}
+		} else {
+			return
+		}
+	}
+	pmap, ok := pp.(map[string]interface{})
+	if !ok {
+		return
+	}
+	for key, val := range pmap {
+		part.SetProp(key, val)
+	}
 }
 
 // copy our paint from our parents -- called during Style for SVG

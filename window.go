@@ -157,7 +157,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		}
 		_, gi := KiToNode2D(k)
 		if gi != nil {
-			if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events
+			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
 				return false
 			}
 			if evi.EventOnFocus() {
@@ -228,7 +228,7 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 			}
 			_, gi := KiToNode2D(k)
 			if gi != nil {
-				if w.Popup != nil && gi.Viewport.This != w.Popup { // only process popup events
+				if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
 					return false
 				}
 				in := pos.In(gi.WinBBox)

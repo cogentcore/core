@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"image"
 	"math"
-	"strings"
 
-	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -174,33 +172,6 @@ func (g *WidgetBase) Render2DParts() {
 
 ///////////////////////////////////////////////////////////////////
 // ConfigParts building-blocks
-
-// get the style properties for a child in parts based on its name -- only
-// call this when new parts were created -- name of properties is #partname
-// (lower cased) and it should contain a map[string]interface{} which is then
-// added to the part's props
-func (g *WidgetBase) PartStyleProps(part ki.Ki, props map[string]interface{}) {
-	stynm := "#" + strings.ToLower(part.Name())
-	pp := g.Prop(stynm, false, false)
-	if pp == nil {
-		if props != nil {
-			ok := false
-			pp, ok = props[stynm]
-			if !ok {
-				return
-			}
-		} else {
-			return
-		}
-	}
-	pmap, ok := pp.(map[string]interface{})
-	if !ok {
-		return
-	}
-	for key, val := range pmap {
-		part.SetProp(key, val)
-	}
-}
 
 // standard config of icon and label left-to right in a row, based on whether items are nil or empty
 func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {

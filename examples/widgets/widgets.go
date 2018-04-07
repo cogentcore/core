@@ -109,7 +109,7 @@ func mainrun() {
 
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		gi.PromptDialog(vp, "This is a prompt", "Do you want to continue now?", true, true)
+		gi.PromptDialog(vp, "This is a prompt", "Do you want to continue now?", true, true, nil, nil)
 	})
 
 	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
@@ -178,7 +178,7 @@ func mainrun() {
 	// row4.SetStretchMaxHeight()
 
 	cb := row4.AddNewChildNamed(gi.KiT_ComboBox, "combobox").(*gi.ComboBox)
-	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem()), true)
+	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem()), true, true, 50)
 	cb.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})

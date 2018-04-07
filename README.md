@@ -26,6 +26,7 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 * `buttons.go` -- `ButtonBase`, `Button` and other basic command button types
 * `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
+* `textwidgets.go` -- `Label`, `TextField`, `ComboBox` -- also defines the `gi.Labeler` interface and `ToLabel` converter method (which falls back on kit.ToString using Stringer), which is used for generating a gui-appropriate label for an object -- e.g., for reflect.Type it just presents the raw type name without prefix.
 * `views.go` -- `TreeView` widget shows a graphical view of a tree, `TabView` widget for tabbed panels.  Todo: `StructView` for editing structs
 
 # Design notes
@@ -67,9 +68,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* add dialog to prompt for type, name, and number of objects to make -- need full dialog infrastructure from that..  first do within-window dialog and later look into separate window dialogs.
+* dialog popup from a menu callback doesn't work!  need to coordinate the new popup on stack, etc 
 
-* combobox, with enum populator, and type populator, to choose type of object to make -- ideally this would actually be a table with type and some info about the type (chooser in emergent) but combobox will work for now and is needed.
+* buttons need to update to show their state during initial render -- combo box menu actions need to be selected  -- dialog Ok doesn't show focus..
+
+* fix issue with tiny window and dialog not scrolling and blocking interface
+
+* dialog 
+
+* add dialog to prompt for type, name, and number of objects to make -- need full dialog infrastructure from that..  first do within-window dialog and later look into separate window dialogs.
 
 * then need grid layout
 

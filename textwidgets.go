@@ -10,6 +10,8 @@ import (
 	"image/color"
 	"math"
 	"reflect"
+	"sort"
+	"unicode/utf8"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
@@ -17,6 +19,37 @@ import (
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Labeler Interface and ToLabel method
+
+// the labeler interface provides a GUI-appropriate label (todo: rich text html tags!?) for an item -- use ToLabel converter to attempt to use this interface and then fall back on Stringer via kit.ToString conversion function
+type Labeler interface {
+	Label() string
+}
+
+// ToLabel returns the gui-appropriate label for an item, using the Labeler interface if it is defined, and falling back on kit.ToString converter otherwise -- also contains label impls for basic interface types for which we cannot easily define the Labeler interface
+func ToLabel(it interface{}) string {
+	lbler, ok := it.(Labeler)
+	if !ok {
+		// typ := reflect.TypeOf(it)
+		// if kit.EmbeddedTypeImplements(typ, reflect.TypeOf((*reflect.Type)(nil)).Elem()) {
+		// 	to, ok :=
+		// }
+		switch v := it.(type) {
+		case reflect.Type:
+			return v.Name()
+		}
+		return kit.ToString(it)
+	}
+	return lbler.Label()
+}
+
+// Labeler interface for some key types
+// note: this doesn't work b/c reflect.Type is an interface..
+// func (ty reflect.Type) Label() string {
+// 	return ty.Name() //  stringer adds the prefix -- we drop that..
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Label
@@ -526,6 +559,7 @@ type ComboBox struct {
 	Items     []interface{} `desc:"items available for selection"`
 	ItemsMenu Menu          `desc:"the menu of actions for selecting items -- automatically generated from Items"`
 	ComboSig  ki.Signal     `desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, nil)
@@ -568,12 +602,37 @@ func (g *ComboBox) MakeItems(reset bool, capacity int) {
 	}
 }
 
-// ItemsFromTypes sets the Items list from a list of types -- see e.g., AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then set current item to the first item in the list
-func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst bool) {
+// SortItems sorts the items according to their labels
+func (g *ComboBox) SortItems(ascending bool) {
+	sort.Slice(g.Items, func(i, j int) bool {
+		return ToLabel(g.Items[i]) < ToLabel(g.Items[j])
+	})
+}
+
+// SetToMaxLength gets the maximum label length so that the width of the button label is automatically set according to the max length of all items in the list -- if maxLen > 0 then it is used as an upper do-not-exceed length
+func (g *ComboBox) SetToMaxLength(maxLen int) {
+	ml := 0
+	for _, it := range g.Items {
+		ml = kit.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
+	}
+	if maxLen > 0 {
+		ml = kit.MinInt(ml, maxLen)
+	}
+	g.MaxLength = ml
+}
+
+// ItemsFromTypes sets the Items list from a list of types -- see e.g., AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then set current item to the first item in the list, sort sorts the list in ascending order, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
 	sz := len(tl)
 	g.Items = make([]interface{}, sz)
 	for i, typ := range tl {
 		g.Items[i] = typ
+	}
+	if sort {
+		g.SortItems(true)
+	}
+	if maxLen > 0 {
+		g.SetToMaxLength(maxLen)
 	}
 	if setFirst {
 		g.SetCurIndex(0)
@@ -597,7 +656,7 @@ func (g *ComboBox) FindItem(it interface{}) int {
 func (g *ComboBox) SetCurVal(it interface{}) int {
 	g.CurVal = it
 	g.CurIndex = g.FindItem(it)
-	g.SetText(kit.Sel(kit.ToString(it))[0].(string))
+	g.SetText(ToLabel(it))
 	return g.CurIndex
 }
 
@@ -609,7 +668,7 @@ func (g *ComboBox) SetCurIndex(idx int) interface{} {
 		g.SetText(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		g.CurVal = g.Items[idx]
-		g.SetText(kit.Sel(kit.ToString(g.CurVal))[0].(string))
+		g.SetText(ToLabel(g.CurVal))
 	}
 	return g.CurVal
 }
@@ -645,7 +704,7 @@ func (g *ComboBox) MakeItemsMenu() {
 			ac.Init(ac)
 			g.ItemsMenu = append(g.ItemsMenu, ac.This.(Node2D))
 		}
-		txt, _ := kit.ToString(it)
+		txt := ToLabel(it)
 		nm := fmt.Sprintf("Item_%v", i)
 		ac.SetName(nm)
 		ac.Text = txt
@@ -731,17 +790,21 @@ var ComboBoxProps = []map[string]interface{}{
 func (g *ComboBox) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
-	icnm, ok := kit.ToString(g.Prop("indicator", false, false))
-	if !ok || icnm == "" {
+	icnm := kit.ToString(g.Prop("indicator", false, false))
+	if icnm == "" || icnm == "nil" {
 		icnm = "widget-down-wedge"
 	}
 	if icnm != "none" {
-		config.Add(KiT_Space, "InStretch")
+		config.Add(KiT_Stretch, "InStretch")
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ComboBoxProps[ButtonNormal])
+	if g.MaxLength > 0 && lbIdx >= 0 {
+		lbl := g.Parts.Child(lbIdx).(*Label)
+		lbl.SetMinPrefWidth(units.NewValue(float64(g.MaxLength), units.Ex))
+	}
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm {

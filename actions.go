@@ -163,11 +163,12 @@ func (g *Action) ConfigPartsMenu() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
 	if len(g.Kids) > 0 { // include a right-wedge indicator for sub-menu
-		config.Add(KiT_Space, "InStretch") // todo: stretch
+		config.Add(KiT_Stretch, "InStretch") // todo: stretch
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
+	g.SetProp("max-width", -1)
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
@@ -384,6 +385,19 @@ var _ Node2D = &Separator{}
 // displayed in a popup) -- don't use stretchy sizes in general for these items!
 type Menu []Node2D
 
+var MenuProps = map[string]interface{}{
+	"#frame": map[string]interface{}{
+		"border-width":        units.NewValue(0, units.Px),
+		"border-color":        "none",
+		"margin":              units.NewValue(4, units.Px),
+		"padding":             units.NewValue(2, units.Px),
+		"box-shadow.h-offset": units.NewValue(2, units.Px),
+		"box-shadow.v-offset": units.NewValue(2, units.Px),
+		"box-shadow.blur":     units.NewValue(2, units.Px),
+		"box-shadow.color":    "#CCC",
+	},
+}
+
 // menu just pops up a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
@@ -392,23 +406,24 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
 	}
-	lay := Layout{}
-	lay.InitName(&lay, name+"Menu")
-	lay.Lay = LayoutCol
+	frame := Frame{}
+	frame.InitName(&frame, "Frame")
+	frame.Lay = LayoutCol
+	frame.PartStyleProps(frame.This, MenuProps)
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
 		acn.UpdateReset() // could have some leftovers from before
-		lay.AddChild(acn.This)
+		frame.AddChild(acn.This)
 	}
-	lay.Init2DTree()
-	lay.Style2DTree()                            // sufficient to get sizes
-	lay.LayData.AllocSize = vp.LayData.AllocSize // give it the whole vp initially
-	lay.Size2DTree()                             // collect sizes
-	vpsz := lay.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
+	frame.Init2DTree()
+	frame.Style2DTree()                            // sufficient to get sizes
+	frame.LayData.AllocSize = vp.LayData.AllocSize // give it the whole vp initially
+	frame.Size2DTree()                             // collect sizes
+	vpsz := frame.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp := NewViewport2D(vpsz.X, vpsz.Y)
-	pvp.InitName(pvp, name+"PopupVP")
+	pvp.InitName(pvp, name+"Menu")
 	pvp.Fill = true
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
@@ -417,7 +432,7 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	win := vp.ParentWindow()
 	win.PushPopup(pvp.This)
 	pvp.UpdateStart()
-	pvp.AddChild(lay.This)
+	pvp.AddChild(frame.This)
 	pvp.Init2DTree() // do an explicit init to get connected to window and viewport properly
 	pvp.Style2DTree()
 	pvp.UpdateEnd()
@@ -569,8 +584,8 @@ var MenuButtonProps = []map[string]interface{}{
 func (g *MenuButton) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
-	icnm, ok := kit.ToString(g.Prop("indicator", false, false))
-	if !ok || icnm == "" {
+	icnm := kit.ToString(g.Prop("indicator", false, false))
+	if icnm == "" || icnm == "nil" {
 		icnm = "widget-down-wedge"
 	}
 	if icnm != "none" {
