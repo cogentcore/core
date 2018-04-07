@@ -126,13 +126,35 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// robustly convert anything to a String -- just calls Stringer -- for completeness
-func ToString(it interface{}) (string, bool) {
-	strer, ok := it.(fmt.Stringer) // will fail if not impl
-	if !ok {
-		return "", false
+// robustly convert anything to a String -- because Stringer is so ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should definitely work in all cases, so there is no bool return value
+func ToString(it interface{}) string {
+	if it == nil {
+		return "nil"
 	}
-	return strer.String(), true
+	v := NonPtrValue(reflect.ValueOf(it))
+	vk := v.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return strconv.FormatInt(v.Int(), 10)
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return strconv.FormatUint(v.Uint(), 10)
+	case vk == reflect.Bool:
+		return strconv.FormatBool(v.Bool())
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return strconv.FormatFloat(v.Float(), 'G', -1, 64)
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		cv := v.Complex()
+		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
+		return rv
+	case vk == reflect.String: // todo: what about []byte?
+		return v.String()
+	default:
+		strer, ok := it.(fmt.Stringer) // will fail if not impl
+		if !ok {
+			return fmt.Sprintf("%v", it)
+		}
+		return strer.String()
+	}
 }
 
 // robustly set the to value from the from value -- to must be a pointer-to --
@@ -180,11 +202,9 @@ func SetRobust(to, from interface{}) bool {
 		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		// return rv, true
 	case vk == reflect.String: // todo: what about []byte?
-		fm, ok := ToString(from)
-		if ok {
-			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-			return true
-		}
+		fm := ToString(from)
+		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		return true
 	}
 
 	fv := reflect.ValueOf(from)

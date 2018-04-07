@@ -587,8 +587,8 @@ func TestProps(t *testing.T) {
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprops, ok := kit.ToString(schild2.Prop("stringprop", true, false))
-	if !ok || sprops != tstr {
+	sprops := kit.ToString(schild2.Prop("stringprop", true, false))
+	if sprops != tstr {
 		t.Errorf("TestProps error -- sprops inherited %v != %v\n", sprops, tstr)
 	}
 

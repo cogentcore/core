@@ -794,6 +794,9 @@ func (n *Node) DestroyAllDeleted() {
 }
 
 func (n *Node) Destroy() {
+	if n.This == nil { // already dead!
+		return
+	}
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.DisconnectAll()
