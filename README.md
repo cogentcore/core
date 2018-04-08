@@ -68,6 +68,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* Key fix for render speed: use WinBBox to only draw that portion of VP that was updated to draw into window!  should be easy -- bbox of top-level guy should be it.  crazy to be redrawing full buffer into window every time!
+
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
 * then need grid layout

@@ -101,22 +101,28 @@ var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, false, nil, "Overflow")
 
 // style preferences on the layout of the element
 type LayoutStyle struct {
-	z_index        int           `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH         Align         `xml:"align-self" alt:"horiz-align,align-horiz" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV         Align         `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX           units.Value   `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY           units.Value   `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width          units.Value   `xml:"width" desc:"specified size of element -- 0 if not specified"`
-	Height         units.Value   `xml:"height" desc:"specified size of element -- 0 if not specified"`
-	MaxWidth       units.Value   `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight      units.Value   `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth       units.Value   `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight      units.Value   `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
-	Offsets        []units.Value `xml:"{top,right,bottom,left}" desc:"specified offsets for each side"`
-	Margin         units.Value   `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Padding        units.Value   `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
-	Overflow       Overflow      `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
-	ScrollBarWidth units.Value   `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
+	z_index   int           `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH    Align         `xml:"align-self" alt:"horiz-align,align-horiz" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV    Align         `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX      units.Value   `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY      units.Value   `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
+	Width     units.Value   `xml:"width" desc:"specified size of element -- 0 if not specified"`
+	Height    units.Value   `xml:"height" desc:"specified size of element -- 0 if not specified"`
+	MaxWidth  units.Value   `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight units.Value   `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth  units.Value   `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight units.Value   `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
+	Offsets   []units.Value `xml:"{top,right,bottom,left}" desc:"specified offsets for each side"`
+	Margin    units.Value   `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding   units.Value   `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	Overflow  Overflow      `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	Columns   int           `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
+	Row       int           `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
+	Col       int           `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
+	RowSpan   int           `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
+	ColSpan   int           `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
+
+	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
 }
 
 func (ls *LayoutStyle) Defaults() {
@@ -274,14 +280,17 @@ const (
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay        Layouts    `xml:"lay" desc:"type of layout to use"`
-	StackTop   ki.Ptr     `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize  Vec2D      `xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize  Vec2D      `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasHScroll bool       `desc:"horizontal scrollbar is used, at bottom of layout"`
-	HasVScroll bool       `desc:"vertical scrollbar is used, at right of layout"`
-	HScroll    *ScrollBar `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
-	VScroll    *ScrollBar `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
+	Lay          Layouts      `xml:"lay" desc:"type of layout to use"`
+	StackTop     ki.Ptr       `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize    Vec2D        `xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize    Vec2D        `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasHScroll   bool         `desc:"horizontal scrollbar is used, at bottom of layout"`
+	HasVScroll   bool         `desc:"vertical scrollbar is used, at right of layout"`
+	HScroll      *ScrollBar   `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
+	VScroll      *ScrollBar   `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
+	GridSize     image.Point  `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridDataRows []LayoutData `json:"-" xml:"-" desc:"grid data for rows"`
+	GridDataCols []LayoutData `json:"-" xml:"-" desc:"grid data for cols"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -335,6 +344,129 @@ func (ly *Layout) GatherSizes() {
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
 	// todo: something entirely different needed for grids..
+
+	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	if Layout2DTrace {
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
+	}
+}
+
+// first pass: gather the size information from the children, grid version
+func (ly *Layout) GatherSizesGrid() {
+	if len(ly.Kids) == 0 {
+		return
+	}
+
+	cols := ly.Style.Layout.Columns
+	rows := 0
+
+	sz := len(ly.Kids)
+	// collect overal size
+	for _, c := range ly.Kids {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
+			continue
+		}
+		lst := gi.Style.Layout
+		if lst.Col > 0 {
+			cols = kit.MaxInt(cols, lst.Col+lst.ColSpan)
+		}
+		if lst.Row > 0 {
+			rows = kit.MaxInt(rows, lst.Row+lst.RowSpan)
+		}
+	}
+
+	if cols == 0 {
+		cols = int(math.Sqrt(float64(sz))) // whatever -- not well defined
+	}
+	if rows == 0 {
+		rows = sz / cols
+	}
+	for rows*cols < sz { // not defined to have multiple items per cell -- make room for everyone
+		rows++
+	}
+
+	ly.LayData.GridSize.X = cols
+	ly.LayData.GridSize.Y = rows
+
+	if len(ly.GridDataRows) != rows {
+		ly.GridDataRows = make([]LayoutData, rows)
+	}
+	if len(ly.GridDataCols) != cols {
+		ly.GridDataCols = make([]LayoutData, cols)
+	}
+
+	for ld := range ly.GridDataRows {
+		ld.Size.Need.Set(0, 0)
+		ld.Size.Pref.Set(0, 0)
+	}
+	for ld := range ly.GridDataCols {
+		ld.Size.Need.Set(0, 0)
+		ld.Size.Pref.Set(0, 0)
+	}
+
+	col := 0
+	row := 0
+	// var sumPref, sumNeed, maxPref, maxNeed Vec2D
+	for _, c := range ly.Kids {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
+			continue
+		}
+		gi.LayData.UpdateSizes()
+		lst := gi.Style.Layout
+		if lst.Col > 0 {
+			col = lst.Col
+		}
+		if lst.Row > 0 {
+			row = lst.Row
+		}
+		// r   0   1   col X = max(all in col), Y = sum of all in col
+		//   +--+---+
+		// 0 |  |   |  Y = max(all in row), X = sum of all in row
+		//   +--+---+
+		// 1 |  |   |
+		//   +--+---+
+
+		// todo: need to deal with span in sums..
+		ly.GridDataRows[row].Size.Need.SetMaxDim(Y, gi.LayData.Size.Need.Y)
+		ly.GridDataRows[row].Size.Pref.SetMaxDim(Y, gi.LayData.Size.Pref.Y)
+		ly.GridDataRows[col].Size.Need.SetMaxDim(X, gi.LayData.Size.Need.X)
+		ly.GridDataRows[col].Size.Pref.SetMaxDim(X, gi.LayData.Size.Pref.X)
+
+		col++
+		if col >= cols { // todo: really only works if NO items specify row,col or ALL do..
+			col = 0
+			row++
+			if row >= rows { // wrap-around.. no other good option
+				row = 0
+			}
+		}
+	}
+
+	// Y = sum across rows which have max's -- not really using sums!
+	var sumPref, sumNeed Vec2D
+	for ld := range ly.GridDataRows {
+		sumNeed.SetAddDim(Y, ld.Size.Pref.Y)
+		sumPref.SetAddDim(Y, ld.Size.Pref.Y)
+	}
+	// X = sum across cols which have max's -- not really using sums!
+	for ld := range ly.GridDataCols {
+		sumNeed.SetAddDim(X, ld.Size.Pref.X)
+		sumPref.SetAddDim(X, ld.Size.Pref.X)
+	}
+
+	sumNeed.SetAddDim(Y, (len(ly.GridDataRows)-1)*lst.Margin.Dots)
+	sumPref.SetAddDim(Y, (len(ly.GridDataRows)-1)*lst.Margin.Dots)
+	sumNeed.SetAddDim(X, (len(ly.GridDataCols)-1)*lst.Margin.Dots)
+	sumPref.SetAddDim(X, (len(ly.GridDataCols)-1)*lst.Margin.Dots)
+
+	ly.LayData.Size.Need.SetMax(sumNeed)
+	ly.LayData.Size.Pref.SetMax(sumPref)
+
+	spc := ly.Style.BoxSpace()
+	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
+	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
