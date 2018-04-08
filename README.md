@@ -68,15 +68,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* dialog popup from a menu callback doesn't work!  need to coordinate the new popup on stack, etc 
-
-* buttons need to update to show their state during initial render -- combo box menu actions need to be selected  -- dialog Ok doesn't show focus..
-
 * fix issue with tiny window and dialog not scrolling and blocking interface
-
-* dialog 
-
-* add dialog to prompt for type, name, and number of objects to make -- need full dialog infrastructure from that..  first do within-window dialog and later look into separate window dialogs.
 
 * then need grid layout
 

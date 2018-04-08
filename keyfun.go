@@ -36,6 +36,9 @@ const (
 	KeyFunBackspace
 	KeyFunDelete
 	KeyFunKill
+	KeyFunDuplicate
+	KeyFunInsert
+	KeyFunInsertAfter
 	// either shift key
 	KeyFunShift
 	// the control key: command for mac, ctrl for others?
@@ -89,6 +92,9 @@ var DefaultKeyMap = KeyMap{
 	"control+d":     KeyFunDelete,
 	"control+h":     KeyFunBackspace,
 	"control+k":     KeyFunKill,
+	"control+m":     KeyFunDuplicate,
+	"control+i":     KeyFunInsert,
+	"control+o":     KeyFunInsertAfter,
 }
 
 // users can set this to an alternative map

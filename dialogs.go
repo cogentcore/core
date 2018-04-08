@@ -409,7 +409,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	frame := dlg.Frame()
 	nrow := frame.ChildByName("NRow", 0).(*Layout)
 	ntf := nrow.ChildByName("NField", 0).(*TextField)
-	n, _ := strconv.Atoi(ntf.Text)
+	n, _ := strconv.Atoi(ntf.EditText) // use active text b/c may not always enter it
 	trow := frame.ChildByName("TRow", 0).(*Layout)
 	typs := trow.ChildByName("Types", 0).(*ComboBox)
 	typ := typs.CurVal.(reflect.Type)

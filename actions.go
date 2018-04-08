@@ -58,6 +58,12 @@ func (g *Action) ButtonRelease() {
 		g.ActionSig.Emit(g.This, 0, g.Data)
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), g.Data)
 	}
+	if g.IsMenu() && g.Viewport != nil {
+		win := g.Viewport.ParentWindow()
+		if win != nil {
+			win.ClosePopup(g.Viewport) // in case we are a menu popup -- no harm if not
+		}
+	}
 	g.UpdateEnd()
 }
 
@@ -239,6 +245,7 @@ func (g *Action) ChildrenBBox2D() image.Rectangle {
 
 func (g *Action) Render2D() {
 	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
 		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
@@ -656,6 +663,7 @@ func (g *MenuButton) Move2D(delta Vec2D, parBBox image.Rectangle) {
 
 func (g *MenuButton) Render2D() {
 	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {

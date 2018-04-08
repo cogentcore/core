@@ -312,7 +312,7 @@ var ButtonProps = []map[string]interface{}{
 	}, { // hover
 		"background-color": "#CCF", // todo "darker"
 	}, { // focus
-		"border-color":     "#EEF",
+		"border-color":     "#88F",
 		"box-shadow.color": "#BBF",
 	}, { // press
 		"border-color":     "#DDF",
@@ -385,6 +385,7 @@ func (g *Button) Move2D(delta Vec2D, parBBox image.Rectangle) {
 
 func (g *Button) Render2D() {
 	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
 		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()

@@ -498,6 +498,7 @@ func (g *TreeView) SrcDelete() {
 		PromptDialog(g.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil)
 		return
 	}
+	g.MoveDown()
 	sk := g.SrcNode.Ptr
 	sk.Delete(true)
 }
@@ -515,7 +516,7 @@ func (g *TreeView) SrcDuplicate() {
 		return
 	}
 	myidx := sk.Index()
-	nm := fmt.Sprintf("NewItem%v", myidx+1)
+	nm := fmt.Sprintf("%vCopy", sk.Name())
 	par.InsertChildNamed(sk.Clone(), myidx+1, nm)
 }
 
@@ -634,28 +635,40 @@ func (g *TreeView) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.(*TreeView)
+		tv := recv.(*TreeView)
 		kt := d.(*oswin.KeyTypedEvent)
 		// fmt.Printf("TreeView key: %v\n", kt.Chord)
 		kf := KeyFun(kt.Key, kt.Chord)
 		switch kf {
 		case KeyFunSelectItem:
-			ab.SelectAction()
+			tv.SelectAction()
 			kt.SetProcessed()
 		case KeyFunCancelSelect:
-			ab.RootUnselectAll()
+			tv.RootUnselectAll()
 			kt.SetProcessed()
 		case KeyFunMoveRight:
-			ab.Expand()
+			tv.Expand()
 			kt.SetProcessed()
 		case KeyFunMoveLeft:
-			ab.Collapse()
+			tv.Collapse()
 			kt.SetProcessed()
 		case KeyFunMoveDown:
-			ab.MoveDown()
+			tv.MoveDown()
 			kt.SetProcessed()
 		case KeyFunMoveUp:
-			ab.MoveUp()
+			tv.MoveUp()
+			kt.SetProcessed()
+		case KeyFunDelete:
+			tv.SrcDelete()
+			kt.SetProcessed()
+		case KeyFunDuplicate:
+			tv.SrcDuplicate()
+			kt.SetProcessed()
+		case KeyFunInsert:
+			tv.SrcInsertBefore()
+			kt.SetProcessed()
+		case KeyFunInsertAfter:
+			tv.SrcInsertAfter()
 			kt.SetProcessed()
 		}
 	})
