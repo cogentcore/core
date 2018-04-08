@@ -75,6 +75,31 @@ func (w *Window) Resize(width, height int) {
 	w.Viewport.Resize(width, height)
 }
 
+func (w *Window) UpdateScreen() {
+	s := w.OSWin.Screen()
+	s.CopyRGBA(w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
+	// then all the current popups
+	if w.PopupStack != nil {
+		for _, pop := range w.PopupStack {
+			gii, _ := KiToNode2D(pop)
+			if gii != nil {
+				vp := gii.AsViewport2D()
+				r := vp.ViewBox.Bounds()
+				s.CopyRGBA(vp.Pixels, r)
+			}
+		}
+	}
+	if w.Popup != nil {
+		gii, _ := KiToNode2D(w.Popup)
+		if gii != nil {
+			vp := gii.AsViewport2D()
+			r := vp.ViewBox.Bounds()
+			s.CopyRGBA(vp.Pixels, r)
+		}
+	}
+	w.OSWin.FlushImage()
+}
+
 func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.EmbeddedStruct(KiT_Window).(*Window)
 	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
@@ -511,8 +536,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 // disconnect given popup -- typically the current one
 func (w *Window) DisconnectPopup(pop ki.Ki) {
 	w.DisconnectNode(pop)
-	pop.SetParent(nil)         // don't redraw the popup anymore
-	w.Viewport.RestorePixels() // revert prior to processing events
+	pop.SetParent(nil) // don't redraw the popup anymore
 	w.Viewport.DrawIntoWindow()
 }
 
@@ -554,6 +578,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 		}
 		// do nothing
 	}
+	w.UpdateScreen()
 }
 
 // push current focus onto stack and set new focus

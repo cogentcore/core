@@ -401,7 +401,8 @@ var MenuProps = map[string]interface{}{
 // menu just pops up a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
-func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
+func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
+	vp := win.Viewport
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
@@ -429,7 +430,6 @@ func PopupMenu(menu Menu, x, y int, vp *Viewport2D, name string) *Viewport2D {
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
-	win := vp.ParentWindow()
 	win.PushPopup(pvp.This)
 	pvp.UpdateStart()
 	pvp.AddChild(frame.This)
@@ -457,9 +457,6 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 
 func (g *MenuButton) ButtonRelease() {
 	win := g.Viewport.ParentWindow()
-	if win.Popup != nil {
-		return
-	}
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.SetButtonState(ButtonNormal)
@@ -476,7 +473,7 @@ func (g *MenuButton) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
-	PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)
+	PopupMenu(g.Menu, pos.X, pos.Y, win, g.Text)
 }
 
 // set the text and update button

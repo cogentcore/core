@@ -134,18 +134,13 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
 }
 
-// todo: consider caching window pointer
+// draw main viewport into window
 func (vp *Viewport2D) DrawIntoWindow() {
-	win := vp.ParentWindow()
-	if win != nil {
-		// width, height := win.Win.Size() // todo: update size of our window
-		s := win.OSWin.Screen()
-		s.CopyRGBA(vp.Pixels, vp.Pixels.Bounds())
-		win.OSWin.FlushImage()
-		if win.Popup == nil { //  only save if not doing a popup
-			vp.SavePixels()
-		}
+	win := vp.ParentWindow() // todo: consider caching window pointer
+	if win == nil {
+		return
 	}
+	win.UpdateScreen()
 }
 
 // draw a popup into window viewport
@@ -154,12 +149,7 @@ func (vp *Viewport2D) DrawPopup() {
 	if !ok {
 		return
 	}
-	parVp := win.Viewport
-	r := vp.ViewBox.Bounds()
-	sp := image.ZP
-	parVp.RestorePixels() // parent is frozen -- restore its last saved pixels
-	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
-	parVp.DrawIntoWindow()
+	win.UpdateScreen()
 }
 
 // Delete this viewport -- has already been disconnected from window events

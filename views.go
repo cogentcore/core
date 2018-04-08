@@ -406,27 +406,42 @@ func (g *TreeView) ToggleCollapse() {
 
 // insert a new node in the source tree
 func (g *TreeView) SrcInsertAfter() {
+	ttl := "TreeView Insert After"
 	if g.IsField() {
 		// todo: disable menu!
-		PromptDialog(g.Viewport, "TreeView Insert After", "Cannot insert after fields", true, false, nil, nil)
+		PromptDialog(g.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(g.Viewport, "TreeView Insert After", "Cannot insert after the root of the tree", true, false, nil, nil)
+		PromptDialog(g.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
-	nm := fmt.Sprintf("NewItem%v", myidx+1)
-	par.InsertNewChildNamed(nil, myidx+1, nm)
+	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(DialogAccepted) {
+			tv, _ := recv.(*TreeView)
+			sk := tv.SrcNode.Ptr
+			par := sk.Parent()
+			dlg, _ := send.(*Dialog)
+			n, typ := NewKiDialogValues(dlg)
+			par.UpdateStart()
+			for i := 0; i < n; i++ {
+				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
+				par.InsertNewChildNamed(typ, myidx+1+i, nm)
+			}
+			par.UpdateEnd()
+		}
+	})
 }
 
 // insert a new node in the source tree
 func (g *TreeView) SrcInsertBefore() {
 	ttl := "TreeView Insert Before"
 	if g.IsField() {
-		PromptDialog(g.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
+		// todo: disable menu!
+		PromptDialog(g.Viewport, ttl, "Cannot insert before fields", true, false, nil, nil)
 		return
 	}
 	sk := g.SrcNode.Ptr
@@ -440,21 +455,37 @@ func (g *TreeView) SrcInsertBefore() {
 	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(DialogAccepted) {
 			tv, _ := recv.(*TreeView)
+			sk := tv.SrcNode.Ptr
+			par := sk.Parent()
 			dlg, _ := send.(*Dialog)
 			n, typ := NewKiDialogValues(dlg)
+			par.UpdateStart()
 			for i := 0; i < n; i++ {
-				nm := fmt.Sprintf("New%v_%v", typ.Name(), myidx+i)
-				tv.Par.InsertNewChildNamed(typ, myidx, nm)
+				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
+				par.InsertNewChildNamed(typ, myidx+i, nm)
 			}
+			par.UpdateEnd()
 		}
 	})
 }
 
-// insert a new node in the source tree
+// add a new child node in the source tree
 func (g *TreeView) SrcAddChild() {
-	sk := g.SrcNode.Ptr
-	nm := fmt.Sprintf("NewItem%v", len(sk.Children()))
-	sk.AddNewChildNamed(nil, nm)
+	ttl := "TreeView Add Child"
+	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Add:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(DialogAccepted) {
+			tv, _ := recv.(*TreeView)
+			sk := tv.SrcNode.Ptr
+			dlg, _ := send.(*Dialog)
+			n, typ := NewKiDialogValues(dlg)
+			sk.UpdateStart()
+			for i := 0; i < n; i++ {
+				nm := fmt.Sprintf("New%v%v", typ.Name(), i)
+				sk.AddNewChildNamed(typ, nm)
+			}
+			sk.UpdateEnd()
+		}
+	})
 }
 
 // delete me in source tree
