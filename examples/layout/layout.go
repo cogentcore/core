@@ -24,6 +24,8 @@ func mainrun() {
 	win := gi.NewWindow2D("test window", width, height)
 	win.UpdateStart()
 
+	gi.Layout2DTrace = true
+
 	frsz := [5]gi.Vec2D{
 		{20, 100},
 		{80, 20},
@@ -31,6 +33,12 @@ func mainrun() {
 		{40, 120},
 		{150, 100},
 	}
+	// frsz := [4]gi.Vec2D{
+	// 	{100, 100},
+	// 	{100, 100},
+	// 	{100, 100},
+	// 	{100, 100},
+	// }
 
 	vp := win.WinViewport2D()
 	vp.SetProp("background-color", "#FFF")
@@ -83,9 +91,9 @@ func mainrun() {
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
-		if i == 2 {
-			row2.AddNewChildNamed(gi.KiT_Stretch, "str")
-		}
+		// if i == 2 {
+		// 	row2.AddNewChildNamed(gi.KiT_Stretch, "str")
+		// }
 	}
 
 	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
@@ -107,6 +115,28 @@ func mainrun() {
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
+		// fr.SetProp("max-width", -1) // spacer
+	}
+
+	row4 := vlay.AddNewChildNamed(gi.KiT_Layout, "row4").(*gi.Layout)
+	row4.Lay = gi.LayoutGrid
+	row4.SetProp("columns", 2)
+	// row4.SetProp("max-width", -1)
+
+	row4.SetProp("align-vert", "top")
+	// row4.SetProp("align-horiz", "justify")
+	row4.SetProp("align-horiz", "left")
+	row4.SetProp("margin", 6.0)
+
+	for i, sz := range frsz {
+		nm := fmt.Sprintf("fr%v", i)
+		fr := row4.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr.SetProp("width", sz.X)
+		fr.SetProp("height", sz.Y)
+		// fr.SetProp("min-height", sz.Y)
+		fr.SetProp("align-vert", "inherit")
+		fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("margin", 2.0)
 		// fr.SetProp("max-width", -1) // spacer
 	}
 

@@ -268,6 +268,19 @@ const (
 
 //go:generate stringer -type=Layouts
 
+// row / col for grid data
+type RowCol int32
+
+const (
+	Row RowCol = iota
+	Col
+	RowColN
+)
+
+var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, nil, "")
+
+//go:generate stringer -type=RowCol
+
 // note: Layout cannot be a Widget type because Controls in Widget is a Layout..
 
 // Layout is the primary node type responsible for organizing the sizes and
@@ -280,17 +293,16 @@ const (
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay          Layouts      `xml:"lay" desc:"type of layout to use"`
-	StackTop     ki.Ptr       `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize    Vec2D        `xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize    Vec2D        `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasHScroll   bool         `desc:"horizontal scrollbar is used, at bottom of layout"`
-	HasVScroll   bool         `desc:"vertical scrollbar is used, at right of layout"`
-	HScroll      *ScrollBar   `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
-	VScroll      *ScrollBar   `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
-	GridSize     image.Point  `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
-	GridDataRows []LayoutData `json:"-" xml:"-" desc:"grid data for rows"`
-	GridDataCols []LayoutData `json:"-" xml:"-" desc:"grid data for cols"`
+	Lay        Layouts               `xml:"lay" desc:"type of layout to use"`
+	StackTop   ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize  Vec2D                 `xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize  Vec2D                 `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasHScroll bool                  `desc:"horizontal scrollbar is used, at bottom of layout"`
+	HasVScroll bool                  `desc:"vertical scrollbar is used, at right of layout"`
+	HScroll    *ScrollBar            `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
+	VScroll    *ScrollBar            `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
+	GridSize   image.Point           `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridData   [RowColN][]LayoutData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -351,6 +363,8 @@ func (ly *Layout) GatherSizes() {
 	}
 }
 
+// todo: grid does not process spans at all yet -- assumes = 1
+
 // first pass: gather the size information from the children, grid version
 func (ly *Layout) GatherSizesGrid() {
 	if len(ly.Kids) == 0 {
@@ -389,25 +403,26 @@ func (ly *Layout) GatherSizesGrid() {
 	ly.GridSize.X = cols
 	ly.GridSize.Y = rows
 
-	if len(ly.GridDataRows) != rows {
-		ly.GridDataRows = make([]LayoutData, rows)
+	if len(ly.GridData[Row]) != rows {
+		ly.GridData[Row] = make([]LayoutData, rows)
 	}
-	if len(ly.GridDataCols) != cols {
-		ly.GridDataCols = make([]LayoutData, cols)
+	if len(ly.GridData[Col]) != cols {
+		ly.GridData[Col] = make([]LayoutData, cols)
 	}
 
-	for _, ld := range ly.GridDataRows {
+	for i := range ly.GridData[Row] {
+		ld := &ly.GridData[Row][i]
 		ld.Size.Need.Set(0, 0)
 		ld.Size.Pref.Set(0, 0)
 	}
-	for _, ld := range ly.GridDataCols {
+	for i := range ly.GridData[Col] {
+		ld := &ly.GridData[Col][i]
 		ld.Size.Need.Set(0, 0)
 		ld.Size.Pref.Set(0, 0)
 	}
 
 	col := 0
 	row := 0
-	// var sumPref, sumNeed, maxPref, maxNeed Vec2D
 	for _, c := range ly.Kids {
 		_, gi := KiToNode2D(c)
 		if gi == nil {
@@ -421,18 +436,34 @@ func (ly *Layout) GatherSizesGrid() {
 		if lst.Row > 0 {
 			row = lst.Row
 		}
-		// r   0   1   col X = max(all in col), Y = sum of all in col
+		// r   0   1   col X = max(ea in col) (Y = not used)
 		//   +--+---+
-		// 0 |  |   |  Y = max(all in row), X = sum of all in row
+		// 0 |  |   |  row Y = max(ea in row) (X = not used)
 		//   +--+---+
 		// 1 |  |   |
 		//   +--+---+
 
 		// todo: need to deal with span in sums..
-		ly.GridDataRows[row].Size.Need.SetMaxDim(Y, gi.LayData.Size.Need.Y)
-		ly.GridDataRows[row].Size.Pref.SetMaxDim(Y, gi.LayData.Size.Pref.Y)
-		ly.GridDataRows[col].Size.Need.SetMaxDim(X, gi.LayData.Size.Need.X)
-		ly.GridDataRows[col].Size.Pref.SetMaxDim(X, gi.LayData.Size.Pref.X)
+		ly.GridData[Row][row].Size.Need.SetMaxDim(Y, gi.LayData.Size.Need.Y)
+		ly.GridData[Row][row].Size.Pref.SetMaxDim(Y, gi.LayData.Size.Pref.Y)
+		ly.GridData[Col][col].Size.Need.SetMaxDim(X, gi.LayData.Size.Need.X)
+		ly.GridData[Col][col].Size.Pref.SetMaxDim(X, gi.LayData.Size.Pref.X)
+
+		// for max: any -1 stretch dominates, else accumulate any max
+		if ly.GridData[Row][row].Size.Max.Y >= 0 {
+			if gi.LayData.Size.Max.Y < 0 { // stretch
+				ly.GridData[Row][row].Size.Max.Y = -1
+			} else {
+				ly.GridData[Row][row].Size.Max.SetMaxDim(Y, gi.LayData.Size.Max.Y)
+			}
+		}
+		if ly.GridData[Col][col].Size.Max.X >= 0 {
+			if gi.LayData.Size.Max.Y < 0 { // stretch
+				ly.GridData[Col][col].Size.Max.X = -1
+			} else {
+				ly.GridData[Col][col].Size.Max.SetMaxDim(X, gi.LayData.Size.Max.X)
+			}
+		}
 
 		col++
 		if col >= cols { // todo: really only works if NO items specify row,col or ALL do..
@@ -444,24 +475,17 @@ func (ly *Layout) GatherSizesGrid() {
 		}
 	}
 
-	lst := ly.Style.Layout
-
 	// Y = sum across rows which have max's
 	var sumPref, sumNeed Vec2D
-	for _, ld := range ly.GridDataRows {
-		sumNeed.SetAddDim(Y, ld.Size.Pref.Y)
+	for _, ld := range ly.GridData[Row] {
+		sumNeed.SetAddDim(Y, ld.Size.Need.Y)
 		sumPref.SetAddDim(Y, ld.Size.Pref.Y)
 	}
 	// X = sum across cols which have max's
-	for _, ld := range ly.GridDataCols {
-		sumNeed.SetAddDim(X, ld.Size.Pref.X)
+	for _, ld := range ly.GridData[Col] {
+		sumNeed.SetAddDim(X, ld.Size.Need.X)
 		sumPref.SetAddDim(X, ld.Size.Pref.X)
 	}
-
-	sumNeed.SetAddDim(Y, float64(len(ly.GridDataRows)-1)*lst.Margin.Dots)
-	sumPref.SetAddDim(Y, float64(len(ly.GridDataRows)-1)*lst.Margin.Dots)
-	sumNeed.SetAddDim(X, float64(len(ly.GridDataCols)-1)*lst.Margin.Dots)
-	sumPref.SetAddDim(X, float64(len(ly.GridDataCols)-1)*lst.Margin.Dots)
 
 	ly.LayData.Size.Need.SetMax(sumNeed)
 	ly.LayData.Size.Pref.SetMax(sumPref)
@@ -472,7 +496,7 @@ func (ly *Layout) GatherSizesGrid() {
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
+		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
 	}
 }
 
@@ -504,7 +528,7 @@ func (ly *Layout) AllocFromParent() {
 }
 
 // calculations to layout a single-element dimension, returns pos and size
-func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (pos, size float64) {
+func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float64, al Align) (pos, size float64) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -526,7 +550,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 		stretchNeed = true // stretch relative to need
 	}
 
-	pos = ly.Style.BoxSpace()
+	pos = spc
 	size = need
 	if usePref {
 		size = pref
@@ -543,8 +567,8 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max float64, al Align) (po
 		}
 	}
 
-	// if ly.IsField() {
-	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, pos: %v size: %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, pos, size)
+	// if Layout2DTrace {
+	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, pos: %v size: %v spc: %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, pos, size, spc)
 	// }
 
 	return
@@ -563,7 +587,7 @@ func (ly *Layout) LayoutSingle(dim Dims2D) {
 		pref := gi.LayData.Size.Pref.Dim(dim)
 		need := gi.LayData.Size.Need.Dim(dim)
 		max := gi.LayData.Size.Max.Dim(dim)
-		pos, size := ly.LayoutSingleImpl(avail, need, pref, max, al)
+		pos, size := ly.LayoutSingleImpl(avail, need, pref, max, spc, al)
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPos.SetDim(dim, pos)
 	}
@@ -580,8 +604,8 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	al := ly.Style.Layout.AlignDim(dim)
 	spc := ly.Style.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
-	pref := ly.LayData.Size.Pref.Dim(dim)
-	need := ly.LayData.Size.Need.Dim(dim)
+	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
+	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
 
 	targ := pref
 	usePref := true
@@ -676,6 +700,176 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		// 	fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Nm, pos, size)
 		// }
 		pos += size
+	}
+}
+
+// layout grid data along each dimension (row, Y; col, X), same as LayoutAll.
+// For cols, X has width prefs of each -- turn that into an actual allocated
+// width for each column, and likewise for rows.
+func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
+	gd := ly.GridData[rowcol]
+	sz := len(gd)
+	if sz == 0 {
+		return
+	}
+	al := ly.Style.Layout.AlignDim(dim)
+	spc := ly.Style.BoxSpace()
+	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
+	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
+	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
+
+	targ := pref
+	usePref := true
+	extra := avail - targ
+	if extra < -0.1 { // not fitting in pref, go with need
+		usePref = false
+		targ = need
+		extra = avail - targ
+	}
+	extra = math.Max(extra, 0.0) // no negatives
+
+	nstretch := 0
+	stretchTot := 0.0
+	stretchNeed := false        // stretch relative to need
+	stretchMax := false         // only stretch Max = neg
+	addSpace := false           // apply extra toward spacing -- for justify
+	if usePref && extra > 0.0 { // have some stretch extra
+		for i := range gd {
+			ld := &gd[i]
+			if ld.Size.HasMaxStretch(dim) {
+				nstretch++
+				stretchTot += ld.Size.Pref.Dim(dim)
+			}
+		}
+		if nstretch > 0 {
+			stretchMax = true // only stretch those marked as infinitely stretchy
+		}
+	} else if extra > 0.0 { // extra relative to Need
+		for i := range gd {
+			ld := &gd[i]
+			if ld.Size.HasMaxStretch(dim) || ld.Size.CanStretchNeed(dim) {
+				nstretch++
+				stretchTot += ld.Size.Pref.Dim(dim)
+			}
+		}
+		if nstretch > 0 {
+			stretchNeed = true // stretch relative to need
+		}
+	}
+
+	extraSpace := 0.0
+	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
+		addSpace = true
+		// if neither, then just distribute as spacing for justify
+		extraSpace = extra / float64(sz-1)
+	}
+
+	// now arrange everyone
+	pos := spc
+
+	// todo: need a direction setting too
+	if IsAlignEnd(al) && !stretchNeed && !stretchMax {
+		pos += extra
+	}
+
+	if Layout2DTrace {
+		fmt.Printf("Layout Grid Dim: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+	}
+
+	for i := range gd {
+		ld := &gd[i]
+		size := ld.Size.Need.Dim(dim)
+		if usePref {
+			size = ld.Size.Pref.Dim(dim)
+		}
+		if stretchMax { // negative = stretch
+			if ld.Size.HasMaxStretch(dim) { // in proportion to pref
+				size += extra * (ld.Size.Pref.Dim(dim) / stretchTot)
+			}
+		} else if stretchNeed {
+			if ld.Size.HasMaxStretch(dim) || ld.Size.CanStretchNeed(dim) {
+				size += extra * (ld.Size.Pref.Dim(dim) / stretchTot)
+			}
+		} else if addSpace { // implies align justify
+			if i > 0 {
+				pos += extraSpace
+			}
+		}
+
+		ld.AllocSize.SetDim(dim, size)
+		ld.AllocPos.SetDim(dim, pos)
+		if Layout2DTrace {
+			fmt.Printf("Grid %v Dim: %v, pos: %v, size: %v\n", rowcol, dim, pos, size)
+		}
+		pos += size
+	}
+}
+
+func (ly *Layout) LayoutGrid() {
+	sz := len(ly.Kids)
+	if sz == 0 {
+		return
+	}
+
+	ly.LayoutGridDim(Row, Y)
+	ly.LayoutGridDim(Col, X)
+
+	col := 0
+	row := 0
+	cols := ly.GridSize.X
+	rows := ly.GridSize.Y
+	for _, c := range ly.Kids {
+		_, gi := KiToNode2D(c)
+		if gi == nil {
+			continue
+		}
+
+		lst := gi.Style.Layout
+		if lst.Col > 0 {
+			col = lst.Col
+		}
+		if lst.Row > 0 {
+			row = lst.Row
+		}
+
+		{ // col, X dim
+			dim := X
+			ld := &(ly.GridData[Col][col])
+			avail := ld.AllocSize.Dim(dim)
+			al := lst.AlignDim(dim)
+			pref := gi.LayData.Size.Pref.Dim(dim)
+			need := gi.LayData.Size.Need.Dim(dim)
+			max := gi.LayData.Size.Max.Dim(dim)
+			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
+			gi.LayData.AllocSize.SetDim(dim, size)
+			gi.LayData.AllocPos.SetDim(dim, pos+ld.AllocPos.X)
+
+		}
+		{ // row, Y dim
+			dim := Y
+			ld := &(ly.GridData[Row][row])
+			avail := ld.AllocSize.Dim(dim)
+			al := lst.AlignDim(dim)
+			pref := gi.LayData.Size.Pref.Dim(dim)
+			need := gi.LayData.Size.Need.Dim(dim)
+			max := gi.LayData.Size.Max.Dim(dim)
+			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
+			gi.LayData.AllocSize.SetDim(dim, size)
+			gi.LayData.AllocPos.SetDim(dim, pos+ld.AllocPos.Y)
+		}
+
+		if Layout2DTrace {
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, gi.LayData.AllocPos, gi.LayData.AllocSize)
+		}
+
+		col++
+		if col >= cols { // todo: really only works if NO items specify row,col or ALL do..
+			col = 0
+			row++
+			if row >= rows { // wrap-around.. no other good option
+				row = 0
+			}
+		}
 	}
 }
 
@@ -938,7 +1132,11 @@ func (ly *Layout) Style2D() {
 
 func (ly *Layout) Size2D() {
 	ly.InitLayout2D()
-	ly.GatherSizes()
+	if ly.Lay == LayoutGrid {
+		ly.GatherSizesGrid()
+	} else {
+		ly.GatherSizes()
+	}
 }
 
 func (ly *Layout) Layout2D(parBBox image.Rectangle) {
@@ -951,6 +1149,8 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	case LayoutCol:
 		ly.LayoutAll(Y)
 		ly.LayoutSingle(X)
+	case LayoutGrid:
+		ly.LayoutGrid()
 	case LayoutStacked:
 		ly.LayoutSingle(X)
 		ly.LayoutSingle(Y)

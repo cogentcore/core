@@ -45,7 +45,6 @@ type Viewport2D struct {
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
 	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into"`
-	LastPix *image.RGBA `json:"-" desc:"optional copy of last set of pixels that were rendered"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
@@ -104,22 +103,6 @@ func (vp *Viewport2D) IsSVG() bool {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Main Rendering code
-
-// save our pixels into LastPix
-func (vp *Viewport2D) SavePixels() {
-	if vp.LastPix == nil || vp.LastPix.Bounds() != vp.Pixels.Bounds() {
-		vp.LastPix = image.NewRGBA(vp.Pixels.Bounds())
-	}
-	copy(vp.LastPix.Pix, vp.Pixels.Pix)
-}
-
-// restore last saved pixels into active pixels
-func (vp *Viewport2D) RestorePixels() {
-	if vp.LastPix == nil {
-		return
-	}
-	copy(vp.Pixels.Pix, vp.LastPix.Pix)
-}
 
 // draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {

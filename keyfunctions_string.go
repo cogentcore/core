@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _KeyFunctions_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunFocusNextKeyFunFocusPrevKeyFunSelectItemKeyFunAbortKeyFunCancelSelectKeyFunExtendSelectKeyFunSelectTextKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunBackspaceKeyFunDeleteKeyFunKillKeyFunShiftKeyFunCtrlKeyFunctionsN"
+const _KeyFunctions_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunFocusNextKeyFunFocusPrevKeyFunSelectItemKeyFunAbortKeyFunCancelSelectKeyFunExtendSelectKeyFunSelectTextKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunBackspaceKeyFunDeleteKeyFunKillKeyFunDuplicateKeyFunInsertKeyFunInsertAfterKeyFunShiftKeyFunCtrlKeyFunctionsN"
 
-var _KeyFunctions_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 153, 168, 184, 195, 213, 231, 247, 261, 271, 280, 291, 306, 318, 328, 339, 349, 362}
+var _KeyFunctions_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 153, 168, 184, 195, 213, 231, 247, 261, 271, 280, 291, 306, 318, 328, 343, 355, 372, 383, 393, 406}
 
 func (i KeyFunctions) String() string {
 	if i < 0 || i >= KeyFunctions(len(_KeyFunctions_index)-1) {
