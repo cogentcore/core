@@ -237,6 +237,14 @@ func (n *Node) IsField() bool {
 	return bitflag.Has(n.Flag, int(IsField))
 }
 
+func (n *Node) OnlySelfUpdate() bool {
+	return bitflag.Has(n.Flag, int(OnlySelfUpdate))
+}
+
+func (n *Node) SetOnlySelfUpdate() {
+	bitflag.Set(&n.Flag, int(OnlySelfUpdate))
+}
+
 func (n *Node) IsDeleted() bool {
 	return bitflag.Has(n.Flag, int(NodeDeleted))
 }
@@ -338,7 +346,7 @@ func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
 // set parent of node -- does not remove from existing parent -- use Add / Insert / Delete
 func (n *Node) SetParent(parent Ki) {
 	n.Par = parent
-	if parent != nil {
+	if parent != nil && !parent.OnlySelfUpdate() {
 		upc := parent.UpdateCtr().Value() // we need parent's update counter b/c they will end
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.UpdateCtr().Set(upc)
@@ -1073,71 +1081,93 @@ func (n *Node) UpdateStart() {
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
 		return
 	}
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		if k.UpdateCtr().Value() == 0 { // clear at start of update
-			bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
-		}
-		k.UpdateCtr().Inc()
-		return true
-	})
+	if n.OnlySelfUpdate() {
+		n.Updating.Inc()
+	} else {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			if k.UpdateCtr().Value() == 0 { // clear at start of update
+				bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
+			}
+			k.UpdateCtr().Inc()
+			return true
+		})
+	}
 }
 
 func (n *Node) UpdateEnd() {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	par_updt := false
-	n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
-		par_up := d.(*bool)             // did the parent already update?
-		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-			if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
-				k.UpdateCtr().Dec()
-				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
-				k.DestroyAllDeleted()
-				*par_up = true // we updated so nobody else can!
-			} else {
-				k.UpdateCtr().Dec()
-			}
-		} else {
-			if k.UpdateCtr().Value() <= 0 {
-				if !k.IsDestroyed() && !k.IsDeleted() {
-					log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+	if n.OnlySelfUpdate() {
+		if n.Updating.Dec() == 0 {
+			n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+			n.DestroyAllDeleted()
+		}
+	} else {
+		par_updt := false
+		n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
+			par_up := d.(*bool)             // did the parent already update?
+			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
+				if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
+					k.UpdateCtr().Dec()
+					k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
+					k.DestroyAllDeleted()
+					*par_up = true // we updated so nobody else can!
+				} else {
+					k.UpdateCtr().Dec()
 				}
 			} else {
-				k.UpdateCtr().Dec()
+				if k.UpdateCtr().Value() <= 0 {
+					if !k.IsDestroyed() && !k.IsDeleted() {
+						log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+					}
+				} else {
+					k.UpdateCtr().Dec()
+				}
 			}
-		}
-		return true
-	})
+			return true
+		})
+	}
 }
 
 func (n *Node) UpdateEndAll() {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-			k.UpdateCtr().Dec()
-			k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
-			k.DestroyDeleted()
-		} else {
-			if k.UpdateCtr().Value() <= 0 {
-				if !k.IsDestroyed() && !k.IsDeleted() {
-					log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
-				}
-			} else {
-				k.UpdateCtr().Dec()
-			}
+	if n.OnlySelfUpdate() {
+		if n.Updating.Dec() == 0 {
+			n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+			n.DestroyAllDeleted()
 		}
-		return true
-	})
+	} else {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
+				k.UpdateCtr().Dec()
+				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
+				k.DestroyDeleted()
+			} else {
+				if k.UpdateCtr().Value() <= 0 {
+					if !k.IsDestroyed() && !k.IsDeleted() {
+						log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+					}
+				} else {
+					k.UpdateCtr().Dec()
+				}
+			}
+			return true
+		})
+	}
 }
 
 func (n *Node) UpdateReset() {
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		k.UpdateCtr().Set(0)
-		return true
-	})
+	if n.OnlySelfUpdate() {
+		n.Updating.Set(0)
+	} else {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			k.UpdateCtr().Set(0)
+			return true
+		})
+	}
 }
 
 func (n *Node) Disconnect() {

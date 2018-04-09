@@ -18,6 +18,8 @@ type Flags int32
 const (
 	// this node is a field in its parent node, not a child in children
 	IsField Flags = iota
+	// the UpdateStart / End logic only applies to this node in isolation, not to its children -- useful for a parent node that has a different functional role than its children
+	OnlySelfUpdate
 	// following flags record what happened to a given node since the last
 	// Update signal -- these are cleared at first UpdateStart and valid after
 	// UpdateEnd -- these should be coordinated with NodeSignals in signal.go
@@ -135,6 +137,12 @@ type Ki interface {
 
 	// IsField checks if this is a field on a parent struct (via IsField Flag), as opposed to a child in Children -- Ki nodes can be added as fields to structs and they are automatically parented and named with field name during Init function -- essentially they function as fixed children of the parent struct, and are automatically included in FuncDown* traversals, etc -- see also FunFields
 	IsField() bool
+
+	// OnlySelfUpdate checks if this node only applies UpdateStart / End logic to itself, not its children (which is the default) (via Flag of same name) -- useful for a parent node that has a different function than its children
+	OnlySelfUpdate() bool
+
+	// SetOnlySelfUpdate sets the OnlySelfUpdate flag -- see OnlySelfUpdate method and flag
+	SetOnlySelfUpdate()
 
 	// IsDeleted checks if this node has just been deleted (within last update cycle), indicated by the NodeDeleted flag which is set when the node is deleted, and is cleared at next UpdateStart call
 	IsDeleted() bool

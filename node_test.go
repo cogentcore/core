@@ -641,8 +641,8 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 256
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 64
+	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 512
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 128
 `
 	// fmt.Printf("Move Signals:\n%v", sigs)
 	if sigs != mvsigs {
@@ -657,7 +657,7 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 64
 	// fmt.Printf("#################################\n")
 
 	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 256
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 512
 ki.Signal Emit from: child12 sig: NodeSignalDestroying data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
