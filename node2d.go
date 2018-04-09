@@ -65,6 +65,8 @@ var Layout2DTrace bool = false
 
 // primary interface for all Node2D nodes
 type Node2D interface {
+	// nodes are Ki elements -- this comes for free by embedding ki.Node in all Node2D elements
+	ki.Ki
 	// get a generic Node2DBase for our node -- not otherwise possible -- don't want to interface everything that a base node can do as that would be highly redundant
 	AsNode2D() *Node2DBase
 	// if this is a Viewport2D-derived node, get it as a Viewport2D, else return nil
@@ -94,6 +96,75 @@ type Node2D interface {
 	// function called on node when it gets or loses focus -- focus flag has current state too
 	FocusChanged2D(gotFocus bool)
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Node2D impl for Node2DBase
+// only need to redefine (override) these methods as necessary
+
+func (g *Node2DBase) AsNode2D() *Node2DBase {
+	return g
+}
+
+func (g *Node2DBase) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *Node2DBase) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *Node2DBase) Init2D() {
+	g.Init2DBase()
+}
+
+func (g *Node2DBase) Style2D() {
+	g.Style2DWidget(nil) // node: most classes should override this as needed!
+}
+
+func (g *Node2DBase) Size2D() {
+	g.InitLayout2D()
+}
+
+func (g *Node2DBase) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+func (g *Node2DBase) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
+}
+
+func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DBase(parBBox)
+}
+
+func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
+func (g *Node2DBase) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
+func (g *Node2DBase) Render2D() {
+	if g.PushBounds() {
+		g.Render2DChildren()
+		g.PopBounds()
+	}
+}
+
+func (g *Node2DBase) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
+}
+
+func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &Node2DBase{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code

@@ -955,12 +955,12 @@ const (
 
 // StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type StructView struct {
-	WidgetBase
-	Struct        interface{}     `desc:"the struct that we are a view onto"`
-	StructViewSig ki.Signal       `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
-	Title         string          `desc:"title / prompt to show above the editor fields"`
-	FieldNames    []string        `desc:"names of the fields"`
-	FieldVals     []reflect.Value `desc:"reflect.Value for the fields"`
+	Frame
+	Struct        interface{}           `desc:"the struct that we are a view onto"`
+	StructViewSig ki.Signal             `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
+	Title         string                `desc:"title / prompt to show above the editor fields"`
+	Fields        []reflect.StructField `desc:"overall field information"`
+	FieldVals     []reflect.Value       `desc:"reflect.Value for the fields"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, nil)
@@ -999,20 +999,10 @@ var StructViewProps = map[string]interface{}{
 	},
 }
 
-// SetFrame creates a standard vertical column frame layout as first element of the view, named "Frame"
-func (sv *StructView) SetFrame() *Frame {
-	if len(sv.Kids) == 0 {
-		frame := sv.AddNewChildNamed(KiT_Frame, "Frame").(*Frame)
-		frame.Lay = LayoutCol
-		sv.PartStyleProps(frame, StructViewProps)
-		return frame
-	}
-	return sv.Frame()
-}
-
-// Frame returns the main frame for the view, assumed to be the first element in the view
-func (sv *StructView) Frame() *Frame {
-	return sv.Child(0).(*Frame)
+// SetFrame configures view as a frame
+func (sv *StructView) SetFrame() {
+	sv.Lay = LayoutCol
+	sv.PartStyleProps(sv, StructViewProps)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -1027,12 +1017,11 @@ func (g *StructView) StdFrameConfig() kit.TypeAndNameList {
 	return config
 }
 
-// configure a standard setup of Frame
-func (sv *StructView) ConfigStdFrame() *Frame {
-	frame := sv.SetFrame()
+// StdConfig configures a standard setup of the overall Frame
+func (sv *StructView) StdConfig() {
+	sv.SetFrame()
 	config := sv.StdFrameConfig()
-	frame.ConfigChildren(config, false)
-	return frame
+	sv.ConfigChildren(config, false)
 }
 
 // SetTitle sets the title and updates the Title label
@@ -1046,41 +1035,29 @@ func (sv *StructView) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) TitleWidget() (*Label, int) {
-	frame := sv.Frame()
-	if frame != nil {
-		idx := frame.ChildIndexByName("Title", 0)
-		if idx < 0 {
-			return nil, -1
-		}
-		return frame.Child(idx).(*Label), idx
+	idx := sv.ChildIndexByName("Title", 0)
+	if idx < 0 {
+		return nil, -1
 	}
-	return nil, -1
+	return sv.Child(idx).(*Label), idx
 }
 
 // StructGrid returns the StructGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) StructGrid() (*Layout, int) {
-	frame := sv.Frame()
-	if frame != nil {
-		idx := frame.ChildIndexByName("StructGrid", 0)
-		if idx < 0 {
-			return nil, -1
-		}
-		return frame.Child(idx).(*Layout), idx
+	idx := sv.ChildIndexByName("StructGrid", 0)
+	if idx < 0 {
+		return nil, -1
 	}
-	return nil, -1
+	return sv.Child(idx).(*Layout), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) ButtonBox() (*Layout, int) {
-	frame := sv.Frame()
-	if frame != nil {
-		idx := frame.ChildIndexByName("ButtonBox", 0)
-		if idx < 0 {
-			return nil, -1
-		}
-		return frame.Child(idx).(*Layout), idx
+	idx := sv.ChildIndexByName("ButtonBox", 0)
+	if idx < 0 {
+		return nil, -1
 	}
-	return nil, -1
+	return sv.Child(idx).(*Layout), idx
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -1095,24 +1072,23 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	if sv.FieldNames == nil {
-		sv.FieldNames = make([]string, 0)
-		sv.FieldVals = make([]reflect.Value, 0)
-	}
+	// always start fresh!
+	sv.Fields = make([]reflect.StructField, 0)
+	sv.FieldVals = make([]reflect.Value, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		labnm := fmt.Sprintf("Lbl%v", field.Name)
 		valnm := fmt.Sprintf("Val%v", field.Name)
 		config.Add(KiT_Label, labnm)
 		config.Add(KiT_TextField, valnm) // todo: extend to diff types using interface..
-		sv.FieldNames = append(sv.FieldNames, field.Name)
+		sv.Fields = append(sv.Fields, field)
 		sv.FieldVals = append(sv.FieldVals, fieldVal)
 		return true
 	})
 	sg.ConfigChildren(config, false)
 	for i, fv := range sv.FieldVals {
 		lbl := sg.Child(i * 2).(*Label)
-		lbl.Text = sv.FieldNames[i]
+		lbl.Text = sv.Fields[i].Name
 		tf := sg.Child(i*2 + 1).(*TextField)
 		tf.SetProp("max-width", -1)
 		tf.Text = kit.ToString(fv.Interface())
@@ -1125,7 +1101,7 @@ func (sv *StructView) ConfigStructGrid() {
 }
 
 func (sv *StructView) UpdateFromStruct() {
-	sv.ConfigStdFrame()
+	sv.StdConfig()
 	if sv.Title == "" {
 		typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
 		sv.SetTitle(fmt.Sprintf("Properties of %v", typ.Name()))
@@ -1135,73 +1111,6 @@ func (sv *StructView) UpdateFromStruct() {
 
 ////////////////////////////////////////////////////
 // Node2D interface
-
-func (g *StructView) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *StructView) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *StructView) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *StructView) Init2D() {
-	g.Init2DWidget()
-}
-
-func (g *StructView) Style2D() {
-	g.Style2DWidget(nil)
-}
-
-func (g *StructView) Size2D() {
-	g.InitLayout2D()
-	frame := g.Frame()
-	if frame != nil {
-		g.LayData.AllocSize = frame.LayData.Size.Pref // get from children
-	}
-	g.Size2DAddSpace()
-}
-
-func (g *StructView) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *StructView) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *StructView) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *StructView) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *StructView) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *StructView) Render2D() {
-	if g.PushBounds() {
-		g.Render2DChildren()
-		g.PopBounds()
-	}
-}
-
-func (g *StructView) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *StructView) FocusChanged2D(gotFocus bool) {
-}
 
 // check for interface implementation
 var _ Node2D = &StructView{}

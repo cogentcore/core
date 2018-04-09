@@ -1215,22 +1215,6 @@ type Frame struct {
 
 var KiT_Frame = kit.Types.AddType(&Frame{}, nil)
 
-func (g *Frame) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Frame) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Frame) AsLayout2D() *Layout {
-	return &g.Layout
-}
-
-func (g *Frame) Init2D() {
-	g.Init2DBase()
-}
-
 var FrameProps = map[string]interface{}{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
@@ -1240,30 +1224,6 @@ var FrameProps = map[string]interface{}{
 	"margin":           units.NewValue(2, units.Px),
 	"color":            color.Black,
 	"background-color": color.White,
-}
-
-func (g *Frame) Style2D() {
-	g.Style2DWidget(FrameProps)
-}
-
-func (g *Frame) Size2D() {
-	g.Layout.Size2D()
-}
-
-func (g *Frame) Layout2D(parBBox image.Rectangle) {
-	g.Layout.Layout2D(parBBox)
-}
-
-func (g *Frame) BBox2D() image.Rectangle {
-	return g.Layout.BBox2D()
-}
-
-func (g *Frame) ComputeBBox2D(parBBox image.Rectangle) {
-	g.Layout.ComputeBBox2D(parBBox)
-}
-
-func (g *Frame) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Layout.Move2D(delta, parBBox)
 }
 
 func (g *Frame) Render2D() {
@@ -1309,15 +1269,6 @@ func (g *Frame) Render2D() {
 		g.Layout.Render2D()
 		g.PopBounds()
 	}
-}
-
-func (g *Frame) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = true
-	return
-}
-
-func (g *Frame) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

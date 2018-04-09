@@ -246,3 +246,55 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 	}
 	return false
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Node2D impl for WidgetBase
+
+func (g *WidgetBase) Init2D() {
+	g.Init2DWidget()
+}
+
+func (g *WidgetBase) Style2D() {
+	g.Style2DWidget(nil) // node: most classes should override this as needed!
+}
+
+func (g *WidgetBase) Size2D() {
+	g.Size2DWidget()
+}
+
+func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DWidget(parBBox)
+	g.Layout2DChildren()
+}
+
+func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
+}
+
+func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
+func (g *WidgetBase) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
+func (g *WidgetBase) Render2D() {
+	if g.PushBounds() {
+		g.Render2DChildren()
+		g.PopBounds()
+	}
+}
+
+func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
+}
+
+func (g *WidgetBase) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &WidgetBase{}

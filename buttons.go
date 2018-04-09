@@ -260,18 +260,6 @@ func (g *Button) SetIcon(ic *Icon) {
 	SetButtonIcon(g, ic)
 }
 
-func (g *Button) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Button) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Button) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *Button) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
@@ -351,10 +339,6 @@ func (g *Button) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *Button) Size2D() {
-	g.Size2DWidget()
-}
-
 func (g *Button) Layout2D(parBBox image.Rectangle) {
 	g.ConfigPartsIfNeeded()
 	g.Layout2DWidget(parBBox) // lays out parts
@@ -362,23 +346,6 @@ func (g *Button) Layout2D(parBBox image.Rectangle) {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.Layout2DChildren()
-}
-
-func (g *Button) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Button) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *Button) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *Button) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
 }
 
 // todo: need color brigher / darker functions
@@ -401,12 +368,6 @@ func (g *Button) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-}
-
-func (g *Button) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {
