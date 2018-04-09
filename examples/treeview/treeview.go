@@ -11,6 +11,17 @@ import (
 	"github.com/rcoreilly/goki/ki"
 )
 
+// todo: enum field, etc
+
+// A node for testing
+type TestNode struct {
+	ki.Node
+	StrField   string  `desc:"a string"`
+	IntField   int     `desc:"an int"`
+	FloatField float64 `desc:"a float"`
+	BoolField  bool    `desc:"a bool"`
+}
+
 func main() {
 	go mainrun()
 	oswin.RunBackendEventLoop() // this needs to run in main loop
@@ -18,7 +29,7 @@ func main() {
 
 func mainrun() {
 	// a source tree to view
-	srctree := ki.Node{}
+	srctree := TestNode{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
 	srctree.AddNewChildNamed(nil, "child1")
@@ -41,7 +52,10 @@ func mainrun() {
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
-	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	hlay := vp.AddNewChildNamed(gi.KiT_Frame, "hlay").(*gi.Frame)
+	hlay.Lay = gi.LayoutRow
+
+	vlay := hlay.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
@@ -51,6 +65,13 @@ func mainrun() {
 
 	tv1 := row1.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
 	tv1.SetSrcNode(&srctree)
+
+	svlay := hlay.AddNewChildNamed(gi.KiT_Frame, "svlay").(*gi.Frame)
+	svlay.Lay = gi.LayoutCol
+
+	sv1 := svlay.AddNewChildNamed(gi.KiT_StructView, "sv1").(*gi.StructView)
+	sv1.SetStruct(&srctree)
+	sv1.SetProp("horiz-align", gi.AlignLeft)
 
 	win.UpdateEnd()
 

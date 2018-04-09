@@ -457,6 +457,14 @@ func (g *TextField) AutoScroll() {
 	st := &g.Style
 
 	sz := len(g.EditText)
+
+	if sz == 0 {
+		g.CursorPos = 0
+		g.EndPos = 0
+		g.StartPos = 0
+		return
+	}
+
 	spc := st.BoxSpace()
 	maxw := g.LayData.AllocSize.X - 2.0*spc
 	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch))

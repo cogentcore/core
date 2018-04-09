@@ -22,7 +22,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TreeView -- a widget that graphically represents / manipulates a Ki Tree
 
-// signals that buttons can send
+// signals that treeview can send
 type TreeViewSignals int64
 
 const (
@@ -90,9 +90,8 @@ type TreeView struct {
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
-// todo: several functions require traversing tree -- this will require an
-// interface to allow others to implement different behavior -- for now just
-// explicitly checking for TreeView type
+// todo: could create an interface for TreeView types -- right now just using
+// EmbeddedStruct to make everything general for anything that might embed TreeView
 
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
@@ -124,13 +123,13 @@ func (g *TreeView) SyncToSrc() {
 		win := g.ParentWindow()
 		if win != nil {
 			for _, vki := range g.Deleted {
-				vk := vki.(*TreeView)
+				vk := vki.EmbeddedStruct(KiT_TreeView).(*TreeView)
 				vk.DisconnectAllEventsTree(win)
 			}
 		}
 	}
 	for i, vki := range g.Kids {
-		vk := vki.(*TreeView)
+		vk := vki.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		skid := sk.Children()[i]
 		if vk.SrcNode.Ptr != skid {
 			vk.SetSrcNode(skid)
@@ -333,7 +332,7 @@ func (g *TreeView) MoveDownSibling() {
 			nn.SelectAction()
 		}
 	} else {
-		g.Par.(*TreeView).MoveDownSibling() // try up
+		g.Par.EmbeddedStruct(KiT_TreeView).(*TreeView).MoveDownSibling() // try up
 	}
 }
 
@@ -421,7 +420,7 @@ func (g *TreeView) SrcInsertAfter() {
 	myidx := sk.Index()
 	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(DialogAccepted) {
-			tv, _ := recv.(*TreeView)
+			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
 			par := sk.Parent()
 			dlg, _ := send.(*Dialog)
@@ -454,7 +453,7 @@ func (g *TreeView) SrcInsertBefore() {
 
 	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(DialogAccepted) {
-			tv, _ := recv.(*TreeView)
+			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
 			par := sk.Parent()
 			dlg, _ := send.(*Dialog)
@@ -474,7 +473,7 @@ func (g *TreeView) SrcAddChild() {
 	ttl := "TreeView Add Child"
 	NewKiDialog(g.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Add:", g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(DialogAccepted) {
-			tv, _ := recv.(*TreeView)
+			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
 			dlg, _ := send.(*Dialog)
 			n, typ := NewKiDialogValues(dlg)
@@ -574,7 +573,7 @@ func (g *TreeView) ConfigParts() {
 	if updt {
 		g.PartStyleProps(wb.This, TreeViewProps[0])
 		wb.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv, _ := recv.(*TreeView)
+			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.ToggleCollapse()
 		})
 	}
@@ -584,7 +583,7 @@ func (g *TreeView) ConfigParts() {
 	if updt {
 		g.PartStyleProps(lbl.This, TreeViewProps[0])
 		// lbl.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// 	_, ok := recv.(*TreeView)
+		// 	_, ok := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		// 	if !ok {
 		// 		return
 		// 	}
@@ -592,7 +591,7 @@ func (g *TreeView) ConfigParts() {
 		// })
 		lbl.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
-			tv := lb.Parent().Parent().(*TreeView)
+			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SelectAction()
 		})
 	}
@@ -604,23 +603,23 @@ func (g *TreeView) ConfigParts() {
 
 		// todo: shortcuts!
 		mb.AddMenuText("Add Child", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.(*TreeView)
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SrcAddChild()
 		})
 		mb.AddMenuText("Insert Before", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.(*TreeView)
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SrcInsertBefore()
 		})
 		mb.AddMenuText("Insert After", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.(*TreeView)
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SrcInsertAfter()
 		})
 		mb.AddMenuText("Duplicate", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.(*TreeView)
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SrcDuplicate()
 		})
 		mb.AddMenuText("Delete", g.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.(*TreeView)
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.SrcDelete()
 		})
 	}
@@ -635,7 +634,7 @@ func (g *TreeView) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tv := recv.(*TreeView)
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		kt := d.(*oswin.KeyTypedEvent)
 		// fmt.Printf("TreeView key: %v\n", kt.Chord)
 		kf := KeyFun(kt.Key, kt.Chord)
@@ -673,7 +672,7 @@ func (g *TreeView) Init2D() {
 		}
 	})
 	g.ReceiveEventType(oswin.KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.(*TreeView)
+		ab := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		kt := d.(*oswin.KeyDownEvent)
 		kf := KeyFun(kt.Key, "")
 		// fmt.Printf("TreeView key down: %v\n", kt.Key)
@@ -687,7 +686,7 @@ func (g *TreeView) Init2D() {
 		}
 	})
 	g.ReceiveEventType(oswin.KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.(*TreeView)
+		ab := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		ab.ClearSelectMods()
 	})
 }
@@ -922,6 +921,276 @@ func (g *TreeView) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &TreeView{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  StructView -- a widget that graphically represents / manipulates a struct
+//  as a property editor
+
+// signals that structview can send
+type StructViewSignals int64
+
+const (
+	// struct field was edited -- data is the field name
+	StructFieldEdited StructViewSignals = iota
+	StructViewSignalsN
+)
+
+//go:generate stringer -type=TreeViewSignals
+
+// todo: sub-editor panels with shared menubutton panel at bottom.. not clear that that is necc -- probably better to have each sub-panel fully separate
+
+// StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
+type StructView struct {
+	WidgetBase
+	Struct        interface{}     `desc:"the struct that we are a view onto"`
+	StructViewSig ki.Signal       `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
+	Title         string          `desc:"title / prompt to show above the editor fields"`
+	FieldNames    []string        `desc:"names of the fields"`
+	FieldVals     []reflect.Value `desc:"reflect.Value for the fields"`
+}
+
+var KiT_StructView = kit.Types.AddType(&StructView{}, nil)
+
+// Note: the overall strategy here is similar to Dialog, where we provide lots
+// of flexible configuration elements that can be easily extended and modified
+
+// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
+func (sv *StructView) SetStruct(st interface{}) {
+	sv.Struct = st
+	sv.UpdateFromStruct()
+}
+
+var StructViewProps = map[string]interface{}{
+	"#frame": map[string]interface{}{
+		"border-width":        units.NewValue(2, units.Px),
+		"margin":              units.NewValue(8, units.Px),
+		"padding":             units.NewValue(4, units.Px),
+		"box-shadow.h-offset": units.NewValue(4, units.Px),
+		"box-shadow.v-offset": units.NewValue(4, units.Px),
+		"box-shadow.blur":     units.NewValue(4, units.Px),
+		"box-shadow.color":    "#CCC",
+	},
+	"#title": map[string]interface{}{
+		// todo: add "bigger" font
+		"max-width":        units.NewValue(-1, units.Px),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignTop,
+		"background-color": "none",
+	},
+	"#prompt": map[string]interface{}{
+		"max-width":        units.NewValue(-1, units.Px),
+		"text-align":       AlignLeft,
+		"vertical-align":   AlignTop,
+		"background-color": "none",
+	},
+}
+
+// SetFrame creates a standard vertical column frame layout as first element of the view, named "Frame"
+func (sv *StructView) SetFrame() *Frame {
+	if len(sv.Kids) == 0 {
+		frame := sv.AddNewChildNamed(KiT_Frame, "Frame").(*Frame)
+		frame.Lay = LayoutCol
+		sv.PartStyleProps(frame, StructViewProps)
+		return frame
+	}
+	return sv.Frame()
+}
+
+// Frame returns the main frame for the view, assumed to be the first element in the view
+func (sv *StructView) Frame() *Frame {
+	return sv.Child(0).(*Frame)
+}
+
+// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
+// -- can modify as desired before calling ConfigChildren on Frame using this
+func (g *StructView) StdFrameConfig() kit.TypeAndNameList {
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config.Add(KiT_Label, "Title")
+	config.Add(KiT_Space, "TitleSpace")
+	config.Add(KiT_Layout, "StructGrid")
+	config.Add(KiT_Space, "GridSpace")
+	config.Add(KiT_Layout, "ButtonBox")
+	return config
+}
+
+// configure a standard setup of Frame
+func (sv *StructView) ConfigStdFrame() *Frame {
+	frame := sv.SetFrame()
+	config := sv.StdFrameConfig()
+	frame.ConfigChildren(config, false)
+	return frame
+}
+
+// SetTitle sets the title and updates the Title label
+func (sv *StructView) SetTitle(title string) {
+	sv.Title = title
+	lab, _ := sv.TitleWidget()
+	if lab != nil {
+		lab.Text = title
+	}
+}
+
+// Title returns the title label widget, and its index, within frame -- nil, -1 if not found
+func (sv *StructView) TitleWidget() (*Label, int) {
+	frame := sv.Frame()
+	if frame != nil {
+		idx := frame.ChildIndexByName("Title", 0)
+		if idx < 0 {
+			return nil, -1
+		}
+		return frame.Child(idx).(*Label), idx
+	}
+	return nil, -1
+}
+
+// StructGrid returns the StructGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
+func (sv *StructView) StructGrid() (*Layout, int) {
+	frame := sv.Frame()
+	if frame != nil {
+		idx := frame.ChildIndexByName("StructGrid", 0)
+		if idx < 0 {
+			return nil, -1
+		}
+		return frame.Child(idx).(*Layout), idx
+	}
+	return nil, -1
+}
+
+// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
+func (sv *StructView) ButtonBox() (*Layout, int) {
+	frame := sv.Frame()
+	if frame != nil {
+		idx := frame.ChildIndexByName("ButtonBox", 0)
+		if idx < 0 {
+			return nil, -1
+		}
+		return frame.Child(idx).(*Layout), idx
+	}
+	return nil, -1
+}
+
+// ConfigStructGrid configures the StructGrid for the current struct
+func (sv *StructView) ConfigStructGrid() {
+	if sv.Struct == nil {
+		return
+	}
+	sg, _ := sv.StructGrid()
+	if sg == nil {
+		return
+	}
+	sg.Lay = LayoutGrid
+	sg.SetProp("columns", 2)
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	if sv.FieldNames == nil {
+		sv.FieldNames = make([]string, 0)
+		sv.FieldVals = make([]reflect.Value, 0)
+	}
+	kit.FlatFieldsValueFun(sv.Struct, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		// todo: check tags, skip various etc
+		labnm := fmt.Sprintf("Lbl%v", field.Name)
+		valnm := fmt.Sprintf("Val%v", field.Name)
+		config.Add(KiT_Label, labnm)
+		config.Add(KiT_TextField, valnm) // todo: extend to diff types using interface..
+		sv.FieldNames = append(sv.FieldNames, field.Name)
+		sv.FieldVals = append(sv.FieldVals, fieldVal)
+		return true
+	})
+	sg.ConfigChildren(config, false)
+	for i, fv := range sv.FieldVals {
+		lbl := sg.Child(i * 2).(*Label)
+		lbl.Text = sv.FieldNames[i]
+		tf := sg.Child(i*2 + 1).(*TextField)
+		tf.SetProp("max-width", -1)
+		tf.Text = kit.ToString(fv.Interface())
+		tf.TextFieldSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			// ssv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
+			// tf := send.(*TextField)
+			// // todo: set value from text field!
+		})
+	}
+}
+
+func (sv *StructView) UpdateFromStruct() {
+	sv.ConfigStdFrame()
+	if sv.Title == "" {
+		typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
+		sv.SetTitle(fmt.Sprintf("Properties of %v", typ.Name()))
+	}
+	sv.ConfigStructGrid()
+}
+
+////////////////////////////////////////////////////
+// Node2D interface
+
+func (g *StructView) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
+func (g *StructView) AsViewport2D() *Viewport2D {
+	return nil
+}
+
+func (g *StructView) AsLayout2D() *Layout {
+	return nil
+}
+
+func (g *StructView) Init2D() {
+	g.Init2DWidget()
+}
+
+func (g *StructView) Style2D() {
+	g.Style2DWidget(nil)
+}
+
+func (g *StructView) Size2D() {
+	g.InitLayout2D()
+	frame := g.Frame()
+	if frame != nil {
+		g.LayData.AllocSize = frame.LayData.Size.Pref // get from parts
+	}
+	g.Size2DAddSpace()
+}
+
+func (g *StructView) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DWidget(parBBox)
+	g.Layout2DChildren()
+}
+
+func (g *StructView) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
+}
+
+func (g *StructView) ComputeBBox2D(parBBox image.Rectangle) {
+	g.ComputeBBox2DWidget(parBBox)
+}
+
+func (g *StructView) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
+func (g *StructView) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
+func (g *StructView) Render2D() {
+	if g.PushBounds() {
+		g.Render2DChildren()
+		g.PopBounds()
+	}
+}
+
+func (g *StructView) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
+}
+
+func (g *StructView) FocusChanged2D(gotFocus bool) {
+}
+
+// check for interface implementation
+var _ Node2D = &StructView{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Tab Widget
