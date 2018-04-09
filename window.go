@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"runtime"
 
@@ -73,6 +74,13 @@ func (w *Window) WinViewport2D() *Viewport2D {
 
 func (w *Window) Resize(width, height int) {
 	w.Viewport.Resize(width, height)
+}
+
+func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	vpimg := vp.Pixels.SubImage(vpBBox).(*image.RGBA)
+	s := w.OSWin.Screen()
+	s.CopyRGBA(vpimg, winBBox)
+	w.OSWin.FlushImage()
 }
 
 func (w *Window) UpdateScreen() {

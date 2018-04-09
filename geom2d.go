@@ -140,6 +140,15 @@ func (a *Vec2D) SetAddVal(val float64) {
 	a.Y += val
 }
 
+func (a *Vec2D) SetAddDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X += val
+	case Y:
+		a.Y += val
+	}
+}
+
 func (a Vec2D) Sub(b Vec2D) Vec2D {
 	return Vec2D{a.X - b.X, a.Y - b.Y}
 }
@@ -152,6 +161,15 @@ func (a *Vec2D) SetSub(b Vec2D) {
 func (a *Vec2D) SetSubVal(val float64) {
 	a.X -= val
 	a.Y -= val
+}
+
+func (a *Vec2D) SetSubDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X -= val
+	case Y:
+		a.Y -= val
+	}
 }
 
 func (a Vec2D) SubVal(val float64) Vec2D {
@@ -176,6 +194,15 @@ func (a *Vec2D) SetMulVal(val float64) {
 	a.Y *= val
 }
 
+func (a *Vec2D) SetMulDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X *= val
+	case Y:
+		a.Y *= val
+	}
+}
+
 func (a Vec2D) Div(b Vec2D) Vec2D {
 	return Vec2D{a.X / b.X, a.Y / b.Y}
 }
@@ -188,6 +215,15 @@ func (a *Vec2D) SetDiv(b Vec2D) {
 func (a *Vec2D) SetDivlVal(val float64) {
 	a.X /= val
 	a.Y /= val
+}
+
+func (a *Vec2D) SetDivDim(d Dims2D, val float64) {
+	switch d {
+	case X:
+		a.X /= val
+	case Y:
+		a.Y /= val
+	}
 }
 
 func (a Vec2D) DivVal(val float64) Vec2D {

@@ -123,6 +123,7 @@ func (vp *Viewport2D) RestorePixels() {
 
 // draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
+	win := vp.ParentWindow() // todo: consider caching window pointer
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
@@ -132,6 +133,9 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		r = nr
 	}
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
+	if win != nil {
+		win.UpdateVpRegion(parVp, vp.VpBBox, vp.WinBBox)
+	}
 }
 
 // draw main viewport into window
@@ -248,10 +252,19 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
+		if Render2DTrace {
+			fmt.Printf("Render: %v at %v DrawPopup\n", vp.PathUnique(), vp.VpBBox)
+		}
 		vp.DrawPopup()
 	} else if vp.Viewport != nil {
+		if Render2DTrace {
+			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
+		}
 		vp.DrawIntoParent(vp.Viewport)
 	} else {
+		if Render2DTrace {
+			fmt.Printf("Render: %v at %v DrawIntoWindow\n", vp.PathUnique(), vp.VpBBox)
+		}
 		vp.DrawIntoWindow()
 	}
 }
@@ -392,7 +405,11 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
 	gn.Render2DTree()
-	vp.RenderViewport2D()
+	win := vp.ParentWindow() // todo: consider caching window pointer
+	if win != nil {
+		// direct update
+		win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+	}
 }
 
 // SavePNG encodes the image as a PNG and writes it to disk.

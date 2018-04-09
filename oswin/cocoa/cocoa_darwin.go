@@ -24,11 +24,12 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"github.com/rcoreilly/goki/gi/oswin"
 	"image"
 	"image/draw"
 	"runtime"
 	"unsafe"
+
+	"github.com/rcoreilly/goki/gi/oswin"
 )
 
 var tasks chan func()

@@ -386,8 +386,8 @@ func (ly *Layout) GatherSizesGrid() {
 		rows++
 	}
 
-	ly.LayData.GridSize.X = cols
-	ly.LayData.GridSize.Y = rows
+	ly.GridSize.X = cols
+	ly.GridSize.Y = rows
 
 	if len(ly.GridDataRows) != rows {
 		ly.GridDataRows = make([]LayoutData, rows)
@@ -396,11 +396,11 @@ func (ly *Layout) GatherSizesGrid() {
 		ly.GridDataCols = make([]LayoutData, cols)
 	}
 
-	for ld := range ly.GridDataRows {
+	for _, ld := range ly.GridDataRows {
 		ld.Size.Need.Set(0, 0)
 		ld.Size.Pref.Set(0, 0)
 	}
-	for ld := range ly.GridDataCols {
+	for _, ld := range ly.GridDataCols {
 		ld.Size.Need.Set(0, 0)
 		ld.Size.Pref.Set(0, 0)
 	}
@@ -444,22 +444,24 @@ func (ly *Layout) GatherSizesGrid() {
 		}
 	}
 
-	// Y = sum across rows which have max's -- not really using sums!
+	lst := ly.Style.Layout
+
+	// Y = sum across rows which have max's
 	var sumPref, sumNeed Vec2D
-	for ld := range ly.GridDataRows {
+	for _, ld := range ly.GridDataRows {
 		sumNeed.SetAddDim(Y, ld.Size.Pref.Y)
 		sumPref.SetAddDim(Y, ld.Size.Pref.Y)
 	}
-	// X = sum across cols which have max's -- not really using sums!
-	for ld := range ly.GridDataCols {
+	// X = sum across cols which have max's
+	for _, ld := range ly.GridDataCols {
 		sumNeed.SetAddDim(X, ld.Size.Pref.X)
 		sumPref.SetAddDim(X, ld.Size.Pref.X)
 	}
 
-	sumNeed.SetAddDim(Y, (len(ly.GridDataRows)-1)*lst.Margin.Dots)
-	sumPref.SetAddDim(Y, (len(ly.GridDataRows)-1)*lst.Margin.Dots)
-	sumNeed.SetAddDim(X, (len(ly.GridDataCols)-1)*lst.Margin.Dots)
-	sumPref.SetAddDim(X, (len(ly.GridDataCols)-1)*lst.Margin.Dots)
+	sumNeed.SetAddDim(Y, float64(len(ly.GridDataRows)-1)*lst.Margin.Dots)
+	sumPref.SetAddDim(Y, float64(len(ly.GridDataRows)-1)*lst.Margin.Dots)
+	sumNeed.SetAddDim(X, float64(len(ly.GridDataCols)-1)*lst.Margin.Dots)
+	sumPref.SetAddDim(X, float64(len(ly.GridDataCols)-1)*lst.Margin.Dots)
 
 	ly.LayData.Size.Need.SetMax(sumNeed)
 	ly.LayData.Size.Pref.SetMax(sumPref)
