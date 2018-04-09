@@ -45,6 +45,7 @@ func NewWindow(name string, width, height int) *Window {
 	FontLibrary.AddFontPaths("/Library/Fonts")
 	win := &Window{}
 	win.InitName(win, name)
+	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
 	win.OSWin, err = oswin.NewOSWindow(width, height)
 	if err != nil {
@@ -52,8 +53,8 @@ func NewWindow(name string, width, height int) *Window {
 		return nil
 	}
 	win.OSWin.SetTitle(name)
-	// we signal ourselves!
-	win.NodeSig.Connect(win.This, SignalWindow)
+	// we signal ourselves to flush the OSWin
+	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
 
@@ -76,14 +77,16 @@ func (w *Window) Resize(width, height int) {
 	w.Viewport.Resize(width, height)
 }
 
+// UpdateVpRegion updates pixels for one viewport region on the screen, using vpBBox bounding box for the viewport, and winBBox bounding box for the window (which should not be empty given the overall logic driving updates) -- the Window has a its OnlySelfUpdate logic for determining when to flush changes to the underlying OSWindow -- wrap updates in win.UpdateStart / win.UpdateEnd to actually flush the updates to be visible
 func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
 	vpimg := vp.Pixels.SubImage(vpBBox).(*image.RGBA)
 	s := w.OSWin.Screen()
 	s.CopyRGBA(vpimg, winBBox)
-	w.OSWin.FlushImage()
 }
 
-func (w *Window) UpdateScreen() {
+// FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
+func (w *Window) FullUpdate() {
+	w.UpdateStart()
 	s := w.OSWin.Screen()
 	s.CopyRGBA(w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// then all the current popups
@@ -105,15 +108,15 @@ func (w *Window) UpdateScreen() {
 			s.CopyRGBA(vp.Pixels, r)
 		}
 	}
-	w.OSWin.FlushImage()
+	w.UpdateEnd() // drives the flush
 }
 
-func SignalWindow(winki, node ki.Ki, sig int64, data interface{}) {
+func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.EmbeddedStruct(KiT_Window).(*Window)
-	// fmt.Printf("window: %v rendering due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
-	if win.Viewport != nil {
-		win.Viewport.FullRender2DTree()
+	if Render2DTrace {
+		fmt.Printf("Window: %v flushing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
+	win.OSWin.FlushImage()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
@@ -417,6 +420,8 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus == k {
 		return false
 	}
+	w.UpdateStart()
+	defer w.UpdateEnd()
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
@@ -586,7 +591,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 		}
 		// do nothing
 	}
-	w.UpdateScreen()
+	w.FullUpdate()
 }
 
 // push current focus onto stack and set new focus

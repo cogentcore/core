@@ -106,7 +106,6 @@ func (vp *Viewport2D) IsSVG() bool {
 
 // draw our image into parents -- called at right place in Render
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
-	win := vp.ParentWindow() // todo: consider caching window pointer
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
@@ -116,27 +115,27 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		r = nr
 	}
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
-	if win != nil {
-		win.UpdateVpRegion(parVp, vp.VpBBox, vp.WinBBox)
-	}
 }
 
-// draw main viewport into window
+// draw main viewport into window -- needs to redraw popups over top of it, so does a full update
 func (vp *Viewport2D) DrawIntoWindow() {
 	win := vp.ParentWindow() // todo: consider caching window pointer
 	if win == nil {
 		return
 	}
-	win.UpdateScreen()
+	win.FullUpdate()
 }
 
-// draw a popup into window viewport
+// draw a popup into window viewport -- assuming it is a top-level so only does it
 func (vp *Viewport2D) DrawPopup() {
 	win, ok := vp.Par.(*Window)
 	if !ok {
 		return
 	}
-	win.UpdateScreen()
+	// win.FullUpdate()
+	win.UpdateStart()
+	win.UpdateVpRegion(vp, vp.VpBBox, vp.WinBBox)
+	win.UpdateEnd()
 }
 
 // Delete this viewport -- has already been disconnected from window events
@@ -390,8 +389,9 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn.Render2DTree()
 	win := vp.ParentWindow() // todo: consider caching window pointer
 	if win != nil {
-		// direct update
+		win.UpdateStart()
 		win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		win.UpdateEnd()
 	}
 }
 

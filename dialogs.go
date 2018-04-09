@@ -276,11 +276,12 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopupDestroyAll)) // std is disposable
 }
 
-// NewStdDialog returns a basic standard dialog with a name, title, prompt, and ok / cancel buttons -- any empty text will not be added
+// NewStdDialog returns a basic standard dialog with a name, title, prompt, and ok / cancel buttons -- any empty text will not be added -- returns with UpdateStart started but NOT ended -- must call UpdateEnd once done configuring!
 func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 	dlg := Dialog{}
 	dlg.InitName(&dlg, name)
 	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopup))
+	dlg.UpdateStart()
 	dlg.StdDialog(title, prompt, ok, cancel)
 	return &dlg
 }
@@ -291,6 +292,7 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.UpdateEnd()
 	dlg.Open(0, 0, avp)
 }
 
@@ -400,6 +402,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.UpdateEnd()
 	dlg.Open(0, 0, avp)
 	return dlg
 }

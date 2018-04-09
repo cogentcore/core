@@ -243,6 +243,10 @@ func (g *TreeView) Label() string {
 // a select action has been received (e.g., a mouse click) -- translate into
 // selection updates
 func (g *TreeView) SelectAction() {
+	win := g.Viewport.ParentWindow()
+	if win != nil {
+		win.UpdateStart()
+	}
 	rn := g.RootWidget
 	if bitflag.Has(rn.NodeFlags, int(NodeFlagExtendSelect)) {
 		if g.IsSelected() {
@@ -257,6 +261,9 @@ func (g *TreeView) SelectAction() {
 			rn.UnselectAll()
 			g.Select()
 		}
+	}
+	if win != nil {
+		win.UpdateEnd()
 	}
 }
 
@@ -281,6 +288,10 @@ func (g *TreeView) Unselect() {
 
 // unselect everything below me -- call on Root to clear all
 func (g *TreeView) UnselectAll() {
+	win := g.Viewport.ParentWindow()
+	if win != nil {
+		win.UpdateStart()
+	}
 	g.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
@@ -294,6 +305,9 @@ func (g *TreeView) UnselectAll() {
 			return false
 		}
 	})
+	if win != nil {
+		win.UpdateEnd()
+	}
 }
 
 // unselect everything below me -- call on Root to clear all

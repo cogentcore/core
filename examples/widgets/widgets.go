@@ -26,7 +26,7 @@ func mainrun() {
 	height := 800
 
 	// turn this on to see a trace of the rendering
-	// gi.Render2DTrace = true
+	gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
 	rec := ki.Node{}          // receiver for events
