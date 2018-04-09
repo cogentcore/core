@@ -36,6 +36,7 @@ type Window struct {
 	LastDrag      time.Time                   `json:"-" xml:"-" desc:"time since last drag event"`
 	LastSentDrag  oswin.MouseDraggedEvent     `json:"-" xml:"-" desc:"last drag that we actually sent"`
 	stopEventLoop bool                        `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
+	DoFullRender  bool                        `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -140,8 +141,7 @@ func (w *Window) StopEventLoop() {
 }
 
 func (w *Window) StartEventLoop() {
-	w.Viewport.FullRender2DTree()
-	w.SetNextFocusItem()
+	w.DoFullRender = true
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go w.EventLoop()
@@ -323,13 +323,11 @@ func (w *Window) EventLoop() {
 	lastResize := interface{}(nil)
 
 	for ei := range events {
+		runtime.Gosched()
 		if w.stopEventLoop {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
 		}
-		// this is bad: need to keep it sequential here!
-		runtime.Gosched()
-
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
 
@@ -410,6 +408,13 @@ func (w *Window) EventLoop() {
 		if delPop {
 			// fmt.Printf("delpop poping curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
 			w.PopPopup(curPop)
+		}
+
+		if w.DoFullRender {
+			fmt.Printf("Doing full render\n")
+			w.DoFullRender = false
+			w.Viewport.FullRender2DTree()
+			w.SetNextFocusItem()
 		}
 	}
 	fmt.Println("end of events")

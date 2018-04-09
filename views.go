@@ -552,18 +552,6 @@ func (g *TreeView) ClearSelectMods() {
 ////////////////////////////////////////////////////
 // Node2D interface
 
-func (g *TreeView) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *TreeView) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *TreeView) AsLayout2D() *Layout {
-	return nil
-}
-
 // qt calls the open / close thing a "branch"
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
@@ -587,8 +575,8 @@ func (g *TreeView) ConfigParts() {
 	if updt {
 		g.PartStyleProps(wb.This, TreeViewProps[0])
 		wb.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.ToggleCollapse()
+			tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvr.ToggleCollapse()
 		})
 	}
 
@@ -861,11 +849,6 @@ func (g *TreeView) ChildrenBBox2D() image.Rectangle {
 		ar = ar.Intersect(pgi.ChildrenBBox2D())
 	}
 	return ar
-}
-
-func (g *TreeView) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *TreeView) Render2D() {

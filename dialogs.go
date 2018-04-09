@@ -299,63 +299,9 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (dlg *Dialog) AsNode2D() *Node2DBase {
-	return &dlg.Node2DBase
-}
-
-func (dlg *Dialog) AsViewport2D() *Viewport2D {
-	return &dlg.Viewport2D
-}
-
-func (dlg *Dialog) AsLayout2D() *Layout {
-	return nil
-}
-
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
 	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopup))
-}
-
-func (dlg *Dialog) Style2D() {
-	dlg.Style2DWidget(nil)
-}
-
-func (dlg *Dialog) Size2D() {
-	dlg.Viewport2D.Size2D()
-}
-
-func (dlg *Dialog) Layout2D(parBBox image.Rectangle) {
-	dlg.Viewport2D.Layout2D(parBBox)
-}
-
-func (dlg *Dialog) BBox2D() image.Rectangle {
-	return dlg.Viewport2D.BBox2D()
-}
-
-func (dlg *Dialog) ComputeBBox2D(parBBox image.Rectangle) {
-	dlg.Viewport2D.ComputeBBox2D(parBBox)
-}
-
-func (dlg *Dialog) ChildrenBBox2D() image.Rectangle {
-	return dlg.VpBBox // no margin, padding, etc
-}
-
-func (dlg *Dialog) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	dlg.Move2DBase(delta, parBBox)
-	dlg.Move2DChildren(delta)
-}
-
-func (dlg *Dialog) Render2D() {
-	dlg.Viewport2D.Render2D()
-}
-
-func (dlg *Dialog) ReRender2D() (node Node2D, layout bool) {
-	node = dlg.This.(Node2D)
-	layout = false
-	return
-}
-
-func (dlg *Dialog) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

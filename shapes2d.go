@@ -28,56 +28,9 @@ type Rect struct {
 
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
-func (g *Rect) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Rect) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Rect) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Rect) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Rect) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-func (g *Rect) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Rect) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Rect) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
-}
-
-func (g *Rect) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Rect) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Rect) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Rect) Render2D() {
@@ -109,9 +62,6 @@ func (g *Rect) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-func (g *Rect) FocusChanged2D(gotFocus bool) {
-}
-
 // check for interface implementation
 var _ Node2D = &Rect{}
 
@@ -127,18 +77,6 @@ type Viewport2DFill struct {
 
 var KiT_Viewport2DFill = kit.Types.AddType(&Viewport2DFill{}, nil)
 
-func (g *Viewport2DFill) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Viewport2DFill) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Viewport2DFill) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *Viewport2DFill) Init2D() {
 	g.Init2DBase()
 	vp := g.Viewport
@@ -150,46 +88,16 @@ func (g *Viewport2DFill) Style2D() {
 	g.Style2DSVG(nil)
 }
 
-func (g *Viewport2DFill) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Viewport2DFill) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Viewport2DFill) BBox2D() image.Rectangle {
 	g.Init2D() // keep up-to-date -- cheap
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 }
 
-func (g *Viewport2DFill) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Viewport2DFill) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Viewport2DFill) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *Viewport2DFill) Render2D() {
-	g.Rect.Render2D()
-}
-
 func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
 	node = g.This.(Node2D)
 	layout = false
 	return
-}
-
-func (g *Viewport2DFill) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -207,56 +115,9 @@ type Circle struct {
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
-func (g *Circle) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Circle) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Circle) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Circle) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Circle) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-func (g *Circle) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Circle) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Circle) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
-}
-
-func (g *Circle) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Circle) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Circle) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Circle) Render2D() {
@@ -283,9 +144,6 @@ func (g *Circle) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-func (g *Circle) FocusChanged2D(gotFocus bool) {
-}
-
 // check for interface implementation
 var _ Node2D = &Circle{}
 
@@ -301,56 +159,9 @@ type Ellipse struct {
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
-func (g *Ellipse) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Ellipse) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Ellipse) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Ellipse) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Ellipse) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-func (g *Ellipse) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Ellipse) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Ellipse) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
-}
-
-func (g *Ellipse) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Ellipse) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Ellipse) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Ellipse) Render2D() {
@@ -377,9 +188,6 @@ func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-func (g *Ellipse) FocusChanged2D(gotFocus bool) {
-}
-
 // check for interface implementation
 var _ Node2D = &Ellipse{}
 
@@ -395,56 +203,9 @@ type Line struct {
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
-func (g *Line) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Line) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Line) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Line) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Line) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-func (g *Line) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Line) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Line) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
-}
-
-func (g *Line) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Line) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Line) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Line) Render2D() {
@@ -471,9 +232,6 @@ func (g *Line) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-func (g *Line) FocusChanged2D(gotFocus bool) {
-}
-
 // check for interface implementation
 var _ Node2D = &Line{}
 
@@ -488,56 +246,9 @@ type Polyline struct {
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
-func (g *Polyline) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Polyline) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Polyline) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Polyline) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Polyline) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
-		pc.Off = true
-	}
-}
-
-func (g *Polyline) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Polyline) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Polyline) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
-}
-
-func (g *Polyline) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Polyline) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Polyline) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Polyline) Render2D() {
@@ -567,9 +278,6 @@ func (g *Polyline) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-func (g *Polyline) FocusChanged2D(gotFocus bool) {
-}
-
 // check for interface implementation
 var _ Node2D = &Polyline{}
 
@@ -584,56 +292,9 @@ type Polygon struct {
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
-func (g *Polygon) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Polygon) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Polygon) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Polygon) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Polygon) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() || len(g.Points) < 2 {
-		pc.Off = true
-	}
-}
-
-func (g *Polygon) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Polygon) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Polygon) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
-}
-
-func (g *Polygon) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Polygon) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Polygon) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Polygon) Render2D() {
@@ -661,9 +322,6 @@ func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
 	}
 	layout = false
 	return
-}
-
-func (g *Polygon) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -742,7 +400,7 @@ func (pc PathCmds) EncCmd(n int) PathData {
 	return pd
 }
 
-// 2D Path
+// 2D Path, using SVG-style data that can render just about anything
 type Path struct {
 	Node2DBase
 	Data []PathData `xml:"d" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
@@ -750,53 +408,11 @@ type Path struct {
 
 var KiT_Path = kit.Types.AddType(&Path{}, nil)
 
-func (g *Path) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Path) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Path) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Path) Init2D() {
-	g.Init2DBase()
-}
-
-func (g *Path) Style2D() {
-	g.Style2DSVG(nil)
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() || len(g.Data) < 2 {
-		pc.Off = true
-	}
-}
-
-func (g *Path) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size())
-}
-
-func (g *Path) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Path) BBox2D() image.Rectangle {
-	// hmm -- this is somewhat expensive -- probably better to compute earlier and save?
+	// todo -- this is somewhat expensive -- probably better to compute earlier and save?
 	// psz := g.Viewport.VpBBox.Size()
 	return image.Rect(0, 0, 100, 100)
 	// return g.Paint.BoundingBoxFromPoints(g.Points)
-}
-
-func (g *Path) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Path) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
 }
 
 // get the next path data element, incrementing the index -- ++ not an
@@ -1105,11 +721,6 @@ func ParsePathData(d string) []PathData {
 	return pd
 }
 
-func (g *Path) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
 func (g *Path) Render2D() {
 	if len(g.Data) < 2 {
 		return
@@ -1135,9 +746,6 @@ func (g *Path) ReRender2D() (node Node2D, layout bool) {
 	}
 	layout = false
 	return
-}
-
-func (g *Path) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

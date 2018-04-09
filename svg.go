@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"image"
-
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -22,18 +20,6 @@ type SVG struct {
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
 
-func (vp *SVG) AsNode2D() *Node2DBase {
-	return &vp.Node2DBase
-}
-
-func (vp *SVG) AsViewport2D() *Viewport2D {
-	return &vp.Viewport2D
-}
-
-func (vp *SVG) AsLayout2D() *Layout {
-	return nil
-}
-
 func (vp *SVG) Init2D() {
 	vp.Viewport2D.Init2D()
 	bitflag.Set(&vp.NodeFlags, int(VpFlagSVG)) // we are an svg type
@@ -43,31 +29,6 @@ func (vp *SVG) Style2D() {
 	// we use both forms of styling -- need width, height, pos from widget..
 	vp.Style2DSVG(nil)
 	vp.Style2DWidget(nil)
-}
-
-func (vp *SVG) Size2D() {
-	vp.Viewport2D.Size2D()
-}
-
-func (vp *SVG) Layout2D(parBBox image.Rectangle) {
-	vp.Viewport2D.Layout2D(parBBox)
-}
-
-func (vp *SVG) BBox2D() image.Rectangle {
-	return vp.Viewport2D.BBox2D()
-}
-
-func (vp *SVG) ComputeBBox2D(parBBox image.Rectangle) {
-	vp.Viewport2D.ComputeBBox2D(parBBox)
-}
-
-func (vp *SVG) ChildrenBBox2D() image.Rectangle {
-	return vp.VpBBox // no margin, padding, etc
-}
-
-func (vp *SVG) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	vp.Move2DBase(delta, parBBox)
-	vp.Move2DChildren(delta)
 }
 
 func (vp *SVG) Render2D() {
@@ -88,15 +49,6 @@ func (vp *SVG) Render2D() {
 		vp.PopBounds()
 		rs.PopXForm()
 	}
-}
-
-func (vp *SVG) ReRender2D() (node Node2D, layout bool) {
-	node = vp.This.(Node2D)
-	layout = false
-	return
-}
-
-func (vp *SVG) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

@@ -338,18 +338,6 @@ func (g *Slider) Defaults() { // todo: should just get these from props
 	g.Max = 1.0
 }
 
-func (g *Slider) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Slider) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Slider) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *Slider) Init2D() {
 	g.Init2DSlider()
 }
@@ -418,23 +406,6 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
-}
-
-func (g *Slider) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Slider) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *Slider) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *Slider) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
 }
 
 func (g *Slider) Render2D() {
@@ -515,12 +486,6 @@ func (g *Slider) Render2DDefaultStyle() {
 	}
 }
 
-func (g *Slider) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
 func (g *Slider) FocusChanged2D(gotFocus bool) {
 	// fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
@@ -551,18 +516,6 @@ func (g *ScrollBar) Defaults() { // todo: should just get these from props
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
-}
-
-func (g *ScrollBar) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *ScrollBar) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *ScrollBar) AsLayout2D() *Layout {
-	return nil
 }
 
 func (g *ScrollBar) Init2D() {
@@ -626,23 +579,6 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
-func (g *ScrollBar) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *ScrollBar) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *ScrollBar) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *ScrollBar) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
 func (g *ScrollBar) Render2D() {
 	if g.PushBounds() {
 		if !g.HasChildren() {
@@ -687,12 +623,6 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
 		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 	}
-}
-
-func (g *ScrollBar) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {

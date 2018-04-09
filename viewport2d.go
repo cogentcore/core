@@ -160,16 +160,8 @@ func (vp *Viewport2D) DeletePopup() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (vp *Viewport2D) AsNode2D() *Node2DBase {
-	return &vp.Node2DBase
-}
-
 func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 	return vp
-}
-
-func (g *Viewport2D) AsLayout2D() *Layout {
-	return nil
 }
 
 func (vp *Viewport2D) Init2D() {
@@ -224,6 +216,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) {
 	vp.SetWinBBox()    // this adds all PARENT offsets
 	if !vp.IsPopup() { // non-popups use allocated positions
 		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
+		fmt.Printf("Viewport: %v viewbox.min updated: %v\n", vp.PathUnique(), vp.ViewBox.Min)
 	}
 	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
 }
@@ -278,7 +271,6 @@ func (vp *Viewport2D) PopBounds() {
 }
 
 func (vp *Viewport2D) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	// todo: might need to do something special here!?
 	vp.Move2DBase(delta, parBBox)
 	vp.Move2DChildren(delta)
 }

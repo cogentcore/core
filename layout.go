@@ -696,9 +696,9 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPos.SetDim(dim, pos)
-		// if ly.IsField() {
-		// 	fmt.Printf("child: %v, pos: %v, size: %v\n", gi.Nm, pos, size)
-		// }
+		if Layout2DTrace {
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), gi.UniqueNm, pos, size)
+		}
 		pos += size
 	}
 }
@@ -1226,6 +1226,10 @@ var FrameProps = map[string]interface{}{
 	"background-color": color.White,
 }
 
+func (g *Frame) Style2D() {
+	g.Style2DWidget(FrameProps)
+}
+
 func (g *Frame) Render2D() {
 	if g.PushBounds() {
 		pc := &g.Paint
@@ -1286,22 +1290,6 @@ type Stretch struct {
 
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, nil)
 
-func (g *Stretch) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Stretch) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Stretch) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Stretch) Init2D() {
-	g.Init2DBase()
-}
-
 var StretchProps = map[string]interface{}{
 	"max-width":  -1.0,
 	"max-height": -1.0,
@@ -1311,46 +1299,9 @@ func (g *Stretch) Style2D() {
 	g.Style2DWidget(StretchProps)
 }
 
-func (g *Stretch) Size2D() {
-	g.InitLayout2D()
-}
-
 func (g *Stretch) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DChildren()
-}
-
-func (g *Stretch) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Stretch) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Stretch) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Stretch) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *Stretch) Render2D() {
-	if g.PushBounds() {
-		g.Render2DChildren()
-		g.PopBounds()
-	}
-}
-
-func (g *Stretch) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *Stretch) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -1363,22 +1314,6 @@ type Space struct {
 
 var KiT_Space = kit.Types.AddType(&Space{}, nil)
 
-func (g *Space) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Space) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Space) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Space) Init2D() {
-	g.Init2DBase()
-}
-
 var SpaceProps = map[string]interface{}{
 	"width":  units.NewValue(1, units.Em),
 	"height": units.NewValue(1, units.Em),
@@ -1388,46 +1323,9 @@ func (g *Space) Style2D() {
 	g.Style2DWidget(SpaceProps)
 }
 
-func (g *Space) Size2D() {
-	g.InitLayout2D()
-}
-
 func (g *Space) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DChildren()
-}
-
-func (g *Space) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Space) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Space) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Space) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *Space) Render2D() {
-	if g.PushBounds() {
-		g.Render2DChildren()
-		g.PopBounds()
-	}
-}
-
-func (g *Space) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *Space) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

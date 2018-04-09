@@ -118,15 +118,20 @@ func (g *Node2DBase) Init2D() {
 }
 
 func (g *Node2DBase) Style2D() {
-	g.Style2DWidget(nil) // node: most classes should override this as needed!
+	g.Style2DSVG(nil) // base is used for SVG -- Widget overrides
+	pc := &g.Paint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	}
 }
 
 func (g *Node2DBase) Size2D() {
 	g.InitLayout2D()
+	g.LayData.AllocSize.SetPoint(g.BBox2D().Size()) // get size from bbox -- minimal case
 }
 
 func (g *Node2DBase) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DBase(parBBox, false) // no style
 	g.Layout2DChildren()
 }
 
@@ -139,7 +144,7 @@ func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle) {
 }
 
 func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
+	return g.VpBBox // pass-thru
 }
 
 func (g *Node2DBase) Move2D(delta Vec2D, parBBox image.Rectangle) {

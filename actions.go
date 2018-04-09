@@ -89,18 +89,6 @@ func (g *Action) SetAsButton() {
 	bitflag.Clear(&g.NodeFlags, int(ActionFlagMenu))
 }
 
-func (g *Action) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Action) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Action) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *Action) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
@@ -213,10 +201,6 @@ func (g *Action) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *Action) Size2D() {
-	g.Size2DWidget()
-}
-
 func (g *Action) Layout2D(parBBox image.Rectangle) {
 	g.ConfigPartsIfNeeded()
 	g.Layout2DWidget(parBBox)
@@ -224,23 +208,6 @@ func (g *Action) Layout2D(parBBox image.Rectangle) {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.Layout2DChildren()
-}
-
-func (g *Action) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
-}
-
-func (g *Action) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Action) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *Action) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
 }
 
 func (g *Action) Render2D() {
@@ -261,12 +228,6 @@ func (g *Action) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-}
-
-func (g *Action) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *Action) FocusChanged2D(gotFocus bool) {
@@ -293,22 +254,6 @@ type Separator struct {
 
 var KiT_Separator = kit.Types.AddType(&Separator{}, nil)
 
-func (g *Separator) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Separator) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Separator) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Separator) Init2D() {
-	g.Init2DWidget()
-}
-
 var SeparatorProps = map[string]interface{}{
 	"padding":      units.NewValue(2, units.Px),
 	"margin":       units.NewValue(2, units.Px),
@@ -320,32 +265,6 @@ var SeparatorProps = map[string]interface{}{
 
 func (g *Separator) Style2D() {
 	g.Style2DWidget(SeparatorProps)
-}
-
-func (g *Separator) Size2D() {
-	g.Size2DWidget()
-}
-
-func (g *Separator) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *Separator) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Separator) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Separator) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *Separator) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
 }
 
 func (g *Separator) Render2D() {
@@ -370,15 +289,6 @@ func (g *Separator) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	}
-}
-
-func (g *Separator) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *Separator) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -510,18 +420,6 @@ func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun 
 	return &ac
 }
 
-func (g *MenuButton) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *MenuButton) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *MenuButton) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *MenuButton) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
@@ -629,10 +527,6 @@ func (g *MenuButton) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *MenuButton) Size2D() {
-	g.Size2DWidget()
-}
-
 func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
 	g.ConfigParts()
 	g.Layout2DWidget(parBBox)
@@ -641,25 +535,6 @@ func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
 	}
 	g.Layout2DChildren()
 }
-
-func (g *MenuButton) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *MenuButton) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *MenuButton) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *MenuButton) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
-}
-
-// todo: need color brigher / darker functions
 
 func (g *MenuButton) Render2D() {
 	if g.PushBounds() {
@@ -678,12 +553,6 @@ func (g *MenuButton) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-}
-
-func (g *MenuButton) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *MenuButton) FocusChanged2D(gotFocus bool) {

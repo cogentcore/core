@@ -63,22 +63,6 @@ type Label struct {
 
 var KiT_Label = kit.Types.AddType(&Label{}, nil)
 
-func (g *Label) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Label) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Label) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Label) Init2D() {
-	g.Init2DWidget()
-}
-
 var LabelProps = map[string]interface{}{
 	"padding":        units.NewValue(2, units.Px),
 	"margin":         units.NewValue(2, units.Px),
@@ -94,28 +78,6 @@ func (g *Label) Size2D() {
 	g.Size2DFromText(g.Text)
 }
 
-func (g *Label) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *Label) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Label) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *Label) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *Label) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
-}
-
 func (g *Label) Render2D() {
 	if g.PushBounds() {
 		st := &g.Style
@@ -124,15 +86,6 @@ func (g *Label) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	}
-}
-
-func (g *Label) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *Label) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
@@ -350,18 +303,6 @@ func (g *TextField) SetCursorFromPixel(pixOff float64) {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (g *TextField) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *TextField) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *TextField) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *TextField) Init2D() {
 	g.Init2DWidget()
 	g.EditText = g.Text
@@ -419,18 +360,6 @@ func (g *TextField) Layout2D(parBBox image.Rectangle) {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.Layout2DChildren()
-}
-
-func (g *TextField) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *TextField) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *TextField) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
 }
 
 func (g *TextField) RenderCursor() {
@@ -515,11 +444,6 @@ func (g *TextField) AutoScroll() {
 	}
 }
 
-func (g *TextField) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
-}
-
 func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
@@ -537,12 +461,6 @@ func (g *TextField) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	}
-}
-
-func (g *TextField) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *TextField) FocusChanged2D(gotFocus bool) {
@@ -724,18 +642,6 @@ func (g *ComboBox) MakeItemsMenu() {
 	}
 }
 
-func (g *ComboBox) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *ComboBox) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *ComboBox) AsLayout2D() *Layout {
-	return nil
-}
-
 func (g *ComboBox) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
@@ -853,23 +759,6 @@ func (g *ComboBox) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
-func (g *ComboBox) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *ComboBox) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *ComboBox) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *ComboBox) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
-}
-
 // todo: need color brigher / darker functions
 
 func (g *ComboBox) Render2D() {
@@ -888,12 +777,6 @@ func (g *ComboBox) Render2DDefaultStyle() {
 	st := &g.Style
 	g.RenderStdBox(st)
 	g.Render2DParts()
-}
-
-func (g *ComboBox) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *ComboBox) FocusChanged2D(gotFocus bool) {

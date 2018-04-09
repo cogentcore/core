@@ -100,23 +100,6 @@ type Text2D struct {
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
 
-func (g *Text2D) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *Text2D) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *Text2D) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *Text2D) Init2D() {
-	g.Init2DBase()
-	g.LayData.Defaults()
-}
-
 func (g *Text2D) Style2D() {
 	g.Style2DSVG(nil)
 }
@@ -134,27 +117,9 @@ func (g *Text2D) Size2D() {
 	g.LayData.AllocSize = Vec2D{w, h}
 }
 
-func (g *Text2D) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
 func (g *Text2D) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
-}
-
-func (g *Text2D) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-}
-
-func (g *Text2D) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *Text2D) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox) // moves parts
-	g.Move2DChildren(delta)
 }
 
 func (g *Text2D) Render2D() {
@@ -183,9 +148,6 @@ func (g *Text2D) ReRender2D() (node Node2D, layout bool) {
 	}
 	layout = false
 	return
-}
-
-func (g *Text2D) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation

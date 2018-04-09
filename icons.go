@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"log"
 
 	"github.com/rcoreilly/goki/ki/kit"
@@ -36,18 +35,6 @@ type Icon struct {
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, nil)
 
-func (vp *Icon) AsNode2D() *Node2DBase {
-	return &vp.Node2DBase
-}
-
-func (vp *Icon) AsViewport2D() *Viewport2D {
-	return &vp.Viewport2D
-}
-
-func (vp *Icon) AsLayout2D() *Layout {
-	return nil
-}
-
 func (vp *Icon) Init2D() {
 	vp.SVG.Init2D()
 	vp.Fill = true
@@ -71,27 +58,6 @@ func (vp *Icon) Size2D() {
 	vp.SVG.Size2D()
 }
 
-func (vp *Icon) Layout2D(parBBox image.Rectangle) {
-	vp.SVG.Layout2D(parBBox)
-}
-
-func (vp *Icon) BBox2D() image.Rectangle {
-	return vp.SVG.BBox2D()
-}
-
-func (vp *Icon) ComputeBBox2D(parBBox image.Rectangle) {
-	vp.SVG.ComputeBBox2D(parBBox)
-}
-
-func (vp *Icon) ChildrenBBox2D() image.Rectangle {
-	return vp.SVG.ChildrenBBox2D()
-}
-
-func (g *Icon) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
 func (vp *Icon) Render2D() {
 	// todo: check rendered -- don't re-render
 	// set scaling to normalized 0-1 coords -- todo: check actual width, height etc
@@ -101,15 +67,6 @@ func (vp *Icon) Render2D() {
 	pc.Identity()
 	pc.Scale(vps.X, vps.Y)
 	vp.SVG.Render2D()
-}
-
-func (vp *Icon) ReRender2D() (node Node2D, layout bool) {
-	node = vp.This.(Node2D)
-	layout = false
-	return
-}
-
-func (vp *Icon) FocusChanged2D(gotFocus bool) {
 }
 
 // check for interface implementation
