@@ -68,8 +68,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* Key fix for render speed: use WinBBox to only draw that portion of VP that was updated to draw into window!  should be easy -- bbox of top-level guy should be it.  crazy to be redrawing full buffer into window every time!
-
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
 * then need grid layout
@@ -80,8 +78,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ condshow / edit
 	+ use "Stringer" paradigm for interface for getting UI elements for different types -- anyone can define them!  returns a Widget and with parts etc can embed anything in anything..  Widgeter interface: Widget() Widget method, SetWidget(widg) to configure it for a given thing, and ReadWidget(widg) to get value back..
 	
-	how to manage the "factory" / delegation of different edits for different types?  just build in inheritance and support for basic types and then there is no issue -- i.e., it is all custom and styles can be used for options?  probably that's best..
-
 * styles for different button states are not propagating into the parts
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 

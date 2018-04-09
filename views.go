@@ -1146,7 +1146,7 @@ func (g *StructView) Size2D() {
 	g.InitLayout2D()
 	frame := g.Frame()
 	if frame != nil {
-		g.LayData.AllocSize = frame.LayData.Size.Pref // get from parts
+		g.LayData.AllocSize = frame.LayData.Size.Pref // get from children
 	}
 	g.Size2DAddSpace()
 }
