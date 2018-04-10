@@ -124,9 +124,10 @@ type ValueView interface {
 	SetSliceValue(val reflect.Value, owner interface{}, idx int)
 	// WidgetType returns an appropriate type of widget to represent the current value
 	WidgetType() reflect.Type
+	// UpdateWidget updates the widget representation to reflect the current value
+	UpdateWidget()
 	// ConfigWidget configures a widget of WidgetType for representing the value, including setting up the signal connections to set the value when the user edits it (values are always set immediately when the widget is updated)
 	ConfigWidget(widg Node2D)
-	// todo: not clear if any kind of "update from value" is needed?  just rebuild on updates?
 }
 
 // ValueViewBase provides the basis for implementations of the ValueView interface, representing values in the interface -- it implements a generic TextField representation of the string value, and provides the generic fallback for everything that doesn't provide a specific ValueViewer type
@@ -172,23 +173,30 @@ func (vv *ValueViewBase) WidgetType() reflect.Type {
 	return vv.WidgetTyp
 }
 
-func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
-	vv.Widget = widg
-	tf := widg.(*TextField)
-	tf.SetProp("max-width", -1) // todo..
+func (vv *ValueViewBase) UpdateWidget() {
+	tf := vv.Widget.(*TextField)
 	txt := kit.ToString(vv.Value.Interface())
 	tf.SetText(txt)
-	tf.TextFieldSig.DisconnectAll()
+}
+
+func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	tf := vv.Widget.(*TextField)
+	tf.SetProp("max-width", -1) // todo..
+	vv.UpdateWidget()
+	tf.TextFieldSig.DisconnectAll() // these are re-used, so key to disconnect!
 	tf.TextFieldSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
 		tf := send.(*TextField)
 		if vvv.Owner != nil {
 			if kiv, ok := vvv.Owner.(ki.Ki); ok {
 				kiv.SetField(vvv.Field.Name, tf.Text) // does updates
+				vvv.UpdateWidget()                    // always update after setting value..
 				return
 			}
 		}
 		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), tf.Text)
+		vvv.UpdateWidget() // always update after setting value..
 	})
 }
 

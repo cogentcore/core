@@ -167,7 +167,8 @@ func (sv *StructView) ConfigStructGrid() {
 		if vv == nil { // shouldn't happen
 			return true
 		}
-		vv.SetStructValue(fieldVal, sv.Struct, &field)
+		vvp := fieldVal.Addr()
+		vv.SetStructValue(vvp, sv.Struct, &field)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("Lbl%v", field.Name)

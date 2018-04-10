@@ -729,6 +729,7 @@ var TreeViewProps = []map[string]interface{}{
 		"#label": map[string]interface{}{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
+			"min-width":        units.NewValue(16, units.Ex),
 			"background-color": "none",
 		},
 		"#menu": map[string]interface{}{
