@@ -802,7 +802,7 @@ func (tv *TreeView) Layout2DParts(parBBox image.Rectangle) {
 
 func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	if tv.HasCollapsedParent() {
-		tv.LayData.AllocPos.X = -1000000 // put it very far off screen..
+		tv.LayData.AllocPosRel.X = -1000000 // put it very far off screen..
 	}
 	tv.ConfigParts()
 
@@ -832,8 +832,8 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 		for _, kid := range tv.Kids {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
-				gi.LayData.AllocPos.Y = h
-				gi.LayData.AllocPos.X = 20 // indent
+				gi.LayData.AllocPosRel.Y = h
+				gi.LayData.AllocPosRel.X = 20 // indent
 				h += gi.LayData.AllocSize.Y
 			}
 		}

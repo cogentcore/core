@@ -302,23 +302,11 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		if !g.IsField() {
-			g.LayData.AllocPos.SetAdd(pg.LayData.AllocPos)
+			g.LayData.AllocPos = pg.LayData.AllocPos.Add(g.LayData.AllocPosRel)
 		}
 		return pg.LayData.AllocSize
 	}
 	return Vec2DZero
-}
-
-// subtract the position of our parent to our layout position -- for
-// re-rendering at a given point, where the layout will add the parent
-// position again
-func (g *Node2DBase) SubParentPos() {
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		if !g.IsField() {
-			g.LayData.AllocPos.SetSub(pg.LayData.AllocPos)
-		}
-	}
 }
 
 // ComputeBBox2DBase -- computes the VpBBox and WinBBox for node
@@ -485,8 +473,6 @@ func (g *Node2DBase) Layout2DTree() {
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
-	g.SubParentPos() // subtract parent pos, as it will be added back..
-	// todo: better to just save non-added one as AllocPosRel, then it is fully re-doable
 	g.This.(Node2D).Layout2D(parBBox) // important to use interface version to get interface!
 }
 

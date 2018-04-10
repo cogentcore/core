@@ -203,8 +203,9 @@ type LayoutData struct {
 	Margins      Margins     `desc:"margins around this item"`
 	GridPos      image.Point `desc:"position within a grid"`
 	GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
-	AllocPos     Vec2D       `desc:"allocated relative position of this item, by the parent layout"`
 	AllocSize    Vec2D       `desc:"allocated size of this item, by the parent layout"`
+	AllocPos     Vec2D       `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
+	AllocPosRel  Vec2D       `desc:"allocated relative position of this item, computed by the parent layout"`
 	AllocPosOrig Vec2D       `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
 }
 
@@ -231,9 +232,10 @@ func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 
 // called at start of layout process -- resets all values back to 0
 func (ld *LayoutData) Reset() {
-	ld.AllocPos = Vec2DZero
-	ld.AllocPosOrig = Vec2DZero
 	ld.AllocSize = Vec2DZero
+	ld.AllocPos = Vec2DZero
+	ld.AllocPosRel = Vec2DZero
+	ld.AllocPosOrig = Vec2DZero
 }
 
 // update our sizes based on AllocSize and Max constraints, etc
@@ -515,7 +517,6 @@ func (ly *Layout) AllocFromParent() {
 				return false
 			}
 			if !pg.LayData.AllocSize.IsZero() {
-				ly.LayData.AllocPos = pg.LayData.AllocPos
 				ly.LayData.AllocSize = pg.LayData.AllocSize
 				if Layout2DTrace {
 					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayData.AllocSize, pg.PathUnique())
@@ -589,7 +590,7 @@ func (ly *Layout) LayoutSingle(dim Dims2D) {
 		max := gi.LayData.Size.Max.Dim(dim)
 		pos, size := ly.LayoutSingleImpl(avail, need, pref, max, spc, al)
 		gi.LayData.AllocSize.SetDim(dim, size)
-		gi.LayData.AllocPos.SetDim(dim, pos)
+		gi.LayData.AllocPosRel.SetDim(dim, pos)
 	}
 }
 
@@ -695,7 +696,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		}
 
 		gi.LayData.AllocSize.SetDim(dim, size)
-		gi.LayData.AllocPos.SetDim(dim, pos)
+		gi.LayData.AllocPosRel.SetDim(dim, pos)
 		if Layout2DTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), gi.UniqueNm, pos, size)
 		}
@@ -797,7 +798,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 		}
 
 		ld.AllocSize.SetDim(dim, size)
-		ld.AllocPos.SetDim(dim, pos)
+		ld.AllocPosRel.SetDim(dim, pos)
 		if Layout2DTrace {
 			fmt.Printf("Grid %v Dim: %v, pos: %v, size: %v\n", rowcol, dim, pos, size)
 		}
@@ -842,7 +843,7 @@ func (ly *Layout) LayoutGrid() {
 			max := gi.LayData.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
 			gi.LayData.AllocSize.SetDim(dim, size)
-			gi.LayData.AllocPos.SetDim(dim, pos+ld.AllocPos.X)
+			gi.LayData.AllocPosRel.SetDim(dim, pos+ld.AllocPosRel.X)
 
 		}
 		{ // row, Y dim
@@ -855,11 +856,11 @@ func (ly *Layout) LayoutGrid() {
 			max := gi.LayData.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
 			gi.LayData.AllocSize.SetDim(dim, size)
-			gi.LayData.AllocPos.SetDim(dim, pos+ld.AllocPos.Y)
+			gi.LayData.AllocPosRel.SetDim(dim, pos+ld.AllocPosRel.Y)
 		}
 
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, gi.LayData.AllocPos, gi.LayData.AllocSize)
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, gi.LayData.AllocPosRel, gi.LayData.AllocSize)
 		}
 
 		col++
@@ -873,8 +874,7 @@ func (ly *Layout) LayoutGrid() {
 	}
 }
 
-// final pass through children to finalize the layout, capturing original
-// positions and computing summary size stats
+// final pass through children to finalize the layout, computing summary size stats
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
 	for _, c := range ly.Kids {
@@ -882,8 +882,7 @@ func (ly *Layout) FinalizeLayout() {
 		if gi == nil {
 			continue
 		}
-		gi.LayData.AllocPosOrig = gi.LayData.AllocPos
-		ly.ChildSize.SetMax(gi.LayData.AllocPos.Add(gi.LayData.AllocSize))
+		ly.ChildSize.SetMax(gi.LayData.AllocPosRel.Add(gi.LayData.AllocSize))
 	}
 }
 
@@ -1028,8 +1027,8 @@ func (ly *Layout) LayoutScrolls() {
 	if ly.HasHScroll {
 		sc := ly.HScroll
 		sc.Size2D()
-		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X
-		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y + ly.LayData.AllocSize.Y - sbw - 2.0
+		sc.LayData.AllocPosRel.X = ly.LayData.AllocPosRel.X
+		sc.LayData.AllocPosRel.Y = ly.LayData.AllocPosRel.Y + ly.LayData.AllocSize.Y - sbw - 2.0
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
 		if ly.HasVScroll { // make room for V
@@ -1045,8 +1044,8 @@ func (ly *Layout) LayoutScrolls() {
 	if ly.HasVScroll {
 		sc := ly.VScroll
 		sc.Size2D()
-		sc.LayData.AllocPos.X = ly.LayData.AllocPos.X + ly.LayData.AllocSize.X - sbw - 2.0
-		sc.LayData.AllocPos.Y = ly.LayData.AllocPos.Y
+		sc.LayData.AllocPosRel.X = ly.LayData.AllocPosRel.X + ly.LayData.AllocSize.X - sbw - 2.0
+		sc.LayData.AllocPosRel.Y = ly.LayData.AllocPosRel.Y
 		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
 		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
 		if ly.HasHScroll { // make room for H
@@ -1336,3 +1335,30 @@ func (g *Space) Layout2D(parBBox image.Rectangle) {
 
 // check for interface implementation
 var _ Node2D = &Space{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//    Splitter
+
+// Splitter allocates a fixed amount of space to each child, along given dimension
+type Splitter struct {
+	Node2DBase
+}
+
+var KiT_Splitter = kit.Types.AddType(&Splitter{}, nil)
+
+var SplitterProps = map[string]interface{}{
+	"width":  units.NewValue(1, units.Em),
+	"height": units.NewValue(1, units.Em),
+}
+
+func (g *Splitter) Style2D() {
+	g.Style2DWidget(SplitterProps)
+}
+
+func (g *Splitter) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DChildren()
+}
+
+// check for interface implementation
+var _ Node2D = &Splitter{}
