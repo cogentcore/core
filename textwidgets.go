@@ -121,6 +121,11 @@ type TextField struct {
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
 
+func (g *TextField) SetText(txt string) {
+	g.Text = txt
+	g.RevertEdit()
+}
+
 // done editing: return key pressed or out of focus
 func (g *TextField) EditDone() {
 	g.Text = g.EditText

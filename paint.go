@@ -784,7 +784,7 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
-	return math.Ceil(float64(a>>6)) + 2.0, pc.FontStyle.Height
+	return math.Ceil(float64(a >> 6)), pc.FontStyle.Height
 }
 
 func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {

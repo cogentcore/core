@@ -52,10 +52,7 @@ func mainrun() {
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
-	hlay := vp.AddNewChildNamed(gi.KiT_Frame, "hlay").(*gi.Frame)
-	hlay.Lay = gi.LayoutRow
-
-	vlay := hlay.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
 	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
@@ -66,12 +63,21 @@ func mainrun() {
 	tv1 := row1.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
 	tv1.SetSrcNode(&srctree)
 
-	svlay := hlay.AddNewChildNamed(gi.KiT_Frame, "svlay").(*gi.Frame)
-	svlay.Lay = gi.LayoutCol
-
-	sv1 := svlay.AddNewChildNamed(gi.KiT_StructView, "sv1").(*gi.StructView)
+	sv1 := row1.AddNewChildNamed(gi.KiT_StructView, "sv1").(*gi.StructView)
 	sv1.SetStruct(&srctree)
 	sv1.SetProp("horiz-align", gi.AlignLeft)
+
+	tv1.TreeViewSig.Connect(sv1.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if data == nil {
+			return
+		}
+		// tvr, _ := send.EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView) // root is sender
+		tvn, _ := data.(ki.Ki).EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView)
+		svr, _ := recv.EmbeddedStruct(gi.KiT_StructView).(*gi.StructView)
+		if sig == int64(gi.NodeSelected) {
+			svr.SetStruct(tvn.SrcNode.Ptr)
+		}
+	})
 
 	win.UpdateEnd()
 

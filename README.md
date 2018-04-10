@@ -74,6 +74,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * consolidate dialog popup code between menu and dialog
 
+* need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok
+
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
 * then can do StructView using grid layout -- keeps labels aligned with rows.

@@ -942,14 +942,19 @@ func (ly *Layout) SetHScroll() {
 	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
 	sc.ThumbVal = ly.LayData.AllocSize.X - spc
 	sc.Tracking = true
+	sc.TrackThr = sc.Step
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
 		li, _ := KiToNode2D(rec) // note: avoid using closures
 		ls := li.AsLayout2D()
-		ls.Move2DTree()
-		ls.Viewport.ReRender2DNode(li)
+		if ls.Updating.Value() == 0 {
+			ls.Move2DTree()
+			ls.Viewport.ReRender2DNode(li)
+		} else {
+			fmt.Printf("not ready to update\n")
+		}
 	})
 }
 
@@ -986,6 +991,7 @@ func (ly *Layout) SetVScroll() {
 	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
 	sc.ThumbVal = ly.LayData.AllocSize.Y - spc
 	sc.Tracking = true
+	sc.TrackThr = sc.Step
 	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return

@@ -75,7 +75,8 @@ type SliderBase struct {
 	DragPos     float64              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float64              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Horiz       bool                 `xml:"horiz" desc:"true if horizontal, else vertical"`
-	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end"`
+	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
+	TrackThr    float64              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	StateStyles [SliderStatesN]Style `desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       SliderStates
@@ -182,8 +183,10 @@ func (g *SliderBase) SetSliderPos(pos float64) {
 		g.UpdatePosFromValue()
 	}
 	if g.Tracking && g.Value != g.EmitValue {
-		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
-		g.EmitValue = g.Value
+		if math.Abs(g.Value-g.EmitValue) > g.TrackThr {
+			g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
+			g.EmitValue = g.Value
+		}
 	}
 	g.UpdateEnd()
 }

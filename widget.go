@@ -275,6 +275,11 @@ func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
 
+func (g *WidgetBase) Move2D(delta Vec2D, parBBox image.Rectangle) {
+	g.Move2DWidget(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
 func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
 	node = g.This.(Node2D)
 	layout = false
