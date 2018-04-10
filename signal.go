@@ -12,12 +12,12 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// Implements general signal passing between Ki objects, like Qt's Signal / Slot system
-// started from: github.com/tucnak/meta/
-
+// Implements general signal passing between Ki objects, like Qt's Signal /
+// Slot system started from: github.com/tucnak/meta/
+//
 // todo: Once I learn more about channels and concurrency, could add a channel
 // as an alternative method of sending signals too, perhaps
-
+//
 // A receivier has to connect to a given signal on a sender to receive those
 // signals, when the signal is emitted.  To make more efficient use of signal
 // connections, we also support a signal type int64 that the receiver can

@@ -56,6 +56,18 @@ func NonPtrInterface(el interface{}) interface{} {
 	return v.Interface()
 }
 
+// the pointer value of an interface, if it is possible to get one through Addr()
+func PtrInterface(el interface{}) interface{} {
+	v := reflect.ValueOf(el)
+	if v.Kind() == reflect.Ptr { // todo: could also look for slice here
+		return el
+	}
+	if v.CanAddr() {
+		return v.Addr().Interface()
+	}
+	return el
+}
+
 // call a function on all the the primary fields of a given struct type,
 // including those on anonymous embedded structs that this struct has, passing
 // the current (embedded) type and StructField -- effectively flattens the
