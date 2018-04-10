@@ -22,9 +22,7 @@ import (
 // signals, when the signal is emitted.  To make more efficient use of signal
 // connections, we also support a signal type int64 that the receiver can
 // decode depending on the type of signal that it is receiving -- completely
-// up to the semantics of that particular signal -- be sure to reserve 0 for a
-// nil signal value -- if that is sent, then the signal's default signal is
-// exchanged instead
+// up to the semantics of that particular signal.
 
 // NodeSignals are signals that a Ki node sends about updates to the tree
 // structure using the NodeSignal (convert sig int64 to NodeSignals to get the
@@ -70,9 +68,7 @@ func RecvCustomNodeSignal(sig int64) int64 {
 
 // Signal -- add one of these for each signal a node can emit
 type Signal struct {
-	// default signal used if Emit gets a NilSignal
-	DefSig int64
-	Cons   []Connection
+	Cons []Connection
 }
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
@@ -164,9 +160,6 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
-	if sig == 0 && s.DefSig != 0 {
-		sig = s.DefSig
-	}
 	if NodeSignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
@@ -187,9 +180,6 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if sender.IsDestroyed() { // dead nodes don't talk..
 		return
-	}
-	if sig == 0 && s.DefSig != 0 {
-		sig = s.DefSig
 	}
 	if NodeSignalTrace {
 		s.EmitTrace(sender, sig, data)
@@ -212,9 +202,6 @@ type SignalFilterFunc func(ki Ki) bool
 
 // Emit Filtered calls function on each item only sends signal if function returns true
 func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
-	if sig == 0 && s.DefSig != 0 {
-		sig = s.DefSig
-	}
 	deleted := 0
 	for i := range s.Cons {
 		j := i - deleted
@@ -232,9 +219,6 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun Signal
 
 // EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
-	if sig == 0 && s.DefSig != 0 {
-		sig = s.DefSig
-	}
 	deleted := 0
 	for i := range s.Cons {
 		j := i - deleted
