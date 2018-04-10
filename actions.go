@@ -324,8 +324,15 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
 	}
-	frame := Frame{}
-	frame.InitName(&frame, "Frame")
+	pvp := Viewport2D{}
+	pvp.InitName(&pvp, name+"Menu")
+	pvp.UpdateStart()
+	pvp.Fill = true
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
+	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
+	pvp.ViewBox.Min = image.Point{x, y}
+	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
+	frame := pvp.AddNewChildNamed(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
 	frame.PartStyleProps(frame.This, MenuProps)
 	for _, ac := range menu {
@@ -340,20 +347,12 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	vpsz := frame.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
-	pvp := NewViewport2D(vpsz.X, vpsz.Y)
-	pvp.InitName(pvp, name+"Menu")
-	pvp.Fill = true
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
+	pvp.Resize(vpsz.X, vpsz.Y)
 	pvp.ViewBox.Min = image.Point{x, y}
-	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
-	win.PushPopup(pvp.This)
-	pvp.UpdateStart()
-	pvp.AddChild(frame.This)
-	pvp.Init2DTree() // do an explicit init to get connected to window and viewport properly
-	pvp.Style2DTree()
 	pvp.UpdateEnd()
-	return pvp
+
+	win.PushPopup(pvp.This)
+	return &pvp
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

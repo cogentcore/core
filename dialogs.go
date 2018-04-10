@@ -65,6 +65,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	// todo: deal with modeless -- need a separate window presumably -- not hard
 	dlg.State = DialogOpenModal
 
+	dlg.UpdateStart()
 	dlg.Init2DTree()
 	dlg.Style2DTree()                                      // sufficient to get sizes
 	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
@@ -77,9 +78,9 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	dlg.Resize(vpsz.X, vpsz.Y)
 	dlg.ViewBox.Min = image.Point{x, y}
+	dlg.UpdateEnd()
 
 	win.PushPopup(dlg.This)
-	dlg.FullRender2DTree()
 	return true
 }
 

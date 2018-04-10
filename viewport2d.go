@@ -86,7 +86,9 @@ func (vp *Viewport2D) Resize(width, height int) {
 	vp.Render.Defaults()
 	vp.ViewBox.Size = nwsz // make sure
 	vp.Render.Image = vp.Pixels
-	vp.FullRender2DTree()
+	if vp.Viewport == nil { // parent
+		vp.FullRender2DTree()
+	}
 }
 
 func (vp *Viewport2D) IsPopup() bool {
@@ -216,7 +218,6 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) {
 	vp.SetWinBBox()    // this adds all PARENT offsets
 	if !vp.IsPopup() { // non-popups use allocated positions
 		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
-		fmt.Printf("Viewport: %v viewbox.min updated: %v\n", vp.PathUnique(), vp.ViewBox.Min)
 	}
 	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
 }

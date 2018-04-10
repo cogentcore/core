@@ -27,7 +27,7 @@ func mainrun() {
 
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
-	gi.Layout2DTrace = true
+	// gi.Layout2DTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes

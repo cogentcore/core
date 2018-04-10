@@ -328,6 +328,12 @@ func (w *Window) EventLoop() {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
 		}
+		if w.DoFullRender {
+			fmt.Printf("Doing full render\n")
+			w.DoFullRender = false
+			w.Viewport.FullRender2DTree()
+			w.SetNextFocusItem()
+		}
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
 
@@ -408,13 +414,6 @@ func (w *Window) EventLoop() {
 		if delPop {
 			// fmt.Printf("delpop poping curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
 			w.PopPopup(curPop)
-		}
-
-		if w.DoFullRender {
-			fmt.Printf("Doing full render\n")
-			w.DoFullRender = false
-			w.Viewport.FullRender2DTree()
-			w.SetNextFocusItem()
 		}
 	}
 	fmt.Println("end of events")
@@ -547,8 +546,11 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
+	_, gi := KiToNode2D(pop)
+	if gi != nil {
+		gi.FullRender2DTree()
+	}
 	w.PushFocus(pop)
-	w.SetNextFocusItem()
 }
 
 // disconnect given popup -- typically the current one
@@ -606,6 +608,7 @@ func (w *Window) PushFocus(p ki.Ki) {
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
 	w.Focus = p
+	w.SetNextFocusItem()
 }
 
 // pop Mask off the focus stack and set to current focus
