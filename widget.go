@@ -199,7 +199,7 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
-			ic.CopyFrom(icn.This)
+			ic.CopyFromIcon(icn)
 			ic.UniqueNm = icn.UniqueNm
 			g.PartStyleProps(ic.This, props)
 		}

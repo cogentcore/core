@@ -630,6 +630,12 @@ func (g *TreeView) ConfigParts() {
 func (g *TreeView) ConfigPartsIfNeeded() {
 	lbl := g.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = g.Label()
+	wb := g.Parts.Child(tvBranchIdx).(*Action)
+	if g.IsCollapsed() {
+		wb.Icon = IconByName("widget-right-wedge")
+	} else {
+		wb.Icon = IconByName("widget-down-wedge")
+	}
 }
 
 func (g *TreeView) Init2D() {

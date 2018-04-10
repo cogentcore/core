@@ -68,9 +68,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* fix issue with tiny window and dialog not scrolling and blocking interface
+* don't re-render scrollbar in course of scrolling!?
 
-* then need grid layout
+* need to put scrollbar on inner layout -- outer is getting it all for treeview -- treeview should separately scroll -- may need a diff layout config
+
+* consolidate dialog popup code between menu and dialog
+
+* fix issue with tiny window and dialog not scrolling and blocking interface
 
 * then can do StructView using grid layout -- keeps labels aligned with rows.
     + read-only

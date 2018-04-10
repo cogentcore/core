@@ -40,6 +40,26 @@ func (vp *Icon) Init2D() {
 	vp.Fill = true
 }
 
+// copy from a source icon, typically one from a library -- preserves all the exisiting render state etc for the current icon, so that only a new render is required
+func (vp *Icon) CopyFromIcon(cp *Icon) {
+	oldIc := *vp
+	vp.CopyFrom(cp)
+	vp.Viewport = oldIc.Viewport
+	vp.LayData = oldIc.LayData
+	vp.VpBBox = oldIc.VpBBox
+	vp.WinBBox = oldIc.WinBBox
+	vp.ViewBox = oldIc.ViewBox
+	vp.Style = oldIc.Style
+	vp.Fill = oldIc.Fill
+	vp.Pixels = nil
+	vp.Resize(vp.ViewBox.Size.X, vp.ViewBox.Size.Y)
+	vp.FullRender2DTree()
+	vp.LayData = oldIc.LayData
+	vp.VpBBox = oldIc.VpBBox
+	vp.WinBBox = oldIc.WinBBox
+	vp.ViewBox = oldIc.ViewBox
+}
+
 var IconProps = []map[string]interface{}{
 	{ // widget props
 		"background-color": "transparent",

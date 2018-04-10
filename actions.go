@@ -167,7 +167,7 @@ func (g *Action) ConfigPartsMenu() {
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
-			ic.CopyFrom(IconByName("widget-right-wedge"))
+			ic.CopyFromIcon(IconByName("widget-right-wedge"))
 			g.PartStyleProps(ic.This, ActionProps[ButtonNormal])
 		}
 	}
@@ -499,7 +499,7 @@ func (g *MenuButton) ConfigParts() {
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
-			ic.CopyFrom(IconByName(icnm))
+			ic.CopyFromIcon(IconByName(icnm))
 			ic.UniqueNm = icnm
 			g.PartStyleProps(ic.This, MenuButtonProps[ButtonNormal])
 		}
