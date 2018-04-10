@@ -68,6 +68,10 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* splitter is new type (not layout), n = number of children, keep size []int updated for that, and, critically, set a new NodeFlag for FixedSize element on the children -- add FixedSizedParent() method and send that for re-rendering in treeview and structview when they need to fully rebuild.  parent Vp sets fixedsize too.  Also do the AllocPosRel vs. AllocPos split-out to keep that sane.
+
+* add creator / inspector in a different window :)
+
 * don't re-render scrollbar in course of scrolling!?
 
 * need to put scrollbar on inner layout -- outer is getting it all for treeview -- treeview should separately scroll -- may need a diff layout config
@@ -82,14 +86,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
     + read-only
 	+ inline
 	+ condshow / edit
-	+ use "Stringer" paradigm for interface for getting UI elements for different types -- anyone can define them!  returns a Widget and with parts etc can embed anything in anything..  Widgeter interface: Widget() Widget method, SetWidget(widg) to configure it for a given thing, and ReadWidget(widg) to get value back..
 	
 * styles for different button states are not propagating into the parts
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 
 * add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  
-
-* add inspector in a different window :)
 
 * test SVG path rendering 
 * property-based xforms for svg
@@ -108,7 +109,6 @@ Next:
 * UnContext not getting initialized on either paint or style -- probably paint -- paint is used for svg while style is for widgets
 * check for Updating count > 0 somewhere -- going to be a common error
 * Layout flow types
-* Layout grid
 
 * double-click!
 
@@ -125,10 +125,8 @@ Soon:
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ SplitView
-	+ ComboBox
 	+ SpinBox
 	+ RadioButton, CheckBox
-	+ Dialog -- either overlay or additional window -- platform dependent
 	+ Toolbar / ToolButton / Action
 	+ ProgressBar  (based on slider?)
 	+ ToolTip
@@ -145,6 +143,8 @@ Soon:
 	+ TabWidget -- needs updating
 	+ Label -- done -- could make lots of H1, etc alts
 	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient! 
+	+ ComboBox
+	+ Dialog -- either overlay or additional window -- platform dependent
 
 * not needed now: update increment threshold for scrollbar -- less frequent updates.
 
