@@ -10,6 +10,7 @@ import (
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -178,9 +179,13 @@ func (sv *StructView) ConfigStructGrid() {
 		sv.Fields = append(sv.Fields, vv)
 		return true
 	})
-	sg.ConfigChildren(config, false)
+	updt := sg.ConfigChildren(config, false)
+	if updt {
+		bitflag.Set(&sv.NodeFlags, int(NodeFlagFullReRender))
+	}
 	for i, vv := range sv.Fields {
 		lbl := sg.Child(i * 2).(*Label)
+		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
 		lbltag := vvb.Field.Tag.Get("label")
 		if lbltag != "" {
@@ -195,11 +200,26 @@ func (sv *StructView) ConfigStructGrid() {
 
 func (sv *StructView) UpdateFromStruct() {
 	sv.StdConfig()
-	if sv.Title == "" {
-		typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
-		sv.SetTitle(fmt.Sprintf("Properties of %v", typ.Name()))
-	}
+	typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
+	sv.SetTitle(fmt.Sprintf("Properties of %v", typ.Name()))
 	sv.ConfigStructGrid()
+}
+
+func (sv *StructView) Render2D() {
+	bitflag.Clear(&sv.NodeFlags, int(NodeFlagFullReRender))
+	sv.Frame.Render2D()
+}
+
+// todo: see notes on treeview
+func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
+	if bitflag.Has(sv.NodeFlags, int(NodeFlagFullReRender)) {
+		node = nil
+		layout = false
+	} else {
+		node = sv.This.(Node2D)
+		layout = true
+	}
+	return
 }
 
 // check for interface implementation

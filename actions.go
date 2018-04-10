@@ -419,6 +419,11 @@ func (g *MenuButton) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun 
 	return &ac
 }
 
+// remove all items in the menu
+func (g *MenuButton) ResetMenu() {
+	g.Menu = make(Menu, 0, 10)
+}
+
 func (g *MenuButton) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
@@ -430,20 +435,20 @@ func (g *MenuButton) Init2D() {
 
 var MenuButtonProps = []map[string]interface{}{
 	{
-		"border-width":        units.NewValue(1, units.Px),
-		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        color.Black,
-		"border-style":        BorderSolid,
-		"padding":             units.NewValue(4, units.Px),
-		"margin":              units.NewValue(4, units.Px),
-		"box-shadow.h-offset": units.NewValue(4, units.Px),
-		"box-shadow.v-offset": units.NewValue(4, units.Px),
-		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
-		"text-align":          AlignCenter,
-		"vertical-align":      AlignMiddle,
-		"color":               color.Black,
-		"background-color":    "#EEF",
+		"border-width":  units.NewValue(1, units.Px),
+		"border-radius": units.NewValue(4, units.Px),
+		"border-color":  color.Black,
+		"border-style":  BorderSolid,
+		"padding":       units.NewValue(4, units.Px),
+		"margin":        units.NewValue(4, units.Px),
+		// "box-shadow.h-offset": units.NewValue(4, units.Px),
+		// "box-shadow.v-offset": units.NewValue(4, units.Px),
+		// "box-shadow.blur":     units.NewValue(4, units.Px),
+		// "box-shadow.color":    "#CCC",
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignMiddle,
+		"color":            color.Black,
+		"background-color": "#EEF",
 		"#icon": map[string]interface{}{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),

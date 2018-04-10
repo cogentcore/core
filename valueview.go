@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/rcoreilly/goki/ki"
@@ -76,12 +77,23 @@ func ToValueView(it interface{}) ValueView {
 		return &vv
 	case vk == reflect.Ptr: // nothing possible for plain pointers -- ki.Ptr can do it though..
 		return nil
-		// case vk == reflect.Slice:
-		// 	// todo: button that pulls up a slice editor..
-		// case vk == reflect.Map:
-		// 	// todo: button that pulls up a map editor..
-		// case vk == reflect.Struct:
-		// 	// todo: inline struct or button for struct editor
+	case vk == reflect.Slice:
+		vv := SliceValueView{}
+		vv.Init(&vv)
+		return &vv
+	case vk == reflect.Array:
+		vv := SliceValueView{} // probably works?
+		vv.Init(&vv)
+		return &vv
+	case vk == reflect.Map:
+		vv := MapValueView{}
+		vv.Init(&vv)
+		return &vv
+	case vk == reflect.Struct:
+		// todo: check inline, use that if possible
+		vv := StructValueView{}
+		vv.Init(&vv)
+		return &vv
 	}
 	// fallback.
 	vv := ValueViewBase{}
@@ -202,3 +214,106 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 
 // check for interface implementation
 var _ ValueView = &ValueViewBase{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  StructValueView
+
+// StructValueView presents a button to edit slices
+type StructValueView struct {
+	ValueViewBase
+}
+
+var KiT_StructValueView = kit.Types.AddType(&StructValueView{}, nil)
+
+func (vv *StructValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MenuButton
+	return vv.WidgetTyp
+}
+
+func (vv *StructValueView) UpdateWidget() {
+	mb := vv.Widget.(*MenuButton)
+	txt := fmt.Sprintf("%v", vv.Value.Type().Elem().Name())
+	mb.SetText(txt)
+}
+
+func (vv *StructValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	mb := vv.Widget.(*MenuButton)
+	mb.ResetMenu()
+	mb.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
+		mb := vvv.Widget.(*MenuButton)
+		PromptDialog(mb.Viewport, "Struct Value View", "Sorry, slice editor not implemented yet -- would show up here", true, false, nil, nil)
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  SliceValueView
+
+// SliceValueView presents a button to edit slices
+type SliceValueView struct {
+	ValueViewBase
+}
+
+var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
+
+func (vv *SliceValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MenuButton
+	return vv.WidgetTyp
+}
+
+func (vv *SliceValueView) UpdateWidget() {
+	mb := vv.Widget.(*MenuButton)
+	npv := vv.Value.Elem()
+	sz := npv.Len()
+	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
+	mb.SetText(txt)
+}
+
+func (vv *SliceValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	mb := vv.Widget.(*MenuButton)
+	mb.ResetMenu()
+	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+		mb := vvv.Widget.(*MenuButton)
+		PromptDialog(mb.Viewport, "Slice Value View", "Sorry, slice editor not implemented yet -- would show up here", true, false, nil, nil)
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  MapValueView
+
+// MapValueView presents a button to edit slices
+type MapValueView struct {
+	ValueViewBase
+}
+
+var KiT_MapValueView = kit.Types.AddType(&MapValueView{}, nil)
+
+func (vv *MapValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MenuButton
+	return vv.WidgetTyp
+}
+
+func (vv *MapValueView) UpdateWidget() {
+	mb := vv.Widget.(*MenuButton)
+	npv := vv.Value.Elem()
+	sz := npv.Len()
+	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
+	mb.SetText(txt)
+}
+
+func (vv *MapValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	mb := vv.Widget.(*MenuButton)
+	mb.ResetMenu()
+	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
+		mb := vvv.Widget.(*MenuButton)
+		PromptDialog(mb.Viewport, "Map Value View", "Sorry, map editor not implemented yet -- would show up here", true, false, nil, nil)
+	})
+}

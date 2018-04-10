@@ -71,7 +71,7 @@ func (g *WidgetBase) MeasureTextSize(txt string) (w, h float64) {
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	w, h = pc.MeasureString(txt)
-	w += 2.0 // add a little buffer for text widths so things don't get cutoff
+	w += 4.0 // add a little buffer for text widths so things don't get cutoff
 	return
 }
 
