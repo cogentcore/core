@@ -8,6 +8,7 @@ import (
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	_ "github.com/rcoreilly/goki/gi/oswin/init"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )
 
@@ -57,15 +58,33 @@ func mainrun() {
 
 	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
+	row1.SetProp("align-vert", gi.AlignMiddle)
+	row1.SetProp("align-horiz", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	// row1.SetStretchMaxWidth()
+	row1.SetStretchMaxWidth()
 
-	tv1 := row1.AddNewChild(gi.KiT_TreeView, "tv1").(*gi.TreeView)
+	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+
+	row1.AddNewChild(gi.KiT_Stretch, "str1")
+	lab1 := row1.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+	lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
+	lab1.SetProp("max-width", -1)
+	lab1.SetProp("text-align", "center")
+	row1.AddNewChild(gi.KiT_Stretch, "str2")
+
+	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split.Dim = gi.X
+
+	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
+	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
+	// split.SetSplits(.2, .8)
+
+	tv1 := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
 	tv1.SetSrcNode(&srctree)
 
-	sv1 := row1.AddNewChild(gi.KiT_StructView, "sv1").(*gi.StructView)
+	sv1 := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
 	sv1.SetStruct(&srctree)
-	sv1.SetProp("horiz-align", gi.AlignLeft)
 
 	tv1.TreeViewSig.Connect(sv1.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {

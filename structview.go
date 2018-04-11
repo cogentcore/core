@@ -200,7 +200,7 @@ func (sv *StructView) ConfigStructGrid() {
 func (sv *StructView) UpdateFromStruct() {
 	sv.StdConfig()
 	typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
-	sv.SetTitle(fmt.Sprintf("Properties of %v", typ.Name()))
+	sv.SetTitle(fmt.Sprintf("%v Fields", typ.Name()))
 	sv.ConfigStructGrid()
 }
 

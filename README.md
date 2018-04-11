@@ -68,7 +68,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* splitter is new type (not layout), n = number of children, keep size []int updated for that, and, critically, set a new NodeFlag for FixedSize element on the children -- add FixedSizedParent() method and send that for re-rendering in treeview and structview when they need to fully rebuild.  parent Vp sets fixedsize too.  Also do the AllocPosRel vs. AllocPos split-out to keep that sane.
+* SplitView is new type (not layout) -- needs SplitterHandle widget with drag logic
 
 * add creator / inspector in a different window :)
 

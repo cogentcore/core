@@ -20,10 +20,12 @@ type NodeFlags int32
 
 const (
 	NodeFlagsNil NodeFlags = iota
-	// can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style 'can-focus' property
+	// CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style 'can-focus' property
 	CanFocus
-	// does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
+	// HasFocus: does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
 	HasFocus
+	// ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame's within a SplitView
+	ReRenderAnchor
 	// indicates that the MouseEnteredEvent was previously registered on this node
 	MouseHasEntered
 	// this node is currently dragging -- win.Dragging set to this node
@@ -89,6 +91,16 @@ func (g *NodeBase) HasFocus() bool {
 // is the current node currently receiving dragging events?  set by window
 func (g *NodeBase) IsDragging() bool {
 	return bitflag.Has(g.NodeFlags, int(NodeDragging))
+}
+
+// is the current node a ReRenderAnchor?
+func (g *NodeBase) IsReRenderAnchor() bool {
+	return bitflag.Has(g.NodeFlags, int(ReRenderAnchor))
+}
+
+// set node as a ReRenderAnchor
+func (g *NodeBase) SetReRenderAnchor() {
+	bitflag.Set(&g.NodeFlags, int(ReRenderAnchor))
 }
 
 // set node as focus node

@@ -907,12 +907,11 @@ func (ly *Layout) ManageOverflow() {
 		if ly.ChildSize.Y > avail.Y { // overflowing
 			ly.HasVScroll = true
 			ly.ExtraSize.X += sbw
+			fmt.Printf("Layout: %v Overflow Y: avail: %v childsize: %v\n", ly.PathUnique(), avail.Y, ly.ChildSize.Y)
 		}
 
 		if ly.HasHScroll {
 			ly.SetHScroll()
-			// } else {
-			// todo: probably don't need to delete hscroll - just keep around
 		}
 		if ly.HasVScroll {
 			ly.SetVScroll()
@@ -1027,15 +1026,14 @@ func (ly *Layout) LayoutScrolls() {
 	if ly.HasHScroll {
 		sc := ly.HScroll
 		sc.Size2D()
-		sc.LayData.AllocPosRel.X = ly.LayData.AllocPosRel.X
-		sc.LayData.AllocPosRel.Y = ly.LayData.AllocPosRel.Y + ly.LayData.AllocSize.Y - sbw - 2.0
-		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
+		sc.LayData.AllocPosRel.X = 0.0
+		sc.LayData.AllocPosRel.Y = ly.LayData.AllocSize.Y - sbw - 2.0
 		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
 		if ly.HasVScroll { // make room for V
 			sc.LayData.AllocSize.X -= sbw
 		}
 		sc.LayData.AllocSize.Y = sbw
-		sc.Layout2D(ly.VpBBox)
+		sc.Layout2D(ly.VpBBox) // this will add parent position to above rel pos
 	} else {
 		if ly.HScroll != nil {
 			ly.DeactivateScroll(ly.HScroll)
@@ -1044,9 +1042,8 @@ func (ly *Layout) LayoutScrolls() {
 	if ly.HasVScroll {
 		sc := ly.VScroll
 		sc.Size2D()
-		sc.LayData.AllocPosRel.X = ly.LayData.AllocPosRel.X + ly.LayData.AllocSize.X - sbw - 2.0
-		sc.LayData.AllocPosRel.Y = ly.LayData.AllocPosRel.Y
-		sc.LayData.AllocPosOrig = sc.LayData.AllocPos
+		sc.LayData.AllocPosRel.X = ly.LayData.AllocSize.X - sbw - 2.0
+		sc.LayData.AllocPosRel.Y = 0.0
 		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
 		if ly.HasHScroll { // make room for H
 			sc.LayData.AllocSize.Y -= sbw
@@ -1378,6 +1375,7 @@ func (g *SplitView) UpdateSplits() {
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a child entirely -- does an Update
 func (g *SplitView) SetSplits(splits ...float64) {
 	g.UpdateStart()
+	g.UpdateSplits()
 	sz := len(g.Kids)
 	mx := kit.MinInt(sz, len(splits))
 	for i := 0; i < mx; i++ {
@@ -1458,6 +1456,9 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	for i, sp := range g.Splits {
 		_, gi := KiToNode2D(g.Kids[i])
 		if gi != nil {
+			if gi.TypeEmbeds(KiT_Frame) {
+				gi.SetReRenderAnchor()
+			}
 			size := sp * avail
 			gi.LayData.AllocSize.SetDim(g.Dim, size)
 			gi.LayData.AllocSize.SetDim(odim, osz)

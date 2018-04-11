@@ -363,11 +363,20 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 			}
 			vp.ReRender2DNode(rr)
 		} else {
-			if Render2DTrace {
-				fmt.Printf("Render: %v Viewport2D ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+			anchor := gi.ParentReRenderAnchor()
+			if anchor != nil {
+				if Render2DTrace {
+					fmt.Printf("Render: %v Viewport2D ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
+				}
+				gi.Style2DTree() // restyle only from affected node downward
+				vp.ReRender2DAnchor(anchor.AsNode2D())
+			} else {
+				if Render2DTrace {
+					fmt.Printf("Render: %v Viewport2D ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+				}
+				gi.Style2DTree()    // restyle only from affected node downward
+				vp.ReRender2DTree() // need to re-render entirely from us
 			}
-			gi.Style2DTree()    // restyle only from affected node downward
-			vp.ReRender2DTree() // need to re-render entirely from us
 		}
 	}
 	// don't do anything on deleting or destroying, and
@@ -380,6 +389,18 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
 	gn.Render2DTree()
+	win := vp.ParentWindow() // todo: consider caching window pointer
+	if win != nil {
+		win.UpdateStart()
+		win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		win.UpdateEnd()
+	}
+}
+
+// re-render a specific node that has said it can re-render
+func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
+	gn := gni.AsNode2D()
+	gn.ReRender2DTree()
 	win := vp.ParentWindow() // todo: consider caching window pointer
 	if win != nil {
 		win.UpdateStart()

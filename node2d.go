@@ -414,7 +414,9 @@ func (g *Node2DBase) FullRender2DTree() {
 // re-render of the tree -- after it has already been initialized and styled
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
+	ld := g.LayData // save our current layout data
 	g.Size2DTree()
+	g.LayData = ld // restore
 	g.Layout2DTree()
 	g.Render2DTree()
 }
@@ -599,4 +601,21 @@ func (g *Node2DBase) ParentLayout() *Layout {
 		return true
 	})
 	return parLy
+}
+
+// find parent that is a ReRenderAnchor (NodeFlags)
+func (g *Node2DBase) ParentReRenderAnchor() Node2D {
+	var par Node2D
+	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		gii, gi := KiToNode2D(k)
+		if gii == nil {
+			return false // don't keep going up
+		}
+		if gi.IsReRenderAnchor() {
+			par = gii
+			return false
+		}
+		return true
+	})
+	return par
 }
