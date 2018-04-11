@@ -63,7 +63,8 @@ func NewWindow(name string, width, height int) *Window {
 func NewWindow2D(name string, width, height int) *Window {
 	win := NewWindow(name, width, height)
 	vp := NewViewport2D(width, height)
-	win.AddChildNamed(vp, "WinVp")
+	vp.SetName("WinVp")
+	win.AddChild(vp)
 	win.Viewport = vp
 	return win
 }

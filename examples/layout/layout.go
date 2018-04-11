@@ -44,10 +44,10 @@ func mainrun() {
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
-	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
 
 	row1.SetProp("align-vert", "top")
@@ -58,7 +58,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row1.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row1.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("align-vert", "inherit")
@@ -66,14 +66,14 @@ func mainrun() {
 		fr.SetProp("margin", "inherit")
 		if i == 2 {
 			fr.SetFixedWidth(units.NewValue(20, units.Em))
-			spc := row1.AddNewChildNamed(gi.KiT_Space, "spc").(*gi.Space)
+			spc := row1.AddNewChild(gi.KiT_Space, "spc").(*gi.Space)
 			spc.SetFixedWidth(units.NewValue(4, units.Em))
 		} else {
 			fr.SetProp("max-width", -1) // spacer
 		}
 	}
 
-	row2 := vlay.AddNewChildNamed(gi.KiT_Layout, "row2").(*gi.Layout)
+	row2 := vlay.AddNewChild(gi.KiT_Layout, "row2").(*gi.Layout)
 	row2.Lay = gi.LayoutRow
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
@@ -85,18 +85,18 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row2.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row2.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("align-vert", "inherit")
 		// fr.SetProp("align-horiz", "inherit")
 		fr.SetProp("margin", "inherit")
 		// if i == 2 {
-		// 	row2.AddNewChildNamed(gi.KiT_Stretch, "str")
+		// 	row2.AddNewChild(gi.KiT_Stretch, "str")
 		// }
 	}
 
-	row3 := vlay.AddNewChildNamed(gi.KiT_Layout, "row3").(*gi.Layout)
+	row3 := vlay.AddNewChild(gi.KiT_Layout, "row3").(*gi.Layout)
 	row3.Lay = gi.LayoutRow
 	row3.SetProp("text-align", "center")
 	// row3.SetProp("max-width", -1) // always stretch width
@@ -108,7 +108,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row3.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row3.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("min-height", sz.Y)
@@ -118,7 +118,7 @@ func mainrun() {
 		// fr.SetProp("max-width", -1) // spacer
 	}
 
-	row4 := vlay.AddNewChildNamed(gi.KiT_Layout, "row4").(*gi.Layout)
+	row4 := vlay.AddNewChild(gi.KiT_Layout, "row4").(*gi.Layout)
 	row4.Lay = gi.LayoutGrid
 	row4.SetProp("columns", 2)
 	// row4.SetProp("max-width", -1)
@@ -130,7 +130,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row4.AddNewChildNamed(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := row4.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		// fr.SetProp("min-height", sz.Y)

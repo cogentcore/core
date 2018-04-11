@@ -195,28 +195,28 @@ func MakeDefaultIcons() *IconSet {
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-down-wedge")
-		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.Data = ParsePathData("M 0.05 0.05 .95 0.05 .5 .95 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-up-wedge")
-		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.Data = ParsePathData("M 0.05 0.95 .95 0.95 .5 .05 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-left-wedge")
-		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.Data = ParsePathData("M 0.95 0.05 .95 0.95 .05 .5 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-right-wedge")
-		p := wd.AddNewChildNamed(KiT_Path, "p").(*Path)
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.Data = ParsePathData("M 0.05 0.05 .05 0.95 .95 .5 Z")
 		iset[wd.Nm] = &wd
 	}

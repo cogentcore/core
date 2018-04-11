@@ -5,15 +5,14 @@
 package main
 
 import (
-	// "fmt"
 	"github.com/rcoreilly/goki/gi"
-	_ "github.com/rcoreilly/goki/gi/init"
-	// "math/rand"
+	"github.com/rcoreilly/goki/gi/oswin"
+	_ "github.com/rcoreilly/goki/gi/oswin/init"
 )
 
 func main() {
 	go mainrun()
-	gi.RunBackendEventLoop() // this needs to run in main loop
+	oswin.RunBackendEventLoop() // this needs to run in main loop
 }
 
 func mainrun() {
@@ -24,41 +23,41 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
+	vpfill := vp.AddNewChild(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF")
 
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vpfill.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
 	// rect1.SetProp("stroke-linejoin", "round")
-	rect1 := vlay.AddNewChildNamed(gi.KiT_Rect, "rect1").(*gi.Rect)
+	rect1 := vlay.AddNewChild(gi.KiT_Rect, "rect1").(*gi.Rect)
 	rect1.SetProp("fill", "#008800")
 	rect1.SetProp("stroke", "#0000FF")
 	rect1.SetProp("stroke-width", 5.0)
 	rect1.Pos = gi.Vec2D{10, 10}
 	rect1.Size = gi.Vec2D{100, 100}
 
-	circle1 := vlay.AddNewChildNamed(gi.KiT_Circle, "circle1").(*gi.Circle)
+	circle1 := vlay.AddNewChild(gi.KiT_Circle, "circle1").(*gi.Circle)
 	circle1.SetProp("fill", "none")
 	circle1.SetProp("stroke", "#CC0000")
 	circle1.SetProp("stroke-width", 2.0)
 	circle1.Pos = gi.Vec2D{400, 400}
 	circle1.Radius = 40
 
-	ellipse1 := circle1.AddNewChildNamed(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
+	ellipse1 := circle1.AddNewChild(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
 	ellipse1.SetProp("fill", "#55000055")
 	ellipse1.SetProp("stroke", "#880000")
 	ellipse1.SetProp("stroke-width", 2.0)
 	ellipse1.Pos = gi.Vec2D{400, 200}
 	ellipse1.Radii = gi.Vec2D{80, 20}
 
-	line1 := vlay.AddNewChildNamed(gi.KiT_Line, "line1").(*gi.Line)
+	line1 := vlay.AddNewChild(gi.KiT_Line, "line1").(*gi.Line)
 	line1.SetProp("stroke", "#888800")
 	line1.SetProp("stroke-width", 5.0)
 	line1.Start = gi.Vec2D{100, 100}
 	line1.End = gi.Vec2D{150, 200}
 
-	text1 := vlay.AddNewChildNamed(gi.KiT_Text2D, "text1").(*gi.Text2D)
+	text1 := vlay.AddNewChild(gi.KiT_Text2D, "text1").(*gi.Text2D)
 	text1.SetProp("stroke", "#000")
 	text1.SetProp("stroke-width", 1.0)
 	text1.SetProp("text-align", "left")
@@ -69,15 +68,15 @@ func mainrun() {
 	text1.Width = 100
 	text1.Text = "this is test text!"
 
-	rlay := vlay.AddNewChildNamed(gi.KiT_Layout, "rowlay").(*gi.Layout)
+	rlay := vlay.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)
 	rlay.Lay = gi.LayoutRow
 	rlay.SetProp("x", 10)
 	rlay.SetProp("y", 500)
 	rlay.SetProp("text-align", "center")
-	edit1 := rlay.AddNewChildNamed(gi.KiT_TextField, "edit1").(*gi.TextField)
-	button1 := rlay.AddNewChildNamed(gi.KiT_Button, "button1").(*gi.Button)
-	button2 := rlay.AddNewChildNamed(gi.KiT_Button, "button2").(*gi.Button)
-	slider1 := rlay.AddNewChildNamed(gi.KiT_Slider, "slider1").(*gi.Slider)
+	edit1 := rlay.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
+	button1 := rlay.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
+	button2 := rlay.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
+	slider1 := rlay.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
 
 	edit1.Text = "Edit this text"
 	edit1.SetProp("min-width", "20em")

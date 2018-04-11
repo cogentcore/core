@@ -32,12 +32,12 @@ func mainrun() {
 	srctree := TestNode{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
-	srctree.AddNewChildNamed(nil, "child1")
-	child2 := srctree.AddNewChildNamed(nil, "child2")
+	srctree.AddNewChild(nil, "child1")
+	child2 := srctree.AddNewChild(nil, "child2")
 	// child3 :=
-	srctree.AddNewChildNamed(nil, "child3")
+	srctree.AddNewChild(nil, "child3")
 	// schild2 :=
-	child2.AddNewChildNamed(nil, "subchild1")
+	child2.AddNewChild(nil, "subchild1")
 
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
@@ -52,18 +52,18 @@ func mainrun() {
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
-	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	// row1.SetStretchMaxWidth()
 
-	tv1 := row1.AddNewChildNamed(gi.KiT_TreeView, "tv1").(*gi.TreeView)
+	tv1 := row1.AddNewChild(gi.KiT_TreeView, "tv1").(*gi.TreeView)
 	tv1.SetSrcNode(&srctree)
 
-	sv1 := row1.AddNewChildNamed(gi.KiT_StructView, "sv1").(*gi.StructView)
+	sv1 := row1.AddNewChild(gi.KiT_StructView, "sv1").(*gi.StructView)
 	sv1.SetStruct(&srctree)
 	sv1.SetProp("horiz-align", gi.AlignLeft)
 

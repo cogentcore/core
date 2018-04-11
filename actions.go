@@ -332,7 +332,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
-	frame := pvp.AddNewChildNamed(KiT_Frame, "Frame").(*Frame)
+	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
 	frame.PartStyleProps(frame.This, MenuProps)
 	for _, ac := range menu {

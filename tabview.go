@@ -176,12 +176,12 @@ func (g *TabWidget) InitTabs() {
 	skids := g.SrcNode.Ptr.Children()
 	for _, sk := range skids {
 		nm := "TabFrameOf_" + sk.UniqueName()
-		tf := tabstack.AddNewChildNamed(KiT_Frame, nm).(*Frame)
+		tf := tabstack.AddNewChild(KiT_Frame, nm).(*Frame)
 		tf.Lay = LayoutCol
 		tf.SetProp("max-width", -1.0) // stretch flex
 		tf.SetProp("max-height", -1.0)
 		nm = "TabOf_" + sk.UniqueName()
-		tb := tabrow.AddNewChildNamed(KiT_Button, nm).(*Button) // todo make tab button
+		tb := tabrow.AddNewChild(KiT_Button, nm).(*Button) // todo make tab button
 		tb.Text = sk.Name()
 		for key, val := range TabButtonProps {
 			tb.SetProp(key, val)
@@ -200,11 +200,11 @@ func (g *TabWidget) InitTabWidget() {
 		return
 	}
 	g.UpdateStart()
-	tabcol := g.AddNewChildNamed(KiT_Layout, "TabCol").(*Layout)
+	tabcol := g.AddNewChild(KiT_Layout, "TabCol").(*Layout)
 	tabcol.Lay = LayoutCol
-	tabrow := tabcol.AddNewChildNamed(KiT_Layout, "TabRow").(*Layout)
+	tabrow := tabcol.AddNewChild(KiT_Layout, "TabRow").(*Layout)
 	tabrow.Lay = LayoutRow
-	tabstack := tabcol.AddNewChildNamed(KiT_Layout, "TabStack").(*Layout)
+	tabstack := tabcol.AddNewChild(KiT_Layout, "TabStack").(*Layout)
 	tabstack.Lay = LayoutStacked
 	tabstack.SetProp("max-width", -1.0) // stretch flex
 	tabstack.SetProp("max-height", -1.0)

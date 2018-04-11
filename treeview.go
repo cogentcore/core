@@ -445,7 +445,7 @@ func (tv *TreeView) SrcInsertAfter() {
 			par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
-				par.InsertNewChildNamed(typ, myidx+1+i, nm)
+				par.InsertNewChild(typ, myidx+1+i, nm)
 			}
 			par.UpdateEnd()
 		}
@@ -478,7 +478,7 @@ func (tv *TreeView) SrcInsertBefore() {
 			par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
-				par.InsertNewChildNamed(typ, myidx+i, nm)
+				par.InsertNewChild(typ, myidx+i, nm)
 			}
 			par.UpdateEnd()
 		}
@@ -497,7 +497,7 @@ func (tv *TreeView) SrcAddChild() {
 			sk.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), i)
-				sk.AddNewChildNamed(typ, nm)
+				sk.AddNewChild(typ, nm)
 			}
 			sk.UpdateEnd()
 		}
@@ -533,7 +533,9 @@ func (tv *TreeView) SrcDuplicate() {
 	}
 	myidx := sk.Index()
 	nm := fmt.Sprintf("%vCopy", sk.Name())
-	par.InsertChildNamed(sk.Clone(), myidx+1, nm)
+	nwkid := sk.Clone()
+	nwkid.SetName(nm)
+	par.InsertChild(nwkid, myidx+1)
 }
 
 func (tv *TreeView) SetContinuousSelect() {

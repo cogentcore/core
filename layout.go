@@ -1337,28 +1337,144 @@ func (g *Space) Layout2D(parBBox image.Rectangle) {
 var _ Node2D = &Space{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//    Splitter
+//    SplitView
 
-// Splitter allocates a fixed amount of space to each child, along given dimension
-type Splitter struct {
-	Node2DBase
+// SplitView allocates a fixed proportion of space to each child, along given dimension, always using only the available space given to it by its parent (i.e., it will force its children, which should be layouts (typically Frame's), to have their own scroll bars as necesssary).  It should generally be used as a main outer-level structure within a window, providing a framework for inner elements -- it allows individual child elements to update indpendently and thus is important for speeding update performance.  It uses the Widget Parts to hold the splitter widgets separately from the children that contain the rest of the scenegraph to be displayed within each region.
+type SplitView struct {
+	WidgetBase
+	Splits      []float64 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
+	SavedSplits []float64 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
+	Dim         Dims2D    `desc:"dimension along which to split the space"`
 }
 
-var KiT_Splitter = kit.Types.AddType(&Splitter{}, nil)
+var KiT_SplitView = kit.Types.AddType(&SplitView{}, nil)
 
-var SplitterProps = map[string]interface{}{
-	"width":  units.NewValue(1, units.Em),
-	"height": units.NewValue(1, units.Em),
+// UpdateSplits updates the splits to be same length as number of children, and normalized
+func (g *SplitView) UpdateSplits() {
+	sz := len(g.Kids)
+	if sz == 0 {
+		return
+	}
+	if g.Splits == nil || len(g.Splits) != sz {
+		g.Splits = make([]float64, sz)
+	}
+	sum := 0.0
+	for _, sp := range g.Splits {
+		sum += sp
+	}
+	if sum == 0 { // set default even splits
+		even := 1.0 / float64(sz)
+		for i := range g.Splits {
+			g.Splits[i] = even
+		}
+		sum = 1.0
+	}
+	norm := 1.0 / sum
+	for i := range g.Splits {
+		g.Splits[i] *= norm
+	}
 }
 
-func (g *Splitter) Style2D() {
-	g.Style2DWidget(SplitterProps)
+// SetSplits sets the split proportions -- can use 0 to hide / collapse a child entirely -- does an Update
+func (g *SplitView) SetSplits(splits ...float64) {
+	g.UpdateStart()
+	sz := len(g.Kids)
+	mx := kit.MinInt(sz, len(splits))
+	for i := 0; i < mx; i++ {
+		g.Splits[i] = splits[i]
+	}
+	g.UpdateSplits()
+	g.UpdateEnd()
 }
 
-func (g *Splitter) Layout2D(parBBox image.Rectangle) {
+// SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
+func (g *SplitView) SaveSplits() {
+	sz := len(g.Splits)
+	if sz == 0 {
+		return
+	}
+	if g.SavedSplits == nil || len(g.SavedSplits) != sz {
+		g.SavedSplits = make([]float64, sz)
+	}
+	for i, sp := range g.Splits {
+		g.SavedSplits[i] = sp
+	}
+}
+
+// RestoreSplits restores a previously-saved set of splits (if it exists), does an update
+func (g *SplitView) RestoreSplits() {
+	if g.SavedSplits == nil {
+		return
+	}
+	g.SetSplits(g.SavedSplits...)
+}
+
+// CollapseChild collapses given child(ren) (sets split proportion to 0), optionally saving the prior splits for later Restore function -- does an Update -- triggered by double-click of splitter
+func (g *SplitView) CollapseChild(save bool, idxs ...int) {
+	g.UpdateStart()
+	if save {
+		g.SaveSplits()
+	}
+	sz := len(g.Kids)
+	for _, idx := range idxs {
+		if idx >= 0 && idx < sz {
+			g.Splits[idx] = 0
+		}
+	}
+	g.UpdateSplits()
+	g.UpdateEnd()
+}
+
+func (g *SplitView) Init2D() {
+	g.Init2DWidget()
+	g.UpdateSplits()
+}
+
+// auto-max-stretch
+var SplitViewProps = map[string]interface{}{
+	"max-width":  -1.0,
+	"max-height": -1.0,
+}
+
+func (g *SplitView) Style2D() {
+	g.Style2DWidget(SplitViewProps)
+	g.UpdateSplits()
+}
+
+func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
+	g.UpdateSplits()
+
+	sz := len(g.Kids)
+	// g.Parts.SetNChildren(sz-1, KiT_SplitHandle, "Handle")
+
+	handsz := 10.0
+
+	odim := OtherDim(g.Dim)
+	avail := g.LayData.AllocSize.Dim(g.Dim) - handsz*float64(sz-1)
+	osz := g.LayData.AllocSize.Dim(odim)
+	pos := 0.0
+
+	for i, sp := range g.Splits {
+		_, gi := KiToNode2D(g.Kids[i])
+		if gi != nil {
+			size := sp * avail
+			gi.LayData.AllocSize.SetDim(g.Dim, size)
+			gi.LayData.AllocSize.SetDim(odim, osz)
+			gi.LayData.AllocPosRel.SetDim(g.Dim, pos)
+			gi.LayData.AllocPosRel.SetDim(odim, 0)
+			pos += size + handsz
+		}
+	}
+
 	g.Layout2DChildren()
 }
 
+func (g *SplitView) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = true
+	return
+}
+
 // check for interface implementation
-var _ Node2D = &Splitter{}
+var _ Node2D = &SplitView{}

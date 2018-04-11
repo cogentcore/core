@@ -196,7 +196,7 @@ func (w *OSWindow) EventChan() (events <-chan interface{}) {
 				ke.Key = keyMapping[keycode]
 
 				if !downKeys[ke.Key] {
-					kde := oswin.KeyDownEvent(ke)
+					kde := oswin.KeyDownEvent{ke}
 					ec <- &kde
 				}
 

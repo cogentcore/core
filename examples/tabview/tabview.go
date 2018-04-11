@@ -21,12 +21,12 @@ func mainrun() {
 	srctree := ki.Node{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
-	srctree.AddNewChildNamed(nil, "child1")
-	child2 := srctree.AddNewChildNamed(nil, "child2")
+	srctree.AddNewChild(nil, "child1")
+	child2 := srctree.AddNewChild(nil, "child2")
 	// child3 :=
-	srctree.AddNewChildNamed(nil, "child3")
+	srctree.AddNewChild(nil, "child3")
 	// schild2 :=
-	child2.AddNewChildNamed(nil, "subchild1")
+	child2.AddNewChild(nil, "subchild1")
 
 	width := 800
 	height := 800
@@ -37,15 +37,15 @@ func mainrun() {
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
-	vlay := vp.AddNewChildNamed(gi.KiT_Frame, "vlay").(*gi.Frame)
+	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	tv1 := vlay.AddNewChildNamed(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
+	tv1 := vlay.AddNewChild(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
 	tv1.SetSrcNode(&srctree)
 
 	for i, sk := range srctree.Kids {
 		tf := tv1.TabFrameAtIndex(i)
-		lbl := tf.AddNewChildNamed(gi.KiT_Label, "tst").(*gi.Label)
+		lbl := tf.AddNewChild(gi.KiT_Label, "tst").(*gi.Label)
 		lbl.Text = sk.UniqueName()
 		// note: these were set by default -- could override
 		// tf.SetProp("max-width", -1.0) // stretch flex

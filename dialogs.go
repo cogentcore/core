@@ -136,7 +136,7 @@ var DialogProps = map[string]interface{}{
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "Frame"
 func (dlg *Dialog) SetFrame() *Frame {
-	frame := dlg.AddNewChildNamed(KiT_Frame, "Frame").(*Frame)
+	frame := dlg.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
 	dlg.PartStyleProps(frame, DialogProps)
 	return frame
@@ -151,7 +151,7 @@ func (dlg *Dialog) Frame() *Frame {
 func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
-		lab := frame.AddNewChildNamed(KiT_Label, "Title").(*Label)
+		lab := frame.AddNewChild(KiT_Label, "Title").(*Label)
 		lab.Text = title
 		dlg.PartStyleProps(lab, DialogProps)
 		return lab
@@ -173,10 +173,10 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float64, frame *Frame) *
 	dlg.Prompt = prompt
 	if frame != nil {
 		if spaceBefore > 0 {
-			spc := frame.AddNewChildNamed(KiT_Space, "PromptSpace").(*Space)
+			spc := frame.AddNewChild(KiT_Space, "PromptSpace").(*Space)
 			spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
 		}
-		lab := frame.AddNewChildNamed(KiT_Label, "Prompt").(*Label)
+		lab := frame.AddNewChild(KiT_Label, "Prompt").(*Label)
 		lab.Text = prompt
 		dlg.PartStyleProps(lab, DialogProps)
 		return lab
@@ -199,10 +199,10 @@ func (dlg *Dialog) AddButtonBox(spaceBefore float64, frame *Frame) *Layout {
 		return nil
 	}
 	if spaceBefore > 0 {
-		spc := frame.AddNewChildNamed(KiT_Space, "ButtonSpace").(*Space)
+		spc := frame.AddNewChild(KiT_Space, "ButtonSpace").(*Space)
 		spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
 	}
-	bb := frame.AddNewChildNamed(KiT_Layout, "ButtonBox").(*Layout)
+	bb := frame.AddNewChild(KiT_Layout, "ButtonBox").(*Layout)
 	bb.Lay = LayoutRow
 	bb.SetProp("max-width", -1)
 	return bb
@@ -318,29 +318,29 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChildNamed(KiT_Space, prIdx+1, "NSpace").(*Space)
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "NSpace").(*Space)
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
-	nrow := frame.InsertNewChildNamed(KiT_Layout, prIdx+2, "NRow").(*Layout)
+	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "NRow").(*Layout)
 	nrow.Lay = LayoutRow
 
-	nlbl := nrow.AddNewChildNamed(KiT_Label, "NLabel").(*Label)
+	nlbl := nrow.AddNewChild(KiT_Label, "NLabel").(*Label)
 	nlbl.Text = "Number:  "
 
-	ntf := nrow.AddNewChildNamed(KiT_TextField, "NField").(*TextField)
+	ntf := nrow.AddNewChild(KiT_TextField, "NField").(*TextField)
 	ntf.SetFixedWidth(units.NewValue(6, units.Ex))
 	ntf.Text = "1"
 
-	tspc := frame.InsertNewChildNamed(KiT_Space, prIdx+3, "TypeSpace").(*Space)
+	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "TypeSpace").(*Space)
 	tspc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
-	trow := frame.InsertNewChildNamed(KiT_Layout, prIdx+4, "TRow").(*Layout)
+	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "TRow").(*Layout)
 	trow.Lay = LayoutRow
 
-	tlbl := trow.AddNewChildNamed(KiT_Label, "TLabel").(*Label)
+	tlbl := trow.AddNewChild(KiT_Label, "TLabel").(*Label)
 	tlbl.Text = "Type:    "
 
-	typs := trow.AddNewChildNamed(KiT_ComboBox, "Types").(*ComboBox)
+	typs := trow.AddNewChild(KiT_ComboBox, "Types").(*ComboBox)
 	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface), true, true, 50)
 	// typs.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)

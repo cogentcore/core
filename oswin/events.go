@@ -98,6 +98,18 @@ type EventBase struct {
 	Time      time.Time
 }
 
+func (ev EventBase) EventTime() time.Time {
+	return ev.Time
+}
+
+func (ev EventBase) IsProcessed() bool {
+	return ev.Processed
+}
+
+func (ev *EventBase) SetProcessed() {
+	ev.Processed = true
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Mouse Events
 
@@ -105,6 +117,18 @@ type EventBase struct {
 type MouseEvent struct {
 	EventBase
 	Where image.Point
+}
+
+func (ev MouseEvent) EventHasPos() bool {
+	return true
+}
+
+func (ev MouseEvent) EventPos() image.Point {
+	return ev.Where
+}
+
+func (ev MouseEvent) EventOnFocus() bool {
+	return false
 }
 
 ////////////////////////////////////////////
@@ -117,30 +141,6 @@ type MouseMovedEvent struct {
 
 func (ev MouseMovedEvent) EventType() EventType {
 	return MouseMovedEventType
-}
-
-func (ev MouseMovedEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseMovedEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseMovedEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MouseMovedEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseMovedEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseMovedEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
@@ -161,30 +161,6 @@ func (ev MouseDownEvent) EventType() EventType {
 	return MouseDownEventType
 }
 
-func (ev MouseDownEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseDownEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseDownEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MouseDownEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseDownEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseDownEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &MouseDownEvent{}
 
@@ -193,30 +169,6 @@ type MouseUpEvent MouseButtonEvent
 
 func (ev MouseUpEvent) EventType() EventType {
 	return MouseUpEventType
-}
-
-func (ev MouseUpEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseUpEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseUpEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MouseUpEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseUpEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseUpEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
@@ -234,26 +186,6 @@ func (ev MouseDraggedEvent) EventType() EventType {
 	return MouseDraggedEventType
 }
 
-func (ev MouseDraggedEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseDraggedEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseDraggedEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseDraggedEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseDraggedEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &MouseDraggedEvent{}
 
@@ -262,8 +194,7 @@ var _ Event = &MouseDraggedEvent{}
 
 // GestureEvent is used to represents common elements of all gesture-based events
 type GestureEvent struct {
-	EventBase
-	Where image.Point
+	MouseEvent
 }
 
 ////////////////////////////////////////////
@@ -276,30 +207,6 @@ type MagnifyEvent struct {
 
 func (ev MagnifyEvent) EventType() EventType {
 	return MagnifyEventType
-}
-
-func (ev MagnifyEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MagnifyEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MagnifyEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MagnifyEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MagnifyEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MagnifyEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
@@ -317,30 +224,6 @@ func (ev RotateEvent) EventType() EventType {
 	return RotateEventType
 }
 
-func (ev RotateEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev RotateEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev RotateEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev RotateEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev RotateEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *RotateEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &RotateEvent{}
 
@@ -356,30 +239,6 @@ func (ev ScrollEvent) EventType() EventType {
 	return ScrollEventType
 }
 
-func (ev ScrollEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev ScrollEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev ScrollEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev ScrollEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev ScrollEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *ScrollEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &ScrollEvent{}
 
@@ -392,71 +251,39 @@ type KeyEvent struct {
 	Key string
 }
 
-////////////////////////////////////////////
-
-// KeyDownEvent is for when a key is pressed.
-type KeyDownEvent KeyEvent
-
-func (ev KeyDownEvent) EventType() EventType {
-	return KeyDownEventType
-}
-
-func (ev KeyDownEvent) EventHasPos() bool {
+func (ev KeyEvent) EventHasPos() bool {
 	return false
 }
 
-func (ev KeyDownEvent) EventPos() image.Point {
+func (ev KeyEvent) EventPos() image.Point {
 	return image.ZP
 }
 
-func (ev KeyDownEvent) EventOnFocus() bool {
+func (ev KeyEvent) EventOnFocus() bool {
 	return true
 }
 
-func (ev KeyDownEvent) EventTime() time.Time {
-	return ev.Time
+////////////////////////////////////////////
+
+// KeyDownEvent is for when a key is pressed.
+type KeyDownEvent struct {
+	KeyEvent
 }
 
-func (ev KeyDownEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *KeyDownEvent) SetProcessed() {
-	ev.Processed = true
+func (ev KeyDownEvent) EventType() EventType {
+	return KeyDownEventType
 }
 
 // check for interface implementation
 var _ Event = &KeyDownEvent{}
 
 // KeyUpEvent is for when a key is unpressed.
-type KeyUpEvent KeyEvent
+type KeyUpEvent struct {
+	KeyEvent
+}
 
 func (ev KeyUpEvent) EventType() EventType {
 	return KeyUpEventType
-}
-
-func (ev KeyUpEvent) EventHasPos() bool {
-	return false
-}
-
-func (ev KeyUpEvent) EventPos() image.Point {
-	return image.ZP
-}
-
-func (ev KeyUpEvent) EventOnFocus() bool {
-	return true
-}
-
-func (ev KeyUpEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev KeyUpEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *KeyUpEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
@@ -478,30 +305,6 @@ func (ev KeyTypedEvent) EventType() EventType {
 	return KeyTypedEventType
 }
 
-func (ev KeyTypedEvent) EventHasPos() bool {
-	return false
-}
-
-func (ev KeyTypedEvent) EventPos() image.Point {
-	return image.ZP
-}
-
-func (ev KeyTypedEvent) EventOnFocus() bool {
-	return true
-}
-
-func (ev KeyTypedEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev KeyTypedEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *KeyTypedEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &KeyTypedEvent{}
 
@@ -511,68 +314,24 @@ var _ Event = &KeyTypedEvent{}
 ////////////////////////////////////////////
 
 // MouseEnteredEvent is for when the mouse enters a window, or a widget (computed by window)
-type MouseEnteredEvent MouseMovedEvent
+type MouseEnteredEvent struct {
+	MouseMovedEvent
+}
 
 func (ev MouseEnteredEvent) EventType() EventType {
 	return MouseEnteredEventType
-}
-
-func (ev MouseEnteredEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseEnteredEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseEnteredEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MouseEnteredEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseEnteredEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseEnteredEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
 var _ Event = &MouseEnteredEvent{}
 
 // MouseExitedEvent is for when the mouse exits a window, or a widget (computed by window)a
-type MouseExitedEvent MouseMovedEvent
+type MouseExitedEvent struct {
+	MouseMovedEvent
+}
 
 func (ev MouseExitedEvent) EventType() EventType {
 	return MouseExitedEventType
-}
-
-func (ev MouseExitedEvent) EventHasPos() bool {
-	return true
-}
-
-func (ev MouseExitedEvent) EventPos() image.Point {
-	return ev.Where
-}
-
-func (ev MouseExitedEvent) EventOnFocus() bool {
-	return false
-}
-
-func (ev MouseExitedEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev MouseExitedEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *MouseExitedEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation
@@ -600,18 +359,6 @@ func (ev ResizeEvent) EventOnFocus() bool {
 	return false
 }
 
-func (ev ResizeEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev ResizeEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *ResizeEvent) SetProcessed() {
-	ev.Processed = true
-}
-
 // check for interface implementation
 var _ Event = &ResizeEvent{}
 
@@ -634,18 +381,6 @@ func (ev CloseEvent) EventPos() image.Point {
 
 func (ev CloseEvent) EventOnFocus() bool {
 	return false
-}
-
-func (ev CloseEvent) EventTime() time.Time {
-	return ev.Time
-}
-
-func (ev CloseEvent) IsProcessed() bool {
-	return ev.Processed
-}
-
-func (ev *CloseEvent) SetProcessed() {
-	ev.Processed = true
 }
 
 // check for interface implementation

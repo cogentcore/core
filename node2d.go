@@ -40,11 +40,14 @@ Rendering is done in 4 separate passes:
 	sizing and positioning of children in this pass, based on the Size2D data
 	gathered bottom-up and constraints applied top-down from higher levels
 
-	4. Render2D: Render2D: Final rendering pass, each node is fully
-	responsible for rendering its own children, to provide maximum flexibility
-	(see Render2DChildren) -- bracket the render calls in PushBounds /
-	PopBounds and a false from PushBounds indicates that VpBBox is empty and
-	no rendering should occur
+	4. Render2D: Final rendering pass, each node is fully responsible for
+	rendering its own children, to provide maximum flexibility (see
+	Render2DChildren) -- bracket the render calls in PushBounds / PopBounds
+	and a false from PushBounds indicates that VpBBox is empty and no
+	rendering should occur
+
+    * Move2D: optional pass invoked by scrollbars to move elements relative to
+      their previously-assigned positions.
 
 */
 type Node2DBase struct {
