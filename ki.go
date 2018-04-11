@@ -198,38 +198,26 @@ type Ki interface {
 	// SetChildType sets the ChildType used as a default type for creating new children, and for the gui -- ensures that the type is a Ki type, and errors if not
 	SetChildType(t reflect.Type) error
 
-	// AddChild adds a new child at end of children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
+	// AddChild adds a new child at end of children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child -- UniquifyNames is called after adding to ensure name is unique (assumed to already have a name)
 	AddChild(kid Ki) error
 
-	// InsertChild adds a new child at given position in children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child
+	// InsertChild adds a new child at given position in children list -- if child is in an existing tree, it is removed from that parent, and a NodeMoved signal is emitted for the child -- UniquifyNames is called after adding to ensure name is unique (assumed to already have a name)
 	InsertChild(kid Ki, at int) error
-
-	// AddChildNamed adds a new child at end of children list, and gives it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	AddChildNamed(kid Ki, name string) error
-
-	// InsertChildNamed adds a new child at given position in children list, and gives it a name -- important to set name after adding, to ensure that UniqueNames are indeed unique
-	InsertChildNamed(kid Ki, at int, name string) error
-
-	// InsertChildNamedUnique adds a child at given position in children list, and give it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
-	InsertChildNamedUnique(kid Ki, at int, name string) error
 
 	// MakeNew creates a new child of given type -- if nil, uses ChildType, else uses the same type as this struct
 	MakeNew(typ reflect.Type) Ki
 
-	// AddNewChild creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at end of children list
-	AddNewChild(typ reflect.Type) Ki
+	// AddNewChild creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at end of children list -- assigns name (can be empty) and enforces UniqueName
+	AddNewChild(typ reflect.Type, name string) Ki
 
-	// InsertNewChild creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at given position in children list
-	InsertNewChild(typ reflect.Type, at int) Ki
+	// InsertNewChild creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at given position in children list -- assigns name (can be empty) and enforces UniqueName
+	InsertNewChild(typ reflect.Type, at int, name string) Ki
 
-	// AddNewChildNamed creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at end of children list, and give it a name
-	AddNewChildNamed(typ reflect.Type, name string) Ki
+	// InsertNewChildUnique adds a new child at given position in children list, and gives it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
+	InsertNewChildUnique(typ reflect.Type, at int, name string) Ki
 
-	// InsertNewChildNamed creates a new child of given type -- if nil, uses ChildType, else type of this struct -- and add at given position in children list, and give it a name
-	InsertNewChildNamed(typ reflect.Type, at int, name string) Ki
-
-	// InsertNewChildNamedUnique adds a new child at given position in children list, and gives it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
-	InsertNewChildNamedUnique(typ reflect.Type, at int, name string) Ki
+	// SetNChildren ensures that there are exactly n children, deleting any extra, and creating any new ones, using AddNewChild with given type and naming according to nameStubX where X is the index of the child -- does not ensure existing children are of given type, or change their names, or call UniquifyNames -- use ConfigChildren for those cases -- this function is for simpler cases where a parent uses this function consistently to manage children all of the same type
+	SetNChildren(n int, typ reflect.Type, nameStub string)
 
 	// MoveChild moves child from one position to another in the list of children (see also corresponding Slice method)
 	MoveChild(from, to int) error

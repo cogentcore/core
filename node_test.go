@@ -90,8 +90,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	child := parent.AddNewChild(nil)
-	child.SetName("child1")
+	child := parent.AddNewChild(nil, "child1")
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
@@ -106,12 +105,9 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 func TestNodeUniqueNames(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	child := NodeEmbed{}
-	parent.AddChildNamed(&child, "child1")
-	child2 := NodeEmbed{}
-	parent.AddChildNamed(&child2, "child1")
-	child3 := NodeEmbed{}
-	parent.AddChildNamed(&child3, "child1")
+	child := parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1")
+	child3 := parent.AddNewChild(nil, "child1")
 	if len(parent.Kids) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.Kids))
 	}
@@ -130,9 +126,8 @@ func TestNodeUniqueNames(t *testing.T) {
 func TestNodeDeleteChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	child := NodeEmbed{}
-	parent.AddChildNamed(&child, "child1")
-	parent.DeleteChild(&child, true)
+	child := parent.AddNewChild(nil, "child1")
+	parent.DeleteChild(child, true)
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
 	}
@@ -144,8 +139,7 @@ func TestNodeDeleteChild(t *testing.T) {
 func TestNodeDeleteChildName(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	child := NodeEmbed{}
-	parent.AddChildNamed(&child, "child1")
+	parent.AddNewChild(nil, "child1")
 	parent.DeleteChildByName("child1", true)
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
@@ -160,8 +154,7 @@ func TestNodeFindName(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
 	for _, nm := range names {
-		child := Node{}
-		parent.AddChildNamed(&child, nm)
+		parent.AddNewChild(nil, nm)
 	}
 	if len(parent.Kids) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
@@ -181,8 +174,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
 	for range names {
-		child := Node{}
-		parent.AddChildNamed(&child, "child")
+		parent.AddNewChild(nil, "child")
 	}
 	if len(parent.Kids) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
@@ -200,8 +192,8 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	parent.AddNewChildNamed(KiT_NodeEmbed, "child1")
-	parent.AddNewChildNamed(KiT_Node, "child2")
+	parent.AddNewChild(KiT_NodeEmbed, "child1")
+	parent.AddNewChild(KiT_Node, "child2")
 	idx := parent.ChildIndexByType(KiT_NodeEmbed, false, 0)
 	if idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
@@ -222,14 +214,14 @@ func TestNodeMove(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child0")
-	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	parent.AddNewChild(nil, "child0")
+	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child2")
+	parent.AddNewChild(nil, "child2")
 	//schild2 :=
-	child2.AddNewChildNamed(nil, "subchild1")
+	child2.AddNewChild(nil, "subchild1")
 	// child4 :=
-	parent.AddNewChildNamed(nil, "child3")
+	parent.AddNewChild(nil, "child3")
 
 	bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 	parent.MoveChild(3, 1)
@@ -291,14 +283,14 @@ func TestNodeConfig(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child0")
-	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	parent.AddNewChild(nil, "child0")
+	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child2")
+	parent.AddNewChild(nil, "child2")
 	//schild2 :=
-	child2.AddNewChildNamed(nil, "subchild1")
+	child2.AddNewChild(nil, "subchild1")
 	// child4 :=
-	parent.AddNewChildNamed(nil, "child3")
+	parent.AddNewChild(nil, "child3")
 
 	config1 := kit.TypeAndNameList{
 		{KiT_NodeEmbed, "child2"},
@@ -367,11 +359,11 @@ func TestNodeJSonSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	parent.AddNewChild(nil, "child1")
+	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
@@ -403,11 +395,11 @@ func TestNodeXMLSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	var child2 *NodeEmbed = parent.AddNewChildNamed(nil, "child1").(*NodeEmbed)
+	parent.AddNewChild(nil, "child1")
+	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
@@ -442,11 +434,11 @@ func TestNodeCallFun(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1")
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1")
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	res := make([]string, 0, 10)
 	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
@@ -485,13 +477,13 @@ func TestNodeUpdate(t *testing.T) {
 			kit.BitFlagsToString(*(s.Flags()), FlagsN)))
 	})
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1")
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1")
 	// child3 :=
 	parent.UpdateStart()
-	parent.AddNewChildNamed(nil, "child1")
+	parent.AddNewChild(nil, "child1")
 	parent.UpdateEnd()
-	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
 	trg := []string{"par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded"}
@@ -557,13 +549,13 @@ func TestProps(t *testing.T) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), sig))
 	})
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1")
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1")
 	// child3 :=
 	parent.UpdateStart()
-	parent.AddNewChildNamed(nil, "child1")
+	parent.AddNewChild(nil, "child1")
 	parent.UpdateEnd()
-	schild2 := child2.AddNewChildNamed(nil, "subchild1")
+	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
 	pprop, ok := kit.ToInt(parent.Prop("intprop", false, false))
@@ -613,22 +605,22 @@ func TestTreeMod(t *testing.T) {
 	tree1 := Node{}
 	tree1.InitName(&tree1, "tree1")
 	// child11 :=
-	tree1.AddNewChildNamed(nil, "child11")
-	child12 := tree1.AddNewChildNamed(nil, "child12")
+	tree1.AddNewChild(nil, "child11")
+	child12 := tree1.AddNewChild(nil, "child12")
 	// child13 :=
-	tree1.AddNewChildNamed(nil, "child13")
+	tree1.AddNewChild(nil, "child13")
 	// schild12 :=
-	child12.AddNewChildNamed(nil, "subchild12")
+	child12.AddNewChild(nil, "subchild12")
 
 	tree2 := Node{}
 	tree2.InitName(&tree2, "tree2")
 	// child21 :=
-	tree2.AddNewChildNamed(nil, "child21")
-	child22 := tree2.AddNewChildNamed(nil, "child22")
+	tree2.AddNewChild(nil, "child21")
+	child22 := tree2.AddNewChild(nil, "child22")
 	// child23 :=
-	tree2.AddNewChildNamed(nil, "child23")
+	tree2.AddNewChild(nil, "child23")
 	// schild22 :=
-	child22.AddNewChildNamed(nil, "subchild22")
+	child22.AddNewChild(nil, "subchild22")
 
 	// fmt.Printf("Setup Signals:\n%v", sigs)
 	sigs = ""
@@ -700,10 +692,10 @@ func TestNodeFieldFunc(t *testing.T) {
 	}
 	res = res[:0]
 
-	par2.AddNewChildNamed(nil, "child0")
-	child1 := par2.AddNewChildNamed(nil, "child1")
-	child1.AddNewChildNamed(nil, "subchild0")
-	child1.AddNewChildNamed(nil, "subchild1")
+	par2.AddNewChild(nil, "child0")
+	child1 := par2.AddNewChild(nil, "child1")
+	child1.AddNewChild(nil, "subchild0")
+	child1.AddNewChild(nil, "subchild1")
 
 	par2.FuncDownDepthFirst(0, "fun_down_depth", func(k Ki, level int, d interface{}) bool {
 		return true
@@ -726,11 +718,11 @@ func TestNodeFieldJSonSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
 
 	parent.Ptr.Ptr = &child2.Field1
 	child2.Ptr.Ptr = &schild2.Field2
@@ -764,11 +756,11 @@ func TestNodeFieldSet(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
 
 	parent.Ptr.Ptr = &child2.Field1
 	child2.Ptr.Ptr = &schild2.Field2
@@ -794,11 +786,11 @@ func TestClone(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChildNamed(nil, "child1")
-	child2 := parent.AddNewChildNamed(nil, "child1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChildNamed(nil, "child1")
-	schild2 := child2.AddNewChildNamed(nil, "subchild1").(*NodeField2)
+	parent.AddNewChild(nil, "child1")
+	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
 
 	parent.Ptr.Ptr = &child2.Field1
 	child2.Ptr.Ptr = &schild2.Field2

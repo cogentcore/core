@@ -465,6 +465,10 @@ func (n *Node) AddChild(kid Ki) error {
 	err := n.AddChildImpl(kid)
 	if err == nil {
 		bitflag.Set(&n.Flag, int(ChildAdded))
+		if kid.UniqueName() == "" {
+			kid.SetUniqueName(kid.Name())
+		}
+		n.UniquifyNames()
 	}
 	n.UpdateEnd()
 	return err
@@ -475,40 +479,10 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		bitflag.Set(&n.Flag, int(ChildAdded))
-	}
-	n.UpdateEnd()
-	return err
-}
-
-func (n *Node) AddChildNamed(kid Ki, name string) error {
-	n.UpdateStart()
-	err := n.AddChildImpl(kid)
-	if err == nil {
-		kid.SetName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
-	}
-	n.UpdateEnd()
-	return err
-}
-
-func (n *Node) InsertChildNamed(kid Ki, at int, name string) error {
-	n.UpdateStart()
-	err := n.InsertChildImpl(kid, at)
-	if err == nil {
-		kid.SetName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
-	}
-	n.UpdateEnd()
-	return err
-}
-
-func (n *Node) InsertChildNamedUnique(kid Ki, at int, name string) error {
-	n.UpdateStart()
-	err := n.InsertChildImpl(kid, at)
-	if err == nil {
-		kid.SetNameRaw(name)
-		kid.SetUniqueName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		if kid.UniqueName() == "" {
+			kid.SetUniqueName(kid.Name())
+		}
+		n.UniquifyNames()
 	}
 	n.UpdateEnd()
 	return err
@@ -529,34 +503,58 @@ func (n *Node) MakeNew(typ reflect.Type) Ki {
 	return kid
 }
 
-func (n *Node) AddNewChild(typ reflect.Type) Ki {
+func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
+	n.UpdateStart()
 	kid := n.MakeNew(typ)
-	n.AddChild(kid)
+	err := n.AddChildImpl(kid)
+	if err == nil {
+		kid.SetName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return kid
 }
 
-func (n *Node) InsertNewChild(typ reflect.Type, at int) Ki {
+func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
+	n.UpdateStart()
 	kid := n.MakeNew(typ)
-	n.InsertChild(kid, at)
+	err := n.InsertChildImpl(kid, at)
+	if err == nil {
+		kid.SetName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return kid
 }
 
-func (n *Node) AddNewChildNamed(typ reflect.Type, name string) Ki {
+func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
+	n.UpdateStart()
 	kid := n.MakeNew(typ)
-	n.AddChildNamed(kid, name)
+	err := n.InsertChildImpl(kid, at)
+	if err == nil {
+		kid.SetNameRaw(name)
+		kid.SetUniqueName(name)
+		bitflag.Set(&n.Flag, int(ChildAdded))
+	}
+	n.UpdateEnd()
 	return kid
 }
 
-func (n *Node) InsertNewChildNamed(typ reflect.Type, at int, name string) Ki {
-	kid := n.MakeNew(typ)
-	n.InsertChildNamed(kid, at, name)
-	return kid
-}
-
-func (n *Node) InsertNewChildNamedUnique(typ reflect.Type, at int, name string) Ki {
-	kid := n.MakeNew(typ)
-	n.InsertChildNamedUnique(kid, at, name)
-	return kid
+func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) {
+	sz := len(n.Kids)
+	if trgn == sz {
+		return
+	}
+	n.UpdateStart()
+	for sz > trgn {
+		sz--
+		n.DeleteChildAtIndex(sz, true)
+	}
+	for sz < trgn {
+		nm := fmt.Sprintf("%v%v", nameStub, sz)
+		n.InsertNewChildUnique(typ, sz, nm)
+	}
+	n.UpdateEnd()
 }
 
 func (n *Node) MoveChild(from, to int) error {
@@ -615,9 +613,9 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 				n.UpdateStart()
 			}
 			if uniqNm {
-				n.InsertNewChildNamedUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
+				n.InsertNewChildUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
 			} else {
-				n.InsertNewChildNamed(tn.Type, i, tn.Name)
+				n.InsertNewChild(tn.Type, i, tn.Name)
 			}
 		} else {
 			if kidx != i {
