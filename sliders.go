@@ -349,20 +349,36 @@ func (g *Slider) Defaults() { // todo: should just get these from props
 
 func (g *Slider) Init2D() {
 	g.Init2DSlider()
+	g.ConfigParts()
 }
 
 func (g *Slider) ConfigParts() {
-	g.Parts.Lay = LayoutCol
+	g.Parts.Lay = LayoutNil
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
 	g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, SliderProps[SliderNormal])
 }
 
-func (g *Slider) ConfigPartsIfNeeded() {
-	if !g.PartsNeedUpdateIconLabel(g.Icon, "") {
-		return
+func (g *Slider) ConfigPartsIfNeeded(render bool) {
+	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
+		g.ConfigParts()
 	}
-	g.ConfigParts()
+	if g.Icon != nil && g.Parts.HasChildren() {
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+		if ic != nil {
+			mrg := g.Style.Layout.Margin.Dots
+			pad := g.Style.Layout.Padding.Dots
+			spc := mrg + pad
+			odim := OtherDim(g.Dim)
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
+			ic.LayData.AllocPosRel.SetDim(odim, -pad)
+			ic.LayData.AllocSize.X = g.ThumbSize
+			ic.LayData.AllocSize.Y = g.ThumbSize
+			if render {
+				ic.Layout2DTree()
+			}
+		}
+	}
 }
 
 var SliderProps = []map[string]interface{}{
@@ -425,7 +441,7 @@ func (g *Slider) Size2D() {
 }
 
 func (g *Slider) Layout2D(parBBox image.Rectangle) {
-	g.ConfigPartsIfNeeded()
+	g.ConfigPartsIfNeeded(false)
 	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
@@ -453,7 +469,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	st := &g.Style
 	rs := &g.Viewport.Render
 
-	g.ConfigPartsIfNeeded()
+	g.ConfigPartsIfNeeded(true)
 
 	// overall fill box
 	g.RenderStdBox(&g.StateStyles[SliderBox])
@@ -499,10 +515,10 @@ func (g *Slider) Render2DDefaultStyle() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			gotIc = true
-			ic.LayData.AllocPosRel = tpos.Sub(g.Parts.LayData.AllocPos)
-			ic.LayData.AllocPos = tpos
-			ic.LayData.AllocPosOrig = tpos
-			ic.Render2DTree()
+			// ic.LayData.AllocPosRel = tpos.Sub(g.Parts.LayData.AllocPos)
+			// ic.LayData.AllocPos = tpos
+			// ic.LayData.AllocPosOrig = tpos
+			g.Parts.Render2DTree()
 		}
 	}
 
@@ -513,7 +529,6 @@ func (g *Slider) Render2DDefaultStyle() {
 }
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
-	// fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
@@ -645,7 +660,6 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 }
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
-	// fmt.Printf("focus changed %v\n", gotFocus)
 	g.UpdateStart()
 	if gotFocus {
 		g.SetSliderState(SliderFocus)

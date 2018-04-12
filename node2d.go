@@ -60,6 +60,9 @@ type Node2DBase struct {
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
 
+// set this variable to true to obtain a trace of updates that trigger re-rendering
+var Update2DTrace bool = false
+
 // set this variable to true to obtain a trace of the nodes rendering (just printfs to stdout)
 var Render2DTrace bool = false
 

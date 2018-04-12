@@ -172,7 +172,9 @@ func (vp *Viewport2D) Init2D() {
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()
-		// fmt.Printf("viewport: %v rendering due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+		}
 		// todo: don't re-render if deleting!
 		rvp.FullRender2DTree()
 	})
@@ -330,8 +332,8 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		return
 	}
 
-	if Render2DTrace {
-		fmt.Printf("Render: %v Viewport2D rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+	if Update2DTrace {
+		fmt.Printf("Update: Viewport2D: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 
 	fullRend := false
@@ -348,16 +350,16 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	}
 
 	if fullRend {
-		if Render2DTrace {
-			fmt.Printf("Render: %v Viewport2D FullRender2DTree (structural changes)\n", vp.PathUnique())
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes)\n", vp.PathUnique())
 		}
 		vp.FullRender2DTree()
 	} else {
 		rr, layout := gii.ReRender2D()
 		if rr != nil {
 			rrn := rr.AsNode2D()
-			if Render2DTrace {
-				fmt.Printf("Render: %v Viewport2D ReRender2D on %v, layout: %v\n", vp.PathUnique(), rrn.PathUnique(), layout)
+			if Update2DTrace {
+				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v, layout: %v\n", vp.PathUnique(), rrn.PathUnique(), layout)
 			}
 			if layout {
 				rrn.Layout2DTree()
@@ -366,14 +368,14 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		} else {
 			anchor := gi.ParentReRenderAnchor()
 			if anchor != nil {
-				if Render2DTrace {
-					fmt.Printf("Render: %v Viewport2D ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
 				}
 				gi.Style2DTree() // restyle only from affected node downward
 				vp.ReRender2DAnchor(anchor.AsNode2D())
 			} else {
-				if Render2DTrace {
-					fmt.Printf("Render: %v Viewport2D ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
 				}
 				gi.Style2DTree()    // restyle only from affected node downward
 				vp.ReRender2DTree() // need to re-render entirely from us

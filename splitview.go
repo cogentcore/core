@@ -102,6 +102,7 @@ func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 }
 
 func (g *SplitView) Init2D() {
+	g.Parts.Lay = LayoutNil
 	g.Init2DWidget()
 	g.UpdateSplits()
 }

@@ -265,6 +265,8 @@ const (
 	LayoutColFlow
 	// arrange items stacked on top of each other -- Top index indicates which to show -- overall size accommodates largest in each dimension
 	LayoutStacked
+	// nil layout -- don't do anything -- for cases when a parent wants to take over the job of the layout
+	LayoutNil
 	LayoutsN
 )
 
@@ -1157,6 +1159,8 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	case LayoutStacked:
 		ly.LayoutSingle(X)
 		ly.LayoutSingle(Y)
+	case LayoutNil:
+		// nothing
 	}
 	ly.FinalizeLayout()
 	ly.ManageOverflow()

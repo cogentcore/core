@@ -177,7 +177,6 @@ func (g *WidgetBase) Render2DParts() {
 // ConfigPartsIconLabel returns a standard config for creating parts, of icon and label left-to right in a row, based on whether items are nil or empty
 func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
 	// todo: add some styles for button layout
-	g.Parts.Lay = LayoutRow
 	config = kit.TypeAndNameList{} // note: slice is already a pointer
 	icIdx = -1
 	lbIdx = -1

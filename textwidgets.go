@@ -124,6 +124,9 @@ type TextField struct {
 var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
 
 func (g *TextField) SetText(txt string) {
+	if g.Text == txt && g.EditText == txt {
+		return
+	}
 	g.Text = txt
 	g.RevertEdit()
 }
@@ -613,6 +616,7 @@ func (g *SpinBox) ConfigParts() {
 	config.Add(KiT_Layout, "Buttons")
 	updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if updt {
+		g.UpdateStart()
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
 		buts.SetNChildren(2, KiT_Action, "But")
@@ -648,12 +652,21 @@ func (g *SpinBox) ConfigParts() {
 				sb.SetValueAction(vl)
 			}
 		})
+		g.UpdateEnd()
 	}
 }
 
 func (g *SpinBox) ConfigPartsIfNeeded() {
 	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
-	tf.SetText(fmt.Sprintf("%g", g.Value))
+	txt := fmt.Sprintf("%g", g.Value)
+	if tf.Text != txt {
+		tf.SetText(txt)
+	}
+}
+
+func (g *SpinBox) Init2D() {
+	g.Init2DWidget()
+	g.ConfigParts()
 }
 
 func (g *SpinBox) Style2D() {

@@ -30,10 +30,11 @@ import (
 // Icon is an SVG that is assumed to contain no color information -- it should
 // just be a filled shape where the fill and stroke colors come from the
 // surrounding context / paint settings.  The rendered version can be cached
-// for a given set of fill / stroke paint values, as an optimization (later).
+// for a given set of fill / stroke paint values, as an optimization.
 type Icon struct {
 	SVG
-	Rendered bool `json:"-" xml:"-" desc:"we have already rendered at our current size -- doesn't re-render"`
+	Rendered     bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+	RenderedSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, nil)
@@ -47,6 +48,7 @@ func (vp *Icon) Init2D() {
 func (vp *Icon) CopyFromIcon(cp *Icon) {
 	oldIc := *vp
 	vp.CopyFrom(cp)
+	vp.Rendered = false
 	vp.Viewport = oldIc.Viewport
 	vp.LayData = oldIc.LayData
 	vp.VpBBox = oldIc.VpBBox
@@ -61,6 +63,7 @@ func (vp *Icon) CopyFromIcon(cp *Icon) {
 	vp.VpBBox = oldIc.VpBBox
 	vp.WinBBox = oldIc.WinBBox
 	vp.ViewBox = oldIc.ViewBox
+	vp.Rendered = false // not yet..
 }
 
 var IconProps = []map[string]interface{}{
@@ -92,8 +95,13 @@ func (vp *Icon) Layout2D(parBBox image.Rectangle) {
 }
 
 func (vp *Icon) Render2D() {
-	// todo: check rendered -- don't re-render
+	// todo: not working -- icons blank..
+	// if vp.Rendered && vp.RenderedSize == vp.ViewBox.Size {
+	// 	return
+	// }
 	if vp.PushBounds() {
+		// vp.Rendered = true
+		// vp.RenderedSize = vp.ViewBox.Size
 		pc := &vp.Paint
 		rs := &vp.Render
 		if vp.Fill {
