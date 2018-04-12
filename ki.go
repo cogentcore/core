@@ -216,8 +216,8 @@ type Ki interface {
 	// InsertNewChildUnique adds a new child at given position in children list, and gives it a name, using SetNameRaw and SetUniqueName for the name -- only when names are known to be unique (faster)
 	InsertNewChildUnique(typ reflect.Type, at int, name string) Ki
 
-	// SetNChildren ensures that there are exactly n children, deleting any extra, and creating any new ones, using AddNewChild with given type and naming according to nameStubX where X is the index of the child -- does not ensure existing children are of given type, or change their names, or call UniquifyNames -- use ConfigChildren for those cases -- this function is for simpler cases where a parent uses this function consistently to manage children all of the same type
-	SetNChildren(n int, typ reflect.Type, nameStub string)
+	// SetNChildren ensures that there are exactly n children, deleting any extra, and creating any new ones, using AddNewChild with given type and naming according to nameStubX where X is the index of the child -- returns true if any updates were made -- does not ensure existing children are of given type, or change their names, or call UniquifyNames -- use ConfigChildren for those cases -- this function is for simpler cases where a parent uses this function consistently to manage children all of the same type
+	SetNChildren(n int, typ reflect.Type, nameStub string) bool
 
 	// MoveChild moves child from one position to another in the list of children (see also corresponding Slice method)
 	MoveChild(from, to int) error

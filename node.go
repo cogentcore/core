@@ -540,22 +540,33 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 	return kid
 }
 
-func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) {
+func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) bool {
 	sz := len(n.Kids)
 	if trgn == sz {
-		return
+		return false
 	}
-	n.UpdateStart()
+	updt := false
 	for sz > trgn {
+		if !updt {
+			updt = true
+			n.UpdateStart()
+		}
 		sz--
 		n.DeleteChildAtIndex(sz, true)
 	}
 	for sz < trgn {
+		if !updt {
+			updt = true
+			n.UpdateStart()
+		}
 		nm := fmt.Sprintf("%v%v", nameStub, sz)
 		n.InsertNewChildUnique(typ, sz, nm)
 		sz++
 	}
-	n.UpdateEnd()
+	if updt {
+		n.UpdateEnd()
+	}
+	return updt
 }
 
 func (n *Node) MoveChild(from, to int) error {
