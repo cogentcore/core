@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -70,6 +71,7 @@ type SliderBase struct {
 	EmitValue   float64              `xml:"value" desc:"previous emitted value - don't re-emit if it is the same"`
 	Size        float64              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
 	ThumbSize   float64              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	Icon        *Icon                `desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float64              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float64              `xml:"pos" desc:"logical position of the slider relative to Size"`
@@ -342,8 +344,22 @@ func (g *Slider) Init2D() {
 	g.Init2DSlider()
 }
 
+func (g *Slider) ConfigParts() {
+	g.Parts.Lay = LayoutCol
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, SliderProps[SliderNormal])
+}
+
+func (g *Slider) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, "") {
+		return
+	}
+	g.ConfigParts()
+}
+
 var SliderProps = []map[string]interface{}{
-	{
+	{ // normal
 		"border-width":     "1px",
 		"border-radius":    "4px",
 		"border-color":     "black",
@@ -351,6 +367,12 @@ var SliderProps = []map[string]interface{}{
 		"padding":          "6px",
 		"margin":           "4px",
 		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
 	}, { // disabled
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
@@ -381,7 +403,7 @@ func (g *Slider) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
+	g.ConfigParts()
 }
 
 func (g *Slider) Size2D() {
@@ -396,6 +418,7 @@ func (g *Slider) Size2D() {
 }
 
 func (g *Slider) Layout2D(parBBox image.Rectangle) {
+	g.ConfigPartsIfNeeded()
 	g.Layout2DWidget(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
@@ -422,6 +445,8 @@ func (g *Slider) Render2DDefaultStyle() {
 	pc := &g.Paint
 	st := &g.Style
 	rs := &g.Viewport.Render
+
+	g.ConfigPartsIfNeeded()
 
 	// overall fill box
 	g.RenderStdBox(&g.StateStyles[SliderBox])
@@ -461,8 +486,23 @@ func (g *Slider) Render2DDefaultStyle() {
 	tpos.SetDim(g.Dim, bpos.Dim(g.Dim)+g.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColor(&st.Background.Color)
-	pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
-	pc.FillStrokeClear(rs)
+
+	gotIc := false
+	if g.Icon != nil && g.Parts.HasChildren() {
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+		if ic != nil {
+			gotIc = true
+			ic.LayData.AllocPosRel = tpos.Sub(g.Parts.LayData.AllocPos)
+			ic.LayData.AllocPos = tpos
+			ic.LayData.AllocPosOrig = tpos
+			ic.Render2DTree()
+		}
+	}
+
+	if !gotIc {
+		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
+		pc.FillStrokeClear(rs)
+	}
 }
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {

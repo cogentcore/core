@@ -563,25 +563,23 @@ func (tv *TreeView) ClearSelectMods() {
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	config.Add(KiT_Action, "Branch")
+	config.Add(KiT_CheckBox, "Branch")
 	config.Add(KiT_Space, "Space")
 	config.Add(KiT_Label, "Label")
 	config.Add(KiT_Stretch, "Stretch")
 	config.Add(KiT_MenuButton, "Menu")
 	updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
-	// todo: create a toggle button widget that has 2 different states with icons pre-loaded
-	wb := tv.Parts.Child(tvBranchIdx).(*Action)
-	if tv.IsCollapsed() {
-		wb.Icon = IconByName("widget-wedge-right")
-	} else {
-		wb.Icon = IconByName("widget-wedge-down")
-	}
+	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
+	wb.Icon = IconByName("widget-wedge-down")
+	wb.IconOff = IconByName("widget-wedge-right")
 	if updt {
 		tv.PartStyleProps(wb.This, TreeViewProps[0])
-		wb.ActionSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tvr.ToggleCollapse()
+		wb.ButtonSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(ButtonToggled) {
+				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+				tvr.ToggleCollapse()
+			}
 		})
 	}
 
@@ -635,12 +633,8 @@ func (tv *TreeView) ConfigParts() {
 func (tv *TreeView) ConfigPartsIfNeeded() {
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
-	wb := tv.Parts.Child(tvBranchIdx).(*Action)
-	if tv.IsCollapsed() {
-		wb.Icon = IconByName("widget-wedge-right")
-	} else {
-		wb.Icon = IconByName("widget-wedge-down")
-	}
+	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
+	wb.SetChecked(!tv.IsCollapsed())
 }
 
 func (tv *TreeView) Init2D() {
@@ -718,7 +712,13 @@ var TreeViewProps = []map[string]interface{}{
 			"vertical-align": AlignMiddle,
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
-			"#icon": map[string]interface{}{
+			"#icon0": map[string]interface{}{
+				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
+				"height":  units.NewValue(.8, units.Em),
+				"margin":  units.NewValue(0, units.Px),
+				"padding": units.NewValue(0, units.Px),
+			},
+			"#icon1": map[string]interface{}{
 				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
 				"height":  units.NewValue(.8, units.Em),
 				"margin":  units.NewValue(0, units.Px),

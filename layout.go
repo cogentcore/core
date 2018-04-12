@@ -907,7 +907,7 @@ func (ly *Layout) ManageOverflow() {
 		if ly.ChildSize.Y > (avail.Y + 2.0) { // overflowing
 			ly.HasVScroll = true
 			ly.ExtraSize.X += sbw
-			fmt.Printf("Layout: %v Overflow Y: avail: %v childsize: %v\n", ly.PathUnique(), avail.Y, ly.ChildSize.Y)
+			// fmt.Printf("Layout: %v Overflow Y: avail: %v childsize: %v\n", ly.PathUnique(), avail.Y, ly.ChildSize.Y)
 		}
 
 		if ly.HasHScroll {

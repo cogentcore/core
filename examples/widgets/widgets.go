@@ -48,7 +48,7 @@ func mainrun() {
 	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
 	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
+	row1.SetProp("align-horiz", gi.AlignCenter)
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
@@ -65,7 +65,7 @@ func mainrun() {
 	row2 := vlay.AddNewChild(gi.KiT_Layout, "row2").(*gi.Layout)
 	row2.Lay = gi.LayoutRow
 	row2.SetProp("align-vert", "center")
-	row2.SetProp("align-horiz", "left")
+	row2.SetProp("align-horiz", gi.AlignJustify)
 	row2.SetProp("margin", 2.0)
 	row2.SetStretchMaxWidth()
 
@@ -88,6 +88,8 @@ func mainrun() {
 
 	button1 := row2.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
+	//	checkbox :=
+	row2.AddNewChild(gi.KiT_CheckBox, "checkbox") // .(*gi.CheckBox)
 	edit1 := row2.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 
 	edit1.Text = "Edit this text"
@@ -127,6 +129,7 @@ func mainrun() {
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
+	slider1.Icon = gi.IconByName("widget-circlebutton-on")
 
 	slider2 := row3.AddNewChild(gi.KiT_Slider, "slider2").(*gi.Slider)
 	slider2.Dim = gi.Y

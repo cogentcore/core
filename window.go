@@ -426,7 +426,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		return false
 	}
 	w.UpdateStart()
-	defer w.UpdateEnd()
+	// defer w.UpdateEnd()
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
@@ -436,6 +436,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	w.Focus = k
 	if k == nil {
+		w.UpdateEnd()
 		return true
 	}
 	gii, gi := KiToNode2D(k)
@@ -443,6 +444,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		bitflag.Set(&gi.NodeFlags, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
+	w.UpdateEnd()
 	return true
 }
 

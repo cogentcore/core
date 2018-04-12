@@ -165,6 +165,8 @@ var StdIconNames = [IconContextsN][]string{
 		"widget-wedge-left",
 		"widget-wedge-right",
 		"widget-checkmark",
+		"widget-checked-box",
+		"widget-unchecked-box",
 		"widget-circlebutton-on",
 		"widget-circlebutton-off",
 		"widget-handle-circles",
@@ -270,6 +272,28 @@ func MakeDefaultIcons() *IconSet {
 		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
 		p.SetProp("fill", "none")
 		p.Data = PathDataParse("M 0.1 0.6 .5 0.9 .9 .1")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-checked-box")
+		bx := wd.AddNewChild(KiT_Rect, "bx").(*Rect)
+		bx.Pos.Set(0.05, 0.05)
+		bx.Size.Set(0.9, 0.9)
+		// bx.Radius.Set(0.02, 0.02)
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
+		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
+		p.SetProp("fill", "none")
+		p.Data = PathDataParse("M 0.1 0.6 .5 0.9 .9 .1")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-unchecked-box")
+		bx := wd.AddNewChild(KiT_Rect, "bx").(*Rect)
+		bx.Pos.Set(0.05, 0.05)
+		bx.Size.Set(0.9, 0.9)
+		// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
 		iset[wd.Nm] = &wd
 	}
 	{

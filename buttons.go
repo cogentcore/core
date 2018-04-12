@@ -33,12 +33,13 @@ const (
 type ButtonSignals int64
 
 const (
-	// main signal -- button pressed down and up
+	// ButtonClicked is the main signal to check for normal button activation -- button pressed down and up
 	ButtonClicked ButtonSignals = iota
 	// button pushed down but not yet up
 	ButtonPressed
+	// a mouse up event occurred -- typically look at ButtonClicked instead of this one
 	ButtonReleased
-	// toggled is for checked / unchecked state
+	// toggled means the checked / unchecked state was toggled -- only sent for buttons with Checkable flag set
 	ButtonToggled
 	ButtonSignalsN
 )
@@ -92,20 +93,30 @@ func (g *ButtonBase) IsCheckable() bool {
 	return bitflag.Has(g.NodeFlags, int(ButtonFlagCheckable))
 }
 
+// SetCheckable sets whether this button is checkable -- emits ButtonToggled signals if so
+func (g *ButtonBase) SetCheckable(checkable bool) {
+	bitflag.SetState(&g.NodeFlags, checkable, int(ButtonFlagCheckable))
+}
+
 // is this button checked
 func (g *ButtonBase) IsChecked() bool {
 	return bitflag.Has(g.NodeFlags, int(ButtonFlagChecked))
 }
 
-// set the selected state of this button
+// set the selected state of this button -- does not emit signal or update
 func (g *ButtonBase) SetSelected(sel bool) {
 	bitflag.SetState(&g.NodeFlags, sel, int(ButtonFlagSelected))
-	g.SetButtonState(ButtonNormal) // update state
+	g.SetButtonState(ButtonNormal) // update style
 }
 
-// set the checked state of this button
+// set the checked state of this button -- does not emit signal or update
 func (g *ButtonBase) SetChecked(chk bool) {
 	bitflag.SetState(&g.NodeFlags, chk, int(ButtonFlagChecked))
+}
+
+// ToggleChecked toggles the checked state of this button -- does not emit signal or update
+func (g *ButtonBase) ToggleChecked() {
+	g.SetChecked(!g.IsChecked())
 }
 
 // set the button state to target
@@ -139,6 +150,10 @@ func (g *ButtonBase) ButtonReleased() {
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+		if g.IsCheckable() {
+			g.ToggleChecked()
+			g.ButtonSig.Emit(g.This, int64(ButtonToggled), nil)
+		}
 	}
 	g.UpdateEnd()
 }
@@ -230,6 +245,7 @@ func Init2DButtonEvents(bw ButtonWidget) {
 }
 
 ///////////////////////////////////////////////////////////
+// Button
 
 // Button is a standard command button -- PushButton in Qt Widgets, and Button
 // in Qt Quick -- by default it puts the icon to the left and the text to the
@@ -292,6 +308,7 @@ var ButtonProps = []map[string]interface{}{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
+			"color":            "inherit",
 		},
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -382,3 +399,210 @@ func (g *Button) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &Button{}
+
+///////////////////////////////////////////////////////////
+// CheckBox
+
+// CheckBox toggles between a checked and unchecked state
+type CheckBox struct {
+	ButtonBase
+	IconOff *Icon `desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
+}
+
+var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
+
+// CheckBoxWidget interface
+
+func (g *CheckBox) ButtonAsBase() *ButtonBase {
+	return &(g.ButtonBase)
+}
+
+func (g *CheckBox) ButtonRelease() {
+	g.ButtonReleased()
+}
+
+// set the text and update button
+func (g *CheckBox) SetText(txt string) {
+	SetButtonText(g, txt)
+}
+
+// set the Icons for the On (checked) and Off (unchecked) states, and updates button
+func (g *CheckBox) SetIcons(icOn, icOff *Icon) {
+	g.UpdateStart()
+	g.Icon = icOn
+	g.IconOff = icOff
+	g.ConfigParts()
+	g.UpdateEnd()
+}
+
+func (g *CheckBox) Init2D() {
+	g.SetCheckable(true)
+	g.Init2DWidget()
+	g.ConfigParts()
+	Init2DButtonEvents(g)
+}
+
+var CheckBoxProps = []map[string]interface{}{
+	{
+		"text-align": AlignLeft,
+		"color":      color.Black,
+		"#icon0": map[string]interface{}{
+			"width":   units.NewValue(1.5, units.Em),
+			"height":  units.NewValue(1.5, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    "#EEF",
+			"stroke":  color.Black,
+		},
+		"#icon1": map[string]interface{}{
+			"width":   units.NewValue(1.5, units.Em),
+			"height":  units.NewValue(1.5, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    "#EEF",
+			"stroke":  color.Black,
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+	}, { // disabled
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	}, { // hover
+		"background-color": "#CCF", // todo "darker"
+	}, { // focus
+		"border-color":     "#88F",
+		"box-shadow.color": "#BBF",
+	}, { // press
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	}, { // selected
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
+
+func (g *CheckBox) ConfigParts() {
+	g.SetCheckable(true)
+	if g.Icon == nil {
+		g.Icon = IconByName("widget-checked-box")
+	}
+	if g.IconOff == nil {
+		g.IconOff = IconByName("widget-unchecked-box")
+	}
+	props := CheckBoxProps[ButtonNormal]
+	config := kit.TypeAndNameList{}
+	icIdx := 0 // always there
+	lbIdx := -1
+	config.Add(KiT_Layout, "Stack")
+	if g.Text != "" {
+		config.Add(KiT_Space, "Space")
+		lbIdx = len(config)
+		config.Add(KiT_Label, "Label")
+	}
+	g.Parts.ConfigChildren(config, false) // not unique names
+	ist := g.Parts.Child(icIdx).(*Layout)
+	ist.Lay = LayoutStacked
+	ist.SetNChildren(2, KiT_Icon, "Icon")
+	icon := ist.Child(0).(*Icon)
+	if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
+		icon.CopyFromIcon(g.Icon)
+		icon.UniqueNm = g.Icon.UniqueNm
+		g.PartStyleProps(icon.This, props)
+	}
+	icoff := ist.Child(1).(*Icon)
+	if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
+		icoff.CopyFromIcon(g.IconOff)
+		icoff.UniqueNm = g.IconOff.UniqueNm
+		g.PartStyleProps(icoff.This, props)
+	}
+	if g.IsChecked() {
+		ist.ShowChildAtIndex(0)
+	} else {
+		ist.ShowChildAtIndex(1)
+	}
+	if lbIdx >= 0 {
+		lbl := g.Parts.Child(lbIdx).(*Label)
+		if lbl.Text != g.Text {
+			g.PartStyleProps(lbl.This, props)
+			lbl.Text = g.Text
+		}
+	}
+}
+
+func (g *CheckBox) ConfigPartsIfNeeded() {
+	icIdx := 0 // always there
+	ist := g.Parts.Child(icIdx).(*Layout)
+	if g.IsChecked() {
+		ist.ShowChildAtIndex(0)
+	} else {
+		ist.ShowChildAtIndex(1)
+	}
+
+	// if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+	// 	return
+	// }
+	// g.ConfigParts()
+}
+
+func (g *CheckBox) Style2D() {
+	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	g.Style2DWidget(CheckBoxProps[ButtonNormal])
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i] = g.Style
+		if i > 0 {
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, CheckBoxProps[i])
+		}
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
+	}
+	g.ConfigParts()
+}
+
+func (g *CheckBox) Layout2D(parBBox image.Rectangle) {
+	g.ConfigPartsIfNeeded()
+	g.Layout2DWidget(parBBox) // lays out parts
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.Layout2DChildren()
+}
+
+// todo: need color brigher / darker functions
+
+func (g *CheckBox) Render2D() {
+	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
+		g.ConfigPartsIfNeeded()
+		if !g.HasChildren() {
+			g.Render2DDefaultStyle()
+		} else {
+			g.Render2DChildren()
+		}
+		g.PopBounds()
+	}
+}
+
+// render using a default style if no children
+func (g *CheckBox) Render2DDefaultStyle() {
+	st := &g.Style
+	g.RenderStdBox(st)
+	g.Render2DParts()
+}
+
+func (g *CheckBox) FocusChanged2D(gotFocus bool) {
+	g.UpdateStart()
+	if gotFocus {
+		g.SetButtonState(ButtonFocus)
+	} else {
+		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+	}
+	g.UpdateEnd()
+}
+
+// check for interface implementation
+var _ Node2D = &CheckBox{}

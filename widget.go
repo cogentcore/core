@@ -225,6 +225,7 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm {
 			return true
 		}
+		// todo: here add a thing that copies any style elements marked as "inherit" from parent to part
 	} else {
 		ic := g.Parts.ChildByName("Icon", 0)
 		if ic != nil {

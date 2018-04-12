@@ -68,13 +68,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* SplitView is new type (not layout) -- needs SplitterHandle widget with drag logic
+* SplitView is new type (not layout) -- needs Splitter widget with drag logic -- u
 
 * add creator / inspector in a different window :)
 
 * don't re-render scrollbar in course of scrolling!?
 
-* need to put scrollbar on inner layout -- outer is getting it all for treeview -- treeview should separately scroll -- may need a diff layout config
+* Focus display highlight not getting updated when clicking around in the treeview.
 
 * consolidate dialog popup code between menu and dialog
 
@@ -88,6 +88,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ condshow / edit
 	
 * styles for different button states are not propagating into the parts
+	+ in widget.go: here add a thing that copies any style elements marked as "inherit" from parent to part
+
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
 
 * add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  
