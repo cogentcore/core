@@ -5,8 +5,10 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -105,28 +107,62 @@ func (g *SplitView) Init2D() {
 	g.Parts.Lay = LayoutNil
 	g.Init2DWidget()
 	g.UpdateSplits()
+	g.ConfigSplitters()
+}
+
+func (g *SplitView) ConfigSplitters() {
+	sz := len(g.Kids)
+	updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
+	odim := OtherDim(g.Dim)
+	spc := g.Style.BoxSpace()
+	size := g.LayData.AllocSize.Dim(odim) - 2.0*spc
+	osz := 20.0
+	mid := 0.5 * size
+	for _, spk := range g.Parts.Children() {
+		sp := spk.(*Splitter)
+		sp.Dim = g.Dim
+		sp.LayData.AllocSize.SetDim(g.Dim, size)
+		sp.LayData.AllocSize.SetDim(odim, osz)
+		sp.LayData.AllocPosRel.SetDim(g.Dim, 0)
+		sp.LayData.AllocPosRel.SetDim(odim, mid-20.0)
+		sp.Min = 0.0
+		sp.Max = 1.0
+		if updt {
+			sp.SliderSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(SliderValueChanged) {
+					spr, _ := recv.EmbeddedStruct(KiT_SplitView).(*SplitView)
+					spr.UpdateStart()
+					spl := send.(*Splitter)
+					spr.Splits[0] = spl.Value
+					spr.UpdateEnd()
+				}
+			})
+		}
+	}
 }
 
 // auto-max-stretch
 var SplitViewProps = map[string]interface{}{
 	"max-width":  -1.0,
 	"max-height": -1.0,
+	"margin":     0,
+	"padding":    0,
 }
 
 func (g *SplitView) Style2D() {
 	g.Style2DWidget(SplitViewProps)
 	g.UpdateSplits()
+	g.ConfigSplitters()
 }
 
 func (g *SplitView) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
+	g.ConfigSplitters()
+	g.Layout2DWidget(parBBox)
 	g.UpdateSplits()
-
-	sz := len(g.Kids)
-	g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 
 	handsz := 10.0
 
+	sz := len(g.Kids)
 	odim := OtherDim(g.Dim)
 	avail := g.LayData.AllocSize.Dim(g.Dim) - handsz*float64(sz-1)
 	osz := g.LayData.AllocSize.Dim(odim)
@@ -144,10 +180,23 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 			gi.LayData.AllocPosRel.SetDim(g.Dim, pos)
 			gi.LayData.AllocPosRel.SetDim(odim, 0)
 			pos += size + handsz
+
+			if i < sz-1 {
+				spl := g.Parts.Child(i).(*Splitter)
+				spl.Value = sp
+			}
 		}
 	}
 
 	g.Layout2DChildren()
+}
+
+func (g *SplitView) Render2D() {
+	if g.PushBounds() {
+		g.Render2DChildren()
+		g.Parts.Render2DTree()
+		g.PopBounds()
+	}
 }
 
 func (g *SplitView) ReRender2D() (node Node2D, layout bool) {
@@ -183,14 +232,14 @@ func (g *Splitter) Init2D() {
 
 var SplitterProps = []map[string]interface{}{
 	{
-		"width":            "16px", // assumes vertical -- user needs to set!
-		"min-width":        "16px",
-		"border-width":     "1px",
-		"border-radius":    "4px",
-		"border-color":     "black",
-		"border-style":     "solid",
+		// "width":            "16px", // assumes vertical -- user needs to set!
+		// "min-width":        "16px",
+		// "border-width":     "1px",
+		// "border-radius":    "4px",
+		// "border-color":     "black",
+		// "border-style":     "solid",
 		"padding":          "0px",
-		"margin":           "2px",
+		"margin":           "0px",
 		"background-color": "#EEF",
 	}, { // disabled
 		"border-color":     "#BBB",
@@ -207,7 +256,7 @@ var SplitterProps = []map[string]interface{}{
 		"border-color":     "#00F",
 		"background-color": "#00F",
 	}, { // overall box -- just white
-		"border-color":     "#FFF",
+		"border-color":     "#888",
 		"background-color": "#FFF",
 	},
 }
@@ -239,6 +288,8 @@ func (g *Splitter) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Splitter) Render2D() {
+	fmt.Printf("Splitter Rendering: %v, apos: %v size: %v vpbb: %v, winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
+
 	if g.PushBounds() {
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
