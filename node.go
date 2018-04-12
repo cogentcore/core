@@ -553,6 +553,7 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) {
 	for sz < trgn {
 		nm := fmt.Sprintf("%v%v", nameStub, sz)
 		n.InsertNewChildUnique(typ, sz, nm)
+		sz++
 	}
 	n.UpdateEnd()
 }
