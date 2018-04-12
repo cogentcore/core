@@ -209,6 +209,9 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
 			g.PartStyleProps(lbl.This, props)
+			if icIdx >= 0 {
+				g.PartStyleProps(g.Parts.Child(lbIdx-1), props) // also get the space
+			}
 			lbl.Text = txt
 		}
 	}
@@ -257,7 +260,7 @@ func (g *WidgetBase) Init2D() {
 }
 
 func (g *WidgetBase) Style2D() {
-	g.Style2DWidget(nil) // node: most classes should override this as needed!
+	g.Style2DWidget(nil) // note: most classes should override this as needed!
 }
 
 func (g *WidgetBase) Size2D() {

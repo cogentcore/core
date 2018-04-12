@@ -66,6 +66,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * Every non-terminal Widget must either be a Layout or take full responsibility for everything under it -- i.e., all arbitrary collections of widgets must be Layouts -- only the layout has all the logic necessary for organizing the geometry of its children.  There is only one Layout type that supports all forms of Layout -- and it is a proper Widget -- not a side class like in Qt Widgets.  The Frame is a type of Layout that draws a frame around itself.
 
+* General Widget method conventions:
+	+ SetValue kinds of methods are wrapped in updates, but do NOT emit a signal
+	+ SetValueAction calls SetValue and emits the signal
+	+ this allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  ValueView in particular requires this kind of behavior.  todo: go back and make this more consistent.
+
 ### TODO
 
 * SplitView is new type (not layout) -- needs Splitter widget with drag logic -- u
@@ -116,6 +121,8 @@ Next:
 
 * style parsing crash on font-family
 
+* all widgets need read-only and disabled states
+
 * color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc -- key innovation over css: relative color transforms: lighterX darkerX that transform existing color -- great for styling widgets etc.
 
 Soon:
@@ -126,11 +133,11 @@ Soon:
 * all builtin defaults should use units.Value and other raw values instead of strings
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
-	+ SplitView
-	+ SpinBox
-	+ RadioButton, CheckBox
-	+ Toolbar / ToolButton / Action
-	+ ProgressBar  (based on slider?)
+	+ sub-menus -- should just work??
+	+ SplitView -- almost..
+	+ RadioButton -- checkbox + mutex logic
+	+ Toolbar / ToolButton -- just a layout really, with some styling?
+	+ ProgressBar -- very simple
 	+ ToolTip
 	+ TextArea
 
@@ -147,6 +154,8 @@ Soon:
 	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient! 
 	+ ComboBox
 	+ Dialog -- either overlay or additional window -- platform dependent
+	+ CheckBox
+	+ SpinBox
 
 * not needed now: update increment threshold for scrollbar -- less frequent updates.
 

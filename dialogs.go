@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"reflect"
-	"strconv"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
@@ -327,9 +326,11 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 	nlbl := nrow.AddNewChild(KiT_Label, "NLabel").(*Label)
 	nlbl.Text = "Number:  "
 
-	ntf := nrow.AddNewChild(KiT_TextField, "NField").(*TextField)
-	ntf.SetFixedWidth(units.NewValue(6, units.Ex))
-	ntf.Text = "1"
+	nsb := nrow.AddNewChild(KiT_SpinBox, "NField").(*SpinBox)
+	nsb.Defaults()
+	nsb.SetMin(1)
+	nsb.Value = 1
+	nsb.Step = 1
 
 	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "TypeSpace").(*Space)
 	tspc.SetFixedHeight(units.NewValue(0.5, units.Em))
@@ -358,8 +359,8 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	frame := dlg.Frame()
 	nrow := frame.ChildByName("NRow", 0).(*Layout)
-	ntf := nrow.ChildByName("NField", 0).(*TextField)
-	n, _ := strconv.Atoi(ntf.EditText) // use active text b/c may not always enter it
+	ntf := nrow.ChildByName("NField", 0).(*SpinBox)
+	n := int(ntf.Value)
 	trow := frame.ChildByName("TRow", 0).(*Layout)
 	typs := trow.ChildByName("Types", 0).(*ComboBox)
 	typ := typs.CurVal.(reflect.Type)

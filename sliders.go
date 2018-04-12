@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"math"
+	"strconv"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
@@ -63,14 +64,15 @@ const (
 // - thumbsize
 type SliderBase struct {
 	WidgetBase
+	Value       float64              `xml:"value" desc:"current value"`
+	EmitValue   float64              `xml:"-" desc:"previous emitted value - don't re-emit if it is the same"`
 	Min         float64              `xml:"min" desc:"minimum value in range"`
 	Max         float64              `xml:"max" desc:"maximum value in range"`
 	Step        float64              `xml:"step" desc:"smallest step size to increment"`
-	PageStep    float64              `xml:"step" desc:"larger PageUp / Dn step size"`
-	Value       float64              `xml:"value" desc:"current value"`
-	EmitValue   float64              `xml:"value" desc:"previous emitted value - don't re-emit if it is the same"`
+	PageStep    float64              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Size        float64              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
 	ThumbSize   float64              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	Prec        int                  `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Icon        *Icon                `desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float64              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
@@ -93,6 +95,8 @@ var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, nil)
 func (g *SliderBase) SnapValue() {
 	if g.Snap {
 		g.Value = float64(int(math.Round(g.Value/g.Step))) * g.Step
+		frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
+		g.Value, _ = strconv.ParseFloat(frep, 64)
 	}
 }
 
@@ -176,6 +180,8 @@ func (g *SliderBase) SetSliderPos(pos float64) {
 	}
 	g.Pos = math.Max(0, g.Pos)
 	g.Value = g.Min + (g.Max-g.Min)*(g.Pos/g.Size)
+	frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
+	g.Value, _ = strconv.ParseFloat(frep, 64)
 	g.DragPos = g.Pos
 	if g.Snap {
 		g.SnapValue()
@@ -338,6 +344,7 @@ func (g *Slider) Defaults() { // todo: should just get these from props
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
+	g.Prec = 9
 }
 
 func (g *Slider) Init2D() {
@@ -535,6 +542,7 @@ func (g *ScrollBar) Defaults() { // todo: should just get these from props
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
+	g.Prec = 9
 }
 
 func (g *ScrollBar) Init2D() {

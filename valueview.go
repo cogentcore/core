@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -57,19 +58,17 @@ func ToValueView(it interface{}) ValueView {
 	vk := typ.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		// todo: spinbox -- could set some properties here based on kind..
-		vv := ValueViewBase{}
+		vv := IntValueView{}
 		vv.Init(&vv)
 		return &vv
 	case vk == reflect.Bool:
-		// todo: togglebutton
-		vv := ValueViewBase{}
+		vv := BoolValueView{}
 		vv.Init(&vv)
 		return &vv
-	// case vk >= reflect.Float32 && vk <= reflect.Float64: // just default
-	// 	vv := ValueViewBase{}
-	// 	vv.Init(&vv)
-	// 	return &vv
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		vv := FloatValueView{} // handles step, min / max etc
+		vv.Init(&vv)
+		return &vv
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// todo: special edit with 2 fields..
 		vv := ValueViewBase{}
@@ -315,5 +314,189 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*MenuButton)
 		PromptDialog(mb.Viewport, "Map Value View", "Sorry, map editor not implemented yet -- would show up here", true, false, nil, nil)
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  BoolValueView
+
+// BoolValueView presents a checkbox for a boolean
+type BoolValueView struct {
+	ValueViewBase
+}
+
+var KiT_BoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
+
+func (vv *BoolValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_CheckBox
+	return vv.WidgetTyp
+}
+
+func (vv *BoolValueView) UpdateWidget() {
+	cb := vv.Widget.(*CheckBox)
+	npv := vv.Value.Elem()
+	cb.SetChecked(npv.Bool())
+}
+
+func (vv *BoolValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	cb := vv.Widget.(*CheckBox)
+	cb.ButtonSig.DisconnectAll()
+	cb.ButtonSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
+		cbb := vvv.Widget.(*CheckBox)
+		if vvv.Owner != nil {
+			if kiv, ok := vvv.Owner.(ki.Ki); ok {
+				kiv.SetField(vvv.Field.Name, cbb.IsChecked()) // does updates
+				return
+			}
+		}
+		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), cbb.IsChecked())
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  IntValueView
+
+// IntValueView presents a spinbox
+type IntValueView struct {
+	ValueViewBase
+}
+
+var KiT_IntValueView = kit.Types.AddType(&IntValueView{}, nil)
+
+func (vv *IntValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_SpinBox
+	return vv.WidgetTyp
+}
+
+func (vv *IntValueView) UpdateWidget() {
+	sb := vv.Widget.(*SpinBox)
+	npv := vv.Value.Elem()
+	fv, ok := kit.ToFloat(npv.Interface())
+	if ok {
+		sb.SetValue(fv)
+	}
+}
+
+func (vv *IntValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	sb := vv.Widget.(*SpinBox)
+	sb.Defaults()
+	sb.Step = 1.0
+	sb.PageStep = 10.0
+	vk := vv.Value.Kind()
+	if vk >= reflect.Uint && vk <= reflect.Uint64 {
+		sb.SetMin(0)
+	}
+	// todo: make a utility for this kind of thing..
+	mintag := vv.Field.Tag.Get("min")
+	if mintag != "" {
+		min, err := strconv.ParseFloat(mintag, 64)
+		if err == nil {
+			sb.SetMin(min)
+		}
+	}
+	maxtag := vv.Field.Tag.Get("max")
+	if maxtag != "" {
+		max, err := strconv.ParseFloat(maxtag, 64)
+		if err == nil {
+			sb.SetMax(max)
+		}
+	}
+	steptag := vv.Field.Tag.Get("step")
+	if steptag != "" {
+		step, err := strconv.ParseFloat(steptag, 64)
+		if err == nil {
+			sb.Step = step
+		}
+	}
+	sb.SpinBoxSig.DisconnectAll()
+	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_IntValueView).(*IntValueView)
+		sbb := vvv.Widget.(*SpinBox)
+		if vvv.Owner != nil {
+			if kiv, ok := vvv.Owner.(ki.Ki); ok {
+				kiv.SetField(vvv.Field.Name, sbb.Value) // does updates
+				vvv.UpdateWidget()
+				return
+			}
+		}
+		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), sbb.Value)
+		vvv.UpdateWidget()
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  FloatValueView
+
+// FloatValueView presents a spinbox
+type FloatValueView struct {
+	ValueViewBase
+}
+
+var KiT_FloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
+
+func (vv *FloatValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_SpinBox
+	return vv.WidgetTyp
+}
+
+func (vv *FloatValueView) UpdateWidget() {
+	sb := vv.Widget.(*SpinBox)
+	npv := vv.Value.Elem()
+	fv, ok := kit.ToFloat(npv.Interface())
+	if ok {
+		sb.SetValue(fv)
+	}
+}
+
+func (vv *FloatValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	sb := vv.Widget.(*SpinBox)
+	sb.Defaults()
+	sb.Step = 1.0
+	sb.PageStep = 10.0
+	// todo: make a utility for this kind of thing..
+	mintag := vv.Field.Tag.Get("min")
+	if mintag != "" {
+		min, err := strconv.ParseFloat(mintag, 64)
+		if err == nil {
+			sb.HasMin = true
+			sb.Min = min
+		}
+	}
+	maxtag := vv.Field.Tag.Get("max")
+	if maxtag != "" {
+		max, err := strconv.ParseFloat(maxtag, 64)
+		if err == nil {
+			sb.HasMax = true
+			sb.Max = max
+		}
+	}
+	steptag := vv.Field.Tag.Get("step")
+	if steptag != "" {
+		step, err := strconv.ParseFloat(steptag, 64)
+		if err == nil {
+			sb.Step = step
+		}
+	}
+
+	sb.SpinBoxSig.DisconnectAll()
+	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
+		sbb := vvv.Widget.(*SpinBox)
+		if vvv.Owner != nil {
+			if kiv, ok := vvv.Owner.(ki.Ki); ok {
+				kiv.SetField(vvv.Field.Name, sbb.Value) // does updates
+				vvv.UpdateWidget()
+				return
+			}
+		}
+		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), sbb.Value)
+		vvv.UpdateWidget()
 	})
 }

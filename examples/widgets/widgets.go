@@ -88,8 +88,8 @@ func mainrun() {
 
 	button1 := row2.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
 	button2 := row2.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
-	//	checkbox :=
-	row2.AddNewChild(gi.KiT_CheckBox, "checkbox") // .(*gi.CheckBox)
+	checkbox := row2.AddNewChild(gi.KiT_CheckBox, "checkbox").(*gi.CheckBox)
+	checkbox.Text = "Toggle"
 	edit1 := row2.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 
 	edit1.Text = "Edit this text"
@@ -100,6 +100,7 @@ func mainrun() {
 	button2.SetText("Button 2")
 	button1.SetProp("align-vert", gi.AlignMiddle)
 	button2.SetProp("align-vert", gi.AlignMiddle)
+	checkbox.SetProp("align-vert", gi.AlignMiddle)
 
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
@@ -180,19 +181,18 @@ func mainrun() {
 	row4.SetStretchMaxWidth()
 	// row4.SetStretchMaxHeight()
 
+	sb := row4.AddNewChild(gi.KiT_SpinBox, "spinbox").(*gi.SpinBox)
+	sb.HasMin = true
+	sb.Min = 0.0
+	sb.SpinBoxSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
+	})
+
 	cb := row4.AddNewChild(gi.KiT_ComboBox, "combobox").(*gi.ComboBox)
 	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem()), true, true, 50)
 	cb.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
-
-	ico := row4.AddNewChild(gi.KiT_Icon, wdicon.Name()).(*gi.Icon)
-	ico.CopyFrom(wdicon)
-	ico.SetMinPrefWidth(units.NewValue(100, units.Px))
-	ico.SetMinPrefHeight(units.NewValue(100, units.Px))
-	ico.SetProp("background-color", "transparent")
-	ico.SetProp("fill", "blue")
-	ico.SetProp("stroke", "black")
 
 	win.UpdateEnd()
 

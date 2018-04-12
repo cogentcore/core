@@ -189,6 +189,7 @@ func (sv *StructView) ConfigStructGrid() {
 			lbl.Text = vvb.Field.Name
 		}
 		widg := sg.Child((i * 2) + 1).(Node2D)
+		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
 }

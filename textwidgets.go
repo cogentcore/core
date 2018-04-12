@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 	"math"
 	"reflect"
 	"sort"
+	"strconv"
 	"unicode/utf8"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -478,6 +480,210 @@ func (g *TextField) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &TextField{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// SpinBox
+
+//go:generate stringer -type=TextFieldSignals
+
+// SpinBox combines a TextField with up / down buttons for incrementing / decrementing values -- all configured within the Parts of the widget
+type SpinBox struct {
+	WidgetBase
+	Value      float64   `xml:"value" desc:"current value"`
+	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
+	Min        float64   `xml:"min" desc:"minimum value in range"`
+	HasMax     bool      `xml:"has-max" desc:"is there a maximumvalue to enforce"`
+	Max        float64   `xml:"max" desc:"maximum value in range"`
+	Step       float64   `xml:"step" desc:"smallest step size to increment"`
+	PageStep   float64   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	UpIcon     *Icon     `desc:"icon to use for up button -- defaults to widget-wedge-up"`
+	DownIcon   *Icon     `desc:"icon to use for down button -- defaults to widget-wedge-down"`
+	SpinBoxSig ki.Signal `json:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+}
+
+var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, nil)
+
+func (g *SpinBox) Defaults() { // todo: should just get these from props
+	g.Step = 0.1
+	g.PageStep = 0.2
+	g.Max = 1.0
+	g.Prec = 9
+}
+
+// SetMin sets the min limits on the value
+func (g *SpinBox) SetMin(min float64) {
+	g.HasMin = true
+	g.Min = min
+}
+
+// SetMax sets the max limits on the value
+func (g *SpinBox) SetMax(max float64) {
+	g.HasMax = true
+	g.Max = max
+}
+
+// SetMinMax sets the min and max limits on the value
+func (g *SpinBox) SetMinMax(hasMin bool, min float64, hasMax bool, max float64) {
+	g.HasMin = hasMin
+	g.Min = min
+	g.HasMax = hasMax
+	g.Max = max
+	if g.Max < g.Min {
+		log.Printf("gi.SpinBox SetMinMax: max was less than min -- disabling limits\n")
+		g.HasMax = false
+		g.HasMin = false
+	}
+}
+
+// SetValue sets the value, enforcing any limits, and updates the display
+func (g *SpinBox) SetValue(val float64) {
+	g.UpdateStart()
+	g.Value = val
+	if g.HasMax {
+		g.Value = math.Min(g.Value, g.Max)
+	}
+	if g.HasMin {
+		g.Value = math.Max(g.Value, g.Min)
+	}
+	frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
+	g.Value, _ = strconv.ParseFloat(frep, 64)
+	g.UpdateEnd()
+}
+
+// SetValueAction calls SetValue and also emits the signal
+func (g *SpinBox) SetValueAction(val float64) {
+	g.SetValue(val)
+	g.SpinBoxSig.Emit(g.This, 0, g.Value)
+}
+
+// IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
+func (g *SpinBox) IncrValue(steps float64) {
+	val := g.Value + steps*g.Step
+	val = float64(int(math.Round(val/g.Step))) * g.Step
+	g.SetValueAction(val)
+}
+
+var SpinBoxProps = []map[string]interface{}{
+	{
+		"#up": map[string]interface{}{
+			"max-width":  units.NewValue(1.5, units.Ex),
+			"max-height": units.NewValue(1.5, units.Ex),
+			"margin":     units.NewValue(1, units.Px),
+			"padding":    units.NewValue(0, units.Px),
+		},
+		"#down": map[string]interface{}{
+			"max-width":  units.NewValue(1.5, units.Ex),
+			"max-height": units.NewValue(1.5, units.Ex),
+			"margin":     units.NewValue(1, units.Px),
+			"padding":    units.NewValue(0, units.Px),
+		},
+		"#space": map[string]interface{}{
+			"width": units.NewValue(.1, units.Ex),
+		},
+		"#textfield": map[string]interface{}{
+			"min-width": units.NewValue(4, units.Ex),
+			"width":     units.NewValue(12, units.Ex),
+			"margin":    units.NewValue(2, units.Px),
+			"padding":   units.NewValue(2, units.Px),
+		},
+	},
+}
+
+// internal indexes for accessing elements of the widget
+const (
+	sbTextFieldIdx = iota
+	sbSpaceIdx
+	sbButtonsIdx
+)
+
+func (g *SpinBox) ConfigParts() {
+	if g.UpIcon == nil {
+		g.UpIcon = IconByName("widget-wedge-up")
+	}
+	if g.DownIcon == nil {
+		g.DownIcon = IconByName("widget-wedge-down")
+	}
+	g.Parts.Lay = LayoutRow
+	g.Parts.SetProp("vert-align", AlignMiddle)
+	props := SpinBoxProps[0]
+	config := kit.TypeAndNameList{}
+	config.Add(KiT_TextField, "TextField")
+	config.Add(KiT_Space, "Space")
+	config.Add(KiT_Layout, "Buttons")
+	updt := g.Parts.ConfigChildren(config, false) // not unique names
+	if updt {
+		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
+		buts.Lay = LayoutCol
+		buts.SetNChildren(2, KiT_Action, "But")
+		// up
+		up := buts.Child(0).(*Action)
+		up.SetName("Up")
+		up.Icon = g.UpIcon
+		g.PartStyleProps(up.This, props)
+		up.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sb := recv.(*SpinBox)
+			sb.IncrValue(1.0)
+		})
+		// dn
+		dn := buts.Child(1).(*Action)
+		dn.SetName("Down")
+		dn.Icon = g.DownIcon
+		g.PartStyleProps(dn.This, props)
+		dn.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sb := recv.(*SpinBox)
+			sb.IncrValue(-1.0)
+		})
+		// space
+		g.PartStyleProps(g.Parts.Child(sbSpaceIdx), props) // also get the space
+		// textfield
+		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
+		g.PartStyleProps(tf.This, props)
+		tf.Text = fmt.Sprintf("%g", g.Value)
+		tf.TextFieldSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sb := recv.(*SpinBox)
+			tf := send.(*TextField)
+			vl, err := strconv.ParseFloat(tf.Text, 64)
+			if err == nil {
+				sb.SetValueAction(vl)
+			}
+		})
+	}
+}
+
+func (g *SpinBox) ConfigPartsIfNeeded() {
+	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
+	tf.SetText(fmt.Sprintf("%g", g.Value))
+}
+
+func (g *SpinBox) Style2D() {
+	if g.Step == 0 {
+		g.Defaults()
+	}
+	g.Style2DWidget(SpinBoxProps[0])
+	g.ConfigParts()
+}
+
+func (g *SpinBox) Size2D() {
+	g.Size2DWidget()
+	g.ConfigParts()
+}
+
+func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
+	g.ConfigPartsIfNeeded()
+	g.Layout2DWidget(parBBox)
+	g.Layout2DChildren()
+}
+
+func (g *SpinBox) Render2D() {
+	if g.PushBounds() {
+		// g.Style = g.StateStyles[g.State] // get current styles
+		g.ConfigPartsIfNeeded()
+		g.Render2DChildren()
+		g.Render2DParts()
+		g.PopBounds()
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // ComboBox for selecting items from a list

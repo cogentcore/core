@@ -271,7 +271,7 @@ func MakeDefaultIcons() *IconSet {
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
 		p.SetProp("fill", "none")
-		p.Data = PathDataParse("M 0.1 0.6 .5 0.9 .9 .1")
+		p.Data = PathDataParse("M 0.1 0.5 .5 0.9 .9 .1")
 		iset[wd.Nm] = &wd
 	}
 	{
@@ -284,7 +284,7 @@ func MakeDefaultIcons() *IconSet {
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
 		p.SetProp("fill", "none")
-		p.Data = PathDataParse("M 0.1 0.6 .5 0.9 .9 .1")
+		p.Data = PathDataParse("M 0.2 0.5 .5 0.8 .8 .2")
 		iset[wd.Nm] = &wd
 	}
 	{

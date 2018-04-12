@@ -447,20 +447,23 @@ var CheckBoxProps = []map[string]interface{}{
 		"text-align": AlignLeft,
 		"color":      color.Black,
 		"#icon0": map[string]interface{}{
-			"width":   units.NewValue(1.5, units.Em),
-			"height":  units.NewValue(1.5, units.Em),
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 			"fill":    "#EEF",
 			"stroke":  color.Black,
 		},
 		"#icon1": map[string]interface{}{
-			"width":   units.NewValue(1.5, units.Em),
-			"height":  units.NewValue(1.5, units.Em),
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 			"fill":    "#EEF",
 			"stroke":  color.Black,
+		},
+		"#space": map[string]interface{}{
+			"width": units.NewValue(1, units.Ex),
 		},
 		"#label": map[string]interface{}{
 			"margin":           units.NewValue(0, units.Px),
@@ -529,6 +532,7 @@ func (g *CheckBox) ConfigParts() {
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != g.Text {
+			g.PartStyleProps(g.Parts.Child(lbIdx-1), props) // also get the space
 			g.PartStyleProps(lbl.This, props)
 			lbl.Text = g.Text
 		}

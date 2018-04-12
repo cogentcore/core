@@ -18,8 +18,8 @@ import (
 type TestNode struct {
 	ki.Node
 	StrField   string  `desc:"a string"`
-	IntField   int     `desc:"an int"`
-	FloatField float64 `desc:"a float"`
+	IntField   int     `min:"5" max:"25" step:"5" desc:"an int"`
+	FloatField float64 `min:"-1" max:"1" step:".25" desc:"a float"`
 	BoolField  bool    `desc:"a bool"`
 }
 
