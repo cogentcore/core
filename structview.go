@@ -155,10 +155,6 @@ func (sv *StructView) ConfigStructGrid() {
 	sv.Fields = make([]ValueView, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
-		jstag := field.Tag.Get("json")
-		if jstag == "-" { // skip non-saved elements -- todo: options for what to skip
-			return true
-		}
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {
 			return true

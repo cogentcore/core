@@ -533,7 +533,11 @@ func (g *ComboBox) MakeItems(reset bool, capacity int) {
 // SortItems sorts the items according to their labels
 func (g *ComboBox) SortItems(ascending bool) {
 	sort.Slice(g.Items, func(i, j int) bool {
-		return ToLabel(g.Items[i]) < ToLabel(g.Items[j])
+		if ascending {
+			return ToLabel(g.Items[i]) < ToLabel(g.Items[j])
+		} else {
+			return ToLabel(g.Items[i]) > ToLabel(g.Items[j])
+		}
 	})
 }
 
@@ -708,7 +712,7 @@ func (g *ComboBox) ConfigParts() {
 	wrIdx := -1
 	icnm := kit.ToString(g.Prop("indicator", false, false))
 	if icnm == "" || icnm == "nil" {
-		icnm = "widget-down-wedge"
+		icnm = "widget-wedge-down"
 	}
 	if icnm != "none" {
 		config.Add(KiT_Stretch, "InStretch")

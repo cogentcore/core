@@ -42,6 +42,7 @@ var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 type NodeBase struct {
 	ki.Node
 	NodeFlags int64           `desc:"bitwise flags set according to NodeFlags type"`
+	BBox      image.Rectangle `desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
 	VpBBox    image.Rectangle `json:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
 	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }

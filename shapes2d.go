@@ -30,7 +30,10 @@ var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Rect) Render2D() {
@@ -90,8 +93,7 @@ func (g *Viewport2DFill) Style2D() {
 
 func (g *Viewport2DFill) BBox2D() image.Rectangle {
 	g.Init2D() // keep up-to-date -- cheap
-	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	return g.Viewport.VpBBox
 }
 
 func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
@@ -117,7 +119,10 @@ var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Circle) Render2D() {
@@ -161,7 +166,10 @@ var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Ellipse) Render2D() {
@@ -205,7 +213,10 @@ var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Line) Render2D() {
@@ -248,7 +259,10 @@ var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Polyline) Render2D() {
@@ -294,7 +308,10 @@ var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PushXForm(g.Paint.XForm)
+	bb := g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PopXForm()
+	return bb
 }
 
 func (g *Polygon) Render2D() {
@@ -403,181 +420,187 @@ func (pc PathCmds) EncCmd(n int) PathData {
 // 2D Path, using SVG-style data that can render just about anything
 type Path struct {
 	Node2DBase
-	Data []PathData `xml:"d" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+	Data     []PathData `xml:"d" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+	MinCoord Vec2D      `desc:"minimum coord in path -- computed in BBox2D"`
+	MaxCoord Vec2D      `desc:"maximum coord in path -- computed in BBox2D"`
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, nil)
 
 func (g *Path) BBox2D() image.Rectangle {
-	// todo -- this is somewhat expensive -- probably better to compute earlier and save?
-	// psz := g.Viewport.VpBBox.Size()
-	return image.Rect(0, 0, 100, 100)
-	// return g.Paint.BoundingBoxFromPoints(g.Points)
+	// todo: cache values, only update when path is updated..
+	rs := &g.Viewport.Render
+	rs.PushXForm(g.Paint.XForm)
+	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
+	bb := g.Paint.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
+	rs.PopXForm()
+	return bb
+	// return vp.Viewport.VpBBox
 }
 
-// get the next path data element, incrementing the index -- ++ not an
+// PathDataNext gets the next path data element, incrementing the index -- ++ not an
 // expression so its clunky -- hopefully this is inlined..
-func NextPathData(data []PathData, i *int) PathData {
+func PathDataNext(data []PathData, i *int) PathData {
 	pd := data[*i]
 	(*i)++
 	return pd
 }
 
-// this traverses the path data and renders it using paint and render state --
+// PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
-func RenderPathData(data []PathData, pc *Paint, rs *RenderState) {
+func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 	sz := len(data)
 	if sz == 0 {
 		return
 	}
 	var cx, cy, x1, y1, x2, y2 PathData
 	for i := 0; i < sz; {
-		cmd, n := NextPathData(data, &i).Cmd()
+		cmd, n := PathDataNext(data, &i).Cmd()
 		switch cmd {
 		case PcM:
-			cx = NextPathData(data, &i)
-			cy = NextPathData(data, &i)
+			cx = PathDataNext(data, &i)
+			cy = PathDataNext(data, &i)
 			pc.MoveTo(rs, float64(cx), float64(cy))
 			for np := 1; np < n/2; np++ {
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case Pcm:
-			cx += NextPathData(data, &i)
-			cy += NextPathData(data, &i)
+			cx += PathDataNext(data, &i)
+			cy += PathDataNext(data, &i)
 			pc.MoveTo(rs, float64(cx), float64(cy))
 			for np := 1; np < n/2; np++ {
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
-				cx = NextPathData(data, &i)
+				cx = PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
-				cx += NextPathData(data, &i)
+				cx += PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
-				cy = NextPathData(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
-				cy += NextPathData(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, float64(cx), float64(cy))
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
-				x1 = NextPathData(data, &i)
-				y1 = NextPathData(data, &i)
-				x2 = NextPathData(data, &i)
-				y2 = NextPathData(data, &i)
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				x1 = PathDataNext(data, &i)
+				y1 = PathDataNext(data, &i)
+				x2 = PathDataNext(data, &i)
+				y2 = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
-				x1 = cx + NextPathData(data, &i)
-				y1 = cy + NextPathData(data, &i)
-				x2 = cx + NextPathData(data, &i)
-				y2 = cy + NextPathData(data, &i)
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				x1 = cx + PathDataNext(data, &i)
+				y1 = cy + PathDataNext(data, &i)
+				x2 = cx + PathDataNext(data, &i)
+				y2 = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
 				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
 				y1 = 2*cy - y2
-				x2 = NextPathData(data, &i)
-				y2 = NextPathData(data, &i)
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				x2 = PathDataNext(data, &i)
+				y2 = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
 				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
 				y1 = 2*cy - y2
-				x2 = cx + NextPathData(data, &i)
-				y2 = cy + NextPathData(data, &i)
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				x2 = cx + PathDataNext(data, &i)
+				y2 = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				x1 = NextPathData(data, &i)
-				y1 = NextPathData(data, &i)
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				x1 = PathDataNext(data, &i)
+				y1 = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				x1 = cx + NextPathData(data, &i)
-				y1 = cy + NextPathData(data, &i)
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				x1 = cx + PathDataNext(data, &i)
+				y1 = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
 				x1 = 2*cx - x1 // this is a reflection
 				y1 = 2*cy - y1
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
 				x1 = 2*cx - x1 // this is a reflection
 				y1 = 2*cy - y1
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
 			}
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rx := NextPathData(data, &i)
-				ry := NextPathData(data, &i)
-				ang := NextPathData(data, &i)
-				_ = NextPathData(data, &i) // large-arc-flag
-				_ = NextPathData(data, &i) // sweep-flag
-				cx = NextPathData(data, &i)
-				cy = NextPathData(data, &i)
+				rx := PathDataNext(data, &i)
+				ry := PathDataNext(data, &i)
+				ang := PathDataNext(data, &i)
+				_ = PathDataNext(data, &i) // large-arc-flag
+				_ = PathDataNext(data, &i) // sweep-flag
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
 				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
 			}
 		case Pca:
 			for np := 0; np < n/7; np++ {
-				rx := NextPathData(data, &i)
-				ry := NextPathData(data, &i)
-				ang := NextPathData(data, &i)
-				_ = NextPathData(data, &i) // large-arc-flag
-				_ = NextPathData(data, &i) // sweep-flag
-				cx += NextPathData(data, &i)
-				cy += NextPathData(data, &i)
+				rx := PathDataNext(data, &i)
+				ry := PathDataNext(data, &i)
+				ang := PathDataNext(data, &i)
+				_ = PathDataNext(data, &i) // large-arc-flag
+				_ = PathDataNext(data, &i) // sweep-flag
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
 				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
@@ -590,7 +613,174 @@ func RenderPathData(data []PathData, pc *Paint, rs *RenderState) {
 	}
 }
 
-func ParsePathData(d string) []PathData {
+// update min max for given coord index and coords
+func minMaxUpdate(i int, cx, cy float32, min, max *Vec2D) {
+	c := Vec2D{float64(cx), float64(cy)}
+	if i == 0 {
+		*min = c
+		*max = c
+	} else {
+		min.SetMin(c)
+		max.SetMax(c)
+	}
+}
+
+// PathDataMinMax traverses the path data and extracts the min and max point coords
+func PathDataMinMax(data []PathData) (min, max Vec2D) {
+	sz := len(data)
+	if sz == 0 {
+		return
+	}
+	var cx, cy PathData
+	for i := 0; i < sz; {
+		cmd, n := PathDataNext(data, &i).Cmd()
+		switch cmd {
+		case PcM:
+			cx = PathDataNext(data, &i)
+			cy = PathDataNext(data, &i)
+			minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			for np := 1; np < n/2; np++ {
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcm:
+			cx += PathDataNext(data, &i)
+			cy += PathDataNext(data, &i)
+			minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			for np := 1; np < n/2; np++ {
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcL:
+			for np := 0; np < n/2; np++ {
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcl:
+			for np := 0; np < n/2; np++ {
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcH:
+			for np := 0; np < n; np++ {
+				cx = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pch:
+			for np := 0; np < n; np++ {
+				cx += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcV:
+			for np := 0; np < n; np++ {
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcv:
+			for np := 0; np < n; np++ {
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcC:
+			for np := 0; np < n/6; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcc:
+			for np := 0; np < n/6; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcS:
+			for np := 0; np < n/4; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcs:
+			for np := 0; np < n/4; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcQ:
+			for np := 0; np < n/4; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pcq:
+			for np := 0; np < n/4; np++ {
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcT:
+			for np := 0; np < n/2; np++ {
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case Pct:
+			for np := 0; np < n/2; np++ {
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			}
+		case PcA:
+			for np := 0; np < n/7; np++ {
+				PathDataNext(data, &i) // rx
+				PathDataNext(data, &i) // ry
+				PathDataNext(data, &i) // ang
+				PathDataNext(data, &i) // large-arc-flag
+				PathDataNext(data, &i) // sweep-flag
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max) // todo: not accurate
+			}
+		case Pca:
+			for np := 0; np < n/7; np++ {
+				PathDataNext(data, &i) // rx
+				PathDataNext(data, &i) // ry
+				PathDataNext(data, &i) // ang
+				PathDataNext(data, &i) // large-arc-flag
+				PathDataNext(data, &i) // sweep-flag
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
+				minMaxUpdate(i, float32(cx), float32(cy), &min, &max) // todo: not accurate
+			}
+		case PcZ:
+		case Pcz:
+		}
+	}
+	return
+}
+
+func PathDataParse(d string) []PathData {
 	dt := strings.Replace(d, ",", " ", -1) // replace commas with spaces
 	ds := strings.Fields(dt)               // split by whitespace
 	pd := make([]PathData, 0, 20)
@@ -710,6 +900,7 @@ func ParsePathData(d string) []PathData {
 			}
 			ntot += mn
 			if i >= sz-1 {
+				i++
 				break
 			}
 		}
@@ -729,7 +920,7 @@ func (g *Path) Render2D() {
 		pc := &g.Paint
 		rs := &g.Viewport.Render
 		rs.PushXForm(pc.XForm)
-		RenderPathData(g.Data, pc, rs)
+		PathDataRender(g.Data, pc, rs)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()

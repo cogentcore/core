@@ -157,12 +157,12 @@ func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
 	g.Layout2DParts(parBBox)
 }
 
-func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
-	g.Parts.This.(Node2D).ComputeBBox2D(parBBox)
+func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DBase(parBBox, delta)
+	g.Parts.This.(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
-func (g *WidgetBase) Move2DWidget(delta Vec2D, parBBox image.Rectangle) {
+func (g *WidgetBase) Move2DWidget(delta image.Point, parBBox image.Rectangle) {
 	g.Move2DBase(delta, parBBox)
 	g.Parts.This.(Node2D).Move2D(delta, parBBox)
 }
@@ -268,15 +268,15 @@ func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
-func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
+func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DWidget(parBBox, delta)
 }
 
 func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
 
-func (g *WidgetBase) Move2D(delta Vec2D, parBBox image.Rectangle) {
+func (g *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	g.Move2DWidget(delta, parBBox)
 	g.Move2DChildren(delta)
 }

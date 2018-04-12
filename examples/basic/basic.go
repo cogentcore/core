@@ -44,7 +44,7 @@ func mainrun() {
 	circle1.Pos = gi.Vec2D{400, 400}
 	circle1.Radius = 40
 
-	ellipse1 := circle1.AddNewChild(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
+	ellipse1 := vlay.AddNewChild(gi.KiT_Ellipse, "ellipse1").(*gi.Ellipse)
 	ellipse1.SetProp("fill", "#55000055")
 	ellipse1.SetProp("stroke", "#880000")
 	ellipse1.SetProp("stroke-width", 2.0)
@@ -82,7 +82,7 @@ func mainrun() {
 	edit1.SetProp("min-width", "20em")
 	button1.Text = "Button 1"
 	button2.Text = "Button 2"
-	slider1.Horiz = true
+	slider1.Dim = gi.X
 	slider1.SetProp("width", "20em")
 	slider1.SetValue(0.5)
 

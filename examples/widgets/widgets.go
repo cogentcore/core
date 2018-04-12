@@ -35,7 +35,7 @@ func mainrun() {
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
 	win.UpdateStart()
 
-	icnm := "widget-down-wedge"
+	icnm := "widget-wedge-down"
 	wdicon := gi.IconByName(icnm)
 
 	vp := win.WinViewport2D()
@@ -121,7 +121,7 @@ func mainrun() {
 	// row3.SetStretchMaxHeight()
 
 	slider1 := row3.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
-	slider1.Horiz = true
+	slider1.Dim = gi.X
 	slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	slider1.Defaults()
 	slider1.SetValue(0.5)
@@ -129,7 +129,7 @@ func mainrun() {
 	slider1.Tracking = true
 
 	slider2 := row3.AddNewChild(gi.KiT_Slider, "slider2").(*gi.Slider)
-	slider2.Horiz = false
+	slider2.Dim = gi.Y
 	slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
 	slider2.SetStretchMaxHeight()
 	slider2.Defaults()
@@ -144,7 +144,7 @@ func mainrun() {
 	})
 
 	scrollbar1 := row3.AddNewChild(gi.KiT_ScrollBar, "scrollbar1").(*gi.ScrollBar)
-	scrollbar1.Horiz = true
+	scrollbar1.Dim = gi.X
 	scrollbar1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	scrollbar1.SetFixedHeight(units.NewValue(20, units.Px))
 	scrollbar1.Defaults()
@@ -154,7 +154,7 @@ func mainrun() {
 	scrollbar1.Tracking = true
 
 	scrollbar2 := row3.AddNewChild(gi.KiT_ScrollBar, "scrollbar2").(*gi.ScrollBar)
-	scrollbar2.Horiz = false
+	scrollbar2.Dim = gi.Y
 	scrollbar2.SetMinPrefHeight(units.NewValue(10, units.Em))
 	scrollbar2.SetStretchMaxHeight()
 	scrollbar2.Defaults()

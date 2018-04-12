@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"log"
 
 	"github.com/rcoreilly/goki/ki"
@@ -214,68 +213,6 @@ func (g *TabWidget) InitTabWidget() {
 
 ////////////////////////////////////////////////////
 // Node2D interface
-
-func (g *TabWidget) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-func (g *TabWidget) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (g *TabWidget) AsLayout2D() *Layout {
-	return nil
-}
-
-func (g *TabWidget) Init2D() {
-	g.Init2DWidget()
-}
-
-func (g *TabWidget) Style2D() {
-	g.Style2DWidget(nil)
-}
-
-func (g *TabWidget) Size2D() {
-	g.InitLayout2D()
-}
-
-func (g *TabWidget) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *TabWidget) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *TabWidget) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DWidget(parBBox)
-}
-
-func (g *TabWidget) Move2D(delta Vec2D, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *TabWidget) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *TabWidget) Render2D() {
-	if g.PushBounds() {
-		g.Render2DChildren()
-		g.PopBounds()
-	}
-}
-
-func (g *TabWidget) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *TabWidget) FocusChanged2D(gotFocus bool) {
-}
 
 // check for interface implementation
 var _ Node2D = &TabWidget{}

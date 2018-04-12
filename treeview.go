@@ -573,9 +573,9 @@ func (tv *TreeView) ConfigParts() {
 	// todo: create a toggle button widget that has 2 different states with icons pre-loaded
 	wb := tv.Parts.Child(tvBranchIdx).(*Action)
 	if tv.IsCollapsed() {
-		wb.Icon = IconByName("widget-right-wedge")
+		wb.Icon = IconByName("widget-wedge-right")
 	} else {
-		wb.Icon = IconByName("widget-down-wedge")
+		wb.Icon = IconByName("widget-wedge-down")
 	}
 	if updt {
 		tv.PartStyleProps(wb.This, TreeViewProps[0])
@@ -637,9 +637,9 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	lbl.Text = tv.Label()
 	wb := tv.Parts.Child(tvBranchIdx).(*Action)
 	if tv.IsCollapsed() {
-		wb.Icon = IconByName("widget-right-wedge")
+		wb.Icon = IconByName("widget-wedge-right")
 	} else {
-		wb.Icon = IconByName("widget-down-wedge")
+		wb.Icon = IconByName("widget-wedge-down")
 	}
 }
 
@@ -818,7 +818,8 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
 	tv.Style.SetUnitContext(tv.Viewport, psize) // update units with final layout
 	tv.Paint.SetUnitContext(tv.Viewport, psize) // always update paint
-	tv.This.(Node2D).ComputeBBox2D(parBBox)
+	tv.BBox = tv.This.(Node2D).BBox2D()         // only compute once, at this point
+	tv.This.(Node2D).ComputeBBox2D(parBBox, image.ZP)
 
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.PathUnique(), tv.WidgetSize.X, rn.LayData.AllocSize.X, tv.LayData.AllocPos.X, rn.LayData.AllocPos.X)
@@ -848,10 +849,6 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 	tp := tv.LayData.AllocPos.ToPointFloor()
 	ts := tv.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
-}
-
-func (tv *TreeView) ComputeBBox2D(parBBox image.Rectangle) {
-	tv.ComputeBBox2DWidget(parBBox)
 }
 
 func (tv *TreeView) ChildrenBBox2D() image.Rectangle {

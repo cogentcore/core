@@ -167,7 +167,7 @@ func (g *Action) ConfigPartsMenu() {
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
-			ic.CopyFromIcon(IconByName("widget-right-wedge"))
+			ic.CopyFromIcon(IconByName("widget-wedge-right"))
 			g.PartStyleProps(ic.This, ActionProps[ButtonNormal])
 		}
 	}
@@ -492,7 +492,7 @@ func (g *MenuButton) ConfigParts() {
 	wrIdx := -1
 	icnm := kit.ToString(g.Prop("indicator", false, false))
 	if icnm == "" || icnm == "nil" {
-		icnm = "widget-down-wedge"
+		icnm = "widget-wedge-down"
 	}
 	if icnm != "none" {
 		config.Add(KiT_Space, "InStretch")

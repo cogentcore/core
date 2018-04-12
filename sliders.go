@@ -57,8 +57,9 @@ const (
 //go:generate stringer -type=SliderStates
 
 // SliderBase has common slider functionality -- two major modes: ValThumb =
-// false is a slider with a fixed-size thumb knob, while = true has a
-// thumb that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
+// false is a slider with a fixed-size thumb knob, while = true has a thumb
+// that represents a value, as in a scrollbar, and the scrolling range is size
+// - thumbsize
 type SliderBase struct {
 	WidgetBase
 	Min         float64              `xml:"min" desc:"minimum value in range"`
@@ -74,7 +75,7 @@ type SliderBase struct {
 	Pos         float64              `xml:"pos" desc:"logical position of the slider relative to Size"`
 	DragPos     float64              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float64              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
-	Horiz       bool                 `xml:"horiz" desc:"true if horizontal, else vertical"`
+	Dim         Dims2D               `desc:"dimension along which the slider slides"`
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
 	TrackThr    float64              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
@@ -154,11 +155,7 @@ func (g *SliderBase) SizeFromAlloc() {
 		return
 	}
 	spc := g.Style.BoxSpace()
-	if g.Horiz {
-		g.Size = g.LayData.AllocSize.X - 2.0*spc
-	} else {
-		g.Size = g.LayData.AllocSize.Y - 2.0*spc
-	}
+	g.Size = g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	if !g.ValThumb {
 		g.Size -= g.ThumbSize // half on each side
 	}
@@ -283,7 +280,7 @@ func (g *SliderBase) Init2DSlider() {
 			me := d.(*oswin.MouseDraggedEvent)
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
-			if sl.Horiz {
+			if sl.Dim == X {
 				sl.SliderMoved(float64(st.X), float64(ed.X))
 			} else {
 				sl.SliderMoved(float64(st.Y), float64(ed.Y))
@@ -297,7 +294,7 @@ func (g *SliderBase) Init2DSlider() {
 		ed := sl.PointToRelPos(me.Where)
 		st := &sl.Style
 		spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
-		if sl.Horiz {
+		if sl.Dim == X {
 			sl.SliderPressed(float64(ed.X) - spc)
 		} else {
 			sl.SliderPressed(float64(ed.Y) - spc)
@@ -327,7 +324,7 @@ func (g *SliderBase) Init2DSlider() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Slider
 
-// Slider is a standard value slider with a fixed-sized thumb knob
+// Slider is a standard value slider with a fixed-sized thumb knob -- if an Icon is set, it is used for the knob of the slider
 type Slider struct {
 	SliderBase
 }
@@ -395,11 +392,7 @@ func (g *Slider) Size2D() {
 	st := &g.Style
 	// get at least thumbsize + margin + border.size
 	sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
-	if g.Horiz {
-		g.LayData.AllocSize.Y = sz
-	} else {
-		g.LayData.AllocSize.X = sz
-	}
+	g.LayData.AllocSize.SetDim(OtherDim(g.Dim), sz)
 }
 
 func (g *Slider) Layout2D(parBBox image.Rectangle) {
@@ -454,39 +447,22 @@ func (g *Slider) Render2DDefaultStyle() {
 
 	ht := 0.5 * g.ThumbSize
 
-	if g.Horiz {
-		bpos.Y += spc
-		bsz.Y -= 2.0 * spc
-		bpos.X += spc + ht
-		bsz.X -= 2.0 * (spc + ht)
-		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	odim := OtherDim(g.Dim)
+	bpos.SetAddDim(odim, spc)
+	bsz.SetSubDim(odim, 2.0*spc)
+	bpos.SetAddDim(g.Dim, spc+ht)
+	bsz.SetSubDim(g.Dim, 2.0*(spc+ht))
+	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
-		bsz.X = g.Pos
-		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	bsz.SetDim(g.Dim, g.Pos)
+	pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
-		tpos.X = bpos.X + g.Pos
-		tpos.Y += 0.5 * sz.Y // ctr
-		pc.FillStyle.SetColor(&st.Background.Color)
-		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
-		pc.FillStrokeClear(rs)
-	} else {
-		bpos.X += spc
-		bsz.X -= 2.0 * spc
-		bpos.Y += spc + ht
-		bsz.Y -= 2.0 * (spc + ht)
-		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
-
-		bsz.Y = g.Pos
-		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
-
-		tpos.Y = bpos.Y + g.Pos
-		tpos.X += 0.5 * sz.X // ctr
-		pc.FillStyle.SetColor(&st.Background.Color)
-		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
-		pc.FillStrokeClear(rs)
-	}
+	tpos.SetDim(g.Dim, bpos.Dim(g.Dim)+g.Pos)
+	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
+	pc.FillStyle.SetColor(&st.Background.Color)
+	pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
+	pc.FillStrokeClear(rs)
 }
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
@@ -613,19 +589,11 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	pos := g.LayData.AllocPos.AddVal(spc)
 	sz := g.LayData.AllocSize.SubVal(2.0 * spc)
 
-	if g.Horiz {
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
-		pos.X += g.Pos                                  // start of thumb
-		sz.X = g.ThumbSize
-		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-	} else {
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-		pos.Y += g.Pos
-		sz.Y = g.ThumbSize
-		pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
-		g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-	}
+	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
+	pos.SetAddDim(g.Dim, g.Pos)                     // start of thumb
+	sz.SetDim(g.Dim, g.ThumbSize)
+	pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {

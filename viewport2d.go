@@ -200,10 +200,6 @@ func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
 }
 
 func (vp *Viewport2D) BBox2D() image.Rectangle {
-	return vp.Pixels.Bounds()
-}
-
-func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) {
 	// viewport ignores any parent parent bbox info!
 	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
 		if !vp.LayData.AllocSize.IsZero() {
@@ -214,12 +210,17 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle) {
 			vp.Resize(64, 64) // gotta have something..
 		}
 	}
+	return vp.Pixels.Bounds()
+}
+
+func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 	vp.VpBBox = vp.Pixels.Bounds()
 	vp.SetWinBBox()    // this adds all PARENT offsets
 	if !vp.IsPopup() { // non-popups use allocated positions
 		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
 	}
 	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
+	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.PathUnique(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
@@ -271,9 +272,9 @@ func (vp *Viewport2D) PopBounds() {
 	rs.PopBounds()
 }
 
-func (vp *Viewport2D) Move2D(delta Vec2D, parBBox image.Rectangle) {
+func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 	vp.Move2DBase(delta, parBBox)
-	vp.Move2DChildren(delta)
+	vp.Move2DChildren(image.ZP) // reset delta here -- we absorb the delta in our placement relative to the parent
 }
 
 func (vp *Viewport2D) Render2D() {

@@ -72,6 +72,12 @@ func NewVec2D(x, y float64) Vec2D {
 	return Vec2D{x, y}
 }
 
+func NewVec2DFmPoint(pt image.Point) Vec2D {
+	v := Vec2D{}
+	v.SetPoint(pt)
+	return v
+}
+
 // return value along given dimension
 func (a Vec2D) Dim(d Dims2D) float64 {
 	switch d {

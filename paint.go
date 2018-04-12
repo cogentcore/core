@@ -257,9 +257,11 @@ func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float64) im
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeStyle.Width.Dots
 	}
-	tx1, ty1 := rs.XForm.TransformPoint(minX-sw, minY-sw)
-	tx2, ty2 := rs.XForm.TransformPoint(maxX+sw, maxY+sw)
-	return image.Rect(int(tx1), int(ty1), int(tx2), int(ty2))
+	tx1, ty1 := rs.XForm.TransformPoint(minX, minY)
+	tx2, ty2 := rs.XForm.TransformPoint(maxX, maxY)
+	tp1 := NewVec2D(tx1-sw, ty1-sw).ToPointFloor()
+	tp2 := NewVec2D(tx2+sw, ty2+sw).ToPointCeil()
+	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
 // get the bounding box for a slice of points
@@ -268,22 +270,13 @@ func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Re
 	if sz == 0 {
 		return image.Rectangle{}
 	}
-	tx, ty := rs.XForm.TransformPointToInt(points[0].X, points[0].Y)
-	bb := image.Rect(tx, ty, tx, ty)
+	min := points[0]
+	max := points[1]
 	for i := 1; i < sz; i++ {
-		tx, ty := rs.XForm.TransformPointToInt(points[i].X, points[i].Y)
-		if tx < bb.Min.X {
-			bb.Min.X = tx
-		} else if tx > bb.Max.X {
-			bb.Max.X = tx
-		}
-		if ty < bb.Min.Y {
-			bb.Min.Y = ty
-		} else if ty > bb.Max.Y {
-			bb.Max.Y = ty
-		}
+		min.SetMin(points[i])
+		max.SetMax(points[i])
 	}
-	return bb
+	return pc.BoundingBox(rs, min.X, min.Y, max.X, max.Y)
 }
 
 // MoveTo starts a new subpath within the current path starting at the

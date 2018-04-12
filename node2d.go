@@ -84,12 +84,12 @@ type Node2D interface {
 	Size2D()
 	// Layout2D: MeFirst downward pass (each node calls on its children at appropriate point) with relevant parent BBox that the children are constrained to render within -- they then intersect this BBox with their own BBox (from BBox2D) -- typically just call Layout2DBase for default behavior -- and add parent position to AllocPos -- Layout does all its sizing and positioning of children in this pass, based on the Size2D data gathered bottom-up and constraints applied top-down from higher levels
 	Layout2D(parBBox image.Rectangle)
-	// Move2D: optional MeFirst downward pass to move all elements by given delta -- used for scrolling -- the layout pass assigns canonical positions, saved in AllocPosOrig, and this adds the given delta to that AllocPosOrig -- each node must then call ComputeBBox2D to update its bounding box information given the new position
-	Move2D(delta Vec2D, parBBox image.Rectangle)
-	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- used in setting WinBBox and VpBBox, during Layout2D
+	// Move2D: optional MeFirst downward pass to move all elements by given delta -- used for scrolling -- the layout pass assigns canonical positions, saved in AllocPosOrig and BBox, and this adds the given delta to that AllocPosOrig -- each node must call ComputeBBox2D to update its bounding box information given the new position
+	Move2D(delta image.Point, parBBox image.Rectangle)
+	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- called during Layout2D to set node BBox field, which is then used in setting WinBBox and VpBBox
 	BBox2D() image.Rectangle
-	// Compute VpBBox and WinBBox for node, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code -- called during Layout and Move
-	ComputeBBox2D(parBBox image.Rectangle)
+	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code -- called during Layout and Move
+	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
 	// ChildrenBBox2D: compute the bbox available to my children (content), adjusting for margins, border, padding (BoxSpace) taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
 	ChildrenBBox2D() image.Rectangle
 	// Render2D: Final rendering pass, each node is fully responsible for calling Render2D on its own children, to provide maximum flexibility (see Render2DChildren for default impl) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
@@ -142,15 +142,15 @@ func (g *Node2DBase) BBox2D() image.Rectangle {
 	return g.BBoxFromAlloc()
 }
 
-func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle) {
-	g.ComputeBBox2DBase(parBBox)
+func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DBase(parBBox, delta)
 }
 
 func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox // pass-thru
 }
 
-func (g *Node2DBase) Move2D(delta Vec2D, parBBox image.Rectangle) {
+func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	g.Move2DBase(delta, parBBox)
 	g.Move2DChildren(delta)
 }
@@ -312,10 +312,9 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 	return Vec2DZero
 }
 
-// ComputeBBox2DBase -- computes the VpBBox and WinBBox for node
-func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle) {
-	bb := g.This.(Node2D).BBox2D()
-	g.VpBBox = parBBox.Intersect(bb)
+// ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with whatever delta may be in effect
+func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
+	g.VpBBox = parBBox.Intersect(g.BBox.Add(delta))
 	g.SetWinBBox()
 }
 
@@ -327,17 +326,18 @@ func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}
 	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
+	g.BBox = g.This.(Node2D).BBox2D()         // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	g.This.(Node2D).ComputeBBox2D(parBBox)
+	g.This.(Node2D).ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
 	// typically Layout2DChildren must be called after this!
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
 	}
 }
 
-func (g *Node2DBase) Move2DBase(delta Vec2D, parBBox image.Rectangle) {
-	g.LayData.AllocPos = g.LayData.AllocPosOrig.Add(delta)
-	g.This.(Node2D).ComputeBBox2D(parBBox)
+func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
+	g.LayData.AllocPos = g.LayData.AllocPosOrig.Add(NewVec2DFmPoint(delta))
+	g.This.(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
 // if non-empty, push our bounding-box bounds onto the bounds stack -- this
@@ -488,7 +488,7 @@ func (g *Node2DBase) Move2DTree() {
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
-	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig)
+	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig).ToPoint()
 	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
 }
 
@@ -523,7 +523,7 @@ func (g *Node2DBase) Layout2DChildren() {
 }
 
 // move all of node's children, giving them the ChildrenBBox2D -- default call at end of Move2D
-func (g *Node2DBase) Move2DChildren(delta Vec2D) {
+func (g *Node2DBase) Move2DChildren(delta image.Point) {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
 		gii, _ := KiToNode2D(kid)

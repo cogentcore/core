@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"image"
+
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -20,6 +22,16 @@ type SVG struct {
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
 
+// set a normalized 0-1 scaling transform so svg's use 0-1 coordinates that
+// map to actual size of the viewport -- used e.g. for Icon
+func (vp *Icon) SetNormXForm() {
+	pc := &vp.Paint
+	pc.Identity()
+	vps := Vec2D{}
+	vps.SetPoint(vp.ViewBox.Size)
+	pc.Scale(vps.X, vps.Y)
+}
+
 func (vp *SVG) Init2D() {
 	vp.Viewport2D.Init2D()
 	bitflag.Set(&vp.NodeFlags, int(VpFlagSVG)) // we are an svg type
@@ -29,6 +41,15 @@ func (vp *SVG) Style2D() {
 	// we use both forms of styling -- need width, height, pos from widget..
 	vp.Style2DSVG(nil)
 	vp.Style2DWidget(nil)
+}
+
+func (vp *SVG) Layout2D(parBBox image.Rectangle) {
+	pc := &vp.Paint
+	rs := &vp.Render
+	vp.Layout2DBase(parBBox, true)
+	rs.PushXForm(pc.XForm) // need xforms to get proper bboxes during layout
+	vp.Layout2DChildren()
+	rs.PopXForm()
 }
 
 func (vp *SVG) Render2D() {
@@ -45,9 +66,9 @@ func (vp *SVG) Render2D() {
 		}
 		rs.PushXForm(pc.XForm)
 		vp.Render2DChildren() // we must do children first, then us!
-		vp.RenderViewport2D() // update our parent image
 		vp.PopBounds()
 		rs.PopXForm()
+		vp.RenderViewport2D() // update our parent image
 	}
 }
 

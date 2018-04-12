@@ -5,8 +5,11 @@
 package gi
 
 import (
+	"image"
 	"log"
+	"sort"
 
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -78,15 +81,36 @@ func (vp *Icon) Size2D() {
 	vp.SVG.Size2D()
 }
 
+func (vp *Icon) Layout2D(parBBox image.Rectangle) {
+	vp.Layout2DBase(parBBox, true)
+	pc := &vp.Paint
+	rs := &vp.Render
+	vp.SetNormXForm()
+	rs.PushXForm(pc.XForm) // need xforms to get proper bboxes during layout
+	vp.Layout2DChildren()
+	rs.PopXForm()
+}
+
 func (vp *Icon) Render2D() {
 	// todo: check rendered -- don't re-render
-	// set scaling to normalized 0-1 coords -- todo: check actual width, height etc
-	pc := &vp.Paint
-	vps := Vec2D{}
-	vps.SetPoint(vp.ViewBox.Size)
-	pc.Identity()
-	pc.Scale(vps.X, vps.Y)
-	vp.SVG.Render2D()
+	if vp.PushBounds() {
+		pc := &vp.Paint
+		rs := &vp.Render
+		if vp.Fill {
+			var tmp = Paint{}
+			tmp = vp.Paint
+			tmp.FillStyle.SetColor(&vp.Style.Background.Color)
+			tmp.StrokeStyle.SetColor(nil)
+			tmp.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			tmp.FillStrokeClear(rs)
+		}
+		vp.SetNormXForm()
+		rs.PushXForm(pc.XForm)
+		vp.Render2DChildren() // we must do children first, then us!
+		vp.PopBounds()
+		rs.PopXForm()
+		vp.RenderViewport2D() // update our parent image
+	}
 }
 
 // check for interface implementation
@@ -136,10 +160,14 @@ var KiT_IconContexts = kit.Enums.AddEnum(IconContextsN, false, nil)
 // list of standard icon names that we expect to find in an IconSet
 var StdIconNames = [IconContextsN][]string{
 	{ // WidgetIcons
-		"widget-down-wedge",
-		"widget-up-wedge",
-		"widget-left-wedge",
-		"widget-right-wedge",
+		"widget-wedge-down",
+		"widget-wedge-up",
+		"widget-wedge-left",
+		"widget-wedge-right",
+		"widget-checkmark",
+		"widget-circlebutton-on",
+		"widget-circlebutton-off",
+		"widget-handle-circles",
 	}, { // ActionIcons
 		"edit-clear",
 		"edit-copy",
@@ -175,12 +203,13 @@ var DefaultIconSet *IconSet = MakeDefaultIcons()
 // the current icon set can be set to any icon set
 var CurIconSet *IconSet = DefaultIconSet
 
-// main function to get icon by name -- looks in CurIconSet and falls back to DefaultIconSet if not found there -- logs a message and returns nil if not found
+// IconByName is main function to get icon by name -- looks in CurIconSet and falls back to DefaultIconSet if not found there -- logs a message and returns nil if not found
 func IconByName(name string) *Icon {
 	ic, ok := (*CurIconSet)[name]
 	if !ok {
 		ic, ok = (*DefaultIconSet)[name]
 		if !ok {
+			// todo: look on StdIconNames to see if it is not a standard name..
 			log.Printf("gi.IconByName: unable to find icon name in either CurIconSet or DefaultIconSet: %v\n", name)
 
 			return nil
@@ -189,35 +218,95 @@ func IconByName(name string) *Icon {
 	return ic
 }
 
+// IconListSorted returns a slice of all the icons in the icon set sorted by name
+func IconListSorted(is IconSet) []*Icon {
+	il := make([]*Icon, len(is))
+	idx := 0
+	for _, ic := range is {
+		il[idx] = ic
+		idx++
+	}
+	sort.Slice(il, func(i, j int) bool {
+		return il[i].Name() < il[j].Name()
+	})
+	return il
+}
+
 // note: icons must use a normalized 0-1 coordinate system!
 func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
 	{
 		wd := Icon{}
-		wd.InitName(&wd, "widget-down-wedge")
+		wd.InitName(&wd, "widget-wedge-down")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = ParsePathData("M 0.05 0.05 .95 0.05 .5 .95 Z")
+		p.Data = PathDataParse("M 0.05 0.05 .95 0.05 .5 .95 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
-		wd.InitName(&wd, "widget-up-wedge")
+		wd.InitName(&wd, "widget-wedge-up")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = ParsePathData("M 0.05 0.95 .95 0.95 .5 .05 Z")
+		p.Data = PathDataParse("M 0.05 0.95 .95 0.95 .5 .05 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
-		wd.InitName(&wd, "widget-left-wedge")
+		wd.InitName(&wd, "widget-wedge-left")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = ParsePathData("M 0.95 0.05 .95 0.95 .05 .5 Z")
+		p.Data = PathDataParse("M 0.95 0.05 .95 0.95 .05 .5 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
-		wd.InitName(&wd, "widget-right-wedge")
+		wd.InitName(&wd, "widget-wedge-right")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = ParsePathData("M 0.05 0.05 .05 0.95 .95 .5 Z")
+		p.Data = PathDataParse("M 0.05 0.05 .05 0.95 .95 .5 Z")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-checkmark")
+		p := wd.AddNewChild(KiT_Path, "p").(*Path)
+		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
+		p.SetProp("fill", "none")
+		p.Data = PathDataParse("M 0.1 0.6 .5 0.9 .9 .1")
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-circlebutton-on")
+		oc := wd.AddNewChild(KiT_Circle, "oc").(*Circle)
+		oc.Pos.Set(0.5, 0.5)
+		oc.Radius = 0.4
+		oc.SetProp("fill", "none")
+		oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
+		ic := wd.AddNewChild(KiT_Circle, "ic").(*Circle)
+		ic.Pos.Set(0.5, 0.5)
+		ic.Radius = 0.2
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-circlebutton-off")
+		oc := wd.AddNewChild(KiT_Circle, "oc").(*Circle)
+		oc.Pos.Set(0.5, 0.5)
+		oc.Radius = 0.4
+		oc.SetProp("fill", "none")
+		oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "widget-handle-circles")
+		c0 := wd.AddNewChild(KiT_Circle, "c0").(*Circle)
+		c0.Pos.Set(0.5, 0.15)
+		c0.Radius = 0.1
+		c1 := wd.AddNewChild(KiT_Circle, "c1").(*Circle)
+		c1.Pos.Set(0.5, 0.5)
+		c1.Radius = 0.1
+		c2 := wd.AddNewChild(KiT_Circle, "c2").(*Circle)
+		c2.Pos.Set(0.5, 0.85)
+		c2.Radius = 0.1
 		iset[wd.Nm] = &wd
 	}
 	return &iset
