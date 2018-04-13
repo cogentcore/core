@@ -60,7 +60,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		y = win.Viewport.ViewBox.Size.Y / 3
 	}
 
-	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopup))
+	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 	// todo: deal with modeless -- need a separate window presumably -- not hard
 	dlg.State = DialogOpenModal
 
@@ -273,14 +273,14 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	bbc := dlg.StdButtonConfig(true, ok, cancel)
 	bb.ConfigChildren(bbc, false) // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
-	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopupDestroyAll)) // std is disposable
+	bitflag.Set(&dlg.Flag, int(VpFlagPopupDestroyAll)) // std is disposable
 }
 
 // NewStdDialog returns a basic standard dialog with a name, title, prompt, and ok / cancel buttons -- any empty text will not be added -- returns with UpdateStart started but NOT ended -- must call UpdateEnd once done configuring!
 func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 	dlg := Dialog{}
 	dlg.InitName(&dlg, name)
-	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopup))
+	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 	dlg.UpdateStart()
 	dlg.StdDialog(title, prompt, ok, cancel)
 	return &dlg
@@ -301,7 +301,7 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
-	bitflag.Set(&dlg.NodeFlags, int(VpFlagPopup))
+	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 }
 
 // check for interface implementation

@@ -176,7 +176,7 @@ func (sv *StructView) ConfigStructGrid() {
 	})
 	updt := sg.ConfigChildren(config, false)
 	if updt {
-		bitflag.Set(&sv.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
 	}
 	for i, vv := range sv.Fields {
 		lbl := sg.Child(i * 2).(*Label)
@@ -202,13 +202,13 @@ func (sv *StructView) UpdateFromStruct() {
 }
 
 func (sv *StructView) Render2D() {
-	bitflag.Clear(&sv.NodeFlags, int(NodeFlagFullReRender))
+	bitflag.Clear(&sv.Flag, int(NodeFlagFullReRender))
 	sv.Frame.Render2D()
 }
 
 // todo: see notes on treeview
 func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
-	if bitflag.Has(sv.NodeFlags, int(NodeFlagFullReRender)) {
+	if bitflag.Has(sv.Flag, int(NodeFlagFullReRender)) {
 		node = nil
 		layout = false
 	} else {

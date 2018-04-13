@@ -85,33 +85,33 @@ var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, nil)
 
 // is this button selected?
 func (g *ButtonBase) IsSelected() bool {
-	return bitflag.Has(g.NodeFlags, int(ButtonFlagSelected))
+	return bitflag.Has(g.Flag, int(ButtonFlagSelected))
 }
 
 // is this button checkable
 func (g *ButtonBase) IsCheckable() bool {
-	return bitflag.Has(g.NodeFlags, int(ButtonFlagCheckable))
+	return bitflag.Has(g.Flag, int(ButtonFlagCheckable))
 }
 
 // SetCheckable sets whether this button is checkable -- emits ButtonToggled signals if so
 func (g *ButtonBase) SetCheckable(checkable bool) {
-	bitflag.SetState(&g.NodeFlags, checkable, int(ButtonFlagCheckable))
+	bitflag.SetState(&g.Flag, checkable, int(ButtonFlagCheckable))
 }
 
 // is this button checked
 func (g *ButtonBase) IsChecked() bool {
-	return bitflag.Has(g.NodeFlags, int(ButtonFlagChecked))
+	return bitflag.Has(g.Flag, int(ButtonFlagChecked))
 }
 
 // set the selected state of this button -- does not emit signal or update
 func (g *ButtonBase) SetSelected(sel bool) {
-	bitflag.SetState(&g.NodeFlags, sel, int(ButtonFlagSelected))
+	bitflag.SetState(&g.Flag, sel, int(ButtonFlagSelected))
 	g.SetButtonState(ButtonNormal) // update style
 }
 
 // set the checked state of this button -- does not emit signal or update
 func (g *ButtonBase) SetChecked(chk bool) {
-	bitflag.SetState(&g.NodeFlags, chk, int(ButtonFlagChecked))
+	bitflag.SetState(&g.Flag, chk, int(ButtonFlagChecked))
 }
 
 // ToggleChecked toggles the checked state of this button -- does not emit signal or update
@@ -344,7 +344,7 @@ func (g *Button) ConfigPartsIfNeeded() {
 }
 
 func (g *Button) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(ButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
@@ -555,7 +555,7 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 }
 
 func (g *CheckBox) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(CheckBoxProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style

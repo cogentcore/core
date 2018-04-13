@@ -34,7 +34,7 @@ func (vp *Icon) SetNormXForm() {
 
 func (vp *SVG) Init2D() {
 	vp.Viewport2D.Init2D()
-	bitflag.Set(&vp.NodeFlags, int(VpFlagSVG)) // we are an svg type
+	bitflag.Set(&vp.Flag, int(VpFlagSVG)) // we are an svg type
 }
 
 func (vp *SVG) Style2D() {

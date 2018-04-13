@@ -5,12 +5,11 @@
 package gi
 
 import (
-	"fmt"
 	"image"
-	"image/color"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -140,9 +139,9 @@ func (g *SplitView) ConfigSplitters() {
 					spl := send.(*Splitter)
 					spr.Splits[i+1] = 1.0 - spl.Value
 					spr.Splits[i] = spl.Value
-					fmt.Printf("splits: %v value: %v\n", i, spl.Value)
+					// fmt.Printf("splits: %v value: %v\n", i, spl.Value)
 					spr.UpdateSplits()
-					fmt.Printf("splits: %v\n", spr.Splits)
+					// fmt.Printf("splits: %v\n", spr.Splits)
 					spr.UpdateEnd()
 				}
 			})
@@ -242,10 +241,11 @@ var KiT_Splitter = kit.Types.AddType(&Splitter{}, nil)
 func (g *Splitter) Defaults() { // todo: should just get these from props
 	g.ValThumb = false
 	g.ThumbSize = 10.0
-	g.Step = 0.1
-	g.PageStep = 0.2
+	g.Step = 0.01
+	g.PageStep = 0.1
 	g.Max = 1.0
 	g.Snap = false
+	g.Prec = 4
 }
 
 func (g *Splitter) Init2D() {
@@ -264,7 +264,7 @@ var SplitterProps = []map[string]interface{}{
 		// "border-style":     "solid",
 		"padding":          "0px",
 		"margin":           "0px",
-		"background-color": color.White,
+		"background-color": "#EEF",
 		"#icon": map[string]interface{}{
 			"max-width":  units.NewValue(1, units.Em),
 			"max-height": units.NewValue(5, units.Em),
@@ -278,13 +278,13 @@ var SplitterProps = []map[string]interface{}{
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
 	}, { // hover
-		"background-color": color.White,
+		"background-color": "#EEF",
 	}, { // focus
 		"border-color":     "#008",
 		"background.color": "#CCF",
 	}, { // press
 		"border-color":     "#000",
-		"background-color": color.White,
+		"background-color": "#EEF",
 	}, { // value fill
 		"border-color":     "#00F",
 		"background-color": "#00F",
@@ -294,8 +294,36 @@ var SplitterProps = []map[string]interface{}{
 	},
 }
 
+func (g *Splitter) ConfigPartsIfNeeded(render bool) {
+	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
+		g.ConfigParts()
+	}
+	if g.Icon != nil && g.Parts.HasChildren() {
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+		if ic != nil {
+			mrg := g.Style.Layout.Margin.Dots
+			pad := g.Style.Layout.Padding.Dots
+			spc := mrg + pad
+			odim := OtherDim(g.Dim)
+			if g.IsDragging() {
+				bitflag.Set(&ic.Flag, int(VpFlagDrawIntoWin))
+				// ic.DrawMainVpOverMe()
+			} else {
+				bitflag.Clear(&ic.Flag, int(VpFlagDrawIntoWin))
+			}
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
+			ic.LayData.AllocPosRel.SetDim(odim, -pad)
+			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThumbSize)
+			ic.LayData.AllocSize.SetDim(g.Dim, g.ThumbSize)
+			if render {
+				ic.Layout2DTree()
+			}
+		}
+	}
+}
+
 func (g *Splitter) Style2D() {
-	// bitflag.Set(&g.NodeFlags, int(CanFocus))
+	// bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(SplitterProps[SliderNormal])
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
@@ -357,17 +385,34 @@ func (g *Splitter) Render2DDefaultStyle() {
 
 	g.ConfigPartsIfNeeded(true)
 
-	pc.StrokeStyle.SetColor(nil)
-	pc.FillStyle.SetColor(&st.Background.Color)
-
-	pos := NewVec2DFmPoint(g.VpBBox.Min)
-	pos.SetSubDim(OtherDim(g.Dim), 10.0)
-	sz := NewVec2DFmPoint(g.VpBBox.Size())
-	g.RenderBoxImpl(pos, sz, 0)
-
 	if g.Icon != nil && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
+	} else {
+		pc.StrokeStyle.SetColor(nil)
+		pc.FillStyle.SetColor(&st.Background.Color)
+
+		pos := NewVec2DFmPoint(g.VpBBox.Min)
+		pos.SetSubDim(OtherDim(g.Dim), 10.0)
+		sz := NewVec2DFmPoint(g.VpBBox.Size())
+		g.RenderBoxImpl(pos, sz, 0)
 	}
+}
+
+func (g *Splitter) ReRender2D() (node Node2D, layout bool) {
+	// if g.IsDragging() {
+	// 	if g.Icon != nil && g.Parts.HasChildren() {
+	// 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+	// 		if ic != nil {
+	// 			g.ConfigPartsIfNeeded(true)
+	// 			node = ic.This.(Node2D)
+	// 			layout = false
+	// 			return
+	// 		}
+	// 	}
+	// }
+	node = g.This.(Node2D)
+	layout = false
+	return
 }
 
 func (g *Splitter) FocusChanged2D(gotFocus bool) {

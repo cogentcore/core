@@ -78,15 +78,15 @@ func (g *Action) SetIcon(ic *Icon) {
 }
 
 func (g *Action) SetAsMenu() {
-	bitflag.Set(&g.NodeFlags, int(ActionFlagMenu))
+	bitflag.Set(&g.Flag, int(ActionFlagMenu))
 }
 
 func (g *Action) IsMenu() bool {
-	return bitflag.Has(g.NodeFlags, int(ActionFlagMenu))
+	return bitflag.Has(g.Flag, int(ActionFlagMenu))
 }
 
 func (g *Action) SetAsButton() {
-	bitflag.Clear(&g.NodeFlags, int(ActionFlagMenu))
+	bitflag.Clear(&g.Flag, int(ActionFlagMenu))
 }
 
 func (g *Action) Init2D() {
@@ -189,7 +189,7 @@ func (g *Action) ConfigPartsIfNeeded() {
 }
 
 func (g *Action) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(ActionProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
@@ -328,8 +328,8 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	pvp.InitName(&pvp, name+"Menu")
 	pvp.UpdateStart()
 	pvp.Fill = true
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagPopup))
-	bitflag.Set(&pvp.NodeFlags, int(VpFlagMenu))
+	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
+	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
@@ -519,7 +519,7 @@ func (g *MenuButton) ConfigPartsIfNeeded() {
 }
 
 func (g *MenuButton) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(MenuButtonProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style

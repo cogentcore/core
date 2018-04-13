@@ -86,6 +86,19 @@ func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	s.CopyRGBA(vpimg, winBBox)
 }
 
+// UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
+func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	s := w.OSWin.Screen()
+	s.CopyRGBA(vp.Pixels, winBBox)
+}
+
+// UpdateVpRegionFromMain basically clears the region where the vp would show up, from the main
+func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
+	vpimg := w.Viewport.Pixels.SubImage(winBBox).(*image.RGBA)
+	s := w.OSWin.Screen()
+	s.CopyRGBA(vpimg, winBBox)
+}
+
 // FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
 func (w *Window) FullUpdate() {
 	w.UpdateStart()
@@ -217,7 +230,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 							w.LastDrag = time.Now()
 							w.Dragging = gi.This
 							w.LastSentDrag = *mde
-							bitflag.Set(&gi.NodeFlags, int(NodeDragging))
+							bitflag.Set(&gi.Flag, int(NodeDragging))
 							return true
 						}
 						return false
@@ -226,7 +239,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 					if w.Dragging == gi.This {
 						_, dg := KiToNode2D(w.Dragging)
 						if dg != nil {
-							bitflag.Clear(&dg.NodeFlags, int(NodeDragging))
+							bitflag.Clear(&dg.Flag, int(NodeDragging))
 						}
 						w.Dragging = nil
 						return true
@@ -271,17 +284,17 @@ func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
 				in := pos.In(gi.WinBBox)
 				if in {
 					if ete == oswin.MouseEnteredEventType {
-						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
+						if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 							return false // already in
 						}
-						bitflag.Set(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						bitflag.Set(&gi.Flag, int(MouseHasEntered)) // we'll send the event, and now set the flag
 					} else {
 						return false // don't send any exited events if in
 					}
 				} else { // mouse not in object
 					if ete == oswin.MouseExitedEventType {
-						if bitflag.Has(gi.NodeFlags, int(MouseHasEntered)) {
-							bitflag.Clear(&gi.NodeFlags, int(MouseHasEntered)) // we'll send the event, and now set the flag
+						if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+							bitflag.Clear(&gi.Flag, int(MouseHasEntered)) // we'll send the event, and now set the flag
 						} else {
 							return false // already out..
 						}
@@ -430,7 +443,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
-			bitflag.Clear(&gi.NodeFlags, int(HasFocus))
+			bitflag.Clear(&gi.Flag, int(HasFocus))
 			gii.FocusChanged2D(false)
 		}
 	}
@@ -441,7 +454,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	gii, gi := KiToNode2D(k)
 	if gi != nil {
-		bitflag.Set(&gi.NodeFlags, int(HasFocus))
+		bitflag.Set(&gi.Flag, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
 	w.UpdateEnd()
@@ -478,7 +491,7 @@ func (w *Window) SetNextFocusItem() bool {
 				focusNext = true
 				return true
 			}
-			if !bitflag.Has(gi.NodeFlags, int(CanFocus)) || gi.VpBBox.Empty() {
+			if !bitflag.Has(gi.Flag, int(CanFocus)) || gi.VpBBox.Empty() {
 				return true
 			}
 			if focusNext {
@@ -527,7 +540,7 @@ func (w *Window) SetPrevFocusItem() bool {
 			gotFocus = true
 			return false
 		}
-		if !bitflag.Has(gi.NodeFlags, int(CanFocus)) || gi.VpBBox.Empty() {
+		if !bitflag.Has(gi.Flag, int(CanFocus)) || gi.VpBBox.Empty() {
 			return true
 		}
 		prevItem = k

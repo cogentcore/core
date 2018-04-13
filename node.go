@@ -13,13 +13,13 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// node flags are bitflags for tracking common high-frequency GUI state,
+// gi node flags are bitflags for tracking common high-frequency GUI state,
 // mostly having to do with event processing -- use properties map for less
-// frequently used information
+// frequently used information -- uses ki Flags field
 type NodeFlags int32
 
 const (
-	NodeFlagsNil NodeFlags = iota
+	NodeFlagsNil NodeFlags = NodeFlags(ki.FlagsN) + iota
 	// CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style 'can-focus' property
 	CanFocus
 	// HasFocus: does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
@@ -41,10 +41,9 @@ var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 // base struct node for GoGi
 type NodeBase struct {
 	ki.Node
-	NodeFlags int64           `desc:"bitwise flags set according to NodeFlags type"`
-	BBox      image.Rectangle `desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
-	VpBBox    image.Rectangle `json:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
-	WinBBox   image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+	BBox    image.Rectangle `desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
+	VpBBox  image.Rectangle `json:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	WinBBox image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
@@ -86,22 +85,22 @@ func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
 
 // does the current node have keyboard focus
 func (g *NodeBase) HasFocus() bool {
-	return bitflag.Has(g.NodeFlags, int(HasFocus))
+	return bitflag.Has(g.Flag, int(HasFocus))
 }
 
 // is the current node currently receiving dragging events?  set by window
 func (g *NodeBase) IsDragging() bool {
-	return bitflag.Has(g.NodeFlags, int(NodeDragging))
+	return bitflag.Has(g.Flag, int(NodeDragging))
 }
 
 // is the current node a ReRenderAnchor?
 func (g *NodeBase) IsReRenderAnchor() bool {
-	return bitflag.Has(g.NodeFlags, int(ReRenderAnchor))
+	return bitflag.Has(g.Flag, int(ReRenderAnchor))
 }
 
 // set node as a ReRenderAnchor
 func (g *NodeBase) SetReRenderAnchor() {
-	bitflag.Set(&g.NodeFlags, int(ReRenderAnchor))
+	bitflag.Set(&g.Flag, int(ReRenderAnchor))
 }
 
 // set node as focus node

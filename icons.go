@@ -95,28 +95,26 @@ func (vp *Icon) Layout2D(parBBox image.Rectangle) {
 }
 
 func (vp *Icon) Render2D() {
-	// todo: not working -- icons blank..
-	// if vp.Rendered && vp.RenderedSize == vp.ViewBox.Size {
-	// 	return
-	// }
 	if vp.PushBounds() {
-		// vp.Rendered = true
-		// vp.RenderedSize = vp.ViewBox.Size
-		pc := &vp.Paint
-		rs := &vp.Render
-		if vp.Fill {
-			var tmp = Paint{}
-			tmp = vp.Paint
-			tmp.FillStyle.SetColor(&vp.Style.Background.Color)
-			tmp.StrokeStyle.SetColor(nil)
-			tmp.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
-			tmp.FillStrokeClear(rs)
+		if !(vp.Rendered && vp.RenderedSize == vp.ViewBox.Size) {
+			pc := &vp.Paint
+			rs := &vp.Render
+			if vp.Fill {
+				var tmp = Paint{}
+				tmp = vp.Paint
+				tmp.FillStyle.SetColor(&vp.Style.Background.Color)
+				tmp.StrokeStyle.SetColor(nil)
+				tmp.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+				tmp.FillStrokeClear(rs)
+			}
+			vp.SetNormXForm()
+			rs.PushXForm(pc.XForm)
+			vp.Render2DChildren() // we must do children first, then us!
+			vp.PopBounds()
+			rs.PopXForm()
+			vp.Rendered = true
+			vp.RenderedSize = vp.ViewBox.Size
 		}
-		vp.SetNormXForm()
-		rs.PushXForm(pc.XForm)
-		vp.Render2DChildren() // we must do children first, then us!
-		vp.PopBounds()
-		rs.PopXForm()
 		vp.RenderViewport2D() // update our parent image
 	}
 }

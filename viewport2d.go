@@ -28,6 +28,8 @@ const (
 	VpFlagPopupDestroyAll
 	// this viewport is an SVG viewport -- determines the styling that it uses
 	VpFlagSVG
+	// draw into window directly instead of drawing into parent -- i.e., as a sprite
+	VpFlagDrawIntoWin
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
@@ -92,15 +94,15 @@ func (vp *Viewport2D) Resize(width, height int) {
 }
 
 func (vp *Viewport2D) IsPopup() bool {
-	return bitflag.Has(vp.NodeFlags, int(VpFlagPopup))
+	return bitflag.Has(vp.Flag, int(VpFlagPopup))
 }
 
 func (vp *Viewport2D) IsMenu() bool {
-	return bitflag.Has(vp.NodeFlags, int(VpFlagMenu))
+	return bitflag.Has(vp.Flag, int(VpFlagMenu))
 }
 
 func (vp *Viewport2D) IsSVG() bool {
-	return bitflag.Has(vp.NodeFlags, int(VpFlagSVG))
+	return bitflag.Has(vp.Flag, int(VpFlagSVG))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +122,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 }
 
 // draw main viewport into window -- needs to redraw popups over top of it, so does a full update
-func (vp *Viewport2D) DrawIntoWindow() {
+func (vp *Viewport2D) DrawMainViewport() {
 	win := vp.ParentWindow() // todo: consider caching window pointer
 	if win == nil {
 		return
@@ -128,15 +130,25 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	win.FullUpdate()
 }
 
-// draw a popup into window viewport -- assuming it is a top-level so only does it
-func (vp *Viewport2D) DrawPopup() {
-	win, ok := vp.Par.(*Window)
-	if !ok {
+// draw a vp into window directly -- for most non-main vp's
+func (vp *Viewport2D) DrawIntoWindow() {
+	win := vp.ParentWindow() // todo: consider caching window pointer
+	if win == nil {
 		return
 	}
-	// win.FullUpdate()
 	win.UpdateStart()
-	win.UpdateVpRegion(vp, vp.VpBBox, vp.WinBBox)
+	win.UpdateFullVpRegion(vp, vp.VpBBox, vp.WinBBox)
+	win.UpdateEnd()
+}
+
+// draw main window vp into region of this vp
+func (vp *Viewport2D) DrawMainVpOverMe() {
+	win := vp.ParentWindow() // todo: consider caching window pointer
+	if win == nil {
+		return
+	}
+	win.UpdateStart()
+	win.UpdateVpRegionFromMain(vp.WinBBox)
 	win.UpdateEnd()
 }
 
@@ -146,7 +158,7 @@ func (vp *Viewport2D) DrawPopup() {
 // children are destroyed
 func (vp *Viewport2D) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
-	if !bitflag.Has(vp.NodeFlags, int(VpFlagPopupDestroyAll)) {
+	if !bitflag.Has(vp.Flag, int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
 			cli, _ := KiToNode2D(vp.Child(0))
@@ -232,19 +244,26 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawPopup\n", vp.PathUnique(), vp.VpBBox)
-		}
-		vp.DrawPopup()
-	} else if vp.Viewport != nil {
-		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
-		}
-		vp.DrawIntoParent(vp.Viewport)
-	} else {
-		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawIntoWindow\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v DrawPopup into Window\n", vp.PathUnique(), vp.VpBBox)
 		}
 		vp.DrawIntoWindow()
+	} else if vp.Viewport != nil { // sub-vp
+		if bitflag.Has(vp.Flag, int(VpFlagDrawIntoWin)) {
+			if Render2DTrace {
+				fmt.Printf("Render: %v at %v DrawIntoWindow\n", vp.PathUnique(), vp.VpBBox)
+			}
+			vp.DrawIntoWindow()
+		} else {
+			if Render2DTrace {
+				fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
+			}
+			vp.DrawIntoParent(vp.Viewport)
+		}
+	} else { // we are the main vp
+		if Render2DTrace {
+			fmt.Printf("Render: %v at %v DrawMainViewport, full render\n", vp.PathUnique(), vp.VpBBox)
+		}
+		vp.DrawMainViewport()
 	}
 }
 
@@ -392,11 +411,14 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
 	gn.Render2DTree()
-	win := vp.ParentWindow() // todo: consider caching window pointer
-	if win != nil {
-		win.UpdateStart()
-		win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-		win.UpdateEnd()
+	gnvp := gn.AsViewport2D()
+	if !(gnvp != nil && bitflag.Has(gnvp.Flag, int(VpFlagDrawIntoWin))) {
+		win := vp.ParentWindow() // todo: consider caching window pointer
+		if win != nil {
+			win.UpdateStart()
+			win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+			win.UpdateEnd()
+		}
 	}
 }
 

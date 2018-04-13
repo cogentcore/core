@@ -120,7 +120,7 @@ func (g *SliderBase) SliderPressed(pos float64) {
 	g.SetSliderState(SliderDown)
 	g.SetSliderPos(pos)
 	g.SliderSig.Emit(g.This, int64(SliderPressed), g.Value)
-	// bitflag.Set(&g.NodeFlags, int(SliderFlagDragging))
+	// bitflag.Set(&g.Flag, int(SliderFlagDragging))
 	g.UpdateEnd()
 }
 
@@ -423,7 +423,7 @@ var SliderProps = []map[string]interface{}{
 }
 
 func (g *Slider) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(SliderProps[SliderNormal])
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
@@ -593,7 +593,7 @@ var ScrollBarProps = []map[string]interface{}{
 }
 
 func (g *ScrollBar) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(ScrollBarProps[SliderNormal])
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style

@@ -606,7 +606,7 @@ func (g *Node2DBase) ParentLayout() *Layout {
 	return parLy
 }
 
-// find parent that is a ReRenderAnchor (NodeFlags)
+// find parent that is a ReRenderAnchor
 func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {

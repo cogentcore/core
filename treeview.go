@@ -119,7 +119,7 @@ func (tv *TreeView) SyncToSrc() {
 	}
 	updt := tv.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
 	if updt {
-		bitflag.Set(&tv.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
 		win := tv.ParentWindow()
 		if win != nil {
 			for _, vki := range tv.Deleted {
@@ -211,7 +211,7 @@ func (tv *TreeView) RootTreeView() *TreeView {
 
 // is this node itself collapsed?
 func (tv *TreeView) IsCollapsed() bool {
-	return bitflag.Has(tv.NodeFlags, int(NodeFlagCollapsed))
+	return bitflag.Has(tv.Flag, int(NodeFlagCollapsed))
 }
 
 // does this node have a collapsed parent? if so, don't render!
@@ -224,7 +224,7 @@ func (tv *TreeView) HasCollapsedParent() bool {
 		}
 		if pg.TypeEmbeds(KiT_TreeView) {
 			// nw := pg.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			if bitflag.Has(pg.NodeFlags, int(NodeFlagCollapsed)) {
+			if bitflag.Has(pg.Flag, int(NodeFlagCollapsed)) {
 				pcol = true
 				return false
 			}
@@ -236,7 +236,7 @@ func (tv *TreeView) HasCollapsedParent() bool {
 
 // is this node selected?
 func (tv *TreeView) IsSelected() bool {
-	return bitflag.Has(tv.NodeFlags, int(NodeFlagSelected))
+	return bitflag.Has(tv.Flag, int(NodeFlagSelected))
 }
 
 func (tv *TreeView) Label() string {
@@ -251,7 +251,7 @@ func (tv *TreeView) SelectAction() {
 		win.UpdateStart()
 	}
 	rn := tv.RootWidget
-	if bitflag.Has(rn.NodeFlags, int(NodeFlagExtendSelect)) {
+	if bitflag.Has(rn.Flag, int(NodeFlagExtendSelect)) {
 		if tv.IsSelected() {
 			tv.Unselect()
 		} else {
@@ -273,7 +273,7 @@ func (tv *TreeView) SelectAction() {
 func (tv *TreeView) Select() {
 	if !tv.IsSelected() {
 		tv.UpdateStart()
-		bitflag.Set(&tv.NodeFlags, int(NodeFlagSelected))
+		bitflag.Set(&tv.Flag, int(NodeFlagSelected))
 		tv.GrabFocus() // focus always follows select  todo: option
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeSelected), tv.This)
 		tv.UpdateEnd()
@@ -283,7 +283,7 @@ func (tv *TreeView) Select() {
 func (tv *TreeView) Unselect() {
 	if tv.IsSelected() {
 		tv.UpdateStart()
-		bitflag.Clear(&tv.NodeFlags, int(NodeFlagSelected))
+		bitflag.Clear(&tv.Flag, int(NodeFlagSelected))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeUnselected), tv.This)
 		tv.UpdateEnd()
 	}
@@ -392,9 +392,9 @@ func (tv *TreeView) Collapse() {
 	if !tv.IsCollapsed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
-			bitflag.Set(&tv.NodeFlags, int(NodeFlagFullReRender))
+			bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
 		}
-		bitflag.Set(&tv.NodeFlags, int(NodeFlagCollapsed))
+		bitflag.Set(&tv.Flag, int(NodeFlagCollapsed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeCollapsed), tv.This)
 		tv.UpdateEnd()
 	}
@@ -404,9 +404,9 @@ func (tv *TreeView) Expand() {
 	if tv.IsCollapsed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
-			bitflag.Set(&tv.NodeFlags, int(NodeFlagFullReRender))
+			bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
 		}
-		bitflag.Clear(&tv.NodeFlags, int(NodeFlagCollapsed))
+		bitflag.Clear(&tv.Flag, int(NodeFlagCollapsed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeOpened), tv.This)
 		tv.UpdateEnd()
 	}
@@ -540,18 +540,18 @@ func (tv *TreeView) SrcDuplicate() {
 
 func (tv *TreeView) SetContinuousSelect() {
 	rn := tv.RootWidget
-	bitflag.Set(&rn.NodeFlags, int(NodeFlagContinuousSelect))
+	bitflag.Set(&rn.Flag, int(NodeFlagContinuousSelect))
 }
 
 func (tv *TreeView) SetExtendSelect() {
 	rn := tv.RootWidget
-	bitflag.Set(&rn.NodeFlags, int(NodeFlagExtendSelect))
+	bitflag.Set(&rn.Flag, int(NodeFlagExtendSelect))
 }
 
 func (tv *TreeView) ClearSelectMods() {
 	rn := tv.RootWidget
-	bitflag.Clear(&rn.NodeFlags, int(NodeFlagContinuousSelect))
-	bitflag.Clear(&rn.NodeFlags, int(NodeFlagExtendSelect))
+	bitflag.Clear(&rn.Flag, int(NodeFlagContinuousSelect))
+	bitflag.Clear(&rn.Flag, int(NodeFlagExtendSelect))
 }
 
 ////////////////////////////////////////////////////
@@ -757,7 +757,7 @@ func (tv *TreeView) Style2D() {
 		return
 	}
 	tv.ConfigParts()
-	bitflag.Set(&tv.NodeFlags, int(CanFocus))
+	bitflag.Set(&tv.Flag, int(CanFocus))
 	tv.Style2DWidget(TreeViewProps[0])
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i] = tv.Style
@@ -867,7 +867,7 @@ func (tv *TreeView) Render2D() {
 	if tv.PushBounds() {
 		tv.ConfigPartsIfNeeded()
 		// reset for next update
-		bitflag.Clear(&tv.NodeFlags, int(NodeFlagFullReRender))
+		bitflag.Clear(&tv.Flag, int(NodeFlagFullReRender))
 
 		if tv.IsSelected() {
 			tv.Style = tv.StateStyles[TreeViewSelState]
@@ -897,7 +897,7 @@ func (tv *TreeView) Render2D() {
 }
 
 func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
-	if bitflag.Has(tv.NodeFlags, int(NodeFlagFullReRender)) {
+	if bitflag.Has(tv.Flag, int(NodeFlagFullReRender)) {
 		// todo: this can be fixed by adding a previous size to layout and it can clear that
 		// dynamic re-rendering doesn't work b/c we don't clear out the full space we
 		// used to take!

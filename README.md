@@ -73,7 +73,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* SplitView is new type (not layout) -- needs Splitter widget with drag logic -- u
+* SplitView is new type (not layout) -- needs Splitter widget with drag logic -- splitter is a sprite, don't draw background box, need to get DrawIntoWindow working, and draw background..
 
 * add creator / inspector in a different window :)
 

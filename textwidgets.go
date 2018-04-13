@@ -351,7 +351,7 @@ var TextFieldProps = [2]map[string]interface{}{
 }
 
 func (g *TextField) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(TextFieldProps[0])
 	g.StateStyles[0] = g.Style
 	g.StateStyles[1] = g.Style
@@ -962,7 +962,7 @@ func (g *ComboBox) ConfigPartsIfNeeded() {
 }
 
 func (g *ComboBox) Style2D() {
-	bitflag.Set(&g.NodeFlags, int(CanFocus))
+	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget(ComboBoxProps[ButtonNormal])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
