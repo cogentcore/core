@@ -87,6 +87,7 @@ type SliderBase struct {
 	State       SliderStates
 	SliderSig   ki.Signal `json:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
+	origWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, nil)
@@ -279,6 +280,11 @@ func (g *SliderBase) KeyInput(kt *oswin.KeyTypedEvent) {
 	}
 }
 
+// translate a point in global pixel coords into relative position within node
+func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
+	return pt.Sub(g.origWinBBox.Min)
+}
+
 func (g *SliderBase) Init2DSlider() {
 	g.Init2DWidget()
 	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -329,6 +335,35 @@ func (g *SliderBase) Init2DSlider() {
 	})
 }
 
+func (g *SliderBase) ConfigParts() {
+	g.Parts.Lay = LayoutNil
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
+	g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, SliderProps[SliderNormal])
+}
+
+func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
+	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
+		g.ConfigParts()
+	}
+	if g.Icon != nil && g.Parts.HasChildren() {
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+		if ic != nil {
+			mrg := g.Style.Layout.Margin.Dots
+			pad := g.Style.Layout.Padding.Dots
+			spc := mrg + pad
+			odim := OtherDim(g.Dim)
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
+			ic.LayData.AllocPosRel.SetDim(odim, -pad)
+			ic.LayData.AllocSize.X = g.ThumbSize
+			ic.LayData.AllocSize.Y = g.ThumbSize
+			if render {
+				ic.Layout2DTree()
+			}
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Slider
 
@@ -350,35 +385,6 @@ func (g *Slider) Defaults() { // todo: should just get these from props
 func (g *Slider) Init2D() {
 	g.Init2DSlider()
 	g.ConfigParts()
-}
-
-func (g *Slider) ConfigParts() {
-	g.Parts.Lay = LayoutNil
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
-	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, SliderProps[SliderNormal])
-}
-
-func (g *Slider) ConfigPartsIfNeeded(render bool) {
-	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
-		g.ConfigParts()
-	}
-	if g.Icon != nil && g.Parts.HasChildren() {
-		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
-		if ic != nil {
-			mrg := g.Style.Layout.Margin.Dots
-			pad := g.Style.Layout.Padding.Dots
-			spc := mrg + pad
-			odim := OtherDim(g.Dim)
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
-			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.X = g.ThumbSize
-			ic.LayData.AllocSize.Y = g.ThumbSize
-			if render {
-				ic.Layout2DTree()
-			}
-		}
-	}
 }
 
 var SliderProps = []map[string]interface{}{
@@ -448,6 +454,7 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
+	g.origWinBBox = g.WinBBox
 }
 
 func (g *Slider) Render2D() {
@@ -510,19 +517,9 @@ func (g *Slider) Render2DDefaultStyle() {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColor(&st.Background.Color)
 
-	gotIc := false
 	if g.Icon != nil && g.Parts.HasChildren() {
-		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
-		if ic != nil {
-			gotIc = true
-			// ic.LayData.AllocPosRel = tpos.Sub(g.Parts.LayData.AllocPos)
-			// ic.LayData.AllocPos = tpos
-			// ic.LayData.AllocPosOrig = tpos
-			g.Parts.Render2DTree()
-		}
-	}
-
-	if !gotIc {
+		g.Parts.Render2DTree()
+	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
 	}
@@ -619,6 +616,7 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
+	g.origWinBBox = g.WinBBox
 }
 
 func (g *ScrollBar) Render2D() {
