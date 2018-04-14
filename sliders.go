@@ -39,7 +39,7 @@ type SliderStates int32
 
 const (
 	// normal state -- there but not being interacted with
-	SliderNormal SliderStates = iota
+	SliderActive SliderStates = iota
 	// disabled -- not pressable
 	SliderDisabled
 	// mouse is hovering over the slider
@@ -49,7 +49,7 @@ const (
 	// slider is currently being pressed down
 	SliderDown
 	// use background-color here to fill in selected value of slider
-	SliderValueFill
+	SliderValue
 	// these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
 	SliderBox
 	// total number of slider states
@@ -57,6 +57,9 @@ const (
 )
 
 //go:generate stringer -type=SliderStates
+
+// Style selector names for the different states
+var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":value", ":box"}
 
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
@@ -105,7 +108,7 @@ func (g *SliderBase) SnapValue() {
 func (g *SliderBase) SetSliderState(state SliderStates) {
 	// todo: process disabled state -- probably just deal with the property directly?
 	// it overrides any choice here and just sets state to disabled..
-	if state == SliderNormal && g.HasFocus() {
+	if state == SliderActive && g.HasFocus() {
 		state = SliderFocus
 	}
 	g.State = state
@@ -129,7 +132,7 @@ func (g *SliderBase) SliderPressed(pos float64) {
 func (g *SliderBase) SliderReleased() {
 	wasPressed := (g.State == SliderDown)
 	g.UpdateStart()
-	g.SetSliderState(SliderNormal)
+	g.SetSliderState(SliderActive)
 	g.SliderSig.Emit(g.This, int64(SliderReleased), g.Value)
 	if wasPressed && g.Value != g.EmitValue {
 		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
@@ -151,7 +154,7 @@ func (g *SliderBase) SliderEnterHover() {
 func (g *SliderBase) SliderExitHover() {
 	if g.State == SliderHover {
 		g.UpdateStart()
-		g.SetSliderState(SliderNormal)
+		g.SetSliderState(SliderActive)
 		g.UpdateEnd()
 	}
 }
@@ -339,7 +342,7 @@ func (g *SliderBase) ConfigParts() {
 	g.Parts.Lay = LayoutNil
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, SliderProps[SliderNormal])
+	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, g.StyleProps(SliderSelectors[SliderActive]))
 }
 
 func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
@@ -372,7 +375,48 @@ type Slider struct {
 	SliderBase
 }
 
-var KiT_Slider = kit.Types.AddType(&Slider{}, nil)
+var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
+
+var SliderProps = map[string]interface{}{
+	SliderSelectors[SliderActive]: map[string]interface{}{
+		"border-width":     "1px",
+		"border-radius":    "4px",
+		"border-color":     "black",
+		"border-style":     "solid",
+		"padding":          "6px",
+		"margin":           "4px",
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+	},
+	SliderSelectors[SliderDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"background-color": "#DDD",
+	},
+	SliderSelectors[SliderHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	SliderSelectors[SliderFocus]: map[string]interface{}{
+		"border-color":     "#008",
+		"background.color": "#CCF",
+	},
+	SliderSelectors[SliderDown]: map[string]interface{}{
+		"border-color":     "#000",
+		"background-color": "#DDF",
+	},
+	SliderSelectors[SliderValue]: map[string]interface{}{
+		"border-color":     "#00F",
+		"background-color": "#00F",
+	},
+	SliderSelectors[SliderBox]: map[string]interface{}{
+		"border-color":     "#FFF",
+		"background-color": "#FFF",
+	},
+}
 
 func (g *Slider) Defaults() { // todo: should just get these from props
 	g.ThumbSize = 25.0
@@ -387,48 +431,13 @@ func (g *Slider) Init2D() {
 	g.ConfigParts()
 }
 
-var SliderProps = []map[string]interface{}{
-	{ // normal
-		"border-width":     "1px",
-		"border-radius":    "4px",
-		"border-color":     "black",
-		"border-style":     "solid",
-		"padding":          "6px",
-		"margin":           "4px",
-		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#008",
-		"background.color": "#CCF",
-	}, { // press
-		"border-color":     "#000",
-		"background-color": "#DDF",
-	}, { // value fill
-		"border-color":     "#00F",
-		"background-color": "#00F",
-	}, { // overall box -- just white
-		"border-color":     "#FFF",
-		"background-color": "#FFF",
-	},
-}
-
 func (g *Slider) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(SliderProps[SliderNormal])
+	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, SliderProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(SliderSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -510,7 +519,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	bsz.SetDim(g.Dim, g.Pos)
-	pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+	pc.FillStyle.SetColor(&g.StateStyles[SliderValue].Background.Color)
 	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	tpos.SetDim(g.Dim, bpos.Dim(g.Dim)+g.Pos)
@@ -530,7 +539,7 @@ func (g *Slider) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
-		g.SetSliderState(SliderNormal) // lose any hover state but whatever..
+		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }
@@ -546,7 +555,44 @@ type ScrollBar struct {
 	SliderBase
 }
 
-var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, nil)
+var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
+
+var ScrollBarProps = map[string]interface{}{
+	SliderSelectors[SliderActive]: map[string]interface{}{
+		"width":            "16px", // assumes vertical -- user needs to set!
+		"min-width":        "16px",
+		"border-width":     "1px",
+		"border-radius":    "4px",
+		"border-color":     "black",
+		"border-style":     "solid",
+		"padding":          "0px",
+		"margin":           "2px",
+		"background-color": "#EEF",
+	},
+	SliderSelectors[SliderDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"background-color": "#DDD",
+	},
+	SliderSelectors[SliderHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	SliderSelectors[SliderFocus]: map[string]interface{}{
+		"border-color":     "#008",
+		"background.color": "#CCF",
+	},
+	SliderSelectors[SliderDown]: map[string]interface{}{
+		"border-color":     "#000",
+		"background-color": "#DDF",
+	},
+	SliderSelectors[SliderValue]: map[string]interface{}{
+		"border-color":     "#00F",
+		"background-color": "#00F",
+	},
+	SliderSelectors[SliderBox]: map[string]interface{}{
+		"border-color":     "#FFF",
+		"background-color": "#FFF",
+	},
+}
 
 func (g *ScrollBar) Defaults() { // todo: should just get these from props
 	g.ValThumb = true
@@ -561,44 +607,13 @@ func (g *ScrollBar) Init2D() {
 	g.Init2DSlider()
 }
 
-var ScrollBarProps = []map[string]interface{}{
-	{
-		"width":            "16px", // assumes vertical -- user needs to set!
-		"min-width":        "16px",
-		"border-width":     "1px",
-		"border-radius":    "4px",
-		"border-color":     "black",
-		"border-style":     "solid",
-		"padding":          "0px",
-		"margin":           "2px",
-		"background-color": "#EEF",
-	}, { // disabled
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#008",
-		"background.color": "#CCF",
-	}, { // press
-		"border-color":     "#000",
-		"background-color": "#DDF",
-	}, { // value fill
-		"border-color":     "#00F",
-		"background-color": "#00F",
-	}, { // overall box -- just white
-		"border-color":     "#FFF",
-		"background-color": "#FFF",
-	},
-}
-
 func (g *ScrollBar) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(ScrollBarProps[SliderNormal])
+	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, ScrollBarProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(SliderSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -653,7 +668,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(g.Dim, g.Pos)                     // start of thumb
 	sz.SetDim(g.Dim, g.ThumbSize)
-	pc.FillStyle.SetColor(&g.StateStyles[SliderValueFill].Background.Color)
+	pc.FillStyle.SetColor(&g.StateStyles[SliderValue].Background.Color)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
@@ -662,7 +677,7 @@ func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
-		g.SetSliderState(SliderNormal) // lose any hover state but whatever..
+		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }

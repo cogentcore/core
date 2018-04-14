@@ -892,9 +892,12 @@ func (ly *Layout) FinalizeLayout() {
 func (ly *Layout) AvailSize() Vec2D {
 	spc := ly.Style.BoxSpace()
 	avail := ly.LayData.AllocSize.SubVal(spc)
-	if ly.Par != nil {
-		if vp, ok := ly.Par.(*Viewport2D); ok {
+	pargi, _ := KiToNode2D(ly.Par)
+	if pargi != nil {
+		vp := pargi.AsViewport2D()
+		if vp != nil {
 			if vp.Viewport == nil {
+				fmt.Printf("non-nil par vp\n")
 				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
 			}
 		}
@@ -1180,7 +1183,7 @@ type Frame struct {
 	Layout
 }
 
-var KiT_Frame = kit.Types.AddType(&Frame{}, nil)
+var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 
 var FrameProps = map[string]interface{}{
 	"border-width":     units.NewValue(2, units.Px),
@@ -1255,7 +1258,7 @@ type Stretch struct {
 	Node2DBase
 }
 
-var KiT_Stretch = kit.Types.AddType(&Stretch{}, nil)
+var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
 
 var StretchProps = map[string]interface{}{
 	"max-width":  -1.0,
@@ -1279,7 +1282,7 @@ type Space struct {
 	Node2DBase
 }
 
-var KiT_Space = kit.Types.AddType(&Space{}, nil)
+var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
 
 var SpaceProps = map[string]interface{}{
 	"width":  units.NewValue(1, units.Em),

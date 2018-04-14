@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
@@ -126,6 +127,24 @@ func (g *NodeBase) GrabFocus() {
 // translate a point in global pixel coords into relative position within node
 func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(g.WinBBox.Min)
+}
+
+// StyleProps returns a property that contains another map of properties for a
+// given styling selector, such as :normal :active :hover etc -- the
+// convention is to prefix this selector with a : and use lower-case names, so
+// we follow that.  Standard widgets set these props on the type, and we use
+// type-based fallback, so these should exist for most.
+func (g *NodeBase) StyleProps(selector string) map[string]interface{} {
+	sp := g.Prop(selector, false, true) // don't inherit (style handles that separately) but do use type props
+	if sp == nil {
+		return nil
+	}
+	spm, ok := sp.(map[string]interface{})
+	if ok {
+		return spm
+	}
+	log.Printf("gi.StyleProps: looking for a map[string]interface{} for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, g.PathUnique())
+	return nil
 }
 
 // standard css properties on nodes apply, including visible, etc.

@@ -25,7 +25,7 @@ type MapView struct {
 	Values []ValueView `desc:"ValueView representations of the map values"`
 }
 
-var KiT_MapView = kit.Types.AddType(&MapView{}, nil)
+var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified

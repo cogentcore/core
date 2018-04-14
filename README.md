@@ -64,6 +64,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * Basic CSS styling is based on the Box model: https://www.w3schools.com/css/css_boxmodel.asp -- see also the Box shadow model https://www.w3schools.com/css/css3_shadows.asp -- general html spec: https://www.w3.org/TR/html5/index.html#contents -- better ref section of w3schools for css spec: https://www.w3schools.com/cssref/default.asp
 
+* Naming conventions for scenegraph / html / css objects: it seems conventional in HTML to use lowercase with hyphen separator for id naming.  And states such as :hover :active etc: https://stackoverflow.com/questions/1696864/naming-class-and-id-html-attributes-dashes-vs-underlines https://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html -- so we use that convention, which then provides a clear contrast to the UpperCase Go code (see ki/README.md for Go conventions).  Specific defined selectors: https://www.w3schools.com/cssref/css_selectors.asp -- note that read-only is used
+
 * Every non-terminal Widget must either be a Layout or take full responsibility for everything under it -- i.e., all arbitrary collections of widgets must be Layouts -- only the layout has all the logic necessary for organizing the geometry of its children.  There is only one Layout type that supports all forms of Layout -- and it is a proper Widget -- not a side class like in Qt Widgets.  The Frame is a type of Layout that draws a frame around itself.
 
 * General Widget method conventions:

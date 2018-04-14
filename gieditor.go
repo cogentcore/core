@@ -48,7 +48,7 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 
 	tvfr := split.AddNewChild(KiT_Frame, "tvfr").(*Frame)
 	svfr := split.AddNewChild(KiT_Frame, "svfr").(*Frame)
-	split.SetSplits(.3, .7)
+	split.SetSplits(.2, .8)
 
 	tv1 := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
 	tv1.SetSrcNode(obj)

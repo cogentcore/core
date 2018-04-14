@@ -24,7 +24,15 @@ type SplitView struct {
 	Dim         Dims2D    `desc:"dimension along which to split the space"`
 }
 
-var KiT_SplitView = kit.Types.AddType(&SplitView{}, nil)
+var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
+
+// auto-max-stretch
+var SplitViewProps = map[string]interface{}{
+	"max-width":  -1.0,
+	"max-height": -1.0,
+	"margin":     0,
+	"padding":    0,
+}
 
 // UpdateSplits updates the splits to be same length as number of children, and normalized
 func (g *SplitView) UpdateSplits() {
@@ -149,14 +157,6 @@ func (g *SplitView) ConfigSplitters() {
 	}
 }
 
-// auto-max-stretch
-var SplitViewProps = map[string]interface{}{
-	"max-width":  -1.0,
-	"max-height": -1.0,
-	"margin":     0,
-	"padding":    0,
-}
-
 func (g *SplitView) Style2D() {
 	g.Style2DWidget(SplitViewProps)
 	g.UpdateSplits()
@@ -236,7 +236,47 @@ type Splitter struct {
 	SliderBase
 }
 
-var KiT_Splitter = kit.Types.AddType(&Splitter{}, nil)
+var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
+
+var SplitterProps = map[string]interface{}{
+	SliderSelectors[SliderActive]: map[string]interface{}{
+		"padding":          "0px",
+		"margin":           "0px",
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"max-width":  units.NewValue(1, units.Em),
+			"max-height": units.NewValue(5, units.Em),
+			"min-width":  units.NewValue(1, units.Em),
+			"min-height": units.NewValue(5, units.Em),
+			"margin":     units.NewValue(0, units.Px),
+			"padding":    units.NewValue(0, units.Px),
+			"vert-align": AlignMiddle,
+		},
+	},
+	SliderSelectors[SliderDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"background-color": "#DDD",
+	},
+	SliderSelectors[SliderHover]: map[string]interface{}{
+		"background-color": "#EEF",
+	},
+	SliderSelectors[SliderFocus]: map[string]interface{}{
+		"border-color":     "#008",
+		"background.color": "#CCF",
+	},
+	SliderSelectors[SliderDown]: map[string]interface{}{
+		"border-color":     "#000",
+		"background-color": "#EEF",
+	},
+	SliderSelectors[SliderValue]: map[string]interface{}{
+		"border-color":     "#00F",
+		"background-color": "#00F",
+	},
+	SliderSelectors[SliderBox]: map[string]interface{}{
+		"border-color":     "#888",
+		"background-color": "#FFF",
+	},
+}
 
 func (g *Splitter) Defaults() { // todo: should just get these from props
 	g.ValThumb = false
@@ -252,46 +292,6 @@ func (g *Splitter) Init2D() {
 	g.Init2DSlider()
 	g.Defaults()
 	g.ConfigParts()
-}
-
-var SplitterProps = []map[string]interface{}{
-	{
-		// "width":            "16px", // assumes vertical -- user needs to set!
-		// "min-width":        "16px",
-		// "border-width":     "1px",
-		// "border-radius":    "4px",
-		// "border-color":     "black",
-		// "border-style":     "solid",
-		"padding":          "0px",
-		"margin":           "0px",
-		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
-			"max-width":  units.NewValue(1, units.Em),
-			"max-height": units.NewValue(5, units.Em),
-			"min-width":  units.NewValue(1, units.Em),
-			"min-height": units.NewValue(5, units.Em),
-			"margin":     units.NewValue(0, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-			"vert-align": AlignMiddle,
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#EEF",
-	}, { // focus
-		"border-color":     "#008",
-		"background.color": "#CCF",
-	}, { // press
-		"border-color":     "#000",
-		"background-color": "#EEF",
-	}, { // value fill
-		"border-color":     "#00F",
-		"background-color": "#00F",
-	}, { // overall box -- just white
-		"border-color":     "#888",
-		"background-color": "#FFF",
-	},
 }
 
 func (g *Splitter) ConfigPartsIfNeeded(render bool) {
@@ -323,12 +323,11 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 }
 
 func (g *Splitter) Style2D() {
-	// bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(SplitterProps[SliderNormal])
+	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, SplitterProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(SliderSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -421,7 +420,7 @@ func (g *Splitter) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
-		g.SetSliderState(SliderNormal) // lose any hover state but whatever..
+		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }

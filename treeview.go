@@ -58,11 +58,11 @@ type TreeViewStates int32
 
 const (
 	// normal state -- there but not being interacted with
-	TreeViewNormalState TreeViewStates = iota
+	TreeViewActive TreeViewStates = iota
 	// selected
-	TreeViewSelState
+	TreeViewSel
 	// in focus -- will respond to keyboard input
-	TreeViewFocusState
+	TreeViewFocus
 	TreeViewStatesN
 )
 
@@ -870,11 +870,11 @@ func (tv *TreeView) Render2D() {
 		bitflag.Clear(&tv.Flag, int(NodeFlagFullReRender))
 
 		if tv.IsSelected() {
-			tv.Style = tv.StateStyles[TreeViewSelState]
+			tv.Style = tv.StateStyles[TreeViewSel]
 		} else if tv.HasFocus() {
-			tv.Style = tv.StateStyles[TreeViewFocusState]
+			tv.Style = tv.StateStyles[TreeViewFocus]
 		} else {
-			tv.Style = tv.StateStyles[TreeViewNormalState]
+			tv.Style = tv.StateStyles[TreeViewActive]
 		}
 
 		// note: this is std except using WidgetSize instead of AllocSize

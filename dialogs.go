@@ -47,7 +47,7 @@ type Dialog struct {
 	DialogSig ki.Signal   `desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
 }
 
-var KiT_Dialog = kit.Types.AddType(&Dialog{}, nil)
+var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 // Open this dialog, in given location (0 = middle of window), finding window from given viewport -- returns false if it fails for any reason
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
@@ -388,7 +388,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, r
 	return dlg
 }
 
-// Map Map dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// Map View dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("MapView", title, prompt, true, true)
 
@@ -400,6 +400,27 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv k
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "MapView").(*MapView)
 	sv.SetMap(mp)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.UpdateEnd()
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// Slice View dialog for editing fields of a slice using a SliceView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+func SliceViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("SliceView", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "SliceView").(*SliceView)
+	sv.SetSlice(mp)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

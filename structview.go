@@ -27,18 +27,7 @@ type StructView struct {
 	Fields []ValueView `desc:"ValueView representations of the fields"`
 }
 
-var KiT_StructView = kit.Types.AddType(&StructView{}, nil)
-
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
-
-// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
-func (sv *StructView) SetStruct(st interface{}) {
-	sv.UpdateStart()
-	sv.Struct = st
-	sv.UpdateFromStruct()
-	sv.UpdateEnd()
-}
+var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
 var StructViewProps = map[string]interface{}{
 	"#frame": map[string]interface{}{
@@ -63,6 +52,17 @@ var StructViewProps = map[string]interface{}{
 		"vertical-align":   AlignTop,
 		"background-color": "none",
 	},
+}
+
+// Note: the overall strategy here is similar to Dialog, where we provide lots
+// of flexible configuration elements that can be easily extended and modified
+
+// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
+func (sv *StructView) SetStruct(st interface{}) {
+	sv.UpdateStart()
+	sv.Struct = st
+	sv.UpdateFromStruct()
+	sv.UpdateEnd()
 }
 
 // SetFrame configures view as a frame

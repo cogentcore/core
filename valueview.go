@@ -256,6 +256,7 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*TextField)
 	tf.SetProp("max-width", -1) // todo..
+	bitflag.SetState(tf.Flags(), vv.IsReadOnly(), int(ReadOnly))
 	vv.UpdateWidget()
 	tf.TextFieldSig.DisconnectAll() // these are re-used, so key to disconnect!
 	tf.TextFieldSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -306,7 +307,8 @@ func (vv *StructValueView) WidgetType() reflect.Type {
 
 func (vv *StructValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
-	txt := fmt.Sprintf("%v", vv.Value.Type().Elem().Name())
+	npv := kit.NonPtrValue(vv.Value)
+	txt := fmt.Sprintf("%v", npv.Type().Name())
 	mb.SetText(txt)
 }
 
@@ -370,7 +372,7 @@ func (vv *MapInlineValueView) WidgetType() reflect.Type {
 
 func (vv *MapInlineValueView) UpdateWidget() {
 	// sv := vv.Widget.(*MapViewInline)
-	// npv := vv.Value.Elem()
+	// npv := kit.NonPtrValue(vv.Value)
 	// sv.SetChecked(npv.Bool())
 }
 
@@ -399,7 +401,7 @@ func (vv *SliceValueView) WidgetType() reflect.Type {
 
 func (vv *SliceValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
-	npv := vv.Value.Elem()
+	npv := kit.NonPtrValue(vv.Value)
 	sz := npv.Len()
 	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
 	mb.SetText(txt)
@@ -415,7 +417,7 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*MenuButton)
-		PromptDialog(mb.Viewport, "Slice Value View", "Sorry, slice editor not implemented yet -- would show up here", true, false, nil, nil)
+		SliceViewDialog(mb.Viewport, vv.Value.Interface(), "Slice Value View", "", nil, nil)
 	})
 }
 
@@ -436,7 +438,7 @@ func (vv *MapValueView) WidgetType() reflect.Type {
 
 func (vv *MapValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
-	npv := vv.Value.Elem()
+	npv := kit.NonPtrValue(vv.Value)
 	sz := npv.Len()
 	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
 	mb.SetText(txt)
@@ -473,7 +475,19 @@ func (vv *KiPtrValueView) WidgetType() reflect.Type {
 
 // get the Ki struct itself (or nil)
 func (vv *KiPtrValueView) KiStruct() ki.Ki {
-	npv := vv.Value.Elem()
+	if !vv.Value.IsValid() {
+		return nil
+	}
+	if vv.Value.IsNil() {
+		return nil
+	}
+	npv := vv.Value
+	if vv.Value.Kind() == reflect.Ptr {
+		npv = vv.Value.Elem()
+	}
+	if npv.Kind() == reflect.Struct {
+		npv = vv.Value // go back up
+	}
 	if !npv.IsNil() {
 		k, ok := npv.Interface().(ki.Ki)
 		if ok && k != nil {
@@ -539,7 +553,7 @@ func (vv *BoolValueView) WidgetType() reflect.Type {
 
 func (vv *BoolValueView) UpdateWidget() {
 	cb := vv.Widget.(*CheckBox)
-	npv := vv.Value.Elem()
+	npv := kit.NonPtrValue(vv.Value)
 	cb.SetChecked(npv.Bool())
 }
 
@@ -575,7 +589,7 @@ func (vv *IntValueView) WidgetType() reflect.Type {
 
 func (vv *IntValueView) UpdateWidget() {
 	sb := vv.Widget.(*SpinBox)
-	npv := vv.Value.Elem()
+	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat(npv.Interface())
 	if ok {
 		sb.SetValue(fv)
@@ -646,7 +660,7 @@ func (vv *FloatValueView) WidgetType() reflect.Type {
 
 func (vv *FloatValueView) UpdateWidget() {
 	sb := vv.Widget.(*SpinBox)
-	npv := vv.Value.Elem()
+	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat(npv.Interface())
 	if ok {
 		sb.SetValue(fv)

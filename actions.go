@@ -40,7 +40,64 @@ type Action struct {
 	ActionSig ki.Signal   `desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 }
 
-var KiT_Action = kit.Types.AddType(&Action{}, nil)
+var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
+
+var ActionProps = map[string]interface{}{
+	ButtonSelectors[ButtonActive]: map[string]interface{}{
+		"border-width":     units.NewValue(0, units.Px), // todo: should be default
+		"border-radius":    units.NewValue(0, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(2, units.Px),
+		"margin":           units.NewValue(0, units.Px),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignTop,
+		"color":            color.Black,
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignMiddle,
+		},
+	},
+	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	},
+	ButtonSelectors[ButtonHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+		"background-color": "#DDF",
+	},
+	ButtonSelectors[ButtonDown]: map[string]interface{}{
+		"border-color": "#BBF",
+		"color":        color.White, // todo: this is no longer working for label
+		"#label": map[string]interface{}{
+			"color": color.White,
+		},
+		"background-color": "#008",
+	},
+	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#88F",
+	},
+}
 
 // ButtonWidget interface
 
@@ -52,7 +109,7 @@ func (g *Action) ButtonAsBase() *ButtonBase {
 func (g *Action) ButtonRelease() {
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
-	g.SetButtonState(ButtonNormal)
+	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ActionSig.Emit(g.This, 0, g.Data)
@@ -95,62 +152,10 @@ func (g *Action) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-var ActionProps = []map[string]interface{}{
-	{
-		"border-width":     units.NewValue(0, units.Px),
-		"border-radius":    units.NewValue(0, units.Px),
-		"border-color":     color.Black,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(2, units.Px),
-		"margin":           units.NewValue(0, units.Px),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
-		"color":            color.Black,
-		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#label": map[string]interface{}{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
-		},
-		"#indicator": map[string]interface{}{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignMiddle,
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"background-color": "#DDF",
-	}, { // press
-		"border-color": "#BBF",
-		"color":        color.White, // todo: this is no longer working for label
-		"#label": map[string]interface{}{
-			"color": color.White,
-		},
-		"background-color": "#008",
-	}, { // selected
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#88F",
-	},
-}
-
 func (g *Action) ConfigPartsButton() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
 }
 
 func (g *Action) ConfigPartsMenu() {
@@ -163,12 +168,13 @@ func (g *Action) ConfigPartsMenu() {
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
 	g.SetProp("max-width", -1)
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ActionProps[ButtonNormal])
+	props := g.StyleProps(ButtonSelectors[ButtonActive])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
 			ic.CopyFromIcon(IconByName("widget-wedge-right"))
-			g.PartStyleProps(ic.This, ActionProps[ButtonNormal])
+			g.PartStyleProps(ic.This, props)
 		}
 	}
 }
@@ -190,11 +196,11 @@ func (g *Action) ConfigPartsIfNeeded() {
 
 func (g *Action) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(ActionProps[ButtonNormal])
+	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, ActionProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2D{})
 	}
@@ -235,7 +241,7 @@ func (g *Action) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }
@@ -252,7 +258,7 @@ type Separator struct {
 	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
 }
 
-var KiT_Separator = kit.Types.AddType(&Separator{}, nil)
+var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
 var SeparatorProps = map[string]interface{}{
 	"padding":      units.NewValue(2, units.Px),
@@ -363,7 +369,62 @@ type MenuButton struct {
 	Menu Menu `desc:"the menu items for this menu"`
 }
 
-var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, nil)
+var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
+
+var MenuButtonProps = map[string]interface{}{
+	ButtonSelectors[ButtonActive]: map[string]interface{}{
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(4, units.Px),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignMiddle,
+		"color":            color.Black,
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignBottom,
+		},
+	},
+	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	},
+	ButtonSelectors[ButtonHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+		"border-color":     "#EEF",
+		"box-shadow.color": "#BBF",
+	},
+	ButtonSelectors[ButtonDown]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	},
+	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
 
 // ButtonWidget interface
 
@@ -374,7 +435,7 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 func (g *MenuButton) ButtonRelease() {
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
-	g.SetButtonState(ButtonNormal)
+	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
@@ -429,59 +490,6 @@ func (g *MenuButton) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-the-qpushbutton-s-menu-indicator-sub-control
-// menu-indicator
-
-var MenuButtonProps = []map[string]interface{}{
-	{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     color.Black,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(4, units.Px),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignMiddle,
-		"color":            color.Black,
-		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#label": map[string]interface{}{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
-		},
-		"#indicator": map[string]interface{}{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignBottom,
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#EEF",
-		"box-shadow.color": "#BBF",
-	}, { // press
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
-	}, { // selected
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
-	},
-}
-
 func (g *MenuButton) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
@@ -495,13 +503,14 @@ func (g *MenuButton) ConfigParts() {
 		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, MenuButtonProps[ButtonNormal])
+	props := g.StyleProps(ButtonSelectors[ButtonActive])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFromIcon(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.PartStyleProps(ic.This, MenuButtonProps[ButtonNormal])
+			g.PartStyleProps(ic.This, props)
 		}
 	}
 }
@@ -515,11 +524,11 @@ func (g *MenuButton) ConfigPartsIfNeeded() {
 
 func (g *MenuButton) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(MenuButtonProps[ButtonNormal])
+	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, MenuButtonProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -559,7 +568,7 @@ func (g *MenuButton) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }

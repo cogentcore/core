@@ -63,7 +63,7 @@ type Label struct {
 	Text string `xml:"text" desc:"label to display"`
 }
 
-var KiT_Label = kit.Types.AddType(&Label{}, nil)
+var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
 var LabelProps = map[string]interface{}{
 	"padding":        units.NewValue(2, units.Px),
@@ -112,15 +112,18 @@ type TextFieldStates int32
 
 const (
 	// normal state -- there but not being interacted with
-	TextFieldNormal TextFieldStates = iota
+	TextFieldActive TextFieldStates = iota
 	// textfield is the focus -- will respond to keyboard input
 	TextFieldFocus
 	// read only / disabled -- not editable
-	TextFieldDisabled
+	TextFieldReadOnly
 	TextFieldStatesN
 )
 
 //go:generate stringer -type=TextFieldStates
+
+// Style selector names for the different states
+var TextFieldSelectors = []string{":active", ":focus", ":read-only"}
 
 // TextField is a widget for editing a line of text
 type TextField struct {
@@ -136,7 +139,27 @@ type TextField struct {
 	StateStyles  [TextFieldStatesN]Style `desc:"normal style and focus style"`
 }
 
-var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
+var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
+
+var TextFieldProps = map[string]interface{}{
+	TextFieldSelectors[TextFieldActive]: map[string]interface{}{
+		"border-width":     units.NewValue(1, units.Px),
+		"border-color":     color.Black,
+		"border-style":     "solid",
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(1, units.Px),
+		"text-align":       AlignLeft,
+		"vertical-align":   AlignTop,
+		"color":            "black",
+		"background-color": "#EEE",
+	},
+	TextFieldSelectors[TextFieldFocus]: map[string]interface{}{
+		"background-color": color.White,
+	},
+	TextFieldSelectors[TextFieldReadOnly]: map[string]interface{}{
+		"background-color": "#CCC",
+	},
+}
 
 func (g *TextField) SetText(txt string) {
 	if g.Text == txt && g.EditText == txt {
@@ -358,35 +381,17 @@ func (g *TextField) Init2D() {
 	})
 }
 
-var TextFieldProps = [TextFieldStatesN]map[string]interface{}{
-	{ // normal
-		"border-width":     units.NewValue(1, units.Px),
-		"border-color":     color.Black,
-		"border-style":     "solid",
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(1, units.Px),
-		"text-align":       AlignLeft,
-		"vertical-align":   AlignTop,
-		"color":            "black",
-		"background-color": "#EEE",
-	}, { // focus
-		"background-color": color.White,
-	}, { // read-only
-		"background-color": "#CCC",
-	},
-}
-
 func (g *TextField) Style2D() {
 	if g.IsReadOnly() {
 		bitflag.Clear(&g.Flag, int(CanFocus))
 	} else {
 		bitflag.Set(&g.Flag, int(CanFocus))
 	}
-	g.Style2DWidget(TextFieldProps[TextFieldNormal])
+	g.Style2DWidget(g.StyleProps(TextFieldSelectors[TextFieldActive]))
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, TextFieldProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(TextFieldSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -492,11 +497,11 @@ func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
 		if g.IsReadOnly() {
-			g.Style = g.StateStyles[TextFieldDisabled]
+			g.Style = g.StateStyles[TextFieldReadOnly]
 		} else if g.HasFocus() {
 			g.Style = g.StateStyles[TextFieldFocus]
 		} else {
-			g.Style = g.StateStyles[TextFieldNormal]
+			g.Style = g.StateStyles[TextFieldActive]
 		}
 		g.RenderStdBox(&g.Style)
 		cur := g.EditText[g.StartPos:g.EndPos]
@@ -541,7 +546,33 @@ type SpinBox struct {
 	SpinBoxSig ki.Signal `json:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
-var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, nil)
+var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
+
+var SpinBoxProps = map[string]interface{}{
+	":normal": map[string]interface{}{ // todo: could add other states
+		"#up": map[string]interface{}{
+			"max-width":  units.NewValue(1.5, units.Ex),
+			"max-height": units.NewValue(1.5, units.Ex),
+			"margin":     units.NewValue(1, units.Px),
+			"padding":    units.NewValue(0, units.Px),
+		},
+		"#down": map[string]interface{}{
+			"max-width":  units.NewValue(1.5, units.Ex),
+			"max-height": units.NewValue(1.5, units.Ex),
+			"margin":     units.NewValue(1, units.Px),
+			"padding":    units.NewValue(0, units.Px),
+		},
+		"#space": map[string]interface{}{
+			"width": units.NewValue(.1, units.Ex),
+		},
+		"#textfield": map[string]interface{}{
+			"min-width": units.NewValue(4, units.Ex),
+			"width":     units.NewValue(8, units.Ex),
+			"margin":    units.NewValue(2, units.Px),
+			"padding":   units.NewValue(2, units.Px),
+		},
+	},
+}
 
 func (g *SpinBox) Defaults() { // todo: should just get these from props
 	g.Step = 0.1
@@ -603,32 +634,6 @@ func (g *SpinBox) IncrValue(steps float64) {
 	g.SetValueAction(val)
 }
 
-var SpinBoxProps = []map[string]interface{}{
-	{
-		"#up": map[string]interface{}{
-			"max-width":  units.NewValue(1.5, units.Ex),
-			"max-height": units.NewValue(1.5, units.Ex),
-			"margin":     units.NewValue(1, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-		},
-		"#down": map[string]interface{}{
-			"max-width":  units.NewValue(1.5, units.Ex),
-			"max-height": units.NewValue(1.5, units.Ex),
-			"margin":     units.NewValue(1, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-		},
-		"#space": map[string]interface{}{
-			"width": units.NewValue(.1, units.Ex),
-		},
-		"#textfield": map[string]interface{}{
-			"min-width": units.NewValue(4, units.Ex),
-			"width":     units.NewValue(8, units.Ex),
-			"margin":    units.NewValue(2, units.Px),
-			"padding":   units.NewValue(2, units.Px),
-		},
-	},
-}
-
 // internal indexes for accessing elements of the widget
 const (
 	sbTextFieldIdx = iota
@@ -645,7 +650,7 @@ func (g *SpinBox) ConfigParts() {
 	}
 	g.Parts.Lay = LayoutRow
 	g.Parts.SetProp("vert-align", AlignMiddle)
-	props := SpinBoxProps[0]
+	props := g.StyleProps(":normal")
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "TextField")
 	config.Add(KiT_Space, "Space")
@@ -718,7 +723,7 @@ func (g *SpinBox) Style2D() {
 	if g.Step == 0 {
 		g.Defaults()
 	}
-	g.Style2DWidget(SpinBoxProps[0])
+	g.Style2DWidget(g.StyleProps(":normal"))
 	g.ConfigParts()
 }
 
@@ -757,7 +762,57 @@ type ComboBox struct {
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
-var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, nil)
+var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps[0])
+
+var ComboBoxProps = []map[string]interface{}{
+	{
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(4, units.Px),
+		"text-align":       AlignCenter,
+		"vertical-align":   AlignMiddle,
+		"color":            color.Black,
+		"background-color": "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+		"#indicator": map[string]interface{}{
+			"width":          units.NewValue(1.5, units.Ex),
+			"height":         units.NewValue(1.5, units.Ex),
+			"margin":         units.NewValue(0, units.Px),
+			"padding":        units.NewValue(0, units.Px),
+			"vertical-align": AlignBottom,
+		},
+	}, { // disabled
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	}, { // hover
+		"background-color": "#CCF", // todo "darker"
+	}, { // focus
+		"border-color":     "#EEF",
+		"box-shadow.color": "#BBF",
+	}, { // press
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	}, { // selected
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
 
 // ButtonWidget interface
 
@@ -767,14 +822,14 @@ func (g *ComboBox) ButtonAsBase() *ButtonBase {
 
 func (g *ComboBox) ButtonRelease() {
 	if g.IsReadOnly() {
-		g.SetButtonState(ButtonNormal)
+		g.SetButtonState(ButtonActive)
 		return
 	}
 	win := g.Viewport.Win
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.MakeItemsMenu()
-	g.SetButtonState(ButtonNormal)
+	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
@@ -925,56 +980,6 @@ func (g *ComboBox) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-var ComboBoxProps = []map[string]interface{}{
-	{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     color.Black,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(4, units.Px),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignMiddle,
-		"color":            color.Black,
-		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#label": map[string]interface{}{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
-		},
-		"#indicator": map[string]interface{}{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignBottom,
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#EEF",
-		"box-shadow.color": "#BBF",
-	}, { // press
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
-	}, { // selected
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
-	},
-}
-
 func (g *ComboBox) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
@@ -988,7 +993,7 @@ func (g *ComboBox) ConfigParts() {
 		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ComboBoxProps[ButtonNormal])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ComboBoxProps[ButtonActive])
 	if g.MaxLength > 0 && lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float64(g.MaxLength), units.Ex))
@@ -998,7 +1003,7 @@ func (g *ComboBox) ConfigParts() {
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFrom(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.PartStyleProps(ic.This, ComboBoxProps[ButtonNormal])
+			g.PartStyleProps(ic.This, ComboBoxProps[ButtonActive])
 		}
 	}
 }
@@ -1012,7 +1017,7 @@ func (g *ComboBox) ConfigPartsIfNeeded() {
 
 func (g *ComboBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(ComboBoxProps[ButtonNormal])
+	g.Style2DWidget(ComboBoxProps[ButtonActive])
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -1061,7 +1066,7 @@ func (g *ComboBox) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }

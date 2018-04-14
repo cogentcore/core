@@ -52,8 +52,8 @@ const (
 type ButtonStates int32
 
 const (
-	// normal state -- there but not being interacted with
-	ButtonNormal ButtonStates = iota
+	// normal active state -- there but not being interacted with
+	ButtonActive ButtonStates = iota
 	// disabled -- not pressable
 	ButtonDisabled
 	// mouse is hovering over the button
@@ -69,6 +69,9 @@ const (
 )
 
 //go:generate stringer -type=ButtonStates
+
+// Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
+var ButtonSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":selected"}
 
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
@@ -106,7 +109,7 @@ func (g *ButtonBase) IsChecked() bool {
 // set the selected state of this button -- does not emit signal or update
 func (g *ButtonBase) SetSelected(sel bool) {
 	bitflag.SetState(&g.Flag, sel, int(ButtonFlagSelected))
-	g.SetButtonState(ButtonNormal) // update style
+	g.SetButtonState(ButtonActive) // update style
 }
 
 // set the checked state of this button -- does not emit signal or update
@@ -124,9 +127,9 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	if g.IsReadOnly() {
 		state = ButtonDisabled
 	} else {
-		if state == ButtonNormal && g.IsSelected() {
+		if state == ButtonActive && g.IsSelected() {
 			state = ButtonSelected
-		} else if state == ButtonNormal && g.HasFocus() {
+		} else if state == ButtonActive && g.HasFocus() {
 			state = ButtonFocus
 		}
 	}
@@ -147,12 +150,12 @@ func (g *ButtonBase) ButtonPressed() {
 // state to normal, and emits clicked signal if if it was previously in pressed state
 func (g *ButtonBase) ButtonReleased() {
 	if g.IsReadOnly() {
-		g.SetButtonState(ButtonNormal)
+		g.SetButtonState(ButtonActive)
 		return
 	}
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
-	g.SetButtonState(ButtonNormal)
+	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
@@ -183,7 +186,7 @@ func (g *ButtonBase) ButtonExitHover() {
 	}
 	if g.State == ButtonHover {
 		g.UpdateStart()
-		g.SetButtonState(ButtonNormal)
+		g.SetButtonState(ButtonActive)
 		g.UpdateEnd()
 	}
 }
@@ -269,7 +272,60 @@ type Button struct {
 	ButtonBase
 }
 
-var KiT_Button = kit.Types.AddType(&Button{}, nil)
+var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
+
+var ButtonProps = map[string]interface{}{
+	ButtonSelectors[ButtonActive]: map[string]interface{}{
+		"border-width":        units.NewValue(1, units.Px),
+		"border-radius":       units.NewValue(4, units.Px),
+		"border-color":        color.Black,
+		"border-style":        BorderSolid,
+		"padding":             units.NewValue(4, units.Px),
+		"margin":              units.NewValue(4, units.Px),
+		"box-shadow.h-offset": units.NewValue(4, units.Px),
+		"box-shadow.v-offset": units.NewValue(4, units.Px),
+		"box-shadow.blur":     units.NewValue(4, units.Px),
+		"box-shadow.color":    "#CCC",
+		"text-align":          AlignCenter,
+		"vertical-align":      AlignTop,
+		"color":               color.Black,
+		"background-color":    "#EEF",
+		"#icon": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+			"color":            "inherit",
+		},
+	},
+	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	},
+	ButtonSelectors[ButtonHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+		"border-color":     "#88F",
+		"box-shadow.color": "#BBF",
+	},
+	ButtonSelectors[ButtonDown]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	},
+	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
 
 // ButtonWidget interface
 
@@ -297,58 +353,10 @@ func (g *Button) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-var ButtonProps = [ButtonStatesN]map[string]interface{}{
-	{
-		"border-width":        units.NewValue(1, units.Px),
-		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        color.Black,
-		"border-style":        BorderSolid,
-		"padding":             units.NewValue(4, units.Px),
-		"margin":              units.NewValue(4, units.Px),
-		"box-shadow.h-offset": units.NewValue(4, units.Px),
-		"box-shadow.v-offset": units.NewValue(4, units.Px),
-		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
-		"text-align":          AlignCenter,
-		"vertical-align":      AlignTop,
-		"color":               color.Black,
-		"background-color":    "#EEF",
-		"#icon": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#label": map[string]interface{}{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
-			"color":            "inherit",
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#88F",
-		"box-shadow.color": "#BBF",
-	}, { // press
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
-	}, { // selected
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
-	},
-}
-
 func (g *Button) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ButtonProps[ButtonNormal])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
 }
 
 func (g *Button) ConfigPartsIfNeeded() {
@@ -360,11 +368,11 @@ func (g *Button) ConfigPartsIfNeeded() {
 
 func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(ButtonProps[ButtonNormal])
+	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, ButtonProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -407,7 +415,7 @@ func (g *Button) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }
@@ -424,7 +432,60 @@ type CheckBox struct {
 	IconOff *Icon `desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
 }
 
-var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
+var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
+
+var CheckBoxProps = map[string]interface{}{
+	ButtonSelectors[ButtonActive]: map[string]interface{}{
+		"text-align": AlignLeft,
+		"color":      color.Black,
+		"#icon0": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    "#EEF",
+			"stroke":  color.Black,
+		},
+		"#icon1": map[string]interface{}{
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    "#EEF",
+			"stroke":  color.Black,
+		},
+		"#space": map[string]interface{}{
+			"width": units.NewValue(1, units.Ex),
+		},
+		"#label": map[string]interface{}{
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "none",
+		},
+	},
+	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+		"border-color":     "#BBB",
+		"color":            "#AAA",
+		"background-color": "#DDD",
+	},
+	ButtonSelectors[ButtonHover]: map[string]interface{}{
+		"background-color": "#CCF", // todo "darker"
+	},
+	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+		"border-color":     "#88F",
+		"box-shadow.color": "#BBF",
+	},
+	ButtonSelectors[ButtonDown]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#008",
+	},
+	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+		"border-color":     "#DDF",
+		"color":            "white",
+		"background-color": "#00F",
+	},
+}
 
 // CheckBoxWidget interface
 
@@ -457,63 +518,15 @@ func (g *CheckBox) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-var CheckBoxProps = []map[string]interface{}{
-	{
-		"text-align": AlignLeft,
-		"color":      color.Black,
-		"#icon0": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    "#EEF",
-			"stroke":  color.Black,
-		},
-		"#icon1": map[string]interface{}{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    "#EEF",
-			"stroke":  color.Black,
-		},
-		"#space": map[string]interface{}{
-			"width": units.NewValue(1, units.Ex),
-		},
-		"#label": map[string]interface{}{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
-		},
-	}, { // disabled
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
-	}, { // hover
-		"background-color": "#CCF", // todo "darker"
-	}, { // focus
-		"border-color":     "#88F",
-		"box-shadow.color": "#BBF",
-	}, { // press
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
-	}, { // selected
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
-	},
-}
-
 func (g *CheckBox) ConfigParts() {
 	g.SetCheckable(true)
-	if g.Icon == nil {
+	if g.Icon == nil { // todo: just use style
 		g.Icon = IconByName("widget-checked-box")
 	}
 	if g.IconOff == nil {
 		g.IconOff = IconByName("widget-unchecked-box")
 	}
-	props := CheckBoxProps[ButtonNormal]
+	props := g.StyleProps(ButtonSelectors[ButtonActive])
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
@@ -571,11 +584,11 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 
 func (g *CheckBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(CheckBoxProps[ButtonNormal])
+	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, CheckBoxProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -618,7 +631,7 @@ func (g *CheckBox) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonNormal) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
 	g.UpdateEnd()
 }
