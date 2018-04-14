@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const _TextFieldStates_name = "TextFieldNormalTextFieldFocusTextFieldDisabledTextFieldStatesN"
+const _TextFieldStates_name = "TextFieldActiveTextFieldFocusTextFieldReadOnlyTextFieldStatesN"
 
 var _TextFieldStates_index = [...]uint8{0, 15, 29, 46, 62}
 

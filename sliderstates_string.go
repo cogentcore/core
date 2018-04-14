@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _SliderStates_name = "SliderNormalSliderDisabledSliderHoverSliderFocusSliderDownSliderValueFillSliderBoxSliderStatesN"
+const _SliderStates_name = "SliderActiveSliderDisabledSliderHoverSliderFocusSliderDownSliderValueSliderBoxSliderStatesN"
 
-var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 73, 82, 95}
+var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 69, 78, 91}
 
 func (i SliderStates) String() string {
 	if i < 0 || i >= SliderStates(len(_SliderStates_index)-1) {

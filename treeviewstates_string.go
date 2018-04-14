@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TreeViewStates_name = "TreeViewNormalStateTreeViewSelStateTreeViewFocusStateTreeViewStatesN"
+const _TreeViewStates_name = "TreeViewActiveTreeViewSelTreeViewFocusTreeViewStatesN"
 
-var _TreeViewStates_index = [...]uint8{0, 19, 35, 53, 68}
+var _TreeViewStates_index = [...]uint8{0, 14, 25, 38, 53}
 
 func (i TreeViewStates) String() string {
 	if i < 0 || i >= TreeViewStates(len(_TreeViewStates_index)-1) {
