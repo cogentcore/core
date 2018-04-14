@@ -297,16 +297,14 @@ var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, nil, "")
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	Lay        Layouts               `xml:"lay" desc:"type of layout to use"`
-	StackTop   ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize  Vec2D                 `xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize  Vec2D                 `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasHScroll bool                  `desc:"horizontal scrollbar is used, at bottom of layout"`
-	HasVScroll bool                  `desc:"vertical scrollbar is used, at right of layout"`
-	HScroll    *ScrollBar            `xml:"-" desc:"horizontal scroll bar -- we fully manage this as needed"`
-	VScroll    *ScrollBar            `xml:"-" desc:"vertical scroll bar -- we fully manage this as needed"`
-	GridSize   image.Point           `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
-	GridData   [RowColN][]LayoutData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
+	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize Vec2D                 `xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize Vec2D                 `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll [Dims2DN]bool         `desc:"whether scrollbar is used for given dim"`
+	Scrolls   [Dims2DN]*ScrollBar   `xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	GridSize  image.Point           `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridData  [RowColN][]LayoutData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -888,66 +886,85 @@ func (ly *Layout) FinalizeLayout() {
 	}
 }
 
+// AvailSize returns the total size avail to this layout -- typically
+// AllocSize except for top-level layout which uses VpBBox in case less is
+// avail
+func (ly *Layout) AvailSize() Vec2D {
+	spc := ly.Style.BoxSpace()
+	avail := ly.LayData.AllocSize.SubVal(spc)
+	if ly.Par != nil {
+		if vp, ok := ly.Par.(*Viewport2D); ok {
+			if vp.Viewport == nil {
+				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
+			}
+		}
+	}
+	return avail
+}
+
 // process any overflow according to overflow settings
 func (ly *Layout) ManageOverflow() {
 	if len(ly.Kids) == 0 {
 		return
 	}
-	spc := ly.Style.BoxSpace()
-	avail := ly.LayData.AllocSize.SubVal(spc)
+	avail := ly.AvailSize()
 
 	ly.ExtraSize.SetVal(0.0)
-	ly.HasHScroll = false
-	ly.HasVScroll = false
+	for d := X; d < Dims2DN; d++ {
+		ly.HasScroll[d] = false
+	}
 
 	if ly.Style.Layout.Overflow != OverflowHidden {
 		sbw := ly.Style.Layout.ScrollBarWidth.Dots
-		if ly.ChildSize.X > (avail.X + 2.0) { // overflowing -- allow some margin
-			ly.HasHScroll = true
-			ly.ExtraSize.Y += sbw
+		for d := X; d < Dims2DN; d++ {
+			odim := OtherDim(d)
+			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
+				ly.HasScroll[d] = true
+				ly.ExtraSize.SetAddDim(odim, sbw)
+			}
 		}
-		if ly.ChildSize.Y > (avail.Y + 2.0) { // overflowing
-			ly.HasVScroll = true
-			ly.ExtraSize.X += sbw
-			// fmt.Printf("Layout: %v Overflow Y: avail: %v childsize: %v\n", ly.PathUnique(), avail.Y, ly.ChildSize.Y)
-		}
-
-		if ly.HasHScroll {
-			ly.SetHScroll()
-		}
-		if ly.HasVScroll {
-			ly.SetVScroll()
+		for d := X; d < Dims2DN; d++ {
+			if ly.HasScroll[d] {
+				ly.SetScroll(d)
+			}
 		}
 		ly.LayoutScrolls()
 	}
 }
 
-func (ly *Layout) SetHScroll() {
-	if ly.HScroll == nil {
-		ly.HScroll = &ScrollBar{}
-		ly.HScroll.InitName(ly.HScroll, "Lay_HScroll")
-		ly.HScroll.SetParent(ly.This)
-		ly.HScroll.Dim = X
-		ly.HScroll.Init2D()
-		ly.HScroll.Defaults()
+func (ly *Layout) SetScroll(d Dims2D) {
+	if ly.Scrolls[d] == nil {
+		ly.Scrolls[d] = &ScrollBar{}
+		sc := ly.Scrolls[d]
+		sc.InitName(sc, fmt.Sprintf("Scroll%v", d))
+		sc.SetParent(ly.This)
+		sc.Dim = d
+		sc.Init2D()
+		sc.Defaults()
 	}
 	spc := ly.Style.BoxSpace()
-	sc := ly.HScroll
-	sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
-	sc.SetFixedWidth(units.NewValue(ly.LayData.AllocSize.X, units.Dot))
+	avail := ly.AvailSize()
+	sc := ly.Scrolls[d]
+	if d == X {
+		sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.Dot))
+	} else {
+		sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.Dot))
+	}
 	sc.Style2D()
 	sc.Min = 0.0
-	sc.Max = ly.ChildSize.X + ly.ExtraSize.X // only scrollbar
-	sc.Step = ly.Style.Font.Size.Dots        // step by lines
-	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
-	sc.ThumbVal = ly.LayData.AllocSize.X - spc
+	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
+	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
+	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
+	sc.ThumbVal = avail.Dim(d) - spc
 	sc.Tracking = true
 	sc.TrackThr = sc.Step
-	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
+	sc.SliderSig.Connect(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
-		li, _ := KiToNode2D(rec) // note: avoid using closures
+		li, _ := KiToNode2D(recv) // note: avoid using closures
 		ls := li.AsLayout2D()
 		if ls.Updating.Value() == 0 {
 			ls.Move2DTree()
@@ -959,62 +976,17 @@ func (ly *Layout) SetHScroll() {
 }
 
 // todo: we are leaking the scrollbars..
-func (ly *Layout) DeleteHScroll() {
-	if ly.HScroll == nil {
+func (ly *Layout) DeleteScroll(d Dims2D) {
+	if ly.Scrolls[d] == nil {
 		return
 	}
-	sc := ly.HScroll
+	sc := ly.Scrolls[d]
 	win := ly.ParentWindow()
 	if win != nil {
 		sc.DisconnectAllEvents(win)
 	}
 	sc.Destroy()
-	ly.HScroll = nil
-}
-
-func (ly *Layout) SetVScroll() {
-	if ly.VScroll == nil {
-		ly.VScroll = &ScrollBar{}
-		ly.VScroll.InitName(ly.VScroll, "Lay_VScroll")
-		ly.VScroll.SetParent(ly.This)
-		ly.VScroll.Dim = Y
-		ly.VScroll.Init2D()
-		ly.VScroll.Defaults()
-	}
-	spc := ly.Style.BoxSpace()
-	sc := ly.VScroll
-	sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
-	sc.SetFixedHeight(units.NewValue(ly.LayData.AllocSize.Y, units.Dot))
-	sc.Style2D()
-	sc.Min = 0.0
-	sc.Max = ly.ChildSize.Y + ly.ExtraSize.Y // only scrollbar
-	sc.Step = ly.Style.Font.Size.Dots        // step by lines
-	sc.PageStep = 10.0 * sc.Step             // todo: more dynamic
-	sc.ThumbVal = ly.LayData.AllocSize.Y - spc
-	sc.Tracking = true
-	sc.TrackThr = sc.Step
-	sc.SliderSig.Connect(ly.This, func(rec, send ki.Ki, sig int64, data interface{}) {
-		if sig != int64(SliderValueChanged) {
-			return
-		}
-		li, _ := KiToNode2D(rec) // note: avoid using closures
-		ls := li.AsLayout2D()
-		ls.Move2DTree()
-		ls.Viewport.ReRender2DNode(li)
-	})
-}
-
-func (ly *Layout) DeleteVScroll() {
-	if ly.VScroll == nil {
-		return
-	}
-	sc := ly.VScroll
-	win := ly.ParentWindow()
-	if win != nil {
-		sc.DisconnectAllEvents(win)
-	}
-	sc.Destroy() // this resets all signals and connections
-	ly.VScroll = nil
+	ly.Scrolls[d] = nil
 }
 
 func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
@@ -1026,46 +998,34 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 
 func (ly *Layout) LayoutScrolls() {
 	sbw := ly.Style.Layout.ScrollBarWidth.Dots
-	if ly.HasHScroll {
-		sc := ly.HScroll
-		sc.Size2D()
-		sc.LayData.AllocPosRel.X = 0.0
-		sc.LayData.AllocPosRel.Y = ly.LayData.AllocSize.Y - sbw - 2.0
-		sc.LayData.AllocSize.X = ly.LayData.AllocSize.X
-		if ly.HasVScroll { // make room for V
-			sc.LayData.AllocSize.X -= sbw
-		}
-		sc.LayData.AllocSize.Y = sbw
-		sc.Layout2D(ly.VpBBox) // this will add parent position to above rel pos
-	} else {
-		if ly.HScroll != nil {
-			ly.DeactivateScroll(ly.HScroll)
-		}
-	}
-	if ly.HasVScroll {
-		sc := ly.VScroll
-		sc.Size2D()
-		sc.LayData.AllocPosRel.X = ly.LayData.AllocSize.X - sbw - 2.0
-		sc.LayData.AllocPosRel.Y = 0.0
-		sc.LayData.AllocSize.Y = ly.LayData.AllocSize.Y
-		if ly.HasHScroll { // make room for H
-			sc.LayData.AllocSize.Y -= sbw
-		}
-		sc.LayData.AllocSize.X = sbw
-		sc.Layout2D(ly.VpBBox)
-	} else {
-		if ly.VScroll != nil {
-			ly.DeactivateScroll(ly.VScroll)
+
+	avail := ly.AvailSize()
+	for d := X; d < Dims2DN; d++ {
+		odim := OtherDim(d)
+		if ly.HasScroll[d] {
+			sc := ly.Scrolls[d]
+			sc.Size2D()
+			sc.LayData.AllocPosRel.SetDim(d, 0.0)
+			sc.LayData.AllocPosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
+			sc.LayData.AllocSize.SetDim(d, avail.Dim(d))
+			if ly.HasScroll[odim] { // make room for other
+				sc.LayData.AllocSize.SetSubDim(d, sbw)
+			}
+			sc.LayData.AllocSize.SetDim(odim, sbw)
+			sc.Layout2D(ly.VpBBox) // this will add parent position to above rel pos
+		} else {
+			if ly.Scrolls[d] != nil {
+				ly.DeactivateScroll(ly.Scrolls[d])
+			}
 		}
 	}
 }
 
 func (ly *Layout) RenderScrolls() {
-	if ly.HasHScroll {
-		ly.HScroll.Render2D()
-	}
-	if ly.HasVScroll {
-		ly.VScroll.Render2D()
+	for d := X; d < Dims2DN; d++ {
+		if ly.HasScroll[d] {
+			ly.Scrolls[d].Render2D()
+		}
 	}
 }
 
@@ -1174,12 +1134,12 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 
 // we add our own offset here
 func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
-	if ly.HasHScroll {
-		off := ly.HScroll.Value
+	if ly.HasScroll[X] {
+		off := ly.Scrolls[X].Value
 		delta.X -= int(off)
 	}
-	if ly.HasVScroll {
-		off := ly.VScroll.Value
+	if ly.HasScroll[Y] {
+		off := ly.Scrolls[Y].Value
 		delta.Y -= int(off)
 	}
 	return delta

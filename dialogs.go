@@ -51,7 +51,7 @@ var KiT_Dialog = kit.Types.AddType(&Dialog{}, nil)
 
 // Open this dialog, in given location (0 = middle of window), finding window from given viewport -- returns false if it fails for any reason
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
-	win := avp.ParentWindow()
+	win := avp.Win
 	if win == nil {
 		return false
 	}
@@ -85,7 +85,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
-	win := dlg.ParentWindow()
+	win := dlg.Win
 	if win != nil {
 		win.ClosePopup(dlg.This)
 	}

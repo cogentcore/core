@@ -770,7 +770,7 @@ func (g *ComboBox) ButtonRelease() {
 		g.SetButtonState(ButtonNormal)
 		return
 	}
-	win := g.Viewport.ParentWindow()
+	win := g.Viewport.Win
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.MakeItemsMenu()

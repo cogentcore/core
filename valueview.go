@@ -513,6 +513,13 @@ func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
 		mb := vvv.Widget.(*MenuButton)
 		PromptDialog(mb.Viewport, "KiPtr Value View", "Sorry, Ki object chooser  not implemented yet -- would show up here", true, false, nil, nil)
 	})
+	mb.AddMenuText("GoGiEditor", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
+		k := vvv.KiStruct()
+		if k != nil {
+			GoGiEditorOf(k)
+		}
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

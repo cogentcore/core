@@ -561,6 +561,18 @@ func (g *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
+func (g *Node2DBase) ParentWindow() *Window {
+	if g.Viewport != nil && g.Viewport.Win != nil {
+		return g.Viewport.Win
+	}
+	wini := g.ParentByType(KiT_Window, true)
+	if wini == nil {
+		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
+		return nil
+	}
+	return wini.EmbeddedStruct(KiT_Window).(*Window)
+}
+
 // find parent viewport -- uses AsViewport2D() method on Node2D interface
 func (g *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D

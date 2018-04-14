@@ -47,6 +47,7 @@ type Viewport2D struct {
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
 	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into"`
+	Win     *Window     `json:"-" desc:"our parent window that we render into"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
@@ -105,6 +106,11 @@ func (vp *Viewport2D) IsSVG() bool {
 	return bitflag.Has(vp.Flag, int(VpFlagSVG))
 }
 
+// set our window pointer to point to the current window we are under
+func (vp *Viewport2D) SetCurWin() {
+	vp.Win = vp.ParentWindow()
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Main Rendering code
 
@@ -123,33 +129,30 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 
 // draw main viewport into window -- needs to redraw popups over top of it, so does a full update
 func (vp *Viewport2D) DrawMainViewport() {
-	win := vp.ParentWindow() // todo: consider caching window pointer
-	if win == nil {
+	if vp.Win == nil {
 		return
 	}
-	win.FullUpdate()
+	vp.Win.FullUpdate()
 }
 
 // draw a vp into window directly -- for most non-main vp's
 func (vp *Viewport2D) DrawIntoWindow() {
-	win := vp.ParentWindow() // todo: consider caching window pointer
-	if win == nil {
+	if vp.Win == nil {
 		return
 	}
-	win.UpdateStart()
-	win.UpdateFullVpRegion(vp, vp.VpBBox, vp.WinBBox)
-	win.UpdateEnd()
+	vp.Win.UpdateStart()
+	vp.Win.UpdateFullVpRegion(vp, vp.VpBBox, vp.WinBBox)
+	vp.Win.UpdateEnd()
 }
 
 // draw main window vp into region of this vp
 func (vp *Viewport2D) DrawMainVpOverMe() {
-	win := vp.ParentWindow() // todo: consider caching window pointer
-	if win == nil {
+	if vp.Win == nil {
 		return
 	}
-	win.UpdateStart()
-	win.UpdateVpRegionFromMain(vp.WinBBox)
-	win.UpdateEnd()
+	vp.Win.UpdateStart()
+	vp.Win.UpdateVpRegionFromMain(vp.WinBBox)
+	vp.Win.UpdateEnd()
 }
 
 // Delete this viewport -- has already been disconnected from window events
@@ -179,6 +182,7 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 }
 
 func (vp *Viewport2D) Init2D() {
+	vp.SetCurWin()
 	vp.Init2DBase()
 	// we update oursleves whenever any node update event happens
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
@@ -193,6 +197,7 @@ func (vp *Viewport2D) Init2D() {
 }
 
 func (vp *Viewport2D) Style2D() {
+	vp.SetCurWin()
 	vp.Style2DWidget(nil)
 }
 
@@ -243,6 +248,7 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
+		vp.SetCurWin()
 		if Render2DTrace {
 			fmt.Printf("Render: %v at %v DrawPopup into Window\n", vp.PathUnique(), vp.VpBBox)
 		}
@@ -413,11 +419,10 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn.Render2DTree()
 	gnvp := gn.AsViewport2D()
 	if !(gnvp != nil && bitflag.Has(gnvp.Flag, int(VpFlagDrawIntoWin))) {
-		win := vp.ParentWindow() // todo: consider caching window pointer
-		if win != nil {
-			win.UpdateStart()
-			win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-			win.UpdateEnd()
+		if vp.Win != nil {
+			vp.Win.UpdateStart()
+			vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+			vp.Win.UpdateEnd()
 		}
 	}
 }
@@ -426,11 +431,10 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	gn := gni.AsNode2D()
 	gn.ReRender2DTree()
-	win := vp.ParentWindow() // todo: consider caching window pointer
-	if win != nil {
-		win.UpdateStart()
-		win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-		win.UpdateEnd()
+	if vp.Win != nil {
+		vp.Win.UpdateStart()
+		vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		vp.Win.UpdateEnd()
 	}
 }
 

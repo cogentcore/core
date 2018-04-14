@@ -13,7 +13,7 @@ import (
 )
 
 // open an interactive editor of the given Ki tree, at its root
-func GoGiEditorOf(obj ki.Ki) {
+func GoGiEditorOf(obj ki.Ki) *Window {
 	width := 1280
 	height := 1024
 	win := NewWindow2D("GoGi Editor Window", width, height)
@@ -103,6 +103,6 @@ func GoGiEditorOf(obj ki.Ki) {
 	})
 
 	win.UpdateEnd()
-
 	win.StartEventLoopNoWait()
+	return win
 }

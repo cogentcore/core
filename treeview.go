@@ -246,7 +246,7 @@ func (tv *TreeView) Label() string {
 // a select action has been received (e.g., a mouse click) -- translate into
 // selection updates
 func (tv *TreeView) SelectAction() {
-	win := tv.Viewport.ParentWindow()
+	win := tv.Viewport.Win
 	if win != nil {
 		win.UpdateStart()
 	}
@@ -291,7 +291,7 @@ func (tv *TreeView) Unselect() {
 
 // unselect everything below me -- call on Root to clear all
 func (tv *TreeView) UnselectAll() {
-	win := tv.Viewport.ParentWindow()
+	win := tv.Viewport.Win
 	if win != nil {
 		win.UpdateStart()
 	}

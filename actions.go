@@ -59,7 +59,7 @@ func (g *Action) ButtonRelease() {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), g.Data)
 	}
 	if g.IsMenu() && g.Viewport != nil {
-		win := g.Viewport.ParentWindow()
+		win := g.Viewport.Win
 		if win != nil {
 			win.ClosePopup(g.Viewport) // in case we are a menu popup -- no harm if not
 		}
@@ -372,7 +372,6 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 }
 
 func (g *MenuButton) ButtonRelease() {
-	win := g.Viewport.ParentWindow()
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.SetButtonState(ButtonNormal)
@@ -389,7 +388,7 @@ func (g *MenuButton) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
-	PopupMenu(g.Menu, pos.X, pos.Y, win, g.Text)
+	PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
 }
 
 // set the text and update button
