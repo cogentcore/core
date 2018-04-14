@@ -413,6 +413,9 @@ func (w *Window) EventLoop() {
 						delPop = true
 						kt.SetProcessed()
 					}
+				case KeyFunGoGiEditor:
+					GoGiEditorOf(w.Viewport.This)
+					kt.SetProcessed()
 				}
 				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)
 			}

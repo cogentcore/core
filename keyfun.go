@@ -39,6 +39,7 @@ const (
 	KeyFunDuplicate
 	KeyFunInsert
 	KeyFunInsertAfter
+	KeyFunGoGiEditor
 	// either shift key
 	KeyFunShift
 	// the control key: command for mac, ctrl for others?
@@ -96,6 +97,8 @@ var DefaultKeyMap = KeyMap{
 	"control+m":     KeyFunDuplicate,
 	"control+i":     KeyFunInsert,
 	"control+o":     KeyFunInsertAfter,
+	"alt+control+i": KeyFunGoGiEditor,
+	"alt+control+e": KeyFunGoGiEditor,
 }
 
 // users can set this to an alternative map
