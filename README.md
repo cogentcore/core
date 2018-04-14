@@ -73,17 +73,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* SplitView is new type (not layout) -- needs Splitter widget with drag logic -- splitter is a sprite, don't draw background box, need to get DrawIntoWindow working, and draw background..
-
-* add creator / inspector in a different window :)
+* structview pointer is showing entire struct -- need to detect pointers -- e.g., Viewport.   then after fix that, mark it as view:"-" anyway
 
 * don't re-render scrollbar in course of scrolling!?
 
 * Focus display highlight not getting updated when clicking around in the treeview.
 
 * consolidate dialog popup code between menu and dialog
-
-* need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok
 
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
@@ -96,8 +92,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ in widget.go: here add a thing that copies any style elements marked as "inherit" from parent to part
 
 * Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
-
-* add a ReRender2D call (change existing to ReRender2DNode or something?) that does the re-rendering: layout (or frame?) remembers its last size and clears that prior size -- (within parVp constraints) -- basically allows more modular updates within layouts even if they change size.  
 
 * test SVG path rendering 
 * property-based xforms for svg
@@ -132,10 +126,11 @@ Soon:
 
 * all builtin defaults should use units.Value and other raw values instead of strings
 
+* maybe not: need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok
+
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ sub-menus -- should just work??
-	+ SplitView -- almost..
-	+ RadioButton -- checkbox + mutex logic
+	+ RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 	+ Toolbar / ToolButton -- just a layout really, with some styling?
 	+ ProgressBar -- very simple
 	+ ToolTip
@@ -156,6 +151,7 @@ Soon:
 	+ Dialog -- either overlay or additional window -- platform dependent
 	+ CheckBox
 	+ SpinBox
+	+ SplitView -- almost..
 
 * not needed now: update increment threshold for scrollbar -- less frequent updates.
 

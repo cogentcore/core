@@ -787,7 +787,7 @@ func (tv *TreeView) Size2D() {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				h += gi.LayData.AllocSize.Y
-				w = math.Max(w, 20+gi.LayData.AllocSize.X) // 20 = indent, use max
+				w = math.Max(w, 10+gi.LayData.AllocSize.X) // 10 = indent, use max
 			}
 		}
 	}
@@ -836,7 +836,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				gi.LayData.AllocPosRel.Y = h
-				gi.LayData.AllocPosRel.X = 20 // indent
+				gi.LayData.AllocPosRel.X = 10 // indent
 				h += gi.LayData.AllocSize.Y
 			}
 		}

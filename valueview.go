@@ -56,7 +56,8 @@ func ToValueView(it interface{}) ValueView {
 			return vvo
 		}
 	}
-	typ := kit.NonPtrType(reflect.TypeOf(it))
+	typ := reflect.TypeOf(it)
+	nptyp := kit.NonPtrType(typ)
 	typrops := kit.Types.Properties(typ.Name(), false) // don't make
 	vk := typ.Kind()
 	switch {
@@ -77,7 +78,12 @@ func ToValueView(it interface{}) ValueView {
 		vv := ValueViewBase{}
 		vv.Init(&vv)
 		return &vv
-	case vk == reflect.Ptr: // nothing possible for plain pointers -- ki.Ptr can do it though..
+	case vk == reflect.Ptr:
+		if ki.IsKi(nptyp) {
+			vv := KiPtrValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 		return nil
 	case vk == reflect.Slice:
 		vv := SliceValueView{}
@@ -416,7 +422,7 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  MapValueView
 
-// MapValueView presents a button to edit slices
+// MapValueView presents a button to edit maps
 type MapValueView struct {
 	ValueViewBase
 }
@@ -447,6 +453,65 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*MenuButton)
 		MapViewDialog(mb.Viewport, vv.Value.Interface(), "Map Value View", "", nil, nil)
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  KiPtrValueView
+
+// KiPtrValueView provides a chooser for pointers to Ki objects
+type KiPtrValueView struct {
+	ValueViewBase
+}
+
+var KiT_KiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
+
+func (vv *KiPtrValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MenuButton
+	return vv.WidgetTyp
+}
+
+// get the Ki struct itself (or nil)
+func (vv *KiPtrValueView) KiStruct() ki.Ki {
+	npv := vv.Value.Elem()
+	if !npv.IsNil() {
+		k, ok := npv.Interface().(ki.Ki)
+		if ok && k != nil {
+			return k
+		}
+	}
+	return nil
+}
+
+func (vv *KiPtrValueView) UpdateWidget() {
+	mb := vv.Widget.(*MenuButton)
+	path := "nil"
+	k := vv.KiStruct()
+	if k != nil {
+		path = k.Path()
+	}
+	mb.SetText(path)
+}
+
+func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	mb := vv.Widget.(*MenuButton)
+	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("margin", units.NewValue(2, units.Px))
+	mb.ResetMenu()
+	mb.AddMenuText("Edit", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
+		k := vvv.KiStruct()
+		if k != nil {
+			mb := vvv.Widget.(*MenuButton)
+			StructViewDialog(mb.Viewport, k, "Struct Value View", "", nil, nil)
+		}
+	})
+	mb.AddMenuText("Select", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
+		mb := vvv.Widget.(*MenuButton)
+		PromptDialog(mb.Viewport, "KiPtr Value View", "Sorry, Ki object chooser  not implemented yet -- would show up here", true, false, nil, nil)
 	})
 }
 
