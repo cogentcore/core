@@ -26,6 +26,8 @@ const (
 	HasFocus
 	// ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame's within a SplitView
 	ReRenderAnchor
+	// ReadOnly: for widgets that support editing, it is read-only -- this must be universally supported in an appropriately-indicated way for each widget
+	ReadOnly
 	// indicates that the MouseEnteredEvent was previously registered on this node
 	MouseHasEntered
 	// this node is currently dragging -- win.Dragging set to this node
@@ -91,6 +93,16 @@ func (g *NodeBase) HasFocus() bool {
 // is the current node currently receiving dragging events?  set by window
 func (g *NodeBase) IsDragging() bool {
 	return bitflag.Has(g.Flag, int(NodeDragging))
+}
+
+// is this node ReadOnly?  if so, behave and style appropriately -- equivalent to disabled e.g. for buttons / actions
+func (g *NodeBase) IsReadOnly() bool {
+	return bitflag.Has(g.Flag, int(ReadOnly))
+}
+
+// set the node as read-only
+func (g *NodeBase) SetReadOnly() {
+	bitflag.Set(&g.Flag, int(ReadOnly))
 }
 
 // is the current node a ReRenderAnchor?

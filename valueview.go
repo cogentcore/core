@@ -9,7 +9,9 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -55,6 +57,7 @@ func ToValueView(it interface{}) ValueView {
 		}
 	}
 	typ := kit.NonPtrType(reflect.TypeOf(it))
+	typrops := kit.Types.Properties(typ.Name(), false) // don't make
 	vk := typ.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
@@ -85,14 +88,34 @@ func ToValueView(it interface{}) ValueView {
 		vv.Init(&vv)
 		return &vv
 	case vk == reflect.Map:
-		vv := MapValueView{}
-		vv.Init(&vv)
-		return &vv
+		v := reflect.ValueOf(it)
+		sz := v.Len()
+		if sz > 0 && sz <= 4 { // todo: param somewhere
+			vv := MapInlineValueView{}
+			vv.Init(&vv)
+			return &vv
+		} else {
+			vv := MapValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 	case vk == reflect.Struct:
-		// todo: check inline, use that if possible
-		vv := StructValueView{}
-		vv.Init(&vv)
-		return &vv
+		inline := false
+		if typrops != nil {
+			inprop, ok := typrops["inline"]
+			if ok {
+				inline, ok = kit.ToBool(inprop)
+			}
+		}
+		if inline || typ.NumField() <= 5 {
+			vv := StructInlineValueView{}
+			vv.Init(&vv)
+			return &vv
+		} else {
+			vv := StructValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 	}
 	// fallback.
 	vv := ValueViewBase{}
@@ -122,7 +145,7 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 	return ToValueView(fval)
 }
 
-// ValueView is an interface for representing values (e.g., fields) in Views
+// ValueView is an interface for representing values (e.g., fields, map values, slice values) in Views (StructView, MapView, etc) -- the different types of ValueView are for different Kinds of values (bool, float, etc) -- which can have different Kinds of owners -- the ValueVuewBase class supports all the basic fields for managing the owner kinds
 type ValueView interface {
 	ki.Ki
 	// AsValueViewBase gives access to the basic data fields so that the interface doesn't need to provide accessors for them
@@ -133,18 +156,27 @@ type ValueView interface {
 	SetMapValue(val reflect.Value, owner interface{}, key interface{})
 	// SetSliceValue sets the value, owner and index information for a slice element
 	SetSliceValue(val reflect.Value, owner interface{}, idx int)
+	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
+	OwnerKind() reflect.Kind
+	// IsReadOnly returns whether the value is read-only -- e.g., Map owners have ReadOnly values, and some fields can be marked as ReadOnly using a struct tag
+	IsReadOnly() bool
 	// WidgetType returns an appropriate type of widget to represent the current value
 	WidgetType() reflect.Type
 	// UpdateWidget updates the widget representation to reflect the current value
 	UpdateWidget()
 	// ConfigWidget configures a widget of WidgetType for representing the value, including setting up the signal connections to set the value when the user edits it (values are always set immediately when the widget is updated)
 	ConfigWidget(widg Node2D)
+	// SetValue sets the value (if not ReadOnly), using Ki.SetField for Ki types and kit.SetRobust otherwise
+	SetValue(val interface{}) bool
+	// FieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
+	FieldTag(tagName string) string
 }
 
 // ValueViewBase provides the basis for implementations of the ValueView interface, representing values in the interface -- it implements a generic TextField representation of the string value, and provides the generic fallback for everything that doesn't provide a specific ValueViewer type
 type ValueViewBase struct {
 	ki.Node
 	Value     reflect.Value        `desc:"the reflect.Value representation of the value"`
+	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
 	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
 	OwnerType reflect.Type         `desc:"non-pointer type of the Owner, for convenience"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
@@ -162,21 +194,45 @@ func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 }
 
 func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField) {
+	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
 	vv.Field = field
 }
 
 func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}) {
+	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
 	vv.Key = key
 }
 
 func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int) {
+	vv.OwnKind = reflect.Slice
 	vv.Value = val
 	vv.Owner = owner
 	vv.Idx = idx
+}
+
+// we have this one accessor b/c it is more useful for outside consumers vs. internal usage
+func (vv *ValueViewBase) OwnerKind() reflect.Kind {
+	return vv.OwnKind
+}
+
+func (vv *ValueViewBase) IsReadOnly() bool {
+	// if !vv.Value.CanAddr() {
+	// 	return true
+	// }
+	if vv.OwnKind == reflect.Map {
+		return true
+	}
+	if vv.OwnKind == reflect.Struct {
+		rotag := vv.FieldTag("readonly")
+		if rotag != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func (vv *ValueViewBase) WidgetType() reflect.Type {
@@ -199,16 +255,29 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	tf.TextFieldSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
 		tf := send.(*TextField)
-		if vvv.Owner != nil {
-			if kiv, ok := vvv.Owner.(ki.Ki); ok {
-				kiv.SetField(vvv.Field.Name, tf.Text) // does updates
-				vvv.UpdateWidget()                    // always update after setting value..
-				return
-			}
+		if vvv.SetValue(tf) {
+			vvv.UpdateWidget() // always update after setting value..
 		}
-		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), tf.Text)
-		vvv.UpdateWidget() // always update after setting value..
 	})
+}
+
+func (vv *ValueViewBase) SetValue(val interface{}) bool {
+	if vv.IsReadOnly() {
+		return false
+	}
+	if vv.Owner != nil && vv.OwnKind == reflect.Struct {
+		if kiv, ok := vv.Owner.(ki.Ki); ok {
+			return kiv.SetField(vv.Field.Name, val)
+		}
+	}
+	return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+}
+
+func (vv *ValueViewBase) FieldTag(tagName string) string {
+	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+		return ""
+	}
+	return vv.Field.Tag.Get(tagName)
 }
 
 // check for interface implementation
@@ -239,12 +308,72 @@ func (vv *StructValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
+	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*MenuButton)
-		PromptDialog(mb.Viewport, "Struct Value View", "Sorry, slice editor not implemented yet -- would show up here", true, false, nil, nil)
+		StructViewDialog(mb.Viewport, vv.Value.Interface(), "Struct Value View", "", nil, nil)
 	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  StructInlineValueView
+
+// StructInlineValueView presents a StructViewInline for a struct
+type StructInlineValueView struct {
+	ValueViewBase
+}
+
+var KiT_StructInlineValueView = kit.Types.AddType(&StructInlineValueView{}, nil)
+
+func (vv *StructInlineValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_StructViewInline
+	return vv.WidgetTyp
+}
+
+func (vv *StructInlineValueView) UpdateWidget() {
+	// sv := vv.Widget.(*StructViewInline)
+	// npv := vv.Value.Elem()
+	// sv.SetChecked(npv.Bool())
+}
+
+func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	sv := vv.Widget.(*StructViewInline)
+	// npv := vv.Value.Elem()
+	sv.SetStruct(vv.Value.Interface())
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  MapInlineValueView
+
+// MapInlineValueView presents a MapViewInline for a map
+type MapInlineValueView struct {
+	ValueViewBase
+}
+
+var KiT_MapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
+
+func (vv *MapInlineValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MapViewInline
+	return vv.WidgetTyp
+}
+
+func (vv *MapInlineValueView) UpdateWidget() {
+	// sv := vv.Widget.(*MapViewInline)
+	// npv := vv.Value.Elem()
+	// sv.SetChecked(npv.Bool())
+}
+
+func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	sv := vv.Widget.(*MapViewInline)
+	// npv := vv.Value.Elem()
+	sv.SetMap(vv.Value.Interface())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +403,8 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
+	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
@@ -309,11 +440,13 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
+	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*MenuButton)
-		PromptDialog(mb.Viewport, "Map Value View", "Sorry, map editor not implemented yet -- would show up here", true, false, nil, nil)
+		MapViewDialog(mb.Viewport, vv.Value.Interface(), "Map Value View", "", nil, nil)
 	})
 }
 
@@ -342,17 +475,14 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
+	bitflag.SetState(cb.Flags(), vv.IsReadOnly(), int(ReadOnly))
 	cb.ButtonSig.DisconnectAll()
 	cb.ButtonSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
 		cbb := vvv.Widget.(*CheckBox)
-		if vvv.Owner != nil {
-			if kiv, ok := vvv.Owner.(ki.Ki); ok {
-				kiv.SetField(vvv.Field.Name, cbb.IsChecked()) // does updates
-				return
-			}
+		if vvv.SetValue(cbb.IsChecked()) {
+			vvv.UpdateWidget() // always update after setting value..
 		}
-		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), cbb.IsChecked())
 	})
 }
 
@@ -384,29 +514,33 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
+	bitflag.SetState(sb.Flags(), vv.IsReadOnly(), int(ReadOnly))
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
+	sb.SetProp("#textfield", map[string]interface{}{
+		"width": units.NewValue(5, units.Ex),
+	})
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
 		sb.SetMin(0)
 	}
 	// todo: make a utility for this kind of thing..
-	mintag := vv.Field.Tag.Get("min")
+	mintag := vv.FieldTag("min")
 	if mintag != "" {
 		min, err := strconv.ParseFloat(mintag, 64)
 		if err == nil {
 			sb.SetMin(min)
 		}
 	}
-	maxtag := vv.Field.Tag.Get("max")
+	maxtag := vv.FieldTag("max")
 	if maxtag != "" {
 		max, err := strconv.ParseFloat(maxtag, 64)
 		if err == nil {
 			sb.SetMax(max)
 		}
 	}
-	steptag := vv.Field.Tag.Get("step")
+	steptag := vv.FieldTag("step")
 	if steptag != "" {
 		step, err := strconv.ParseFloat(steptag, 64)
 		if err == nil {
@@ -417,15 +551,9 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_IntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*SpinBox)
-		if vvv.Owner != nil {
-			if kiv, ok := vvv.Owner.(ki.Ki); ok {
-				kiv.SetField(vvv.Field.Name, sbb.Value) // does updates
-				vvv.UpdateWidget()
-				return
-			}
+		if vvv.SetValue(sbb.Value) {
+			vvv.UpdateWidget()
 		}
-		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), sbb.Value)
-		vvv.UpdateWidget()
 	})
 }
 
@@ -457,11 +585,12 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
+	bitflag.SetState(sb.Flags(), vv.IsReadOnly(), int(ReadOnly))
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// todo: make a utility for this kind of thing..
-	mintag := vv.Field.Tag.Get("min")
+	mintag := vv.FieldTag("min")
 	if mintag != "" {
 		min, err := strconv.ParseFloat(mintag, 64)
 		if err == nil {
@@ -469,7 +598,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 			sb.Min = min
 		}
 	}
-	maxtag := vv.Field.Tag.Get("max")
+	maxtag := vv.FieldTag("max")
 	if maxtag != "" {
 		max, err := strconv.ParseFloat(maxtag, 64)
 		if err == nil {
@@ -477,7 +606,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 			sb.Max = max
 		}
 	}
-	steptag := vv.Field.Tag.Get("step")
+	steptag := vv.FieldTag("step")
 	if steptag != "" {
 		step, err := strconv.ParseFloat(steptag, 64)
 		if err == nil {
@@ -489,14 +618,8 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*SpinBox)
-		if vvv.Owner != nil {
-			if kiv, ok := vvv.Owner.(ki.Ki); ok {
-				kiv.SetField(vvv.Field.Name, sbb.Value) // does updates
-				vvv.UpdateWidget()
-				return
-			}
+		if vvv.SetValue(sbb.Value) {
+			vvv.UpdateWidget()
 		}
-		kit.SetRobust(kit.PtrValue(vvv.Value).Interface(), sbb.Value)
-		vvv.UpdateWidget()
 	})
 }

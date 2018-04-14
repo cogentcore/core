@@ -7,13 +7,14 @@ import (
 	"strconv"
 )
 
-const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusReRenderAnchorMouseHasEnteredNodeDraggingButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuNodeFlagExtendSelect"
+const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusReRenderAnchorReadOnlyMouseHasEnteredNodeDraggingButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuNodeFlagExtendSelect"
 
-var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 42, 57, 69, 87, 106, 123, 137, 157}
+var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 42, 50, 65, 77, 95, 114, 131, 145, 165}
 
 func (i NodeFlags) String() string {
+	i -= 13
 	if i < 0 || i >= NodeFlags(len(_NodeFlags_index)-1) {
-		return "NodeFlags(" + strconv.FormatInt(int64(i), 10) + ")"
+		return "NodeFlags(" + strconv.FormatInt(int64(i+13), 10) + ")"
 	}
 	return _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]]
 }
@@ -21,7 +22,7 @@ func (i NodeFlags) String() string {
 func StringToNodeFlags(s string) (NodeFlags, error) {
 	for i := 0; i < len(_NodeFlags_index)-1; i++ {
 		if s == _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]] {
-			return NodeFlags(i), nil
+			return NodeFlags(i + 13), nil
 		}
 	}
 	return 0, fmt.Errorf("String %v is not a valid option for type NodeFlags", s)

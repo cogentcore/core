@@ -107,18 +107,33 @@ const (
 
 //go:generate stringer -type=TextFieldSignals
 
+// mutually-exclusive textfield states -- determines appearance
+type TextFieldStates int32
+
+const (
+	// normal state -- there but not being interacted with
+	TextFieldNormal TextFieldStates = iota
+	// textfield is the focus -- will respond to keyboard input
+	TextFieldFocus
+	// read only / disabled -- not editable
+	TextFieldDisabled
+	TextFieldStatesN
+)
+
+//go:generate stringer -type=TextFieldStates
+
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Text         string    `xml:"text" desc:"the last saved value of the text string being edited"`
-	EditText     string    `xml:"-" desc:"the live text string being edited, with latest modifications"`
-	StartPos     int       `xml:"start-pos" desc:"starting display position in the string"`
-	EndPos       int       `xml:"end-pos" desc:"ending display position in the string"`
-	CursorPos    int       `xml:"cursor-pos" desc:"current cursor position"`
-	CharWidth    int       `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectMode   bool      `xml:"select-mode" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal `json:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	StateStyles  [2]Style  `desc:"normal style and focus style"`
+	Text         string                  `xml:"text" desc:"the last saved value of the text string being edited"`
+	EditText     string                  `xml:"-" desc:"the live text string being edited, with latest modifications"`
+	StartPos     int                     `xml:"start-pos" desc:"starting display position in the string"`
+	EndPos       int                     `xml:"end-pos" desc:"ending display position in the string"`
+	CursorPos    int                     `xml:"cursor-pos" desc:"current cursor position"`
+	CharWidth    int                     `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectMode   bool                    `xml:"select-mode" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal               `json:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	StateStyles  [TextFieldStatesN]Style `desc:"normal style and focus style"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, nil)
@@ -316,8 +331,14 @@ func (g *TextField) SetCursorFromPixel(pixOff float64) {
 func (g *TextField) Init2D() {
 	g.Init2DWidget()
 	g.EditText = g.Text
+	// if g.IsReadOnly() {
+	// 	return
+	// }
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
+		if tf.IsReadOnly() { // todo: need more subtle read-only behavior here -- can select but not edit
+			return
+		}
 		md := d.(*oswin.MouseDownEvent)
 		if !tf.HasFocus() {
 			tf.GrabFocus()
@@ -328,13 +349,16 @@ func (g *TextField) Init2D() {
 	})
 	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
+		if tf.IsReadOnly() {
+			return
+		}
 		kt := d.(*oswin.KeyTypedEvent)
 		tf.KeyInput(kt)
 		kt.SetProcessed()
 	})
 }
 
-var TextFieldProps = [2]map[string]interface{}{
+var TextFieldProps = [TextFieldStatesN]map[string]interface{}{
 	{ // normal
 		"border-width":     units.NewValue(1, units.Px),
 		"border-color":     color.Black,
@@ -347,15 +371,25 @@ var TextFieldProps = [2]map[string]interface{}{
 		"background-color": "#EEE",
 	}, { // focus
 		"background-color": color.White,
+	}, { // read-only
+		"background-color": "#CCC",
 	},
 }
 
 func (g *TextField) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(TextFieldProps[0])
-	g.StateStyles[0] = g.Style
-	g.StateStyles[1] = g.Style
-	g.StateStyles[1].SetStyle(nil, &StyleDefault, TextFieldProps[1])
+	if g.IsReadOnly() {
+		bitflag.Clear(&g.Flag, int(CanFocus))
+	} else {
+		bitflag.Set(&g.Flag, int(CanFocus))
+	}
+	g.Style2DWidget(TextFieldProps[TextFieldNormal])
+	for i := 0; i < int(TextFieldStatesN); i++ {
+		g.StateStyles[i] = g.Style
+		if i > 0 {
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, TextFieldProps[i])
+		}
+		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
+	}
 }
 
 func (g *TextField) Size2D() {
@@ -366,7 +400,7 @@ func (g *TextField) Size2D() {
 
 func (g *TextField) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DWidget(parBBox)
-	for i := 0; i < 2; i++ {
+	for i := 0; i < int(TextFieldStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.Layout2DChildren()
@@ -457,10 +491,12 @@ func (g *TextField) AutoScroll() {
 func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
-		if g.HasFocus() {
-			g.Style = g.StateStyles[1]
+		if g.IsReadOnly() {
+			g.Style = g.StateStyles[TextFieldDisabled]
+		} else if g.HasFocus() {
+			g.Style = g.StateStyles[TextFieldFocus]
 		} else {
-			g.Style = g.StateStyles[0]
+			g.Style = g.StateStyles[TextFieldNormal]
 		}
 		g.RenderStdBox(&g.Style)
 		cur := g.EditText[g.StartPos:g.EndPos]
@@ -475,7 +511,7 @@ func (g *TextField) Render2D() {
 
 func (g *TextField) FocusChanged2D(gotFocus bool) {
 	g.UpdateStart()
-	if !gotFocus {
+	if !gotFocus && !g.IsReadOnly() {
 		g.EditDone() // lose focus
 	}
 	g.UpdateEnd()
@@ -586,7 +622,7 @@ var SpinBoxProps = []map[string]interface{}{
 		},
 		"#textfield": map[string]interface{}{
 			"min-width": units.NewValue(4, units.Ex),
-			"width":     units.NewValue(12, units.Ex),
+			"width":     units.NewValue(8, units.Ex),
 			"margin":    units.NewValue(2, units.Px),
 			"padding":   units.NewValue(2, units.Px),
 		},
@@ -623,35 +659,44 @@ func (g *SpinBox) ConfigParts() {
 		// up
 		up := buts.Child(0).(*Action)
 		up.SetName("Up")
+		bitflag.SetState(up.Flags(), g.IsReadOnly(), int(ReadOnly))
 		up.Icon = g.UpIcon
 		g.PartStyleProps(up.This, props)
-		up.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			sb := recv.(*SpinBox)
-			sb.IncrValue(1.0)
-		})
+		if !g.IsReadOnly() {
+			up.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				sb := recv.(*SpinBox)
+				sb.IncrValue(1.0)
+			})
+		}
 		// dn
 		dn := buts.Child(1).(*Action)
+		bitflag.SetState(dn.Flags(), g.IsReadOnly(), int(ReadOnly))
 		dn.SetName("Down")
 		dn.Icon = g.DownIcon
 		g.PartStyleProps(dn.This, props)
-		dn.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			sb := recv.(*SpinBox)
-			sb.IncrValue(-1.0)
-		})
+		if !g.IsReadOnly() {
+			dn.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				sb := recv.(*SpinBox)
+				sb.IncrValue(-1.0)
+			})
+		}
 		// space
 		g.PartStyleProps(g.Parts.Child(sbSpaceIdx), props) // also get the space
 		// textfield
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
+		bitflag.SetState(tf.Flags(), g.IsReadOnly(), int(ReadOnly))
 		g.PartStyleProps(tf.This, props)
 		tf.Text = fmt.Sprintf("%g", g.Value)
-		tf.TextFieldSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			sb := recv.(*SpinBox)
-			tf := send.(*TextField)
-			vl, err := strconv.ParseFloat(tf.Text, 64)
-			if err == nil {
-				sb.SetValueAction(vl)
-			}
-		})
+		if !g.IsReadOnly() {
+			tf.TextFieldSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				sb := recv.(*SpinBox)
+				tf := send.(*TextField)
+				vl, err := strconv.ParseFloat(tf.Text, 64)
+				if err == nil {
+					sb.SetValueAction(vl)
+				}
+			})
+		}
 		g.UpdateEnd()
 	}
 }
@@ -721,6 +766,10 @@ func (g *ComboBox) ButtonAsBase() *ButtonBase {
 }
 
 func (g *ComboBox) ButtonRelease() {
+	if g.IsReadOnly() {
+		g.SetButtonState(ButtonNormal)
+		return
+	}
 	win := g.Viewport.ParentWindow()
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()

@@ -418,6 +418,7 @@ func (g *Node2DBase) FullRender2DTree() {
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
 	ld := g.LayData // save our current layout data
+	g.Style2DTree()
 	g.Size2DTree()
 	g.LayData = ld // restore
 	g.Layout2DTree()

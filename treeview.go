@@ -898,17 +898,6 @@ func (tv *TreeView) Render2D() {
 
 func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(tv.Flag, int(NodeFlagFullReRender)) {
-		// todo: this can be fixed by adding a previous size to layout and it can clear that
-		// dynamic re-rendering doesn't work b/c we don't clear out the full space we
-		// used to take!
-		// rwly := tv.RootWidget.ParentLayout()
-		// if rwly != nil {
-		// 	node = rwly.This.(Node2D)
-		// 	layout = true
-		// } else {
-		// node = tv.RootWidget.This.(Node2D)
-		// layout = false
-		// }
 		node = nil
 		layout = false
 	} else {
@@ -919,8 +908,6 @@ func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
 }
 
 func (tv *TreeView) FocusChanged2D(gotFocus bool) {
-	// todo: good to somehow indicate focus
-	// Qt does it by changing the color of the little toggle widget!  sheesh!
 	tv.UpdateStart()
 	tv.UpdateEnd()
 }

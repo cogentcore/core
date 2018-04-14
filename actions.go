@@ -435,16 +435,12 @@ func (g *MenuButton) Init2D() {
 
 var MenuButtonProps = []map[string]interface{}{
 	{
-		"border-width":  units.NewValue(1, units.Px),
-		"border-radius": units.NewValue(4, units.Px),
-		"border-color":  color.Black,
-		"border-style":  BorderSolid,
-		"padding":       units.NewValue(4, units.Px),
-		"margin":        units.NewValue(4, units.Px),
-		// "box-shadow.h-offset": units.NewValue(4, units.Px),
-		// "box-shadow.v-offset": units.NewValue(4, units.Px),
-		// "box-shadow.blur":     units.NewValue(4, units.Px),
-		// "box-shadow.color":    "#CCC",
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     color.Black,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(4, units.Px),
+		"margin":           units.NewValue(4, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignMiddle,
 		"color":            color.Black,

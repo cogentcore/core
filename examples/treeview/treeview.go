@@ -5,6 +5,8 @@
 package main
 
 import (
+	"image"
+
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	_ "github.com/rcoreilly/goki/gi/oswin/init"
@@ -15,12 +17,26 @@ import (
 // todo: enum field, etc
 
 // A node for testing
-type TestNode struct {
+type TestNodeA struct {
 	ki.Node
-	StrField   string  `desc:"a string"`
-	IntField   int     `min:"5" max:"25" step:"5" desc:"an int"`
-	FloatField float64 `min:"-1" max:"1" step:".25" desc:"a float"`
-	BoolField  bool    `desc:"a bool"`
+	StrField   string          `desc:"a string"`
+	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
+	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
+	BoolField  bool            `desc:"a bool"`
+	Vec        gi.Vec2D        `desc:"a vec"`
+	Rect       image.Rectangle `desc:"rect"`
+}
+
+// B node for testing
+type TestNodeB struct {
+	ki.Node
+	StrField   string          `desc:"a string"`
+	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
+	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
+	BoolField  bool            `desc:"a bool"`
+	Vec        gi.Vec2D        `desc:"a vec"`
+	Rect       image.Rectangle `desc:"rect"`
+	SubObj     TestNodeA       `desc:"a sub-object"`
 }
 
 func main() {
@@ -30,7 +46,7 @@ func main() {
 
 func mainrun() {
 	// a source tree to view
-	srctree := TestNode{}
+	srctree := TestNodeB{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
 	srctree.AddNewChild(nil, "child1")
@@ -39,6 +55,10 @@ func mainrun() {
 	srctree.AddNewChild(nil, "child3")
 	// schild2 :=
 	child2.AddNewChild(nil, "subchild1")
+
+	srctree.SetProp("test1", "string val")
+	srctree.SetProp("test2", 3.14)
+	srctree.SetProp("test3", false)
 
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
@@ -78,7 +98,7 @@ func mainrun() {
 
 	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
 	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
-	// split.SetSplits(.2, .8)
+	split.SetSplits(.3, .7)
 
 	tv1 := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
 	tv1.SetSrcNode(&srctree)

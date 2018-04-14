@@ -121,12 +121,14 @@ func (g *ButtonBase) ToggleChecked() {
 
 // set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
-	// todo: process disabled state -- probably just deal with the property directly?
-	// it overrides any choice here and just sets state to disabled..
-	if state == ButtonNormal && g.IsSelected() {
-		state = ButtonSelected
-	} else if state == ButtonNormal && g.HasFocus() {
-		state = ButtonFocus
+	if g.IsReadOnly() {
+		state = ButtonDisabled
+	} else {
+		if state == ButtonNormal && g.IsSelected() {
+			state = ButtonSelected
+		} else if state == ButtonNormal && g.HasFocus() {
+			state = ButtonFocus
+		}
 	}
 	g.State = state
 	g.Style = g.StateStyles[state] // get relevant styles
@@ -144,6 +146,10 @@ func (g *ButtonBase) ButtonPressed() {
 // the button has just been released -- sends a released signal and returns
 // state to normal, and emits clicked signal if if it was previously in pressed state
 func (g *ButtonBase) ButtonReleased() {
+	if g.IsReadOnly() {
+		g.SetButtonState(ButtonNormal)
+		return
+	}
 	wasPressed := (g.State == ButtonDown)
 	g.UpdateStart()
 	g.SetButtonState(ButtonNormal)
@@ -160,6 +166,9 @@ func (g *ButtonBase) ButtonReleased() {
 
 // button starting hover-- todo: keep track of time and popup a tooltip -- signal?
 func (g *ButtonBase) ButtonEnterHover() {
+	if g.IsReadOnly() {
+		return
+	}
 	if g.State != ButtonHover {
 		g.UpdateStart()
 		g.SetButtonState(ButtonHover)
@@ -169,6 +178,9 @@ func (g *ButtonBase) ButtonEnterHover() {
 
 // button exiting hover
 func (g *ButtonBase) ButtonExitHover() {
+	if g.IsReadOnly() {
+		return
+	}
 	if g.State == ButtonHover {
 		g.UpdateStart()
 		g.SetButtonState(ButtonNormal)
@@ -209,6 +221,9 @@ func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 // handles all the basic button events
 func Init2DButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
+	// if g.IsReadOnly() {
+	// 	return
+	// }
 	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
 		(d.(oswin.Event)).SetProcessed()
 		ab := (interface{})(recv).(ButtonWidget)
@@ -282,7 +297,7 @@ func (g *Button) Init2D() {
 	Init2DButtonEvents(g)
 }
 
-var ButtonProps = []map[string]interface{}{
+var ButtonProps = [ButtonStatesN]map[string]interface{}{
 	{
 		"border-width":        units.NewValue(1, units.Px),
 		"border-radius":       units.NewValue(4, units.Px),

@@ -183,11 +183,11 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float64, frame *Frame) *
 	return nil
 }
 
-// Prompt returns the prompt label widget, and its index, within frame -- nil, -1 if not found
+// Prompt returns the prompt label widget, and its index, within frame -- if nil returns the title widget (flexible if prompt is nil)
 func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 	idx := frame.ChildIndexByName("Prompt", 0)
 	if idx < 0 {
-		return nil, -1
+		return dlg.TitleWidget(frame)
 	}
 	return frame.Child(idx).(*Label), idx
 }
@@ -286,7 +286,7 @@ func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 	return &dlg
 }
 
-// Prompt opens a basic standard dialog with a title, prompt, and ok / cancel buttons -- any empty text will not be added -- optionally connects to given signal receiving object and function for dialog signals
+// Prompt opens a basic standard dialog with a title, prompt, and ok / cancel buttons -- any empty text will not be added -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
 	dlg := NewStdDialog("Prompt", title, prompt, ok, cancel)
 	if recv != nil && fun != nil {
@@ -310,7 +310,7 @@ var _ Node2D = &Dialog{}
 ////////////////////////////////////////////////////////////////////////////////////////
 // more specialized types of dialogs
 
-// New Ki item(s) of type dialog, showing types that implement given interface -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type
+// New Ki item(s) of type dialog, showing types that implement given interface -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("NewKi", title, prompt, true, true)
 
@@ -365,4 +365,46 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	typs := trow.ChildByName("Types", 0).(*ComboBox)
 	typ := typs.CurVal.(reflect.Type)
 	return n, typ
+}
+
+// Struct View dialog for editing fields of a structure using a StructView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("StructView", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "StructView").(*StructView)
+	sv.SetStruct(stru)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.UpdateEnd()
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// Map Map dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("MapView", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "MapView").(*MapView)
+	sv.SetMap(mp)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.UpdateEnd()
+	dlg.Open(0, 0, avp)
+	return dlg
 }

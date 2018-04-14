@@ -15,29 +15,16 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  StructView -- a widget that graphically represents / manipulates a struct
-//  as a property editor
-
-// signals that structview can send
-type StructViewSignals int64
-
-const (
-	// struct field was edited -- data is the field name
-	StructFieldEdited StructViewSignals = iota
-	StructViewSignalsN
-)
-
-//go:generate stringer -type=TreeViewSignals
+//  StructView
 
 // todo: sub-editor panels with shared menubutton panel at bottom.. not clear that that is necc -- probably better to have each sub-panel fully separate
 
 // StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type StructView struct {
 	Frame
-	Struct        interface{} `desc:"the struct that we are a view onto"`
-	StructViewSig ki.Signal   `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
-	Title         string      `desc:"title / prompt to show above the editor fields"`
-	Fields        []ValueView `desc:"ValueView representations of the fields"`
+	Struct interface{} `desc:"the struct that we are a view onto"`
+	Title  string      `desc:"title / prompt to show above the editor fields"`
+	Fields []ValueView `desc:"ValueView representations of the fields"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, nil)
@@ -141,7 +128,7 @@ func (sv *StructView) ButtonBox() (*Layout, int) {
 
 // ConfigStructGrid configures the StructGrid for the current struct
 func (sv *StructView) ConfigStructGrid() {
-	if sv.Struct == nil {
+	if kit.IsNil(sv.Struct) {
 		return
 	}
 	sg, _ := sv.StructGrid()
@@ -206,7 +193,6 @@ func (sv *StructView) Render2D() {
 	sv.Frame.Render2D()
 }
 
-// todo: see notes on treeview
 func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
 	if bitflag.Has(sv.Flag, int(NodeFlagFullReRender)) {
 		node = nil
@@ -220,3 +206,100 @@ func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
 
 // check for interface implementation
 var _ Node2D = &StructView{}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  StructViewInline
+
+// StructViewInline represents a struct as a single line widget, for smaller structs and those explicitly marked inline in the kit type registry type properties -- constructs widgets in Parts to show the field names and editor fields for each field
+type StructViewInline struct {
+	WidgetBase
+	Struct        interface{} `desc:"the struct that we are a view onto"`
+	StructViewSig ki.Signal   `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
+	Fields        []ValueView `desc:"ValueView representations of the fields"`
+}
+
+var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, nil)
+
+// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
+func (sv *StructViewInline) SetStruct(st interface{}) {
+	sv.UpdateStart()
+	sv.Struct = st
+	sv.UpdateFromStruct()
+	sv.UpdateEnd()
+}
+
+var StructViewInlineProps = map[string]interface{}{}
+
+// ConfigParts configures Parts for the current struct
+func (sv *StructViewInline) ConfigParts() {
+	if kit.IsNil(sv.Struct) {
+		return
+	}
+	sv.Parts.Lay = LayoutRow
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	// always start fresh!
+	sv.Fields = make([]ValueView, 0)
+	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		// todo: check tags, skip various etc
+		vwtag := field.Tag.Get("view")
+		if vwtag == "-" {
+			return true
+		}
+		vv := FieldToValueView(sv.Struct, field.Name, fval)
+		if vv == nil { // shouldn't happen
+			return true
+		}
+		vvp := fieldVal.Addr()
+		vv.SetStructValue(vvp, sv.Struct, &field)
+		vtyp := vv.WidgetType()
+		// todo: other things with view tag..
+		labnm := fmt.Sprintf("Lbl%v", field.Name)
+		valnm := fmt.Sprintf("Val%v", field.Name)
+		config.Add(KiT_Label, labnm)
+		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
+		sv.Fields = append(sv.Fields, vv)
+		return true
+	})
+	//	updt :=
+	sv.Parts.ConfigChildren(config, false)
+	// if updt {
+	// 	bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
+	// }
+	for i, vv := range sv.Fields {
+		lbl := sv.Parts.Child(i * 2).(*Label)
+		lbl.SetProp("vertical-align", AlignMiddle)
+		vvb := vv.AsValueViewBase()
+		lbltag := vvb.Field.Tag.Get("label")
+		if lbltag != "" {
+			lbl.Text = lbltag
+		} else {
+			lbl.Text = vvb.Field.Name
+		}
+		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
+		widg.SetProp("vertical-align", AlignMiddle)
+		vv.ConfigWidget(widg)
+	}
+}
+
+func (sv *StructViewInline) UpdateFromStruct() {
+	sv.ConfigParts()
+}
+
+func (sv *StructViewInline) Render2D() {
+	// bitflag.Clear(&sv.Flag, int(NodeFlagFullReRender))
+	if sv.PushBounds() {
+		sv.Render2DParts()
+		sv.Render2DChildren()
+		sv.PopBounds()
+	}
+}
+
+// todo: see notes on treeview
+func (sv *StructViewInline) ReRender2D() (node Node2D, layout bool) {
+	node = sv.This.(Node2D)
+	layout = true
+	return
+}
+
+// check for interface implementation
+var _ Node2D = &StructViewInline{}
