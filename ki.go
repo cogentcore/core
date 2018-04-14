@@ -463,7 +463,12 @@ type Ki interface {
 // function to call on ki objects walking the tree -- return bool = false means don't continue processing this branch of the tree, but other branches can continue
 type Func func(ki Ki, level int, data interface{}) bool
 
-// a Ki reflect.Type, suitable for checking for Type.Implements
+// KiType returns a Ki reflect.Type, suitable for checking for Type.Implements
 func KiType() reflect.Type {
 	return reflect.TypeOf((*Ki)(nil)).Elem()
+}
+
+// IsKi returns true if the given type implements the Ki interface at any level of embedded structure
+func IsKi(typ reflect.Type) bool {
+	return kit.EmbeddedTypeImplements(typ, KiType())
 }
