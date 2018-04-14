@@ -20,10 +20,10 @@ package units
 
 import (
 	"fmt"
-	"golang.org/x/image/math/fixed"
-	"log"
 	"math"
 	"strings"
+
+	"golang.org/x/image/math/fixed"
 )
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of css-based viewport-dependent factors
@@ -170,7 +170,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float64) {
 // factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) ToDotsFactor(un Unit) float64 {
 	if uc.DPI == 0 {
-		log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
+		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
 	}
 	switch un {

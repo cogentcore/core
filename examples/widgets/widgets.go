@@ -26,7 +26,7 @@ func mainrun() {
 	height := 800
 
 	// turn this on to see a trace of the rendering
-	gi.Update2DTrace = true
+	// gi.Update2DTrace = true
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
@@ -98,7 +98,7 @@ func mainrun() {
 	edit1.SetProp("align-vert", gi.AlignMiddle)
 	// button1.SetText("Button 1")
 	button1.SetIcon(wdicon)
-	button2.SetText("Button 2")
+	button2.SetText("Open GoGiEditor")
 	button1.SetProp("align-vert", gi.AlignMiddle)
 	button2.SetProp("align-vert", gi.AlignMiddle)
 	checkbox.SetProp("align-vert", gi.AlignMiddle)
@@ -113,7 +113,7 @@ func mainrun() {
 
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		gi.PromptDialog(vp, "This is a prompt", "Do you want to continue now?", true, true, nil, nil)
+		gi.GoGiEditorOf(vp)
 	})
 
 	row3 := vlay.AddNewChild(gi.KiT_Layout, "row3").(*gi.Layout)

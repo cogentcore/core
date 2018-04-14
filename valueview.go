@@ -255,7 +255,7 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	tf.TextFieldSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
 		tf := send.(*TextField)
-		if vvv.SetValue(tf) {
+		if vvv.SetValue(tf.Text) {
 			vvv.UpdateWidget() // always update after setting value..
 		}
 	})

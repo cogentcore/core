@@ -162,6 +162,11 @@ func (w *Window) StartEventLoop() {
 	wg.Wait()
 }
 
+func (w *Window) StartEventLoopNoWait() {
+	w.DoFullRender = true
+	go w.EventLoop()
+}
+
 // send given event signal to all receivers that want it -- note that because
 // there is a different EventSig for each event type, we are ONLY looking at
 // nodes that have registered to receive that type of event -- the further
