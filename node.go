@@ -113,6 +113,10 @@ func (n *Node) ThisCheck() error {
 	return nil
 }
 
+func (n *Node) ThisOk() bool {
+	return n.This != nil
+}
+
 func (n *Node) Type() reflect.Type {
 	return reflect.TypeOf(n.This).Elem()
 }
@@ -356,7 +360,7 @@ func (n *Node) SetParent(parent Ki) {
 }
 
 func (n *Node) IsRoot() bool {
-	return (n.Par == nil)
+	return (n.Par == nil || !n.Par.ThisOk() || n.This == nil) // extra safe
 }
 
 func (n *Node) Root() Ki {

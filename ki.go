@@ -87,6 +87,9 @@ type Ki interface {
 	// ThisCheck checks that the This pointer is set and issues a warning to log if not -- returns error if not set -- called when nodes are added and inserted
 	ThisCheck() error
 
+	// ThisOk -- a simpler check for parent access routines where the parent .This pointer may be validly not set yet -- returns false if .This is nil
+	ThisOk() bool
+
 	// Type returns the underlying struct type of this node (reflect.TypeOf(This).Elem())
 	Type() reflect.Type
 

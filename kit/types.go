@@ -94,17 +94,22 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 
 // Type finds a type based on its name (package path + "." + type name) --
 // returns nil if not found
-func (tr *TypeRegistry) Type(name string) reflect.Type {
-	if typ, ok := tr.Types[name]; ok {
+func (tr *TypeRegistry) Type(typeName string) reflect.Type {
+	if typ, ok := tr.Types[typeName]; ok {
 		return typ
 	}
 	return nil
 }
 
-// Properties returns properties for this type -- makes props map if not already made
-func (tr *TypeRegistry) Properties(typeName string) map[string]interface{} {
+// Properties returns properties for this type -- optionally makes props map
+// if not already made -- can use this to register properties for types that
+// are not registered
+func (tr *TypeRegistry) Properties(typeName string, makeNew bool) map[string]interface{} {
 	tp, ok := tr.Props[typeName]
 	if !ok {
+		if !makeNew {
+			return nil
+		}
 		tp = make(map[string]interface{})
 		tr.Props[typeName] = tp
 	}

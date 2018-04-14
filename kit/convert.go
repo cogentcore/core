@@ -24,6 +24,21 @@ func Sel(a ...interface{}) []interface{} {
 	return a
 }
 
+// check if an interface value is nil -- the interface itself could be nil, or
+// the value pointed to by the interface could be nil -- this checks both,
+// safely
+func IsNil(it interface{}) bool {
+	if it == nil {
+		return true
+	}
+	v := reflect.ValueOf(it)
+	vk := v.Kind()
+	if vk == reflect.Ptr || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
+		return v.IsNil()
+	}
+	return false
+}
+
 // Convenience functions for converting interface{} (e.g. properties) to given
 // types uses the "ok" bool mechanism to report failure -- are as robust and
 // general as possible.

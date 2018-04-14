@@ -109,6 +109,9 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 		return false
 	}
 	v := NonPtrValue(vv)
+	if !v.IsValid() {
+		return true
+	}
 	typ := v.Type()
 	rval := true
 	for i := 0; i < typ.NumField(); i++ {
