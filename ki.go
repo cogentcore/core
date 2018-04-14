@@ -433,8 +433,14 @@ type Ki interface {
 	// SaveJSON saves the tree to a JSON-encoded byte string -- wraps MarshalJSON
 	SaveJSON(indent bool) ([]byte, error)
 
+	// SaveJSONToFile saves the tree to a JSON-encoded file
+	SaveJSONToFile(filename string) error
+
 	// LoadJSON loads the tree from a JSON-encoded byte string -- wraps UnmarshalJSON and calls UnmarshalPost to recover pointers from paths
 	LoadJSON(b []byte) error
+
+	// SaveJSONFromFile loads the tree from a JSON-encoded file
+	LoadJSONFromFile(filename string) error
 
 	// SaveXML saves the tree to an XML-encoded byte string
 	SaveXML(indent bool) ([]byte, error)

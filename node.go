@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 
 	"log"
 	"reflect"
@@ -1448,6 +1449,14 @@ func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 	}
 }
 
+func (n *Node) SaveJSONToFile(filename string) error {
+	b, err := n.SaveJSON(true) // use indent by default
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, b, 0644) // todo: permissions??
+}
+
 func (n *Node) LoadJSON(b []byte) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
@@ -1464,6 +1473,14 @@ func (n *Node) LoadJSON(b []byte) error {
 	}
 	n.UpdateEnd()
 	return err
+}
+
+func (n *Node) LoadJSONFromFile(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	return n.LoadJSON(b)
 }
 
 func (n *Node) SaveXML(indent bool) ([]byte, error) {
