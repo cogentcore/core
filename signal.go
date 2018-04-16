@@ -157,7 +157,7 @@ func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 
 // Emit sends the signal across all the connections to the receivers -- sequential
 func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
-	if sender.IsDestroyed() { // dead nodes don't talk..
+	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
 	if NodeSignalTrace {
@@ -168,6 +168,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 		j := i - deleted
 		con := s.Cons[j]
 		if con.Recv.IsDestroyed() {
+			fmt.Printf("ki.Signal deleting destroyed receiver: %v path %v\n", con.Recv.Name(), con.Recv.PathUnique())
 			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
 			deleted++
 			continue
@@ -178,7 +179,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 
 // EmitGo concurrent version -- sends the signal across all the connections to the receivers
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
-	if sender.IsDestroyed() { // dead nodes don't talk..
+	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
 	if NodeSignalTrace {

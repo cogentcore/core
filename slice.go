@@ -69,7 +69,7 @@ func (k *Slice) Insert(ki Ki, idx int) {
 	// this avoids extra garbage collection
 	*k = append(*k, nil)
 	if idx < kl {
-		copy((*k)[idx+1:], (*k)[idx:])
+		copy((*k)[idx+1:], (*k)[idx:kl])
 	}
 	(*k)[idx] = ki
 }
