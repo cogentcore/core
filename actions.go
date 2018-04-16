@@ -449,7 +449,9 @@ func (g *MenuButton) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
-	PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+	if g.Viewport != nil { // todo: if persistent, log?
+		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+	}
 }
 
 // set the text and update button

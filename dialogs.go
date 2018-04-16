@@ -70,7 +70,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
 	dlg.Size2DTree()                                       // collect sizes
 
-	frame := dlg.ChildByName("Frame", 0).(*Frame)
+	frame := dlg.ChildByName("frame", 0).(*Frame)
 	vpsz := frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
@@ -133,9 +133,9 @@ var DialogProps = map[string]interface{}{
 	},
 }
 
-// SetFrame creates a standard vertical column frame layout as first element of the dialog, named "Frame"
+// SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {
-	frame := dlg.AddNewChild(KiT_Frame, "Frame").(*Frame)
+	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutCol
 	dlg.PartStyleProps(frame, DialogProps)
 	return frame
@@ -146,11 +146,11 @@ func (dlg *Dialog) Frame() *Frame {
 	return dlg.Child(0).(*Frame)
 }
 
-// SetTitle sets the title and adds a Label named "Title" to the given frame layout if passed
+// SetTitle sets the title and adds a Label named "title" to the given frame layout if passed
 func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
-		lab := frame.AddNewChild(KiT_Label, "Title").(*Label)
+		lab := frame.AddNewChild(KiT_Label, "title").(*Label)
 		lab.Text = title
 		dlg.PartStyleProps(lab, DialogProps)
 		return lab
@@ -160,22 +160,22 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
 func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
-	idx := frame.ChildIndexByName("Title", 0)
+	idx := frame.ChildIndexByName("title", 0)
 	if idx < 0 {
 		return nil, -1
 	}
 	return frame.Child(idx).(*Label), idx
 }
 
-// SetPrompt sets the prompt and adds a Label named "Prompt" to the given frame layout if passed, with the given amount of space before it, sized in "Em"'s (units of font size), if > 0
+// SetPrompt sets the prompt and adds a Label named "prompt" to the given frame layout if passed, with the given amount of space before it, sized in "Em"'s (units of font size), if > 0
 func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float64, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
 		if spaceBefore > 0 {
-			spc := frame.AddNewChild(KiT_Space, "PromptSpace").(*Space)
+			spc := frame.AddNewChild(KiT_Space, "prompt-space").(*Space)
 			spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
 		}
-		lab := frame.AddNewChild(KiT_Label, "Prompt").(*Label)
+		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
 		dlg.PartStyleProps(lab, DialogProps)
 		return lab
@@ -185,23 +185,23 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float64, frame *Frame) *
 
 // Prompt returns the prompt label widget, and its index, within frame -- if nil returns the title widget (flexible if prompt is nil)
 func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
-	idx := frame.ChildIndexByName("Prompt", 0)
+	idx := frame.ChildIndexByName("prompt", 0)
 	if idx < 0 {
 		return dlg.TitleWidget(frame)
 	}
 	return frame.Child(idx).(*Label), idx
 }
 
-// AddButtonBox adds a button box (Row Layout) named "ButtonBox" to given frame, with given amount of space before
+// AddButtonBox adds a button box (Row Layout) named "buttons" to given frame, with given amount of space before
 func (dlg *Dialog) AddButtonBox(spaceBefore float64, frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
 	if spaceBefore > 0 {
-		spc := frame.AddNewChild(KiT_Space, "ButtonSpace").(*Space)
+		spc := frame.AddNewChild(KiT_Space, "button-space").(*Space)
 		spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
 	}
-	bb := frame.AddNewChild(KiT_Layout, "ButtonBox").(*Layout)
+	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
 	bb.Lay = LayoutRow
 	bb.SetProp("max-width", -1)
 	return bb
@@ -209,7 +209,7 @@ func (dlg *Dialog) AddButtonBox(spaceBefore float64, frame *Frame) *Layout {
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
-	idx := frame.ChildIndexByName("ButtonBox", 0)
+	idx := frame.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -288,7 +288,7 @@ func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 
 // Prompt opens a basic standard dialog with a title, prompt, and ok / cancel buttons -- any empty text will not be added -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
-	dlg := NewStdDialog("Prompt", title, prompt, ok, cancel)
+	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
@@ -312,36 +312,36 @@ var _ Node2D = &Dialog{}
 
 // New Ki item(s) of type dialog, showing types that implement given interface -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("NewKi", title, prompt, true, true)
+	dlg := NewStdDialog("new-ki", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "NSpace").(*Space)
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "n-space").(*Space)
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
-	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "NRow").(*Layout)
+	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutRow
 
-	nlbl := nrow.AddNewChild(KiT_Label, "NLabel").(*Label)
+	nlbl := nrow.AddNewChild(KiT_Label, "n-label").(*Label)
 	nlbl.Text = "Number:  "
 
-	nsb := nrow.AddNewChild(KiT_SpinBox, "NField").(*SpinBox)
+	nsb := nrow.AddNewChild(KiT_SpinBox, "n-field").(*SpinBox)
 	nsb.Defaults()
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "TypeSpace").(*Space)
+	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "type-space").(*Space)
 	tspc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
-	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "TRow").(*Layout)
+	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutRow
 
-	tlbl := trow.AddNewChild(KiT_Label, "TLabel").(*Label)
+	tlbl := trow.AddNewChild(KiT_Label, "t-label").(*Label)
 	tlbl.Text = "Type:    "
 
-	typs := trow.AddNewChild(KiT_ComboBox, "Types").(*ComboBox)
+	typs := trow.AddNewChild(KiT_ComboBox, "types").(*ComboBox)
 	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface), true, true, 50)
 	// typs.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
@@ -358,26 +358,26 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 // get the user-set values from a NewKiDialog
 func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	frame := dlg.Frame()
-	nrow := frame.ChildByName("NRow", 0).(*Layout)
-	ntf := nrow.ChildByName("NField", 0).(*SpinBox)
+	nrow := frame.ChildByName("n-row", 0).(*Layout)
+	ntf := nrow.ChildByName("n-field", 0).(*SpinBox)
 	n := int(ntf.Value)
-	trow := frame.ChildByName("TRow", 0).(*Layout)
-	typs := trow.ChildByName("Types", 0).(*ComboBox)
+	trow := frame.ChildByName("t-row", 0).(*Layout)
+	typs := trow.ChildByName("types", 0).(*ComboBox)
 	typ := typs.CurVal.(reflect.Type)
 	return n, typ
 }
 
 // Struct View dialog for editing fields of a structure using a StructView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("StructView", title, prompt, true, true)
+	dlg := NewStdDialog("struct-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "StructView").(*StructView)
+	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "struct-view").(*StructView)
 	sv.SetStruct(stru)
 
 	if recv != nil && fun != nil {
@@ -390,15 +390,15 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, r
 
 // Map View dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("MapView", title, prompt, true, true)
+	dlg := NewStdDialog("map-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "MapView").(*MapView)
+	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "map-view").(*MapView)
 	sv.SetMap(mp)
 
 	if recv != nil && fun != nil {
@@ -411,15 +411,15 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv k
 
 // Slice View dialog for editing fields of a slice using a SliceView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func SliceViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("SliceView", title, prompt, true, true)
+	dlg := NewStdDialog("slice-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "ViewSpace").(*Space)
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "SliceView").(*SliceView)
+	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
 	sv.SetSlice(mp)
 
 	if recv != nil && fun != nil {

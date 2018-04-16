@@ -897,8 +897,8 @@ func (ly *Layout) AvailSize() Vec2D {
 		vp := pargi.AsViewport2D()
 		if vp != nil {
 			if vp.Viewport == nil {
-				fmt.Printf("non-nil par vp\n")
 				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
+				fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
 			}
 		}
 	}

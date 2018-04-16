@@ -26,22 +26,22 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 	vlay := vp.AddNewChild(KiT_Frame, "vlay").(*Frame)
 	vlay.Lay = LayoutCol
 
-	row1 := vlay.AddNewChild(KiT_Layout, "row1").(*Layout)
-	row1.Lay = LayoutRow
-	row1.SetProp("align-vert", AlignMiddle)
-	row1.SetProp("align-horiz", "center")
-	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	row1.SetStretchMaxWidth()
+	trow := vlay.AddNewChild(KiT_Layout, "trow").(*Layout)
+	trow.Lay = LayoutRow
+	trow.SetProp("align-vert", AlignMiddle)
+	trow.SetProp("align-horiz", "center")
+	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	trow.SetStretchMaxWidth()
 
 	spc := vlay.AddNewChild(KiT_Space, "spc1").(*Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	row1.AddNewChild(KiT_Stretch, "str1")
-	lab1 := row1.AddNewChild(KiT_Label, "lab1").(*Label)
-	lab1.Text = fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", obj.Name())
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
-	row1.AddNewChild(KiT_Stretch, "str2")
+	trow.AddNewChild(KiT_Stretch, "str1")
+	title := trow.AddNewChild(KiT_Label, "title").(*Label)
+	title.Text = fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", obj.Name())
+	title.SetProp("max-width", -1)
+	title.SetProp("text-align", "center")
+	trow.AddNewChild(KiT_Stretch, "str2")
 
 	split := vlay.AddNewChild(KiT_SplitView, "split").(*SplitView)
 	split.Dim = X
@@ -50,13 +50,13 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 	svfr := split.AddNewChild(KiT_Frame, "svfr").(*Frame)
 	split.SetSplits(.2, .8)
 
-	tv1 := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
-	tv1.SetSrcNode(obj)
+	tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
+	tv.SetSrcNode(obj)
 
-	sv1 := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
-	sv1.SetStruct(obj)
+	sv := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv.SetStruct(obj)
 
-	tv1.TreeViewSig.Connect(sv1.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
 			return
 		}
@@ -70,14 +70,14 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 	bspc := vlay.AddNewChild(KiT_Space, "ButSpc").(*Space)
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
-	rowb := vlay.AddNewChild(KiT_Layout, "rowb").(*Layout)
-	rowb.Lay = LayoutRow
-	rowb.SetProp("align-vert", AlignMiddle)
-	rowb.SetProp("align-horiz", "center")
-	rowb.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	rowb.SetStretchMaxWidth()
+	brow := vlay.AddNewChild(KiT_Layout, "brow").(*Layout)
+	brow.Lay = LayoutRow
+	brow.SetProp("align-vert", AlignMiddle)
+	brow.SetProp("align-horiz", "center")
+	brow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	brow.SetStretchMaxWidth()
 
-	updtobj := rowb.AddNewChild(KiT_Button, "updtobj").(*Button)
+	updtobj := brow.AddNewChild(KiT_Button, "updtobj").(*Button)
 	updtobj.SetText("Update")
 	updtobj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
@@ -86,7 +86,7 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 		}
 	})
 
-	savej := rowb.AddNewChild(KiT_Button, "savejson").(*Button)
+	savej := brow.AddNewChild(KiT_Button, "savejson").(*Button)
 	savej.SetText("Save JSON")
 	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
@@ -94,7 +94,7 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 		}
 	})
 
-	loadj := rowb.AddNewChild(KiT_Button, "loadjson").(*Button)
+	loadj := brow.AddNewChild(KiT_Button, "loadjson").(*Button)
 	loadj.SetText("Load JSON")
 	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {

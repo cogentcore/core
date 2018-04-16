@@ -75,7 +75,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* structview pointer is showing entire struct -- need to detect pointers -- e.g., Viewport.   then after fix that, mark it as view:"-" anyway
+* Map has editable keys, everything is not RO -- just need to use a diff method to set key value, etc, instead of directly writing to the value.  also support RO tag to get RO.
+
+* basic map, slice methods for add, delete
+
+* arg view / dialog and button tags
+
+* switch to shiny window flush (first) --- add fps button to gogi first
+
+* DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
 
 * don't re-render scrollbar in course of scrolling!?
 
@@ -87,7 +95,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * then can do StructView using grid layout -- keeps labels aligned with rows.
     + read-only
-	+ inline
 	+ condshow / edit
 	
 * styles for different button states are not propagating into the parts

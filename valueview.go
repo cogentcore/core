@@ -158,8 +158,10 @@ type ValueView interface {
 	AsValueViewBase() *ValueViewBase
 	// SetStructValue sets the value, owner and field information for a struct field
 	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField)
-	// SetMapValue sets the value, owner and map key information for a map element
-	SetMapValue(val reflect.Value, owner interface{}, key interface{})
+	// SetMapKey sets the key value and owner for a map key
+	SetMapKey(val reflect.Value, owner interface{})
+	// SetMapValue sets the value, owner and map key information for a map element -- needs pointer to ValueView representation of key to track current key value
+	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView)
 	// SetSliceValue sets the value, owner and index information for a slice element
 	SetSliceValue(val reflect.Value, owner interface{}, idx int)
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
@@ -183,10 +185,12 @@ type ValueViewBase struct {
 	ki.Node
 	Value     reflect.Value        `desc:"the reflect.Value representation of the value"`
 	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
+	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
 	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
 	OwnerType reflect.Type         `desc:"non-pointer type of the Owner, for convenience"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
-	Key       interface{}          `desc:"if Owner is a map, this is the key for this value in the map"`
+	Key       interface{}          `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
+	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`
 	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
 	Widget    Node2D               `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
@@ -206,11 +210,19 @@ func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, fi
 	vv.Field = field
 }
 
-func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}) {
+func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}) {
+	vv.OwnKind = reflect.Map
+	vv.IsMapKey = true
+	vv.Value = key
+	vv.Owner = owner
+}
+
+func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView) {
 	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
 	vv.Key = key
+	vv.KeyView = keyView
 }
 
 func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int) {
@@ -226,14 +238,8 @@ func (vv *ValueViewBase) OwnerKind() reflect.Kind {
 }
 
 func (vv *ValueViewBase) IsReadOnly() bool {
-	// if !vv.Value.CanAddr() {
-	// 	return true
-	// }
-	if vv.OwnKind == reflect.Map {
-		return true
-	}
 	if vv.OwnKind == reflect.Struct {
-		rotag := vv.FieldTag("readonly")
+		rotag := vv.FieldTag("read-only")
 		if rotag != "" {
 			return true
 		}
@@ -272,12 +278,38 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 	if vv.IsReadOnly() {
 		return false
 	}
-	if vv.Owner != nil && vv.OwnKind == reflect.Struct {
-		if kiv, ok := vv.Owner.(ki.Ki); ok {
-			return kiv.SetField(vv.Field.Name, val)
+	if vv.Owner != nil {
+		switch vv.OwnKind {
+		case reflect.Struct:
+			if kiv, ok := vv.Owner.(ki.Ki); ok {
+				return kiv.SetField(vv.Field.Name, val)
+			} else {
+				return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+			}
+		case reflect.Map:
+			ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
+			if vv.IsMapKey {
+				nv := reflect.ValueOf(val)                // new key value
+				cv := ov.MapIndex(vv.Value)               // get current value
+				ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
+				ov.SetMapIndex(nv, cv)                    // set new key to current value
+				vv.Value = nv                             // update value to new key
+			} else {
+				if vv.KeyView != nil {
+					ck := vv.KeyView.AsValueViewBase().Value // current key value
+					ov.SetMapIndex(ck, reflect.ValueOf(val))
+				} else { // static, key not editable?
+					ov.SetMapIndex(reflect.ValueOf(vv.Key), reflect.ValueOf(val))
+				}
+			}
+		case reflect.Slice:
+			// should be addressable?
+			return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 		}
+	} else {
+		return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 	}
-	return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+	return false
 }
 
 func (vv *ValueViewBase) FieldTag(tagName string) string {

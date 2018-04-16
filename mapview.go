@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"reflect"
+	"sort"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
@@ -22,6 +23,7 @@ type MapView struct {
 	Frame
 	Map    interface{} `desc:"the map that we are a view onto"`
 	Title  string      `desc:"title / prompt to show above the editor fields"`
+	Keys   []ValueView `desc:"ValueView representations of the map keys"`
 	Values []ValueView `desc:"ValueView representations of the map values"`
 }
 
@@ -73,11 +75,11 @@ func (sv *MapView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *MapView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	config.Add(KiT_Label, "Title")
-	config.Add(KiT_Space, "TitleSpace")
-	config.Add(KiT_Layout, "MapGrid")
-	config.Add(KiT_Space, "GridSpace")
-	config.Add(KiT_Layout, "ButtonBox")
+	config.Add(KiT_Label, "title")
+	config.Add(KiT_Space, "title-space")
+	config.Add(KiT_Layout, "map-grid")
+	config.Add(KiT_Space, "grid-space")
+	config.Add(KiT_Layout, "buttons")
 	return config
 }
 
@@ -99,7 +101,7 @@ func (sv *MapView) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
 func (sv *MapView) TitleWidget() (*Label, int) {
-	idx := sv.ChildIndexByName("Title", 0)
+	idx := sv.ChildIndexByName("title", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -108,7 +110,7 @@ func (sv *MapView) TitleWidget() (*Label, int) {
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
 func (sv *MapView) MapGrid() (*Layout, int) {
-	idx := sv.ChildIndexByName("MapGrid", 0)
+	idx := sv.ChildIndexByName("map-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -117,7 +119,7 @@ func (sv *MapView) MapGrid() (*Layout, int) {
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (sv *MapView) ButtonBox() (*Layout, int) {
-	idx := sv.ChildIndexByName("ButtonBox", 0)
+	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -137,26 +139,37 @@ func (sv *MapView) ConfigMapGrid() {
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
+	sv.Keys = make([]ValueView, 0)
 	sv.Values = make([]ValueView, 0)
 
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
 
-	// todo: could sort keys
 	keys := mvnp.MapKeys()
+	sort.Slice(keys, func(i, j int) bool {
+		return kit.ToString(keys[i]) < kit.ToString(keys[j])
+	})
 	for _, key := range keys {
+		kv := ToValueView(key.Interface())
+		if kv == nil { // shouldn't happen
+			continue
+		}
+		kv.SetMapKey(key, sv.Map)
+
 		val := mvnp.MapIndex(key)
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, sv.Map, key.Interface())
-		vtyp := vv.WidgetType()
-		lbltxt := kit.ToString(key.Interface())
-		labnm := fmt.Sprintf("Lbl%v", lbltxt)
-		valnm := fmt.Sprintf("Val%v", lbltxt)
-		config.Add(KiT_Label, labnm)
-		config.Add(vtyp, valnm)
+		vv.SetMapValue(val, sv.Map, key.Interface(), kv) // needs key value view to track updates
+
+		keytxt := kit.ToString(key.Interface())
+		keynm := fmt.Sprintf("key-%v", keytxt)
+		valnm := fmt.Sprintf("value-%v", keytxt)
+
+		config.Add(kv.WidgetType(), keynm)
+		config.Add(vv.WidgetType(), valnm)
+		sv.Keys = append(sv.Keys, kv)
 		sv.Values = append(sv.Values, vv)
 	}
 	updt := sg.ConfigChildren(config, false)
@@ -164,15 +177,58 @@ func (sv *MapView) ConfigMapGrid() {
 		bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
 	}
 	for i, vv := range sv.Values {
-		lbl := sg.Child(i * 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
-		vvb := vv.AsValueViewBase()
-		lbltxt := kit.ToString(vvb.Key)
-		lbl.Text = lbltxt
+		keyw := sg.Child(i * 2).(Node2D)
+		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := sg.Child((i * 2) + 1).(Node2D)
 		widg.SetProp("vertical-align", AlignMiddle)
+		kv := sv.Keys[i]
+		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 	}
+}
+
+func (sv *MapView) MapAdd() {
+	if kit.IsNil(sv.Map) {
+		return
+	}
+	mv := reflect.ValueOf(sv.Map)
+	mvnp := kit.NonPtrValue(mv)
+	mvtyp := mvnp.Type()
+
+	nkey := reflect.New(mvtyp.Key())
+	nval := reflect.New(mvtyp.Elem())
+	mvnp.SetMapIndex(nkey.Elem(), nval.Elem())
+}
+
+// ConfigMapButtons configures the buttons for map functions
+func (sv *MapView) ConfigMapButtons() {
+	if kit.IsNil(sv.Map) {
+		return
+	}
+	bb, _ := sv.ButtonBox()
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config.Add(KiT_Button, "Add")
+	config.Add(KiT_Button, "Delete")
+	bb.ConfigChildren(config, false)
+	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	addb.SetText("Add")
+	addb.ButtonSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			svv.MapAdd()
+			bitflag.Set(&svv.Flag, int(NodeFlagFullReRender))
+		}
+	})
+	delb := bb.ChildByName("Delete", 0).EmbeddedStruct(KiT_Button).(*Button)
+	delb.SetText("Delete")
+	delb.ButtonSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		// todo: need a dialog etc
+		// if sig == int64(ButtonClicked) {
+		// 	svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+		// 	svv.MapDel()
+		// 	bitflag.Set(&svv.Flag, int(NodeFlagFullReRender))
+		// }
+	})
 }
 
 func (sv *MapView) UpdateFromMap() {
@@ -180,6 +236,7 @@ func (sv *MapView) UpdateFromMap() {
 	typ := kit.NonPtrType(reflect.TypeOf(sv.Map))
 	sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	sv.ConfigMapGrid()
+	sv.ConfigMapButtons()
 }
 
 func (sv *MapView) Render2D() {
@@ -209,6 +266,7 @@ type MapViewInline struct {
 	WidgetBase
 	Map        interface{} `desc:"the map that we are a view onto"`
 	MapViewSig ki.Signal   `json:"-" desc:"signal for MapView -- see MapViewSignals for the types"`
+	Keys       []ValueView `desc:"ValueView representations of the map keys"`
 	Values     []ValueView `desc:"ValueView representations of the fields"`
 }
 
@@ -224,6 +282,8 @@ func (sv *MapViewInline) SetMap(st interface{}) {
 
 var MapViewInlineProps = map[string]interface{}{}
 
+// todo: maybe figure out a way to share some of this redundant code..
+
 // ConfigParts configures Parts for the current map
 func (sv *MapViewInline) ConfigParts() {
 	if kit.IsNil(sv.Map) {
@@ -232,42 +292,54 @@ func (sv *MapViewInline) ConfigParts() {
 	sv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
+	sv.Keys = make([]ValueView, 0)
 	sv.Values = make([]ValueView, 0)
 
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
 
 	keys := mvnp.MapKeys()
+	sort.Slice(keys, func(i, j int) bool {
+		return kit.ToString(keys[i]) < kit.ToString(keys[j])
+	})
 	for _, key := range keys {
+		kv := ToValueView(key.Interface())
+		if kv == nil { // shouldn't happen
+			continue
+		}
+		kv.SetMapKey(key, sv.Map)
+
 		val := mvnp.MapIndex(key)
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, sv.Map, key.Interface())
-		vtyp := vv.WidgetType()
-		lbltxt := kit.ToString(key.Interface())
-		labnm := fmt.Sprintf("Lbl%v", lbltxt)
-		valnm := fmt.Sprintf("Val%v", lbltxt)
-		config.Add(KiT_Label, labnm)
-		config.Add(vtyp, valnm)
+		vv.SetMapValue(val, sv.Map, key.Interface(), kv) // needs key value view to track updates
+
+		keytxt := kit.ToString(key.Interface())
+		keynm := fmt.Sprintf("key-%v", keytxt)
+		valnm := fmt.Sprintf("value-%v", keytxt)
+
+		config.Add(kv.WidgetType(), keynm)
+		config.Add(vv.WidgetType(), valnm)
+		sv.Keys = append(sv.Keys, kv)
 		sv.Values = append(sv.Values, vv)
 	}
 	config.Add(KiT_Action, "EditAction")
 	sv.Parts.ConfigChildren(config, false)
 	for i, vv := range sv.Values {
-		lbl := sv.Parts.Child(i * 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
-		vvb := vv.AsValueViewBase()
-		lbltxt := kit.ToString(vvb.Key)
-		lbl.Text = lbltxt
+		keyw := sv.Parts.Child(i * 2).(Node2D)
+		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
 		widg.SetProp("vertical-align", AlignMiddle)
+		kv := sv.Keys[i]
+		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 	}
 	edac := sv.Parts.Child(-1).(*Action)
 	edac.SetProp("vertical-align", AlignMiddle)
 	edac.Text = "  ..."
+	edac.ActionSig.DisconnectAll()
 	edac.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 		MapViewDialog(svv.Viewport, svv.Map, "Map Value View", "", nil, nil)

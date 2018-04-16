@@ -75,11 +75,11 @@ func (sv *StructView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	config.Add(KiT_Label, "Title")
-	config.Add(KiT_Space, "TitleSpace")
-	config.Add(KiT_Layout, "StructGrid")
-	config.Add(KiT_Space, "GridSpace")
-	config.Add(KiT_Layout, "ButtonBox")
+	config.Add(KiT_Label, "title")
+	config.Add(KiT_Space, "title-space")
+	config.Add(KiT_Layout, "struct-grid")
+	config.Add(KiT_Space, "grid-space")
+	config.Add(KiT_Layout, "buttons")
 	return config
 }
 
@@ -101,7 +101,7 @@ func (sv *StructView) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) TitleWidget() (*Label, int) {
-	idx := sv.ChildIndexByName("Title", 0)
+	idx := sv.ChildIndexByName("title", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -110,7 +110,7 @@ func (sv *StructView) TitleWidget() (*Label, int) {
 
 // StructGrid returns the StructGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) StructGrid() (*Layout, int) {
-	idx := sv.ChildIndexByName("StructGrid", 0)
+	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -119,7 +119,7 @@ func (sv *StructView) StructGrid() (*Layout, int) {
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) ButtonBox() (*Layout, int) {
-	idx := sv.ChildIndexByName("ButtonBox", 0)
+	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -154,8 +154,8 @@ func (sv *StructView) ConfigStructGrid() {
 		vv.SetStructValue(vvp, sv.Struct, &field)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
-		labnm := fmt.Sprintf("Lbl%v", field.Name)
-		valnm := fmt.Sprintf("Val%v", field.Name)
+		labnm := fmt.Sprintf("label-%v", field.Name)
+		valnm := fmt.Sprintf("value-%v", field.Name)
 		config.Add(KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.Fields = append(sv.Fields, vv)
@@ -253,8 +253,8 @@ func (sv *StructViewInline) ConfigParts() {
 		vv.SetStructValue(vvp, sv.Struct, &field)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
-		labnm := fmt.Sprintf("Lbl%v", field.Name)
-		valnm := fmt.Sprintf("Val%v", field.Name)
+		labnm := fmt.Sprintf("label-%v", field.Name)
+		valnm := fmt.Sprintf("value-%v", field.Name)
 		config.Add(KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.Fields = append(sv.Fields, vv)
