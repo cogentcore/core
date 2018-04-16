@@ -174,6 +174,8 @@ type ValueView interface {
 	UpdateWidget()
 	// ConfigWidget configures a widget of WidgetType for representing the value, including setting up the signal connections to set the value when the user edits it (values are always set immediately when the widget is updated)
 	ConfigWidget(widg Node2D)
+	// Val returns the reflect.Value representation for this item
+	Val() reflect.Value
 	// SetValue sets the value (if not ReadOnly), using Ki.SetField for Ki types and kit.SetRobust otherwise
 	SetValue(val interface{}) bool
 	// FieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
@@ -272,6 +274,10 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 			vvv.UpdateWidget() // always update after setting value..
 		}
 	})
+}
+
+func (vv *ValueViewBase) Val() reflect.Value {
+	return vv.Value
 }
 
 func (vv *ValueViewBase) SetValue(val interface{}) bool {

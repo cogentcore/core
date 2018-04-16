@@ -75,9 +75,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* Map has editable keys, everything is not RO -- just need to use a diff method to set key value, etc, instead of directly writing to the value.  also support RO tag to get RO.
+* basic map, slice methods for add, delete -- started -- dialog not updating
 
-* basic map, slice methods for add, delete
+* finish converting to lower-case-hyphen style for ki object names in gi context
 
 * arg view / dialog and button tags
 

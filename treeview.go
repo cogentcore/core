@@ -45,8 +45,6 @@ const (
 	NodeFlagCollapsed NodeFlags = NodeFlagsN + iota
 	// node is selected
 	NodeFlagSelected
-	// a full re-render is required due to nature of update event -- otherwise default is local re-render
-	NodeFlagFullReRender
 	// the shift key was pressed, putting the selection mode into continous selection mode
 	NodeFlagContinuousSelect
 	// the ctrl / cmd key was pressed, putting the selection mode into continous selection mode
@@ -119,7 +117,7 @@ func (tv *TreeView) SyncToSrc() {
 	}
 	updt := tv.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
 	if updt {
-		bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
+		tv.SetFullReRender()
 		win := tv.ParentWindow()
 		if win != nil {
 			for _, vki := range tv.Deleted {
@@ -392,7 +390,7 @@ func (tv *TreeView) Collapse() {
 	if !tv.IsCollapsed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
-			bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
+			tv.SetFullReRender()
 		}
 		bitflag.Set(&tv.Flag, int(NodeFlagCollapsed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeCollapsed), tv.This)
@@ -404,7 +402,7 @@ func (tv *TreeView) Expand() {
 	if tv.IsCollapsed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
-			bitflag.Set(&tv.Flag, int(NodeFlagFullReRender))
+			tv.SetFullReRender()
 		}
 		bitflag.Clear(&tv.Flag, int(NodeFlagCollapsed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeOpened), tv.This)
@@ -867,7 +865,7 @@ func (tv *TreeView) Render2D() {
 	if tv.PushBounds() {
 		tv.ConfigPartsIfNeeded()
 		// reset for next update
-		bitflag.Clear(&tv.Flag, int(NodeFlagFullReRender))
+		tv.ClearFullReRender()
 
 		if tv.IsSelected() {
 			tv.Style = tv.StateStyles[TreeViewSel]
@@ -897,7 +895,7 @@ func (tv *TreeView) Render2D() {
 }
 
 func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
-	if bitflag.Has(tv.Flag, int(NodeFlagFullReRender)) {
+	if tv.NeedsFullReRender() {
 		node = nil
 		layout = false
 	} else {

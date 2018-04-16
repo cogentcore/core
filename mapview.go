@@ -11,7 +11,6 @@ import (
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -75,8 +74,8 @@ func (sv *MapView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *MapView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	config.Add(KiT_Label, "title")
-	config.Add(KiT_Space, "title-space")
+	// config.Add(KiT_Label, "title")
+	// config.Add(KiT_Space, "title-space")
 	config.Add(KiT_Layout, "map-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
@@ -135,8 +134,9 @@ func (sv *MapView) ConfigMapGrid() {
 	if sg == nil {
 		return
 	}
+	sv.UpdateStart()
 	sg.Lay = LayoutGrid
-	sg.SetProp("columns", 2)
+	sg.SetProp("columns", 3)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
 	sv.Keys = make([]ValueView, 0)
@@ -166,31 +166,48 @@ func (sv *MapView) ConfigMapGrid() {
 		keytxt := kit.ToString(key.Interface())
 		keynm := fmt.Sprintf("key-%v", keytxt)
 		valnm := fmt.Sprintf("value-%v", keytxt)
+		delnm := fmt.Sprintf("del-%v", keytxt)
 
 		config.Add(kv.WidgetType(), keynm)
 		config.Add(vv.WidgetType(), valnm)
+		config.Add(KiT_Action, delnm)
 		sv.Keys = append(sv.Keys, kv)
 		sv.Values = append(sv.Values, vv)
 	}
 	updt := sg.ConfigChildren(config, false)
 	if updt {
-		bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
+		sv.SetFullReRender()
 	}
 	for i, vv := range sv.Values {
-		keyw := sg.Child(i * 2).(Node2D)
+		keyw := sg.Child(i * 3).(Node2D)
 		keyw.SetProp("vertical-align", AlignMiddle)
-		widg := sg.Child((i * 2) + 1).(Node2D)
+		widg := sg.Child(i*3 + 1).(Node2D)
 		widg.SetProp("vertical-align", AlignMiddle)
 		kv := sv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
+		delact := sg.Child(i*3 + 2).(*Action)
+		delact.SetProp("vertical-align", AlignMiddle)
+		delact.Text = "  --"
+		delact.Data = kv
+		// delact.ActionSig.DisconnectAll()
+		delact.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			act := send.(*Action)
+			svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			svv.UpdateStart()
+			svv.MapDelete(act.Data.(ValueView).Val())
+			svv.SetFullReRender()
+			svv.UpdateEnd()
+		})
 	}
+	sv.UpdateEnd()
 }
 
 func (sv *MapView) MapAdd() {
 	if kit.IsNil(sv.Map) {
 		return
 	}
+	sv.UpdateStart()
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
 	mvtyp := mvnp.Type()
@@ -198,6 +215,18 @@ func (sv *MapView) MapAdd() {
 	nkey := reflect.New(mvtyp.Key())
 	nval := reflect.New(mvtyp.Elem())
 	mvnp.SetMapIndex(nkey.Elem(), nval.Elem())
+	sv.UpdateEnd()
+}
+
+func (sv *MapView) MapDelete(key reflect.Value) {
+	if kit.IsNil(sv.Map) {
+		return
+	}
+	sv.UpdateStart()
+	mv := reflect.ValueOf(sv.Map)
+	mvnp := kit.NonPtrValue(mv)
+	mvnp.SetMapIndex(key, reflect.Value{}) // delete
+	sv.UpdateEnd()
 }
 
 // ConfigMapButtons configures the buttons for map functions
@@ -208,44 +237,41 @@ func (sv *MapView) ConfigMapButtons() {
 	bb, _ := sv.ButtonBox()
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	config.Add(KiT_Button, "Add")
-	config.Add(KiT_Button, "Delete")
 	bb.ConfigChildren(config, false)
 	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
 	addb.SetText("Add")
 	addb.ButtonSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
 			svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			svv.UpdateStart()
 			svv.MapAdd()
-			bitflag.Set(&svv.Flag, int(NodeFlagFullReRender))
+			svv.SetFullReRender()
+			svv.UpdateEnd()
 		}
-	})
-	delb := bb.ChildByName("Delete", 0).EmbeddedStruct(KiT_Button).(*Button)
-	delb.SetText("Delete")
-	delb.ButtonSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		// todo: need a dialog etc
-		// if sig == int64(ButtonClicked) {
-		// 	svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
-		// 	svv.MapDel()
-		// 	bitflag.Set(&svv.Flag, int(NodeFlagFullReRender))
-		// }
 	})
 }
 
 func (sv *MapView) UpdateFromMap() {
 	sv.StdConfig()
-	typ := kit.NonPtrType(reflect.TypeOf(sv.Map))
-	sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
+	// typ := kit.NonPtrType(reflect.TypeOf(sv.Map))
+	// sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	sv.ConfigMapGrid()
 	sv.ConfigMapButtons()
 }
 
+// needs full rebuild and this is where we do it:
+func (sv *MapView) Style2D() {
+	sv.ConfigMapGrid()
+	sv.Frame.Style2D()
+}
+
 func (sv *MapView) Render2D() {
-	bitflag.Clear(&sv.Flag, int(NodeFlagFullReRender))
+	sv.ClearFullReRender()
 	sv.Frame.Render2D()
 }
 
 func (sv *MapView) ReRender2D() (node Node2D, layout bool) {
-	if bitflag.Has(sv.Flag, int(NodeFlagFullReRender)) {
+	if sv.NeedsFullReRender() {
 		node = nil
 		layout = false
 	} else {
@@ -339,15 +365,29 @@ func (sv *MapViewInline) ConfigParts() {
 	edac := sv.Parts.Child(-1).(*Action)
 	edac.SetProp("vertical-align", AlignMiddle)
 	edac.Text = "  ..."
-	edac.ActionSig.DisconnectAll()
+	// edac.ActionSig.DisconnectAll()
 	edac.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-		MapViewDialog(svv.Viewport, svv.Map, "Map Value View", "", nil, nil)
+		MapViewDialog(svv.Viewport, svv.Map, "Map Value View", "", svv.This,
+			func(recv, send ki.Ki, sig int64, data interface{}) {
+				svvv := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+				svpar := svvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
+				if svpar != nil {
+					svpar.SetFullReRender() // todo: not working to re-generate item
+					svpar.UpdateStart()
+					svpar.UpdateEnd()
+				}
+			})
 	})
 }
 
 func (sv *MapViewInline) UpdateFromMap() {
 	sv.ConfigParts()
+}
+
+func (sv *MapViewInline) Style2D() {
+	sv.ConfigParts()
+	sv.WidgetBase.Style2D()
 }
 
 func (sv *MapViewInline) Render2D() {

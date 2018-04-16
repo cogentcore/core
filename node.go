@@ -25,6 +25,8 @@ const (
 	CanFocus
 	// HasFocus: does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
 	HasFocus
+	// FullReRender indicates that a full re-render is required due to nature of update event -- otherwise default is local re-render -- used internally for nodes to determine what to do on the ReRender step
+	FullReRender
 	// ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame's within a SplitView
 	ReRenderAnchor
 	// ReadOnly: for widgets that support editing, it is read-only -- this must be universally supported in an appropriately-indicated way for each widget
@@ -104,6 +106,21 @@ func (g *NodeBase) IsReadOnly() bool {
 // set the node as read-only
 func (g *NodeBase) SetReadOnly() {
 	bitflag.Set(&g.Flag, int(ReadOnly))
+}
+
+// node needs full re-render?
+func (g *NodeBase) NeedsFullReRender() bool {
+	return bitflag.Has(g.Flag, int(FullReRender))
+}
+
+// set node as needing a full ReRender
+func (g *NodeBase) SetFullReRender() {
+	bitflag.Set(&g.Flag, int(FullReRender))
+}
+
+// clear node as needing a full ReRender
+func (g *NodeBase) ClearFullReRender() {
+	bitflag.Clear(&g.Flag, int(FullReRender))
 }
 
 // is the current node a ReRenderAnchor?

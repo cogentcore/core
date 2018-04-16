@@ -10,7 +10,6 @@ import (
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -135,6 +134,7 @@ func (sv *StructView) ConfigStructGrid() {
 	if sg == nil {
 		return
 	}
+	sg.UpdateStart()
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
@@ -163,7 +163,7 @@ func (sv *StructView) ConfigStructGrid() {
 	})
 	updt := sg.ConfigChildren(config, false)
 	if updt {
-		bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
+		sv.SetFullReRender()
 	}
 	for i, vv := range sv.Fields {
 		lbl := sg.Child(i * 2).(*Label)
@@ -179,6 +179,7 @@ func (sv *StructView) ConfigStructGrid() {
 		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
+	sg.UpdateEnd()
 }
 
 func (sv *StructView) UpdateFromStruct() {
@@ -189,12 +190,12 @@ func (sv *StructView) UpdateFromStruct() {
 }
 
 func (sv *StructView) Render2D() {
-	bitflag.Clear(&sv.Flag, int(NodeFlagFullReRender))
+	sv.ClearFullReRender()
 	sv.Frame.Render2D()
 }
 
 func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
-	if bitflag.Has(sv.Flag, int(NodeFlagFullReRender)) {
+	if sv.NeedsFullReRender() {
 		node = nil
 		layout = false
 	} else {
@@ -235,6 +236,7 @@ func (sv *StructViewInline) ConfigParts() {
 	if kit.IsNil(sv.Struct) {
 		return
 	}
+	sv.UpdateStart()
 	sv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
@@ -260,11 +262,7 @@ func (sv *StructViewInline) ConfigParts() {
 		sv.Fields = append(sv.Fields, vv)
 		return true
 	})
-	//	updt :=
 	sv.Parts.ConfigChildren(config, false)
-	// if updt {
-	// 	bitflag.Set(&sv.Flag, int(NodeFlagFullReRender))
-	// }
 	for i, vv := range sv.Fields {
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
@@ -279,6 +277,7 @@ func (sv *StructViewInline) ConfigParts() {
 		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
+	sv.UpdateEnd()
 }
 
 func (sv *StructViewInline) UpdateFromStruct() {
@@ -286,7 +285,6 @@ func (sv *StructViewInline) UpdateFromStruct() {
 }
 
 func (sv *StructViewInline) Render2D() {
-	// bitflag.Clear(&sv.Flag, int(NodeFlagFullReRender))
 	if sv.PushBounds() {
 		sv.Render2DParts()
 		sv.Render2DChildren()

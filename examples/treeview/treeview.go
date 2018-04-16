@@ -76,22 +76,22 @@ func mainrun() {
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
-	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	row1.SetStretchMaxWidth()
+	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow.Lay = gi.LayoutRow
+	trow.SetProp("align-vert", gi.AlignMiddle)
+	trow.SetProp("align-horiz", "center")
+	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	trow.SetStretchMaxWidth()
 
 	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	row1.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := row1.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+	trow.AddNewChild(gi.KiT_Stretch, "str1")
+	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
 	lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	row1.AddNewChild(gi.KiT_Stretch, "str2")
+	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 	split.Dim = gi.X
@@ -100,13 +100,13 @@ func mainrun() {
 	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
 	split.SetSplits(.3, .7)
 
-	tv1 := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
-	tv1.SetSrcNode(&srctree)
+	tv := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
+	tv.SetSrcNode(&srctree)
 
-	sv1 := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
-	sv1.SetStruct(&srctree)
+	sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
+	sv.SetStruct(&srctree)
 
-	tv1.TreeViewSig.Connect(sv1.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
 			return
 		}
