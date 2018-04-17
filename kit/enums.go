@@ -500,3 +500,18 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 func (tr *EnumRegistry) TypeValues(et reflect.Type, alt bool) []EnumValue {
 	return tr.Values(FullTypeName(et), alt)
 }
+
+// AllTagged returns a list of all registered enum types that include a given
+// property key value -- does not check for the value of that value -- just
+// its existence
+func (tr *EnumRegistry) AllTagged(key string) []reflect.Type {
+	tl := make([]reflect.Type, 0)
+	for _, typ := range tr.Enums {
+		tp := tr.Prop(FullTypeName(typ), key)
+		if tp == nil {
+			continue
+		}
+		tl = append(tl, typ)
+	}
+	return tl
+}

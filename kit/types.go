@@ -212,12 +212,18 @@ func (tr *TypeRegistry) Init() {
 	tr.Props = make(map[string]map[string]interface{})
 
 	{
+		var BoolProps = map[string]interface{}{
+			"basic-type": true,
+		}
 		ob := false
-		tr.AddType(&ob, nil)
+		tr.AddType(&ob, BoolProps)
 	}
 	{
+		var IntProps = map[string]interface{}{
+			"basic-type": true,
+		}
 		ob := int(0)
-		tr.AddType(&ob, nil)
+		tr.AddType(&ob, IntProps)
 	}
 	{
 		ob := int8(0)
@@ -264,8 +270,11 @@ func (tr *TypeRegistry) Init() {
 		tr.AddType(&ob, nil)
 	}
 	{
+		var Float64Props = map[string]interface{}{
+			"basic-type": true,
+		}
 		ob := float64(0)
-		tr.AddType(&ob, nil)
+		tr.AddType(&ob, Float64Props)
 	}
 	{
 		ob := complex64(0)
@@ -276,7 +285,10 @@ func (tr *TypeRegistry) Init() {
 		tr.AddType(&ob, nil)
 	}
 	{
+		var StringProps = map[string]interface{}{
+			"basic-type": true,
+		}
 		ob := string(0)
-		tr.AddType(&ob, nil)
+		tr.AddType(&ob, StringProps)
 	}
 }
