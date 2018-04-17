@@ -165,7 +165,7 @@ type Ki interface {
 	// SetPropUpdate sets given property key to value val, with update notification (wrapped in UpdateStart/End) so other nodes receiving update signals from this node can update to reflect these changes
 	SetPropUpdate(key string, val interface{})
 
-	// Prop gets property value from key -- if inherit, then checks all parents too -- if typ then checks property on type as well -- returns nil if not set
+	// Prop gets property value from key -- if inherit, then checks all parents too -- if typ then checks property on type as well (and on embedded types if inherit is true) -- returns nil if not set
 	Prop(key string, inherit, typ bool) interface{}
 
 	// DeleteProp deletes property key, safely

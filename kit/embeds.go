@@ -127,7 +127,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 			continue
 		}
 		vfi := vf.Interface()
-		if vfi == nil || vfi == stru {
+		if vfi == stru {
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {

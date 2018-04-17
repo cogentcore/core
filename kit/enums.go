@@ -223,7 +223,7 @@ func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 // EnumIfacePtrFromInt64 returns an interface{} value which is a pointer to
 // an enum value of given type, set to given integer value
 func EnumIfacePtrFromInt64(ival int64, typ reflect.Type) interface{} {
-	evnp := reflect.New(PtrType(typ))
+	evnp := reflect.New(PtrType(typ)) // todo: this should be unnec. b/c New returns a pointer
 	evpi := evnp.Interface()
 	evn := reflect.New(typ)
 	evi := evn.Interface()
