@@ -144,7 +144,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 	for i := 0; i < sz; i++ {
-		val := mvnp.Index(i)
+		val := kit.OnePtrVal(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
@@ -313,7 +313,7 @@ func (sv *SliceViewInline) ConfigParts() {
 
 	sz := mvnp.Len()
 	for i := 0; i < sz; i++ {
-		val := mvnp.Index(i)
+		val := kit.OnePtrVal(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
