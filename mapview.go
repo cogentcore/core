@@ -20,10 +20,11 @@ import (
 // MapView represents a map, creating a property editor of the values -- constructs Children widgets to show the key / value pairs, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type MapView struct {
 	Frame
-	Map    interface{} `desc:"the map that we are a view onto"`
-	Title  string      `desc:"title / prompt to show above the editor fields"`
-	Keys   []ValueView `desc:"ValueView representations of the map keys"`
-	Values []ValueView `desc:"ValueView representations of the map values"`
+	Map     interface{} `desc:"the map that we are a view onto"`
+	Title   string      `desc:"title / prompt to show above the editor fields"`
+	Keys    []ValueView `desc:"ValueView representations of the map keys"`
+	Values  []ValueView `desc:"ValueView representations of the map values"`
+	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
@@ -32,9 +33,10 @@ var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 // of flexible configuration elements that can be easily extended and modified
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (sv *MapView) SetMap(mp interface{}) {
+func (sv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Map = mp
+	sv.TmpSave = tmpSave
 	sv.UpdateFromMap()
 	sv.UpdateEnd()
 }
@@ -173,14 +175,14 @@ func (sv *MapView) ConfigMapGrid() {
 		if kv == nil { // shouldn't happen
 			continue
 		}
-		kv.SetMapKey(key, sv.Map)
+		kv.SetMapKey(key, sv.Map, sv.TmpSave)
 
 		val := mvnp.MapIndex(key)
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, sv.Map, key.Interface(), kv) // needs key value view to track updates
+		vv.SetMapValue(val, sv.Map, key.Interface(), kv, sv.TmpSave) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
 		keynm := fmt.Sprintf("key-%v", keytxt)
@@ -235,6 +237,9 @@ func (sv *MapView) ConfigMapGrid() {
 				kit.SetRobust(evi, cv.Interface())
 				ov := kit.NonPtrValue(reflect.ValueOf(svv.Map))
 				ov.SetMapIndex(ck, reflect.ValueOf(evi).Elem())
+				if svv.TmpSave != nil {
+					svv.TmpSave.SaveTmp()
+				}
 				svv.SetFullReRender()
 				svv.UpdateEnd()
 			})
@@ -271,6 +276,9 @@ func (sv *MapView) MapAdd() {
 	nkey := reflect.New(mvtyp.Key())
 	nval := reflect.New(valtyp)
 	mvnp.SetMapIndex(nkey.Elem(), nval.Elem())
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
 	sv.UpdateEnd()
 }
 
@@ -282,6 +290,9 @@ func (sv *MapView) MapDelete(key reflect.Value) {
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
 	mvnp.SetMapIndex(key, reflect.Value{}) // delete
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
 	sv.UpdateEnd()
 }
 
@@ -350,14 +361,16 @@ type MapViewInline struct {
 	MapViewSig ki.Signal   `json:"-" desc:"signal for MapView -- see MapViewSignals for the types"`
 	Keys       []ValueView `desc:"ValueView representations of the map keys"`
 	Values     []ValueView `desc:"ValueView representations of the fields"`
+	TmpSave    ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, nil)
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (sv *MapViewInline) SetMap(st interface{}) {
+func (sv *MapViewInline) SetMap(st interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Map = st
+	sv.TmpSave = tmpSave
 	sv.UpdateFromMap()
 	sv.UpdateEnd()
 }
@@ -389,14 +402,14 @@ func (sv *MapViewInline) ConfigParts() {
 		if kv == nil { // shouldn't happen
 			continue
 		}
-		kv.SetMapKey(key, sv.Map)
+		kv.SetMapKey(key, sv.Map, sv.TmpSave)
 
 		val := mvnp.MapIndex(key)
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, sv.Map, key.Interface(), kv) // needs key value view to track updates
+		vv.SetMapValue(val, sv.Map, key.Interface(), kv, sv.TmpSave) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
 		keynm := fmt.Sprintf("key-%v", keytxt)
@@ -424,7 +437,7 @@ func (sv *MapViewInline) ConfigParts() {
 	// edac.ActionSig.DisconnectAll()
 	edac.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-		MapViewDialog(svv.Viewport, svv.Map, "Map Value View", "", svv.This,
+		MapViewDialog(svv.Viewport, svv.Map, svv.TmpSave, "Map Value View", "", svv.This,
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				svvv := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 				svpar := svvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)

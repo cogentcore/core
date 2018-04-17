@@ -23,6 +23,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/rcoreilly/goki/ki/kit"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -79,7 +80,12 @@ const (
 	Dp
 	// actual real display pixels -- generally only use internally
 	Dot
+	UnitN
 )
+
+//go:generate stringer -type=Unit
+
+var KiT_Unit = kit.Enums.AddEnumAltLower(UnitN, false, nil, "")
 
 var UnitNames = [...]string{
 	Pct:  "pct",

@@ -54,7 +54,7 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 	tv.SetSrcNode(obj)
 
 	sv := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
-	sv.SetStruct(obj)
+	sv.SetStruct(obj, nil)
 
 	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
@@ -63,7 +63,7 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 		tvn, _ := data.(ki.Ki).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		svr, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
 		if sig == int64(NodeSelected) {
-			svr.SetStruct(tvn.SrcNode.Ptr)
+			svr.SetStruct(tvn.SrcNode.Ptr, nil)
 		}
 	})
 

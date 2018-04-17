@@ -19,9 +19,10 @@ import (
 // SliceView represents a slice, creating a property editor of the values -- constructs Children widgets to show the index / value pairs, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type SliceView struct {
 	Frame
-	Slice  interface{} `desc:"the slice that we are a view onto"`
-	Title  string      `desc:"title / prompt to show above the editor fields"`
-	Values []ValueView `desc:"ValueView representations of the slice values"`
+	Slice   interface{} `desc:"the slice that we are a view onto"`
+	Title   string      `desc:"title / prompt to show above the editor fields"`
+	Values  []ValueView `desc:"ValueView representations of the slice values"`
+	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -30,9 +31,10 @@ var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 // of flexible configuration elements that can be easily extended and modified
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceView) SetSlice(mp interface{}) {
+func (sv *SliceView) SetSlice(mp interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Slice = mp
+	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
 	sv.UpdateEnd()
 }
@@ -147,7 +149,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetSliceValue(val, sv.Slice, i)
+		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
 		vtyp := vv.WidgetType()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
@@ -215,6 +217,9 @@ func (sv *SliceView) SliceNewAt(idx int) {
 		svnp.Index(idx).Set(nval.Elem())
 	}
 	svl.Elem().Set(svnp)
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
 	sv.UpdateEnd()
 }
 
@@ -229,6 +234,9 @@ func (sv *SliceView) SliceDelete(idx int) {
 	reflect.Copy(svnp.Slice(idx, sz-1), svnp.Slice(idx+1, sz))
 	svnp.Index(sz - 1).Set(nval.Elem())
 	svl.Elem().Set(svnp.Slice(0, sz-1))
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
 	sv.UpdateEnd()
 }
 
@@ -273,14 +281,16 @@ type SliceViewInline struct {
 	Slice        interface{} `desc:"the slice that we are a view onto"`
 	SliceViewSig ki.Signal   `json:"-" desc:"signal for SliceView -- see SliceViewSignals for the types"`
 	Values       []ValueView `desc:"ValueView representations of the fields"`
+	TmpSave      ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, nil)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(st interface{}) {
+func (sv *SliceViewInline) SetSlice(st interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Slice = st
+	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
 	sv.UpdateEnd()
 }
@@ -308,7 +318,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetSliceValue(val, sv.Slice, i)
+		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
 		vtyp := vv.WidgetType()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
@@ -334,7 +344,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	edac.ActionSig.DisconnectAll()
 	edac.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-		SliceViewDialog(svv.Viewport, svv.Slice, "Slice Value View", "", svv.This,
+		SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", svv.This,
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				svvv := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
 				svpar := svvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)

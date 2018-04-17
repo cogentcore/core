@@ -21,9 +21,10 @@ import (
 // StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type StructView struct {
 	Frame
-	Struct interface{} `desc:"the struct that we are a view onto"`
-	Title  string      `desc:"title / prompt to show above the editor fields"`
-	Fields []ValueView `desc:"ValueView representations of the fields"`
+	Struct  interface{} `desc:"the struct that we are a view onto"`
+	Title   string      `desc:"title / prompt to show above the editor fields"`
+	Fields  []ValueView `desc:"ValueView representations of the fields"`
+	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -57,9 +58,10 @@ var StructViewProps = map[string]interface{}{
 // of flexible configuration elements that can be easily extended and modified
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
-func (sv *StructView) SetStruct(st interface{}) {
+func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Struct = st
+	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
 	sv.UpdateEnd()
 }
@@ -150,7 +152,7 @@ func (sv *StructView) ConfigStructGrid() {
 			return true
 		}
 		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field)
+		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
@@ -220,14 +222,16 @@ type StructViewInline struct {
 	Struct        interface{} `desc:"the struct that we are a view onto"`
 	StructViewSig ki.Signal   `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
 	Fields        []ValueView `desc:"ValueView representations of the fields"`
+	TmpSave       ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, nil)
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
-func (sv *StructViewInline) SetStruct(st interface{}) {
+func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateStart()
 	sv.Struct = st
+	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
 	sv.UpdateEnd()
 }
@@ -255,7 +259,7 @@ func (sv *StructViewInline) ConfigParts() {
 			return true
 		}
 		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field)
+		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)

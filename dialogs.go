@@ -368,7 +368,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 }
 
 // Struct View dialog for editing fields of a structure using a StructView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
-func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("struct-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
@@ -378,7 +378,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, r
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "struct-view").(*StructView)
-	sv.SetStruct(stru)
+	sv.SetStruct(stru, tmpSave)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -389,7 +389,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, r
 }
 
 // Map View dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
-func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("map-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
@@ -399,7 +399,7 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv k
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "map-view").(*MapView)
-	sv.SetMap(mp)
+	sv.SetMap(mp, tmpSave)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -410,7 +410,7 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv k
 }
 
 // Slice View dialog for editing fields of a slice using a SliceView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
-func SliceViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("slice-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
@@ -420,7 +420,7 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
-	sv.SetSlice(mp)
+	sv.SetSlice(mp, tmpSave)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

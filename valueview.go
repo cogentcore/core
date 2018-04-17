@@ -128,6 +128,14 @@ func ToValueView(it interface{}) ValueView {
 			vv.Init(&vv)
 			return &vv
 		}
+	case vk == reflect.Interface:
+		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
+		switch {
+		case nptyp == reflect.TypeOf((*reflect.Type)(nil)).Elem():
+			vv := TypeValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 	}
 	// fallback.
 	vv := ValueViewBase{}
@@ -163,13 +171,13 @@ type ValueView interface {
 	// AsValueViewBase gives access to the basic data fields so that the interface doesn't need to provide accessors for them
 	AsValueViewBase() *ValueViewBase
 	// SetStructValue sets the value, owner and field information for a struct field
-	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField)
+	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView)
 	// SetMapKey sets the key value and owner for a map key
-	SetMapKey(val reflect.Value, owner interface{})
+	SetMapKey(val reflect.Value, owner interface{}, tmpSave ValueView)
 	// SetMapValue sets the value, owner and map key information for a map element -- needs pointer to ValueView representation of key to track current key value
-	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView)
+	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView)
 	// SetSliceValue sets the value, owner and index information for a slice element
-	SetSliceValue(val reflect.Value, owner interface{}, idx int)
+	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView)
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
 	OwnerKind() reflect.Kind
 	// IsReadOnly returns whether the value is read-only -- e.g., Map owners have ReadOnly values, and some fields can be marked as ReadOnly using a struct tag
@@ -186,6 +194,8 @@ type ValueView interface {
 	SetValue(val interface{}) bool
 	// FieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
 	FieldTag(tagName string) string
+	// SaveTmp saves a temporary copy of a struct to a map -- map values must be explicitly re-saved and cannot be directly written to by the value elements -- each ValueView has a pointer to any parent ValueView that might need to be saved after SetValue -- SaveTmp called automatically in SetValue but other cases that use something different need to call it explicitly
+	SaveTmp()
 }
 
 // ValueViewBase provides the basis for implementations of the ValueView interface, representing values in the interface -- it implements a generic TextField representation of the string value, and provides the generic fallback for everything that doesn't provide a specific ValueViewer type
@@ -203,6 +213,7 @@ type ValueViewBase struct {
 	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
 	Widget    Node2D               `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
 	Label     string               `desc:"label for displaying this item -- based on Field.Name and optional label Tag value"`
+	TmpSave   ValueView            `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
@@ -215,33 +226,37 @@ func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
 }
 
-func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField) {
+func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
 	vv.Field = field
+	vv.TmpSave = tmpSave
 }
 
-func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}) {
+func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave ValueView) {
 	vv.OwnKind = reflect.Map
 	vv.IsMapKey = true
 	vv.Value = key
 	vv.Owner = owner
+	vv.TmpSave = tmpSave
 }
 
-func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView) {
+func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView) {
 	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
 	vv.Key = key
 	vv.KeyView = keyView
+	vv.TmpSave = tmpSave
 }
 
-func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int) {
+func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView) {
 	vv.OwnKind = reflect.Slice
 	vv.Value = val
 	vv.Owner = owner
 	vv.Idx = idx
+	vv.TmpSave = tmpSave
 }
 
 // we have this one accessor b/c it is more useful for outside consumers vs. internal usage
@@ -291,16 +306,18 @@ func (vv *ValueViewBase) Val() reflect.Value {
 }
 
 func (vv *ValueViewBase) SetValue(val interface{}) bool {
-	if vv.IsReadOnly() {
+	if vv.This.(ValueView).IsReadOnly() {
 		return false
 	}
+	rval := false
 	if vv.Owner != nil {
 		switch vv.OwnKind {
 		case reflect.Struct:
 			if kiv, ok := vv.Owner.(ki.Ki); ok {
-				return kiv.SetField(vv.Field.Name, val)
+				rval = kiv.SetField(vv.Field.Name, val)
+
 			} else {
-				return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+				rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 			}
 		case reflect.Map:
 			ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
@@ -310,6 +327,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
 				ov.SetMapIndex(nv, cv)                    // set new key to current value
 				vv.Value = nv                             // update value to new key
+				rval = true
 			} else {
 				if vv.KeyView != nil {
 					ck := vv.KeyView.Val() // current key value
@@ -317,13 +335,53 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				} else { // static, key not editable?
 					ov.SetMapIndex(reflect.ValueOf(vv.Key), reflect.ValueOf(val))
 				}
+				rval = true
 			}
 		case reflect.Slice:
-			// should be addressable?
-			return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+			rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 		}
 	} else {
-		return kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+		rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+	}
+	if rval {
+		vv.This.(ValueView).SaveTmp()
+	}
+	return rval
+}
+
+func (vv *ValueViewBase) SaveTmp() {
+	if vv.TmpSave == nil {
+		return
+	}
+	if vv.TmpSave == vv.This.(ValueView) {
+		// if we are a map value, of a struct value, we save our value
+		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.IsMapKey {
+			if kit.NonPtrValue(vv.Value).Kind() == reflect.Struct {
+				ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
+				if vv.KeyView != nil {
+					ck := vv.KeyView.Val()
+					ov.SetMapIndex(ck, kit.NonPtrValue(vv.Value))
+					// fmt.Printf("save tmp of struct value in key: %v\n", ck.Interface())
+				} else {
+					ov.SetMapIndex(reflect.ValueOf(vv.Key), kit.NonPtrValue(vv.Value))
+					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
+				}
+			}
+		}
+	} else {
+		vv.TmpSave.SaveTmp()
+	}
+}
+
+func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
+	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
+		vv.TmpSave = vv.This.(ValueView) // we are it!
+		vtyp := reflect.TypeOf(vv.Value.Interface())
+		vtp := reflect.New(vtyp)
+		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
+		kit.SetRobust(vtp.Interface(), vv.Value.Interface())
+		vv.Value = vtp // use this instead
+		return true
 	}
 	return false
 }
@@ -363,6 +421,7 @@ func (vv *StructValueView) UpdateWidget() {
 func (vv *StructValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
+	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	mb := vv.Widget.(*MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
@@ -370,7 +429,7 @@ func (vv *StructValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*MenuButton)
-		StructViewDialog(mb.Viewport, vv.Value.Interface(), "Struct Value View", "", nil, nil)
+		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Struct Value View", "", nil, nil)
 	})
 }
 
@@ -392,44 +451,14 @@ func (vv *StructInlineValueView) WidgetType() reflect.Type {
 func (vv *StructInlineValueView) UpdateWidget() {
 	// sv := vv.Widget.(*StructViewInline)
 	// npv := vv.Value.Elem()
-	// sv.SetChecked(npv.Bool())
 }
 
 func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sv := vv.Widget.(*StructViewInline)
-	// npv := vv.Value.Elem()
-	sv.SetStruct(vv.Value.Interface())
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  MapInlineValueView
-
-// MapInlineValueView presents a MapViewInline for a map
-type MapInlineValueView struct {
-	ValueViewBase
-}
-
-var KiT_MapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
-
-func (vv *MapInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MapViewInline
-	return vv.WidgetTyp
-}
-
-func (vv *MapInlineValueView) UpdateWidget() {
-	// sv := vv.Widget.(*MapViewInline)
-	// npv := kit.NonPtrValue(vv.Value)
-	// sv.SetChecked(npv.Bool())
-}
-
-func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
-	vv.Widget = widg
-	vv.UpdateWidget()
-	sv := vv.Widget.(*MapViewInline)
-	// npv := vv.Value.Elem()
-	sv.SetMap(vv.Value.Interface())
+	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
+	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +494,7 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*MenuButton)
-		SliceViewDialog(mb.Viewport, vv.Value.Interface(), "Slice Value View", "", nil, nil)
+		SliceViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Slice Value View", "", nil, nil)
 	})
 }
 
@@ -502,8 +531,37 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*MenuButton)
-		MapViewDialog(mb.Viewport, vv.Value.Interface(), "Map Value View", "", nil, nil)
+		MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil)
 	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  MapInlineValueView
+
+// MapInlineValueView presents a MapViewInline for a map
+type MapInlineValueView struct {
+	ValueViewBase
+}
+
+var KiT_MapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
+
+func (vv *MapInlineValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_MapViewInline
+	return vv.WidgetTyp
+}
+
+func (vv *MapInlineValueView) UpdateWidget() {
+	// sv := vv.Widget.(*MapViewInline)
+	// npv := kit.NonPtrValue(vv.Value)
+	// sv.SetChecked(npv.Bool())
+}
+
+func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	vv.UpdateWidget()
+	sv := vv.Widget.(*MapViewInline)
+	// npv := vv.Value.Elem()
+	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -567,7 +625,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
 		k := vvv.KiStruct()
 		if k != nil {
 			mb := vvv.Widget.(*MenuButton)
-			StructViewDialog(mb.Viewport, k, "Struct Value View", "", nil, nil)
+			StructViewDialog(mb.Viewport, k, vv.TmpSave, "Struct Value View", "", nil, nil)
 		}
 	})
 	mb.AddMenuText("Select", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -609,7 +667,7 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
-	cb.SetReadOnlyState(vv.IsReadOnly())
+	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
 	cb.ButtonSig.DisconnectAll()
 	cb.ButtonSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
@@ -648,7 +706,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	sb.SetReadOnlyState(vv.IsReadOnly())
+	sb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -719,7 +777,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	sb.SetReadOnlyState(vv.IsReadOnly())
+	sb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -798,7 +856,7 @@ func (vv *EnumValueView) UpdateWidget() {
 func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
-	cb.SetReadOnlyState(vv.IsReadOnly())
+	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
@@ -811,6 +869,69 @@ func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 		cbb := vvv.Widget.(*ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
+			vvv.UpdateWidget()
+		}
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  TypeValueView
+
+// TypeValueView presents a combobox for choosing types
+type TypeValueView struct {
+	ValueViewBase
+}
+
+var KiT_TypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
+
+func (vv *TypeValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_ComboBox
+	return vv.WidgetTyp
+}
+
+func (vv *TypeValueView) UpdateWidget() {
+	sb := vv.Widget.(*ComboBox)
+	npv := kit.NonPtrValue(vv.Value)
+	typ, ok := npv.Interface().(reflect.Type)
+	if ok {
+		sb.SetCurVal(typ)
+	}
+}
+
+func (vv *TypeValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	cb := vv.Widget.(*ComboBox)
+	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+
+	typEmbeds := ki.KiT_Node
+	if kiv, ok := vv.Owner.(ki.Ki); ok {
+		tep := kiv.Prop("type-embeds", true, true) // inherit, typ
+		if tep != nil {
+			if te, ok := tep.(reflect.Type); ok {
+				typEmbeds = te
+			}
+		}
+	}
+
+	tetag := vv.FieldTag("type-embeds")
+	if tetag != "" {
+		typ := kit.Types.Type(tetag)
+		if typ != nil {
+			typEmbeds = typ
+		}
+	}
+
+	tl := kit.Types.AllEmbedsOf(typEmbeds, true, false)
+	cb.ItemsFromTypes(tl, false, true, 50)
+
+	vv.UpdateWidget()
+
+	cb.ComboSig.DisconnectAll()
+	cb.ComboSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_TypeValueView).(*TypeValueView)
+		cbb := vvv.Widget.(*ComboBox)
+		tval := cbb.CurVal.(reflect.Type)
+		if vvv.SetValue(tval) {
 			vvv.UpdateWidget()
 		}
 	})
