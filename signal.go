@@ -168,7 +168,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 		j := i - deleted
 		con := s.Cons[j]
 		if con.Recv.IsDestroyed() {
-			fmt.Printf("ki.Signal deleting destroyed receiver: %v path %v\n", con.Recv.Name(), con.Recv.PathUnique())
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v path %v\n", con.Recv.Name(), con.Recv.PathUnique())
 			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
 			deleted++
 			continue

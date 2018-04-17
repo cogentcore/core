@@ -17,6 +17,9 @@ import (
 
 // the non-pointer underlying type
 func NonPtrType(typ reflect.Type) reflect.Type {
+	if typ == nil {
+		return typ
+	}
 	for typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
 	}
@@ -25,6 +28,9 @@ func NonPtrType(typ reflect.Type) reflect.Type {
 
 // the pointer to underlying type
 func PtrType(typ reflect.Type) reflect.Type {
+	if typ == nil {
+		return typ
+	}
 	for typ.Kind() != reflect.Ptr {
 		typ = reflect.PtrTo(typ)
 	}
@@ -251,7 +257,7 @@ func EmbeddedStruct(stru interface{}, embed reflect.Type) interface{} {
 // checks if given type implements given interface, or it embeds a type that does so -- must pass a type constructed like this: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
 func EmbeddedTypeImplements(typ, iface reflect.Type) bool {
 	if iface.Kind() != reflect.Interface {
-		log.Printf("kit.TypeRegistry AllImplementersOf -- type is not an interface: %v\n", iface)
+		log.Printf("kit.TypeRegistry EmbeddedTypeImplements -- type is not an interface: %v\n", iface)
 		return false
 	}
 	if typ.Implements(iface) {
@@ -263,6 +269,9 @@ func EmbeddedTypeImplements(typ, iface reflect.Type) bool {
 	typ = NonPtrType(typ)
 	if typ.Implements(iface) { // try it all possible ways..
 		return true
+	}
+	if typ.Kind() != reflect.Struct {
+		return false
 	}
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
