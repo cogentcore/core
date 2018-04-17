@@ -108,8 +108,8 @@ func (dlg *Dialog) Cancel() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Configuration functions construct standard types of dialogs but anything can be done
 
-var DialogProps = map[string]interface{}{
-	"#frame": map[string]interface{}{
+var DialogProps = ki.Props{
+	"#frame": ki.Props{
 		"border-width":        units.NewValue(2, units.Px),
 		"margin":              units.NewValue(8, units.Px),
 		"padding":             units.NewValue(4, units.Px),
@@ -118,14 +118,14 @@ var DialogProps = map[string]interface{}{
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 	},
-	"#title": map[string]interface{}{
+	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
 	},
-	"#prompt": map[string]interface{}{
+	"#prompt": ki.Props{
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,

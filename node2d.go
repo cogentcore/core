@@ -60,7 +60,7 @@ type Node2DBase struct {
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
-var Node2DBaseProps = map[string]interface{}{
+var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
@@ -209,7 +209,7 @@ func (g *Node2DBase) Init2DBase() {
 }
 
 // style the Paint values directly from node properties and optional base-level defaults -- for SVG-style nodes
-func (g *Node2DBase) Style2DSVG(baseProps map[string]interface{}) {
+func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
@@ -226,7 +226,7 @@ func (g *Node2DBase) Style2DSVG(baseProps map[string]interface{}) {
 }
 
 // style the Style values from node properties and optional base-level defautls -- for Widget-style nodes
-func (g *Node2DBase) Style2DWidget(baseProps map[string]interface{}) {
+func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
@@ -251,8 +251,8 @@ func (g *Node2DBase) Style2DWidget(baseProps map[string]interface{}) {
 // get the style properties for a child in parts (or any other child) based on
 // its name -- only call this when new parts were created -- name of
 // properties is #partname (lower cased) and it should contain a
-// map[string]interface{} which is then added to the part's props
-func (g *Node2DBase) PartStyleProps(part ki.Ki, props map[string]interface{}) {
+// ki.Props which is then added to the part's props
+func (g *Node2DBase) PartStyleProps(part ki.Ki, props ki.Props) {
 	stynm := "#" + strings.ToLower(part.Name())
 	pp := g.Prop(stynm, false, false)
 	if pp == nil {
@@ -266,7 +266,7 @@ func (g *Node2DBase) PartStyleProps(part ki.Ki, props map[string]interface{}) {
 			return
 		}
 	}
-	pmap, ok := pp.(map[string]interface{})
+	pmap, ok := pp.(ki.Props)
 	if !ok {
 		return
 	}

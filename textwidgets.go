@@ -65,7 +65,7 @@ type Label struct {
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
-var LabelProps = map[string]interface{}{
+var LabelProps = ki.Props{
 	"padding":        units.NewValue(2, units.Px),
 	"margin":         units.NewValue(2, units.Px),
 	"vertical-align": AlignTop,
@@ -141,8 +141,8 @@ type TextField struct {
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
-var TextFieldProps = map[string]interface{}{
-	TextFieldSelectors[TextFieldActive]: map[string]interface{}{
+var TextFieldProps = ki.Props{
+	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-color":     color.Black,
 		"border-style":     "solid",
@@ -153,10 +153,10 @@ var TextFieldProps = map[string]interface{}{
 		"color":            "black",
 		"background-color": "#EEE",
 	},
-	TextFieldSelectors[TextFieldFocus]: map[string]interface{}{
+	TextFieldSelectors[TextFieldFocus]: ki.Props{
 		"background-color": color.White,
 	},
-	TextFieldSelectors[TextFieldReadOnly]: map[string]interface{}{
+	TextFieldSelectors[TextFieldReadOnly]: ki.Props{
 		"background-color": "#CCC",
 	},
 }
@@ -548,24 +548,24 @@ type SpinBox struct {
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
-var SpinBoxProps = map[string]interface{}{
-	":active": map[string]interface{}{ // todo: could add other states
-		"#up": map[string]interface{}{
+var SpinBoxProps = ki.Props{
+	":active": ki.Props{ // todo: could add other states
+		"#up": ki.Props{
 			"max-width":  units.NewValue(1.5, units.Ex),
 			"max-height": units.NewValue(1.5, units.Ex),
 			"margin":     units.NewValue(1, units.Px),
 			"padding":    units.NewValue(0, units.Px),
 		},
-		"#down": map[string]interface{}{
+		"#down": ki.Props{
 			"max-width":  units.NewValue(1.5, units.Ex),
 			"max-height": units.NewValue(1.5, units.Ex),
 			"margin":     units.NewValue(1, units.Px),
 			"padding":    units.NewValue(0, units.Px),
 		},
-		"#space": map[string]interface{}{
+		"#space": ki.Props{
 			"width": units.NewValue(.1, units.Ex),
 		},
-		"#textfield": map[string]interface{}{
+		"#textfield": ki.Props{
 			"min-width": units.NewValue(4, units.Ex),
 			"width":     units.NewValue(8, units.Ex),
 			"margin":    units.NewValue(2, units.Px),
@@ -764,8 +764,8 @@ type ComboBox struct {
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 
-var ComboBoxProps = map[string]interface{}{
-	ButtonSelectors[ButtonActive]: map[string]interface{}{
+var ComboBoxProps = ki.Props{
+	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-radius":    units.NewValue(4, units.Px),
 		"border-color":     color.Black,
@@ -776,18 +776,18 @@ var ComboBoxProps = map[string]interface{}{
 		"vertical-align":   AlignMiddle,
 		"color":            color.Black,
 		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
 		},
-		"#indicator": map[string]interface{}{
+		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
 			"height":         units.NewValue(1.5, units.Ex),
 			"margin":         units.NewValue(0, units.Px),
@@ -795,24 +795,24 @@ var ComboBoxProps = map[string]interface{}{
 			"vertical-align": AlignBottom,
 		},
 	},
-	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
 	},
-	ButtonSelectors[ButtonHover]: map[string]interface{}{
+	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-color":     "#EEF",
 		"box-shadow.color": "#BBF",
 	},
-	ButtonSelectors[ButtonDown]: map[string]interface{}{
+	ButtonSelectors[ButtonDown]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#008",
 	},
-	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+	ButtonSelectors[ButtonSelected]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#00F",

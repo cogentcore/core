@@ -95,7 +95,7 @@ type SliderBase struct {
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
-var SliderBaseProps = map[string]interface{}{
+var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
 
@@ -381,8 +381,8 @@ type Slider struct {
 
 var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 
-var SliderProps = map[string]interface{}{
-	SliderSelectors[SliderActive]: map[string]interface{}{
+var SliderProps = ki.Props{
+	SliderSelectors[SliderActive]: ki.Props{
 		"border-width":     "1px",
 		"border-radius":    "4px",
 		"border-color":     "black",
@@ -390,33 +390,33 @@ var SliderProps = map[string]interface{}{
 		"padding":          "6px",
 		"margin":           "4px",
 		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 		},
 	},
-	SliderSelectors[SliderDisabled]: map[string]interface{}{
+	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
 	},
-	SliderSelectors[SliderHover]: map[string]interface{}{
+	SliderSelectors[SliderHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	SliderSelectors[SliderFocus]: map[string]interface{}{
+	SliderSelectors[SliderFocus]: ki.Props{
 		"border-color":     "#008",
 		"background.color": "#CCF",
 	},
-	SliderSelectors[SliderDown]: map[string]interface{}{
+	SliderSelectors[SliderDown]: ki.Props{
 		"border-color":     "#000",
 		"background-color": "#DDF",
 	},
-	SliderSelectors[SliderValue]: map[string]interface{}{
+	SliderSelectors[SliderValue]: ki.Props{
 		"border-color":     "#00F",
 		"background-color": "#00F",
 	},
-	SliderSelectors[SliderBox]: map[string]interface{}{
+	SliderSelectors[SliderBox]: ki.Props{
 		"border-color":     "#FFF",
 		"background-color": "#FFF",
 	},
@@ -561,8 +561,8 @@ type ScrollBar struct {
 
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
-var ScrollBarProps = map[string]interface{}{
-	SliderSelectors[SliderActive]: map[string]interface{}{
+var ScrollBarProps = ki.Props{
+	SliderSelectors[SliderActive]: ki.Props{
 		"width":            "16px", // assumes vertical -- user needs to set!
 		"min-width":        "16px",
 		"border-width":     "1px",
@@ -573,26 +573,26 @@ var ScrollBarProps = map[string]interface{}{
 		"margin":           "2px",
 		"background-color": "#EEF",
 	},
-	SliderSelectors[SliderDisabled]: map[string]interface{}{
+	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
 	},
-	SliderSelectors[SliderHover]: map[string]interface{}{
+	SliderSelectors[SliderHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	SliderSelectors[SliderFocus]: map[string]interface{}{
+	SliderSelectors[SliderFocus]: ki.Props{
 		"border-color":     "#008",
 		"background.color": "#CCF",
 	},
-	SliderSelectors[SliderDown]: map[string]interface{}{
+	SliderSelectors[SliderDown]: ki.Props{
 		"border-color":     "#000",
 		"background-color": "#DDF",
 	},
-	SliderSelectors[SliderValue]: map[string]interface{}{
+	SliderSelectors[SliderValue]: ki.Props{
 		"border-color":     "#00F",
 		"background-color": "#00F",
 	},
-	SliderSelectors[SliderBox]: map[string]interface{}{
+	SliderSelectors[SliderBox]: ki.Props{
 		"border-color":     "#FFF",
 		"background-color": "#FFF",
 	},

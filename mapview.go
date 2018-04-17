@@ -41,8 +41,8 @@ func (sv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 	sv.UpdateEnd()
 }
 
-var MapViewProps = map[string]interface{}{
-	"#frame": map[string]interface{}{
+var MapViewProps = ki.Props{
+	"#frame": ki.Props{
 		"border-width":        units.NewValue(2, units.Px),
 		"margin":              units.NewValue(8, units.Px),
 		"padding":             units.NewValue(4, units.Px),
@@ -51,14 +51,14 @@ var MapViewProps = map[string]interface{}{
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 	},
-	"#title": map[string]interface{}{
+	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
 	},
-	"#prompt": map[string]interface{}{
+	"#prompt": ki.Props{
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
@@ -232,11 +232,10 @@ func (sv *MapView) ConfigMapGrid() {
 				cv := kit.NonPtrValue(valv.Val()) // current val value
 
 				// create a new item of selected type, and attempt to convert existing to it
-				evn := reflect.New(typ)
-				evi := evn.Interface()
-				kit.SetRobust(evi, cv.Interface())
+				evn := kit.CloneToType(typ, cv.Interface())
 				ov := kit.NonPtrValue(reflect.ValueOf(svv.Map))
-				ov.SetMapIndex(ck, reflect.ValueOf(evi).Elem())
+				valv.AsValueViewBase().Value = evn.Elem()
+				ov.SetMapIndex(ck, evn.Elem())
 				if svv.TmpSave != nil {
 					svv.TmpSave.SaveTmp()
 				}
@@ -375,7 +374,7 @@ func (sv *MapViewInline) SetMap(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd()
 }
 
-var MapViewInlineProps = map[string]interface{}{}
+var MapViewInlineProps = ki.Props{}
 
 // todo: maybe figure out a way to share some of this redundant code..
 

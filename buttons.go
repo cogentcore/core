@@ -86,7 +86,7 @@ type ButtonBase struct {
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
-var ButtonBaseProps = map[string]interface{}{
+var ButtonBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
@@ -278,8 +278,8 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 
-var ButtonProps = map[string]interface{}{
-	ButtonSelectors[ButtonActive]: map[string]interface{}{
+var ButtonProps = ki.Props{
+	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":        units.NewValue(1, units.Px),
 		"border-radius":       units.NewValue(4, units.Px),
 		"border-color":        color.Black,
@@ -294,37 +294,37 @@ var ButtonProps = map[string]interface{}{
 		"vertical-align":      AlignTop,
 		"color":               color.Black,
 		"background-color":    "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
 			"color":            "inherit",
 		},
 	},
-	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
 	},
-	ButtonSelectors[ButtonHover]: map[string]interface{}{
+	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-color":     "#88F",
 		"box-shadow.color": "#BBF",
 	},
-	ButtonSelectors[ButtonDown]: map[string]interface{}{
+	ButtonSelectors[ButtonDown]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#008",
 	},
-	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+	ButtonSelectors[ButtonSelected]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#00F",
@@ -438,11 +438,11 @@ type CheckBox struct {
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
-var CheckBoxProps = map[string]interface{}{
-	ButtonSelectors[ButtonActive]: map[string]interface{}{
+var CheckBoxProps = ki.Props{
+	ButtonSelectors[ButtonActive]: ki.Props{
 		"text-align": AlignLeft,
 		"color":      color.Black,
-		"#icon0": map[string]interface{}{
+		"#icon0": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
@@ -450,7 +450,7 @@ var CheckBoxProps = map[string]interface{}{
 			"fill":    "#EEF",
 			"stroke":  color.Black,
 		},
-		"#icon1": map[string]interface{}{
+		"#icon1": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
@@ -458,33 +458,33 @@ var CheckBoxProps = map[string]interface{}{
 			"fill":    "#EEF",
 			"stroke":  color.Black,
 		},
-		"#space": map[string]interface{}{
+		"#space": ki.Props{
 			"width": units.NewValue(1, units.Ex),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
 		},
 	},
-	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
 	},
-	ButtonSelectors[ButtonHover]: map[string]interface{}{
+	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-color":     "#88F",
 		"box-shadow.color": "#BBF",
 	},
-	ButtonSelectors[ButtonDown]: map[string]interface{}{
+	ButtonSelectors[ButtonDown]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#008",
 	},
-	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+	ButtonSelectors[ButtonSelected]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#00F",

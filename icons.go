@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -66,7 +67,7 @@ func (vp *Icon) CopyFromIcon(cp *Icon) {
 	vp.Rendered = false // not yet..
 }
 
-var IconProps = []map[string]interface{}{
+var IconProps = []ki.Props{
 	{ // widget props
 		"background-color": "transparent",
 	}, { // paint props

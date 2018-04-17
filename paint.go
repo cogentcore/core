@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang/freetype/raster"
 	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
@@ -76,7 +77,7 @@ func NewPaint() Paint {
 var PaintDefault = NewPaint()
 
 // set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
-func (pc *Paint) SetStyle(parent, defs *Paint, props map[string]interface{}) {
+func (pc *Paint) SetStyle(parent, defs *Paint, props ki.Props) {
 	// nil interface is special and != interface{} of a nil ptr!
 	pfi := interface{}(nil)
 	dfi := interface{}(nil)
@@ -115,7 +116,7 @@ func (s *Paint) ToDots() {
 
 	WalkStyleStruct(s, nil, nil, "", false, nil,
 		func(sf reflect.StructField, vf, pf, df reflect.Value,
-			hasPar bool, tag string, inherit bool, props map[string]interface{}) {
+			hasPar bool, tag string, inherit bool, props ki.Props) {
 			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
 				uv := vf.Addr().Interface().(*units.Value)
 				uv.ToDots(&s.UnContext)

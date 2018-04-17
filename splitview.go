@@ -27,7 +27,7 @@ type SplitView struct {
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
 // auto-max-stretch
-var SplitViewProps = map[string]interface{}{
+var SplitViewProps = ki.Props{
 	"max-width":  -1.0,
 	"max-height": -1.0,
 	"margin":     0,
@@ -238,12 +238,12 @@ type Splitter struct {
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
-var SplitterProps = map[string]interface{}{
-	SliderSelectors[SliderActive]: map[string]interface{}{
+var SplitterProps = ki.Props{
+	SliderSelectors[SliderActive]: ki.Props{
 		"padding":          "0px",
 		"margin":           "0px",
 		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"max-width":  units.NewValue(1, units.Em),
 			"max-height": units.NewValue(5, units.Em),
 			"min-width":  units.NewValue(1, units.Em),
@@ -253,26 +253,26 @@ var SplitterProps = map[string]interface{}{
 			"vert-align": AlignMiddle,
 		},
 	},
-	SliderSelectors[SliderDisabled]: map[string]interface{}{
+	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
 	},
-	SliderSelectors[SliderHover]: map[string]interface{}{
+	SliderSelectors[SliderHover]: ki.Props{
 		"background-color": "#EEF",
 	},
-	SliderSelectors[SliderFocus]: map[string]interface{}{
+	SliderSelectors[SliderFocus]: ki.Props{
 		"border-color":     "#008",
 		"background.color": "#CCF",
 	},
-	SliderSelectors[SliderDown]: map[string]interface{}{
+	SliderSelectors[SliderDown]: ki.Props{
 		"border-color":     "#000",
 		"background-color": "#EEF",
 	},
-	SliderSelectors[SliderValue]: map[string]interface{}{
+	SliderSelectors[SliderValue]: ki.Props{
 		"border-color":     "#00F",
 		"background-color": "#00F",
 	},
-	SliderSelectors[SliderBox]: map[string]interface{}{
+	SliderSelectors[SliderBox]: ki.Props{
 		"border-color":     "#888",
 		"background-color": "#FFF",
 	},

@@ -734,7 +734,7 @@ func (tv *TreeView) Init2D() {
 	})
 }
 
-var TreeViewProps = []map[string]interface{}{
+var TreeViewProps = []ki.Props{
 	{
 		"border-width":     units.NewValue(0, units.Px),
 		"border-radius":    units.NewValue(0, units.Px),
@@ -744,33 +744,33 @@ var TreeViewProps = []map[string]interface{}{
 		"vertical-align":   AlignTop,
 		"color":            color.Black,
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
-		"#branch": map[string]interface{}{
+		"#branch": ki.Props{
 			"vertical-align": AlignMiddle,
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
-			"#icon0": map[string]interface{}{
+			"#icon0": ki.Props{
 				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
 				"height":  units.NewValue(.8, units.Em),
 				"margin":  units.NewValue(0, units.Px),
 				"padding": units.NewValue(0, units.Px),
 			},
-			"#icon1": map[string]interface{}{
+			"#icon1": ki.Props{
 				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
 				"height":  units.NewValue(.8, units.Em),
 				"margin":  units.NewValue(0, units.Px),
 				"padding": units.NewValue(0, units.Px),
 			},
 		},
-		"#space": map[string]interface{}{
+		"#space": ki.Props{
 			"width": units.NewValue(.5, units.Em),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"min-width":        units.NewValue(16, units.Ex),
 			"background-color": "none",
 		},
-		"#menu": map[string]interface{}{
+		"#menu": ki.Props{
 			"border-width":        units.NewValue(0, units.Px),
 			"border-radius":       units.NewValue(0, units.Px),
 			"border-color":        "none",

@@ -218,7 +218,7 @@ type ValueViewBase struct {
 
 var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
 
-var ValueViewBaseProps = map[string]interface{}{
+var ValueViewBaseProps = ki.Props{
 	"base-type": true,
 }
 
@@ -329,11 +329,12 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				vv.Value = nv                             // update value to new key
 				rval = true
 			} else {
+				vv.Value = reflect.ValueOf(val)
 				if vv.KeyView != nil {
 					ck := vv.KeyView.Val() // current key value
-					ov.SetMapIndex(ck, reflect.ValueOf(val))
+					ov.SetMapIndex(ck, vv.Value)
 				} else { // static, key not editable?
-					ov.SetMapIndex(reflect.ValueOf(vv.Key), reflect.ValueOf(val))
+					ov.SetMapIndex(reflect.ValueOf(vv.Key), vv.Value)
 				}
 				rval = true
 			}
@@ -414,7 +415,7 @@ func (vv *StructValueView) WidgetType() reflect.Type {
 func (vv *StructValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
-	txt := fmt.Sprintf("%v", npv.Type().Name())
+	txt := fmt.Sprintf("%T", npv.Interface())
 	mb.SetText(txt)
 }
 
@@ -479,8 +480,12 @@ func (vv *SliceValueView) WidgetType() reflect.Type {
 func (vv *SliceValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
-	sz := npv.Len()
-	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
+	txt := ""
+	if npv.Kind() == reflect.Interface {
+		txt = fmt.Sprintf("Slice: %T", npv.Interface())
+	} else {
+		txt = fmt.Sprintf("[%v] %T", npv.Len(), npv.Interface())
+	}
 	mb.SetText(txt)
 }
 
@@ -516,8 +521,12 @@ func (vv *MapValueView) WidgetType() reflect.Type {
 func (vv *MapValueView) UpdateWidget() {
 	mb := vv.Widget.(*MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
-	sz := npv.Len()
-	txt := fmt.Sprintf("[%v] %v", sz, npv.Type().Elem().Name())
+	txt := ""
+	if npv.Kind() == reflect.Interface {
+		txt = fmt.Sprintf("Map: %T", npv.Interface())
+	} else {
+		txt = fmt.Sprintf("Map: [%v] %T", npv.Len(), npv.Interface())
+	}
 	mb.SetText(txt)
 }
 
@@ -527,6 +536,7 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	mb := vv.Widget.(*MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
+	mb.SetProp("min-width", units.NewValue(6, units.Ex))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
@@ -710,7 +720,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
-	sb.SetProp("#textfield", map[string]interface{}{
+	sb.SetProp("#textfield", ki.Props{
 		"width": units.NewValue(5, units.Ex),
 	})
 	vk := vv.Value.Kind()

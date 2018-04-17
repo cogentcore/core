@@ -7,14 +7,16 @@ package gi
 import (
 	"fmt"
 	// "reflect"
-	"github.com/rcoreilly/goki/gi/units"
 	"testing"
+
+	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 )
 
 var fp = FontLibrary.AddFontPaths("/Library/Fonts")
 
 func TestStyle(t *testing.T) {
-	props := make(map[string]interface{})
+	props := make(ki.Props)
 	props["color"] = "red"
 	props["width"] = "24.7em"
 	props["box-shadow.h-offset"] = "10px"

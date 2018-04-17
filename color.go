@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 	"golang.org/x/image/colornames"
 	// "gopkg.in/go-playground/colors.v1"
@@ -22,7 +23,7 @@ type Color struct {
 
 var KiT_Color = kit.Types.AddType(&Color{}, ColorProps)
 
-var ColorProps = map[string]interface{}{
+var ColorProps = ki.Props{
 	"style-prop": true,
 }
 

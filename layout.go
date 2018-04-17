@@ -1186,7 +1186,7 @@ type Frame struct {
 
 var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 
-var FrameProps = map[string]interface{}{
+var FrameProps = ki.Props{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
 	"border-color":     color.Black,
@@ -1261,7 +1261,7 @@ type Stretch struct {
 
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
 
-var StretchProps = map[string]interface{}{
+var StretchProps = ki.Props{
 	"max-width":  -1.0,
 	"max-height": -1.0,
 }
@@ -1285,7 +1285,7 @@ type Space struct {
 
 var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
 
-var SpaceProps = map[string]interface{}{
+var SpaceProps = ki.Props{
 	"width":  units.NewValue(1, units.Em),
 	"height": units.NewValue(1, units.Em),
 }

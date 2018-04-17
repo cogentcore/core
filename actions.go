@@ -42,8 +42,8 @@ type Action struct {
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
 
-var ActionProps = map[string]interface{}{
-	ButtonSelectors[ButtonActive]: map[string]interface{}{
+var ActionProps = ki.Props{
+	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(0, units.Px), // todo: should be default
 		"border-radius":    units.NewValue(0, units.Px),
 		"border-color":     color.Black,
@@ -54,18 +54,18 @@ var ActionProps = map[string]interface{}{
 		"vertical-align":   AlignTop,
 		"color":            color.Black,
 		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
 		},
-		"#indicator": map[string]interface{}{
+		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
 			"height":         units.NewValue(1.5, units.Ex),
 			"margin":         units.NewValue(0, units.Px),
@@ -73,26 +73,26 @@ var ActionProps = map[string]interface{}{
 			"vertical-align": AlignMiddle,
 		},
 	},
-	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
 	},
-	ButtonSelectors[ButtonHover]: map[string]interface{}{
+	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+	ButtonSelectors[ButtonFocus]: ki.Props{
 		"background-color": "#DDF",
 	},
-	ButtonSelectors[ButtonDown]: map[string]interface{}{
+	ButtonSelectors[ButtonDown]: ki.Props{
 		"border-color": "#BBF",
 		"color":        color.White, // todo: this is no longer working for label
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"color": color.White,
 		},
 		"background-color": "#008",
 	},
-	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+	ButtonSelectors[ButtonSelected]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#88F",
@@ -260,7 +260,7 @@ type Separator struct {
 
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
-var SeparatorProps = map[string]interface{}{
+var SeparatorProps = ki.Props{
 	"padding":      units.NewValue(2, units.Px),
 	"margin":       units.NewValue(2, units.Px),
 	"align-vert":   AlignCenter,
@@ -308,8 +308,8 @@ var _ Node2D = &Separator{}
 // displayed in a popup) -- don't use stretchy sizes in general for these items!
 type Menu []Node2D
 
-var MenuProps = map[string]interface{}{
-	"#frame": map[string]interface{}{
+var MenuProps = ki.Props{
+	"#frame": ki.Props{
 		"border-width":        units.NewValue(0, units.Px),
 		"border-color":        "none",
 		"margin":              units.NewValue(4, units.Px),
@@ -371,8 +371,8 @@ type MenuButton struct {
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 
-var MenuButtonProps = map[string]interface{}{
-	ButtonSelectors[ButtonActive]: map[string]interface{}{
+var MenuButtonProps = ki.Props{
+	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-radius":    units.NewValue(4, units.Px),
 		"border-color":     color.Black,
@@ -383,18 +383,18 @@ var MenuButtonProps = map[string]interface{}{
 		"vertical-align":   AlignMiddle,
 		"color":            color.Black,
 		"background-color": "#EEF",
-		"#icon": map[string]interface{}{
+		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
 		},
-		"#label": map[string]interface{}{
+		"#label": ki.Props{
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
 			"background-color": "none",
 		},
-		"#indicator": map[string]interface{}{
+		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
 			"height":         units.NewValue(1.5, units.Ex),
 			"margin":         units.NewValue(0, units.Px),
@@ -402,24 +402,24 @@ var MenuButtonProps = map[string]interface{}{
 			"vertical-align": AlignBottom,
 		},
 	},
-	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
+	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
 	},
-	ButtonSelectors[ButtonHover]: map[string]interface{}{
+	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "#CCF", // todo "darker"
 	},
-	ButtonSelectors[ButtonFocus]: map[string]interface{}{
+	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-color":     "#EEF",
 		"box-shadow.color": "#BBF",
 	},
-	ButtonSelectors[ButtonDown]: map[string]interface{}{
+	ButtonSelectors[ButtonDown]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#008",
 	},
-	ButtonSelectors[ButtonSelected]: map[string]interface{}{
+	ButtonSelectors[ButtonSelected]: ki.Props{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#00F",

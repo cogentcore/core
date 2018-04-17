@@ -150,7 +150,7 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 	}
 }
 
-var TabButtonProps = map[string]interface{}{
+var TabButtonProps = ki.Props{
 	"border-width":        "1px",
 	"border-radius":       "0px",
 	"border-color":        "black",

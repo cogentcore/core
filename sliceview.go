@@ -39,8 +39,8 @@ func (sv *SliceView) SetSlice(mp interface{}, tmpSave ValueView) {
 	sv.UpdateEnd()
 }
 
-var SliceViewProps = map[string]interface{}{
-	"#frame": map[string]interface{}{
+var SliceViewProps = ki.Props{
+	"#frame": ki.Props{
 		"border-width":        units.NewValue(2, units.Px),
 		"margin":              units.NewValue(8, units.Px),
 		"padding":             units.NewValue(4, units.Px),
@@ -49,14 +49,14 @@ var SliceViewProps = map[string]interface{}{
 		"box-shadow.blur":     units.NewValue(4, units.Px),
 		"box-shadow.color":    "#CCC",
 	},
-	"#title": map[string]interface{}{
+	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
 	},
-	"#prompt": map[string]interface{}{
+	"#prompt": ki.Props{
 		"max-width":        units.NewValue(-1, units.Px),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
@@ -144,7 +144,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 	for i := 0; i < sz; i++ {
-		val := kit.OnePtrVal(mvnp.Index(i)) // deal with pointer lists
+		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
@@ -295,7 +295,7 @@ func (sv *SliceViewInline) SetSlice(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd()
 }
 
-var SliceViewInlineProps = map[string]interface{}{}
+var SliceViewInlineProps = ki.Props{}
 
 // ConfigParts configures Parts for the current slice
 func (sv *SliceViewInline) ConfigParts() {
@@ -313,7 +313,7 @@ func (sv *SliceViewInline) ConfigParts() {
 
 	sz := mvnp.Len()
 	for i := 0; i < sz; i++ {
-		val := kit.OnePtrVal(mvnp.Index(i)) // deal with pointer lists
+		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue

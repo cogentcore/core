@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rcoreilly/goki/gi/units"
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -58,7 +59,7 @@ import (
 // use StylePropProps for any enum (not type -- types must have their own
 // props) that is useful as a styling property -- use this for selecting types
 // to add to Props
-var StylePropProps = map[string]interface{}{
+var StylePropProps = ki.Props{
 	"style-prop": true,
 }
 
@@ -180,7 +181,7 @@ func NewStyle() Style {
 var StyleDefault = NewStyle()
 
 // set style values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
-func (s *Style) SetStyle(parent, defs *Style, props map[string]interface{}) {
+func (s *Style) SetStyle(parent, defs *Style, props ki.Props) {
 	// nil interface is special and != interface{} of a nil ptr!
 	pfi := interface{}(nil)
 	dfi := interface{}(nil)
@@ -227,7 +228,7 @@ func (s *Style) ToDots() {
 
 	WalkStyleStruct(s, nil, nil, "", false, nil,
 		func(sf reflect.StructField, vf, pf, df reflect.Value,
-			hasPar bool, tag string, inherit bool, props map[string]interface{}) {
+			hasPar bool, tag string, inherit bool, props ki.Props) {
 			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
 				uv := vf.Addr().Interface().(*units.Value)
 				uv.ToDots(&s.UnContext)
@@ -246,11 +247,11 @@ func (s *Style) BoxSpace() float64 {
 //   Style processing util
 
 // this is the function to process a given field when walking the style
-type WalkStyleFieldFun func(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, tag string, inherit bool, props map[string]interface{})
+type WalkStyleFieldFun func(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, tag string, inherit bool, props ki.Props)
 
 // general-purpose function for walking through style structures and calling fun on each field with a valid 'xml' tag
 func WalkStyleStruct(obj interface{}, parent interface{}, defs interface{}, outerTag string,
-	inherit bool, props map[string]interface{}, fun WalkStyleFieldFun) {
+	inherit bool, props ki.Props, fun WalkStyleFieldFun) {
 	otp := reflect.TypeOf(obj)
 	if otp.Kind() != reflect.Ptr {
 		log.Printf("gi.StyleStruct -- you must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
@@ -324,7 +325,7 @@ func StyleEffTag(tag, outerTag string) string {
 }
 
 // process the field tags for any that fit with values in props, trying xml and xml_alt options
-func StyleFieldProps(sf reflect.StructField, outerTag string, props map[string]interface{}) (interface{}, bool) {
+func StyleFieldProps(sf reflect.StructField, outerTag string, props ki.Props) (interface{}, bool) {
 	tag := StyleEffTag(sf.Tag.Get("xml"), outerTag)
 	prv, got := props[tag]
 	if got {
@@ -350,7 +351,7 @@ func StyleFieldProps(sf reflect.StructField, outerTag string, props map[string]i
 }
 
 // standard field processing function for WalkStyleStruct
-func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, outerTag string, inherit bool, props map[string]interface{}) {
+func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, outerTag string, inherit bool, props ki.Props) {
 
 	if inherit { // first process inherit flag -- only inherit on FIRST pass!!
 		inhs := sf.Tag.Get("inherit")
@@ -442,7 +443,7 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 }
 
 // manual method for getting a units value directly
-func StyleUnitsValue(tag string, uv *units.Value, props map[string]interface{}) bool {
+func StyleUnitsValue(tag string, uv *units.Value, props ki.Props) bool {
 	prv, got := props[tag]
 	if !got {
 		return false

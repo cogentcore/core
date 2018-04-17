@@ -9,6 +9,7 @@ import (
 	"image"
 	"math"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -20,7 +21,7 @@ type WidgetBase struct {
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
-var WidgetBaseProps = map[string]interface{}{
+var WidgetBaseProps = ki.Props{
 	"base-type": true,
 }
 
@@ -199,7 +200,7 @@ func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.Typ
 }
 
 // set the icon and text values in parts, and get part style props, using given props if not set in object props
-func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int, props map[string]interface{}) {
+func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int, props ki.Props) {
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does

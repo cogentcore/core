@@ -53,7 +53,7 @@ type NodeBase struct {
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
-var NodeBaseProps = map[string]interface{}{
+var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
@@ -160,16 +160,16 @@ func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.  Standard widgets set these props on the type, and we use
 // type-based fallback, so these should exist for most.
-func (g *NodeBase) StyleProps(selector string) map[string]interface{} {
+func (g *NodeBase) StyleProps(selector string) ki.Props {
 	sp := g.Prop(selector, false, true) // don't inherit (style handles that separately) but do use type props
 	if sp == nil {
 		return nil
 	}
-	spm, ok := sp.(map[string]interface{})
+	spm, ok := sp.(ki.Props)
 	if ok {
 		return spm
 	}
-	log.Printf("gi.StyleProps: looking for a map[string]interface{} for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, g.PathUnique())
+	log.Printf("gi.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, g.PathUnique())
 	return nil
 }
 
