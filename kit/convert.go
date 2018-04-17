@@ -48,7 +48,7 @@ func IsNil(it interface{}) bool {
 // properties, and deal with most common-sense cases, e.g., string <-> number,
 // etc.  nil values return !ok
 
-// robustly convert anything to a bool
+// ToBool robustly converts anything to a bool
 func ToBool(it interface{}) (bool, bool) {
 	if it == nil {
 		return false, false
@@ -77,7 +77,7 @@ func ToBool(it interface{}) (bool, bool) {
 	}
 }
 
-// robustly convert anything to an int64
+// ToInt robustlys converts anything to an int64
 func ToInt(it interface{}) (int64, bool) {
 	if it == nil {
 		return 0, false
@@ -109,7 +109,7 @@ func ToInt(it interface{}) (int64, bool) {
 	}
 }
 
-// robustly convert anything to a Float64
+// ToFloat robustly converts anything to a Float64
 func ToFloat(it interface{}) (float64, bool) {
 	if it == nil {
 		return 0.0, false
@@ -141,7 +141,9 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// robustly convert anything to a String -- because Stringer is so ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should definitely work in all cases, so there is no bool return value
+// ToString robustly converts anything to a String -- because Stringer is so
+// ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
+// definitely work in all cases, so there is no bool return value
 func ToString(it interface{}) string {
 	if it == nil {
 		return "nil"
@@ -172,8 +174,9 @@ func ToString(it interface{}) string {
 	}
 }
 
-// robustly set the to value from the from value -- to must be a pointer-to --
-// only for basic field values -- use copier package for more complex cases
+// SetRobust robustly sets the to value from the from value -- to must be a
+// pointer-to -- only for basic field values -- use copier package for more
+// complex cases
 func SetRobust(to, from interface{}) bool {
 	if to == nil {
 		return false
@@ -229,6 +232,31 @@ func SetRobust(to, from interface{}) bool {
 		return true
 	}
 	return false
+}
+
+// CloneToType creates a new object of given type, and uses SetRobust to copy
+// an existing value (of perhaps another type) into it -- only expected to
+// work for basic types
+func CloneToType(typ reflect.Type, val interface{}) reflect.Value {
+	if NonPtrType(typ).Kind() == reflect.Map {
+		mp := reflect.MakeMap(typ)
+		evn := reflect.ValueOf(mp.Interface()) // try to get rid of interface
+		typp := evn.Type()
+		mptr := reflect.New(typp)
+		mptr.Elem().Set(evn)
+		return mptr
+	} else if NonPtrType(typ).Kind() == reflect.Slice {
+		sp := reflect.MakeSlice(typ, 0, 0)
+		evn := reflect.ValueOf(sp.Interface()) // try to get rid of interface
+		typp := evn.Type()
+		mptr := reflect.New(typp)
+		mptr.Elem().Set(evn)
+		return mptr
+	}
+	evn := reflect.New(typ)
+	evi := evn.Interface()
+	SetRobust(evi, val)
+	return evn
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

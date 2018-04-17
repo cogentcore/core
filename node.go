@@ -41,18 +41,18 @@ The Node implements the Ki interface and provides the core functionality for the
 The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info -- add these to all your derived struct's fields.  See relevant docs for other such tags controlling a wide range of GUI and other functionality -- Ki makes extensive use of such tags.
 */
 type Node struct {
-	Nm        string                 `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm  string                 `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag      int64                  `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
-	Props     map[string]interface{} `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par       Ki                     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	ChildType kit.Type               `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Kids      Slice                  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	NodeSig   Signal                 `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Updating  atomctr.Ctr            `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	Deleted   []Ki                   `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
-	This      Ki                     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
-	index     int                    `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
+	Nm        string      `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm  string      `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag      int64       `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
+	Props     Props       `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par       Ki          `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	ChildType kit.Type    `desc:"default type of child to create -- if nil then same type as node itself is used"`
+	Kids      Slice       `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	NodeSig   Signal      `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Updating  atomctr.Ctr `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
+	Deleted   []Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
+	This      Ki          `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	index     int         `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -261,13 +261,13 @@ func (n *Node) IsDestroyed() bool {
 //////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
-func (n *Node) Properties() map[string]interface{} {
+func (n *Node) Properties() Props {
 	return n.Props
 }
 
 func (n *Node) SetProp(key string, val interface{}) {
 	if n.Props == nil {
-		n.Props = make(map[string]interface{})
+		n.Props = make(Props)
 	}
 	n.Props[key] = val
 }
@@ -307,12 +307,12 @@ func (n *Node) DeleteProp(key string) {
 
 func (n *Node) DeleteAllProps(cap int) {
 	if n.Props != nil {
-		n.Props = make(map[string]interface{}, cap)
+		n.Props = make(Props, cap)
 	}
 }
 
 func init() {
-	gob.Register(map[string]interface{}{})
+	gob.Register(Props{})
 }
 
 func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
@@ -320,7 +320,7 @@ func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
 		return nil
 	}
 	if n.Props == nil {
-		n.Props = make(map[string]interface{})
+		n.Props = make(Props)
 	}
 	fmP := from.Properties()
 	if deep {
