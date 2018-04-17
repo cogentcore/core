@@ -74,11 +74,10 @@ func FullTypeName(typ reflect.Type) string {
 	return typ.PkgPath() + "." + typ.Name()
 }
 
-// AddType adds a given type to the registry -- requires an empty object to grab type info from -- must be passed as a pointer to ensure that it is an addressable, settable type -- also optional properties that can be associated with the type and accessible e.g. for view-specific properties etc
+// AddType adds a given type to the registry -- requires an empty object to grab type info from -- must be passed as a pointer to ensure that it is an addressable, settable type -- also optional properties that can be associated with the type and accessible e.g. for view-specific properties etc -- these props MUST be specific to this type as they are used directly, not copied!!
 func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) reflect.Type {
 	if tr.Types == nil {
-		tr.Types = make(map[string]reflect.Type)
-		tr.Props = make(map[string]map[string]interface{})
+		tr.Init()
 	}
 
 	typ := reflect.TypeOf(obj).Elem()
@@ -131,14 +130,35 @@ func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
 	return p
 }
 
-// AllImplementersOf returns a list of all registered types that implement the given interface type at any level of embedding -- must pass a type constructed like this: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
-func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type) []reflect.Type {
+// TypeProp safely finds a type property from type and property key -- nil if not found
+func (tr *TypeRegistry) TypeProp(typ reflect.Type, propKey string) interface{} {
+	typeName := FullTypeName(typ)
+	return tr.Prop(typeName, propKey)
+}
+
+// AllImplementersOf returns a list of all registered types that implement the
+// given interface type at any level of embedding -- must pass a type
+// constructed like this: reflect.TypeOf((*gi.Node2D)(nil)).Elem() --
+// includeBases indicates whether to include types marked with property of
+// base-type -- typically not useful for user-facing type selection
+func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type, includeBases bool) []reflect.Type {
 	if iface.Kind() != reflect.Interface {
 		log.Printf("kit.TypeRegistry AllImplementersOf -- type is not an interface: %v\n", iface)
 		return nil
 	}
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
+		if !includeBases {
+			btp := tr.TypeProp(typ, "base-type")
+			btpb, _ := ToBool(btp)
+			if btp != nil && btpb {
+				continue
+			}
+		}
+		nptyp := NonPtrType(typ)
+		if nptyp.Kind() != reflect.Struct {
+			continue
+		}
 		if EmbeddedTypeImplements(typ, iface) {
 			tl = append(tl, typ)
 		}
@@ -146,16 +166,117 @@ func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type) []reflect.Type {
 	return tl
 }
 
-// AllEmbedsOf returns a list of all registered types that embed (inherit from in C++ terminology) the given type -- inclusive determines whether the type itself is included in list
-func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive bool) []reflect.Type {
+// AllEmbedsOf returns a list of all registered types that embed (inherit from
+// in C++ terminology) the given type -- inclusive determines whether the type
+// itself is included in list -- includeBases indicates whether to include
+// types marked with property of base-type -- typically not useful for
+// user-facing type selection
+func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive, includeBases bool) []reflect.Type {
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
 		if !inclusive && typ == embed {
 			continue
+		}
+		if !includeBases {
+			btp := tr.TypeProp(typ, "base-type")
+			btpb, _ := ToBool(btp)
+			if btp != nil && btpb {
+				continue
+			}
 		}
 		if TypeEmbeds(typ, embed) {
 			tl = append(tl, typ)
 		}
 	}
 	return tl
+}
+
+// AllTagged returns a list of all registered types that include a given
+// property key value -- does not check for the value of that value -- just
+// its existence
+func (tr *TypeRegistry) AllTagged(key string) []reflect.Type {
+	tl := make([]reflect.Type, 0)
+	for _, typ := range tr.Types {
+		tp := tr.TypeProp(typ, key)
+		if tp == nil {
+			continue
+		}
+		tl = append(tl, typ)
+	}
+	return tl
+}
+
+// Init initializes the type registry, including adding basic types
+func (tr *TypeRegistry) Init() {
+	tr.Types = make(map[string]reflect.Type)
+	tr.Props = make(map[string]map[string]interface{})
+
+	{
+		ob := false
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := int(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := int8(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := int16(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := int32(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := int64(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uint(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uint8(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uint16(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uint32(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uint64(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := uintptr(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := float32(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := float64(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := complex64(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := complex128(0)
+		tr.AddType(&ob, nil)
+	}
+	{
+		ob := string(0)
+		tr.AddType(&ob, nil)
+	}
 }
