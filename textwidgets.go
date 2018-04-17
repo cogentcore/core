@@ -549,7 +549,7 @@ type SpinBox struct {
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
 var SpinBoxProps = map[string]interface{}{
-	":normal": map[string]interface{}{ // todo: could add other states
+	":active": map[string]interface{}{ // todo: could add other states
 		"#up": map[string]interface{}{
 			"max-width":  units.NewValue(1.5, units.Ex),
 			"max-height": units.NewValue(1.5, units.Ex),
@@ -650,7 +650,7 @@ func (g *SpinBox) ConfigParts() {
 	}
 	g.Parts.Lay = LayoutRow
 	g.Parts.SetProp("vert-align", AlignMiddle)
-	props := g.StyleProps(":normal")
+	props := g.StyleProps(":active")
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "TextField")
 	config.Add(KiT_Space, "Space")
@@ -723,7 +723,7 @@ func (g *SpinBox) Style2D() {
 	if g.Step == 0 {
 		g.Defaults()
 	}
-	g.Style2DWidget(g.StyleProps(":normal"))
+	g.Style2DWidget(g.StyleProps(":active"))
 	g.ConfigParts()
 }
 
@@ -762,10 +762,10 @@ type ComboBox struct {
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
-var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps[0])
+var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 
-var ComboBoxProps = []map[string]interface{}{
-	{
+var ComboBoxProps = map[string]interface{}{
+	ButtonSelectors[ButtonActive]: map[string]interface{}{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-radius":    units.NewValue(4, units.Px),
 		"border-color":     color.Black,
@@ -794,20 +794,25 @@ var ComboBoxProps = []map[string]interface{}{
 			"padding":        units.NewValue(0, units.Px),
 			"vertical-align": AlignBottom,
 		},
-	}, { // disabled
+	},
+	ButtonSelectors[ButtonDisabled]: map[string]interface{}{
 		"border-color":     "#BBB",
 		"color":            "#AAA",
 		"background-color": "#DDD",
-	}, { // hover
+	},
+	ButtonSelectors[ButtonHover]: map[string]interface{}{
 		"background-color": "#CCF", // todo "darker"
-	}, { // focus
+	},
+	ButtonSelectors[ButtonFocus]: map[string]interface{}{
 		"border-color":     "#EEF",
 		"box-shadow.color": "#BBF",
-	}, { // press
+	},
+	ButtonSelectors[ButtonDown]: map[string]interface{}{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#008",
-	}, { // selected
+	},
+	ButtonSelectors[ButtonSelected]: map[string]interface{}{
 		"border-color":     "#DDF",
 		"color":            "white",
 		"background-color": "#00F",
@@ -892,6 +897,26 @@ func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen
 	if setFirst {
 		g.SetCurIndex(0)
 	}
+}
+
+// ItemsFromEnumList sets the Items list from a list of enum values (see kit.EnumRegistry) -- if setFirst then set current item to the first item in the list, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
+	sz := len(el)
+	g.Items = make([]interface{}, sz)
+	for i, enum := range el {
+		g.Items[i] = enum
+	}
+	if maxLen > 0 {
+		g.SetToMaxLength(maxLen)
+	}
+	if setFirst {
+		g.SetCurIndex(0)
+	}
+}
+
+// ItemsFromEnum sets the Items list from an enum type, which must be registered on kit.EnumRegistry -- if setFirst then set current item to the first item in the list, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit -- see kit.EnumRegistry, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+func (g *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
+	g.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
 }
 
 // FindItem finds an item on list of items and returns its index
@@ -993,7 +1018,8 @@ func (g *ComboBox) ConfigParts() {
 		config.Add(KiT_Icon, "Indicator")
 	}
 	g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, ComboBoxProps[ButtonActive])
+	props := g.StyleProps(ButtonSelectors[ButtonActive])
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if g.MaxLength > 0 && lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float64(g.MaxLength), units.Ex))
@@ -1003,7 +1029,7 @@ func (g *ComboBox) ConfigParts() {
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFrom(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.PartStyleProps(ic.This, ComboBoxProps[ButtonActive])
+			g.PartStyleProps(ic.This, props)
 		}
 	}
 }
@@ -1017,11 +1043,12 @@ func (g *ComboBox) ConfigPartsIfNeeded() {
 
 func (g *ComboBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(ComboBoxProps[ButtonActive])
+	props := g.StyleProps(ButtonSelectors[ButtonActive])
+	g.Style2DWidget(props)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, ComboBoxProps[i])
+			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}

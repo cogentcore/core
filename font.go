@@ -31,7 +31,7 @@ const (
 
 //go:generate stringer -type=FontStyles
 
-var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, nil, "Font")
+var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, StylePropProps, "Font")
 
 // styles of font: normal, italic, etc
 type FontWeights int32
@@ -47,7 +47,7 @@ const (
 
 //go:generate stringer -type=FontWeights
 
-var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, nil, "Weight")
+var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, StylePropProps, "Weight")
 
 // todo: Variant = normal / small-caps
 

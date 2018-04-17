@@ -84,7 +84,11 @@ type ButtonBase struct {
 	ButtonSig   ki.Signal            `desc:"signal for button -- see ButtonSignals for the types"`
 }
 
-var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, nil)
+var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
+
+var ButtonBaseProps = map[string]interface{}{
+	"base-type": true, // excludes type from user selections
+}
 
 // is this button selected?
 func (g *ButtonBase) IsSelected() bool {

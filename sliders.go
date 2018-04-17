@@ -93,7 +93,11 @@ type SliderBase struct {
 	origWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }
 
-var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, nil)
+var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
+
+var SliderBaseProps = map[string]interface{}{
+	"base-type": true,
+}
 
 // if snap is set, then snap the value to step sizes
 func (g *SliderBase) SnapValue() {

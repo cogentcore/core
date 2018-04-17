@@ -51,7 +51,11 @@ type NodeBase struct {
 	WinBBox image.Rectangle `json:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }
 
-var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, nil)
+var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
+
+var NodeBaseProps = map[string]interface{}{
+	"base-type": true, // excludes type from user selections
+}
 
 func (g *NodeBase) ParentWindow() *Window {
 	wini := g.ParentByType(KiT_Window, true)
@@ -106,6 +110,11 @@ func (g *NodeBase) IsReadOnly() bool {
 // set the node as read-only
 func (g *NodeBase) SetReadOnly() {
 	bitflag.Set(&g.Flag, int(ReadOnly))
+}
+
+// set read-only state of the node
+func (g *NodeBase) SetReadOnlyState(readOnly bool) {
+	bitflag.SetState(&g.Flag, readOnly, int(ReadOnly))
 }
 
 // node needs full re-render?

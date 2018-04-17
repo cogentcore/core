@@ -45,7 +45,7 @@ const (
 
 //go:generate stringer -type=Align
 
-var KiT_Align = kit.Enums.AddEnumAltLower(AlignN, false, nil, "Align")
+var KiT_Align = kit.Enums.AddEnumAltLower(AlignN, false, StylePropProps, "Align")
 
 // is this a generalized alignment to start of container?
 func IsAlignStart(a Align) bool {
@@ -77,7 +77,7 @@ const (
 	OverflowN
 )
 
-var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, false, nil, "Overflow")
+var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, false, StylePropProps, "Overflow")
 
 //go:generate stringer -type=Overflow
 
@@ -281,7 +281,7 @@ const (
 	RowColN
 )
 
-var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, nil, "")
+var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, StylePropProps, "")
 
 //go:generate stringer -type=RowCol
 

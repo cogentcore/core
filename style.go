@@ -55,6 +55,13 @@ import (
 
 // transition -- animation of hover, etc
 
+// use StylePropProps for any enum (not type -- types must have their own
+// props) that is useful as a styling property -- use this for selecting types
+// to add to Props
+var StylePropProps = map[string]interface{}{
+	"style-prop": true,
+}
+
 // style parameters for backgrounds
 type BackgroundStyle struct {
 	Color Color `xml:"color" desc:"background color"`
@@ -85,7 +92,7 @@ const (
 
 //go:generate stringer -type=BoxSides
 
-var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, false, nil, "Box")
+var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, false, StylePropProps, "Box")
 
 // how to draw the border
 type BorderDrawStyle int32
@@ -106,7 +113,7 @@ const (
 
 //go:generate stringer -type=BorderDrawStyle
 
-var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, false, nil, "Border")
+var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, false, StylePropProps, "Border")
 
 // style parameters for borders
 type BorderStyle struct {
@@ -417,7 +424,7 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
 		if prstr != "" {
 			tn := kit.FullTypeName(sf.Type)
-			if kit.Enums.FindEnum(tn) != nil {
+			if kit.Enums.Enum(tn) != nil {
 				kit.Enums.SetEnumValueFromAltString(vf, prstr)
 			} else {
 				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, sf.Name)

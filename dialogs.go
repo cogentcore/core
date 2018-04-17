@@ -342,7 +342,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 	tlbl.Text = "Type:    "
 
 	typs := trow.AddNewChild(KiT_ComboBox, "types").(*ComboBox)
-	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface), true, true, 50)
+	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
 	// typs.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	// })

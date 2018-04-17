@@ -18,7 +18,11 @@ type WidgetBase struct {
 	Parts Layout `desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget"`
 }
 
-var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, nil)
+var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
+
+var WidgetBaseProps = map[string]interface{}{
+	"base-type": true,
+}
 
 // Styling notes:
 // simple elemental widgets (buttons etc) have a DefaultRender method that renders based on

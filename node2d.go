@@ -58,7 +58,11 @@ type Node2DBase struct {
 	LayData  LayoutData  `desc:"all the layout information for this item"`
 }
 
-var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, nil)
+var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
+
+var Node2DBaseProps = map[string]interface{}{
+	"base-type": true, // excludes type from user selections
+}
 
 // set this variable to true to obtain a trace of updates that trigger re-rendering
 var Update2DTrace bool = false

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 
+	"github.com/rcoreilly/goki/ki/kit"
 	"golang.org/x/image/colornames"
 	// "gopkg.in/go-playground/colors.v1"
 	"image/color"
@@ -17,6 +18,12 @@ import (
 // our color object
 type Color struct {
 	Rgba color.RGBA
+}
+
+var KiT_Color = kit.Types.AddType(&Color{}, ColorProps)
+
+var ColorProps = map[string]interface{}{
+	"style-prop": true,
 }
 
 var NilColor Color

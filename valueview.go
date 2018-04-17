@@ -62,9 +62,15 @@ func ToValueView(it interface{}) ValueView {
 	vk := typ.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		vv := IntValueView{}
-		vv.Init(&vv)
-		return &vv
+		if kit.Enums.TypeRegistered(nptyp) { // todo: bitfield
+			vv := EnumValueView{}
+			vv.Init(&vv)
+			return &vv
+		} else {
+			vv := IntValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 	case vk == reflect.Bool:
 		vv := BoolValueView{}
 		vv.Init(&vv)
@@ -199,7 +205,11 @@ type ValueViewBase struct {
 	Label     string               `desc:"label for displaying this item -- based on Field.Name and optional label Tag value"`
 }
 
-var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, nil)
+var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
+
+var ValueViewBaseProps = map[string]interface{}{
+	"base-type": true,
+}
 
 func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
@@ -599,7 +609,7 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
-	bitflag.SetState(cb.Flags(), vv.IsReadOnly(), int(ReadOnly))
+	cb.SetReadOnlyState(vv.IsReadOnly())
 	cb.ButtonSig.DisconnectAll()
 	cb.ButtonSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
@@ -638,7 +648,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	bitflag.SetState(sb.Flags(), vv.IsReadOnly(), int(ReadOnly))
+	sb.SetReadOnlyState(vv.IsReadOnly())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -709,7 +719,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	bitflag.SetState(sb.Flags(), vv.IsReadOnly(), int(ReadOnly))
+	sb.SetReadOnlyState(vv.IsReadOnly())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -743,6 +753,64 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*SpinBox)
 		if vvv.SetValue(sbb.Value) {
+			vvv.UpdateWidget()
+		}
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  EnumValueView
+
+// EnumValueView presents a combobox for choosing enums
+type EnumValueView struct {
+	ValueViewBase
+}
+
+var KiT_EnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
+
+func (vv *EnumValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_ComboBox
+	return vv.WidgetTyp
+}
+
+func (vv *EnumValueView) EnumType() reflect.Type {
+	// derive type indirectly from the interface instead of directly from the value
+	// because that works for interface{} types as in property maps
+	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
+	return typ
+}
+
+func (vv *EnumValueView) SetEnumValueFromInt(ival int64) bool {
+	typ := vv.EnumType()
+	eval := kit.EnumIfaceFromInt64(ival, typ)
+	return vv.SetValue(eval)
+}
+
+func (vv *EnumValueView) UpdateWidget() {
+	sb := vv.Widget.(*ComboBox)
+	npv := kit.NonPtrValue(vv.Value)
+	iv, ok := kit.ToInt(npv.Interface())
+	if ok {
+		sb.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
+	}
+}
+
+func (vv *EnumValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+	cb := vv.Widget.(*ComboBox)
+	cb.SetReadOnlyState(vv.IsReadOnly())
+
+	typ := vv.EnumType()
+	cb.ItemsFromEnum(typ, false, 50)
+
+	vv.UpdateWidget()
+
+	cb.ComboSig.DisconnectAll()
+	cb.ComboSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_EnumValueView).(*EnumValueView)
+		cbb := vvv.Widget.(*ComboBox)
+		eval := cbb.CurVal.(kit.EnumValue)
+		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
 			vvv.UpdateWidget()
 		}
 	})
