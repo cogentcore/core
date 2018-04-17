@@ -27,13 +27,13 @@ type TreeViewSignals int64
 
 const (
 	// node was selected
-	NodeSelected TreeViewSignals = iota
+	TreeViewSelected TreeViewSignals = iota
 	// TreeView unselected
-	NodeUnselected
-	// collapsed TreeView was opened
-	NodeOpened
-	// open TreeView was collapsed -- children not visible
-	NodeCollapsed
+	TreeViewUnselected
+	// closed TreeView was opened
+	TreeViewOpened
+	// open TreeView was closed -- children not visible
+	TreeViewClosed
 	TreeViewSignalsN
 )
 
@@ -41,14 +41,14 @@ const (
 
 // these extend NodeBase NodeFlags to hold TreeView state
 const (
-	// node is collapsed
-	NodeFlagCollapsed NodeFlags = NodeFlagsN + iota
+	// node is closed
+	TreeViewFlagClosed NodeFlags = NodeFlagsN + iota
 	// node is selected
-	NodeFlagSelected
+	TreeViewFlagSelected
 	// the shift key was pressed, putting the selection mode into continous selection mode
-	NodeFlagContinuousSelect
+	TreeViewFlagContinuousSelect
 	// the ctrl / cmd key was pressed, putting the selection mode into continous selection mode
-	NodeFlagExtendSelect
+	TreeViewFlagExtendSelect
 )
 
 // mutually-exclusive tree view states -- determines appearance
@@ -109,9 +109,27 @@ func (tv *TreeView) SyncToSrc() {
 	if tv.Nm != nm {
 		tv.SetName(nm)
 	}
+	vcprop := "view-closed"
 	skids := sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
 	typ := tv.This.Type() // always make our type
+	flds := make([]ki.Ki, 0)
+	fldClosed := make([]bool, 0)
+	sk.FuncFields(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		flds = append(flds, k)
+		tnl.Add(typ, "ViewOf_"+k.Name())
+		ft := sk.FieldTag(k.Name(), vcprop)
+		cls := false
+		if vc, ok := kit.ToBool(ft); ok && vc {
+			cls = true
+		} else {
+			if vc, ok := kit.ToBool(k.Prop(vcprop, false, true)); vc && ok {
+				cls = true
+			}
+		}
+		fldClosed = append(fldClosed, cls)
+		return true
+	})
 	for _, skid := range skids {
 		tnl.Add(typ, "ViewOf_"+skid.UniqueName())
 	}
@@ -126,12 +144,24 @@ func (tv *TreeView) SyncToSrc() {
 			}
 		}
 	}
-	for i, vki := range tv.Kids {
-		vk := vki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		skid := sk.Children()[i]
+	idx := 0
+	for i, fld := range flds {
+		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if vk.SrcNode.Ptr != fld {
+			vk.SetSrcNode(fld)
+			vk.SetClosedState(fldClosed[i])
+		}
+		idx++
+	}
+	for _, skid := range sk.Children() {
+		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if vk.SrcNode.Ptr != skid {
 			vk.SetSrcNode(skid)
+			if vc, ok := kit.ToBool(skid.Prop(vcprop, false, true)); vc && ok {
+				vk.SetClosed()
+			}
 		}
+		idx++
 	}
 	tv.UpdateEnd()
 }
@@ -207,13 +237,21 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
-// is this node itself collapsed?
-func (tv *TreeView) IsCollapsed() bool {
-	return bitflag.Has(tv.Flag, int(NodeFlagCollapsed))
+// is this node itself closed?
+func (tv *TreeView) IsClosed() bool {
+	return bitflag.Has(tv.Flag, int(TreeViewFlagClosed))
 }
 
-// does this node have a collapsed parent? if so, don't render!
-func (tv *TreeView) HasCollapsedParent() bool {
+func (tv *TreeView) SetClosed() {
+	bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
+}
+
+func (tv *TreeView) SetClosedState(closed bool) {
+	bitflag.SetState(&tv.Flag, closed, int(TreeViewFlagClosed))
+}
+
+// does this node have a closed parent? if so, don't render!
+func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
 	tv.FuncUpParent(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := KiToNode2D(k)
@@ -222,7 +260,7 @@ func (tv *TreeView) HasCollapsedParent() bool {
 		}
 		if pg.TypeEmbeds(KiT_TreeView) {
 			// nw := pg.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			if bitflag.Has(pg.Flag, int(NodeFlagCollapsed)) {
+			if bitflag.Has(pg.Flag, int(TreeViewFlagClosed)) {
 				pcol = true
 				return false
 			}
@@ -234,7 +272,7 @@ func (tv *TreeView) HasCollapsedParent() bool {
 
 // is this node selected?
 func (tv *TreeView) IsSelected() bool {
-	return bitflag.Has(tv.Flag, int(NodeFlagSelected))
+	return bitflag.Has(tv.Flag, int(TreeViewFlagSelected))
 }
 
 func (tv *TreeView) Label() string {
@@ -249,7 +287,7 @@ func (tv *TreeView) SelectAction() {
 		win.UpdateStart()
 	}
 	rn := tv.RootWidget
-	if bitflag.Has(rn.Flag, int(NodeFlagExtendSelect)) {
+	if bitflag.Has(rn.Flag, int(TreeViewFlagExtendSelect)) {
 		if tv.IsSelected() {
 			tv.Unselect()
 		} else {
@@ -271,9 +309,9 @@ func (tv *TreeView) SelectAction() {
 func (tv *TreeView) Select() {
 	if !tv.IsSelected() {
 		tv.UpdateStart()
-		bitflag.Set(&tv.Flag, int(NodeFlagSelected))
+		bitflag.Set(&tv.Flag, int(TreeViewFlagSelected))
 		tv.GrabFocus() // focus always follows select  todo: option
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeSelected), tv.This)
+		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewSelected), tv.This)
 		tv.UpdateEnd()
 	}
 }
@@ -281,8 +319,8 @@ func (tv *TreeView) Select() {
 func (tv *TreeView) Unselect() {
 	if tv.IsSelected() {
 		tv.UpdateStart()
-		bitflag.Clear(&tv.Flag, int(NodeFlagSelected))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeUnselected), tv.This)
+		bitflag.Clear(&tv.Flag, int(TreeViewFlagSelected))
+		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewUnselected), tv.This)
 		tv.UpdateEnd()
 	}
 }
@@ -320,7 +358,7 @@ func (tv *TreeView) MoveDown() {
 	if tv.Par == nil {
 		return
 	}
-	if tv.IsCollapsed() || !tv.HasChildren() { // next sibling
+	if tv.IsClosed() || !tv.HasChildren() { // next sibling
 		tv.MoveDownSibling()
 	} else {
 		if tv.HasChildren() {
@@ -376,7 +414,7 @@ func (tv *TreeView) MoveToLastChild() {
 	if tv.Par == nil || tv == tv.RootWidget {
 		return
 	}
-	if !tv.IsCollapsed() && tv.HasChildren() {
+	if !tv.IsClosed() && tv.HasChildren() {
 		nn := tv.Child(-1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			nn.MoveToLastChild()
@@ -386,35 +424,35 @@ func (tv *TreeView) MoveToLastChild() {
 	}
 }
 
-func (tv *TreeView) Collapse() {
-	if !tv.IsCollapsed() {
+func (tv *TreeView) Close() {
+	if !tv.IsClosed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
-		bitflag.Set(&tv.Flag, int(NodeFlagCollapsed))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeCollapsed), tv.This)
+		bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
+		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewClosed), tv.This)
 		tv.UpdateEnd()
 	}
 }
 
-func (tv *TreeView) Expand() {
-	if tv.IsCollapsed() {
+func (tv *TreeView) Open() {
+	if tv.IsClosed() {
 		tv.UpdateStart()
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
-		bitflag.Clear(&tv.Flag, int(NodeFlagCollapsed))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(NodeOpened), tv.This)
+		bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
+		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewOpened), tv.This)
 		tv.UpdateEnd()
 	}
 }
 
-func (tv *TreeView) ToggleCollapse() {
-	if tv.IsCollapsed() {
-		tv.Expand()
+func (tv *TreeView) ToggleClose() {
+	if tv.IsClosed() {
+		tv.Open()
 	} else {
-		tv.Collapse()
+		tv.Close()
 	}
 }
 
@@ -538,18 +576,18 @@ func (tv *TreeView) SrcDuplicate() {
 
 func (tv *TreeView) SetContinuousSelect() {
 	rn := tv.RootWidget
-	bitflag.Set(&rn.Flag, int(NodeFlagContinuousSelect))
+	bitflag.Set(&rn.Flag, int(TreeViewFlagContinuousSelect))
 }
 
 func (tv *TreeView) SetExtendSelect() {
 	rn := tv.RootWidget
-	bitflag.Set(&rn.Flag, int(NodeFlagExtendSelect))
+	bitflag.Set(&rn.Flag, int(TreeViewFlagExtendSelect))
 }
 
 func (tv *TreeView) ClearSelectMods() {
 	rn := tv.RootWidget
-	bitflag.Clear(&rn.Flag, int(NodeFlagContinuousSelect))
-	bitflag.Clear(&rn.Flag, int(NodeFlagExtendSelect))
+	bitflag.Clear(&rn.Flag, int(TreeViewFlagContinuousSelect))
+	bitflag.Clear(&rn.Flag, int(TreeViewFlagExtendSelect))
 }
 
 ////////////////////////////////////////////////////
@@ -576,7 +614,7 @@ func (tv *TreeView) ConfigParts() {
 		wb.ButtonSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
 				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-				tvr.ToggleCollapse()
+				tvr.ToggleClose()
 			}
 		})
 	}
@@ -632,7 +670,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
-	wb.SetChecked(!tv.IsCollapsed())
+	wb.SetChecked(!tv.IsClosed())
 }
 
 func (tv *TreeView) Init2D() {
@@ -651,10 +689,10 @@ func (tv *TreeView) Init2D() {
 			tv.RootUnselectAll()
 			kt.SetProcessed()
 		case KeyFunMoveRight:
-			tv.Expand()
+			tv.Open()
 			kt.SetProcessed()
 		case KeyFunMoveLeft:
-			tv.Collapse()
+			tv.Close()
 			kt.SetProcessed()
 		case KeyFunMoveDown:
 			tv.MoveDown()
@@ -751,7 +789,7 @@ var TreeViewProps = []map[string]interface{}{
 }
 
 func (tv *TreeView) Style2D() {
-	if tv.HasCollapsedParent() {
+	if tv.HasClosedParent() {
 		return
 	}
 	tv.ConfigParts()
@@ -771,7 +809,7 @@ func (tv *TreeView) Size2D() {
 	tv.RootWidget = tv.RootTreeView() // cache
 
 	tv.InitLayout2D()
-	if tv.HasCollapsedParent() {
+	if tv.HasClosedParent() {
 		return // nothing
 	}
 	tv.SizeFromParts() // get our size from parts
@@ -779,7 +817,7 @@ func (tv *TreeView) Size2D() {
 	h := tv.WidgetSize.Y
 	w := tv.WidgetSize.X
 
-	if !tv.IsCollapsed() {
+	if !tv.IsClosed() {
 		// we layout children under us
 		for _, kid := range tv.Kids {
 			_, gi := KiToNode2D(kid)
@@ -801,7 +839,7 @@ func (tv *TreeView) Layout2DParts(parBBox image.Rectangle) {
 }
 
 func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
-	if tv.HasCollapsedParent() {
+	if tv.HasClosedParent() {
 		tv.LayData.AllocPosRel.X = -1000000 // put it very far off screen..
 	}
 	tv.ConfigParts()
@@ -829,7 +867,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	h := tv.WidgetSize.Y
-	if !tv.IsCollapsed() {
+	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
@@ -859,7 +897,7 @@ func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 }
 
 func (tv *TreeView) Render2D() {
-	if tv.HasCollapsedParent() {
+	if tv.HasClosedParent() {
 		return // nothing
 	}
 	if tv.PushBounds() {

@@ -192,8 +192,8 @@ type ValueView interface {
 	Val() reflect.Value
 	// SetValue sets the value (if not ReadOnly), using Ki.SetField for Ki types and kit.SetRobust otherwise
 	SetValue(val interface{}) bool
-	// FieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
-	FieldTag(tagName string) string
+	// ViewFieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
+	ViewFieldTag(tagName string) string
 	// SaveTmp saves a temporary copy of a struct to a map -- map values must be explicitly re-saved and cannot be directly written to by the value elements -- each ValueView has a pointer to any parent ValueView that might need to be saved after SetValue -- SaveTmp called automatically in SetValue but other cases that use something different need to call it explicitly
 	SaveTmp()
 }
@@ -266,7 +266,7 @@ func (vv *ValueViewBase) OwnerKind() reflect.Kind {
 
 func (vv *ValueViewBase) IsReadOnly() bool {
 	if vv.OwnKind == reflect.Struct {
-		rotag := vv.FieldTag("read-only")
+		rotag := vv.ViewFieldTag("read-only")
 		if rotag != "" {
 			return true
 		}
@@ -386,7 +386,7 @@ func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
 	return false
 }
 
-func (vv *ValueViewBase) FieldTag(tagName string) string {
+func (vv *ValueViewBase) ViewFieldTag(tagName string) string {
 	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
 		return ""
 	}
@@ -718,21 +718,21 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 		sb.SetMin(0)
 	}
 	// todo: make a utility for this kind of thing..
-	mintag := vv.FieldTag("min")
+	mintag := vv.ViewFieldTag("min")
 	if mintag != "" {
 		min, err := strconv.ParseFloat(mintag, 64)
 		if err == nil {
 			sb.SetMin(min)
 		}
 	}
-	maxtag := vv.FieldTag("max")
+	maxtag := vv.ViewFieldTag("max")
 	if maxtag != "" {
 		max, err := strconv.ParseFloat(maxtag, 64)
 		if err == nil {
 			sb.SetMax(max)
 		}
 	}
-	steptag := vv.FieldTag("step")
+	steptag := vv.ViewFieldTag("step")
 	if steptag != "" {
 		step, err := strconv.ParseFloat(steptag, 64)
 		if err == nil {
@@ -782,7 +782,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// todo: make a utility for this kind of thing..
-	mintag := vv.FieldTag("min")
+	mintag := vv.ViewFieldTag("min")
 	if mintag != "" {
 		min, err := strconv.ParseFloat(mintag, 64)
 		if err == nil {
@@ -790,7 +790,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 			sb.Min = min
 		}
 	}
-	maxtag := vv.FieldTag("max")
+	maxtag := vv.ViewFieldTag("max")
 	if maxtag != "" {
 		max, err := strconv.ParseFloat(maxtag, 64)
 		if err == nil {
@@ -798,7 +798,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 			sb.Max = max
 		}
 	}
-	steptag := vv.FieldTag("step")
+	steptag := vv.ViewFieldTag("step")
 	if steptag != "" {
 		step, err := strconv.ParseFloat(steptag, 64)
 		if err == nil {
@@ -913,7 +913,7 @@ func (vv *TypeValueView) ConfigWidget(widg Node2D) {
 		}
 	}
 
-	tetag := vv.FieldTag("type-embeds")
+	tetag := vv.ViewFieldTag("type-embeds")
 	if tetag != "" {
 		typ := kit.Types.Type(tetag)
 		if typ != nil {
