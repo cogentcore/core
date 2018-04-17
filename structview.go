@@ -134,7 +134,6 @@ func (sv *StructView) ConfigStructGrid() {
 	if sg == nil {
 		return
 	}
-	sg.UpdateStart()
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
@@ -179,7 +178,6 @@ func (sv *StructView) ConfigStructGrid() {
 		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
-	sg.UpdateEnd()
 }
 
 func (sv *StructView) UpdateFromStruct() {
@@ -187,6 +185,11 @@ func (sv *StructView) UpdateFromStruct() {
 	typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
 	sv.SetTitle(fmt.Sprintf("%v Fields", typ.Name()))
 	sv.ConfigStructGrid()
+}
+
+func (sv *StructView) Style2D() {
+	sv.Frame.Style2D()
+	sv.UpdateFromStruct()
 }
 
 func (sv *StructView) Render2D() {

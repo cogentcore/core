@@ -312,7 +312,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				vv.Value = nv                             // update value to new key
 			} else {
 				if vv.KeyView != nil {
-					ck := vv.KeyView.AsValueViewBase().Value // current key value
+					ck := vv.KeyView.Val() // current key value
 					ov.SetMapIndex(ck, reflect.ValueOf(val))
 				} else { // static, key not editable?
 					ov.SetMapIndex(reflect.ValueOf(vv.Key), reflect.ValueOf(val))

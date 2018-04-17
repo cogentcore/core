@@ -132,7 +132,6 @@ func (sv *SliceView) ConfigSliceGrid() {
 	if sg == nil {
 		return
 	}
-	sv.UpdateStart()
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 4)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
@@ -200,7 +199,6 @@ func (sv *SliceView) ConfigSliceGrid() {
 			svv.UpdateEnd()
 		})
 	}
-	sv.UpdateEnd()
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice

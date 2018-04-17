@@ -134,9 +134,7 @@ func (sv *MapView) ConfigMapGrid() {
 	if sg == nil {
 		return
 	}
-	sv.UpdateStart()
 	sg.Lay = LayoutGrid
-	sg.SetProp("columns", 3)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
 	sv.Keys = make([]ValueView, 0)
@@ -144,6 +142,26 @@ func (sv *MapView) ConfigMapGrid() {
 
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
+
+	valtyp := kit.NonPtrType(reflect.TypeOf(sv.Map)).Elem()
+	ncol := 3
+	ifaceType := false
+	typeTag := ""
+	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
+		ifaceType = true
+		ncol = 4
+		typeTag = "style-prop" // todo: need some way of setting & getting
+		// this for given domain mapview could have a structview parent and
+		// the source node of that struct, if a Ki, could have a property --
+		// unlike inline case, plain mapview is not a child of struct view
+		// directly -- but field on struct view does create the mapview
+		// dialog.. a bit hacky and indirect..
+	}
+
+	valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
+	valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
+
+	sg.SetProp("columns", ncol)
 
 	keys := mvnp.MapKeys()
 	sort.Slice(keys, func(i, j int) bool {
@@ -170,6 +188,10 @@ func (sv *MapView) ConfigMapGrid() {
 
 		config.Add(kv.WidgetType(), keynm)
 		config.Add(vv.WidgetType(), valnm)
+		if ifaceType {
+			typnm := fmt.Sprintf("type-%v", keytxt)
+			config.Add(KiT_ComboBox, typnm)
+		}
 		config.Add(KiT_Action, delnm)
 		sv.Keys = append(sv.Keys, kv)
 		sv.Values = append(sv.Values, vv)
@@ -179,14 +201,43 @@ func (sv *MapView) ConfigMapGrid() {
 		sv.SetFullReRender()
 	}
 	for i, vv := range sv.Values {
-		keyw := sg.Child(i * 3).(Node2D)
+		keyw := sg.Child(i * ncol).(Node2D)
 		keyw.SetProp("vertical-align", AlignMiddle)
-		widg := sg.Child(i*3 + 1).(Node2D)
+		widg := sg.Child(i*ncol + 1).(Node2D)
 		widg.SetProp("vertical-align", AlignMiddle)
 		kv := sv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
-		delact := sg.Child(i*3 + 2).(*Action)
+		if ifaceType {
+			typw := sg.Child(i*ncol + 2).(*ComboBox)
+			typw.ItemsFromTypes(valtypes, false, true, 50)
+			typw.SetCurVal(kit.NonPtrValue(vv.Val()).Type())
+			typw.SetProp("mapview-index", i)
+			typw.ComboSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				cb := send.(*ComboBox)
+				idx := cb.Prop("mapview-index", false, false).(int)
+				svv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+				svv.UpdateStart()
+				typ := cb.CurVal.(reflect.Type)
+				keyv := svv.Keys[idx]
+				ck := keyv.Val() // current key value
+				valv := svv.Values[idx]
+				cv := kit.NonPtrValue(valv.Val()) // current val value
+
+				// create a new item of selected type, and attempt to convert existing to it
+				evnp := reflect.New(kit.PtrType(typ))
+				evpi := evnp.Interface()
+				evn := reflect.New(typ)
+				evi := evn.Interface()
+				evpi = &evi
+				kit.SetRobust(evpi, cv.Interface())
+				ov := kit.NonPtrValue(reflect.ValueOf(svv.Map))
+				ov.SetMapIndex(ck, reflect.ValueOf(evnp.Elem()))
+				svv.SetFullReRender()
+				svv.UpdateEnd()
+			})
+		}
+		delact := sg.Child(i*ncol + ncol - 1).(*Action)
 		delact.SetProp("vertical-align", AlignMiddle)
 		delact.Text = "  --"
 		delact.Data = kv
@@ -200,7 +251,6 @@ func (sv *MapView) ConfigMapGrid() {
 			svv.UpdateEnd()
 		})
 	}
-	sv.UpdateEnd()
 }
 
 func (sv *MapView) MapAdd() {
