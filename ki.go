@@ -383,6 +383,9 @@ type Ki interface {
 	// FieldByName returns field value by name (can be any type of field -- see KiFieldByName for Ki fields) -- returns nil if not found
 	FieldByName(field string) interface{}
 
+	// FieldTag returns given field tag for that field, or empty string if not set
+	FieldTag(field, tag string) string
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees
 

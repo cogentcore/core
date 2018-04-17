@@ -1255,6 +1255,10 @@ func (n *Node) FieldByName(field string) interface{} {
 	return kit.FlatFieldInterfaceByName(n.This, field)
 }
 
+func (n *Node) FieldTag(field, tag string) string {
+	return kit.FlatFieldTag(n.Type(), field, tag)
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Deep Copy / Clone
 
