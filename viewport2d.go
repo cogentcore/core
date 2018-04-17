@@ -393,15 +393,15 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 		} else {
 			anchor := gi.ParentReRenderAnchor()
 			if anchor != nil {
-				// if Update2DTrace {
-				fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
-				// }
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
+				}
 				gi.Style2DTree() // restyle only from affected node downward
 				vp.ReRender2DAnchor(anchor.AsNode2D())
 			} else {
-				// if Update2DTrace {
-				fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
-				// }
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+				}
 				gi.Style2DTree()    // restyle only from affected node downward
 				vp.ReRender2DTree() // need to re-render entirely from us
 			}

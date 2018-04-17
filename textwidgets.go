@@ -932,10 +932,14 @@ func (g *ComboBox) FindItem(it interface{}) int {
 	return -1
 }
 
-// SetCurVal sets the current value (CurVal) and the corresponding CurIndex for that item on the current Items list (-1 if not found) -- returns that index -- and sets the text to the string value of that value (using standard Stringer string conversion)
+// SetCurVal sets the current value (CurVal) and the corresponding CurIndex for that item on the current Items list (adds to items list if not found) -- returns that index -- and sets the text to the string value of that value (using standard Stringer string conversion)
 func (g *ComboBox) SetCurVal(it interface{}) int {
 	g.CurVal = it
 	g.CurIndex = g.FindItem(it)
+	if g.CurIndex < 0 { // add to list if not found..
+		g.CurIndex = len(g.Items)
+		g.Items = append(g.Items, it)
+	}
 	g.SetText(ToLabel(it))
 	return g.CurIndex
 }

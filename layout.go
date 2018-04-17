@@ -898,7 +898,7 @@ func (ly *Layout) AvailSize() Vec2D {
 		if vp != nil {
 			if vp.Viewport == nil {
 				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
-				fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
+				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
 			}
 		}
 	}
@@ -946,7 +946,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Defaults()
 	}
 	spc := ly.Style.BoxSpace()
-	avail := ly.AvailSize()
+	avail := ly.AvailSize().SubVal(spc * 2.0)
 	sc := ly.Scrolls[d]
 	if d == X {
 		sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
@@ -1002,15 +1002,16 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 func (ly *Layout) LayoutScrolls() {
 	sbw := ly.Style.Layout.ScrollBarWidth.Dots
 
+	spc := ly.Style.BoxSpace()
 	avail := ly.AvailSize()
 	for d := X; d < Dims2DN; d++ {
 		odim := OtherDim(d)
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D()
-			sc.LayData.AllocPosRel.SetDim(d, 0.0)
+			sc.LayData.AllocPosRel.SetDim(d, spc)
 			sc.LayData.AllocPosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
-			sc.LayData.AllocSize.SetDim(d, avail.Dim(d))
+			sc.LayData.AllocSize.SetDim(d, avail.Dim(d)-spc)
 			if ly.HasScroll[odim] { // make room for other
 				sc.LayData.AllocSize.SetSubDim(d, sbw)
 			}

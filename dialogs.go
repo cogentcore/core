@@ -369,7 +369,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 
 // Struct View dialog for editing fields of a structure using a StructView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("struct-view", title, prompt, true, true)
+	dlg := NewStdDialog("struct-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -390,7 +390,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, title, prompt string, r
 
 // Map View dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("map-view", title, prompt, true, true)
+	dlg := NewStdDialog("map-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -411,7 +411,7 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv k
 
 // Slice View dialog for editing fields of a slice using a SliceView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
 func SliceViewDialog(avp *Viewport2D, mp interface{}, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("slice-view", title, prompt, true, true)
+	dlg := NewStdDialog("slice-view", title, prompt, true, false)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

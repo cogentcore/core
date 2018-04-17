@@ -147,6 +147,7 @@ func (sv *MapView) ConfigMapGrid() {
 	ncol := 3
 	ifaceType := false
 	typeTag := ""
+	strtyp := reflect.TypeOf(typeTag)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		ifaceType = true
 		ncol = 4
@@ -211,7 +212,11 @@ func (sv *MapView) ConfigMapGrid() {
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
-			typw.SetCurVal(kit.NonPtrValue(vv.Val()).Type())
+			vtyp := kit.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
+			if vtyp == nil {
+				vtyp = strtyp // default to string
+			}
+			typw.SetCurVal(vtyp)
 			typw.SetProp("mapview-index", i)
 			typw.ComboSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				cb := send.(*ComboBox)
@@ -225,14 +230,11 @@ func (sv *MapView) ConfigMapGrid() {
 				cv := kit.NonPtrValue(valv.Val()) // current val value
 
 				// create a new item of selected type, and attempt to convert existing to it
-				evnp := reflect.New(kit.PtrType(typ))
-				evpi := evnp.Interface()
 				evn := reflect.New(typ)
 				evi := evn.Interface()
-				evpi = &evi
-				kit.SetRobust(evpi, cv.Interface())
+				kit.SetRobust(evi, cv.Interface())
 				ov := kit.NonPtrValue(reflect.ValueOf(svv.Map))
-				ov.SetMapIndex(ck, reflect.ValueOf(evnp.Elem()))
+				ov.SetMapIndex(ck, reflect.ValueOf(evi).Elem())
 				svv.SetFullReRender()
 				svv.UpdateEnd()
 			})
@@ -261,9 +263,13 @@ func (sv *MapView) MapAdd() {
 	mv := reflect.ValueOf(sv.Map)
 	mvnp := kit.NonPtrValue(mv)
 	mvtyp := mvnp.Type()
-
+	valtyp := kit.NonPtrType(reflect.TypeOf(sv.Map)).Elem()
+	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
+		str := ""
+		valtyp = reflect.TypeOf(str)
+	}
 	nkey := reflect.New(mvtyp.Key())
-	nval := reflect.New(mvtyp.Elem())
+	nval := reflect.New(valtyp)
 	mvnp.SetMapIndex(nkey.Elem(), nval.Elem())
 	sv.UpdateEnd()
 }
