@@ -111,6 +111,7 @@ func main(f func(oswin.Screen)) error {
 
 //export driverStarted
 func driverStarted() {
+	oswin.OSScreen = theScreen
 	go func() {
 		mainCallback(theScreen)
 		C.stopDriver()
@@ -226,14 +227,14 @@ var mods = [...]struct {
 }{
 	// Left and right variants of modifier keys have their own masks,
 	// but they are not documented. These were determined empirically.
-	{1<<17 | 0x102, C.kVK_Shift, key.ModShift},
-	{1<<17 | 0x104, C.kVK_RightShift, key.ModShift},
-	{1<<18 | 0x101, C.kVK_Control, key.ModControl},
+	{1<<17 | 0x102, C.kVK_Shift, key.Shift},
+	{1<<17 | 0x104, C.kVK_RightShift, key.Shift},
+	{1<<18 | 0x101, C.kVK_Control, key.Control},
 	// TODO key.ControlRight
-	{1<<19 | 0x120, C.kVK_Option, key.ModAlt},
-	{1<<19 | 0x140, C.kVK_RightOption, key.ModAlt},
-	{1<<20 | 0x108, C.kVK_Command, key.ModMeta},
-	{1<<20 | 0x110, C.kVK_Command, key.ModMeta}, // TODO: missing kVK_RightCommand
+	{1<<19 | 0x120, C.kVK_Option, key.Alt},
+	{1<<19 | 0x140, C.kVK_RightOption, key.Alt},
+	{1<<20 | 0x108, C.kVK_Command, key.Meta},
+	{1<<20 | 0x110, C.kVK_Command, key.Meta}, // TODO: missing kVK_RightCommand
 }
 
 func cocoaMods(flags uint32) (m int32) {
@@ -293,14 +294,16 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 			From: from,
 		}
 	case C.NSLeftMouseDragged, C.NSRightMouseDragged, C.NSOtherMouseDragged:
-		event = &mouse.MoveEvent{
-			Event: mouse.Event{
-				Where:     where,
-				Button:    cmButton,
-				Action:    mouse.Drag,
-				Modifiers: mods,
+		event = &mouse.DragEvent{
+			MoveEvent: mouse.MoveEvent{
+				Event: mouse.Event{
+					Where:     where,
+					Button:    cmButton,
+					Action:    mouse.Drag,
+					Modifiers: mods,
+				},
+				From: from,
 			},
-			From: from,
 		}
 	case C.NSScrollWheel:
 		// Note that the direction of scrolling is inverted by default
@@ -348,13 +351,20 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 }
 
 //export keyEvent
-func keyEvent(id uintptr, runeVal rune, dir uint8, code uint16, flags uint32) {
-	sendWindowEvent(id, &key.Event{
+func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
+	event := &key.Event{
 		Rune:      cocoaRune(runeVal),
-		Action:    key.Action(dir),
+		Action:    key.Action(act),
 		Code:      cocoaKeyCode(code),
 		Modifiers: cocoaMods(flags),
-	})
+	}
+
+	sendWindowEvent(id, event)
+
+	if event.Action == key.Release && event.Rune >= 0 { // trigger for chord
+		che := &key.ChordEvent{Event: *event}
+		sendWindowEvent(id, che)
+	}
 }
 
 //export flagEvent

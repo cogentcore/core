@@ -15,8 +15,8 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// CurScreen is the current Screen for current app -- only ever one in effect
-var CurScreen Screen
+// OSScreen is the current oswin Screen for app -- only ever one in effect
+var OSScreen Screen
 
 // Screen represents the overall screen hardware, and creates Images, Textures
 // and Windows, appropriate for that hardware / OS, and maintains data about

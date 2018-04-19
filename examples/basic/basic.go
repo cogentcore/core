@@ -5,8 +5,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/driver"
@@ -14,19 +12,16 @@ import (
 
 func main() {
 	driver.Main(func(s oswin.Screen) {
-		width = 800
-		height = 800
+		width := 800
+		height := 800
 		win := gi.NewWindow2D("test window", width, height)
-		if err != nil {
-			log.Fatal(err)
-		}
 		defer win.OSWin.Release()
 
 		win.UpdateStart()
 		vp := win.WinViewport2D()
 		vp.Fill = true
 
-		vlay := vpfill.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
+		vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 		vlay.Lay = gi.LayoutCol
 
 		rlay := vlay.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)

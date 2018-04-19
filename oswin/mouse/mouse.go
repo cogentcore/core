@@ -61,8 +61,9 @@ func (e *Event) SetModifiers(mods ...key.Modifiers) {
 	}
 }
 
-// mouse.MoveEvent is for mouse movement, with or without button down --
-// actions are Move or Drag
+/////////////////////////////////////////////////////////////////
+
+// mouse.MoveEvent is for mouse movement, without button down -- action is Move
 type MoveEvent struct {
 	Event
 
@@ -73,10 +74,21 @@ type MoveEvent struct {
 	LastTime time.Time
 }
 
+/////////////////////////////////////////////////////////////////
+
+// mouse.DragEvent is for mouse movement, with button down -- action is Drag
+// -- many receivers will be interested in Drag events but not Move events,
+// which is why these are separate
+type DragEvent struct {
+	MoveEvent
+}
+
 // Delta returns the amount of mouse movement (Where - From)
 func (e MoveEvent) Delta() image.Point {
 	return e.Where.Sub(e.From)
 }
+
+/////////////////////////////////////////////////////////////////
 
 // mouse.ScrollEvent is for mouse scrolling, recording the delta of the scroll
 type ScrollEvent struct {
@@ -84,6 +96,15 @@ type ScrollEvent struct {
 
 	// Delta is the amount of scrolling in each axis
 	Delta image.Point
+}
+
+/////////////////////////////////////////////////////////////////
+
+// mouse.FocusEvent records actions of Enter and Exit of mouse into a given
+// widget bounding box -- generated from mouse.MoveEvents in gi.Window, which
+// knows about widget bounding boxes
+type FocusEvent struct {
+	Event
 }
 
 // Button is a mouse button.
@@ -105,7 +126,8 @@ const (
 
 var KiT_Button = kit.Enums.AddEnum(ButtonN, false, nil)
 
-// Action taken with the mouse button
+// Action taken with the mouse button -- different ones are applicable to
+// different mouse event types
 type Action int32
 
 const (
@@ -116,6 +138,8 @@ const (
 	Move
 	Drag
 	Scroll
+	Enter
+	Exit
 
 	ActionN
 )
@@ -150,5 +174,14 @@ func (ev MoveEvent) Type() oswin.EventType {
 	return oswin.MouseMoveEvent
 }
 
-// check for interface implementation
-var _ oswin.Event = &MoveEvent{}
+func (ev DragEvent) Type() oswin.EventType {
+	return oswin.MouseDragEvent
+}
+
+func (ev ScrollEvent) Type() oswin.EventType {
+	return oswin.MouseScrollEvent
+}
+
+func (ev FocusEvent) Type() oswin.EventType {
+	return oswin.MouseFocusEvent
+}

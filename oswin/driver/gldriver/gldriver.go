@@ -24,8 +24,8 @@ import (
 // returns.
 func Main(f func(oswin.Screen)) {
 	if err := main(f); err != nil {
-		oswin.CurScreen = errscreen.Stub(err)
-		f(oswin.CurScreen)
+		oswin.OSScreen = errscreen.Stub(err)
+		f(oswin.OSScreen)
 	}
 }
 

@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _EventType_name = "MouseEventMouseMoveEventMouseScrollEventKeyEventTouchEventMagnifyEventRotateEventWindowEventLifeCycleEventPaintEventEventTypeN"
+const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventLifeCycleEventPaintEventEventTypeN"
 
-var _EventType_index = [...]uint8{0, 10, 24, 40, 48, 58, 70, 81, 92, 106, 116, 126}
+var _EventType_index = [...]uint8{0, 10, 24, 38, 54, 69, 77, 90, 100, 112, 123, 134, 148, 158, 168}
 
 func (i EventType) String() string {
 	if i < 0 || i >= EventType(len(_EventType_index)-1) {

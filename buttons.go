@@ -9,6 +9,8 @@ import (
 	"image/color"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -231,33 +233,33 @@ func Init2DButtonEvents(bw ButtonWidget) {
 	// if g.IsReadOnly() {
 	// 	return
 	// }
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
-		ab := (interface{})(recv).(ButtonWidget)
-		ab.ButtonAsBase().ButtonPressed()
+	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		ab := recv.(ButtonWidget)
+		if me.Action == mouse.Press {
+			ab.ButtonAsBase().ButtonPressed()
+		} else {
+			ab.ButtonAsBase().ButtonReleased()
+		}
 	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
-		ab := (interface{})(recv).(ButtonWidget)
-		ab.ButtonRelease() // special one
+	g.ReceiveEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.FocusEvent)
+		me.SetProcessed()
+		ab := recv.(ButtonWidget)
+		if me.Action == mouse.Enter {
+			ab.ButtonAsBase().ButtonEnterHover()
+		} else {
+			ab.ButtonAsBase().ButtonExitHover()
+		}
 	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
-		ab := (interface{})(recv).(ButtonWidget)
-		ab.ButtonAsBase().ButtonEnterHover()
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
-		ab := (interface{})(recv).(ButtonWidget)
-		ab.ButtonAsBase().ButtonExitHover()
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := (interface{})(recv).(ButtonWidget)
+	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		kt := d.(*key.ChordEvent)
+		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		kt := d.(*oswin.KeyTypedEvent)
 		// todo: register shortcuts with window, and generalize these keybindings
-		kf := KeyFun(kt.Key, kt.Chord)
-		if kf == KeyFunSelectItem || kt.Key == "space" {
+		kf := KeyFun(kt.ChordString())
+		if kf == KeyFunSelectItem || kt.Rune == ' ' {
 			kt.SetProcessed()
 			bb.ButtonPressed()
 			// todo: brief delay??

@@ -8,9 +8,12 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"runtime"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/gi/oswin/lifecycle"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
+	"github.com/rcoreilly/goki/gi/oswin/window"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -20,10 +23,9 @@ import (
 	"time"
 )
 
-// notes:
-// oswin/screen -> buffer rename to -> image is the thing that a Vp should have
-// uploader uploads the buffer/image to the window -- can also render directly
-// onto window using textures using the drawer interface, but..
+// notes: oswin/Image is the thing that a Vp should have uploader uploads the
+// buffer/image to the window -- can also render directly onto window using
+// textures using the drawer interface, but..
 
 // todo: could have two subtypes of windows, one a native 3D with OpenGl etc.
 
@@ -32,14 +34,14 @@ type Window struct {
 	NodeBase
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
 	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface"`
-	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
+	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
 	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
 	LastDrag      time.Time                   `json:"-" xml:"-" desc:"time since last drag event"`
-	LastSentDrag  oswin.MouseDraggedEvent     `json:"-" xml:"-" desc:"last drag that we actually sent"`
+	LastSentDrag  mouse.DragEvent             `json:"-" xml:"-" desc:"last drag that we actually sent"`
 	stopEventLoop bool                        `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 	DoFullRender  bool                        `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 }
@@ -53,15 +55,13 @@ func NewWindow(name string, width, height int) *Window {
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
-	win.OSWin, err = oswin.CurScreen.NewWindow(&oswin.NewWindowOptions{
-		Title: name,
+	win.OSWin, err = oswin.OSScreen.NewWindow(&oswin.NewWindowOptions{
+		Title: name, Width: width, Height: height,
 	})
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	// win.OSWin.SetTitle(name)
-	// we signal ourselves to flush the OSWin
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
@@ -86,31 +86,41 @@ func (w *Window) Resize(width, height int) {
 	w.Viewport.Resize(width, height)
 }
 
-// UpdateVpRegion updates pixels for one viewport region on the screen, using vpBBox bounding box for the viewport, and winBBox bounding box for the window (which should not be empty given the overall logic driving updates) -- the Window has a its OnlySelfUpdate logic for determining when to flush changes to the underlying OSWindow -- wrap updates in win.UpdateStart / win.UpdateEnd to actually flush the updates to be visible
+// UpdateVpRegion updates pixels for one viewport region on the screen, using
+// vpBBox bounding box for the viewport, and winBBox bounding box for the
+// window (which should not be empty given the overall logic driving updates)
+// -- the Window has a its OnlySelfUpdate logic for determining when to flush
+// changes to the underlying OSWindow -- wrap updates in win.UpdateStart /
+// win.UpdateEnd to actually flush the updates to be visible
 func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	vpimg := vp.Pixels.SubImage(vpBBox).(*image.RGBA)
-	s := w.OSWin.Screen()
-	s.CopyRGBA(vpimg, winBBox)
+	// vpimg := vp.Pixels.SubImage(vpBBox).(*image.RGBA)
+	// s := w.OSWin.Screen()
+	// s.CopyRGBA(vpimg, winBBox)
+	w.OSWin.Upload(winBBox.Min, vp.OSImage, vpBBox)
 }
 
 // UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
 func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	s := w.OSWin.Screen()
-	s.CopyRGBA(vp.Pixels, winBBox)
+	// s := w.OSWin.Screen()
+	// s.CopyRGBA(vp.Pixels, winBBox)
+	w.OSWin.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
 }
 
-// UpdateVpRegionFromMain basically clears the region where the vp would show up, from the main
+// UpdateVpRegionFromMain basically clears the region where the vp would show
+// up, from the main
 func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
-	vpimg := w.Viewport.Pixels.SubImage(winBBox).(*image.RGBA)
-	s := w.OSWin.Screen()
-	s.CopyRGBA(vpimg, winBBox)
+	// vpimg := w.Viewport.Pixels.SubImage(winBBox).(*image.RGBA)
+	// s := w.OSWin.Screen()
+	// s.CopyRGBA(vpimg, winBBox)
+	w.OSWin.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
 }
 
 // FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
 func (w *Window) FullUpdate() {
 	w.UpdateStart()
-	s := w.OSWin.Screen()
-	s.CopyRGBA(w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
+	// s := w.OSWin.Screen()
+	// s.CopyRGBA(w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
+	w.OSWin.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
@@ -118,7 +128,8 @@ func (w *Window) FullUpdate() {
 			if gii != nil {
 				vp := gii.AsViewport2D()
 				r := vp.ViewBox.Bounds()
-				s.CopyRGBA(vp.Pixels, r)
+				// s.CopyRGBA(vp.Pixels, r)
+				w.OSWin.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 			}
 		}
 	}
@@ -127,7 +138,8 @@ func (w *Window) FullUpdate() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.ViewBox.Bounds()
-			s.CopyRGBA(vp.Pixels, r)
+			// s.CopyRGBA(vp.Pixels, r)
+			w.OSWin.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
 	w.UpdateEnd() // drives the flush
@@ -138,7 +150,7 @@ func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v flushing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	win.OSWin.FlushImage()
+	win.OSWin.Publish()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
@@ -183,7 +195,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	if evi.IsProcessed() { // someone took care of it
 		return
 	}
-	et := evi.EventType()
+	et := evi.Type()
 	if et > oswin.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
@@ -222,16 +234,16 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
 				return false
 			}
-			if evi.EventOnFocus() {
+			if evi.OnFocus() {
 				if gi.This != w.Focus { // todo: could use GiNodeI interface
 					return false
 				}
-			} else if evi.EventHasPos() {
-				pos := evi.EventPos()
+			} else if evi.HasPos() {
+				pos := evi.Pos()
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
 
 				// drag events start with node but can go beyond it..
-				mde, ok := evi.(*oswin.MouseDraggedEvent)
+				mde, ok := evi.(*mouse.DragEvent)
 				if ok {
 					if w.Dragging == gi.This {
 						return true
@@ -269,59 +281,43 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	})
 }
 
-// process MouseMoved events for enter / exit status
-func (w *Window) ProcessMouseMovedEvent(evi oswin.Event) {
-	pos := evi.EventPos()
-	var mene oswin.MouseEnteredEvent
-	mene.From = pos
-	var mexe oswin.MouseExitedEvent
-	mexe.From = pos
-	enex := []oswin.EventType{oswin.MouseEnteredEventType, oswin.MouseExitedEventType}
-	for _, ete := range enex {
-		nwei := interface{}(nil)
-		if ete == oswin.MouseEnteredEventType {
-			nwei = &mene
-		} else {
-			nwei = &mexe
+// process mouse.MoveEvent to generate mouse.FocusEvent events
+func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
+	fe := mouse.FocusEvent{Event: mev.Event}
+	pos := mev.Pos()
+	ftyp := oswin.MouseFocusEvent
+	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), fe, func(k ki.Ki) bool {
+		if k.IsDeleted() { // destroyed is filtered upstream
+			return false
 		}
-		w.EventSigs[ete].EmitFiltered(w.This, int64(ete), nwei, func(k ki.Ki) bool {
-			if k.IsDeleted() { // destroyed is filtered upstream
+		_, gi := KiToNode2D(k)
+		if gi != nil {
+			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
 				return false
 			}
-			_, gi := KiToNode2D(k)
-			if gi != nil {
-				if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
-					return false
+			in := pos.In(gi.WinBBox)
+			if in {
+				if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+					fe.Action = mouse.Enter
+					bitflag.Set(&gi.Flag, int(MouseHasEntered))
+					return true // send event
+				} else {
+					return false // already in
 				}
-				in := pos.In(gi.WinBBox)
-				if in {
-					if ete == oswin.MouseEnteredEventType {
-						if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
-							return false // already in
-						}
-						bitflag.Set(&gi.Flag, int(MouseHasEntered)) // we'll send the event, and now set the flag
-					} else {
-						return false // don't send any exited events if in
-					}
-				} else { // mouse not in object
-					if ete == oswin.MouseExitedEventType {
-						if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
-							bitflag.Clear(&gi.Flag, int(MouseHasEntered)) // we'll send the event, and now set the flag
-						} else {
-							return false // already out..
-						}
-					} else {
-						return false // don't send any exited events if in
-					}
+			} else { // mouse not in object
+				if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+					fe.Action = mouse.Exit
+					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
+					return true // send event
+				} else {
+					return false // already out
 				}
-			} else {
-				// todo: 3D
-				return false
 			}
-			return true
-		})
-	}
-
+		} else {
+			// todo: 3D
+			return false
+		}
+	})
 }
 
 // process Mouseup events during popup for possible closing of popup -- returns true if popup should be deleted
@@ -334,7 +330,7 @@ func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
 	if vp == nil {
 		return false
 	}
-	// pos := evi.EventPos()
+	// pos := evi.Pos()
 	if vp.IsMenu() {
 		return true
 	}
@@ -344,12 +340,10 @@ func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
 	// todo: separate the inner and outer loops here?  not sure if events needs to be outside?
-	events := w.OSWin.EventChan()
+	// lastResize := interface{}(nil)
 
-	lastResize := interface{}(nil)
-
-	for ei := range events {
-		runtime.Gosched()
+	for {
+		evi := w.OSWin.NextEvent()
 		if w.stopEventLoop {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
@@ -367,65 +361,60 @@ func (w *Window) EventLoop() {
 		// 	fmt.Printf("curpop: %v\n", curPop.Name())
 		// }
 
-		evi, ok := ei.(oswin.Event)
-		if !ok {
-			log.Printf("Gi Window: programmer error -- got a non-Event -- event does not define all EventI interface methods\n")
-			continue
-		}
-		et := evi.EventType()
+		et := evi.Type()
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
 		if w.Popup != nil {
-			if et == oswin.MouseUpEventType {
-				delPop = w.PopupMouseUpEvent(evi) // popup before processing event
-				// if curPop != nil {
-				// 	fmt.Printf("curpop: %v delpop: %v\n", curPop.Name(), delPop)
-				// }
-			}
-		}
-		// todo: what about iconify events!?
-		if et == oswin.CloseEventType {
-			fmt.Println("close")
-			w.OSWin.Close()
-			// todo: only if last one..
-			oswin.StopBackendEventLoop()
-			evi.SetProcessed()
-		}
-		if et == oswin.ResizeEventType {
-			lastResize = ei
-			evi.SetProcessed()
-		} else {
-			if lastResize != nil { // only do last one
-				rev, ok := lastResize.(*oswin.ResizeEvent)
-				lastResize = nil
-				if ok {
-					w.Resize(rev.Width, rev.Height)
+			if me, ok := evi.(*mouse.Event); ok {
+				if me.Action == mouse.Release {
+					delPop = w.PopupMouseUpEvent(evi) // popup before processing event
+					// if curPop != nil {
+					// 	fmt.Printf("curpop: %v delpop: %v\n", curPop.Name(), delPop)
+					// }
 				}
 			}
 		}
-		if et == oswin.KeyTypedEventType {
-			kt, ok := ei.(*oswin.KeyTypedEvent)
-			if ok {
-				kf := KeyFun(kt.Key, kt.Chord)
-				switch kf {
-				case KeyFunFocusNext:
-					w.SetNextFocusItem()
-					kt.SetProcessed()
-				case KeyFunFocusPrev:
-					w.SetPrevFocusItem()
-					kt.SetProcessed()
-				case KeyFunAbort:
-					if w.Popup != nil && w.Popup == curPop {
-						delPop = true
-						kt.SetProcessed()
-					}
-				case KeyFunGoGiEditor:
-					GoGiEditorOf(w.Viewport.This)
-					kt.SetProcessed()
-				}
-				// fmt.Printf("key typed: key: %v glyph: %v Chord: %v\n", kt.Key, kt.Glyph, kt.Chord)
+		switch e := evi.(type) {
+		case *lifecycle.Event:
+			if e.To == lifecycle.StageDead {
+				fmt.Println("close")
+				// oswin.StopBackendEventLoop()
+				evi.SetProcessed()
+				return // break out of our event loop
 			}
+		case *window.Event:
+			// todo: deal with all window events here!
+			// 	lastResize = ei
+			// 	evi.SetProcessed()
+			// } else {
+			// 	if lastResize != nil { // only do last one
+			// 		rev, ok := lastResize.(*oswin.ResizeEvent)
+			// 		lastResize = nil
+			// 		if ok {
+			// 			w.Resize(rev.Width, rev.Height)
+			// 		}
+			// 	}
+			// }
+		case *key.ChordEvent:
+			kf := KeyFun(e.ChordString())
+			switch kf {
+			case KeyFunFocusNext:
+				w.SetNextFocusItem()
+				e.SetProcessed()
+			case KeyFunFocusPrev:
+				w.SetPrevFocusItem()
+				e.SetProcessed()
+			case KeyFunAbort:
+				if w.Popup != nil && w.Popup == curPop {
+					delPop = true
+					e.SetProcessed()
+				}
+			case KeyFunGoGiEditor:
+				GoGiEditorOf(w.Viewport.This)
+				e.SetProcessed()
+			}
+			fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		}
 
 		if delPop {
@@ -435,8 +424,8 @@ func (w *Window) EventLoop() {
 
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
-			if !delPop && et == oswin.MouseMovedEventType {
-				w.ProcessMouseMovedEvent(evi)
+			if !delPop && et == oswin.MouseMoveEvent {
+				w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
 			}
 		}
 

@@ -16,6 +16,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -266,8 +268,8 @@ func (g *TextField) InsertAtCursor(str string) {
 	g.UpdateEnd()
 }
 
-func (g *TextField) KeyInput(kt *oswin.KeyTypedEvent) {
-	kf := KeyFun(kt.Key, kt.Chord)
+func (g *TextField) KeyInput(kt *key.ChordEvent) {
+	kf := KeyFun(kt.ChordString())
 	switch kf {
 	case KeyFunSelectItem:
 		g.EditDone()
@@ -288,9 +290,8 @@ func (g *TextField) KeyInput(kt *oswin.KeyTypedEvent) {
 	case KeyFunAbort:
 		g.RevertEdit()
 	case KeyFunNil:
-		k := oswin.KeyToLetter(kt.Key, kt.Chord)
-		if k != "" {
-			g.InsertAtCursor(k)
+		if kt.Rune > 0 {
+			g.InsertAtCursor(string(kt.Rune))
 		}
 	}
 }
@@ -357,25 +358,25 @@ func (g *TextField) Init2D() {
 	// if g.IsReadOnly() {
 	// 	return
 	// }
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
 		if tf.IsReadOnly() { // todo: need more subtle read-only behavior here -- can select but not edit
 			return
 		}
-		md := d.(*oswin.MouseDownEvent)
+		me := d.(*mouse.Event)
+		me.SetProcessed()
 		if !tf.HasFocus() {
 			tf.GrabFocus()
 		}
-		pt := tf.PointToRelPos(md.EventPos())
+		pt := tf.PointToRelPos(me.Pos())
 		tf.SetCursorFromPixel(float64(pt.X))
-		md.SetProcessed()
 	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
 		if tf.IsReadOnly() {
 			return
 		}
-		kt := d.(*oswin.KeyTypedEvent)
+		kt := d.(*key.ChordEvent)
 		tf.KeyInput(kt)
 		kt.SetProcessed()
 	})

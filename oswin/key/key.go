@@ -24,7 +24,11 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// key.Event is a key event.
+// key.Event is a low-level immediately-generated key event, tracking press
+// and release of keys -- suitable for fine-grained tracking of key events --
+// see also key.ChordEvent for events that are generated only on keyboard release,
+// and that include the full chord information about all the modifier keys
+// that were present when a non-modifier key was released
 type Event struct {
 	oswin.EventBase
 
@@ -62,6 +66,14 @@ type Event struct {
 	// TODO: add a Device ID, for multiple input devices?
 }
 
+// key.ChordEvent reports events that are generated only on keyboard release,
+// and that include the full chord information about all the modifier keys
+// that were present when a non-modifier key was released -- these are
+// generally appropriate for most uses
+type ChordEvent struct {
+	Event
+}
+
 func (e Event) String() string {
 	if e.Rune >= 0 {
 		return fmt.Sprintf("key.Event{%q (%v), %v, %v}", e.Rune, e.Code, e.Modifiers, e.Action)
@@ -72,8 +84,23 @@ func (e Event) String() string {
 // SetModifiers sets the bitflags based on a list of key.Modifiers
 func (e *Event) SetModifiers(mods ...Modifiers) {
 	for _, m := range mods {
-		e.Modifiers |= 1 << uint32(m)
+		e.Modifiers |= (1 << uint32(m))
 	}
+}
+
+// ChordString returns a string representation of the modifiers plus rune for the event
+func (e *Event) ChordString() string {
+	str := ""
+	for m := Shift; m < ModifiersN; m++ {
+		if e.Modifiers&(1<<uint32(m)) != 0 {
+			if len(str) > 0 {
+				str += "+"
+			}
+			str += interface{}(m).(fmt.Stringer).String()
+		}
+	}
+	str += string(e.Rune)
+	return str
 }
 
 // Action is the action taken on the key
@@ -96,10 +123,10 @@ var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
 type Modifiers int32
 
 const (
-	ModShift Modifiers = iota
-	ModControl
-	ModAlt
-	ModMeta // called "Command" on OS X
+	Shift Modifiers = iota
+	Control
+	Alt
+	Meta // called "Command" on OS X
 
 	ModifiersN
 )
@@ -284,3 +311,7 @@ func (ev Event) OnFocus() bool {
 
 // check for interface implementation
 var _ oswin.Event = &Event{}
+
+func (ev ChordEvent) Type() oswin.EventType {
+	return oswin.KeyChordEvent
+}

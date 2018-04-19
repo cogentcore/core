@@ -10,6 +10,8 @@ import (
 	"strconv"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -251,8 +253,8 @@ func (g *SliderBase) UpdateThumbValSize() {
 	g.ThumbSize *= g.Size
 }
 
-func (g *SliderBase) KeyInput(kt *oswin.KeyTypedEvent) {
-	kf := KeyFun(kt.Key, kt.Chord)
+func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
+	kf := KeyFun(kt.ChordString())
 	switch kf {
 	case KeyFunMoveUp:
 		g.SetValue(g.Value - g.Step)
@@ -294,11 +296,11 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 
 func (g *SliderBase) Init2DSlider() {
 	g.Init2DWidget()
-	g.ReceiveEventType(oswin.MouseDraggedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
+	g.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(mouse.DragEvent)
+		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		if sl.IsDragging() {
-			me := d.(*oswin.MouseDraggedEvent)
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
 			if sl.Dim == X {
@@ -308,37 +310,36 @@ func (g *SliderBase) Init2DSlider() {
 			}
 		}
 	})
-	g.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
+	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(mouse.Event)
+		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		me := d.(*oswin.MouseDownEvent)
-		ed := sl.PointToRelPos(me.Where)
-		st := &sl.Style
-		spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
-		if sl.Dim == X {
-			sl.SliderPressed(float64(ed.X) - spc)
+		if me.Action == mouse.Press {
+			ed := sl.PointToRelPos(me.Where)
+			st := &sl.Style
+			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
+			if sl.Dim == X {
+				sl.SliderPressed(float64(ed.X) - spc)
+			} else {
+				sl.SliderPressed(float64(ed.Y) - spc)
+			}
 		} else {
-			sl.SliderPressed(float64(ed.Y) - spc)
+			sl.SliderReleased()
 		}
 	})
-	g.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
+	g.ReceiveEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.FocusEvent)
+		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		sl.SliderReleased()
+		if me.Action == mouse.Enter {
+			sl.SliderEnterHover()
+		} else {
+			sl.SliderExitHover()
+		}
 	})
-	g.ReceiveEventType(oswin.MouseEnteredEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
+	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		sl.SliderEnterHover()
-	})
-	g.ReceiveEventType(oswin.MouseExitedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		(d.(oswin.Event)).SetProcessed()
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		sl.SliderExitHover()
-	})
-	g.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		sl.KeyInput(d.(*oswin.KeyTypedEvent))
+		sl.KeyInput(d.(*key.ChordEvent))
 	})
 }
 

@@ -175,15 +175,15 @@ uint64 threadID() {
 
 	uint32_t rune = (uint32_t)buf[0]<<0 | (uint32_t)buf[1]<<8 | (uint32_t)buf[2]<<16 | (uint32_t)buf[3]<<24;
 
-	uint8_t direction;
+	uint8_t action;
 	if ([theEvent isARepeat]) {
-		direction = 0;
+		action = 0;
 	} else if (theEvent.type == NSEventTypeKeyDown) {
-		direction = 1;
+		action = 1;
 	} else {
-		direction = 2;
+		action = 2;
 	}
-	keyEvent((GoUintptr)self, (int32_t)rune, direction, theEvent.keyCode, theEvent.modifierFlags);
+	keyEvent((GoUintptr)self, (int32_t)rune, action, theEvent.keyCode, theEvent.modifierFlags);
 }
 
 - (void)windowDidChangeScreenProfile:(NSNotification *)notification {

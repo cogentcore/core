@@ -53,7 +53,7 @@ func (e Event) Bounds() image.Rectangle {
 // ScreenData returns the screen data associated with the screen on which this
 // window is displayed
 func (e Event) ScreenData() *oswin.ScreenData {
-	return oswin.CurScreen.ScreenData(e.ScreenNumber)
+	return oswin.OSScreen.ScreenData(e.ScreenNumber)
 }
 
 // Visibility is the visibility status of the window

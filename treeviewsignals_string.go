@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TreeViewSignals_name = "NodeSelectedNodeUnselectedNodeOpenedNodeCollapsedTreeViewSignalsN"
+const _TreeViewSignals_name = "TreeViewSelectedTreeViewUnselectedTreeViewOpenedTreeViewClosedTreeViewSignalsN"
 
-var _TreeViewSignals_index = [...]uint8{0, 12, 26, 36, 49, 65}
+var _TreeViewSignals_index = [...]uint8{0, 16, 34, 48, 62, 78}
 
 func (i TreeViewSignals) String() string {
 	if i < 0 || i >= TreeViewSignals(len(_TreeViewSignals_index)-1) {

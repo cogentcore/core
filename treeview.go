@@ -12,6 +12,8 @@ import (
 	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -38,6 +40,8 @@ const (
 )
 
 //go:generate stringer -type=TreeViewSignals
+
+// todo: continuous select, extend select can now be read directly from mouse event
 
 // these extend NodeBase NodeFlags to hold TreeView state
 const (
@@ -623,17 +627,13 @@ func (tv *TreeView) ConfigParts() {
 	lbl.Text = tv.Label()
 	if updt {
 		tv.PartStyleProps(lbl.This, TreeViewProps[0])
-		// lbl.ReceiveEventType(oswin.MouseDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		// 	_, ok := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		// 	if !ok {
-		// 		return
-		// 	}
-		// 	// todo: specifically on down?  needed this for emergent
-		// })
-		lbl.ReceiveEventType(oswin.MouseUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
-			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SelectAction()
+			me := d.(*mouse.Event)
+			if me.Action == mouse.Release {
+				tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
+				tv.SelectAction()
+			}
 		})
 	}
 
@@ -676,11 +676,11 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 func (tv *TreeView) Init2D() {
 	tv.Init2DWidget()
 	tv.ConfigParts()
-	tv.ReceiveEventType(oswin.KeyTypedEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		kt := d.(*oswin.KeyTypedEvent)
+		kt := d.(*key.ChordEvent)
 		// fmt.Printf("TreeView key: %v\n", kt.Chord)
-		kf := KeyFun(kt.Key, kt.Chord)
+		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunSelectItem:
 			tv.SelectAction()
@@ -713,24 +713,6 @@ func (tv *TreeView) Init2D() {
 			tv.SrcInsertAfter()
 			kt.SetProcessed()
 		}
-	})
-	tv.ReceiveEventType(oswin.KeyDownEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		kt := d.(*oswin.KeyDownEvent)
-		kf := KeyFun(kt.Key, "")
-		// fmt.Printf("TreeView key down: %v\n", kt.Key)
-		switch kf {
-		case KeyFunShift:
-			ab.SetContinuousSelect()
-			kt.SetProcessed()
-		case KeyFunCtrl:
-			ab.SetExtendSelect()
-			kt.SetProcessed()
-		}
-	})
-	tv.ReceiveEventType(oswin.KeyUpEventType, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		ab.ClearSelectMods()
 	})
 }
 

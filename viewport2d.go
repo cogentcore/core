@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -46,30 +47,27 @@ type Viewport2D struct {
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into"`
+	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage oswin.Image `json:"-" desc:"the oswin.Image that owns our pixels"`
 	Win     *Window     `json:"-" desc:"our parent window that we render into"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
 
-// NewViewport2D creates a new image.RGBA with the specified width and height
+// NewViewport2D creates a new OSImage with the specified width and height,
+// and intializes the renderer etc
 func NewViewport2D(width, height int) *Viewport2D {
-	return NewViewport2DForRGBA(image.NewRGBA(image.Rect(0, 0, width, height)))
-}
-
-// NewViewport2DForImage copies the specified image into a new image.RGBA
-// and prepares a context for rendering onto that image.
-func NewViewport2DForImage(im image.Image) *Viewport2D {
-	return NewViewport2DForRGBA(imageToRGBA(im))
-}
-
-// NewViewport2DForRGBA prepares a context for rendering onto the specified image.
-// No copy is made.
-func NewViewport2DForRGBA(im *image.RGBA) *Viewport2D {
+	sz := image.Point{width, height}
 	vp := &Viewport2D{
-		ViewBox: ViewBox2D{Size: im.Bounds().Size()},
-		Pixels:  im,
+		ViewBox: ViewBox2D{Size: sz},
 	}
+	var err error
+	vp.OSImage, err = oswin.OSScreen.NewImage(sz)
+	if err != nil {
+		log.Printf("%v", err)
+		return nil
+	}
+	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Defaults()
 	vp.Render.Image = vp.Pixels
 	return vp
@@ -85,7 +83,13 @@ func (vp *Viewport2D) Resize(width, height int) {
 			return                 // already good
 		}
 	}
-	vp.Pixels = image.NewRGBA(image.Rect(0, 0, width, height))
+	var err error
+	vp.OSImage, err = oswin.OSScreen.NewImage(nwsz)
+	if err != nil {
+		log.Printf("%v", err)
+		return
+	}
+	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Defaults()
 	vp.ViewBox.Size = nwsz // make sure
 	vp.Render.Image = vp.Pixels

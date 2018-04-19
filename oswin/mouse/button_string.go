@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Button_name = "NoButtonLeftMiddleRightWheelUpWheelDownWheelLeftWheelRightButtonN"
+const _Button_name = "NoButtonLeftMiddleRightButtonN"
 
-var _Button_index = [...]uint8{0, 8, 12, 18, 23, 30, 39, 48, 58, 65}
+var _Button_index = [...]uint8{0, 8, 12, 18, 23, 30}
 
 func (i Button) String() string {
 	if i < 0 || i >= Button(len(_Button_index)-1) {
