@@ -1,0 +1,154 @@
+// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/mobile/event:
+//
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package mouse defines mouse events, for the GoGi GUI system.  The most
+// important distinction for mouse events is moving versus static -- many GI
+// elements don't need to know about motion, and they are high-volume events,
+// so it is important to split those out.
+package mouse
+
+import (
+	"image"
+	"time"
+
+	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
+	"github.com/rcoreilly/goki/ki/kit"
+)
+
+// DoubleClickMSec is the maximum time interval in msec between button release
+// events to count as a double-click -- can set this global variable to change
+var DoubleClickMSec = 500
+
+// DoubleClickWait causes the event system to wait for a possible double-click event before sending single clicks.  This causes a delay, but avoids many sources of potential difficulty in dealing with double-clicking, as described here: https://blogs.msdn.microsoft.com/oldnewthing/20041015-00/?p=37553
+var DoubleClickWait = true
+
+// mouse.Event is a basic mouse event for button presses, but not motion or scrolling
+type Event struct {
+	oswin.EventBase
+
+	// Where is the mouse location, in raw display dots (raw, actual pixels)
+	Where image.Point
+
+	// Button is the mouse button being pressed or released. Its value may be
+	// ButtonNone (zero), for a mouse move with no button
+	Button Button
+
+	// Action taken on the mouse button: Press, Release, DoubleClick, Drag or Move
+	Action Action
+
+	// TODO: have a field to hold what other buttons are down, for detecting
+	// drags or button-chords.
+
+	// Modifiers is a bitmask representing a set of modifier keys:
+	// key.ModShift, key.ModAlt, etc. -- bit positions are key.Modifiers
+	Modifiers int32
+
+	// TODO: add a Device ID, for multiple input devices?
+}
+
+// SetModifiers sets the bitflags based on a list of key.Modifiers
+func (e *Event) SetModifiers(mods ...key.Modifiers) {
+	for _, m := range mods {
+		e.Modifiers |= 1 << uint32(m)
+	}
+}
+
+// mouse.MoveEvent is for mouse movement, with or without button down --
+// actions are Move or Drag
+type MoveEvent struct {
+	Event
+
+	// From is the previous location of the mouse
+	From image.Point
+
+	// LastTime is the time of the previous event
+	LastTime time.Time
+}
+
+// Delta returns the amount of mouse movement (Where - From)
+func (e MoveEvent) Delta() image.Point {
+	return e.Where.Sub(e.From)
+}
+
+// mouse.ScrollEvent is for mouse scrolling, recording the delta of the scroll
+type ScrollEvent struct {
+	Event
+
+	// Delta is the amount of scrolling in each axis
+	Delta image.Point
+}
+
+// Button is a mouse button.
+type Button int32
+
+// TODO: have a separate axis concept for wheel up/down? How does that relate
+// to joystick events?
+
+const (
+	NoButton Button = iota
+	Left
+	Middle
+	Right
+
+	ButtonN
+)
+
+//go:generate stringer -type=Button
+
+var KiT_Button = kit.Enums.AddEnum(ButtonN, false, nil)
+
+// Action taken with the mouse button
+type Action int32
+
+const (
+	NoAction Action = iota
+	Press
+	Release
+	DoubleClick
+	Move
+	Drag
+	Scroll
+
+	ActionN
+)
+
+//go:generate stringer -type=Action
+
+var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+
+/////////////////////////////
+// oswin.Event interface
+
+func (ev Event) Type() oswin.EventType {
+	return oswin.MouseEvent
+}
+
+func (ev Event) HasPos() bool {
+	return true
+}
+
+func (ev Event) Pos() image.Point {
+	return ev.Where
+}
+
+func (ev Event) OnFocus() bool {
+	return false
+}
+
+// check for interface implementation
+var _ oswin.Event = &Event{}
+
+func (ev MoveEvent) Type() oswin.EventType {
+	return oswin.MouseMoveEvent
+}
+
+// check for interface implementation
+var _ oswin.Event = &MoveEvent{}

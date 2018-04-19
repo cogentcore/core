@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 
-	_ "github.com/rcoreilly/goki/gi/oswin/init"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )

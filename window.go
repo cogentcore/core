@@ -20,13 +20,18 @@ import (
 	"time"
 )
 
+// notes:
+// oswin/screen -> buffer rename to -> image is the thing that a Vp should have
+// uploader uploads the buffer/image to the window -- can also render directly
+// onto window using textures using the drawer interface, but..
+
 // todo: could have two subtypes of windows, one a native 3D with OpenGl etc.
 
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
-	OSWin         oswin.OSWindow              `json:"-" xml:"-" desc:"OS-specific window interface"`
+	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of window (wde) event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
@@ -48,12 +53,14 @@ func NewWindow(name string, width, height int) *Window {
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
-	win.OSWin, err = oswin.NewOSWindow(width, height)
+	win.OSWin, err = oswin.CurScreen.NewWindow(&oswin.NewWindowOptions{
+		Title: name,
+	})
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	win.OSWin.SetTitle(name)
+	// win.OSWin.SetTitle(name)
 	// we signal ourselves to flush the OSWin
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
