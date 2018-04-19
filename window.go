@@ -13,13 +13,13 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/key"
 	"github.com/rcoreilly/goki/gi/oswin/lifecycle"
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
+	"github.com/rcoreilly/goki/gi/oswin/paint"
 	"github.com/rcoreilly/goki/gi/oswin/window"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 	// "reflect"
 
-	"sync"
 	"time"
 )
 
@@ -174,11 +174,11 @@ func (w *Window) StopEventLoop() {
 }
 
 func (w *Window) StartEventLoop() {
-	w.DoFullRender = true
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go w.EventLoop()
-	wg.Wait()
+	// w.DoFullRender = true
+	// var wg sync.WaitGroup
+	// wg.Add(1)
+	w.EventLoop()
+	// wg.Wait()
 }
 
 func (w *Window) StartEventLoopNoWait() {
@@ -286,7 +286,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
 	ftyp := oswin.MouseFocusEvent
-	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), fe, func(k ki.Ki) bool {
+	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
 		}
@@ -344,6 +344,13 @@ func (w *Window) EventLoop() {
 
 	for {
 		evi := w.OSWin.NextEvent()
+
+		// format := "got %#v\n"
+		// if _, ok := evi.(fmt.Stringer); ok {
+		// 	format = "got %v\n"
+		// }
+		// fmt.Printf(format, evi)
+
 		if w.stopEventLoop {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
@@ -396,6 +403,10 @@ func (w *Window) EventLoop() {
 			// 		}
 			// 	}
 			// }
+		case *paint.Event:
+			w.Viewport.FullRender2DTree()
+			w.SetNextFocusItem()
+			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
 			switch kf {

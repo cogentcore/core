@@ -5,6 +5,8 @@
 package main
 
 import (
+	"image/color"
+
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/driver"
@@ -20,6 +22,7 @@ func main() {
 		win.UpdateStart()
 		vp := win.WinViewport2D()
 		vp.Fill = true
+		vp.SetProp("background-color", color.White)
 
 		vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 		vlay.Lay = gi.LayoutCol

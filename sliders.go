@@ -297,7 +297,7 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 func (g *SliderBase) Init2DSlider() {
 	g.Init2DWidget()
 	g.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(mouse.DragEvent)
+		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		if sl.IsDragging() {
@@ -311,7 +311,7 @@ func (g *SliderBase) Init2DSlider() {
 		}
 	})
 	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(mouse.Event)
+		me := d.(*mouse.Event)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		if me.Action == mouse.Press {
