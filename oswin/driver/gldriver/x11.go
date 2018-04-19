@@ -45,8 +45,6 @@ import (
 
 const useLifecycler = true
 
-const handleSizeEventsAtChannelReceive = true
-
 var theKeysyms x11key.KeysymTable
 
 func init() {

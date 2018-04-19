@@ -86,8 +86,7 @@ uint64 threadID() {
 
 	CGDirectDisplayID display = (CGDirectDisplayID)[[[screen deviceDescription] valueForKey:@"NSScreenNumber"] intValue];
 	CGSize screenSizeMM = CGDisplayScreenSize(display); // in millimeters
-	float ppi = 25.4 * screenPixW / screenSizeMM.width;
-	float pixelsPerPt = ppi/72.0;
+	float dpi = 25.4 * screenPixW / screenSizeMM.width;
 
 	// The width and height reported to the geom package are the
 	// bounds of the OpenGL view. Several steps are necessary.
@@ -98,7 +97,7 @@ uint64 threadID() {
 	int w = r.size.width * [screen backingScaleFactor];
 	int h = r.size.height * [screen backingScaleFactor];
 
-	setGeom((GoUintptr)self, pixelsPerPt, w, h);
+	setGeom((GoUintptr)self, dpi, w, h);
 }
 
 - (void)reshape {
@@ -325,3 +324,22 @@ void stopDriver() {
 		[NSApp terminate:nil];
 	});
 }
+
+void getScreens() {
+        NSArray *screens = [NSScreen screens];
+	int nscr = [screens count];
+	resetScreens();
+	int i;
+	for (i=0; i < nscr; i++) {
+	  NSScreen *screen = [screens objectAtIndex: i];
+	  float pixratio = [screen backingScaleFactor];
+	  float screenPixW = [screen frame].size.width * pixratio;
+	  float screenPixH = [screen frame].size.height * pixratio;
+	  int depth = [screen depth];
+	  CGDirectDisplayID display = (CGDirectDisplayID)[[[screen deviceDescription] valueForKey:@"NSScreenNumber"] intValue];
+	  CGSize screenSizeMM = CGDisplayScreenSize(display); // in millimeters
+	  float dpi = 25.4 * screenPixW / screenSizeMM.width;
+	  setScreen(i, dpi, pixratio, (int)screenPixW, (int)screenPixH, (int)screenSizeMM.width, (int)screenSizeMM.height, depth);
+	}
+}
+

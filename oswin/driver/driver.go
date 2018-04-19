@@ -17,6 +17,6 @@ import "github.com/rcoreilly/goki/gi/oswin"
 // It calls f on the Screen, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(oswin.Screen)) {
+func Main(f func(oswin.App)) {
 	main(f)
 }

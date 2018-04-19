@@ -10,15 +10,46 @@
 package oswin
 
 import (
+	"image"
 	"unicode/utf8"
 )
 
-// Window is a top-level, double-buffered GUI window.
+// Window is a double-buffered OS-specific hardware window
 type Window interface {
-	// Release closes the window.
-	//
-	// The behavior of the Window after Release, whether calling its methods or
-	// passing it as an argument, is undefined.
+	// Name returns the name of the window -- name is used strictly for
+	// internal tracking and finding of windows -- see Title for the displayed
+	// title of the window
+	Name() string
+
+	// SetName sets the name of the window
+	SetName(name string)
+
+	// Title returns the current title of the window, which is displayed in the GUI
+	Title() string
+
+	// SetTitle sets the current title of the window, which is displayed in the GUI
+	SetTitle(title string)
+
+	// Size returns the current size of the window, in raw underlying dots / pixels
+	Size() image.Point
+
+	// LogicalDPI returns the current logical dots-per-inch resolution of the
+	// window, which should be used for most conversion of standard units --
+	// physical DPI can be found in the Screen
+	LogicalDPI() float32
+
+	// Geometry returns the current position and size of the window relative
+	// to the screen
+	Geometry() image.Rectangle
+
+	// Screen returns the screen for this window, with all the relevant
+	// information about its properties
+	Screen() *Screen
+
+	// todo: lots of other basic props of windows!
+
+	// Release closes the window. The behavior of the Window after Release,
+	// whether calling its methods or passing it as an argument, is undefined.
 	Release()
 
 	EventDeque
@@ -41,9 +72,9 @@ type PublishResult struct {
 
 // NewWindowOptions are optional arguments to NewWindow.
 type NewWindowOptions struct {
-	// Width and Height specify the dimensions of the new window. If Width
-	// or Height are zero, a driver-dependent default will be used for each
-	// zero value dimension.
+	// Width and Height specify the dimensions of the new window, in raw
+	// pixels. If Width or Height are zero, a driver-dependent default will be
+	// used for each zero value dimension.
 	Width, Height int
 
 	// Title specifies the window title.
@@ -77,4 +108,37 @@ func sanitizeUTF8(s string, n int) string {
 		i += n
 	}
 	return s[:i]
+}
+
+// WindowBase provides a base-level implementation of the generic data aspects
+// of the window, including maintaining the current window size and dpi
+type WindowBase struct {
+	Nm     string
+	Titl   string
+	Sz     image.Point
+	LogDPI float32
+}
+
+func (w WindowBase) Name() string {
+	return w.Nm
+}
+
+func (w *WindowBase) SetName(name string) {
+	w.Nm = name
+}
+
+func (w WindowBase) Title() string {
+	return w.Titl
+}
+
+func (w *WindowBase) SetTitle(title string) {
+	w.Titl = title
+}
+
+func (w WindowBase) Size() image.Point {
+	return w.Sz
+}
+
+func (w WindowBase) LogicalDPI() float32 {
+	return w.LogDPI
 }

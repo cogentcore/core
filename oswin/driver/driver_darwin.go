@@ -11,6 +11,6 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/driver/gldriver"
 )
 
-func main(f func(oswin.Screen)) {
+func main(f func(oswin.App)) {
 	gldriver.Main(f)
 }

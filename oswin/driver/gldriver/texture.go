@@ -102,7 +102,7 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	}
 
 	glctx.Viewport(0, 0, t.size.X, t.size.Y)
-	doFill(t.w.s, t.w.glctx, mvp, src, op)
+	doFill(t.w.app, t.w.glctx, mvp, src, op)
 
 	// We can't restore the GL state (i.e. bind the back buffer, also known as
 	// gl.Framebuffer{Value: 0}) right away, since we don't necessarily know

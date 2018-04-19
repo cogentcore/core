@@ -27,15 +27,20 @@ import (
 type Event struct {
 	oswin.EventBase
 
-	// Size is the window's dimensions in raw physical pixels.
+	// Size is the window's new dimensions in raw physical pixels.
 	Size image.Point
 
+	// DPI is the window's current logical dots-per-inch -- can change if
+	// moved to different screen
+	LogicalDPI float32
+
 	// ScreenNumber contains index of the current physical or logical screen
-	// on which the window is being displayed -- see Screen.ScreenData() for
+	// on which the window is being displayed -- see App.Screen() for
 	// the accessing the data associated with this screen
 	ScreenNumber int
 
-	// Visibility is the visibility status of the window: Closed, NotVisible, Visible, Iconified
+	// Visibility is the visibility status of the window: Closed, NotVisible,
+	// Visible, Iconified
 	Visibility Visibility
 
 	// Action taken on the window -- what has changed
@@ -52,8 +57,8 @@ func (e Event) Bounds() image.Rectangle {
 
 // ScreenData returns the screen data associated with the screen on which this
 // window is displayed
-func (e Event) ScreenData() *oswin.ScreenData {
-	return oswin.OSScreen.ScreenData(e.ScreenNumber)
+func (e Event) Screen() *oswin.Screen {
+	return oswin.TheApp.Screen(e.ScreenNumber)
 }
 
 // Visibility is the visibility status of the window

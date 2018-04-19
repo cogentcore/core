@@ -25,6 +25,7 @@ void flushContext(uintptr_t ctx);
 uintptr_t doNewWindow(int width, int height, char* title);
 void doShowWindow(uintptr_t id);
 void doCloseWindow(uintptr_t id);
+void getScreens();
 uint64_t threadID();
 */
 import "C"
@@ -48,9 +49,6 @@ import (
 )
 
 const useLifecycler = true
-
-// TODO: change this to true, after manual testing on OS X.
-const handleSizeEventsAtChannelReceive = false
 
 var initThreadID C.uint64_t
 
@@ -85,9 +83,9 @@ func showWindow(w *windowImpl) {
 
 //export preparedOpenGL
 func preparedOpenGL(id, ctx, vba uintptr) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	w.ctx = ctx
 	go drawLoop(w, vba)
@@ -97,9 +95,9 @@ func closeWindow(id uintptr) {
 	C.doCloseWindow(C.uintptr_t(id))
 }
 
-var mainCallback func(oswin.Screen)
+var mainCallback func(oswin.App)
 
-func main(f func(oswin.Screen)) error {
+func main(f func(oswin.App)) error {
 	if tid := C.threadID(); tid != initThreadID {
 		log.Fatalf("gldriver.Main called on thread %d, but gldriver.init ran on %d", tid, initThreadID)
 	}
@@ -111,18 +109,19 @@ func main(f func(oswin.Screen)) error {
 
 //export driverStarted
 func driverStarted() {
-	oswin.OSScreen = theScreen
+	oswin.TheApp = theApp
+	C.getScreens()
 	go func() {
-		mainCallback(theScreen)
+		mainCallback(theApp)
 		C.stopDriver()
 	}()
 }
 
 //export drawgl
 func drawgl(id uintptr) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return // closing window
@@ -181,26 +180,57 @@ func drawLoop(w *windowImpl, vba uintptr) {
 }
 
 //export setGeom
-func setGeom(id uintptr, ppp float32, widthPx, heightPx int) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+func setGeom(id uintptr, dpi float32, widthPx, heightPx int) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return // closing window
 	}
 
-	sz := window.Event{
-		Size: image.Point{widthPx, heightPx},
+	sz := image.Point{widthPx, heightPx}
+	w.sizeMu.Lock()
+	w.Sz = sz
+	w.LogDPI = dpi
+	w.sizeMu.Unlock()
+
+	winEv := window.Event{
+		Size:       sz,
+		LogicalDPI: dpi,
+		Action:     window.Resize,
 	}
 
-	if !handleSizeEventsAtChannelReceive {
-		w.szMu.Lock()
-		w.sz = &sz
-		w.szMu.Unlock()
-	}
+	w.Send(&winEv)
+}
 
-	w.Send(&sz)
+//export resetScreens
+func resetScreens() {
+	theApp.mu.Lock()
+	theApp.screens = make([]*oswin.Screen, 0)
+	theApp.mu.Unlock()
+}
+
+//export setScreen
+func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int) {
+	theApp.mu.Lock()
+	var sc *oswin.Screen
+	if scrIdx < len(theApp.screens) {
+		sc = theApp.screens[scrIdx]
+	} else {
+		sc = &oswin.Screen{}
+		theApp.screens = append(theApp.screens, sc)
+	}
+	theApp.mu.Unlock()
+
+	sc.ScreenNumber = scrIdx
+	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
+	sc.Depth = depth
+	sc.LogicalDPI = dpi
+	sc.PhysicalDPI = dpi
+	sc.DevicePixelRatio = pixratio
+	sc.PhysicalSize = image.Point{widthMM, heightMM}
+	// todo: rest of the fields
 }
 
 //export windowClosing
@@ -209,9 +239,9 @@ func windowClosing(id uintptr) {
 }
 
 func sendWindowEvent(id uintptr, e oswin.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return // closing window
@@ -383,9 +413,9 @@ func flagEvent(id uintptr, flags uint32) {
 var lastFlags uint32
 
 func sendLifecycle(id uintptr, setter func(*lifecycler.State, bool), val bool) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return
@@ -397,11 +427,11 @@ func sendLifecycle(id uintptr, setter func(*lifecycler.State, bool), val bool) {
 func sendLifecycleAll(dead bool) {
 	windows := []*windowImpl{}
 
-	theScreen.mu.Lock()
-	for _, w := range theScreen.windows {
+	theApp.mu.Lock()
+	for _, w := range theApp.windows {
 		windows = append(windows, w)
 	}
-	theScreen.mu.Unlock()
+	theApp.mu.Unlock()
 
 	for _, w := range windows {
 		w.lifecycler.SetFocused(false)

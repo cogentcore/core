@@ -7,10 +7,10 @@
 package driver
 
 import (
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/driver/x11driver"
-	"github.com/rcoreilly/goki/gi/oswin/screen"
 )
 
-func main(f func(screen.Screen)) {
+func main(f func(oswin.App)) {
 	x11driver.Main(f)
 }

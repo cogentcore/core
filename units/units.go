@@ -132,7 +132,7 @@ type Context struct {
 }
 
 func (uc *Context) Defaults() {
-	uc.DPI = PxPerInch // default
+	uc.DPI = PxPerInch
 	uc.FontEm = 12.0
 	uc.FontEx = 6.0
 	uc.FontCh = 6.0

@@ -15,6 +15,7 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/oswin/paint"
 	"github.com/rcoreilly/goki/gi/oswin/window"
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -34,6 +35,7 @@ type Window struct {
 	NodeBase
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
 	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface"`
+	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which then updates the window"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
@@ -48,27 +50,53 @@ type Window struct {
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
-// create a new window with given name and sizing
-func NewWindow(name string, width, height int) *Window {
+// NewWindow creates a new window with given name and sizing (0 = some kind of
+// default) -- stdPixels means use standardized "pixel" units for the display
+// size (96 per inch), not the actual underlying raw display dot pixels
+func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	FontLibrary.AddFontPaths("/Library/Fonts")
 	win := &Window{}
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
-	win.OSWin, err = oswin.OSScreen.NewWindow(&oswin.NewWindowOptions{
-		Title: name, Width: width, Height: height,
+	sz := image.Point{width, height}
+	if stdPixels {
+		unctx := units.Context{}
+		unctx.Defaults()
+		if oswin.TheApp.NScreens() > 0 {
+			sc := oswin.TheApp.Screen(0)
+			unctx.DPI = float64(sc.LogicalDPI)
+			fmt.Printf("screen logical dpi is: %v\n", sc.LogicalDPI)
+			sz.X = int(unctx.ToDots(float64(width), units.Px))
+			sz.Y = int(unctx.ToDots(float64(height), units.Px))
+		}
+	}
+	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
+		Title: name, Width: sz.X, Height: sz.Y,
 	})
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
+	win.WinTex, err = oswin.TheApp.NewTexture(sz)
+	if err != nil {
+		fmt.Printf("GoGi NewTexture error: %v \n", err)
+		return nil
+	}
+	win.OSWin.SetName(name)
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
 
-// create a new window with given name and sizing, and initialize a 2D viewport within it
-func NewWindow2D(name string, width, height int) *Window {
-	win := NewWindow(name, width, height)
+// NewWindow2D creates a new window with given name and sizing, and initializes
+// a 2D viewport within it -- stdPixels means use standardized "pixel" units for
+// the display size (96 per inch), not the actual underlying raw display dot
+// pixels
+func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
+	win := NewWindow(name, width, height, stdPixels)
+	if win == nil {
+		return nil
+	}
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
 	win.AddChild(vp)
@@ -83,6 +111,7 @@ func (w *Window) WinViewport2D() *Viewport2D {
 }
 
 func (w *Window) Resize(width, height int) {
+	w.WinTex, _ = oswin.TheApp.NewTexture(image.Point{width, height})
 	w.Viewport.Resize(width, height)
 }
 
@@ -93,34 +122,24 @@ func (w *Window) Resize(width, height int) {
 // changes to the underlying OSWindow -- wrap updates in win.UpdateStart /
 // win.UpdateEnd to actually flush the updates to be visible
 func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	// vpimg := vp.Pixels.SubImage(vpBBox).(*image.RGBA)
-	// s := w.OSWin.Screen()
-	// s.CopyRGBA(vpimg, winBBox)
-	w.OSWin.Upload(winBBox.Min, vp.OSImage, vpBBox)
+	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 }
 
 // UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
 func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	// s := w.OSWin.Screen()
-	// s.CopyRGBA(vp.Pixels, winBBox)
-	w.OSWin.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
+	w.WinTex.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
 }
 
 // UpdateVpRegionFromMain basically clears the region where the vp would show
 // up, from the main
 func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
-	// vpimg := w.Viewport.Pixels.SubImage(winBBox).(*image.RGBA)
-	// s := w.OSWin.Screen()
-	// s.CopyRGBA(vpimg, winBBox)
-	w.OSWin.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
+	w.WinTex.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
 }
 
 // FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
 func (w *Window) FullUpdate() {
 	w.UpdateStart()
-	// s := w.OSWin.Screen()
-	// s.CopyRGBA(w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
-	w.OSWin.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
+	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
@@ -128,8 +147,7 @@ func (w *Window) FullUpdate() {
 			if gii != nil {
 				vp := gii.AsViewport2D()
 				r := vp.ViewBox.Bounds()
-				// s.CopyRGBA(vp.Pixels, r)
-				w.OSWin.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
+				w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 			}
 		}
 	}
@@ -138,11 +156,16 @@ func (w *Window) FullUpdate() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.ViewBox.Bounds()
-			// s.CopyRGBA(vp.Pixels, r)
-			w.OSWin.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
+			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
 	w.UpdateEnd() // drives the flush
+}
+
+func (w *Window) Publish() {
+	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
+	w.OSWin.Publish()
+
 }
 
 func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
@@ -150,7 +173,7 @@ func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v flushing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	win.OSWin.Publish()
+	win.Publish()
 }
 
 func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
@@ -300,6 +323,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Enter
 					bitflag.Set(&gi.Flag, int(MouseHasEntered))
+					fmt.Printf("sending enter to: %v\n", gi.PathUnique())
 					return true // send event
 				} else {
 					return false // already in
@@ -308,6 +332,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Exit
 					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
+					fmt.Printf("sending exit to: %v\n", gi.PathUnique())
 					return true // send event
 				} else {
 					return false // already out
@@ -339,8 +364,8 @@ func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
 
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
-	// todo: separate the inner and outer loops here?  not sure if events needs to be outside?
-	// lastResize := interface{}(nil)
+	var lastResize *window.Event
+	resizing := false
 
 	for {
 		evi := w.OSWin.NextEvent()
@@ -368,6 +393,20 @@ func (w *Window) EventLoop() {
 		// 	fmt.Printf("curpop: %v\n", curPop.Name())
 		// }
 
+		if rs, ok := evi.(*window.Event); ok {
+			if rs.Action == window.Resize {
+				resizing = true
+				lastResize = rs
+				continue
+			}
+		} else {
+			if resizing {
+				w.Resize(lastResize.Size.X, lastResize.Size.Y)
+				resizing = false
+				lastResize = nil
+			}
+		}
+
 		et := evi.Type()
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
@@ -390,20 +429,8 @@ func (w *Window) EventLoop() {
 				evi.SetProcessed()
 				return // break out of our event loop
 			}
-		case *window.Event:
-			// todo: deal with all window events here!
-			// 	lastResize = ei
-			// 	evi.SetProcessed()
-			// } else {
-			// 	if lastResize != nil { // only do last one
-			// 		rev, ok := lastResize.(*oswin.ResizeEvent)
-			// 		lastResize = nil
-			// 		if ok {
-			// 			w.Resize(rev.Width, rev.Height)
-			// 		}
-			// 	}
-			// }
 		case *paint.Event:
+			fmt.Printf("Got paint event!\n")
 			w.Viewport.FullRender2DTree()
 			w.SetNextFocusItem()
 			continue

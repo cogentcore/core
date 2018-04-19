@@ -15,16 +15,17 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/driver/internal/event"
 	"github.com/rcoreilly/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/rcoreilly/goki/gi/oswin/lifecycle"
-	"github.com/rcoreilly/goki/gi/oswin/window"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )
 
 type windowImpl struct {
-	s *screenImpl
+	oswin.WindowBase
+
+	app *appImpl
 
 	// id is an OS-specific data structure for the window.
-	//	- Cocoa:   ScreenGLView*
+	//	- Cocoa:   AppGLView*
 	//	- X11:     Window
 	//	- Windows: win32.HWND
 	id uintptr
@@ -59,25 +60,15 @@ type windowImpl struct {
 	// bind to a texture's Framebuffer or when the window size changes.
 	backBufferBound bool
 
-	// szMu protects only sz. If you need to hold both glctxMu and szMu, the
-	// lock ordering is to lock glctxMu first (and unlock it last).
-	szMu sync.Mutex
-	sz   *window.Event
+	// sizeMu protects the setting of Sz based on window resize events. If you
+	// need to hold both glctxMu and sizeMu, the lock ordering is to lock
+	// glctxMu first (and unlock it last).
+	sizeMu sync.Mutex
 }
 
 // NextEvent implements the oswin.EventDeque interface.
 func (w *windowImpl) NextEvent() oswin.Event {
 	e := w.Deque.NextEvent()
-	if handleSizeEventsAtChannelReceive {
-		if sz, ok := e.(*window.Event); ok {
-			w.glctxMu.Lock()
-			w.backBufferBound = false
-			w.szMu.Lock()
-			w.sz = sz
-			w.szMu.Unlock()
-			w.glctxMu.Unlock()
-		}
-	}
 	return e
 }
 
@@ -108,9 +99,9 @@ func (w *windowImpl) Release() {
 	// thread). Even if that isn't true, the windowWillClose handler is
 	// idempotent.
 
-	theScreen.mu.Lock()
-	delete(theScreen.windows, w.id)
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	delete(theApp.windows, w.id)
+	theApp.mu.Unlock()
 
 	closeWindow(w.id)
 }
@@ -123,7 +114,7 @@ func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle)
 	}
 	dp = dp.Add(sr.Min.Sub(originalSRMin))
 	// TODO: keep a texture around for this purpose?
-	t, err := w.s.NewTexture(sr.Size())
+	t, err := w.app.NewTexture(sr.Size())
 	if err != nil {
 		panic(err)
 	}
@@ -145,13 +136,13 @@ func useOp(glctx gl.Context, op draw.Op) {
 }
 
 func (w *windowImpl) bindBackBuffer() {
-	w.szMu.Lock()
-	sz := w.sz
-	w.szMu.Unlock()
+	w.sizeMu.Lock()
+	size := w.Sz
+	w.sizeMu.Unlock()
 
 	w.backBufferBound = true
 	w.glctx.BindFramebuffer(gl.FRAMEBUFFER, gl.Framebuffer{Value: 0})
-	w.glctx.Viewport(0, 0, sz.Size.X, sz.Size.Y)
+	w.glctx.Viewport(0, 0, size.X, size.Y)
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
@@ -162,46 +153,46 @@ func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
 		w.bindBackBuffer()
 	}
 
-	doFill(w.s, w.glctx, mvp, src, op)
+	doFill(w.app, w.glctx, mvp, src, op)
 }
 
-func doFill(s *screenImpl, glctx gl.Context, mvp f64.Aff3, src color.Color, op draw.Op) {
+func doFill(app *appImpl, glctx gl.Context, mvp f64.Aff3, src color.Color, op draw.Op) {
 	useOp(glctx, op)
-	if !glctx.IsProgram(s.fill.program) {
+	if !glctx.IsProgram(app.fill.program) {
 		p, err := compileProgram(glctx, fillVertexSrc, fillFragmentSrc)
 		if err != nil {
 			// TODO: initialize this somewhere else we can better handle the error.
 			panic(err.Error())
 		}
-		s.fill.program = p
-		s.fill.pos = glctx.GetAttribLocation(p, "pos")
-		s.fill.mvp = glctx.GetUniformLocation(p, "mvp")
-		s.fill.color = glctx.GetUniformLocation(p, "color")
-		s.fill.quad = glctx.CreateBuffer()
+		app.fill.program = p
+		app.fill.pos = glctx.GetAttribLocation(p, "pos")
+		app.fill.mvp = glctx.GetUniformLocation(p, "mvp")
+		app.fill.color = glctx.GetUniformLocation(p, "color")
+		app.fill.quad = glctx.CreateBuffer()
 
-		glctx.BindBuffer(gl.ARRAY_BUFFER, s.fill.quad)
+		glctx.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
 		glctx.BufferData(gl.ARRAY_BUFFER, quadCoords, gl.STATIC_DRAW)
 	}
-	glctx.UseProgram(s.fill.program)
+	glctx.UseProgram(app.fill.program)
 
-	writeAff3(glctx, s.fill.mvp, mvp)
+	writeAff3(glctx, app.fill.mvp, mvp)
 
 	r, g, b, a := src.RGBA()
 	glctx.Uniform4f(
-		s.fill.color,
+		app.fill.color,
 		float32(r)/65535,
 		float32(g)/65535,
 		float32(b)/65535,
 		float32(a)/65535,
 	)
 
-	glctx.BindBuffer(gl.ARRAY_BUFFER, s.fill.quad)
-	glctx.EnableVertexAttribArray(s.fill.pos)
-	glctx.VertexAttribPointer(s.fill.pos, 2, gl.FLOAT, false, 0, 0)
+	glctx.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
+	glctx.EnableVertexAttribArray(app.fill.pos)
+	glctx.VertexAttribPointer(app.fill.pos, 2, gl.FLOAT, false, 0, 0)
 
 	glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-	glctx.DisableVertexAttribArray(s.fill.pos)
+	glctx.DisableVertexAttribArray(app.fill.pos)
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
@@ -246,7 +237,7 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	}
 
 	useOp(w.glctx, op)
-	w.glctx.UseProgram(w.s.texture.program)
+	w.glctx.UseProgram(w.app.texture.program)
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float64(sr.Min.X)
@@ -254,7 +245,7 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	srcR := float64(sr.Max.X)
 	srcB := float64(sr.Max.Y)
 	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	writeAff3(w.glctx, w.s.texture.mvp, w.mvp(
+	writeAff3(w.glctx, w.app.texture.mvp, w.mvp(
 		src2dst[0]*srcL+src2dst[1]*srcT+src2dst[2],
 		src2dst[3]*srcL+src2dst[4]*srcT+src2dst[5],
 		src2dst[0]*srcR+src2dst[1]*srcT+src2dst[2],
@@ -293,27 +284,27 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
-	writeAff3(w.glctx, w.s.texture.uvp, f64.Aff3{
+	writeAff3(w.glctx, w.app.texture.uvp, f64.Aff3{
 		qx - px, 0, px,
 		0, sy - py, py,
 	})
 
 	w.glctx.ActiveTexture(gl.TEXTURE0)
 	w.glctx.BindTexture(gl.TEXTURE_2D, t.id)
-	w.glctx.Uniform1i(w.s.texture.sample, 0)
+	w.glctx.Uniform1i(w.app.texture.sample, 0)
 
-	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.s.texture.quad)
-	w.glctx.EnableVertexAttribArray(w.s.texture.pos)
-	w.glctx.VertexAttribPointer(w.s.texture.pos, 2, gl.FLOAT, false, 0, 0)
+	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
+	w.glctx.EnableVertexAttribArray(w.app.texture.pos)
+	w.glctx.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, 0)
 
-	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.s.texture.quad)
-	w.glctx.EnableVertexAttribArray(w.s.texture.inUV)
-	w.glctx.VertexAttribPointer(w.s.texture.inUV, 2, gl.FLOAT, false, 0, 0)
+	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
+	w.glctx.EnableVertexAttribArray(w.app.texture.inUV)
+	w.glctx.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, 0)
 
 	w.glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-	w.glctx.DisableVertexAttribArray(w.s.texture.pos)
-	w.glctx.DisableVertexAttribArray(w.s.texture.inUV)
+	w.glctx.DisableVertexAttribArray(w.app.texture.pos)
+	w.glctx.DisableVertexAttribArray(w.app.texture.inUV)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -325,11 +316,11 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 }
 
 func (w *windowImpl) mvp(tlx, tly, trx, try, blx, bly float64) f64.Aff3 {
-	w.szMu.Lock()
-	sz := w.sz
-	w.szMu.Unlock()
+	w.sizeMu.Lock()
+	size := w.Sz
+	w.sizeMu.Unlock()
 
-	return calcMVP(sz.Size.X, sz.Size.Y, tlx, tly, trx, try, blx, bly)
+	return calcMVP(size.X, size.Y, tlx, tly, trx, try, blx, bly)
 }
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords
@@ -369,7 +360,7 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	// gl.Flush is a lightweight (on modern GL drivers) blocking call
 	// that ensures all GL functions pending in the gl package have
 	// been passed onto the GL driver before the app package attempts
-	// to swap the screen buffer.
+	// to swap the buffer.
 	//
 	// This enforces that the final receive (for this paint cycle) on
 	// gl.WorkAvailable happens before the send on publish.
@@ -386,4 +377,16 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	}
 
 	return res
+}
+
+func (w *windowImpl) Geometry() image.Rectangle {
+	// todo: will require getting some os-specific stuff..
+	// use lower-case getGeometry() method that OS-specific code implements
+	return image.ZR
+}
+
+func (w *windowImpl) Screen() *oswin.Screen {
+	// todo will require os-specific hook..
+	// use lower-case getScreen() method that OS-specific code implements
+	return nil
 }

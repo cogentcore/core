@@ -62,7 +62,7 @@ func NewViewport2D(width, height int) *Viewport2D {
 		ViewBox: ViewBox2D{Size: sz},
 	}
 	var err error
-	vp.OSImage, err = oswin.OSScreen.NewImage(sz)
+	vp.OSImage, err = oswin.TheApp.NewImage(sz)
 	if err != nil {
 		log.Printf("%v", err)
 		return nil
@@ -84,7 +84,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 		}
 	}
 	var err error
-	vp.OSImage, err = oswin.OSScreen.NewImage(nwsz)
+	vp.OSImage, err = oswin.TheApp.NewImage(nwsz)
 	if err != nil {
 		log.Printf("%v", err)
 		return

@@ -15,47 +15,15 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// OSScreen is the current oswin Screen for app -- only ever one in effect
-var OSScreen Screen
-
-// Screen represents the overall screen hardware, and creates Images, Textures
-// and Windows, appropriate for that hardware / OS, and maintains data about
-// the physical screen(s)
-type Screen interface {
-	// NScreens returns the number of different logical and/or physical screens managed under this overall screen hardware
-	NScreens() int
-
-	// ScreenData returns screen data for given screen number, or nil if not a
-	// valid screen number
-	ScreenData(scrN int) *ScreenData
-
-	// NWindows returns the number of windows open for this app
-	NWindows() int
-
-	// Window returns given window in list of windows opened under this screen
-	Window(win int) Window
-
-	// NewWindow returns a new Window for this screen.
-	//
-	// A nil opts is valid and means to use the default option values.
-	NewWindow(opts *NewWindowOptions) (Window, error)
-
-	// NewImage returns a new Image for this screen.  Images can be drawn upon directly using image and other packages, and have an accessable []byte slice holding the image data
-	NewImage(size image.Point) (Image, error)
-
-	// NewTexture returns a new Texture for this screen.  Textures are opaque and could be non-local, but very fast for rendering to windows -- for holding static content
-	NewTexture(size image.Point) (Texture, error)
-}
-
 // note: fields obtained from QScreen in Qt
 
-// ScreenData contains data about each physical and / or logical screen
-type ScreenData struct {
+// Screen contains data about each physical and / or logical screen
+type Screen struct {
 	// ScreenNumber is the index of this screen in the list of screens
 	// maintained under Screen
 	ScreenNumber int
 
-	// Geometry contains the geometry of the screen -- all physical screens start at 0,0
+	// Geometry contains the geometry of the screen in raw pixels -- all physical screens start at 0,0
 	Geometry image.Rectangle
 
 	// Color depth of the screen, in bits
@@ -73,6 +41,12 @@ type ScreenData struct {
 
 	// PhysicalSize is the actual physical size of the screen, in mm
 	PhysicalSize image.Point
+
+	// DevicePixelRatio is a multiplier factor that scales the screen's
+	// "natural" pixel coordinates into actual device pixels.
+	//
+	// On OS-X  it is backingScaleFactor, which is 2.0 on "retina" displays
+	DevicePixelRatio float32
 
 	RefreshRate float32
 

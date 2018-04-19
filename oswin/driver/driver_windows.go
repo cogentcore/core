@@ -6,9 +6,8 @@ package driver
 
 import (
 	"github.com/rcoreilly/goki/gi/oswin/driver/windriver"
-	"github.com/rcoreilly/goki/gi/oswin/screen"
 )
 
-func main(f func(screen.Screen)) {
+func main(f func(oswin.Ap)) {
 	windriver.Main(f)
 }

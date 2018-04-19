@@ -13,10 +13,10 @@ package driver
 import (
 	"errors"
 
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/driver/internal/errscreen"
-	"github.com/rcoreilly/goki/gi/oswin/screen"
 )
 
-func main(f func(screen.Screen)) {
+func main(f func(oswin.App)) {
 	f(errscreen.Stub(errors.New("no driver for accessing a screen")))
 }

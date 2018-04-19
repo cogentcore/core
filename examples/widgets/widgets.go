@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	driver.Main(func(s oswin.Screen) {
-		width := 800
-		height := 800
+	driver.Main(func(app oswin.App) {
+		width := 400
+		height := 400
 
 		// turn this on to see a trace of the rendering
 		// gi.Update2DTrace = true
@@ -29,7 +29,7 @@ func main() {
 		rec := ki.Node{}          // receiver for events
 		rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-		win := gi.NewWindow2D("GoGi Widgets Window", width, height)
+		win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
 		win.UpdateStart()
 
 		icnm := "widget-wedge-down"

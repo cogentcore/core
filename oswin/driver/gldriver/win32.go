@@ -26,9 +26,6 @@ import (
 // TODO: change this to true, after manual testing on Win32.
 const useLifecycler = false
 
-// TODO: change this to true, after manual testing on Win32.
-const handleSizeEventsAtChannelReceive = false
-
 func main(f func(oswin.Screen)) error {
 	return win32.Main(func() { f(theScreen) })
 }

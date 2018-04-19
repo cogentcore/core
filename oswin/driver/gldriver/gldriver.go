@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package gldriver provides an OpenGL driver for accessing a screen.
-package gldriver // import "github.com/rcoreilly/goki/gi/oswin/driver/gldriver"
+package gldriver
 
 import (
 	"encoding/binary"
@@ -11,7 +11,7 @@ import (
 	"math"
 
 	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/driver/internal/errscreen"
+	"github.com/rcoreilly/goki/gi/oswin/driver/internal/errapp"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )
@@ -19,13 +19,13 @@ import (
 // Main is called by the program's main function to run the graphical
 // application.
 //
-// It calls f on the Screen, possibly in a separate goroutine, as some OS-
+// It calls f on the App, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(oswin.Screen)) {
+func Main(f func(oswin.App)) {
 	if err := main(f); err != nil {
-		oswin.OSScreen = errscreen.Stub(err)
-		f(oswin.OSScreen)
+		oswin.TheApp = errapp.Stub(err)
+		f(oswin.TheApp)
 	}
 }
 

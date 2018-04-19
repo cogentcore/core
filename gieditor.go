@@ -13,9 +13,9 @@ import (
 
 // open an interactive editor of the given Ki tree, at its root
 func GoGiEditorOf(obj ki.Ki) *Window {
-	width := 1280
-	height := 1024
-	win := NewWindow2D("GoGi Editor Window", width, height)
+	width := 800
+	height := 600
+	win := NewWindow2D("GoGi Editor Window", width, height, true)
 	win.UpdateStart()
 
 	vp := win.WinViewport2D()
