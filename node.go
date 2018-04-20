@@ -1154,14 +1154,14 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.OnlySelfUpdate() {
 		n.DestroyAllDeleted()
 		n.ClearFlagMu(int(Updating))
-		n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.DestroyAllDeleted()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	}
 }
 
@@ -1175,14 +1175,14 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	if n.OnlySelfUpdate() {
 		n.DestroyAllDeleted()
 		n.ClearFlagMu(int(Updating))
-		// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.DestroyAllDeleted()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	}
 }
 
@@ -1193,7 +1193,7 @@ func (n *Node) UpdateSig() bool {
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
 		return false
 	}
-	n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+	n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	return true
 }
 
