@@ -121,6 +121,9 @@ type Ki interface {
 	// Children returns the slice of children (Node.Kids) -- this can be modified directly (e.g., sort, reorder) but Add* / Delete* functions should be used to ensure proper tracking
 	Children() Slice
 
+	// Fields returns a slice of Ki-embedding fields from all types that we embed -- this is cached and included in all downward traversals of children
+	Fields() []Ki
+
 	// IsValidIndex checks whether the given index is a valid index into children, within range of 0..len-1 -- see ki.Slice.ValidIndex for version that transforms negative numbers into indicies from end of slice, and has explicit error messages
 	IsValidIndex(idx int) bool
 
@@ -361,6 +364,11 @@ type Ki interface {
 
 	// UpdateEnd should be called when done updating after an UpdateStart -- decrements update counter and emits NodeSignalUpdated when counter goes to 0, only if parent is not current updating (i.e., this is the highest-level node that finished updating) -- see also UpdateEndAll
 	UpdateEnd()
+
+	// UpdateEndNoSig is just like UpdateEnd except it does not emit a
+	// NodeSignalUpdated signal -- use this for situations where updating is
+	// already known to be in progress and the signal would be redundant
+	UpdateEndNoSig()
 
 	// UpdateEndAll is an alternative to UpdateEnd when done updating -- decrements update counter and emits NodeSignalUpdated when counter goes to 0 for ALL nodes that might have updated, even if my parent node is still updating -- this is less typically used
 	UpdateEndAll()

@@ -48,6 +48,7 @@ type Node struct {
 	Par       Ki          `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType kit.Type    `desc:"default type of child to create -- if nil then same type as node itself is used"`
 	Kids      Slice       `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	Flds      []Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"slice of all the Ki-type fields within this struct or any that we embed -- we iterate over these fields during all downward passes, just like our children"`
 	NodeSig   Signal      `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
 	Updating  atomctr.Ctr `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
 	Deleted   []Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
@@ -838,6 +839,24 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
+func (n *Node) Fields() []Ki {
+	if n.Flds != nil {
+		return n.Flds
+	}
+	n.Flds = make([]Ki, 0)
+	kitype := KiType()
+	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
+			fk := kit.PtrValue(fieldVal).Interface().(Ki)
+			if fk != nil {
+				n.Flds = append(n.Flds, fk)
+			}
+		}
+		return true
+	})
+	return n.Flds
+}
+
 // Node version of this function from kit/embeds.go
 func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
@@ -872,30 +891,17 @@ func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflec
 }
 
 func (n *Node) FuncFields(level int, data interface{}, fun Func) {
-	kitype := KiType()
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := kit.PtrValue(fieldVal).Interface().(Ki)
-			if fk != nil {
-				return fun(fk, level, data)
-			}
-		}
-		return true
-	})
+	flds := n.Fields()
+	for _, fk := range flds {
+		fun(fk, level, data)
+	}
 }
 
 func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
-	kitype := KiType()
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := kit.PtrValue(fieldVal).Interface().(Ki)
-			if fk != nil {
-				// fmt.Printf("fun field on field: %v kind %v\n", field.Name, fieldVal.Kind())
-				go fun(fk, level, data)
-			}
-		}
-		return true
-	})
+	flds := n.Fields()
+	for _, fk := range flds {
+		go fun(fk, level, data)
+	}
 }
 
 func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
@@ -1126,6 +1132,42 @@ func (n *Node) UpdateEnd() {
 				if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
 					k.UpdateCtr().Dec()
 					k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
+					k.DestroyAllDeleted()
+					*par_up = true // we updated so nobody else can!
+				} else {
+					k.UpdateCtr().Dec()
+				}
+			} else {
+				if k.UpdateCtr().Value() <= 0 {
+					if !k.IsDestroyed() && !k.IsDeleted() {
+						log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
+					}
+				} else {
+					k.UpdateCtr().Dec()
+				}
+			}
+			return true
+		})
+	}
+}
+
+func (n *Node) UpdateEndNoSig() {
+	if n.IsDestroyed() || n.IsDeleted() {
+		return
+	}
+	if n.OnlySelfUpdate() {
+		if n.Updating.Dec() == 0 {
+			// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+			n.DestroyAllDeleted()
+		}
+	} else {
+		par_updt := false
+		n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
+			par_up := d.(*bool)             // did the parent already update?
+			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
+				if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
+					k.UpdateCtr().Dec()
+					// k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
 					k.DestroyAllDeleted()
 					*par_up = true // we updated so nobody else can!
 				} else {
