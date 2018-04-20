@@ -74,7 +74,9 @@ func NewViewport2D(width, height int) *Viewport2D {
 	return vp
 }
 
-// resize viewport, creating a new image (no point in trying to resize the image -- need to re-render) -- updates ViewBox Size too -- triggers update -- wrap in other UpdateStart/End calls as appropriate
+// Resize resizes the viewport, creating a new image (no point in trying to
+// resize the image -- need to re-render) -- updates ViewBox Size too --
+// triggers update -- wrap in other UpdateStart/End calls as appropriate
 func (vp *Viewport2D) Resize(width, height int) {
 	nwsz := image.Point{width, height}
 	if vp.Pixels != nil {
@@ -145,9 +147,9 @@ func (vp *Viewport2D) DrawIntoWindow() {
 	if vp.Win == nil {
 		return
 	}
-	vp.Win.UpdateStart()
+	updt := vp.Win.UpdateStart()
 	vp.Win.UpdateFullVpRegion(vp, vp.VpBBox, vp.WinBBox)
-	vp.Win.UpdateEnd()
+	vp.Win.UpdateEnd(updt)
 }
 
 // draw main window vp into region of this vp
@@ -155,9 +157,9 @@ func (vp *Viewport2D) DrawMainVpOverMe() {
 	if vp.Win == nil {
 		return
 	}
-	vp.Win.UpdateStart()
+	updt := vp.Win.UpdateStart()
 	vp.Win.UpdateVpRegionFromMain(vp.WinBBox)
-	vp.Win.UpdateEnd()
+	vp.Win.UpdateEnd(updt)
 }
 
 // Delete this viewport -- has already been disconnected from window events
@@ -357,8 +359,8 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if gi.IsDeleted() || gi.IsDestroyed() { // skip these for sure
 		return
 	}
-	if gi.UpdateCtr().Value() > 0 {
-		log.Printf("ERROR SignalViewport2D updating node %v with Updating counter: %v\n", gi.PathUnique(), gi.UpdateCtr())
+	if gi.IsUpdatingMu() {
+		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", gi.PathUnique())
 		return
 	}
 
@@ -427,9 +429,9 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gnvp := gn.AsViewport2D()
 	if !(gnvp != nil && bitflag.Has(gnvp.Flag, int(VpFlagDrawIntoWin))) {
 		if vp.Win != nil {
-			vp.Win.UpdateStart()
+			updt := vp.Win.UpdateStart()
 			vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-			vp.Win.UpdateEnd()
+			vp.Win.UpdateEnd(updt)
 		}
 	}
 }
@@ -441,9 +443,9 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	gn.ReRender2DTree()
 	pr.End()
 	if vp.Win != nil {
-		vp.Win.UpdateStart()
+		updt := vp.Win.UpdateStart()
 		vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-		vp.Win.UpdateEnd()
+		vp.Win.UpdateEnd(updt)
 	}
 }
 

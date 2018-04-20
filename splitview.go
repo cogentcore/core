@@ -62,7 +62,7 @@ func (g *SplitView) UpdateSplits() {
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a child entirely -- does an Update
 func (g *SplitView) SetSplits(splits ...float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.UpdateSplits()
 	sz := len(g.Kids)
 	mx := kit.MinInt(sz, len(splits))
@@ -70,7 +70,7 @@ func (g *SplitView) SetSplits(splits ...float64) {
 		g.Splits[i] = splits[i]
 	}
 	g.UpdateSplits()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -97,7 +97,7 @@ func (g *SplitView) RestoreSplits() {
 
 // CollapseChild collapses given child(ren) (sets split proportion to 0), optionally saving the prior splits for later Restore function -- does an Update -- triggered by double-click of splitter
 func (g *SplitView) CollapseChild(save bool, idxs ...int) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	if save {
 		g.SaveSplits()
 	}
@@ -108,7 +108,17 @@ func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	g.UpdateSplits()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
+}
+
+func (g *SplitView) SetSplitsAction(idx int, nwval float64) {
+	updt := g.UpdateStart()
+	g.Splits[idx+1] = 1.0 - nwval
+	g.Splits[idx] = nwval
+	// fmt.Printf("splits: %v value: %v\n", idx, spl.Value)
+	g.UpdateSplits()
+	// fmt.Printf("splits: %v\n", g.Splits)
+	g.UpdateEnd(updt)
 }
 
 func (g *SplitView) Init2D() {
@@ -120,7 +130,7 @@ func (g *SplitView) Init2D() {
 
 func (g *SplitView) ConfigSplitters() {
 	sz := len(g.Kids)
-	updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
+	mods, updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := OtherDim(g.Dim)
 	spc := g.Style.BoxSpace()
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
@@ -139,21 +149,18 @@ func (g *SplitView) ConfigSplitters() {
 		sp.Min = 0.0
 		sp.Max = 1.0
 		sp.Snap = false
-		if updt {
-			sp.SliderSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if mods {
+			sp.SliderSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(SliderValueChanged) {
 					spr, _ := recv.EmbeddedStruct(KiT_SplitView).(*SplitView)
-					spr.UpdateStart()
 					spl := send.(*Splitter)
-					spr.Splits[i+1] = 1.0 - spl.Value
-					spr.Splits[i] = spl.Value
-					// fmt.Printf("splits: %v value: %v\n", i, spl.Value)
-					spr.UpdateSplits()
-					// fmt.Printf("splits: %v\n", spr.Splits)
-					spr.UpdateEnd()
+					spr.SetSplitsAction(i, spl.Value)
 				}
 			})
 		}
+	}
+	if mods {
+		g.Parts.UpdateEnd(updt)
 	}
 }
 
@@ -416,13 +423,12 @@ func (g *Splitter) ReRender2D() (node Node2D, layout bool) {
 
 func (g *Splitter) FocusChanged2D(gotFocus bool) {
 	// fmt.Printf("focus changed %v\n", gotFocus)
-	g.UpdateStart()
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation

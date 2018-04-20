@@ -108,7 +108,7 @@ func (g *Action) ButtonAsBase() *ButtonBase {
 // trigger action signal
 func (g *Action) ButtonRelease() {
 	wasPressed := (g.State == ButtonDown)
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
@@ -121,7 +121,7 @@ func (g *Action) ButtonRelease() {
 			win.ClosePopup(g.Viewport) // in case we are a menu popup -- no harm if not
 		}
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // set the text and update button
@@ -154,8 +154,12 @@ func (g *Action) Init2D() {
 
 func (g *Action) ConfigPartsButton() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
+	if mods {
+		g.UpdateEnd(updt)
+	}
+
 }
 
 func (g *Action) ConfigPartsMenu() {
@@ -166,8 +170,10 @@ func (g *Action) ConfigPartsMenu() {
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}
-	g.Parts.ConfigChildren(config, false) // not unique names
-	g.SetProp("max-width", -1)
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	if mods {
+		g.SetProp("max-width", -1)
+	}
 	props := g.StyleProps(ButtonSelectors[ButtonActive])
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if wrIdx >= 0 {
@@ -176,6 +182,9 @@ func (g *Action) ConfigPartsMenu() {
 			ic.CopyFromIcon(IconByName("widget-wedge-right"))
 			g.PartStyleProps(ic.This, props)
 		}
+	}
+	if mods {
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -237,13 +246,12 @@ func (g *Action) Render2DDefaultStyle() {
 }
 
 func (g *Action) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation
@@ -332,7 +340,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	}
 	pvp := Viewport2D{}
 	pvp.InitName(&pvp, name+"Menu")
-	pvp.UpdateStart()
+	updt := pvp.UpdateStart()
 	pvp.Fill = true
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
@@ -355,7 +363,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz.X, vpsz.Y)
 	pvp.ViewBox.Min = image.Point{x, y}
-	pvp.UpdateEnd()
+	pvp.UpdateEndNoSig(updt)
 
 	win.PushPopup(pvp.This)
 	return &pvp
@@ -434,13 +442,13 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 
 func (g *MenuButton) ButtonRelease() {
 	wasPressed := (g.State == ButtonDown)
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 	pos := g.WinBBox.Max
 	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
 	if indic != nil {
@@ -504,7 +512,7 @@ func (g *MenuButton) ConfigParts() {
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	props := g.StyleProps(ButtonSelectors[ButtonActive])
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if wrIdx >= 0 {
@@ -514,6 +522,9 @@ func (g *MenuButton) ConfigParts() {
 			ic.UniqueNm = icnm
 			g.PartStyleProps(ic.This, props)
 		}
+	}
+	if mods {
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -566,13 +577,12 @@ func (g *MenuButton) Render2DDefaultStyle() {
 }
 
 func (g *MenuButton) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation

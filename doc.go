@@ -25,8 +25,8 @@ viewport, with LayoutCol's within that, or a LayoutGrid for more complex
 layouts:
 
 	win := gi.NewWindow2D("test window", width, height)
-	win.UpdateStart()
 	vp := win.WinViewport2D()
+	updt := vp.UpdateStart()
 
 	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
 	vpfill.SetProp("fill", "#FFF") // white background
@@ -38,6 +38,8 @@ layouts:
 	row1.Lay = gi.LayoutRow
 
 	...
+
+    vp.UpdateEnd(updt)
 
 Controlling the layout involves the following style properties:
 

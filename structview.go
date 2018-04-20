@@ -59,11 +59,14 @@ var StructViewProps = ki.Props{
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
 func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
-	sv.UpdateStart()
-	sv.Struct = st
+	updt := false
+	if sv.Struct != st {
+		updt = sv.UpdateStart()
+		sv.Struct = st
+	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
-	sv.UpdateEnd()
+	sv.UpdateEnd(updt)
 }
 
 // SetFrame configures view as a frame
@@ -84,11 +87,13 @@ func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	return config
 }
 
-// StdConfig configures a standard setup of the overall Frame
-func (sv *StructView) StdConfig() {
+// StdConfig configures a standard setup of the overall Frame -- returns mods,
+// updt from ConfigChildren and does NOT call UpdateEnd
+func (sv *StructView) StdConfig() (mods, updt bool) {
 	sv.SetFrame()
 	config := sv.StdFrameConfig()
-	sv.ConfigChildren(config, false)
+	mods, updt = sv.ConfigChildren(config, false)
+	return
 }
 
 // SetTitle sets the title and updates the Title label
@@ -162,9 +167,11 @@ func (sv *StructView) ConfigStructGrid() {
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
-	updt := sg.ConfigChildren(config, false)
-	if updt {
+	mods, updt := sg.ConfigChildren(config, false)
+	if mods {
 		sv.SetFullReRender()
+	} else {
+		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*Label)
@@ -180,13 +187,17 @@ func (sv *StructView) ConfigStructGrid() {
 		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
+	sg.UpdateEnd(updt)
 }
 
 func (sv *StructView) UpdateFromStruct() {
-	sv.StdConfig()
+	mods, updt := sv.StdConfig()
 	typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
 	sv.SetTitle(fmt.Sprintf("%v Fields", typ.Name()))
 	sv.ConfigStructGrid()
+	if mods {
+		sv.UpdateEnd(updt)
+	}
 }
 
 func (sv *StructView) Style2D() {
@@ -229,11 +240,14 @@ var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, nil)
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
 func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
-	sv.UpdateStart()
-	sv.Struct = st
+	updt := false
+	if sv.Struct != st {
+		updt = sv.UpdateStart()
+		sv.Struct = st
+	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
-	sv.UpdateEnd()
+	sv.UpdateEnd(updt)
 }
 
 var StructViewInlineProps = ki.Props{}
@@ -243,7 +257,6 @@ func (sv *StructViewInline) ConfigParts() {
 	if kit.IsNil(sv.Struct) {
 		return
 	}
-	sv.UpdateStart()
 	sv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
@@ -269,7 +282,10 @@ func (sv *StructViewInline) ConfigParts() {
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
-	sv.Parts.ConfigChildren(config, false)
+	mods, updt := sv.Parts.ConfigChildren(config, false)
+	if !mods {
+		updt = sv.Parts.UpdateStart()
+	}
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
@@ -284,7 +300,7 @@ func (sv *StructViewInline) ConfigParts() {
 		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
-	sv.UpdateEnd()
+	sv.Parts.UpdateEnd(updt)
 }
 
 func (sv *StructViewInline) UpdateFromStruct() {

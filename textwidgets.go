@@ -179,15 +179,15 @@ func (g *TextField) EditDone() {
 
 // abort editing -- revert to last saved text
 func (g *TextField) RevertEdit() {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.EditText = g.Text
 	g.StartPos = 0
 	g.EndPos = g.CharWidth
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorForward(steps int) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.CursorPos += steps
 	if g.CursorPos > len(g.EditText) {
 		g.CursorPos = len(g.EditText)
@@ -196,11 +196,11 @@ func (g *TextField) CursorForward(steps int) {
 		inc := g.CursorPos - g.EndPos
 		g.EndPos += inc
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorBackward(steps int) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	// todo: select mode
 	g.CursorPos -= steps
 	if g.CursorPos < 0 {
@@ -210,24 +210,24 @@ func (g *TextField) CursorBackward(steps int) {
 		dec := kit.MinInt(g.StartPos, 8)
 		g.StartPos -= dec
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorStart() {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	// todo: select mode
 	g.CursorPos = 0
 	g.StartPos = 0
 	g.EndPos = kit.MinInt(len(g.EditText), g.StartPos+g.CharWidth)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorEnd() {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.CursorPos = len(g.EditText)
 	g.EndPos = len(g.EditText) // try -- display will adjust
 	g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorBackspace(steps int) {
@@ -237,10 +237,10 @@ func (g *TextField) CursorBackspace(steps int) {
 	if steps <= 0 {
 		return
 	}
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos-steps] + g.EditText[g.CursorPos:]
 	g.CursorBackward(steps)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorDelete(steps int) {
@@ -250,9 +250,9 @@ func (g *TextField) CursorDelete(steps int) {
 	if steps <= 0 {
 		return
 	}
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + g.EditText[g.CursorPos+steps:]
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) CursorKill() {
@@ -261,11 +261,11 @@ func (g *TextField) CursorKill() {
 }
 
 func (g *TextField) InsertAtCursor(str string) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + str + g.EditText[g.CursorPos:]
 	g.EndPos += len(str)
 	g.CursorForward(len(str))
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *TextField) KeyInput(kt *key.ChordEvent) {
@@ -344,9 +344,9 @@ func (g *TextField) PixelToCursor(pixOff float64) int {
 }
 
 func (g *TextField) SetCursorFromPixel(pixOff float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.CursorPos = g.PixelToCursor(pixOff)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 ////////////////////////////////////////////////////
@@ -516,11 +516,10 @@ func (g *TextField) Render2D() {
 }
 
 func (g *TextField) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if !gotFocus && !g.IsReadOnly() {
 		g.EditDone() // lose focus
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation
@@ -609,7 +608,7 @@ func (g *SpinBox) SetMinMax(hasMin bool, min float64, hasMax bool, max float64) 
 
 // SetValue sets the value, enforcing any limits, and updates the display
 func (g *SpinBox) SetValue(val float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Value = val
 	if g.HasMax {
 		g.Value = math.Min(g.Value, g.Max)
@@ -619,7 +618,7 @@ func (g *SpinBox) SetValue(val float64) {
 	}
 	frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
 	g.Value, _ = strconv.ParseFloat(frep, 64)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // SetValueAction calls SetValue and also emits the signal
@@ -656,9 +655,8 @@ func (g *SpinBox) ConfigParts() {
 	config.Add(KiT_TextField, "TextField")
 	config.Add(KiT_Space, "Space")
 	config.Add(KiT_Layout, "Buttons")
-	updt := g.Parts.ConfigChildren(config, false) // not unique names
-	if updt {
-		g.UpdateStart()
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	if mods {
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
 		buts.SetNChildren(2, KiT_Action, "But")
@@ -669,7 +667,7 @@ func (g *SpinBox) ConfigParts() {
 		up.Icon = g.UpIcon
 		g.PartStyleProps(up.This, props)
 		if !g.IsReadOnly() {
-			up.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
 				sb.IncrValue(1.0)
 			})
@@ -681,7 +679,7 @@ func (g *SpinBox) ConfigParts() {
 		dn.Icon = g.DownIcon
 		g.PartStyleProps(dn.This, props)
 		if !g.IsReadOnly() {
-			dn.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
 				sb.IncrValue(-1.0)
 			})
@@ -694,7 +692,7 @@ func (g *SpinBox) ConfigParts() {
 		g.PartStyleProps(tf.This, props)
 		tf.Text = fmt.Sprintf("%g", g.Value)
 		if !g.IsReadOnly() {
-			tf.TextFieldSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
 				tf := send.(*TextField)
 				vl, err := strconv.ParseFloat(tf.Text, 64)
@@ -703,7 +701,7 @@ func (g *SpinBox) ConfigParts() {
 				}
 			})
 		}
-		g.UpdateEnd()
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -833,14 +831,14 @@ func (g *ComboBox) ButtonRelease() {
 	}
 	win := g.Viewport.Win
 	wasPressed := (g.State == ButtonDown)
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.MakeItemsMenu()
 	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 	pos := g.WinBBox.Max
 	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
 	if indic != nil {
@@ -1022,7 +1020,7 @@ func (g *ComboBox) ConfigParts() {
 		wrIdx = len(config)
 		config.Add(KiT_Icon, "Indicator")
 	}
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	props := g.StyleProps(ButtonSelectors[ButtonActive])
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if g.MaxLength > 0 && lbIdx >= 0 {
@@ -1036,6 +1034,9 @@ func (g *ComboBox) ConfigParts() {
 			ic.UniqueNm = icnm
 			g.PartStyleProps(ic.This, props)
 		}
+	}
+	if mods {
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -1094,13 +1095,12 @@ func (g *ComboBox) Render2DDefaultStyle() {
 }
 
 func (g *ComboBox) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation

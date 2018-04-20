@@ -412,26 +412,26 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 
 // full render of the tree
 func (g *Node2DBase) FullRender2DTree() {
-	g.UpdateStart() // already rendering!
+	updt := g.UpdateStart()
 	g.Init2DTree()
 	g.Style2DTree()
 	g.Size2DTree()
 	g.Layout2DTree()
 	g.Render2DTree()
-	g.UpdateEndNoSig()
+	g.UpdateEndNoSig(updt)
 }
 
 // re-render of the tree -- after it has already been initialized and styled
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
 	ld := g.LayData // save our current layout data
-	g.UpdateStart() // already rendering
+	updt := g.UpdateStart()
 	g.Style2DTree()
 	g.Size2DTree()
 	g.LayData = ld // restore
 	g.Layout2DTree()
 	g.Render2DTree()
-	g.UpdateEnd()
+	g.UpdateEndNoSig(updt)
 }
 
 // initialize scene graph tree from node it is called on -- only needs to be

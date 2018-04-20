@@ -125,43 +125,43 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 // emits SliderPressed signal
 func (g *SliderBase) SliderPressed(pos float64) {
 	g.EmitValue = g.Min - 1.0 // invalid value
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetSliderState(SliderDown)
 	g.SetSliderPos(pos)
 	g.SliderSig.Emit(g.This, int64(SliderPressed), g.Value)
 	// bitflag.Set(&g.Flag, int(SliderFlagDragging))
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // the slider has just been released -- sends a released signal and returns
 // state to normal, and emits clicked signal if if it was previously in pressed state
 func (g *SliderBase) SliderReleased() {
 	wasPressed := (g.State == SliderDown)
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetSliderState(SliderActive)
 	g.SliderSig.Emit(g.This, int64(SliderReleased), g.Value)
 	if wasPressed && g.Value != g.EmitValue {
 		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
 		g.EmitValue = g.Value
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // slider starting hover-- todo: keep track of time and popup a tooltip -- signal?
 func (g *SliderBase) SliderEnterHover() {
 	if g.State != SliderHover {
-		g.UpdateStart()
+		updt := g.UpdateStart()
 		g.SetSliderState(SliderHover)
-		g.UpdateEnd()
+		g.UpdateEnd(updt)
 	}
 }
 
 // slider exiting hover
 func (g *SliderBase) SliderExitHover() {
 	if g.State == SliderHover {
-		g.UpdateStart()
+		updt := g.UpdateStart()
 		g.SetSliderState(SliderActive)
-		g.UpdateEnd()
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -181,7 +181,7 @@ func (g *SliderBase) SizeFromAlloc() {
 
 // set the position of the slider at the given position in pixels -- updates the corresponding Value
 func (g *SliderBase) SetSliderPos(pos float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Pos = pos
 	g.Pos = math.Min(g.Size, g.Pos)
 	if g.ValThumb {
@@ -203,7 +203,7 @@ func (g *SliderBase) SetSliderPos(pos float64) {
 			g.EmitValue = g.Value
 		}
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // slider moved along relevant axis
@@ -224,7 +224,7 @@ func (g *SliderBase) UpdatePosFromValue() {
 
 // set a value
 func (g *SliderBase) SetValue(val float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Value = math.Min(val, g.Max)
 	if g.ValThumb {
 		g.Value = math.Min(g.Value, g.Max-g.ThumbVal)
@@ -233,15 +233,15 @@ func (g *SliderBase) SetValue(val float64) {
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *SliderBase) SetThumbValue(val float64) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.ThumbVal = math.Min(val, g.Max)
 	g.ThumbVal = math.Max(g.ThumbVal, g.Min)
 	g.UpdateThumbValSize()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // set thumb size as proportion of min / max (e.g., amount visible in
@@ -346,8 +346,11 @@ func (g *SliderBase) Init2DSlider() {
 func (g *SliderBase) ConfigParts() {
 	g.Parts.Lay = LayoutNil
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, g.StyleProps(SliderSelectors[SliderActive]))
+	if mods {
+		g.UpdateEnd(updt)
+	}
 }
 
 func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
@@ -540,13 +543,12 @@ func (g *Slider) Render2DDefaultStyle() {
 }
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation
@@ -678,13 +680,12 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 }
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation

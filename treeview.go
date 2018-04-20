@@ -100,19 +100,21 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
 // set the source node that we are viewing
 func (tv *TreeView) SetSrcNode(sk ki.Ki) {
-	tv.SrcNode.Ptr = sk
+	updt := false
+	if tv.SrcNode.Ptr != sk {
+		updt = tv.UpdateStart()
+		tv.SrcNode.Ptr = sk
+	}
 	sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
 	tv.SyncToSrc()
+	tv.UpdateEnd(updt)
 }
 
 // sync with the source tree
 func (tv *TreeView) SyncToSrc() {
-	tv.UpdateStart()
 	sk := tv.SrcNode.Ptr
 	nm := "ViewOf_" + sk.UniqueName()
-	if tv.Nm != nm {
-		tv.SetName(nm)
-	}
+	tv.SetName(nm)
 	vcprop := "view-closed"
 	skids := sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
@@ -137,8 +139,8 @@ func (tv *TreeView) SyncToSrc() {
 	for _, skid := range skids {
 		tnl.Add(typ, "ViewOf_"+skid.UniqueName())
 	}
-	updt := tv.ConfigChildren(tnl, false) // preserves existing to greatest extent possible
-	if updt {
+	mods, updt := tv.ConfigChildren(tnl, false)
+	if mods {
 		tv.SetFullReRender()
 		win := tv.ParentWindow()
 		if win != nil {
@@ -167,7 +169,7 @@ func (tv *TreeView) SyncToSrc() {
 		}
 		idx++
 	}
-	tv.UpdateEnd()
+	tv.UpdateEnd(updt)
 }
 
 // function for receiving node signals from our SrcNode
@@ -177,8 +179,7 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	if bitflag.HasMask(*send.Flags(), int64(ki.ChildUpdateFlagsMask)) {
 		tv.SyncToSrc()
 	} else if bitflag.HasMask(*send.Flags(), int64(ki.ValUpdateFlagsMask)) {
-		tv.UpdateStart()
-		tv.UpdateEnd()
+		tv.UpdateSig()
 	}
 }
 
@@ -287,8 +288,9 @@ func (tv *TreeView) Label() string {
 // selection updates
 func (tv *TreeView) SelectAction() {
 	win := tv.Viewport.Win
+	updt := false
 	if win != nil {
-		win.UpdateStart()
+		updt = win.UpdateStart()
 	}
 	rn := tv.RootWidget
 	if bitflag.Has(rn.Flag, int(TreeViewFlagExtendSelect)) {
@@ -306,34 +308,33 @@ func (tv *TreeView) SelectAction() {
 		}
 	}
 	if win != nil {
-		win.UpdateEnd()
+		win.UpdateEnd(updt)
 	}
 }
 
 func (tv *TreeView) Select() {
 	if !tv.IsSelected() {
-		tv.UpdateStart()
 		bitflag.Set(&tv.Flag, int(TreeViewFlagSelected))
 		tv.GrabFocus() // focus always follows select  todo: option
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewSelected), tv.This)
-		tv.UpdateEnd()
+		tv.UpdateSig()
 	}
 }
 
 func (tv *TreeView) Unselect() {
 	if tv.IsSelected() {
-		tv.UpdateStart()
 		bitflag.Clear(&tv.Flag, int(TreeViewFlagSelected))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewUnselected), tv.This)
-		tv.UpdateEnd()
+		tv.UpdateSig()
 	}
 }
 
 // unselect everything below me -- call on Root to clear all
 func (tv *TreeView) UnselectAll() {
 	win := tv.Viewport.Win
+	updt := false
 	if win != nil {
-		win.UpdateStart()
+		updt = win.UpdateStart()
 	}
 	tv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		_, gi := KiToNode2D(k)
@@ -349,7 +350,7 @@ func (tv *TreeView) UnselectAll() {
 		}
 	})
 	if win != nil {
-		win.UpdateEnd()
+		win.UpdateEnd(updt)
 	}
 }
 
@@ -430,25 +431,25 @@ func (tv *TreeView) MoveToLastChild() {
 
 func (tv *TreeView) Close() {
 	if !tv.IsClosed() {
-		tv.UpdateStart()
+		updt := tv.UpdateStart()
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
 		bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewClosed), tv.This)
-		tv.UpdateEnd()
+		tv.UpdateEnd(updt)
 	}
 }
 
 func (tv *TreeView) Open() {
 	if tv.IsClosed() {
-		tv.UpdateStart()
+		updt := tv.UpdateStart()
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
 		bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
 		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewOpened), tv.This)
-		tv.UpdateEnd()
+		tv.UpdateEnd(updt)
 	}
 }
 
@@ -482,12 +483,12 @@ func (tv *TreeView) SrcInsertAfter() {
 			par := sk.Parent()
 			dlg, _ := send.(*Dialog)
 			n, typ := NewKiDialogValues(dlg)
-			par.UpdateStart()
+			updt := par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
 				par.InsertNewChild(typ, myidx+1+i, nm)
 			}
-			par.UpdateEnd()
+			par.UpdateEnd(updt)
 		}
 	})
 }
@@ -515,12 +516,12 @@ func (tv *TreeView) SrcInsertBefore() {
 			par := sk.Parent()
 			dlg, _ := send.(*Dialog)
 			n, typ := NewKiDialogValues(dlg)
-			par.UpdateStart()
+			updt := par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
 				par.InsertNewChild(typ, myidx+i, nm)
 			}
-			par.UpdateEnd()
+			par.UpdateEnd(updt)
 		}
 	})
 }
@@ -534,12 +535,12 @@ func (tv *TreeView) SrcAddChild() {
 			sk := tv.SrcNode.Ptr
 			dlg, _ := send.(*Dialog)
 			n, typ := NewKiDialogValues(dlg)
-			sk.UpdateStart()
+			updt := sk.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), i)
 				sk.AddNewChild(typ, nm)
 			}
-			sk.UpdateEnd()
+			sk.UpdateEnd(updt)
 		}
 	})
 }
@@ -608,12 +609,12 @@ func (tv *TreeView) ConfigParts() {
 	config.Add(KiT_Label, "Label")
 	config.Add(KiT_Stretch, "Stretch")
 	config.Add(KiT_MenuButton, "Menu")
-	updt := tv.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
-	wb.Icon = IconByName("widget-wedge-down")
+	wb.Icon = IconByName("widget-wedge-down") // todo: style
 	wb.IconOff = IconByName("widget-wedge-right")
-	if updt {
+	if mods {
 		tv.PartStyleProps(wb.This, TreeViewProps[0])
 		wb.ButtonSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
@@ -625,7 +626,7 @@ func (tv *TreeView) ConfigParts() {
 
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
-	if updt {
+	if mods {
 		tv.PartStyleProps(lbl.This, TreeViewProps[0])
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
@@ -638,7 +639,7 @@ func (tv *TreeView) ConfigParts() {
 	}
 
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
-	if updt {
+	if mods {
 		mb.Text = "..."
 		tv.PartStyleProps(mb.This, TreeViewProps[0])
 
@@ -664,6 +665,7 @@ func (tv *TreeView) ConfigParts() {
 			tv.SrcDelete()
 		})
 	}
+	tv.Parts.UpdateEnd(updt)
 }
 
 func (tv *TreeView) ConfigPartsIfNeeded() {
@@ -926,8 +928,7 @@ func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
 }
 
 func (tv *TreeView) FocusChanged2D(gotFocus bool) {
-	tv.UpdateStart()
-	tv.UpdateEnd()
+	tv.UpdateSig()
 }
 
 // check for interface implementation

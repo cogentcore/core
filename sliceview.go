@@ -30,13 +30,17 @@ var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
 
-// SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceView) SetSlice(mp interface{}, tmpSave ValueView) {
-	sv.UpdateStart()
-	sv.Slice = mp
+// SetSlice sets the source slice that we are viewing -- rebuilds the children
+// to represent this slice
+func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
+	updt := false
+	if sv.Slice != sl {
+		updt = sv.UpdateStart()
+		sv.Slice = sl
+	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
-	sv.UpdateEnd()
+	sv.UpdateEnd(updt)
 }
 
 var SliceViewProps = ki.Props{
@@ -82,11 +86,13 @@ func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
 	return config
 }
 
-// StdConfig configures a standard setup of the overall Frame
-func (sv *SliceView) StdConfig() {
+// StdConfig configures a standard setup of the overall Frame -- returns mods,
+// updt from ConfigChildren and does NOT call UpdateEnd
+func (sv *SliceView) StdConfig() (mods, updt bool) {
 	sv.SetFrame()
 	config := sv.StdFrameConfig()
-	sv.ConfigChildren(config, false)
+	mods, updt = sv.ConfigChildren(config, false)
+	return
 }
 
 // SetTitle sets the title and updates the Title label
@@ -162,9 +168,11 @@ func (sv *SliceView) ConfigSliceGrid() {
 		config.Add(KiT_Action, delnm)
 		sv.Values = append(sv.Values, vv)
 	}
-	updt := sg.ConfigChildren(config, false)
-	if updt {
+	mods, updt := sg.ConfigChildren(config, false)
+	if mods {
 		sv.SetFullReRender()
+	} else {
+		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.Values {
 		lbl := sg.Child(i * 4).(*Label)
@@ -178,34 +186,27 @@ func (sv *SliceView) ConfigSliceGrid() {
 		addact.SetProp("vertical-align", AlignMiddle)
 		addact.Text = " + "
 		addact.Data = i
-		// addact.ActionSig.DisconnectAll()
-		addact.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
 			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-			svv.UpdateStart()
 			svv.SliceNewAt(act.Data.(int) + 1)
-			svv.SetFullReRender()
-			svv.UpdateEnd()
 		})
 		delact := sg.Child(i*4 + 3).(*Action)
 		delact.SetProp("vertical-align", AlignMiddle)
 		delact.Text = "  --"
 		delact.Data = i
-		// delact.ActionSig.DisconnectAll()
-		delact.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
 			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-			svv.UpdateStart()
 			svv.SliceDelete(act.Data.(int))
-			svv.SetFullReRender()
-			svv.UpdateEnd()
 		})
 	}
+	sg.UpdateEnd(updt)
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice
 func (sv *SliceView) SliceNewAt(idx int) {
-	sv.UpdateStart()
+	updt := sv.UpdateStart()
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 	svtyp := svnp.Type()
@@ -220,12 +221,13 @@ func (sv *SliceView) SliceNewAt(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.UpdateEnd()
+	sv.SetFullReRender()
+	sv.UpdateEnd(updt)
 }
 
 // SliceDelete deletes element at given index from slice
 func (sv *SliceView) SliceDelete(idx int) {
-	sv.UpdateStart()
+	updt := sv.UpdateStart()
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 	svtyp := svnp.Type()
@@ -237,14 +239,18 @@ func (sv *SliceView) SliceDelete(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.UpdateEnd()
+	sv.SetFullReRender()
+	sv.UpdateEnd(updt)
 }
 
 func (sv *SliceView) UpdateFromSlice() {
-	sv.StdConfig()
+	mods, updt := sv.StdConfig()
 	// typ := kit.NonPtrType(reflect.TypeOf(sv.Slice))
 	// sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	sv.ConfigSliceGrid()
+	if mods {
+		sv.UpdateEnd(updt)
+	}
 }
 
 // needs full rebuild and this is where we do it:
@@ -287,12 +293,15 @@ type SliceViewInline struct {
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, nil)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(st interface{}, tmpSave ValueView) {
-	sv.UpdateStart()
-	sv.Slice = st
+func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
+	updt := false
+	if sv.Slice != sl {
+		updt = sv.UpdateStart()
+		sv.Slice = sl
+	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
-	sv.UpdateEnd()
+	sv.UpdateEnd(updt)
 }
 
 var SliceViewInlineProps = ki.Props{}
@@ -302,7 +311,6 @@ func (sv *SliceViewInline) ConfigParts() {
 	if kit.IsNil(sv.Slice) {
 		return
 	}
-	sv.UpdateStart()
 	sv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
@@ -328,7 +336,10 @@ func (sv *SliceViewInline) ConfigParts() {
 		sv.Values = append(sv.Values, vv)
 	}
 	config.Add(KiT_Action, "EditAction")
-	sv.Parts.ConfigChildren(config, false)
+	mods, updt := sv.Parts.ConfigChildren(config, false)
+	if !mods {
+		updt = sv.Parts.UpdateStart()
+	}
 	for i, vv := range sv.Values {
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
@@ -341,21 +352,19 @@ func (sv *SliceViewInline) ConfigParts() {
 	edac := sv.Parts.Child(-1).(*Action)
 	edac.SetProp("vertical-align", AlignMiddle)
 	edac.Text = "  ..."
-	edac.ActionSig.DisconnectAll()
-	edac.ActionSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
 		SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", svv.This,
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				svvv := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
 				svpar := svvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
 				if svpar != nil {
-					svpar.SetFullReRender() // todo: not working to re-generate item
-					svpar.UpdateStart()
-					svpar.UpdateEnd()
+					svpar.SetFullReRender()
+					svpar.UpdateSig()
 				}
 			})
 	})
-	sv.UpdateEnd()
+	sv.Parts.UpdateEnd(updt)
 }
 
 func (sv *SliceViewInline) UpdateFromSlice() {

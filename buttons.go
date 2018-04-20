@@ -146,10 +146,10 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 // set the button in the down state -- mouse clicked down but not yet up --
 // emits ButtonPressed signal -- ButtonClicked is down and up
 func (g *ButtonBase) ButtonPressed() {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetButtonState(ButtonDown)
 	g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // the button has just been released -- sends a released signal and returns
@@ -160,7 +160,7 @@ func (g *ButtonBase) ButtonReleased() {
 		return
 	}
 	wasPressed := (g.State == ButtonDown)
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
@@ -170,7 +170,7 @@ func (g *ButtonBase) ButtonReleased() {
 			g.ButtonSig.Emit(g.This, int64(ButtonToggled), nil)
 		}
 	}
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // button starting hover-- todo: keep track of time and popup a tooltip -- signal?
@@ -179,9 +179,9 @@ func (g *ButtonBase) ButtonEnterHover() {
 		return
 	}
 	if g.State != ButtonHover {
-		g.UpdateStart()
+		updt := g.UpdateStart()
 		g.SetButtonState(ButtonHover)
-		g.UpdateEnd()
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -191,9 +191,9 @@ func (g *ButtonBase) ButtonExitHover() {
 		return
 	}
 	if g.State == ButtonHover {
-		g.UpdateStart()
+		updt := g.UpdateStart()
 		g.SetButtonState(ButtonActive)
-		g.UpdateEnd()
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -212,19 +212,19 @@ type ButtonWidget interface {
 // set the text and update button
 func SetButtonText(bw ButtonWidget, txt string) {
 	g := bw.ButtonAsBase()
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Text = txt
 	bw.ConfigParts()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // set the Icon (could be nil) and update button
 func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 	g := bw.ButtonAsBase()
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Icon = ic // this is jut the pointer
 	bw.ConfigParts()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 // handles all the basic button events
@@ -361,8 +361,11 @@ func (g *Button) Init2D() {
 
 func (g *Button) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
+	if mods {
+		g.UpdateEnd(updt)
+	}
 }
 
 func (g *Button) ConfigPartsIfNeeded() {
@@ -417,13 +420,12 @@ func (g *Button) Render2DDefaultStyle() {
 }
 
 func (g *Button) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation
@@ -510,11 +512,11 @@ func (g *CheckBox) SetText(txt string) {
 
 // set the Icons for the On (checked) and Off (unchecked) states, and updates button
 func (g *CheckBox) SetIcons(icOn, icOff *Icon) {
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.Icon = icOn
 	g.IconOff = icOff
 	g.ConfigParts()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 func (g *CheckBox) Init2D() {
@@ -542,21 +544,23 @@ func (g *CheckBox) ConfigParts() {
 		lbIdx = len(config)
 		config.Add(KiT_Label, "Label")
 	}
-	g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	ist := g.Parts.Child(icIdx).(*Layout)
-	ist.Lay = LayoutStacked
-	ist.SetNChildren(2, KiT_Icon, "Icon")
-	icon := ist.Child(0).(*Icon)
-	if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
-		icon.CopyFromIcon(g.Icon)
-		icon.UniqueNm = g.Icon.UniqueNm
-		g.PartStyleProps(icon.This, props)
-	}
-	icoff := ist.Child(1).(*Icon)
-	if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
-		icoff.CopyFromIcon(g.IconOff)
-		icoff.UniqueNm = g.IconOff.UniqueNm
-		g.PartStyleProps(icoff.This, props)
+	if mods {
+		ist.Lay = LayoutStacked
+		ist.SetNChildren(2, KiT_Icon, "Icon") // covered by above config update
+		icon := ist.Child(0).(*Icon)
+		if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
+			icon.CopyFromIcon(g.Icon)
+			icon.UniqueNm = g.Icon.UniqueNm
+			g.PartStyleProps(icon.This, props)
+		}
+		icoff := ist.Child(1).(*Icon)
+		if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
+			icoff.CopyFromIcon(g.IconOff)
+			icoff.UniqueNm = g.IconOff.UniqueNm
+			g.PartStyleProps(icoff.This, props)
+		}
 	}
 	if g.IsChecked() {
 		ist.ShowChildAtIndex(0)
@@ -570,6 +574,9 @@ func (g *CheckBox) ConfigParts() {
 			g.PartStyleProps(lbl.This, props)
 			lbl.Text = g.Text
 		}
+	}
+	if mods {
+		g.UpdateEnd(updt)
 	}
 }
 
@@ -633,13 +640,12 @@ func (g *CheckBox) Render2DDefaultStyle() {
 }
 
 func (g *CheckBox) FocusChanged2D(gotFocus bool) {
-	g.UpdateStart()
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}
-	g.UpdateEnd()
+	g.UpdateSig()
 }
 
 // check for interface implementation

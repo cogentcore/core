@@ -64,7 +64,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	// todo: deal with modeless -- need a separate window presumably -- not hard
 	dlg.State = DialogOpenModal
 
-	dlg.UpdateStart()
+	updt := dlg.UpdateStart()
 	dlg.Init2DTree()
 	dlg.Style2DTree()                                      // sufficient to get sizes
 	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
@@ -77,7 +77,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	dlg.Resize(vpsz.X, vpsz.Y)
 	dlg.ViewBox.Min = image.Point{x, y}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(updt)
 
 	win.PushPopup(dlg.This)
 	return true
@@ -258,7 +258,8 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	}
 }
 
-// StdDialog configures a basic standard dialog with a title, prompt, and ok / cancel buttons -- any empty text will not be added
+// StdDialog configures a basic standard dialog with a title, prompt, and ok /
+// cancel buttons -- any empty text will not be added
 func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	frame := dlg.SetFrame()
 	pspc := 0.0
@@ -271,17 +272,23 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	}
 	bb := dlg.AddButtonBox(StdDialogVSpace, frame)
 	bbc := dlg.StdButtonConfig(true, ok, cancel)
-	bb.ConfigChildren(bbc, false) // not unique names
+	mods, updt := bb.ConfigChildren(bbc, false) // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
 	bitflag.Set(&dlg.Flag, int(VpFlagPopupDestroyAll)) // std is disposable
+	if mods {
+		bb.UpdateEnd(updt)
+	}
 }
 
-// NewStdDialog returns a basic standard dialog with a name, title, prompt, and ok / cancel buttons -- any empty text will not be added -- returns with UpdateStart started but NOT ended -- must call UpdateEnd once done configuring!
+// NewStdDialog returns a basic standard dialog with a name, title, prompt,
+// and ok / cancel buttons -- any empty text will not be added -- returns with
+// UpdateStart started but NOT ended -- must call UpdateEnd(true) once done
+// configuring!
 func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 	dlg := Dialog{}
 	dlg.InitName(&dlg, name)
 	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
-	dlg.UpdateStart()
+	dlg.UpdateStart() // guaranteed to be true
 	dlg.StdDialog(title, prompt, ok, cancel)
 	return &dlg
 }
@@ -292,7 +299,7 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp)
 }
 
@@ -350,7 +357,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
 }
@@ -383,7 +390,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, titl
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
 }
@@ -404,7 +411,7 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, pr
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
 }
@@ -425,7 +432,7 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEnd()
+	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
 }

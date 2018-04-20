@@ -149,7 +149,7 @@ func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
 // FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
 func (w *Window) FullUpdate() {
 	pr := prof.Start("win.FullUpdate")
-	w.UpdateStart()
+	updt := w.UpdateStart()
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
@@ -171,7 +171,7 @@ func (w *Window) FullUpdate() {
 		}
 	}
 	pr.End()
-	w.UpdateEnd() // drives the flush
+	w.UpdateEnd(updt) // drives the flush
 }
 
 var lastFlush time.Time
@@ -379,6 +379,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	pos := mev.Pos()
 	ftyp := oswin.MouseFocusEvent
 	updated := false
+	updt := false
 	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
@@ -395,7 +396,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 					bitflag.Set(&gi.Flag, int(MouseHasEntered))
 					// fmt.Printf("sending enter to: %v\n", gi.PathUnique())
 					if !updated {
-						w.UpdateStart()
+						updt = w.UpdateStart()
 						updated = true
 					}
 					return true // send event
@@ -408,7 +409,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
 					// fmt.Printf("sending exit to: %v\n", gi.PathUnique())
 					if !updated {
-						w.UpdateStart()
+						updt = w.UpdateStart()
 						updated = true
 					}
 					return true // send event
@@ -422,7 +423,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 		}
 	})
 	if updated {
-		w.UpdateEnd()
+		w.UpdateEnd(updt)
 	}
 }
 
@@ -567,8 +568,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus == k {
 		return false
 	}
-	w.UpdateStart()
-	// defer w.UpdateEnd()
+	updt := w.UpdateStart()
 	if w.Focus != nil {
 		gii, gi := KiToNode2D(w.Focus)
 		if gi != nil {
@@ -578,7 +578,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	w.Focus = k
 	if k == nil {
-		w.UpdateEnd()
+		w.UpdateEnd(updt)
 		return true
 	}
 	gii, gi := KiToNode2D(k)
@@ -586,7 +586,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		bitflag.Set(&gi.Flag, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
-	w.UpdateEnd()
+	w.UpdateEnd(updt)
 	return true
 }
 

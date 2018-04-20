@@ -13,16 +13,12 @@ import (
 
 // open an interactive editor of the given Ki tree, at its root
 func GoGiEditorOf(obj ki.Ki) {
-	gogiEditorOf(obj)
-}
-
-func gogiEditorOf(obj ki.Ki) {
 	width := 800
 	height := 600
 	win := NewWindow2D("GoGi Editor Window", width, height, true)
 
 	vp := win.WinViewport2D()
-	vp.UpdateStart()
+	updt := vp.UpdateStart()
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
@@ -84,8 +80,7 @@ func gogiEditorOf(obj ki.Ki) {
 	updtobj.SetText("Update")
 	updtobj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
-			obj.UpdateStart()
-			obj.UpdateEnd()
+			obj.UpdateSig()
 		}
 	})
 
@@ -105,6 +100,6 @@ func gogiEditorOf(obj ki.Ki) {
 		}
 	})
 
-	vp.UpdateEnd()
+	vp.UpdateEndNoSig(updt)
 	go win.StartEventLoopNoWait()
 }

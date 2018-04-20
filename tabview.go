@@ -70,12 +70,12 @@ func (g *TabWidget) SelectTabIndex(idx int) error {
 	if !ok {
 		return nil
 	}
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	g.UnselectAllTabButtons()
 	tb.SetSelected(true)
 	tabstack := g.TabStackLayout()
 	tabstack.ShowChildAtIndex(idx)
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 	return nil
 }
 
@@ -122,9 +122,9 @@ func (g *TabWidget) UnselectAllTabButtons() {
 			continue
 		}
 		if tb.IsSelected() {
-			tb.UpdateStart()
+			updt := tb.UpdateStart()
 			tb.SetSelected(false)
-			tb.UpdateEnd()
+			tb.UpdateEnd(updt)
 		}
 	}
 }
@@ -198,7 +198,7 @@ func (g *TabWidget) InitTabWidget() {
 	if len(g.Kids) == 1 {
 		return
 	}
-	g.UpdateStart()
+	updt := g.UpdateStart()
 	tabcol := g.AddNewChild(KiT_Layout, "TabCol").(*Layout)
 	tabcol.Lay = LayoutCol
 	tabrow := tabcol.AddNewChild(KiT_Layout, "TabRow").(*Layout)
@@ -208,7 +208,7 @@ func (g *TabWidget) InitTabWidget() {
 	tabstack.SetProp("max-width", -1.0) // stretch flex
 	tabstack.SetProp("max-height", -1.0)
 	g.InitTabs()
-	g.UpdateEnd()
+	g.UpdateEnd(updt)
 }
 
 ////////////////////////////////////////////////////

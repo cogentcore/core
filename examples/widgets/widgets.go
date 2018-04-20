@@ -35,7 +35,7 @@ func main() {
 		wdicon := gi.IconByName(icnm)
 
 		vp := win.WinViewport2D()
-		vp.UpdateStart()
+		updt := vp.UpdateStart()
 		vp.SetProp("background-color", "#FFF")
 		vp.Fill = true
 
@@ -196,7 +196,7 @@ func main() {
 			fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 		})
 
-		vp.UpdateEnd()
+		vp.UpdateEndNoSig(updt)
 
 		win.StartEventLoop()
 
