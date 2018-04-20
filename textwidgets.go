@@ -706,6 +706,9 @@ func (g *SpinBox) ConfigParts() {
 }
 
 func (g *SpinBox) ConfigPartsIfNeeded() {
+	if !g.Parts.HasChildren() {
+		g.ConfigParts()
+	}
 	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 	txt := fmt.Sprintf("%g", g.Value)
 	if tf.Text != txt {

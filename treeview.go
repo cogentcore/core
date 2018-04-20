@@ -669,6 +669,9 @@ func (tv *TreeView) ConfigParts() {
 }
 
 func (tv *TreeView) ConfigPartsIfNeeded() {
+	if !tv.Parts.HasChildren() {
+		tv.ConfigParts()
+	}
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)

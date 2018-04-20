@@ -60,12 +60,12 @@ func main() {
 		// gi.Render2DTrace = true
 		// gi.Layout2DTrace = true
 
-		width := 800
-		height := 800
+		width := 600
+		height := 600
 		win := gi.NewWindow2D("TreeView Window", width, height, true)
 
 		vp := win.WinViewport2D()
-		vp.UpdateStart()
+		updt := vp.UpdateStart()
 		vp.SetProp("background-color", "#FFF")
 		vp.Fill = true
 
@@ -114,7 +114,7 @@ func main() {
 			}
 		})
 
-		vp.UpdateEnd()
+		vp.UpdateEndNoSig(updt)
 
 		win.StartEventLoop()
 	})

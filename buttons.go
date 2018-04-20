@@ -581,6 +581,9 @@ func (g *CheckBox) ConfigParts() {
 }
 
 func (g *CheckBox) ConfigPartsIfNeeded() {
+	if !g.Parts.HasChildren() {
+		g.ConfigParts()
+	}
 	icIdx := 0 // always there
 	ist := g.Parts.Child(icIdx).(*Layout)
 	if g.IsChecked() {
@@ -588,11 +591,6 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 	} else {
 		ist.ShowChildAtIndex(1)
 	}
-
-	// if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
-	// 	return
-	// }
-	// g.ConfigParts()
 }
 
 func (g *CheckBox) Style2D() {

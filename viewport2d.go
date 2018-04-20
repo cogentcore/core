@@ -343,7 +343,7 @@ var _ Node2D = &Viewport2D{}
 //  Signal Handling
 
 // each node calls this signal method to notify its parent viewport whenever it changes, causing a re-render
-func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
+func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	vpgi, ok := vpki.(Node2D)
 	if !ok {
 		return
@@ -352,7 +352,7 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
-	gii, gi := KiToNode2D(node)
+	gii, gi := KiToNode2D(send)
 	if gii == nil { // should not happen
 		return
 	}
@@ -365,13 +365,13 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 	}
 
 	if Update2DTrace {
-		fmt.Printf("Update: Viewport2D: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+		fmt.Printf("Update: Viewport2D: %v rendering due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), send.PathUnique())
 	}
 
 	fullRend := false
 	if sig == int64(ki.NodeSignalUpdated) {
-		vlupdt := bitflag.HasMask(*(node.Flags()), ki.ValUpdateFlagsMask)
-		strupdt := bitflag.HasMask(*(node.Flags()), ki.StruUpdateFlagsMask)
+		vlupdt := bitflag.HasMask(*(send.Flags()), ki.ValUpdateFlagsMask)
+		strupdt := bitflag.HasMask(*(send.Flags()), ki.StruUpdateFlagsMask)
 		if vlupdt && !strupdt {
 			fullRend = false
 		} else if strupdt {
