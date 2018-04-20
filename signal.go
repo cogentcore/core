@@ -73,7 +73,8 @@ type Signal struct {
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
 
-// Connection represents one connection between a signal and a receiving Ki and function to call
+// Connection represents one connection between a signal and a receiving Ki
+// and function to call
 type Connection struct {
 	// node that will receive the signal
 	Recv Ki
@@ -83,12 +84,21 @@ type Connection struct {
 	// RecvPath string
 }
 
-// send the signal over this connection
+// SendSig sends the signal over this connection
 func (con *Connection) SendSig(sender Ki, sig int64, data interface{}) {
 	con.Func(con.Recv, sender, sig, data)
 }
 
-// Connect attaches a new receiver to the signal -- checks to make sure connection does not already exist -- error if not ok
+// ConnectOnly first deletes any existing connections and then attaches a new
+// receiver to the signal -- checks to make sure connection does not already
+// exist -- error if not ok
+func (sig *Signal) ConnectOnly(recv Ki, fun RecvFunc) error {
+	sig.DisconnectAll()
+	return sig.Connect(recv, fun)
+}
+
+// Connect attaches a new receiver to the signal -- checks to make sure
+// connection does not already exist -- error if not ok
 func (sig *Signal) Connect(recv Ki, fun RecvFunc) error {
 	if recv == nil {
 		return errors.New("ki Signal Connect: no recv node provided")

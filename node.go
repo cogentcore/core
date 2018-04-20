@@ -14,6 +14,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"sync"
 
 	"log"
 	"reflect"
@@ -23,37 +24,38 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/json-iterator/go"
-	"github.com/rcoreilly/goki/ki/atomctr"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// use this to switch between using standard json vs. faster jsoniter
-// right now jsoniter does not continue with the MarshalIndent beyond first level,
+// use this to switch between using standard json vs. faster jsoniter right
+// now jsoniter does not continue with the MarshalIndent beyond first level,
 // even when called specifically in the Slice code
 var UseJsonIter bool = false
 
-// todo:
-
-/*
-The Node implements the Ki interface and provides the core functionality for the GoKi tree -- use the Node as an embedded struct or as a struct field -- the embedded version supports full JSON save / load.
-
-The desc: key for fields is used by the GoGr GUI viewer for help / tooltip info -- add these to all your derived struct's fields.  See relevant docs for other such tags controlling a wide range of GUI and other functionality -- Ki makes extensive use of such tags.
-*/
+// The Node implements the Ki interface and provides the core functionality
+// for the GoKi tree -- use the Node as an embedded struct or as a struct
+// field -- the embedded version supports full JSON save / load.
+//
+// The desc: key for fields is used by the GoGr GUI viewer for help / tooltip
+// info -- add these to all your derived struct's fields.  See relevant docs
+// for other such tags controlling a wide range of GUI and other functionality
+// -- Ki makes extensive use of such tags.
+//
 type Node struct {
-	Nm        string      `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm  string      `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag      int64       `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
-	Props     Props       `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par       Ki          `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	ChildType kit.Type    `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Kids      Slice       `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	Flds      []Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"slice of all the Ki-type fields within this struct or any that we embed -- we iterate over these fields during all downward passes, just like our children"`
-	NodeSig   Signal      `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Updating  atomctr.Ctr `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.UpdateCtr() updating counter used in UpdateStart / End calls -- atomic for thread safety -- read using Value() method (not a good idea to modify)"`
-	Deleted   []Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
-	This      Ki          `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
-	index     int         `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
+	Nm        string     `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm  string     `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag      int64      `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
+	Props     Props      `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par       Ki         `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	ChildType kit.Type   `desc:"default type of child to create -- if nil then same type as node itself is used"`
+	Kids      Slice      `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	Flds      []Ki       `copy:"-" json:"-" xml:"-" view:"-" desc:"slice of all the Ki-type fields within this struct or any that we embed -- we iterate over these fields during all downward passes, just like our children"`
+	NodeSig   Signal     `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Deleted   []Ki       `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
+	This      Ki         `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	FlagMu    sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting flag updates"`
+	index     int        `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -180,12 +182,16 @@ func (n *Node) UniqueName() string {
 }
 
 // set name and unique name, ensuring unique name is unique..
-func (n *Node) SetName(name string) {
+func (n *Node) SetName(name string) bool {
+	if n.Nm == name {
+		return false
+	}
 	n.Nm = name
 	n.UniqueNm = name
 	if n.Par != nil {
 		n.Par.UniquifyNames()
 	}
+	return true
 }
 
 func (n *Node) SetNameRaw(name string) {
@@ -239,6 +245,35 @@ func (n *Node) Flags() *int64 {
 	return &n.Flag
 }
 
+func (n *Node) SetFlagMu(flag ...int) {
+	n.FlagMu.Lock()
+	bitflag.Set(&n.Flag, flag...)
+	n.FlagMu.Unlock()
+}
+
+func (n *Node) SetFlagStateMu(on bool, flag ...int) {
+	n.FlagMu.Lock()
+	bitflag.SetState(&n.Flag, on, flag...)
+	n.FlagMu.Unlock()
+}
+
+func (n *Node) ClearFlagMu(flag ...int) {
+	n.FlagMu.Lock()
+	bitflag.Clear(&n.Flag, flag...)
+	n.FlagMu.Unlock()
+}
+
+func (n *Node) IsUpdatingMu() bool {
+	n.FlagMu.Lock()
+	rval := bitflag.Has(n.Flag, int(Updating))
+	n.FlagMu.Unlock()
+	return rval
+}
+
+func (n *Node) IsUpdating() bool {
+	return bitflag.Has(n.Flag, int(Updating))
+}
+
 func (n *Node) IsField() bool {
 	return bitflag.Has(n.Flag, int(IsField))
 }
@@ -274,10 +309,9 @@ func (n *Node) SetProp(key string, val interface{}) {
 }
 
 func (n *Node) SetPropUpdate(key string, val interface{}) {
-	n.UpdateStart()
 	bitflag.Set(n.Flags(), int(PropUpdated))
 	n.SetProp(key, val)
-	n.UpdateEnd()
+	n.UpdateSig()
 }
 
 func (n *Node) Prop(key string, inherit, typ bool) interface{} {
@@ -353,9 +387,9 @@ func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
 func (n *Node) SetParent(parent Ki) {
 	n.Par = parent
 	if parent != nil && !parent.OnlySelfUpdate() {
-		upc := parent.UpdateCtr().Value() // we need parent's update counter b/c they will end
+		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.UpdateCtr().Set(upc)
+			bitflag.SetState(k.Flags(), parup, int(Updating))
 			return true
 		})
 	}
@@ -467,7 +501,7 @@ func (n *Node) InsertChildImpl(kid Ki, at int) error {
 }
 
 func (n *Node) AddChild(kid Ki) error {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	err := n.AddChildImpl(kid)
 	if err == nil {
 		bitflag.Set(&n.Flag, int(ChildAdded))
@@ -476,12 +510,12 @@ func (n *Node) AddChild(kid Ki) error {
 		}
 		n.UniquifyNames()
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return err
 }
 
 func (n *Node) InsertChild(kid Ki, at int) error {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		bitflag.Set(&n.Flag, int(ChildAdded))
@@ -490,7 +524,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 		}
 		n.UniquifyNames()
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return err
 }
 
@@ -510,31 +544,31 @@ func (n *Node) MakeNew(typ reflect.Type) Ki {
 }
 
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	kid := n.MakeNew(typ)
 	err := n.AddChildImpl(kid)
 	if err == nil {
 		kid.SetName(name)
 		bitflag.Set(&n.Flag, int(ChildAdded))
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return kid
 }
 
 func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	kid := n.MakeNew(typ)
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		kid.SetName(name)
 		bitflag.Set(&n.Flag, int(ChildAdded))
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return kid
 }
 
 func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	kid := n.MakeNew(typ)
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
@@ -542,51 +576,48 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 		kid.SetUniqueName(name)
 		bitflag.Set(&n.Flag, int(ChildAdded))
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return kid
 }
 
-func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) bool {
+func (n *Node) MoveChild(from, to int) error {
+	updt := n.UpdateStart()
+	err := n.Kids.Move(from, to)
+	if err == nil {
+		bitflag.Set(&n.Flag, int(ChildMoved))
+	}
+	n.UpdateEnd(updt)
+	return err
+}
+
+func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, updt bool) {
+	mods, updt = false, false
 	sz := len(n.Kids)
 	if trgn == sz {
-		return false
+		return
 	}
-	updt := false
 	for sz > trgn {
-		if !updt {
-			updt = true
-			n.UpdateStart()
+		if !mods {
+			mods = true
+			updt = n.UpdateStart()
 		}
 		sz--
 		n.DeleteChildAtIndex(sz, true)
 	}
 	for sz < trgn {
-		if !updt {
-			updt = true
-			n.UpdateStart()
+		if !mods {
+			mods = true
+			updt = n.UpdateStart()
 		}
 		nm := fmt.Sprintf("%v%v", nameStub, sz)
 		n.InsertNewChildUnique(typ, sz, nm)
 		sz++
 	}
-	if updt {
-		n.UpdateEnd()
-	}
-	return updt
+	return
 }
 
-func (n *Node) MoveChild(from, to int) error {
-	n.UpdateStart()
-	err := n.Kids.Move(from, to)
-	if err == nil {
-		bitflag.Set(&n.Flag, int(ChildMoved))
-	}
-	n.UpdateEnd()
-	return err
-}
-
-func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
-	didUpdt := false
+func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
+	mods, updt = false, false
 	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
 	for i, tn := range config {
@@ -604,15 +635,15 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 		}
 		ti, ok := nm[knm]
 		if !ok {
-			if !didUpdt {
-				didUpdt = true
-				n.UpdateStart()
+			if !mods {
+				mods = true
+				updt = n.UpdateStart()
 			}
 			n.DeleteChildAtIndex(i, true) // assume destroy
 		} else if kid.Type() != config[ti].Type {
-			if !didUpdt {
-				didUpdt = true
-				n.UpdateStart()
+			if !mods {
+				mods = true
+				updt = n.UpdateStart()
 			}
 			n.DeleteChildAtIndex(i, true) // assume destroy
 		}
@@ -626,9 +657,9 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 			kidx = n.ChildIndexByName(tn.Name, i)
 		}
 		if kidx < 0 {
-			if !didUpdt {
-				didUpdt = true
-				n.UpdateStart()
+			if !mods {
+				mods = true
+				updt = n.UpdateStart()
 			}
 			if uniqNm {
 				n.InsertNewChildUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
@@ -637,18 +668,15 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) bool {
 			}
 		} else {
 			if kidx != i {
-				if !didUpdt {
-					didUpdt = true
-					n.UpdateStart()
+				if !mods {
+					mods = true
+					updt = n.UpdateStart()
 				}
 				n.Kids.Move(kidx, i)
 			}
 		}
 	}
-	if didUpdt {
-		n.UpdateEnd()
-	}
-	return didUpdt
+	return
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -738,7 +766,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 		return
 	}
 	child := n.Kids[idx]
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	bitflag.Set(&n.Flag, int(ChildDeleted))
 	if child.Parent() == n.This {
 		// only deleting if we are still parent -- change parent first to
@@ -755,7 +783,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 		n.Deleted = append(n.Deleted, child)
 	}
 	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 }
 
 func (n *Node) DeleteChild(child Ki, destroy bool) {
@@ -777,7 +805,7 @@ func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
 }
 
 func (n *Node) DeleteChildren(destroy bool) {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	bitflag.Set(&n.Flag, int(ChildrenDeleted))
 	for _, child := range n.Kids {
 		bitflag.Set(child.Flags(), int(NodeDeleted))
@@ -789,7 +817,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 		n.Deleted = append(n.Deleted, n.Kids...)
 	}
 	n.Kids = n.Kids[:0] // preserves capacity of list
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 }
 
 func (n *Node) Delete(destroy bool) {
@@ -1084,8 +1112,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 
 //////////////////////////////////////////////////////////////////////////
 //  State update signaling -- automatically consolidates all changes across
-//   levels so there is only one update at end (optionally per node or only
-//   at highest level)
+//   levels so there is only one update at highest level of modification
 //   All modification starts with UpdateStart() and ends with UpdateEnd()
 
 // after an UpdateEnd, DestroyDeleted is called
@@ -1094,134 +1121,88 @@ func (n *Node) NodeSignal() *Signal {
 	return &n.NodeSig
 }
 
-func (n *Node) UpdateCtr() *atomctr.Ctr {
-	return &n.Updating
-}
-
-func (n *Node) UpdateStart() {
+func (n *Node) UpdateStart() bool {
+	if n.IsUpdatingMu() {
+		return false
+	}
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
-		return
+		return false
 	}
 	if n.OnlySelfUpdate() {
-		n.Updating.Inc()
+		n.SetFlagMu(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			if k.UpdateCtr().Value() == 0 { // clear at start of update
+			if !k.IsUpdating() {
 				bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
-			}
-			k.UpdateCtr().Inc()
-			return true
-		})
-	}
-}
-
-func (n *Node) UpdateEnd() {
-	if n.IsDestroyed() || n.IsDeleted() {
-		return
-	}
-	if n.OnlySelfUpdate() {
-		if n.Updating.Dec() == 0 {
-			n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
-			n.DestroyAllDeleted()
-		}
-	} else {
-		par_updt := false
-		n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
-			par_up := d.(*bool)             // did the parent already update?
-			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-				if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
-					k.UpdateCtr().Dec()
-					k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
-					k.DestroyAllDeleted()
-					*par_up = true // we updated so nobody else can!
-				} else {
-					k.UpdateCtr().Dec()
-				}
+				k.SetFlagMu(int(Updating))
+				return true // keep going down
 			} else {
-				if k.UpdateCtr().Value() <= 0 {
-					if !k.IsDestroyed() && !k.IsDeleted() {
-						log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
-					}
-				} else {
-					k.UpdateCtr().Dec()
-				}
+				return false // bail -- already updating
 			}
-			return true
 		})
 	}
+	return true
 }
 
-func (n *Node) UpdateEndNoSig() {
+func (n *Node) UpdateEnd(updt bool) {
+	if !updt {
+		return
+	}
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
 	if n.OnlySelfUpdate() {
-		if n.Updating.Dec() == 0 {
-			// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
-			n.DestroyAllDeleted()
-		}
+		n.DestroyAllDeleted()
+		n.ClearFlagMu(int(Updating))
+		n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
 	} else {
-		par_updt := false
-		n.FuncDownMeFirst(0, &par_updt, func(k Ki, level int, d interface{}) bool {
-			par_up := d.(*bool)             // did the parent already update?
-			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-				if k.Parent() == nil || (!*par_up && k.Parent().UpdateCtr().Value() == 0) {
-					k.UpdateCtr().Dec()
-					// k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
-					k.DestroyAllDeleted()
-					*par_up = true // we updated so nobody else can!
-				} else {
-					k.UpdateCtr().Dec()
-				}
-			} else {
-				if k.UpdateCtr().Value() <= 0 {
-					if !k.IsDestroyed() && !k.IsDeleted() {
-						log.Printf("Ki Node UpdateEnd called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
-					}
-				} else {
-					k.UpdateCtr().Dec()
-				}
-			}
-			return true
-		})
-	}
-}
-
-func (n *Node) UpdateEndAll() {
-	if n.IsDestroyed() || n.IsDeleted() {
-		return
-	}
-	if n.OnlySelfUpdate() {
-		if n.Updating.Dec() == 0 {
-			n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
-			n.DestroyAllDeleted()
-		}
-	} else {
+		n.DestroyAllDeleted()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			if k.UpdateCtr().Value() == 1 { // we will go to 0 -- but don't do yet so !updtall works
-				k.UpdateCtr().Dec()
-				k.NodeSignal().Emit(k, int64(NodeSignalUpdated), *(k.Flags()))
-				k.DestroyDeleted()
-			} else {
-				if k.UpdateCtr().Value() <= 0 {
-					if !k.IsDestroyed() && !k.IsDeleted() {
-						log.Printf("Ki Node UpdateEndAll called with Updating <= 0: %d in node: %v\n", *(k.UpdateCtr()), k.PathUnique())
-					}
-				} else {
-					k.UpdateCtr().Dec()
-				}
-			}
+			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
+		n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
 	}
+}
+
+func (n *Node) UpdateEndNoSig(updt bool) {
+	if !updt {
+		return
+	}
+	if n.IsDestroyed() || n.IsDeleted() {
+		return
+	}
+	if n.OnlySelfUpdate() {
+		n.DestroyAllDeleted()
+		n.ClearFlagMu(int(Updating))
+		// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+	} else {
+		n.DestroyAllDeleted()
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			return true
+		})
+		// n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+	}
+}
+
+func (n *Node) UpdateSig() bool {
+	if n.IsUpdatingMu() {
+		return false
+	}
+	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
+		return false
+	}
+	n.NodeSignal().Emit(n, int64(NodeSignalUpdated), n.Flag)
+	return true
 }
 
 func (n *Node) UpdateReset() {
 	if n.OnlySelfUpdate() {
-		n.Updating.Set(0)
+		n.ClearFlagMu(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.UpdateCtr().Set(0)
+			k.ClearFlagMu(int(Updating))
 			return true
 		})
 	}
@@ -1266,31 +1247,31 @@ func (n *Node) SetField(field string, val interface{}) bool {
 		log.Printf("ki.SetField, could not find field %v on node %v\n", field, n.PathUnique())
 		return false
 	}
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	ok := kit.SetRobust(kit.PtrValue(fv).Interface(), val)
 	if ok {
 		bitflag.Set(n.Flags(), int(FieldUpdated))
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return ok
 }
 
 func (n *Node) SetFieldDown(field string, val interface{}) {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.SetField(field, val)
 		return true
 	})
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 }
 
 func (n *Node) SetFieldUp(field string, val interface{}) {
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	n.FuncUp(0, nil, func(k Ki, level int, d interface{}) bool {
 		k.SetField(field, val)
 		return true
 	})
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 }
 
 func (n *Node) FieldByName(field string) interface{} {
@@ -1320,21 +1301,21 @@ func (n *Node) CopyFrom(from Ki) error {
 		log.Print(err)
 		return err
 	}
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	bitflag.Set(&n.Flag, int(NodeCopied))
 	sameTree := (n.Root() == from.Root())
 	from.GetPtrPaths()
 	err := n.CopyFromRaw(from)
 	n.DestroyAllDeleted() // in case we deleted some kiddos
 	if err != nil {
-		n.UpdateEnd()
+		n.UpdateEnd(updt)
 		return err
 	}
 	if sameTree {
 		n.UpdatePtrPaths(fmpath, mypath, true)
 	}
 	n.SetPtrsFmPaths()
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return nil
 }
 
@@ -1354,10 +1335,13 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 			cfg[i].Type = kid.Type()
 			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
 		}
-		n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
+		mods, updt := n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
 		for i, kid := range from.Children() {
 			mkid := n.Kids[i]
 			mkid.SetNameRaw(kid.Name()) // restore orig user-names
+		}
+		if mods {
+			n.UpdateEnd(updt)
 		}
 	} else {
 		n.DeleteChildren(true)
@@ -1508,7 +1492,7 @@ func (n *Node) LoadJSON(b []byte) error {
 	if err = n.ThisCheck(); err != nil {
 		return err
 	}
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	if UseJsonIter {
 		err = jsoniter.Unmarshal(b, n.This) // key use of this!
 	} else {
@@ -1517,7 +1501,7 @@ func (n *Node) LoadJSON(b []byte) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return err
 }
 
@@ -1545,12 +1529,12 @@ func (n *Node) LoadXML(b []byte) error {
 	if err = n.ThisCheck(); err != nil {
 		return err
 	}
-	n.UpdateStart()
+	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()
 	}
-	n.UpdateEnd()
+	n.UpdateEnd(updt)
 	return nil
 }
 

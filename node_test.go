@@ -300,7 +300,10 @@ func TestNodeConfig(t *testing.T) {
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 
-	parent.ConfigChildren(config1, false)
+	mods, updt := parent.ConfigChildren(config1, false)
+	if mods {
+		parent.UpdateEnd(updt)
+	}
 
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
@@ -321,8 +324,10 @@ func TestNodeConfig(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	// parent.ConfigChildren(config2, false)
-	parent.ConfigChildren(config3, false)
+	mods, updt = parent.ConfigChildren(config3, false)
+	if mods {
+		parent.UpdateEnd(updt)
+	}
 
 	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 
@@ -480,9 +485,9 @@ func TestNodeUpdate(t *testing.T) {
 	parent.AddNewChild(nil, "child1")
 	child2 := parent.AddNewChild(nil, "child1")
 	// child3 :=
-	parent.UpdateStart()
+	updt := parent.UpdateStart()
 	parent.AddNewChild(nil, "child1")
-	parent.UpdateEnd()
+	parent.UpdateEnd(updt)
 	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	// fmt.Printf("res: %v\n", res)
@@ -499,24 +504,11 @@ func TestNodeUpdate(t *testing.T) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
 
-	// fmt.Print("\nnode update all starting\n")
-	child2.UpdateStart()
-	schild2.UpdateStart()
-	schild2.UpdateEndAll()
-	child2.UpdateEndAll()
-
-	// fmt.Printf("res: %v\n", res)
-	trg = []string{"child1 sig NodeSignalUpdated", "subchild1 sig NodeSignalUpdated"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("update signal all error -- results: %v != target: %v\n", res, trg)
-	}
-	res = res[:0]
-
 	// fmt.Print("\nnode update top starting\n")
-	child2.UpdateStart()
-	schild2.UpdateStart()
-	schild2.UpdateEnd()
-	child2.UpdateEnd()
+	updt = child2.UpdateStart()
+	updt2 := schild2.UpdateStart()
+	schild2.UpdateEnd(updt2)
+	child2.UpdateEnd(updt)
 
 	// fmt.Printf("res: %v\n", res)
 	trg = []string{"child1 sig NodeSignalUpdated"}
@@ -526,12 +518,12 @@ func TestNodeUpdate(t *testing.T) {
 	res = res[:0]
 
 	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
-		res = append(res, fmt.Sprintf("%v %v", n.UniqueName(), *n.UpdateCtr()))
+		res = append(res, fmt.Sprintf("%v %v", n.UniqueName(), n.IsUpdating()))
 		return true
 	})
 	// fmt.Printf("res: %v\n", res)
 
-	trg = []string{"par1 0", "child1 0", "child1_1 0", "subchild1 0", "child1_2 0"}
+	trg = []string{"par1 false", "child1 false", "child1_1 false", "subchild1 false", "child1_2 false"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("update counts error -- results: %v != target: %v\n", res, trg)
 	}
@@ -552,9 +544,9 @@ func TestProps(t *testing.T) {
 	parent.AddNewChild(nil, "child1")
 	child2 := parent.AddNewChild(nil, "child1")
 	// child3 :=
-	parent.UpdateStart()
+	updt := parent.UpdateStart()
 	parent.AddNewChild(nil, "child1")
-	parent.UpdateEnd()
+	parent.UpdateEnd(updt)
 	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
@@ -633,8 +625,8 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 512
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 128
+	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 1024
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 256
 `
 	// fmt.Printf("Move Signals:\n%v", sigs)
 	if sigs != mvsigs {
@@ -642,17 +634,17 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 128
 	}
 	sigs = ""
 
-	tree2.UpdateStart()
+	updt := tree2.UpdateStart()
 	tree2.DeleteChild(child12, true)
-	tree2.UpdateEnd()
+	tree2.UpdateEnd(updt)
 
 	// fmt.Printf("#################################\n")
 
 	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 512
 ki.Signal Emit from: child12 sig: NodeSignalDestroying data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 1024
 `
 
 	// fmt.Printf("Delete Signals:\n%v", sigs)
