@@ -22,7 +22,7 @@ func main() {
 		height := 400
 
 		// turn this on to see a trace of the rendering
-		// gi.Update2DTrace = true
+		gi.Update2DTrace = true
 		// gi.Render2DTrace = true
 		// gi.Layout2DTrace = true
 
@@ -30,12 +30,12 @@ func main() {
 		rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
 		win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
-		win.UpdateStart()
 
 		icnm := "widget-wedge-down"
 		wdicon := gi.IconByName(icnm)
 
 		vp := win.WinViewport2D()
+		vp.UpdateStart()
 		vp.SetProp("background-color", "#FFF")
 		vp.Fill = true
 
@@ -196,8 +196,10 @@ func main() {
 			fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 		})
 
-		win.UpdateEnd()
+		vp.UpdateEnd()
 
 		win.StartEventLoop()
+
+		fmt.Printf("ending\n")
 	})
 }

@@ -240,7 +240,7 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		if me.Action == mouse.Press {
 			ab.ButtonAsBase().ButtonPressed()
 		} else {
-			ab.ButtonAsBase().ButtonReleased()
+			ab.ButtonRelease() // special one
 		}
 	})
 	g.ReceiveEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {

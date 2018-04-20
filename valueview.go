@@ -670,7 +670,8 @@ func (vv *BoolValueView) WidgetType() reflect.Type {
 func (vv *BoolValueView) UpdateWidget() {
 	cb := vv.Widget.(*CheckBox)
 	npv := kit.NonPtrValue(vv.Value)
-	cb.SetChecked(npv.Bool())
+	bv, _ := kit.ToBool(npv.Interface())
+	cb.SetChecked(bv)
 }
 
 func (vv *BoolValueView) ConfigWidget(widg Node2D) {

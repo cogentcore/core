@@ -12,13 +12,17 @@ import (
 )
 
 // open an interactive editor of the given Ki tree, at its root
-func GoGiEditorOf(obj ki.Ki) *Window {
+func GoGiEditorOf(obj ki.Ki) {
+	gogiEditorOf(obj)
+}
+
+func gogiEditorOf(obj ki.Ki) {
 	width := 800
 	height := 600
 	win := NewWindow2D("GoGi Editor Window", width, height, true)
-	win.UpdateStart()
 
 	vp := win.WinViewport2D()
+	vp.UpdateStart()
 	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
@@ -101,7 +105,6 @@ func GoGiEditorOf(obj ki.Ki) *Window {
 		}
 	})
 
-	win.UpdateEnd()
-	win.StartEventLoopNoWait()
-	return win
+	vp.UpdateEnd()
+	go win.StartEventLoopNoWait()
 }

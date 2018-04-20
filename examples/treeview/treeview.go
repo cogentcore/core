@@ -9,7 +9,7 @@ import (
 
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
-	_ "github.com/rcoreilly/goki/gi/oswin/init"
+	"github.com/rcoreilly/goki/gi/oswin/driver"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )
@@ -40,85 +40,82 @@ type TestNodeB struct {
 }
 
 func main() {
-	go mainrun()
-	oswin.RunBackendEventLoop() // this needs to run in main loop
-}
+	driver.Main(func(app oswin.App) {
+		// a source tree to view
+		srctree := TestNodeB{}
+		srctree.InitName(&srctree, "par1")
+		// child1 :=
+		srctree.AddNewChild(nil, "child1")
+		child2 := srctree.AddNewChild(nil, "child2")
+		// child3 :=
+		srctree.AddNewChild(nil, "child3")
+		// schild2 :=
+		child2.AddNewChild(nil, "subchild1")
 
-func mainrun() {
-	// a source tree to view
-	srctree := TestNodeB{}
-	srctree.InitName(&srctree, "par1")
-	// child1 :=
-	srctree.AddNewChild(nil, "child1")
-	child2 := srctree.AddNewChild(nil, "child2")
-	// child3 :=
-	srctree.AddNewChild(nil, "child3")
-	// schild2 :=
-	child2.AddNewChild(nil, "subchild1")
+		srctree.SetProp("test1", "string val")
+		srctree.SetProp("test2", 3.14)
+		srctree.SetProp("test3", false)
 
-	srctree.SetProp("test1", "string val")
-	srctree.SetProp("test2", 3.14)
-	srctree.SetProp("test3", false)
+		// turn this on to see a trace of the rendering
+		// gi.Render2DTrace = true
+		// gi.Layout2DTrace = true
 
-	// turn this on to see a trace of the rendering
-	// gi.Render2DTrace = true
-	// gi.Layout2DTrace = true
+		width := 800
+		height := 800
+		win := gi.NewWindow2D("TreeView Window", width, height, true)
 
-	width := 800
-	height := 800
-	win := gi.NewWindow2D("TreeView Window", width, height)
-	win.UpdateStart()
+		vp := win.WinViewport2D()
+		vp.UpdateStart()
+		vp.SetProp("background-color", "#FFF")
+		vp.Fill = true
 
-	vp := win.WinViewport2D()
-	vp.SetProp("background-color", "#FFF")
-	vp.Fill = true
+		vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
+		vlay.Lay = gi.LayoutCol
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+		trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+		trow.Lay = gi.LayoutRow
+		trow.SetProp("align-vert", gi.AlignMiddle)
+		trow.SetProp("align-horiz", "center")
+		trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+		trow.SetStretchMaxWidth()
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
-	trow.SetProp("align-vert", gi.AlignMiddle)
-	trow.SetProp("align-horiz", "center")
-	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	trow.SetStretchMaxWidth()
+		spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+		spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+		trow.AddNewChild(gi.KiT_Stretch, "str1")
+		lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+		lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
+		lab1.SetProp("max-width", -1)
+		lab1.SetProp("text-align", "center")
+		trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
+		split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+		split.Dim = gi.X
 
-	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
-	split.Dim = gi.X
+		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
+		svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
+		split.SetSplits(.3, .7)
 
-	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
-	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
-	split.SetSplits(.3, .7)
+		tv := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
+		tv.SetSrcNode(&srctree)
 
-	tv := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
-	tv.SetSrcNode(&srctree)
+		sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
+		sv.SetStruct(&srctree, nil)
 
-	sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
-	sv.SetStruct(&srctree)
+		tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if data == nil {
+				return
+			}
+			// tvr, _ := send.EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView) // root is sender
+			tvn, _ := data.(ki.Ki).EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView)
+			svr, _ := recv.EmbeddedStruct(gi.KiT_StructView).(*gi.StructView)
+			if sig == int64(gi.TreeViewSelected) {
+				svr.SetStruct(tvn.SrcNode.Ptr, nil)
+			}
+		})
 
-	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if data == nil {
-			return
-		}
-		// tvr, _ := send.EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView) // root is sender
-		tvn, _ := data.(ki.Ki).EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView)
-		svr, _ := recv.EmbeddedStruct(gi.KiT_StructView).(*gi.StructView)
-		if sig == int64(gi.NodeSelected) {
-			svr.SetStruct(tvn.SrcNode.Ptr)
-		}
+		vp.UpdateEnd()
+
+		win.StartEventLoop()
 	})
-
-	win.UpdateEnd()
-
-	win.StartEventLoop()
 }

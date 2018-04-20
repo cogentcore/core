@@ -21,10 +21,10 @@ import (
 // StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type StructView struct {
 	Frame
-	Struct  interface{} `desc:"the struct that we are a view onto"`
-	Title   string      `desc:"title / prompt to show above the editor fields"`
-	Fields  []ValueView `desc:"ValueView representations of the fields"`
-	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Struct     interface{} `desc:"the struct that we are a view onto"`
+	Title      string      `desc:"title / prompt to show above the editor fields"`
+	FieldViews []ValueView `desc:"ValueView representations of the fields"`
+	TmpSave    ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -140,7 +140,7 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
-	sv.Fields = make([]ValueView, 0)
+	sv.FieldViews = make([]ValueView, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
@@ -159,14 +159,14 @@ func (sv *StructView) ConfigStructGrid() {
 		valnm := fmt.Sprintf("value-%v", field.Name)
 		config.Add(KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-		sv.Fields = append(sv.Fields, vv)
+		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
 	updt := sg.ConfigChildren(config, false)
 	if updt {
 		sv.SetFullReRender()
 	}
-	for i, vv := range sv.Fields {
+	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
@@ -221,7 +221,7 @@ type StructViewInline struct {
 	WidgetBase
 	Struct        interface{} `desc:"the struct that we are a view onto"`
 	StructViewSig ki.Signal   `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
-	Fields        []ValueView `desc:"ValueView representations of the fields"`
+	FieldViews    []ValueView `desc:"ValueView representations of the fields"`
 	TmpSave       ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
@@ -247,7 +247,7 @@ func (sv *StructViewInline) ConfigParts() {
 	sv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
-	sv.Fields = make([]ValueView, 0)
+	sv.FieldViews = make([]ValueView, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
@@ -266,11 +266,11 @@ func (sv *StructViewInline) ConfigParts() {
 		valnm := fmt.Sprintf("value-%v", field.Name)
 		config.Add(KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-		sv.Fields = append(sv.Fields, vv)
+		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
 	sv.Parts.ConfigChildren(config, false)
-	for i, vv := range sv.Fields {
+	for i, vv := range sv.FieldViews {
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()

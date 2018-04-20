@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/rcoreilly/goki/gi/units"
@@ -164,19 +165,33 @@ type FontLib struct {
 	FontPaths  []string
 	FontsAvail map[string]string `desc:"map of font name to path to file"`
 	Faces      map[string]map[float64]font.Face
+	initMu     sync.Mutex
+	loadMu     sync.Mutex
 }
 
 // we export this font library
 var FontLibrary FontLib
 
 func (fl *FontLib) Init() {
+	fl.initMu.Lock()
 	if fl.FontPaths == nil {
 		fl.FontPaths = make([]string, 0, 100)
 		fl.FontsAvail = make(map[string]string)
 		fl.Faces = make(map[string]map[float64]font.Face)
 	} else if len(fl.FontsAvail) == 0 {
+		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
 		fl.UpdateFontsAvail()
 	}
+	fl.initMu.Unlock()
+}
+
+// InitFontPaths initializes font paths to system defaults, only if no paths
+// have yet been set
+func (fl *FontLib) InitFontPaths(paths ...string) {
+	if len(fl.FontPaths) > 0 {
+		return
+	}
+	fl.AddFontPaths(paths...)
 }
 
 func (fl *FontLib) AddFontPaths(paths ...string) bool {
@@ -234,11 +249,13 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 			log.Printf("FontLib: error loading font %v\n", err)
 			return nil, err
 		}
+		fl.loadMu.Lock()
 		facemap := fl.Faces[fontnm]
 		if facemap == nil {
 			facemap = make(map[float64]font.Face)
 		}
 		facemap[points] = face
+		fl.loadMu.Unlock()
 		return face, nil
 	}
 	return nil, fmt.Errorf("FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)

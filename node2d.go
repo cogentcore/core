@@ -222,7 +222,7 @@ func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
 
 	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
-	g.Paint.SetUnitContext(g.Viewport, Vec2DZero) // svn only has to set units here once
+	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 }
 
 // style the Style values from node properties and optional base-level defautls -- for Widget-style nodes
@@ -245,7 +245,8 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 		g.Style.SetStyle(nil, &StyleDefault, g.Properties())
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
-	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
+	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
+	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
 }
 
 // get the style properties for a child in parts (or any other child) based on
@@ -411,22 +412,26 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 
 // full render of the tree
 func (g *Node2DBase) FullRender2DTree() {
+	g.UpdateStart() // already rendering!
 	g.Init2DTree()
 	g.Style2DTree()
 	g.Size2DTree()
 	g.Layout2DTree()
 	g.Render2DTree()
+	g.UpdateEndNoSig()
 }
 
 // re-render of the tree -- after it has already been initialized and styled
 // -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
 	ld := g.LayData // save our current layout data
+	g.UpdateStart() // already rendering
 	g.Style2DTree()
 	g.Size2DTree()
 	g.LayData = ld // restore
 	g.Layout2DTree()
 	g.Render2DTree()
+	g.UpdateEnd()
 }
 
 // initialize scene graph tree from node it is called on -- only needs to be

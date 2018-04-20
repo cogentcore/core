@@ -8,8 +8,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate stringer -type=Code
-
 // Package key defines an event for physical keyboard keys, for the GoGi GUI
 // system.
 //
@@ -286,7 +284,7 @@ const (
 	CodeCompose Code = 0x10000
 )
 
-//go:generate stringer -type=Code
+// // go: generate stringer -type=Code
 
 // TODO: Given we use runes outside the unicode space, should we provide a
 // printing function? Related: it's a little unfortunate that printing a

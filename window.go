@@ -5,9 +5,13 @@
 package gi
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	"log"
+	"os"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/key"
@@ -19,7 +23,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
-	// "reflect"
+	"github.com/rcoreilly/prof"
 
 	"time"
 )
@@ -54,7 +58,7 @@ var KiT_Window = kit.Types.AddType(&Window{}, nil)
 // default) -- stdPixels means use standardized "pixel" units for the display
 // size (96 per inch), not the actual underlying raw display dot pixels
 func NewWindow(name string, width, height int, stdPixels bool) *Window {
-	FontLibrary.AddFontPaths("/Library/Fonts")
+	FontLibrary.InitFontPaths("/Library/Fonts")
 	win := &Window{}
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
@@ -122,22 +126,29 @@ func (w *Window) Resize(width, height int) {
 // changes to the underlying OSWindow -- wrap updates in win.UpdateStart /
 // win.UpdateEnd to actually flush the updates to be visible
 func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	pr := prof.Start("win.UpdateVpRegion")
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
+	pr.End()
 }
 
 // UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
 func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	pr := prof.Start("win.UpdateFullVpRegion")
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
+	pr.End()
 }
 
 // UpdateVpRegionFromMain basically clears the region where the vp would show
 // up, from the main
 func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
+	pr := prof.Start("win.UpdateVpRegionFromMain")
 	w.WinTex.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
+	pr.End()
 }
 
 // FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
 func (w *Window) FullUpdate() {
+	pr := prof.Start("win.FullUpdate")
 	w.UpdateStart()
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
@@ -159,13 +170,25 @@ func (w *Window) FullUpdate() {
 			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
+	pr.End()
 	w.UpdateEnd() // drives the flush
 }
 
-func (w *Window) Publish() {
-	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
-	w.OSWin.Publish()
+var lastFlush time.Time
 
+func (w *Window) Publish() {
+	// interval := time.Now().Sub(lastFlush) / time.Millisecond
+	// // fmt.Printf("interval: %v\n", interval)
+	// if interval < 20 {
+	// 	return
+	// }
+	pr := prof.Start("win.Publish.Copy")
+	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
+	pr.End()
+	pr2 := prof.Start("win.Publish.Publish")
+	w.OSWin.Publish()
+	pr2.End()
+	lastFlush = time.Now()
 }
 
 func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
@@ -196,17 +219,63 @@ func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true
 }
 
+var cpuprofile *string
+var memprofile *string
+
+func (w *Window) StartProfile() {
+	if cpuprofile != nil {
+		return
+	}
+
+	// to read profile: go tool pprof -http=localhost:5555 cpu.prof
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
+	memprofile = flag.String("memprofile", "", "write memory profile to `file`")
+	profFlag := flag.Bool("prof", false, "turn on targeted profiling")
+	flag.Parse()
+	prof.Profiling = *profFlag
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+	}
+}
+
+func (w *Window) EndProfile() {
+	prof.Report(time.Millisecond)
+
+	if *cpuprofile != "" {
+		pprof.StopCPUProfile()
+	}
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+		f.Close()
+	}
+}
+
 func (w *Window) StartEventLoop() {
 	// w.DoFullRender = true
 	// var wg sync.WaitGroup
 	// wg.Add(1)
 	w.EventLoop()
 	// wg.Wait()
+	fmt.Printf("stop event loop\n")
 }
 
 func (w *Window) StartEventLoopNoWait() {
 	w.DoFullRender = true
-	go w.EventLoop()
+	w.EventLoop()
 }
 
 // send given event signal to all receivers that want it -- note that because
@@ -309,6 +378,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
 	ftyp := oswin.MouseFocusEvent
+	updated := false
 	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
@@ -323,7 +393,11 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Enter
 					bitflag.Set(&gi.Flag, int(MouseHasEntered))
-					fmt.Printf("sending enter to: %v\n", gi.PathUnique())
+					// fmt.Printf("sending enter to: %v\n", gi.PathUnique())
+					if !updated {
+						w.UpdateStart()
+						updated = true
+					}
 					return true // send event
 				} else {
 					return false // already in
@@ -332,7 +406,11 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Exit
 					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
-					fmt.Printf("sending exit to: %v\n", gi.PathUnique())
+					// fmt.Printf("sending exit to: %v\n", gi.PathUnique())
+					if !updated {
+						w.UpdateStart()
+						updated = true
+					}
 					return true // send event
 				} else {
 					return false // already out
@@ -343,6 +421,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 			return false
 		}
 	})
+	if updated {
+		w.UpdateEnd()
+	}
 }
 
 // process Mouseup events during popup for possible closing of popup -- returns true if popup should be deleted
@@ -425,14 +506,20 @@ func (w *Window) EventLoop() {
 		case *lifecycle.Event:
 			if e.To == lifecycle.StageDead {
 				fmt.Println("close")
-				// oswin.StopBackendEventLoop()
 				evi.SetProcessed()
-				return // break out of our event loop
+				break
+			} else {
+				fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
+				if e.Crosses(lifecycle.StageFocused) == lifecycle.CrossOff {
+					w.EndProfile()
+				}
+				evi.SetProcessed()
 			}
 		case *paint.Event:
 			fmt.Printf("Got paint event!\n")
 			w.Viewport.FullRender2DTree()
 			w.SetNextFocusItem()
+			w.StartProfile()
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())

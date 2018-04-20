@@ -36,7 +36,6 @@ import (
 	"image"
 	"log"
 	"runtime"
-	"time"
 	"unsafe"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -360,16 +359,16 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 		}
 	default:
 		act := cocoaMouseAct(ty)
-		if lastMouseEvent != nil {
-			interval := time.Now().Sub(lastMouseEvent.Time()) / time.Millisecond
-			// todo: process DoubleClickWait option -- requires caching the
-			// event and delivering conditional on a global timer... probably
-			// don't want to delay things here.. some kid of go routine with a
-			// timer delay on it or something like that
-			if interval < time.Duration(mouse.DoubleClickMSec) {
-				act = mouse.DoubleClick
-			}
-		}
+		// if lastMouseEvent != nil {
+		// 	interval := time.Now().Sub(lastMouseEvent.Time()) / time.Millisecond
+		// 	// todo: process DoubleClickWait option -- requires caching the
+		// 	// event and delivering conditional on a global timer... probably
+		// 	// don't want to delay things here.. some kid of go routine with a
+		// 	// timer delay on it or something like that
+		// 	if interval < time.Duration(mouse.DoubleClickMSec) {
+		// 		act = mouse.DoubleClick
+		// 	}
+		// }
 		event = &mouse.Event{
 			Where:     where,
 			Button:    cmButton,
@@ -377,6 +376,8 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 			Modifiers: mods,
 		}
 	}
+	event.SetTime() // need this now for double-click
+	lastMouseEvent = event
 	sendWindowEvent(id, event)
 }
 

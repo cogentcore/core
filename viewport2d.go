@@ -17,6 +17,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/rcoreilly/prof"
 )
 
 // these extend NodeBase NodeFlags to hold viewport state
@@ -420,7 +421,9 @@ func SignalViewport2D(vpki, node ki.Ki, sig int64, data interface{}) {
 // re-render a specific node that has said it can re-render
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
+	pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
+	pr.End()
 	gnvp := gn.AsViewport2D()
 	if !(gnvp != nil && bitflag.Has(gnvp.Flag, int(VpFlagDrawIntoWin))) {
 		if vp.Win != nil {
@@ -434,7 +437,9 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 // re-render a specific node that has said it can re-render
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	gn := gni.AsNode2D()
+	pr := prof.Start("vp.ReRender2DAnchor")
 	gn.ReRender2DTree()
+	pr.End()
 	if vp.Win != nil {
 		vp.Win.UpdateStart()
 		vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
