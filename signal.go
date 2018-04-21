@@ -215,9 +215,9 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 }
 
 // function type for filtering signals
-type SignalFilterFunc func(ki Ki) bool
+type SignalFilterFunc func(ki Ki, idx int, con *Connection) bool
 
-// Emit Filtered calls function on each item only sends signal if function returns true
+// EmitFiltered calls function on each item only sends signal if function returns true
 func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
 	deleted := 0
 	for i := range s.Cons {
@@ -228,13 +228,13 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun Signal
 			deleted++
 			continue
 		}
-		if fun(con.Recv) {
+		if fun(con.Recv, j, &con) {
 			con.Func(con.Recv, sender, sig, data)
 		}
 	}
 }
 
-// EmitGo Filtered calls function on each item only sends signal if function returns true -- concurrent version
+// EmitGoFiltered calls function on each item only sends signal if function returns true -- concurrent version
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
 	deleted := 0
 	for i := range s.Cons {
@@ -245,7 +245,7 @@ func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun Sign
 			deleted++
 			continue
 		}
-		if fun(con.Recv) {
+		if fun(con.Recv, j, &con) {
 			go con.Func(con.Recv, sender, sig, data)
 		}
 	}
