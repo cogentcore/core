@@ -64,16 +64,18 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
 	sz := image.Point{width, height}
+	winDPI := 96.0
+	if oswin.TheApp.NScreens() > 0 {
+		sc := oswin.TheApp.Screen(0)
+		winDPI = float64(sc.LogicalDPI)
+		fmt.Printf("screen logical dpi is: %v\n", winDPI)
+	}
 	if stdPixels {
 		unctx := units.Context{}
 		unctx.Defaults()
-		if oswin.TheApp.NScreens() > 0 {
-			sc := oswin.TheApp.Screen(0)
-			unctx.DPI = float64(sc.LogicalDPI)
-			fmt.Printf("screen logical dpi is: %v\n", sc.LogicalDPI)
-			sz.X = int(unctx.ToDots(float64(width), units.Px))
-			sz.Y = int(unctx.ToDots(float64(height), units.Px))
-		}
+		unctx.DPI = winDPI
+		sz.X = int(unctx.ToDots(float64(width), units.Px))
+		sz.Y = int(unctx.ToDots(float64(height), units.Px))
 	}
 	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
 		Title: name, Width: sz.X, Height: sz.Y,
@@ -88,6 +90,7 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 		return nil
 	}
 	win.OSWin.SetName(name)
+	win.OSWin.SetLogicalDPI(float32(winDPI)) // will also be updated by resize events
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
@@ -106,6 +109,16 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	win.AddChild(vp)
 	win.Viewport = vp
 	return win
+}
+
+// LogicalDPI returns the current logical dots-per-inch resolution of the
+// window, which should be used for most conversion of standard units --
+// physical DPI can be found in the Screen
+func (w *Window) LogicalDPI() float64 {
+	if w.OSWin == nil {
+		return 96.0 // null default
+	}
+	return float64(w.OSWin.LogicalDPI())
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {

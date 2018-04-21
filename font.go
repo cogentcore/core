@@ -70,7 +70,7 @@ type FontStyle struct {
 
 func (p *FontStyle) Defaults() {
 	p.FaceName = "Arial"
-	p.Size = units.NewValue(24, units.Pt)
+	p.Size = units.NewValue(12, units.Pt)
 }
 
 // any updates after generic xml-tag property setting?
@@ -78,8 +78,10 @@ func (p *FontStyle) SetStylePost() {
 }
 
 func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
-	pts := p.Size.Convert(units.Pt, ctxt) // this sets dots too..
-	face, err := FontLibrary.Font(p.FaceName, pts.Val)
+	pts := p.Size.Convert(units.Pt, ctxt) // make sure we're in points
+	scpts := pts.Val * (ctxt.DPI / 96.0)  // rescale in comparison to std DPI
+	// fmt.Printf("LoadFont points: %v scaled: %v, ctxt dpi: %v\n", p.Size.Val, scpts, ctxt.DPI)
+	face, err := FontLibrary.Font(p.FaceName, scpts)
 	if err != nil {
 		log.Printf("%v\n", err)
 		if p.Face == nil {

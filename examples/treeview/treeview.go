@@ -60,8 +60,8 @@ func main() {
 		// gi.Render2DTrace = true
 		// gi.Layout2DTrace = true
 
-		width := 600
-		height := 600
+		width := 1024
+		height := 640
 		win := gi.NewWindow2D("TreeView Window", width, height, true)
 
 		vp := win.WinViewport2D()

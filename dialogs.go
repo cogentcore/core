@@ -65,10 +65,12 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	dlg.State = DialogOpenModal
 
 	updt := dlg.UpdateStart()
+	dlg.Win = win
 	dlg.Init2DTree()
 	dlg.Style2DTree()                                      // sufficient to get sizes
 	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
 	dlg.Size2DTree()                                       // collect sizes
+	dlg.Win = nil
 
 	frame := dlg.ChildByName("frame", 0).(*Frame)
 	vpsz := frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()

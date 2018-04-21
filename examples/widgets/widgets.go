@@ -18,11 +18,11 @@ import (
 
 func main() {
 	driver.Main(func(app oswin.App) {
-		width := 400
-		height := 400
+		width := 1024
+		height := 640
 
 		// turn this on to see a trace of the rendering
-		gi.Update2DTrace = true
+		// gi.Update2DTrace = true
 		// gi.Render2DTrace = true
 		// gi.Layout2DTrace = true
 
@@ -127,8 +127,9 @@ func main() {
 
 		slider1 := row3.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
 		slider1.Dim = gi.X
-		slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
 		slider1.Defaults()
+		slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
+		slider1.SetMinPrefHeight(units.NewValue(1, units.Ex))
 		slider1.SetValue(0.5)
 		slider1.Snap = true
 		slider1.Tracking = true
@@ -136,9 +137,10 @@ func main() {
 
 		slider2 := row3.AddNewChild(gi.KiT_Slider, "slider2").(*gi.Slider)
 		slider2.Dim = gi.Y
-		slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
-		slider2.SetStretchMaxHeight()
 		slider2.Defaults()
+		slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
+		slider2.SetMinPrefWidth(units.NewValue(20, units.Px))
+		slider2.SetStretchMaxHeight()
 		slider2.SetValue(0.5)
 
 		slider1.SliderSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {

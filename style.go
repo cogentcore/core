@@ -204,9 +204,16 @@ func (s *Style) SetStyle(parent, defs *Style, props ki.Props) {
 // render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	s.UnContext.Defaults() // todo: need to get screen information and true dpi
-	if vp != nil && vp.Render.Image != nil {
-		sz := vp.Render.Image.Bounds().Size()
-		s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+	if vp != nil {
+		if vp.Win != nil {
+			s.UnContext.DPI = vp.Win.LogicalDPI()
+			// } else {
+			// 	fmt.Printf("No win for vp: %v\n", vp.PathUnique())
+		}
+		if vp.Render.Image != nil {
+			sz := vp.Render.Image.Bounds().Size()
+			s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+		}
 	}
 	s.Font.SetUnitContext(&s.UnContext)
 	s.ToDots()

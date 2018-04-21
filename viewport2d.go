@@ -115,7 +115,11 @@ func (vp *Viewport2D) IsSVG() bool {
 
 // set our window pointer to point to the current window we are under
 func (vp *Viewport2D) SetCurWin() {
-	vp.Win = vp.ParentWindow()
+	pwin := vp.ParentWindow()
+	if pwin != nil { // ony update if non-nil -- otherwise we could be setting
+		// temporarily to give access to DPI etc
+		vp.Win = pwin
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

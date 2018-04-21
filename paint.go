@@ -101,9 +101,14 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props ki.Props) {
 // render
 func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.UnContext.Defaults() // todo: need to get screen information and true dpi
-	if vp != nil && vp.Render.Image != nil {
-		sz := vp.Render.Image.Bounds().Size()
-		pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+	if vp != nil {
+		if vp.Win != nil {
+			pc.UnContext.DPI = vp.Win.LogicalDPI()
+		}
+		if vp.Render.Image != nil {
+			sz := vp.Render.Image.Bounds().Size()
+			pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+		}
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
 	pc.ToDots()

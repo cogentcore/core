@@ -38,6 +38,11 @@ type Window interface {
 	// physical DPI can be found in the Screen
 	LogicalDPI() float32
 
+	// SetLogicalDPI sets the current logical dots-per-inch resolution of the
+	// window, which should be used for most conversion of standard units --
+	// physical DPI can be found in the Screen
+	SetLogicalDPI(dpi float32)
+
 	// Geometry returns the current position and size of the window relative
 	// to the screen
 	Geometry() image.Rectangle
@@ -141,4 +146,8 @@ func (w WindowBase) Size() image.Point {
 
 func (w WindowBase) LogicalDPI() float32 {
 	return w.LogDPI
+}
+
+func (w WindowBase) SetLogicalDPI(dpi float32) {
+	w.LogDPI = dpi
 }

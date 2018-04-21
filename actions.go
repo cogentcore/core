@@ -340,6 +340,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	}
 	pvp := Viewport2D{}
 	pvp.InitName(&pvp, name+"Menu")
+	pvp.Win = win
 	updt := pvp.UpdateStart()
 	pvp.Fill = true
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
@@ -351,13 +352,13 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	frame.PartStyleProps(frame.This, MenuProps)
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
-		acn.UpdateReset() // could have some leftovers from before
 		frame.AddChild(acn.This)
 	}
 	frame.Init2DTree()
 	frame.Style2DTree()                            // sufficient to get sizes
 	frame.LayData.AllocSize = vp.LayData.AllocSize // give it the whole vp initially
 	frame.Size2DTree()                             // collect sizes
+	pvp.Win = nil
 	vpsz := frame.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit

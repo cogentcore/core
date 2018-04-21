@@ -20,6 +20,7 @@ package units
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"strings"
 
@@ -176,7 +177,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float64) {
 // factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) ToDotsFactor(un Unit) float64 {
 	if uc.DPI == 0 {
-		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
+		log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
 	}
 	switch un {
