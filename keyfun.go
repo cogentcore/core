@@ -4,8 +4,6 @@
 
 package gi
 
-import "fmt"
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  KeyFun is for mapping Keys to Functions
 
@@ -107,7 +105,7 @@ func KeyFun(chord string) KeyFunctions {
 	kf := KeyFunNil
 	if chord != "" {
 		kf = (*ActiveKeyMap)[chord]
-		fmt.Printf("chord: %v = %v\n", chord, kf)
+		// fmt.Printf("chord: %v = %v\n", chord, kf)
 	}
 	return kf
 }

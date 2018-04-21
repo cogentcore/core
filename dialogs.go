@@ -79,6 +79,11 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
 
+	dlg.Resize(vpsz.X, vpsz.Y)
+	dlg.ViewBox.Min = image.Point{x, y}
+	dlg.UpdateEndNoSig(updt)
+
+	// put window at the very end
 	win.ReceiveEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
@@ -90,10 +95,6 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 			ddlg.Accept()
 		}
 	})
-
-	dlg.Resize(vpsz.X, vpsz.Y)
-	dlg.ViewBox.Min = image.Point{x, y}
-	dlg.UpdateEndNoSig(updt)
 
 	win.PushPopup(dlg.This)
 	return true

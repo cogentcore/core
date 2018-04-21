@@ -160,7 +160,8 @@ func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
 	pr.End()
 }
 
-// FullUpdate does a complete update of window pixels -- grab pixels from all the different active viewports
+// FullUpdate does a complete update of window pixels -- grab pixels from all
+// the different active viewports
 func (w *Window) FullUpdate() {
 	pr := prof.Start("win.FullUpdate")
 	updt := w.UpdateStart()
@@ -188,21 +189,13 @@ func (w *Window) FullUpdate() {
 	w.UpdateEnd(updt) // drives the flush
 }
 
-var lastFlush time.Time
-
 func (w *Window) Publish() {
-	// interval := time.Now().Sub(lastFlush) / time.Millisecond
-	// // fmt.Printf("interval: %v\n", interval)
-	// if interval < 20 {
-	// 	return
-	// }
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
 	pr.End()
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
 	pr2.End()
-	lastFlush = time.Now()
 }
 
 func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
@@ -292,11 +285,28 @@ func (w *Window) StartEventLoopNoWait() {
 	w.EventLoop()
 }
 
-// send given event signal to all receivers that want it -- note that because
-// there is a different EventSig for each event type, we are ONLY looking at
-// nodes that have registered to receive that type of event -- the further
-// filtering is just to ensure that they are in the right position to receive
-// the event (focus, etc)
+// IsInScope returns true if the given object is in scope for receiving events
+func (w *Window) IsInScope(gii Node2D, gi *Node2DBase) bool {
+	if w.Popup == nil {
+		return true
+	}
+	if gi.This == w.Popup {
+		return true
+	}
+	if gi.Viewport == nil {
+		return false
+	}
+	if gi.Viewport.This == w.Popup {
+		return true
+	}
+	return false
+}
+
+// SendEventSignal sends given event signal to all receivers that want it --
+// note that because there is a different EventSig for each event type, we are
+// ONLY looking at nodes that have registered to receive that type of event --
+// the further filtering is just to ensure that they are in the right position
+// to receive the event (focus, popup filtering, etc)
 func (w *Window) SendEventSignal(evi oswin.Event) {
 	if evi.IsProcessed() { // someone took care of it
 		return
@@ -306,29 +316,12 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
-	// if et == oswin.MouseDraggedEventType {
-	// 	mde, ok := evi.(*oswin.MouseDraggedEvent)
-	// 	if ok {
-	// 		if w.Dragging != nil {
-	// 			// td := time.Now().Sub(w.LastDrag)
-	// 			// ed := time.Now().Sub(mde.Time)
-	// 			// fmt.Printf("td %v  ed %v\n", td, ed)
-	// 			// if td < 10*time.Millisecond {
-	// 			// 	// fmt.Printf("skipping td %v\n", td)
-	// 			// 	return // too laggy, bail on sending this event
-	// 			// }
-	// 			// lsd := w.LastSentDrag
-	// 			// w.LastSentDrag = *mde
-	// 			// mde.From = lsd.From
-	// 			// w.LastDrag = time.Now()
-	// 			// // evi = mde // reset interface to us
-	// 		}
-	// 	}
-	// }
+	// always process the popup last as a second pass -- this is index if found
+	var popupCon *ki.Connection
 
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
-	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
+	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki, idx int, con *ki.Connection) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
 		}
@@ -337,7 +330,11 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		}
 		gii, gi := KiToNode2D(k)
 		if gi != nil {
-			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
+			if gi.This == w.Popup { // do this last
+				popupCon = con
+				return false
+			}
+			if !w.IsInScope(gii, gi) { // no
 				return false
 			}
 			if evi.OnFocus() && !gii.HasFocus2D() {
@@ -373,7 +370,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 						return true
 					}
 					if !pos.In(gi.WinBBox) {
-						return false // todo: we should probably check entered / existed events and set flags accordingly -- this is a diff pathway for that
+						return false
 					}
 				}
 			}
@@ -383,6 +380,13 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		}
 		return true
 	})
+
+	// send events to the popup last so e.g., dialog can do Accept / Cancel
+	// after other events have been processed
+	if popupCon != nil {
+		popupCon.Func(popupCon.Recv, w.Popup, int64(et), evi)
+	}
+
 }
 
 // process mouse.MoveEvent to generate mouse.FocusEvent events
@@ -392,13 +396,13 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	ftyp := oswin.MouseFocusEvent
 	updated := false
 	updt := false
-	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
+	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki, idx int, con *ki.Connection) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
 		}
-		_, gi := KiToNode2D(k)
+		gii, gi := KiToNode2D(k)
 		if gi != nil {
-			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
+			if !w.IsInScope(gii, gi) { // no
 				return false
 			}
 			in := pos.In(gi.WinBBox)
