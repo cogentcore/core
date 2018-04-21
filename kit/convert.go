@@ -234,24 +234,36 @@ func SetRobust(to, from interface{}) bool {
 	return false
 }
 
+// MakeMap makes a map that is actually addressable, getting around the hidden
+// interface{} that reflect.MakeMap makes..  or something like that.
+func MakeMap(typ reflect.Type) reflect.Value {
+	mp := reflect.MakeMap(typ)
+	evn := reflect.ValueOf(mp.Interface()) // try to get rid of interface
+	typp := evn.Type()
+	mptr := reflect.New(typp)
+	mptr.Elem().Set(evn)
+	return mptr
+}
+
+// MakeSlice makes a slice that is actually addressable, getting around the hidden
+// interface{} that reflect.MakeSlice makes..  or something like that.
+func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
+	sp := reflect.MakeSlice(typ, len, cap)
+	evn := reflect.ValueOf(sp.Interface()) // try to get rid of interface
+	typp := evn.Type()
+	sptr := reflect.New(typp)
+	sptr.Elem().Set(evn)
+	return sptr
+}
+
 // CloneToType creates a new object of given type, and uses SetRobust to copy
 // an existing value (of perhaps another type) into it -- only expected to
 // work for basic types
 func CloneToType(typ reflect.Type, val interface{}) reflect.Value {
 	if NonPtrType(typ).Kind() == reflect.Map {
-		mp := reflect.MakeMap(typ)
-		evn := reflect.ValueOf(mp.Interface()) // try to get rid of interface
-		typp := evn.Type()
-		mptr := reflect.New(typp)
-		mptr.Elem().Set(evn)
-		return mptr
+		return MakeMap(typ)
 	} else if NonPtrType(typ).Kind() == reflect.Slice {
-		sp := reflect.MakeSlice(typ, 0, 0)
-		evn := reflect.ValueOf(sp.Interface()) // try to get rid of interface
-		typp := evn.Type()
-		mptr := reflect.New(typp)
-		mptr.Elem().Set(evn)
-		return mptr
+		return MakeSlice(typ, 0, 0)
 	}
 	evn := reflect.New(typ)
 	evi := evn.Interface()

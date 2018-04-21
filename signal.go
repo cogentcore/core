@@ -7,6 +7,7 @@ package ki
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/rcoreilly/goki/ki/kit"
@@ -101,20 +102,25 @@ func (sig *Signal) ConnectOnly(recv Ki, fun RecvFunc) error {
 // connection does not already exist -- error if not ok
 func (sig *Signal) Connect(recv Ki, fun RecvFunc) error {
 	if recv == nil {
-		return errors.New("ki Signal Connect: no recv node provided")
+		err := errors.New("ki Signal Connect: no recv node provided\n")
+		log.Println(err)
+		return err
 	}
 	if fun == nil {
-		return errors.New("ki Signal Connect: no recv func provided")
+		err := errors.New("ki Signal Connect: no recv func provided\n")
+		log.Println(err)
+		return err
 	}
 
 	if sig.FindConnectionIndex(recv, fun) >= 0 {
+		// fmt.Printf("Already found connection to recv %v fun %v\n", recv.Name(), reflect.ValueOf(fun))
 		return nil
 	}
 
 	con := Connection{recv, fun}
 	sig.Cons = append(sig.Cons, con)
 
-	// fmt.Printf("added connection to recv %v fun %v", recv.KiName(), reflect.ValueOf(fun))
+	// fmt.Printf("added connection to recv %v fun %v", recv.Name(), reflect.ValueOf(fun))
 
 	return nil
 }
@@ -178,7 +184,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 		j := i - deleted
 		con := s.Cons[j]
 		if con.Recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v path %v\n", con.Recv.Name(), con.Recv.PathUnique())
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", con.Recv.Name(), con.Recv)
 			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
 			deleted++
 			continue

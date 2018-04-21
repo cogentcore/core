@@ -849,11 +849,17 @@ func (n *Node) Destroy() {
 	if n.This == nil { // already dead!
 		return
 	}
+	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This, n.This, len(n.Kids))
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
-	n.DestroyDeleted()     // then destroy all those kids
+	// and destroy all my fields
+	n.FuncFields(0, nil, func(k Ki, level int, d interface{}) bool {
+		k.Destroy()
+		return true
+	})
+	n.DestroyDeleted() // then destroy all those kids
 	// extra step to delete all the slices and maps -- super friendly to GC :)
 	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
@@ -1079,7 +1085,6 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if len(pe) == 0 {
 			continue
 		}
-		// fmt.Printf("pe: %v\n", pe)
 		if i <= 1 && curn.UniqueName() == pe {
 			continue
 		}
@@ -1220,6 +1225,7 @@ func (n *Node) Disconnect() {
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 		case fieldVal.Type() == KiT_Signal:
 			if fs, ok := kit.PtrValue(fieldVal).Interface().(*Signal); ok {
+				// fmt.Printf("ki.Node: %v Type: %T Disconnecting signal field: %v\n", n.Name(), n.This, field.Name)
 				fs.DisconnectAll()
 			}
 		case fieldVal.Type() == KiT_Ptr:
