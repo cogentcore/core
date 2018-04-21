@@ -289,10 +289,10 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*TextField)
 	tf.SetProp("max-width", -1) // todo..
+	tf.SetProp("min-width", units.NewValue(6, units.Ex))
 	bitflag.SetState(tf.Flags(), vv.IsReadOnly(), int(ReadOnly))
 	vv.UpdateWidget()
-	tf.TextFieldSig.DisconnectAll() // these are re-used, so key to disconnect!
-	tf.TextFieldSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
 		tf := send.(*TextField)
 		if vvv.SetValue(tf.Text) {
@@ -536,7 +536,6 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	mb := vv.Widget.(*MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
-	mb.SetProp("min-width", units.NewValue(6, units.Ex))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
@@ -679,8 +678,7 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
 	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
-	cb.ButtonSig.DisconnectAll()
-	cb.ButtonSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
 		cbb := vvv.Widget.(*CheckBox)
 		if vvv.SetValue(cbb.IsChecked()) {
@@ -750,8 +748,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 			sb.Step = step
 		}
 	}
-	sb.SpinBoxSig.DisconnectAll()
-	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_IntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*SpinBox)
 		if vvv.SetValue(sbb.Value) {
@@ -817,8 +814,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 		}
 	}
 
-	sb.SpinBoxSig.DisconnectAll()
-	sb.SpinBoxSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*SpinBox)
 		if vvv.SetValue(sbb.Value) {
@@ -874,8 +870,7 @@ func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 
 	vv.UpdateWidget()
 
-	cb.ComboSig.DisconnectAll()
-	cb.ComboSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_EnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
@@ -937,8 +932,7 @@ func (vv *TypeValueView) ConfigWidget(widg Node2D) {
 
 	vv.UpdateWidget()
 
-	cb.ComboSig.DisconnectAll()
-	cb.ComboSig.Connect(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_TypeValueView).(*TypeValueView)
 		cbb := vvv.Widget.(*ComboBox)
 		tval := cbb.CurVal.(reflect.Type)

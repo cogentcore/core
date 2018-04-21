@@ -75,6 +75,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* old action is being shown in mapviewinline -- maybe not getting the update?
+
 * initial paint / resize not working for 2nd window (GoGi Editor)
 
 * double-click interval not working at all -- calling everything double-click

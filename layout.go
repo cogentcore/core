@@ -963,7 +963,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.Tracking = true
 	sc.TrackThr = sc.Step
-	sc.SliderSig.Connect(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sc.SliderSig.ConnectOnly(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}

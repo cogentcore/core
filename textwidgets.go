@@ -550,6 +550,9 @@ var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
 var SpinBoxProps = ki.Props{
 	":active": ki.Props{ // todo: could add other states
+		"#buttons": ki.Props{
+			"vert-align": AlignMiddle,
+		},
 		"#up": ki.Props{
 			"max-width":  units.NewValue(1.5, units.Ex),
 			"max-height": units.NewValue(1.5, units.Ex),
@@ -565,7 +568,7 @@ var SpinBoxProps = ki.Props{
 		"#space": ki.Props{
 			"width": units.NewValue(.1, units.Ex),
 		},
-		"#textfield": ki.Props{
+		"#text-field": ki.Props{
 			"min-width": units.NewValue(4, units.Ex),
 			"width":     units.NewValue(8, units.Ex),
 			"margin":    units.NewValue(2, units.Px),
@@ -649,20 +652,21 @@ func (g *SpinBox) ConfigParts() {
 		g.DownIcon = IconByName("widget-wedge-down")
 	}
 	g.Parts.Lay = LayoutRow
-	g.Parts.SetProp("vert-align", AlignMiddle)
+	g.Parts.SetProp("vert-align", AlignMiddle) // todo: style..
 	props := g.StyleProps(":active")
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_TextField, "TextField")
-	config.Add(KiT_Space, "Space")
-	config.Add(KiT_Layout, "Buttons")
+	config.Add(KiT_TextField, "text-field")
+	config.Add(KiT_Space, "space")
+	config.Add(KiT_Layout, "buttons")
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
-		buts.SetNChildren(2, KiT_Action, "But")
+		g.PartStyleProps(buts, props)
+		buts.SetNChildren(2, KiT_Action, "but")
 		// up
 		up := buts.Child(0).(*Action)
-		up.SetName("Up")
+		up.SetName("up")
 		bitflag.SetState(up.Flags(), g.IsReadOnly(), int(ReadOnly))
 		up.Icon = g.UpIcon
 		g.PartStyleProps(up.This, props)
@@ -675,7 +679,7 @@ func (g *SpinBox) ConfigParts() {
 		// dn
 		dn := buts.Child(1).(*Action)
 		bitflag.SetState(dn.Flags(), g.IsReadOnly(), int(ReadOnly))
-		dn.SetName("Down")
+		dn.SetName("down")
 		dn.Icon = g.DownIcon
 		g.PartStyleProps(dn.This, props)
 		if !g.IsReadOnly() {
@@ -686,7 +690,7 @@ func (g *SpinBox) ConfigParts() {
 		}
 		// space
 		g.PartStyleProps(g.Parts.Child(sbSpaceIdx), props) // also get the space
-		// textfield
+		// text-field
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsReadOnly(), int(ReadOnly))
 		g.PartStyleProps(tf.This, props)
@@ -997,7 +1001,7 @@ func (g *ComboBox) MakeItemsMenu() {
 		ac.Data = i // index is the data
 		ac.SetSelected(i == g.CurIndex)
 		ac.SetAsMenu()
-		ac.ActionSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)
 			cb := recv.(*ComboBox)
 			cb.SelectItem(idx)

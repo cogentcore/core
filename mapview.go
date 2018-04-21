@@ -271,6 +271,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
+	mv.FullReRenderParentStructView()
 }
 
 func (mv *MapView) MapAdd() {
@@ -288,12 +289,18 @@ func (mv *MapView) MapAdd() {
 	}
 	nkey := reflect.New(mvtyp.Key())
 	nval := reflect.New(valtyp)
+	if mpvnp.IsNil() { // make a new map
+		nmp := kit.MakeMap(mvtyp)
+		mpv.Elem().Set(nmp.Elem())
+		mpvnp = kit.NonPtrValue(mpv)
+	}
 	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
+	mv.FullReRenderParentStructView()
 }
 
 func (mv *MapView) MapDelete(key reflect.Value) {
@@ -309,6 +316,24 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
+	mv.FullReRenderParentStructView()
+}
+
+func (mv *MapView) FullReRenderParentStructView() {
+	// todo: this will typically fail because MapView is in a separate dialog
+	// need some way of hooking back to the struct view -- another TmpSave??
+	if mv.TmpSave == nil {
+		return
+	}
+	svp := mv.TmpSave.ParentByType(KiT_StructView, true)
+	if svp == nil {
+		return
+	}
+	svpar := svp.EmbeddedStruct(KiT_StructView).(*StructView)
+	if svpar != nil {
+		svpar.SetFullReRender()
+		svpar.UpdateSig()
+	}
 }
 
 // ConfigMapButtons configures the buttons for map functions
@@ -463,14 +488,18 @@ func (mv *MapViewInline) ConfigParts() {
 		MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", mvv.This,
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvvv := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-				svpar := mvvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
-				if svpar != nil {
-					svpar.SetFullReRender()
-					svpar.UpdateSig()
-				}
+				mvvv.FullReRenderParentStructView()
 			})
 	})
 	mv.Parts.UpdateEnd(updt)
+}
+
+func (mv *MapViewInline) FullReRenderParentStructView() {
+	svpar := mv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
+	if svpar != nil {
+		svpar.SetFullReRender()
+		svpar.UpdateSig()
+	}
 }
 
 func (mv *MapViewInline) UpdateFromMap() {

@@ -616,7 +616,7 @@ func (tv *TreeView) ConfigParts() {
 	wb.IconOff = IconByName("widget-wedge-right")
 	if mods {
 		tv.PartStyleProps(wb.This, TreeViewProps[0])
-		wb.ButtonSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
 				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 				tvr.ToggleClose()
