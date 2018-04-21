@@ -259,7 +259,7 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		bb := ab.ButtonAsBase()
 		// todo: register shortcuts with window, and generalize these keybindings
 		kf := KeyFun(kt.ChordString())
-		if kf == KeyFunSelectItem || kt.Rune == ' ' {
+		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
 			kt.SetProcessed()
 			bb.ButtonPressed()
 			// todo: brief delay??

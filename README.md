@@ -75,18 +75,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* old action is being shown in mapviewinline -- maybe not getting the update?
+* sliders not the right size in widgets.  reorg widgets with buttons, sliders, text, etc
 
 * initial paint / resize not working for 2nd window (GoGi Editor)
 
 * double-click interval not working at all -- calling everything double-click
 
-* plug in DPI -- all uncontext needs updating -- font size needs to be scaled by dpi factor
-
 * keyboard stuff totally borked
-
-* basic rendering / updating logic much better now with UpdateEndNoSig and
-  wrapping full renders -- also somehow the Publish is now fine for hover changing..
 
 * finish converting to lower-case-hyphen style for ki object names in gi context
 

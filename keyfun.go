@@ -7,7 +7,7 @@ package gi
 import "fmt"
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  Mapping Keys to Functions
+//  KeyFun is for mapping Keys to Functions
 
 // functions that keyboard events can perform in the gui
 type KeyFunctions int64
@@ -26,7 +26,8 @@ const (
 	KeyFunEnd
 	KeyFunFocusNext
 	KeyFunFocusPrev
-	KeyFunSelectItem
+	KeyFunSelectItem // enter
+	KeyFunAccept     // accept any changes and close dialog / move to next
 	KeyFunAbort
 	KeyFunCancelSelect
 	KeyFunExtendSelect
@@ -57,50 +58,45 @@ type KeyMap map[string]KeyFunctions
 
 // the default map has emacs-style navigation etc
 var DefaultKeyMap = KeyMap{
-	"up_arrow":                 KeyFunMoveUp,
-	"Control+p":                KeyFunMoveUp,
-	"down_arrow":               KeyFunMoveDown,
-	"Control+n":                KeyFunMoveDown,
-	"right_arrow":              KeyFunMoveRight,
-	"Control+f":                KeyFunMoveRight,
-	"left_arrow":               KeyFunMoveLeft,
-	"Control+b":                KeyFunMoveLeft,
-	"Control+up_arrow":         KeyFunPageUp,
-	"Control+u":                KeyFunPageUp,
-	"Control+down_arrow":       KeyFunPageDown,
-	"Control+v":                KeyFunPageDown,
-	"Control+right_arrow":      KeyFunPageRight,
-	"Control+left_arrow":       KeyFunPageLeft,
-	"home":                     KeyFunHome,
-	"kp_home":                  KeyFunHome,
-	"Control+a":                KeyFunHome,
-	"super+Control+left_arrow": KeyFunHome,
-	"end":                       KeyFunEnd,
-	"kp_end":                    KeyFunEnd,
-	"Control+e":                 KeyFunEnd,
-	"super+Control+right_arrow": KeyFunEnd,
-	"tab":            KeyFunFocusNext,
-	"shift+tab":      KeyFunFocusPrev,
-	"return":         KeyFunSelectItem,
-	"Control+return": KeyFunSelectItem,
-	"escape":         KeyFunAbort,
-	"Control+g":      KeyFunCancelSelect,
-	// "Control+down_arrow": KeyFunExtendSelect,
-	"Control+space": KeyFunSelectText,
-	"left_shift":    KeyFunShift,
-	"right_shift":   KeyFunShift,
-	"left_super":    KeyFunCtrl,
-	"right_super":   KeyFunCtrl,
-	"backspace":     KeyFunBackspace,
-	"delete":        KeyFunDelete,
-	"Control+d":     KeyFunDelete,
-	"Control+h":     KeyFunBackspace,
-	"Control+k":     KeyFunKill,
-	"Control+m":     KeyFunDuplicate,
-	"Control+i":     KeyFunInsert,
-	"Control+o":     KeyFunInsertAfter,
-	"Alt+Control+i": KeyFunGoGiEditor,
-	"Alt+Control+e": KeyFunGoGiEditor,
+	"UpArrow":             KeyFunMoveUp,
+	"Control+P":           KeyFunMoveUp,
+	"DownArrow":           KeyFunMoveDown,
+	"Control+N":           KeyFunMoveDown,
+	"RightArrow":          KeyFunMoveRight,
+	"Control+F":           KeyFunMoveRight,
+	"LeftArrow":           KeyFunMoveLeft,
+	"Control+B":           KeyFunMoveLeft,
+	"Control+UpArrow":     KeyFunPageUp,
+	"Control+U":           KeyFunPageUp,
+	"Control+DownArrow":   KeyFunPageDown,
+	"Control+V":           KeyFunPageDown,
+	"Control+RightArrow":  KeyFunPageRight,
+	"Control+LeftArrow":   KeyFunPageLeft,
+	"Home":                KeyFunHome,
+	"Control+A":           KeyFunHome,
+	"Meta+LeftArrow":      KeyFunHome,
+	"End":                 KeyFunEnd,
+	"Control+E":           KeyFunEnd,
+	"Meta+RightArrow":     KeyFunEnd,
+	"Tab":                 KeyFunFocusNext,
+	"Shift+Tab":           KeyFunFocusPrev,
+	"ReturnEnter":         KeyFunSelectItem,
+	"KeypadEnter":         KeyFunSelectItem,
+	"Control+ReturnEnter": KeyFunAccept,
+	"Escape":              KeyFunAbort,
+	"Control+G":           KeyFunCancelSelect,
+	// "Control+DownArrow": KeyFunExtendSelect,
+	"Control+Spacebar": KeyFunSelectText,
+	"DeleteBackspace":  KeyFunBackspace,
+	"DeleteForward":    KeyFunDelete,
+	"Control+D":        KeyFunDelete,
+	"Control+H":        KeyFunBackspace,
+	"Control+K":        KeyFunKill,
+	"Control+M":        KeyFunDuplicate,
+	"Control+I":        KeyFunInsert,
+	"Control+O":        KeyFunInsertAfter,
+	"Control+Alt+I":    KeyFunGoGiEditor,
+	"Control+Alt+E":    KeyFunGoGiEditor,
 }
 
 // users can set this to an alternative map

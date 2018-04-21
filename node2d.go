@@ -77,34 +77,94 @@ var Layout2DTrace bool = false
 type Node2D interface {
 	// nodes are Ki elements -- this comes for free by embedding ki.Node in all Node2D elements
 	ki.Ki
-	// get a generic Node2DBase for our node -- not otherwise possible -- don't want to interface everything that a base node can do as that would be highly redundant
+
+	// AsNode2D returns a generic Node2DBase for our node -- gives generic
+	// access to all the base-level data structures without requiring
+	// interface methods
 	AsNode2D() *Node2DBase
-	// if this is a Viewport2D-derived node, get it as a Viewport2D, else return nil
+
+	// AsViewport2D returns Viewport2D if this node is one (has its own
+	// bitmap, used for menus, dialogs, icons, etc), else nil
 	AsViewport2D() *Viewport2D
-	// if this is a Layout-derived node, get it as a Layout, else return nil
+
+	// AsLayout2D returns Layout if this is a Layout-derived node, else nil
 	AsLayout2D() *Layout
-	// initialize a node -- setup event receiving connections etc -- must call InitNodeBase as first step set basic inits including setting Viewport and connecting node signal to parent vp -- all code here must be robust to being called repeatedly
+
+	// Init2D initializes a node -- sets up event receiving connections etc --
+	// must call InitNodeBase as first step set basic inits including setting
+	// Viewport and connecting node signal to parent vp -- all code here must
+	// be robust to being called repeatedly
 	Init2D()
-	// Style2D: In a MeFirst downward pass, all properties are cached out in an inherited manner, and incorporating any css styles, into either the Paint or Style object for each Node, depending on the type of node (SVG does Paint, Widget does Style).  Only done once after structural changes -- styles are not for dynamic changes.
+
+	// Style2D: In a MeFirst downward pass, all properties are cached out in
+	// an inherited manner, and incorporating any css styles, into either the
+	// Paint or Style object for each Node, depending on the type of node (SVG
+	// does Paint, Widget does Style).  Only done once after structural
+	// changes -- styles are not for dynamic changes.
 	Style2D()
-	// Size2D: DepthFirst downward pass, each node first calls g.Layout.Reset(), then sets their LayoutSize according to their own intrinsic size parameters, and/or those of its children if it is a Layout
+
+	// Size2D: DepthFirst downward pass, each node first calls
+	// g.Layout.Reset(), then sets their LayoutSize according to their own
+	// intrinsic size parameters, and/or those of its children if it is a
+	// Layout
 	Size2D()
-	// Layout2D: MeFirst downward pass (each node calls on its children at appropriate point) with relevant parent BBox that the children are constrained to render within -- they then intersect this BBox with their own BBox (from BBox2D) -- typically just call Layout2DBase for default behavior -- and add parent position to AllocPos -- Layout does all its sizing and positioning of children in this pass, based on the Size2D data gathered bottom-up and constraints applied top-down from higher levels
+
+	// Layout2D: MeFirst downward pass (each node calls on its children at
+	// appropriate point) with relevant parent BBox that the children are
+	// constrained to render within -- they then intersect this BBox with
+	// their own BBox (from BBox2D) -- typically just call Layout2DBase for
+	// default behavior -- and add parent position to AllocPos -- Layout does
+	// all its sizing and positioning of children in this pass, based on the
+	// Size2D data gathered bottom-up and constraints applied top-down from
+	// higher levels
 	Layout2D(parBBox image.Rectangle)
-	// Move2D: optional MeFirst downward pass to move all elements by given delta -- used for scrolling -- the layout pass assigns canonical positions, saved in AllocPosOrig and BBox, and this adds the given delta to that AllocPosOrig -- each node must call ComputeBBox2D to update its bounding box information given the new position
+
+	// Move2D: optional MeFirst downward pass to move all elements by given
+	// delta -- used for scrolling -- the layout pass assigns canonical
+	// positions, saved in AllocPosOrig and BBox, and this adds the given
+	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
+	// update its bounding box information given the new position
 	Move2D(delta image.Point, parBBox image.Rectangle)
-	// BBox2D: compute the raw bounding box of this node relative to its parent viewport -- called during Layout2D to set node BBox field, which is then used in setting WinBBox and VpBBox
+
+	// BBox2D: compute the raw bounding box of this node relative to its
+	// parent viewport -- called during Layout2D to set node BBox field, which
+	// is then used in setting WinBBox and VpBBox
 	BBox2D() image.Rectangle
-	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes call ComputeBBox2DBase but viewports require special code -- called during Layout and Move
+
+	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
+	// call ComputeBBox2DBase but viewports require special code -- called
+	// during Layout and Move
 	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
-	// ChildrenBBox2D: compute the bbox available to my children (content), adjusting for margins, border, padding (BoxSpace) taken up by me -- operates on the existing VpBBox for this node -- this is what is passed down as parBBox do the children's Layout2D
+
+	// ChildrenBBox2D: compute the bbox available to my children (content),
+	// adjusting for margins, border, padding (BoxSpace) taken up by me --
+	// operates on the existing VpBBox for this node -- this is what is passed
+	// down as parBBox do the children's Layout2D
 	ChildrenBBox2D() image.Rectangle
-	// Render2D: Final rendering pass, each node is fully responsible for calling Render2D on its own children, to provide maximum flexibility (see Render2DChildren for default impl) -- bracket the render calls in PushBounds / PopBounds and a false from PushBounds indicates that VpBBox is empty and no rendering should occur
+
+	// Render2D: Final rendering pass, each node is fully responsible for
+	// calling Render2D on its own children, to provide maximum flexibility
+	// (see Render2DChildren for default impl) -- bracket the render calls in
+	// PushBounds / PopBounds and a false from PushBounds indicates that
+	// VpBBox is empty and no rendering should occur
 	Render2D()
-	// ReRender2D: returns the node that should be re-rendered when an Update signal is received for a given node, and whether a new layout pass from that node down is needed) -- can be the node itself, any of its parents or children, or nil to indicate that a full re-render is necessary.  For re-rendering to work, an opaque background should be painted first
+
+	// ReRender2D: returns the node that should be re-rendered when an Update
+	// signal is received for a given node, and whether a new layout pass from
+	// that node down is needed) -- can be the node itself, any of its parents
+	// or children, or nil to indicate that a full re-render is necessary.
+	// For re-rendering to work, an opaque background should be painted first
 	ReRender2D() (node Node2D, layout bool)
-	// function called on node when it gets or loses focus -- focus flag has current state too
+
+	// FocusChanged2D is called on node when it gets or loses focus -- focus
+	// flag has current state too
 	FocusChanged2D(gotFocus bool)
+
+	// HasFocus2D returns true if this node has keyboard focus and should
+	// receive keyboard events -- typically this just returns HasFocus based
+	// on the Window-managed HasFocus flag, but some types may want to monitor
+	// all keyboard activity for certain key keys..
+	HasFocus2D() bool
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +236,10 @@ func (g *Node2DBase) ReRender2D() (node Node2D, layout bool) {
 }
 
 func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
+}
+
+func (g *Node2DBase) HasFocus2D() bool {
+	return g.HasFocus()
 }
 
 // check for interface implementation

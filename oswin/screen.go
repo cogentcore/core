@@ -11,11 +11,18 @@ package oswin
 
 import (
 	"image"
+	"math"
 
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // note: fields obtained from QScreen in Qt
+
+// LogicalDPIScale is a scaling factor that can be set by preferences to
+// rescale the logical DPI relative to the actual physical DPI, thereby
+// scaling the overall density of the display (e.g., smaller numbers produce
+// smaller, higher-density displays)
+var LogicalDPIScale = float32(0.5)
 
 // Screen contains data about each physical and / or logical screen
 type Screen struct {
@@ -99,3 +106,13 @@ const (
 //go:generate stringer -type=ScreenOrientation
 
 var KiT_ScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, false, nil)
+
+// LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling
+// based on the LogicalDPIScale factor, and also makes it a multiple of 6 to
+// make normal font sizes look best
+func LogicalFmPhysicalDPI(pdpi float32) float32 {
+	idpi := int(math.Round(float64(pdpi * LogicalDPIScale)))
+	mdpi := idpi / 6
+	mdpi *= 6
+	return float32(mdpi)
+}

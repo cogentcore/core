@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -272,25 +273,34 @@ func (g *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
 	switch kf {
 	case KeyFunSelectItem:
-		g.EditDone()
+		g.EditDone() // not processed, others could consume
+	case KeyFunAccept:
+		g.EditDone() // not processed, others could consume
+	case KeyFunAbort:
+		g.RevertEdit() // not processed, others could consume
 	case KeyFunMoveRight:
 		g.CursorForward(1)
+		kt.SetProcessed()
 	case KeyFunMoveLeft:
 		g.CursorBackward(1)
+		kt.SetProcessed()
 	case KeyFunHome:
 		g.CursorStart()
+		kt.SetProcessed()
 	case KeyFunEnd:
 		g.CursorEnd()
+		kt.SetProcessed()
 	case KeyFunBackspace:
 		g.CursorBackspace(1)
+		kt.SetProcessed()
 	case KeyFunKill:
 		g.CursorKill()
+		kt.SetProcessed()
 	case KeyFunDelete:
 		g.CursorDelete(1)
-	case KeyFunAbort:
-		g.RevertEdit()
+		kt.SetProcessed()
 	case KeyFunNil:
-		if kt.Rune > 0 {
+		if unicode.IsPrint(kt.Rune) {
 			g.InsertAtCursor(string(kt.Rune))
 		}
 	}
@@ -378,7 +388,6 @@ func (g *TextField) Init2D() {
 		}
 		kt := d.(*key.ChordEvent)
 		tf.KeyInput(kt)
-		kt.SetProcessed()
 	})
 }
 

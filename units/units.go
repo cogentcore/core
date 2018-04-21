@@ -256,7 +256,8 @@ func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
 
 // Convert converts value to the given units, given unit context
 func (v *Value) Convert(to Unit, ctxt *Context) Value {
-	return Value{v.ToDots(ctxt) / ctxt.ToDotsFactor(to), to, 0.0}
+	dots := v.ToDots(ctxt)
+	return Value{dots / ctxt.ToDotsFactor(to), to, dots}
 }
 
 // String implements the fmt.Stringer interface.

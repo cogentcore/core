@@ -17,6 +17,8 @@ package key
 import (
 	"fmt"
 	"image"
+	"strings"
+	"unicode"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -86,19 +88,34 @@ func (e *Event) SetModifiers(mods ...Modifiers) {
 	}
 }
 
-// ChordString returns a string representation of the modifiers plus rune for the event
+// ChordString returns a string representation of the keyboard event suitable
+// for keyboard function maps, etc -- printable runes are sent directly, and
+// non-printable ones are converted to their corresponding code names without
+// the "Code" prefix
 func (e *Event) ChordString() string {
-	str := ""
+	modstr := ""
 	for m := Shift; m < ModifiersN; m++ {
 		if e.Modifiers&(1<<uint32(m)) != 0 {
-			if len(str) > 0 {
-				str += "+"
-			}
-			str += interface{}(m).(fmt.Stringer).String()
+			modstr += interface{}(m).(fmt.Stringer).String() + "+"
 		}
 	}
-	str += string(e.Rune)
-	return str
+	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
+		return modstr + "Spacebar"
+	}
+	if unicode.IsPrint(e.Rune) {
+		return modstr + string(e.Rune)
+	}
+	// now convert code
+	codestr := strings.TrimPrefix(interface{}(e.Code).(fmt.Stringer).String(), "Code")
+	return modstr + codestr
+}
+
+// CodeIsModifier returns true if given code is a modifier key
+func CodeIsModifier(c Code) bool {
+	if c >= CodeLeftControl && c <= CodeRightGUI {
+		return true
+	}
+	return false
 }
 
 // Action is the action taken on the key
@@ -266,7 +283,7 @@ const (
 	CodeLeftControl  Code = 224
 	CodeLeftShift    Code = 225
 	CodeLeftAlt      Code = 226
-	CodeLeftGUI      Code = 227
+	CodeLeftGUI      Code = 227 // Command on mac, ? on windows, ? on linux
 	CodeRightControl Code = 228
 	CodeRightShift   Code = 229
 	CodeRightAlt     Code = 230

@@ -12,9 +12,9 @@ const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusFullReRenderReRenderAnchorR
 var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 40, 54, 62, 77, 89, 107, 126, 143, 157, 174}
 
 func (i NodeFlags) String() string {
-	i -= 13
+	i -= 14
 	if i < 0 || i >= NodeFlags(len(_NodeFlags_index)-1) {
-		return "NodeFlags(" + strconv.FormatInt(int64(i+13), 10) + ")"
+		return "NodeFlags(" + strconv.FormatInt(int64(i+14), 10) + ")"
 	}
 	return _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]]
 }
@@ -22,7 +22,7 @@ func (i NodeFlags) String() string {
 func StringToNodeFlags(s string) (NodeFlags, error) {
 	for i := 0; i < len(_NodeFlags_index)-1; i++ {
 		if s == _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]] {
-			return NodeFlags(i + 13), nil
+			return NodeFlags(i + 14), nil
 		}
 	}
 	return 0, fmt.Errorf("String %v is not a valid option for type NodeFlags", s)

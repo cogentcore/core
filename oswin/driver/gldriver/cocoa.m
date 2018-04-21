@@ -182,6 +182,7 @@ uint64 threadID() {
 	} else {
 		action = 2;
 	}
+
 	keyEvent((GoUintptr)self, (int32_t)rune, action, theEvent.keyCode, theEvent.modifierFlags);
 }
 

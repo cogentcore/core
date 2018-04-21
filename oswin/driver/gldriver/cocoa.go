@@ -188,15 +188,17 @@ func setGeom(id uintptr, dpi float32, widthPx, heightPx int) {
 		return // closing window
 	}
 
+	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+
 	sz := image.Point{widthPx, heightPx}
 	w.sizeMu.Lock()
 	w.Sz = sz
-	w.LogDPI = dpi
+	w.LogDPI = ldpi
 	w.sizeMu.Unlock()
 
 	winEv := window.Event{
 		Size:       sz,
-		LogicalDPI: dpi,
+		LogicalDPI: ldpi,
 		Action:     window.Resize,
 	}
 
@@ -225,7 +227,7 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	sc.ScreenNumber = scrIdx
 	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
 	sc.Depth = depth
-	sc.LogicalDPI = dpi
+	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{widthMM, heightMM}
@@ -249,26 +251,28 @@ func sendWindowEvent(id uintptr, e oswin.Event) {
 	w.Send(e)
 }
 
+// Mac virtual keys (kVK_) defined here:
+// /System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/Headers/Events.h
+// and NSEventModifierFlags are here:
+// /System/Library/Frameworks/AppKit.framework/Headers/NSEvent.h
 var mods = [...]struct {
 	flags uint32
 	code  uint16
 	mod   key.Modifiers
 }{
-	// Left and right variants of modifier keys have their own masks,
-	// but they are not documented. These were determined empirically.
-	{1<<17 | 0x102, C.kVK_Shift, key.Shift},
-	{1<<17 | 0x104, C.kVK_RightShift, key.Shift},
-	{1<<18 | 0x101, C.kVK_Control, key.Control},
-	// TODO key.ControlRight
-	{1<<19 | 0x120, C.kVK_Option, key.Alt},
-	{1<<19 | 0x140, C.kVK_RightOption, key.Alt},
-	{1<<20 | 0x108, C.kVK_Command, key.Meta},
-	{1<<20 | 0x110, C.kVK_Command, key.Meta}, // TODO: missing kVK_RightCommand
+	{C.NSEventModifierFlagShift, C.kVK_Shift, key.Shift},
+	{C.NSEventModifierFlagShift, C.kVK_RightShift, key.Shift},
+	{C.NSEventModifierFlagControl, C.kVK_Control, key.Control},
+	{C.NSEventModifierFlagControl, C.kVK_RightControl, key.Control},
+	{C.NSEventModifierFlagOption, C.kVK_Option, key.Alt},
+	{C.NSEventModifierFlagOption, C.kVK_RightOption, key.Alt},
+	{C.NSEventModifierFlagCommand, C.kVK_Command, key.Meta},
+	{C.NSEventModifierFlagCommand, C.kVK_RightCommand, key.Meta},
 }
 
 func cocoaMods(flags uint32) (m int32) {
 	for _, mod := range mods {
-		if flags&mod.flags == mod.flags {
+		if flags&mod.flags != 0 {
 			m |= 1 << uint32(mod.mod)
 		}
 	}
@@ -383,16 +387,24 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 
 //export keyEvent
 func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
+	er := cocoaRune(runeVal)
+	ea := key.Action(act)
+	ec := cocoaKeyCode(code)
+	em := cocoaMods(flags)
+
 	event := &key.Event{
-		Rune:      cocoaRune(runeVal),
-		Action:    key.Action(act),
-		Code:      cocoaKeyCode(code),
-		Modifiers: cocoaMods(flags),
+		Rune:      er,
+		Action:    ea,
+		Code:      ec,
+		Modifiers: em,
 	}
 
 	sendWindowEvent(id, event)
 
-	if event.Action == key.Release && event.Rune >= 0 { // trigger for chord
+	// do ChordEvent -- only for non-modifier key presses -- call
+	// key.ChordString to convert the event into a parsable string for GUI
+	// events
+	if ea == key.Press && !key.CodeIsModifier(ec) {
 		che := &key.ChordEvent{Event: *event}
 		sendWindowEvent(id, che)
 	}
@@ -401,10 +413,10 @@ func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
 //export flagEvent
 func flagEvent(id uintptr, flags uint32) {
 	for _, mod := range mods {
-		if flags&mod.flags == mod.flags && lastFlags&mod.flags != mod.flags {
+		if flags&mod.flags != 0 && lastFlags&mod.flags == 0 {
 			keyEvent(id, -1, C.NSKeyDown, mod.code, flags)
 		}
-		if lastFlags&mod.flags == mod.flags && flags&mod.flags != mod.flags {
+		if lastFlags&mod.flags != 0 && flags&mod.flags == 0 {
 			keyEvent(id, -1, C.NSKeyUp, mod.code, flags)
 		}
 	}

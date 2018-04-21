@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -77,11 +78,11 @@ func (p *FontStyle) Defaults() {
 func (p *FontStyle) SetStylePost() {
 }
 
+var lastDots = 0.0
+
 func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
-	pts := p.Size.Convert(units.Pt, ctxt) // make sure we're in points
-	scpts := pts.Val * (ctxt.DPI / 96.0)  // rescale in comparison to std DPI
-	// fmt.Printf("LoadFont points: %v scaled: %v, ctxt dpi: %v\n", p.Size.Val, scpts, ctxt.DPI)
-	face, err := FontLibrary.Font(p.FaceName, scpts)
+	intDots := math.Round(p.Size.Dots)
+	face, err := FontLibrary.Font(p.FaceName, intDots)
 	if err != nil {
 		log.Printf("%v\n", err)
 		if p.Face == nil {
@@ -97,6 +98,11 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 		p.Face = face
 	}
 	p.Height = float64(p.Face.Metrics().Height) / 64.0
+	// if lastDots != p.Size.Dots {
+	// 	pts := p.Size.Convert(units.Pt, ctxt)
+	// 	fmt.Printf("LoadFont points: %v intDots: %v, origDots: %v, height %v, ctxt dpi: %v\n", pts.Val, intDots, pts.Dots, p.Height, ctxt.DPI)
+	// 	lastDots = p.Size.Dots
+	// }
 	p.SetUnitContext(ctxt)
 	// em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
 	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, p.Height, em)

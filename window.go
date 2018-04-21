@@ -68,7 +68,8 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	if oswin.TheApp.NScreens() > 0 {
 		sc := oswin.TheApp.Screen(0)
 		winDPI = float64(sc.LogicalDPI)
-		fmt.Printf("screen logical dpi is: %v\n", winDPI)
+		fmt.Printf("screen logical dpi is: %v geom %v phys size: %v dpr: %v\n",
+			winDPI, sc.Geometry, sc.PhysicalSize, sc.DevicePixelRatio)
 	}
 	if stdPixels {
 		unctx := units.Context{}
@@ -278,7 +279,7 @@ func (w *Window) EndProfile() {
 }
 
 func (w *Window) StartEventLoop() {
-	// w.DoFullRender = true
+	w.DoFullRender = true
 	// var wg sync.WaitGroup
 	// wg.Add(1)
 	w.EventLoop()
@@ -334,15 +335,13 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		if evi.IsProcessed() { // someone took care of it
 			return false
 		}
-		_, gi := KiToNode2D(k)
+		gii, gi := KiToNode2D(k)
 		if gi != nil {
 			if w.Popup != nil && (gi.Viewport == nil || gi.Viewport.This != w.Popup) {
 				return false
 			}
-			if evi.OnFocus() {
-				if gi.This != w.Focus { // todo: could use GiNodeI interface
-					return false
-				}
+			if evi.OnFocus() && !gii.HasFocus2D() {
+				return false
 			} else if evi.HasPos() {
 				pos := evi.Pos()
 				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
@@ -440,9 +439,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	}
 }
 
-// process Mouseup events during popup for possible closing of popup -- returns true if popup should be deleted
-func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
-	gii, gi := KiToNode2D(w.Popup)
+// PopupIsMenu returns true if the given popup item is a menu
+func PopupIsMenu(pop ki.Ki) bool {
+	gii, gi := KiToNode2D(pop)
 	if gi == nil {
 		return false
 	}
@@ -450,7 +449,6 @@ func (w *Window) PopupMouseUpEvent(evi oswin.Event) bool {
 	if vp == nil {
 		return false
 	}
-	// pos := evi.Pos()
 	if vp.IsMenu() {
 		return true
 	}
@@ -509,10 +507,9 @@ func (w *Window) EventLoop() {
 		if w.Popup != nil {
 			if me, ok := evi.(*mouse.Event); ok {
 				if me.Action == mouse.Release {
-					delPop = w.PopupMouseUpEvent(evi) // popup before processing event
-					// if curPop != nil {
-					// 	fmt.Printf("curpop: %v delpop: %v\n", curPop.Name(), delPop)
-					// }
+					if PopupIsMenu(w.Popup) { // remove menus automatically after mouse release
+						delPop = true
+					}
 				}
 			}
 		}
@@ -530,7 +527,6 @@ func (w *Window) EventLoop() {
 				evi.SetProcessed()
 			}
 		case *paint.Event:
-			fmt.Printf("Got paint event!\n")
 			w.Viewport.FullRender2DTree()
 			w.SetNextFocusItem()
 			w.StartProfile()
@@ -546,14 +542,22 @@ func (w *Window) EventLoop() {
 				e.SetProcessed()
 			case KeyFunAbort:
 				if w.Popup != nil && w.Popup == curPop {
-					delPop = true
-					e.SetProcessed()
+					if PopupIsMenu(w.Popup) {
+						delPop = true
+						e.SetProcessed()
+					}
+				}
+			case KeyFunAccept:
+				if w.Popup != nil && w.Popup == curPop {
+					if PopupIsMenu(w.Popup) {
+						delPop = true
+					}
 				}
 			case KeyFunGoGiEditor:
 				GoGiEditorOf(w.Viewport.This)
 				e.SetProcessed()
 			}
-			fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		}
 
 		if delPop {

@@ -8,6 +8,8 @@ import (
 	"image"
 	"reflect"
 
+	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/key"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -76,6 +78,18 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	vpsz := frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
+
+	win.ReceiveEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		kt := d.(*key.ChordEvent)
+		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		kf := KeyFun(kt.ChordString())
+		switch kf {
+		case KeyFunAbort:
+			ddlg.Cancel()
+		case KeyFunAccept:
+			ddlg.Accept()
+		}
+	})
 
 	dlg.Resize(vpsz.X, vpsz.Y)
 	dlg.ViewBox.Min = image.Point{x, y}
@@ -311,6 +325,10 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
 	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
+}
+
+func (dlg *Dialog) HasFocus2D() bool {
+	return true // dialog ALWAYS gets all the events!
 }
 
 // check for interface implementation
