@@ -92,6 +92,11 @@ func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
 	})
 }
 
+// can this node focus?
+func (g *NodeBase) CanFocus() bool {
+	return bitflag.Has(g.Flag, int(CanFocus))
+}
+
 // does the current node have keyboard focus
 func (g *NodeBase) HasFocus() bool {
 	return bitflag.Has(g.Flag, int(HasFocus))

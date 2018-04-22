@@ -110,6 +110,9 @@ func (dlg *Dialog) Close() {
 
 // Accept accepts the dialog, activated by the default Ok button
 func (dlg *Dialog) Accept() {
+	if dlg == nil {
+		return
+	}
 	dlg.State = DialogAccepted
 	dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
 	dlg.Close()
@@ -117,6 +120,9 @@ func (dlg *Dialog) Accept() {
 
 // Cancel cancels the dialog, activated by the default Cancel button
 func (dlg *Dialog) Cancel() {
+	if dlg == nil {
+		return
+	}
 	dlg.State = DialogCanceled
 	dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
 	dlg.Close()

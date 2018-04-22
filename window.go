@@ -587,6 +587,47 @@ func (w *Window) EventLoop() {
 	fmt.Println("end of events")
 }
 
+// ClearNonFocus clears the focus of any non-w.Focus item -- sometimes can get
+// off
+func (w *Window) ClearNonFocus() {
+	focRoot := w.Viewport.This
+	if w.Popup != nil {
+		focRoot = w.Popup
+	}
+
+	updated := false
+	updt := false
+
+	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		if k == focRoot { // skip top-level
+			return true
+		}
+		// todo: see about 3D guys
+		gii, gi := KiToNode2D(k)
+		if gi == nil {
+			return true
+		}
+		if gi.Paint.Off { // off below this
+			return false
+		}
+		if w.Focus == k {
+			return true
+		}
+		if gi.HasFocus() {
+			if !updated {
+				updated = true
+				updt = w.UpdateStart()
+			}
+			bitflag.Clear(&gi.Flag, int(HasFocus))
+			gii.FocusChanged2D(false)
+		}
+		return true
+	})
+	if updated {
+		w.UpdateEnd(updt)
+	}
+}
+
 // set focus to given item -- returns true if focus changed
 func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus == k {
@@ -610,6 +651,7 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		bitflag.Set(&gi.Flag, int(HasFocus))
 		gii.FocusChanged2D(true)
 	}
+	w.ClearNonFocus()
 	w.UpdateEnd(updt)
 	return true
 }
@@ -644,7 +686,7 @@ func (w *Window) SetNextFocusItem() bool {
 				focusNext = true
 				return true
 			}
-			if !bitflag.Has(gi.Flag, int(CanFocus)) || gi.VpBBox.Empty() {
+			if !gi.CanFocus() || gi.VpBBox.Empty() {
 				return true
 			}
 			if focusNext {
@@ -693,7 +735,7 @@ func (w *Window) SetPrevFocusItem() bool {
 			gotFocus = true
 			return false
 		}
-		if !bitflag.Has(gi.Flag, int(CanFocus)) || gi.VpBBox.Empty() {
+		if !gi.CanFocus() || gi.VpBBox.Empty() {
 			return true
 		}
 		prevItem = k
