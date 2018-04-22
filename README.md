@@ -101,24 +101,11 @@ As the docs state, you really have to use it for a while to appreciate all of th
 
 # TODO
 
+* save /load enums as strings -- much more robust..
+
 * what about Kind == reflect.Interface fields in structs -- should they be set to zero?  probably..
 * XML IO -- first pass done, but more should be in attr instead of full elements
 * FindChildRecursive functions?
 * port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus
-
-* alternative form of UpdateStart / End that would be sig faster, but not
-  robust to concurrent updating from different routines:
-
-``` Go
-  updt := UpdateStart() // if nobody else has set the update flag yet we do and return true
-  // propagate flag down entire tree as now, and new items inherit flag state
-  ....
-  UpdateEnd(updt) // if !updt return else clear flags and emit signal
-```
-
-The problem here is that it depends on strictly hierarchically-nested updates.  If someone else comes in and drives an update at a higher level *after* a lower-level update was already in progress, then the lower level will clear the flag with its updt and emit its signal, and the upper level will encounter already-cleared sub-tree.  Now, that actually might be more logical, and not entirely bad?
-
-The current method is doing a TON of tree traversals: every UpdateStart AND End at every level goes all the way down the tree.  and using atomic actions which could get rather expensive.
-
 
 

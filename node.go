@@ -1494,15 +1494,22 @@ func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 func (n *Node) SaveJSONToFile(filename string) error {
 	b, err := n.SaveJSON(true) // use indent by default
 	if err != nil {
+		log.Println(err)
+		fmt.Println(b)
 		return err
 	}
-	return ioutil.WriteFile(filename, b, 0644) // todo: permissions??
+	err = ioutil.WriteFile(filename, b, 0644) // todo: permissions??
+	if err != nil {
+		log.Println(err)
+	}
+	return err
 }
 
 func (n *Node) LoadJSON(b []byte) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
 		return err
+		log.Println(err)
 	}
 	updt := n.UpdateStart()
 	if UseJsonIter {
@@ -1520,6 +1527,7 @@ func (n *Node) LoadJSON(b []byte) error {
 func (n *Node) LoadJSONFromFile(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	return n.LoadJSON(b)
@@ -1527,6 +1535,7 @@ func (n *Node) LoadJSONFromFile(filename string) error {
 
 func (n *Node) SaveXML(indent bool) ([]byte, error) {
 	if err := n.ThisCheck(); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	if indent {
@@ -1539,6 +1548,7 @@ func (n *Node) SaveXML(indent bool) ([]byte, error) {
 func (n *Node) LoadXML(b []byte) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
+		log.Println(err)
 		return err
 	}
 	updt := n.UpdateStart()
