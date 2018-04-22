@@ -36,8 +36,8 @@ const (
 // todo: need icon
 type Action struct {
 	ButtonBase
-	Data      interface{} `desc:"optional data that is sent with the ActionSig when it is emitted"`
-	ActionSig ki.Signal   `desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
+	Data      interface{} `json:"-" xml:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
+	ActionSig ki.Signal   `json:"-" xml:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 }
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
@@ -166,9 +166,9 @@ func (g *Action) ConfigPartsMenu() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
 	if len(g.Kids) > 0 { // include a right-wedge indicator for sub-menu
-		config.Add(KiT_Stretch, "InStretch") // todo: stretch
+		config.Add(KiT_Stretch, "indic-stretch")
 		wrIdx = len(config)
-		config.Add(KiT_Icon, "Indicator")
+		config.Add(KiT_Icon, "indicator")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
@@ -249,7 +249,7 @@ func (g *Action) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
 	} else {
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
+		g.SetButtonState(ButtonActive)
 	}
 	g.UpdateSig()
 }
@@ -451,7 +451,7 @@ func (g *MenuButton) ButtonRelease() {
 	}
 	g.UpdateEnd(updt)
 	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
+	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
 	if indic != nil {
 		pos = indic.WinBBox.Min
 	} else {
@@ -509,9 +509,9 @@ func (g *MenuButton) ConfigParts() {
 		icnm = "widget-wedge-down"
 	}
 	if icnm != "none" {
-		config.Add(KiT_Space, "InStretch")
+		config.Add(KiT_Space, "indic-stretch")
 		wrIdx = len(config)
-		config.Add(KiT_Icon, "Indicator")
+		config.Add(KiT_Icon, "indicator")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	props := g.StyleProps(ButtonSelectors[ButtonActive])

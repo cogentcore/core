@@ -75,13 +75,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* sliders not the right size in widgets.  reorg widgets with buttons, sliders, text, etc
-
-* initial paint / resize not working for 2nd window (GoGi Editor)
-
 * double-click interval not working at all -- calling everything double-click
-
-* keyboard stuff totally borked
 
 * finish converting to lower-case-hyphen style for ki object names in gi context
 

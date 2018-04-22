@@ -95,7 +95,7 @@ type Text2D struct {
 	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
 	Width       float64  `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text        string   `xml:"text" desc:"text string to render"`
-	WrappedText []string `json:"-","desc:word-wrapped version of the string"`
+	WrappedText []string `json:"-" xml:"-" "desc:word-wrapped version of the string"`
 }
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)

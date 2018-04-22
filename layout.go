@@ -299,11 +299,11 @@ type Layout struct {
 	Node2DBase
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize Vec2D                 `xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize Vec2D                 `xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasScroll [Dims2DN]bool         `desc:"whether scrollbar is used for given dim"`
-	Scrolls   [Dims2DN]*ScrollBar   `xml:"-" desc:"scroll bars -- we fully manage them as needed"`
-	GridSize  image.Point           `desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize Vec2D                 `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll [Dims2DN]bool         `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	Scrolls   [Dims2DN]*ScrollBar   `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	GridSize  image.Point           `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
 	GridData  [RowColN][]LayoutData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
 }
 

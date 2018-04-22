@@ -131,15 +131,15 @@ var TextFieldSelectors = []string{":active", ":focus", ":read-only"}
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Text         string                  `xml:"text" desc:"the last saved value of the text string being edited"`
-	EditText     string                  `xml:"-" desc:"the live text string being edited, with latest modifications"`
+	Text         string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	EditText     string                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications"`
 	StartPos     int                     `xml:"start-pos" desc:"starting display position in the string"`
 	EndPos       int                     `xml:"end-pos" desc:"ending display position in the string"`
 	CursorPos    int                     `xml:"cursor-pos" desc:"current cursor position"`
 	CharWidth    int                     `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
 	SelectMode   bool                    `xml:"select-mode" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `json:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	StateStyles  [TextFieldStatesN]Style `desc:"normal style and focus style"`
+	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -550,9 +550,9 @@ type SpinBox struct {
 	Step       float64   `xml:"step" desc:"smallest step size to increment"`
 	PageStep   float64   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	UpIcon     *Icon     `desc:"icon to use for up button -- defaults to widget-wedge-up"`
-	DownIcon   *Icon     `desc:"icon to use for down button -- defaults to widget-wedge-down"`
-	SpinBoxSig ki.Signal `json:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	UpIcon     *Icon     `json:"-" xml:"-" desc:"icon to use for up button -- defaults to widget-wedge-up"`
+	DownIcon   *Icon     `json:"-" xml:"-" desc:"icon to use for down button -- defaults to widget-wedge-down"`
+	SpinBoxSig ki.Signal `json:"-" xml:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
@@ -769,11 +769,11 @@ func (g *SpinBox) Render2D() {
 type ComboBox struct {
 	ButtonBase
 	Editable  bool          `desc:"provide a text field for editing the value, or just a button for selecting items?"`
-	CurVal    interface{}   `desc:"current selected value"`
-	CurIndex  int           `desc:"current index in list of possible items"`
-	Items     []interface{} `desc:"items available for selection"`
-	ItemsMenu Menu          `desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	ComboSig  ki.Signal     `desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	CurVal    interface{}   `json:"-" xml:"-" desc:"current selected value"`
+	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
+	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
+	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	ComboSig  ki.Signal     `json:"-" xml:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
@@ -856,7 +856,7 @@ func (g *ComboBox) ButtonRelease() {
 	}
 	g.UpdateEnd(updt)
 	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("Indicator", 3))
+	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
 	if indic != nil {
 		pos = indic.WinBBox.Min
 	} else {
@@ -1032,9 +1032,9 @@ func (g *ComboBox) ConfigParts() {
 		icnm = "widget-wedge-down"
 	}
 	if icnm != "none" {
-		config.Add(KiT_Stretch, "InStretch")
+		config.Add(KiT_Stretch, "indic-stretch")
 		wrIdx = len(config)
-		config.Add(KiT_Icon, "Indicator")
+		config.Add(KiT_Icon, "indicator")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	props := g.StyleProps(ButtonSelectors[ButtonActive])

@@ -84,8 +84,8 @@ const (
 type TreeView struct {
 	WidgetBase
 	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	TreeViewSig ki.Signal              `json:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
-	StateStyles [TreeViewStatesN]Style `desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	TreeViewSig ki.Signal              `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
+	StateStyles [TreeViewStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 	RootWidget  *TreeView              `json:"-" desc:"cached root widget"`
 }
@@ -175,12 +175,14 @@ func (tv *TreeView) SyncToSrc() {
 // function for receiving node signals from our SrcNode
 func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data, *send.Flags())
-	dflags := data.(int64)
-	if bitflag.HasMask(dflags, int64(ki.ChildUpdateFlagsMask)) {
-		tv.SyncToSrc()
-	} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
-		tv.UpdateSig()
+	// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data, *send.Flags())
+	if data != nil {
+		dflags := data.(int64)
+		if bitflag.HasMask(dflags, int64(ki.ChildUpdateFlagsMask)) {
+			tv.SyncToSrc()
+		} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
+			tv.UpdateSig()
+		}
 	}
 }
 
@@ -605,11 +607,11 @@ func (tv *TreeView) ClearSelectMods() {
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	config.Add(KiT_CheckBox, "Branch")
-	config.Add(KiT_Space, "Space")
-	config.Add(KiT_Label, "Label")
-	config.Add(KiT_Stretch, "Stretch")
-	config.Add(KiT_MenuButton, "Menu")
+	config.Add(KiT_CheckBox, "branch")
+	config.Add(KiT_Space, "space")
+	config.Add(KiT_Label, "label")
+	config.Add(KiT_Stretch, "stretch")
+	config.Add(KiT_MenuButton, "menu")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)

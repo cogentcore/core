@@ -21,8 +21,8 @@ type SliceView struct {
 	Frame
 	Slice   interface{} `desc:"the slice that we are a view onto"`
 	Title   string      `desc:"title / prompt to show above the editor fields"`
-	Values  []ValueView `desc:"ValueView representations of the slice values"`
-	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -285,9 +285,9 @@ var _ Node2D = &SliceView{}
 type SliceViewInline struct {
 	WidgetBase
 	Slice        interface{} `desc:"the slice that we are a view onto"`
-	SliceViewSig ki.Signal   `json:"-" desc:"signal for SliceView -- see SliceViewSignals for the types"`
-	Values       []ValueView `desc:"ValueView representations of the fields"`
-	TmpSave      ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	SliceViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for SliceView -- see SliceViewSignals for the types"`
+	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, nil)

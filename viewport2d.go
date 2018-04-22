@@ -47,10 +47,10 @@ type Viewport2D struct {
 	Node2DBase
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
-	Render  RenderState `json:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage oswin.Image `json:"-" desc:"the oswin.Image that owns our pixels"`
-	Win     *Window     `json:"-" desc:"our parent window that we render into"`
+	Render  RenderState `json:"-" xml:"-" desc:"render state for rendering"`
+	Pixels  *image.RGBA `json:"-" xml:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage oswin.Image `json:"-" xml:"-" desc:"the oswin.Image that owns our pixels"`
+	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)

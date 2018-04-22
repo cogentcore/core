@@ -23,8 +23,8 @@ type StructView struct {
 	Frame
 	Struct     interface{} `desc:"the struct that we are a view onto"`
 	Title      string      `desc:"title / prompt to show above the editor fields"`
-	FieldViews []ValueView `desc:"ValueView representations of the fields"`
-	TmpSave    ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -231,9 +231,9 @@ var _ Node2D = &StructView{}
 type StructViewInline struct {
 	WidgetBase
 	Struct        interface{} `desc:"the struct that we are a view onto"`
-	StructViewSig ki.Signal   `json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
-	FieldViews    []ValueView `desc:"ValueView representations of the fields"`
-	TmpSave       ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	StructViewSig ki.Signal   `json:"-" xml:"-" json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
+	FieldViews    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave       ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, nil)

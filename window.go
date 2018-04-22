@@ -527,7 +527,7 @@ func (w *Window) EventLoop() {
 				evi.SetProcessed()
 				break
 			} else {
-				fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
+				// fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
 				if e.Crosses(lifecycle.StageFocused) == lifecycle.CrossOff {
 					w.EndProfile()
 				}

@@ -79,11 +79,11 @@ var ButtonSelectors = []string{":active", ":disabled", ":hover", ":focus", ":dow
 type ButtonBase struct {
 	WidgetBase
 	Text        string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon        *Icon                `desc:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
+	Icon        *Icon                `json:"-" xml:"-" xml:desc:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
-	StateStyles [ButtonStatesN]Style `desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	StateStyles [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig   ki.Signal            `desc:"signal for button -- see ButtonSignals for the types"`
+	ButtonSig   ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -437,7 +437,7 @@ var _ Node2D = &Button{}
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff *Icon `desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
+	IconOff *Icon `json:"-" xml:"-" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
@@ -538,17 +538,17 @@ func (g *CheckBox) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
-	config.Add(KiT_Layout, "Stack")
+	config.Add(KiT_Layout, "stack")
 	if g.Text != "" {
-		config.Add(KiT_Space, "Space")
+		config.Add(KiT_Space, "space")
 		lbIdx = len(config)
-		config.Add(KiT_Label, "Label")
+		config.Add(KiT_Label, "label")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	ist := g.Parts.Child(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked
-		ist.SetNChildren(2, KiT_Icon, "Icon") // covered by above config update
+		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
 		if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
 			icon.CopyFromIcon(g.Icon)

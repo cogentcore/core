@@ -22,9 +22,9 @@ type MapView struct {
 	Frame
 	Map     interface{} `desc:"the map that we are a view onto"`
 	Title   string      `desc:"title / prompt to show above the editor fields"`
-	Keys    []ValueView `desc:"ValueView representations of the map keys"`
-	Values  []ValueView `desc:"ValueView representations of the map values"`
-	TmpSave ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
+	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
+	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
@@ -398,10 +398,10 @@ var _ Node2D = &MapView{}
 type MapViewInline struct {
 	WidgetBase
 	Map        interface{} `desc:"the map that we are a view onto"`
-	MapViewSig ki.Signal   `json:"-" desc:"signal for MapView -- see MapViewSignals for the types"`
-	Keys       []ValueView `desc:"ValueView representations of the map keys"`
-	Values     []ValueView `desc:"ValueView representations of the fields"`
-	TmpSave    ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	MapViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for MapView -- see MapViewSignals for the types"`
+	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
+	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)

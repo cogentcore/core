@@ -52,10 +52,10 @@ Rendering is done in 4 separate passes:
 */
 type Node2DBase struct {
 	NodeBase
-	Style    Style       `desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	Paint    Paint       `json:"-",desc:"full paint information for this node"`
-	Viewport *Viewport2D `json:"-",desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
-	LayData  LayoutData  `desc:"all the layout information for this item"`
+	Style    Style       `json:"-" xml:"-" desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	Paint    Paint       `json:"-" xml:"-" desc:"full paint information for this node"`
+	Viewport *Viewport2D `json:"-" xml:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
+	LayData  LayoutData  `json:"-" xml:"-" desc:"all the layout information for this item"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)

@@ -78,7 +78,7 @@ type SliderBase struct {
 	Size        float64              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
 	ThumbSize   float64              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	Prec        int                  `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Icon        *Icon                `desc:"optional icon for the dragging knob"`
+	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float64              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float64              `xml:"pos" desc:"logical position of the slider relative to Size"`
@@ -88,9 +88,9 @@ type SliderBase struct {
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
 	TrackThr    float64              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
-	StateStyles [SliderStatesN]Style `desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State       SliderStates
-	SliderSig   ki.Signal `json:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	State       SliderStates         `desc:"state of slider"`
+	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	SliderSig   ki.Signal            `json:"-" xml:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
 	origWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }

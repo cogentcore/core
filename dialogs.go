@@ -46,7 +46,7 @@ type Dialog struct {
 	Prompt    string      `desc:"a prompt string displayed below the title"`
 	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
 	State     DialogState `desc:"state of the dialog"`
-	DialogSig ki.Signal   `desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
+	DialogSig ki.Signal   `json:"-" xml:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
@@ -237,16 +237,16 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList {
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	if stretch {
-		config.Add(KiT_Stretch, "Stretch")
+		config.Add(KiT_Stretch, "stretch")
 	}
 	if ok {
-		config.Add(KiT_Button, "Ok")
+		config.Add(KiT_Button, "ok")
 	}
 	if cancel {
 		if ok {
-			config.Add(KiT_Space, "Space")
+			config.Add(KiT_Space, "space")
 		}
-		config.Add(KiT_Button, "Cancel")
+		config.Add(KiT_Button, "cancel")
 	}
 	return config
 }
@@ -254,7 +254,7 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 // StdButtonConnnect connects standard buttons in given button box layout to Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.ChildByName("Ok", 0).EmbeddedStruct(KiT_Button).(*Button)
+		okb := bb.ChildByName("ok", 0).EmbeddedStruct(KiT_Button).(*Button)
 		okb.SetText("Ok")
 		okb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
@@ -264,7 +264,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 		})
 	}
 	if cancel {
-		canb := bb.ChildByName("Cancel", 0).EmbeddedStruct(KiT_Button).(*Button)
+		canb := bb.ChildByName("cancel", 0).EmbeddedStruct(KiT_Button).(*Button)
 		canb.SetText("Cancel")
 		canb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {

@@ -186,15 +186,15 @@ func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.Typ
 	icIdx = -1
 	lbIdx = -1
 	if icn != nil {
-		config.Add(KiT_Icon, "Icon")
+		config.Add(KiT_Icon, "icon")
 		icIdx = 0
 		if txt != "" {
-			config.Add(KiT_Space, "Space")
+			config.Add(KiT_Space, "space")
 		}
 	}
 	if txt != "" {
 		lbIdx = len(config)
-		config.Add(KiT_Label, "Label")
+		config.Add(KiT_Label, "label")
 	}
 	return
 }
@@ -224,7 +224,7 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 // check if parts need to be updated -- for ConfigPartsIfNeeded
 func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 	if icn != nil {
-		ick := g.Parts.ChildByName("Icon", 0)
+		ick := g.Parts.ChildByName("icon", 0)
 		if ick == nil {
 			return true
 		}
@@ -234,13 +234,13 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 		}
 		// todo: here add a thing that copies any style elements marked as "inherit" from parent to part
 	} else {
-		ic := g.Parts.ChildByName("Icon", 0)
+		ic := g.Parts.ChildByName("icon", 0)
 		if ic != nil {
 			return true
 		}
 	}
 	if txt != "" {
-		lbl := g.Parts.ChildByName("Label", 2)
+		lbl := g.Parts.ChildByName("label", 2)
 		if lbl == nil {
 			return true
 		}
@@ -248,7 +248,7 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 			return true
 		}
 	} else {
-		lbl := g.Parts.ChildByName("Label", 2)
+		lbl := g.Parts.ChildByName("label", 2)
 		if lbl != nil {
 			return true
 		}

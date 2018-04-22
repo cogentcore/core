@@ -40,7 +40,7 @@ const (
 type TabWidget struct {
 	WidgetBase
 	SrcNode      ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
-	TabWidgetSig ki.Signal `json:"-" desc:"signal for tab widget -- see TabWidgetSignals for the types"`
+	TabWidgetSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabWidgetSignals for the types"`
 }
 
 var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
