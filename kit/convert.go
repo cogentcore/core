@@ -141,6 +141,38 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
+// ToFloat32 robustly converts anything to a Float64
+func ToFloat32(it interface{}) (float32, bool) {
+	if it == nil {
+		return float32(0.0), false
+	}
+	v := NonPtrValue(reflect.ValueOf(it))
+	vk := v.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return float32(v.Int()), true
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return float32(v.Uint()), true
+	case vk == reflect.Bool:
+		if v.Bool() {
+			return 1.0, true
+		}
+		return 0.0, true
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return float32(v.Float()), true
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return float32(real(v.Complex())), true
+	case vk == reflect.String:
+		r, err := strconv.ParseFloat(v.String(), 32)
+		if err != nil {
+			return float32(0.0), false
+		}
+		return float32(r), true
+	default:
+		return float32(0.0), false
+	}
+}
+
 // ToString robustly converts anything to a String -- because Stringer is so
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
@@ -308,6 +340,18 @@ func MinInt(a, b int) int {
 func MinPos(a, b float64) float64 {
 	if a > 0.0 && b > 0.0 {
 		return math.Min(a, b)
+	} else if a > 0.0 {
+		return a
+	} else if b > 0.0 {
+		return b
+	}
+	return a
+}
+
+// minimum excluding 0
+func MinPos32(a, b float32) float32 {
+	if a > 0.0 && b > 0.0 {
+		return Min32(a, b)
 	} else if a > 0.0 {
 		return a
 	} else if b > 0.0 {

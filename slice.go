@@ -234,7 +234,7 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte(fmt.Sprintf("%d", nk))...)
 	b = append(b, []byte(",")...)
 	for i, kid := range k {
-		fmt.Printf("json out of %v\n", kid.PathUnique())
+		// fmt.Printf("json out of %v\n", kid.PathUnique())
 		b = append(b, []byte("\"type\":\"")...)
 		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
 		b = append(b, []byte(knm)...)
