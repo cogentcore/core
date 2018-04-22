@@ -175,10 +175,11 @@ func (tv *TreeView) SyncToSrc() {
 // function for receiving node signals from our SrcNode
 func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-	// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data, *send.Flags())
-	if bitflag.HasMask(*send.Flags(), int64(ki.ChildUpdateFlagsMask)) {
+	fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data, *send.Flags())
+	dflags := data.(int64)
+	if bitflag.HasMask(dflags, int64(ki.ChildUpdateFlagsMask)) {
 		tv.SyncToSrc()
-	} else if bitflag.HasMask(*send.Flags(), int64(ki.ValUpdateFlagsMask)) {
+	} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
 		tv.UpdateSig()
 	}
 }

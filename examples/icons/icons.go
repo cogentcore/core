@@ -7,93 +7,91 @@ package main
 import (
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
-	_ "github.com/rcoreilly/goki/gi/oswin/init"
+	"github.com/rcoreilly/goki/gi/oswin/driver"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )
 
 func main() {
-	go mainrun()
-	oswin.RunBackendEventLoop() // this needs to run in main loop
-}
+	driver.Main(func(app oswin.App) {
+		width := 1024
+		height := 640
 
-func mainrun() {
-	width := 800
-	height := 800
+		// turn this on to see a trace of the rendering
+		// gi.Update2DTrace = true
+		// gi.Render2DTrace = true
+		// gi.Layout2DTrace = true
 
-	// turn this on to see a trace of the rendering
-	// gi.Render2DTrace = true
-	// gi.Layout2DTrace = true
+		rec := ki.Node{}          // receiver for events
+		rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
+		win := gi.NewWindow2D("GoGi Widgets Window", width, height, true)
+		vp := win.WinViewport2D()
+		updt := vp.UpdateStart()
 
-	win := gi.NewWindow2D("GoGi Widgets Window", width, height)
-	win.UpdateStart()
+		vp.SetProp("background-color", "#FFF")
+		vp.Fill = true
 
-	vp := win.WinViewport2D()
-	vp.SetProp("background-color", "#FFF")
-	vp.Fill = true
+		vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
+		vlay.Lay = gi.LayoutCol
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+		row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
+		row1.Lay = gi.LayoutRow
+		row1.SetProp("align-vert", gi.AlignMiddle)
+		row1.SetProp("align-horiz", "center")
+		row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+		row1.SetStretchMaxWidth()
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
-	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	row1.SetStretchMaxWidth()
+		spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+		spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+		row1.AddNewChild(gi.KiT_Stretch, "str1")
+		lab1 := row1.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+		lab1.Text = "These are all the GoGi Icons, in a small and large size"
+		lab1.SetProp("max-width", -1)
+		lab1.SetProp("text-align", "center")
+		row1.AddNewChild(gi.KiT_Stretch, "str2")
 
-	row1.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := row1.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "These are all the GoGi Icons, in a small and large size"
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
-	row1.AddNewChild(gi.KiT_Stretch, "str2")
+		grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
+		grid.Lay = gi.LayoutGrid
+		grid.SetProp("columns", 5)
+		grid.SetProp("align-vert", "center")
+		grid.SetProp("align-horiz", "center")
+		grid.SetProp("margin", 2.0)
+		grid.SetStretchMaxWidth()
+		grid.SetStretchMaxHeight()
 
-	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
-	grid.Lay = gi.LayoutGrid
-	grid.SetProp("columns", 5)
-	grid.SetProp("align-vert", "center")
-	grid.SetProp("align-horiz", "center")
-	grid.SetProp("margin", 2.0)
-	grid.SetStretchMaxWidth()
-	grid.SetStretchMaxHeight()
+		il := gi.IconListSorted(*gi.CurIconSet)
 
-	il := gi.IconListSorted(*gi.CurIconSet)
+		for _, ic := range il {
+			vb := grid.AddNewChild(gi.KiT_Layout, "vb").(*gi.Layout)
+			vb.Lay = gi.LayoutCol
 
-	for _, ic := range il {
-		vb := grid.AddNewChild(gi.KiT_Layout, "vb").(*gi.Layout)
-		vb.Lay = gi.LayoutCol
+			nm := ic.Name()
 
-		nm := ic.Name()
+			smico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
+			smico.CopyFrom(ic)
+			smico.SetMinPrefWidth(units.NewValue(20, units.Px))
+			smico.SetMinPrefHeight(units.NewValue(20, units.Px))
+			smico.SetProp("background-color", "transparent")
+			smico.SetProp("fill", "blue")
+			smico.SetProp("stroke", "black")
+			smico.SetProp("align-horiz", gi.AlignCenter)
 
-		smico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
-		smico.CopyFrom(ic)
-		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
-		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
-		smico.SetProp("background-color", "transparent")
-		smico.SetProp("fill", "blue")
-		smico.SetProp("stroke", "black")
-		smico.SetProp("align-horiz", gi.AlignCenter)
+			ico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
+			ico.CopyFrom(ic)
+			ico.SetMinPrefWidth(units.NewValue(100, units.Px))
+			ico.SetMinPrefHeight(units.NewValue(100, units.Px))
+			ico.SetProp("background-color", "transparent")
+			ico.SetProp("fill", "blue")
+			ico.SetProp("stroke", "black")
+			ico.SetProp("align-horiz", gi.AlignCenter)
+			nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+			nmlbl.Text = nm
+		}
 
-		ico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
-		ico.CopyFrom(ic)
-		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
-		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
-		ico.SetProp("background-color", "transparent")
-		ico.SetProp("fill", "blue")
-		ico.SetProp("stroke", "black")
-		ico.SetProp("align-horiz", gi.AlignCenter)
-		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-		nmlbl.Text = nm
-	}
+		vp.UpdateEndNoSig(updt)
 
-	win.UpdateEnd()
-
-	win.StartEventLoop()
+		win.StartEventLoop()
+	})
 }

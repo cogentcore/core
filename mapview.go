@@ -404,7 +404,7 @@ type MapViewInline struct {
 	TmpSave    ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, nil)
+var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
 func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
@@ -415,7 +415,9 @@ func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
 	mv.UpdateFromMap()
 }
 
-var MapViewInlineProps = ki.Props{}
+var MapViewInlineProps = ki.Props{
+	"min-width": units.NewValue(60, units.Ex),
+}
 
 // todo: maybe figure out a way to share some of this redundant code..
 

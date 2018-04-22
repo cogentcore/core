@@ -566,8 +566,6 @@ var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
 var ScrollBarProps = ki.Props{
 	SliderSelectors[SliderActive]: ki.Props{
-		"width":            "16px", // assumes vertical -- user needs to set!
-		"min-width":        "16px",
 		"border-width":     "1px",
 		"border-radius":    "4px",
 		"border-color":     "black",
@@ -624,7 +622,6 @@ func (g *ScrollBar) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	// todo: how to get state-specific user prefs?  need an extra prefix..
 }
 
 func (g *ScrollBar) Size2D() {

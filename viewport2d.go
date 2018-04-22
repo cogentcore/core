@@ -378,8 +378,9 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 
 	fullRend := false
 	if sig == int64(ki.NodeSignalUpdated) {
-		vlupdt := bitflag.HasMask(*(send.Flags()), ki.ValUpdateFlagsMask)
-		strupdt := bitflag.HasMask(*(send.Flags()), ki.StruUpdateFlagsMask)
+		dflags := data.(int64)
+		vlupdt := bitflag.HasMask(dflags, ki.ValUpdateFlagsMask)
+		strupdt := bitflag.HasMask(dflags, ki.StruUpdateFlagsMask)
 		if vlupdt && !strupdt {
 			fullRend = false
 		} else if strupdt {

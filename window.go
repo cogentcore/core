@@ -168,7 +168,9 @@ func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
 func (w *Window) FullUpdate() {
 	pr := prof.Start("win.FullUpdate")
 	updt := w.UpdateStart()
-	fmt.Printf("win %v upload full vp, img bnd: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
+	if Render2DTrace {
+		fmt.Printf("Window: %v uploading full Vp, image bound: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
+	}
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
