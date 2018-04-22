@@ -202,6 +202,9 @@ type Ki interface {
 	// update signals from this node can update to reflect these changes
 	SetPropUpdate(key string, val interface{})
 
+	// SetPropChildren sets given property key to value val for all Children
+	SetPropChildren(key string, val interface{})
+
 	// Prop gets property value from key -- if inherit, then checks all
 	// parents too -- if typ then checks property on type as well (and on
 	// embedded types if inherit is true) -- returns nil if not set

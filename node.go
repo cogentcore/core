@@ -314,6 +314,12 @@ func (n *Node) SetPropUpdate(key string, val interface{}) {
 	n.UpdateSig()
 }
 
+func (n *Node) SetPropChildren(key string, val interface{}) {
+	for _, k := range n.Kids {
+		k.SetProp(key, val)
+	}
+}
+
 func (n *Node) Prop(key string, inherit, typ bool) interface{} {
 	if n.Props != nil {
 		v, ok := n.Props[key]

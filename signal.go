@@ -32,16 +32,27 @@ type NodeSignals int64
 
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (
-	// no signal
+	// NodeSignalNil is a nil signal value
 	NodeSignalNil NodeSignals = iota
-	// node was updated -- see the node Flags field for the specific changes
-	// that occured during the update -- data is those flags too
+
+	// NodeSignalUpdated indicates that the node was updated -- the node Flags
+	// accumulate the specific changes made since the last update signal --
+	// these flags are sent in the signal data -- strongly recommend using
+	// that instead of the flags, which can be subsequently updated by the
+	// time a signal is processed
 	NodeSignalUpdated
-	// node is being deleted from its parent children list -- not blocked by updating status and delivered immediately
+
+	// NodeSignalDeleting indicates that the node is being deleted from its
+	// parent children list -- this is not blocked by Updating status and is
+	// delivered immediately
 	NodeSignalDeleting
-	// node is about to be destroyed -- second pass after removal from parent -- all of its children will be destroyed too -- not blocked by updating status and delivered immediately
+
+	// NodeSignalDestroying indicates that the node is about to be destroyed
+	// -- this is a second pass after removal from parent -- all of its
+	// children and Ki fields will be destroyed too -- not blocked by updating
+	// status and delivered immediately
 	NodeSignalDestroying
-	// number of signal type consts -- add this to any other signal types passed
+
 	NodeSignalsN
 )
 
@@ -54,20 +65,15 @@ var NodeSignalTrace bool = false
 // otherwise just goes to stdout
 var NodeSignalTraceString *string
 
-// Receiver function type on receiver node -- gets the sending node and arbitrary additional data
-type RecvFunc func(receiver, sender Ki, sig int64, data interface{})
+// RecvFunc is a receiver function type for signals -- gets the full
+// connection information and signal, data as specified by the sender.  It is
+// good practice to avoid closures in these functions, which can be numerous
+// and have a long lifetime, by converting the recv, send into their known
+// types and referring to them directly
+type RecvFunc func(recv, send Ki, sig int64, data interface{})
 
-// use this to encode a custom signal type to be used over the ki.Node.NodeSig and not be confused with basic signals defined above
-func SendCustomNodeSignal(sig int64) int64 {
-	return sig + int64(NodeSignalsN)
-}
-
-// use this to encode a custom signal type to be used over the ki.Node.NodeSig and not be confused with basic signals defined above
-func RecvCustomNodeSignal(sig int64) int64 {
-	return sig - int64(NodeSignalsN)
-}
-
-// Signal -- add one of these for each signal a node can emit
+// Signal structure -- add one of these to your struct for each signal a node
+// can emit
 type Signal struct {
 	Cons []Connection
 }
@@ -136,7 +142,10 @@ func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFunc) int {
 	return -1
 }
 
-// Disconnect all connections for receiver and/or function if they exist in our list -- can pass nil for either (or both) to match only on one or the other -- both nil means disconnect from all, but more efficient to use DisconnectAll
+// Disconnect all connections for receiver and/or function if they exist in
+// our list -- can pass nil for either (or both) to match only on one or the
+// other -- both nil means disconnect from all, but more efficient to use
+// DisconnectAll
 func (sig *Signal) Disconnect(recv Ki, fun RecvFunc) bool {
 	rfref := reflect.ValueOf(fun).Pointer()
 	sz := len(sig.Cons)
@@ -162,7 +171,7 @@ func (sig *Signal) DisconnectAll() {
 	sig.Cons = sig.Cons[:0]
 }
 
-// record a trace of signal being emitted
+// EmitTrace records a trace of signal being emitted
 func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 	if NodeSignalTraceString != nil {
 		*NodeSignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
@@ -214,7 +223,8 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	}
 }
 
-// function type for filtering signals
+// SignalFilterFunc is the function type for filtering signals before they are
+// sent -- returns false to prevent sending, and true to allow sending
 type SignalFilterFunc func(ki Ki, idx int, con *Connection) bool
 
 // EmitFiltered calls function on each item only sends signal if function returns true
@@ -234,7 +244,8 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun Signal
 	}
 }
 
-// EmitGoFiltered calls function on each item only sends signal if function returns true -- concurrent version
+// EmitGoFiltered calls function on each item only sends signal if function
+// returns true -- concurrent version
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
 	deleted := 0
 	for i := range s.Cons {
