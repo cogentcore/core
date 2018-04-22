@@ -24,9 +24,9 @@ func Sel(a ...interface{}) []interface{} {
 	return a
 }
 
-// check if an interface value is nil -- the interface itself could be nil, or
-// the value pointed to by the interface could be nil -- this checks both,
-// safely
+// IsNil checks if an interface value is nil -- the interface itself could be
+// nil, or the value pointed to by the interface could be nil -- this checks
+// both, safely
 func IsNil(it interface{}) bool {
 	if it == nil {
 		return true
@@ -34,6 +34,25 @@ func IsNil(it interface{}) bool {
 	v := reflect.ValueOf(it)
 	vk := v.Kind()
 	if vk == reflect.Ptr || vk == reflect.Interface || vk == reflect.Map || vk == reflect.Slice || vk == reflect.Func || vk == reflect.Chan {
+		return v.IsNil()
+	}
+	return false
+}
+
+// ValueIsZero returns true if the reflect.Value is Zero -- from https://github.com/golang/go/issues/7501
+func ValueIsZero(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Array, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool:
+		return !v.Bool()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return v.Int() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return v.Uint() == 0
+	case reflect.Float32, reflect.Float64:
+		return v.Float() == 0
+	case reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
 		return v.IsNil()
 	}
 	return false

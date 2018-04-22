@@ -197,6 +197,9 @@ func TypeEmbeds(typ, embed reflect.Type) bool {
 // EmbeddedStruct returns the embedded struct of given type within given
 // struct
 func EmbeddedStruct(stru interface{}, embed reflect.Type) interface{} {
+	if IsNil(stru) {
+		return nil
+	}
 	v := NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
 	if typ == embed {
