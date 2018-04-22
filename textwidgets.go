@@ -306,7 +306,7 @@ func (g *TextField) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-func (g *TextField) PixelToCursor(pixOff float64) int {
+func (g *TextField) PixelToCursor(pixOff float32) int {
 	pc := &g.Paint
 	st := &g.Style
 
@@ -320,7 +320,7 @@ func (g *TextField) PixelToCursor(pixOff float64) int {
 	// todo: we're getting the wrong sizes here -- not sure why..
 	// fmt.Printf("em %v ex %v ch %v\n", st.UnContext.ToDotsFactor(units.Em), st.UnContext.ToDotsFactor(units.Ex), st.UnContext.ToDotsFactor(units.Ch))
 
-	c := int(math.Round(px / st.UnContext.ToDotsFactor(units.Ch)))
+	c := int(math.Round(float64(px / st.UnContext.ToDotsFactor(units.Ch))))
 	sz := len(g.EditText)
 	if g.StartPos+c > sz {
 		c = sz - g.StartPos
@@ -353,7 +353,7 @@ func (g *TextField) PixelToCursor(pixOff float64) int {
 	return g.StartPos + c
 }
 
-func (g *TextField) SetCursorFromPixel(pixOff float64) {
+func (g *TextField) SetCursorFromPixel(pixOff float32) {
 	updt := g.UpdateStart()
 	g.CursorPos = g.PixelToCursor(pixOff)
 	g.UpdateEnd(updt)
@@ -379,7 +379,7 @@ func (g *TextField) Init2D() {
 			tf.GrabFocus()
 		}
 		pt := tf.PointToRelPos(me.Pos())
-		tf.SetCursorFromPixel(float64(pt.X))
+		tf.SetCursorFromPixel(float32(pt.X))
 	})
 	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
@@ -542,13 +542,13 @@ var _ Node2D = &TextField{}
 // SpinBox combines a TextField with up / down buttons for incrementing / decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
 	WidgetBase
-	Value      float64   `xml:"value" desc:"current value"`
+	Value      float32   `xml:"value" desc:"current value"`
 	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
-	Min        float64   `xml:"min" desc:"minimum value in range"`
+	Min        float32   `xml:"min" desc:"minimum value in range"`
 	HasMax     bool      `xml:"has-max" desc:"is there a maximumvalue to enforce"`
-	Max        float64   `xml:"max" desc:"maximum value in range"`
-	Step       float64   `xml:"step" desc:"smallest step size to increment"`
-	PageStep   float64   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Max        float32   `xml:"max" desc:"maximum value in range"`
+	Step       float32   `xml:"step" desc:"smallest step size to increment"`
+	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	UpIcon     *Icon     `json:"-" xml:"-" desc:"icon to use for up button -- defaults to widget-wedge-up"`
 	DownIcon   *Icon     `json:"-" xml:"-" desc:"icon to use for down button -- defaults to widget-wedge-down"`
@@ -594,19 +594,19 @@ func (g *SpinBox) Defaults() { // todo: should just get these from props
 }
 
 // SetMin sets the min limits on the value
-func (g *SpinBox) SetMin(min float64) {
+func (g *SpinBox) SetMin(min float32) {
 	g.HasMin = true
 	g.Min = min
 }
 
 // SetMax sets the max limits on the value
-func (g *SpinBox) SetMax(max float64) {
+func (g *SpinBox) SetMax(max float32) {
 	g.HasMax = true
 	g.Max = max
 }
 
 // SetMinMax sets the min and max limits on the value
-func (g *SpinBox) SetMinMax(hasMin bool, min float64, hasMax bool, max float64) {
+func (g *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) {
 	g.HasMin = hasMin
 	g.Min = min
 	g.HasMax = hasMax
@@ -619,30 +619,29 @@ func (g *SpinBox) SetMinMax(hasMin bool, min float64, hasMax bool, max float64) 
 }
 
 // SetValue sets the value, enforcing any limits, and updates the display
-func (g *SpinBox) SetValue(val float64) {
+func (g *SpinBox) SetValue(val float32) {
 	updt := g.UpdateStart()
 	g.Value = val
 	if g.HasMax {
-		g.Value = math.Min(g.Value, g.Max)
+		g.Value = Min32(g.Value, g.Max)
 	}
 	if g.HasMin {
-		g.Value = math.Max(g.Value, g.Min)
+		g.Value = Max32(g.Value, g.Min)
 	}
-	frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
-	g.Value, _ = strconv.ParseFloat(frep, 64)
+	g.Value = Truncate32(g.Value, g.Prec)
 	g.UpdateEnd(updt)
 }
 
 // SetValueAction calls SetValue and also emits the signal
-func (g *SpinBox) SetValueAction(val float64) {
+func (g *SpinBox) SetValueAction(val float32) {
 	g.SetValue(val)
 	g.SpinBoxSig.Emit(g.This, 0, g.Value)
 }
 
 // IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
-func (g *SpinBox) IncrValue(steps float64) {
+func (g *SpinBox) IncrValue(steps float32) {
 	val := g.Value + steps*g.Step
-	val = float64(int(math.Round(val/g.Step))) * g.Step
+	val = FloatMod32(val, g.Step)
 	g.SetValueAction(val)
 }
 
@@ -708,9 +707,9 @@ func (g *SpinBox) ConfigParts() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
 				tf := send.(*TextField)
-				vl, err := strconv.ParseFloat(tf.Text, 64)
+				vl, err := strconv.ParseFloat(tf.Text, 32)
 				if err == nil {
-					sb.SetValueAction(vl)
+					sb.SetValueAction(float32(vl))
 				}
 			})
 		}
@@ -1041,7 +1040,7 @@ func (g *ComboBox) ConfigParts() {
 	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
 	if g.MaxLength > 0 && lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewValue(float64(g.MaxLength), units.Ex))
+		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
 	}
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)

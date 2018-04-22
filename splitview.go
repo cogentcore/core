@@ -19,8 +19,8 @@ import (
 // SplitView allocates a fixed proportion of space to each child, along given dimension, always using only the available space given to it by its parent (i.e., it will force its children, which should be layouts (typically Frame's), to have their own scroll bars as necesssary).  It should generally be used as a main outer-level structure within a window, providing a framework for inner elements -- it allows individual child elements to update indpendently and thus is important for speeding update performance.  It uses the Widget Parts to hold the splitter widgets separately from the children that contain the rest of the scenegraph to be displayed within each region.
 type SplitView struct {
 	WidgetBase
-	Splits      []float64 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
-	SavedSplits []float64 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
+	Splits      []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
+	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
 	Dim         Dims2D    `desc:"dimension along which to split the space"`
 }
 
@@ -41,14 +41,14 @@ func (g *SplitView) UpdateSplits() {
 		return
 	}
 	if g.Splits == nil || len(g.Splits) != sz {
-		g.Splits = make([]float64, sz)
+		g.Splits = make([]float32, sz)
 	}
-	sum := 0.0
+	sum := float32(0.0)
 	for _, sp := range g.Splits {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
-		even := 1.0 / float64(sz)
+		even := 1.0 / float32(sz)
 		for i := range g.Splits {
 			g.Splits[i] = even
 		}
@@ -61,7 +61,7 @@ func (g *SplitView) UpdateSplits() {
 }
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a child entirely -- does an Update
-func (g *SplitView) SetSplits(splits ...float64) {
+func (g *SplitView) SetSplits(splits ...float32) {
 	updt := g.UpdateStart()
 	g.UpdateSplits()
 	sz := len(g.Kids)
@@ -80,7 +80,7 @@ func (g *SplitView) SaveSplits() {
 		return
 	}
 	if g.SavedSplits == nil || len(g.SavedSplits) != sz {
-		g.SavedSplits = make([]float64, sz)
+		g.SavedSplits = make([]float32, sz)
 	}
 	for i, sp := range g.Splits {
 		g.SavedSplits[i] = sp
@@ -111,7 +111,7 @@ func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 	g.UpdateEnd(updt)
 }
 
-func (g *SplitView) SetSplitsAction(idx int, nwval float64) {
+func (g *SplitView) SetSplitsAction(idx int, nwval float32) {
 	updt := g.UpdateStart()
 	g.Splits[idx+1] = 1.0 - nwval
 	g.Splits[idx] = nwval
@@ -134,7 +134,7 @@ func (g *SplitView) ConfigSplitters() {
 	odim := OtherDim(g.Dim)
 	spc := g.Style.BoxSpace()
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
-	osz := 50.0
+	osz := float32(50.0)
 	mid := 0.5 * size
 	spicon := IconByName("widget-handle-circles")
 	for i, spk := range g.Parts.Children() {
@@ -175,14 +175,14 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DWidget(parBBox)
 	g.UpdateSplits()
 
-	handsz := 10.0
+	handsz := float32(10.0)
 
 	sz := len(g.Kids)
 	odim := OtherDim(g.Dim)
 	size := g.LayData.AllocSize.Dim(g.Dim)
-	avail := size - handsz*float64(sz-1)
+	avail := size - handsz*float32(sz-1)
 	osz := g.LayData.AllocSize.Dim(odim)
-	pos := 0.0
+	pos := float32(0.0)
 	handval := 0.6 * handsz / size
 
 	for i, sp := range g.Splits {

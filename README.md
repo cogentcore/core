@@ -27,13 +27,10 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 * `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
 * `textwidgets.go` -- `Label`, `TextField`, `ComboBox` -- also defines the `gi.Labeler` interface and `ToLabel` converter method (which falls back on kit.ToString using Stringer), which is used for generating a gui-appropriate label for an object -- e.g., for reflect.Type it just presents the raw type name without prefix.
-* `views.go` -- `TreeView` widget shows a graphical view of a tree, `TabView` widget for tabbed panels.  Todo: `StructView` for editing structs
+* `*view.go` -- `TreeView` widget shows a graphical view of a tree, `TabView` widget for tabbed panels.  Todo: `StructView` for editing structs
+* `oswin` is a modified version of the back-end OS-specific code from Shiny: https://github.com/golang/exp/tree/master/shiny -- originally used https://github.com/skelterjohn/go.wde but shiny is much faster for updating the window because it is gl-based, and doesn't have any other dependencies (removed dependencies on mobile, changed the event structure to better fit needs here).
 
 # Design notes
-
-* Excellent rendering code on top of freetype rasterizer, does almost everything we need: https://github.com/fogleman/gg -- borrowed heavily from that!
-
-* Also incorporated this framework for getting windows and events: https://github.com/skelterjohn/go.wde
 
 The 2D Gi is based entirely on the SVG2 spec: https://www.w3.org/TR/SVG2/Overview.html, and renders directly to an Image struct (`Viewport2D`)
 
@@ -49,18 +46,20 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ## 2D Design
 
-* There are two main types of 2D nodes, which can be intermingled, but generally are segregated:
-	+ SVG rendering nodes that directly set properties on the Paint object and typically have their own geometry etc -- generally not put within a Layout etc -- convenient to put in an SVGBox or SVGViewport -- their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float64 values
-	+ Widget nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a Layout -- they do NOT use Paint.Transform -- instead use units system with arbitrary DPI to transform sizes into actual rendered dots (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point)
+* There are three main types of 2D nodes:
+	+ `Viewport2D` nodes that manage their own `oswin.Image` bitmap and can upload that directly to the `oswin.Texture` that then uploads directly to the `oswin.Window`.  The parent `Window` has a master `Viewport2D` that backs the entire window, and is what most `Widget`'s render into.
+		+ Popup `Dialog` and `Menu`'s have their own viewports that are layered on top of the main window viewport.
+		+ `SVG` and its subclass `Icon` are containers for SVG-rendering nodes.
+	+ `Widget` nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a `Layout` -- they use `units` system with arbitrary DPI to transform sizes into actual rendered `dots` (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point).  Widgets have non-overlapping bounding boxes (`BBox`).
+	+ `SVG` rendering nodes that directly set properties on the `Paint` object and typically have their own geometry etc -- they should be within a parent `SVG` viewport, and their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float values.
 
-* Using the basic 64bit geom from fogleman/gg -- the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` did not have appropriate 2D rendering transforms etc.
+* Rendering: there are 2 major render frameworks:
+	+ https://godoc.org/github.com/golang/freetype/raster
+	+ https://godoc.org/golang.org/x/image/vector
+	+ This code: https://github.com/fogleman/gg uses freetype and handles the majority of SVG.  Freetype has a `Painter` interface that is key for supporting the more flexible types of patterns, images, etc that can be used for the final render step.  It also directly supports line joins (round, bevel) and caps: square, butt, round.  It uses fixed.Int26_6 values.  The `image/vector` code is highly optimized based on this rust-based rasterizer: https://medium.com/@raphlinus/inside-the-fastest-font-renderer-in-the-world-75ae5270c445 and uses SIMD instructions.  It switches between float32 and fixed.Int22_10 values depending on size.  Presumably the optimal case would be a merge of these different technologies for the best-of-all but I'm not sure how the Painter flexibility could be incorporated.  Also, the freetype system is already supported for fonts -- would need to integrate that.  This is clearly a job for nigeltao.. :)
+	+ Converted the gg system to float32 instead of 64, using the `geom.go Vec2D` core element.  Note that the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` do not have appropriate 2D rendering transforms etc.
 
-* Using 64bit floats for coordinates etc because the spec says you need those for the "high quality" transforms, and Go defaults to them, and it just makes life easier -- won't have so crazy many coords in 2D space as we might have in 3D, where 32bit makes more sense and optimizes GPU hardware.
-	+ shiny uses highly optimized rendering with either 32bit floats or ints -- later could look into it
-
-* The SVG default coordinate system has 0,0 at the upper-left.  The default 3D coordinate system flips the Y axis so 0,0 is at the lower left effectively (actually it uses center-based coordinates so 0,0 is in the center of the image, effectively -- everything is defined by the camera anyway)
-
-* Widget-based layout is simple x,y offsets, and All 2D nodes obey that -- typically you want to add an SVGBox or SVGViewport node to encapsulate pure SVG-based rendering within an overall simple x,y framework
+* The SVG and most 2D default coordinate systems have 0,0 at the upper-left.  The default 3D coordinate system flips the Y axis so 0,0 is at the lower left effectively (actually it uses center-based coordinates so 0,0 is in the center of the image, effectively -- everything is defined by the camera anyway)
 
 * Basic CSS styling is based on the Box model: https://www.w3schools.com/css/css_boxmodel.asp -- see also the Box shadow model https://www.w3schools.com/css/css3_shadows.asp -- general html spec: https://www.w3.org/TR/html5/index.html#contents -- better ref section of w3schools for css spec: https://www.w3schools.com/cssref/default.asp
 
@@ -75,17 +74,21 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* double-click interval not working at all -- calling everything double-click
+* zoom keys, change LogicalDPIScale factor -- should just work!
 
-* finish converting to lower-case-hyphen style for ki object names in gi context
+* Dialog uses min-width / height props -- need to do that directly
+
+* CSS styling attached to Viewport
+
+* preferences struct, editor
+
+* double-click interval not working at all -- calling everything double-click
 
 * arg view / dialog and button tags
 
 * add fps button to gogi first
 
 * DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
-
-* don't re-render scrollbar in course of scrolling!?
 
 * Focus display highlight not getting updated when clicking around in the treeview.
 
@@ -113,14 +116,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
 
 * look into scroll gestures, scrollwheel, etc.
-* tree view should work quite well -- put in a layout and test out..
 
 Next:
-* UnContext not getting initialized on either paint or style -- probably paint -- paint is used for svg while style is for widgets
-* check for Updating count > 0 somewhere -- going to be a common error
 * Layout flow types
-
-* double-click!
 
 * style parsing crash on font-family
 
@@ -182,7 +180,7 @@ Soon:
 ## GUI
 
 * qt quick controls https://doc.qt.io/qt-5.10/qtquickcontrols2-differences.html
-* Shiny (not much progress recently, only works on android?):  https://github.com/golang/go/issues/11818 https://github.com/golang/exp/tree/master/shiny
+* Shiny https://github.com/golang/go/issues/11818 https://github.com/golang/exp/tree/master/shiny
 * Current plans for GUI based on OpenGL: https://docs.google.com/document/d/1mXev7TyEnvM4t33lnqoji-x7EqGByzh4RpE4OqEZck4
 * Window events: https://github.com/skelterjohn/go.wde
 * Mobile: https://github.com/golang/mobile/  https://github.com/golang/go/wiki/Mobile

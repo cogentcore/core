@@ -84,7 +84,7 @@ func (g *Viewport2DFill) Init2D() {
 	g.Init2DBase()
 	vp := g.Viewport
 	g.Pos = Vec2DZero
-	g.Size = Vec2D{float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y)} // assuming no transforms..
+	g.Size = Vec2D{float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y)} // assuming no transforms..
 }
 
 func (g *Viewport2DFill) Style2D() {
@@ -112,7 +112,7 @@ var _ Node2D = &Viewport2DFill{}
 type Circle struct {
 	Node2DBase
 	Pos    Vec2D   `xml:"{cx,cy}" desc:"position of the center of the circle"`
-	Radius float64 `xml:"r" desc:"radius of the circle"`
+	Radius float32 `xml:"r" desc:"radius of the circle"`
 }
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
@@ -460,52 +460,52 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 		case PcM:
 			cx = PathDataNext(data, &i)
 			cy = PathDataNext(data, &i)
-			pc.MoveTo(rs, float64(cx), float64(cy))
+			pc.MoveTo(rs, float32(cx), float32(cy))
 			for np := 1; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case Pcm:
 			cx += PathDataNext(data, &i)
 			cy += PathDataNext(data, &i)
-			pc.MoveTo(rs, float64(cx), float64(cy))
+			pc.MoveTo(rs, float32(cx), float32(cy))
 			for np := 1; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cx = PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cx += PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float64(cx), float64(cy))
+				pc.LineTo(rs, float32(cx), float32(cy))
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
@@ -515,7 +515,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
@@ -525,7 +525,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
@@ -535,7 +535,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
@@ -545,7 +545,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, float64(x1), float64(y1), float64(x2), float64(y2), float64(cx), float64(cy))
+				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
@@ -553,7 +553,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
@@ -561,7 +561,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
@@ -569,7 +569,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = 2*cy - y1
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
@@ -577,7 +577,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = 2*cy - y1
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float64(x1), float64(y1), float64(cx), float64(cy))
+				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
 			}
 		case PcA:
 			for np := 0; np < n/7; np++ {
@@ -590,7 +590,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cy = PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
+				pc.DrawEllipticalArc(rs, float32(cx), float32(cy), float32(rx), float32(ry), float32(ang), 0)
 			}
 		case Pca:
 			for np := 0; np < n/7; np++ {
@@ -603,7 +603,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cy += PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, float64(cx), float64(cy), float64(rx), float64(ry), float64(ang), 0)
+				pc.DrawEllipticalArc(rs, float32(cx), float32(cy), float32(rx), float32(ry), float32(ang), 0)
 			}
 		case PcZ:
 			pc.ClosePath(rs)
@@ -615,7 +615,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 
 // update min max for given coord index and coords
 func minMaxUpdate(i int, cx, cy float32, min, max *Vec2D) {
-	c := Vec2D{float64(cx), float64(cy)}
+	c := Vec2D{float32(cx), float32(cy)}
 	if i == 0 {
 		*min = c
 		*max = c

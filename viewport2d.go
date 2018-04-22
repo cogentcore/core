@@ -326,7 +326,7 @@ func (vp *Viewport2D) Render2D() {
 			rs := &vp.Render
 			pc.FillStyle.SetColor(&vp.Style.Background.Color)
 			pc.StrokeStyle.SetColor(nil)
-			pc.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			pc.DrawRectangle(rs, 0.0, 0.0, float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y))
 			pc.FillStrokeClear(rs)
 		}
 		vp.Render2DChildren() // we must do children first, then us!
@@ -473,7 +473,7 @@ func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 // DrawPoint is like DrawCircle but ensures that a circle of the specified
 // size is drawn regardless of the current transformation matrix. The position
 // is still transformed, but not the shape of the point.
-// func (vp *Viewport2D) DrawPoint(x, y, r float64) {
+// func (vp *Viewport2D) DrawPoint(x, y, r float32) {
 // 	pc := vp.PushNewPaint()
 // 	p := pc.TransformPoint(x, y)
 // 	pc.Identity()

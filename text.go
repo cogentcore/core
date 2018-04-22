@@ -19,7 +19,7 @@ import (
 type TextStyle struct {
 	Align         Align       `xml:"text-align" inherit:"true" desc:"how to align text"`
 	AlignV        Align       `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment of text -- copied from layout style AlignV"`
-	LineHeight    float64     `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
+	LineHeight    float32     `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
 	LetterSpacing units.Value `xml:"letter-spacing" desc:"spacing between characters and lines"`
 	Indent        units.Value `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
 	TabSize       units.Value `xml:"tab-size" inherit:"true" desc:"tab size"`
@@ -48,7 +48,7 @@ func (p *TextStyle) SetStylePost() {
 }
 
 // effective line height (taking into account 0 value)
-func (p *TextStyle) EffLineHeight() float64 {
+func (p *TextStyle) EffLineHeight() float32 {
 	if p.LineHeight == 0 {
 		return 1.0
 	}
@@ -56,7 +56,7 @@ func (p *TextStyle) EffLineHeight() float64 {
 }
 
 // get basic text alignment factors for DrawString routines -- does not handle justified
-func (p *TextStyle) AlignFactors() (ax, ay float64) {
+func (p *TextStyle) AlignFactors() (ax, ay float32) {
 	ax = 0.0
 	ay = 0.0
 	hal := p.Align
@@ -93,7 +93,7 @@ func (p *TextStyle) AlignFactors() (ax, ay float64) {
 type Text2D struct {
 	Node2DBase
 	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
-	Width       float64  `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Width       float32  `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text        string   `xml:"text" desc:"text string to render"`
 	WrappedText []string `json:"-" xml:"-" "desc:word-wrapped version of the string"`
 }
@@ -107,7 +107,7 @@ func (g *Text2D) Style2D() {
 func (g *Text2D) Size2D() {
 	g.InitLayout2D()
 	pc := &g.Paint
-	var w, h float64
+	var w, h float32
 	// pre-wrap the text
 	if pc.TextStyle.WordWrap {
 		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
@@ -157,7 +157,7 @@ var _ Node2D = &Text2D{}
 //  Utilities
 
 type measureStringer interface {
-	MeasureString(s string) (w, h float64)
+	MeasureString(s string) (w, h float32)
 }
 
 func splitOnSpace(x string) []string {
@@ -176,7 +176,7 @@ func splitOnSpace(x string) []string {
 	return result
 }
 
-func wordWrap(m measureStringer, s string, width float64) []string {
+func wordWrap(m measureStringer, s string, width float32) []string {
 	var result []string
 	for _, line := range strings.Split(s, "\n") {
 		fields := splitOnSpace(line)

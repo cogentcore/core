@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 	"reflect"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -813,7 +812,7 @@ func (tv *TreeView) Size2D() {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				h += gi.LayData.AllocSize.Y
-				w = math.Max(w, 10+gi.LayData.AllocSize.X) // 10 = indent, use max
+				w = Max32(w, 10+gi.LayData.AllocSize.X) // 10 = indent, use max
 			}
 		}
 	}

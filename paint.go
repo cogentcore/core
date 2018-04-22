@@ -7,9 +7,9 @@ package gi
 import (
 	"errors"
 	"image"
-	"math"
 	"reflect"
 
+	"github.com/chewxy/math32"
 	"github.com/golang/freetype/raster"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
@@ -107,7 +107,7 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		}
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
-			pc.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
@@ -252,14 +252,14 @@ func (rs *RenderState) PopClip() {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(rs *RenderState, x, y float64) Vec2D {
+func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) Vec2D {
 	tx, ty := rs.XForm.TransformPoint(x, y)
 	return Vec2D{tx, ty}
 }
 
 // get the bounding box for an element in pixel int coordinates
-func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float64) image.Rectangle {
-	sw := 0.0
+func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) image.Rectangle {
+	sw := float32(0.0)
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeStyle.Width.Dots
 	}
@@ -287,7 +287,7 @@ func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Re
 
 // MoveTo starts a new subpath within the current path starting at the
 // specified point.
-func (pc *Paint) MoveTo(rs *RenderState, x, y float64) {
+func (pc *Paint) MoveTo(rs *RenderState, x, y float32) {
 	if rs.HasCurrent {
 		rs.FillPath.Add1(rs.Start.Fixed())
 	}
@@ -301,7 +301,7 @@ func (pc *Paint) MoveTo(rs *RenderState, x, y float64) {
 
 // LineTo adds a line segment to the current path starting at the current
 // point. If there is no current point, it is equivalent to MoveTo(x, y)
-func (pc *Paint) LineTo(rs *RenderState, x, y float64) {
+func (pc *Paint) LineTo(rs *RenderState, x, y float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x, y)
 	} else {
@@ -315,7 +315,7 @@ func (pc *Paint) LineTo(rs *RenderState, x, y float64) {
 // QuadraticTo adds a quadratic bezier curve to the current path starting at
 // the current point. If there is no current point, it first performs
 // MoveTo(x1, y1)
-func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float64) {
+func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
@@ -330,7 +330,7 @@ func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float64) {
 // current point. If there is no current point, it first performs
 // MoveTo(x1, y1). Because freetype/raster does not support cubic beziers,
 // this is emulated with many small line segments.
-func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float64) {
+func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
@@ -528,7 +528,7 @@ func (pc *Paint) SetPixel(rs *RenderState, x, y int) {
 	rs.Image.Set(x, y, &pc.StrokeStyle.Color)
 }
 
-func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float64) {
+func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float32) {
 	pc.MoveTo(rs, x1, y1)
 	pc.LineTo(rs, x2, y2)
 }
@@ -549,7 +549,7 @@ func (pc *Paint) DrawPolygon(rs *RenderState, points []Vec2D) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRectangle(rs *RenderState, x, y, w, h float64) {
+func (pc *Paint) DrawRectangle(rs *RenderState, x, y, w, h float32) {
 	pc.NewSubPath(rs)
 	pc.MoveTo(rs, x, y)
 	pc.LineTo(rs, x+w, y)
@@ -558,7 +558,7 @@ func (pc *Paint) DrawRectangle(rs *RenderState, x, y, w, h float64) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float64) {
+func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
 	x0, x1, x2, x3 := x, x+r, x+w-r, x+w
 	y0, y1, y2, y3 := y, y+r, y+h-r, y+h
 	pc.NewSubPath(rs)
@@ -574,19 +574,19 @@ func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float64) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawEllipticalArc(rs *RenderState, x, y, rx, ry, angle1, angle2 float64) {
+func (pc *Paint) DrawEllipticalArc(rs *RenderState, x, y, rx, ry, angle1, angle2 float32) {
 	const n = 16
 	for i := 0; i < n; i++ {
-		p1 := float64(i+0) / n
-		p2 := float64(i+1) / n
+		p1 := float32(i+0) / n
+		p2 := float32(i+1) / n
 		a1 := angle1 + (angle2-angle1)*p1
 		a2 := angle1 + (angle2-angle1)*p2
-		x0 := x + rx*math.Cos(a1)
-		y0 := y + ry*math.Sin(a1)
-		x1 := x + rx*math.Cos(a1+(a2-a1)/2)
-		y1 := y + ry*math.Sin(a1+(a2-a1)/2)
-		x2 := x + rx*math.Cos(a2)
-		y2 := y + ry*math.Sin(a2)
+		x0 := x + rx*math32.Cos(a1)
+		y0 := y + ry*math32.Sin(a1)
+		x1 := x + rx*math32.Cos(a1+(a2-a1)/2)
+		y1 := y + ry*math32.Sin(a1+(a2-a1)/2)
+		x2 := x + rx*math32.Cos(a2)
+		y2 := y + ry*math32.Sin(a2)
 		cx := 2*x1 - x0/2 - x2/2
 		cy := 2*y1 - y0/2 - y2/2
 		if i == 0 && !rs.HasCurrent {
@@ -596,32 +596,32 @@ func (pc *Paint) DrawEllipticalArc(rs *RenderState, x, y, rx, ry, angle1, angle2
 	}
 }
 
-func (pc *Paint) DrawEllipse(rs *RenderState, x, y, rx, ry float64) {
+func (pc *Paint) DrawEllipse(rs *RenderState, x, y, rx, ry float32) {
 	pc.NewSubPath(rs)
-	pc.DrawEllipticalArc(rs, x, y, rx, ry, 0, 2*math.Pi)
+	pc.DrawEllipticalArc(rs, x, y, rx, ry, 0, 2*math32.Pi)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawArc(rs *RenderState, x, y, r, angle1, angle2 float64) {
+func (pc *Paint) DrawArc(rs *RenderState, x, y, r, angle1, angle2 float32) {
 	pc.DrawEllipticalArc(rs, x, y, r, r, angle1, angle2)
 }
 
-func (pc *Paint) DrawCircle(rs *RenderState, x, y, r float64) {
+func (pc *Paint) DrawCircle(rs *RenderState, x, y, r float32) {
 	pc.NewSubPath(rs)
-	pc.DrawEllipticalArc(rs, x, y, r, r, 0, 2*math.Pi)
+	pc.DrawEllipticalArc(rs, x, y, r, r, 0, 2*math32.Pi)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRegularPolygon(rs *RenderState, n int, x, y, r, rotation float64) {
-	angle := 2 * math.Pi / float64(n)
-	rotation -= math.Pi / 2
+func (pc *Paint) DrawRegularPolygon(rs *RenderState, n int, x, y, r, rotation float32) {
+	angle := 2 * math32.Pi / float32(n)
+	rotation -= math32.Pi / 2
 	if n%2 == 0 {
 		rotation += angle / 2
 	}
 	pc.NewSubPath(rs)
 	for i := 0; i < n; i++ {
-		a := rotation + angle*float64(i)
-		pc.LineTo(rs, x+r*math.Cos(a), y+r*math.Sin(a))
+		a := rotation + angle*float32(i)
+		pc.LineTo(rs, x+r*math32.Cos(a), y+r*math32.Sin(a))
 	}
 	pc.ClosePath(rs)
 }
@@ -634,14 +634,14 @@ func (pc *Paint) DrawImage(rs *RenderState, fmIm image.Image, x, y int) {
 // DrawImageAnchored draws the specified image at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, ax, ay float64) {
+func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, ax, ay float32) {
 	s := rs.Image.Bounds().Size()
-	x -= int(ax * float64(s.X))
-	y -= int(ay * float64(s.Y))
+	x -= int(ax * float32(s.X))
+	y -= int(ay * float32(s.Y))
 	transformer := draw.BiLinear
-	fx, fy := float64(x), float64(y)
+	fx, fy := float32(x), float32(y)
 	m := rs.XForm.Translate(fx, fy)
-	s2d := f64.Aff3{m.XX, m.XY, m.X0, m.YX, m.YY, m.Y0}
+	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
 	} else {
@@ -657,7 +657,7 @@ func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, 
 
 func (pc *Paint) SetFontFace(fontFace font.Face) {
 	pc.FontStyle.Face = fontFace
-	pc.FontStyle.Height = float64(fontFace.Metrics().Height) / 64.0
+	pc.FontStyle.Height = float32(fontFace.Metrics().Height) / 64.0
 }
 
 func (pc *Paint) LoadFontFace(path string, points float64) error {
@@ -668,11 +668,11 @@ func (pc *Paint) LoadFontFace(path string, points float64) error {
 	return err
 }
 
-func (pc *Paint) FontHeight() float64 {
+func (pc *Paint) FontHeight() float32 {
 	return pc.FontStyle.Height
 }
 
-func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectangle, s string, x, y float64) {
+func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectangle, s string, x, y float32) {
 	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
 		return
 	}
@@ -702,9 +702,9 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 		}
 		sr := dr.Sub(dr.Min)
 		transformer := draw.BiLinear
-		fx, fy := float64(dr.Min.X), float64(dr.Min.Y)
+		fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
 		m := rs.XForm.Translate(fx, fy)
-		s2d := f64.Aff3{m.XX, m.XY, m.X0, m.YX, m.YY, m.Y0}
+		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(d.Dst, s2d, d.Src, sr, draw.Over, &draw.Options{
 			SrcMask:  mask,
 			SrcMaskP: maskp,
@@ -718,7 +718,7 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 // -- if non-zero, then x position is for the left edge of the width box, and
 // alignment is WRT that width -- otherwise x position is as in
 // DrawStringAnchored
-func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
+func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float32) {
 	ax, ay := pc.TextStyle.AlignFactors()
 	if width > 0.0 {
 		x += ax * width // re-offset for width
@@ -730,7 +730,7 @@ func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float64) {
 	}
 }
 
-func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float64) {
+func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float32) {
 	ax, ay := pc.TextStyle.AlignFactors()
 	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextStyle.EffLineHeight())
 }
@@ -738,7 +738,7 @@ func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, h
 // DrawStringAnchored draws the specified text at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // text. Use ax=0.5, ay=0.5 to center the text at the specified point.
-func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, width float64) {
+func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, width float32) {
 	w, h := pc.MeasureString(s)
 	x -= ax * w
 	y += ay * h
@@ -755,12 +755,12 @@ func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, wid
 // DrawStringWrapped word-wraps the specified string to the given max width
 // and then draws it at the specified anchor point using the given line
 // spacing and text alignment.
-func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float64) {
+func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float32) {
 	lines, h := pc.MeasureStringWrapped(s, width, lineHeight)
 	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineHeight)
 }
 
-func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float64) {
+func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float32) {
 	x -= ax * width
 	y -= ay * h
 	ax, ay = pc.TextStyle.AlignFactors()
@@ -775,7 +775,7 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 
 // MeasureString returns the rendered width and height of the specified text
 // given the current font face.
-func (pc *Paint) MeasureString(s string) (w, h float64) {
+func (pc *Paint) MeasureString(s string) (w, h float32) {
 	if pc.FontStyle.Face == nil {
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 	}
@@ -783,19 +783,19 @@ func (pc *Paint) MeasureString(s string) (w, h float64) {
 		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
-	return math.Ceil(float64(a >> 6)), pc.FontStyle.Height
+	return math32.Ceil(float32(a >> 6)), pc.FontStyle.Height
 }
 
-func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float64) ([]string, float64) {
+func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float32) ([]string, float32) {
 	lines := pc.WordWrap(s, width)
-	h := float64(len(lines)) * pc.FontStyle.Height * lineHeight
+	h := float32(len(lines)) * pc.FontStyle.Height * lineHeight
 	h -= (lineHeight - 1) * pc.FontStyle.Height
 	return lines, h
 }
 
 // WordWrap wraps the specified string to the given max width and current
 // font face.
-func (pc *Paint) WordWrap(s string, w float64) []string {
+func (pc *Paint) WordWrap(s string, w float32) []string {
 	return wordWrap(pc, s, w)
 }
 
@@ -809,19 +809,19 @@ func (pc *Paint) Identity() {
 }
 
 // Translate updates the current matrix with a translation.
-func (pc *Paint) Translate(x, y float64) {
+func (pc *Paint) Translate(x, y float32) {
 	pc.XForm = pc.XForm.Translate(x, y)
 }
 
 // Scale updates the current matrix with a scaling factor.
 // Scaling occurs about the origin.
-func (pc *Paint) Scale(x, y float64) {
+func (pc *Paint) Scale(x, y float32) {
 	pc.XForm = pc.XForm.Scale(x, y)
 }
 
 // ScaleAbout updates the current matrix with a scaling factor.
 // Scaling occurs about the specified point.
-func (pc *Paint) ScaleAbout(sx, sy, x, y float64) {
+func (pc *Paint) ScaleAbout(sx, sy, x, y float32) {
 	pc.Translate(x, y)
 	pc.Scale(sx, sy)
 	pc.Translate(-x, -y)
@@ -829,13 +829,13 @@ func (pc *Paint) ScaleAbout(sx, sy, x, y float64) {
 
 // Rotate updates the current matrix with a clockwise rotation.
 // Rotation occurs about the origin. Angle is specified in radians.
-func (pc *Paint) Rotate(angle float64) {
+func (pc *Paint) Rotate(angle float32) {
 	pc.XForm = pc.XForm.Rotate(angle)
 }
 
 // RotateAbout updates the current matrix with a clockwise rotation.
 // Rotation occurs about the specified point. Angle is specified in radians.
-func (pc *Paint) RotateAbout(angle, x, y float64) {
+func (pc *Paint) RotateAbout(angle, x, y float32) {
 	pc.Translate(x, y)
 	pc.Rotate(angle)
 	pc.Translate(-x, -y)
@@ -843,13 +843,13 @@ func (pc *Paint) RotateAbout(angle, x, y float64) {
 
 // Shear updates the current matrix with a shearing angle.
 // Shearing occurs about the origin.
-func (pc *Paint) Shear(x, y float64) {
+func (pc *Paint) Shear(x, y float32) {
 	pc.XForm = pc.XForm.Shear(x, y)
 }
 
 // ShearAbout updates the current matrix with a shearing angle.
 // Shearing occurs about the specified point.
-func (pc *Paint) ShearAbout(sx, sy, x, y float64) {
+func (pc *Paint) ShearAbout(sx, sy, x, y float32) {
 	pc.Translate(x, y)
 	pc.Shear(sx, sy)
 	pc.Translate(-x, -y)
@@ -858,7 +858,7 @@ func (pc *Paint) ShearAbout(sx, sy, x, y float64) {
 // InvertY flips the Y axis so that Y grows from bottom to top and Y=0 is at
 // the bottom of the image.
 func (pc *Paint) InvertY(rs *RenderState) {
-	pc.Translate(0, float64(rs.Image.Bounds().Size().Y))
+	pc.Translate(0, float32(rs.Image.Bounds().Size().Y))
 	pc.Scale(1, -1)
 }
 
@@ -868,7 +868,7 @@ func (pc *Paint) InvertY(rs *RenderState) {
 func flattenPath(p raster.Path) [][]Vec2D {
 	var result [][]Vec2D
 	var path []Vec2D
-	var cx, cy float64
+	var cx, cy float32
 	for i := 0; i < len(p); {
 		switch p[i] {
 		case 0:
@@ -917,7 +917,7 @@ func flattenPath(p raster.Path) [][]Vec2D {
 	return result
 }
 
-func dashPath(paths [][]Vec2D, dashes []float64) [][]Vec2D {
+func dashPath(paths [][]Vec2D, dashes []float32) [][]Vec2D {
 	var result [][]Vec2D
 	if len(dashes) == 0 {
 		return paths
@@ -932,7 +932,7 @@ func dashPath(paths [][]Vec2D, dashes []float64) [][]Vec2D {
 		previous := path[0]
 		pathIndex := 1
 		dashIndex := 0
-		segmentLength := 0.0
+		segmentLength := float32(0.0)
 		var segment []Vec2D
 		segment = append(segment, previous)
 		for pathIndex < len(path) {
@@ -995,6 +995,6 @@ func rasterPath(paths [][]Vec2D) raster.Path {
 	return result
 }
 
-func dashed(path raster.Path, dashes []float64) raster.Path {
+func dashed(path raster.Path, dashes []float32) raster.Path {
 	return rasterPath(dashPath(flattenPath(path), dashes))
 }

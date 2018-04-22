@@ -36,7 +36,7 @@ const (
 //go:generate stringer -type=DialogState
 
 // standard vertical space between elements in a dialog, in Em units
-var StdDialogVSpace = 2.0
+var StdDialogVSpace = float32(2.0)
 var StdDialogVSpaceUnits = units.Value{StdDialogVSpace, units.Em, 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either be rendered in a separate window or on top of an existing one
@@ -185,7 +185,7 @@ func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
 }
 
 // SetPrompt sets the prompt and adds a Label named "prompt" to the given frame layout if passed, with the given amount of space before it, sized in "Em"'s (units of font size), if > 0
-func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float64, frame *Frame) *Label {
+func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
 		if spaceBefore > 0 {
@@ -210,7 +210,7 @@ func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 }
 
 // AddButtonBox adds a button box (Row Layout) named "buttons" to given frame, with given amount of space before
-func (dlg *Dialog) AddButtonBox(spaceBefore float64, frame *Frame) *Layout {
+func (dlg *Dialog) AddButtonBox(spaceBefore float32, frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
@@ -279,7 +279,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 // cancel buttons -- any empty text will not be added
 func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	frame := dlg.SetFrame()
-	pspc := 0.0
+	pspc := float32(0.0)
 	if title != "" {
 		dlg.SetTitle(title, frame)
 		pspc = StdDialogVSpace

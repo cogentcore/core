@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"math"
 
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -36,7 +35,7 @@ var WidgetBaseProps = ki.Props{
 // WidgetBase supports full Box rendering model, so Button just calls these methods to render
 // -- base function needs to take a Style arg.
 
-func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float64) {
+func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	if rad == 0.0 {
@@ -70,7 +69,7 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 }
 
 // measure given text string using current style
-func (g *WidgetBase) MeasureTextSize(txt string) (w, h float64) {
+func (g *WidgetBase) MeasureTextSize(txt string) (w, h float32) {
 	st := &g.Style
 	pc := &g.Paint
 	pc.FontStyle = st.Font
@@ -85,10 +84,10 @@ func (g *WidgetBase) Size2DFromText(txt string) {
 	st := &g.Style
 	w, h := g.MeasureTextSize(txt)
 	if st.Layout.Width.Dots > 0 {
-		w = math.Max(st.Layout.Width.Dots, w)
+		w = Max32(st.Layout.Width.Dots, w)
 	}
 	if st.Layout.Height.Dots > 0 {
-		h = math.Max(st.Layout.Height.Dots, h)
+		h = Max32(st.Layout.Height.Dots, h)
 	}
 	spc := st.BoxSpace()
 	w += 2.0 * spc

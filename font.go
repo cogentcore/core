@@ -58,7 +58,7 @@ var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, StylePropPr
 // font style information -- used in Paint and in Style -- see style.go
 type FontStyle struct {
 	Face     font.Face   `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
-	Height   float64     `desc:"recommended line hieight of font in dots"`
+	Height   float32     `desc:"recommended line hieight of font in dots"`
 	FaceName string      `desc:"name corresponding to Face"`
 	Size     units.Value `xml:"size" desc:"size of font to render -- convert to points when getting font to use"`
 	Family   string      `xml:"family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
@@ -81,7 +81,7 @@ func (p *FontStyle) SetStylePost() {
 var lastDots = 0.0
 
 func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
-	intDots := math.Round(p.Size.Dots)
+	intDots := math.Round(float64(p.Size.Dots))
 	face, err := FontLibrary.Font(p.FaceName, intDots)
 	if err != nil {
 		log.Printf("%v\n", err)
@@ -97,21 +97,21 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	} else {
 		p.Face = face
 	}
-	p.Height = float64(p.Face.Metrics().Height) / 64.0
+	p.Height = float32(p.Face.Metrics().Height) / 64.0
 	// if lastDots != p.Size.Dots {
 	// 	pts := p.Size.Convert(units.Pt, ctxt)
 	// 	fmt.Printf("LoadFont points: %v intDots: %v, origDots: %v, height %v, ctxt dpi: %v\n", pts.Val, intDots, pts.Dots, p.Height, ctxt.DPI)
 	// 	lastDots = p.Size.Dots
 	// }
 	p.SetUnitContext(ctxt)
-	// em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
+	// em := float32(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
 	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, p.Height, em)
 }
 
 func (p *FontStyle) SetUnitContext(ctxt *units.Context) {
 	// todo: could measure actual chars but just use defaults right now
 	if p.Face != nil {
-		em := float64(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
+		em := float32(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
 		ctxt.SetFont(em, 0.5*em, .9*em, 12.0) // todo: rem!?  just using 12
 		// fmt.Printf("em %v ex %v ch %v\n", em, 0.5*em, 0.9*em)
 		// order is ex, ch, rem -- using .75 for ch

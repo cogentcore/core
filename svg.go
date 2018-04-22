@@ -61,7 +61,7 @@ func (vp *SVG) Render2D() {
 			tmp = vp.Paint
 			tmp.FillStyle.SetColor(&vp.Style.Background.Color)
 			tmp.StrokeStyle.SetColor(nil)
-			tmp.DrawRectangle(rs, 0.0, 0.0, float64(vp.ViewBox.Size.X), float64(vp.ViewBox.Size.Y))
+			tmp.DrawRectangle(rs, 0.0, 0.0, float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y))
 			tmp.FillStrokeClear(rs)
 		}
 		rs.PushXForm(pc.XForm)

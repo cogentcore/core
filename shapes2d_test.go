@@ -67,8 +67,8 @@ func TestShapesAll(t *testing.T) {
 	polyline1.SetProp("stroke-width", 4.0)
 
 	for i := 0; i < 10; i++ {
-		x1 := rand.Float64() * float64(width)
-		y1 := rand.Float64() * float64(height)
+		x1 := rand.Float32() * float32(width)
+		y1 := rand.Float32() * float32(height)
 		polyline1.Points = append(polyline1.Points, Vec2D{x1, y1})
 	}
 
@@ -78,8 +78,8 @@ func TestShapesAll(t *testing.T) {
 	polygon1.SetProp("stroke-width", 4.0)
 
 	for i := 0; i < 10; i++ {
-		x1 := rand.Float64() * float64(width)
-		y1 := rand.Float64() * float64(height)
+		x1 := rand.Float32() * float32(width)
+		y1 := rand.Float32() * float32(height)
 		polygon1.Points = append(polygon1.Points, Vec2D{x1, y1})
 	}
 

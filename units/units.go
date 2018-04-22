@@ -21,7 +21,6 @@ package units
 import (
 	"fmt"
 	"log"
-	"math"
 	"strings"
 
 	"github.com/rcoreilly/goki/ki/kit"
@@ -113,23 +112,23 @@ var UnitNames = [...]string{
 // into specific display-dependent pixels
 type Context struct {
 	// dots-per-inch of the display
-	DPI float64
+	DPI float32
 	// point size of font (in points)
-	FontEm float64
+	FontEm float32
 	// x-height of font in points
-	FontEx float64
+	FontEx float32
 	// ch-size of font in points
-	FontCh float64
+	FontCh float32
 	// rem-size of font in points
-	FontRem float64
+	FontRem float32
 	// viewport width in dots
-	VpW float64
+	VpW float32
 	// viewport height in dots
-	VpH float64
+	VpH float32
 	// width of surrounding contextual element in dots
-	ElW float64
+	ElW float32
 	// height of surrounding contextual element in dots
-	ElH float64
+	ElH float32
 }
 
 func (uc *Context) Defaults() {
@@ -145,13 +144,13 @@ func (uc *Context) Defaults() {
 }
 
 // set the context values
-func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float64) {
+func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float32) {
 	uc.SetSizes(vpw, vph, elw, elh)
 	uc.SetFont(em, ex, ch, rem)
 }
 
 // set the context values for non-font sizes -- el can be 0 and then defaults to vpw
-func (uc *Context) SetSizes(vpw, vph, elw, elh float64) {
+func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
 	uc.VpW = vpw
 	uc.VpH = vph
 	if elw == 0 {
@@ -167,7 +166,7 @@ func (uc *Context) SetSizes(vpw, vph, elw, elh float64) {
 }
 
 // set the context values for fonts
-func (uc *Context) SetFont(em, ex, ch, rem float64) {
+func (uc *Context) SetFont(em, ex, ch, rem float32) {
 	uc.FontEm = em
 	uc.FontEx = ex
 	uc.FontCh = ch
@@ -175,7 +174,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float64) {
 }
 
 // factor needed to convert given unit into raw pixels (dots in DPI)
-func (uc *Context) ToDotsFactor(un Unit) float64 {
+func (uc *Context) ToDotsFactor(un Unit) float32 {
 	if uc.DPI == 0 {
 		log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
@@ -196,9 +195,9 @@ func (uc *Context) ToDotsFactor(un Unit) float64 {
 	case Vh:
 		return uc.VpH
 	case Vmin:
-		return math.Min(uc.VpW, uc.VpH)
+		return kit.Min32(uc.VpW, uc.VpH)
 	case Vmax:
-		return math.Max(uc.VpW, uc.VpH)
+		return kit.Max32(uc.VpW, uc.VpH)
 	case Cm:
 		return uc.DPI / CmPerInch
 	case Mm:
@@ -222,29 +221,29 @@ func (uc *Context) ToDotsFactor(un Unit) float64 {
 }
 
 // convert value in given units into raw display pixels (dots in DPI)
-func (uc *Context) ToDots(val float64, un Unit) float64 {
+func (uc *Context) ToDots(val float32, un Unit) float32 {
 	return val * uc.ToDotsFactor(un)
 }
 
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
-	Val  float64
+	Val  float32
 	Un   Unit
-	Dots float64
+	Dots float32
 }
 
 // convenience for not having to specify the Dots member
-func NewValue(val float64, un Unit) Value {
+func NewValue(val float32, un Unit) Value {
 	return Value{val, un, 0.0}
 }
 
-func (v *Value) Set(val float64, un Unit) {
+func (v *Value) Set(val float32, un Unit) {
 	v.Val = val
 	v.Un = un
 }
 
 // Convert value to raw display pixels (dots as in DPI), setting also the Dots field
-func (v *Value) ToDots(ctxt *Context) float64 {
+func (v *Value) ToDots(ctxt *Context) float32 {
 	v.Dots = ctxt.ToDots(v.Val, v.Un)
 	return v.Dots
 }
@@ -296,7 +295,7 @@ func (v *Value) SetFromString(str string) {
 	if len(numstr) == 0 { // no units
 		numstr = trstr
 	}
-	var val float64
+	var val float32
 	fmt.Sscanf(strings.TrimSpace(numstr), "%g", &val)
 	v.Set(val, un)
 }

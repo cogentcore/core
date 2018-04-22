@@ -151,7 +151,7 @@ type Style struct {
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
 	Color         Color           `xml:"color" inherit:"true" desc:"text color"`
 	Background    BackgroundStyle `xml:"background" desc:"background settings"`
-	Opacity       float64         `xml:"opacity" desc:"alpha value to apply to all elements"`
+	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
 	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
 	// todo: also see above for more notes on missing style elements
@@ -212,7 +212,7 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		}
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
-			s.UnContext.SetSizes(float64(sz.X), float64(sz.Y), el.X, el.Y)
+			s.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
 	s.Font.SetUnitContext(&s.UnContext)
@@ -246,7 +246,7 @@ func (s *Style) ToDots() {
 // extra space around the central content in the box model, in dots -- todo:
 // must complicate this if we want different spacing on different sides
 // box outside-in: margin | border | padding | content
-func (s *Style) BoxSpace() float64 {
+func (s *Style) BoxSpace() float32 {
 	return s.Layout.Margin.Dots + s.Border.Width.Dots + s.Layout.Padding.Dots
 }
 
@@ -422,7 +422,7 @@ func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, o
 			case units.Value:
 				*uv = prtv
 			default: // assume Px as an implicit default
-				prvflt := reflect.ValueOf(prv).Convert(reflect.TypeOf(0.0)).Interface().(float64)
+				prvflt := reflect.ValueOf(prv).Convert(reflect.TypeOf(float32(0.0))).Interface().(float32)
 				uv.Set(prvflt, units.Px)
 			}
 			return
@@ -459,11 +459,11 @@ func StyleUnitsValue(tag string, uv *units.Value, props ki.Props) bool {
 	case string:
 		uv.SetFromString(v)
 	case float64:
-		uv.Set(v, units.Px) // assume px
+		uv.Set(float32(v), units.Px) // assume px
 	case float32:
-		uv.Set(float64(v), units.Px) // assume px
+		uv.Set(v, units.Px) // assume px
 	case int:
-		uv.Set(float64(v), units.Px) // assume px
+		uv.Set(float32(v), units.Px) // assume px
 	}
 	return true
 }

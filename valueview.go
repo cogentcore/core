@@ -705,7 +705,7 @@ func (vv *IntValueView) WidgetType() reflect.Type {
 func (vv *IntValueView) UpdateWidget() {
 	sb := vv.Widget.(*SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
-	fv, ok := kit.ToFloat(npv.Interface())
+	fv, ok := kit.ToFloat32(npv.Interface())
 	if ok {
 		sb.SetValue(fv)
 	}
@@ -729,23 +729,23 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	// todo: make a utility for this kind of thing..
 	mintag := vv.ViewFieldTag("min")
 	if mintag != "" {
-		min, err := strconv.ParseFloat(mintag, 64)
+		min, err := strconv.ParseFloat(mintag, 32)
 		if err == nil {
-			sb.SetMin(min)
+			sb.SetMin(float32(min))
 		}
 	}
 	maxtag := vv.ViewFieldTag("max")
 	if maxtag != "" {
-		max, err := strconv.ParseFloat(maxtag, 64)
+		max, err := strconv.ParseFloat(maxtag, 32)
 		if err == nil {
-			sb.SetMax(max)
+			sb.SetMax(float32(max))
 		}
 	}
 	steptag := vv.ViewFieldTag("step")
 	if steptag != "" {
-		step, err := strconv.ParseFloat(steptag, 64)
+		step, err := strconv.ParseFloat(steptag, 32)
 		if err == nil {
-			sb.Step = step
+			sb.Step = float32(step)
 		}
 	}
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -775,7 +775,7 @@ func (vv *FloatValueView) WidgetType() reflect.Type {
 func (vv *FloatValueView) UpdateWidget() {
 	sb := vv.Widget.(*SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
-	fv, ok := kit.ToFloat(npv.Interface())
+	fv, ok := kit.ToFloat32(npv.Interface())
 	if ok {
 		sb.SetValue(fv)
 	}
@@ -792,25 +792,25 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	// todo: make a utility for this kind of thing..
 	mintag := vv.ViewFieldTag("min")
 	if mintag != "" {
-		min, err := strconv.ParseFloat(mintag, 64)
+		min, err := strconv.ParseFloat(mintag, 32)
 		if err == nil {
 			sb.HasMin = true
-			sb.Min = min
+			sb.Min = float32(min)
 		}
 	}
 	maxtag := vv.ViewFieldTag("max")
 	if maxtag != "" {
-		max, err := strconv.ParseFloat(maxtag, 64)
+		max, err := strconv.ParseFloat(maxtag, 32)
 		if err == nil {
 			sb.HasMax = true
-			sb.Max = max
+			sb.Max = float32(max)
 		}
 	}
 	steptag := vv.ViewFieldTag("step")
 	if steptag != "" {
-		step, err := strconv.ParseFloat(steptag, 64)
+		step, err := strconv.ParseFloat(steptag, 32)
 		if err == nil {
-			sb.Step = step
+			sb.Step = float32(step)
 		}
 	}
 

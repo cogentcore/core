@@ -6,9 +6,8 @@ package gi
 
 import (
 	"image"
-	"math"
-	"strconv"
 
+	"github.com/chewxy/math32"
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/key"
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
@@ -69,24 +68,24 @@ var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":dow
 // - thumbsize
 type SliderBase struct {
 	WidgetBase
-	Value       float64              `xml:"value" desc:"current value"`
-	EmitValue   float64              `xml:"-" desc:"previous emitted value - don't re-emit if it is the same"`
-	Min         float64              `xml:"min" desc:"minimum value in range"`
-	Max         float64              `xml:"max" desc:"maximum value in range"`
-	Step        float64              `xml:"step" desc:"smallest step size to increment"`
-	PageStep    float64              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Size        float64              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThumbSize   float64              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	Value       float32              `xml:"value" desc:"current value"`
+	EmitValue   float32              `xml:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	Min         float32              `xml:"min" desc:"minimum value in range"`
+	Max         float32              `xml:"max" desc:"maximum value in range"`
+	Step        float32              `xml:"step" desc:"smallest step size to increment"`
+	PageStep    float32              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Size        float32              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
+	ThumbSize   float32              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	Prec        int                  `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
-	ThumbVal    float64              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
-	Pos         float64              `xml:"pos" desc:"logical position of the slider relative to Size"`
-	DragPos     float64              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
-	VisPos      float64              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
+	ThumbVal    float32              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
+	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
+	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
+	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Dim         Dims2D               `desc:"dimension along which the slider slides"`
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
-	TrackThr    float64              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
+	TrackThr    float32              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	State       SliderStates         `desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
@@ -104,9 +103,8 @@ var SliderBaseProps = ki.Props{
 // if snap is set, then snap the value to step sizes
 func (g *SliderBase) SnapValue() {
 	if g.Snap {
-		g.Value = float64(int(math.Round(g.Value/g.Step))) * g.Step
-		frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
-		g.Value, _ = strconv.ParseFloat(frep, 64)
+		g.Value = FloatMod32(g.Value, g.Step)
+		g.Value = Truncate32(g.Value, g.Prec)
 	}
 }
 
@@ -123,7 +121,7 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 
 // set the slider in the down state -- mouse clicked down but not yet up --
 // emits SliderPressed signal
-func (g *SliderBase) SliderPressed(pos float64) {
+func (g *SliderBase) SliderPressed(pos float32) {
 	g.EmitValue = g.Min - 1.0 // invalid value
 	updt := g.UpdateStart()
 	g.SetSliderState(SliderDown)
@@ -180,25 +178,23 @@ func (g *SliderBase) SizeFromAlloc() {
 }
 
 // set the position of the slider at the given position in pixels -- updates the corresponding Value
-func (g *SliderBase) SetSliderPos(pos float64) {
+func (g *SliderBase) SetSliderPos(pos float32) {
 	updt := g.UpdateStart()
 	g.Pos = pos
-	g.Pos = math.Min(g.Size, g.Pos)
+	g.Pos = Min32(g.Size, g.Pos)
 	if g.ValThumb {
 		g.UpdateThumbValSize()
-		g.Pos = math.Min(g.Size-g.ThumbSize, g.Pos)
+		g.Pos = Min32(g.Size-g.ThumbSize, g.Pos)
 	}
-	g.Pos = math.Max(0, g.Pos)
-	g.Value = g.Min + (g.Max-g.Min)*(g.Pos/g.Size)
-	frep := strconv.FormatFloat(g.Value, 'g', g.Prec, 64)
-	g.Value, _ = strconv.ParseFloat(frep, 64)
+	g.Pos = Max32(0, g.Pos)
+	g.Value = Truncate32(g.Min+(g.Max-g.Min)*(g.Pos/g.Size), g.Prec)
 	g.DragPos = g.Pos
 	if g.Snap {
 		g.SnapValue()
 		g.UpdatePosFromValue()
 	}
 	if g.Tracking && g.Value != g.EmitValue {
-		if math.Abs(g.Value-g.EmitValue) > g.TrackThr {
+		if math32.Abs(g.Value-g.EmitValue) > g.TrackThr {
 			g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
 			g.EmitValue = g.Value
 		}
@@ -207,7 +203,7 @@ func (g *SliderBase) SetSliderPos(pos float64) {
 }
 
 // slider moved along relevant axis
-func (g *SliderBase) SliderMoved(start, end float64) {
+func (g *SliderBase) SliderMoved(start, end float32) {
 	del := end - start
 	g.SetSliderPos(g.DragPos + del)
 }
@@ -223,23 +219,23 @@ func (g *SliderBase) UpdatePosFromValue() {
 }
 
 // set a value
-func (g *SliderBase) SetValue(val float64) {
+func (g *SliderBase) SetValue(val float32) {
 	updt := g.UpdateStart()
-	g.Value = math.Min(val, g.Max)
+	g.Value = Min32(val, g.Max)
 	if g.ValThumb {
-		g.Value = math.Min(g.Value, g.Max-g.ThumbVal)
+		g.Value = Min32(g.Value, g.Max-g.ThumbVal)
 	}
-	g.Value = math.Max(g.Value, g.Min)
+	g.Value = Max32(g.Value, g.Min)
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
 	g.UpdateEnd(updt)
 }
 
-func (g *SliderBase) SetThumbValue(val float64) {
+func (g *SliderBase) SetThumbValue(val float32) {
 	updt := g.UpdateStart()
-	g.ThumbVal = math.Min(val, g.Max)
-	g.ThumbVal = math.Max(g.ThumbVal, g.Min)
+	g.ThumbVal = Min32(val, g.Max)
+	g.ThumbVal = Max32(g.ThumbVal, g.Min)
 	g.UpdateThumbValSize()
 	g.UpdateEnd(updt)
 }
@@ -248,8 +244,8 @@ func (g *SliderBase) SetThumbValue(val float64) {
 // scrollbar) -- max's out to full size
 func (g *SliderBase) UpdateThumbValSize() {
 	g.ThumbSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
-	g.ThumbSize = math.Min(g.ThumbSize, 1.0)
-	g.ThumbSize = math.Max(g.ThumbSize, 0.0)
+	g.ThumbSize = Min32(g.ThumbSize, 1.0)
+	g.ThumbSize = Max32(g.ThumbSize, 0.0)
 	g.ThumbSize *= g.Size
 }
 
@@ -304,9 +300,9 @@ func (g *SliderBase) Init2DSlider() {
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
 			if sl.Dim == X {
-				sl.SliderMoved(float64(st.X), float64(ed.X))
+				sl.SliderMoved(float32(st.X), float32(ed.X))
 			} else {
-				sl.SliderMoved(float64(st.Y), float64(ed.Y))
+				sl.SliderMoved(float32(st.Y), float32(ed.Y))
 			}
 		}
 	})
@@ -319,9 +315,9 @@ func (g *SliderBase) Init2DSlider() {
 			st := &sl.Style
 			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
 			if sl.Dim == X {
-				sl.SliderPressed(float64(ed.X) - spc)
+				sl.SliderPressed(float32(ed.X) - spc)
 			} else {
-				sl.SliderPressed(float64(ed.Y) - spc)
+				sl.SliderPressed(float32(ed.Y) - spc)
 			}
 		} else {
 			sl.SliderReleased()

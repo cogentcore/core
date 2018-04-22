@@ -32,7 +32,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-func quadratic(x0, y0, x1, y1, x2, y2, t float64) (x, y float64) {
+// from "golang.org/x/image/vector"
+// devSquared returns a measure of how curvy the sequence (ax, ay) to (bx, by)
+// to (cx, cy) is. It determines how many line segments will approximate a
+// Bezier curve segment.
+//
+// http://lists.nongnu.org/archive/html/freetype-devel/2016-08/msg00080.html
+// gives the rationale for this evenly spaced heuristic instead of a recursive
+// de Casteljau approach:
+//
+// The reason for the subdivision by n is that I expect the "flatness"
+// computation to be semi-expensive (it's done once rather than on each
+// potential subdivision) and also because you'll often get fewer subdivisions.
+// Taking a circular arc as a simplifying assumption (ie a spherical cow),
+// where I get n, a recursive approach would get 2^[lg n], which, if I haven't
+// made any horrible mistakes, is expected to be 33% more in the limit.
+func devSquared(ax, ay, bx, by, cx, cy float32) float32 {
+	devx := ax - 2*bx + cx
+	devy := ay - 2*by + cy
+	return devx*devx + devy*devy
+}
+
+func quadratic(x0, y0, x1, y1, x2, y2, t float32) (x, y float32) {
 	u := 1 - t
 	a := u * u
 	b := 2 * u * t
@@ -42,24 +63,24 @@ func quadratic(x0, y0, x1, y1, x2, y2, t float64) (x, y float64) {
 	return
 }
 
-func QuadraticBezier(x0, y0, x1, y1, x2, y2 float64) []Vec2D {
-	l := (math.Hypot(x1-x0, y1-y0) +
-		math.Hypot(x2-x1, y2-y1))
+func QuadraticBezier(x0, y0, x1, y1, x2, y2 float32) []Vec2D {
+	// l := (math.Hypot(float64(x1-x0), float64(y1-y0)) + math.Hypot(float64(x2-x1), float64(y2-y1)))
+	l := math.Sqrt(float64(devSquared(x0, y0, x1, y1, x2, y2)))
 	n := int(l + 0.5)
 	if n < 4 {
 		n = 4
 	}
-	d := float64(n) - 1
+	d := float32(n) - 1
 	result := make([]Vec2D, n)
 	for i := 0; i < n; i++ {
-		t := float64(i) / d
+		t := float32(i) / d
 		x, y := quadratic(x0, y0, x1, y1, x2, y2, t)
 		result[i] = Vec2D{x, y}
 	}
 	return result
 }
 
-func cubic(x0, y0, x1, y1, x2, y2, x3, y3, t float64) (x, y float64) {
+func cubic(x0, y0, x1, y1, x2, y2, x3, y3, t float32) (x, y float32) {
 	u := 1 - t
 	a := u * u * u
 	b := 3 * u * u * t
@@ -70,18 +91,17 @@ func cubic(x0, y0, x1, y1, x2, y2, x3, y3, t float64) (x, y float64) {
 	return
 }
 
-func CubicBezier(x0, y0, x1, y1, x2, y2, x3, y3 float64) []Vec2D {
-	l := (math.Hypot(x1-x0, y1-y0) +
-		math.Hypot(x2-x1, y2-y1) +
-		math.Hypot(x3-x2, y3-y2))
+func CubicBezier(x0, y0, x1, y1, x2, y2, x3, y3 float32) []Vec2D {
+	// l := (math.Hypot(float64(x1-x0), float64(y1-y0)) + math.Hypot(float64(x2-x1), float64(y2-y1)) + math.Hypot(float64(3-x2), float64(y3-y2)))
+	l := math.Sqrt(float64(devSquared(x0, y0, x1, y1, x2, y2)))
 	n := int(l + 0.5)
 	if n < 4 {
 		n = 4
 	}
-	d := float64(n) - 1
+	d := float32(n) - 1
 	result := make([]Vec2D, n)
 	for i := 0; i < n; i++ {
-		t := float64(i) / d
+		t := float32(i) / d
 		x, y := cubic(x0, y0, x1, y1, x2, y2, x3, y3, t)
 		result[i] = Vec2D{x, y}
 	}

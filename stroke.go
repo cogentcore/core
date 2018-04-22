@@ -45,13 +45,13 @@ var KiT_LineJoin = kit.Enums.AddEnumAltLower(LineJoinN, false, StylePropProps, "
 type StrokeStyle struct {
 	On         bool        `desc:"is stroke active -- if property is none then false"`
 	Color      Color       `xml:"stroke" desc:"default stroke color when such a color is needed -- Server could be anything"`
-	Opacity    float64     `xml:"stroke-opacity" desc:"global alpha opacity / transparency factor"`
+	Opacity    float32     `xml:"stroke-opacity" desc:"global alpha opacity / transparency factor"`
 	Server     PaintServer `desc:"paint server for the stroke -- if solid color, defines the stroke color"`
 	Width      units.Value `xml:"stroke-width" desc:"line width"`
-	Dashes     []float64   `xml:"stroke-dasharray" desc:"dash pattern"`
+	Dashes     []float32   `xml:"stroke-dasharray" desc:"dash pattern"`
 	Cap        LineCap     `xml:"stroke-linecap" desc:"how to draw the end cap of lines"`
 	Join       LineJoin    `xml:"stroke-linejoin" desc:"how to join line segments"`
-	MiterLimit float64     `xml:"stroke-miterlimit,min:"1" desc:"limit of how far to miter -- must be 1 or larger"`
+	MiterLimit float32     `xml:"stroke-miterlimit,min:"1" desc:"limit of how far to miter -- must be 1 or larger"`
 }
 
 // initialize default values for paint stroke

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 
+	"github.com/chewxy/math32"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -186,11 +186,11 @@ func (sp SizePrefs) CanStretchNeed(d Dims2D) bool {
 
 // 2D margins
 type Margins struct {
-	left, right, top, bottom float64
+	left, right, top, bottom float32
 }
 
 // set a single margin for all items
-func (m *Margins) SetMargin(marg float64) {
+func (m *Margins) SetMargin(marg float32) {
 	m.left = marg
 	m.right = marg
 	m.top = marg
@@ -393,7 +393,7 @@ func (ly *Layout) GatherSizesGrid() {
 	}
 
 	if cols == 0 {
-		cols = int(math.Sqrt(float64(sz))) // whatever -- not well defined
+		cols = int(math32.Sqrt(float32(sz))) // whatever -- not well defined
 	}
 	if rows == 0 {
 		rows = sz / cols
@@ -529,7 +529,7 @@ func (ly *Layout) AllocFromParent() {
 }
 
 // calculations to layout a single-element dimension, returns pos and size
-func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float64, al Align) (pos, size float64) {
+func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align) (pos, size float32) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -538,7 +538,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float64, al Align
 		targ = need
 		extra = avail - targ
 	}
-	extra = math.Max(extra, 0.0) // no negatives
+	extra = Max32(extra, 0.0) // no negatives
 
 	stretchNeed := false // stretch relative to need
 	stretchMax := false  // only stretch Max = neg
@@ -616,10 +616,10 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		targ = need
 		extra = avail - targ
 	}
-	extra = math.Max(extra, 0.0) // no negatives
+	extra = Max32(extra, 0.0) // no negatives
 
 	nstretch := 0
-	stretchTot := 0.0
+	stretchTot := float32(0.0)
 	stretchNeed := false        // stretch relative to need
 	stretchMax := false         // only stretch Max = neg
 	addSpace := false           // apply extra toward spacing -- for justify
@@ -653,11 +653,11 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		}
 	}
 
-	extraSpace := 0.0
+	extraSpace := float32(0.0)
 	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
-		extraSpace = extra / float64(sz-1)
+		extraSpace = extra / float32(sz-1)
 	}
 
 	// now arrange everyone
@@ -727,10 +727,10 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 		targ = need
 		extra = avail - targ
 	}
-	extra = math.Max(extra, 0.0) // no negatives
+	extra = Max32(extra, 0.0) // no negatives
 
 	nstretch := 0
-	stretchTot := 0.0
+	stretchTot := float32(0.0)
 	stretchNeed := false        // stretch relative to need
 	stretchMax := false         // only stretch Max = neg
 	addSpace := false           // apply extra toward spacing -- for justify
@@ -758,11 +758,11 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 		}
 	}
 
-	extraSpace := 0.0
+	extraSpace := float32(0.0)
 	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
-		extraSpace = extra / float64(sz-1)
+		extraSpace = extra / float32(sz-1)
 	}
 
 	// now arrange everyone

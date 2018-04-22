@@ -64,10 +64,10 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
 	sz := image.Point{width, height}
-	winDPI := 96.0
+	winDPI := float32(96.0)
 	if oswin.TheApp.NScreens() > 0 {
 		sc := oswin.TheApp.Screen(0)
-		winDPI = float64(sc.LogicalDPI)
+		winDPI = float32(sc.LogicalDPI)
 		fmt.Printf("screen logical dpi is: %v geom %v phys size: %v dpr: %v\n",
 			winDPI, sc.Geometry, sc.PhysicalSize, sc.DevicePixelRatio)
 	}
@@ -75,8 +75,8 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 		unctx := units.Context{}
 		unctx.Defaults()
 		unctx.DPI = winDPI
-		sz.X = int(unctx.ToDots(float64(width), units.Px))
-		sz.Y = int(unctx.ToDots(float64(height), units.Px))
+		sz.X = int(unctx.ToDots(float32(width), units.Px))
+		sz.Y = int(unctx.ToDots(float32(height), units.Px))
 	}
 	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
 		Title: name, Width: sz.X, Height: sz.Y,
@@ -115,11 +115,11 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
-func (w *Window) LogicalDPI() float64 {
+func (w *Window) LogicalDPI() float32 {
 	if w.OSWin == nil {
 		return 96.0 // null default
 	}
-	return float64(w.OSWin.LogicalDPI())
+	return float32(w.OSWin.LogicalDPI())
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {
