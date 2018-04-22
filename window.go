@@ -19,7 +19,6 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/oswin/paint"
 	"github.com/rcoreilly/goki/gi/oswin/window"
-	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -64,22 +63,8 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
 	sz := image.Point{width, height}
-	winDPI := float32(96.0)
-	if oswin.TheApp.NScreens() > 0 {
-		sc := oswin.TheApp.Screen(0)
-		winDPI = float32(sc.LogicalDPI)
-		fmt.Printf("screen logical dpi is: %v geom %v phys size: %v dpr: %v\n",
-			winDPI, sc.Geometry, sc.PhysicalSize, sc.DevicePixelRatio)
-	}
-	if stdPixels {
-		unctx := units.Context{}
-		unctx.Defaults()
-		unctx.DPI = winDPI
-		sz.X = int(unctx.ToDots(float32(width), units.Px))
-		sz.Y = int(unctx.ToDots(float32(height), units.Px))
-	}
 	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
-		Title: name, Width: sz.X, Height: sz.Y,
+		Title: name, Width: width, Height: height, StdPixels: stdPixels,
 	})
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
@@ -91,7 +76,6 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 		return nil
 	}
 	win.OSWin.SetName(name)
-	win.OSWin.SetLogicalDPI(float32(winDPI)) // will also be updated by resize events
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
@@ -119,7 +103,7 @@ func (w *Window) LogicalDPI() float32 {
 	if w.OSWin == nil {
 		return 96.0 // null default
 	}
-	return float32(w.OSWin.LogicalDPI())
+	return w.OSWin.LogicalDPI()
 }
 
 func (w *Window) WinViewport2D() *Viewport2D {
@@ -484,7 +468,9 @@ func (w *Window) EventLoop() {
 			fmt.Printf("Doing full render\n")
 			w.DoFullRender = false
 			w.Viewport.FullRender2DTree()
-			w.SetNextFocusItem()
+			if w.Focus == nil {
+				w.SetNextFocusItem()
+			}
 		}
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
@@ -535,7 +521,9 @@ func (w *Window) EventLoop() {
 			}
 		case *paint.Event:
 			w.Viewport.FullRender2DTree()
-			w.SetNextFocusItem()
+			if w.Focus == nil {
+				w.SetNextFocusItem()
+			}
 			w.StartProfile()
 			continue
 		case *key.ChordEvent:
@@ -562,6 +550,22 @@ func (w *Window) EventLoop() {
 				}
 			case KeyFunGoGiEditor:
 				GoGiEditorOf(w.Viewport.This)
+				e.SetProcessed()
+			case KeyFunZoomIn:
+				oswin.LogicalDPIScale *= 1.1
+				pdpi := w.OSWin.PhysicalDPI()
+				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
+				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
+				fmt.Printf("DPI now: %v\n", dpi)
+				w.Viewport.FullRender2DTree()
+				e.SetProcessed()
+			case KeyFunZoomOut:
+				oswin.LogicalDPIScale *= 0.9
+				pdpi := w.OSWin.PhysicalDPI()
+				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
+				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
+				fmt.Printf("DPI now: %v\n", dpi)
+				w.Viewport.FullRender2DTree()
 				e.SetProcessed()
 			}
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())

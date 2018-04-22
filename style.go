@@ -207,6 +207,7 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	if vp != nil {
 		if vp.Win != nil {
 			s.UnContext.DPI = vp.Win.LogicalDPI()
+			// fmt.Printf("set dpi: %v\n", s.UnContext.DPI)
 			// } else {
 			// 	fmt.Printf("No win for vp: %v\n", vp.PathUnique())
 		}

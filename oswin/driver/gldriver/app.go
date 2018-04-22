@@ -97,7 +97,7 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	return t, nil
 }
 
-func optsSize(opts *oswin.NewWindowOptions) (width, height int) {
+func optsSize(app *appImpl, opts *oswin.NewWindowOptions) (width, height int) {
 	width, height = 1024, 768
 	if opts != nil {
 		if opts.Width > 0 {
@@ -105,6 +105,15 @@ func optsSize(opts *oswin.NewWindowOptions) (width, height int) {
 		}
 		if opts.Height > 0 {
 			height = opts.Height
+		}
+	}
+
+	if opts.StdPixels {
+		if app.NScreens() > 0 {
+			sc := app.Screen(0)
+			winDPI := sc.LogicalDPI
+			width = int(float32(width) * (winDPI / 96))
+			height = int(float32(height) * (winDPI / 96))
 		}
 	}
 	return width, height
@@ -132,6 +141,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.windows[id] = w
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
+
+	if app.NScreens() > 0 {
+		sc := app.Screen(0)
+		w.PhysDPI = sc.PhysicalDPI
+		w.LogDPI = sc.LogicalDPI
+	}
 
 	if useLifecycler {
 		w.lifecycler.SendEvent(w, nil)

@@ -64,7 +64,7 @@ func init() {
 }
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
-	width, height := optsSize(opts)
+	width, height := optsSize(theApp, opts)
 
 	title := C.CString(opts.GetTitle())
 	defer C.free(unsafe.Pointer(title))

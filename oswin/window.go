@@ -33,6 +33,11 @@ type Window interface {
 	// Size returns the current size of the window, in raw underlying dots / pixels
 	Size() image.Point
 
+	// PhysicalDPI is the physical dots per inch of the window, for generating
+	// true-to-physical-size output, for example -- see the gi/units package for
+	// translating into various other units
+	PhysicalDPI() float32
+
 	// LogicalDPI returns the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units --
 	// physical DPI can be found in the Screen
@@ -82,6 +87,10 @@ type NewWindowOptions struct {
 	// used for each zero value dimension.
 	Width, Height int
 
+	// StdPixels means use standardized "pixel" units for the display size(96
+	// per inch), not the actual underlying raw display dot pixels
+	StdPixels bool
+
 	// Title specifies the window title.
 	Title string
 
@@ -118,10 +127,11 @@ func sanitizeUTF8(s string, n int) string {
 // WindowBase provides a base-level implementation of the generic data aspects
 // of the window, including maintaining the current window size and dpi
 type WindowBase struct {
-	Nm     string
-	Titl   string
-	Sz     image.Point
-	LogDPI float32
+	Nm      string
+	Titl    string
+	Sz      image.Point
+	PhysDPI float32
+	LogDPI  float32
 }
 
 func (w WindowBase) Name() string {
@@ -144,10 +154,14 @@ func (w WindowBase) Size() image.Point {
 	return w.Sz
 }
 
+func (w WindowBase) PhysicalDPI() float32 {
+	return w.PhysDPI
+}
+
 func (w WindowBase) LogicalDPI() float32 {
 	return w.LogDPI
 }
 
-func (w WindowBase) SetLogicalDPI(dpi float32) {
+func (w *WindowBase) SetLogicalDPI(dpi float32) {
 	w.LogDPI = dpi
 }

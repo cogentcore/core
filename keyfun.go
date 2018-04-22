@@ -45,6 +45,8 @@ const (
 	KeyFunShift
 	// the control key: command for mac, ctrl for others?
 	KeyFunCtrl
+	KeyFunZoomOut
+	KeyFunZoomIn
 	KeyFunctionsN
 )
 
@@ -95,6 +97,10 @@ var DefaultKeyMap = KeyMap{
 	"Control+O":        KeyFunInsertAfter,
 	"Control+Alt+I":    KeyFunGoGiEditor,
 	"Control+Alt+E":    KeyFunGoGiEditor,
+	"Shift+Meta+=":     KeyFunZoomIn,
+	"Meta+=":           KeyFunZoomIn,
+	"Meta+-":           KeyFunZoomOut,
+	"Shift+Meta+-":     KeyFunZoomOut,
 }
 
 // users can set this to an alternative map
