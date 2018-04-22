@@ -35,14 +35,11 @@ var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map
 func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
-	updt := false
-	if mv.Map != mp {
-		updt = mv.UpdateStart()
-		mv.Map = mp
-	}
+	// note: because we make new maps, and due to the strangeness of reflect, they
+	// end up not being comparable types, so we can't check if equal
+	mv.Map = mp
 	mv.TmpSave = tmpSave
 	mv.UpdateFromMap()
-	mv.UpdateEnd(updt)
 }
 
 var MapViewProps = ki.Props{
@@ -411,14 +408,11 @@ var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, nil)
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
 func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
-	updt := false
-	if mv.Map != mp {
-		updt = mv.UpdateStart()
-		mv.Map = mp
-	}
+	// note: because we make new maps, and due to the strangeness of reflect, they
+	// end up not being comparable types, so we can't check if equal
+	mv.Map = mp
 	mv.TmpSave = tmpSave
 	mv.UpdateFromMap()
-	mv.UpdateEnd(updt)
 }
 
 var MapViewInlineProps = ki.Props{}

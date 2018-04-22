@@ -52,25 +52,10 @@ func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error
 	}, nil
 }
 
-func (app *appImpl) NewTexture(size image.Point) (oswin.Texture, error) {
+func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
 	// TODO: can we compile these programs eagerly instead of lazily?
 
-	// Find a GL context for this texture.
-	// TODO: this might be correct. Some GL objects can be shared
-	// across contexts. But this needs a review of the spec to make
-	// sure it's correct, and some testing would be nice.
-	var w *windowImpl
-
-	app.mu.Lock()
-	for _, window := range app.windows {
-		w = window
-		break
-	}
-	app.mu.Unlock()
-
-	if w == nil {
-		return nil, fmt.Errorf("gldriver: no window available")
-	}
+	w := win.(*windowImpl)
 
 	w.glctxMu.Lock()
 	defer w.glctxMu.Unlock()

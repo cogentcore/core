@@ -13,8 +13,8 @@ import (
 
 // open an interactive editor of the given Ki tree, at its root
 func GoGiEditorOf(obj ki.Ki) {
-	width := 800
-	height := 600
+	width := 1280
+	height := 920
 	win := NewWindow2D("GoGi Editor Window", width, height, true)
 
 	vp := win.WinViewport2D()

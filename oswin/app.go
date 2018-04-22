@@ -49,10 +49,10 @@ type App interface {
 	// slice holding the image data
 	NewImage(size image.Point) (Image, error)
 
-	// NewTexture returns a new Texture for this screen.  Textures are opaque
+	// NewTexture returns a new Texture for the given window.  Textures are opaque
 	// and could be non-local, but very fast for rendering to windows --
-	// typically create a texture of reach window and render to that texture,
+	// typically create a texture of each window and render to that texture,
 	// then Draw that texture to the window when it is time to update (call
 	// Publish on window after drawing)
-	NewTexture(size image.Point) (Texture, error)
+	NewTexture(win Window, size image.Point) (Texture, error)
 }

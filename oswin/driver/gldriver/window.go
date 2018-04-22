@@ -114,7 +114,7 @@ func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle)
 	}
 	dp = dp.Add(sr.Min.Sub(originalSRMin))
 	// TODO: keep a texture around for this purpose?
-	t, err := w.app.NewTexture(sr.Size())
+	t, err := w.app.NewTexture(w, sr.Size())
 	if err != nil {
 		panic(err)
 	}

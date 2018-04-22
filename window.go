@@ -85,7 +85,7 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	win.WinTex, err = oswin.TheApp.NewTexture(sz)
+	win.WinTex, err = oswin.TheApp.NewTexture(win.OSWin, sz)
 	if err != nil {
 		fmt.Printf("GoGi NewTexture error: %v \n", err)
 		return nil
@@ -129,7 +129,10 @@ func (w *Window) WinViewport2D() *Viewport2D {
 }
 
 func (w *Window) Resize(width, height int) {
-	w.WinTex, _ = oswin.TheApp.NewTexture(image.Point{width, height})
+	if w.WinTex != nil {
+		w.WinTex.Release()
+	}
+	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, image.Point{width, height})
 	w.Viewport.Resize(width, height)
 }
 
@@ -165,6 +168,7 @@ func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
 func (w *Window) FullUpdate() {
 	pr := prof.Start("win.FullUpdate")
 	updt := w.UpdateStart()
+	fmt.Printf("win %v upload full vp, img bnd: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
@@ -190,6 +194,7 @@ func (w *Window) FullUpdate() {
 }
 
 func (w *Window) Publish() {
+	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
 	pr.End()
@@ -272,7 +277,7 @@ func (w *Window) EndProfile() {
 }
 
 func (w *Window) StartEventLoop() {
-	w.DoFullRender = true
+	// w.DoFullRender = true
 	// var wg sync.WaitGroup
 	// wg.Add(1)
 	w.EventLoop()
@@ -281,7 +286,7 @@ func (w *Window) StartEventLoop() {
 }
 
 func (w *Window) StartEventLoopNoWait() {
-	w.DoFullRender = true
+	// w.DoFullRender = true
 	w.EventLoop()
 }
 
@@ -341,8 +346,6 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 				return false
 			} else if evi.HasPos() {
 				pos := evi.Pos()
-				// fmt.Printf("checking pos %v of: %v\n", pos, gi.PathUnique())
-
 				// drag events start with node but can go beyond it..
 				mde, ok := evi.(*mouse.DragEvent)
 				if ok {
@@ -410,7 +413,6 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Enter
 					bitflag.Set(&gi.Flag, int(MouseHasEntered))
-					// fmt.Printf("sending enter to: %v\n", gi.PathUnique())
 					if !updated {
 						updt = w.UpdateStart()
 						updated = true
@@ -423,7 +425,6 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 				if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
 					fe.Action = mouse.Exit
 					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
-					// fmt.Printf("sending exit to: %v\n", gi.PathUnique())
 					if !updated {
 						updt = w.UpdateStart()
 						updated = true

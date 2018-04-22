@@ -86,6 +86,9 @@ func (vp *Viewport2D) Resize(width, height int) {
 			return                 // already good
 		}
 	}
+	if vp.OSImage != nil {
+		vp.OSImage.Release()
+	}
 	var err error
 	vp.OSImage, err = oswin.TheApp.NewImage(nwsz)
 	if err != nil {
@@ -99,6 +102,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 	if vp.Viewport == nil { // parent
 		vp.FullRender2DTree()
 	}
+	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
 func (vp *Viewport2D) IsPopup() bool {
