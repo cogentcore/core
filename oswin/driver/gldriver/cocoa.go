@@ -193,6 +193,7 @@ func setGeom(id uintptr, dpi float32, widthPx, heightPx int) {
 	sz := image.Point{widthPx, heightPx}
 	w.sizeMu.Lock()
 	w.Sz = sz
+	w.PhysDPI = dpi
 	w.LogDPI = ldpi
 	w.sizeMu.Unlock()
 

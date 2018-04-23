@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/draw"
 
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -49,7 +50,7 @@ func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
 // draw standard box using given style
 func (g *WidgetBase) RenderStdBox(st *Style) {
 	pc := &g.Paint
-	// rs := &g.Viewport.Render
+	rs := &g.Viewport.Render
 
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
@@ -62,9 +63,14 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 		g.RenderBoxImpl(spos, sz, st.Border.Radius.Dots)
 	}
 	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
+	if !st.Background.Color.IsNil() {
+		draw.Draw(rs.Image, RectFromPosSize(pos, sz), &image.Uniform{&st.Background.Color}, image.ZP, draw.Src)
+	}
+
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColor(&st.Background.Color)
+	// pc.FillStyle.SetColor(&st.Background.Color)
+	pc.FillStyle.SetColor(nil)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 

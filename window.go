@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"flag"
 	"fmt"
 	"image"
 	"log"
@@ -96,6 +95,20 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	return win
 }
 
+func (w *Window) StartEventLoop() {
+	// w.DoFullRender = true
+	// var wg sync.WaitGroup
+	// wg.Add(1)
+	w.EventLoop()
+	// wg.Wait()
+	fmt.Printf("stop event loop\n")
+}
+
+func (w *Window) StartEventLoopNoWait() {
+	// w.DoFullRender = true
+	w.EventLoop()
+}
+
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
@@ -155,6 +168,9 @@ func (w *Window) FullUpdate() {
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading full Vp, image bound: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
 	}
+	// if w.Viewport.Fill {
+	// 	w.WinTex.Fill(w.Viewport.OSImage.Bounds(), &w.Viewport.Style.Background.Color, oswin.Src)
+	// }
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
@@ -182,7 +198,7 @@ func (w *Window) FullUpdate() {
 func (w *Window) Publish() {
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
-	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Over, nil)
+	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
 	pr.End()
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
@@ -215,65 +231,6 @@ func (w *Window) DisconnectNode(recv ki.Ki) {
 // tell the event loop to stop running
 func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true
-}
-
-var cpuprofile *string
-var memprofile *string
-
-func (w *Window) StartProfile() {
-	if cpuprofile != nil {
-		return
-	}
-
-	// to read profile: go tool pprof -http=localhost:5555 cpu.prof
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
-	memprofile = flag.String("memprofile", "", "write memory profile to `file`")
-	profFlag := flag.Bool("prof", false, "turn on targeted profiling")
-	flag.Parse()
-	prof.Profiling = *profFlag
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
-		}
-		if err := pprof.StartCPUProfile(f); err != nil {
-			log.Fatal("could not start CPU profile: ", err)
-		}
-	}
-}
-
-func (w *Window) EndProfile() {
-	prof.Report(time.Millisecond)
-
-	if *cpuprofile != "" {
-		pprof.StopCPUProfile()
-	}
-
-	if *memprofile != "" {
-		f, err := os.Create(*memprofile)
-		if err != nil {
-			log.Fatal("could not create memory profile: ", err)
-		}
-		runtime.GC() // get up-to-date statistics
-		if err := pprof.WriteHeapProfile(f); err != nil {
-			log.Fatal("could not write memory profile: ", err)
-		}
-		f.Close()
-	}
-}
-
-func (w *Window) StartEventLoop() {
-	// w.DoFullRender = true
-	// var wg sync.WaitGroup
-	// wg.Add(1)
-	w.EventLoop()
-	// wg.Wait()
-	fmt.Printf("stop event loop\n")
-}
-
-func (w *Window) StartEventLoopNoWait() {
-	// w.DoFullRender = true
-	w.EventLoop()
 }
 
 // IsInScope returns true if the given object is in scope for receiving events
@@ -514,9 +471,8 @@ func (w *Window) EventLoop() {
 				break
 			} else {
 				// fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
-				if e.Crosses(lifecycle.StageFocused) == lifecycle.CrossOff {
-					w.EndProfile()
-				}
+				// if e.Crosses(lifecycle.StageFocused) == lifecycle.CrossOff {
+				// }
 				evi.SetProcessed()
 			}
 		case *paint.Event:
@@ -524,7 +480,7 @@ func (w *Window) EventLoop() {
 			if w.Focus == nil {
 				w.SetNextFocusItem()
 			}
-			w.StartProfile()
+			// w.StartProfile()
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
@@ -567,6 +523,23 @@ func (w *Window) EventLoop() {
 				fmt.Printf("DPI now: %v\n", dpi)
 				w.Viewport.FullRender2DTree()
 				e.SetProcessed()
+			}
+			if !e.IsProcessed() {
+				cs := e.ChordString()
+				switch cs { // some other random special codes, during dev..
+				case "Control+Alt+P":
+					w.StartTargProfile() // could switch to CPUMem
+					e.SetProcessed()
+				case "Control+Alt+R":
+					w.EndTargProfile()
+					e.SetProcessed()
+				case "Control+Alt+F":
+					w.BenchmarkFullRender()
+					e.SetProcessed()
+				case "Control+Alt+G":
+					w.BenchmarkReRender()
+					e.SetProcessed()
+				}
 			}
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		}
@@ -835,4 +808,73 @@ func (w *Window) PopFocus() {
 	sz := len(w.FocusStack)
 	w.Focus = w.FocusStack[sz-1]
 	w.FocusStack = w.FocusStack[:sz-1]
+}
+
+///////////////////////////////////////////////////////
+// Profiling and Benchmarking, controlled by hot-keys (or buttons :)
+
+func (w *Window) StartCPUMemProfile() {
+	fmt.Println("Starting Std CPU / Mem Profiling")
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+}
+
+func (w *Window) EndCPUMemProfile() {
+	fmt.Println("Ending Std CPU / Mem Profiling")
+	pprof.StopCPUProfile()
+	f, err := os.Create("mem.prof")
+	if err != nil {
+		log.Fatal("could not create memory profile: ", err)
+	}
+	runtime.GC() // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		log.Fatal("could not write memory profile: ", err)
+	}
+	f.Close()
+}
+
+// start targeted profiling using prof package
+func (w *Window) StartTargProfile() {
+	fmt.Println("Starting Targeted Profiling")
+	prof.Reset()
+	prof.Profiling = true
+}
+
+// end targeted profiling and print report
+func (w *Window) EndTargProfile() {
+	prof.Report(time.Millisecond)
+	prof.Profiling = false
+}
+
+// run benchmark of 50 full re-renders, report targeted profile results
+func (w *Window) BenchmarkFullRender() {
+	fmt.Println("Starting BenchmarkFullRender")
+	w.StartTargProfile()
+	ts := time.Now()
+	n := 50
+	for i := 0; i < n; i++ {
+		w.Viewport.FullRender2DTree()
+	}
+	td := time.Now().Sub(ts)
+	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	w.EndTargProfile()
+}
+
+// run benchmark of 50 just-re-renders, not full rebuilds
+func (w *Window) BenchmarkReRender() {
+	fmt.Println("Starting BenchmarkReRender")
+	w.StartTargProfile()
+	ts := time.Now()
+	n := 50
+	for i := 0; i < n; i++ {
+		w.Viewport.Render2DTree()
+	}
+	td := time.Now().Sub(ts)
+	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	w.EndTargProfile()
 }

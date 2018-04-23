@@ -12,6 +12,7 @@ import (
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/rcoreilly/prof"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -355,9 +356,7 @@ func (g *Node2DBase) InitLayout2D() {
 
 // get our bbox from Layout allocation
 func (g *Node2DBase) BBoxFromAlloc() image.Rectangle {
-	tp := g.LayData.AllocPos.ToPointFloor()
-	ts := g.LayData.AllocSize.ToPointCeil()
-	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+	return RectFromPosSize(g.LayData.AllocPos, g.LayData.AllocSize)
 }
 
 // set our window-level BBox from vp and our bbox
@@ -502,6 +501,7 @@ func (g *Node2DBase) ReRender2DTree() {
 // done once but must be robust to repeated calls -- use a flag if necessary
 // -- needed after structural updates to ensure all nodes are updated
 func (g *Node2DBase) Init2DTree() {
+	pr := prof.Start("Node2D.Init2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
@@ -510,11 +510,13 @@ func (g *Node2DBase) Init2DTree() {
 		gii.Init2D()
 		return true
 	})
+	pr.End()
 }
 
 // style scene graph tree from node it is called on -- only needs to be
 // done after a structural update in case inherited options changed
 func (g *Node2DBase) Style2DTree() {
+	pr := prof.Start("Node2D.Style2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
@@ -523,10 +525,12 @@ func (g *Node2DBase) Style2DTree() {
 		gii.Style2D()
 		return true
 	})
+	pr.End()
 }
 
 // do the sizing as a depth-first pass
 func (g *Node2DBase) Size2DTree() {
+	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
 		func(k ki.Ki, level int, d interface{}) bool {
 			// this is for testing whether to process node
@@ -546,16 +550,19 @@ func (g *Node2DBase) Size2DTree() {
 			gii.Size2D()
 			return true
 		})
+	pr.End()
 }
 
 // layout pass -- each node iterates over children for maximum control -- this starts with parent VpBBox -- can be called de novo
 func (g *Node2DBase) Layout2DTree() {
+	pr := prof.Start("Node2D.Layout2DTree")
 	parBBox := image.ZR
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
 	g.This.(Node2D).Layout2D(parBBox) // important to use interface version to get interface!
+	pr.End()
 }
 
 // move2d pass -- each node iterates over children for maximum control -- this starts with parent VpBBox and current delta -- can be called de novo
@@ -573,7 +580,9 @@ func (g *Node2DBase) Move2DTree() {
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
 func (g *Node2DBase) Render2DTree() {
+	pr := prof.Start("Node2D.Render2DTree")
 	g.This.(Node2D).Render2D() // important to use interface version to get interface!
+	pr.End()
 }
 
 // this provides a basic widget box-model subtraction of margin and padding to

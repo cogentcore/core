@@ -321,13 +321,8 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (vp *Viewport2D) Render2D() {
 	if vp.PushBounds() {
-		if vp.Fill {
-			pc := &vp.Paint
-			rs := &vp.Render
-			pc.FillStyle.SetColor(&vp.Style.Background.Color)
-			pc.StrokeStyle.SetColor(nil)
-			pc.DrawRectangle(rs, 0.0, 0.0, float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y))
-			pc.FillStrokeClear(rs)
+		if vp.Fill { // sub-viewport
+			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{&vp.Style.Background.Color}, image.ZP, draw.Src)
 		}
 		vp.Render2DChildren() // we must do children first, then us!
 		vp.RenderViewport2D() // update our parent image

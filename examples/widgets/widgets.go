@@ -24,7 +24,7 @@ func main() {
 
 func mainrun() {
 	width := 1024
-	height := 640
+	height := 768
 
 	// turn this on to see a trace of the rendering
 	// gi.Update2DTrace = true

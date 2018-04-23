@@ -140,20 +140,22 @@ func (s *ShadowStyle) HasShadow() bool {
 
 // all the CSS-based style elements -- used for widget-type objects
 type Style struct {
-	IsSet         bool            `desc:"has this style been set from object values yet?"`
-	Display       bool            `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool            `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	UnContext     units.Context   `desc:"units context -- parameters necessary for anchoring relative units"`
-	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
-	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
-	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Font          FontStyle       `xml:"font" desc:"font parameters"`
-	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
-	Color         Color           `xml:"color" inherit:"true" desc:"text color"`
-	Background    BackgroundStyle `xml:"background" desc:"background settings"`
-	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
-	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
-	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	IsSet         bool                  `desc:"has this style been set from object values yet?"`
+	Display       bool                  `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool                  `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	UnContext     units.Context         `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	Layout        LayoutStyle           `desc:"layout styles -- do not prefix with any xml"`
+	Border        BorderStyle           `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	BoxShadow     ShadowStyle           `xml:"box-shadow" desc:"type of shadow to render around box"`
+	Font          FontStyle             `xml:"font" desc:"font parameters"`
+	Text          TextStyle             `desc:"text parameters -- no xml prefix"`
+	Color         Color                 `xml:"color" inherit:"true" desc:"text color"`
+	Background    BackgroundStyle       `xml:"background" desc:"background settings"`
+	Opacity       float32               `xml:"opacity" desc:"alpha value to apply to all elements"`
+	Outline       BorderStyle           `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
+	PointerEvents bool                  `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	StyleFields   map[string]StyleField `xml:"-" desc:"the compiled stylable fields, mapped the xml and alt tags for the field"`
+	UnitsFields   []StyleField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
 	// todo: also see above for more notes on missing style elements
 }
 
@@ -192,16 +194,16 @@ func (s *Style) SetStyle(parent, defs *Style, props ki.Props) {
 		dfi = interface{}(defs)
 	}
 	inherit := !s.IsSet // we only inherit if not already set
-	WalkStyleStruct(s, pfi, dfi, "", inherit, props, StyleField)
+	WalkStyleStruct(s, pfi, dfi, "", inherit, props, DoStyleField)
 	s.Layout.SetStylePost()
 	s.Font.SetStylePost()
 	s.Text.SetStylePost()
 	s.IsSet = true
 }
 
-// set the unit context based on size of viewport and parent element (from bbox)
-// and then cache everything out in terms of raw pixel dots for rendering -- call at start of
-// render
+// SetUnitContext sets the unit context based on size of viewport and parent
+// element (from bbox) and then cache everything out in terms of raw pixel
+// dots for rendering -- call at start of render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	s.UnContext.Defaults() // todo: need to get screen information and true dpi
 	if vp != nil {
@@ -220,17 +222,18 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	s.ToDots()
 }
 
-// copy units context from another, update with our font info, and then cache
-// everything out in terms of raw pixel dots for rendering -- call at start of
-// render
+// CopyUnitContext copies unit context from another, update with our font
+// info, and then cache everything out in terms of raw pixel dots for
+// rendering -- call at start of render
 func (s *Style) CopyUnitContext(ctxt *units.Context) {
 	s.UnContext = *ctxt
 	s.Font.SetUnitContext(&s.UnContext)
 	s.ToDots()
 }
 
-// call ToDots on all units.Value fields in the style (recursively) -- need to have set the
-// UnContext first -- only after layout at render time is that possible
+// ToDots calls ToDots on all units.Value fields in the style (recursively) --
+// need to have set the UnContext first -- only after layout at render time is
+// that possible
 func (s *Style) ToDots() {
 	valtyp := reflect.TypeOf(units.Value{})
 
@@ -253,6 +256,13 @@ func (s *Style) BoxSpace() float32 {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Style processing util
+
+// StyleField contains the relevant data for a given stylable field in a style struct
+type StyleField struct {
+	Field   reflect.StructField
+	Value   reflect.Value
+	Default reflect.Value
+}
 
 // this is the function to process a given field when walking the style
 type WalkStyleFieldFun func(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, tag string, inherit bool, props ki.Props)
@@ -359,7 +369,7 @@ func StyleFieldProps(sf reflect.StructField, outerTag string, props ki.Props) (i
 }
 
 // standard field processing function for WalkStyleStruct
-func StyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, outerTag string, inherit bool, props ki.Props) {
+func DoStyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, outerTag string, inherit bool, props ki.Props) {
 
 	if inherit { // first process inherit flag -- only inherit on FIRST pass!!
 		inhs := sf.Tag.Get("inherit")

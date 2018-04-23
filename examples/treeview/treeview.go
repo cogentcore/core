@@ -66,7 +66,7 @@ func mainrun() {
 	// gi.Layout2DTrace = true
 
 	width := 1024
-	height := 640
+	height := 768
 	win := gi.NewWindow2D("TreeView Window", width, height, true)
 
 	vp := win.WinViewport2D()

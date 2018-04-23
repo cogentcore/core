@@ -114,6 +114,7 @@ func optsSize(app *appImpl, opts *oswin.NewWindowOptions) (width, height int) {
 			winDPI := sc.LogicalDPI
 			width = int(float32(width) * (winDPI / 96))
 			height = int(float32(height) * (winDPI / 96))
+			// fmt.Printf("new size: %v %v for dpi: %v\n", width, height, winDPI)
 		}
 	}
 	return width, height

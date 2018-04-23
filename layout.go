@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 
 	"github.com/chewxy/math32"
 	"github.com/rcoreilly/goki/gi/units"
@@ -1207,18 +1208,17 @@ func (g *Frame) Render2D() {
 		st := &g.Style
 		rs := &g.Viewport.Render
 		// first draw a background rectangle in our full area
-		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColor(&st.Background.Color)
+
 		pos := g.LayData.AllocPos
 		sz := g.LayData.AllocSize
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-		pc.FillStrokeClear(rs)
+		// todo: won't work for gradients..
+		draw.Draw(rs.Image, g.BBox, &image.Uniform{&st.Background.Color}, image.ZP, draw.Src)
 
 		rad := st.Border.Radius.Dots
 		pos = pos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
 		sz = sz.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
 
-		// then any shadow
+		// then any shadow -- todo: optimize!
 		if st.BoxShadow.HasShadow() {
 			spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 			pc.StrokeStyle.SetColor(nil)

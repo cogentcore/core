@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/draw"
 
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -57,12 +58,7 @@ func (vp *SVG) Render2D() {
 		pc := &vp.Paint
 		rs := &vp.Render
 		if vp.Fill {
-			var tmp = Paint{}
-			tmp = vp.Paint
-			tmp.FillStyle.SetColor(&vp.Style.Background.Color)
-			tmp.StrokeStyle.SetColor(nil)
-			tmp.DrawRectangle(rs, 0.0, 0.0, float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y))
-			tmp.FillStrokeClear(rs)
+			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{&vp.Style.Background.Color}, image.ZP, draw.Src)
 		}
 		rs.PushXForm(pc.XForm)
 		vp.Render2DChildren() // we must do children first, then us!

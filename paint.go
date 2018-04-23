@@ -13,6 +13,7 @@ import (
 	"github.com/golang/freetype/raster"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/prof"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
@@ -49,7 +50,7 @@ SOFTWARE.
 type Paint struct {
 	Off         bool          `desc:"node and everything below it are off, non-rendering"`
 	StyleSet    bool          `desc:"have the styles already been set?"`
-	UnContext   units.Context `desc:"units context -- parameters necessary for anchoring relative units"`
+	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
 	FontStyle   FontStyle
@@ -88,7 +89,7 @@ func (pc *Paint) SetStyle(parent, defs *Paint, props ki.Props) {
 		dfi = interface{}(defs)
 	}
 	inherit := !pc.StyleSet // we only inherit if not already set
-	WalkStyleStruct(pc, pfi, dfi, "", inherit, props, StyleField)
+	WalkStyleStruct(pc, pfi, dfi, "", inherit, props, DoStyleField)
 	pc.StrokeStyle.SetStylePost()
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
@@ -405,6 +406,7 @@ func (pc *Paint) joiner() raster.Joiner {
 }
 
 func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
+	pr := prof.Start("Paint.stroke")
 	path := rs.StrokePath
 	if len(pc.StrokeStyle.Dashes) > 0 {
 		path = dashed(path, pc.StrokeStyle.Dashes)
@@ -418,9 +420,11 @@ func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
 	r.UseNonZeroWinding = true
 	r.AddStroke(path, fix(pc.StrokeStyle.Width.Dots), pc.capper(), pc.joiner())
 	r.Rasterize(painter)
+	pr.End()
 }
 
 func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
+	pr := prof.Start("Paint.fill")
 	path := rs.FillPath
 	if rs.HasCurrent {
 		path = make(raster.Path, len(rs.FillPath))
@@ -432,6 +436,7 @@ func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
 	r.UseNonZeroWinding = (pc.FillStyle.Rule == FillRuleNonZero)
 	r.AddPath(path)
 	r.Rasterize(painter)
+	pr.End()
 }
 
 // StrokePreserve strokes the current path with the current color, line width,
@@ -676,6 +681,7 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
 		return
 	}
+	pr := prof.Start("Paint.drawString")
 	d := &font.Drawer{
 		Dst:  im,
 		Src:  image.NewUniform(&pc.StrokeStyle.Color),
@@ -712,6 +718,7 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 		d.Dot.X = nxt
 		prevC = c
 	}
+	pr.End()
 }
 
 // DrawString according to current settings -- width is needed for alignment
@@ -776,6 +783,7 @@ func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, 
 // MeasureString returns the rendered width and height of the specified text
 // given the current font face.
 func (pc *Paint) MeasureString(s string) (w, h float32) {
+	pr := prof.Start("Paint.MeasureString")
 	if pc.FontStyle.Face == nil {
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 	}
@@ -783,6 +791,7 @@ func (pc *Paint) MeasureString(s string) (w, h float32) {
 		Face: pc.FontStyle.Face,
 	}
 	a := d.MeasureString(s)
+	pr.End()
 	return math32.Ceil(float32(a >> 6)), pc.FontStyle.Height
 }
 
