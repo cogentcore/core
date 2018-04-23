@@ -18,11 +18,12 @@ func (i BoxSides) String() string {
 	return _BoxSides_name[_BoxSides_index[i]:_BoxSides_index[i+1]]
 }
 
-func StringToBoxSides(s string) (BoxSides, error) {
-	for i := 0; i < len(_BoxSides_index)-1; i++ {
-		if s == _BoxSides_name[_BoxSides_index[i]:_BoxSides_index[i+1]] {
-			return BoxSides(i), nil
+func (i *BoxSides) FromString(s string) error {
+	for j := 0; j < len(_BoxSides_index)-1; j++ {
+		if s == _BoxSides_name[_BoxSides_index[j]:_BoxSides_index[j+1]] {
+			*i = BoxSides(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type BoxSides", s)
+	return fmt.Errorf("String %v is not a valid option for type BoxSides", s)
 }

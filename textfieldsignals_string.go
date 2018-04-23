@@ -18,11 +18,12 @@ func (i TextFieldSignals) String() string {
 	return _TextFieldSignals_name[_TextFieldSignals_index[i]:_TextFieldSignals_index[i+1]]
 }
 
-func StringToTextFieldSignals(s string) (TextFieldSignals, error) {
-	for i := 0; i < len(_TextFieldSignals_index)-1; i++ {
-		if s == _TextFieldSignals_name[_TextFieldSignals_index[i]:_TextFieldSignals_index[i+1]] {
-			return TextFieldSignals(i), nil
+func (i *TextFieldSignals) FromString(s string) error {
+	for j := 0; j < len(_TextFieldSignals_index)-1; j++ {
+		if s == _TextFieldSignals_name[_TextFieldSignals_index[j]:_TextFieldSignals_index[j+1]] {
+			*i = TextFieldSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type TextFieldSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type TextFieldSignals", s)
 }

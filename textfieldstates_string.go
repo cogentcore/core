@@ -18,11 +18,12 @@ func (i TextFieldStates) String() string {
 	return _TextFieldStates_name[_TextFieldStates_index[i]:_TextFieldStates_index[i+1]]
 }
 
-func StringToTextFieldStates(s string) (TextFieldStates, error) {
-	for i := 0; i < len(_TextFieldStates_index)-1; i++ {
-		if s == _TextFieldStates_name[_TextFieldStates_index[i]:_TextFieldStates_index[i+1]] {
-			return TextFieldStates(i), nil
+func (i *TextFieldStates) FromString(s string) error {
+	for j := 0; j < len(_TextFieldStates_index)-1; j++ {
+		if s == _TextFieldStates_name[_TextFieldStates_index[j]:_TextFieldStates_index[j+1]] {
+			*i = TextFieldStates(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type TextFieldStates", s)
+	return fmt.Errorf("String %v is not a valid option for type TextFieldStates", s)
 }

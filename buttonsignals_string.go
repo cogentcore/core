@@ -18,11 +18,12 @@ func (i ButtonSignals) String() string {
 	return _ButtonSignals_name[_ButtonSignals_index[i]:_ButtonSignals_index[i+1]]
 }
 
-func StringToButtonSignals(s string) (ButtonSignals, error) {
-	for i := 0; i < len(_ButtonSignals_index)-1; i++ {
-		if s == _ButtonSignals_name[_ButtonSignals_index[i]:_ButtonSignals_index[i+1]] {
-			return ButtonSignals(i), nil
+func (i *ButtonSignals) FromString(s string) error {
+	for j := 0; j < len(_ButtonSignals_index)-1; j++ {
+		if s == _ButtonSignals_name[_ButtonSignals_index[j]:_ButtonSignals_index[j+1]] {
+			*i = ButtonSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type ButtonSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type ButtonSignals", s)
 }

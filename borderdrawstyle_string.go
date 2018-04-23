@@ -18,11 +18,12 @@ func (i BorderDrawStyle) String() string {
 	return _BorderDrawStyle_name[_BorderDrawStyle_index[i]:_BorderDrawStyle_index[i+1]]
 }
 
-func StringToBorderDrawStyle(s string) (BorderDrawStyle, error) {
-	for i := 0; i < len(_BorderDrawStyle_index)-1; i++ {
-		if s == _BorderDrawStyle_name[_BorderDrawStyle_index[i]:_BorderDrawStyle_index[i+1]] {
-			return BorderDrawStyle(i), nil
+func (i *BorderDrawStyle) FromString(s string) error {
+	for j := 0; j < len(_BorderDrawStyle_index)-1; j++ {
+		if s == _BorderDrawStyle_name[_BorderDrawStyle_index[j]:_BorderDrawStyle_index[j+1]] {
+			*i = BorderDrawStyle(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type BorderDrawStyle", s)
+	return fmt.Errorf("String %v is not a valid option for type BorderDrawStyle", s)
 }

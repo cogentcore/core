@@ -18,11 +18,12 @@ func (i Align) String() string {
 	return _Align_name[_Align_index[i]:_Align_index[i+1]]
 }
 
-func StringToAlign(s string) (Align, error) {
-	for i := 0; i < len(_Align_index)-1; i++ {
-		if s == _Align_name[_Align_index[i]:_Align_index[i+1]] {
-			return Align(i), nil
+func (i *Align) FromString(s string) error {
+	for j := 0; j < len(_Align_index)-1; j++ {
+		if s == _Align_name[_Align_index[j]:_Align_index[j+1]] {
+			*i = Align(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Align", s)
+	return fmt.Errorf("String %v is not a valid option for type Align", s)
 }

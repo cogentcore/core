@@ -2,6 +2,8 @@
 
 `Control+Alt+F` is full render, and `Control+Alt+G` is Re Render
 
+**VERY IMPORTANT** must run benchmarks from a go build and NOT from dlv debug session.
+
 ## 2018 - 04 - 22
 
 After converting everything to float32, but before optimizing Styling, measure
@@ -118,4 +120,24 @@ Time for 50 Re-Renders:        11.75 s
      win.Publish.Publish:	Tot:	       19.61	Avg:	        0.39	N:	    50	Pct:	 0.08
         win.Publish.Copy:	Tot:	        6.40	Avg:	        0.13	N:	    50	Pct:	 0.03
      Node2D.Layout2DTree:	Tot:	        2.65	Avg:	        0.05	N:	    50	Pct:	 0.01
+```
+
+After fixing fills and optimizing the style, down to 1/2 the time for full render:
+
+```
+Starting BenchmarkFullRender
+Starting Targeted Profiling
+Time for 50 Re-Renders:        14.61 s
+     Node2D.Render2DTree:	Tot:	     7386.06	Avg:	      147.72	N:	    50	Pct:	29.50
+     Paint.MeasureString:	Tot:	     5585.40	Avg:	        0.26	N:	 21600	Pct:	22.31
+       Node2D.Size2DTree:	Tot:	     3620.81	Avg:	       72.42	N:	    50	Pct:	14.46
+              Paint.fill:	Tot:	     3610.36	Avg:	        1.64	N:	  2200	Pct:	14.42
+      Node2D.Style2DTree:	Tot:	     1663.35	Avg:	       33.27	N:	    50	Pct:	 6.64
+     Node2D.Layout2DTree:	Tot:	     1194.25	Avg:	       11.94	N:	   100	Pct:	 4.77
+        Paint.drawString:	Tot:	     1039.29	Avg:	        0.15	N:	  7150	Pct:	 4.15
+       Node2D.Init2DTree:	Tot:	      612.39	Avg:	       12.25	N:	    50	Pct:	 2.45
+            Paint.stroke:	Tot:	      232.19	Avg:	        0.06	N:	  3750	Pct:	 0.93
+          win.FullUpdate:	Tot:	       57.50	Avg:	        1.15	N:	    50	Pct:	 0.23
+     win.Publish.Publish:	Tot:	       26.28	Avg:	        0.53	N:	    50	Pct:	 0.10
+        win.Publish.Copy:	Tot:	        6.34	Avg:	        0.13	N:	    50	Pct:	 0.03
 ```

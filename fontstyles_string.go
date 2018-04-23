@@ -18,11 +18,12 @@ func (i FontStyles) String() string {
 	return _FontStyles_name[_FontStyles_index[i]:_FontStyles_index[i+1]]
 }
 
-func StringToFontStyles(s string) (FontStyles, error) {
-	for i := 0; i < len(_FontStyles_index)-1; i++ {
-		if s == _FontStyles_name[_FontStyles_index[i]:_FontStyles_index[i+1]] {
-			return FontStyles(i), nil
+func (i *FontStyles) FromString(s string) error {
+	for j := 0; j < len(_FontStyles_index)-1; j++ {
+		if s == _FontStyles_name[_FontStyles_index[j]:_FontStyles_index[j+1]] {
+			*i = FontStyles(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type FontStyles", s)
+	return fmt.Errorf("String %v is not a valid option for type FontStyles", s)
 }

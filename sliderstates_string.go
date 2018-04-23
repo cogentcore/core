@@ -18,11 +18,12 @@ func (i SliderStates) String() string {
 	return _SliderStates_name[_SliderStates_index[i]:_SliderStates_index[i+1]]
 }
 
-func StringToSliderStates(s string) (SliderStates, error) {
-	for i := 0; i < len(_SliderStates_index)-1; i++ {
-		if s == _SliderStates_name[_SliderStates_index[i]:_SliderStates_index[i+1]] {
-			return SliderStates(i), nil
+func (i *SliderStates) FromString(s string) error {
+	for j := 0; j < len(_SliderStates_index)-1; j++ {
+		if s == _SliderStates_name[_SliderStates_index[j]:_SliderStates_index[j+1]] {
+			*i = SliderStates(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type SliderStates", s)
+	return fmt.Errorf("String %v is not a valid option for type SliderStates", s)
 }

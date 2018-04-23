@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _KeyFunctions_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunFocusNextKeyFunFocusPrevKeyFunSelectItemKeyFunAcceptKeyFunAbortKeyFunCancelSelectKeyFunExtendSelectKeyFunSelectTextKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunBackspaceKeyFunDeleteKeyFunKillKeyFunDuplicateKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunShiftKeyFunCtrlKeyFunctionsN"
+const _KeyFunctions_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunFocusNextKeyFunFocusPrevKeyFunSelectItemKeyFunAcceptKeyFunAbortKeyFunCancelSelectKeyFunExtendSelectKeyFunSelectTextKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunBackspaceKeyFunDeleteKeyFunKillKeyFunDuplicateKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunShiftKeyFunCtrlKeyFunZoomOutKeyFunZoomInKeyFunctionsN"
 
-var _KeyFunctions_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 153, 168, 184, 196, 207, 225, 243, 259, 273, 283, 292, 303, 318, 330, 340, 355, 367, 384, 400, 411, 421, 434}
+var _KeyFunctions_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 153, 168, 184, 196, 207, 225, 243, 259, 273, 283, 292, 303, 318, 330, 340, 355, 367, 384, 400, 411, 421, 434, 446, 459}
 
 func (i KeyFunctions) String() string {
 	if i < 0 || i >= KeyFunctions(len(_KeyFunctions_index)-1) {
@@ -18,11 +18,12 @@ func (i KeyFunctions) String() string {
 	return _KeyFunctions_name[_KeyFunctions_index[i]:_KeyFunctions_index[i+1]]
 }
 
-func StringToKeyFunctions(s string) (KeyFunctions, error) {
-	for i := 0; i < len(_KeyFunctions_index)-1; i++ {
-		if s == _KeyFunctions_name[_KeyFunctions_index[i]:_KeyFunctions_index[i+1]] {
-			return KeyFunctions(i), nil
+func (i *KeyFunctions) FromString(s string) error {
+	for j := 0; j < len(_KeyFunctions_index)-1; j++ {
+		if s == _KeyFunctions_name[_KeyFunctions_index[j]:_KeyFunctions_index[j+1]] {
+			*i = KeyFunctions(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type KeyFunctions", s)
+	return fmt.Errorf("String %v is not a valid option for type KeyFunctions", s)
 }

@@ -18,11 +18,12 @@ func (i LineCap) String() string {
 	return _LineCap_name[_LineCap_index[i]:_LineCap_index[i+1]]
 }
 
-func StringToLineCap(s string) (LineCap, error) {
-	for i := 0; i < len(_LineCap_index)-1; i++ {
-		if s == _LineCap_name[_LineCap_index[i]:_LineCap_index[i+1]] {
-			return LineCap(i), nil
+func (i *LineCap) FromString(s string) error {
+	for j := 0; j < len(_LineCap_index)-1; j++ {
+		if s == _LineCap_name[_LineCap_index[j]:_LineCap_index[j+1]] {
+			*i = LineCap(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type LineCap", s)
+	return fmt.Errorf("String %v is not a valid option for type LineCap", s)
 }

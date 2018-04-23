@@ -18,11 +18,12 @@ func (i ViewBoxMeetOrSlice) String() string {
 	return _ViewBoxMeetOrSlice_name[_ViewBoxMeetOrSlice_index[i]:_ViewBoxMeetOrSlice_index[i+1]]
 }
 
-func StringToViewBoxMeetOrSlice(s string) (ViewBoxMeetOrSlice, error) {
-	for i := 0; i < len(_ViewBoxMeetOrSlice_index)-1; i++ {
-		if s == _ViewBoxMeetOrSlice_name[_ViewBoxMeetOrSlice_index[i]:_ViewBoxMeetOrSlice_index[i+1]] {
-			return ViewBoxMeetOrSlice(i), nil
+func (i *ViewBoxMeetOrSlice) FromString(s string) error {
+	for j := 0; j < len(_ViewBoxMeetOrSlice_index)-1; j++ {
+		if s == _ViewBoxMeetOrSlice_name[_ViewBoxMeetOrSlice_index[j]:_ViewBoxMeetOrSlice_index[j+1]] {
+			*i = ViewBoxMeetOrSlice(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type ViewBoxMeetOrSlice", s)
+	return fmt.Errorf("String %v is not a valid option for type ViewBoxMeetOrSlice", s)
 }

@@ -18,11 +18,12 @@ func (i Dims2D) String() string {
 	return _Dims2D_name[_Dims2D_index[i]:_Dims2D_index[i+1]]
 }
 
-func StringToDims2D(s string) (Dims2D, error) {
-	for i := 0; i < len(_Dims2D_index)-1; i++ {
-		if s == _Dims2D_name[_Dims2D_index[i]:_Dims2D_index[i+1]] {
-			return Dims2D(i), nil
+func (i *Dims2D) FromString(s string) error {
+	for j := 0; j < len(_Dims2D_index)-1; j++ {
+		if s == _Dims2D_name[_Dims2D_index[j]:_Dims2D_index[j+1]] {
+			*i = Dims2D(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Dims2D", s)
+	return fmt.Errorf("String %v is not a valid option for type Dims2D", s)
 }

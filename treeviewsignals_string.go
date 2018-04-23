@@ -18,11 +18,12 @@ func (i TreeViewSignals) String() string {
 	return _TreeViewSignals_name[_TreeViewSignals_index[i]:_TreeViewSignals_index[i+1]]
 }
 
-func StringToTreeViewSignals(s string) (TreeViewSignals, error) {
-	for i := 0; i < len(_TreeViewSignals_index)-1; i++ {
-		if s == _TreeViewSignals_name[_TreeViewSignals_index[i]:_TreeViewSignals_index[i+1]] {
-			return TreeViewSignals(i), nil
+func (i *TreeViewSignals) FromString(s string) error {
+	for j := 0; j < len(_TreeViewSignals_index)-1; j++ {
+		if s == _TreeViewSignals_name[_TreeViewSignals_index[j]:_TreeViewSignals_index[j+1]] {
+			*i = TreeViewSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type TreeViewSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type TreeViewSignals", s)
 }

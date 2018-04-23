@@ -18,11 +18,12 @@ func (i PaintServers) String() string {
 	return _PaintServers_name[_PaintServers_index[i]:_PaintServers_index[i+1]]
 }
 
-func StringToPaintServers(s string) (PaintServers, error) {
-	for i := 0; i < len(_PaintServers_index)-1; i++ {
-		if s == _PaintServers_name[_PaintServers_index[i]:_PaintServers_index[i+1]] {
-			return PaintServers(i), nil
+func (i *PaintServers) FromString(s string) error {
+	for j := 0; j < len(_PaintServers_index)-1; j++ {
+		if s == _PaintServers_name[_PaintServers_index[j]:_PaintServers_index[j+1]] {
+			*i = PaintServers(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type PaintServers", s)
+	return fmt.Errorf("String %v is not a valid option for type PaintServers", s)
 }

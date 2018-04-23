@@ -18,11 +18,12 @@ func (i LineJoin) String() string {
 	return _LineJoin_name[_LineJoin_index[i]:_LineJoin_index[i+1]]
 }
 
-func StringToLineJoin(s string) (LineJoin, error) {
-	for i := 0; i < len(_LineJoin_index)-1; i++ {
-		if s == _LineJoin_name[_LineJoin_index[i]:_LineJoin_index[i+1]] {
-			return LineJoin(i), nil
+func (i *LineJoin) FromString(s string) error {
+	for j := 0; j < len(_LineJoin_index)-1; j++ {
+		if s == _LineJoin_name[_LineJoin_index[j]:_LineJoin_index[j+1]] {
+			*i = LineJoin(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type LineJoin", s)
+	return fmt.Errorf("String %v is not a valid option for type LineJoin", s)
 }

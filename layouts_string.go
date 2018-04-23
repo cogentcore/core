@@ -18,11 +18,12 @@ func (i Layouts) String() string {
 	return _Layouts_name[_Layouts_index[i]:_Layouts_index[i+1]]
 }
 
-func StringToLayouts(s string) (Layouts, error) {
-	for i := 0; i < len(_Layouts_index)-1; i++ {
-		if s == _Layouts_name[_Layouts_index[i]:_Layouts_index[i+1]] {
-			return Layouts(i), nil
+func (i *Layouts) FromString(s string) error {
+	for j := 0; j < len(_Layouts_index)-1; j++ {
+		if s == _Layouts_name[_Layouts_index[j]:_Layouts_index[j+1]] {
+			*i = Layouts(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Layouts", s)
+	return fmt.Errorf("String %v is not a valid option for type Layouts", s)
 }

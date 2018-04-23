@@ -18,11 +18,12 @@ func (i RowCol) String() string {
 	return _RowCol_name[_RowCol_index[i]:_RowCol_index[i+1]]
 }
 
-func StringToRowCol(s string) (RowCol, error) {
-	for i := 0; i < len(_RowCol_index)-1; i++ {
-		if s == _RowCol_name[_RowCol_index[i]:_RowCol_index[i+1]] {
-			return RowCol(i), nil
+func (i *RowCol) FromString(s string) error {
+	for j := 0; j < len(_RowCol_index)-1; j++ {
+		if s == _RowCol_name[_RowCol_index[j]:_RowCol_index[j+1]] {
+			*i = RowCol(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type RowCol", s)
+	return fmt.Errorf("String %v is not a valid option for type RowCol", s)
 }

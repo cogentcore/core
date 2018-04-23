@@ -18,11 +18,12 @@ func (i FillRule) String() string {
 	return _FillRule_name[_FillRule_index[i]:_FillRule_index[i+1]]
 }
 
-func StringToFillRule(s string) (FillRule, error) {
-	for i := 0; i < len(_FillRule_index)-1; i++ {
-		if s == _FillRule_name[_FillRule_index[i]:_FillRule_index[i+1]] {
-			return FillRule(i), nil
+func (i *FillRule) FromString(s string) error {
+	for j := 0; j < len(_FillRule_index)-1; j++ {
+		if s == _FillRule_name[_FillRule_index[j]:_FillRule_index[j+1]] {
+			*i = FillRule(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type FillRule", s)
+	return fmt.Errorf("String %v is not a valid option for type FillRule", s)
 }

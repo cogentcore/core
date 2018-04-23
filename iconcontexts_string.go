@@ -18,11 +18,12 @@ func (i IconContexts) String() string {
 	return _IconContexts_name[_IconContexts_index[i]:_IconContexts_index[i+1]]
 }
 
-func StringToIconContexts(s string) (IconContexts, error) {
-	for i := 0; i < len(_IconContexts_index)-1; i++ {
-		if s == _IconContexts_name[_IconContexts_index[i]:_IconContexts_index[i+1]] {
-			return IconContexts(i), nil
+func (i *IconContexts) FromString(s string) error {
+	for j := 0; j < len(_IconContexts_index)-1; j++ {
+		if s == _IconContexts_name[_IconContexts_index[j]:_IconContexts_index[j+1]] {
+			*i = IconContexts(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type IconContexts", s)
+	return fmt.Errorf("String %v is not a valid option for type IconContexts", s)
 }

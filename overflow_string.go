@@ -18,11 +18,12 @@ func (i Overflow) String() string {
 	return _Overflow_name[_Overflow_index[i]:_Overflow_index[i+1]]
 }
 
-func StringToOverflow(s string) (Overflow, error) {
-	for i := 0; i < len(_Overflow_index)-1; i++ {
-		if s == _Overflow_name[_Overflow_index[i]:_Overflow_index[i+1]] {
-			return Overflow(i), nil
+func (i *Overflow) FromString(s string) error {
+	for j := 0; j < len(_Overflow_index)-1; j++ {
+		if s == _Overflow_name[_Overflow_index[j]:_Overflow_index[j+1]] {
+			*i = Overflow(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Overflow", s)
+	return fmt.Errorf("String %v is not a valid option for type Overflow", s)
 }

@@ -18,11 +18,12 @@ func (i ButtonStates) String() string {
 	return _ButtonStates_name[_ButtonStates_index[i]:_ButtonStates_index[i+1]]
 }
 
-func StringToButtonStates(s string) (ButtonStates, error) {
-	for i := 0; i < len(_ButtonStates_index)-1; i++ {
-		if s == _ButtonStates_name[_ButtonStates_index[i]:_ButtonStates_index[i+1]] {
-			return ButtonStates(i), nil
+func (i *ButtonStates) FromString(s string) error {
+	for j := 0; j < len(_ButtonStates_index)-1; j++ {
+		if s == _ButtonStates_name[_ButtonStates_index[j]:_ButtonStates_index[j+1]] {
+			*i = ButtonStates(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type ButtonStates", s)
+	return fmt.Errorf("String %v is not a valid option for type ButtonStates", s)
 }

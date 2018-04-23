@@ -18,11 +18,12 @@ func (i FontWeights) String() string {
 	return _FontWeights_name[_FontWeights_index[i]:_FontWeights_index[i+1]]
 }
 
-func StringToFontWeights(s string) (FontWeights, error) {
-	for i := 0; i < len(_FontWeights_index)-1; i++ {
-		if s == _FontWeights_name[_FontWeights_index[i]:_FontWeights_index[i+1]] {
-			return FontWeights(i), nil
+func (i *FontWeights) FromString(s string) error {
+	for j := 0; j < len(_FontWeights_index)-1; j++ {
+		if s == _FontWeights_name[_FontWeights_index[j]:_FontWeights_index[j+1]] {
+			*i = FontWeights(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type FontWeights", s)
+	return fmt.Errorf("String %v is not a valid option for type FontWeights", s)
 }

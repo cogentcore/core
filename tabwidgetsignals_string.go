@@ -18,11 +18,12 @@ func (i TabWidgetSignals) String() string {
 	return _TabWidgetSignals_name[_TabWidgetSignals_index[i]:_TabWidgetSignals_index[i+1]]
 }
 
-func StringToTabWidgetSignals(s string) (TabWidgetSignals, error) {
-	for i := 0; i < len(_TabWidgetSignals_index)-1; i++ {
-		if s == _TabWidgetSignals_name[_TabWidgetSignals_index[i]:_TabWidgetSignals_index[i+1]] {
-			return TabWidgetSignals(i), nil
+func (i *TabWidgetSignals) FromString(s string) error {
+	for j := 0; j < len(_TabWidgetSignals_index)-1; j++ {
+		if s == _TabWidgetSignals_name[_TabWidgetSignals_index[j]:_TabWidgetSignals_index[j+1]] {
+			*i = TabWidgetSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type TabWidgetSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type TabWidgetSignals", s)
 }

@@ -18,11 +18,12 @@ func (i TreeViewStates) String() string {
 	return _TreeViewStates_name[_TreeViewStates_index[i]:_TreeViewStates_index[i+1]]
 }
 
-func StringToTreeViewStates(s string) (TreeViewStates, error) {
-	for i := 0; i < len(_TreeViewStates_index)-1; i++ {
-		if s == _TreeViewStates_name[_TreeViewStates_index[i]:_TreeViewStates_index[i+1]] {
-			return TreeViewStates(i), nil
+func (i *TreeViewStates) FromString(s string) error {
+	for j := 0; j < len(_TreeViewStates_index)-1; j++ {
+		if s == _TreeViewStates_name[_TreeViewStates_index[j]:_TreeViewStates_index[j+1]] {
+			*i = TreeViewStates(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type TreeViewStates", s)
+	return fmt.Errorf("String %v is not a valid option for type TreeViewStates", s)
 }

@@ -18,11 +18,12 @@ func (i SliderSignals) String() string {
 	return _SliderSignals_name[_SliderSignals_index[i]:_SliderSignals_index[i+1]]
 }
 
-func StringToSliderSignals(s string) (SliderSignals, error) {
-	for i := 0; i < len(_SliderSignals_index)-1; i++ {
-		if s == _SliderSignals_name[_SliderSignals_index[i]:_SliderSignals_index[i+1]] {
-			return SliderSignals(i), nil
+func (i *SliderSignals) FromString(s string) error {
+	for j := 0; j < len(_SliderSignals_index)-1; j++ {
+		if s == _SliderSignals_name[_SliderSignals_index[j]:_SliderSignals_index[j+1]] {
+			*i = SliderSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type SliderSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type SliderSignals", s)
 }

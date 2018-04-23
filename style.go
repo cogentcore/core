@@ -378,9 +378,14 @@ func StyledFieldsFromProps(fields map[string]*StyledField, obj, par interface{},
 	hasPar := (par == nil)
 	// fewer props than fields, esp with alts!
 	for key, prv := range props {
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' {
+			continue
+		}
 		fld, ok := fields[key]
 		if !ok {
-			log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
+			// note: props can apply to Paint or Style and not easy to keep those
+			// precisely separated, so there will be mismatch..
+			// log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
 			continue
 		}
 		fld.FromProps(obj, par, prv, hasPar)
@@ -391,7 +396,7 @@ func StyledFieldsFromProps(fields map[string]*StyledField, obj, par interface{},
 func UnitValsToDots(unvls []*StyledField, obj interface{}, uc *units.Context) {
 	for _, fld := range unvls {
 		vf := fld.FieldValue(obj)
-		uv := vf.Addr().Interface().(*units.Value)
+		uv := vf.Interface().(*units.Value)
 		uv.ToDots(uc)
 	}
 }
@@ -407,7 +412,8 @@ type StyledField struct {
 func (sf StyledField) FieldValue(obj interface{}) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
-	return reflect.NewAt(sf.Field.Type, f).Addr()
+	nwp := kit.UnhideIfaceValue(reflect.NewAt(sf.Field.Type, f)).Elem()
+	return nwp
 }
 
 // FromProps styles given field from property value prv
@@ -421,12 +427,14 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 	switch prtv := prv.(type) {
 	case string:
 		prstr = prtv
-		if prtv == "inherit" && hasPar {
-			vf.Set(pf)
+		if prtv == "inherit" {
+			if hasPar {
+				vf.Set(pf)
+			}
 			// fmt.Printf("StyleField %v set to inherited value: %v\n", sf.Name, pf)
 			return
 		}
-		if prtv == "initial" && hasPar {
+		if prtv == "initial" {
 			vf.Set(fld.Default)
 			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
 			return
@@ -435,12 +443,14 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 
 	// todo: support keywords such as auto, normal, which should just set to 0
 
-	vk := vf.Kind()
-	vt := vf.Type()
+	npvf := kit.NonPtrValue(vf)
+
+	vk := npvf.Kind()
+	vt := npvf.Type()
 
 	if vk == reflect.Struct { // only a few types
 		if vt == reflect.TypeOf(Color{}) {
-			vc := vf.Addr().Interface().(*Color)
+			vc := vf.Interface().(*Color)
 			switch prtv := prv.(type) {
 			case string:
 				err := vc.SetFromString(prtv)
@@ -452,7 +462,7 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 			}
 			return
 		} else if vt == reflect.TypeOf(units.Value{}) {
-			uv := vf.Addr().Interface().(*units.Value)
+			uv := vf.Interface().(*units.Value)
 			switch prtv := prv.(type) {
 			case string:
 				uv.SetFromString(prtv)
@@ -466,21 +476,23 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 		}
 		return // no can do any struct otherwise
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
-		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
+		// to do set here we need an extra MakePtrValue call..
+		vfp := kit.MakePtrValue(vf)
 		if prstr != "" {
 			tn := kit.FullTypeName(fld.Field.Type)
 			if kit.Enums.Enum(tn) != nil {
-				kit.Enums.SetEnumValueFromAltString(vf, prstr)
+				kit.Enums.SetEnumValueFromStringAltFirst(vfp, prstr)
 			} else {
 				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 			}
 			return
 		} else {
-			// note: cannot use convert on const values apparently.. but this works
-			vf.Set(reflect.ValueOf(prv))
+			vfp.Set(reflect.ValueOf(prv))
 			return
 		}
 	}
+
+	// fmt.Printf("field: %v, type: %v value: %v %T\n", fld.Field.Name, fld.Field.Type.Name(), vf.Interface(), vf.Interface())
 
 	// otherwise just set directly based on type, using standard conversions
 	vf.Set(reflect.ValueOf(prv).Convert(reflect.TypeOf(vt)))
