@@ -786,7 +786,7 @@ func (tv *TreeView) Style2D() {
 	tv.Style2DWidget(TreeViewProps[0])
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i] = tv.Style
-		tv.StateStyles[i].SetStyle(nil, &StyleDefault, TreeViewProps[i])
+		tv.StateStyles[i].SetStyle(nil, TreeViewProps[i])
 		tv.StateStyles[i].SetUnitContext(tv.Viewport, Vec2DZero)
 	}
 }

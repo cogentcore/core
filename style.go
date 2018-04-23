@@ -10,6 +10,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"unsafe"
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
@@ -140,22 +141,20 @@ func (s *ShadowStyle) HasShadow() bool {
 
 // all the CSS-based style elements -- used for widget-type objects
 type Style struct {
-	IsSet         bool                  `desc:"has this style been set from object values yet?"`
-	Display       bool                  `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool                  `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	UnContext     units.Context         `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
-	Layout        LayoutStyle           `desc:"layout styles -- do not prefix with any xml"`
-	Border        BorderStyle           `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
-	BoxShadow     ShadowStyle           `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Font          FontStyle             `xml:"font" desc:"font parameters"`
-	Text          TextStyle             `desc:"text parameters -- no xml prefix"`
-	Color         Color                 `xml:"color" inherit:"true" desc:"text color"`
-	Background    BackgroundStyle       `xml:"background" desc:"background settings"`
-	Opacity       float32               `xml:"opacity" desc:"alpha value to apply to all elements"`
-	Outline       BorderStyle           `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
-	PointerEvents bool                  `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
-	StyleFields   map[string]StyleField `xml:"-" desc:"the compiled stylable fields, mapped the xml and alt tags for the field"`
-	UnitsFields   []StyleField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
+	IsSet         bool            `desc:"has this style been set from object values yet?"`
+	Display       bool            `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool            `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	UnContext     units.Context   `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
+	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
+	Font          FontStyle       `xml:"font" desc:"font parameters"`
+	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
+	Color         Color           `xml:"color" inherit:"true" desc:"text color"`
+	Background    BackgroundStyle `xml:"background" desc:"background settings"`
+	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
+	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
+	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
 	// todo: also see above for more notes on missing style elements
 }
 
@@ -182,19 +181,13 @@ func NewStyle() Style {
 // default style can be used when property specifies "default"
 var StyleDefault = NewStyle()
 
-// set style values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
-func (s *Style) SetStyle(parent, defs *Style, props ki.Props) {
-	// nil interface is special and != interface{} of a nil ptr!
-	pfi := interface{}(nil)
-	dfi := interface{}(nil)
-	if parent != nil {
-		pfi = interface{}(parent)
+// SetStyle sets style values based on given property map (name: value pairs),
+// inheriting elements as appropriate from parent
+func (s *Style) SetStyle(parent *Style, props ki.Props) {
+	if !s.IsSet { // first time
+		StyleFieldsVar.Inherit(s, parent)
 	}
-	if defs != nil {
-		dfi = interface{}(defs)
-	}
-	inherit := !s.IsSet // we only inherit if not already set
-	WalkStyleStruct(s, pfi, dfi, "", inherit, props, DoStyleField)
+	StyleFieldsVar.SetFromProps(s, parent, props)
 	s.Layout.SetStylePost()
 	s.Font.SetStylePost()
 	s.Text.SetStylePost()
@@ -235,16 +228,7 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // need to have set the UnContext first -- only after layout at render time is
 // that possible
 func (s *Style) ToDots() {
-	valtyp := reflect.TypeOf(units.Value{})
-
-	WalkStyleStruct(s, nil, nil, "", false, nil,
-		func(sf reflect.StructField, vf, pf, df reflect.Value,
-			hasPar bool, tag string, inherit bool, props ki.Props) {
-			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
-				uv := vf.Addr().Interface().(*units.Value)
-				uv.ToDots(&s.UnContext)
-			}
-		})
+	StyleFieldsVar.ToDots(s)
 }
 
 // extra space around the central content in the box model, in dots -- todo:
@@ -254,22 +238,44 @@ func (s *Style) BoxSpace() float32 {
 	return s.Layout.Margin.Dots + s.Border.Width.Dots + s.Layout.Padding.Dots
 }
 
+// StyleFields contains the compiled fields for the Style type
+type StyleFields struct {
+	Fields   map[string]*StyledField `xml:"-" desc:"the compiled stylable fields, mapped the xml and alt tags for the field"`
+	Inherits []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
+	Units    []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
+}
+
+var StyleFieldsVar = StyleFields{}
+
+func (sf *StyleFields) Init() {
+	if sf.Fields == nil {
+		sf.Fields, sf.Inherits, sf.Units = CompileStyledFields(&StyleDefault)
+	}
+}
+
+func (sf *StyleFields) Inherit(st, par *Style) {
+	sf.Init()
+	InheritStyledFields(sf.Inherits, st, par)
+}
+
+func (sf *StyleFields) SetFromProps(st, par *Style, props ki.Props) {
+	sf.Init()
+	StyledFieldsFromProps(sf.Fields, st, par, props)
+}
+
+func (sf *StyleFields) ToDots(st *Style) {
+	sf.Init()
+	UnitValsToDots(sf.Units, st, &st.UnContext)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Style processing util
 
-// StyleField contains the relevant data for a given stylable field in a style struct
-type StyleField struct {
-	Field   reflect.StructField
-	Value   reflect.Value
-	Default reflect.Value
-}
-
 // this is the function to process a given field when walking the style
-type WalkStyleFieldFun func(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, tag string, inherit bool, props ki.Props)
+type WalkStyleFieldFun func(sf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
 
 // general-purpose function for walking through style structures and calling fun on each field with a valid 'xml' tag
-func WalkStyleStruct(obj interface{}, parent interface{}, defs interface{}, outerTag string,
-	inherit bool, props ki.Props, fun WalkStyleFieldFun) {
+func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun WalkStyleFieldFun) {
 	otp := reflect.TypeOf(obj)
 	if otp.Kind() != reflect.Ptr {
 		log.Printf("gi.StyleStruct -- you must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
@@ -279,14 +285,6 @@ func WalkStyleStruct(obj interface{}, parent interface{}, defs interface{}, oute
 	if ot.Kind() != reflect.Struct {
 		log.Printf("gi.StyleStruct -- only works on structs, not type: %v kind %v\n", ot, ot.Kind())
 		return
-	}
-	var pt reflect.Type
-	if parent != nil {
-		pt = reflect.TypeOf(parent).Elem()
-		if pt != ot {
-			log.Printf("gi.StyleStruct -- inheritance only works for objs of same type: %v != %v\n", ot, pt)
-			parent = nil
-		}
 	}
 	vo := reflect.ValueOf(obj).Elem()
 	for i := 0; i < ot.NumField(); i++ {
@@ -303,25 +301,13 @@ func WalkStyleStruct(obj interface{}, parent interface{}, defs interface{}, oute
 		// fmt.Printf("processing field named: %v\n", sf.Nm)
 		vf := vo.Field(i)
 		vfi := vf.Addr().Interface()
-		var pf reflect.Value
-		var df reflect.Value
-		pfi := interface{}(nil)
-		dfi := interface{}(nil)
-		if parent != nil {
-			pf = reflect.ValueOf(parent).Elem().Field(i)
-			pfi = pf.Addr().Interface()
-		}
-		if defs != nil {
-			df = reflect.ValueOf(defs).Elem().Field(i)
-			dfi = df.Addr().Interface()
-		}
 		if ft.Kind() == reflect.Struct && ft.Name() != "Value" && ft.Name() != "Color" {
-			WalkStyleStruct(vfi, pfi, dfi, tag, inherit, props, fun)
+			WalkStyleStruct(vfi, tag, baseoff+sf.Offset, fun)
 		} else {
 			if tag == "" { // non-struct = don't process
 				continue
 			}
-			fun(sf, vf, pf, df, parent != nil, outerTag, inherit, props)
+			fun(sf, vf, outerTag, baseoff)
 		}
 	}
 }
@@ -342,55 +328,95 @@ func StyleEffTag(tag, outerTag string) string {
 	return tagEff
 }
 
-// process the field tags for any that fit with values in props, trying xml and xml_alt options
-func StyleFieldProps(sf reflect.StructField, outerTag string, props ki.Props) (interface{}, bool) {
-	tag := StyleEffTag(sf.Tag.Get("xml"), outerTag)
-	prv, got := props[tag]
-	if got {
-		return prv, got
-	}
-	atags := sf.Tag.Get("alt")
-	if atags == "" {
-		return nil, false
-	}
-	atag := strings.Split(atags, ",")
+// CompileStyledFields gathers all the fields with xml tag != "-", plus those
+// that are units.Value's for later optimized processing of styles
+func CompileStyledFields(defobj interface{}) (flds map[string]*StyledField, inhflds, uvls []*StyledField) {
+	valtyp := reflect.TypeOf(units.Value{})
 
-	for _, tg := range atag {
-		tag = StyleEffTag(tg, outerTag)
-		prv, got = props[tag]
-		if got {
-			// fmt.Printf("Got alt tag: %v for field %v\n", tag, sf.Name)
-			return prv, true
-			// } else {
-			// 	fmt.Printf("Did NOT get xml_alt tag: %v for field %v\n", tag, sf.Name)
-		}
-	}
-	return nil, false
+	flds = make(map[string]*StyledField)
+	inhflds = make([]*StyledField, 0, 50)
+	uvls = make([]*StyledField, 0, 50)
+
+	WalkStyleStruct(defobj, "", uintptr(0),
+		func(sf reflect.StructField, vf reflect.Value, outerTag string, baseoff uintptr) {
+			styf := &StyledField{Field: sf, NetOff: baseoff + sf.Offset}
+			styf.Default = styf.FieldValue(defobj)
+			tag := StyleEffTag(sf.Tag.Get("xml"), outerTag)
+			flds[tag] = styf
+			atags := sf.Tag.Get("alt")
+			if atags != "" {
+				atag := strings.Split(atags, ",")
+
+				for _, tg := range atag {
+					tag = StyleEffTag(tg, outerTag)
+					flds[tag] = styf
+				}
+			}
+			inhs := sf.Tag.Get("inherit")
+			if inhs == "true" {
+				inhflds = append(inhflds, styf)
+			}
+			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
+				uvls = append(uvls, styf)
+			}
+		})
+	return
 }
 
-// standard field processing function for WalkStyleStruct
-func DoStyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool, outerTag string, inherit bool, props ki.Props) {
+// InheritStyleFields copies all the values from par to obj for fields marked
+// as "inherit" -- inherited by default
+func InheritStyledFields(inhflds []*StyledField, obj, par interface{}) {
+	for _, fld := range inhflds {
+		vf := fld.FieldValue(obj)
+		pf := fld.FieldValue(par)
+		vf.Set(pf) // copy
+	}
+}
 
-	if inherit { // first process inherit flag -- only inherit on FIRST pass!!
-		inhs := sf.Tag.Get("inherit")
-		if inhs == "true" {
-			if hasPar {
-				// fmt.Printf("StyleField %v inherited property: %v\n", sf.Name, pf)
-				vf.Set(pf) // copy
-			}
-		} else if inhs != "" && inhs != "false" {
-			log.Printf("gi.StyleField -- bad inherit tag -- can only be true or false: %v\n", inhs)
+// StyleFieldsFromProps styles the fields from given properties for given object
+func StyledFieldsFromProps(fields map[string]*StyledField, obj, par interface{}, props ki.Props) {
+	hasPar := (par == nil)
+	// fewer props than fields, esp with alts!
+	for key, prv := range props {
+		fld, ok := fields[key]
+		if !ok {
+			log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
+			continue
 		}
+		fld.FromProps(obj, par, prv, hasPar)
 	}
-	// fmt.Printf("StyleField %v tag: %v\n", vf, tag)
+}
 
-	prv, got := StyleFieldProps(sf, outerTag, props)
-	if !got {
-		// fmt.Printf("StyleField didn't find tag: %v\n", tag)
-		return
+// UnitValsToDots runs ToDots on unit values, to compile down to raw pixels
+func UnitValsToDots(unvls []*StyledField, obj interface{}, uc *units.Context) {
+	for _, fld := range unvls {
+		vf := fld.FieldValue(obj)
+		uv := vf.Addr().Interface().(*units.Value)
+		uv.ToDots(uc)
 	}
-	// fmt.Printf("StyleField %v got value %v\n", sf.Name, prv)
+}
 
+// StyledField contains the relevant data for a given stylable field in a style struct
+type StyledField struct {
+	Field   reflect.StructField
+	NetOff  uintptr       `desc:"net accumulated offset from the overall main type, e.g., Style"`
+	Default reflect.Value `desc:"value of default value of this field"`
+}
+
+// FieldValue returns a reflect.Value for a given object, computed from NetOff
+func (sf StyledField) FieldValue(obj interface{}) reflect.Value {
+	ov := reflect.ValueOf(obj)
+	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
+	return reflect.NewAt(sf.Field.Type, f).Addr()
+}
+
+// FromProps styles given field from property value prv
+func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
+	vf := fld.FieldValue(obj)
+	var pf reflect.Value
+	if hasPar {
+		pf = fld.FieldValue(par)
+	}
 	prstr := ""
 	switch prtv := prv.(type) {
 	case string:
@@ -401,7 +427,7 @@ func DoStyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool,
 			return
 		}
 		if prtv == "initial" && hasPar {
-			vf.Set(df)
+			vf.Set(fld.Default)
 			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
 			return
 		}
@@ -442,11 +468,11 @@ func DoStyleField(sf reflect.StructField, vf, pf, df reflect.Value, hasPar bool,
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
 		// fmt.Printf("int field: %v, type: %v\n", sf.Name, sf.Type.Name())
 		if prstr != "" {
-			tn := kit.FullTypeName(sf.Type)
+			tn := kit.FullTypeName(fld.Field.Type)
 			if kit.Enums.Enum(tn) != nil {
 				kit.Enums.SetEnumValueFromAltString(vf, prstr)
 			} else {
-				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, sf.Name)
+				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 			}
 			return
 		} else {

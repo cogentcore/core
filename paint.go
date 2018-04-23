@@ -7,7 +7,6 @@ package gi
 import (
 	"errors"
 	"image"
-	"reflect"
 
 	"github.com/chewxy/math32"
 	"github.com/golang/freetype/raster"
@@ -78,18 +77,11 @@ func NewPaint() Paint {
 var PaintDefault = NewPaint()
 
 // set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
-func (pc *Paint) SetStyle(parent, defs *Paint, props ki.Props) {
-	// nil interface is special and != interface{} of a nil ptr!
-	pfi := interface{}(nil)
-	dfi := interface{}(nil)
-	if parent != nil {
-		pfi = interface{}(parent)
+func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
+	if !pc.StyleSet { // first time
+		PaintFieldsVar.Inherit(pc, parent)
 	}
-	if defs != nil {
-		dfi = interface{}(defs)
-	}
-	inherit := !pc.StyleSet // we only inherit if not already set
-	WalkStyleStruct(pc, pfi, dfi, "", inherit, props, DoStyleField)
+	PaintFieldsVar.SetFromProps(pc, parent, props)
 	pc.StrokeStyle.SetStylePost()
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
@@ -115,19 +107,41 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.ToDots()
 }
 
-// call ToDots on all units.Value fields in the style (recursively) -- need to have set the
-// UnContext first -- only after layout at render time is that possible
+// ToDots calls ToDots on all units.Value fields in the style (recursively) --
+// need to have set the UnContext first -- only after layout at render time is
+// that possible
 func (s *Paint) ToDots() {
-	valtyp := reflect.TypeOf(units.Value{})
+	PaintFieldsVar.ToDots(s)
+}
 
-	WalkStyleStruct(s, nil, nil, "", false, nil,
-		func(sf reflect.StructField, vf, pf, df reflect.Value,
-			hasPar bool, tag string, inherit bool, props ki.Props) {
-			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
-				uv := vf.Addr().Interface().(*units.Value)
-				uv.ToDots(&s.UnContext)
-			}
-		})
+// PaintFields contains the compiled fields for the Paint type
+type PaintFields struct {
+	Fields   map[string]*StyledField `xml:"-" desc:"the compiled stylable fields, mapped the xml and alt tags for the field"`
+	Inherits []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
+	Units    []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
+}
+
+var PaintFieldsVar = PaintFields{}
+
+func (sf *PaintFields) Init() {
+	if sf.Fields == nil {
+		sf.Fields, sf.Inherits, sf.Units = CompileStyledFields(&PaintDefault)
+	}
+}
+
+func (sf *PaintFields) Inherit(st, par *Paint) {
+	sf.Init()
+	InheritStyledFields(sf.Inherits, st, par)
+}
+
+func (sf *PaintFields) SetFromProps(st, par *Paint, props ki.Props) {
+	sf.Init()
+	StyledFieldsFromProps(sf.Fields, st, par, props)
+}
+
+func (sf *PaintFields) ToDots(st *Paint) {
+	sf.Init()
+	UnitValsToDots(sf.Units, st, &st.UnContext)
 }
 
 //////////////////////////////////////////////////////////////////////////////////

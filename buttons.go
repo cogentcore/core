@@ -381,7 +381,7 @@ func (g *Button) Style2D() {
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
+			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
@@ -599,7 +599,7 @@ func (g *CheckBox) Style2D() {
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, &StyleDefault, g.StyleProps(ButtonSelectors[i]))
+			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}

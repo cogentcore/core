@@ -282,11 +282,11 @@ func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.StyleSet = false  // this is always first call, restart
 	if baseProps != nil {
-		g.Paint.SetStyle(&pg.Paint, &PaintDefault, baseProps)
+		g.Paint.SetStyle(&pg.Paint, baseProps)
 	}
-	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
+	g.Paint.SetStyle(&pg.Paint, g.Properties())
 
-	g.Paint.SetStyle(&pg.Paint, &PaintDefault, g.Properties())
+	g.Paint.SetStyle(&pg.Paint, g.Properties())
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 }
 
@@ -300,14 +300,14 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	g.Style.IsSet = false // this is always first call, restart
 	if pg != nil {
 		if baseProps != nil {
-			g.Style.SetStyle(&pg.Style, &StyleDefault, baseProps)
+			g.Style.SetStyle(&pg.Style, baseProps)
 		}
-		g.Style.SetStyle(&pg.Style, &StyleDefault, g.Properties())
+		g.Style.SetStyle(&pg.Style, g.Properties())
 	} else {
 		if baseProps != nil {
-			g.Style.SetStyle(nil, &StyleDefault, baseProps)
+			g.Style.SetStyle(nil, baseProps)
 		}
-		g.Style.SetStyle(nil, &StyleDefault, g.Properties())
+		g.Style.SetStyle(nil, g.Properties())
 	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
