@@ -149,7 +149,8 @@ func (tr *EnumRegistry) Properties(enumName string) map[string]interface{} {
 	return tp
 }
 
-// Prop safely finds an enum type property from enum type name and property key -- nil if not found
+// Prop safely finds an enum type property from enum type name and property
+// key -- nil if not found
 func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
 	tp, ok := tr.Props[enumName]
 	if !ok {
@@ -164,11 +165,11 @@ func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
 	return p
 }
 
-// get optional alternative string map for enums -- e.g., lower-case, without
-// prefixes etc -- can put multiple such alt strings in the one string with
-
-// your own separator, in a predefined order, if necessary, and just call
-// strings.Split on those and get the one you want -- nil if not set
+// AltStrings returns optional alternative string map for enums -- e.g.,
+// lower-case, without prefixes etc -- can put multiple such alt strings in
+// the one string with your own separator, in a predefined order, if
+// necessary, and just call strings.Split on those and get the one you want --
+// nil if not set
 func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
 	ps := tr.Prop(enumName, "AltStrings")
 	if ps == nil {
@@ -182,14 +183,14 @@ func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
 	return m
 }
 
-// number of defined enum values
+// NVals returns the number of defined enum values
 func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 	typ := reflect.TypeOf(eval)
 	n, _ := ToInt(tr.Prop(FullTypeName(typ), "N"))
 	return n
 }
 
-// check if this enum is for bit flags instead of mutually-exclusive int
+// IsBitFlag checks if this enum is for bit flags instead of mutually-exclusive int
 // values -- checks BitFlag property -- if true string rep of a value contains
 // an or-list of names for each bit set, separated by |
 func (tr *EnumRegistry) IsBitFlag(eval interface{}) bool {
@@ -223,7 +224,9 @@ func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 // EnumIfacePtrFromInt64 returns an interface{} value which is a pointer to
 // an enum value of given type, set to given integer value
 func EnumIfacePtrFromInt64(ival int64, typ reflect.Type) interface{} {
-	evnp := reflect.New(PtrType(typ)) // todo: this should be unnec. b/c New returns a pointer
+	// note: for reasons that remain obscure, enums seem to require an EXTRA level of
+	// pointer indirection -- this is true in gi.Style as well
+	evnp := reflect.New(PtrType(typ))
 	evpi := evnp.Interface()
 	evn := reflect.New(typ)
 	evi := evn.Interface()
@@ -244,8 +247,8 @@ func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
 	return evi
 }
 
-// EnumInt64ToString First converts an int64 to enum of given type, and then
-// converts that to a string value -- does not
+// EnumInt64ToString first converts an int64 to enum of given type, and then
+// converts that to a string value
 func EnumInt64ToString(ival int64, typ reflect.Type) string {
 	evnp := reflect.New(PtrType(typ))
 	evpi := evnp.Interface()
@@ -256,7 +259,7 @@ func EnumInt64ToString(ival int64, typ reflect.Type) string {
 	return EnumToString(evi)
 }
 
-// Enum to String converts an enum value to its corresponding string value --
+// EnumToString converts an enum value to its corresponding string value --
 // you could just call fmt.Sprintf("%v") too but this is slightly faster, and
 // it also works for bitflags which regular stringer does not
 func EnumToString(eval interface{}) string {
@@ -268,7 +271,7 @@ func EnumToString(eval interface{}) string {
 	return strer.String()
 }
 
-// BitFlags To String -- convert an int64 of bit flags into a string
+// BitFlagsToString converts an int64 of bit flags into a string
 // representation of the bits that are set -- en is number of defined bits,
 // and also provides the type name for looking up strings
 func BitFlagsToString(bflg int64, en interface{}) string {
@@ -290,19 +293,13 @@ func BitFlagsToString(bflg int64, en interface{}) string {
 
 // note: convenience methods b/c it is easier to find on registry type
 
-// Enum to String converts an enum value to its corresponding string value --
+// EnumToString converts an enum value to its corresponding string value --
 // you could just call fmt.Sprintf("%v") too but this is slightly faster
 func (tr *EnumRegistry) EnumToString(eval interface{}) string {
 	return EnumToString(eval)
 }
 
-// First convert an int64 to enum of given type, and then convert to string value
-func (tr *EnumRegistry) EnumInt64ToString(ival int64, typ reflect.Type) string {
-	return EnumInt64ToString(ival, typ)
-}
-
-// Enum to alternative String value converts an enum value to its
-// corresponding alternative string value
+// EnumToAltString converts an enum value to its corresponding alternative string value
 func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 	if reflect.TypeOf(eval).Kind() == reflect.Ptr {
 		eval = reflect.ValueOf(eval).Elem() // deref the pointer
@@ -319,8 +316,14 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 	return alts[ival]
 }
 
-// Enum to alternative String value converts an int64 to corresponding
-// alternative string value, for given type name
+// EnumInt64ToAltString converts an int64 value to the enum of given type, and
+// then into corresponding string value
+func (tr *EnumRegistry) EnumInt64ToString(ival int64, typ reflect.Type) string {
+	return EnumInt64ToString(ival, typ)
+}
+
+// EnumInt64ToAltString converts an int64 value to the enum of given type, and
+// then into corresponding alternative string value
 func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 	alts := tr.AltStrings(typnm)
 	if alts == nil {
@@ -330,101 +333,74 @@ func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 	return alts[ival]
 }
 
-// Enum from String Sets enum value from string -- must pass a *pointer* to
-// the enum item. IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
-func SetEnumFromString(eptr interface{}, str string) error {
-	etp := reflect.TypeOf(eptr)
-	if etp.Kind() != reflect.Ptr {
-		err := fmt.Errorf("kit.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
-		log.Printf("%v", err)
-		return err
-	}
-	et := etp.Elem()
-	sv := reflect.ValueOf(str)
-	methnm := "StringTo" + et.Name()
-	meth := sv.MethodByName(methnm)
-	if meth.IsNil() {
-		err := fmt.Errorf("kit.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
-		log.Printf("%v", err)
-		return err
-	}
-	args := make([]reflect.Value, 0, 1)
-	args = append(args, sv)
-	rv := meth.Call(args)
-	reflect.ValueOf(eptr).Elem().Set(rv[0])
-	return nil
-}
-
-// Set Enum from String Sets enum value from string -- must pass a *pointer* to
-// the enum item. IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
-func (tr *EnumRegistry) SetEnumFromString(eptr interface{}, str string) error {
-	return SetEnumFromString(eptr, str)
-}
-
-// Set  Enum from String using reflect.Value
+// SetEnumValueFromString sets enum value from string using reflect.Value
 // IMPORTANT: requires the modified stringer go generate utility
 // that generates a StringToTypeName method
 func SetEnumValueFromString(eval reflect.Value, str string) error {
-	et := eval.Type()
-	sv := reflect.ValueOf(str)
-	methnm := "StringTo" + et.Name()
-	meth := sv.MethodByName(methnm)
-	if meth.IsNil() {
-		err := fmt.Errorf("kit.EnumFromString: stringer-generated StringToX method not found: %v\n", methnm)
+	etp := eval.Type()
+	if etp.Kind() != reflect.Ptr {
+		err := fmt.Errorf("kit.SetEnumValueFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		// log.Printf("%v", err)
+		return err
+	}
+	et := etp.Elem()
+	methnm := "FromString"
+	meth := eval.MethodByName(methnm)
+	if ValueIsZero(meth) || meth.IsNil() {
+		err := fmt.Errorf("kit.SetEnumValueFromString: stringer-generated FromString() method not found: %v for type: %v %T\n", methnm, et.Name(), eval.Interface())
 		log.Printf("%v", err)
 		return err
 	}
-	args := make([]reflect.Value, 0, 1)
-	args = append(args, sv)
+	sv := reflect.ValueOf(str)
+	args := make([]reflect.Value, 1)
+	args[0] = sv
 	rv := meth.Call(args)
-	eval.Set(rv[0])
+	fmt.Printf("return from FromString method: %v\n", rv[0].Interface())
 	return nil
 }
 
-// Sets enum value from string, into a reflect.Value
+// SetEnumValueFromString sets enum value from string, into a reflect.Value
 // IMPORTANT: requires the modified stringer go generate utility
 // that generates a StringToTypeName method
 func (tr *EnumRegistry) SetEnumValueFromString(eval reflect.Value, str string) error {
 	return SetEnumValueFromString(eval, str)
 }
 
-// Set Enum from alternative String -- must pass a *pointer* to the enum item.
+// SetEnumFromString sets enum value from string -- must pass a *pointer* to
+// the enum item. IMPORTANT: requires the modified stringer go generate utility
+// that generates a StringToTypeName method
+func SetEnumFromString(eptr interface{}, str string) error {
+	return SetEnumValueFromString(reflect.ValueOf(eptr), str)
+}
+
+// SetEnumFromString sets enum value from string -- must pass a *pointer* to
+// the enum item. IMPORTANT: requires the modified stringer go generate utility
+// that generates a StringToTypeName method
+func (tr *EnumRegistry) SetEnumFromString(eptr interface{}, str string) error {
+	return SetEnumFromString(eptr, str)
+}
+
+// SetEnumFromAltString sets from alternative string list using an interface{}
+// to the enum -- must pass a *pointer* to the enum item.
 func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error {
-	etp := reflect.TypeOf(eptr)
+	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), str)
+}
+
+// SetEnumValueFromAltString sets value from alternative string using a
+// reflect.Value -- must pass a *pointer* value to the enum item.
+func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string) error {
+	etp := eval.Type()
 	if etp.Kind() != reflect.Ptr {
-		err := fmt.Errorf("kit.EnumFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
-		log.Printf("%v", err)
+		err := fmt.Errorf("kit.SetEnumValueFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		// log.Printf("%v", err)
 		return err
 	}
 	et := etp.Elem()
 	tn := FullTypeName(et)
 	alts := tr.AltStrings(tn)
 	if alts == nil {
-		err := fmt.Errorf("kit.EnumFromAltString: no alternative string map for type %v\n", tn)
-		log.Printf("%v", err)
-		return err
-	}
-	for i, v := range alts {
-		if v == str {
-			reflect.ValueOf(eptr).Elem().Set(reflect.ValueOf(i).Convert(et))
-			return nil
-		}
-	}
-	err := fmt.Errorf("kit.EnumFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
-	log.Printf("%v", err)
-	return err
-}
-
-// Set Enum from alternative String using a reflect.Value -- must pass a *pointer* to the enum item.
-func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string) error {
-	et := eval.Type()
-	tn := FullTypeName(et)
-	alts := tr.AltStrings(tn)
-	if alts == nil {
 		err := fmt.Errorf("kit.SetEnumValueFromAltString: no alternative string map for type %v\n", tn)
-		log.Printf("%v", err)
+		// log.Printf("%v", err)
 		return err
 	}
 	for i, v := range alts {
@@ -434,48 +410,53 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 		}
 	}
 	err := fmt.Errorf("kit.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
-	log.Printf("%v", err)
+	// log.Printf("%v", err)
 	return err
 }
 
-// Set Enum from int64 value
+// SetEnumValueFromStringAltFirst first attempts to set an enum from an
+// alternative string, and if that fails, then it tries to set from the
+// regular string representation func (tr *EnumRegistry)
+func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str string) error {
+	err := tr.SetEnumValueFromAltString(eval, str)
+	if err != nil {
+		return tr.SetEnumValueFromString(eval, str)
+	}
+	return err
+}
+
+// SetEnumValueFromInt64 sets the enum value using reflect.Value
+// representation from a generic int64 value
 func (tr *EnumRegistry) SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
 	evi := eval.Interface()
 	et := eval.Type()
 	return EnumFromInt64(&evi, ival, et)
 }
 
-// get a pointer and the enum itself as interface{}'s, based on the type
-// todo: can't seem to get this to work -- just replicate the code per below
-// func NewEnumFromType(typ reflect.Type) (interface{}, interface{}) {
-// 	evnp := reflect.New(reflect.PtrTo(typ))
-// 	evpi := evnp.Interface()
-// 	evn := reflect.New(typ)
-// 	evi := evn.Interface()
-// 	evpi = &evi
-// 	return evpi, evi
-// }
-
 ///////////////////////////////////////////////////////////////////////////////
-//  EnumValue -- represents enum values, in common int64 terms, e.g., for GUI
+//  EnumValue
 
+// EnumValue represents enum values, in common int64 terms, e.g., for GUI
 type EnumValue struct {
 	Name  string       `desc:"name for this value"`
 	Value int64        `desc:"integer value"`
 	Type  reflect.Type `desc:"the enum type that this value belongs to"`
 }
 
+// Set sets the values of the EnumValue struct
 func (ev *EnumValue) Set(name string, val int64, typ reflect.Type) {
 	ev.Name = name
 	ev.Value = val
 	ev.Type = typ
 }
 
+// String satisfies fmt.Stringer and provides a string representation of enum: just the name
 func (ev EnumValue) String() string {
 	return ev.Name
 }
 
-// Values returns an EnumValue slice for all the values of an enum type -- if alt is true and alt names exist, then those are used
+// Values returns an EnumValue slice for all the values of an enum type -- if
+// alt is true and alt names exist, then those are used
 func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 	vals, ok := tr.Vals[enumName]
 	if ok {
@@ -496,7 +477,8 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 	return vals
 }
 
-// TypeValues returns an EnumValue slice for all the values of an enum type -- if alt is true and alt names exist, then those are used
+// TypeValues returns an EnumValue slice for all the values of an enum type --
+// if alt is true and alt names exist, then those are used
 func (tr *EnumRegistry) TypeValues(et reflect.Type, alt bool) []EnumValue {
 	return tr.Values(FullTypeName(et), alt)
 }

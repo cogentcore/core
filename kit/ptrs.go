@@ -13,6 +13,9 @@ import (
 // These are a set of consistently-named functions for navigating pointer
 // types and values within the reflect system
 
+/////////////////////////////////////////////////
+//  reflect.Type versions
+
 // NonPtrType returns the non-pointer underlying type
 func NonPtrType(typ reflect.Type) reflect.Type {
 	if typ == nil {
@@ -24,7 +27,7 @@ func NonPtrType(typ reflect.Type) reflect.Type {
 	return typ
 }
 
-// PtrType returns the pointer to underlying type
+// PtrType returns the pointer type for given type, if given type is not already a Ptr
 func PtrType(typ reflect.Type) reflect.Type {
 	if typ == nil {
 		return typ
@@ -50,6 +53,9 @@ func OnePtrType(typ reflect.Type) reflect.Type {
 	return typ
 }
 
+/////////////////////////////////////////////////
+//  reflect.Value versions
+
 // NonPtrValue returns the non-pointer underlying value
 func NonPtrValue(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Ptr {
@@ -58,7 +64,8 @@ func NonPtrValue(v reflect.Value) reflect.Value {
 	return v
 }
 
-// PtrValue returns the pointer version (Addr()) of the underlying value
+// PtrValue returns the pointer version (Addr()) of the underlying value if
+// the value is not already a Ptr
 func PtrValue(v reflect.Value) reflect.Value {
 	if v.Kind() != reflect.Ptr {
 		v = v.Addr()
@@ -77,6 +84,43 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 	}
 	return v
 }
+
+// evnp := reflect.New(kit.PtrType(vf.Type()))
+// evpi := evnp.Interface()
+// evpi = vf.Interface()
+// evp := reflect.ValueOf(evpi).Elem()
+
+// // somehow, enums require an extra level of indirection
+// evnp := reflect.New(kit.PtrType(vf.Type()))
+// evpi := evnp.Interface()
+// evpi = vf.Interface()
+
+// MakePtrValue makes a new pointer to the given value, adding an extra level
+// of indirection, and then removing that indirection, resulting in something
+// that is now addressable / assignable -- this is necessary for enums..
+func MakePtrValue(v reflect.Value) reflect.Value {
+	np := reflect.New(PtrType(v.Type()))
+	pi := np.Interface()
+	pi = v.Interface()       // assign pointer using interface assignment instead of set..
+	p := reflect.ValueOf(pi) // has a double pointer, remove that last one
+	return p.Elem()
+}
+
+// UnhideIfaceValue returns a reflect.Value for any of the Make* functions
+// that is actually assignable -- even though these functions return a pointer
+// to the new object, it is somehow hidden behind an interface{} and this
+// magic foo, posted by someone somewhere that I cannot now find again,
+// un-hides it..
+func UnhideIfaceValue(v reflect.Value) reflect.Value {
+	vn := reflect.ValueOf(v.Interface())
+	typ := vn.Type()
+	ptr := reflect.New(typ)
+	ptr.Elem().Set(vn)
+	return ptr
+}
+
+/////////////////////////////////////////////////
+//  interface{} versions
 
 // NonPtrInterface returns the non-pointer value of an interface
 func NonPtrInterface(el interface{}) interface{} {

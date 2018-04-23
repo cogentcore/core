@@ -39,8 +39,25 @@ func IsNil(it interface{}) bool {
 	return false
 }
 
-// ValueIsZero returns true if the reflect.Value is Zero -- from https://github.com/golang/go/issues/7501
+// ValueIsBasic returns true if the reflect.Value is a basic value such as Int, Float, etc
+func ValueIsBasic(v reflect.Value) bool {
+	if !v.IsValid() {
+		return false
+	}
+	vk := v.Kind()
+	if vk >= reflect.Bool && vk <= reflect.Complex128 {
+		return true
+	}
+	return false
+}
+
+// ValueIsZero returns true if the reflect.Value is Zero or nil or invalid or
+// otherwise doesn't have a useful value -- from
+// https://github.com/golang/go/issues/7501
 func ValueIsZero(v reflect.Value) bool {
+	if !v.IsValid() {
+		return true
+	}
 	switch v.Kind() {
 	case reflect.Array, reflect.String:
 		return v.Len() == 0
@@ -54,6 +71,8 @@ func ValueIsZero(v reflect.Value) bool {
 		return v.Float() == 0
 	case reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
 		return v.IsNil()
+	case reflect.Func:
+		return v == reflect.Zero(v.Type())
 	}
 	return false
 }
@@ -286,25 +305,15 @@ func SetRobust(to, from interface{}) bool {
 }
 
 // MakeMap makes a map that is actually addressable, getting around the hidden
-// interface{} that reflect.MakeMap makes..  or something like that.
+// interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
 func MakeMap(typ reflect.Type) reflect.Value {
-	mp := reflect.MakeMap(typ)
-	evn := reflect.ValueOf(mp.Interface()) // try to get rid of interface
-	typp := evn.Type()
-	mptr := reflect.New(typp)
-	mptr.Elem().Set(evn)
-	return mptr
+	return UnhideIfaceValue(reflect.MakeMap(typ))
 }
 
-// MakeSlice makes a slice that is actually addressable, getting around the hidden
-// interface{} that reflect.MakeSlice makes..  or something like that.
+// MakeSlice makes a map that is actually addressable, getting around the hidden
+// interface{} that reflect.MakeSlice makes, by calling UnhideIfaceValue (from ptrs.go)
 func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
-	sp := reflect.MakeSlice(typ, len, cap)
-	evn := reflect.ValueOf(sp.Interface()) // try to get rid of interface
-	typp := evn.Type()
-	sptr := reflect.New(typp)
-	sptr.Elem().Set(evn)
-	return sptr
+	return UnhideIfaceValue(reflect.MakeSlice(typ, len, cap))
 }
 
 // CloneToType creates a new object of given type, and uses SetRobust to copy
@@ -316,10 +325,10 @@ func CloneToType(typ reflect.Type, val interface{}) reflect.Value {
 	} else if NonPtrType(typ).Kind() == reflect.Slice {
 		return MakeSlice(typ, 0, 0)
 	}
-	evn := reflect.New(typ)
-	evi := evn.Interface()
+	vn := reflect.New(typ)
+	evi := vn.Interface()
 	SetRobust(evi, val)
-	return evn
+	return vn
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
