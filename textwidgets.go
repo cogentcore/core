@@ -425,9 +425,10 @@ func (g *TextField) UpdateCharPos() bool {
 
 func (g *TextField) Size2D() {
 	g.EditText = g.Text
+	g.StartPos = 0
 	g.EndPos = len(g.EditText)
 	g.UpdateCharPos()
-	h := g.Paint.FontStyle.Height
+	h := g.Paint.FontHeight()
 	w := float32(10.0)
 	sz := len(g.CharPos)
 	if sz > 0 {

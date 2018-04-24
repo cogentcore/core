@@ -76,6 +76,11 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	frame := dlg.ChildByName("frame", 0).(*Frame)
 	vpsz := frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+
+	stw := int(dlg.Style.Layout.MinWidth.Dots)
+	sth := int(dlg.Style.Layout.MinHeight.Dots)
+	vpsz.X = kit.MaxInt(vpsz.X, stw)
+	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
 	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
 
@@ -215,14 +220,19 @@ func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 	return frame.Child(idx).(*Label), idx
 }
 
-// AddButtonBox adds a button box (Row Layout) named "buttons" to given frame, with given amount of space before
-func (dlg *Dialog) AddButtonBox(spaceBefore float32, frame *Frame) *Layout {
+// AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
+// with optional fixed space and stretch elements before it
+func (dlg *Dialog) AddButtonBox(spaceBefore float32, stretchBefore bool, frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
+
 	if spaceBefore > 0 {
 		spc := frame.AddNewChild(KiT_Space, "button-space").(*Space)
 		spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
+	}
+	if stretchBefore {
+		frame.AddNewChild(KiT_Stretch, "button-stretch")
 	}
 	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
 	bb.Lay = LayoutRow
@@ -293,7 +303,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	if prompt != "" {
 		dlg.SetPrompt(prompt, pspc, frame)
 	}
-	bb := dlg.AddButtonBox(StdDialogVSpace, frame)
+	bb := dlg.AddButtonBox(StdDialogVSpace, true, frame)
 	bbc := dlg.StdButtonConfig(true, ok, cancel)
 	mods, updt := bb.ConfigChildren(bbc, false) // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
@@ -417,6 +427,8 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, titl
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
@@ -438,6 +450,8 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, pr
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
@@ -459,6 +473,8 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg

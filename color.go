@@ -212,7 +212,7 @@ func (c *Color) ParseHex(x string) error {
 
 // Lighter returns a color that is lighter (factor > 1) or darker (factor < 1) -- converts to HSL and back
 func (c *Color) Lighter(factor float32) Color {
-	hsl := HSLAf32Model.Convert(*c).(HSLAf32)
+	hsl := HSLAModel.Convert(*c).(HSLA)
 	hsl.L *= factor
 	if hsl.L > 1.0 {
 		hsl.L = 1.0
@@ -263,12 +263,12 @@ func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
 
 // HSLA represents the Hue [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
-type HSLAf32 struct {
+type HSLA struct {
 	H, S, L, A float32
 }
 
 // Implements the color.Color interface
-func (c HSLAf32) RGBA() (r, g, b, a uint32) {
+func (c HSLA) RGBA() (r, g, b, a uint32) {
 	fr, fg, fb := HSLtoRGBf32(c.H, c.S, c.L)
 	r = uint32(fr*c.A*65535.0 + 0.5)
 	g = uint32(fg*c.A*65535.0 + 0.5)
@@ -364,7 +364,7 @@ var (
 	ColorModel    color.Model = color.ModelFunc(colorModel)
 	RGBAf32Model  color.Model = color.ModelFunc(rgbaf32Model)
 	NRGBAf32Model color.Model = color.ModelFunc(nrgbaf32Model)
-	HSLAf32Model  color.Model = color.ModelFunc(hslaf32Model)
+	HSLAModel     color.Model = color.ModelFunc(hslaf32Model)
 )
 
 func colorModel(c color.Color) color.Color {
@@ -405,7 +405,7 @@ func nrgbaf32Model(c color.Color) color.Color {
 }
 
 func hslaf32Model(c color.Color) color.Color {
-	if _, ok := c.(HSLAf32); ok {
+	if _, ok := c.(HSLA); ok {
 		return c
 	}
 	r, g, b, a := c.RGBA()
@@ -426,5 +426,5 @@ func hslaf32Model(c color.Color) color.Color {
 
 	h, s, l := RGBtoHSLf32(fr, fg, fb)
 
-	return HSLAf32{h, s, l, fa}
+	return HSLA{h, s, l, fa}
 }
