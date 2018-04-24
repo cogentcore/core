@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/draw"
 
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -64,7 +63,7 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 	}
 	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
 	if !st.Background.Color.IsNil() {
-		draw.Draw(rs.Image, RectFromPosSize(pos, sz), &image.Uniform{&st.Background.Color}, image.ZP, draw.Src)
+		pc.FillBox(rs, pos, sz, &st.Background.Color)
 	}
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
@@ -87,8 +86,13 @@ func (g *WidgetBase) MeasureTextSize(txt string) (w, h float32) {
 
 // set our LayData.AllocSize from measured text size
 func (g *WidgetBase) Size2DFromText(txt string) {
-	st := &g.Style
 	w, h := g.MeasureTextSize(txt)
+	g.Size2DFromWH(w, h)
+}
+
+// set our LayData.AllocSize from constraints
+func (g *WidgetBase) Size2DFromWH(w, h float32) {
+	st := &g.Style
 	if st.Layout.Width.Dots > 0 {
 		w = Max32(st.Layout.Width.Dots, w)
 	}

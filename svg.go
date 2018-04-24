@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/draw"
 
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -58,7 +57,7 @@ func (vp *SVG) Render2D() {
 		pc := &vp.Paint
 		rs := &vp.Render
 		if vp.Fill {
-			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{&vp.Style.Background.Color}, image.ZP, draw.Src)
+			vp.FillViewport()
 		}
 		rs.PushXForm(pc.XForm)
 		vp.Render2DChildren() // we must do children first, then us!

@@ -183,6 +183,7 @@ var FontLibrary FontLib
 func (fl *FontLib) Init() {
 	fl.initMu.Lock()
 	if fl.FontPaths == nil {
+		fmt.Printf("Initializing font lib\n")
 		fl.FontPaths = make([]string, 0, 100)
 		fl.FontsAvail = make(map[string]string)
 		fl.Faces = make(map[string]map[float64]font.Face)
@@ -248,6 +249,7 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 	fl.Init()
 	if facemap := fl.Faces[fontnm]; facemap != nil {
 		if face := facemap[points]; face != nil {
+			// fmt.Printf("Got font face from cache: %v %v\n", fontnm, points)
 			return face, nil
 		}
 	}
@@ -261,8 +263,10 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 		facemap := fl.Faces[fontnm]
 		if facemap == nil {
 			facemap = make(map[float64]font.Face)
+			fl.Faces[fontnm] = facemap
 		}
 		facemap[points] = face
+		// fmt.Printf("Loaded font face: %v %v\n", fontnm, points)
 		fl.loadMu.Unlock()
 		return face, nil
 	}

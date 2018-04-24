@@ -16,6 +16,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/chewxy/math32"
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/key"
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
@@ -131,15 +132,17 @@ var TextFieldSelectors = []string{":active", ":focus", ":read-only"}
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Text         string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	EditText     string                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications"`
-	StartPos     int                     `xml:"start-pos" desc:"starting display position in the string"`
-	EndPos       int                     `xml:"end-pos" desc:"ending display position in the string"`
-	CursorPos    int                     `xml:"cursor-pos" desc:"current cursor position"`
-	CharWidth    int                     `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectMode   bool                    `xml:"select-mode" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	Text          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	EditText      string                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications"`
+	StartPos      int                     `xml:"start-pos" desc:"starting display position in the string"`
+	EndPos        int                     `xml:"end-pos" desc:"ending display position in the string"`
+	CursorPos     int                     `xml:"cursor-pos" desc:"current cursor position"`
+	CharWidth     int                     `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectMode    bool                    `xml:"select-mode" desc:"if true, select text as cursor moves"`
+	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
+	lastSizedText string                  `json:"-" xml:"-" the last text string we got charpos for"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -306,8 +309,8 @@ func (g *TextField) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
+// PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (g *TextField) PixelToCursor(pixOff float32) int {
-	pc := &g.Paint
 	st := &g.Style
 
 	spc := st.BoxSpace()
@@ -320,21 +323,23 @@ func (g *TextField) PixelToCursor(pixOff float32) int {
 	// todo: we're getting the wrong sizes here -- not sure why..
 	// fmt.Printf("em %v ex %v ch %v\n", st.UnContext.ToDotsFactor(units.Em), st.UnContext.ToDotsFactor(units.Ex), st.UnContext.ToDotsFactor(units.Ch))
 
-	c := int(math.Round(float64(px / st.UnContext.ToDotsFactor(units.Ch))))
 	sz := len(g.EditText)
-	if g.StartPos+c > sz {
-		c = sz - g.StartPos
-	}
+	c := g.StartPos + int(math.Round(float64(px/st.UnContext.ToDotsFactor(units.Ch))))
+	c = kit.MinInt(c, sz)
+
 	lastbig := false
 	lastsm := false
-	for i := 0; i < 20; i++ {
-		cur := g.EditText[g.StartPos : g.StartPos+c]
-		w, _ := pc.MeasureString(cur)
+	for {
+		w := g.TextWidth(g.StartPos, c)
 		if w > px {
 			if lastsm { // last was smaller, break
 				break
 			}
 			c--
+			if c <= g.StartPos {
+				c = g.StartPos
+				break
+			}
 			lastbig = true
 			// fmt.Printf("dec c: %v, w: %v, px: %v\n", c, w, px)
 		} else if w < px { // last was bigger, brea
@@ -343,14 +348,14 @@ func (g *TextField) PixelToCursor(pixOff float32) int {
 			}
 			c++
 			// fmt.Printf("inc c: %v, w: %v, px: %v\n", c, w, px)
-			if g.StartPos+c > sz {
-				c = sz - g.StartPos
+			if c > sz {
+				c = sz
 				break
 			}
 			lastsm = true
 		}
 	}
-	return g.StartPos + c
+	return c
 }
 
 func (g *TextField) SetCursorFromPixel(pixOff float32) {
@@ -378,8 +383,10 @@ func (g *TextField) Init2D() {
 		if !tf.HasFocus() {
 			tf.GrabFocus()
 		}
-		pt := tf.PointToRelPos(me.Pos())
-		tf.SetCursorFromPixel(float32(pt.X))
+		if me.Action == mouse.Press {
+			pt := tf.PointToRelPos(me.Pos())
+			tf.SetCursorFromPixel(float32(pt.X))
+		}
 	})
 	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
@@ -407,10 +414,26 @@ func (g *TextField) Style2D() {
 	}
 }
 
+func (g *TextField) UpdateCharPos() bool {
+	if g.EditText == g.lastSizedText && len(g.EditText) == len(g.CharPos) {
+		return false
+	}
+	g.CharPos = g.Paint.MeasureChars(g.EditText)
+	g.lastSizedText = g.EditText
+	return true
+}
+
 func (g *TextField) Size2D() {
 	g.EditText = g.Text
 	g.EndPos = len(g.EditText)
-	g.Size2DFromText(g.EditText)
+	g.UpdateCharPos()
+	h := g.Paint.FontStyle.Height
+	w := float32(10.0)
+	sz := len(g.CharPos)
+	if sz > 0 {
+		w = g.CharPos[sz-1]
+	}
+	g.Size2DFromWH(w, h)
 }
 
 func (g *TextField) Layout2D(parBBox image.Rectangle) {
@@ -421,28 +444,48 @@ func (g *TextField) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
+// StartCharPos returns the starting position of the given character -- CharPos contains the ending positions
+func (g *TextField) StartCharPos(idx int) float32 {
+	if idx <= 0 {
+		return 0.0
+	}
+	sz := len(g.CharPos)
+	if sz == 0 {
+		return 0.0
+	}
+	if idx > sz {
+		return g.CharPos[sz-1]
+	}
+	return g.CharPos[idx-1]
+}
+
+// TextWidth returns the text width in dots between the two text string
+// positions (ed is exclusive -- +1 beyond actual char)
+func (g *TextField) TextWidth(st, ed int) float32 {
+	return g.StartCharPos(ed) - g.StartCharPos(st)
+}
+
 func (g *TextField) RenderCursor() {
 	pc := &g.Paint
 	rs := &g.Viewport.Render
 	st := &g.Style
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
-
 	spc := st.BoxSpace()
-
-	tocur := g.EditText[g.StartPos:g.CursorPos]
-	w, h := pc.MeasureString(tocur)
-
 	pos := g.LayData.AllocPos.AddVal(spc)
 
-	pc.DrawLine(rs, pos.X+w, pos.Y, pos.X+w, pos.Y+h)
+	cpos := g.TextWidth(g.StartPos, g.CursorPos)
+
+	h := pc.FontHeight()
+	pc.DrawLine(rs, pos.X+cpos, pos.Y, pos.X+cpos, pos.Y+h)
 	pc.Stroke(rs)
 }
 
-// scroll the starting position to keep the cursor visible
+// AutoScroll scrolls the starting position to keep the cursor visible
 func (g *TextField) AutoScroll() {
-	pc := &g.Paint
 	st := &g.Style
+
+	g.UpdateCharPos()
 
 	sz := len(g.EditText)
 
@@ -452,54 +495,79 @@ func (g *TextField) AutoScroll() {
 		g.StartPos = 0
 		return
 	}
-
 	spc := st.BoxSpace()
 	maxw := g.LayData.AllocSize.X - 2.0*spc
-	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch))
+	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
 
-	g.CursorPos = kit.MinInt(g.CursorPos, sz)
+	// first rationalize all the values
 	if g.EndPos == 0 || g.EndPos > sz { // not init
 		g.EndPos = sz
 	}
 	if g.StartPos >= g.EndPos {
 		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	}
+	g.CursorPos = kit.MinInt(g.CursorPos, sz)
+	g.CursorPos = kit.MaxInt(g.CursorPos, 0)
 
-	tocur := g.EditText[g.StartPos:g.CursorPos]
-	w, _ := pc.MeasureString(tocur)
+	inc := int(math32.Ceil(.1 * float32(g.CharWidth)))
+	inc = kit.MaxInt(4, inc)
 
-	// scroll to keep cursor in view
-	if w >= maxw {
-		inc := 8 // todo: scroll amount
-		g.StartPos += inc
+	// keep cursor in view with buffer
+	startIsAnchor := true
+	if g.CursorPos < (g.StartPos + inc) {
+		g.StartPos -= inc
+		g.StartPos = kit.MaxInt(g.StartPos, 0)
+		g.EndPos = g.StartPos + g.CharWidth
+		g.EndPos = kit.MinInt(sz, g.EndPos)
+	} else if g.CursorPos > (g.EndPos - inc) {
 		g.EndPos += inc
-	}
-	// keep sane
-	g.EndPos = kit.MinInt(len(g.EditText), g.EndPos)
-	if g.StartPos > g.EndPos {
-		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
+		g.EndPos = kit.MinInt(g.EndPos, sz)
+		g.StartPos = g.EndPos - g.CharWidth
+		g.StartPos = kit.MaxInt(0, g.StartPos)
+		startIsAnchor = false
 	}
 
-	// now make sure text fits -- iteratively for 10 tries..
-	for i := 0; i < 10; i++ {
-		cur := g.EditText[g.StartPos:g.EndPos]
-		w, _ = pc.MeasureString(cur)
-
-		// scroll endpos to keep cursor in view
-		if w >= maxw {
-			if g.EndPos > g.CursorPos {
-				g.EndPos--
+	if startIsAnchor {
+		gotWidth := false
+		spos := g.StartCharPos(g.StartPos)
+		for {
+			w := g.StartCharPos(g.EndPos) - spos
+			if w < maxw {
+				if g.EndPos == sz {
+					break
+				}
+				nw := g.StartCharPos(g.EndPos+1) - spos
+				if nw >= maxw {
+					gotWidth = true
+					break
+				}
+				g.EndPos++
 			} else {
-				g.StartPos++
+				g.EndPos--
 			}
-		} else {
-			break
 		}
+		if gotWidth || g.StartPos == 0 {
+			return
+		}
+		// otherwise, try getting some more chars by moving up start..
 	}
-	// keep sane
-	g.EndPos = kit.MinInt(len(g.EditText), g.EndPos)
-	if g.StartPos > g.EndPos {
-		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
+
+	// end is now anchor
+	epos := g.StartCharPos(g.EndPos)
+	for {
+		w := epos - g.StartCharPos(g.StartPos)
+		if w < maxw {
+			if g.StartPos == 0 {
+				break
+			}
+			nw := epos - g.StartCharPos(g.StartPos-1)
+			if nw >= maxw {
+				break
+			}
+			g.StartPos--
+		} else {
+			g.StartPos++
+		}
 	}
 }
 

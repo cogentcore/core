@@ -208,7 +208,7 @@ func (a Vec2D) IsZero() bool {
 }
 
 func (a Vec2D) Fixed() fixed.Point26_6 {
-	return fixp(a.X, a.Y)
+	return Float32ToFixedPoint(a.X, a.Y)
 }
 
 func (a Vec2D) Add(b Vec2D) Vec2D {
@@ -600,15 +600,15 @@ func Degrees(radians float32) float32 {
 	return radians * 180 / math32.Pi
 }
 
-func fixp(x, y float32) fixed.Point26_6 {
-	return fixed.Point26_6{fix(x), fix(y)}
+func Float32ToFixedPoint(x, y float32) fixed.Point26_6 {
+	return fixed.Point26_6{Float32ToFixed(x), Float32ToFixed(y)}
 }
 
-func fix(x float32) fixed.Int26_6 {
+func Float32ToFixed(x float32) fixed.Int26_6 {
 	return fixed.Int26_6(x * 64)
 }
 
-func unfix(x fixed.Int26_6) float32 {
+func FixedToFloat32(x fixed.Int26_6) float32 {
 	const shift, mask = 6, 1<<6 - 1
 	if x >= 0 {
 		return float32(x>>shift) + float32(x&mask)/64

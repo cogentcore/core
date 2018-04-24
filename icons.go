@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/draw"
 	"log"
 	"sort"
 
@@ -102,7 +101,7 @@ func (vp *Icon) Render2D() {
 			pc := &vp.Paint
 			rs := &vp.Render
 			if vp.Fill {
-				draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{&vp.Style.Background.Color}, image.ZP, draw.Src)
+				vp.FillViewport()
 			}
 			vp.SetNormXForm()
 			rs.PushXForm(pc.XForm)

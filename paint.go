@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"image"
+	"image/color"
 
 	"github.com/chewxy/math32"
 	"github.com/golang/freetype/raster"
@@ -432,7 +433,7 @@ func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
 	sz := rs.Image.Bounds().Size()
 	r := raster.NewRasterizer(sz.X, sz.Y)
 	r.UseNonZeroWinding = true
-	r.AddStroke(path, fix(pc.StrokeStyle.Width.Dots), pc.capper(), pc.joiner())
+	r.AddStroke(path, Float32ToFixed(pc.StrokeStyle.Width.Dots), pc.capper(), pc.joiner())
 	r.Rasterize(painter)
 	pr.End()
 }
@@ -481,6 +482,13 @@ func (pc *Paint) FillPreserve(rs *RenderState) {
 func (pc *Paint) Fill(rs *RenderState) {
 	pc.FillPreserve(rs)
 	pc.ClearPath(rs)
+}
+
+// Fill box is an optimized fill of a square region with a uniform color --
+// currently Fill is the major bottleneck on performance..
+func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr color.Color) {
+	b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
+	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
 }
 
 // ClipPreserve updates the clipping region by intersecting the current
@@ -687,10 +695,6 @@ func (pc *Paint) LoadFontFace(path string, points float64) error {
 	return err
 }
 
-func (pc *Paint) FontHeight() float32 {
-	return pc.FontStyle.Height
-}
-
 func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectangle, s string, x, y float32) {
 	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
 		return
@@ -700,7 +704,7 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 		Dst:  im,
 		Src:  image.NewUniform(&pc.StrokeStyle.Color),
 		Face: pc.FontStyle.Face,
-		Dot:  fixp(x, y),
+		Dot:  Float32ToFixedPoint(x, y),
 	}
 	// based on Drawer.DrawString() in golang.org/x/image/font/font.go
 	prevC := rune(-1)
@@ -806,7 +810,27 @@ func (pc *Paint) MeasureString(s string) (w, h float32) {
 	}
 	a := d.MeasureString(s)
 	pr.End()
-	return math32.Ceil(float32(a >> 6)), pc.FontStyle.Height
+	return math32.Ceil(FixedToFloat32(a)), pc.FontStyle.Height
+}
+
+// MeasureChars measures the rendered character positions of the given text in
+// the current font
+func (pc *Paint) MeasureChars(s string) []float32 {
+	pr := prof.Start("Paint.MeasureChars")
+	if pc.FontStyle.Face == nil {
+		pc.FontStyle.LoadFont(&pc.UnContext, "")
+	}
+	chrs := MeasureChars(pc.FontStyle.Face, s)
+	pr.End()
+	return chrs
+}
+
+// FontHeight -- returns the height of the current font
+func (pc *Paint) FontHeight() float32 {
+	if pc.FontStyle.Face == nil {
+		pc.FontStyle.LoadFont(&pc.UnContext, "")
+	}
+	return pc.FontStyle.Height
 }
 
 func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float32) ([]string, float32) {
@@ -899,33 +923,33 @@ func flattenPath(p raster.Path) [][]Vec2D {
 				result = append(result, path)
 				path = nil
 			}
-			x := unfix(p[i+1])
-			y := unfix(p[i+2])
+			x := FixedToFloat32(p[i+1])
+			y := FixedToFloat32(p[i+2])
 			path = append(path, Vec2D{x, y})
 			cx, cy = x, y
 			i += 4
 		case 1:
-			x := unfix(p[i+1])
-			y := unfix(p[i+2])
+			x := FixedToFloat32(p[i+1])
+			y := FixedToFloat32(p[i+2])
 			path = append(path, Vec2D{x, y})
 			cx, cy = x, y
 			i += 4
 		case 2:
-			x1 := unfix(p[i+1])
-			y1 := unfix(p[i+2])
-			x2 := unfix(p[i+3])
-			y2 := unfix(p[i+4])
+			x1 := FixedToFloat32(p[i+1])
+			y1 := FixedToFloat32(p[i+2])
+			x2 := FixedToFloat32(p[i+3])
+			y2 := FixedToFloat32(p[i+4])
 			points := QuadraticBezier(cx, cy, x1, y1, x2, y2)
 			path = append(path, points...)
 			cx, cy = x2, y2
 			i += 6
 		case 3:
-			x1 := unfix(p[i+1])
-			y1 := unfix(p[i+2])
-			x2 := unfix(p[i+3])
-			y2 := unfix(p[i+4])
-			x3 := unfix(p[i+5])
-			y3 := unfix(p[i+6])
+			x1 := FixedToFloat32(p[i+1])
+			y1 := FixedToFloat32(p[i+2])
+			x2 := FixedToFloat32(p[i+3])
+			y2 := FixedToFloat32(p[i+4])
+			x3 := FixedToFloat32(p[i+5])
+			y3 := FixedToFloat32(p[i+6])
 			points := CubicBezier(cx, cy, x1, y1, x2, y2, x3, y3)
 			path = append(path, points...)
 			cx, cy = x3, y3

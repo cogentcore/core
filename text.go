@@ -11,6 +11,8 @@ import (
 
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki/kit"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 // note: most of these are inherited
@@ -155,6 +157,29 @@ var _ Node2D = &Text2D{}
 
 //////////////////////////////////////////////////////////////////////////////////
 //  Utilities
+
+// MeasureChars returns inter-character points for each char, in float32
+func MeasureChars(f font.Face, s string) []float32 {
+	chrs := make([]float32, len(s))
+	prevC := rune(-1)
+	var advance fixed.Int26_6
+	for i, c := range s {
+		if prevC >= 0 {
+			advance += f.Kern(prevC, c)
+		}
+		a, ok := f.GlyphAdvance(c)
+		if !ok {
+			// TODO: is falling back on the U+FFFD glyph the responsibility of
+			// the Drawer or the Face?
+			// TODO: set prevC = '\ufffd'?
+			continue
+		}
+		advance += a
+		chrs[i] = FixedToFloat32(advance)
+		prevC = c
+	}
+	return chrs
+}
 
 type measureStringer interface {
 	MeasureString(s string) (w, h float32)

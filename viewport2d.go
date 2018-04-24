@@ -319,10 +319,14 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 	vp.Move2DChildren(image.ZP) // reset delta here -- we absorb the delta in our placement relative to the parent
 }
 
+func (vp *Viewport2D) FillViewport() {
+	vp.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.ViewBox.Size), &vp.Style.Background.Color)
+}
+
 func (vp *Viewport2D) Render2D() {
 	if vp.PushBounds() {
-		if vp.Fill { // sub-viewport
-			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{&vp.Style.Background.Color}, image.ZP, draw.Src)
+		if vp.Fill {
+			vp.FillViewport()
 		}
 		vp.Render2DChildren() // we must do children first, then us!
 		vp.RenderViewport2D() // update our parent image
