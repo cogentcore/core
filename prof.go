@@ -14,59 +14,79 @@
 //  prof.Profiling = *profFlag
 //  ...
 //  // surrounding the code of interest:
-//  pr := prof.Prof.Start("name of function")
+//  pr := prof.Start("name of function")
 //  ... code
 //  pr.End()
 //  ...
 //  // at end or whenever you've got enough data:
-//  prof.Prof.Report(time.Millisecond) // or time.Second or whatever
+//  prof.Report(time.Millisecond) // or time.Second or whatever
 //
 package prof
 
 import (
 	"fmt"
 	"sort"
+	"sync"
 	"time"
-
-	"github.com/rcoreilly/goki/ki/atomctr"
 )
+
+// Main User API:
+
+// Start starts profiling and returns a Profile struct that must have .End()
+// called on it when done timing -- note will be nil if not the first to start
+// timing on this function -- assumes nested inner / outer loop structure for
+// calls to the same method
+func Start(name string) *Profile {
+	return Prof.Start(name)
+}
+
+// Report generates a report of all the profile data collected
+func Report(units time.Duration) {
+	Prof.Report(units)
+}
+
+// Reset all data
+func Reset() {
+	Prof.Reset()
+}
+
+////////////////////////////////////////////////////////////////////
+// IMPL:
 
 var Profiling = false
 
 var Prof = Profiler{}
 
 type Profile struct {
-	Name string
-	Tot  time.Duration
-	N    int64
-	Avg  float64
-	St   time.Time
-	Ctr  atomctr.Ctr
+	Name   string
+	Tot    time.Duration
+	N      int64
+	Avg    float64
+	St     time.Time
+	Timing bool
 }
 
-func (p *Profile) Start() {
-	if p.Ctr.Inc() == 1 { // first one
+func (p *Profile) Start() *Profile {
+	if !p.Timing {
 		p.St = time.Now()
+		p.Timing = true
+		return p
 	}
+	return nil
 }
 
 func (p *Profile) End() {
 	if p == nil || !Profiling {
 		return
 	}
-	if p.Ctr.Dec() > 0 {
-		return
-	}
 	dur := time.Now().Sub(p.St)
 	p.Tot += dur
 	p.N++
 	p.Avg = float64(p.Tot) / float64(p.N)
+	p.Timing = false
 }
 
 func (p *Profile) Report(tot, units float64) {
-	if p.Ctr.Value() != 0 {
-		fmt.Printf("%v:\tCounter != 0 -- imbalanced!: %d\n", p.Ctr.Value())
-	}
 	fmt.Printf("%24v:\tTot:\t%12.2f\tAvg:\t%12.2f\tN:\t%6d\tPct:\t%5.2f\n",
 		p.Name, float64(p.Tot)/units, p.Avg/units, p.N, 100.0*float64(p.Tot)/tot)
 }
@@ -74,6 +94,7 @@ func (p *Profile) Report(tot, units float64) {
 // Profiler manages a map of profiled functions
 type Profiler struct {
 	Profs map[string]*Profile
+	mu    sync.Mutex
 }
 
 // Start starts profiling and returns a Profile struct that must have .End()
@@ -82,6 +103,7 @@ func (p *Profiler) Start(name string) *Profile {
 	if !Profiling {
 		return nil
 	}
+	p.mu.Lock()
 	if p.Profs == nil {
 		p.Profs = make(map[string]*Profile, 0)
 	}
@@ -90,8 +112,9 @@ func (p *Profiler) Start(name string) *Profile {
 		pr = &Profile{Name: name}
 		p.Profs[name] = pr
 	}
-	pr.Start()
-	return pr
+	prval := pr.Start()
+	p.mu.Unlock()
+	return prval
 }
 
 // Report generates a report of all the profile data collected
@@ -116,13 +139,6 @@ func (p *Profiler) Report(units time.Duration) {
 	}
 }
 
-// Start starts profiling and returns a Profile struct that must have .End()
-// called on it when done timing
-func Start(name string) *Profile {
-	return Prof.Start(name)
-}
-
-// Report generates a report of all the profile data collected
-func Report(units time.Duration) {
-	Prof.Report(units)
+func (p *Profiler) Reset() {
+	p.Profs = make(map[string]*Profile, 0)
 }
