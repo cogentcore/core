@@ -74,9 +74,12 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* zoom keys, change LogicalDPIScale factor -- should just work!
+* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc -- key innovation over css: relative color transforms: lighterX darkerX that transform existing color -- great for styling widgets etc.
 
-* Dialog uses min-width / height props -- need to do that directly
+* enums not working in valueview -- they were, right?
+
+* saving non-string properties not working -- doesn't know the type for
+  loading.. converts to a map.
 
 * CSS styling attached to Viewport
 
@@ -86,8 +89,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * arg view / dialog and button tags
 
-* add fps button to gogi first
-
 * DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
 
 * Focus display highlight not getting updated when clicking around in the treeview.
@@ -96,9 +97,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
-* then can do StructView using grid layout -- keeps labels aligned with rows.
-    + read-only
-	+ condshow / edit
+* Structview: condshow / edit
 	
 * styles for different button states are not propagating into the parts
 	+ in widget.go: here add a thing that copies any style elements marked as "inherit" from parent to part
@@ -123,8 +122,6 @@ Next:
 * style parsing crash on font-family
 
 * all widgets need read-only and disabled states
-
-* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc -- key innovation over css: relative color transforms: lighterX darkerX that transform existing color -- great for styling widgets etc.
 
 Soon:
 
