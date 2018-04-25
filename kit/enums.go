@@ -221,20 +221,6 @@ func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 	return nil
 }
 
-// EnumIfacePtrFromInt64 returns an interface{} value which is a pointer to
-// an enum value of given type, set to given integer value
-func EnumIfacePtrFromInt64(ival int64, typ reflect.Type) interface{} {
-	// note: for reasons that remain obscure, enums seem to require an EXTRA level of
-	// pointer indirection -- this is true in gi.Style as well
-	evnp := reflect.New(PtrType(typ))
-	evpi := evnp.Interface()
-	evn := reflect.New(typ)
-	evi := evn.Interface()
-	evpi = &evi
-	reflect.ValueOf(evpi).Elem().Set(reflect.ValueOf(ival).Convert(typ))
-	return evpi
-}
-
 // EnumIfaceFromInt64 returns an interface{} value which is an enum value of
 // given type, set to given integer value
 func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
@@ -354,8 +340,8 @@ func SetEnumValueFromString(eval reflect.Value, str string) error {
 	sv := reflect.ValueOf(str)
 	args := make([]reflect.Value, 1)
 	args[0] = sv
-	rv := meth.Call(args)
-	fmt.Printf("return from FromString method: %v\n", rv[0].Interface())
+	meth.Call(args)
+	// fmt.Printf("return from FromString method: %v\n", rv[0].Interface())
 	return nil
 }
 
@@ -405,8 +391,7 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 	}
 	for i, v := range alts {
 		if v == str {
-			eval.Set(reflect.ValueOf(i).Convert(et))
-			return nil
+			return tr.SetEnumValueFromInt64(eval, int64(i))
 		}
 	}
 	err := fmt.Errorf("kit.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
@@ -429,8 +414,8 @@ func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str s
 // representation from a generic int64 value
 func (tr *EnumRegistry) SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
 	evi := eval.Interface()
-	et := eval.Type()
-	return EnumFromInt64(&evi, ival, et)
+	et := eval.Type().Elem()
+	return EnumFromInt64(evi, ival, et)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -497,3 +482,20 @@ func (tr *EnumRegistry) AllTagged(key string) []reflect.Type {
 	}
 	return tl
 }
+
+/////////////////////////////////////////////////////////////
+// Following is for testing..
+
+// testing
+type TestFlags int32
+
+const (
+	TestFlagsNil TestFlags = iota
+	TestFlag1
+	TestFlag2
+	TestFlagsN
+)
+
+//go:generate stringer -type=TestFlags
+
+var KiT_TestFlags = Enums.AddEnumAltLower(TestFlagsN, false, nil, "Test")
