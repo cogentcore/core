@@ -183,7 +183,7 @@ var FontLibrary FontLib
 func (fl *FontLib) Init() {
 	fl.initMu.Lock()
 	if fl.FontPaths == nil {
-		fmt.Printf("Initializing font lib\n")
+		// fmt.Printf("Initializing font lib\n")
 		fl.FontPaths = make([]string, 0, 100)
 		fl.FontsAvail = make(map[string]string)
 		fl.Faces = make(map[string]map[float64]font.Face)

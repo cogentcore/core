@@ -21,20 +21,42 @@ type NodeFlags int32
 
 const (
 	NodeFlagsNil NodeFlags = NodeFlags(ki.FlagsN) + iota
-	// CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style 'can-focus' property
+
+	// CanFocus: can this node accept focus to receive keyboard input events
+	// -- set by default for typical nodes that do so, but can be overridden,
+	// including by the style 'can-focus' property
 	CanFocus
-	// HasFocus: does this node currently have the focus for keyboard input events?  use tab / alt tab and clicking events to update focus -- see interface on Window
+
+	// HasFocus: does this node currently have the focus for keyboard input
+	// events?  use tab / alt tab and clicking events to update focus -- see
+	// interface on Window
 	HasFocus
-	// FullReRender indicates that a full re-render is required due to nature of update event -- otherwise default is local re-render -- used internally for nodes to determine what to do on the ReRender step
+
+	// FullReRender indicates that a full re-render is required due to nature
+	// of update event -- otherwise default is local re-render -- used
+	// internally for nodes to determine what to do on the ReRender step
 	FullReRender
-	// ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame's within a SplitView
+
+	// ReRenderAnchor: this node has a static size, and repaints its
+	// background -- any children under it that need to dynamically resize on
+	// a ReRender (Update) can refer the update up to rerendering this node,
+	// instead of going further up the tree -- e.g., true of Frame's within a
+	// SplitView
 	ReRenderAnchor
-	// ReadOnly: for widgets that support editing, it is read-only -- this must be universally supported in an appropriately-indicated way for each widget
+
+	// ReadOnly is for widgets that support editing, it is read-only -- this
+	// must be universally supported in an appropriately-indicated way for
+	// each widget
 	ReadOnly
-	// indicates that the MouseEnteredEvent was previously registered on this node
+
+	// MouseHasEntered indicates that the MouseEnteredEvent was previously
+	// registered on this node
 	MouseHasEntered
-	// this node is currently dragging -- win.Dragging set to this node
+
+	// NodeDragging indicates this node is currently dragging -- win.Dragging
+	// set to this node
 	NodeDragging
+
 	// can extend node flags from here
 	NodeFlagsN
 )

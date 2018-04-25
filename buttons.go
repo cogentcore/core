@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -377,9 +376,7 @@ func (g *Button) ConfigPartsIfNeeded() {
 
 func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	fmt.Printf("button pre-alignv: %v\n", g.Style.Layout.AlignV)
 	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
-	fmt.Printf("button post-alignv: %v\n", g.Style.Layout.AlignV)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -595,9 +592,7 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 func (g *CheckBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	fmt.Printf("Checkbox pre-alignv: %v\n", g.Style.Layout.AlignV)
 	g.Style2DWidget(props)
-	fmt.Printf("Checkbox post-alignv: %v\n", g.Style.Layout.AlignV)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i] = g.Style
 		if i > 0 {
@@ -605,7 +600,6 @@ func (g *CheckBox) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
-	fmt.Printf("checkbox alignv: %v\n", g.Style.Layout.AlignV)
 	g.ConfigParts()
 }
 

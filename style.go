@@ -188,6 +188,7 @@ func (s *Style) SetStyle(parent *Style, props ki.Props) {
 		StyleFieldsVar.Inherit(s, parent)
 	}
 	StyleFieldsVar.SetFromProps(s, parent, props)
+	s.Text.AlignV = s.Layout.AlignV
 	s.Layout.SetStylePost()
 	s.Font.SetStylePost()
 	s.Text.SetStylePost()
@@ -339,9 +340,12 @@ func CompileStyledFields(defobj interface{}) (flds map[string]*StyledField, inhf
 
 	WalkStyleStruct(defobj, "", uintptr(0),
 		func(sf reflect.StructField, vf reflect.Value, outerTag string, baseoff uintptr) {
-			styf := &StyledField{Field: sf, NetOff: baseoff + sf.Offset}
-			styf.Default = vf
+			// fmt.Printf("complile fld: %v base: %v off: %v\n", sf.Name, baseoff, sf.Offset)
+			styf := &StyledField{Field: sf, NetOff: baseoff + sf.Offset, Default: vf}
 			tag := StyleEffTag(sf.Tag.Get("xml"), outerTag)
+			if _, ok := flds[tag]; ok {
+				fmt.Printf("CompileStyledFields: ERROR redundant tag found! will fail! %v\n", tag)
+			}
 			flds[tag] = styf
 			atags := sf.Tag.Get("alt")
 			if atags != "" {
@@ -409,19 +413,15 @@ type StyledField struct {
 }
 
 // FieldValue returns a reflect.Value for a given object, computed from NetOff
-func (sf StyledField) FieldValue(obj interface{}) reflect.Value {
+func (sf *StyledField) FieldValue(obj interface{}) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
-	if kit.KindIsBasic(sf.Field.Type.Kind()) {
-		nw := reflect.NewAt(reflect.PtrTo(sf.Field.Type), f)
-		return nw.Elem()
-	}
 	nw := reflect.NewAt(sf.Field.Type, f)
 	return kit.UnhideIfaceValue(nw).Elem()
 }
 
 // FromProps styles given field from property value prv
-func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
+func (fld *StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 	vf := fld.FieldValue(obj)
 	var pf reflect.Value
 	if hasPar {
@@ -488,27 +488,23 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 		}
 		return // no can do any struct otherwise
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
-		fmt.Printf("pre set enum: fld ptr: %v %v val %v typ %T ptr: %p prv: %v %T\n",
-			fld.Field.Name, unsafe.Pointer(reflect.ValueOf(obj).Pointer()+fld.NetOff), vf.Interface(), vf.Interface(), vf.Interface(), prv, prv)
-		// }
 		if prstr != "" {
 			tn := kit.FullTypeName(fld.Field.Type)
 			if kit.Enums.Enum(tn) != nil {
 				kit.Enums.SetEnumValueFromStringAltFirst(vf, prstr)
-				if fld.Field.Name == "AlignV" {
-					fmt.Printf("string set enum: fld %v val %v typ %T  prv: %v %T\n",
-						fld.Field.Name, vf.Interface(), vf.Interface(), prv, prv)
-				}
 			} else {
 				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 			}
 			return
 		} else {
-			vf.Set(reflect.ValueOf(prv))
-			// if fld.Field.Name == "AlignV" {
-			fmt.Printf("post set enum: fld %v val %v typ %T ptr %p prv: %v %T\n",
-				fld.Field.Name, vf.Interface(), vf.Interface(), vf.Interface(), prv, prv)
-			// }
+			// somehow this doesn't work:
+			// vf.Set(reflect.ValueOf(prv))
+			ival, ok := kit.ToInt(prv)
+			if !ok {
+				log.Printf("gi.StyledField.FromProps: for field: %v could not convert property to int: %v %T\n", fld.Field.Name, prv, prv)
+			} else {
+				kit.Enums.SetEnumValueFromInt64(vf, ival)
+			}
 			return
 		}
 	}

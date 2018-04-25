@@ -20,7 +20,7 @@ import (
 // all the style information associated with how to render text
 type TextStyle struct {
 	Align         Align       `xml:"text-align" inherit:"true" desc:"how to align text"`
-	AlignV        Align       `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment of text -- copied from layout style AlignV"`
+	AlignV        Align       `xml:"-" json:"-" desc:"vertical alignment of text -- copied from layout style AlignV"`
 	LineHeight    float32     `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (note: specific values such as pixels are not supported)"`
 	LetterSpacing units.Value `xml:"letter-spacing" desc:"spacing between characters and lines"`
 	Indent        units.Value `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
