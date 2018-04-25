@@ -412,16 +412,12 @@ type StyledField struct {
 func (sf StyledField) FieldValue(obj interface{}) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
-	nw := reflect.NewAt(sf.Default.Type(), f) // Field.Type, f)
+	if kit.KindIsBasic(sf.Field.Type.Kind()) {
+		nw := reflect.NewAt(reflect.PtrTo(sf.Field.Type), f)
+		return nw.Elem()
+	}
+	nw := reflect.NewAt(sf.Field.Type, f)
 	return kit.UnhideIfaceValue(nw).Elem()
-}
-
-// FieldValuePtr returns a reflect.Value for a given object, computed from NetOff
-func (sf StyledField) FieldValuePtr(obj interface{}) reflect.Value {
-	ov := reflect.ValueOf(obj)
-	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
-	nw := reflect.NewAt(sf.Default.Type(), f) // Field.Type, f)
-	return kit.UnhideIfaceValue(nw)
 }
 
 // FromProps styles given field from property value prv
@@ -492,31 +488,26 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 		}
 		return // no can do any struct otherwise
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
-		// to do set here we need an extra MakePtrValue call..
-		vfp := kit.MakePtrValue(vf)
-		// vfp := vf
-		// if fld.Field.Name == "AlignV" {
-
 		fmt.Printf("pre set enum: fld ptr: %v %v val %v typ %T ptr: %p prv: %v %T\n",
-			fld.Field.Name, unsafe.Pointer(reflect.ValueOf(obj).Pointer()+fld.NetOff), vfp.Interface(), vfp.Interface(), vfp.Interface(), prv, prv)
+			fld.Field.Name, unsafe.Pointer(reflect.ValueOf(obj).Pointer()+fld.NetOff), vf.Interface(), vf.Interface(), vf.Interface(), prv, prv)
 		// }
 		if prstr != "" {
 			tn := kit.FullTypeName(fld.Field.Type)
 			if kit.Enums.Enum(tn) != nil {
-				kit.Enums.SetEnumValueFromStringAltFirst(vfp, fld.Field.Type, prstr)
+				kit.Enums.SetEnumValueFromStringAltFirst(vf, prstr)
 				if fld.Field.Name == "AlignV" {
 					fmt.Printf("string set enum: fld %v val %v typ %T  prv: %v %T\n",
-						fld.Field.Name, vfp.Interface(), vfp.Interface(), prv, prv)
+						fld.Field.Name, vf.Interface(), vf.Interface(), prv, prv)
 				}
 			} else {
 				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 			}
 			return
 		} else {
-			vfp.Set(reflect.ValueOf(prv))
+			vf.Set(reflect.ValueOf(prv))
 			// if fld.Field.Name == "AlignV" {
 			fmt.Printf("post set enum: fld %v val %v typ %T ptr %p prv: %v %T\n",
-				fld.Field.Name, vfp.Interface(), vfp.Interface(), vfp.Interface(), prv, prv)
+				fld.Field.Name, vf.Interface(), vf.Interface(), vf.Interface(), prv, prv)
 			// }
 			return
 		}
