@@ -79,7 +79,7 @@ var PaintDefault = NewPaint()
 
 // set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
 func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
-	if !pc.StyleSet { // first time
+	if !pc.StyleSet && parent != nil { // first time
 		PaintFieldsVar.Inherit(pc, parent)
 	}
 	PaintFieldsVar.SetFromProps(pc, parent, props)

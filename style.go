@@ -184,7 +184,7 @@ var StyleDefault = NewStyle()
 // SetStyle sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
 func (s *Style) SetStyle(parent *Style, props ki.Props) {
-	if !s.IsSet { // first time
+	if !s.IsSet && parent != nil { // first time
 		StyleFieldsVar.Inherit(s, parent)
 	}
 	StyleFieldsVar.SetFromProps(s, parent, props)
@@ -340,7 +340,7 @@ func CompileStyledFields(defobj interface{}) (flds map[string]*StyledField, inhf
 	WalkStyleStruct(defobj, "", uintptr(0),
 		func(sf reflect.StructField, vf reflect.Value, outerTag string, baseoff uintptr) {
 			styf := &StyledField{Field: sf, NetOff: baseoff + sf.Offset}
-			styf.Default = styf.FieldValue(defobj)
+			styf.Default = vf
 			tag := StyleEffTag(sf.Tag.Get("xml"), outerTag)
 			flds[tag] = styf
 			atags := sf.Tag.Get("alt")
@@ -369,7 +369,7 @@ func InheritStyledFields(inhflds []*StyledField, obj, par interface{}) {
 	for _, fld := range inhflds {
 		vf := fld.FieldValue(obj)
 		pf := fld.FieldValue(par)
-		vf.Set(pf) // copy
+		vf.Elem().Set(pf.Elem()) // copy
 	}
 }
 
@@ -412,8 +412,16 @@ type StyledField struct {
 func (sf StyledField) FieldValue(obj interface{}) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
-	nwp := kit.UnhideIfaceValue(reflect.NewAt(sf.Field.Type, f)).Elem()
-	return nwp
+	nw := reflect.NewAt(sf.Default.Type(), f) // Field.Type, f)
+	return kit.UnhideIfaceValue(nw).Elem()
+}
+
+// FieldValuePtr returns a reflect.Value for a given object, computed from NetOff
+func (sf StyledField) FieldValuePtr(obj interface{}) reflect.Value {
+	ov := reflect.ValueOf(obj)
+	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
+	nw := reflect.NewAt(sf.Default.Type(), f) // Field.Type, f)
+	return kit.UnhideIfaceValue(nw)
 }
 
 // FromProps styles given field from property value prv
@@ -430,8 +438,8 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 		if prtv == "inherit" {
 			if hasPar {
 				vf.Set(pf)
+				fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, pf.Interface())
 			}
-			// fmt.Printf("StyleField %v set to inherited value: %v\n", sf.Name, pf)
 			return
 		}
 		if prtv == "initial" {
@@ -453,7 +461,15 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 			vc := vf.Interface().(*Color)
 			switch prtv := prv.(type) {
 			case string:
-				err := vc.SetFromString(prtv)
+				if hasPar {
+					if pclr, pok := pf.Interface().(*Color); pok {
+						vc.SetFromString(prtv, pclr)
+						fmt.Printf("StyleField %v set to color string: %v, with parent value: %v\n", fld.Field.Name, prtv, pclr)
+						return
+					}
+
+				}
+				err := vc.SetFromString(prtv, nil)
 				if err != nil {
 					log.Printf("StyleField: %v\n", err)
 				}
@@ -478,16 +494,30 @@ func (fld StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
 		// to do set here we need an extra MakePtrValue call..
 		vfp := kit.MakePtrValue(vf)
+		// vfp := vf
+		// if fld.Field.Name == "AlignV" {
+
+		fmt.Printf("pre set enum: fld ptr: %v %v val %v typ %T ptr: %p prv: %v %T\n",
+			fld.Field.Name, unsafe.Pointer(reflect.ValueOf(obj).Pointer()+fld.NetOff), vfp.Interface(), vfp.Interface(), vfp.Interface(), prv, prv)
+		// }
 		if prstr != "" {
 			tn := kit.FullTypeName(fld.Field.Type)
 			if kit.Enums.Enum(tn) != nil {
-				kit.Enums.SetEnumValueFromStringAltFirst(vfp, prstr)
+				kit.Enums.SetEnumValueFromStringAltFirst(vfp, fld.Field.Type, prstr)
+				if fld.Field.Name == "AlignV" {
+					fmt.Printf("string set enum: fld %v val %v typ %T  prv: %v %T\n",
+						fld.Field.Name, vfp.Interface(), vfp.Interface(), prv, prv)
+				}
 			} else {
 				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 			}
 			return
 		} else {
 			vfp.Set(reflect.ValueOf(prv))
+			// if fld.Field.Name == "AlignV" {
+			fmt.Printf("post set enum: fld %v val %v typ %T ptr %p prv: %v %T\n",
+				fld.Field.Name, vfp.Interface(), vfp.Interface(), vfp.Interface(), prv, prv)
+			// }
 			return
 		}
 	}

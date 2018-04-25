@@ -22,7 +22,7 @@ import (
 // rescale the logical DPI relative to the actual physical DPI, thereby
 // scaling the overall density of the display (e.g., smaller numbers produce
 // smaller, higher-density displays)
-var LogicalDPIScale = float32(0.8)
+var LogicalDPIScale = float32(0.6)
 
 // Screen contains data about each physical and / or logical screen
 type Screen struct {

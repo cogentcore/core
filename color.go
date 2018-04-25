@@ -139,14 +139,94 @@ func (c *Color) ToHSLA() (h, s, l, a float32) {
 	return
 }
 
-func (c *Color) SetFromString(nm string) error {
-	if len(nm) == 0 { // consider it null
+func cvtPctFromStringErr(gotpct bool, pctstr string) {
+	if !gotpct {
+		log.Printf("gi.Color.SetFromString -- percent was not converted from: %v\n", pctstr)
+	}
+}
+
+// SetFromString sets color value from string, including # hex specs, standard
+// color names, "none" or "off", or the following transformations (which
+// use a non-nil base color as the starting point, if it is provided):
+//
+// * lighter-PCT or darker-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
+// * saturate-PCT or pastel-PCT: manipulates the saturation level in HSL by PCT
+// * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
+// * blend-PCT-color: blends given percent of given color name relative to base (or current)
+//
+func (c *Color) SetFromString(str string, base color.Color) error {
+	if len(str) == 0 { // consider it null
 		c.SetToNil()
 	}
-	if nm[0] == '#' {
-		return c.ParseHex(nm)
+	if str[0] == '#' {
+		return c.ParseHex(str)
 	} else {
-		low := strings.ToLower(nm)
+		low := strings.ToLower(str)
+		if hidx := strings.Index(low, "-"); hidx > 0 {
+			cmd := low[:hidx]
+			pctstr := low[hidx+1:]
+			pct, gotpct := kit.ToFloat32(pctstr)
+			switch cmd {
+			case "lighter":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Lighter(pct))
+				return nil
+			case "darker":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Darker(pct))
+				return nil
+			case "saturate":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Saturate(pct))
+				return nil
+			case "pastel":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Pastel(pct))
+				return nil
+			case "clearer":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Clearer(pct))
+				return nil
+			case "opaquer":
+				cvtPctFromStringErr(gotpct, pctstr)
+				if base != nil {
+					c.SetColor(base)
+				}
+				c.SetColor(c.Opaquer(pct))
+				return nil
+			case "blend":
+				if base != nil {
+					c.SetColor(base)
+				}
+				clridx := strings.Index(pctstr, "-")
+				if clridx < 0 {
+					err := fmt.Errorf("gi.Color.SetFromString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v\n", low, pctstr)
+					return err
+				}
+				pctstr = low[hidx+1 : clridx]
+				pct, gotpct = kit.ToFloat32(pctstr)
+				cvtPctFromStringErr(gotpct, pctstr)
+				clrstr := low[clridx+1:]
+				othc, err := ColorFromString(clrstr, base)
+				c.SetColor(c.Blend(pct, &othc))
+				return err
+			}
+		}
 		switch low {
 		case "none", "off":
 			c.SetToNil()
@@ -157,7 +237,7 @@ func (c *Color) SetFromString(nm string) error {
 		default:
 			nc, ok := colornames.Map[low]
 			if !ok {
-				err := fmt.Errorf("gi Color FromString: name not found %v", nm)
+				err := fmt.Errorf("gi Color FromString: name not found %v", str)
 				log.Printf("%v\n", err)
 				return err
 			} else {
@@ -168,9 +248,11 @@ func (c *Color) SetFromString(nm string) error {
 	return nil
 }
 
-func ColorFromString(nm string) (Color, error) {
+// ColorFromString returns a new color set from given string and optional base
+// color for transforms -- see SetFromString
+func ColorFromString(str string, base color.Color) (Color, error) {
 	var c Color
-	err := c.SetFromString(nm)
+	err := c.SetFromString(str, base)
 	return c, err
 }
 
@@ -210,17 +292,78 @@ func (c *Color) ParseHex(x string) error {
 	return nil
 }
 
-// Lighter returns a color that is lighter (factor > 1) or darker (factor < 1) -- converts to HSL and back
-func (c *Color) Lighter(factor float32) Color {
+// Lighter returns a color that is lighter by the given percent, e.g., 50 = 50%
+// lighter, relative to maximum possible lightness -- converts to HSL,
+// multiplies the L factor, and then converts back to RGBA
+func (c *Color) Lighter(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	hsl.L *= factor
-	if hsl.L > 1.0 {
-		hsl.L = 1.0
-	}
-	if hsl.L < 0.0 {
-		hsl.L = 0.0
-	}
+	pct = InRange32(pct, 0, 100.0)
+	hsl.L += (1.0 - hsl.L) * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
+}
+
+// Darker returns a color that is darker by the given percent, e.g., 50 = 50%
+// darker, relative to maximum possible darkness -- converts to HSL,
+// multiplies the L factor, and then converts back to RGBA
+func (c *Color) Darker(pct float32) Color {
+	hsl := HSLAModel.Convert(*c).(HSLA)
+	pct = InRange32(pct, 0, 100.0)
+	hsl.L -= hsl.L * (pct / 100.0)
+	return ColorModel.Convert(hsl).(Color)
+}
+
+// Saturate returns a color that is more saturated by the given percent: 100 =
+// 100% more saturated, etc -- converts to HSL, multiplies the S factor, and
+// then converts back to RGBA
+func (c *Color) Saturate(pct float32) Color {
+	hsl := HSLAModel.Convert(*c).(HSLA)
+	pct = InRange32(pct, 0, 100.0)
+	hsl.S += (1.0 - hsl.S) * (pct / 100.0)
+	return ColorModel.Convert(hsl).(Color)
+}
+
+// Pastel returns a color that is less saturated (more pastel-like) by the
+// given percent: 100 = 100% less saturated (i.e., grey) -- converts to HSL,
+// multiplies the S factor, and then converts back to RGBA
+func (c *Color) Pastel(pct float32) Color {
+	hsl := HSLAModel.Convert(*c).(HSLA)
+	pct = InRange32(pct, 0, 100.0)
+	hsl.S -= hsl.S * (pct / 100.0)
+	return ColorModel.Convert(hsl).(Color)
+}
+
+// Clearer returns a color that is given percent more transparent (lower alpha
+// value) relative to current alpha level
+func (c *Color) Clearer(pct float32) Color {
+	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+	pct = InRange32(pct, 0, 100.0)
+	f32.A -= f32.A * (pct / 100.0)
+	return ColorModel.Convert(f32).(Color)
+}
+
+// Opaquer returns a color that is given percent more opaque (higher alpha
+// value) relative to current alpha level
+func (c *Color) Opaquer(pct float32) Color {
+	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+	pct = InRange32(pct, 0, 100.0)
+	f32.A += (1.0 - f32.A) * (pct / 100.0)
+	return ColorModel.Convert(f32).(Color)
+}
+
+// Blend returns a color that is the given percent blend between current color
+// and given clr -- 10 = 10% of the clr and 90% of the current color, etc --
+// blending is done directly on non-pre-multiplied RGB values
+func (c *Color) Blend(pct float32, clr color.Color) Color {
+	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+	othc := NRGBAf32Model.Convert(clr).(NRGBAf32)
+	pct = InRange32(pct, 0, 100.0)
+	oth := pct / 100.0
+	me := 1.0 - pct/100.0
+	f32.R = me*f32.A + oth*othc.R
+	f32.G = me*f32.G + oth*othc.G
+	f32.B = me*f32.B + oth*othc.B
+	f32.A = me*f32.A + oth*othc.A
+	return ColorModel.Convert(f32).(Color)
 }
 
 /////////////////////////////////////////////////////////////////////////////

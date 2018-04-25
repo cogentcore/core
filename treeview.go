@@ -69,6 +69,9 @@ const (
 
 //go:generate stringer -type=TreeViewStates
 
+// Style selector names for the different states:
+var TreeViewSelectors = []string{":active", ":selected", ":focus"}
+
 // internal indexes for accessing elements of the widget
 const (
 	tvBranchIdx = iota
@@ -89,7 +92,7 @@ type TreeView struct {
 	RootWidget  *TreeView              `json:"-" desc:"cached root widget"`
 }
 
-var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
+var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
 
 // todo: could create an interface for TreeView types -- right now just using
 // EmbeddedStruct to make everything general for anything that might embed TreeView
@@ -616,8 +619,9 @@ func (tv *TreeView) ConfigParts() {
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.Icon = IconByName("widget-wedge-down") // todo: style
 	wb.IconOff = IconByName("widget-wedge-right")
+	props := tv.StyleProps(TreeViewSelectors[TreeViewActive])
 	if mods {
-		tv.PartStyleProps(wb.This, TreeViewProps[0])
+		tv.PartStyleProps(wb.This, props)
 		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
 				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -629,7 +633,7 @@ func (tv *TreeView) ConfigParts() {
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	if mods {
-		tv.PartStyleProps(lbl.This, TreeViewProps[0])
+		tv.PartStyleProps(lbl.This, props)
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
 			me := d.(*mouse.Event)
@@ -643,7 +647,7 @@ func (tv *TreeView) ConfigParts() {
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
 	if mods {
 		mb.Text = "..."
-		tv.PartStyleProps(mb.This, TreeViewProps[0])
+		tv.PartStyleProps(mb.This, props)
 
 		// todo: shortcuts!
 		mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -723,8 +727,8 @@ func (tv *TreeView) Init2D() {
 	})
 }
 
-var TreeViewProps = []ki.Props{
-	{
+var TreeViewProps = ki.Props{
+	TreeViewSelectors[TreeViewActive]: ki.Props{
 		"border-width":     units.NewValue(0, units.Px),
 		"border-radius":    units.NewValue(0, units.Px),
 		"padding":          units.NewValue(1, units.Px),
@@ -734,20 +738,25 @@ var TreeViewProps = []ki.Props{
 		"color":            color.Black,
 		"background-color": "#FFF", // todo: get also from user, type on viewed node
 		"#branch": ki.Props{
-			"vertical-align": AlignMiddle,
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
+			"vertical-align":   AlignMiddle,
+			"margin":           units.NewValue(0, units.Px),
+			"padding":          units.NewValue(0, units.Px),
+			"background-color": "transparent",
 			"#icon0": ki.Props{
-				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
-				"height":  units.NewValue(.8, units.Em),
-				"margin":  units.NewValue(0, units.Px),
-				"padding": units.NewValue(0, units.Px),
+				"width":            units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
+				"height":           units.NewValue(.8, units.Em),
+				"margin":           units.NewValue(0, units.Px),
+				"padding":          units.NewValue(0, units.Px),
+				"background-color": "inherit",
+				"vertical-align":   AlignMiddle,
 			},
 			"#icon1": ki.Props{
-				"width":   units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
-				"height":  units.NewValue(.8, units.Em),
-				"margin":  units.NewValue(0, units.Px),
-				"padding": units.NewValue(0, units.Px),
+				"width":            units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
+				"height":           units.NewValue(.8, units.Em),
+				"margin":           units.NewValue(0, units.Px),
+				"padding":          units.NewValue(0, units.Px),
+				"background-color": "inherit",
+				"vertical-align":   AlignMiddle,
 			},
 		},
 		"#space": ki.Props{
@@ -770,10 +779,12 @@ var TreeViewProps = []ki.Props{
 			"box-shadow.blur":     units.NewValue(0, units.Px),
 			"indicator":           "none",
 		},
-	}, { // selected
-		"background-color": "#CFC", // todo: also
-	}, { // focused
-		"background-color": "#CCF", // todo: also
+	},
+	TreeViewSelectors[TreeViewSel]: ki.Props{
+		"background-color": "darker-25",
+	},
+	TreeViewSelectors[TreeViewFocus]: ki.Props{
+		"background-color": "lighter-20",
 	},
 }
 
@@ -781,14 +792,15 @@ func (tv *TreeView) Style2D() {
 	if tv.HasClosedParent() {
 		return
 	}
-	tv.ConfigParts()
 	bitflag.Set(&tv.Flag, int(CanFocus))
-	tv.Style2DWidget(TreeViewProps[0])
+	props := tv.StyleProps(TreeViewSelectors[TreeViewActive])
+	tv.Style2DWidget(props)
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i] = tv.Style
-		tv.StateStyles[i].SetStyle(nil, TreeViewProps[i])
+		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].SetUnitContext(tv.Viewport, Vec2DZero)
 	}
+	tv.ConfigParts()
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to

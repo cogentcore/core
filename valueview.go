@@ -90,7 +90,13 @@ func ToValueView(it interface{}) ValueView {
 			vv.Init(&vv)
 			return &vv
 		}
-		return nil
+		if it == nil {
+			return nil
+		}
+		v := reflect.ValueOf(it)
+		if !kit.ValueIsZero(v) {
+			return ToValueView(v.Elem().Interface())
+		}
 	case vk == reflect.Slice:
 		vv := SliceValueView{}
 		vv.Init(&vv)
@@ -864,6 +870,8 @@ func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
 	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	cb.SetProp("padding", units.NewValue(2, units.Px))
+	cb.SetProp("margin", units.NewValue(2, units.Px))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)

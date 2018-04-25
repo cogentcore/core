@@ -101,6 +101,7 @@ func (vp *Icon) Render2D() {
 			pc := &vp.Paint
 			rs := &vp.Render
 			if vp.Fill {
+				// fmt.Printf("icon %v fill bg %v\n", vp.PathUnique(), vp.Style.Background.Color)
 				vp.FillViewport()
 			}
 			vp.SetNormXForm()

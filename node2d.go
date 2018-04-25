@@ -273,7 +273,7 @@ func (g *Node2DBase) Init2DBase() {
 	g.LayData.Defaults() // doesn't overwrite
 }
 
-// style the Paint values directly from node properties and optional base-level defaults -- for SVG-style nodes
+// Style2DSVG styles the Paint values directly from node properties and optional base-level defaults -- for SVG-style nodes
 func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
@@ -290,7 +290,7 @@ func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 }
 
-// style the Style values from node properties and optional base-level defautls -- for Widget-style nodes
+// Style2DWidget styles the Style values from node properties and optional base-level defautls -- for Widget-style nodes
 func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
@@ -312,6 +312,19 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
+}
+
+// Restyle2D does a basic re-style using only current obj props and update of
+// inherited values -- called for Parts when parent styles change
+func (g *Node2DBase) Restyle2D() {
+	g.Style.IsSet = false // allow inherts
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		g.Style.SetStyle(&pg.Style, g.Properties())
+	} else {
+		g.Style.SetStyle(nil, g.Properties())
+	}
+	g.Style.IsSet = true
 }
 
 // get the style properties for a child in parts (or any other child) based on
@@ -520,12 +533,25 @@ func (g *Node2DBase) Style2DTree() {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, _ := KiToNode2D(k)
 		if gii == nil {
-			return false // going into a different type of thing, bail
+			return false
 		}
 		gii.Style2D()
 		return true
 	})
 	pr.End()
+}
+
+// Restyle2D calls Restyle2D on the tree down from me (inclusive) -- called
+// for Parts when parent styles change
+func (g *Node2DBase) Restyle2DTree() {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false
+		}
+		gi.Restyle2D()
+		return true
+	})
 }
 
 // do the sizing as a depth-first pass
@@ -635,7 +661,7 @@ func (g *Node2DBase) BBoxReport() string {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		gii, gi := KiToNode2D(k)
 		if gii == nil {
-			return false // going into a different type of thing, bail
+			return false
 		}
 		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", gi.Nm, gi.VpBBox, gi.WinBBox)
 		return true

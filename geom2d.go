@@ -83,7 +83,7 @@ func MinInt(a, b int) int {
 	return b
 }
 
-// minimum excluding 0
+// MinPos returns the minimum of the two values, excluding any that are 0
 func MinPos(a, b float64) float64 {
 	if a > 0.0 && b > 0.0 {
 		return math.Min(a, b)
@@ -95,7 +95,7 @@ func MinPos(a, b float64) float64 {
 	return a
 }
 
-// minimum excluding 0
+// MinPos32 returns the minimum of the two values, excluding any that are 0
 func MinPos32(a, b float32) float32 {
 	if a > 0.0 && b > 0.0 {
 		return Min32(a, b)
@@ -105,6 +105,36 @@ func MinPos32(a, b float32) float32 {
 		return b
 	}
 	return a
+}
+
+// InRange returns the value constrained to the min / max range
+func InRange(val, min, max float64) float64 {
+	if val < min {
+		return min
+	} else if val > max {
+		return max
+	}
+	return val
+}
+
+// InRange32 returns the value constrained to the min / max range
+func InRange32(val, min, max float32) float32 {
+	if val < min {
+		return min
+	} else if val > max {
+		return max
+	}
+	return val
+}
+
+// InRangeInt returns the value constrained to the min / max range
+func InRangeInt(val, min, max int) int {
+	if val < min {
+		return min
+	} else if val > max {
+		return max
+	}
+	return val
 }
 
 // Truncate a floating point number to given level of precision -- slow.. uses string conversion

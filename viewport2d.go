@@ -47,9 +47,9 @@ type Viewport2D struct {
 	Node2DBase
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
-	Render  RenderState `json:"-" xml:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" xml:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage oswin.Image `json:"-" xml:"-" desc:"the oswin.Image that owns our pixels"`
+	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	Pixels  *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
 	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
 }
 
@@ -139,7 +139,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		sp = nr.Min.Sub(r.Min)
 		r = nr
 	}
-	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Src)
+	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
 
 // draw main viewport into window -- needs to redraw popups over top of it, so does a full update

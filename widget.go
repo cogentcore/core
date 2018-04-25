@@ -15,7 +15,7 @@ import (
 // Widget base type -- manages control elements and provides standard box model rendering
 type WidgetBase struct {
 	Node2DBase
-	Parts Layout `view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget"`
+	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -156,8 +156,9 @@ func (g *WidgetBase) Size2DWidget() {
 	g.SizeFromParts() // get our size from parts
 }
 
-// todo: parts are allocated within the box space, but we don't strictly enforce the
-// ChildrenBBox2D on them?
+func (g *WidgetBase) Style2DWidget(baseProps ki.Props) {
+	g.Node2DBase.Style2DWidget(baseProps)
+}
 
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()

@@ -434,6 +434,7 @@ func (g *TextField) Size2D() {
 	if sz > 0 {
 		w = g.CharPos[sz-1]
 	}
+	w += 2.0 // give some extra buffer
 	g.Size2DFromWH(w, h)
 }
 
@@ -507,8 +508,7 @@ func (g *TextField) AutoScroll() {
 	if g.StartPos >= g.EndPos {
 		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
 	}
-	g.CursorPos = kit.MinInt(g.CursorPos, sz)
-	g.CursorPos = kit.MaxInt(g.CursorPos, 0)
+	g.CursorPos = InRangeInt(g.CursorPos, 0, sz)
 
 	inc := int(math32.Ceil(.1 * float32(g.CharWidth)))
 	inc = kit.MaxInt(4, inc)

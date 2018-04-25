@@ -82,6 +82,7 @@ func mainrun() {
 
 	button2 := brow.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
 	button2.SetText("Open GoGiEditor")
+	button2.SetProp("background-color", "#EDF")
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {
@@ -91,7 +92,6 @@ func mainrun() {
 
 	checkbox := brow.AddNewChild(gi.KiT_CheckBox, "checkbox").(*gi.CheckBox)
 	checkbox.Text = "Toggle"
-	checkbox.SetProp("align-vert", gi.AlignMiddle)
 
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
@@ -107,7 +107,8 @@ func mainrun() {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	brow.SetPropChildren("align-vert", "center") // align all..
+	// brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
+	brow.SetPropChildren("vertical-align", "middle") // align all..
 	brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	//////////////////////////////////////////
