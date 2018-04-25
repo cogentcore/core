@@ -89,18 +89,11 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 // of indirection, and then removing that indirection, resulting in something
 // that is now addressable / assignable -- this is necessary for enums..
 func MakePtrValue(v reflect.Value) reflect.Value {
-	np := reflect.New(reflect.PtrTo(v.Type()))
-	npp := reflect.New(reflect.PtrTo(np.Type()))
-	nppi := npp.Interface()
-	evi := v.Interface()
-	nppi = &evi
-	// npp := reflect.New()
-	// pi := np.Interface()
-	// npp.Elem().Set(v)
-	// pi = v.Interface()       // assign pointer using interface assignment instead of set..
-	// p := reflect.ValueOf(pi) // has a double pointer, remove that last one
-	// return p.Elem()
-	return reflect.ValueOf(nppi).Elem()
+	np := reflect.New(PtrType(v.Type()))
+	pi := np.Interface()
+	pi = v.Interface()       // assign pointer using interface assignment instead of set..
+	p := reflect.ValueOf(pi) // has a double pointer, remove that last one
+	return p.Elem()
 }
 
 // UnhideIfaceValue returns a reflect.Value for any of the Make* functions

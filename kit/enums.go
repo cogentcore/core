@@ -336,11 +336,18 @@ func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 // SetEnumValueFromString sets enum value from string using reflect.Value
 // IMPORTANT: requires the modified stringer go generate utility
 // that generates a StringToTypeName method
-func SetEnumValueFromString(eval reflect.Value, typ reflect.Type, str string) error {
+func SetEnumValueFromString(eval reflect.Value, str string) error {
+	etp := eval.Type()
+	if etp.Kind() != reflect.Ptr {
+		err := fmt.Errorf("kit.SetEnumValueFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		// log.Printf("%v", err)
+		return err
+	}
+	et := etp.Elem()
 	methnm := "FromString"
 	meth := eval.MethodByName(methnm)
 	if ValueIsZero(meth) || meth.IsNil() {
-		err := fmt.Errorf("kit.SetEnumValueFromString: stringer-generated FromString() method not found: %v for type: %v %T\n", methnm, eval.Type().Name(), eval.Interface())
+		err := fmt.Errorf("kit.SetEnumValueFromString: stringer-generated FromString() method not found: %v for type: %v %T\n", methnm, et.Name(), eval.Interface())
 		log.Printf("%v", err)
 		return err
 	}
@@ -355,15 +362,15 @@ func SetEnumValueFromString(eval reflect.Value, typ reflect.Type, str string) er
 // SetEnumValueFromString sets enum value from string, into a reflect.Value
 // IMPORTANT: requires the modified stringer go generate utility
 // that generates a StringToTypeName method
-func (tr *EnumRegistry) SetEnumValueFromString(eval reflect.Value, typ reflect.Type, str string) error {
-	return SetEnumValueFromString(eval, typ, str)
+func (tr *EnumRegistry) SetEnumValueFromString(eval reflect.Value, str string) error {
+	return SetEnumValueFromString(eval, str)
 }
 
 // SetEnumFromString sets enum value from string -- must pass a *pointer* to
 // the enum item. IMPORTANT: requires the modified stringer go generate utility
 // that generates a StringToTypeName method
 func SetEnumFromString(eptr interface{}, str string) error {
-	return SetEnumValueFromString(reflect.ValueOf(eptr), reflect.TypeOf(eptr).Elem(), str)
+	return SetEnumValueFromString(reflect.ValueOf(eptr), str)
 }
 
 // SetEnumFromString sets enum value from string -- must pass a *pointer* to
@@ -376,37 +383,44 @@ func (tr *EnumRegistry) SetEnumFromString(eptr interface{}, str string) error {
 // SetEnumFromAltString sets from alternative string list using an interface{}
 // to the enum -- must pass a *pointer* to the enum item.
 func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error {
-	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), reflect.TypeOf(eptr).Elem(), str)
+	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), str)
 }
 
 // SetEnumValueFromAltString sets value from alternative string using a
 // reflect.Value -- must pass a *pointer* value to the enum item.
-func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, typ reflect.Type, str string) error {
-	tn := FullTypeName(typ)
+func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string) error {
+	etp := eval.Type()
+	if etp.Kind() != reflect.Ptr {
+		err := fmt.Errorf("kit.SetEnumValueFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		log.Printf("%v", err)
+		return err
+	}
+	et := etp.Elem()
+	tn := FullTypeName(et)
 	alts := tr.AltStrings(tn)
 	if alts == nil {
 		err := fmt.Errorf("kit.SetEnumValueFromAltString: no alternative string map for type %v\n", tn)
-		log.Printf("%v", err)
+		// log.Printf("%v", err)
 		return err
 	}
 	for i, v := range alts {
 		if v == str {
-			eval.Set(reflect.ValueOf(i).Convert(typ))
+			eval.Set(reflect.ValueOf(i).Convert(et))
 			return nil
 		}
 	}
 	err := fmt.Errorf("kit.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
-	log.Printf("%v", err)
+	// log.Printf("%v", err)
 	return err
 }
 
 // SetEnumValueFromStringAltFirst first attempts to set an enum from an
 // alternative string, and if that fails, then it tries to set from the
 // regular string representation func (tr *EnumRegistry)
-func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, typ reflect.Type, str string) error {
-	err := tr.SetEnumValueFromAltString(eval, typ, str)
+func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str string) error {
+	err := tr.SetEnumValueFromAltString(eval, str)
 	if err != nil {
-		return tr.SetEnumValueFromString(eval, typ, str)
+		return tr.SetEnumValueFromString(eval, str)
 	}
 	return err
 }

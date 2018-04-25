@@ -39,12 +39,8 @@ func IsNil(it interface{}) bool {
 	return false
 }
 
-// ValueIsBasic returns true if the reflect.Value is a basic value such as Int, Float, etc
-func ValueIsBasic(v reflect.Value) bool {
-	if !v.IsValid() {
-		return false
-	}
-	vk := v.Kind()
+// KindIsBasic returns true if the reflect.Kind is a basic type such as Int, Float, etc
+func KindIsBasic(vk reflect.Kind) bool {
 	if vk >= reflect.Bool && vk <= reflect.Complex128 {
 		return true
 	}
