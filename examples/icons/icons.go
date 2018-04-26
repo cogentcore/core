@@ -5,6 +5,8 @@
 package main
 
 import (
+	"image/color"
+
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/driver"
@@ -78,8 +80,8 @@ func mainrun() {
 		smico.CopyFrom(ic)
 		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
 		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
-		smico.SetProp("background-color", "transparent")
-		smico.SetProp("fill", "blue")
+		smico.SetProp("background-color", color.Transparent)
+		smico.SetProp("fill", "#88F")
 		smico.SetProp("stroke", "black")
 		smico.SetProp("align-horiz", gi.AlignCenter)
 
@@ -87,8 +89,8 @@ func mainrun() {
 		ico.CopyFrom(ic)
 		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
 		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
-		ico.SetProp("background-color", "transparent")
-		ico.SetProp("fill", "blue")
+		ico.SetProp("background-color", color.Transparent)
+		ico.SetProp("fill", "#88F")
 		ico.SetProp("stroke", "black")
 		ico.SetProp("align-horiz", gi.AlignCenter)
 		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)

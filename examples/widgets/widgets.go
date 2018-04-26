@@ -41,7 +41,6 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
@@ -82,7 +81,7 @@ func mainrun() {
 
 	button2 := brow.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
 	button2.SetText("Open GoGiEditor")
-	button2.SetProp("background-color", "#EDF")
+	// button2.SetProp("background-color", "#EDF")
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {

@@ -131,6 +131,13 @@ func (c *Color) SetHSLA(h, s, l, a float32) {
 	c.SetNPFloat32(r, g, b, a)
 }
 
+// Convert from HSL: [0..360], Saturation [0..1], and Luminance
+// (lightness) [0..1] of the color using float32 values
+func (c *Color) SetHSL(h, s, l float32) {
+	r, g, b := HSLtoRGBf32(h, s, l)
+	c.SetNPFloat32(r, g, b, float32(c.A)/255.0)
+}
+
 // Convert to HSLA: [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 func (c *Color) ToHSLA() (h, s, l, a float32) {
@@ -139,13 +146,13 @@ func (c *Color) ToHSLA() (h, s, l, a float32) {
 	return
 }
 
-func cvtPctFromStringErr(gotpct bool, pctstr string) {
+func cvtPctStringErr(gotpct bool, pctstr string) {
 	if !gotpct {
-		log.Printf("gi.Color.SetFromString -- percent was not converted from: %v\n", pctstr)
+		log.Printf("gi.Color.SetString -- percent was not converted from: %v\n", pctstr)
 	}
 }
 
-// SetFromString sets color value from string, including # hex specs, standard
+// SetString sets color value from string, including # hex specs, standard
 // color names, "none" or "off", or the following transformations (which
 // use a non-nil base color as the starting point, if it is provided):
 //
@@ -154,56 +161,77 @@ func cvtPctFromStringErr(gotpct bool, pctstr string) {
 // * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
 // * blend-PCT-color: blends given percent of given color name relative to base (or current)
 //
-func (c *Color) SetFromString(str string, base color.Color) error {
+func (c *Color) SetString(str string, base color.Color) error {
 	if len(str) == 0 { // consider it null
 		c.SetToNil()
 	}
-	if str[0] == '#' {
+	low := strings.ToLower(str)
+	if low[0] == '#' {
 		return c.ParseHex(str)
+	} else if strings.HasPrefix(low, "hsl(") {
+		val := strings.TrimLeft(low, "hsl(")
+		val = strings.TrimRight(val, ")")
+		format := "%d,%d,%d"
+		var h, s, l int
+		fmt.Sscanf(val, format, &h, &s, &l)
+		c.SetHSL(float32(h), float32(s)/100.0, float32(l)/100.0)
+	} else if strings.HasPrefix(low, "rgb(") {
+		val := strings.TrimLeft(low, "rgb(")
+		val = strings.TrimRight(val, ")")
+		val = strings.Trim(val, "%")
+		var r, g, b, a int
+		a = 255
+		format := "%d,%d,%d"
+		if strings.Count(val, ",") == 4 {
+			format = "%d,%d,%d,%d"
+			fmt.Sscanf(val, format, &r, &g, &b, &a)
+		} else {
+			fmt.Sscanf(val, format, &r, &g, &b)
+		}
+		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
 	} else {
-		low := strings.ToLower(str)
 		if hidx := strings.Index(low, "-"); hidx > 0 {
 			cmd := low[:hidx]
 			pctstr := low[hidx+1:]
 			pct, gotpct := kit.ToFloat32(pctstr)
 			switch cmd {
 			case "lighter":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
 				c.SetColor(c.Lighter(pct))
 				return nil
 			case "darker":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
 				c.SetColor(c.Darker(pct))
 				return nil
 			case "saturate":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
 				c.SetColor(c.Saturate(pct))
 				return nil
 			case "pastel":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
 				c.SetColor(c.Pastel(pct))
 				return nil
 			case "clearer":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
 				c.SetColor(c.Clearer(pct))
 				return nil
 			case "opaquer":
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				if base != nil {
 					c.SetColor(base)
 				}
@@ -215,12 +243,12 @@ func (c *Color) SetFromString(str string, base color.Color) error {
 				}
 				clridx := strings.Index(pctstr, "-")
 				if clridx < 0 {
-					err := fmt.Errorf("gi.Color.SetFromString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v\n", low, pctstr)
+					err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v\n", low, pctstr)
 					return err
 				}
 				pctstr = low[hidx+1 : clridx]
 				pct, gotpct = kit.ToFloat32(pctstr)
-				cvtPctFromStringErr(gotpct, pctstr)
+				cvtPctStringErr(gotpct, pctstr)
 				clrstr := low[clridx+1:]
 				othc, err := ColorFromString(clrstr, base)
 				c.SetColor(c.Blend(pct, &othc))
@@ -237,7 +265,7 @@ func (c *Color) SetFromString(str string, base color.Color) error {
 		default:
 			nc, ok := colornames.Map[low]
 			if !ok {
-				err := fmt.Errorf("gi Color FromString: name not found %v", str)
+				err := fmt.Errorf("gi Color String: name not found %v", str)
 				log.Printf("%v\n", err)
 				return err
 			} else {
@@ -249,14 +277,14 @@ func (c *Color) SetFromString(str string, base color.Color) error {
 }
 
 // ColorFromString returns a new color set from given string and optional base
-// color for transforms -- see SetFromString
+// color for transforms -- see SetString
 func ColorFromString(str string, base color.Color) (Color, error) {
 	var c Color
-	err := c.SetFromString(str, base)
+	err := c.SetString(str, base)
 	return c, err
 }
 
-// parse Hex color
+// parse Hex color -- this is from fogelman/gg I think..
 func (c *Color) ParseHex(x string) error {
 	x = strings.TrimPrefix(x, "#")
 	var r, g, b, a int

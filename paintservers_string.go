@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _PaintServers_name = "PaintSolidcolorPaintLinearGradientPaintRadialGradientPaintMeshGradientPaintPatternPaintHatchPaintHatchpathPaintImage"
+const _PaintServers_name = "PaintSolidcolorPaintLinearGradientPaintRadialGradientPaintMeshGradientPaintPatternPaintHatchPaintHatchpathPaintImagePaintServersN"
 
-var _PaintServers_index = [...]uint8{0, 15, 34, 53, 70, 82, 92, 106, 116}
+var _PaintServers_index = [...]uint8{0, 15, 34, 53, 70, 82, 92, 106, 116, 129}
 
 func (i PaintServers) String() string {
 	if i < 0 || i >= PaintServers(len(_PaintServers_index)-1) {

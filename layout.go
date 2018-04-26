@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 
 	"github.com/chewxy/math32"
 	"github.com/rcoreilly/goki/gi/units"
@@ -1099,6 +1098,10 @@ func (ly *Layout) Style2D() {
 	ly.Style2DWidget(nil)
 }
 
+func (g *Layout) ReStyle2D() {
+	g.ReStyle2DWidget()
+}
+
 func (ly *Layout) Size2D() {
 	ly.InitLayout2D()
 	if ly.Lay == LayoutGrid {
@@ -1189,16 +1192,20 @@ var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 var FrameProps = ki.Props{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
-	"border-color":     color.Black,
+	"border-color":     &Prefs.BorderColor,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"color":            color.Black,
-	"background-color": color.White,
+	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.BackgroundColor,
 }
 
 func (g *Frame) Style2D() {
 	g.Style2DWidget(FrameProps)
+}
+
+func (g *Frame) ReStyle2D() {
+	g.ReStyle2DWidget()
 }
 
 func (g *Frame) Render2D() {

@@ -17,6 +17,7 @@ var theApp = &appImpl{
 	windows: make(map[uintptr]*windowImpl),
 	winlist: make([]*windowImpl, 0),
 	screens: make([]*oswin.Screen, 0),
+	name:    "GoGi",
 }
 
 type appImpl struct {
@@ -41,6 +42,7 @@ type appImpl struct {
 	windows map[uintptr]*windowImpl
 	winlist []*windowImpl
 	screens []*oswin.Screen
+	name    string
 }
 
 func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
@@ -189,4 +191,12 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 		}
 	}
 	return nil
+}
+
+func (app *appImpl) Name() string {
+	return app.name
+}
+
+func (app *appImpl) SetName(name string) {
+	app.name = name
 }

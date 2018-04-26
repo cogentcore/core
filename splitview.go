@@ -135,7 +135,7 @@ func (g *SplitView) ConfigSplitters() {
 	spc := g.Style.BoxSpace()
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	osz := float32(50.0)
-	mid := 0.5 * size
+	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
 	spicon := IconByName("widget-handle-circles")
 	for i, spk := range g.Parts.Children() {
 		sp := spk.(*Splitter)

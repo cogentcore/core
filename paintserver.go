@@ -9,6 +9,7 @@ import (
 	"image/color"
 
 	"github.com/golang/freetype/raster"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 /*
@@ -36,7 +37,7 @@ SOFTWARE.
 */
 
 // PaintServers provide patterned colors for stroke and fill operations
-type PaintServers int
+type PaintServers int32
 
 const (
 	PaintSolidcolor PaintServers = iota
@@ -47,9 +48,12 @@ const (
 	PaintHatch
 	PaintHatchpath
 	PaintImage // apparently not SVG-standard but we have it.
+	PaintServersN
 )
 
 //go:generate stringer -type=PaintServers
+
+var KiT_PaintServers = kit.Enums.AddEnumAltLower(PaintServersN, false, StylePropProps, "Paint")
 
 // todo: implement all the other types of paint servers
 

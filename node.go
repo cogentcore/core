@@ -14,6 +14,56 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
+// NodeBase is the base struct type for GoGi graphical interface system, containing infrastructure for both 2D and 3D scene graph nodes
+type NodeBase struct {
+	ki.Node
+	Class   string          `desc:"user-defined class name used primarily for attaching CSS styles to different display elements"`
+	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
+	VpBBox  image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	WinBBox image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+}
+
+var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
+
+var NodeBaseProps = ki.Props{
+	"base-type": true, // excludes type from user selections
+}
+
+func (g *NodeBase) ParentWindow() *Window {
+	wini := g.ParentByType(KiT_Window, true)
+	if wini == nil {
+		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
+		return nil
+	}
+	return wini.EmbeddedStruct(KiT_Window).(*Window)
+}
+
+// register this node to receive a given type of GUI event signal from the parent window
+func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
+	win := g.ParentWindow()
+	if win != nil {
+		win.ReceiveEventType(g.This, et, fun)
+	}
+}
+
+// disconnect node from all events
+func (g *NodeBase) DisconnectAllEvents(win *Window) {
+	win.DisconnectNode(g.This)
+}
+
+// disconnect node from all events - todo: need a more generic Ki version of this
+func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false // going into a different type of thing, bail
+		}
+		gi.DisconnectAllEvents(win)
+		gi.NodeSig.DisconnectAll()
+		return true
+	})
+}
+
 // gi node flags are bitflags for tracking common high-frequency GUI state,
 // mostly having to do with event processing -- use properties map for less
 // frequently used information -- uses ki Flags field
@@ -64,55 +114,6 @@ const (
 //go:generate stringer -type=NodeFlags
 
 var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
-
-// base struct node for GoGi
-type NodeBase struct {
-	ki.Node
-	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
-	VpBBox  image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
-	WinBBox image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
-}
-
-var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
-
-var NodeBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
-}
-
-func (g *NodeBase) ParentWindow() *Window {
-	wini := g.ParentByType(KiT_Window, true)
-	if wini == nil {
-		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
-		return nil
-	}
-	return wini.EmbeddedStruct(KiT_Window).(*Window)
-}
-
-// register this node to receive a given type of GUI event signal from the parent window
-func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
-	win := g.ParentWindow()
-	if win != nil {
-		win.ReceiveEventType(g.This, et, fun)
-	}
-}
-
-// disconnect node from all events
-func (g *NodeBase) DisconnectAllEvents(win *Window) {
-	win.DisconnectNode(g.This)
-}
-
-// disconnect node from all events - todo: need a more generic Ki version of this
-func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
-			return false // going into a different type of thing, bail
-		}
-		gi.DisconnectAllEvents(win)
-		gi.NodeSig.DisconnectAll()
-		return true
-	})
-}
 
 // can this node focus?
 func (g *NodeBase) CanFocus() bool {

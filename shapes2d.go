@@ -921,6 +921,8 @@ func (g *Path) Render2D() {
 		rs := &g.Viewport.Render
 		rs.PushXForm(pc.XForm)
 		PathDataRender(g.Data, pc, rs)
+		// fmt.Printf("PathRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
+		// 	g.PathUnique(), g.Style.Background.Color, g.Paint.FillStyle.Color, g.Style.Color, g.Paint.StrokeStyle.Color)
 		pc.FillStrokeClear(rs)
 		g.Render2DChildren()
 		g.PopBounds()

@@ -20,20 +20,6 @@ import (
 	"github.com/rcoreilly/prof"
 )
 
-// these extend NodeBase NodeFlags to hold viewport state
-const (
-	// viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)
-	VpFlagPopup NodeFlags = NodeFlagsN + iota
-	// viewport is serving as a popup menu -- affects how window processes clicks
-	VpFlagMenu
-	// if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)
-	VpFlagPopupDestroyAll
-	// this viewport is an SVG viewport -- determines the styling that it uses
-	VpFlagSVG
-	// draw into window directly instead of drawing into parent -- i.e., as a sprite
-	VpFlagDrawIntoWin
-)
-
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
 // rendering area even if it is itself a child of another Viewport.  This is
 // necessary for rendering onto the image that it provides.  This creates
@@ -53,7 +39,11 @@ type Viewport2D struct {
 	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
 }
 
-var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, nil)
+var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
+
+var Viewport2DProps = ki.Props{
+	"background-color": &Prefs.BackgroundColor,
+}
 
 // NewViewport2D creates a new OSImage with the specified width and height,
 // and intializes the renderer etc
@@ -104,6 +94,20 @@ func (vp *Viewport2D) Resize(width, height int) {
 	}
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
+
+// these flags extend NodeBase NodeFlags to hold viewport state
+const (
+	// viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)
+	VpFlagPopup NodeFlags = NodeFlagsN + iota
+	// viewport is serving as a popup menu -- affects how window processes clicks
+	VpFlagMenu
+	// if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)
+	VpFlagPopupDestroyAll
+	// this viewport is an SVG viewport -- determines the styling that it uses
+	VpFlagSVG
+	// draw into window directly instead of drawing into parent -- i.e., as a sprite
+	VpFlagDrawIntoWin
+)
 
 func (vp *Viewport2D) IsPopup() bool {
 	return bitflag.Has(vp.Flag, int(VpFlagPopup))
@@ -203,9 +207,9 @@ func (vp *Viewport2D) Init2D() {
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()
-		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
-		}
+		// if Update2DTrace {
+		fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+		// }
 		// todo: don't re-render if deleting!
 		rvp.FullRender2DTree()
 	})

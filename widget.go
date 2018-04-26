@@ -160,6 +160,10 @@ func (g *WidgetBase) Style2DWidget(baseProps ki.Props) {
 	g.Node2DBase.Style2DWidget(baseProps)
 }
 
+func (g *WidgetBase) ReStyle2D() {
+	g.ReStyle2DWidget()
+}
+
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
@@ -242,7 +246,6 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm {
 			return true
 		}
-		// todo: here add a thing that copies any style elements marked as "inherit" from parent to part
 	} else {
 		ic := g.Parts.ChildByName("icon", 0)
 		if ic != nil {
@@ -254,6 +257,7 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
 		if lbl == nil {
 			return true
 		}
+		lbl.(*Label).Style.Color = g.Style.Color
 		if lbl.(*Label).Text != txt {
 			return true
 		}

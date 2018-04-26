@@ -35,33 +35,6 @@ const (
 
 //go:generate stringer -type=SliderSignals
 
-// mutually-exclusive slider states -- determines appearance
-type SliderStates int32
-
-const (
-	// normal state -- there but not being interacted with
-	SliderActive SliderStates = iota
-	// disabled -- not pressable
-	SliderDisabled
-	// mouse is hovering over the slider
-	SliderHover
-	// slider is the focus -- will respond to keyboard input
-	SliderFocus
-	// slider is currently being pressed down
-	SliderDown
-	// use background-color here to fill in selected value of slider
-	SliderValue
-	// these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
-	SliderBox
-	// total number of slider states
-	SliderStatesN
-)
-
-//go:generate stringer -type=SliderStates
-
-// Style selector names for the different states
-var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":value", ":box"}
-
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size
@@ -99,6 +72,33 @@ var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
+
+// mutually-exclusive slider states -- determines appearance
+type SliderStates int32
+
+const (
+	// normal state -- there but not being interacted with
+	SliderActive SliderStates = iota
+	// disabled -- not pressable
+	SliderDisabled
+	// mouse is hovering over the slider
+	SliderHover
+	// slider is the focus -- will respond to keyboard input
+	SliderFocus
+	// slider is currently being pressed down
+	SliderDown
+	// use background-color here to fill in selected value of slider
+	SliderValue
+	// these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
+	SliderBox
+	// total number of slider states
+	SliderStatesN
+)
+
+//go:generate stringer -type=SliderStates
+
+// Style selector names for the different states
+var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":value", ":box"}
 
 // if snap is set, then snap the value to step sizes
 func (g *SliderBase) SnapValue() {
@@ -383,42 +383,43 @@ var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 
 var SliderProps = ki.Props{
 	SliderSelectors[SliderActive]: ki.Props{
-		"border-width":     "1px",
-		"border-radius":    "4px",
-		"border-color":     "black",
-		"border-style":     "solid",
-		"padding":          "6px",
-		"margin":           "4px",
-		"background-color": "#EEF",
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     &Prefs.BorderColor,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(6, units.Px),
+		"margin":           units.NewValue(4, units.Px),
+		"background-color": &Prefs.ControlColor,
 		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.IconColor,
+			"stroke":  &Prefs.FontColor,
 		},
 	},
 	SliderSelectors[SliderDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "#CCF", // todo "darker"
+		"background-color": "darker-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-color":     "#008",
-		"background.color": "#CCF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-20",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
-		"border-color":     "#000",
-		"background-color": "#DDF",
+		"background-color": "lighter-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     "#00F",
-		"background-color": "#00F",
+		"border-color":     &Prefs.IconColor,
+		"background-color": &Prefs.IconColor,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     "#FFF",
-		"background-color": "#FFF",
+		"border-color":     &Prefs.BackgroundColor,
+		"background-color": &Prefs.BackgroundColor,
 	},
 }
 
@@ -562,36 +563,35 @@ var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
 var ScrollBarProps = ki.Props{
 	SliderSelectors[SliderActive]: ki.Props{
-		"border-width":     "1px",
-		"border-radius":    "4px",
-		"border-color":     "black",
-		"border-style":     "solid",
-		"padding":          "0px",
-		"margin":           "2px",
-		"background-color": "#EEF",
+		"border-width":     units.NewValue(1, units.Px),
+		"border-radius":    units.NewValue(4, units.Px),
+		"border-color":     &Prefs.BorderColor,
+		"border-style":     BorderSolid,
+		"padding":          units.NewValue(0, units.Px),
+		"margin":           units.NewValue(2, units.Px),
+		"background-color": &Prefs.ControlColor,
 	},
 	SliderSelectors[SliderDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "#CCF", // todo "darker"
+		"background-color": "darker-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-color":     "#008",
-		"background.color": "#CCF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-20",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
-		"border-color":     "#000",
-		"background-color": "#DDF",
+		"background-color": "lighter-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     "#00F",
-		"background-color": "#00F",
+		"border-color":     &Prefs.IconColor,
+		"background-color": &Prefs.IconColor,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     "#FFF",
-		"background-color": "#FFF",
+		"border-color":     &Prefs.BackgroundColor,
+		"background-color": &Prefs.BackgroundColor,
 	},
 }
 

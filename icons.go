@@ -81,6 +81,11 @@ func (vp *Icon) Style2D() {
 	vp.Style2DSVG(IconProps[1])
 }
 
+func (vp *Icon) ReStyle2D() {
+	vp.ReStyle2DWidget()
+	vp.ReStyle2DSVG()
+}
+
 func (vp *Icon) Size2D() {
 	vp.SVG.Size2D()
 }
@@ -106,6 +111,8 @@ func (vp *Icon) Render2D() {
 			}
 			vp.SetNormXForm()
 			rs.PushXForm(pc.XForm)
+			// fmt.Printf("IconRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
+			// 	vp.PathUnique(), vp.Style.Background.Color, vp.Paint.FillStyle.Color, vp.Style.Color, vp.Paint.StrokeStyle.Color)
 			vp.Render2DChildren() // we must do children first, then us!
 			vp.PopBounds()
 			rs.PopXForm()

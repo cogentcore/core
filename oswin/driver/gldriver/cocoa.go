@@ -35,6 +35,9 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"os"
+	"os/user"
+	"path/filepath"
 	"runtime"
 	"unsafe"
 
@@ -744,4 +747,29 @@ func cocoaKeyCode(vkcode uint16) key.Code {
 
 func surfaceCreate() error {
 	return errors.New("gldriver: surface creation not implemented on darwin")
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, "Library")
+}
+
+func (app *appImpl) GoGiPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), "GoGi")
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) AppPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), app.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/Library/Fonts"}
 }

@@ -70,9 +70,10 @@ type Label struct {
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
 var LabelProps = ki.Props{
-	"padding":        units.NewValue(2, units.Px),
-	"margin":         units.NewValue(2, units.Px),
-	"vertical-align": AlignTop,
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"vertical-align":   AlignTop,
+	"background-color": color.Transparent,
 }
 
 func (g *Label) Style2D() {
@@ -150,20 +151,20 @@ var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 var TextFieldProps = ki.Props{
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
-		"border-color":     color.Black,
-		"border-style":     "solid",
+		"border-color":     &Prefs.BorderColor,
+		"border-style":     BorderSolid,
 		"padding":          units.NewValue(4, units.Px),
 		"margin":           units.NewValue(1, units.Px),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
-		"color":            "black",
-		"background-color": "#EEE",
+		"background-color": &Prefs.ControlColor,
 	},
 	TextFieldSelectors[TextFieldFocus]: ki.Props{
-		"background-color": color.White,
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-80",
 	},
 	TextFieldSelectors[TextFieldReadOnly]: ki.Props{
-		"background-color": "#CCC",
+		"background-color": "darker-20",
 	},
 }
 
@@ -636,12 +637,16 @@ var SpinBoxProps = ki.Props{
 			"max-height": units.NewValue(1.5, units.Ex),
 			"margin":     units.NewValue(1, units.Px),
 			"padding":    units.NewValue(0, units.Px),
+			"fill":       &Prefs.IconColor,
+			"stroke":     &Prefs.FontColor,
 		},
 		"#down": ki.Props{
 			"max-width":  units.NewValue(1.5, units.Ex),
 			"max-height": units.NewValue(1.5, units.Ex),
 			"margin":     units.NewValue(1, units.Px),
 			"padding":    units.NewValue(0, units.Px),
+			"fill":       &Prefs.IconColor,
+			"stroke":     &Prefs.FontColor,
 		},
 		"#space": ki.Props{
 			"width": units.NewValue(.1, units.Ex),
@@ -851,24 +856,24 @@ var ComboBoxProps = ki.Props{
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     color.Black,
+		"border-color":     &Prefs.BorderColor,
 		"border-style":     BorderSolid,
 		"padding":          units.NewValue(4, units.Px),
 		"margin":           units.NewValue(4, units.Px),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignMiddle,
-		"color":            color.Black,
-		"background-color": "#EEF",
+		"background-color": &Prefs.ControlColor,
 		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.IconColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
 		},
 		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
@@ -876,29 +881,28 @@ var ComboBoxProps = ki.Props{
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
 			"vertical-align": AlignBottom,
+			"fill":           &Prefs.IconColor,
+			"stroke":         &Prefs.FontColor,
 		},
 	},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "#CCF", // todo "darker"
+		"background-color": "darker-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-color":     "#EEF",
-		"box-shadow.color": "#BBF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-20",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
+		"color":            "lighter-90",
+		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
+		"background-color": "darker-25",
+		"color":            "lighter-90",
 	},
 }
 
@@ -1158,10 +1162,10 @@ func (g *ComboBox) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
-// todo: need color brigher / darker functions
-
 func (g *ComboBox) Render2D() {
 	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
+		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {

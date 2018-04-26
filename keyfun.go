@@ -4,6 +4,8 @@
 
 package gi
 
+import "github.com/rcoreilly/goki/ki/kit"
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  KeyFun is for mapping Keys to Functions
 
@@ -51,6 +53,8 @@ const (
 )
 
 //go:generate stringer -type=KeyFunctions
+
+var KiT_KeyFunctions = kit.Enums.AddEnumAltLower(KeyFunctionsN, false, StylePropProps, "KeyFun")
 
 // todo: need to have multiple functions possible per key, depending on context?
 

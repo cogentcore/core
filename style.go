@@ -379,11 +379,24 @@ func InheritStyledFields(inhflds []*StyledField, obj, par interface{}) {
 
 // StyleFieldsFromProps styles the fields from given properties for given object
 func StyledFieldsFromProps(fields map[string]*StyledField, obj, par interface{}, props ki.Props) {
-	hasPar := (par == nil)
+	hasPar := (par != nil)
 	// fewer props than fields, esp with alts!
 	for key, prv := range props {
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' {
 			continue
+		}
+		if pstr, ok := prv.(string); ok {
+			if len(pstr) > 0 && pstr[0] == '$' {
+				nkey := pstr[1:]
+				if vfld, nok := fields[nkey]; nok {
+					nprv := vfld.FieldValue(obj).Elem().Interface()
+					if fld, fok := fields[key]; fok {
+						fld.FromProps(fields, obj, par, nprv, hasPar)
+						continue
+					}
+				}
+				fmt.Printf("StyledFieldsFromProps: redirect field not found: %v for key: %v\n", nkey, key)
+			}
 		}
 		fld, ok := fields[key]
 		if !ok {
@@ -392,7 +405,7 @@ func StyledFieldsFromProps(fields map[string]*StyledField, obj, par interface{},
 			// log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
 			continue
 		}
-		fld.FromProps(obj, par, prv, hasPar)
+		fld.FromProps(fields, obj, par, prv, hasPar)
 	}
 }
 
@@ -421,7 +434,7 @@ func (sf *StyledField) FieldValue(obj interface{}) reflect.Value {
 }
 
 // FromProps styles given field from property value prv
-func (fld *StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
+func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, prv interface{}, hasPar bool) {
 	vf := fld.FieldValue(obj)
 	var pf reflect.Value
 	if hasPar {
@@ -452,20 +465,37 @@ func (fld *StyledField) FromProps(obj, par, prv interface{}, hasPar bool) {
 	vk := npvf.Kind()
 	vt := npvf.Type()
 
-	if vk == reflect.Struct { // only a few types
+	if vk == reflect.Struct { // only a few types -- todo: could make an interface if needed
 		if vt == reflect.TypeOf(Color{}) {
 			vc := vf.Interface().(*Color)
 			switch prtv := prv.(type) {
 			case string:
-				if hasPar {
-					if pclr, pok := pf.Interface().(*Color); pok {
-						vc.SetFromString(prtv, pclr)
-						fmt.Printf("StyleField %v set to color string: %v, with parent value: %v\n", fld.Field.Name, prtv, pclr)
-						return
+				if idx := strings.Index(prtv, "$"); idx > 0 {
+					oclr := prtv[idx+1:]
+					prtv = prtv[:idx]
+					if vfld, nok := fields[oclr]; nok {
+						nclr, nok := vfld.FieldValue(obj).Interface().(*Color)
+						if nok {
+							vc.SetColor(nclr) // init from color
+							fmt.Printf("StyleField %v initialized to other color: %v val: %v\n", fld.Field.Name, oclr, vc)
+						}
 					}
-
 				}
-				err := vc.SetFromString(prtv, nil)
+				// todo: this is crashing due to some kind of bad color -- presumably a pointer?
+				// if hasPar {
+				// 	fmt.Printf("field %v pf kind: %v str %v\n",
+				// 		fld.Field.Name, pf.Kind(), pf.String())
+				// 	// fmt.Printf("field %v pf kind: %v if: %v typ %T ptr %p\n",
+				// 	// 	fld.Field.Name, pf.Kind(), pf.Interface(), pf.Interface(), pf.Interface())
+				// 	// fmt.Printf("elem kind %v elem if %v elem typ %T ptr %p\n",
+				// 	// 	pf.Elem().Kind(), pf.Elem().Interface(), pf.Elem().Interface(), pf.Elem().Interface())
+				// 	if pclr, pok := pf.Interface().(*Color); pok {
+				// 		vc.SetString(prtv, pclr)
+				// 		fmt.Printf("StyleField %v set to color string: %v, with parent value: %v\n", fld.Field.Name, prtv, pclr)
+				// 		return
+				// 	}
+				// }
+				err := vc.SetString(prtv, nil)
 				if err != nil {
 					log.Printf("StyleField: %v\n", err)
 				}

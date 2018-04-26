@@ -680,6 +680,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	}
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
+	lbl.Style.Color = tv.Style.Color
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.SetChecked(!tv.IsClosed())
 }
@@ -735,38 +736,36 @@ var TreeViewProps = ki.Props{
 		"margin":           units.NewValue(1, units.Px),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
-		"color":            color.Black,
-		"background-color": "#FFF", // todo: get also from user, type on viewed node
+		"background-color": &Prefs.BackgroundColor,
 		"#branch": ki.Props{
 			"vertical-align":   AlignMiddle,
 			"margin":           units.NewValue(0, units.Px),
 			"padding":          units.NewValue(0, units.Px),
-			"background-color": "transparent",
+			"background-color": color.Transparent,
 			"#icon0": ki.Props{
-				"width":            units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
-				"height":           units.NewValue(.8, units.Em),
-				"margin":           units.NewValue(0, units.Px),
-				"padding":          units.NewValue(0, units.Px),
-				"background-color": "inherit",
-				"vertical-align":   AlignMiddle,
+				"width":   units.NewValue(.8, units.Em),
+				"height":  units.NewValue(.8, units.Em),
+				"margin":  units.NewValue(0, units.Px),
+				"padding": units.NewValue(0, units.Px),
+				"fill":    &Prefs.IconColor,
+				"stroke":  &Prefs.FontColor,
 			},
 			"#icon1": ki.Props{
-				"width":            units.NewValue(.8, units.Em), // todo: this has to be .8 else text label doesn't render sometimes
-				"height":           units.NewValue(.8, units.Em),
-				"margin":           units.NewValue(0, units.Px),
-				"padding":          units.NewValue(0, units.Px),
-				"background-color": "inherit",
-				"vertical-align":   AlignMiddle,
+				"width":   units.NewValue(.8, units.Em),
+				"height":  units.NewValue(.8, units.Em),
+				"margin":  units.NewValue(0, units.Px),
+				"padding": units.NewValue(0, units.Px),
+				"fill":    &Prefs.IconColor,
+				"stroke":  &Prefs.FontColor,
 			},
 		},
 		"#space": ki.Props{
 			"width": units.NewValue(.5, units.Em),
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"min-width":        units.NewValue(16, units.Ex),
-			"background-color": "none",
+			"margin":    units.NewValue(0, units.Px),
+			"padding":   units.NewValue(0, units.Px),
+			"min-width": units.NewValue(16, units.Ex),
 		},
 		"#menu": ki.Props{
 			"border-width":        units.NewValue(0, units.Px),
@@ -781,10 +780,11 @@ var TreeViewProps = ki.Props{
 		},
 	},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": "darker-25",
+		"background-color": &Prefs.IconColor,
+		"color":            "lighter-90",
 	},
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
-		"background-color": "lighter-20",
+		"background-color": &Prefs.ControlColor,
 	},
 }
 
@@ -902,7 +902,6 @@ func (tv *TreeView) Render2D() {
 		return // nothing
 	}
 	if tv.PushBounds() {
-		tv.ConfigPartsIfNeeded()
 		// reset for next update
 		tv.ClearFullReRender()
 
@@ -913,6 +912,7 @@ func (tv *TreeView) Render2D() {
 		} else {
 			tv.Style = tv.StateStyles[TreeViewActive]
 		}
+		tv.ConfigPartsIfNeeded()
 
 		// note: this is std except using WidgetSize instead of AllocSize
 		pc := &tv.Paint

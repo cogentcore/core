@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/color"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/key"
@@ -71,6 +70,8 @@ const (
 )
 
 //go:generate stringer -type=ButtonStates
+
+var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
 
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
 var ButtonSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":selected"}
@@ -141,7 +142,7 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	}
 	g.State = state
 	g.Style = g.StateStyles[state] // get relevant styles
-	g.Parts.Restyle2DTree()
+	// g.Parts.ReStyle2DTree()
 }
 
 // set the button in the down state -- mouse clicked down but not yet up --
@@ -285,50 +286,48 @@ var ButtonProps = ki.Props{
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":        units.NewValue(1, units.Px),
 		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        color.Black,
+		"border-color":        &Prefs.BorderColor,
 		"border-style":        BorderSolid,
 		"padding":             units.NewValue(4, units.Px),
 		"margin":              units.NewValue(4, units.Px),
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
+		"box-shadow.color":    &Prefs.ShadowColor,
 		"text-align":          AlignCenter,
 		"vertical-align":      AlignTop,
-		"background-color":    "inherit",
+		"background-color":    &Prefs.ControlColor,
 		"#icon": ki.Props{
-			"width":            units.NewValue(1, units.Em),
-			"height":           units.NewValue(1, units.Em),
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "inherit",
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.IconColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
 		},
 	},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
-		"border-color":     "lighter-50",
-		"color":            "lighter-50",
-		"background-color": "lighter-50",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "darker-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-20",
+		"background-color": "lighter-40",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"border-color":     "lighter-20",
-		"color":            "lighter-80",
-		"background-color": "darker-50",
+		"color":            "lighter-90",
+		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"color":            "lighter-20",
 		"background-color": "darker-25",
+		"color":            "lighter-90",
 	},
 }
 
@@ -443,35 +442,35 @@ var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
 var CheckBoxProps = ki.Props{
 	ButtonSelectors[ButtonActive]: ki.Props{
-		"text-align": AlignLeft,
-		"color":      color.Black,
+		"text-align":       AlignLeft,
+		"background-color": &Prefs.ControlColor,
 		"#icon0": ki.Props{
-			"width":          units.NewValue(1, units.Em),
-			"height":         units.NewValue(1, units.Em),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": "inherit",
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.ControlColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#icon1": ki.Props{
-			"width":          units.NewValue(1, units.Em),
-			"height":         units.NewValue(1, units.Em),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": "inherit",
+			"width":   units.NewValue(1, units.Em),
+			"height":  units.NewValue(1, units.Em),
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.ControlColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#space": ki.Props{
 			"width": units.NewValue(1, units.Ex),
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
 		},
 	},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
-		"border-color":     "lighter-50",
-		"color":            "lighter-50",
-		"background-color": "lighter-50",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
 		"background-color": "darker-10",
@@ -481,12 +480,11 @@ var CheckBoxProps = ki.Props{
 		"background-color": "lighter-20",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"border-color":     "lighter-20",
-		"color":            "lighter-80",
-		"background-color": "darker-50",
+		"color":            "lighter-90",
+		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"color":            "lighter-20",
+		"color":            "darker-20",
 		"background-color": "darker-25",
 	},
 }
@@ -611,8 +609,6 @@ func (g *CheckBox) Layout2D(parBBox image.Rectangle) {
 	}
 	g.Layout2DChildren()
 }
-
-// todo: need color brigher / darker functions
 
 func (g *CheckBox) Render2D() {
 	if g.PushBounds() {

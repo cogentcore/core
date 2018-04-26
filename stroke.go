@@ -46,7 +46,7 @@ type StrokeStyle struct {
 	On         bool        `desc:"is stroke active -- if property is none then false"`
 	Color      Color       `xml:"stroke" desc:"default stroke color when such a color is needed -- Server could be anything"`
 	Opacity    float32     `xml:"stroke-opacity" desc:"global alpha opacity / transparency factor"`
-	Server     PaintServer `desc:"paint server for the stroke -- if solid color, defines the stroke color"`
+	Server     PaintServer `view:"-" desc:"paint server for the stroke -- if solid color, defines the stroke color"`
 	Width      units.Value `xml:"stroke-width" desc:"line width"`
 	Dashes     []float32   `xml:"stroke-dasharray" desc:"dash pattern"`
 	Cap        LineCap     `xml:"stroke-linecap" desc:"how to draw the end cap of lines"`

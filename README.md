@@ -74,16 +74,18 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc -- key innovation over css: relative color transforms: lighterX darkerX that transform existing color -- great for styling widgets etc.
+* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
+* also thumb in slider -- make it em sized -- will fix weird sizing issues
 
-* enums not working in valueview -- they were, right?
+* CSS styling attached to Viewport; .class #name -- just need to call
+  additional style passes with whatever matches..
+
+* scroll wheel events for scrolling! -- frame intercepts.  also sliders when in focus?
+
+* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
 
 * saving non-string properties not working -- doesn't know the type for
   loading.. converts to a map.
-
-* CSS styling attached to Viewport
-
-* preferences struct, editor
 
 * double-click interval not working at all -- calling everything double-click
 
@@ -91,19 +93,12 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
 
-* Focus display highlight not getting updated when clicking around in the treeview.
-
 * consolidate dialog popup code between menu and dialog
 
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
 * Structview: condshow / edit
 	
-* styles for different button states are not propagating into the parts
-	+ in widget.go: here add a thing that copies any style elements marked as "inherit" from parent to part
-
-* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
-
 * test SVG path rendering 
 * property-based xforms for svg
 
@@ -113,8 +108,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * which means finishing graphical elements using simple hand-coded Icon's instead of parsing from file, until the tree view and property editor are usable, to then make the parsing workable.
 
 * first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
-
-* look into scroll gestures, scrollwheel, etc.
 
 Next:
 * Layout flow types

@@ -56,7 +56,7 @@ var KiT_Window = kit.Types.AddType(&Window{}, nil)
 // default) -- stdPixels means use standardized "pixel" units for the display
 // size (96 per inch), not the actual underlying raw display dot pixels
 func NewWindow(name string, width, height int, stdPixels bool) *Window {
-	FontLibrary.InitFontPaths("/Library/Fonts")
+	Init() // overall gogi system initialization
 	win := &Window{}
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
@@ -107,6 +107,24 @@ func (w *Window) StartEventLoop() {
 func (w *Window) StartEventLoopNoWait() {
 	// w.DoFullRender = true
 	w.EventLoop()
+}
+
+// Init performs overall initialization of the gogi system: loading prefs, etc
+func Init() {
+	if Prefs.LogicalDPIScale == 0 {
+		Prefs.Defaults()
+		Prefs.Load()
+		oswin.LogicalDPIScale = Prefs.LogicalDPIScale
+		if Prefs.CustomKeyMap != nil {
+			ActiveKeyMap = &Prefs.CustomKeyMap
+		}
+	}
+	if Prefs.FontPaths != nil {
+		paths := append(Prefs.FontPaths, oswin.TheApp.FontPaths()...)
+		FontLibrary.InitFontPaths(paths...)
+	} else {
+		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
+	}
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
@@ -422,7 +440,7 @@ func (w *Window) EventLoop() {
 			fmt.Println("stop event loop")
 		}
 		if w.DoFullRender {
-			fmt.Printf("Doing full render\n")
+			// fmt.Printf("Doing full render\n")
 			w.DoFullRender = false
 			w.Viewport.FullRender2DTree()
 			if w.Focus == nil {
@@ -447,6 +465,7 @@ func (w *Window) EventLoop() {
 				w.Resize(lastResize.Size.X, lastResize.Size.Y)
 				resizing = false
 				lastResize = nil
+				w.DoFullRender = true
 			}
 		}
 
@@ -528,7 +547,7 @@ func (w *Window) EventLoop() {
 				cs := e.ChordString()
 				switch cs { // some other random special codes, during dev..
 				case "Control+Alt+P":
-					w.StartTargProfile() // could switch to CPUMem
+					Prefs.Edit()
 					e.SetProcessed()
 				case "Control+Alt+R":
 					w.EndTargProfile()

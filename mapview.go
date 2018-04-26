@@ -259,7 +259,12 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	cv := kit.NonPtrValue(valv.Val()) // current val value
 
 	// create a new item of selected type, and attempt to convert existing to it
-	evn := kit.CloneToType(typ, cv.Interface())
+	var evn reflect.Value
+	if kit.ValueIsZero(cv) {
+		evn = kit.MakeOfType(typ)
+	} else {
+		evn = kit.CloneToType(typ, cv.Interface())
+	}
 	ov := kit.NonPtrValue(reflect.ValueOf(mv.Map))
 	valv.AsValueViewBase().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())

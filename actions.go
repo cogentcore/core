@@ -7,8 +7,6 @@ package gi
 import (
 	// "fmt"
 
-	"image/color"
-
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
@@ -46,24 +44,25 @@ var ActionProps = ki.Props{
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(0, units.Px), // todo: should be default
 		"border-radius":    units.NewValue(0, units.Px),
-		"border-color":     color.Black,
+		"border-color":     &Prefs.BorderColor,
 		"border-style":     BorderSolid,
 		"padding":          units.NewValue(2, units.Px),
 		"margin":           units.NewValue(0, units.Px),
+		"box-shadow.color": &Prefs.ShadowColor,
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
-		"color":            color.Black,
-		"background-color": "#EEF",
+		"background-color": &Prefs.ControlColor,
 		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.IconColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
 		},
 		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
@@ -74,28 +73,23 @@ var ActionProps = ki.Props{
 		},
 	},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "#CCF", // todo "darker"
+		"background-color": "darker-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"background-color": "#DDF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-40",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"border-color": "#BBF",
-		"color":        color.White, // todo: this is no longer working for label
-		"#label": ki.Props{
-			"color": color.White,
-		},
-		"background-color": "#008",
+		"color":            "lighter-90",
+		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#88F",
+		"color":            "lighter-90",
+		"background-color": "darker-25",
 	},
 }
 
@@ -384,24 +378,25 @@ var MenuButtonProps = ki.Props{
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"border-width":     units.NewValue(1, units.Px),
 		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     color.Black,
+		"border-color":     &Prefs.BorderColor,
 		"border-style":     BorderSolid,
 		"padding":          units.NewValue(4, units.Px),
 		"margin":           units.NewValue(4, units.Px),
+		"box-shadow.color": &Prefs.ShadowColor,
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignMiddle,
-		"color":            color.Black,
-		"background-color": "#EEF",
+		"background-color": &Prefs.ControlColor,
 		"#icon": ki.Props{
 			"width":   units.NewValue(1, units.Em),
 			"height":  units.NewValue(1, units.Em),
 			"margin":  units.NewValue(0, units.Px),
 			"padding": units.NewValue(0, units.Px),
+			"fill":    &Prefs.IconColor,
+			"stroke":  &Prefs.FontColor,
 		},
 		"#label": ki.Props{
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": "none",
+			"margin":  units.NewValue(0, units.Px),
+			"padding": units.NewValue(0, units.Px),
 		},
 		"#indicator": ki.Props{
 			"width":          units.NewValue(1.5, units.Ex),
@@ -409,29 +404,28 @@ var MenuButtonProps = ki.Props{
 			"margin":         units.NewValue(0, units.Px),
 			"padding":        units.NewValue(0, units.Px),
 			"vertical-align": AlignBottom,
+			"fill":           &Prefs.IconColor,
+			"stroke":         &Prefs.FontColor,
 		},
 	},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"color":            "#AAA",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "#CCF", // todo "darker"
+		"background-color": "darker-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-color":     "#EEF",
-		"box-shadow.color": "#BBF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-40",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#008",
+		"color":            "lighter-90",
+		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"border-color":     "#DDF",
-		"color":            "white",
-		"background-color": "#00F",
+		"color":            "lighter-90",
+		"background-color": "darker-25",
 	},
 }
 
@@ -561,6 +555,7 @@ func (g *MenuButton) Layout2D(parBBox image.Rectangle) {
 func (g *MenuButton) Render2D() {
 	if g.PushBounds() {
 		g.Style = g.StateStyles[g.State] // get current styles
+		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {

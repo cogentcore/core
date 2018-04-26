@@ -104,6 +104,10 @@ type Node2D interface {
 	// changes -- styles are not for dynamic changes.
 	Style2D()
 
+	// ReStyle2D: An optional ad-hoc pass to update part styles after a parent
+	// node has updated its state
+	ReStyle2D()
+
 	// Size2D: DepthFirst downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
@@ -194,6 +198,10 @@ func (g *Node2DBase) Style2D() {
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
 	}
+}
+
+func (g *Node2DBase) ReStyle2D() {
+	g.ReStyle2DSVG()
 }
 
 func (g *Node2DBase) Size2D() {
@@ -290,6 +298,15 @@ func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 }
 
+// ReStyle2DSVG does a basic re-style using only current obj props and update of
+// inherited values -- called for Parts when parent styles change
+func (g *Node2DBase) ReStyle2DSVG() {
+	g.Paint.StyleSet = false  // allow inherts
+	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
+	g.Paint.SetStyle(&pg.Paint, g.Properties())
+	g.Paint.StyleSet = true
+}
+
 // Style2DWidget styles the Style values from node properties and optional base-level defautls -- for Widget-style nodes
 func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	gii, _ := g.This.(Node2D)
@@ -314,9 +331,9 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
 }
 
-// Restyle2D does a basic re-style using only current obj props and update of
+// ReStyle2DWidget does a basic re-style using only current obj props and update of
 // inherited values -- called for Parts when parent styles change
-func (g *Node2DBase) Restyle2D() {
+func (g *Node2DBase) ReStyle2DWidget() {
 	g.Style.IsSet = false // allow inherts
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
@@ -354,7 +371,8 @@ func (g *Node2DBase) PartStyleProps(part ki.Ki, props ki.Props) {
 	}
 }
 
-// copy our paint from our parents -- called during Style for SVG
+// CopyParentPaint copy our paint from our parents -- called during Style for
+// SVG
 func (g *Node2DBase) CopyParentPaint() *Node2DBase {
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
@@ -542,14 +560,14 @@ func (g *Node2DBase) Style2DTree() {
 }
 
 // Restyle2D calls Restyle2D on the tree down from me (inclusive) -- called
-// for Parts when parent styles change
-func (g *Node2DBase) Restyle2DTree() {
+// e.g., for Parts when parent styles change
+func (g *Node2DBase) ReStyle2DTree() {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
+		gii, _ := KiToNode2D(k)
+		if gii == nil {
 			return false
 		}
-		gi.Restyle2D()
+		gii.ReStyle2D()
 		return true
 	})
 }

@@ -29,5 +29,12 @@ func (s stub) NWindows() int                                                    
 func (s stub) Window(win int) oswin.Window                                          { return nil }
 func (s stub) WindowByName(name string) oswin.Window                                { return nil }
 
+func (s stub) Name() string         { return "" }
+func (s stub) SetName(name string)  {}
+func (s stub) PrefsDir() string     { return "" }
+func (s stub) GoGiPrefsDir() string { return "" }
+func (s stub) AppPrefsDir() string  { return "" }
+func (s stub) FontPaths() []string  { return nil }
+
 // check for interface implementation
 var _ oswin.App = &stub{}

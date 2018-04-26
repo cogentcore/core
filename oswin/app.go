@@ -20,6 +20,13 @@ var TheApp App
 // and Windows, appropriate for that hardware / OS, and maintains data about
 // the physical screen(s)
 type App interface {
+	// Name is the overall name of the application -- used for specifying an
+	// application-specific preferences directory, etc
+	Name() string
+
+	// SetName sets the application name -- defaults to GoGi if not otherwise set
+	SetName(name string)
+
 	// NScreens returns the number of different logical and/or physical
 	// screens managed under this overall screen hardware
 	NScreens() int
@@ -55,4 +62,19 @@ type App interface {
 	// then Draw that texture to the window when it is time to update (call
 	// Publish on window after drawing)
 	NewTexture(win Window, size image.Point) (Texture, error)
+
+	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
+	// Linux: ~/.config, Windows: ?
+	PrefsDir() string
+
+	// GoGiPrefsDir returns the GoGi preferences directory: PrefsDir + GoGi --
+	// ensures that the directory exists first
+	GoGiPrefsDir() string
+
+	// AppPrefsDir returns the application-specific preferences directory:
+	// PrefsDir + App.Name --ensures that the directory exists first
+	AppPrefsDir() string
+
+	// FontPaths returns the default system font paths
+	FontPaths() []string
 }

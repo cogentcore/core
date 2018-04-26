@@ -27,9 +27,6 @@ func GoGiEditorOf(obj ki.Ki) {
 
 	trow := vlay.AddNewChild(KiT_Layout, "trow").(*Layout)
 	trow.Lay = LayoutRow
-	trow.SetProp("align-vert", AlignMiddle)
-	trow.SetProp("align-horiz", "center")
-	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
 	spc := vlay.AddNewChild(KiT_Space, "spc1").(*Space)
@@ -38,8 +35,7 @@ func GoGiEditorOf(obj ki.Ki) {
 	trow.AddNewChild(KiT_Stretch, "str1")
 	title := trow.AddNewChild(KiT_Label, "title").(*Label)
 	title.Text = fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", obj.Name())
-	title.SetProp("max-width", -1)
-	title.SetProp("text-align", "center")
+	title.SetStretchMaxWidth()
 	trow.AddNewChild(KiT_Stretch, "str2")
 
 	split := vlay.AddNewChild(KiT_SplitView, "split").(*SplitView)
@@ -71,9 +67,6 @@ func GoGiEditorOf(obj ki.Ki) {
 
 	brow := vlay.AddNewChild(KiT_Layout, "brow").(*Layout)
 	brow.Lay = LayoutRow
-	brow.SetProp("align-vert", AlignMiddle)
-	brow.SetProp("align-horiz", "center")
-	brow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	brow.SetStretchMaxWidth()
 
 	updtobj := brow.AddNewChild(KiT_Button, "updtobj").(*Button)
