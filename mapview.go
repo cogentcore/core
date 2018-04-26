@@ -70,7 +70,7 @@ var MapViewProps = ki.Props{
 // SetFrame configures view as a frame
 func (mv *MapView) SetFrame() {
 	mv.Lay = LayoutCol
-	mv.PartStyleProps(mv, MapViewProps)
+	mv.StylePart(mv, MapViewProps)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame

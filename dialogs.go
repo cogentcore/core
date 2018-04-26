@@ -165,7 +165,7 @@ var DialogProps = ki.Props{
 func (dlg *Dialog) SetFrame() *Frame {
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutCol
-	dlg.PartStyleProps(frame, DialogProps)
+	dlg.StylePart(frame, DialogProps)
 	return frame
 }
 
@@ -180,7 +180,7 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	if frame != nil {
 		lab := frame.AddNewChild(KiT_Label, "title").(*Label)
 		lab.Text = title
-		dlg.PartStyleProps(lab, DialogProps)
+		dlg.StylePart(lab, DialogProps)
 		return lab
 	}
 	return nil
@@ -205,7 +205,7 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *
 		}
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
-		dlg.PartStyleProps(lab, DialogProps)
+		dlg.StylePart(lab, DialogProps)
 		return lab
 	}
 	return nil

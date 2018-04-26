@@ -326,8 +326,7 @@ var ButtonProps = ki.Props{
 		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "darker-25",
-		"color":            "lighter-90",
+		"background-color": &Prefs.SelectColor,
 	},
 }
 
@@ -484,8 +483,7 @@ var CheckBoxProps = ki.Props{
 		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"color":            "darker-20",
-		"background-color": "darker-25",
+		"background-color": &Prefs.SelectColor,
 	},
 }
 
@@ -547,13 +545,13 @@ func (g *CheckBox) ConfigParts() {
 		if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
 			icon.CopyFromIcon(g.Icon)
 			icon.UniqueNm = g.Icon.UniqueNm
-			g.PartStyleProps(icon.This, props)
+			g.StylePart(icon.This, props)
 		}
 		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
 			icoff.CopyFromIcon(g.IconOff)
 			icoff.UniqueNm = g.IconOff.UniqueNm
-			g.PartStyleProps(icoff.This, props)
+			g.StylePart(icoff.This, props)
 		}
 	}
 	if g.IsChecked() {
@@ -564,8 +562,8 @@ func (g *CheckBox) ConfigParts() {
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != g.Text {
-			g.PartStyleProps(g.Parts.Child(lbIdx-1), props) // also get the space
-			g.PartStyleProps(lbl.This, props)
+			g.StylePart(g.Parts.Child(lbIdx-1), props) // also get the space
+			g.StylePart(lbl.This, props)
 			lbl.Text = g.Text
 		}
 	}

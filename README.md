@@ -74,15 +74,24 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* TEST: CSS on everything .class #name -- just need to call
+  additional style passes with whatever matches..
+
+* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
+* also thumb in slider -- make it em sized -- will fix weird sizing issues -- generalize "StyleFields" struct -- just needs an Init interface.
+
+* Nonmodal dialogs -> windows
+
+* highlight, lowlight versions of lighter-darker that are relative to current
+  lightness for dark-style themes.
+
+* override ki.Props json to save type names
+
+* get all json save / load working
+
 * Button parts not updating when I add a label, even with full re-render.
 
 * Auto-apply when valueview TextField is destroyed?
-
-* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
-* also thumb in slider -- make it em sized -- will fix weird sizing issues
-
-* CSS styling attached to Viewport; .class #name -- just need to call
-  additional style passes with whatever matches..
 
 * scroll wheel events for scrolling! -- frame intercepts.  also sliders when in focus?
 

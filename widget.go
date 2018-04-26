@@ -15,7 +15,8 @@ import (
 // Widget base type -- manages control elements and provides standard box model rendering
 type WidgetBase struct {
 	Node2DBase
-	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
+	CSS   ki.Props `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
+	Parts Layout   `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -27,13 +28,14 @@ var WidgetBaseProps = ki.Props{
 // Styling notes:
 // simple elemental widgets (buttons etc) have a DefaultRender method that renders based on
 // Style, with full css styling support -- code has built-in initial defaults for a default
-// style based on fusion style parameters on QML Qt Quick Controls
+// style
 
-// Alternatively they support custom svg code for rendering each state as appropriate in a Stack
-// more complex widgets such as a TreeView automatically render and don't support custom svg
+// TODO: Alternatively they support custom svg code for rendering each state
+// as appropriate in a Stack more complex widgets such as a TreeView
+// automatically render and don't support custom svg
 
-// WidgetBase supports full Box rendering model, so Button just calls these methods to render
-// -- base function needs to take a Style arg.
+// WidgetBase supports full Box rendering model, so Button just calls these
+// methods to render -- base function needs to take a Style arg.
 
 func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
 	pc := &g.Paint
@@ -160,10 +162,6 @@ func (g *WidgetBase) Style2DWidget(baseProps ki.Props) {
 	g.Node2DBase.Style2DWidget(baseProps)
 }
 
-func (g *WidgetBase) ReStyle2D() {
-	g.ReStyle2DWidget()
-}
-
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
@@ -220,15 +218,15 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
 			ic.CopyFromIcon(icn)
 			ic.UniqueNm = icn.UniqueNm
-			g.PartStyleProps(ic.This, props)
+			g.StylePart(ic.This, props)
 		}
 	}
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
-			g.PartStyleProps(lbl.This, props)
+			g.StylePart(lbl.This, props)
 			if icIdx >= 0 {
-				g.PartStyleProps(g.Parts.Child(lbIdx-1), props) // also get the space
+				g.StylePart(g.Parts.Child(lbIdx-1), props) // also get the space
 			}
 			lbl.Text = txt
 		}
@@ -279,6 +277,14 @@ func (g *WidgetBase) Init2D() {
 
 func (g *WidgetBase) Style2D() {
 	g.Style2DWidget(nil) // note: most classes should override this as needed!
+}
+
+func (g *WidgetBase) StyleCSS(node Node2D) {
+	StyleCSSWidget(node, g.CSS)
+}
+
+func (g *WidgetBase) ReStyle2D() {
+	g.ReStyle2DWidget()
 }
 
 func (g *WidgetBase) Size2D() {

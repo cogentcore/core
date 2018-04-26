@@ -104,6 +104,11 @@ type Node2D interface {
 	// changes -- styles are not for dynamic changes.
 	Style2D()
 
+	// StyleCSS: Called by widgets within their Style2D pass -- implements the
+	// CSS cascade of styles for given node -- only Widget nodes have CSS
+	// sheets attached
+	StyleCSS(node Node2D)
+
 	// ReStyle2D: An optional ad-hoc pass to update part styles after a parent
 	// node has updated its state
 	ReStyle2D()
@@ -198,6 +203,10 @@ func (g *Node2DBase) Style2D() {
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
 	}
+}
+
+func (g *Node2DBase) StyleCSS(node Node2D) {
+	// nop for regular nodes -- only Widget, Viewport, and Layout nodes can cascade
 }
 
 func (g *Node2DBase) ReStyle2D() {
@@ -326,29 +335,50 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 		}
 		g.Style.SetStyle(nil, g.Properties())
 	}
+	// then css:
+	if g.Viewport != nil {
+		g.Viewport.StyleCSStoMe(gii)
+	}
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
 }
 
-// ReStyle2DWidget does a basic re-style using only current obj props and update of
-// inherited values -- called for Parts when parent styles change
-func (g *Node2DBase) ReStyle2DWidget() {
-	g.Style.IsSet = false // allow inherts
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		g.Style.SetStyle(&pg.Style, g.Properties())
-	} else {
-		g.Style.SetStyle(nil, g.Properties())
+func ApplyCSS(node Node2D, key string, css ki.Props) bool {
+	pp, got := css[key]
+	if !got {
+		return false
 	}
-	g.Style.IsSet = true
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+
+	nb := node.AsNode2D()
+	_, pg := KiToNode2D(node.Parent())
+	if pg != nil {
+		nb.Style.SetStyle(&pg.Style, pmap)
+	} else {
+		nb.Style.SetStyle(nil, pmap)
+	}
+	return true
 }
 
-// get the style properties for a child in parts (or any other child) based on
-// its name -- only call this when new parts were created -- name of
-// properties is #partname (lower cased) and it should contain a
-// ki.Props which is then added to the part's props
-func (g *Node2DBase) PartStyleProps(part ki.Ki, props ki.Props) {
+func StyleCSSWidget(node Node2D, css ki.Props) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	ApplyCSS(node, tyn, css)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	ApplyCSS(node, cln, css)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	ApplyCSS(node, idnm, css)
+}
+
+// StylePart sets the style properties for a child in parts (or any other
+// child) based on its name -- only call this when new parts were created --
+// name of properties is #partname (lower cased) and it should contain a
+// ki.Props which is then added to the part's props -- this provides built-in
+// defaults for parts, so it is separate from the CSS process
+func (g *Node2DBase) StylePart(part ki.Ki, props ki.Props) {
 	stynm := "#" + strings.ToLower(part.Name())
 	pp := g.Prop(stynm, false, false)
 	if pp == nil {
@@ -369,6 +399,19 @@ func (g *Node2DBase) PartStyleProps(part ki.Ki, props ki.Props) {
 	for key, val := range pmap {
 		part.SetProp(key, val)
 	}
+}
+
+// ReStyle2DWidget does a basic re-style using only current obj props and update of
+// inherited values -- called for Parts when parent styles change
+func (g *Node2DBase) ReStyle2DWidget() {
+	g.Style.IsSet = false // allow inherts
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		g.Style.SetStyle(&pg.Style, g.Properties())
+	} else {
+		g.Style.SetStyle(nil, g.Properties())
+	}
+	g.Style.IsSet = true
 }
 
 // CopyParentPaint copy our paint from our parents -- called during Style for
@@ -559,7 +602,25 @@ func (g *Node2DBase) Style2DTree() {
 	pr.End()
 }
 
-// Restyle2D calls Restyle2D on the tree down from me (inclusive) -- called
+// StyleCSStoMe calls StyleCSS on the tree (typically from the top viewport)
+// down from given node (inclusive) -- higher style settings are naturally
+// overridden by lower ones
+func (g *Node2DBase) StyleCSStoMe(me Node2D) {
+	g.FuncDownMeFirst(0, me, func(k ki.Ki, level int, d interface{}) bool {
+		gii, _ := KiToNode2D(k)
+		if gii == nil {
+			return false
+		}
+		gii.StyleCSS(me)
+		if gii == me {
+			return false
+		} else {
+			return true
+		}
+	})
+}
+
+// Restyle2DTree calls Restyle2D on the tree down from me (inclusive) -- called
 // e.g., for Parts when parent styles change
 func (g *Node2DBase) ReStyle2DTree() {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {

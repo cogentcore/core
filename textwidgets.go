@@ -744,14 +744,14 @@ func (g *SpinBox) ConfigParts() {
 	if mods {
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
-		g.PartStyleProps(buts, props)
+		g.StylePart(buts, props)
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
 		up := buts.Child(0).(*Action)
 		up.SetName("up")
 		bitflag.SetState(up.Flags(), g.IsReadOnly(), int(ReadOnly))
 		up.Icon = g.UpIcon
-		g.PartStyleProps(up.This, props)
+		g.StylePart(up.This, props)
 		if !g.IsReadOnly() {
 			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
@@ -763,7 +763,7 @@ func (g *SpinBox) ConfigParts() {
 		bitflag.SetState(dn.Flags(), g.IsReadOnly(), int(ReadOnly))
 		dn.SetName("down")
 		dn.Icon = g.DownIcon
-		g.PartStyleProps(dn.This, props)
+		g.StylePart(dn.This, props)
 		if !g.IsReadOnly() {
 			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
@@ -771,11 +771,11 @@ func (g *SpinBox) ConfigParts() {
 			})
 		}
 		// space
-		g.PartStyleProps(g.Parts.Child(sbSpaceIdx), props) // also get the space
+		g.StylePart(g.Parts.Child(sbSpaceIdx), props) // also get the space
 		// text-field
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsReadOnly(), int(ReadOnly))
-		g.PartStyleProps(tf.This, props)
+		g.StylePart(tf.This, props)
 		tf.Text = fmt.Sprintf("%g", g.Value)
 		if !g.IsReadOnly() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1120,7 +1120,7 @@ func (g *ComboBox) ConfigParts() {
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFrom(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.PartStyleProps(ic.This, props)
+			g.StylePart(ic.This, props)
 		}
 	}
 	if mods {

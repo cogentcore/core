@@ -71,7 +71,7 @@ var SliceViewProps = ki.Props{
 // SetFrame configures view as a frame
 func (sv *SliceView) SetFrame() {
 	sv.Lay = LayoutCol
-	sv.PartStyleProps(sv, SliceViewProps)
+	sv.StylePart(sv, SliceViewProps)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame

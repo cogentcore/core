@@ -88,8 +88,7 @@ var ActionProps = ki.Props{
 		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "darker-25",
+		"background-color": &Prefs.SelectColor,
 	},
 }
 
@@ -174,7 +173,7 @@ func (g *Action) ConfigPartsMenu() {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
 			ic.CopyFromIcon(IconByName("widget-wedge-right"))
-			g.PartStyleProps(ic.This, props)
+			g.StylePart(ic.This, props)
 		}
 	}
 	if mods {
@@ -343,7 +342,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
-	frame.PartStyleProps(frame.This, MenuProps)
+	frame.StylePart(frame.This, MenuProps)
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
 		frame.AddChild(acn.This)
@@ -424,8 +423,7 @@ var MenuButtonProps = ki.Props{
 		"background-color": "darker-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "darker-25",
+		"background-color": &Prefs.SelectColor,
 	},
 }
 
@@ -515,7 +513,7 @@ func (g *MenuButton) ConfigParts() {
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFromIcon(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.PartStyleProps(ic.This, props)
+			g.StylePart(ic.This, props)
 		}
 	}
 	if mods {

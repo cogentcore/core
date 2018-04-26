@@ -621,7 +621,7 @@ func (tv *TreeView) ConfigParts() {
 	wb.IconOff = IconByName("widget-wedge-right")
 	props := tv.StyleProps(TreeViewSelectors[TreeViewActive])
 	if mods {
-		tv.PartStyleProps(wb.This, props)
+		tv.StylePart(wb.This, props)
 		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
 				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -633,7 +633,7 @@ func (tv *TreeView) ConfigParts() {
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	if mods {
-		tv.PartStyleProps(lbl.This, props)
+		tv.StylePart(lbl.This, props)
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
 			me := d.(*mouse.Event)
@@ -647,7 +647,7 @@ func (tv *TreeView) ConfigParts() {
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
 	if mods {
 		mb.Text = "..."
-		tv.PartStyleProps(mb.This, props)
+		tv.StylePart(mb.This, props)
 
 		// todo: shortcuts!
 		mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -780,8 +780,7 @@ var TreeViewProps = ki.Props{
 		},
 	},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": &Prefs.IconColor,
-		"color":            "lighter-90",
+		"background-color": &Prefs.SelectColor,
 	},
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
 		"background-color": &Prefs.ControlColor,

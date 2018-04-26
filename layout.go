@@ -271,6 +271,8 @@ const (
 
 //go:generate stringer -type=Layouts
 
+var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, false, StylePropProps, "Layout")
+
 // row / col for grid data
 type RowCol int32
 
@@ -296,6 +298,7 @@ var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, StylePropProps, "")
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
+	CSS       ki.Props              `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
@@ -1096,6 +1099,10 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget(nil)
+}
+
+func (g *Layout) StyleCSS(node Node2D) {
+	StyleCSSWidget(node, g.CSS)
 }
 
 func (g *Layout) ReStyle2D() {

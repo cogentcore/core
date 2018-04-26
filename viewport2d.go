@@ -31,6 +31,7 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	Node2DBase
+	CSS     ki.Props    `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
@@ -218,6 +219,10 @@ func (vp *Viewport2D) Init2D() {
 func (vp *Viewport2D) Style2D() {
 	vp.SetCurWin()
 	vp.Style2DWidget(nil)
+}
+
+func (g *Viewport2D) StyleCSS(node Node2D) {
+	StyleCSSWidget(node, g.CSS)
 }
 
 func (vp *Viewport2D) Size2D() {

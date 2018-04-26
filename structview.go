@@ -72,7 +72,7 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 // SetFrame configures view as a frame
 func (sv *StructView) SetFrame() {
 	sv.Lay = LayoutCol
-	sv.PartStyleProps(sv, StructViewProps)
+	sv.StylePart(sv, StructViewProps)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
