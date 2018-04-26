@@ -84,7 +84,7 @@ func ValueIsZero(v reflect.Value) bool {
 
 // ToBool robustly converts anything to a bool
 func ToBool(it interface{}) (bool, bool) {
-	if it == nil {
+	if IsNil(it) {
 		return false, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -113,7 +113,7 @@ func ToBool(it interface{}) (bool, bool) {
 
 // ToInt robustlys converts anything to an int64
 func ToInt(it interface{}) (int64, bool) {
-	if it == nil {
+	if IsNil(it) {
 		return 0, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -145,7 +145,7 @@ func ToInt(it interface{}) (int64, bool) {
 
 // ToFloat robustly converts anything to a Float64
 func ToFloat(it interface{}) (float64, bool) {
-	if it == nil {
+	if IsNil(it) {
 		return 0.0, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -177,7 +177,7 @@ func ToFloat(it interface{}) (float64, bool) {
 
 // ToFloat32 robustly converts anything to a Float64
 func ToFloat32(it interface{}) (float32, bool) {
-	if it == nil {
+	if IsNil(it) {
 		return float32(0.0), false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -211,7 +211,7 @@ func ToFloat32(it interface{}) (float32, bool) {
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
 func ToString(it interface{}) string {
-	if it == nil {
+	if IsNil(it) {
 		return "nil"
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -244,11 +244,14 @@ func ToString(it interface{}) string {
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
 func SetRobust(to, from interface{}) bool {
-	if to == nil {
+	if IsNil(to) {
 		return false
 	}
 	v := reflect.ValueOf(to)
 	vnp := NonPtrValue(v)
+	if ValueIsZero(vnp) {
+		return false
+	}
 	typ := vnp.Type()
 	vp := PtrValue(v)
 	vk := vnp.Kind()
@@ -324,6 +327,18 @@ func CloneToType(typ reflect.Type, val interface{}) reflect.Value {
 	vn := reflect.New(typ)
 	evi := vn.Interface()
 	SetRobust(evi, val)
+	return vn
+}
+
+// MakeOfType creates a new object of given type with appropriate magic foo to
+// make it usable
+func MakeOfType(typ reflect.Type) reflect.Value {
+	if NonPtrType(typ).Kind() == reflect.Map {
+		return MakeMap(typ)
+	} else if NonPtrType(typ).Kind() == reflect.Slice {
+		return MakeSlice(typ, 0, 0)
+	}
+	vn := reflect.New(typ)
 	return vn
 }
 
