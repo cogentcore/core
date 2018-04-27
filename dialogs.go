@@ -51,6 +51,8 @@ type Dialog struct {
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
+func (n *Dialog) New() ki.Ki { return &Dialog{} }
+
 // Open this dialog, in given location (0 = middle of window), finding window from given viewport -- returns false if it fails for any reason
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	win := avp.Win
@@ -165,7 +167,7 @@ var DialogProps = ki.Props{
 func (dlg *Dialog) SetFrame() *Frame {
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutCol
-	dlg.StylePart(frame, DialogProps)
+	dlg.StylePart(frame.This)
 	return frame
 }
 
@@ -180,7 +182,7 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	if frame != nil {
 		lab := frame.AddNewChild(KiT_Label, "title").(*Label)
 		lab.Text = title
-		dlg.StylePart(lab, DialogProps)
+		dlg.StylePart(lab.This)
 		return lab
 	}
 	return nil
@@ -205,7 +207,7 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *
 		}
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
-		dlg.StylePart(lab, DialogProps)
+		dlg.StylePart(lab.This)
 		return lab
 	}
 	return nil

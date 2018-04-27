@@ -25,6 +25,8 @@ type NodeBase struct {
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
+func (n *NodeBase) New() ki.Ki { return &NodeBase{} }
+
 var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
@@ -186,10 +188,9 @@ func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 // StyleProps returns a property that contains another map of properties for a
 // given styling selector, such as :normal :active :hover etc -- the
 // convention is to prefix this selector with a : and use lower-case names, so
-// we follow that.  Standard widgets set these props on the type, and we use
-// type-based fallback, so these should exist for most.
+// we follow that.
 func (g *NodeBase) StyleProps(selector string) ki.Props {
-	sp := g.Prop(selector, false, true) // don't inherit (style handles that separately) but do use type props
+	sp := g.Prop(selector, false, false)
 	if sp == nil {
 		return nil
 	}
@@ -214,3 +215,5 @@ type Node3DBase struct {
 }
 
 var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, nil)
+
+func (n *Node3DBase) New() ki.Ki { return &Node3DBase{} }

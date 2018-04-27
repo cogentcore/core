@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 	"strings"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -55,12 +56,15 @@ Rendering is done in 4 separate passes:
 type Node2DBase struct {
 	NodeBase
 	Style    Style       `json:"-" xml:"-" desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	DefStyle *Style      `json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	Paint    Paint       `json:"-" xml:"-" desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-" xml:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
 	LayData  LayoutData  `json:"-" xml:"-" desc:"all the layout information for this item"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
+
+func (n *Node2DBase) New() ki.Ki { return &Node2DBase{} }
 
 var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
@@ -325,23 +329,67 @@ func (g *Node2DBase) ReStyle2DSVG() {
 	g.Paint.StyleSet = true
 }
 
-// Style2DWidget styles the Style values from node properties and optional base-level defautls -- for Widget-style nodes
-func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
+// DefaultStyle2DWidget retrieves default style object for the type, from type
+// properties -- selector is optional selector for state etc.  Property key is
+// "__DefStyle" + selector -- if part != nil, then use that obj for getting the
+// default style starting point when creating a new style
+func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *Style {
+	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
+	styprops := tprops
+	if selector != "" {
+		sp, ok := tprops[selector]
+		if !ok {
+			log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, g.Type().Name())
+		} else {
+			spm, ok := sp.(ki.Props)
+			if !ok {
+				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, g.Type().Name())
+			} else {
+				styprops = spm
+			}
+		}
+	}
+	var dsty *Style
+	pnm := "__DefStyle" + selector
+	dstyi := tprops[pnm]
+	if dstyi == nil {
+		dsty = &Style{}
+		dsty.Defaults()
+		if selector != "" {
+			var baseStyle *Style
+			if part != nil {
+				baseStyle = part.DefaultStyle2DWidget("", nil)
+			} else {
+				baseStyle = g.DefaultStyle2DWidget("", nil)
+			}
+			*dsty = *baseStyle
+		}
+		dsty.SetStyle(nil, styprops)
+		dsty.IsSet = false // keep as non-set
+		tprops[pnm] = dsty
+	} else {
+		dsty, _ = dstyi.(*Style)
+	}
+	return dsty
+}
+
+// Style2DWidget styles the Style values from node properties and optional base-level defaults -- for Widget-style nodes
+func (g *Node2DBase) Style2DWidget() {
+	if g.DefStyle != nil {
+		g.Style = *g.DefStyle
+	} else {
+		g.Style = *g.DefaultStyle2DWidget("", nil)
+	}
+	g.Style.IsSet = false // this is always first call, restart
+
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 	_, pg := KiToNode2D(g.Par)
-	g.Style.IsSet = false // this is always first call, restart
 	if pg != nil {
-		if baseProps != nil {
-			g.Style.SetStyle(&pg.Style, baseProps)
-		}
 		g.Style.SetStyle(&pg.Style, g.Properties())
 	} else {
-		if baseProps != nil {
-			g.Style.SetStyle(nil, baseProps)
-		}
 		g.Style.SetStyle(nil, g.Properties())
 	}
 	// then css:
@@ -387,27 +435,18 @@ func StyleCSSWidget(node Node2D, css ki.Props) {
 // name of properties is #partname (lower cased) and it should contain a
 // ki.Props which is then added to the part's props -- this provides built-in
 // defaults for parts, so it is separate from the CSS process
-func (g *Node2DBase) StylePart(part ki.Ki, props ki.Props) {
-	stynm := "#" + strings.ToLower(part.Name())
-	pp := g.Prop(stynm, false, false)
-	if pp == nil {
-		if props != nil {
-			ok := false
-			pp, ok = props[stynm]
-			if !ok {
-				return
-			}
-		} else {
-			return
-		}
-	}
-	pmap, ok := pp.(ki.Props)
-	if !ok {
+func (g *Node2DBase) StylePart(pk ki.Ki) {
+	_, pg := KiToNode2D(pk)
+	if pg.DefStyle != nil {
 		return
 	}
-	for key, val := range pmap {
-		part.SetProp(key, val)
-	}
+	stynm := "#" + strings.ToLower(pk.Name())
+	// this is called on US (the parent object) so we store the #partname
+	// default style within our type properties..  that's good -- HOWEVER we
+	// cannot put any sub-selector properties within these part styles -- must
+	// all be in the base-level.. hopefully that works..
+	pdst := g.DefaultStyle2DWidget(stynm, pg)
+	pg.DefStyle = pdst // will use this as starting point for all styles now..
 }
 
 // ReStyle2DWidget does a basic re-style using only current obj props and update of

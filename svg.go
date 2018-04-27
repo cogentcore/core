@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -21,6 +22,8 @@ type SVG struct {
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
+
+func (n *SVG) New() ki.Ki { return &SVG{} }
 
 // set a normalized 0-1 scaling transform so svg's use 0-1 coordinates that
 // map to actual size of the viewport -- used e.g. for Icon
@@ -40,7 +43,7 @@ func (vp *SVG) Init2D() {
 func (vp *SVG) Style2D() {
 	// we use both forms of styling -- need width, height, pos from widget..
 	vp.Style2DSVG(nil)
-	vp.Style2DWidget(nil)
+	vp.Style2DWidget()
 }
 
 func (vp *SVG) ReStyle2D() {

@@ -89,6 +89,8 @@ type ButtonBase struct {
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
+func (n *ButtonBase) New() ki.Ki { return &ButtonBase{} }
+
 var ButtonBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
@@ -282,34 +284,35 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 
+func (n *Button) New() ki.Ki { return &Button{} }
+
 var ButtonProps = ki.Props{
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"border-width":        units.NewValue(1, units.Px),
-		"border-radius":       units.NewValue(4, units.Px),
-		"border-color":        &Prefs.BorderColor,
-		"border-style":        BorderSolid,
-		"padding":             units.NewValue(4, units.Px),
-		"margin":              units.NewValue(4, units.Px),
-		"box-shadow.h-offset": units.NewValue(4, units.Px),
-		"box-shadow.v-offset": units.NewValue(4, units.Px),
-		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    &Prefs.ShadowColor,
-		"text-align":          AlignCenter,
-		"vertical-align":      AlignTop,
-		"background-color":    &Prefs.ControlColor,
-		"#icon": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.IconColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#label": ki.Props{
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
+	"border-width":        units.NewValue(1, units.Px),
+	"border-radius":       units.NewValue(4, units.Px),
+	"border-color":        &Prefs.BorderColor,
+	"border-style":        BorderSolid,
+	"padding":             units.NewValue(4, units.Px),
+	"margin":              units.NewValue(4, units.Px),
+	"box-shadow.h-offset": units.NewValue(4, units.Px),
+	"box-shadow.v-offset": units.NewValue(4, units.Px),
+	"box-shadow.blur":     units.NewValue(4, units.Px),
+	"box-shadow.color":    &Prefs.ShadowColor,
+	"text-align":          AlignCenter,
+	"vertical-align":      AlignTop,
+	"background-color":    &Prefs.ControlColor,
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.IconColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -359,7 +362,7 @@ func (g *Button) Init2D() {
 func (g *Button) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
 	if mods {
 		g.UpdateEnd(updt)
 	}
@@ -374,12 +377,11 @@ func (g *Button) ConfigPartsIfNeeded() {
 
 func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }
@@ -438,34 +440,35 @@ type CheckBox struct {
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
+func (n *CheckBox) New() ki.Ki { return &CheckBox{} }
+
 var CheckBoxProps = ki.Props{
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"text-align":       AlignLeft,
-		"background-color": &Prefs.ControlColor,
-		"#icon0": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.ControlColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#icon1": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.ControlColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#space": ki.Props{
-			"width": units.NewValue(1, units.Ex),
-		},
-		"#label": ki.Props{
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
+	"text-align":       AlignLeft,
+	"background-color": &Prefs.ControlColor,
+	"#icon0": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.ControlColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	"#icon1": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.ControlColor,
+		"stroke":  &Prefs.FontColor,
+	},
+	"#space": ki.Props{
+		"width": units.NewValue(1, units.Ex),
+	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -525,7 +528,6 @@ func (g *CheckBox) ConfigParts() {
 	if g.IconOff == nil {
 		g.IconOff = IconByName("widget-unchecked-box")
 	}
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
@@ -544,13 +546,13 @@ func (g *CheckBox) ConfigParts() {
 		if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
 			icon.CopyFromIcon(g.Icon)
 			icon.UniqueNm = g.Icon.UniqueNm
-			g.StylePart(icon.This, props)
+			g.StylePart(icon.This)
 		}
 		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
 			icoff.CopyFromIcon(g.IconOff)
 			icoff.UniqueNm = g.IconOff.UniqueNm
-			g.StylePart(icoff.This, props)
+			g.StylePart(icoff.This)
 		}
 	}
 	if g.IsChecked() {
@@ -561,8 +563,8 @@ func (g *CheckBox) ConfigParts() {
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != g.Text {
-			g.StylePart(g.Parts.Child(lbIdx-1), props) // also get the space
-			g.StylePart(lbl.This, props)
+			g.StylePart(g.Parts.Child(lbIdx - 1)) // also get the space
+			g.StylePart(lbl.This)
 			lbl.Text = g.Text
 		}
 	}
@@ -586,13 +588,11 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 
 func (g *CheckBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	g.Style2DWidget(props)
+	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }

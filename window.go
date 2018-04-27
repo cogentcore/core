@@ -52,6 +52,8 @@ type Window struct {
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
+func (n *Window) New() ki.Ki { return &Window{} }
+
 // NewWindow creates a new window with given name and sizing (0 = some kind of
 // default) -- stdPixels means use standardized "pixel" units for the display
 // size (96 per inch), not the actual underlying raw display dot pixels
@@ -552,8 +554,10 @@ func (w *Window) EventLoop() {
 				case "Control+Alt+R":
 					if prof.Profiling {
 						w.EndTargProfile()
+						w.EndCPUMemProfile()
 					} else {
 						w.StartTargProfile()
+						w.StartCPUMemProfile()
 					}
 					e.SetProcessed()
 				case "Control+Alt+F":

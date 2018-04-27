@@ -21,6 +21,8 @@ type WidgetBase struct {
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
+func (n *WidgetBase) New() ki.Ki { return &WidgetBase{} }
+
 var WidgetBaseProps = ki.Props{
 	"base-type": true,
 }
@@ -158,10 +160,6 @@ func (g *WidgetBase) Size2DWidget() {
 	g.SizeFromParts() // get our size from parts
 }
 
-func (g *WidgetBase) Style2DWidget(baseProps ki.Props) {
-	g.Node2DBase.Style2DWidget(baseProps)
-}
-
 func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
@@ -212,21 +210,21 @@ func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.Typ
 }
 
 // set the icon and text values in parts, and get part style props, using given props if not set in object props
-func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int, props ki.Props) {
+func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
 			ic.CopyFromIcon(icn)
 			ic.UniqueNm = icn.UniqueNm
-			g.StylePart(ic.This, props)
+			g.StylePart(ic.This)
 		}
 	}
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
-			g.StylePart(lbl.This, props)
+			g.StylePart(lbl.This)
 			if icIdx >= 0 {
-				g.StylePart(g.Parts.Child(lbIdx-1), props) // also get the space
+				g.StylePart(g.Parts.Child(lbIdx - 1)) // also get the space
 			}
 			lbl.Text = txt
 		}
@@ -276,7 +274,7 @@ func (g *WidgetBase) Init2D() {
 }
 
 func (g *WidgetBase) Style2D() {
-	g.Style2DWidget(nil) // note: most classes should override this as needed!
+	g.Style2DWidget() // note: most classes should override this as needed!
 }
 
 func (g *WidgetBase) StyleCSS(node Node2D) {

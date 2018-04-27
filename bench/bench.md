@@ -4,9 +4,12 @@
 
 **VERY IMPORTANT** must run benchmarks from a go build and NOT from dlv debug session.
 
+* to get more interpretable results from pprof: `export GOMAXPROCS=1`
+
 * https://github.com/google/pprof/blob/master/doc/pprof.md
-	+ go tool pprof cpu.prof 
+	+ pprof cpu.prof 
 	+ list Style2D to see all the stuff happening in Style2D
+	+ pprof -http=localhost:5555 cpu.prof
 
 ## 2018 - 04 - 24
 

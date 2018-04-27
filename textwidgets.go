@@ -69,6 +69,8 @@ type Label struct {
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
+func (n *Label) New() ki.Ki { return &Label{} }
+
 var LabelProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
@@ -77,7 +79,7 @@ var LabelProps = ki.Props{
 }
 
 func (g *Label) Style2D() {
-	g.Style2DWidget(LabelProps)
+	g.Style2DWidget()
 }
 
 func (g *Label) Size2D() {
@@ -148,17 +150,18 @@ type TextField struct {
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
+func (n *TextField) New() ki.Ki { return &TextField{} }
+
 var TextFieldProps = ki.Props{
-	TextFieldSelectors[TextFieldActive]: ki.Props{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(1, units.Px),
-		"text-align":       AlignLeft,
-		"vertical-align":   AlignTop,
-		"background-color": &Prefs.ControlColor,
-	},
+	"border-width":                      units.NewValue(1, units.Px),
+	"border-color":                      &Prefs.BorderColor,
+	"border-style":                      BorderSolid,
+	"padding":                           units.NewValue(4, units.Px),
+	"margin":                            units.NewValue(1, units.Px),
+	"text-align":                        AlignLeft,
+	"vertical-align":                    AlignTop,
+	"background-color":                  &Prefs.ControlColor,
+	TextFieldSelectors[TextFieldActive]: ki.Props{},
 	TextFieldSelectors[TextFieldFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
 		"background-color": "lighter-80",
@@ -405,12 +408,11 @@ func (g *TextField) Style2D() {
 	} else {
 		bitflag.Set(&g.Flag, int(CanFocus))
 	}
-	g.Style2DWidget(g.StyleProps(TextFieldSelectors[TextFieldActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(TextFieldSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(TextFieldSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(TextFieldSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 }
 
@@ -626,36 +628,36 @@ type SpinBox struct {
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
+func (n *SpinBox) New() ki.Ki { return &SpinBox{} }
+
 var SpinBoxProps = ki.Props{
-	":active": ki.Props{ // todo: could add other states
-		"#buttons": ki.Props{
-			"vert-align": AlignMiddle,
-		},
-		"#up": ki.Props{
-			"max-width":  units.NewValue(1.5, units.Ex),
-			"max-height": units.NewValue(1.5, units.Ex),
-			"margin":     units.NewValue(1, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-			"fill":       &Prefs.IconColor,
-			"stroke":     &Prefs.FontColor,
-		},
-		"#down": ki.Props{
-			"max-width":  units.NewValue(1.5, units.Ex),
-			"max-height": units.NewValue(1.5, units.Ex),
-			"margin":     units.NewValue(1, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-			"fill":       &Prefs.IconColor,
-			"stroke":     &Prefs.FontColor,
-		},
-		"#space": ki.Props{
-			"width": units.NewValue(.1, units.Ex),
-		},
-		"#text-field": ki.Props{
-			"min-width": units.NewValue(4, units.Ex),
-			"width":     units.NewValue(8, units.Ex),
-			"margin":    units.NewValue(2, units.Px),
-			"padding":   units.NewValue(2, units.Px),
-		},
+	"#buttons": ki.Props{
+		"vert-align": AlignMiddle,
+	},
+	"#up": ki.Props{
+		"max-width":  units.NewValue(1.5, units.Ex),
+		"max-height": units.NewValue(1.5, units.Ex),
+		"margin":     units.NewValue(1, units.Px),
+		"padding":    units.NewValue(0, units.Px),
+		"fill":       &Prefs.IconColor,
+		"stroke":     &Prefs.FontColor,
+	},
+	"#down": ki.Props{
+		"max-width":  units.NewValue(1.5, units.Ex),
+		"max-height": units.NewValue(1.5, units.Ex),
+		"margin":     units.NewValue(1, units.Px),
+		"padding":    units.NewValue(0, units.Px),
+		"fill":       &Prefs.IconColor,
+		"stroke":     &Prefs.FontColor,
+	},
+	"#space": ki.Props{
+		"width": units.NewValue(.1, units.Ex),
+	},
+	"#text-field": ki.Props{
+		"min-width": units.NewValue(4, units.Ex),
+		"width":     units.NewValue(8, units.Ex),
+		"margin":    units.NewValue(2, units.Px),
+		"padding":   units.NewValue(2, units.Px),
 	},
 }
 
@@ -734,7 +736,6 @@ func (g *SpinBox) ConfigParts() {
 	}
 	g.Parts.Lay = LayoutRow
 	g.Parts.SetProp("vert-align", AlignMiddle) // todo: style..
-	props := g.StyleProps(":active")
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
 	config.Add(KiT_Space, "space")
@@ -743,14 +744,14 @@ func (g *SpinBox) ConfigParts() {
 	if mods {
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
-		g.StylePart(buts, props)
+		g.StylePart(buts.This)
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
 		up := buts.Child(0).(*Action)
 		up.SetName("up")
 		bitflag.SetState(up.Flags(), g.IsReadOnly(), int(ReadOnly))
 		up.Icon = g.UpIcon
-		g.StylePart(up.This, props)
+		g.StylePart(up.This)
 		if !g.IsReadOnly() {
 			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
@@ -762,7 +763,7 @@ func (g *SpinBox) ConfigParts() {
 		bitflag.SetState(dn.Flags(), g.IsReadOnly(), int(ReadOnly))
 		dn.SetName("down")
 		dn.Icon = g.DownIcon
-		g.StylePart(dn.This, props)
+		g.StylePart(dn.This)
 		if !g.IsReadOnly() {
 			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.(*SpinBox)
@@ -770,11 +771,11 @@ func (g *SpinBox) ConfigParts() {
 			})
 		}
 		// space
-		g.StylePart(g.Parts.Child(sbSpaceIdx), props) // also get the space
+		g.StylePart(g.Parts.Child(sbSpaceIdx)) // also get the space
 		// text-field
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsReadOnly(), int(ReadOnly))
-		g.StylePart(tf.This, props)
+		g.StylePart(tf.This)
 		tf.Text = fmt.Sprintf("%g", g.Value)
 		if !g.IsReadOnly() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -810,7 +811,7 @@ func (g *SpinBox) Style2D() {
 	if g.Step == 0 {
 		g.Defaults()
 	}
-	g.Style2DWidget(g.StyleProps(":active"))
+	g.Style2DWidget()
 	g.ConfigParts()
 }
 
@@ -851,39 +852,40 @@ type ComboBox struct {
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 
+func (n *ComboBox) New() ki.Ki { return &ComboBox{} }
+
 var ComboBoxProps = ki.Props{
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(4, units.Px),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignMiddle,
-		"background-color": &Prefs.ControlColor,
-		"#icon": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.IconColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#label": ki.Props{
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#indicator": ki.Props{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignBottom,
-			"fill":           &Prefs.IconColor,
-			"stroke":         &Prefs.FontColor,
-		},
+	"border-width":     units.NewValue(1, units.Px),
+	"border-radius":    units.NewValue(4, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(4, units.Px),
+	"margin":           units.NewValue(4, units.Px),
+	"text-align":       AlignCenter,
+	"vertical-align":   AlignMiddle,
+	"background-color": &Prefs.ControlColor,
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.IconColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	"#indicator": ki.Props{
+		"width":          units.NewValue(1.5, units.Ex),
+		"height":         units.NewValue(1.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": AlignBottom,
+		"fill":           &Prefs.IconColor,
+		"stroke":         &Prefs.FontColor,
+	},
+	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -1108,8 +1110,7 @@ func (g *ComboBox) ConfigParts() {
 		config.Add(KiT_Icon, "indicator")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
 	if g.MaxLength > 0 && lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
@@ -1119,7 +1120,7 @@ func (g *ComboBox) ConfigParts() {
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFrom(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.StylePart(ic.This, props)
+			g.StylePart(ic.This)
 		}
 	}
 	if mods {
@@ -1136,13 +1137,11 @@ func (g *ComboBox) ConfigPartsIfNeeded() {
 
 func (g *ComboBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	g.Style2DWidget(props)
+	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }

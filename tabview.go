@@ -7,6 +7,7 @@ package gi
 import (
 	"log"
 
+	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
@@ -44,6 +45,8 @@ type TabWidget struct {
 }
 
 var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
+
+func (n *TabWidget) New() ki.Ki { return &TabWidget{} }
 
 // set the source Ki Node that generates our tabs
 func (g *TabWidget) SetSrcNode(k ki.Ki) {
@@ -151,18 +154,18 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 }
 
 var TabButtonProps = ki.Props{
-	"border-width":        "1px",
-	"border-radius":       "0px",
-	"border-color":        "black",
-	"border-style":        "solid",
-	"padding":             "4px",
-	"margin":              "0px",
-	"box-shadow.h-offset": "0px",
-	"box-shadow.v-offset": "0px",
-	"box-shadow.blur":     "0px",
-	"text-align":          "center",
-	"color":               "black",
-	"background-color":    "#EEF",
+	"border-width":        units.NewValue(1, units.Px),
+	"border-radius":       units.NewValue(0, units.Px),
+	"border-color":        &Prefs.BorderColor,
+	"border-style":        BorderSolid,
+	"padding":             units.NewValue(4, units.Px),
+	"margin":              units.NewValue(0, units.Px),
+	"background-color":    &Prefs.ControlColor,
+	"box-shadow.h-offset": units.NewValue(0, units.Px),
+	"box-shadow.v-offset": units.NewValue(0, units.Px),
+	"box-shadow.blur":     units.NewValue(0, units.Px),
+	"box-shadow.color":    &Prefs.ShadowColor,
+	"text-align":          AlignCenter,
 }
 
 // make the initial tab frames for src node

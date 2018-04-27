@@ -70,6 +70,8 @@ type SliderBase struct {
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
+func (n *SliderBase) New() ki.Ki { return &SliderBase{} }
+
 var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
@@ -352,7 +354,7 @@ func (g *SliderBase) ConfigParts() {
 	g.Parts.Lay = LayoutNil
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx, g.StyleProps(SliderSelectors[SliderActive]))
+	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx)
 	if mods {
 		g.UpdateEnd(updt)
 	}
@@ -404,24 +406,25 @@ type Slider struct {
 
 var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 
+func (n *Slider) New() ki.Ki { return &Slider{} }
+
 var SliderProps = ki.Props{
-	SliderSelectors[SliderActive]: ki.Props{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(6, units.Px),
-		"margin":           units.NewValue(4, units.Px),
-		"background-color": &Prefs.ControlColor,
-		"#icon": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.IconColor,
-			"stroke":  &Prefs.FontColor,
-		},
+	"border-width":     units.NewValue(1, units.Px),
+	"border-radius":    units.NewValue(4, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(6, units.Px),
+	"margin":           units.NewValue(4, units.Px),
+	"background-color": &Prefs.ControlColor,
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.IconColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -462,12 +465,11 @@ func (g *Slider) Init2D() {
 
 func (g *Slider) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
 	SliderFields.ToDots(g, &g.Style.UnContext)
@@ -587,16 +589,17 @@ type ScrollBar struct {
 
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
+func (n *ScrollBar) New() ki.Ki { return &ScrollBar{} }
+
 var ScrollBarProps = ki.Props{
-	SliderSelectors[SliderActive]: ki.Props{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(0, units.Px),
-		"margin":           units.NewValue(2, units.Px),
-		"background-color": &Prefs.ControlColor,
-	},
+	"border-width":                units.NewValue(1, units.Px),
+	"border-radius":               units.NewValue(4, units.Px),
+	"border-color":                &Prefs.BorderColor,
+	"border-style":                BorderSolid,
+	"padding":                     units.NewValue(0, units.Px),
+	"margin":                      units.NewValue(2, units.Px),
+	"background-color":            &Prefs.ControlColor,
+	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -636,12 +639,11 @@ func (g *ScrollBar) Init2D() {
 
 func (g *ScrollBar) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
 	SliderFields.ToDots(g, &g.Style.UnContext)

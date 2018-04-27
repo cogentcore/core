@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -27,6 +28,8 @@ type Rect struct {
 }
 
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
+
+func (n *Rect) New() ki.Ki { return &Rect{} }
 
 func (g *Rect) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
@@ -80,6 +83,8 @@ type Viewport2DFill struct {
 
 var KiT_Viewport2DFill = kit.Types.AddType(&Viewport2DFill{}, nil)
 
+func (n *Viewport2DFill) New() ki.Ki { return &Viewport2DFill{} }
+
 func (g *Viewport2DFill) Init2D() {
 	g.Init2DBase()
 	vp := g.Viewport
@@ -116,6 +121,8 @@ type Circle struct {
 }
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
+
+func (n *Circle) New() ki.Ki { return &Circle{} }
 
 func (g *Circle) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
@@ -164,6 +171,8 @@ type Ellipse struct {
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
+func (n *Ellipse) New() ki.Ki { return &Ellipse{} }
+
 func (g *Ellipse) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	rs.PushXForm(g.Paint.XForm)
@@ -211,6 +220,8 @@ type Line struct {
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
+func (n *Line) New() ki.Ki { return &Line{} }
+
 func (g *Line) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	rs.PushXForm(g.Paint.XForm)
@@ -256,6 +267,8 @@ type Polyline struct {
 }
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
+
+func (n *Polyline) New() ki.Ki { return &Polyline{} }
 
 func (g *Polyline) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
@@ -305,6 +318,8 @@ type Polygon struct {
 }
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
+
+func (n *Polygon) New() ki.Ki { return &Polygon{} }
 
 func (g *Polygon) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
@@ -426,6 +441,8 @@ type Path struct {
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, nil)
+
+func (n *Path) New() ki.Ki { return &Path{} }
 
 func (g *Path) BBox2D() image.Rectangle {
 	// todo: cache values, only update when path is updated..

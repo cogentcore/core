@@ -40,38 +40,39 @@ type Action struct {
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
 
+func (n *Action) New() ki.Ki { return &Action{} }
+
 var ActionProps = ki.Props{
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"border-width":     units.NewValue(0, units.Px), // todo: should be default
-		"border-radius":    units.NewValue(0, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(2, units.Px),
-		"margin":           units.NewValue(0, units.Px),
-		"box-shadow.color": &Prefs.ShadowColor,
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
-		"background-color": &Prefs.ControlColor,
-		"#icon": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.IconColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#label": ki.Props{
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#indicator": ki.Props{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignMiddle,
-		},
+	"border-width":     units.NewValue(0, units.Px), // todo: should be default
+	"border-radius":    units.NewValue(0, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(0, units.Px),
+	"box-shadow.color": &Prefs.ShadowColor,
+	"text-align":       AlignCenter,
+	"vertical-align":   AlignTop,
+	"background-color": &Prefs.ControlColor,
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.IconColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	"#indicator": ki.Props{
+		"width":          units.NewValue(1.5, units.Ex),
+		"height":         units.NewValue(1.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": AlignMiddle,
+	},
+	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -148,7 +149,7 @@ func (g *Action) Init2D() {
 func (g *Action) ConfigPartsButton() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, g.StyleProps(ButtonSelectors[ButtonActive]))
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
 	if mods {
 		g.UpdateEnd(updt)
 	}
@@ -167,13 +168,12 @@ func (g *Action) ConfigPartsMenu() {
 	if mods {
 		g.SetProp("max-width", -1)
 	}
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() {
 			ic.CopyFromIcon(IconByName("widget-wedge-right"))
-			g.StylePart(ic.This, props)
+			g.StylePart(ic.This)
 		}
 	}
 	if mods {
@@ -198,12 +198,11 @@ func (g *Action) ConfigPartsIfNeeded() {
 
 func (g *Action) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }
@@ -260,6 +259,8 @@ type Separator struct {
 
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
+func (n *Separator) New() ki.Ki { return &Separator{} }
+
 var SeparatorProps = ki.Props{
 	"padding":      units.NewValue(2, units.Px),
 	"margin":       units.NewValue(2, units.Px),
@@ -270,7 +271,7 @@ var SeparatorProps = ki.Props{
 }
 
 func (g *Separator) Style2D() {
-	g.Style2DWidget(SeparatorProps)
+	g.Style2DWidget()
 }
 
 func (g *Separator) Render2D() {
@@ -317,7 +318,7 @@ var MenuProps = ki.Props{
 		"box-shadow.h-offset": units.NewValue(2, units.Px),
 		"box-shadow.v-offset": units.NewValue(2, units.Px),
 		"box-shadow.blur":     units.NewValue(2, units.Px),
-		"box-shadow.color":    "#CCC",
+		"box-shadow.color":    &Prefs.ShadowColor,
 	},
 }
 
@@ -341,7 +342,8 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
-	frame.StylePart(frame.This, MenuProps)
+	// todo: need this case!
+	// frame.StylePart(frame.This, MenuProps)
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
 		frame.AddChild(acn.This)
@@ -365,47 +367,52 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuButton pops up a menu
 
+// MenuButtonMakeMenuFunc is a callback for making the menu on demand
+type MenuButtonMakeMenuFunc func(mb *MenuButton)
+
 type MenuButton struct {
 	ButtonBase
-	Menu Menu `desc:"the menu items for this menu"`
+	Menu         Menu                   `desc:"the menu items for this menu"`
+	MakeMenuFunc MenuButtonMakeMenuFunc `desc:"set this to make the menu on demand"`
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 
+func (n *MenuButton) New() ki.Ki { return &MenuButton{} }
+
 var MenuButtonProps = ki.Props{
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"border-width":     units.NewValue(1, units.Px),
-		"border-radius":    units.NewValue(4, units.Px),
-		"border-color":     &Prefs.BorderColor,
-		"border-style":     BorderSolid,
-		"padding":          units.NewValue(4, units.Px),
-		"margin":           units.NewValue(4, units.Px),
-		"box-shadow.color": &Prefs.ShadowColor,
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignMiddle,
-		"background-color": &Prefs.ControlColor,
-		"#icon": ki.Props{
-			"width":   units.NewValue(1, units.Em),
-			"height":  units.NewValue(1, units.Em),
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-			"fill":    &Prefs.IconColor,
-			"stroke":  &Prefs.FontColor,
-		},
-		"#label": ki.Props{
-			"margin":  units.NewValue(0, units.Px),
-			"padding": units.NewValue(0, units.Px),
-		},
-		"#indicator": ki.Props{
-			"width":          units.NewValue(1.5, units.Ex),
-			"height":         units.NewValue(1.5, units.Ex),
-			"margin":         units.NewValue(0, units.Px),
-			"padding":        units.NewValue(0, units.Px),
-			"vertical-align": AlignBottom,
-			"fill":           &Prefs.IconColor,
-			"stroke":         &Prefs.FontColor,
-		},
+	"border-width":     units.NewValue(1, units.Px),
+	"border-radius":    units.NewValue(4, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(4, units.Px),
+	"margin":           units.NewValue(4, units.Px),
+	"box-shadow.color": &Prefs.ShadowColor,
+	"text-align":       AlignCenter,
+	"vertical-align":   AlignMiddle,
+	"background-color": &Prefs.ControlColor,
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &Prefs.IconColor,
+		"stroke":  &Prefs.FontColor,
 	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	"#indicator": ki.Props{
+		"width":          units.NewValue(1.5, units.Ex),
+		"height":         units.NewValue(1.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": AlignBottom,
+		"fill":           &Prefs.IconColor,
+		"stroke":         &Prefs.FontColor,
+	},
+	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonDisabled]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -439,18 +446,21 @@ func (g *MenuButton) ButtonRelease() {
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
-	}
-	g.UpdateEnd(updt)
-	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
-	} else {
-		pos.Y -= 10
-		pos.X -= 10
-	}
-	if g.Viewport != nil { // todo: if persistent, log?
-		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+		if g.MakeMenuFunc != nil {
+			g.MakeMenuFunc(g)
+		}
+		g.UpdateEnd(updt)
+		pos := g.WinBBox.Max
+		_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
+		if indic != nil {
+			pos = indic.WinBBox.Min
+		} else {
+			pos.Y -= 10
+			pos.X -= 10
+		}
+		if g.Viewport != nil {
+			PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+		}
 	}
 }
 
@@ -505,14 +515,13 @@ func (g *MenuButton) ConfigParts() {
 		config.Add(KiT_Icon, "indicator")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	props := g.StyleProps(ButtonSelectors[ButtonActive])
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx, props)
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
 	if wrIdx >= 0 {
 		ic := g.Parts.Child(wrIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			ic.CopyFromIcon(IconByName(icnm))
 			ic.UniqueNm = icnm
-			g.StylePart(ic.This, props)
+			g.StylePart(ic.This)
 		}
 	}
 	if mods {
@@ -529,12 +538,11 @@ func (g *MenuButton) ConfigPartsIfNeeded() {
 
 func (g *MenuButton) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget(g.StyleProps(ButtonSelectors[ButtonActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }

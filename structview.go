@@ -29,6 +29,8 @@ type StructView struct {
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
+func (n *StructView) New() ki.Ki { return &StructView{} }
+
 var StructViewProps = ki.Props{
 	"#frame": ki.Props{
 		"border-width":        units.NewValue(2, units.Px),
@@ -37,7 +39,7 @@ var StructViewProps = ki.Props{
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
+		"box-shadow.color":    &Prefs.ShadowColor,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
@@ -72,7 +74,7 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 // SetFrame configures view as a frame
 func (sv *StructView) SetFrame() {
 	sv.Lay = LayoutCol
-	sv.StylePart(sv, StructViewProps)
+	sv.StylePart(sv.This)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -236,7 +238,9 @@ type StructViewInline struct {
 	TmpSave       ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, nil)
+var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
+
+func (n *StructViewInline) New() ki.Ki { return &StructViewInline{} }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
 func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {

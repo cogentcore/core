@@ -26,6 +26,8 @@ type SplitView struct {
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
+func (n *SplitView) New() ki.Ki { return &SplitView{} }
+
 // auto-max-stretch
 var SplitViewProps = ki.Props{
 	"max-width":  -1.0,
@@ -165,7 +167,7 @@ func (g *SplitView) ConfigSplitters() {
 }
 
 func (g *SplitView) Style2D() {
-	g.Style2DWidget(SplitViewProps)
+	g.Style2DWidget()
 	g.UpdateSplits()
 	g.ConfigSplitters()
 }
@@ -245,21 +247,22 @@ type Splitter struct {
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
+func (n *Splitter) New() ki.Ki { return &Splitter{} }
+
 var SplitterProps = ki.Props{
-	SliderSelectors[SliderActive]: ki.Props{
-		"padding":          "0px",
-		"margin":           "0px",
-		"background-color": "#EEF",
-		"#icon": ki.Props{
-			"max-width":  units.NewValue(1, units.Em),
-			"max-height": units.NewValue(5, units.Em),
-			"min-width":  units.NewValue(1, units.Em),
-			"min-height": units.NewValue(5, units.Em),
-			"margin":     units.NewValue(0, units.Px),
-			"padding":    units.NewValue(0, units.Px),
-			"vert-align": AlignMiddle,
-		},
+	"padding":          "0px",
+	"margin":           "0px",
+	"background-color": "#EEF",
+	"#icon": ki.Props{
+		"max-width":  units.NewValue(1, units.Em),
+		"max-height": units.NewValue(5, units.Em),
+		"min-width":  units.NewValue(1, units.Em),
+		"min-height": units.NewValue(5, units.Em),
+		"margin":     units.NewValue(0, units.Px),
+		"padding":    units.NewValue(0, units.Px),
+		"vert-align": AlignMiddle,
 	},
+	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderDisabled]: ki.Props{
 		"border-color":     "#BBB",
 		"background-color": "#DDD",
@@ -330,12 +333,11 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 }
 
 func (g *Splitter) Style2D() {
-	g.Style2DWidget(g.StyleProps(SliderSelectors[SliderActive]))
+	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i] = g.Style
-		if i > 0 {
-			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
-		}
+		g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
 	SliderFields.ToDots(g, &g.Style.UnContext)

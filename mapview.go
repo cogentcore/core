@@ -29,6 +29,8 @@ type MapView struct {
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 
+func (n *MapView) New() ki.Ki { return &MapView{} }
+
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
 
@@ -50,7 +52,7 @@ var MapViewProps = ki.Props{
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
+		"box-shadow.color":    &Prefs.ShadowColor,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
@@ -70,7 +72,7 @@ var MapViewProps = ki.Props{
 // SetFrame configures view as a frame
 func (mv *MapView) SetFrame() {
 	mv.Lay = LayoutCol
-	mv.StylePart(mv, MapViewProps)
+	mv.StylePart(mv)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -410,6 +412,8 @@ type MapViewInline struct {
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
+
+func (n *MapViewInline) New() ki.Ki { return &MapViewInline{} }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
 func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {

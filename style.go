@@ -182,6 +182,9 @@ func NewStyle() Style {
 // SetStyle sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
 func (s *Style) SetStyle(parent *Style, props ki.Props) {
+	if props == nil {
+		return
+	}
 	if !s.IsSet && parent != nil { // first time
 		StyleFields.Inherit(s, parent)
 	}
@@ -376,10 +379,10 @@ func (sf *StyledFields) CompileFields(def interface{}) {
 // as "inherit" -- inherited by default
 func (sf *StyledFields) Inherit(obj, par interface{}) {
 	pr := prof.Start("StyleFields.Inherit")
+	hasPar := (par != nil)
 	for _, fld := range sf.Inherits {
-		vf := fld.FieldValue(obj)
-		pf := fld.FieldValue(par)
-		vf.Elem().Set(pf.Elem()) // copy
+		pfi := fld.FieldIface(par)
+		fld.FromProps(sf.Fields, obj, par, pfi, hasPar)
 	}
 	pr.End()
 }
@@ -390,7 +393,7 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 	hasPar := (par != nil)
 	// fewer props than fields, esp with alts!
 	for key, val := range props {
-		if key[0] == '#' || key[0] == '.' || key[0] == ':' {
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
 		if vstr, ok := val.(string); ok {
@@ -447,6 +450,33 @@ func (sf *StyledField) FieldValue(obj interface{}) reflect.Value {
 	return kit.UnhideIfaceValue(nw).Elem()
 }
 
+// FieldIface returns an interface{} for a given object, computed from NetOff
+// -- much faster -- use this
+func (sf *StyledField) FieldIface(obj interface{}) interface{} {
+	ov := reflect.ValueOf(obj)
+	npt := kit.NonPtrType(sf.Field.Type)
+	npk := npt.Kind()
+	switch {
+	case npt == KiT_Color:
+		return (*Color)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npt.Name() == "Value":
+		return (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npk >= reflect.Int && npk <= reflect.Uint64:
+		return sf.FieldValue(obj).Interface() // no choice for enums
+	case npk == reflect.Float32:
+		return (*float32)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npk == reflect.Float64:
+		return (*float64)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npk == reflect.Bool:
+		return (*bool)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npk == reflect.String:
+		return (*string)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	default:
+		fmt.Printf("Field: %v type %v not processed in StyledField.FieldIface -- fixme!\n", sf.Field.Name, npt.String())
+		return nil
+	}
+}
+
 // UnitsValue returns a units.Value for a field, which must be of that type..
 func (sf *StyledField) UnitsValue(obj interface{}) *units.Value {
 	ov := reflect.ValueOf(obj)
@@ -456,109 +486,104 @@ func (sf *StyledField) UnitsValue(obj interface{}) *units.Value {
 
 // FromProps styles given field from property value val, with optional parent object obj
 func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val interface{}, hasPar bool) {
-	vf := fld.FieldValue(obj)
-	var pf reflect.Value
+	fi := fld.FieldIface(obj)
+	var pfi interface{}
 	if hasPar {
-		pf = fld.FieldValue(par)
+		pfi = fld.FieldIface(par)
 	}
-	prstr := ""
-	switch prtv := val.(type) {
+	switch valv := val.(type) {
 	case string:
-		prstr = prtv
-		if prtv == "inherit" {
+		if valv == "inherit" {
 			if hasPar {
-				vf.Set(pf)
-				fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, pf.Interface())
+				val = pfi
+				fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, pfi)
 			}
-			return
 		}
-		if prtv == "initial" {
-			vf.Set(fld.Default)
+		if valv == "initial" {
+			val = fld.Default.Elem().Interface()
 			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
-			return
 		}
 	}
-
 	// todo: support keywords such as auto, normal, which should just set to 0
 
-	npvf := kit.NonPtrValue(vf)
+	npt := kit.NonPtrType(reflect.TypeOf(fi))
+	npk := npt.Kind()
 
-	vk := npvf.Kind()
-	vt := npvf.Type()
-
-	if vk == reflect.Struct { // only a few types -- todo: could make an interface if needed
-		if vt == reflect.TypeOf(Color{}) {
-			vc := vf.Interface().(*Color)
-			switch prtv := val.(type) {
-			case string:
-				if idx := strings.Index(prtv, "$"); idx > 0 {
-					oclr := prtv[idx+1:]
-					prtv = prtv[:idx]
-					if vfld, nok := fields[oclr]; nok {
-						nclr, nok := vfld.FieldValue(obj).Interface().(*Color)
-						if nok {
-							vc.SetColor(nclr) // init from color
-							fmt.Printf("StyleField %v initialized to other color: %v val: %v\n", fld.Field.Name, oclr, vc)
-						}
+	switch fiv := fi.(type) {
+	case *Color:
+		switch valv := val.(type) {
+		case string:
+			if idx := strings.Index(valv, "$"); idx > 0 {
+				oclr := valv[idx+1:]
+				valv = valv[:idx]
+				if vfld, nok := fields[oclr]; nok {
+					nclr, nok := vfld.FieldIface(obj).(*Color)
+					if nok {
+						fiv.SetColor(nclr) // init from color
+						fmt.Printf("StyleField %v initialized to other color: %v val: %v\n", fld.Field.Name, oclr, fiv)
 					}
 				}
-				err := vc.SetString(prtv, nil)
-				if err != nil {
-					log.Printf("StyleField: %v\n", err)
-				}
-			case color.Color:
-				vc.SetColor(prtv)
 			}
-			return
-		} else if vt == reflect.TypeOf(units.Value{}) {
-			uv := vf.Interface().(*units.Value)
-			switch prtv := val.(type) {
-			case string:
-				uv.SetFromString(prtv)
-			case units.Value:
-				*uv = prtv
-			default: // assume Px as an implicit default
-				valflt := reflect.ValueOf(val).Convert(reflect.TypeOf(float32(0.0))).Interface().(float32)
-				uv.Set(valflt, units.Px)
+			err := fiv.SetString(valv, nil)
+			if err != nil {
+				log.Printf("StyleField: %v\n", err)
 			}
-			return
+		case color.Color:
+			fiv.SetColor(valv)
+		case *Color:
+			*fiv = *valv
+		default:
+			fmt.Printf("StyleField %v could not set Color from prop: %v type: %T\n", val, val)
 		}
-		return // no can do any struct otherwise
-	} else if vk >= reflect.Int && vk <= reflect.Uint64 { // some kind of int
-		if prstr != "" {
-			tn := kit.FullTypeName(fld.Field.Type)
-			if kit.Enums.Enum(tn) != nil {
-				kit.Enums.SetEnumValueFromStringAltFirst(vf, prstr)
+	case *units.Value:
+		switch valv := val.(type) {
+		case string:
+			fiv.SetFromString(valv)
+		case units.Value:
+			*fiv = valv
+		case *units.Value:
+			*fiv = *valv
+		default: // assume Px as an implicit default
+			valflt, ok := kit.ToFloat(val)
+			if ok {
+				fiv.Set(float32(valflt), units.Px)
 			} else {
-				fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
+				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", val, val)
 			}
-			return
+		}
+	default:
+		if npk >= reflect.Int && npk <= reflect.Uint64 {
+			switch valv := val.(type) {
+			case string:
+				tn := kit.FullTypeName(fld.Field.Type)
+				if kit.Enums.Enum(tn) != nil {
+					kit.Enums.SetEnumFromStringAltFirst(fi, valv)
+				} else {
+					fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
+				}
+			default:
+				ival, ok := kit.ToInt(val)
+				if !ok {
+					log.Printf("gi.StyledField.FromProps: for field: %v could not convert property to int: %v %T\n", fld.Field.Name, val, val)
+				} else {
+					kit.SetEnumFromInt64(fi, ival, npt)
+				}
+			}
 		} else {
-			// somehow this doesn't work:
-			// vf.Set(reflect.ValueOf(val))
-			ival, ok := kit.ToInt(val)
-			if !ok {
-				log.Printf("gi.StyledField.FromProps: for field: %v could not convert property to int: %v %T\n", fld.Field.Name, val, val)
-			} else {
-				kit.Enums.SetEnumValueFromInt64(vf, ival)
-			}
-			return
+			kit.SetRobust(fi, val)
 		}
 	}
-	// again, this should work but does not:
-	// vf.Set(reflect.ValueOf(val).Convert(reflect.TypeOf(vt)))
-	kit.SetRobust(vf.Interface(), val)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //   WalkStyleStruct
 
 // this is the function to process a given field when walking the style
-type WalkStyleFieldFun func(struf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
+type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
 
 // WalkStyleStruct walks through a struct, calling a function on fields with
 // xml tags that are not "-", recursively through all the fields
-func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun WalkStyleFieldFun) {
+func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun WalkStyleFieldFunc) {
 	otp := reflect.TypeOf(obj)
 	if otp.Kind() != reflect.Ptr {
 		log.Printf("gi.WalkStyleStruct -- you must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())

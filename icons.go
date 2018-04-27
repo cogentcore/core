@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/color"
 	"log"
 	"sort"
 
@@ -38,7 +39,9 @@ type Icon struct {
 	RenderedSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
-var KiT_Icon = kit.Types.AddType(&Icon{}, nil)
+var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
+
+func (n *Icon) New() ki.Ki { return &Icon{} }
 
 func (vp *Icon) Init2D() {
 	vp.SVG.Init2D()
@@ -67,18 +70,15 @@ func (vp *Icon) CopyFromIcon(cp *Icon) {
 	vp.Rendered = false // not yet..
 }
 
-var IconProps = []ki.Props{
-	{ // widget props
-		"background-color": "transparent",
-	}, { // paint props
-		"fill":   "blue",
-		"stroke": "black",
-	},
+var IconProps = ki.Props{
+	"background-color": color.Transparent,
+	"fill":             "blue",
+	"stroke":           color.Black,
 }
 
 func (vp *Icon) Style2D() {
-	vp.Style2DWidget(IconProps[0])
-	vp.Style2DSVG(IconProps[1])
+	vp.Style2DWidget()
+	vp.Style2DSVG(nil)
 }
 
 func (vp *Icon) ReStyle2D() {

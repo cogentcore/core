@@ -42,6 +42,8 @@ type Viewport2D struct {
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
+func (n *Viewport2D) New() ki.Ki { return &Viewport2D{} }
+
 var Viewport2DProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 }
@@ -208,9 +210,9 @@ func (vp *Viewport2D) Init2D() {
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()
-		// if Update2DTrace {
-		fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
-		// }
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+		}
 		// todo: don't re-render if deleting!
 		rvp.FullRender2DTree()
 	})
@@ -218,7 +220,7 @@ func (vp *Viewport2D) Init2D() {
 
 func (vp *Viewport2D) Style2D() {
 	vp.SetCurWin()
-	vp.Style2DWidget(nil)
+	vp.Style2DWidget()
 }
 
 func (g *Viewport2D) StyleCSS(node Node2D) {

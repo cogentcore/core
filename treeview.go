@@ -17,6 +17,7 @@ import (
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/rcoreilly/prof"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,8 @@ type TreeView struct {
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
 
+func (n *TreeView) New() ki.Ki { return &TreeView{} }
+
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
 
@@ -113,9 +116,11 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki) {
 
 // sync with the source tree
 func (tv *TreeView) SyncToSrc() {
+	pr := prof.Start("TreeView.SyncToSrc")
 	sk := tv.SrcNode.Ptr
 	nm := "ViewOf_" + sk.UniqueName()
-	tv.SetName(nm)
+	tv.SetNameRaw(nm) // guaranteed to be unique
+	tv.SetUniqueName(nm)
 	vcprop := "view-closed"
 	skids := sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
@@ -171,6 +176,7 @@ func (tv *TreeView) SyncToSrc() {
 		idx++
 	}
 	tv.UpdateEnd(updt)
+	pr.End()
 }
 
 // function for receiving node signals from our SrcNode
@@ -618,9 +624,8 @@ func (tv *TreeView) ConfigParts() {
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.Icon = IconByName("widget-wedge-down") // todo: style
 	wb.IconOff = IconByName("widget-wedge-right")
-	props := tv.StyleProps(TreeViewSelectors[TreeViewActive])
 	if mods {
-		tv.StylePart(wb.This, props)
+		tv.StylePart(wb.This)
 		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
 				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -632,7 +637,7 @@ func (tv *TreeView) ConfigParts() {
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	if mods {
-		tv.StylePart(lbl.This, props)
+		tv.StylePart(lbl.This)
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
 			me := d.(*mouse.Event)
@@ -646,31 +651,36 @@ func (tv *TreeView) ConfigParts() {
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
 	if mods {
 		mb.Text = "..."
-		tv.StylePart(mb.This, props)
-
-		// todo: shortcuts!
-		mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcAddChild()
-		})
-		mb.AddMenuText("Insert Before", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcInsertBefore()
-		})
-		mb.AddMenuText("Insert After", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcInsertAfter()
-		})
-		mb.AddMenuText("Duplicate", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcDuplicate()
-		})
-		mb.AddMenuText("Delete", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcDelete()
-		})
+		tv.StylePart(mb.This)
+		mb.MakeMenuFunc = func(mbb *MenuButton) {
+			tv.MakeMenu(mbb)
+		}
 	}
 	tv.Parts.UpdateEnd(updt)
+}
+
+func (tv *TreeView) MakeMenu(mb *MenuButton) {
+	// todo: shortcuts!
+	mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.SrcAddChild()
+	})
+	mb.AddMenuText("Insert Before", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.SrcInsertBefore()
+	})
+	mb.AddMenuText("Insert After", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.SrcInsertAfter()
+	})
+	mb.AddMenuText("Duplicate", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.SrcDuplicate()
+	})
+	mb.AddMenuText("Delete", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.SrcDelete()
+	})
 }
 
 func (tv *TreeView) ConfigPartsIfNeeded() {
@@ -728,57 +738,42 @@ func (tv *TreeView) Init2D() {
 }
 
 var TreeViewProps = ki.Props{
-	TreeViewSelectors[TreeViewActive]: ki.Props{
-		"indent":           units.NewValue(2, units.Ch),
-		"border-width":     units.NewValue(0, units.Px),
-		"border-radius":    units.NewValue(0, units.Px),
-		"padding":          units.NewValue(1, units.Px),
-		"margin":           units.NewValue(1, units.Px),
-		"text-align":       AlignLeft,
-		"vertical-align":   AlignTop,
-		"background-color": &Prefs.BackgroundColor,
-		"#branch": ki.Props{
-			"vertical-align":   AlignMiddle,
-			"margin":           units.NewValue(0, units.Px),
-			"padding":          units.NewValue(0, units.Px),
-			"background-color": color.Transparent,
-			"#icon0": ki.Props{
-				"width":   units.NewValue(.8, units.Em),
-				"height":  units.NewValue(.8, units.Em),
-				"margin":  units.NewValue(0, units.Px),
-				"padding": units.NewValue(0, units.Px),
-				"fill":    &Prefs.IconColor,
-				"stroke":  &Prefs.FontColor,
-			},
-			"#icon1": ki.Props{
-				"width":   units.NewValue(.8, units.Em),
-				"height":  units.NewValue(.8, units.Em),
-				"margin":  units.NewValue(0, units.Px),
-				"padding": units.NewValue(0, units.Px),
-				"fill":    &Prefs.IconColor,
-				"stroke":  &Prefs.FontColor,
-			},
-		},
-		"#space": ki.Props{
-			"width": units.NewValue(.5, units.Em),
-		},
-		"#label": ki.Props{
-			"margin":    units.NewValue(0, units.Px),
-			"padding":   units.NewValue(0, units.Px),
-			"min-width": units.NewValue(16, units.Ex),
-		},
-		"#menu": ki.Props{
-			"border-width":        units.NewValue(0, units.Px),
-			"border-radius":       units.NewValue(0, units.Px),
-			"border-color":        "none",
-			"padding":             units.NewValue(2, units.Px),
-			"margin":              units.NewValue(0, units.Px),
-			"box-shadow.h-offset": units.NewValue(0, units.Px),
-			"box-shadow.v-offset": units.NewValue(0, units.Px),
-			"box-shadow.blur":     units.NewValue(0, units.Px),
-			"indicator":           "none",
-		},
+	"indent":           units.NewValue(2, units.Ch),
+	"border-width":     units.NewValue(0, units.Px),
+	"border-radius":    units.NewValue(0, units.Px),
+	"padding":          units.NewValue(1, units.Px),
+	"margin":           units.NewValue(1, units.Px),
+	"text-align":       AlignLeft,
+	"vertical-align":   AlignTop,
+	"background-color": &Prefs.BackgroundColor,
+	"#branch": ki.Props{
+		"vertical-align":   AlignMiddle,
+		"margin":           units.NewValue(0, units.Px),
+		"padding":          units.NewValue(0, units.Px),
+		"background-color": color.Transparent,
+		"width":            units.NewValue(.8, units.Em),
+		"height":           units.NewValue(.8, units.Em),
 	},
+	"#space": ki.Props{
+		"width": units.NewValue(.5, units.Em),
+	},
+	"#label": ki.Props{
+		"margin":    units.NewValue(0, units.Px),
+		"padding":   units.NewValue(0, units.Px),
+		"min-width": units.NewValue(16, units.Ex),
+	},
+	"#menu": ki.Props{
+		"border-width":        units.NewValue(0, units.Px),
+		"border-radius":       units.NewValue(0, units.Px),
+		"border-color":        "none",
+		"padding":             units.NewValue(2, units.Px),
+		"margin":              units.NewValue(0, units.Px),
+		"box-shadow.h-offset": units.NewValue(0, units.Px),
+		"box-shadow.v-offset": units.NewValue(0, units.Px),
+		"box-shadow.blur":     units.NewValue(0, units.Px),
+		"indicator":           "none",
+	},
+	TreeViewSelectors[TreeViewActive]: ki.Props{},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
 	},
@@ -792,13 +787,13 @@ func (tv *TreeView) Style2D() {
 		return
 	}
 	bitflag.Set(&tv.Flag, int(CanFocus))
-	props := tv.StyleProps(TreeViewSelectors[TreeViewActive])
-	tv.Style2DWidget(props)
+	tv.Style2DWidget()
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i] = tv.Style
+		tv.StateStyles[i] = *tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil)
 		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
+		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
-	TreeViewFields.Style(tv, nil, props)
+	tv.Indent = units.NewValue(2, units.Ch) // default
 	TreeViewFields.Style(tv, nil, tv.Props)
 	TreeViewFields.ToDots(tv, &tv.Style.UnContext)
 	tv.ConfigParts()

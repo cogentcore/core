@@ -27,6 +27,8 @@ type SliceView struct {
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
+func (n *SliceView) New() ki.Ki { return &SliceView{} }
+
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
 
@@ -51,7 +53,7 @@ var SliceViewProps = ki.Props{
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    "#CCC",
+		"box-shadow.color":    &Prefs.ShadowColor,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
@@ -71,7 +73,7 @@ var SliceViewProps = ki.Props{
 // SetFrame configures view as a frame
 func (sv *SliceView) SetFrame() {
 	sv.Lay = LayoutCol
-	sv.StylePart(sv, SliceViewProps)
+	sv.StylePart(sv.This)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -290,7 +292,9 @@ type SliceViewInline struct {
 	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, nil)
+var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
+
+func (n *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
