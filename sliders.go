@@ -468,7 +468,6 @@ func (g *Slider) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	SliderFields.Style(g, nil, g.Props)
 	SliderFields.ToDots(g, &g.Style.UnContext)
@@ -643,7 +642,6 @@ func (g *ScrollBar) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	SliderFields.Style(g, nil, g.Props)
 	SliderFields.ToDots(g, &g.Style.UnContext)

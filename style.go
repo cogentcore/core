@@ -15,6 +15,7 @@ import (
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/rcoreilly/prof"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +197,7 @@ func (s *Style) SetStyle(parent *Style, props ki.Props) {
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
-	s.UnContext.Defaults() // todo: need to get screen information and true dpi
+	s.UnContext.Defaults()
 	if vp != nil {
 		if vp.Win != nil {
 			s.UnContext.DPI = vp.Win.LogicalDPI()
@@ -374,15 +375,18 @@ func (sf *StyledFields) CompileFields(def interface{}) {
 // Inherit copies all the values from par to obj for fields marked
 // as "inherit" -- inherited by default
 func (sf *StyledFields) Inherit(obj, par interface{}) {
+	pr := prof.Start("StyleFields.Inherit")
 	for _, fld := range sf.Inherits {
 		vf := fld.FieldValue(obj)
 		pf := fld.FieldValue(par)
 		vf.Elem().Set(pf.Elem()) // copy
 	}
+	pr.End()
 }
 
 // Style applies styles to the fields from given properties for given object
 func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
+	pr := prof.Start("StyleFields.Style")
 	hasPar := (par != nil)
 	// fewer props than fields, esp with alts!
 	for key, val := range props {
@@ -411,15 +415,17 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 		}
 		fld.FromProps(sf.Fields, obj, par, val, hasPar)
 	}
+	pr.End()
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (sf *StyledFields) ToDots(obj interface{}, uc *units.Context) {
+	pr := prof.Start("StyleFields.ToDots")
 	for _, fld := range sf.Units {
-		vf := fld.FieldValue(obj)
-		uv := vf.Interface().(*units.Value)
+		uv := fld.UnitsValue(obj)
 		uv.ToDots(uc)
 	}
+	pr.End()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -433,11 +439,19 @@ type StyledField struct {
 }
 
 // FieldValue returns a reflect.Value for a given object, computed from NetOff
+// -- this is VERY expensive time-wise -- need to figure out a better solution..
 func (sf *StyledField) FieldValue(obj interface{}) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
 	nw := reflect.NewAt(sf.Field.Type, f)
 	return kit.UnhideIfaceValue(nw).Elem()
+}
+
+// UnitsValue returns a units.Value for a field, which must be of that type..
+func (sf *StyledField) UnitsValue(obj interface{}) *units.Value {
+	ov := reflect.ValueOf(obj)
+	uv := (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	return uv
 }
 
 // FromProps styles given field from property value val, with optional parent object obj

@@ -204,7 +204,6 @@ func (g *Action) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2D{})
 	}
 	g.ConfigParts()
 }
@@ -536,7 +535,6 @@ func (g *MenuButton) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	g.ConfigParts()
 }

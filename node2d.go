@@ -9,6 +9,7 @@ import (
 	"image"
 	"strings"
 
+	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -278,6 +279,14 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 	return nil, nil
 }
 
+// redefining this here gives access to the much faster ParentWindow method!
+func (g *Node2DBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
+	win := g.ParentWindow()
+	if win != nil {
+		win.ReceiveEventType(g.This, et, fun)
+	}
+}
+
 // handles basic node initialization -- Init2D can then do special things
 func (g *Node2DBase) Init2DBase() {
 	g.Viewport = g.ParentViewport()
@@ -336,9 +345,9 @@ func (g *Node2DBase) Style2DWidget(baseProps ki.Props) {
 		g.Style.SetStyle(nil, g.Properties())
 	}
 	// then css:
-	if g.Viewport != nil {
-		g.Viewport.StyleCSStoMe(gii)
-	}
+	// if g.Viewport != nil {
+	// 	g.Viewport.StyleCSStoMe(gii)
+	// }
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset

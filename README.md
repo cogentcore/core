@@ -74,8 +74,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* Style one field -- use for fields in Node objs -- e.g., for indent in TreeView
-* also thumb in slider -- make it em sized -- will fix weird sizing issues -- generalize "StyleFields" struct -- just needs an Init interface.
+* need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok -- just when valueview destructs?
 
 * Nonmodal dialogs -> windows
 
@@ -119,21 +118,17 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
 
-Next:
 * Layout flow types
 
 * style parsing crash on font-family
 
 * all widgets need read-only and disabled states
 
-Soon:
-
 * Reminder: grep all todo: in code -- lots!
+
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
 * all builtin defaults should use units.Value and other raw values instead of strings
-
-* maybe not: need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok
 
 * Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ sub-menus -- should just work??
@@ -142,6 +137,24 @@ Soon:
 	+ ProgressBar -- very simple
 	+ ToolTip
 	+ TextArea
+
+### Performance issues
+
+* Styling is in general very expensive.
+	+ ToDots in partciular is expensive -- just from the traversal part -- computation is not much..  should only recompute when necessary.  Requires figuring out when properties have changed.
+	+ on props themselves?  not sure we have any way of detecting changes in maps?  this would be the most efficient.  compute some overall hash-code on the thing or something?  yes.
+	+ otherwise we would need to compute differences when setting values, which seems like it is too late and defeats the purpose -- makes that more expensive.
+	+ delayed construction of menus, e.g., in TreeView -- build just-in-time at mouse event -- should be easy & save a lot of widgets..
+	+ seems like building the treeview up-front is very slow -- opening the editor is MUCH slower than refreshing -- profile that..
+	+ 4.6sec on FindConnectionIndex when making new Connections -- hash map? -- this is most of the time in Init2D
+	+ astounding 8million ToDots method calls??
+	+ StyledField.FieldValue is massively slow, because it is using generic reflect tech and creating the new pointers etc is very, surprisingly slow.  Switch to a type-switch version instead -- much faster if you just try to convert to a particular type -- and styles only have basic types anyway.
+	+ StyleCSSToMe is very slow.  why?
+	
+
+### Maybe
+
+* cache builtin styled Style object so you don't have to re-do that all the time
 
 ### TO-DONE (ish)
 

@@ -287,7 +287,7 @@ var SplitterProps = ki.Props{
 
 func (g *Splitter) Defaults() { // todo: should just get these from props
 	g.ValThumb = false
-	g.ThSize = 10.0
+	g.ThumbSize = units.NewValue(1, units.Ex)
 	g.Step = 0.01
 	g.PageStep = 0.1
 	g.Max = 1.0
@@ -336,8 +336,10 @@ func (g *Splitter) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
+	SliderFields.Style(g, nil, g.Props)
+	SliderFields.ToDots(g, &g.Style.UnContext)
+	g.ThSize = g.ThumbSize.Dots
 	g.ConfigParts()
 }
 
@@ -383,9 +385,6 @@ func (g *Splitter) Render2DDefaultStyle() {
 		} else {
 			g.VpBBox = image.Rect(g.VpBBox.Min.X, pos, g.VpBBox.Max.X, pos+10)
 			g.WinBBox = image.Rect(g.WinBBox.Min.X, pos, g.WinBBox.Max.X, pos+10)
-		}
-		for i := 0; i < int(SliderStatesN); i++ {
-			g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 		}
 	}
 

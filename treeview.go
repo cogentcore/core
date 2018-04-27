@@ -72,7 +72,7 @@ const (
 // Style selector names for the different states:
 var TreeViewSelectors = []string{":active", ":selected", ":focus"}
 
-// internal indexes for accessing elements of the widget
+// internal indexes for accessing elements of the widget -- todo: icon!
 const (
 	tvBranchIdx = iota
 	tvSpaceIdx
@@ -86,16 +86,15 @@ const (
 type TreeView struct {
 	WidgetBase
 	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	Indent      units.Value            `xml:"indent" desc:"styled amount to indent children relative to this node"`
 	TreeViewSig ki.Signal              `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles [TreeViewStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	RootWidget  *TreeView              `json:"-" desc:"cached root widget"`
+	Icon        *Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
+	RootWidget  *TreeView              `json:"-" xml:"-" view:"-" desc:"cached root widget"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
-
-// todo: could create an interface for TreeView types -- right now just using
-// EmbeddedStruct to make everything general for anything that might embed TreeView
 
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
@@ -730,6 +729,7 @@ func (tv *TreeView) Init2D() {
 
 var TreeViewProps = ki.Props{
 	TreeViewSelectors[TreeViewActive]: ki.Props{
+		"indent":           units.NewValue(2, units.Ch),
 		"border-width":     units.NewValue(0, units.Px),
 		"border-radius":    units.NewValue(0, units.Px),
 		"padding":          units.NewValue(1, units.Px),
@@ -797,8 +797,10 @@ func (tv *TreeView) Style2D() {
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i] = tv.Style
 		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
-		tv.StateStyles[i].SetUnitContext(tv.Viewport, Vec2DZero)
 	}
+	TreeViewFields.Style(tv, nil, props)
+	TreeViewFields.Style(tv, nil, tv.Props)
+	TreeViewFields.ToDots(tv, &tv.Style.UnContext)
 	tv.ConfigParts()
 }
 
@@ -823,7 +825,7 @@ func (tv *TreeView) Size2D() {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				h += gi.LayData.AllocSize.Y
-				w = Max32(w, 10+gi.LayData.AllocSize.X) // 10 = indent, use max
+				w = Max32(w, tv.Indent.Dots+gi.LayData.AllocSize.X)
 			}
 		}
 	}
@@ -863,16 +865,13 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	}
 
 	tv.Layout2DParts(parBBox) // use OUR version
-	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
-	}
 	h := tv.WidgetSize.Y
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
 			_, gi := KiToNode2D(kid)
 			if gi != nil {
 				gi.LayData.AllocPosRel.Y = h
-				gi.LayData.AllocPosRel.X = 10 // indent
+				gi.LayData.AllocPosRel.X = tv.Indent.Dots
 				h += gi.LayData.AllocSize.Y
 			}
 		}
@@ -949,3 +948,18 @@ func (tv *TreeView) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &TreeView{}
+
+// TreeViewDefault is default obj that can be used when property specifies "default"
+var TreeViewDefault TreeView
+
+// TreeViewFields contain the StyledFields for TreeView type
+var TreeViewFields = initTreeView()
+
+func initTreeView() *StyledFields {
+	TreeViewDefault = TreeView{}
+	TreeViewDefault.Indent = units.NewValue(2, units.Ch)
+	sf := &StyledFields{}
+	sf.Default = &TreeViewDefault
+	sf.AddField(&TreeViewDefault, "Indent")
+	return sf
+}

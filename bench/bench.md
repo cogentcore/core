@@ -4,6 +4,10 @@
 
 **VERY IMPORTANT** must run benchmarks from a go build and NOT from dlv debug session.
 
+* https://github.com/google/pprof/blob/master/doc/pprof.md
+	+ go tool pprof cpu.prof 
+	+ list Style2D to see all the stuff happening in Style2D
+
 ## 2018 - 04 - 24
 
 * style is now much faster by just looking at props and compiling all the fields into maps

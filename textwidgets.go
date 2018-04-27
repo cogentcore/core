@@ -411,7 +411,6 @@ func (g *TextField) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(TextFieldSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 }
 
@@ -1144,7 +1143,6 @@ func (g *ComboBox) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	g.ConfigParts()
 }

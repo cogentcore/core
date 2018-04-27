@@ -550,7 +550,11 @@ func (w *Window) EventLoop() {
 					Prefs.Edit()
 					e.SetProcessed()
 				case "Control+Alt+R":
-					w.EndTargProfile()
+					if prof.Profiling {
+						w.EndTargProfile()
+					} else {
+						w.StartTargProfile()
+					}
 					e.SetProcessed()
 				case "Control+Alt+F":
 					w.BenchmarkFullRender()
@@ -873,6 +877,7 @@ func (w *Window) EndTargProfile() {
 // run benchmark of 50 full re-renders, report targeted profile results
 func (w *Window) BenchmarkFullRender() {
 	fmt.Println("Starting BenchmarkFullRender")
+	w.StartCPUMemProfile()
 	w.StartTargProfile()
 	ts := time.Now()
 	n := 50
@@ -882,6 +887,7 @@ func (w *Window) BenchmarkFullRender() {
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	w.EndTargProfile()
+	w.EndCPUMemProfile()
 }
 
 // run benchmark of 50 just-re-renders, not full rebuilds

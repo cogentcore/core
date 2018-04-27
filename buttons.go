@@ -80,7 +80,7 @@ var ButtonSelectors = []string{":active", ":disabled", ":hover", ":focus", ":dow
 type ButtonBase struct {
 	WidgetBase
 	Text        string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon        *Icon                `json:"-" xml:"-" xml:desc:"optional icon for the button -- different button can configure this in different ways relative to the text if both are present"`
+	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
@@ -380,7 +380,6 @@ func (g *Button) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	g.ConfigParts()
 }
@@ -594,7 +593,6 @@ func (g *CheckBox) Style2D() {
 		if i > 0 {
 			g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		}
-		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
 	g.ConfigParts()
 }
