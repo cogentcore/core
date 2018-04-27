@@ -74,15 +74,12 @@ func NewPaint() Paint {
 	return p
 }
 
-// default style can be used when property specifies "default"
-var PaintDefault = NewPaint()
-
 // set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
 func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
 	if !pc.StyleSet && parent != nil { // first time
-		PaintFieldsVar.Inherit(pc, parent)
+		PaintFields.Inherit(pc, parent)
 	}
-	PaintFieldsVar.SetFromProps(pc, parent, props)
+	PaintFields.Style(pc, parent, props)
 	pc.StrokeStyle.SetStylePost()
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
@@ -111,38 +108,21 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 // ToDots calls ToDots on all units.Value fields in the style (recursively) --
 // need to have set the UnContext first -- only after layout at render time is
 // that possible
-func (s *Paint) ToDots() {
-	PaintFieldsVar.ToDots(s)
+func (pc *Paint) ToDots() {
+	PaintFields.ToDots(pc, &pc.UnContext)
 }
 
-// PaintFields contains the compiled fields for the Paint type
-type PaintFields struct {
-	Fields   map[string]*StyledField `xml:"-" desc:"the compiled stylable fields, mapped the xml and alt tags for the field"`
-	Inherits []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
-	Units    []*StyledField          `xml:"-" desc:"the compiled stylable fields of the unit.Value type -- "`
-}
+// PaintDefault is default style can be used when property specifies "default"
+var PaintDefault Paint
 
-var PaintFieldsVar = PaintFields{}
+// PaintFields contain the StyledFields for Paint type
+var PaintFields = initPaint()
 
-func (sf *PaintFields) Init() {
-	if sf.Fields == nil {
-		sf.Fields, sf.Inherits, sf.Units = CompileStyledFields(&PaintDefault)
-	}
-}
-
-func (sf *PaintFields) Inherit(st, par *Paint) {
-	sf.Init()
-	InheritStyledFields(sf.Inherits, st, par)
-}
-
-func (sf *PaintFields) SetFromProps(st, par *Paint, props ki.Props) {
-	sf.Init()
-	StyledFieldsFromProps(sf.Fields, st, par, props)
-}
-
-func (sf *PaintFields) ToDots(st *Paint) {
-	sf.Init()
-	UnitValsToDots(sf.Units, st, &st.UnContext)
+func initPaint() *StyledFields {
+	PaintDefault = NewPaint()
+	sf := &StyledFields{}
+	sf.Init(&PaintDefault)
+	return sf
 }
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -287,7 +287,7 @@ var SplitterProps = ki.Props{
 
 func (g *Splitter) Defaults() { // todo: should just get these from props
 	g.ValThumb = false
-	g.ThumbSize = 10.0
+	g.ThSize = 10.0
 	g.Step = 0.01
 	g.PageStep = 0.1
 	g.Max = 1.0
@@ -318,10 +318,10 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 			} else {
 				bitflag.Clear(&ic.Flag, int(VpFlagDrawIntoWin))
 			}
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThumbSize)
-			ic.LayData.AllocSize.SetDim(g.Dim, g.ThumbSize)
+			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThSize)
+			ic.LayData.AllocSize.SetDim(g.Dim, g.ThSize)
 			if render {
 				ic.Layout2DTree()
 			}
@@ -343,7 +343,7 @@ func (g *Splitter) Style2D() {
 
 func (g *Splitter) Size2D() {
 	g.InitLayout2D()
-	if g.ThumbSize == 0.0 {
+	if g.ThSize == 0.0 {
 		g.Defaults()
 	}
 }

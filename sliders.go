@@ -48,17 +48,18 @@ type SliderBase struct {
 	Step        float32              `xml:"step" desc:"smallest step size to increment"`
 	PageStep    float32              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Size        float32              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThumbSize   float32              `xml:"thumb-size" desc:"size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
-	Prec        int                  `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
+	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
-	ValThumb    bool                 `xml:"prop-thumb","desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" "desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float32              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Dim         Dims2D               `desc:"dimension along which the slider slides"`
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
-	TrackThr    float32              `xml:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
+	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	State       SliderStates         `desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
@@ -99,6 +100,14 @@ const (
 
 // Style selector names for the different states
 var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":value", ":box"}
+
+func (g *SliderBase) Defaults() { // todo: should just get these from props
+	g.ThumbSize = units.NewValue(1, units.Em)
+	g.Step = 0.1
+	g.PageStep = 0.2
+	g.Max = 1.0
+	g.Prec = 9
+}
 
 // if snap is set, then snap the value to step sizes
 func (g *SliderBase) SnapValue() {
@@ -171,7 +180,7 @@ func (g *SliderBase) SizeFromAlloc() {
 	spc := g.Style.BoxSpace()
 	g.Size = g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	if !g.ValThumb {
-		g.Size -= g.ThumbSize // half on each side
+		g.Size -= g.ThSize // half on each side
 	}
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
@@ -184,7 +193,7 @@ func (g *SliderBase) SetSliderPos(pos float32) {
 	g.Pos = Min32(g.Size, g.Pos)
 	if g.ValThumb {
 		g.UpdateThumbValSize()
-		g.Pos = Min32(g.Size-g.ThumbSize, g.Pos)
+		g.Pos = Min32(g.Size-g.ThSize, g.Pos)
 	}
 	g.Pos = Max32(0, g.Pos)
 	g.Value = Truncate32(g.Min+(g.Max-g.Min)*(g.Pos/g.Size), g.Prec)
@@ -243,10 +252,10 @@ func (g *SliderBase) SetThumbValue(val float32) {
 // set thumb size as proportion of min / max (e.g., amount visible in
 // scrollbar) -- max's out to full size
 func (g *SliderBase) UpdateThumbValSize() {
-	g.ThumbSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
-	g.ThumbSize = Min32(g.ThumbSize, 1.0)
-	g.ThumbSize = Max32(g.ThumbSize, 0.0)
-	g.ThumbSize *= g.Size
+	g.ThSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
+	g.ThSize = Min32(g.ThSize, 1.0)
+	g.ThSize = Max32(g.ThSize, 0.0)
+	g.ThSize *= g.Size
 }
 
 func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
@@ -313,7 +322,7 @@ func (g *SliderBase) Init2DSlider() {
 		if me.Action == mouse.Press {
 			ed := sl.PointToRelPos(me.Where)
 			st := &sl.Style
-			spc := st.Layout.Margin.Dots + 0.5*g.ThumbSize
+			spc := st.Layout.Margin.Dots + 0.5*g.ThSize
 			if sl.Dim == X {
 				sl.SliderPressed(float32(ed.X) - spc)
 			} else {
@@ -360,15 +369,29 @@ func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
 			pad := g.Style.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThumbSize)
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.X = g.ThumbSize
-			ic.LayData.AllocSize.Y = g.ThumbSize
+			ic.LayData.AllocSize.X = g.ThSize
+			ic.LayData.AllocSize.Y = g.ThSize
 			if render {
 				ic.Layout2DTree()
 			}
 		}
 	}
+}
+
+// SliderDefault is default obj that can be used when property specifies "default"
+var SliderDefault SliderBase
+
+// SliderFields contain the StyledFields for Slider type
+var SliderFields = initSlider()
+
+func initSlider() *StyledFields {
+	SliderDefault = SliderBase{}
+	SliderDefault.Defaults()
+	sf := &StyledFields{}
+	sf.Init(&SliderDefault)
+	return sf
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -423,8 +446,9 @@ var SliderProps = ki.Props{
 	},
 }
 
-func (g *Slider) Defaults() { // todo: should just get these from props
-	g.ThumbSize = 25.0
+func (g *Slider) Defaults() {
+	g.ThumbSize = units.NewValue(1.5, units.Em)
+	g.ThSize = 25.0
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
@@ -446,17 +470,20 @@ func (g *Slider) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
+	SliderFields.Style(g, nil, g.Props)
+	SliderFields.ToDots(g, &g.Style.UnContext)
+	g.ThSize = g.ThumbSize.Dots
 	g.ConfigParts()
 }
 
 func (g *Slider) Size2D() {
 	g.InitLayout2D()
-	if g.ThumbSize == 0.0 {
+	if g.ThSize == 0.0 {
 		g.Defaults()
 	}
 	st := &g.Style
 	// get at least thumbsize + margin + border.size
-	sz := g.ThumbSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
+	sz := g.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
 	g.LayData.AllocSize.SetDim(OtherDim(g.Dim), sz)
 }
 
@@ -514,7 +541,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	bsz := sz
 	tpos := pos // thumb pos
 
-	ht := 0.5 * g.ThumbSize
+	ht := 0.5 * g.ThSize
 
 	odim := OtherDim(g.Dim)
 	bpos.SetAddDim(odim, spc)
@@ -597,7 +624,7 @@ var ScrollBarProps = ki.Props{
 
 func (g *ScrollBar) Defaults() { // todo: should just get these from props
 	g.ValThumb = true
-	g.ThumbSize = 20.0
+	g.ThumbSize = units.NewValue(1, units.Ex)
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
@@ -618,6 +645,8 @@ func (g *ScrollBar) Style2D() {
 		}
 		g.StateStyles[i].SetUnitContext(g.Viewport, Vec2DZero)
 	}
+	SliderFields.Style(g, nil, g.Props)
+	SliderFields.ToDots(g, &g.Style.UnContext)
 }
 
 func (g *ScrollBar) Size2D() {
@@ -667,7 +696,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(g.Dim, g.Pos)                     // start of thumb
-	sz.SetDim(g.Dim, g.ThumbSize)
+	sz.SetDim(g.Dim, g.ThSize)
 	pc.FillStyle.SetColor(&g.StateStyles[SliderValue].Background.Color)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }

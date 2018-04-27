@@ -52,8 +52,10 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = "This is a demonstration of the various GoGi Widgets"
-	title.SetProp("text-align", "center")
+	title.Text = "This is a demonstration of the various GoGi Widgets\nShortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
+	title.SetProp("text-align", gi.AlignCenter)
+	title.SetProp("word-wrap", true)
+	title.SetMinPrefWidth(units.NewValue(30, units.Ch))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	//////////////////////////////////////////
@@ -183,7 +185,7 @@ func mainrun() {
 	txlab.Text = "Text Widgets:"
 	txrow := vlay.AddNewChild(gi.KiT_Layout, "txrow").(*gi.Layout)
 	txrow.Lay = gi.LayoutRow
-	txrow.SetProp("align-horiz", gi.AlignJustify)
+	// txrow.SetProp("align-horiz", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 	// txrow.SetStretchMaxHeight()
 
