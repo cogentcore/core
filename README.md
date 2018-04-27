@@ -38,7 +38,7 @@ https://golang.org/doc/effective_go.html#names
 
 * Above means that there can be conflicts for any interfaces that need to provide access to those fields, if you also want to export the fields in the struct implementation.  You have to be creative in coming up with different but equally sensible names in both the interface and the implementer.
 
-* `Delete` instead of `Remove`
+* `Delete` instead of `Remove`  `Iface` for `interface{}`
 
 * Unless it is a one-liner converter to a given type or value like Stringer, it can be challenging to name an interface and a base type for that interface differently.
 	+ The Interface should generally be given priority, and have the cleaner name.  Base types are only typed relatively rarely at start of structs that embed them, so they are less important.

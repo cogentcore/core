@@ -18,7 +18,6 @@ import (
 
 	"log"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 
@@ -26,6 +25,7 @@ import (
 	"github.com/json-iterator/go"
 	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/rcoreilly/prof"
 )
 
 // use this to switch between using standard json vs. faster jsoniter right
@@ -61,13 +61,15 @@ type Node struct {
 // must register all new types so type names can be looked up by name -- also props
 var KiT_Node = kit.Types.AddType(&Node{}, nil)
 
+func (n *Node) New() Ki { return &Node{} }
+
 // check for interface implementation
 var _ Ki = &Node{}
 
 //////////////////////////////////////////////////////////////////////////
-//  Stringer
+//  fmt.Stringer
 
-// stringer interface -- basic indented tree representation
+// fmt.stringer interface -- basic indented tree representation
 func (n Node) String() string {
 	str := ""
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
@@ -204,6 +206,7 @@ func (n *Node) SetUniqueName(name string) {
 
 // make sure that the names are unique -- n^2 ish
 func (n *Node) UniquifyNames() {
+	pr := prof.Start("ki.Node.UniquifyNames")
 	for i, child := range n.Kids {
 		if len(child.UniqueName()) == 0 {
 			if n.Par != nil {
@@ -236,6 +239,7 @@ func (n *Node) UniquifyNames() {
 			}
 		}
 	}
+	pr.End()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -334,7 +338,7 @@ func (n *Node) Prop(key string, inherit, typ bool) interface{} {
 		}
 	}
 	if typ {
-		return kit.Types.Prop(kit.FullTypeName(n.Type()), key)
+		return kit.Types.Prop(n.Type(), key)
 	}
 	return nil
 }
@@ -534,7 +538,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 	return err
 }
 
-func (n *Node) MakeNew(typ reflect.Type) Ki {
+func (n *Node) NewOfType(typ reflect.Type) Ki {
 	if err := n.ThisCheck(); err != nil {
 		return nil
 	}
@@ -544,14 +548,20 @@ func (n *Node) MakeNew(typ reflect.Type) Ki {
 	if typ == nil {
 		typ = n.Type() // make us by default
 	}
-	nkid := reflect.New(typ).Interface()
-	kid, _ := nkid.(Ki)
-	return kid
+	inst := kit.Types.Inst(typ)
+	if inst == nil {
+		log.Printf("ki.NewOfType: type %v was not found in kit.Types type registry -- all Ki types must be registered there!\n", typ.String())
+		return nil // almost certainly will crash now..
+	} else {
+		nkid := inst.(Ki).New()
+		kid, _ := nkid.(Ki)
+		return kid
+	}
 }
 
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
 	updt := n.UpdateStart()
-	kid := n.MakeNew(typ)
+	kid := n.NewOfType(typ)
 	err := n.AddChildImpl(kid)
 	if err == nil {
 		kid.SetName(name)
@@ -563,7 +573,7 @@ func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
 
 func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
 	updt := n.UpdateStart()
-	kid := n.MakeNew(typ)
+	kid := n.NewOfType(typ)
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		kid.SetName(name)
@@ -575,7 +585,7 @@ func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
 
 func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 	updt := n.UpdateStart()
-	kid := n.MakeNew(typ)
+	kid := n.NewOfType(typ)
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		kid.SetNameRaw(name)
@@ -848,7 +858,8 @@ func (n *Node) DestroyAllDeleted() {
 		k.DestroyDeleted()
 		return true
 	})
-	runtime.GC() // this is a great time to call the GC!
+	// actually this is a really bad idea and slows things down massively!
+	// runtime.GC() // this is a great time to call the GC!
 }
 
 func (n *Node) Destroy() {
@@ -1332,7 +1343,7 @@ func (n *Node) CopyFrom(from Ki) error {
 }
 
 func (n *Node) Clone() Ki {
-	nki := n.MakeNew(n.Type())
+	nki := n.NewOfType(n.Type())
 	nki.InitName(nki, n.Nm)
 	nki.CopyFrom(n.This)
 	return nki

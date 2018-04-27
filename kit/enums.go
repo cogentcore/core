@@ -208,12 +208,12 @@ func EnumToInt64(eval interface{}) int64 {
 	return ival
 }
 
-// EnumFromInt64 sets enum value from int64 value -- must pass a pointer to
+// SetEnumFromInt64 sets enum value from int64 value -- must pass a pointer to
 // the enum and also needs raw type of the enum as well -- can't get it from
 // the interface{} reliably
-func EnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
+func SetEnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 	if reflect.TypeOf(eval).Kind() != reflect.Ptr {
-		err := fmt.Errorf("kit.EnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
+		err := fmt.Errorf("kit.SetEnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
 		log.Printf("%v", err)
 		return err
 	}
@@ -241,7 +241,7 @@ func EnumInt64ToString(ival int64, typ reflect.Type) string {
 	evn := reflect.New(typ)
 	evi := evn.Interface()
 	evpi = &evi
-	EnumFromInt64(evpi, ival, typ)
+	SetEnumFromInt64(evpi, ival, typ)
 	return EnumToString(evi)
 }
 
@@ -410,12 +410,23 @@ func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str s
 	return err
 }
 
+// SetEnumFromStringAltFirst first attempts to set an enum from an
+// alternative string, and if that fails, then it tries to set from the
+// regular string representation func (tr *EnumRegistry)
+func (tr *EnumRegistry) SetEnumFromStringAltFirst(eptr interface{}, str string) error {
+	err := tr.SetEnumFromAltString(eptr, str)
+	if err != nil {
+		return tr.SetEnumFromString(eptr, str)
+	}
+	return err
+}
+
 // SetEnumValueFromInt64 sets the enum value using reflect.Value
 // representation from a generic int64 value
 func (tr *EnumRegistry) SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
 	evi := eval.Interface()
 	et := eval.Type().Elem()
-	return EnumFromInt64(evi, ival, et)
+	return SetEnumFromInt64(evi, ival, et)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

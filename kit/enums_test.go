@@ -20,12 +20,12 @@ func TestEnums(t *testing.T) {
 		t.Errorf("EnumToInt64 failed %v != %v", i, int64(et))
 	}
 
-	err := EnumFromInt64(&et, 2, KiT_TestFlags)
+	err := SetEnumFromInt64(&et, 2, KiT_TestFlags)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 	if et != TestFlag2 {
-		t.Errorf("EnumFromInt64 failed %v != %v", et, TestFlag2)
+		t.Errorf("SetEnumFromInt64 failed %v != %v", et, TestFlag2)
 	}
 
 	ei := EnumIfaceFromInt64(1, KiT_TestFlags)

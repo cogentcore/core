@@ -59,10 +59,15 @@ import (
 // system for example to color objects of different types using the
 // background-color property.
 type TypeRegistry struct {
-	// to get a type from its name
+	// Types is a map from name to reflect.Type
 	Types map[string]reflect.Type
-	// type properties -- nodes can get default properties from their types and then optionally override them with their own settings
+
+	// Props are type properties -- nodes can get default properties from
+	// their types and then optionally override them with their own settings
 	Props map[string]map[string]interface{}
+
+	// Insts contain an instance of each type (the one passed during AddType)
+	Insts map[string]interface{}
 }
 
 // Types is master registry of types that embed Ki Nodes
@@ -74,7 +79,12 @@ func FullTypeName(typ reflect.Type) string {
 	return typ.PkgPath() + "." + typ.Name()
 }
 
-// AddType adds a given type to the registry -- requires an empty object to grab type info from -- must be passed as a pointer to ensure that it is an addressable, settable type -- also optional properties that can be associated with the type and accessible e.g. for view-specific properties etc -- these props MUST be specific to this type as they are used directly, not copied!!
+// AddType adds a given type to the registry -- requires an empty object to
+// grab type info from (which is then stored in Insts) -- must be passed as a
+// pointer to ensure that it is an addressable, settable type -- also optional
+// properties that can be associated with the type and accessible e.g. for
+// view-specific properties etc -- these props MUST be specific to this type
+// as they are used directly, not copied!!
 func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) reflect.Type {
 	if tr.Types == nil {
 		tr.Init()
@@ -83,16 +93,15 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	typ := reflect.TypeOf(obj).Elem()
 	tn := FullTypeName(typ)
 	tr.Types[tn] = typ
-	// fmt.Printf("added type: %v\n", tn)
+	tr.Insts[tn] = obj
 	if props != nil {
-		// fmt.Printf("added props: %v\n", tn)
 		tr.Props[tn] = props
 	}
 	return typ
 }
 
-// Type finds a type based on its name (package path + "." + type name) --
-// returns nil if not found
+// Type returns the reflect.Type based on its name (package path + "." + type
+// name) -- returns nil if not found
 func (tr *TypeRegistry) Type(typeName string) reflect.Type {
 	if typ, ok := tr.Types[typeName]; ok {
 		return typ
@@ -100,10 +109,26 @@ func (tr *TypeRegistry) Type(typeName string) reflect.Type {
 	return nil
 }
 
-// Properties returns properties for this type -- optionally makes props map
+// InstByName returns the interface{} instance of given type (it is a pointer
+// to that type) -- returns nil if not found
+func (tr *TypeRegistry) InstByName(typeName string) interface{} {
+	if inst, ok := tr.Insts[typeName]; ok {
+		return inst
+	}
+	return nil
+}
+
+// Inst returns the interface{} instance of given type (it is a pointer
+// to that type) -- returns nil if not found
+func (tr *TypeRegistry) Inst(typ reflect.Type) interface{} {
+	typeName := FullTypeName(typ)
+	return tr.InstByName(typeName)
+}
+
+// PropsByName returns properties for given type name -- optionally makes props map
 // if not already made -- can use this to register properties for types that
 // are not registered
-func (tr *TypeRegistry) Properties(typeName string, makeNew bool) map[string]interface{} {
+func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) map[string]interface{} {
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		if !makeNew {
@@ -115,8 +140,16 @@ func (tr *TypeRegistry) Properties(typeName string, makeNew bool) map[string]int
 	return tp
 }
 
-// Prop safely finds a type property from type name and property key -- nil if not found
-func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
+// Properties returns properties for given type -- optionally makes props map
+// if not already made -- can use this to register properties for types that
+// are not registered
+func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) map[string]interface{} {
+	typeName := FullTypeName(typ)
+	return tr.PropsByName(typeName, makeNew)
+}
+
+// PropByName safely finds a type property from type name and property key -- nil if not found
+func (tr *TypeRegistry) PropByName(typeName, propKey string) interface{} {
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		// fmt.Printf("no props for type: %v\n", typeName)
@@ -130,10 +163,10 @@ func (tr *TypeRegistry) Prop(typeName, propKey string) interface{} {
 	return p
 }
 
-// TypeProp safely finds a type property from type and property key -- nil if not found
-func (tr *TypeRegistry) TypeProp(typ reflect.Type, propKey string) interface{} {
+// Prop safely finds a type property from type and property key -- nil if not found
+func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) interface{} {
 	typeName := FullTypeName(typ)
-	return tr.Prop(typeName, propKey)
+	return tr.PropByName(typeName, propKey)
 }
 
 // AllImplementersOf returns a list of all registered types that implement the
@@ -149,7 +182,7 @@ func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type, includeBases bool)
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
 		if !includeBases {
-			btp := tr.TypeProp(typ, "base-type")
+			btp := tr.Prop(typ, "base-type")
 			btpb, _ := ToBool(btp)
 			if btp != nil && btpb {
 				continue
@@ -178,7 +211,7 @@ func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive, includeBases 
 			continue
 		}
 		if !includeBases {
-			btp := tr.TypeProp(typ, "base-type")
+			btp := tr.Prop(typ, "base-type")
 			btpb, _ := ToBool(btp)
 			if btp != nil && btpb {
 				continue
@@ -197,7 +230,7 @@ func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive, includeBases 
 func (tr *TypeRegistry) AllTagged(key string) []reflect.Type {
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
-		tp := tr.TypeProp(typ, key)
+		tp := tr.Prop(typ, key)
 		if tp == nil {
 			continue
 		}
@@ -208,8 +241,9 @@ func (tr *TypeRegistry) AllTagged(key string) []reflect.Type {
 
 // Init initializes the type registry, including adding basic types
 func (tr *TypeRegistry) Init() {
-	tr.Types = make(map[string]reflect.Type)
-	tr.Props = make(map[string]map[string]interface{})
+	tr.Types = make(map[string]reflect.Type, 1000)
+	tr.Insts = make(map[string]interface{}, 1000)
+	tr.Props = make(map[string]map[string]interface{}, 1000)
 
 	{
 		var BoolProps = map[string]interface{}{

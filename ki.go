@@ -34,6 +34,12 @@ type Ki interface {
 	// parent.
 	Init(this Ki)
 
+	// New creates a new object of this type -- MUST be defined for each
+	// new type instance -- can also set any essential default values when
+	// creating, but the Go style is to use 0 initial values wherever possible
+	// -- do NOT call Init() on it as that will happen automatically later
+	New() Ki
+
 	// InitName initializes this node and set its name -- used for root nodes
 	// which don't otherwise have their This pointer set (typically happens in
 	// Add, Insert Child)
@@ -270,9 +276,9 @@ type Ki interface {
 	// after adding to ensure name is unique (assumed to already have a name)
 	InsertChild(kid Ki, at int) error
 
-	// MakeNew creates a new child of given type -- if nil, uses ChildType,
+	// NewOfType creates a new child of given type -- if nil, uses ChildType,
 	// else uses the same type as this struct
-	MakeNew(typ reflect.Type) Ki
+	NewOfType(typ reflect.Type) Ki
 
 	// AddNewChild creates a new child of given type -- if nil, uses
 	// ChildType, else type of this struct -- and add at end of children list
@@ -668,8 +674,11 @@ type Ki interface {
 
 // see node.go for struct implementing this interface
 
-// IMPORTANT: all types must initialize entry in package kit Types Registry:
+// IMPORTANT: all types must initialize entry in package kit Types Registry
+// and define a New method for each type
+//
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
+// func (n *TypeName) New() Ki { return &TypeName{} }
 
 // Func is a function to call on ki objects walking the tree -- return bool
 // = false means don't continue processing this branch of the tree, but other

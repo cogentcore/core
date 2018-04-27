@@ -20,6 +20,8 @@ type TestNode struct {
 
 var KiTTestNode = kit.Types.AddType(&TestNode{}, nil)
 
+func (n *TestNode) New() Ki { return &TestNode{} }
+
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.InitName(&parent, "par1")
