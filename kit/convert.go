@@ -249,7 +249,7 @@ func SetRobust(to, from interface{}) bool {
 	}
 	v := reflect.ValueOf(to)
 	vnp := NonPtrValue(v)
-	if ValueIsZero(vnp) {
+	if !vnp.IsValid() {
 		return false
 	}
 	typ := vnp.Type()
