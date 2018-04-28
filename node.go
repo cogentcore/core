@@ -44,17 +44,16 @@ var UseJsonIter bool = false
 // -- Ki makes extensive use of such tags.
 //
 type Node struct {
-	Nm        string     `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm  string     `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag      int64      `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
-	Props     Props      `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par       Ki         `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	ChildType kit.Type   `desc:"default type of child to create -- if nil then same type as node itself is used"`
-	Kids      Slice      `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	NodeSig   Signal     `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	This      Ki         `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
-	FlagMu    sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting flag updates"`
-	index     int        `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
+	Nm       string     `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm string     `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag     int64      `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
+	Props    Props      `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par      Ki         `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	Kids     Slice      `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	NodeSig  Signal     `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	This     Ki         `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	FlagMu   sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting flag updates"`
+	index    int        `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -466,7 +465,7 @@ func (n *Node) SetChildType(t reflect.Type) error {
 		log.Print(err)
 		return err
 	}
-	n.ChildType.T = t
+	n.SetProp("ChildType", t)
 	return nil
 }
 
@@ -555,7 +554,12 @@ func (n *Node) NewOfType(typ reflect.Type) Ki {
 		return nil
 	}
 	if typ == nil {
-		typ = n.ChildType.T
+		ct := n.Prop("ChildType", false, true) // no inherit but yes from type
+		if ct != nil {
+			if ctt, ok := ct.(reflect.Type); ok {
+				typ = ctt
+			}
+		}
 	}
 	if typ == nil {
 		typ = n.Type() // make us by default

@@ -260,8 +260,8 @@ type Ki interface {
 	Index() int
 
 	// SetChildType sets the ChildType used as a default type for creating new
-	// children, and for the gui -- ensures that the type is a Ki type, and
-	// errors if not
+	// children -- as a property called ChildType --ensures that the type is a
+	// Ki type, and errors if not
 	SetChildType(t reflect.Type) error
 
 	// AddChild adds a new child at end of children list -- if child is in an

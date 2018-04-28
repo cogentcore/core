@@ -103,7 +103,7 @@ func TestNodeEmbedAddNewChild(t *testing.T) {
 	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
-	if reflect.TypeOf(child).Elem() != parent.ChildType.T {
+	if reflect.TypeOf(child).Elem() != parent.Type() {
 		t.Errorf("child type != correct, was %T", child)
 	}
 }
