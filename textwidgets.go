@@ -410,7 +410,11 @@ func (g *TextField) Style2D() {
 	}
 	g.Style2DWidget()
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(TextFieldSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(TextFieldSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(TextFieldSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -1139,7 +1143,11 @@ func (g *ComboBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

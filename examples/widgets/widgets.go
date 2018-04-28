@@ -110,7 +110,6 @@ func mainrun() {
 
 	brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
 	//	brow.SetPropChildren("vertical-align", "middle") // align all..
-	brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	//////////////////////////////////////////
 	//      Sliders

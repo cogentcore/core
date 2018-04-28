@@ -434,7 +434,7 @@ func (vv *StructValueView) ConfigWidget(widg Node2D) {
 	vv.UpdateWidget()
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	mb := vv.Widget.(*MenuButton)
-	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("padding", units.NewValue(5, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -507,7 +507,7 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
-	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("padding", units.NewValue(5, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -550,7 +550,7 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
-	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("padding", units.NewValue(5, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -646,7 +646,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
-	mb.SetProp("padding", units.NewValue(2, units.Px))
+	mb.SetProp("padding", units.NewValue(5, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.AddMenuText("Edit", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -892,7 +892,7 @@ func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
 	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
-	cb.SetProp("padding", units.NewValue(2, units.Px))
+	cb.SetProp("padding", units.NewValue(5, units.Px))
 	cb.SetProp("margin", units.NewValue(2, units.Px))
 
 	typ := vv.EnumType()

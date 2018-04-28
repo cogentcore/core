@@ -604,6 +604,11 @@ func (tv *TreeView) ClearSelectMods() {
 // qt calls the open / close thing a "branch"
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
+var TVBranchProps = ki.Props{
+	"fill":   &Prefs.IconColor,
+	"stroke": &Prefs.FontColor,
+}
+
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = LayoutRow
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
@@ -618,6 +623,8 @@ func (tv *TreeView) ConfigParts() {
 	wb.Icon = IconByName("widget-wedge-down") // todo: style
 	wb.IconOff = IconByName("widget-wedge-right")
 	if mods {
+		wb.SetProp("#icon0", TVBranchProps)
+		wb.SetProp("#icon1", TVBranchProps)
 		tv.StylePart(wb.This)
 		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonToggled) {
@@ -644,6 +651,7 @@ func (tv *TreeView) ConfigParts() {
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
 	if mods {
 		mb.Text = "..."
+		mb.SetProp("indicator", "none")
 		tv.StylePart(mb.This)
 		mb.MakeMenuFunc = func(mbb *MenuButton) {
 			tv.MakeMenu(mbb)
@@ -744,8 +752,8 @@ var TreeViewProps = ki.Props{
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,
-		"width":            units.NewValue(.8, units.Em),
-		"height":           units.NewValue(.8, units.Em),
+		"width":            units.NewValue(.7, units.Em),
+		"height":           units.NewValue(.7, units.Em),
 	},
 	"#space": ki.Props{
 		"width": units.NewValue(.5, units.Em),
@@ -782,7 +790,11 @@ func (tv *TreeView) Style2D() {
 	bitflag.Set(&tv.Flag, int(CanFocus))
 	tv.Style2DWidget()
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i] = *tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil)
+		if tv.DefStyle != nil {
+			tv.StateStyles[i] = *tv.DefStyle
+		} else {
+			tv.StateStyles[i] = *tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil)
+		}
 		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}

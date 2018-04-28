@@ -72,13 +72,11 @@ func (vp *Icon) CopyFromIcon(cp *Icon) {
 
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
-	"fill":             "blue",
-	"stroke":           color.Black,
 }
 
 func (vp *Icon) Style2D() {
 	vp.Style2DWidget()
-	vp.Style2DSVG(nil)
+	vp.Style2DSVG()
 }
 
 func (vp *Icon) ReStyle2D() {

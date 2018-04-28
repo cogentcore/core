@@ -200,7 +200,11 @@ func (g *Action) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -374,6 +378,7 @@ type MenuButton struct {
 	ButtonBase
 	Menu         Menu                   `desc:"the menu items for this menu"`
 	MakeMenuFunc MenuButtonMakeMenuFunc `desc:"set this to make the menu on demand"`
+	Indicator    string                 `xml:"indicator" desc:"name of the menu indicator icon to present, or 'none'"`
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
@@ -505,7 +510,7 @@ func (g *MenuButton) Init2D() {
 func (g *MenuButton) ConfigParts() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
 	wrIdx := -1
-	icnm := kit.ToString(g.Prop("indicator", false, false))
+	icnm := g.Indicator
 	if icnm == "" || icnm == "nil" {
 		icnm = "widget-wedge-down"
 	}
@@ -540,10 +545,16 @@ func (g *MenuButton) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
+	MenuButtonFields.Style(g, nil, g.Props)
+	MenuButtonFields.ToDots(g, &g.Style.UnContext)
 	g.ConfigParts()
 }
 
@@ -587,3 +598,17 @@ func (g *MenuButton) FocusChanged2D(gotFocus bool) {
 
 // check for interface implementation
 var _ Node2D = &MenuButton{}
+
+// MenuButtonDefault is default obj that can be used when property specifies "default"
+var MenuButtonDefault MenuButton
+
+// MenuButtonFields contain the StyledFields for MenuButton type
+var MenuButtonFields = initMenuButton()
+
+func initMenuButton() *StyledFields {
+	MenuButtonDefault = MenuButton{}
+	sf := &StyledFields{}
+	sf.Default = &MenuButtonDefault
+	sf.AddField(&MenuButtonDefault, "Indicator")
+	return sf
+}

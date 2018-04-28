@@ -383,6 +383,7 @@ func (sf *StyledFields) Inherit(obj, par interface{}) {
 	for _, fld := range sf.Inherits {
 		pfi := fld.FieldIface(par)
 		fld.FromProps(sf.Fields, obj, par, pfi, hasPar)
+		// fmt.Printf("inh: %v\n", fld.Field.Name)
 	}
 	pr.End()
 }

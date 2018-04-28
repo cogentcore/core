@@ -42,7 +42,7 @@ func (vp *SVG) Init2D() {
 
 func (vp *SVG) Style2D() {
 	// we use both forms of styling -- need width, height, pos from widget..
-	vp.Style2DSVG(nil)
+	vp.Style2DSVG()
 	vp.Style2DWidget()
 }
 

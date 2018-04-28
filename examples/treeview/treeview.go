@@ -12,6 +12,7 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/driver"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // todo: enum field, etc
@@ -27,6 +28,10 @@ type TestNodeA struct {
 	Rect       image.Rectangle `desc:"rect"`
 }
 
+var KiT_TestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
+
+func (n *TestNodeA) New() ki.Ki { return &TestNodeA{} }
+
 // B node for testing
 type TestNodeB struct {
 	ki.Node
@@ -38,6 +43,10 @@ type TestNodeB struct {
 	Rect       image.Rectangle `desc:"rect"`
 	SubObj     TestNodeA       `desc:"a sub-object"`
 }
+
+var KiT_TestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
+
+func (n *TestNodeB) New() ki.Ki { return &TestNodeB{} }
 
 func main() {
 	driver.Main(func(app oswin.App) {

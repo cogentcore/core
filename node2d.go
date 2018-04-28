@@ -203,7 +203,7 @@ func (g *Node2DBase) Init2D() {
 }
 
 func (g *Node2DBase) Style2D() {
-	g.Style2DSVG(nil) // base is used for SVG -- Widget overrides
+	g.Style2DSVG() // base is used for SVG -- Widget overrides
 	pc := &g.Paint
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
@@ -303,20 +303,21 @@ func (g *Node2DBase) Init2DBase() {
 	g.LayData.Defaults() // doesn't overwrite
 }
 
-// Style2DSVG styles the Paint values directly from node properties and optional base-level defaults -- for SVG-style nodes
-func (g *Node2DBase) Style2DSVG(baseProps ki.Props) {
+// Style2DSVG styles the Paint values directly from node properties -- for
+// SVG-style nodes -- no relevant default styling here -- parents can just set
+// props directly as needed
+func (g *Node2DBase) Style2DSVG() {
 	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.StyleSet = false  // this is always first call, restart
-	if baseProps != nil {
-		g.Paint.SetStyle(&pg.Paint, baseProps)
+	if pg != nil {
+		g.Paint.SetStyle(&pg.Paint, g.Properties())
+	} else {
+		g.Paint.SetStyle(nil, g.Properties())
 	}
-	g.Paint.SetStyle(&pg.Paint, g.Properties())
-
-	g.Paint.SetStyle(&pg.Paint, g.Properties())
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 }
 
@@ -436,8 +437,8 @@ func StyleCSSWidget(node Node2D, css ki.Props) {
 // ki.Props which is then added to the part's props -- this provides built-in
 // defaults for parts, so it is separate from the CSS process
 func (g *Node2DBase) StylePart(pk ki.Ki) {
-	_, pg := KiToNode2D(pk)
-	if pg.DefStyle != nil {
+	pgi, pg := KiToNode2D(pk)
+	if pg.DefStyle != nil { // already set
 		return
 	}
 	stynm := "#" + strings.ToLower(pk.Name())
@@ -447,6 +448,29 @@ func (g *Node2DBase) StylePart(pk ki.Ki) {
 	// all be in the base-level.. hopefully that works..
 	pdst := g.DefaultStyle2DWidget(stynm, pg)
 	pg.DefStyle = pdst // will use this as starting point for all styles now..
+
+	if vp := pgi.AsViewport2D(); vp != nil {
+		// this is typically an icon -- copy fill and stroke params to it
+		styprops := kit.Types.Properties(g.Type(), true)
+		sp := ki.SubProps(styprops, stynm)
+		if sp != nil {
+			if fill, ok := sp["fill"]; ok {
+				pg.SetProp("fill", fill)
+			}
+			if stroke, ok := sp["stroke"]; ok {
+				pg.SetProp("stroke", stroke)
+			}
+		}
+		sp = ki.SubProps(g.Properties(), stynm)
+		if sp != nil {
+			if fill, ok := sp["fill"]; ok {
+				pg.SetProp("fill", fill)
+			}
+			if stroke, ok := sp["stroke"]; ok {
+				pg.SetProp("stroke", stroke)
+			}
+		}
+	}
 }
 
 // ReStyle2DWidget does a basic re-style using only current obj props and update of

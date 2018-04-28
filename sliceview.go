@@ -46,34 +46,22 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var SliceViewProps = ki.Props{
-	"#frame": ki.Props{
-		"border-width":        units.NewValue(2, units.Px),
-		"margin":              units.NewValue(8, units.Px),
-		"padding":             units.NewValue(4, units.Px),
-		"box-shadow.h-offset": units.NewValue(4, units.Px),
-		"box-shadow.v-offset": units.NewValue(4, units.Px),
-		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    &Prefs.ShadowColor,
-	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
-		"max-width":        units.NewValue(-1, units.Px),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
-		"background-color": "none",
+		"max-width":      units.NewValue(-1, units.Px),
+		"text-align":     AlignCenter,
+		"vertical-align": AlignTop,
 	},
 	"#prompt": ki.Props{
-		"max-width":        units.NewValue(-1, units.Px),
-		"text-align":       AlignLeft,
-		"vertical-align":   AlignTop,
-		"background-color": "none",
+		"max-width":      units.NewValue(-1, units.Px),
+		"text-align":     AlignLeft,
+		"vertical-align": AlignTop,
 	},
 }
 
 // SetFrame configures view as a frame
 func (sv *SliceView) SetFrame() {
 	sv.Lay = LayoutCol
-	sv.StylePart(sv.This)
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame

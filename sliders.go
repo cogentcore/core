@@ -467,7 +467,11 @@ func (g *Slider) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -641,7 +645,11 @@ func (g *ScrollBar) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(SliderSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

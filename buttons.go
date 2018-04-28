@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/rcoreilly/goki/gi/oswin"
 	"github.com/rcoreilly/goki/gi/oswin/key"
@@ -379,7 +380,11 @@ func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -446,20 +451,22 @@ var CheckBoxProps = ki.Props{
 	"text-align":       AlignLeft,
 	"background-color": &Prefs.ControlColor,
 	"#icon0": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.ControlColor,
-		"stroke":  &Prefs.FontColor,
+		"width":            units.NewValue(1, units.Em),
+		"height":           units.NewValue(1, units.Em),
+		"margin":           units.NewValue(0, units.Px),
+		"padding":          units.NewValue(0, units.Px),
+		"background-color": color.Transparent,
+		"fill":             &Prefs.ControlColor,
+		"stroke":           &Prefs.FontColor,
 	},
 	"#icon1": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.ControlColor,
-		"stroke":  &Prefs.FontColor,
+		"width":            units.NewValue(1, units.Em),
+		"height":           units.NewValue(1, units.Em),
+		"margin":           units.NewValue(0, units.Px),
+		"padding":          units.NewValue(0, units.Px),
+		"background-color": color.Transparent,
+		"fill":             &Prefs.ControlColor,
+		"stroke":           &Prefs.FontColor,
 	},
 	"#space": ki.Props{
 		"width": units.NewValue(1, units.Ex),
@@ -590,7 +597,11 @@ func (g *CheckBox) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		if g.DefStyle != nil {
+			g.StateStyles[i] = *g.DefStyle
+		} else {
+			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

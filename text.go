@@ -106,7 +106,7 @@ var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
 func (n *Text2D) New() ki.Ki { return &Text2D{} }
 
 func (g *Text2D) Style2D() {
-	g.Style2DSVG(nil)
+	g.Style2DSVG()
 }
 
 func (g *Text2D) Size2D() {

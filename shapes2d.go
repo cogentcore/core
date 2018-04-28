@@ -93,7 +93,7 @@ func (g *Viewport2DFill) Init2D() {
 }
 
 func (g *Viewport2DFill) Style2D() {
-	g.Style2DSVG(nil)
+	g.Style2DSVG()
 }
 
 func (g *Viewport2DFill) BBox2D() image.Rectangle {

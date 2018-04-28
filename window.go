@@ -871,7 +871,7 @@ func (w *Window) StartTargProfile() {
 		nn++
 		return true
 	})
-	fmt.Println("Starting Targeted Profiling, window has %v nodes\n", nn)
+	fmt.Printf("Starting Targeted Profiling, window has %v nodes\n", nn)
 	prof.Reset()
 	prof.Profiling = true
 }
