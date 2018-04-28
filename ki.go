@@ -88,11 +88,6 @@ type Ki interface {
 	// should be used to ensure proper tracking
 	Children() Slice
 
-	// Fields returns a slice of Ki-embedding fields from all types that we
-	// embed -- this is cached and included in all downward traversals of
-	// children
-	Fields() []Ki
-
 	// IsValidIndex checks whether the given index is a valid index into
 	// children, within range of 0..len-1 -- see ki.Slice.ValidIndex for
 	// version that transforms negative numbers into indicies from end of
@@ -410,16 +405,6 @@ type Ki interface {
 	// add removed child to deleted list, to be destroyed later -- otherwise
 	// child remains intact but parent is nil -- could be inserted elsewhere
 	Delete(destroy bool)
-
-	// DestroyDeleted is a second-pass that destroys all previously-removed
-	// children: causes them to remove all their children, cuts all their
-	// pointers and signal connections
-	DestroyDeleted()
-
-	// DestroyAllDeleted recursively calls DestroyDeleted on all nodes under
-	// this one -- called automatically when UpdateEnd reaches 0 Updating
-	// count and the Update signal is sent
-	DestroyAllDeleted()
 
 	// Destroy calls DisconnectAll to cut all pointers and signal connections,
 	// and remove all children and their childrens-children, etc

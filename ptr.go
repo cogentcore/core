@@ -9,9 +9,96 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/rcoreilly/goki/ki/kit"
 )
+
+// todo: get rid of time.Time in events -- cache out to int64 -- it has a pointer!
+// https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
+
+// todo: problem with this plan here is that without actually checking for all
+// the remaining pointers, there is no way to ever delete anything, so really
+// it is truly replicating exactly what the GC is doing.
+
+// Index-based Ki pointer system takes advantage of the idea that trees tend
+// to be relatively stable entities, so it isn't too wasteful to just keep
+// lists of pointers to elements in each tree, and use indexes into these
+// lists.  By avoiding sprinkling Ki pointers throughout many different
+// objects all over memory, leveraging the chunked allocation of pointers in
+// one contiguous slice, we should obtain significant savings.
+//
+// To preserve index validity, tree-lists can only grow in size.  Any attempt
+// to re-use an index will result in the outstanding refs to that index
+// pointing to a new object, and that can produce very difficult bugs.  Unlike
+// the GC, we are not going to go through all of memory and find out when
+// every last reference is gone.
+//
+//
+// IdxPtr is a replacement for a pointer, using two indexes into a master
+// list-of-lists of pointers to Ki objects -- each list is for a different
+// tree -- the idea is to consolidate all pointers in one place to make the GC
+// happier and avoid any actual pointers on Ki objects -- 0 indexes here
+// indicate an invalid pointer -- both start at 1 for valid indexes
+type IdxPtr struct {
+	Tree int32 `desc:"ID of the tree that the item lives in"`
+	Item int
+}
+
+// Ptr returns the Ki element in the pointer list
+func (ip IdxPtr) Ptr() Ki {
+	Ptrs.Mu.RLock()
+	ki := Ptrs.Ptrs[ip.Tree][ip.Item]
+	Ptrs.Mu.RUnlock()
+	return ki
+}
+
+// PtrList is a map of lists of Ki objects
+type PtrList struct {
+	// The map of pointers
+	Ptrs map[int32][]Ki
+
+	// tree index counter -- incremented each time before a new tree list is
+	// created i.e., it is the number of active tree lists and the list id of
+	// the last list made
+	TreeCtr int32
+
+	// RWMutex for accessing pointers
+	Mu sync.RWMutex
+}
+
+// Ptrs is the the master list of Ki ptrs
+var Ptrs = PtrList{}
+
+// NewList creates a new tree list and returns its unique id
+func (pl *PtrList) NewList() int32 {
+	pl.Mu.Lock()
+	if pl.Ptrs == nil {
+		pl.Ptrs = make(map[int32][]Ki, 1000)
+	}
+	pl.TreeCtr++
+	tree := pl.TreeCtr
+	pl.Ptrs[tree] = make([]Ki, 0, 1000)
+	pl.Mu.Unlock()
+	return tree
+}
+
+// Add adds a new item to the given tree and returns its unique index
+func (pl *PtrList) Add(tree int32, ki Ki) int {
+	pl.Mu.Lock()
+	lst := pl.Ptrs[tree]
+	idx := len(lst)
+	pl.Ptrs[tree] = append(pl.Ptrs[tree], ki)
+	pl.Mu.Unlock()
+	return idx
+}
+
+// Delete deletes item in tree -- i.e., sets the element to nil
+func (pl *PtrList) Delete(tree int32, itm int) {
+	pl.Mu.Lock()
+	pl.Ptrs[tree][itm] = nil
+	pl.Mu.Unlock()
+}
 
 // key fact of Go: interface such as Ki is implicitly a pointer!
 

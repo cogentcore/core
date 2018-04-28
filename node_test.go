@@ -137,8 +137,8 @@ func TestNodeDeleteChild(t *testing.T) {
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
 	}
-	if len(parent.Deleted) != 0 { // note: even though using destroy, UpdateEnd does destroy
-		t.Errorf("Deleted length != 0, was %d", len(parent.Kids))
+	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
+		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
 	}
 }
 
@@ -150,8 +150,8 @@ func TestNodeDeleteChildName(t *testing.T) {
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
 	}
-	if len(parent.Deleted) != 0 {
-		t.Errorf("Deleted length != 0, was %d", len(parent.Kids))
+	if len(DelMgr.Dels) != 0 { // note: even though using destroy, UpdateEnd does destroy
+		t.Errorf("Deleted length != 0, was %d", len(DelMgr.Dels))
 	}
 }
 

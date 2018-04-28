@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"sync"
+	"unsafe"
 
 	"log"
 	"reflect"
@@ -50,9 +51,7 @@ type Node struct {
 	Par       Ki         `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	ChildType kit.Type   `desc:"default type of child to create -- if nil then same type as node itself is used"`
 	Kids      Slice      `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	Flds      []Ki       `copy:"-" json:"-" xml:"-" view:"-" desc:"slice of all the Ki-type fields within this struct or any that we embed -- we iterate over these fields during all downward passes, just like our children"`
 	NodeSig   Signal     `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Deleted   []Ki       `copy:"-" json:"-" xml:"-" view:"-" desc:"keeps track of deleted nodes until destroyed"`
 	This      Ki         `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
 	FlagMu    sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting flag updates"`
 	index     int        `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
@@ -796,7 +795,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 	}
 	_ = n.Kids.DeleteAtIndex(idx)
 	if destroy {
-		n.Deleted = append(n.Deleted, child)
+		DelMgr.Add(child)
 	}
 	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	n.UpdateEnd(updt)
@@ -830,7 +829,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 		child.UpdateReset()
 	}
 	if destroy {
-		n.Deleted = append(n.Deleted, n.Kids...)
+		DelMgr.Add(n.Kids...)
 	}
 	n.Kids = n.Kids[:0] // preserves capacity of list
 	n.UpdateEnd(updt)
@@ -844,22 +843,6 @@ func (n *Node) Delete(destroy bool) {
 	} else {
 		n.Par.DeleteChild(n.This, destroy)
 	}
-}
-
-func (n *Node) DestroyDeleted() {
-	for _, child := range n.Deleted {
-		child.Destroy()
-	}
-	n.Deleted = n.Deleted[:0]
-}
-
-func (n *Node) DestroyAllDeleted() {
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		k.DestroyDeleted()
-		return true
-	})
-	// actually this is a really bad idea and slows things down massively!
-	// runtime.GC() // this is a great time to call the GC!
 }
 
 func (n *Node) Destroy() {
@@ -876,7 +859,7 @@ func (n *Node) Destroy() {
 		k.Destroy()
 		return true
 	})
-	n.DestroyDeleted() // then destroy all those kids
+	DelMgr.DestroyDeleted() // then destroy all those kids
 	// extra step to delete all the slices and maps -- super friendly to GC :)
 	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
@@ -890,22 +873,23 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-func (n *Node) Fields() []Ki {
-	if n.Flds != nil {
-		return n.Flds
+func (n *Node) Fields() []uintptr {
+	// we store the offsets for the fields in type properties
+	tprops := kit.Types.Properties(n.Type(), true) // true = makeNew
+	pnm := "__FieldOffs"
+	if foff, ok := tprops[pnm]; ok {
+		return foff.([]uintptr)
 	}
-	n.Flds = make([]Ki, 0)
+	foff := make([]uintptr, 0)
 	kitype := KiType()
 	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
-			fk := kit.PtrValue(fieldVal).Interface().(Ki)
-			if fk != nil {
-				n.Flds = append(n.Flds, fk)
-			}
+			foff = append(foff, field.Offset)
 		}
 		return true
 	})
-	return n.Flds
+	tprops[pnm] = foff
+	return foff
 }
 
 // Node version of this function from kit/embeds.go
@@ -942,16 +926,20 @@ func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflec
 }
 
 func (n *Node) FuncFields(level int, data interface{}, fun Func) {
-	flds := n.Fields()
-	for _, fk := range flds {
-		fun(fk, level, data)
+	op := reflect.ValueOf(n.This).Pointer()
+	foffs := n.Fields()
+	for _, fo := range foffs {
+		fn := (*Node)(unsafe.Pointer(op + fo))
+		fun(fn.This, level, data)
 	}
 }
 
 func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
-	flds := n.Fields()
-	for _, fk := range flds {
-		go fun(fk, level, data)
+	op := reflect.ValueOf(n.This).Pointer()
+	foffs := n.Fields()
+	for _, fo := range foffs {
+		fn := (*Node)(unsafe.Pointer(op + fo))
+		go fun(fn.This, level, data)
 	}
 }
 
@@ -1173,12 +1161,13 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
+	if bitflag.HasAny(n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+		DelMgr.DestroyDeleted()
+	}
 	if n.OnlySelfUpdate() {
-		n.DestroyAllDeleted()
 		n.ClearFlagMu(int(Updating))
 		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
-		n.DestroyAllDeleted()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
@@ -1194,12 +1183,13 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
+	if bitflag.HasAny(n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+		DelMgr.DestroyDeleted()
+	}
 	if n.OnlySelfUpdate() {
-		n.DestroyAllDeleted()
 		n.ClearFlagMu(int(Updating))
 		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
-		n.DestroyAllDeleted()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
@@ -1329,7 +1319,7 @@ func (n *Node) CopyFrom(from Ki) error {
 	sameTree := (n.Root() == from.Root())
 	from.GetPtrPaths()
 	err := n.CopyFromRaw(from)
-	n.DestroyAllDeleted() // in case we deleted some kiddos
+	DelMgr.DestroyDeleted() // in case we deleted some kiddos
 	if err != nil {
 		n.UpdateEnd(updt)
 		return err
@@ -1587,4 +1577,34 @@ func (n *Node) ParentAllChildren() {
 func (n *Node) UnmarshalPost() {
 	n.ParentAllChildren()
 	n.SetPtrsFmPaths()
+}
+
+// Deleted manages all the deleted Ki elements, that are destined to then be
+// destroyed, without having an additional pointer on the Ki object
+type Deleted struct {
+	Dels []Ki
+	Mu   sync.Mutex
+}
+
+// DelMgr is the manager of all deleted items
+var DelMgr = Deleted{}
+
+// Add the Ki elements to the deleted list
+func (dm *Deleted) Add(kis ...Ki) {
+	dm.Mu.Lock()
+	if dm.Dels == nil {
+		dm.Dels = make([]Ki, 0, 1000)
+	}
+	dm.Dels = append(dm.Dels, kis...)
+	dm.Mu.Unlock()
+}
+
+func (dm *Deleted) DestroyDeleted() {
+	dm.Mu.Lock()
+	curdels := dm.Dels
+	dm.Dels = dm.Dels[:0]
+	dm.Mu.Unlock()
+	for _, ki := range curdels {
+		ki.Destroy() // destroy will add to the dels so we need to do this outside of lock
+	}
 }
