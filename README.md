@@ -74,6 +74,10 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* any way to get rid of todots ??  key thing is not to recompute in layout probably.  
+
+* StyleCSSToMe is very slow.  why?
+
 * need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok -- just when valueview destructs?
 
 * Nonmodal dialogs -> windows
@@ -140,16 +144,12 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### Performance issues
 
-* todo: parts styles -- need to compute and cache the parts styles using the Default
-
 * Styling is in general very expensive.
 	+ ToDots in partciular is expensive -- just from the traversal part -- computation is not much..  should only recompute when necessary.  Requires figuring out when properties have changed.
 	+ on props themselves?  not sure we have any way of detecting changes in maps?  this would be the most efficient.  compute some overall hash-code on the thing or something?  yes.
 	+ otherwise we would need to compute differences when setting values, which seems like it is too late and defeats the purpose -- makes that more expensive.
-	+ seems like building the treeview up-front is very slow -- opening the editor is MUCH slower than refreshing -- profile that..
 	+ 4.6sec on FindConnectionIndex when making new Connections -- hash map? -- this is most of the time in Init2D
 	+ astounding 8million ToDots method calls??
-	+ StyleCSSToMe is very slow.  why?
 	
 
 ### Maybe
