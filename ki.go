@@ -198,9 +198,14 @@ type Ki interface {
 	// map if nil
 	SetProp(key string, val interface{})
 
+	// SetProps sets a whole set of properties, and optionally sets the
+	// updated flag and triggers an UpdateSig
+	SetProps(props Props, update bool)
+
 	// SetPropUpdate sets given property key to value val, with update
-	// notification (wrapped in UpdateStart/End) so other nodes receiving
-	// update signals from this node can update to reflect these changes
+	// notification (sets PropUpdated and emits UpdateSig) so other nodes
+	// receiving update signals from this node can update to reflect these
+	// changes
 	SetPropUpdate(key string, val interface{})
 
 	// SetPropChildren sets given property key to value val for all Children

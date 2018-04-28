@@ -311,6 +311,19 @@ func (n *Node) SetProp(key string, val interface{}) {
 	n.Props[key] = val
 }
 
+func (n *Node) SetProps(props Props, update bool) {
+	if n.Props == nil {
+		n.Props = make(Props)
+	}
+	for key, val := range props {
+		n.Props[key] = val
+	}
+	if update {
+		bitflag.Set(n.Flags(), int(PropUpdated))
+		n.UpdateSig()
+	}
+}
+
 func (n *Node) SetPropUpdate(key string, val interface{}) {
 	bitflag.Set(n.Flags(), int(PropUpdated))
 	n.SetProp(key, val)
