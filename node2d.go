@@ -353,7 +353,7 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 	var dsty *Style
 	pnm := "__DefStyle" + selector
 	dstyi, ok := tprops[pnm]
-	if !ok {
+	if !ok || RebuildDefaultStyles {
 		dsty = &Style{}
 		dsty.Defaults()
 		if selector != "" {
@@ -374,12 +374,13 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 	return dsty
 }
 
-// Style2DWidget styles the Style values from node properties and optional base-level defaults -- for Widget-style nodes
+// Style2DWidget styles the Style values from node properties and optional
+// base-level defaults -- for Widget-style nodes
 func (g *Node2DBase) Style2DWidget() {
-	if g.DefStyle != nil {
-		g.Style = *g.DefStyle
+	if !RebuildDefaultStyles && g.DefStyle != nil {
+		g.Style.CopyFrom(g.DefStyle)
 	} else {
-		g.Style = *g.DefaultStyle2DWidget("", nil)
+		g.Style.CopyFrom(g.DefaultStyle2DWidget("", nil))
 	}
 	g.Style.IsSet = false // this is always first call, restart
 
@@ -398,6 +399,7 @@ func (g *Node2DBase) Style2DWidget() {
 	// 	g.Viewport.StyleCSStoMe(gii)
 	// }
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
+	g.Paint.PropsNil = true                       // not using paint props
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
 }
@@ -491,7 +493,7 @@ func (g *Node2DBase) ReStyle2DWidget() {
 func (g *Node2DBase) CopyParentPaint() *Node2DBase {
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
-		g.Paint = pg.Paint
+		g.Paint.CopyFrom(&pg.Paint)
 	}
 	return pg
 }

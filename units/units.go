@@ -43,42 +43,60 @@ const (
 type Unit int32
 
 const (
-	// percentage of surrounding contextual element
-	Pct Unit = iota
-	// font size of the root element -- fallback to 12pt by default
-	Rem
-	// font size of the element -- fallback to 12pt by default
+	// Rem = font size of the root element -- fallback to 12pt by default
+	Rem Unit = iota
+
+	// Pct = percentage of surrounding contextual element
+	Pct
+
+	// Em = font size of the element -- fallback to 12pt by default
 	Em
-	// x-height of the element's font -- fallback to 0.5em by default
+
+	// Ex = x-height of the element's font -- fallback to 0.5em by default
 	Ex
-	// with of the '0' glyph in the element's font -- fallback to 0.5em by default
+
+	// Ch = with of the '0' glyph in the element's font -- fallback to 0.5em by default
 	Ch
-	// 1% of the viewport's width
+
+	// Vw = 1% of the viewport's width
 	Vw
-	// 1% of the viewport's height
+
+	// Vh = 1% of the viewport's height
 	Vh
-	// 1% of the viewport's smaller dimension
+
+	// Vmin = 1% of the viewport's smaller dimension
 	Vmin
-	// 1% of the viewport's larger dimension
+
+	// Vmax = 1% of the viewport's larger dimension
 	Vmax
-	// centimeters -- 1cm = 96px/2.54
+
+	// Cm = centimeters -- 1cm = 96px/2.54
 	Cm
-	// millimeters -- 1mm = 1/10th of cm
+
+	// Mm = millimeters -- 1mm = 1/10th of cm
 	Mm
-	// quarter-millimeters -- 1q = 1/40th of cm
+
+	// Q = quarter-millimeters -- 1q = 1/40th of cm
 	Q
-	// inches -- 1in = 2.54cm = 96px
+
+	// In = inches -- 1in = 2.54cm = 96px
 	In
-	// picas -- 1pc = 1/6th of 1in
+
+	// Pc = picas -- 1pc = 1/6th of 1in
 	Pc
-	// points -- 1pt = 1/72th of 1in
+
+	// Pt = points -- 1pt = 1/72th of 1in
 	Pt
-	// pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
+
+	// Px = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
 	Px
-	// density-independent pixels -- 1dp = 1/160th of 1in
+
+	// Dp = density-independent pixels -- 1dp = 1/160th of 1in
 	Dp
-	// actual real display pixels -- generally only use internally
+
+	// Dot = actual real display pixels -- generally only use internally
 	Dot
+
 	UnitN
 )
 
@@ -148,18 +166,14 @@ func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float32) {
 	uc.SetFont(em, ex, ch, rem)
 }
 
-// set the context values for non-font sizes -- el can be 0 and then defaults to vpw
+// set the context values for non-font sizes -- el is ignored if zero
 func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
 	uc.VpW = vpw
 	uc.VpH = vph
-	if elw == 0 {
-		uc.ElW = vpw
-	} else {
+	if elw != 0 {
 		uc.ElW = elw
 	}
-	if elh == 0 {
-		uc.ElH = vph
-	} else {
+	if elh != 0 {
 		uc.ElH = elh
 	}
 }

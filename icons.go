@@ -76,7 +76,7 @@ var IconProps = ki.Props{
 
 func (vp *Icon) Style2D() {
 	vp.Style2DWidget()
-	vp.Style2DSVG()
+	vp.Style2DSVG() // this must come second
 }
 
 func (vp *Icon) ReStyle2D() {

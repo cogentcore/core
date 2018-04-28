@@ -58,9 +58,13 @@ import (
 
 // transition -- animation of hover, etc
 
-// use StylePropProps for any enum (not type -- types must have their own
-// props) that is useful as a styling property -- use this for selecting types
-// to add to Props
+// RebuildDefaultStyles is a global state var used by Prefs to trigger rebuild
+// of all the default styles, which are otherwise compiled and not updated
+var RebuildDefaultStyles bool
+
+// StylePropProps should be set as type props for any enum (not struct types,
+// which must have their own props) that is useful as a styling property --
+// use this for selecting types to add to Props
 var StylePropProps = ki.Props{
 	"style-prop": true,
 }
@@ -140,9 +144,10 @@ func (s *ShadowStyle) HasShadow() bool {
 	return (s.HOffset.Dots > 0 || s.VOffset.Dots > 0)
 }
 
-// all the CSS-based style elements -- used for widget-type objects
+// Style has all the CSS-based style elements -- used for widget-type objects
 type Style struct {
 	IsSet         bool            `desc:"has this style been set from object values yet?"`
+	PropsNil      bool            `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	Display       bool            `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
 	Visible       bool            `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
 	UnContext     units.Context   `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
@@ -156,7 +161,8 @@ type Style struct {
 	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
 	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
-	// todo: also see above for more notes on missing style elements
+	dotsSet       bool
+	lastUnCtxt    units.Context
 }
 
 func (s *Style) Defaults() {
@@ -179,12 +185,22 @@ func NewStyle() Style {
 	return s
 }
 
+// CopyFrom copies from another style, while preserving relevant local state
+func (s *Style) CopyFrom(cp *Style) {
+	is := s.IsSet
+	pn := s.PropsNil
+	ds := s.dotsSet
+	lu := s.lastUnCtxt
+	*s = *cp
+	s.IsSet = is
+	s.PropsNil = pn
+	s.dotsSet = ds
+	s.lastUnCtxt = lu
+}
+
 // SetStyle sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
 func (s *Style) SetStyle(parent *Style, props ki.Props) {
-	if props == nil {
-		return
-	}
 	if !s.IsSet && parent != nil { // first time
 		StyleFields.Inherit(s, parent)
 	}
@@ -193,6 +209,7 @@ func (s *Style) SetStyle(parent *Style, props ki.Props) {
 	s.Layout.SetStylePost()
 	s.Font.SetStylePost()
 	s.Text.SetStylePost()
+	s.PropsNil = (len(props) == 0)
 	s.IsSet = true
 }
 
@@ -200,7 +217,7 @@ func (s *Style) SetStyle(parent *Style, props ki.Props) {
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
-	s.UnContext.Defaults()
+	// s.UnContext.Defaults()
 	if vp != nil {
 		if vp.Win != nil {
 			s.UnContext.DPI = vp.Win.LogicalDPI()
@@ -214,7 +231,16 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		}
 	}
 	s.Font.SetUnitContext(&s.UnContext)
+
+	// skipping this doesn't seem to be good:
+	// if !(s.dotsSet && s.UnContext == s.lastUnCtxt && s.PropsNil) {
+	// fmt.Printf("dotsSet: %v unctx: %v lst: %v  == %v  pn: %v\n", s.dotsSet, s.UnContext, s.lastUnCtxt, (s.UnContext == s.lastUnCtxt), s.PropsNil)
 	s.ToDots()
+	s.dotsSet = true
+	s.lastUnCtxt = s.UnContext
+	// } else {
+	// 	fmt.Println("skipped")
+	// }
 }
 
 // CopyUnitContext copies unit context from another, update with our font
@@ -223,7 +249,14 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 func (s *Style) CopyUnitContext(ctxt *units.Context) {
 	s.UnContext = *ctxt
 	s.Font.SetUnitContext(&s.UnContext)
-	s.ToDots()
+	// this seems to work fine
+	if !(s.dotsSet && s.UnContext == s.lastUnCtxt && s.PropsNil) {
+		s.ToDots()
+		s.dotsSet = true
+		s.lastUnCtxt = s.UnContext
+		// } else {
+		// 	fmt.Println("skipped")
+	}
 }
 
 // ToDots calls ToDots on all units.Value fields in the style (recursively) --
@@ -390,6 +423,9 @@ func (sf *StyledFields) Inherit(obj, par interface{}) {
 
 // Style applies styles to the fields from given properties for given object
 func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
+	if props == nil {
+		return
+	}
 	pr := prof.Start("StyleFields.Style")
 	hasPar := (par != nil)
 	// fewer props than fields, esp with alts!

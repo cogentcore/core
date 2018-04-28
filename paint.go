@@ -50,12 +50,15 @@ SOFTWARE.
 type Paint struct {
 	Off         bool          `desc:"node and everything below it are off, non-rendering"`
 	StyleSet    bool          `desc:"have the styles already been set?"`
+	PropsNil    bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
 	FontStyle   FontStyle
 	TextStyle   TextStyle
 	XForm       XFormMatrix2D `xml:"-" json:"-" desc:"our additions to transform -- pushed to render state"`
+	dotsSet     bool
+	lastUnCtxt  units.Context
 }
 
 func (pc *Paint) Defaults() {
@@ -74,7 +77,22 @@ func NewPaint() Paint {
 	return p
 }
 
-// set paint values based on given property map (name: value pairs), inheriting elements as appropriate from parent, and also having a default style for the "initial" setting
+// CopyFrom copies from another Paint, while preserving relevant local state
+func (pc *Paint) CopyFrom(cp *Paint) {
+	is := pc.StyleSet
+	pn := pc.PropsNil
+	ds := pc.dotsSet
+	lu := pc.lastUnCtxt
+	*pc = *cp
+	pc.StyleSet = is
+	pc.PropsNil = pn
+	pc.dotsSet = ds
+	pc.lastUnCtxt = lu
+}
+
+// SetStyle sets paint values based on given property map (name: value pairs),
+// inheriting elements as appropriate from parent, and also having a default
+// style for the "initial" setting
 func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
 	if !pc.StyleSet && parent != nil { // first time
 		PaintFields.Inherit(pc, parent)
@@ -84,14 +102,15 @@ func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
 	pc.TextStyle.SetStylePost()
+	pc.PropsNil = (len(props) == 0)
 	pc.StyleSet = true
 }
 
-// set the unit context based on size of viewport and parent element (from bbox)
-// and then cache everything out in terms of raw pixel dots for rendering -- call at start of
-// render
+// SetUnitContext sets the unit context based on size of viewport and parent
+// element (from bbox) and then cache everything out in terms of raw pixel
+// dots for rendering -- call at start of render
 func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
-	pc.UnContext.Defaults() // todo: need to get screen information and true dpi
+	pc.UnContext.Defaults()
 	if vp != nil {
 		if vp.Win != nil {
 			pc.UnContext.DPI = vp.Win.LogicalDPI()
@@ -102,7 +121,12 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		}
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
-	pc.ToDots()
+
+	if !(pc.dotsSet && pc.UnContext == pc.lastUnCtxt && pc.PropsNil) {
+		pc.ToDots()
+		pc.dotsSet = true
+		pc.lastUnCtxt = pc.UnContext
+	}
 }
 
 // ToDots calls ToDots on all units.Value fields in the style (recursively) --

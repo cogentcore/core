@@ -74,6 +74,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+*  get rid of time.Time in events -- cache out to int64 -- it has a pointer!
+https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
+
+* margin not being processed properly on buttons..
+
+* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
+
+* background in struct/map/etc views is white..
+
 * any way to get rid of todots ??  key thing is not to recompute in layout probably.  
 
 * StyleCSSToMe is very slow.  why?

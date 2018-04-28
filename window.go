@@ -77,6 +77,7 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 		return nil
 	}
 	win.OSWin.SetName(name)
+	win.OSWin.SetParent(win.This)
 	win.NodeSig.Connect(win.This, SignalWindowFlush)
 	return win
 }
@@ -151,6 +152,20 @@ func (w *Window) Resize(width, height int) {
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, image.Point{width, height})
 	w.Viewport.Resize(width, height)
+}
+
+// FullReRender can be called to trigger a full re-render of the window
+func (w *Window) FullReRender() {
+	if w.Viewport == nil {
+		return
+	}
+	pdpi := w.OSWin.PhysicalDPI()
+	dpi := oswin.LogicalFmPhysicalDPI(pdpi)
+	w.OSWin.SetLogicalDPI(dpi)
+	w.Viewport.FullRender2DTree()
+	if w.Focus == nil {
+		w.SetNextFocusItem()
+	}
 }
 
 // UpdateVpRegion updates pixels for one viewport region on the screen, using
@@ -444,10 +459,7 @@ func (w *Window) EventLoop() {
 		if w.DoFullRender {
 			// fmt.Printf("Doing full render\n")
 			w.DoFullRender = false
-			w.Viewport.FullRender2DTree()
-			if w.Focus == nil {
-				w.SetNextFocusItem()
-			}
+			w.FullReRender()
 		}
 		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
@@ -497,10 +509,7 @@ func (w *Window) EventLoop() {
 				evi.SetProcessed()
 			}
 		case *paint.Event:
-			w.Viewport.FullRender2DTree()
-			if w.Focus == nil {
-				w.SetNextFocusItem()
-			}
+			w.FullReRender()
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
@@ -533,7 +542,7 @@ func (w *Window) EventLoop() {
 				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
 				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
 				fmt.Printf("DPI now: %v\n", dpi)
-				w.Viewport.FullRender2DTree()
+				w.FullReRender()
 				e.SetProcessed()
 			case KeyFunZoomOut:
 				oswin.LogicalDPIScale *= 0.9
@@ -541,15 +550,18 @@ func (w *Window) EventLoop() {
 				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
 				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
 				fmt.Printf("DPI now: %v\n", dpi)
-				w.Viewport.FullRender2DTree()
+				w.FullReRender()
+				e.SetProcessed()
+			case KeyFunPrefs:
+				Prefs.Edit()
+				e.SetProcessed()
+			case KeyFunRefresh:
+				w.FullReRender()
 				e.SetProcessed()
 			}
 			if !e.IsProcessed() {
 				cs := e.ChordString()
 				switch cs { // some other random special codes, during dev..
-				case "Control+Alt+P":
-					Prefs.Edit()
-					e.SetProcessed()
 				case "Control+Alt+R":
 					if prof.Profiling {
 						w.EndTargProfile()

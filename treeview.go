@@ -752,8 +752,8 @@ var TreeViewProps = ki.Props{
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,
-		"width":            units.NewValue(.7, units.Em),
-		"height":           units.NewValue(.7, units.Em),
+		"max-width":        units.NewValue(.8, units.Em),
+		"max-height":       units.NewValue(.8, units.Em),
 	},
 	"#space": ki.Props{
 		"width": units.NewValue(.5, units.Em),
@@ -791,9 +791,9 @@ func (tv *TreeView) Style2D() {
 	tv.Style2DWidget()
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		if tv.DefStyle != nil {
-			tv.StateStyles[i] = *tv.DefStyle
+			tv.StateStyles[i].CopyFrom(tv.DefStyle)
 		} else {
-			tv.StateStyles[i] = *tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil)
+			tv.StateStyles[i].CopyFrom(tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil))
 		}
 		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)

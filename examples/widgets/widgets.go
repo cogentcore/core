@@ -108,8 +108,8 @@ func mainrun() {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
-	//	brow.SetPropChildren("vertical-align", "middle") // align all..
+	// brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
+	// brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	//////////////////////////////////////////
 	//      Sliders
@@ -208,7 +208,7 @@ func mainrun() {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
 
-	txrow.SetPropChildren("align-vert", gi.AlignMiddle)
+	// txrow.SetPropChildren("align-vert", gi.AlignMiddle)
 
 	vp.UpdateEndNoSig(updt)
 

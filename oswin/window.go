@@ -56,6 +56,14 @@ type Window interface {
 	// information about its properties
 	Screen() *Screen
 
+	// Parent returns the parent object of a given window -- for GoGi it is a
+	// gi.Window but could be something else in other frameworks
+	Parent() interface{}
+
+	// SetParent sets the parent object of a given window -- for GoGi it is a
+	// gi.Window but could be something else in other frameworks
+	SetParent(par interface{})
+
 	// todo: lots of other basic props of windows!
 
 	// Release closes the window. The behavior of the Window after Release,
@@ -132,6 +140,7 @@ type WindowBase struct {
 	Sz      image.Point
 	PhysDPI float32
 	LogDPI  float32
+	Par     interface{}
 }
 
 func (w WindowBase) Name() string {
@@ -164,4 +173,12 @@ func (w WindowBase) LogicalDPI() float32 {
 
 func (w *WindowBase) SetLogicalDPI(dpi float32) {
 	w.LogDPI = dpi
+}
+
+func (w WindowBase) Parent() interface{} {
+	return w.Par
+}
+
+func (w *WindowBase) SetParent(parent interface{}) {
+	w.Par = parent
 }

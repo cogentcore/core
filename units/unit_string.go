@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const _Unit_name = "PctRemEmExChVwVhVminVmaxCmMmQInPcPtPxDpDotUnitN"
+const _Unit_name = "RemPctEmExChVwVhVminVmaxCmMmQInPcPtPxDpDotUnitN"
 
 var _Unit_index = [...]uint8{0, 3, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 29, 31, 33, 35, 37, 39, 42, 47}
 
@@ -18,11 +18,12 @@ func (i Unit) String() string {
 	return _Unit_name[_Unit_index[i]:_Unit_index[i+1]]
 }
 
-func StringToUnit(s string) (Unit, error) {
-	for i := 0; i < len(_Unit_index)-1; i++ {
-		if s == _Unit_name[_Unit_index[i]:_Unit_index[i+1]] {
-			return Unit(i), nil
+func (i *Unit) FromString(s string) error {
+	for j := 0; j < len(_Unit_index)-1; j++ {
+		if s == _Unit_name[_Unit_index[j]:_Unit_index[j+1]] {
+			*i = Unit(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Unit", s)
+	return fmt.Errorf("String %v is not a valid option for type Unit", s)
 }

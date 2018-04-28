@@ -49,6 +49,8 @@ const (
 	KeyFunCtrl
 	KeyFunZoomOut
 	KeyFunZoomIn
+	KeyFunPrefs
+	KeyFunRefresh
 	KeyFunctionsN
 )
 
@@ -105,6 +107,8 @@ var DefaultKeyMap = KeyMap{
 	"Meta+=":           KeyFunZoomIn,
 	"Meta+-":           KeyFunZoomOut,
 	"Shift+Meta+-":     KeyFunZoomOut,
+	"Control+Alt+P":    KeyFunPrefs,
+	"F5":               KeyFunRefresh,
 }
 
 // users can set this to an alternative map

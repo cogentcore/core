@@ -41,14 +41,13 @@ func (vp *SVG) Init2D() {
 }
 
 func (vp *SVG) Style2D() {
-	// we use both forms of styling -- need width, height, pos from widget..
-	vp.Style2DSVG()
 	vp.Style2DWidget()
+	vp.Style2DSVG() // this must come second
 }
 
 func (vp *SVG) ReStyle2D() {
-	vp.ReStyle2DSVG()
 	vp.ReStyle2DWidget()
+	vp.ReStyle2DSVG()
 }
 
 func (vp *SVG) Layout2D(parBBox image.Rectangle) {

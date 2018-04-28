@@ -89,6 +89,28 @@ func (p *Preferences) Save() error {
 	return err
 }
 
+// Update everything with current preferences -- triggers rebuild of default styles
+func (p *Preferences) Update() {
+	oswin.LogicalDPIScale = p.LogicalDPIScale
+
+	RebuildDefaultStyles = true
+	n := oswin.TheApp.NWindows()
+	for i := 0; i < n; i++ {
+		owin := oswin.TheApp.Window(i)
+		if win, ok := owin.Parent().(*Window); ok {
+			win.FullReRender()
+		}
+	}
+	RebuildDefaultStyles = false
+	// needs another pass through to get it right..
+	for i := 0; i < n; i++ {
+		owin := oswin.TheApp.Window(i)
+		if win, ok := owin.Parent().(*Window); ok {
+			win.FullReRender()
+		}
+	}
+}
+
 // DefaultKeyMap installs the current default key map, prior to editing
 func (p *Preferences) DefaultKeyMap() {
 	p.CustomKeyMap = make(KeyMap, len(DefaultKeyMap))
@@ -134,6 +156,14 @@ func (p *Preferences) Edit() {
 	brow.Lay = LayoutRow
 	brow.SetProp("align-horiz", "center")
 	brow.SetStretchMaxWidth()
+
+	up := brow.AddNewChild(KiT_Button, "update").(*Button)
+	up.SetText("Update")
+	up.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			p.Update()
+		}
+	})
 
 	savej := brow.AddNewChild(KiT_Button, "savejson").(*Button)
 	savej.SetText("Save")

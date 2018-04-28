@@ -201,9 +201,9 @@ func (g *Action) Style2D() {
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
 		if g.DefStyle != nil {
-			g.StateStyles[i] = *g.DefStyle
+			g.StateStyles[i].CopyFrom(g.DefStyle)
 		} else {
-			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
 		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
@@ -313,17 +313,15 @@ var _ Node2D = &Separator{}
 // displayed in a popup) -- don't use stretchy sizes in general for these items!
 type Menu []Node2D
 
-var MenuProps = ki.Props{
-	"#frame": ki.Props{
-		"border-width":        units.NewValue(0, units.Px),
-		"border-color":        "none",
-		"margin":              units.NewValue(4, units.Px),
-		"padding":             units.NewValue(2, units.Px),
-		"box-shadow.h-offset": units.NewValue(2, units.Px),
-		"box-shadow.v-offset": units.NewValue(2, units.Px),
-		"box-shadow.blur":     units.NewValue(2, units.Px),
-		"box-shadow.color":    &Prefs.ShadowColor,
-	},
+var MenuFrameProps = ki.Props{
+	"border-width":        units.NewValue(0, units.Px),
+	"border-color":        "none",
+	"margin":              units.NewValue(4, units.Px),
+	"padding":             units.NewValue(2, units.Px),
+	"box-shadow.h-offset": units.NewValue(2, units.Px),
+	"box-shadow.v-offset": units.NewValue(2, units.Px),
+	"box-shadow.blur":     units.NewValue(2, units.Px),
+	"box-shadow.color":    &Prefs.ShadowColor,
 }
 
 // menu just pops up a viewport with a layout that draws the supplied actions
@@ -346,8 +344,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
-	// todo: need this case!
-	// frame.StylePart(frame.This, MenuProps)
+	frame.SetProps(MenuFrameProps, false)
 	for _, ac := range menu {
 		acn := ac.AsNode2D()
 		frame.AddChild(acn.This)
@@ -546,9 +543,9 @@ func (g *MenuButton) Style2D() {
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
 		if g.DefStyle != nil {
-			g.StateStyles[i] = *g.DefStyle
+			g.StateStyles[i].CopyFrom(g.DefStyle)
 		} else {
-			g.StateStyles[i] = *g.DefaultStyle2DWidget(ButtonSelectors[i], nil)
+			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
 		}
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
