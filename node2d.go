@@ -351,8 +351,8 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 	}
 	var dsty *Style
 	pnm := "__DefStyle" + selector
-	dstyi := tprops[pnm]
-	if dstyi == nil {
+	dstyi, ok := tprops[pnm]
+	if !ok {
 		dsty = &Style{}
 		dsty.Defaults()
 		if selector != "" {

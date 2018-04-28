@@ -501,7 +501,6 @@ func (w *Window) EventLoop() {
 			if w.Focus == nil {
 				w.SetNextFocusItem()
 			}
-			// w.StartProfile()
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
@@ -867,7 +866,12 @@ func (w *Window) EndCPUMemProfile() {
 
 // start targeted profiling using prof package
 func (w *Window) StartTargProfile() {
-	fmt.Println("Starting Targeted Profiling")
+	nn := 0
+	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		nn++
+		return true
+	})
+	fmt.Println("Starting Targeted Profiling, window has %v nodes\n", nn)
 	prof.Reset()
 	prof.Profiling = true
 }

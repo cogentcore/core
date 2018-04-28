@@ -533,7 +533,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 		case *Color:
 			*fiv = *valv
 		default:
-			fmt.Printf("StyleField %v could not set Color from prop: %v type: %T\n", val, val)
+			fmt.Printf("StyleField %v could not set Color from prop: %v type: %T\n", fld.Field.Name, val, val)
 		}
 	case *units.Value:
 		switch valv := val.(type) {
@@ -548,7 +548,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 			if ok {
 				fiv.Set(float32(valflt), units.Px)
 			} else {
-				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", val, val)
+				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", fld.Field.Name, val, val)
 			}
 		}
 	default:

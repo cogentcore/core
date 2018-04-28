@@ -148,13 +148,6 @@ func (tv *TreeView) SyncToSrc() {
 	mods, updt := tv.ConfigChildren(tnl, false)
 	if mods {
 		tv.SetFullReRender()
-		win := tv.ParentWindow()
-		if win != nil {
-			for _, vki := range tv.Deleted {
-				vk := vki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-				vk.DisconnectAllEventsTree(win)
-			}
-		}
 	}
 	idx := 0
 	for i, fld := range flds {
