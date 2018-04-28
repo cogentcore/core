@@ -43,6 +43,20 @@ func mainrun() {
 	updt := vp.UpdateStart()
 	vp.Fill = true
 
+	// style sheet!
+	var css = ki.Props{
+		"button": ki.Props{
+			"background-color": "#FEE",
+		},
+		"#combo": ki.Props{
+			"background-color": "#EFE",
+		},
+		".hslides": ki.Props{
+			"background-color": "#EDF",
+		},
+	}
+	vp.CSS = css
+
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
@@ -53,9 +67,10 @@ func mainrun() {
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = "This is a demonstration of the various GoGi Widgets\nShortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
-	title.SetProp("text-align", gi.AlignCenter)
+	title.SetProp("text-align", gi.AlignTop)
+	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("word-wrap", true)
-	title.SetMinPrefWidth(units.NewValue(30, units.Ch))
+	// title.SetMinPrefWidth(units.NewValue(30, units.Ch))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	//////////////////////////////////////////
@@ -108,8 +123,8 @@ func mainrun() {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	// brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
-	// brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
+	brow.SetPropChildren("vertical-align", gi.AlignMiddle) // align all..
+	brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	//////////////////////////////////////////
 	//      Sliders
@@ -126,6 +141,7 @@ func mainrun() {
 
 	slider1 := srow.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
 	slider1.Dim = gi.X
+	slider1.Class = "hslides"
 	slider1.Defaults()
 	slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	slider1.SetMinPrefHeight(units.NewValue(2, units.Em))
@@ -152,6 +168,7 @@ func mainrun() {
 
 	scrollbar1 := srow.AddNewChild(gi.KiT_ScrollBar, "scrollbar1").(*gi.ScrollBar)
 	scrollbar1.Dim = gi.X
+	scrollbar1.Class = "hslides"
 	scrollbar1.Defaults()
 	scrollbar1.SetMinPrefWidth(units.NewValue(20, units.Em))
 	scrollbar1.SetMinPrefHeight(units.NewValue(1, units.Em))
@@ -194,21 +211,23 @@ func mainrun() {
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
+	// edit1.SetProp("read-only", true)
 
-	sb := txrow.AddNewChild(gi.KiT_SpinBox, "spinbox").(*gi.SpinBox)
+	sb := txrow.AddNewChild(gi.KiT_SpinBox, "spin").(*gi.SpinBox)
 	sb.HasMin = true
 	sb.Min = 0.0
 	sb.SpinBoxSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
 	})
 
-	cb := txrow.AddNewChild(gi.KiT_ComboBox, "combobox").(*gi.ComboBox)
+	cb := txrow.AddNewChild(gi.KiT_ComboBox, "combo").(*gi.ComboBox)
 	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
 	cb.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
 
-	// txrow.SetPropChildren("align-vert", gi.AlignMiddle)
+	txrow.SetPropChildren("align-vert", gi.AlignMiddle)
+	txrow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	vp.UpdateEndNoSig(updt)
 

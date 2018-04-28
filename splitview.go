@@ -250,9 +250,9 @@ var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 func (n *Splitter) New() ki.Ki { return &Splitter{} }
 
 var SplitterProps = ki.Props{
-	"padding":          "0px",
-	"margin":           "0px",
-	"background-color": "#EEF",
+	"padding":          units.NewValue(0, units.Px),
+	"margin":           units.NewValue(0, units.Px),
+	"background-color": &Prefs.BackgroundColor,
 	"#icon": ki.Props{
 		"max-width":  units.NewValue(1, units.Em),
 		"max-height": units.NewValue(5, units.Em),
@@ -261,30 +261,29 @@ var SplitterProps = ki.Props{
 		"margin":     units.NewValue(0, units.Px),
 		"padding":    units.NewValue(0, units.Px),
 		"vert-align": AlignMiddle,
+		"fill":       &Prefs.IconColor,
+		"stroke":     &Prefs.FontColor,
 	},
 	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderDisabled]: ki.Props{
-		"border-color":     "#BBB",
-		"background-color": "#DDD",
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "#EEF",
+		"background-color": "darker-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-color":     "#008",
-		"background.color": "#CCF",
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "lighter-20",
 	},
-	SliderSelectors[SliderDown]: ki.Props{
-		"border-color":     "#000",
-		"background-color": "#EEF",
-	},
+	SliderSelectors[SliderDown]: ki.Props{},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     "#00F",
-		"background-color": "#00F",
+		"border-color":     &Prefs.IconColor,
+		"background-color": &Prefs.IconColor,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     "#888",
-		"background-color": "#FFF",
+		"border-color":     &Prefs.BackgroundColor,
+		"background-color": &Prefs.BackgroundColor,
 	},
 }
 
@@ -333,13 +332,10 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 }
 
 func (g *Splitter) Style2D() {
+	bitflag.Clear(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(SliderSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

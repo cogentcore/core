@@ -197,14 +197,10 @@ func (g *Action) ConfigPartsIfNeeded() {
 }
 
 func (g *Action) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
+	g.SetCanFocusIfNotReadOnly()
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -539,14 +535,10 @@ func (g *MenuButton) ConfigPartsIfNeeded() {
 }
 
 func (g *MenuButton) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
+	g.SetCanFocusIfNotReadOnly()
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

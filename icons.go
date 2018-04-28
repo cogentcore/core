@@ -79,11 +79,6 @@ func (vp *Icon) Style2D() {
 	vp.Style2DSVG() // this must come second
 }
 
-func (vp *Icon) ReStyle2D() {
-	vp.ReStyle2DWidget()
-	vp.ReStyle2DSVG()
-}
-
 func (vp *Icon) Size2D() {
 	vp.SVG.Size2D()
 }

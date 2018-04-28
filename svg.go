@@ -45,11 +45,6 @@ func (vp *SVG) Style2D() {
 	vp.Style2DSVG() // this must come second
 }
 
-func (vp *SVG) ReStyle2D() {
-	vp.ReStyle2DWidget()
-	vp.ReStyle2DSVG()
-}
-
 func (vp *SVG) Layout2D(parBBox image.Rectangle) {
 	pc := &vp.Paint
 	rs := &vp.Render

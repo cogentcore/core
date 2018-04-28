@@ -148,9 +148,9 @@ func (s *ShadowStyle) HasShadow() bool {
 type Style struct {
 	IsSet         bool            `desc:"has this style been set from object values yet?"`
 	PropsNil      bool            `desc:"set to true if parent node has no props -- allows optimization of styling"`
-	Display       bool            `xml:display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool            `xml:visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	UnContext     units.Context   `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	Display       bool            `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool            `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	ReadOnly      bool            `xml:"read-only" desc:"make a control read-only so it cannot be edited"`
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
@@ -161,6 +161,7 @@ type Style struct {
 	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
 	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	UnContext     units.Context   `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	dotsSet       bool
 	lastUnCtxt    units.Context
 }

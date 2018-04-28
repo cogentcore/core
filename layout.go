@@ -297,8 +297,9 @@ var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, StylePropProps, "")
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
 	Node2DBase
-	CSS       ki.Props              `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
+	CSS       ki.Props              `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
+	CSSAgg    ki.Props              `desc:"aggregated css properties from all higher nodes down to me"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize Vec2D                 `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
@@ -1102,12 +1103,10 @@ func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
 }
 
-func (g *Layout) StyleCSS(node Node2D) {
-	StyleCSSWidget(node, g.CSS)
-}
-
-func (g *Layout) ReStyle2D() {
-	g.ReStyle2DWidget()
+func (g *Layout) CSSProps() (css, agg *ki.Props) {
+	css = &g.CSS
+	agg = &g.CSSAgg
+	return
 }
 
 func (ly *Layout) Size2D() {
@@ -1212,10 +1211,6 @@ var FrameProps = ki.Props{
 
 func (g *Frame) Style2D() {
 	g.Style2DWidget()
-}
-
-func (g *Frame) ReStyle2D() {
-	g.ReStyle2DWidget()
 }
 
 func (g *Frame) Render2D() {

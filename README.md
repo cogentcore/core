@@ -72,50 +72,47 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ SetValueAction calls SetValue and emits the signal
 	+ this allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  ValueView in particular requires this kind of behavior.  todo: go back and make this more consistent.
 
-### TODO
+### For release
+
+* basic rich text formatting -- word wrap in widgets demo, and bold / italic styles for fonts?
+* style parsing crash on font-family
+
+* scroll wheel events for scrolling! -- frame intercepts.  also sliders when in focus?
 
 *  get rid of time.Time in events -- cache out to int64 -- it has a pointer!
 https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
-
-* margin not being processed properly on buttons..
+* double-click interval not working at all -- calling everything double-click
 
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
 
 * background in struct/map/etc views is white..
 
-* any way to get rid of todots ??  key thing is not to recompute in layout probably.  
-
-* StyleCSSToMe is very slow.  why?
-
 * need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok -- just when valueview destructs?
+* Auto-apply when valueview TextField is destroyed?
 
 * Nonmodal dialogs -> windows
+* consolidate dialog popup code between menu and dialog
+
+* override ki.Props json to save type names
+* saving non-string properties not working -- doesn't know the type for
+  loading.. converts to a map.
+
+* get all json save / load working
+
+* sub-menu -- should just work?
+
+* tab widget and integrate with tree view editor? Popups show up in a separate tab?
+
+### TODO
 
 * highlight, lowlight versions of lighter-darker that are relative to current
   lightness for dark-style themes.
 
-* override ki.Props json to save type names
-
-* get all json save / load working
-
-* Button parts not updating when I add a label, even with full re-render.
-
-* Auto-apply when valueview TextField is destroyed?
-
-* scroll wheel events for scrolling! -- frame intercepts.  also sliders when in focus?
-
-* color generates linear interpolations, lighter, darker -- then add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
-
-* saving non-string properties not working -- doesn't know the type for
-  loading.. converts to a map.
-
-* double-click interval not working at all -- calling everything double-click
+* add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
 
 * arg view / dialog and button tags
 
 * DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
-
-* consolidate dialog popup code between menu and dialog
 
 * fix issue with tiny window and dialog not scrolling and blocking interface
 
@@ -124,66 +121,37 @@ https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
 * test SVG path rendering 
 * property-based xforms for svg
 
-* native UnmarshalXML is not going to be flexible enough to support effective
-  parsing from SVG into corresponding nodes -- going to have to use pi parsing system.. 
-  
-* which means finishing graphical elements using simple hand-coded Icon's instead of parsing from file, until the tree view and property editor are usable, to then make the parsing workable.
-
-* first pass of parser retains a full static []byte string and creates pointers into it as indicies -- don't have to duplicate all that -- actually the go slice system does this sharing already so not a big deal..
-
 * Layout flow types
-
-* style parsing crash on font-family
-
-* all widgets need read-only and disabled states
-
-* Reminder: grep all todo: in code -- lots!
 
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
-* all builtin defaults should use units.Value and other raw values instead of strings
+* Reminder: grep all todo: in code -- lots!
 
-* Missing Widgets, in rough order of importance / ease -- see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
-	+ sub-menus -- should just work??
-	+ RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
-	+ Toolbar / ToolButton -- just a layout really, with some styling?
-	+ ProgressBar -- very simple
-	+ ToolTip
-	+ TextArea
+#### Missing Widgets
+
+see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
+
++ RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
++ Toolbar / ToolButton -- just a layout really, with some styling?
++ ProgressBar -- very simple
++ ToolTip
++ TextArea
+
+#### Remaining features for widgets
+
++ Menu / MenuBar / MenuItem -- needs sub-menu support
++ TextField -- needs selection / clipboard, constraints
++ TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
++ TabWidget -- needs updating
++ Label -- done -- could make lots of H1, etc alts
 
 ### Performance issues
 
-* Styling is in general very expensive.
-	+ ToDots in partciular is expensive -- just from the traversal part -- computation is not much..  should only recompute when necessary.  Requires figuring out when properties have changed.
-	+ on props themselves?  not sure we have any way of detecting changes in maps?  this would be the most efficient.  compute some overall hash-code on the thing or something?  yes.
-	+ otherwise we would need to compute differences when setting values, which seems like it is too late and defeats the purpose -- makes that more expensive.
+* Styling and ToDots
+	+ currently compiling default of main style, but derived state / sub styles MUST be styled dynamically otherwise css and props changes don't propagate -- this doesn't add much -- was previously caching those but then they were not responsive to overall changes.
+	+ Lots of redundant ToDots is happening, but it is difficult to figure out exactly when minimal recompute is necessary.  right now only for nil props.  computing prop diffs might be more expensive and complex than just redoing everything.
 	+ 4.6sec on FindConnectionIndex when making new Connections -- hash map? -- this is most of the time in Init2D
-	+ astounding 8million ToDots method calls??
 	
-
-### Maybe
-
-* cache builtin styled Style object so you don't have to re-do that all the time
-
-### TO-DONE (ish)
-
-* Widgets
-	+ Menu / MenuBar / MenuItem -- needs sub-menu support
-	+ Button -- needs alt styling through children?
-	+ Slider -- pretty done
-	+ TextField -- needs selection / clipboard, constraints
-	+ TreeView (NodeWidget) -- needs controls, menu, updating, dnd, clip, -- see about LI, UL lists..
-	+ TabWidget -- needs updating
-	+ Label -- done -- could make lots of H1, etc alts
-	+ ScrollBar -- ScrollArea must just be a layout, as Layout is already in the right position to know about all of its children's sizes, and to control the display thereof -- it just changes the child positions based on scroll position, and uses WinBBox to exclude rendering of any objects fully outside of view, and clipping for those partially within view -- very efficient! 
-	+ ComboBox
-	+ Dialog -- either overlay or additional window -- platform dependent
-	+ CheckBox
-	+ SpinBox
-	+ SplitView -- almost..
-
-* not needed now: update increment threshold for scrollbar -- less frequent updates.
-
 
 ## 3D Design
 

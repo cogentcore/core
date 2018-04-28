@@ -145,7 +145,6 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	}
 	g.State = state
 	g.Style = g.StateStyles[state] // get relevant styles
-	// g.Parts.ReStyle2DTree()
 }
 
 // set the button in the down state -- mouse clicked down but not yet up --
@@ -242,8 +241,12 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
+		bb := ab.ButtonAsBase()
+		if bb.IsReadOnly() {
+			return
+		}
 		if me.Action == mouse.Press {
-			ab.ButtonAsBase().ButtonPressed()
+			bb.ButtonPressed()
 		} else {
 			ab.ButtonRelease() // special one
 		}
@@ -252,16 +255,23 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
+		bb := ab.ButtonAsBase()
+		if bb.IsReadOnly() {
+			return
+		}
 		if me.Action == mouse.Enter {
-			ab.ButtonAsBase().ButtonEnterHover()
+			bb.ButtonEnterHover()
 		} else {
-			ab.ButtonAsBase().ButtonExitHover()
+			bb.ButtonExitHover()
 		}
 	})
 	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
+		if bb.IsReadOnly() {
+			return
+		}
 		// todo: register shortcuts with window, and generalize these keybindings
 		kf := KeyFun(kt.ChordString())
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
@@ -380,11 +390,7 @@ func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -594,14 +600,10 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 }
 
 func (g *CheckBox) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
+	g.SetCanFocusIfNotReadOnly()
 	g.Style2DWidget()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(ButtonSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}

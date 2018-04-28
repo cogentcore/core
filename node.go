@@ -147,6 +147,11 @@ func (g *NodeBase) SetReadOnlyState(readOnly bool) {
 	bitflag.SetState(&g.Flag, readOnly, int(ReadOnly))
 }
 
+// set read-only state of the node
+func (g *NodeBase) SetCanFocusIfNotReadOnly() {
+	bitflag.SetState(&g.Flag, !g.IsReadOnly(), int(CanFocus))
+}
+
 // node needs full re-render?
 func (g *NodeBase) NeedsFullReRender() bool {
 	return bitflag.Has(g.Flag, int(FullReRender))
@@ -190,7 +195,7 @@ func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.
 func (g *NodeBase) StyleProps(selector string) ki.Props {
-	sp := g.Prop(selector, false, false)
+	sp := g.Prop(selector, false, true) // yeah, use types
 	if sp == nil {
 		return nil
 	}

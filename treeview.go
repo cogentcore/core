@@ -787,14 +787,10 @@ func (tv *TreeView) Style2D() {
 	if tv.HasClosedParent() {
 		return
 	}
-	bitflag.Set(&tv.Flag, int(CanFocus))
+	tv.SetCanFocusIfNotReadOnly()
 	tv.Style2DWidget()
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		if tv.DefStyle != nil {
-			tv.StateStyles[i].CopyFrom(tv.DefStyle)
-		} else {
-			tv.StateStyles[i].CopyFrom(tv.DefaultStyle2DWidget(TreeViewSelectors[i], nil))
-		}
+		tv.StateStyles[i].CopyFrom(&tv.Style)
 		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}

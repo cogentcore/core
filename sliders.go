@@ -13,7 +13,6 @@ import (
 	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -307,6 +306,9 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsReadOnly() {
+			return
+		}
 		if sl.IsDragging() {
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
@@ -321,6 +323,9 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsReadOnly() {
+			return
+		}
 		if me.Action == mouse.Press {
 			ed := sl.PointToRelPos(me.Where)
 			st := &sl.Style
@@ -338,6 +343,9 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsReadOnly() {
+			return
+		}
 		if me.Action == mouse.Enter {
 			sl.SliderEnterHover()
 		} else {
@@ -464,14 +472,10 @@ func (g *Slider) Init2D() {
 }
 
 func (g *Slider) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
+	g.SetCanFocusIfNotReadOnly()
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(SliderSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -642,14 +646,10 @@ func (g *ScrollBar) Init2D() {
 }
 
 func (g *ScrollBar) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
+	g.SetCanFocusIfNotReadOnly()
 	g.Style2DWidget()
 	for i := 0; i < int(SliderStatesN); i++ {
-		if g.DefStyle != nil {
-			g.StateStyles[i].CopyFrom(g.DefStyle)
-		} else {
-			g.StateStyles[i].CopyFrom(g.DefaultStyle2DWidget(SliderSelectors[i], nil))
-		}
+		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
