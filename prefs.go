@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 )
@@ -28,20 +29,21 @@ type ScreenPrefs struct {
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info
 type Preferences struct {
-	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
-	ScreenPrefs     map[string]Preferences
-
-	FontColor       Color    `desc:"default font / pen color"`
-	BackgroundColor Color    `desc:"default background color"`
-	ShadowColor     Color    `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	BorderColor     Color    `desc:"default border color, for button, frame borders, etc"`
-	ControlColor    Color    `desc:"default main color for controls: buttons, etc"`
-	IconColor       Color    `desc:"color for icons or other solidly-colored, small elements"`
-	SelectColor     Color    `desc:"color for selected elements"`
-	CustomKeyMap    KeyMap   `desc:"customized mapping from keys to interface functions"`
-	PrefsOverride   bool     `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
-	CustomStyles    ki.Props `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	FontPaths       []string `desc:"extra font paths, beyond system defaults -- searched first"`
+	LogicalDPIScale  float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
+	ScreenPrefs      map[string]Preferences
+	DialogsSepWindow bool     `desc:"do dialog windows open in a separate OS-level window, or do they open within the same parent window"`
+	DoubleClickMSec  int      `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	FontColor        Color    `desc:"default font / pen color"`
+	BackgroundColor  Color    `desc:"default background color"`
+	ShadowColor      Color    `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	BorderColor      Color    `desc:"default border color, for button, frame borders, etc"`
+	ControlColor     Color    `desc:"default main color for controls: buttons, etc"`
+	IconColor        Color    `desc:"color for icons or other solidly-colored, small elements"`
+	SelectColor      Color    `desc:"color for selected elements"`
+	CustomKeyMap     KeyMap   `desc:"customized mapping from keys to interface functions"`
+	PrefsOverride    bool     `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
+	CustomStyles     ki.Props `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
+	FontPaths        []string `desc:"extra font paths, beyond system defaults -- searched first"`
 }
 
 // Prefs are the overall preferences
@@ -49,6 +51,8 @@ var Prefs = Preferences{}
 
 func (p *Preferences) Defaults() {
 	p.LogicalDPIScale = 0.6 // most people have Hi-DPI these days?
+	p.DialogsSepWindow = true
+	p.DoubleClickMSec = 500
 	p.FontColor.SetColor(color.Black)
 	p.BorderColor.SetString("#666", nil)
 	p.BackgroundColor.SetColor(color.White)
@@ -65,7 +69,7 @@ func (p *Preferences) Load() error {
 	pnm := filepath.Join(pdir, "prefs.json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		log.Println(err)
+		// log.Println(err)
 		return err
 	}
 	return json.Unmarshal(b, p)
@@ -89,9 +93,25 @@ func (p *Preferences) Save() error {
 	return err
 }
 
+// Apply preferences to all the relevant settings
+func (p *Preferences) Apply() {
+	oswin.LogicalDPIScale = p.LogicalDPIScale
+	mouse.DoubleClickMSec = p.DoubleClickMSec
+	DialogsSepWindow = p.DialogsSepWindow
+	if p.CustomKeyMap != nil {
+		ActiveKeyMap = &Prefs.CustomKeyMap
+	}
+	if p.FontPaths != nil {
+		paths := append(p.FontPaths, oswin.TheApp.FontPaths()...)
+		FontLibrary.InitFontPaths(paths...)
+	} else {
+		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
+	}
+}
+
 // Update everything with current preferences -- triggers rebuild of default styles
 func (p *Preferences) Update() {
-	oswin.LogicalDPIScale = p.LogicalDPIScale
+	p.Apply()
 
 	RebuildDefaultStyles = true
 	n := oswin.TheApp.NWindows()

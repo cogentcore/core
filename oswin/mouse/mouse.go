@@ -23,8 +23,9 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// DoubleClickMSec is the maximum time interval in msec between button release
-// events to count as a double-click -- can set this global variable to change
+// DoubleClickMSec is the maximum time interval in msec between button press
+// events to count as a double-click -- can set this global variable to change.
+// This is also in gi.Prefs and updated from there
 var DoubleClickMSec = 500
 
 // DoubleClickWait causes the event system to wait for a possible double-click event before sending single clicks.  This causes a delay, but avoids many sources of potential difficulty in dealing with double-clicking, as described here: https://blogs.msdn.microsoft.com/oldnewthing/20041015-00/?p=37553

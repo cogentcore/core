@@ -98,6 +98,17 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	return win
 }
 
+// NewWindowNoVp creates a new window with given name and sizing (assumed to
+// be in raw dots), without setting its main viewport -- user should do
+// win.AddChild(vp); win.Viewport = vp to set their own viewport
+func NewWindowNoVp(name string, width, height int) *Window {
+	win := NewWindow(name, width, height, false)
+	if win == nil {
+		return nil
+	}
+	return win
+}
+
 func (w *Window) StartEventLoop() {
 	// w.DoFullRender = true
 	// var wg sync.WaitGroup
@@ -117,16 +128,7 @@ func Init() {
 	if Prefs.LogicalDPIScale == 0 {
 		Prefs.Defaults()
 		Prefs.Load()
-		oswin.LogicalDPIScale = Prefs.LogicalDPIScale
-		if Prefs.CustomKeyMap != nil {
-			ActiveKeyMap = &Prefs.CustomKeyMap
-		}
-	}
-	if Prefs.FontPaths != nil {
-		paths := append(Prefs.FontPaths, oswin.TheApp.FontPaths()...)
-		FontLibrary.InitFontPaths(paths...)
-	} else {
-		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
+		Prefs.Apply()
 	}
 }
 
@@ -316,7 +318,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 			if gi.IsInactive() && !bitflag.Has(gi.Flag, int(InactiveEvents)) {
 				return false
 			}
-			if gi.This == w.Popup { // do this last
+			if gi.This == w.Popup || gi.This == w.Viewport.This { // do this last
 				popupCon = con
 				return false
 			}

@@ -111,7 +111,8 @@ var DefaultKeyMap = KeyMap{
 	"F5":               KeyFunRefresh,
 }
 
-// users can set this to an alternative map
+// ActiveKeyMap points to the active map -- users can set this to an
+// alternative map in Prefs
 var ActiveKeyMap *KeyMap = &DefaultKeyMap
 
 // translate chord into keyboard function -- use oswin key.ChordString to get chord

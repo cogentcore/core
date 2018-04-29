@@ -16,6 +16,12 @@ import (
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
+// DialogsSepWindow determines if dialog windows open in a separate OS-level
+// window, or do they open within the same parent window.  If only within
+// parent window, then they are always effectively modal. This is also in
+// gi.Prefs and updated from there
+var DialogsSepWindow = true
+
 // state of the dialog
 type DialogState int64
 
@@ -64,8 +70,6 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		y = win.Viewport.ViewBox.Size.Y / 3
 	}
 
-	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
-	// todo: deal with modeless -- need a separate window presumably -- not hard
 	dlg.State = DialogOpenModal
 
 	updt := dlg.UpdateStart()
@@ -86,11 +90,12 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
 
-	dlg.Resize(vpsz.X, vpsz.Y)
-	dlg.ViewBox.Min = image.Point{x, y}
-	dlg.UpdateEndNoSig(updt)
+	if DialogsSepWindow {
+		win = NewWindowNoVp(dlg.Title, vpsz.X, vpsz.Y)
+		win.AddChild(dlg)
+		win.Viewport = &dlg.Viewport2D
+	}
 
-	// put window at the very end
 	win.ReceiveEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
@@ -103,7 +108,16 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		}
 	})
 
-	win.PushPopup(dlg.This)
+	if DialogsSepWindow {
+		dlg.UpdateEndNoSig(updt)
+		go win.StartEventLoopNoWait()
+	} else {
+		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
+		dlg.Resize(vpsz.X, vpsz.Y)
+		dlg.ViewBox.Min = image.Point{x, y}
+		dlg.UpdateEndNoSig(updt)
+		win.PushPopup(dlg.This)
+	}
 	return true
 }
 
@@ -111,7 +125,11 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 func (dlg *Dialog) Close() {
 	win := dlg.Win
 	if win != nil {
-		win.ClosePopup(dlg.This)
+		if win.This == dlg.Par { // we own the window
+			win.OSWin.Release() // close..
+		} else {
+			win.ClosePopup(dlg.This)
+		}
 	}
 }
 

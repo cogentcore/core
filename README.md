@@ -79,9 +79,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
 
-* Nonmodal dialogs -> windows
-* consolidate dialog popup code between menu and dialog
-
 * override ki.Props json to save type names
 * saving non-string properties not working -- doesn't know the type for
   loading.. converts to a map.
