@@ -301,10 +301,12 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(Inactive))
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
-		tf := send.(*TextField)
-		if vvv.SetValue(tf.Text) {
-			vvv.UpdateWidget() // always update after setting value..
+		if sig == int64(TextFieldDone) {
+			vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
+			tf := send.(*TextField)
+			if vvv.SetValue(tf.Text) {
+				vvv.UpdateWidget() // always update after setting value..
+			}
 		}
 	})
 }

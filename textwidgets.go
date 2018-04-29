@@ -401,6 +401,14 @@ func (g *TextField) Init2D() {
 		kt := d.(*key.ChordEvent)
 		tf.KeyInput(kt)
 	})
+	if dlg, ok := g.Viewport.This.(*Dialog); ok {
+		dlg.DialogSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff, _ := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+			if sig == int64(DialogAccepted) {
+				tff.EditDone()
+			}
+		})
+	}
 }
 
 func (g *TextField) Style2D() {
@@ -781,11 +789,13 @@ func (g *SpinBox) ConfigParts() {
 		tf.Text = fmt.Sprintf("%g", g.Value)
 		if !g.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-				tf := send.(*TextField)
-				vl, err := strconv.ParseFloat(tf.Text, 32)
-				if err == nil {
-					sb.SetValueAction(float32(vl))
+				if sig == int64(TextFieldDone) {
+					sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+					tf := send.(*TextField)
+					vl, err := strconv.ParseFloat(tf.Text, 32)
+					if err == nil {
+						sb.SetValueAction(float32(vl))
+					}
 				}
 			})
 		}

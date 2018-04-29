@@ -79,9 +79,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
 
-* need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok -- just when valueview destructs?
-* Auto-apply when valueview TextField is destroyed?
-
 * Nonmodal dialogs -> windows
 * consolidate dialog popup code between menu and dialog
 
