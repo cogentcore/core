@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const _ButtonStates_name = "ButtonActiveButtonDisabledButtonHoverButtonFocusButtonDownButtonSelectedButtonStatesN"
+const _ButtonStates_name = "ButtonActiveButtonInactiveButtonHoverButtonFocusButtonDownButtonSelectedButtonStatesN"
 
 var _ButtonStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 72, 85}
 

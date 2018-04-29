@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusFullReRenderReRenderAnchorReadOnlyMouseHasEnteredNodeDraggingButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuVpFlagDrawIntoWin"
+const _NodeFlags_name = "NodeFlagsNilCanFocusHasFocusFullReRenderReRenderAnchorInactiveMouseHasEnteredNodeDraggingButtonFlagSelectedButtonFlagCheckableButtonFlagCheckedActionFlagMenuVpFlagDrawIntoWin"
 
 var _NodeFlags_index = [...]uint8{0, 12, 20, 28, 40, 54, 62, 77, 89, 107, 126, 143, 157, 174}
 

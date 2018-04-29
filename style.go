@@ -150,7 +150,7 @@ type Style struct {
 	PropsNil      bool            `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	Display       bool            `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
 	Visible       bool            `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	ReadOnly      bool            `xml:"read-only" desc:"make a control read-only so it cannot be edited"`
+	Inactive      bool            `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
@@ -413,7 +413,7 @@ func (sf *StyledFields) CompileFields(def interface{}) {
 // as "inherit" -- inherited by default
 func (sf *StyledFields) Inherit(obj, par interface{}) {
 	pr := prof.Start("StyleFields.Inherit")
-	hasPar := (par != nil)
+	hasPar := !kit.IfaceIsNil(par)
 	for _, fld := range sf.Inherits {
 		pfi := fld.FieldIface(par)
 		fld.FromProps(sf.Fields, obj, par, pfi, hasPar)
@@ -428,7 +428,7 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 		return
 	}
 	pr := prof.Start("StyleFields.Style")
-	hasPar := (par != nil)
+	hasPar := !kit.IfaceIsNil(par)
 	// fewer props than fields, esp with alts!
 	for key, val := range props {
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
@@ -534,11 +534,13 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 		if valv == "inherit" {
 			if hasPar {
 				val = pfi
-				fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, pfi)
+				// fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, val)
+			} else {
+				return
 			}
 		}
 		if valv == "initial" {
-			val = fld.Default.Elem().Interface()
+			val = fld.Default.Interface()
 			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
 		}
 	}
@@ -566,10 +568,10 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 			if err != nil {
 				log.Printf("StyleField: %v\n", err)
 			}
-		case color.Color:
-			fiv.SetColor(valv)
 		case *Color:
 			*fiv = *valv
+		case color.Color:
+			fiv.SetColor(valv)
 		default:
 			fmt.Printf("StyleField %v could not set Color from prop: %v type: %T\n", fld.Field.Name, val, val)
 		}

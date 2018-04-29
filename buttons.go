@@ -56,16 +56,22 @@ type ButtonStates int32
 const (
 	// normal active state -- there but not being interacted with
 	ButtonActive ButtonStates = iota
-	// disabled -- not pressable
-	ButtonDisabled
+
+	// inactive -- not pressable -- no events
+	ButtonInactive
+
 	// mouse is hovering over the button
 	ButtonHover
+
 	// button is the focus -- will respond to keyboard input
 	ButtonFocus
+
 	// button is currently being pressed down
 	ButtonDown
+
 	// button has been selected -- maintains selected state
 	ButtonSelected
+
 	// total number of button states
 	ButtonStatesN
 )
@@ -75,7 +81,7 @@ const (
 var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
 
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
-var ButtonSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":selected"}
+var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
 
 // ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
 type ButtonBase struct {
@@ -134,8 +140,8 @@ func (g *ButtonBase) ToggleChecked() {
 
 // set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
-	if g.IsReadOnly() {
-		state = ButtonDisabled
+	if g.IsInactive() {
+		state = ButtonInactive
 	} else {
 		if state == ButtonActive && g.IsSelected() {
 			state = ButtonSelected
@@ -159,10 +165,6 @@ func (g *ButtonBase) ButtonPressed() {
 // the button has just been released -- sends a released signal and returns
 // state to normal, and emits clicked signal if if it was previously in pressed state
 func (g *ButtonBase) ButtonReleased() {
-	if g.IsReadOnly() {
-		g.SetButtonState(ButtonActive)
-		return
-	}
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)
@@ -179,9 +181,6 @@ func (g *ButtonBase) ButtonReleased() {
 
 // button starting hover-- todo: keep track of time and popup a tooltip -- signal?
 func (g *ButtonBase) ButtonEnterHover() {
-	if g.IsReadOnly() {
-		return
-	}
 	if g.State != ButtonHover {
 		updt := g.UpdateStart()
 		g.SetButtonState(ButtonHover)
@@ -191,9 +190,6 @@ func (g *ButtonBase) ButtonEnterHover() {
 
 // button exiting hover
 func (g *ButtonBase) ButtonExitHover() {
-	if g.IsReadOnly() {
-		return
-	}
 	if g.State == ButtonHover {
 		updt := g.UpdateStart()
 		g.SetButtonState(ButtonActive)
@@ -234,17 +230,11 @@ func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 // handles all the basic button events
 func Init2DButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
-	// if g.IsReadOnly() {
-	// 	return
-	// }
 	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		if bb.IsReadOnly() {
-			return
-		}
 		if me.Action == mouse.Press {
 			bb.ButtonPressed()
 		} else {
@@ -256,9 +246,6 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		if bb.IsReadOnly() {
-			return
-		}
 		if me.Action == mouse.Enter {
 			bb.ButtonEnterHover()
 		} else {
@@ -269,10 +256,6 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		kt := d.(*key.ChordEvent)
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		if bb.IsReadOnly() {
-			return
-		}
-		// todo: register shortcuts with window, and generalize these keybindings
 		kf := KeyFun(kt.ChordString())
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
 			kt.SetProcessed()
@@ -324,7 +307,7 @@ var ButtonProps = ki.Props{
 		"padding": units.NewValue(0, units.Px),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
-	ButtonSelectors[ButtonDisabled]: ki.Props{
+	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -389,9 +372,14 @@ func (g *Button) ConfigPartsIfNeeded() {
 func (g *Button) Style2D() {
 	bitflag.Set(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
@@ -482,7 +470,7 @@ var CheckBoxProps = ki.Props{
 		"padding": units.NewValue(0, units.Px),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
-	ButtonSelectors[ButtonDisabled]: ki.Props{
+	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -600,11 +588,16 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 }
 
 func (g *CheckBox) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()

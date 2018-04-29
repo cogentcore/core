@@ -754,7 +754,7 @@ var TreeViewProps = ki.Props{
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       AlignLeft,
 	"vertical-align":   AlignTop,
-	"background-color": &Prefs.BackgroundColor,
+	"background-color": "inherit",
 	"#branch": ki.Props{
 		"vertical-align":   AlignMiddle,
 		"margin":           units.NewValue(0, units.Px),
@@ -782,7 +782,9 @@ var TreeViewProps = ki.Props{
 		"box-shadow.blur":     units.NewValue(0, units.Px),
 		"indicator":           "none",
 	},
-	TreeViewSelectors[TreeViewActive]: ki.Props{},
+	TreeViewSelectors[TreeViewActive]: ki.Props{
+		"background-color": "inherit",
+	},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
 	},
@@ -793,15 +795,23 @@ var TreeViewProps = ki.Props{
 
 func (tv *TreeView) Style2D() {
 	if tv.HasClosedParent() {
+		bitflag.Clear(&tv.Flag, int(CanFocus))
 		return
 	}
-	tv.SetCanFocusIfNotReadOnly()
+	tv.SetCanFocusIfActive()
 	tv.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(tv.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Style)
-		tv.StateStyles[i].SetStyle(nil, tv.StyleProps(TreeViewSelectors[i]))
+		tv.StateStyles[i].SetStyle(pst, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
+	tv.Style = tv.StateStyles[TreeViewActive] // get this so our children will get proper inherited color
+
 	tv.Indent = units.NewValue(2, units.Ch) // default
 	TreeViewFields.Style(tv, nil, tv.Props)
 	TreeViewFields.ToDots(tv, &tv.Style.UnContext)

@@ -96,10 +96,15 @@ const (
 	// SplitView
 	ReRenderAnchor
 
-	// ReadOnly is for widgets that support editing, it is read-only -- this
-	// must be universally supported in an appropriately-indicated way for
-	// each widget
-	ReadOnly
+	// Inactive disables interaction with widgets or other nodes -- they
+	// should indicate this inactive state in an appropriate way, and not
+	// process input events
+	Inactive
+
+	// InactiveEvents overrides the default behavior where inactive nodes are
+	// not sent events from the Window -- for e.g., the TextField which can
+	// still be selected and copied when inactive
+	InactiveEvents
 
 	// MouseHasEntered indicates that the MouseEnteredEvent was previously
 	// registered on this node
@@ -132,24 +137,24 @@ func (g *NodeBase) IsDragging() bool {
 	return bitflag.Has(g.Flag, int(NodeDragging))
 }
 
-// is this node ReadOnly?  if so, behave and style appropriately -- equivalent to disabled e.g. for buttons / actions
-func (g *NodeBase) IsReadOnly() bool {
-	return bitflag.Has(g.Flag, int(ReadOnly))
+// is this node Inactive?  if so, behave (ignore events) and style appropriately
+func (g *NodeBase) IsInactive() bool {
+	return bitflag.Has(g.Flag, int(Inactive))
 }
 
-// set the node as read-only
-func (g *NodeBase) SetReadOnly() {
-	bitflag.Set(&g.Flag, int(ReadOnly))
+// set the node as inactive
+func (g *NodeBase) SetInactive() {
+	bitflag.Set(&g.Flag, int(Inactive))
 }
 
-// set read-only state of the node
-func (g *NodeBase) SetReadOnlyState(readOnly bool) {
-	bitflag.SetState(&g.Flag, readOnly, int(ReadOnly))
+// set inactive state of the node
+func (g *NodeBase) SetInactiveState(readOnly bool) {
+	bitflag.SetState(&g.Flag, readOnly, int(Inactive))
 }
 
-// set read-only state of the node
-func (g *NodeBase) SetCanFocusIfNotReadOnly() {
-	bitflag.SetState(&g.Flag, !g.IsReadOnly(), int(CanFocus))
+// set CanFocus only if not inactive
+func (g *NodeBase) SetCanFocusIfActive() {
+	bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
 }
 
 // node needs full re-render?

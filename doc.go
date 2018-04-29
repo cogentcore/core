@@ -93,10 +93,10 @@ StructView field / property editor of the selected node.
 
 The properties controlling the TreeView include:
 
-	* "collapsed" -- node starts out collapsed (default is open)
+	* "view-closed" -- node starts out closed (default is open)
 	* "background-color" -- color of the background of node box
 	* "color" -- font color in rendering node label
-	* "read-only" -- do not display the editing menu actions
+	* "inactive" -- do not display the editing menu actions
 
 StructView
 

@@ -211,9 +211,10 @@ func mainrun() {
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
-	// edit1.SetProp("read-only", true)
+	// edit1.SetProp("inactive", true)
 
 	sb := txrow.AddNewChild(gi.KiT_SpinBox, "spin").(*gi.SpinBox)
+	sb.Defaults()
 	sb.HasMin = true
 	sb.Min = 0.0
 	sb.SpinBoxSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {

@@ -81,18 +81,25 @@ type SliderStates int32
 const (
 	// normal state -- there but not being interacted with
 	SliderActive SliderStates = iota
-	// disabled -- not pressable
-	SliderDisabled
+
+	// inactive -- not responsive
+	SliderInactive
+
 	// mouse is hovering over the slider
 	SliderHover
+
 	// slider is the focus -- will respond to keyboard input
 	SliderFocus
+
 	// slider is currently being pressed down
 	SliderDown
+
 	// use background-color here to fill in selected value of slider
 	SliderValue
+
 	// these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
 	SliderBox
+
 	// total number of slider states
 	SliderStatesN
 )
@@ -100,7 +107,7 @@ const (
 //go:generate stringer -type=SliderStates
 
 // Style selector names for the different states
-var SliderSelectors = []string{":active", ":disabled", ":hover", ":focus", ":down", ":value", ":box"}
+var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
 
 func (g *SliderBase) Defaults() { // todo: should just get these from props
 	g.ThumbSize = units.NewValue(1, units.Em)
@@ -120,8 +127,6 @@ func (g *SliderBase) SnapValue() {
 
 // set the slider state to target
 func (g *SliderBase) SetSliderState(state SliderStates) {
-	// todo: process disabled state -- probably just deal with the property directly?
-	// it overrides any choice here and just sets state to disabled..
 	if state == SliderActive && g.HasFocus() {
 		state = SliderFocus
 	}
@@ -306,9 +311,6 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		if sl.IsReadOnly() {
-			return
-		}
 		if sl.IsDragging() {
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
@@ -323,9 +325,6 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		if sl.IsReadOnly() {
-			return
-		}
 		if me.Action == mouse.Press {
 			ed := sl.PointToRelPos(me.Where)
 			st := &sl.Style
@@ -343,14 +342,22 @@ func (g *SliderBase) Init2DSlider() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		if sl.IsReadOnly() {
-			return
-		}
 		if me.Action == mouse.Enter {
 			sl.SliderEnterHover()
 		} else {
 			sl.SliderExitHover()
 		}
+	})
+	g.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		cur := float32(sl.Pos)
+		if sl.Dim == X {
+			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+		} else {
+			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(false))) // preferY
+		}
+		me.SetProcessed()
 	})
 	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -433,7 +440,7 @@ var SliderProps = ki.Props{
 		"stroke":  &Prefs.FontColor,
 	},
 	SliderSelectors[SliderActive]: ki.Props{},
-	SliderSelectors[SliderDisabled]: ki.Props{
+	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -472,11 +479,16 @@ func (g *Slider) Init2D() {
 }
 
 func (g *Slider) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
@@ -608,7 +620,7 @@ var ScrollBarProps = ki.Props{
 	"margin":                      units.NewValue(2, units.Px),
 	"background-color":            &Prefs.ControlColor,
 	SliderSelectors[SliderActive]: ki.Props{},
-	SliderSelectors[SliderDisabled]: ki.Props{
+	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -646,11 +658,16 @@ func (g *ScrollBar) Init2D() {
 }
 
 func (g *ScrollBar) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)

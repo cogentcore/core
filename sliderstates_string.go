@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const _SliderStates_name = "SliderActiveSliderDisabledSliderHoverSliderFocusSliderDownSliderValueSliderBoxSliderStatesN"
+const _SliderStates_name = "SliderActiveSliderInactiveSliderHoverSliderFocusSliderDownSliderValueSliderBoxSliderStatesN"
 
 var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 69, 78, 91}
 

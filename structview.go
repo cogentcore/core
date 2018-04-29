@@ -32,6 +32,7 @@ var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 func (n *StructView) New() ki.Ki { return &StructView{} }
 
 var StructViewProps = ki.Props{
+	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":      units.NewValue(-1, units.Px),
@@ -124,7 +125,7 @@ func (sv *StructView) ButtonBox() (*Layout, int) {
 
 // ConfigStructGrid configures the StructGrid for the current struct
 func (sv *StructView) ConfigStructGrid() {
-	if kit.IsNil(sv.Struct) {
+	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
 	sg, _ := sv.StructGrid()
@@ -242,11 +243,13 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd(updt)
 }
 
-var StructViewInlineProps = ki.Props{}
+var StructViewInlineProps = ki.Props{
+	"min-width": units.NewValue(20, units.Ex),
+}
 
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts() {
-	if kit.IsNil(sv.Struct) {
+	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
 	sv.Parts.Lay = LayoutRow

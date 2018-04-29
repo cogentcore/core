@@ -186,8 +186,8 @@ type ValueView interface {
 	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView)
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
 	OwnerKind() reflect.Kind
-	// IsReadOnly returns whether the value is read-only -- e.g., Map owners have ReadOnly values, and some fields can be marked as ReadOnly using a struct tag
-	IsReadOnly() bool
+	// IsInactive returns whether the value is inactive -- e.g., Map owners have Inactive values, and some fields can be marked as Inactive using a struct tag
+	IsInactive() bool
 	// WidgetType returns an appropriate type of widget to represent the current value
 	WidgetType() reflect.Type
 	// UpdateWidget updates the widget representation to reflect the current value
@@ -196,7 +196,7 @@ type ValueView interface {
 	ConfigWidget(widg Node2D)
 	// Val returns the reflect.Value representation for this item
 	Val() reflect.Value
-	// SetValue sets the value (if not ReadOnly), using Ki.SetField for Ki types and kit.SetRobust otherwise
+	// SetValue sets the value (if not Inactive), using Ki.SetField for Ki types and kit.SetRobust otherwise
 	SetValue(val interface{}) bool
 	// ViewFieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
 	ViewFieldTag(tagName string) string
@@ -272,9 +272,9 @@ func (vv *ValueViewBase) OwnerKind() reflect.Kind {
 	return vv.OwnKind
 }
 
-func (vv *ValueViewBase) IsReadOnly() bool {
+func (vv *ValueViewBase) IsInactive() bool {
 	if vv.OwnKind == reflect.Struct {
-		rotag := vv.ViewFieldTag("read-only")
+		rotag := vv.ViewFieldTag("inactive")
 		if rotag != "" {
 			return true
 		}
@@ -298,7 +298,7 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	tf := vv.Widget.(*TextField)
 	tf.SetProp("max-width", -1) // todo..
 	tf.SetProp("min-width", units.NewValue(6, units.Ex))
-	bitflag.SetState(tf.Flags(), vv.IsReadOnly(), int(ReadOnly))
+	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(Inactive))
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
@@ -314,7 +314,7 @@ func (vv *ValueViewBase) Val() reflect.Value {
 }
 
 func (vv *ValueViewBase) SetValue(val interface{}) bool {
-	if vv.This.(ValueView).IsReadOnly() {
+	if vv.This.(ValueView).IsInactive() {
 		return false
 	}
 	rval := false
@@ -699,7 +699,7 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
-	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
 		cbb := vvv.Widget.(*CheckBox)
@@ -739,7 +739,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	sb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -811,7 +811,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
-	sb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -891,7 +891,7 @@ func (vv *EnumValueView) UpdateWidget() {
 func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
-	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.SetProp("padding", units.NewValue(2, units.Px))
 	cb.SetProp("margin", units.NewValue(2, units.Px))
 
@@ -939,7 +939,7 @@ func (vv *TypeValueView) UpdateWidget() {
 func (vv *TypeValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
-	cb.SetReadOnlyState(vv.This.(ValueView).IsReadOnly())
+	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 
 	typEmbeds := ki.KiT_Node
 	if kiv, ok := vv.Owner.(ki.Ki); ok {

@@ -313,6 +313,9 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		}
 		gii, gi := KiToNode2D(k)
 		if gi != nil {
+			if gi.IsInactive() && !bitflag.Has(gi.Flag, int(InactiveEvents)) {
+				return false
+			}
 			if gi.This == w.Popup { // do this last
 				popupCon = con
 				return false
@@ -499,7 +502,7 @@ func (w *Window) EventLoop() {
 		switch e := evi.(type) {
 		case *lifecycle.Event:
 			if e.To == lifecycle.StageDead {
-				fmt.Println("close")
+				// fmt.Println("close")
 				evi.SetProcessed()
 				break
 			} else {

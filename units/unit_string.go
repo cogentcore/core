@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Unit_name = "RemPctEmExChVwVhVminVmaxCmMmQInPcPtPxDpDotUnitN"
+const _Unit_name = "PxDpPctRemEmExChVwVhVminVmaxCmMmQInPcPtDotUnitN"
 
-var _Unit_index = [...]uint8{0, 3, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 29, 31, 33, 35, 37, 39, 42, 47}
+var _Unit_index = [...]uint8{0, 2, 4, 7, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 33, 35, 37, 39, 42, 47}
 
 func (i Unit) String() string {
 	if i < 0 || i >= Unit(len(_Unit_index)-1) {

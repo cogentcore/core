@@ -395,7 +395,7 @@ func (g *Node2DBase) Style2DWidget() {
 	g.Paint.PropsNil = true                       // not using paint props
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
 	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
-	g.SetReadOnlyState(g.Style.ReadOnly)
+	g.SetInactiveState(g.Style.Inactive)
 }
 
 // AggCSS aggregates css properties

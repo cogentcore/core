@@ -77,15 +77,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * basic rich text formatting -- word wrap in widgets demo, and bold / italic styles for fonts?
 * style parsing crash on font-family
 
-* scroll wheel events for scrolling! -- frame intercepts.  also sliders when in focus?
-
-*  get rid of time.Time in events -- cache out to int64 -- it has a pointer!
-https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
-* double-click interval not working at all -- calling everything double-click
-
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
-
-* background in struct/map/etc views is white..
 
 * need general Node2D Apply, Revert methods, for e.g., text fields when the user presses Ok -- just when valueview destructs?
 * Auto-apply when valueview TextField is destroyed?

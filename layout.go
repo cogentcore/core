@@ -1047,15 +1047,11 @@ func (ly *Layout) ScrollDelta(del image.Point) bool {
 		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(del.X))
 		return true
 	} else if ly.HasScroll[Y] {
-		d := del.Y
-		if d == 0 {
-			d = del.X
-		}
-		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(d))
+		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(del.Y))
 		return true
 	} else if ly.HasScroll[X] {
 		d := del.X
-		if d == 0 {
+		if d == 0 { // often don't get X
 			d = del.Y
 		}
 		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(d))

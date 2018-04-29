@@ -45,6 +45,7 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 }
 
 var MapViewProps = ki.Props{
+	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
 		"text-align":     AlignCenter,
@@ -121,7 +122,7 @@ func (mv *MapView) ButtonBox() (*Layout, int) {
 
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	sg, _ := mv.MapGrid()
@@ -238,7 +239,7 @@ func (mv *MapView) ConfigMapGrid() {
 // MapChangeValueType changes the type of the value for given map element at
 // idx -- for maps with interface{} values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -266,7 +267,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 }
 
 func (mv *MapView) MapAdd() {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -295,7 +296,7 @@ func (mv *MapView) MapAdd() {
 }
 
 func (mv *MapView) MapDelete(key reflect.Value) {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -329,7 +330,7 @@ func (mv *MapView) FullReRenderParentStructView() {
 
 // ConfigMapButtons configures the buttons for map functions
 func (mv *MapView) ConfigMapButtons() {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	bb, _ := mv.ButtonBox()
@@ -419,7 +420,7 @@ var MapViewInlineProps = ki.Props{
 
 // ConfigParts configures Parts for the current map
 func (mv *MapViewInline) ConfigParts() {
-	if kit.IsNil(mv.Map) {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	mv.Parts.Lay = LayoutRow

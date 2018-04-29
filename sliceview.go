@@ -46,6 +46,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var SliceViewProps = ki.Props{
+	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":      units.NewValue(-1, units.Px),
@@ -123,7 +124,7 @@ func (sv *SliceView) ButtonBox() (*Layout, int) {
 
 // ConfigSliceGrid configures the SliceGrid for the current slice
 func (sv *SliceView) ConfigSliceGrid() {
-	if kit.IsNil(sv.Slice) {
+	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
 	sg, _ := sv.SliceGrid()
@@ -296,11 +297,13 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 	sv.UpdateEnd(updt)
 }
 
-var SliceViewInlineProps = ki.Props{}
+var SliceViewInlineProps = ki.Props{
+	"min-width": units.NewValue(20, units.Ex),
+}
 
 // ConfigParts configures Parts for the current slice
 func (sv *SliceViewInline) ConfigParts() {
-	if kit.IsNil(sv.Slice) {
+	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
 	sv.Parts.Lay = LayoutRow

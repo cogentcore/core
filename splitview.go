@@ -265,7 +265,7 @@ var SplitterProps = ki.Props{
 		"stroke":     &Prefs.FontColor,
 	},
 	SliderSelectors[SliderActive]: ki.Props{},
-	SliderSelectors[SliderDisabled]: ki.Props{
+	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -334,9 +334,14 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 func (g *Splitter) Style2D() {
 	bitflag.Clear(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)

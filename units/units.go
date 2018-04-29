@@ -43,11 +43,17 @@ const (
 type Unit int32
 
 const (
-	// Rem = font size of the root element -- fallback to 12pt by default
-	Rem Unit = iota
+	// Px = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
+	Px Unit = iota
+
+	// Dp = density-independent pixels -- 1dp = 1/160th of 1in
+	Dp
 
 	// Pct = percentage of surrounding contextual element
 	Pct
+
+	// Rem = font size of the root element -- fallback to 12pt by default
+	Rem
 
 	// Em = font size of the element -- fallback to 12pt by default
 	Em
@@ -88,12 +94,6 @@ const (
 	// Pt = points -- 1pt = 1/72th of 1in
 	Pt
 
-	// Px = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
-	Px
-
-	// Dp = density-independent pixels -- 1dp = 1/160th of 1in
-	Dp
-
 	// Dot = actual real display pixels -- generally only use internally
 	Dot
 
@@ -105,6 +105,8 @@ const (
 var KiT_Unit = kit.Enums.AddEnumAltLower(UnitN, false, nil, "")
 
 var UnitNames = [...]string{
+	Px:   "px",
+	Dp:   "dp",
 	Pct:  "pct",
 	Rem:  "rem",
 	Em:   "em",
@@ -120,8 +122,6 @@ var UnitNames = [...]string{
 	In:   "in",
 	Pc:   "pc",
 	Pt:   "pt",
-	Px:   "px",
-	Dp:   "dp",
 	Dot:  "dot",
 }
 

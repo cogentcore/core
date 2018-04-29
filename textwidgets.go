@@ -120,17 +120,20 @@ type TextFieldStates int32
 const (
 	// normal state -- there but not being interacted with
 	TextFieldActive TextFieldStates = iota
+
 	// textfield is the focus -- will respond to keyboard input
 	TextFieldFocus
-	// read only / disabled -- not editable
-	TextFieldReadOnly
+
+	// inactive -- not editable
+	TextFieldInactive
+
 	TextFieldStatesN
 )
 
 //go:generate stringer -type=TextFieldStates
 
 // Style selector names for the different states
-var TextFieldSelectors = []string{":active", ":focus", ":read-only"}
+var TextFieldSelectors = []string{":active", ":focus", ":inactive"}
 
 // TextField is a widget for editing a line of text
 type TextField struct {
@@ -166,7 +169,7 @@ var TextFieldProps = ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
 		"background-color": "lighter-80",
 	},
-	TextFieldSelectors[TextFieldReadOnly]: ki.Props{
+	TextFieldSelectors[TextFieldInactive]: ki.Props{
 		"background-color": "darker-20",
 	},
 }
@@ -374,9 +377,10 @@ func (g *TextField) SetCursorFromPixel(pixOff float32) {
 func (g *TextField) Init2D() {
 	g.Init2DWidget()
 	g.EditText = g.Text
+	bitflag.Set(&g.Flag, int(InactiveEvents))
 	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
-		if tf.IsReadOnly() { // todo: need more subtle read-only behavior here -- can select but not edit
+		if tf.IsInactive() { // todo: need more subtle inactive behavior here -- can select but not edit
 			return
 		}
 		me := d.(*mouse.Event)
@@ -391,7 +395,7 @@ func (g *TextField) Init2D() {
 	})
 	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
-		if tf.IsReadOnly() {
+		if tf.IsInactive() {
 			return
 		}
 		kt := d.(*key.ChordEvent)
@@ -400,11 +404,16 @@ func (g *TextField) Init2D() {
 }
 
 func (g *TextField) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(TextFieldSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(TextFieldSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 }
@@ -570,8 +579,8 @@ func (g *TextField) AutoScroll() {
 func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
-		if g.IsReadOnly() {
-			g.Style = g.StateStyles[TextFieldReadOnly]
+		if g.IsInactive() {
+			g.Style = g.StateStyles[TextFieldInactive]
 		} else if g.HasFocus() {
 			g.Style = g.StateStyles[TextFieldFocus]
 		} else {
@@ -589,7 +598,7 @@ func (g *TextField) Render2D() {
 }
 
 func (g *TextField) FocusChanged2D(gotFocus bool) {
-	if !gotFocus && !g.IsReadOnly() {
+	if !gotFocus && !g.IsInactive() {
 		g.EditDone() // lose focus
 	}
 	g.UpdateSig()
@@ -658,7 +667,7 @@ func (g *SpinBox) Defaults() { // todo: should just get these from props
 	g.Step = 0.1
 	g.PageStep = 0.2
 	g.Max = 1.0
-	g.Prec = 9
+	g.Prec = 6
 }
 
 // SetMin sets the min limits on the value
@@ -742,24 +751,24 @@ func (g *SpinBox) ConfigParts() {
 		// up
 		up := buts.Child(0).(*Action)
 		up.SetName("up")
-		bitflag.SetState(up.Flags(), g.IsReadOnly(), int(ReadOnly))
+		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
 		up.Icon = g.UpIcon
 		g.StylePart(up.This)
-		if !g.IsReadOnly() {
+		if !g.IsInactive() {
 			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.(*SpinBox)
+				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(1.0)
 			})
 		}
 		// dn
 		dn := buts.Child(1).(*Action)
-		bitflag.SetState(dn.Flags(), g.IsReadOnly(), int(ReadOnly))
+		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.Icon = g.DownIcon
 		g.StylePart(dn.This)
-		if !g.IsReadOnly() {
+		if !g.IsInactive() {
 			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.(*SpinBox)
+				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(-1.0)
 			})
 		}
@@ -767,12 +776,12 @@ func (g *SpinBox) ConfigParts() {
 		g.StylePart(g.Parts.Child(sbSpaceIdx)) // also get the space
 		// text-field
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
-		bitflag.SetState(tf.Flags(), g.IsReadOnly(), int(ReadOnly))
+		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
 		g.StylePart(tf.This)
 		tf.Text = fmt.Sprintf("%g", g.Value)
-		if !g.IsReadOnly() {
+		if !g.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.(*SpinBox)
+				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 				tf := send.(*TextField)
 				vl, err := strconv.ParseFloat(tf.Text, 32)
 				if err == nil {
@@ -798,6 +807,12 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 func (g *SpinBox) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
+	g.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+		sb.IncrValue(float32(me.NonZeroDelta(false)))
+		me.SetProcessed()
+	})
 }
 
 func (g *SpinBox) Style2D() {
@@ -879,7 +894,7 @@ var ComboBoxProps = ki.Props{
 		"stroke":         &Prefs.FontColor,
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
-	ButtonSelectors[ButtonDisabled]: ki.Props{
+	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -907,10 +922,6 @@ func (g *ComboBox) ButtonAsBase() *ButtonBase {
 }
 
 func (g *ComboBox) ButtonRelease() {
-	if g.IsReadOnly() {
-		g.SetButtonState(ButtonActive)
-		return
-	}
 	win := g.Viewport.Win
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
@@ -1129,11 +1140,16 @@ func (g *ComboBox) ConfigPartsIfNeeded() {
 }
 
 func (g *ComboBox) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()

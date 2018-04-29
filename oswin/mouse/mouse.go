@@ -98,6 +98,18 @@ type ScrollEvent struct {
 	Delta image.Point
 }
 
+// NonZeroDelta attempts to find a non-zero delta -- often only get Y
+// dimension scrolling and want to use that for X if prefX is true
+func (e ScrollEvent) NonZeroDelta(prefX bool) int {
+	if prefX {
+		if e.Delta.X == 0 {
+			return e.Delta.Y
+		}
+		return e.Delta.X
+	}
+	return e.Delta.Y
+}
+
 /////////////////////////////////////////////////////////////////
 
 // mouse.FocusEvent records actions of Enter and Exit of mouse into a given

@@ -73,7 +73,7 @@ var ActionProps = ki.Props{
 		"vertical-align": AlignMiddle,
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
-	ButtonSelectors[ButtonDisabled]: ki.Props{
+	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -197,11 +197,16 @@ func (g *Action) ConfigPartsIfNeeded() {
 }
 
 func (g *Action) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
@@ -411,7 +416,7 @@ var MenuButtonProps = ki.Props{
 		"stroke":         &Prefs.FontColor,
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
-	ButtonSelectors[ButtonDisabled]: ki.Props{
+	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
@@ -535,11 +540,16 @@ func (g *MenuButton) ConfigPartsIfNeeded() {
 }
 
 func (g *MenuButton) Style2D() {
-	g.SetCanFocusIfNotReadOnly()
+	g.SetCanFocusIfActive()
 	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(nil, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	MenuButtonFields.Style(g, nil, g.Props)
