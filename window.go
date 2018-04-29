@@ -64,7 +64,7 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	var err error
 	sz := image.Point{width, height}
 	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
-		Title: name, Width: width, Height: height, StdPixels: stdPixels,
+		Title: name, Size: image.Point{width, height}, StdPixels: stdPixels,
 	})
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)

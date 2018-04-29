@@ -99,10 +99,7 @@ func (w *windowImpl) Release() {
 	// thread). Even if that isn't true, the windowWillClose handler is
 	// idempotent.
 
-	theApp.mu.Lock()
-	delete(theApp.windows, w.id)
-	theApp.mu.Unlock()
-
+	theApp.DeleteWin(w.id)
 	closeWindow(w.id)
 }
 
@@ -377,16 +374,4 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	}
 
 	return res
-}
-
-func (w *windowImpl) Geometry() image.Rectangle {
-	// todo: will require getting some os-specific stuff..
-	// use lower-case getGeometry() method that OS-specific code implements
-	return image.ZR
-}
-
-func (w *windowImpl) Screen() *oswin.Screen {
-	// todo will require os-specific hook..
-	// use lower-case getScreen() method that OS-specific code implements
-	return nil
 }

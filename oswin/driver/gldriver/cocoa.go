@@ -22,7 +22,7 @@ void startDriver();
 void stopDriver();
 void makeCurrentContext(uintptr_t ctx);
 void flushContext(uintptr_t ctx);
-uintptr_t doNewWindow(int width, int height, char* title);
+uintptr_t doNewWindow(int width, int height, int left, int top, char* title, bool dialog, bool modal, bool tool, bool fullscreen);
 void doShowWindow(uintptr_t id);
 void doCloseWindow(uintptr_t id);
 void getScreens();
@@ -69,11 +69,14 @@ func init() {
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
 	width, height := optsSize(theApp, opts)
+	left, top := optsPos(theApp, opts)
+
+	dialog, modal, tool, fullscreen := optsFlags(theApp, opts)
 
 	title := C.CString(opts.GetTitle())
 	defer C.free(unsafe.Pointer(title))
 
-	return uintptr(C.doNewWindow(C.int(width), C.int(height), title)), nil
+	return uintptr(C.doNewWindow(C.int(width), C.int(height), C.int(left), C.int(top), title, C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))), nil
 }
 
 func initWindow(w *windowImpl) {
@@ -82,6 +85,10 @@ func initWindow(w *windowImpl) {
 
 func showWindow(w *windowImpl) {
 	C.doShowWindow(C.uintptr_t(w.id))
+}
+
+func getGeometry(w *windowImpl) {
+
 }
 
 //export preparedOpenGL
@@ -183,7 +190,7 @@ func drawLoop(w *windowImpl, vba uintptr) {
 }
 
 //export setGeom
-func setGeom(id uintptr, dpi float32, widthPx, heightPx int) {
+func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topPx int) {
 	theApp.mu.Lock()
 	w := theApp.windows[id]
 	theApp.mu.Unlock()
@@ -197,8 +204,14 @@ func setGeom(id uintptr, dpi float32, widthPx, heightPx int) {
 	sz := image.Point{widthPx, heightPx}
 	w.sizeMu.Lock()
 	w.Sz = sz
+	w.Pos = image.Point{leftPx, topPx}
 	w.PhysDPI = dpi
 	w.LogDPI = ldpi
+
+	if scrno > 0 && len(theApp.screens) > scrno {
+		w.Scrn = theApp.screens[scrno]
+	}
+
 	w.sizeMu.Unlock()
 
 	winEv := window.Event{

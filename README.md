@@ -74,9 +74,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### For release
 
-* MenuBar / Toolbar -- just a layout really, with some styling?
+* update parent structview from map updates
 
-* cascaded menu needs to prevent parent from disappearing
+* MenuBar / Toolbar -- just a layout really, with some styling?
 
 * dialogs need window positioning hints, also modal / non-modal hints
 

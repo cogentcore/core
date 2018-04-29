@@ -82,7 +82,13 @@ uint64 threadID() {
 	// 27" iMac,               2560x1440, 109ppi, backingScaleFactor=1, scale=1.51
 	// 27" Retina iMac,        5120x2880, 218ppi, backingScaleFactor=2, scale=3.03
 	NSScreen *screen = self.window.screen;
-	double screenPixW = [screen frame].size.width * [screen backingScaleFactor];
+
+	double pixratio = [screen backingScaleFactor];
+        NSArray *screens = [NSScreen screens];
+	int scrno = [screens indexOfObject:screen];
+
+	double screenH = [screen frame].size.height;
+	double screenPixW = [screen frame].size.width * pixratio;
 
 	CGDirectDisplayID display = (CGDirectDisplayID)[[[screen deviceDescription] valueForKey:@"NSScreenNumber"] intValue];
 	CGSize screenSizeMM = CGDisplayScreenSize(display); // in millimeters
@@ -94,10 +100,15 @@ uint64 threadID() {
 	// in the view. Multiplying this by the backingScaleFactor
 	// gives us the number of actual pixels.
 	NSRect r = [self bounds];
-	int w = r.size.width * [screen backingScaleFactor];
-	int h = r.size.height * [screen backingScaleFactor];
+	int w = r.size.width * pixratio;
+	int h = r.size.height * pixratio;
 
-	setGeom((GoUintptr)self, dpi, w, h);
+	// origin in mac for position is lower-left
+	NSRect p = [self.window frame];
+	int l = p.origin.x * pixratio;
+	int t = (screenH - (p.origin.y + p.size.height)) * pixratio;
+
+	setGeom((GoUintptr)self, scrno, dpi, w, h, l, t);
 }
 
 - (void)reshape {
@@ -190,6 +201,10 @@ uint64 threadID() {
 	[self callSetGeom];
 }
 
+- (void)windowDidMove:(NSNotification *)notification {
+	[self callSetGeom];
+}
+
 // TODO: catch windowDidMiniaturize?
 
 - (void)windowDidExpose:(NSNotification *)notification {
@@ -240,10 +255,19 @@ uint64 threadID() {
 }
 @end
 
-uintptr_t doNewWindow(int width, int height, char* title) {
+// modal is pretty tricky:
+// https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/WinPanel/Concepts/UsingModalWindows.html#//apple_ref/doc/uid/20000223-CJBEADBA
+
+uintptr_t doNewWindow(int width, int height, int left, int top, char* title, bool dialog, bool modal, bool tool, bool fullscreen) {
 	NSScreen *screen = [NSScreen mainScreen];
-	double w = (double)width / [screen backingScaleFactor];
-	double h = (double)height / [screen backingScaleFactor];
+	double pixratio = [screen backingScaleFactor];
+	double screenH = [screen frame].size.height;
+	double w = (double)width / pixratio;
+	double h = (double)height / pixratio;
+
+	double l = (double)left / pixratio;
+	double b = (screenH - ((double)(top + height))) / pixratio;
+
 	__block ScreenGLView* view = NULL;
 
 	dispatch_sync(dispatch_get_main_queue(), ^{
@@ -265,18 +289,41 @@ uintptr_t doNewWindow(int width, int height, char* title) {
 		[menuItem setSubmenu:menu];
 
 		NSRect rect = NSMakeRect(0, 0, w, h);
+		
+		NSWindow* window = NULL;
+  
+		if (dialog || tool) {
+		  window = [[NSPanel alloc] initWithContentRect:rect
+						       styleMask:NSWindowStyleMaskTitled
+							backing:NSBackingStoreBuffered
+							  defer:NO];
+		  if (dialog) {
+		    window.styleMask |= NSWindowStyleMaskResizable;
+		    window.styleMask |= NSWindowStyleMaskMiniaturizable;
+		    window.styleMask |= NSWindowStyleMaskClosable;
+		  }
 
-		NSWindow* window = [[NSWindow alloc] initWithContentRect:rect
-				styleMask:NSWindowStyleMaskTitled
-				backing:NSBackingStoreBuffered
-				defer:NO];
-		window.styleMask |= NSWindowStyleMaskResizable;
-		window.styleMask |= NSWindowStyleMaskMiniaturizable;
-		window.styleMask |= NSWindowStyleMaskClosable;
-		window.title = name;
-		window.displaysWhenScreenProfileChanges = YES;
-		[window cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-		[window setAcceptsMouseMovedEvents:YES];
+		  window.title = name;
+		  window.displaysWhenScreenProfileChanges = YES;
+		  [window setAcceptsMouseMovedEvents:YES];
+		}
+		else {
+		  window = [[NSWindow alloc] initWithContentRect:rect
+						       styleMask:NSWindowStyleMaskTitled
+							 backing:NSBackingStoreBuffered
+							   defer:NO];
+		  window.styleMask |= NSWindowStyleMaskResizable;
+		  window.styleMask |= NSWindowStyleMaskMiniaturizable;
+		  window.styleMask |= NSWindowStyleMaskClosable;
+
+		  if (fullscreen) {
+		    window.styleMask |= NSWindowStyleMaskFullScreen;
+		  }
+
+		  window.title = name;
+		  window.displaysWhenScreenProfileChanges = YES;
+		  [window setAcceptsMouseMovedEvents:YES];
+		}
 
 		NSOpenGLPixelFormatAttribute attr[] = {
 			NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
@@ -292,6 +339,12 @@ uintptr_t doNewWindow(int width, int height, char* title) {
 		[window setContentView:view];
 		[window setDelegate:view];
 		[window makeFirstResponder:view];
+		// this works to absolutely set the position:
+		NSRect fr = [window frame];
+		fr.origin.x = l;
+		fr.origin.y = b;
+		[window setFrame:fr display:YES animate:NO];
+		
 	});
 
 	return (uintptr_t)view;
@@ -343,4 +396,3 @@ void getScreens() {
 	  setScreen(i, dpi, pixratio, (int)screenPixW, (int)screenPixH, (int)screenSizeMM.width, (int)screenSizeMM.height, depth);
 	}
 }
-

@@ -12,6 +12,9 @@ package oswin
 import (
 	"image"
 	"unicode/utf8"
+
+	"github.com/rcoreilly/goki/ki/bitflag"
+	"github.com/rcoreilly/goki/ki/kit"
 )
 
 // Window is a double-buffered OS-specific hardware window
@@ -33,6 +36,10 @@ type Window interface {
 	// Size returns the current size of the window, in raw underlying dots / pixels
 	Size() image.Point
 
+	// Position returns the current lef-top position of the window relative to
+	// underlying screen, in raw underlying dots / pixels
+	Position() image.Point
+
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
 	// translating into various other units
@@ -48,10 +55,6 @@ type Window interface {
 	// physical DPI can be found in the Screen
 	SetLogicalDPI(dpi float32)
 
-	// Geometry returns the current position and size of the window relative
-	// to the screen
-	Geometry() image.Rectangle
-
 	// Screen returns the screen for this window, with all the relevant
 	// information about its properties
 	Screen() *Screen
@@ -64,7 +67,9 @@ type Window interface {
 	// gi.Window but could be something else in other frameworks
 	SetParent(par interface{})
 
-	// todo: lots of other basic props of windows!
+	// Flags returns the bit flags for this window's properties set according
+	// to WindowFlags bits (use bitflag package to access)
+	Flags() int64
 
 	// Release closes the window. The behavior of the Window after Release,
 	// whether calling its methods or passing it as an argument, is undefined.
@@ -88,21 +93,71 @@ type PublishResult struct {
 	BackImagePreserved bool
 }
 
+// Qt options: http://doc.qt.io/qt-5/qt.html#WindowType-enum
+
+// WindowFlags contains all the optional properties of a window -- by default
+// with no flags a window is a main top-level window
+type WindowFlags int32
+
+const (
+	// Dialog indicates that this is a temporary, pop-up window
+	Dialog WindowFlags = iota
+
+	// Modal indicates that this dialog window blocks events going to other
+	// windows until it is closed
+	Modal
+
+	// Tool indicates that this is a floating tool window that has minimized
+	// window decoration
+	Tool
+
+	// FullScreen indicates that this window should be opened full-screen
+	FullScreen
+
+	WindowFlagsN
+)
+
+//go:generate stringer -type=WindowFlags
+
+var KiT_WindowFlags = kit.Enums.AddEnum(WindowFlagsN, true, nil) // bitflags
+
 // NewWindowOptions are optional arguments to NewWindow.
 type NewWindowOptions struct {
-	// Width and Height specify the dimensions of the new window, in raw
-	// pixels. If Width or Height are zero, a driver-dependent default will be
-	// used for each zero value dimension.
-	Width, Height int
+	// Size specifies the dimensions of the new window, either in raw pixels
+	// or std 96 dpi pixels depending on StdPixels. If Width or Height are
+	// zero, a driver-dependent default will be used for each zero value
+	// dimension
+	Size image.Point
 
-	// StdPixels means use standardized "pixel" units for the display size(96
+	// Pos specifies the position of the window, if non-zero -- always in
+	// device-specific raw pixels
+	Pos image.Point
+
+	// StdPixels means use standardized "pixel" units for the window size (96
 	// per inch), not the actual underlying raw display dot pixels
 	StdPixels bool
 
 	// Title specifies the window title.
 	Title string
 
-	// TODO: fullscreen, icon, cursorHidden?
+	// Flags can be set using WindowFlags to request different types of windows
+	Flags int64
+}
+
+func (o *NewWindowOptions) SetDialog() {
+	bitflag.Set(&o.Flags, int(Dialog))
+}
+
+func (o *NewWindowOptions) SetModal() {
+	bitflag.Set(&o.Flags, int(Modal))
+}
+
+func (o *NewWindowOptions) SetTool() {
+	bitflag.Set(&o.Flags, int(Tool))
+}
+
+func (o *NewWindowOptions) SetFullScreen() {
+	bitflag.Set(&o.Flags, int(FullScreen))
 }
 
 // GetTitle returns a sanitized form of o.Title. In particular, its length will
@@ -138,9 +193,12 @@ type WindowBase struct {
 	Nm      string
 	Titl    string
 	Sz      image.Point
+	Pos     image.Point
 	PhysDPI float32
 	LogDPI  float32
+	Scrn    *Screen
 	Par     interface{}
+	Flag    int64
 }
 
 func (w WindowBase) Name() string {
@@ -163,6 +221,10 @@ func (w WindowBase) Size() image.Point {
 	return w.Sz
 }
 
+func (w WindowBase) Position() image.Point {
+	return w.Pos
+}
+
 func (w WindowBase) PhysicalDPI() float32 {
 	return w.PhysDPI
 }
@@ -175,10 +237,18 @@ func (w *WindowBase) SetLogicalDPI(dpi float32) {
 	w.LogDPI = dpi
 }
 
+func (w WindowBase) Screen() *Screen {
+	return w.Scrn
+}
+
 func (w WindowBase) Parent() interface{} {
 	return w.Par
 }
 
 func (w *WindowBase) SetParent(parent interface{}) {
 	w.Par = parent
+}
+
+func (w *WindowBase) Flags() int64 {
+	return w.Flag
 }

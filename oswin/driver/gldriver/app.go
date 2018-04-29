@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"golang.org/x/mobile/gl"
 )
 
@@ -102,11 +103,11 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 func optsSize(app *appImpl, opts *oswin.NewWindowOptions) (width, height int) {
 	width, height = 1024, 768
 	if opts != nil {
-		if opts.Width > 0 {
-			width = opts.Width
+		if opts.Size.X > 0 {
+			width = opts.Size.X
 		}
-		if opts.Height > 0 {
-			height = opts.Height
+		if opts.Size.Y > 0 {
+			height = opts.Size.Y
 		}
 	}
 
@@ -116,10 +117,56 @@ func optsSize(app *appImpl, opts *oswin.NewWindowOptions) (width, height int) {
 			winDPI := sc.LogicalDPI
 			width = int(float32(width) * (winDPI / 96))
 			height = int(float32(height) * (winDPI / 96))
-			// fmt.Printf("new size: %v %v for dpi: %v\n", width, height, winDPI)
 		}
 	}
-	return width, height
+	return
+}
+
+func optsPos(app *appImpl, opts *oswin.NewWindowOptions) (left, top int) {
+	left, top = 0, 0
+	if opts != nil {
+		left = opts.Pos.X
+		top = opts.Pos.Y
+	}
+
+	if left == 0 && top == 0 {
+		width, height := optsSize(app, opts)
+		nw := len(app.winlist)
+		if nw > 0 {
+			lastw := app.winlist[nw-1]
+			// todo: this behavior should depend on modal dialog settings.. pass opts
+			if width > lastw.Sz.X || height > lastw.Sz.Y { // larger, cascade
+				left = lastw.Pos.X + 50
+				top = lastw.Pos.Y + 70
+			} else { // smaller fit in
+				ctrx := lastw.Pos.X + (lastw.Sz.X / 2)
+				ctry := lastw.Pos.Y + (lastw.Sz.Y / 2)
+				left = ctrx - width/2
+				top = ctry - height/2
+			}
+		} else {
+			ns := len(app.screens)
+			if ns > 0 {
+				sc := app.screens[0]
+				sz := sc.Geometry.Size()
+				left = sz.X/2 - width/2
+				top = sz.Y/2 - height/2
+			}
+		}
+	}
+	return
+}
+
+func optsFlags(app *appImpl, opts *oswin.NewWindowOptions) (dialog, modal, tool, fullscreen bool) {
+	dialog, modal, tool, fullscreen = false, false, false, false
+	if opts == nil {
+		return
+	}
+	dialog = bitflag.Has(opts.Flags, int(oswin.Dialog))
+	modal = bitflag.Has(opts.Flags, int(oswin.Modal))
+	tool = bitflag.Has(opts.Flags, int(oswin.Tool))
+	fullscreen = bitflag.Has(opts.Flags, int(oswin.FullScreen))
+	return
 }
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
@@ -149,6 +196,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		sc := app.Screen(0)
 		w.PhysDPI = sc.PhysicalDPI
 		w.LogDPI = sc.LogicalDPI
+		w.Scrn = sc // todo: this is not necc true -- need to update in getGeom
 	}
 
 	if useLifecycler {
@@ -158,6 +206,22 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	showWindow(w)
 
 	return w, nil
+}
+
+func (app *appImpl) DeleteWin(id uintptr) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	_, ok := app.windows[id]
+	if !ok {
+		return
+	}
+	for i, w := range app.winlist {
+		if w.id == id {
+			app.winlist = append(app.winlist[:i], app.winlist[i+1:]...)
+			break
+		}
+	}
+	delete(app.windows, id)
 }
 
 func (app *appImpl) NScreens() int {
