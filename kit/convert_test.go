@@ -9,6 +9,34 @@ import (
 	"testing"
 )
 
+func AFun(aa interface{}) bool {
+	return IfaceIsNil(aa)
+}
+
+func TestIfaceIsNil(t *testing.T) {
+	ai := interface{}(a)
+
+	if IfaceIsNil(ai) != false {
+		t.Errorf("should be non-nil: %v\n", ai)
+	}
+
+	var ap *A
+	api := interface{}(ap)
+
+	if IfaceIsNil(api) != true {
+		t.Errorf("should be nil: %v\n", api)
+	}
+
+	if AFun(ap) != true {
+		t.Errorf("should be nil: %v\n", ap)
+	}
+
+	if AFun(&a) != false {
+		t.Errorf("should be non-nil: %v\n", &a)
+	}
+
+}
+
 func TestConverts(t *testing.T) {
 	fv := 3.14
 	iv := 10

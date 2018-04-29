@@ -24,10 +24,10 @@ func Sel(a ...interface{}) []interface{} {
 	return a
 }
 
-// IsNil checks if an interface value is nil -- the interface itself could be
+// IfaceIsNil checks if an interface value is nil -- the interface itself could be
 // nil, or the value pointed to by the interface could be nil -- this checks
 // both, safely
-func IsNil(it interface{}) bool {
+func IfaceIsNil(it interface{}) bool {
 	if it == nil {
 		return true
 	}
@@ -84,7 +84,7 @@ func ValueIsZero(v reflect.Value) bool {
 
 // ToBool robustly converts anything to a bool
 func ToBool(it interface{}) (bool, bool) {
-	if IsNil(it) {
+	if IfaceIsNil(it) {
 		return false, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -113,7 +113,7 @@ func ToBool(it interface{}) (bool, bool) {
 
 // ToInt robustlys converts anything to an int64
 func ToInt(it interface{}) (int64, bool) {
-	if IsNil(it) {
+	if IfaceIsNil(it) {
 		return 0, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -145,7 +145,7 @@ func ToInt(it interface{}) (int64, bool) {
 
 // ToFloat robustly converts anything to a Float64
 func ToFloat(it interface{}) (float64, bool) {
-	if IsNil(it) {
+	if IfaceIsNil(it) {
 		return 0.0, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -177,7 +177,7 @@ func ToFloat(it interface{}) (float64, bool) {
 
 // ToFloat32 robustly converts anything to a Float64
 func ToFloat32(it interface{}) (float32, bool) {
-	if IsNil(it) {
+	if IfaceIsNil(it) {
 		return float32(0.0), false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -211,7 +211,7 @@ func ToFloat32(it interface{}) (float32, bool) {
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
 func ToString(it interface{}) string {
-	if IsNil(it) {
+	if IfaceIsNil(it) {
 		return "nil"
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -244,7 +244,7 @@ func ToString(it interface{}) string {
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
 func SetRobust(to, from interface{}) bool {
-	if IsNil(to) {
+	if IfaceIsNil(to) {
 		return false
 	}
 	v := reflect.ValueOf(to)
