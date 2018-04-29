@@ -121,8 +121,9 @@ var MenuFrameProps = ki.Props{
 // PopupMenu just pops up a viewport with a layout that draws the supplied
 // actions positions are relative to given viewport -- name is relevant base
 // name to which Menu is appended
-func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
-	vp := win.Viewport
+func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+	win := parVp.Win
+	mainVp := win.Viewport
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
@@ -134,6 +135,7 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 	pvp.Fill = true
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
+
 	pvp.ViewBox.Min = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
@@ -144,18 +146,18 @@ func PopupMenu(menu Menu, x, y int, win *Window, name string) *Viewport2D {
 		frame.AddChild(acn.This)
 	}
 	frame.Init2DTree()
-	frame.Style2DTree()                            // sufficient to get sizes
-	frame.LayData.AllocSize = vp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree()                             // collect sizes
+	frame.Style2DTree()                                // sufficient to get sizes
+	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
+	frame.Size2DTree()                                 // collect sizes
 	pvp.Win = nil
-	vpsz := frame.LayData.Size.Pref.Min(vp.LayData.AllocSize).ToPoint()
-	x = kit.MinInt(x, vp.ViewBox.Size.X-vpsz.X) // fit
-	y = kit.MinInt(y, vp.ViewBox.Size.Y-vpsz.Y) // fit
+	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	x = kit.MinInt(x, mainVp.ViewBox.Size.X-vpsz.X) // fit
+	y = kit.MinInt(y, mainVp.ViewBox.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz.X, vpsz.Y)
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 
-	win.PushPopup(pvp.This)
+	win.NextPopup = pvp.This
 	return &pvp
 }
 

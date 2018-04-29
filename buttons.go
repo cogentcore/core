@@ -24,10 +24,16 @@ import (
 const (
 	// button is selected
 	ButtonFlagSelected NodeFlags = NodeFlagsN + iota
+
 	// button is checkable -- enables display of check control
 	ButtonFlagCheckable
+
 	// button is checked
 	ButtonFlagChecked
+
+	// Menu flag means that the button is a menu item
+	ButtonFlagMenu
+
 	ButtonFlagsN
 )
 
@@ -35,14 +41,21 @@ const (
 type ButtonSignals int64
 
 const (
-	// ButtonClicked is the main signal to check for normal button activation -- button pressed down and up
+	// ButtonClicked is the main signal to check for normal button activation
+	// -- button pressed down and up
 	ButtonClicked ButtonSignals = iota
-	// button pushed down but not yet up
+
+	// Pressed means button pushed down but not yet up
 	ButtonPressed
-	// a mouse up event occurred -- typically look at ButtonClicked instead of this one
+
+	// Released means mose button was released - typically look at
+	// ButtonClicked instead of this one
 	ButtonReleased
-	// toggled means the checked / unchecked state was toggled -- only sent for buttons with Checkable flag set
+
+	// Toggled means the checked / unchecked state was toggled -- only sent
+	// for buttons with Checkable flag set
 	ButtonToggled
+
 	ButtonSignalsN
 )
 
@@ -146,12 +159,23 @@ func (g *ButtonBase) ToggleChecked() {
 	g.SetChecked(!g.IsChecked())
 }
 
-// set the text and update button
+// SetAsMenu ensures that this functions as a menu even before menu items are added
+func (g *ButtonBase) SetAsMenu() {
+	bitflag.Set(&g.Flag, int(ButtonFlagMenu))
+}
+
+// SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
+// or a menu function then it will still behave as a menu
+func (g *ButtonBase) SetAsButton() {
+	bitflag.Clear(&g.Flag, int(ButtonFlagMenu))
+}
+
+// SetText sets the text and updates the button
 func (g *ButtonBase) SetText(txt string) {
 	SetButtonText(g, txt)
 }
 
-// set the Icon (could be nil) and update button
+// SetIcon sets the Icon (could be nil) and updates the button
 func (g *ButtonBase) SetIcon(ic *Icon) {
 	SetButtonIcon(g, ic)
 }
@@ -199,9 +223,15 @@ func (g *ButtonBase) ButtonReleased() {
 	g.UpdateEnd(updt)
 }
 
-// HasMenu returns true if there is a menu or menu-making function set
+// IsMenu returns true this button is on a menu -- it is a menu item
+func (g *ButtonBase) IsMenu() bool {
+	return bitflag.Has(g.Flag, int(ButtonFlagMenu))
+}
+
+// HasMenu returns true if there is a menu or menu-making function set, or the
+// explicit ButtonFlagMenu has been set
 func (g *ButtonBase) HasMenu() bool {
-	return (g.MakeMenuFunc != nil || len(g.Menu) > 0)
+	return g.MakeMenuFunc != nil || len(g.Menu) > 0
 }
 
 // OpenMenu will open any menu associated with this element -- returns true if
@@ -222,9 +252,10 @@ func (g *ButtonBase) OpenMenu() bool {
 		pos.X -= 10
 	}
 	if g.Viewport != nil {
-		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)
+		return true
 	}
-	return true
+	return false
 }
 
 // AddMenuText adds an action to the menu with a text label -- todo: shortcuts

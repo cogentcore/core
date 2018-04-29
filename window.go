@@ -44,8 +44,7 @@ type Window struct {
 	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
-	LastDrag      time.Time                   `json:"-" xml:"-" desc:"time since last drag event"`
-	LastSentDrag  mouse.DragEvent             `json:"-" xml:"-" desc:"last drag that we actually sent"`
+	NextPopup     ki.Ki                       `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
 	stopEventLoop bool                        `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 	DoFullRender  bool                        `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 }
@@ -330,7 +329,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 			} else if evi.HasPos() {
 				pos := evi.Pos()
 				// drag events start with node but can go beyond it..
-				mde, ok := evi.(*mouse.DragEvent)
+				_, ok := evi.(*mouse.DragEvent)
 				if ok {
 					if w.Dragging == gi.This {
 						return true
@@ -338,9 +337,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 						return false
 					} else {
 						if pos.In(gi.WinBBox) {
-							w.LastDrag = time.Now()
 							w.Dragging = gi.This
-							w.LastSentDrag = *mde
 							bitflag.Set(&gi.Flag, int(NodeDragging))
 							return true
 						}
@@ -443,6 +440,17 @@ func PopupIsMenu(pop ki.Ki) bool {
 	return false
 }
 
+// DeletePopupMenu returns true if the given popup item should be deleted
+func (w *Window) DeletePopupMenu(pop ki.Ki) bool {
+	if !PopupIsMenu(pop) {
+		return false
+	}
+	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // poping up another menu
+		return false
+	}
+	return true
+}
+
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
 	var lastResize *window.Event
@@ -466,12 +474,7 @@ func (w *Window) EventLoop() {
 			w.DoFullRender = false
 			w.FullReRender()
 		}
-		curPop := w.Popup
 		delPop := false // if true, delete this popup after event loop
-
-		// if curPop != nil {
-		// 	fmt.Printf("curpop: %v\n", curPop.Name())
-		// }
 
 		if rs, ok := evi.(*window.Event); ok {
 			if rs.Action == window.Resize {
@@ -491,15 +494,6 @@ func (w *Window) EventLoop() {
 		et := evi.Type()
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
-		}
-		if w.Popup != nil {
-			if me, ok := evi.(*mouse.Event); ok {
-				if me.Action == mouse.Release {
-					if PopupIsMenu(w.Popup) { // remove menus automatically after mouse release
-						delPop = true
-					}
-				}
-			}
 		}
 		switch e := evi.(type) {
 		case *lifecycle.Event:
@@ -526,14 +520,14 @@ func (w *Window) EventLoop() {
 				w.SetPrevFocusItem()
 				e.SetProcessed()
 			case KeyFunAbort:
-				if w.Popup != nil && w.Popup == curPop {
+				if w.Popup != nil {
 					if PopupIsMenu(w.Popup) {
 						delPop = true
 						e.SetProcessed()
 					}
 				}
 			case KeyFunAccept:
-				if w.Popup != nil && w.Popup == curPop {
+				if w.Popup != nil {
 					if PopupIsMenu(w.Popup) {
 						delPop = true
 					}
@@ -587,11 +581,6 @@ func (w *Window) EventLoop() {
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		}
 
-		if delPop {
-			// fmt.Printf("delpop disconnecting curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
-			w.DisconnectPopup(curPop)
-		}
-
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
 			if !delPop && et == oswin.MouseMoveEvent {
@@ -599,9 +588,23 @@ func (w *Window) EventLoop() {
 			}
 		}
 
+		if w.Popup != nil {
+			if me, ok := evi.(*mouse.Event); ok {
+				if me.Action == mouse.Release {
+					if w.DeletePopupMenu(w.Popup) {
+						delPop = true
+					}
+				}
+			}
+		}
+
 		if delPop {
-			// fmt.Printf("delpop poping curpop: %v delpop: %v w.Popup %v\n", curPop.Name(), delPop, w.Popup)
-			w.PopPopup(curPop)
+			w.PopPopup(w.Popup)
+		}
+
+		if w.NextPopup != nil {
+			w.PushPopup(w.NextPopup)
+			w.NextPopup = nil
 		}
 	}
 	fmt.Println("end of events")

@@ -97,6 +97,8 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
+* main menu (mac)
+
 * highlight, lowlight versions of lighter-darker that are relative to current
   lightness for dark-style themes.
 

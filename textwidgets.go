@@ -932,7 +932,6 @@ func (g *ComboBox) ButtonAsBase() *ButtonBase {
 }
 
 func (g *ComboBox) ButtonRelease() {
-	win := g.Viewport.Win
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
 	g.MakeItemsMenu()
@@ -950,7 +949,7 @@ func (g *ComboBox) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
-	PopupMenu(g.ItemsMenu, pos.X, pos.Y, win, g.Text)
+	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true, creates one with the given capacity

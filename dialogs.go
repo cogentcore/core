@@ -116,7 +116,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		dlg.Resize(vpsz.X, vpsz.Y)
 		dlg.ViewBox.Min = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
-		win.PushPopup(dlg.This)
+		win.NextPopup = dlg.This
 	}
 	return true
 }

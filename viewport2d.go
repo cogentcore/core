@@ -101,15 +101,26 @@ func (vp *Viewport2D) Resize(width, height int) {
 
 // these flags extend NodeBase NodeFlags to hold viewport state
 const (
-	// viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)
+	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
+	// parent bounds (otherwise does)
 	VpFlagPopup NodeFlags = NodeFlagsN + iota
-	// viewport is serving as a popup menu -- affects how window processes clicks
+
+	// VpFlagMenu means viewport is serving as a popup menu -- affects how window
+	// processes clicks
 	VpFlagMenu
-	// if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)
+
+	// VpFlagPopupDestroyAll means that if this is a popup, then destroy all
+	// the children when it is deleted -- otherwise children below the main
+	// layout under the vp will not be destroyed -- it is up to the caller to
+	// manage those (typically these are reusable assets)
 	VpFlagPopupDestroyAll
-	// this viewport is an SVG viewport -- determines the styling that it uses
+
+	// VpFlagSVG mans that this viewport is an SVG viewport -- SVG elements
+	// look for this for re-rendering
 	VpFlagSVG
-	// draw into window directly instead of drawing into parent -- i.e., as a sprite
+
+	// VpFlagDrawIntoWin means it should draw into window directly instead of
+	// drawing into parent -- i.e., as a sprite
 	VpFlagDrawIntoWin
 )
 

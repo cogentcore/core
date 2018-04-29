@@ -7,20 +7,11 @@ package gi
 import (
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
-// actions contains the Action and Menus and Toolbars where actions live
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Action -- for menu items and tool bars
-
-// these extend NodeBase NodeFlags to hold action state
-const (
-	// action is in a menu -- styles and behaves differently than in a toolbar -- set by menu call
-	ActionFlagMenu NodeFlags = ButtonFlagsN + iota
-)
 
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus and toolbars
@@ -112,18 +103,6 @@ func (g *Action) ButtonRelease() {
 		}
 	}
 	g.UpdateEnd(updt)
-}
-
-func (g *Action) SetAsMenu() {
-	bitflag.Set(&g.Flag, int(ActionFlagMenu))
-}
-
-func (g *Action) IsMenu() bool {
-	return bitflag.Has(g.Flag, int(ActionFlagMenu))
-}
-
-func (g *Action) SetAsButton() {
-	bitflag.Clear(&g.Flag, int(ActionFlagMenu))
 }
 
 func (g *Action) Init2D() {
