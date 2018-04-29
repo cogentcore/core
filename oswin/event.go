@@ -105,10 +105,7 @@ type Event interface {
 	// OnFocus returns true if the event operates only on focus item (e.g., keyboard events)
 	OnFocus() bool
 
-	// Window returns the oswin window that the event applies to
-	Window() Window
-
-	// Time returns the time at which the event was generated
+	// Time returns the time at which the event was generated, in UnixNano nanosecond units
 	Time() time.Time
 
 	// IsProcessed returns whether this event has already been processed
@@ -117,20 +114,22 @@ type Event interface {
 	// SetProcessed marks the event as having been processed
 	SetProcessed()
 
-	// Init sets the window and the time to now -- done just prior to event delivery
-	Init(win Window)
+	// Init sets the time to now, and any other init -- done just prior to event delivery
+	Init()
 
 	// SetTime sets the event time to Now
 	SetTime()
 }
 
-// base type for events -- records time and whether event has been processed by a receiver of the event -- in which case it is skipped
+// EventBase is the base type for events -- records time and whether event has
+// been processed by a receiver of the event -- in which case it is skipped
 type EventBase struct {
-	// Window is the oswin window that the event applies to
-	OSWin Window
-
-	// GenTime records the time when the event was first generated
-	GenTime time.Time
+	// GenTime records the time when the event was first generated, as seconds
+	// and nanoseconds instead of the default Time struct, to avoid having the
+	// location pointer per this:
+	// https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
+	GenTimeSec  int64
+	GenTimeNSec uint32
 
 	// Processed indicates if the event has been processed by an end receiver,
 	// and thus should no longer be processed by other possible receivers
@@ -139,20 +138,17 @@ type EventBase struct {
 
 // SetTime sets the event time to Now
 func (ev *EventBase) SetTime() {
-	ev.GenTime = time.Now()
+	t := time.Now()
+	ev.GenTimeSec = t.Unix()
+	ev.GenTimeNSec = uint32(t.Nanosecond())
 }
 
-func (ev *EventBase) Init(win Window) {
+func (ev *EventBase) Init() {
 	ev.SetTime()
-	ev.OSWin = win
-}
-
-func (ev EventBase) Window() Window {
-	return ev.OSWin
 }
 
 func (ev EventBase) Time() time.Time {
-	return ev.GenTime
+	return time.Unix(ev.GenTimeSec, int64(ev.GenTimeNSec))
 }
 
 func (ev EventBase) IsProcessed() bool {

@@ -39,6 +39,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"time"
 	"unsafe"
 
 	"github.com/rcoreilly/goki/gi/oswin"
@@ -251,7 +252,7 @@ func sendWindowEvent(id uintptr, e oswin.Event) {
 	if w == nil {
 		return // closing window
 	}
-	e.Init(w)
+	e.Init()
 	w.Send(e)
 }
 
@@ -307,6 +308,7 @@ func cocoaMouseButton(button int32) mouse.Button {
 	}
 }
 
+var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
 
 //export mouseEvent
@@ -367,24 +369,31 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 		}
 	default:
 		act := cocoaMouseAct(ty)
-		// if lastMouseEvent != nil {
-		// 	interval := time.Now().Sub(lastMouseEvent.Time()) / time.Millisecond
-		// 	// todo: process DoubleClickWait option -- requires caching the
-		// 	// event and delivering conditional on a global timer... probably
-		// 	// don't want to delay things here.. some kid of go routine with a
-		// 	// timer delay on it or something like that
-		// 	if interval < time.Duration(mouse.DoubleClickMSec) {
-		// 		act = mouse.DoubleClick
-		// 	}
-		// }
+
+		// todo: process DoubleClickWait option -- requires caching the
+		// event and delivering conditional on a global timer... probably
+		// don't want to delay things here.. some kind of go routine with a
+		// timer delay on it or something like that
+
+		if act == mouse.Press && lastMouseClickEvent != nil {
+			interval := time.Now().Sub(lastMouseClickEvent.Time())
+			// fmt.Printf("interval: %v\n", interval)
+			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
+				act = mouse.DoubleClick
+			}
+		}
 		event = &mouse.Event{
 			Where:     where,
 			Button:    cmButton,
 			Action:    act,
 			Modifiers: mods,
 		}
+		if act == mouse.Press {
+			event.SetTime()
+			lastMouseClickEvent = event
+		}
 	}
-	event.SetTime() // need this now for double-click
+	event.SetTime()
 	lastMouseEvent = event
 	sendWindowEvent(id, event)
 }

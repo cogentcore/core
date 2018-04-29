@@ -374,9 +374,6 @@ func (g *TextField) SetCursorFromPixel(pixOff float32) {
 func (g *TextField) Init2D() {
 	g.Init2DWidget()
 	g.EditText = g.Text
-	// if g.IsReadOnly() {
-	// 	return
-	// }
 	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
 		if tf.IsReadOnly() { // todo: need more subtle read-only behavior here -- can select but not edit

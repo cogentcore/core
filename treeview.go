@@ -646,6 +646,14 @@ func (tv *TreeView) ConfigParts() {
 				tv.SelectAction()
 			}
 		})
+		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+			lb, _ := recv.(*Label)
+			me := d.(*mouse.Event)
+			if me.Action == mouse.DoubleClick {
+				tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
+				tv.ToggleClose()
+			}
+		})
 	}
 
 	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)

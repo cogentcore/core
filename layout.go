@@ -9,6 +9,8 @@ import (
 	"image"
 
 	"github.com/chewxy/math32"
+	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/rcoreilly/goki/gi/oswin/mouse"
 	"github.com/rcoreilly/goki/gi/units"
 	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
@@ -948,6 +950,8 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Dim = d
 		sc.Init2D()
 		sc.Defaults()
+		sc.Tracking = true
+		sc.Min = 0.0
 	}
 	spc := ly.Style.BoxSpace()
 	avail := ly.AvailSize().SubVal(spc * 2.0)
@@ -960,12 +964,10 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.Dot))
 	}
 	sc.Style2D()
-	sc.Min = 0.0
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	sc.ThumbVal = avail.Dim(d) - spc
-	sc.Tracking = true
 	sc.TrackThr = sc.Step
 	sc.SliderSig.ConnectOnly(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
@@ -1037,6 +1039,32 @@ func (ly *Layout) RenderScrolls() {
 	}
 }
 
+// ScrollDelta processes a scroll event with given delta -- returns true if
+// scroll was processed
+func (ly *Layout) ScrollDelta(del image.Point) bool {
+	if ly.HasScroll[Y] && ly.HasScroll[X] {
+		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(del.Y))
+		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(del.X))
+		return true
+	} else if ly.HasScroll[Y] {
+		d := del.Y
+		if d == 0 {
+			d = del.X
+		}
+		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(d))
+		return true
+	} else if ly.HasScroll[X] {
+		d := del.X
+		if d == 0 {
+			d = del.Y
+		}
+		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(d))
+		return true
+	} else {
+		return false
+	}
+}
+
 // render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {
@@ -1082,6 +1110,13 @@ func (g *Layout) AsLayout2D() *Layout {
 
 func (ly *Layout) Init2D() {
 	ly.Init2DBase()
+	ly.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
+		if li.ScrollDelta(me.Delta) {
+			me.SetProcessed()
+		}
+	})
 }
 
 func (ly *Layout) BBox2D() image.Rectangle {
