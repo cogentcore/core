@@ -83,15 +83,21 @@ var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StyleProp
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
 var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
 
-// ButtonBase has common button functionality -- properties: checkable, checked, autoRepeat, autoRepeatInterval, autoRepeatDelay
+// todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
+
+// ButtonBase has common button functionality for all buttons, including
+// Button, Action, MenuButton, CheckBox, etc
 type ButtonBase struct {
 	WidgetBase
-	Text        string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Shortcut    string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
-	StateStyles [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State       ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig   ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
+	Icon         *Icon                `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    string               `xml:"indicator" desc:"name of the menu indicator icon to present, or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	MakeMenuFunc MakeMenuFunc         `desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -101,6 +107,8 @@ func (n *ButtonBase) New() ki.Ki { return &ButtonBase{} }
 var ButtonBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
+
+// see menus.go for MakeMenuFunc, etc
 
 // is this button selected?
 func (g *ButtonBase) IsSelected() bool {
@@ -138,6 +146,16 @@ func (g *ButtonBase) ToggleChecked() {
 	g.SetChecked(!g.IsChecked())
 }
 
+// set the text and update button
+func (g *ButtonBase) SetText(txt string) {
+	SetButtonText(g, txt)
+}
+
+// set the Icon (could be nil) and update button
+func (g *ButtonBase) SetIcon(ic *Icon) {
+	SetButtonIcon(g, ic)
+}
+
 // set the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	if g.IsInactive() {
@@ -171,12 +189,113 @@ func (g *ButtonBase) ButtonReleased() {
 	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
 	if wasPressed {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+		g.OpenMenu()
+
 		if g.IsCheckable() {
 			g.ToggleChecked()
 			g.ButtonSig.Emit(g.This, int64(ButtonToggled), nil)
 		}
 	}
 	g.UpdateEnd(updt)
+}
+
+// HasMenu returns true if there is a menu or menu-making function set
+func (g *ButtonBase) HasMenu() bool {
+	return (g.MakeMenuFunc != nil || len(g.Menu) > 0)
+}
+
+// OpenMenu will open any menu associated with this element -- returns true if
+// menu opened, false if not
+func (g *ButtonBase) OpenMenu() bool {
+	if !g.HasMenu() {
+		return false
+	}
+	if g.MakeMenuFunc != nil {
+		g.MakeMenuFunc(g)
+	}
+	pos := g.WinBBox.Max
+	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
+	if indic != nil {
+		pos = indic.WinBBox.Min
+	} else {
+		pos.Y -= 10
+		pos.X -= 10
+	}
+	if g.Viewport != nil {
+		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport.Win, g.Text)
+	}
+	return true
+}
+
+// AddMenuText adds an action to the menu with a text label -- todo: shortcuts
+func (g *ButtonBase) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
+	if g.Menu == nil {
+		g.Menu = make(Menu, 0, 10)
+	}
+	ac := Action{}
+	ac.InitName(&ac, txt)
+	ac.Text = txt
+	ac.Data = data
+	ac.SetAsMenu()
+	g.Menu = append(g.Menu, ac.This.(Node2D))
+	if sigTo != nil && fun != nil {
+		ac.ActionSig.Connect(sigTo, fun)
+	}
+	return &ac
+}
+
+// AddSeparator adds a separator at the next point in the menu
+func (g *ButtonBase) AddSeparator(name string) *Separator {
+	if g.Menu == nil {
+		g.Menu = make(Menu, 0, 10)
+	}
+	sp := Separator{}
+	if name == "" {
+		name = "sep"
+	}
+	sp.InitName(&sp, name)
+	sp.SetProp("min-height", units.NewValue(0.5, units.Em))
+	sp.SetProp("max-width", -1)
+	sp.Horiz = true
+	g.Menu = append(g.Menu, sp.This.(Node2D))
+	return &sp
+}
+
+// ResetMenu removes all items in the menu
+func (g *ButtonBase) ResetMenu() {
+	g.Menu = make(Menu, 0, 10)
+}
+
+// ConfigPartsAddIndicator adds a menu indicator if there is a menu present,
+// and the Indicator field is not "none" -- defOn = true means default to
+// adding the indicator even if no menu is yet present -- returns the index in
+// Parts of the indicator object, which is named "indicator" -- an
+// "indic-stretch" is added as well to put on the right by default
+func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
+	if !g.HasMenu() && !defOn || g.Indicator == "none" {
+		return -1
+	}
+	indIdx := -1
+	config.Add(KiT_Space, "indic-stretch")
+	indIdx = len(*config)
+	config.Add(KiT_Icon, "indicator")
+	return indIdx
+}
+
+func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
+	if indIdx < 0 {
+		return
+	}
+	ic := g.Parts.Child(indIdx).(*Icon)
+	icnm := g.Indicator
+	if icnm == "" || icnm == "nil" {
+		icnm = "widget-wedge-down"
+	}
+	if !ic.HasChildren() || ic.UniqueNm != icnm {
+		ic.CopyFromIcon(IconByName(icnm))
+		ic.UniqueNm = icnm
+		g.StylePart(ic.This)
+	}
 }
 
 // button starting hover-- todo: keep track of time and popup a tooltip -- signal?
@@ -197,7 +316,8 @@ func (g *ButtonBase) ButtonExitHover() {
 	}
 }
 
-// interface for button widgets -- can extend as needed
+// ButtonWidget is an interface for button widgets allowing ButtonBase
+// defaults to handle most cases
 type ButtonWidget interface {
 	// get the button base for most basic functions -- reduces interface size
 	ButtonAsBase() *ButtonBase
@@ -266,6 +386,114 @@ func Init2DButtonEvents(bw ButtonWidget) {
 	})
 }
 
+// ButtonBaseDefault is default obj that can be used when property specifies "default"
+var ButtonBaseDefault ButtonBase
+
+// ButtonBaseFields contain the StyledFields for ButtonBase type
+var ButtonBaseFields = initButtonBase()
+
+func initButtonBase() *StyledFields {
+	ButtonBaseDefault = ButtonBase{}
+	sf := &StyledFields{}
+	sf.Default = &ButtonBaseDefault
+	sf.AddField(&ButtonBaseDefault, "Indicator")
+	return sf
+}
+
+///////////////////////////////////////////////////////////
+// ButtonBase Node2D and ButtonwWidget interface
+
+func (g *ButtonBase) ButtonAsBase() *ButtonBase {
+	return g
+}
+
+func (g *ButtonBase) Init2D() {
+	g.Init2DWidget()
+	g.This.(ButtonWidget).ConfigParts()
+	Init2DButtonEvents(g)
+}
+
+func (g *ButtonBase) ButtonRelease() {
+	g.ButtonReleased() // do base
+}
+
+func (g *ButtonBase) ConfigParts() {
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
+	g.ConfigPartsIndicator(indIdx)
+	if mods {
+		g.UpdateEnd(updt)
+	}
+}
+
+func (g *ButtonBase) ConfigPartsIfNeeded() {
+	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+		return
+	}
+	g.This.(ButtonWidget).ConfigParts()
+}
+
+func (g *ButtonBase) Style2DWidget() {
+	g.WidgetBase.Style2DWidget()
+	ButtonBaseFields.Style(g, nil, g.Props)
+	ButtonBaseFields.ToDots(g, &g.Style.UnContext)
+}
+
+func (g *ButtonBase) Style2D() {
+	g.SetCanFocusIfActive()
+	g.Style2DWidget()
+	var pst *Style
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		pst = &pg.Style
+	}
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].CopyFrom(&g.Style)
+		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.This.(ButtonWidget).ConfigParts()
+}
+
+func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
+	g.This.(ButtonWidget).ConfigPartsIfNeeded()
+	g.Layout2DWidget(parBBox) // lays out parts
+	for i := 0; i < int(ButtonStatesN); i++ {
+		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+	}
+	g.Layout2DChildren()
+}
+
+func (g *ButtonBase) Render2D() {
+	if g.PushBounds() {
+		g.Style = g.StateStyles[g.State] // get current styles
+		g.This.(ButtonWidget).ConfigPartsIfNeeded()
+		if !g.HasChildren() {
+			g.Render2DDefaultStyle()
+		} else {
+			g.Render2DChildren()
+		}
+		g.PopBounds()
+	}
+}
+
+func (g *ButtonBase) Render2DDefaultStyle() {
+	st := &g.Style
+	g.RenderStdBox(st)
+	g.Render2DParts()
+}
+
+func (g *ButtonBase) FocusChanged2D(gotFocus bool) {
+	if gotFocus {
+		g.SetButtonState(ButtonFocus)
+	} else {
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
+	}
+	g.UpdateSig()
+}
+
 ///////////////////////////////////////////////////////////
 // Button
 
@@ -306,6 +534,15 @@ var ButtonProps = ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
 	},
+	"#indicator": ki.Props{
+		"width":          units.NewValue(1.5, units.Ex),
+		"height":         units.NewValue(1.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": AlignBottom,
+		"fill":           &Prefs.IconColor,
+		"stroke":         &Prefs.FontColor,
+	},
 	ButtonSelectors[ButtonActive]: ki.Props{},
 	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
@@ -331,98 +568,6 @@ var ButtonProps = ki.Props{
 
 func (g *Button) ButtonAsBase() *ButtonBase {
 	return &(g.ButtonBase)
-}
-
-func (g *Button) ButtonRelease() {
-	g.ButtonReleased() // do base
-}
-
-// set the text and update button
-func (g *Button) SetText(txt string) {
-	SetButtonText(g, txt)
-}
-
-// set the Icon (could be nil) and update button
-func (g *Button) SetIcon(ic *Icon) {
-	SetButtonIcon(g, ic)
-}
-
-func (g *Button) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
-	Init2DButtonEvents(g)
-}
-
-func (g *Button) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
-	if mods {
-		g.UpdateEnd(updt)
-	}
-}
-
-func (g *Button) ConfigPartsIfNeeded() {
-	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
-		return
-	}
-	g.ConfigParts()
-}
-
-func (g *Button) Style2D() {
-	bitflag.Set(&g.Flag, int(CanFocus))
-	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
-	}
-	g.ConfigParts()
-}
-
-func (g *Button) Layout2D(parBBox image.Rectangle) {
-	g.ConfigPartsIfNeeded()
-	g.Layout2DWidget(parBBox) // lays out parts
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
-	}
-	g.Layout2DChildren()
-}
-
-// todo: need color brigher / darker functions
-
-func (g *Button) Render2D() {
-	if g.PushBounds() {
-		g.Style = g.StateStyles[g.State] // get current styles
-		g.ConfigPartsIfNeeded()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			g.Render2DChildren()
-		}
-		g.PopBounds()
-	}
-}
-
-// render using a default style if no children
-func (g *Button) Render2DDefaultStyle() {
-	st := &g.Style
-	g.RenderStdBox(st)
-	g.Render2DParts()
-}
-
-func (g *Button) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
-		g.SetButtonState(ButtonFocus)
-	} else {
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
-	}
-	g.UpdateSig()
 }
 
 // check for interface implementation
@@ -498,11 +643,6 @@ func (g *CheckBox) ButtonAsBase() *ButtonBase {
 
 func (g *CheckBox) ButtonRelease() {
 	g.ButtonReleased()
-}
-
-// set the text and update button
-func (g *CheckBox) SetText(txt string) {
-	SetButtonText(g, txt)
 }
 
 // set the Icons for the On (checked) and Off (unchecked) states, and updates button
@@ -585,60 +725,6 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 	} else {
 		ist.ShowChildAtIndex(1)
 	}
-}
-
-func (g *CheckBox) Style2D() {
-	g.SetCanFocusIfActive()
-	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
-	}
-	g.ConfigParts()
-}
-
-func (g *CheckBox) Layout2D(parBBox image.Rectangle) {
-	g.ConfigPartsIfNeeded()
-	g.Layout2DWidget(parBBox) // lays out parts
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
-	}
-	g.Layout2DChildren()
-}
-
-func (g *CheckBox) Render2D() {
-	if g.PushBounds() {
-		g.Style = g.StateStyles[g.State] // get current styles
-		g.ConfigPartsIfNeeded()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			g.Render2DChildren()
-		}
-		g.PopBounds()
-	}
-}
-
-// render using a default style if no children
-func (g *CheckBox) Render2DDefaultStyle() {
-	st := &g.Style
-	g.RenderStdBox(st)
-	g.Render2DParts()
-}
-
-func (g *CheckBox) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
-		g.SetButtonState(ButtonFocus)
-	} else {
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
-	}
-	g.UpdateSig()
 }
 
 // check for interface implementation

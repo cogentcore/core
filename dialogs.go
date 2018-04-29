@@ -125,7 +125,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 func (dlg *Dialog) Close() {
 	win := dlg.Win
 	if win != nil {
-		if win.This == dlg.Par { // we own the window
+		if DialogsSepWindow {
 			win.OSWin.Release() // close..
 		} else {
 			win.ClosePopup(dlg.This)

@@ -616,7 +616,7 @@ func (tv *TreeView) ConfigParts() {
 	config.Add(KiT_Space, "space")
 	config.Add(KiT_Label, "label")
 	config.Add(KiT_Stretch, "stretch")
-	config.Add(KiT_MenuButton, "menu")
+	config.Add(KiT_Action, "menu")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
@@ -656,19 +656,19 @@ func (tv *TreeView) ConfigParts() {
 		})
 	}
 
-	mb := tv.Parts.Child(tvMenuIdx).(*MenuButton)
+	mb := tv.Parts.Child(tvMenuIdx).(*Action)
 	if mods {
 		mb.Text = "..."
 		mb.SetProp("indicator", "none")
 		tv.StylePart(mb.This)
-		mb.MakeMenuFunc = func(mbb *MenuButton) {
+		mb.MakeMenuFunc = func(mbb *ButtonBase) {
 			tv.MakeMenu(mbb)
 		}
 	}
 	tv.Parts.UpdateEnd(updt)
 }
 
-func (tv *TreeView) MakeMenu(mb *MenuButton) {
+func (tv *TreeView) MakeMenu(mb *ButtonBase) {
 	// todo: shortcuts!
 	mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -772,15 +772,7 @@ var TreeViewProps = ki.Props{
 		"min-width": units.NewValue(16, units.Ex),
 	},
 	"#menu": ki.Props{
-		"border-width":        units.NewValue(0, units.Px),
-		"border-radius":       units.NewValue(0, units.Px),
-		"border-color":        "none",
-		"padding":             units.NewValue(2, units.Px),
-		"margin":              units.NewValue(0, units.Px),
-		"box-shadow.h-offset": units.NewValue(0, units.Px),
-		"box-shadow.v-offset": units.NewValue(0, units.Px),
-		"box-shadow.blur":     units.NewValue(0, units.Px),
-		"indicator":           "none",
+		"indicator": "none",
 	},
 	TreeViewSelectors[TreeViewActive]: ki.Props{
 		"background-color": "inherit",

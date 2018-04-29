@@ -74,6 +74,14 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### For release
 
+* MenuBar / Toolbar -- just a layout really, with some styling?
+
+* cascaded menu needs to prevent parent from disappearing
+
+* dialogs need window positioning hints, also modal / non-modal hints
+
+* separator not rendering..
+
 * basic rich text formatting -- word wrap in widgets demo, and bold / italic styles for fonts?
 * style parsing crash on font-family
 
@@ -84,8 +92,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
   loading.. converts to a map.
 
 * get all json save / load working
-
-* sub-menu -- should just work?
 
 * tab widget and integrate with tree view editor? Popups show up in a separate tab?
 
@@ -118,14 +124,12 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
-+ Toolbar / ToolButton -- just a layout really, with some styling?
 + ProgressBar -- very simple
 + ToolTip
 + TextArea
 
 #### Remaining features for widgets
 
-+ Menu / MenuBar / MenuItem -- needs sub-menu support
 + TextField -- needs selection / clipboard, constraints
 + TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
 + TabWidget -- needs updating
