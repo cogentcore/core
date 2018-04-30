@@ -157,7 +157,7 @@ func (w *Window) Resized(width, height int) {
 	// if w.WinTex.Size() == sz {
 	// 	return
 	// }
-	fmt.Printf("resized to: %v\n", sz)
+	// fmt.Printf("resized to: %v\n", sz)
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
@@ -466,6 +466,10 @@ func (w *Window) EventLoop() {
 	var lastResize *window.Event
 	resizing := false
 
+	lastEt := oswin.EventTypeN
+	var skipDelta image.Point
+	lastSkipped := false
+
 	for {
 		evi := w.OSWin.NextEvent()
 
@@ -486,6 +490,50 @@ func (w *Window) EventLoop() {
 		}
 		delPop := false // if true, delete this popup after event loop
 
+		et := evi.Type()
+		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
+			continue
+		}
+
+		nw := time.Now()
+		lag := nw.Sub(evi.Time())
+		lagMs := lag / time.Millisecond
+		// fmt.Printf("et %v lag %v\n", et, lag)
+
+		if et == lastEt {
+			switch et {
+			case oswin.MouseScrollEvent:
+				me := evi.(*mouse.ScrollEvent)
+				if lagMs > 100 {
+					fmt.Printf("skipped et %v lag %v\n", et, lag)
+					if !lastSkipped {
+						skipDelta = me.Delta
+					} else {
+						skipDelta = skipDelta.Add(me.Delta)
+					}
+					lastSkipped = true
+					continue
+				} else {
+					lastSkipped = false
+					me.Delta = skipDelta.Add(me.Delta)
+				}
+			case oswin.MouseDragEvent:
+				me := evi.(*mouse.DragEvent)
+				if lagMs > 100 {
+					fmt.Printf("skipped et %v lag %v\n", et, lag)
+					if !lastSkipped {
+						skipDelta = me.From
+					}
+					lastSkipped = true
+					continue
+				} else {
+					lastSkipped = false
+					me.From = skipDelta
+				}
+			}
+		}
+		lastEt = et
+
 		if rs, ok := evi.(*window.Event); ok {
 			if rs.Action == window.Resize {
 				resizing = true
@@ -501,10 +549,6 @@ func (w *Window) EventLoop() {
 			}
 		}
 
-		et := evi.Type()
-		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
-			continue
-		}
 		switch e := evi.(type) {
 		case *lifecycle.Event:
 			if e.To == lifecycle.StageDead {
