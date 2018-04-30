@@ -24,6 +24,7 @@ void makeCurrentContext(uintptr_t ctx);
 void flushContext(uintptr_t ctx);
 uintptr_t doNewWindow(int width, int height, int left, int top, char* title, bool dialog, bool modal, bool tool, bool fullscreen);
 void doShowWindow(uintptr_t id);
+void doResizeWindow(uintptr_t id, int width, int height);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 uint64_t threadID();
@@ -84,6 +85,10 @@ func initWindow(w *windowImpl) {
 
 func showWindow(w *windowImpl) {
 	C.doShowWindow(C.uintptr_t(w.id))
+}
+
+func resizeWindow(w *windowImpl, sz image.Point) {
+	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
 func getGeometry(w *windowImpl) {

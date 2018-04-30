@@ -357,6 +357,16 @@ void doShowWindow(uintptr_t viewID) {
 	});
 }
 
+void doResizeWindow(uintptr_t viewID, int width, int height) {
+	ScreenGLView* view = (ScreenGLView*)viewID;
+	dispatch_async(dispatch_get_main_queue(), ^{
+	    NSSize sz;
+	    sz.width = width;
+	    sz.height = height;
+	    [view.window setContentSize:sz];
+	});
+}
+
 void doCloseWindow(uintptr_t viewID) {
 	ScreenGLView* view = (ScreenGLView*)viewID;
 	dispatch_sync(dispatch_get_main_queue(), ^{

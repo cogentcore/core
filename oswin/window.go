@@ -36,6 +36,10 @@ type Window interface {
 	// Size returns the current size of the window, in raw underlying dots / pixels
 	Size() image.Point
 
+	// SetSize attempts to set the size of the window to given size, in raw
+	// underlying dots / pixels
+	SetSize(sz image.Point)
+
 	// Position returns the current lef-top position of the window relative to
 	// underlying screen, in raw underlying dots / pixels
 	Position() image.Point

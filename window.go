@@ -146,11 +146,21 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	return vp
 }
 
-func (w *Window) Resize(width, height int) {
+func (w *Window) SetSize(sz image.Point) {
+	w.OSWin.SetSize(sz)
+	// wait for resize event for us to update?
+	// w.Resized(sz.X, sz.Y)
+}
+
+func (w *Window) Resized(width, height int) {
+	sz := image.Point{width, height}
+	if w.WinTex.Size() == sz {
+		return
+	}
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
-	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, image.Point{width, height})
+	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.Viewport.Resize(width, height)
 }
 
@@ -483,7 +493,7 @@ func (w *Window) EventLoop() {
 			}
 		} else {
 			if resizing {
-				w.Resize(lastResize.Size.X, lastResize.Size.Y)
+				w.Resized(lastResize.Size.X, lastResize.Size.Y)
 				resizing = false
 				lastResize = nil
 				w.DoFullRender = true

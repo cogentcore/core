@@ -30,6 +30,7 @@ func mainrun() {
 	// gi.Update2DTrace = true
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
+	// ki.SignalTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
@@ -66,12 +67,21 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = "This is a demonstration of the various GoGi Widgets\nShortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
+	title.Text = "This is a demonstration of the various GoGi Widgets"
 	title.SetProp("text-align", gi.AlignTop)
 	title.SetProp("align-vert", gi.AlignTop)
-	title.SetProp("word-wrap", true)
-	// title.SetMinPrefWidth(units.NewValue(30, units.Ch))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
+
+	irow := vlay.AddNewChild(gi.KiT_Layout, "irow").(*gi.Layout)
+	irow.Lay = gi.LayoutRow
+	irow.SetStretchMaxWidth()
+	irow.AddNewChild(gi.KiT_Stretch, "str1")
+	instr := irow.AddNewChild(gi.KiT_Label, "instr").(*gi.Label)
+	instr.Text = "Shortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
+	instr.SetProp("text-align", gi.AlignTop)
+	instr.SetProp("align-vert", gi.AlignTop)
+	// instr.SetMinPrefWidth(units.NewValue(30, units.Ch))
+	irow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	//////////////////////////////////////////
 	//      Buttons

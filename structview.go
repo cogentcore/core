@@ -25,6 +25,7 @@ type StructView struct {
 	Title      string      `desc:"title / prompt to show above the editor fields"`
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -55,6 +56,13 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 	if sv.Struct != st {
 		updt = sv.UpdateStart()
 		sv.Struct = st
+		if k, ok := st.(ki.Ki); ok {
+			k.NodeSignal().Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
+				svv.UpdateFields()
+				svv.ViewSig.Emit(svv.This, 0, nil)
+			})
+		}
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
@@ -168,6 +176,11 @@ func (sv *StructView) ConfigStructGrid() {
 		lbl := sg.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
+			// note: updating here is redundant -- relevant field will have already updated
+			svv.ViewSig.Emit(svv.This, 0, nil)
+		})
 		lbltag := vvb.Field.Tag.Get("label")
 		if lbltag != "" {
 			lbl.Text = lbltag
@@ -189,6 +202,14 @@ func (sv *StructView) UpdateFromStruct() {
 	if mods {
 		sv.UpdateEnd(updt)
 	}
+}
+
+func (sv *StructView) UpdateFields() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.FieldViews {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
 }
 
 func (sv *StructView) Style2D() {
@@ -221,10 +242,10 @@ var _ Node2D = &StructView{}
 // StructViewInline represents a struct as a single line widget, for smaller structs and those explicitly marked inline in the kit type registry type properties -- constructs widgets in Parts to show the field names and editor fields for each field
 type StructViewInline struct {
 	WidgetBase
-	Struct        interface{} `desc:"the struct that we are a view onto"`
-	StructViewSig ki.Signal   `json:"-" xml:"-" json:"-" desc:"signal for StructView -- see StructViewSignals for the types"`
-	FieldViews    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave       ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Struct     interface{} `desc:"the struct that we are a view onto"`
+	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
@@ -237,6 +258,14 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 	if sv.Struct != st {
 		updt = sv.UpdateStart()
 		sv.Struct = st
+		if k, ok := st.(ki.Ki); ok {
+			k.NodeSignal().Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+				svv.UpdateFields()
+				fmt.Printf("struct view inline ki update values\n")
+				svv.ViewSig.Emit(svv.This, 0, k)
+			})
+		}
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromStruct()
@@ -285,6 +314,11 @@ func (sv *StructViewInline) ConfigParts() {
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+			// note: updating here is redundant
+			svv.ViewSig.Emit(svv.This, 0, nil)
+		})
 		lbltag := vvb.Field.Tag.Get("label")
 		if lbltag != "" {
 			lbl.Text = lbltag
@@ -300,6 +334,14 @@ func (sv *StructViewInline) ConfigParts() {
 
 func (sv *StructViewInline) UpdateFromStruct() {
 	sv.ConfigParts()
+}
+
+func (sv *StructViewInline) UpdateFields() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.FieldViews {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
 }
 
 func (sv *StructViewInline) Render2D() {

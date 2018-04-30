@@ -18,25 +18,38 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ValueView -- an interface for representing values (e.g., fields) in Views
 
-// ValueViewer interface supplies the appropriate type of ValueView -- called on a given receiver item if defined for that receiver type (tries both pointer and non-pointer receivers) -- can use this for custom types to provide alternative custom interfaces
+// ValueViewer interface supplies the appropriate type of ValueView -- called
+// on a given receiver item if defined for that receiver type (tries both
+// pointer and non-pointer receivers) -- can use this for custom types to
+// provide alternative custom interfaces
 type ValueViewer interface {
 	ValueView() ValueView
 }
 
-// example implementation of ValueViewer interface -- can't implment on non-local types, so all
-// the basic types are handled separately
+// example implementation of ValueViewer interface -- can't implment on
+// non-local types, so all the basic types are handled separately:
+//
 // func (s string) ValueView() ValueView {
 // 	vv := ValueViewBase{}
 // 	vv.Init(&vv)
 // 	return &vv
 // }
 
-// FieldValueViewer interface supplies the appropriate type of ValueView for a given field name and current field value on the receiver parent struct -- called on a given receiver struct if defined for that receiver type (tries both pointer and non-pointer receivers) -- if a struct implements this interface, then it is used first for structs -- return nil to fall back on the default ToValueView result
+// FieldValueViewer interface supplies the appropriate type of ValueView for a
+// given field name and current field value on the receiver parent struct --
+// called on a given receiver struct if defined for that receiver type (tries
+// both pointer and non-pointer receivers) -- if a struct implements this
+// interface, then it is used first for structs -- return nil to fall back on
+// the default ToValueView result
 type FieldValueViewer interface {
 	FieldValueView(field string, fval interface{}) ValueView
 }
 
-// ToValueView returns the appropriate ValueView for given item, based only on its type -- attempts to get the ValueViewer interface and failing that, falls back on default Kind-based options --  see FieldToValueView, MapToValueView, SliceToValue view for versions that take into account the properties of the owner (used in those appropriate contexts)
+// ToValueView returns the appropriate ValueView for given item, based only on
+// its type -- attempts to get the ValueViewer interface and failing that,
+// falls back on default Kind-based options -- see FieldToValueView,
+// MapToValueView, SliceToValue view for versions that take into account the
+// properties of the owner (used in those appropriate contexts)
 func ToValueView(it interface{}) ValueView {
 	if it == nil {
 		vv := ValueViewBase{}
@@ -149,7 +162,9 @@ func ToValueView(it interface{}) ValueView {
 	return &vv
 }
 
-// FieldToValueView returns the appropriate ValueView for given field on a struct -- attempts to get the FieldValueViewer interface, and falls back on ToValueView otherwise, using field value (fval)
+// FieldToValueView returns the appropriate ValueView for given field on a
+// struct -- attempts to get the FieldValueViewer interface, and falls back on
+// ToValueView otherwise, using field value (fval)
 func FieldToValueView(it interface{}, field string, fval interface{}) ValueView {
 	if it == nil || field == "" {
 		return ToValueView(fval)
@@ -171,42 +186,79 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 	return ToValueView(fval)
 }
 
-// ValueView is an interface for representing values (e.g., fields, map values, slice values) in Views (StructView, MapView, etc) -- the different types of ValueView are for different Kinds of values (bool, float, etc) -- which can have different Kinds of owners -- the ValueVuewBase class supports all the basic fields for managing the owner kinds
+// ValueView is an interface for representing values (e.g., fields, map
+// values, slice values) in Views (StructView, MapView, etc) -- the different
+// types of ValueView are for different Kinds of values (bool, float, etc) --
+// which can have different Kinds of owners -- the ValueVuewBase class
+// supports all the basic fields for managing the owner kinds
 type ValueView interface {
 	ki.Ki
-	// AsValueViewBase gives access to the basic data fields so that the interface doesn't need to provide accessors for them
+
+	// AsValueViewBase gives access to the basic data fields so that the
+	// interface doesn't need to provide accessors for them
 	AsValueViewBase() *ValueViewBase
+
 	// SetStructValue sets the value, owner and field information for a struct field
 	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView)
+
 	// SetMapKey sets the key value and owner for a map key
 	SetMapKey(val reflect.Value, owner interface{}, tmpSave ValueView)
-	// SetMapValue sets the value, owner and map key information for a map element -- needs pointer to ValueView representation of key to track current key value
+
+	// SetMapValue sets the value, owner and map key information for a map
+	// element -- needs pointer to ValueView representation of key to track
+	// current key value
 	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView)
+
 	// SetSliceValue sets the value, owner and index information for a slice element
 	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView)
+
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
 	OwnerKind() reflect.Kind
-	// IsInactive returns whether the value is inactive -- e.g., Map owners have Inactive values, and some fields can be marked as Inactive using a struct tag
+
+	// IsInactive returns whether the value is inactive -- e.g., Map owners
+	// have Inactive values, and some fields can be marked as Inactive using a
+	// struct tag
 	IsInactive() bool
+
 	// WidgetType returns an appropriate type of widget to represent the current value
 	WidgetType() reflect.Type
+
 	// UpdateWidget updates the widget representation to reflect the current value
 	UpdateWidget()
-	// ConfigWidget configures a widget of WidgetType for representing the value, including setting up the signal connections to set the value when the user edits it (values are always set immediately when the widget is updated)
+
+	// ConfigWidget configures a widget of WidgetType for representing the
+	// value, including setting up the signal connections to set the value
+	// when the user edits it (values are always set immediately when the
+	// widget is updated)
 	ConfigWidget(widg Node2D)
+
 	// Val returns the reflect.Value representation for this item
 	Val() reflect.Value
-	// SetValue sets the value (if not Inactive), using Ki.SetField for Ki types and kit.SetRobust otherwise
+
+	// SetValue sets the value (if not Inactive), using Ki.SetField for Ki
+	// types and kit.SetRobust otherwise -- emits a ViewSig signal when set
 	SetValue(val interface{}) bool
-	// ViewFieldTag returns tag associated with this field, if this is a field in a struct ("" otherwise or if tag not set)
+
+	// ViewFieldTag returns tag associated with this field, if this is a field
+	// in a struct ("" otherwise or if tag not set)
 	ViewFieldTag(tagName string) string
-	// SaveTmp saves a temporary copy of a struct to a map -- map values must be explicitly re-saved and cannot be directly written to by the value elements -- each ValueView has a pointer to any parent ValueView that might need to be saved after SetValue -- SaveTmp called automatically in SetValue but other cases that use something different need to call it explicitly
+
+	// SaveTmp saves a temporary copy of a struct to a map -- map values must
+	// be explicitly re-saved and cannot be directly written to by the value
+	// elements -- each ValueView has a pointer to any parent ValueView that
+	// might need to be saved after SetValue -- SaveTmp called automatically
+	// in SetValue but other cases that use something different need to call
+	// it explicitly
 	SaveTmp()
 }
 
-// ValueViewBase provides the basis for implementations of the ValueView interface, representing values in the interface -- it implements a generic TextField representation of the string value, and provides the generic fallback for everything that doesn't provide a specific ValueViewer type
+// ValueViewBase provides the basis for implementations of the ValueView
+// interface, representing values in the interface -- it implements a generic
+// TextField representation of the string value, and provides the generic
+// fallback for everything that doesn't provide a specific ValueViewer type
 type ValueViewBase struct {
 	ki.Node
+	ViewSig   ki.Signal            `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set"`
 	Value     reflect.Value        `desc:"the reflect.Value representation of the value"`
 	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
 	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
@@ -357,6 +409,8 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 	if rval {
 		vv.This.(ValueView).SaveTmp()
 	}
+	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This, val)
+	vv.ViewSig.Emit(vv.This, 0, nil)
 	return rval
 }
 
@@ -464,8 +518,8 @@ func (vv *StructInlineValueView) WidgetType() reflect.Type {
 }
 
 func (vv *StructInlineValueView) UpdateWidget() {
-	// sv := vv.Widget.(*StructViewInline)
-	// npv := vv.Value.Elem()
+	sv := vv.Widget.(*StructViewInline)
+	sv.UpdateFields()
 }
 
 func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
@@ -474,6 +528,11 @@ func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
 	sv := vv.Widget.(*StructViewInline)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
+	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_StructInlineValueView).(*StructInlineValueView)
+		// vvv.UpdateWidget() // prob not necc..
+		vvv.ViewSig.Emit(vvv.This, 0, nil)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -515,7 +574,13 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*MenuButton)
-		SliceViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Slice Value View", "", nil, nil)
+		dlg := SliceViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Slice Value View", "", nil, nil)
+		sv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
+		sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+			vvvv.UpdateWidget()
+			vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+		})
 	})
 }
 
@@ -558,7 +623,13 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	mb.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*MenuButton)
-		MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil)
+		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil)
+		mv := dlg.Frame().ChildByType(KiT_MapView, true, 2).(*MapView)
+		mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
+			vvvv.UpdateWidget()
+			vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+		})
 	})
 }
 
@@ -580,9 +651,8 @@ func (vv *MapInlineValueView) WidgetType() reflect.Type {
 }
 
 func (vv *MapInlineValueView) UpdateWidget() {
-	// sv := vv.Widget.(*MapViewInline)
-	// npv := kit.NonPtrValue(vv.Value)
-	// sv.SetChecked(npv.Bool())
+	sv := vv.Widget.(*MapViewInline)
+	sv.UpdateValues()
 }
 
 func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
@@ -591,6 +661,11 @@ func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
 	sv := vv.Widget.(*MapViewInline)
 	// npv := vv.Value.Elem()
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
+	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_MapInlineValueView).(*MapInlineValueView)
+		vvv.UpdateWidget()
+		vvv.ViewSig.Emit(vvv.This, 0, nil)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

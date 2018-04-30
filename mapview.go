@@ -25,6 +25,7 @@ type MapView struct {
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
@@ -199,6 +200,11 @@ func (mv *MapView) ConfigMapGrid() {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
 	for i, vv := range mv.Values {
+		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvv, _ := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			mvv.ViewSig.Emit(mvv.This, 0, nil)
+		})
 		keyw := sg.Child(i * ncol).(Node2D)
 		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := sg.Child(i*ncol + 1).(Node2D)
@@ -263,7 +269,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
-	mv.FullReRenderParentStructView()
+	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
 func (mv *MapView) MapAdd() {
@@ -292,7 +298,7 @@ func (mv *MapView) MapAdd() {
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
-	mv.FullReRenderParentStructView()
+	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
 func (mv *MapView) MapDelete(key reflect.Value) {
@@ -308,24 +314,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.SetFullReRender()
 	mv.UpdateEnd(updt)
-	mv.FullReRenderParentStructView()
-}
-
-func (mv *MapView) FullReRenderParentStructView() {
-	// todo: this will typically fail because MapView is in a separate dialog
-	// need some way of hooking back to the struct view -- another TmpSave??
-	if mv.TmpSave == nil {
-		return
-	}
-	svp := mv.TmpSave.ParentByType(KiT_StructView, true)
-	if svp == nil {
-		return
-	}
-	svpar := svp.EmbeddedStruct(KiT_StructView).(*StructView)
-	if svpar != nil {
-		svpar.SetFullReRender()
-		svpar.UpdateSig()
-	}
+	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
 // ConfigMapButtons configures the buttons for map functions
@@ -361,6 +350,11 @@ func (mv *MapView) UpdateFromMap() {
 	}
 }
 
+func (mv *MapView) UpdateValues() {
+	// maps have to re-read their values -- can't get pointers
+	mv.ConfigMapGrid()
+}
+
 // needs full rebuild and this is where we do it:
 func (mv *MapView) Style2D() {
 	mv.ConfigMapGrid()
@@ -392,11 +386,11 @@ var _ Node2D = &MapView{}
 // MapViewInline represents a map as a single line widget, for smaller maps and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type MapViewInline struct {
 	WidgetBase
-	Map        interface{} `desc:"the map that we are a view onto"`
-	MapViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for MapView -- see MapViewSignals for the types"`
-	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
-	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Map     interface{} `desc:"the map that we are a view onto"`
+	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
+	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
@@ -465,6 +459,11 @@ func (mv *MapViewInline) ConfigParts() {
 		updt = mv.Parts.UpdateStart()
 	}
 	for i, vv := range mv.Values {
+		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+			mvv.ViewSig.Emit(mvv.This, 0, nil)
+		})
 		keyw := mv.Parts.Child(i * 2).(Node2D)
 		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := mv.Parts.Child((i * 2) + 1).(Node2D)
@@ -478,24 +477,22 @@ func (mv *MapViewInline) ConfigParts() {
 	edac.Text = "  ..."
 	edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-		MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", mvv.This,
-			func(recv, send ki.Ki, sig int64, data interface{}) {
-				mvvv := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-				mvvv.FullReRenderParentStructView()
-			})
+		dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)
+		mvvv := dlg.Frame().ChildByType(KiT_MapView, true, 2).(*MapView)
+		mvvv.ViewSig.ConnectOnly(mvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvvvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+			mvvvv.ViewSig.Emit(mvvvv.This, 0, nil)
+		})
 	})
 	mv.Parts.UpdateEnd(updt)
 }
 
-func (mv *MapViewInline) FullReRenderParentStructView() {
-	svpar := mv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
-	if svpar != nil {
-		svpar.SetFullReRender()
-		svpar.UpdateSig()
-	}
+func (mv *MapViewInline) UpdateFromMap() {
+	mv.ConfigParts()
 }
 
-func (mv *MapViewInline) UpdateFromMap() {
+func (mv *MapViewInline) UpdateValues() {
+	// maps have to re-read their values because they can't get pointers!
 	mv.ConfigParts()
 }
 

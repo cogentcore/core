@@ -7,13 +7,14 @@ package main
 import (
 	"github.com/rcoreilly/goki/gi"
 	"github.com/rcoreilly/goki/gi/oswin"
-	_ "github.com/rcoreilly/goki/gi/oswin/init"
+	"github.com/rcoreilly/goki/gi/oswin/driver"
 	"github.com/rcoreilly/goki/ki"
 )
 
 func main() {
-	go mainrun()
-	oswin.RunBackendEventLoop() // this needs to run in main loop
+	driver.Main(func(app oswin.App) {
+		mainrun()
+	})
 }
 
 func mainrun() {
@@ -28,19 +29,19 @@ func mainrun() {
 	// schild2 :=
 	child2.AddNewChild(nil, "subchild1")
 
-	width := 800
-	height := 800
-	win := gi.NewWindow2D("test window", width, height)
-	win.UpdateStart()
+	width := 1024
+	height := 768
+
+	win := gi.NewWindow2D("TabView Window", width, height, true) // pixel sizes
 
 	vp := win.WinViewport2D()
-	vp.SetProp("background-color", "#FFF")
+	updt := vp.UpdateStart()
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	tv1 := vlay.AddNewChild(gi.KiT_TabWidget, "tv1").(*gi.TabWidget)
+	tv1 := vlay.AddNewChild(gi.KiT_TabView, "tv1").(*gi.TabView)
 	tv1.SetSrcNode(&srctree)
 
 	for i, sk := range srctree.Kids {
@@ -52,7 +53,7 @@ func mainrun() {
 		// tf.SetProp("max-height", -1.0)
 	}
 
-	win.UpdateEnd()
+	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
 }

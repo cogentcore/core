@@ -386,7 +386,9 @@ func Init2DButtonEvents(bw ButtonWidget) {
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		if me.Action == mouse.Press {
+		if me.Action == mouse.DoubleClick { // we just count as a regular click
+			bb.ButtonPressed()
+		} else if me.Action == mouse.Press {
 			bb.ButtonPressed()
 		} else {
 			ab.ButtonRelease() // special one

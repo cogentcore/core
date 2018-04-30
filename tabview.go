@@ -15,54 +15,56 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Tab Widget
 
+// todo: this is out-of-date and non-functional
+
 // signals that buttons can send
-type TabWidgetSignals int64
+type TabViewSignals int64
 
 const (
 	// node was selected -- data is the tab widget
-	TabSelected TabWidgetSignals = iota
+	TabSelected TabViewSignals = iota
 	// tab widget unselected
 	TabUnselected
 	// collapsed tab widget was opened
 	TabOpened
 	// open tab widget was collapsed -- children not visible
 	TabCollapsed
-	TabWidgetSignalsN
+	TabViewSignalsN
 )
 
-//go:generate stringer -type=TabWidgetSignals
+//go:generate stringer -type=TabViewSignals
 
 // todo: could have different positioning of the tabs?
 
-// TabWidget represents children of a source node as tabs with a stacked
+// TabView represents children of a source node as tabs with a stacked
 // layout of Frame widgets for each child in the source -- we create a
 // LayoutCol with a LayoutRow of tab buttons and then the LayoutStacked of
 // Frames
-type TabWidget struct {
+type TabView struct {
 	WidgetBase
-	SrcNode      ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
-	TabWidgetSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabWidgetSignals for the types"`
+	SrcNode    ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
+	TabViewSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 }
 
-var KiT_TabWidget = kit.Types.AddType(&TabWidget{}, nil)
+var KiT_TabView = kit.Types.AddType(&TabView{}, nil)
 
-func (n *TabWidget) New() ki.Ki { return &TabWidget{} }
+func (n *TabView) New() ki.Ki { return &TabView{} }
 
 // set the source Ki Node that generates our tabs
-func (g *TabWidget) SetSrcNode(k ki.Ki) {
+func (g *TabView) SetSrcNode(k ki.Ki) {
 	g.SrcNode.Ptr = k
 	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
 	nm := "TabViewOf_" + k.UniqueName()
 	if g.Nm == "" {
 		g.SetName(nm)
 	}
-	g.InitTabWidget()
+	g.InitTabView()
 }
 
 // todo: various other ways of selecting tabs..
 
 // select tab at given index
-func (g *TabWidget) SelectTabIndex(idx int) error {
+func (g *TabView) SelectTabIndex(idx int) error {
 	tabrow := g.TabRowLayout()
 	idx, err := tabrow.Children().ValidIndex(idx)
 	if err != nil {
@@ -83,7 +85,7 @@ func (g *TabWidget) SelectTabIndex(idx int) error {
 }
 
 // get tab frame for given index
-func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
+func (g *TabView) TabFrameAtIndex(idx int) *Frame {
 	tabstack := g.TabStackLayout()
 	idx, err := tabstack.Children().ValidIndex(idx)
 	if err != nil {
@@ -99,25 +101,25 @@ func (g *TabWidget) TabFrameAtIndex(idx int) *Frame {
 }
 
 // get the overal column layout for the tab widget
-func (g *TabWidget) TabColLayout() *Layout {
-	g.InitTabWidget()
+func (g *TabView) TabColLayout() *Layout {
+	g.InitTabView()
 	return g.Child(0).(*Layout)
 }
 
 // get the row layout of tabs across the top of the tab widget
-func (g *TabWidget) TabRowLayout() *Layout {
+func (g *TabView) TabRowLayout() *Layout {
 	tabcol := g.TabColLayout()
 	return tabcol.Child(0).(*Layout)
 }
 
 // get the stacked layout of tab frames
-func (g *TabWidget) TabStackLayout() *Layout {
+func (g *TabView) TabStackLayout() *Layout {
 	tabcol := g.TabColLayout()
 	return tabcol.Child(1).(*Layout)
 }
 
 // unselect all tabs
-func (g *TabWidget) UnselectAllTabButtons() {
+func (g *TabView) UnselectAllTabButtons() {
 	tabrow := g.TabRowLayout()
 	for _, tbk := range tabrow.Kids {
 		tb, ok := tbk.(*Button)
@@ -133,7 +135,7 @@ func (g *TabWidget) UnselectAllTabButtons() {
 }
 
 func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
-	g, ok := recv.(*TabWidget)
+	g, ok := recv.(*TabView)
 	if !ok {
 		return
 	}
@@ -169,7 +171,7 @@ var TabButtonProps = ki.Props{
 }
 
 // make the initial tab frames for src node
-func (g *TabWidget) InitTabs() {
+func (g *TabView) InitTabs() {
 	tabrow := g.TabRowLayout()
 	tabstack := g.TabStackLayout()
 	if g.SrcNode.Ptr == nil {
@@ -197,7 +199,7 @@ func (g *TabWidget) InitTabs() {
 
 // initialize the tab widget structure -- assumes it has been done if there is
 // already a child node
-func (g *TabWidget) InitTabWidget() {
+func (g *TabView) InitTabView() {
 	if len(g.Kids) == 1 {
 		return
 	}
@@ -218,4 +220,4 @@ func (g *TabWidget) InitTabWidget() {
 // Node2D interface
 
 // check for interface implementation
-var _ Node2D = &TabWidget{}
+var _ Node2D = &TabView{}

@@ -23,6 +23,7 @@ type SliceView struct {
 	Title   string      `desc:"title / prompt to show above the editor fields"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -166,6 +167,12 @@ func (sv *SliceView) ConfigSliceGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.Values {
+		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			svv.UpdateSig()
+			svv.ViewSig.Emit(svv.This, 0, nil)
+		})
 		lbl := sg.Child(i * 4).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		idxtxt := fmt.Sprintf("%05d", i)
@@ -214,6 +221,7 @@ func (sv *SliceView) SliceNewAt(idx int) {
 	}
 	sv.SetFullReRender()
 	sv.UpdateEnd(updt)
+	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
 // SliceDelete deletes element at given index from slice
@@ -232,6 +240,7 @@ func (sv *SliceView) SliceDelete(idx int) {
 	}
 	sv.SetFullReRender()
 	sv.UpdateEnd(updt)
+	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
 func (sv *SliceView) UpdateFromSlice() {
@@ -242,6 +251,14 @@ func (sv *SliceView) UpdateFromSlice() {
 	if mods {
 		sv.UpdateEnd(updt)
 	}
+}
+
+func (sv *SliceView) UpdateValues() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.Values {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
 }
 
 // needs full rebuild and this is where we do it:
@@ -275,10 +292,10 @@ var _ Node2D = &SliceView{}
 // SliceViewInline represents a slice as a single line widget, for smaller slices and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type SliceViewInline struct {
 	WidgetBase
-	Slice        interface{} `desc:"the slice that we are a view onto"`
-	SliceViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for SliceView -- see SliceViewSignals for the types"`
-	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Slice   interface{} `desc:"the slice that we are a view onto"`
+	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
@@ -336,6 +353,12 @@ func (sv *SliceViewInline) ConfigParts() {
 		updt = sv.Parts.UpdateStart()
 	}
 	for i, vv := range sv.Values {
+		vvb := vv.AsValueViewBase()
+		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+			svv.UpdateSig()
+			svv.ViewSig.Emit(svv.This, 0, nil)
+		})
 		lbl := sv.Parts.Child(i * 2).(*Label)
 		lbl.SetProp("vertical-align", AlignMiddle)
 		idxtxt := fmt.Sprintf("%05d", i)
@@ -349,21 +372,26 @@ func (sv *SliceViewInline) ConfigParts() {
 	edac.Text = "  ..."
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-		SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", svv.This,
-			func(recv, send ki.Ki, sig int64, data interface{}) {
-				svvv := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-				svpar := svvv.ParentByType(KiT_StructView, true).EmbeddedStruct(KiT_StructView).(*StructView)
-				if svpar != nil {
-					svpar.SetFullReRender()
-					svpar.UpdateSig()
-				}
-			})
+		dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil)
+		svvv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
+		svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svvvv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+			svvvv.ViewSig.Emit(svvvv.This, 0, nil)
+		})
 	})
 	sv.Parts.UpdateEnd(updt)
 }
 
 func (sv *SliceViewInline) UpdateFromSlice() {
 	sv.ConfigParts()
+}
+
+func (sv *SliceViewInline) UpdateValues() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.Values {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
 }
 
 func (sv *SliceViewInline) Style2D() {

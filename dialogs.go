@@ -65,14 +65,20 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	if win == nil {
 		return false
 	}
-	if x == 0 && y == 0 {
-		x = win.Viewport.ViewBox.Size.X / 3
-		y = win.Viewport.ViewBox.Size.Y / 3
-	}
-
-	dlg.State = DialogOpenModal
 
 	updt := dlg.UpdateStart()
+	if dlg.Modal {
+		dlg.State = DialogOpenModal
+	} else {
+		dlg.State = DialogOpenModeless
+	}
+
+	if DialogsSepWindow {
+		win = NewDialogWin(dlg.Title, 100, 100, dlg.Modal)
+		win.AddChild(dlg)
+		win.Viewport = &dlg.Viewport2D
+	}
+
 	dlg.Win = win
 	dlg.Init2DTree()
 	dlg.Style2DTree()                                      // sufficient to get sizes
@@ -81,20 +87,18 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	dlg.Win = nil
 
 	frame := dlg.ChildByName("frame", 0).(*Frame)
-	vpsz := frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+	var vpsz image.Point
+
+	if DialogsSepWindow {
+		vpsz = frame.LayData.Size.Pref.ToPoint()
+	} else {
+		vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+	}
 
 	stw := int(dlg.Style.Layout.MinWidth.Dots)
 	sth := int(dlg.Style.Layout.MinHeight.Dots)
 	vpsz.X = kit.MaxInt(vpsz.X, stw)
 	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
-	x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
-	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
-
-	if DialogsSepWindow {
-		win = NewDialogWin(dlg.Title, vpsz.X, vpsz.Y, dlg.Modal)
-		win.AddChild(dlg)
-		win.Viewport = &dlg.Viewport2D
-	}
 
 	win.ReceiveEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
@@ -110,8 +114,15 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
+		win.SetSize(vpsz)
 		win.StartEventLoopNoWait()
 	} else {
+		if x == 0 && y == 0 {
+			x = win.Viewport.ViewBox.Size.X / 3
+			y = win.Viewport.ViewBox.Size.Y / 3
+		}
+		x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
+		y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
 		frame := dlg.Child(0).(*Frame)
 		dlg.StylePart(frame.This) // use special styles
 		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
@@ -271,7 +282,11 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 	return frame.Child(idx).(*Layout), idx
 }
 
-// StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren of a button box, to create standard Ok, Cancel buttons (if true), optionally starting with a Stretch element that will cause the buttons to be arranged on the right -- a space element is added between buttons if more than one
+// StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren
+// of a button box, to create standard Ok, Cancel buttons (if true),
+// optionally starting with a Stretch element that will cause the buttons to
+// be arranged on the right -- a space element is added between buttons if
+// more than one
 func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList {
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	if stretch {
@@ -289,7 +304,8 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 	return config
 }
 
-// StdButtonConnnect connects standard buttons in given button box layout to Accept / Cancel actions
+// StdButtonConnnect connects standard buttons in given button box layout to
+// Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).EmbeddedStruct(KiT_Button).(*Button)
@@ -326,8 +342,8 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 		dlg.SetPrompt(prompt, pspc, frame)
 	}
 	bb := dlg.AddButtonBox(StdDialogVSpace, true, frame)
-	bbc := dlg.StdButtonConfig(true, ok, cancel)
-	mods, updt := bb.ConfigChildren(bbc, false) // not unique names
+	bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
+	mods, updt := bb.ConfigChildren(bbc, false)   // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
 	bitflag.Set(&dlg.Flag, int(VpFlagPopupDestroyAll)) // std is disposable
 	if mods {
@@ -342,13 +358,14 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 	dlg := Dialog{}
 	dlg.InitName(&dlg, name)
-	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 	dlg.UpdateStart() // guaranteed to be true
 	dlg.StdDialog(title, prompt, ok, cancel)
 	return &dlg
 }
 
-// Prompt opens a basic standard dialog with a title, prompt, and ok / cancel buttons -- any empty text will not be added -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// PromptDialog opens a basic standard dialog with a title, prompt, and ok / cancel
+// buttons -- any empty text will not be added -- optionally connects to given
+// signal receiving object and function for dialog signals (nil to ignore)
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
 	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
 	if recv != nil && fun != nil {
@@ -363,7 +380,6 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv k
 
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
-	bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 }
 
 func (dlg *Dialog) HasFocus2D() bool {
@@ -376,7 +392,10 @@ var _ Node2D = &Dialog{}
 ////////////////////////////////////////////////////////////////////////////////////////
 // more specialized types of dialogs
 
-// New Ki item(s) of type dialog, showing types that implement given interface -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// New Ki item(s) of type dialog, showing types that implement given interface
+// -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get
+// the interface type -- optionally connects to given signal receiving object
+// and function for dialog signals (nil to ignore)
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("new-ki", title, prompt, true, true)
 
@@ -409,9 +428,6 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv
 
 	typs := trow.AddNewChild(KiT_ComboBox, "types").(*ComboBox)
 	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
-	// typs.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
-	// })
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -433,9 +449,11 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	return n, typ
 }
 
-// Struct View dialog for editing fields of a structure using a StructView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// StructViewDialog is for editing fields of a structure using a StructView --
+// optionally connects to given signal receiving object and function for
+// dialog signals (nil to ignore)
 func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("struct-view", title, prompt, true, false)
+	dlg := NewStdDialog("struct-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -456,9 +474,11 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, titl
 	return dlg
 }
 
-// Map View dialog for editing fields of a map using a MapView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// MapViewDialog is for editing fields of a map using a MapView -- optionally
+// connects to given signal receiving object and function for dialog signals
+// (nil to ignore)
 func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("map-view", title, prompt, true, false)
+	dlg := NewStdDialog("map-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -479,9 +499,11 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, pr
 	return dlg
 }
 
-// Slice View dialog for editing fields of a slice using a SliceView -- optionally connects to given signal receiving object and function for dialog signals (nil to ignore)
+// SliceViewDialog for editing fields of a slice using a SliceView --
+// optionally connects to given signal receiving object and function for
+// dialog signals (nil to ignore)
 func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("slice-view", title, prompt, true, false)
+	dlg := NewStdDialog("slice-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

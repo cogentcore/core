@@ -375,3 +375,7 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 
 	return res
 }
+
+func (w *windowImpl) SetSize(sz image.Point) {
+	resizeWindow(w, sz)
+}

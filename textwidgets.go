@@ -184,8 +184,10 @@ func (g *TextField) SetText(txt string) {
 
 // done editing: return key pressed or out of focus
 func (g *TextField) EditDone() {
-	g.Text = g.EditText
-	g.TextFieldSig.Emit(g.This, int64(TextFieldDone), g.Text)
+	if g.Text != g.EditText {
+		g.Text = g.EditText
+		g.TextFieldSig.Emit(g.This, int64(TextFieldDone), g.Text)
+	}
 }
 
 // abort editing -- revert to last saved text

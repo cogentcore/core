@@ -74,18 +74,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### For release
 
-* update parent structview from map updates
-
-* MenuBar / Toolbar -- just a layout really, with some styling?
-
-* dialogs need window positioning hints, also modal / non-modal hints
-
-* separator not rendering..
-
-* basic rich text formatting -- word wrap in widgets demo, and bold / italic styles for fonts?
-* style parsing crash on font-family
-
-* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
+* word wrap in widgets demo
 
 * override ki.Props json to save type names
 * saving non-string properties not working -- doesn't know the type for
@@ -93,9 +82,20 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * get all json save / load working
 
-* tab widget and integrate with tree view editor? Popups show up in a separate tab?
+* tab widget basic fix
 
 ### TODO
+
+* tab widget and integrate with tree view editor? Popups show up in a separate tab?
+
+* separator not rendering..
+
+* MenuBar / Toolbar -- just a layout really, with some styling?
+
+* basic rich text formatting -- , and bold / italic styles for fonts?
+* style parsing crash on font-family
+
+* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
 
 * main menu (mac)
 
