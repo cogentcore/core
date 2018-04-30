@@ -18,11 +18,12 @@ func (i ScreenOrientation) String() string {
 	return _ScreenOrientation_name[_ScreenOrientation_index[i]:_ScreenOrientation_index[i+1]]
 }
 
-func StringToScreenOrientation(s string) (ScreenOrientation, error) {
-	for i := 0; i < len(_ScreenOrientation_index)-1; i++ {
-		if s == _ScreenOrientation_name[_ScreenOrientation_index[i]:_ScreenOrientation_index[i+1]] {
-			return ScreenOrientation(i), nil
+func (i *ScreenOrientation) FromString(s string) error {
+	for j := 0; j < len(_ScreenOrientation_index)-1; j++ {
+		if s == _ScreenOrientation_name[_ScreenOrientation_index[j]:_ScreenOrientation_index[j+1]] {
+			*i = ScreenOrientation(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type ScreenOrientation", s)
+	return fmt.Errorf("String %v is not a valid option for type ScreenOrientation", s)
 }

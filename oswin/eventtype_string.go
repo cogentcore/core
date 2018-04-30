@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventLifeCycleEventPaintEventEventTypeN"
+const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventLifeCycleEventPaintEventEventTypeN"
 
-var _EventType_index = [...]uint8{0, 10, 24, 38, 54, 69, 77, 90, 100, 112, 123, 134, 148, 158, 168}
+var _EventType_index = [...]uint8{0, 10, 24, 38, 54, 69, 77, 90, 100, 112, 123, 134, 151, 165, 175, 185}
 
 func (i EventType) String() string {
 	if i < 0 || i >= EventType(len(_EventType_index)-1) {
@@ -18,11 +18,12 @@ func (i EventType) String() string {
 	return _EventType_name[_EventType_index[i]:_EventType_index[i+1]]
 }
 
-func StringToEventType(s string) (EventType, error) {
-	for i := 0; i < len(_EventType_index)-1; i++ {
-		if s == _EventType_name[_EventType_index[i]:_EventType_index[i+1]] {
-			return EventType(i), nil
+func (i *EventType) FromString(s string) error {
+	for j := 0; j < len(_EventType_index)-1; j++ {
+		if s == _EventType_name[_EventType_index[j]:_EventType_index[j+1]] {
+			*i = EventType(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type EventType", s)
+	return fmt.Errorf("String %v is not a valid option for type EventType", s)
 }

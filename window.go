@@ -26,6 +26,11 @@ import (
 	"time"
 )
 
+// EventSkipLagMSec is the number of milliseconds of lag between the time the
+// event was sent to the time it is being processed, above which a repeated
+// event type (scroll, drag, resize) is skipped
+var EventSkipLagMSec = 50
+
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
 // textures using the drawer interface, but..
@@ -495,14 +500,14 @@ func (w *Window) EventLoop() {
 
 		nw := time.Now()
 		lag := nw.Sub(evi.Time())
-		lagMs := lag / time.Millisecond
+		lagMs := int(lag / time.Millisecond)
 		// fmt.Printf("et %v lag %v\n", et, lag)
 
 		if et == lastEt {
 			switch et {
 			case oswin.MouseScrollEvent:
 				me := evi.(*mouse.ScrollEvent)
-				if lagMs > 100 {
+				if lagMs > EventSkipLagMSec {
 					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					if !lastSkipped {
 						skipDelta = me.Delta
@@ -519,7 +524,7 @@ func (w *Window) EventLoop() {
 				}
 			case oswin.MouseDragEvent:
 				me := evi.(*mouse.DragEvent)
-				if lagMs > 100 {
+				if lagMs > EventSkipLagMSec {
 					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					if !lastSkipped {
 						skipDelta = me.From
@@ -534,8 +539,8 @@ func (w *Window) EventLoop() {
 				}
 			case oswin.WindowResizeEvent:
 				we := evi.(*window.Event)
-				if lagMs > 100 {
-					fmt.Printf("skipped et %v lag %v\n", et, lag)
+				if lagMs > EventSkipLagMSec {
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					lastSkipped = true
 					skippedResize = we
 					continue
@@ -554,6 +559,7 @@ func (w *Window) EventLoop() {
 		if skippedResize != nil {
 			w.Resized(skippedResize.Size)
 			w.DoFullRender = true
+			skippedResize = nil
 		}
 
 		// if rs, ok := evi.(*window.Event); ok {

@@ -18,11 +18,12 @@ func (i Visibility) String() string {
 	return _Visibility_name[_Visibility_index[i]:_Visibility_index[i+1]]
 }
 
-func StringToVisibility(s string) (Visibility, error) {
-	for i := 0; i < len(_Visibility_index)-1; i++ {
-		if s == _Visibility_name[_Visibility_index[i]:_Visibility_index[i+1]] {
-			return Visibility(i), nil
+func (i *Visibility) FromString(s string) error {
+	for j := 0; j < len(_Visibility_index)-1; j++ {
+		if s == _Visibility_name[_Visibility_index[j]:_Visibility_index[j+1]] {
+			*i = Visibility(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Visibility", s)
+	return fmt.Errorf("String %v is not a valid option for type Visibility", s)
 }

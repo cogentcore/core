@@ -18,11 +18,12 @@ func (i Action) String() string {
 	return _Action_name[_Action_index[i]:_Action_index[i+1]]
 }
 
-func StringToAction(s string) (Action, error) {
-	for i := 0; i < len(_Action_index)-1; i++ {
-		if s == _Action_name[_Action_index[i]:_Action_index[i+1]] {
-			return Action(i), nil
+func (i *Action) FromString(s string) error {
+	for j := 0; j < len(_Action_index)-1; j++ {
+		if s == _Action_name[_Action_index[j]:_Action_index[j+1]] {
+			*i = Action(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Action", s)
+	return fmt.Errorf("String %v is not a valid option for type Action", s)
 }
