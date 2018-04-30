@@ -596,9 +596,9 @@ func TestProps(t *testing.T) {
 }
 
 func TestTreeMod(t *testing.T) {
-	NodeSignalTrace = true
+	SignalTrace = true
 	sigs := ""
-	NodeSignalTraceString = &sigs
+	SignalTraceString = &sigs
 
 	tree1 := Node{}
 	tree1.InitName(&tree1, "tree1")

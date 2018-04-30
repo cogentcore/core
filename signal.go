@@ -59,11 +59,11 @@ const (
 //go:generate stringer -type=NodeSignals
 
 // set this to true to automatically print out a trace of the signals as they are sent
-var NodeSignalTrace bool = false
+var SignalTrace bool = false
 
 // set this to a string to receive trace in a string that can be compared for testing
 // otherwise just goes to stdout
-var NodeSignalTraceString *string
+var SignalTraceString *string
 
 // RecvFunc is a receiver function type for signals -- gets the full
 // connection information and signal, data as specified by the sender.  It is
@@ -173,8 +173,8 @@ func (sig *Signal) DisconnectAll() {
 
 // EmitTrace records a trace of signal being emitted
 func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
-	if NodeSignalTraceString != nil {
-		*NodeSignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
+	if SignalTraceString != nil {
+		*SignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
 	} else {
 		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.PathUnique(), NodeSignals(sig), data)
 	}
@@ -185,7 +185,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
-	if NodeSignalTrace {
+	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
 	deleted := 0 // using this construct from https://stackoverflow.com/questions/20545743/delete-entries-from-a-slice-while-iterating-over-it-in-go
@@ -207,7 +207,7 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
-	if NodeSignalTrace {
+	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
 	deleted := 0
