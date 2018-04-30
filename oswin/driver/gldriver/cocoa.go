@@ -68,15 +68,14 @@ func init() {
 }
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
-	width, height := optsSize(theApp, opts)
-	left, top := optsPos(theApp, opts)
-
-	dialog, modal, tool, fullscreen := optsFlags(theApp, opts)
+	dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
 	title := C.CString(opts.GetTitle())
 	defer C.free(unsafe.Pointer(title))
 
-	return uintptr(C.doNewWindow(C.int(width), C.int(height), C.int(left), C.int(top), title, C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))), nil
+	return uintptr(C.doNewWindow(C.int(opts.Size.X), C.int(opts.Size.Y),
+		C.int(opts.Pos.X), C.int(opts.Pos.Y), title,
+		C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))), nil
 }
 
 func initWindow(w *windowImpl) {

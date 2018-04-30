@@ -91,7 +91,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
 
 	if DialogsSepWindow {
-		win = NewWindowNoVp(dlg.Title, vpsz.X, vpsz.Y)
+		win = NewDialogWin(dlg.Title, vpsz.X, vpsz.Y, dlg.Modal)
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
 	}
@@ -110,8 +110,10 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
-		go win.StartEventLoopNoWait()
+		win.StartEventLoopNoWait()
 	} else {
+		frame := dlg.Child(0).(*Frame)
+		dlg.StylePart(frame.This) // use special styles
 		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 		dlg.Resize(vpsz.X, vpsz.Y)
 		dlg.ViewBox.Min = image.Point{x, y}
@@ -185,7 +187,7 @@ var DialogProps = ki.Props{
 func (dlg *Dialog) SetFrame() *Frame {
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutCol
-	dlg.StylePart(frame.This)
+	// dlg.StylePart(frame.This)
 	return frame
 }
 

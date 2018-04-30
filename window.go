@@ -53,24 +53,19 @@ var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
 func (n *Window) New() ki.Ki { return &Window{} }
 
-// NewWindow creates a new window with given name and sizing (0 = some kind of
-// default) -- stdPixels means use standardized "pixel" units for the display
-// size (96 per inch), not the actual underlying raw display dot pixels
-func NewWindow(name string, width, height int, stdPixels bool) *Window {
+// NewWindow creates a new window with given name and options
+func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization
 	win := &Window{}
 	win.InitName(win, name)
 	win.SetOnlySelfUpdate() // has its own FlushImage update logic
 	var err error
-	sz := image.Point{width, height}
-	win.OSWin, err = oswin.TheApp.NewWindow(&oswin.NewWindowOptions{
-		Title: name, Size: image.Point{width, height}, StdPixels: stdPixels,
-	})
+	win.OSWin, err = oswin.TheApp.NewWindow(opts)
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	win.WinTex, err = oswin.TheApp.NewTexture(win.OSWin, sz)
+	win.WinTex, err = oswin.TheApp.NewTexture(win.OSWin, opts.Size) // note size will be in dots
 	if err != nil {
 		fmt.Printf("GoGi NewTexture error: %v \n", err)
 		return nil
@@ -81,12 +76,15 @@ func NewWindow(name string, width, height int, stdPixels bool) *Window {
 	return win
 }
 
-// NewWindow2D creates a new window with given name and sizing, and initializes
-// a 2D viewport within it -- stdPixels means use standardized "pixel" units for
-// the display size (96 per inch), not the actual underlying raw display dot
-// pixels
+// NewWindow2D creates a new standard 2D window with given name and sizing,
+// with default positioning, and initializes a 2D viewport within it --
+// stdPixels means use standardized "pixel" units for the display size (96 per
+// inch), not the actual underlying raw display dot pixels
 func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
-	win := NewWindow(name, width, height, stdPixels)
+	opts := &oswin.NewWindowOptions{
+		Title: name, Size: image.Point{width, height}, StdPixels: stdPixels,
+	}
+	win := NewWindow(name, opts)
 	if win == nil {
 		return nil
 	}
@@ -97,11 +95,18 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	return win
 }
 
-// NewWindowNoVp creates a new window with given name and sizing (assumed to
-// be in raw dots), without setting its main viewport -- user should do
-// win.AddChild(vp); win.Viewport = vp to set their own viewport
-func NewWindowNoVp(name string, width, height int) *Window {
-	win := NewWindow(name, width, height, false)
+// NewDialogWin creates a new dialog window with given name and sizing
+// (assumed to be in raw dots), without setting its main viewport -- user
+// should do win.AddChild(vp); win.Viewport = vp to set their own viewport
+func NewDialogWin(name string, width, height int, modal bool) *Window {
+	opts := &oswin.NewWindowOptions{
+		Title: name, Size: image.Point{width, height}, StdPixels: false,
+	}
+	opts.SetDialog()
+	if modal {
+		opts.SetModal()
+	}
+	win := NewWindow(name, opts)
 	if win == nil {
 		return nil
 	}
@@ -109,17 +114,11 @@ func NewWindowNoVp(name string, width, height int) *Window {
 }
 
 func (w *Window) StartEventLoop() {
-	// w.DoFullRender = true
-	// var wg sync.WaitGroup
-	// wg.Add(1)
 	w.EventLoop()
-	// wg.Wait()
-	fmt.Printf("stop event loop\n")
 }
 
 func (w *Window) StartEventLoopNoWait() {
-	// w.DoFullRender = true
-	w.EventLoop()
+	go w.EventLoop()
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
