@@ -74,8 +74,13 @@ const (
 	MagnifyEvent
 	RotateEvent
 
-	// WindowEvent reports any changes in the window size, orientation, iconify, close, open
+	// WindowEvent reports any changes in the window size, orientation,
+	// iconify, close, open
 	WindowEvent
+
+	// WindowResizeEvent is specifically for window resize events which need
+	// special treatment
+	WindowResizeEvent
 
 	// LifeCycleEvent for app window activation, focus, and startup / termination
 	LifeCycleEvent

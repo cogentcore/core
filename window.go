@@ -152,8 +152,7 @@ func (w *Window) SetSize(sz image.Point) {
 	// w.Resized(sz.X, sz.Y)
 }
 
-func (w *Window) Resized(width, height int) {
-	sz := image.Point{width, height}
+func (w *Window) Resized(sz image.Point) {
 	// if w.WinTex.Size() == sz {
 	// 	return
 	// }
@@ -162,7 +161,7 @@ func (w *Window) Resized(width, height int) {
 		w.WinTex.Release()
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
-	w.Viewport.Resize(width, height)
+	w.Viewport.Resize(sz.X, sz.Y)
 }
 
 // FullReRender can be called to trigger a full re-render of the window
@@ -463,8 +462,7 @@ func (w *Window) DeletePopupMenu(pop ki.Ki) bool {
 
 // start the event loop running -- runs in a separate goroutine
 func (w *Window) EventLoop() {
-	var lastResize *window.Event
-	resizing := false
+	var skippedResize *window.Event
 
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
@@ -505,7 +503,7 @@ func (w *Window) EventLoop() {
 			case oswin.MouseScrollEvent:
 				me := evi.(*mouse.ScrollEvent)
 				if lagMs > 100 {
-					fmt.Printf("skipped et %v lag %v\n", et, lag)
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					if !lastSkipped {
 						skipDelta = me.Delta
 					} else {
@@ -514,40 +512,64 @@ func (w *Window) EventLoop() {
 					lastSkipped = true
 					continue
 				} else {
+					if lastSkipped {
+						me.Delta = skipDelta.Add(me.Delta)
+					}
 					lastSkipped = false
-					me.Delta = skipDelta.Add(me.Delta)
 				}
 			case oswin.MouseDragEvent:
 				me := evi.(*mouse.DragEvent)
 				if lagMs > 100 {
-					fmt.Printf("skipped et %v lag %v\n", et, lag)
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					if !lastSkipped {
 						skipDelta = me.From
 					}
 					lastSkipped = true
 					continue
 				} else {
+					if lastSkipped {
+						me.From = skipDelta
+					}
 					lastSkipped = false
-					me.From = skipDelta
+				}
+			case oswin.WindowResizeEvent:
+				we := evi.(*window.Event)
+				if lagMs > 100 {
+					fmt.Printf("skipped et %v lag %v\n", et, lag)
+					lastSkipped = true
+					skippedResize = we
+					continue
+				} else {
+					w.Resized(we.Size)
+					w.DoFullRender = true
+					lastSkipped = false
+					skippedResize = nil
+					continue
 				}
 			}
 		}
+		lastSkipped = false
 		lastEt = et
 
-		if rs, ok := evi.(*window.Event); ok {
-			if rs.Action == window.Resize {
-				resizing = true
-				lastResize = rs
-				continue
-			}
-		} else {
-			if resizing {
-				w.Resized(lastResize.Size.X, lastResize.Size.Y)
-				resizing = false
-				lastResize = nil
-				w.DoFullRender = true
-			}
+		if skippedResize != nil {
+			w.Resized(skippedResize.Size)
+			w.DoFullRender = true
 		}
+
+		// if rs, ok := evi.(*window.Event); ok {
+		// 	if rs.Action == window.Resize {
+		// 		resizing = true
+		// 		lastResize = rs
+		// 		continue
+		// 	}
+		// } else {
+		// 	if resizing {
+		// 		w.Resized(lastResize.Size.X, lastResize.Size.Y)
+		// 		resizing = false
+		// 		lastResize = nil
+		// 		w.DoFullRender = true
+		// 	}
+		// }
 
 		switch e := evi.(type) {
 		case *lifecycle.Event:

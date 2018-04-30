@@ -145,7 +145,9 @@ func drawgl(id uintptr) {
 	w.lifecycler.SetVisible(true)
 	w.lifecycler.SendEvent(w, w.glctx)
 
-	w.Send(&paint.Event{External: true})
+	pe := &paint.Event{External: true}
+	pe.Init()
+	w.Send(pe)
 	<-w.drawDone
 }
 
@@ -223,7 +225,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 		LogicalDPI: ldpi,
 		Action:     window.Resize,
 	}
-
+	winEv.Init()
 	w.Send(&winEv)
 }
 

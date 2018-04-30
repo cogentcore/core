@@ -112,7 +112,11 @@ var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
 // oswin.Event interface
 
 func (ev Event) Type() oswin.EventType {
-	return oswin.WindowEvent
+	if ev.Action == Resize {
+		return oswin.WindowResizeEvent
+	} else {
+		return oswin.WindowEvent
+	}
 }
 
 func (ev Event) HasPos() bool {
