@@ -154,9 +154,10 @@ func (w *Window) SetSize(sz image.Point) {
 
 func (w *Window) Resized(width, height int) {
 	sz := image.Point{width, height}
-	if w.WinTex.Size() == sz {
-		return
-	}
+	// if w.WinTex.Size() == sz {
+	// 	return
+	// }
+	fmt.Printf("resized to: %v\n", sz)
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}

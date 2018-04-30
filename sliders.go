@@ -235,12 +235,19 @@ func (g *SliderBase) UpdatePosFromValue() {
 
 // set a value
 func (g *SliderBase) SetValue(val float32) {
-	updt := g.UpdateStart()
-	g.Value = Min32(val, g.Max)
-	if g.ValThumb {
-		g.Value = Min32(g.Value, g.Max-g.ThumbVal)
+	if g.Value == val {
+		return
 	}
-	g.Value = Max32(g.Value, g.Min)
+	updt := g.UpdateStart()
+	val = Min32(val, g.Max)
+	if g.ValThumb {
+		val = Min32(val, g.Max-g.ThumbVal)
+	}
+	val = Max32(val, g.Min)
+	if g.Value == val {
+		return
+	}
+	g.Value = val
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
