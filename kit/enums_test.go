@@ -5,6 +5,7 @@
 package kit
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -107,4 +108,28 @@ func TestEnums(t *testing.T) {
 		t.Errorf("SetEnumValueFromInt64 failed %v != %v", et, TestFlag1)
 	}
 
+}
+
+func TestEnumJSON(t *testing.T) {
+
+	et := TestFlag1
+
+	b, err := json.Marshal(et)
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	// fmt.Println(string(b))
+
+	et = TestFlag2
+	err = json.Unmarshal(b, &et)
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	if et != TestFlag1 {
+		t.Errorf("EnumJSON error, saved as: %v after loading value should be TestFlag1, is: %v\n", string(b), et)
+	}
 }

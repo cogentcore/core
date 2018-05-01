@@ -21,7 +21,7 @@ type NodeEmbed struct {
 	Mbr2 int
 }
 
-var NodeEmbedProps = map[string]interface{}{
+var NodeEmbedProps = Props{
 	"intprop":    -17,
 	"floatprop":  3.1415,
 	"stringprop": "type string",

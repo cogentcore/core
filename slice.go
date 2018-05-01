@@ -22,7 +22,9 @@ import (
 // Slice provides JSON marshal / unmarshal with encoding of underlying types
 type Slice []Ki
 
-// ValidIndex returns a valid index given length of slice -- also supports access from the back of the slice using negative numbers -- -1 = last item, -2 = second to last, etc
+// ValidIndex returns a valid index given length of slice -- also supports
+// access from the back of the slice using negative numbers -- -1 = last item,
+// -2 = second to last, etc
 func (k Slice) ValidIndex(idx int) (int, error) {
 	kl := len(k)
 	if kl == 0 {
@@ -40,12 +42,17 @@ func (k Slice) ValidIndex(idx int) (int, error) {
 	return idx, nil
 }
 
-// IsValidIndex checks whether the given index is a valid index into slice, within range of 0..len-1 -- see ValidIndex for version that transforms negative numbers into indicies from end of slice, and has explicit error messages
+// IsValidIndex checks whether the given index is a valid index into slice,
+// within range of 0..len-1 -- see ValidIndex for version that transforms
+// negative numbers into indicies from end of slice, and has explicit error
+// messages
 func (k Slice) IsValidIndex(idx int) bool {
 	return idx >= 0 && idx < len(k)
 }
 
-// Elem returns element at index, using ValidIndex supporting negative indexing from back of list -- returns nil if index is invalid -- use ValidIndex or IsValidIndex directly to test if unsure
+// Elem returns element at index, using ValidIndex supporting negative
+// indexing from back of list -- returns nil if index is invalid -- use
+// ValidIndex or IsValidIndex directly to test if unsure
 func (k *Slice) Elem(idx int) Ki {
 	idx, err := k.ValidIndex(idx)
 	if err != nil {
@@ -74,7 +81,8 @@ func (k *Slice) Insert(ki Ki, idx int) {
 	(*k)[idx] = ki
 }
 
-// Delete item at index -- does not do any further management deleted item -- optimized version for avoiding memory leaks
+// DeleteAtIndex deletes item at index -- does not do any further management
+// deleted item -- optimized version for avoiding memory leaks
 func (k *Slice) DeleteAtIndex(idx int) error {
 	idx, err := k.ValidIndex(idx)
 	if err != nil {
@@ -108,7 +116,9 @@ func (k *Slice) Move(from, to int) error {
 	return nil
 }
 
-// find index of item based on match function (true for find, false for not) -- startIdx arg allows for optimized bidirectional find if you have an idea where it might be -- can be key speedup for large lists
+// IndexByFunc finds index of item based on match function (true for find,
+// false for not) -- startIdx arg allows for optimized bidirectional find if
+// you have an idea where it might be -- can be key speedup for large lists
 func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) int {
 	sz := len(*k)
 	if sz == 0 {
@@ -155,17 +165,23 @@ func (k *Slice) Index(kid Ki, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
 }
 
-// IndexByName returns index of first element that has given name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+// IndexByName returns index of first element that has given name -- startIdx
+// arg allows for optimized bidirectional search if you have an idea where it
+// might be -- can be key speedup for large lists
 func (k *Slice) IndexByName(name string, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-// IndexByUniqueName returns index of first element that has given unique name -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+// IndexByUniqueName returns index of first element that has given unique name
+// -- startIdx arg allows for optimized bidirectional search if you have an
+// idea where it might be -- can be key speedup for large lists
 func (k *Slice) IndexByUniqueName(name string, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
 }
 
-// IndexByType returns index of element that either is that type or embeds that type -- startIdx arg allows for optimized bidirectional search if you have an idea where it might be -- can be key speedup for large lists
+// IndexByType returns index of element that either is that type or embeds
+// that type -- startIdx arg allows for optimized bidirectional search if you
+// have an idea where it might be -- can be key speedup for large lists
 func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) int {
 	if embeds {
 		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
@@ -174,7 +190,8 @@ func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) int {
 	}
 }
 
-// return a kit.TypeAndNameList of elements in the slice -- useful for Ki ConfigChildren
+// TypeAndNames returns a kit.TypeAndNameList of elements in the slice --
+// useful for Ki ConfigChildren
 func (k *Slice) TypeAndNames() kit.TypeAndNameList {
 	if len(*k) == 0 {
 		return nil
@@ -186,7 +203,8 @@ func (k *Slice) TypeAndNames() kit.TypeAndNameList {
 	return tn
 }
 
-// return a kit.TypeAndNameList of elements in the slice using UniqueNames -- useful for Ki ConfigChildren
+// TypeAndUniqueNames returns a kit.TypeAndNameList of elements in the slice
+// using UniqueNames -- useful for Ki ConfigChildren
 func (k *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
 	if len(*k) == 0 {
 		return nil
@@ -198,7 +216,8 @@ func (k *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
 	return tn
 }
 
-// return a Name to Index map for faster lookup when needing to do a lot of name lookups on same fixed slice
+// NameToINdexMap returns a Name to Index map for faster lookup when needing to
+// do a lot of name lookups on same fixed slice
 func (k *Slice) NameToIndexMap() map[string]int {
 	if len(*k) == 0 {
 		return nil
@@ -210,7 +229,8 @@ func (k *Slice) NameToIndexMap() map[string]int {
 	return nim
 }
 
-// return a UniqueName to Index map for faster lookup when needing to do a lot of name lookups on same fixed slice
+// UniqueNameToIndexMap returns a UniqueName to Index map for faster lookup
+// when needing to do a lot of name lookups on same fixed slice
 func (k *Slice) UniqueNameToIndexMap() map[string]int {
 	if len(*k) == 0 {
 		return nil
@@ -222,7 +242,10 @@ func (k *Slice) UniqueNameToIndexMap() map[string]int {
 	return nim
 }
 
-// MarshalJSON saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
+// MarshalJSON saves the length and type information for each object in a
+// slice, as a separate struct-like record at the start, followed by the
+// structs for each element in the slice -- this allows the Unmarshal to first
+// create all the elements and then load them
 func (k Slice) MarshalJSON() ([]byte, error) {
 	nk := len(k)
 	b := make([]byte, 0, nk*100+20)
@@ -230,15 +253,13 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 		b = append(b, []byte("null")...)
 		return b, nil
 	}
-	b = append(b, []byte("[{\"n\":")...)
-	b = append(b, []byte(fmt.Sprintf("%d", nk))...)
-	b = append(b, []byte(",")...)
+	nstr := fmt.Sprintf("[{\"n\":%d,", nk)
+	b = append(b, []byte(nstr)...)
 	for i, kid := range k {
 		// fmt.Printf("json out of %v\n", kid.PathUnique())
-		b = append(b, []byte("\"type\":\"")...)
 		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
-		b = append(b, []byte(knm)...)
-		b = append(b, []byte("\"")...)
+		tstr := fmt.Sprintf("\"type\":\"%v\"", knm)
+		b = append(b, []byte(tstr)...)
 		if i < nk-1 {
 			b = append(b, []byte(",")...)
 		}
@@ -270,7 +291,9 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
-// UnmarshalJSON parses the length and type information for each object in the slice, creates the new slice with those elements, and then loads based on the remaining bytes which represent each element
+// UnmarshalJSON parses the length and type information for each object in the
+// slice, creates the new slice with those elements, and then loads based on
+// the remaining bytes which represent each element
 func (k *Slice) UnmarshalJSON(b []byte) error {
 	// fmt.Printf("json in: %v\n", string(b))
 	if bytes.Equal(b, []byte("null")) {
@@ -313,12 +336,12 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
 		}
 		nkid := reflect.New(typ).Interface()
-		// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
 		kid, ok := nkid.(Ki)
 		if !ok {
 			return fmt.Errorf("ki.Slice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
 		}
 		kid.Init(kid)
+		fmt.Printf("kid is new obj of type %T\n", kid)
 		nwk = append(nwk, kid)
 	}
 
@@ -342,7 +365,10 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 
 // todo: save N as an attr instead of a full element
 
-// MarshalXML saves the length and type information for each object in a slice, as a separate struct-like record at the start, followed by the structs for each element in the slice -- this allows the Unmarshal to first create all the elements and then load them
+// MarshalXML saves the length and type information for each object in a
+// slice, as a separate struct-like record at the start, followed by the
+// structs for each element in the slice -- this allows the Unmarshal to first
+// create all the elements and then load them
 func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	tokens := []xml.Token{start}
 	nk := len(k)
@@ -479,7 +505,9 @@ func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
 	return
 }
 
-// UnmarshalJSON parses the length and type information for each object in the slice, creates the new slice with those elements, and then loads based on the remaining bytes which represent each element
+// UnmarshalJSON parses the length and type information for each object in the
+// slice, creates the new slice with those elements, and then loads based on
+// the remaining bytes which represent each element
 func (k *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	// for _, attr := range start.Attr {
 	// 	// todo: need to set the props from name / value -- don't have parent though!

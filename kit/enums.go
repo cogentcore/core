@@ -7,6 +7,7 @@ package kit
 // github.com/rcoreilly/goki/ki/kit
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"reflect"
@@ -30,16 +31,16 @@ import (
 // new type by calling AddEnum in the process of creating a new global
 // variable, as in:
 //
-// var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
-//    TypeNameProps (or nil))
+//     var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
+//        TypeNameProps (or nil))
 //
 // where MyEnum is the name of the type, MyEnumN is the enum value
 // representing the number of defined enums (always good practice to define
 // this value, for ease of extension by others), and TypeNameProps is nil or a
 // map[string]interface{} of properties, OR:
 //
-// var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
-//    TypeNameProps, "Prefix")
+//     var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
+//        TypeNameProps, "Prefix")
 //
 // which automatically registers alternative names as lower-case versions of
 // const names with given prefix removed -- often what is used in e.g., json
@@ -52,10 +53,20 @@ import (
 //
 // * "BitFlag": true -- each value represents a bit in a set of bit flags, so
 // the string rep of a value contains an or-list of names for each bit set,
-// separated by |
+// separated by "|".  Use the bitflag package to set and clear bits while
+// keeping the definition of the flags as a standard ordinal integer value --
+// much more flexible than pre-compiling the bitmasks.  Usually should be an
+// int64 type.
 //
 // * "AltStrings": map[int64]string -- provides an alternative string mapping for
 // the enum values
+//
+// Also recommend defining JSON I/O functions for each registered enum -- much
+// safer to save enums as strings than using their raw numerical values, which
+// can change over time:
+//
+//     func (ev TestFlags) MarshalJSON() ([]byte, error) { return kit.EnumMarshalJSON(ev) }
+//     func (ev *TestFlags) UnmarshalJSON() ([]byte, error) { return kit.EnumUnmarshalJSON(ev) }
 //
 type EnumRegistry struct {
 	Enums map[string]reflect.Type
@@ -193,8 +204,8 @@ func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 // IsBitFlag checks if this enum is for bit flags instead of mutually-exclusive int
 // values -- checks BitFlag property -- if true string rep of a value contains
 // an or-list of names for each bit set, separated by |
-func (tr *EnumRegistry) IsBitFlag(eval interface{}) bool {
-	tn := FullTypeName(reflect.TypeOf(eval))
+func (tr *EnumRegistry) IsBitFlag(typ reflect.Type) bool {
+	tn := FullTypeName(typ)
 	b, _ := ToBool(tr.Prop(tn, "BitFlag"))
 	return b
 }
@@ -221,28 +232,40 @@ func SetEnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 	return nil
 }
 
+// SetEnumValueFromInt64 sets enum value from int64 value, using a
+// reflect.Value representation of the enum
+func SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
+	if eval.Kind() != reflect.Ptr {
+		err := fmt.Errorf("kit.SetEnumValueFromInt64: must pass a pointer value to the enum: Type: %v, Kind: %v\n", eval.Type().String(), eval.Kind())
+		log.Printf("%v", err)
+		return err
+	}
+	npt := NonPtrType(eval.Type())
+	eval.Elem().Set(reflect.ValueOf(ival).Convert(npt))
+	return nil
+}
+
 // EnumIfaceFromInt64 returns an interface{} value which is an enum value of
-// given type, set to given integer value
+// given type (not a pointer to it), set to given integer value
 func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
-	evnp := reflect.New(PtrType(typ))
-	evpi := evnp.Interface()
 	evn := reflect.New(typ)
-	evi := evn.Interface()
-	evpi = &evi
-	reflect.ValueOf(evpi).Elem().Set(reflect.ValueOf(ival).Convert(typ))
-	return evi
+	SetEnumValueFromInt64(evn, ival)
+	return evn.Elem().Interface()
+}
+
+// EnumIfaceFromString returns an interface{} value which is an enum value of
+// given type (not a pointer to it), set to given string value
+func EnumIfaceFromString(str string, typ reflect.Type) interface{} {
+	evn := reflect.New(typ)
+	SetEnumValueFromString(evn, str)
+	return evn.Elem().Interface()
 }
 
 // EnumInt64ToString first converts an int64 to enum of given type, and then
 // converts that to a string value
 func EnumInt64ToString(ival int64, typ reflect.Type) string {
-	evnp := reflect.New(PtrType(typ))
-	evpi := evnp.Interface()
-	evn := reflect.New(typ)
-	evi := evn.Interface()
-	evpi = &evi
-	SetEnumFromInt64(evpi, ival, typ)
-	return EnumToString(evi)
+	ev := EnumIfaceFromInt64(ival, typ)
+	return EnumToString(ev)
 }
 
 // EnumToString converts an enum value to its corresponding string value --
@@ -494,6 +517,33 @@ func (tr *EnumRegistry) AllTagged(key string) []reflect.Type {
 	return tl
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//  JSON Marshal
+
+func EnumMarshalJSON(eval interface{}) ([]byte, error) {
+	et := reflect.TypeOf(eval)
+	b := make([]byte, 0, 50)
+	b = append(b, []byte("\"")...)
+	if Enums.IsBitFlag(et) {
+		b = append(b, []byte(BitFlagsToString(EnumToInt64(eval), eval))...)
+	} else {
+		b = append(b, []byte(EnumToString(eval))...)
+	}
+	b = append(b, []byte("\"")...)
+	return b, nil
+}
+
+func EnumUnmarshalJSON(eval interface{}, b []byte) error {
+	et := reflect.TypeOf(eval)
+	noq := string(bytes.Trim(b, "\""))
+	if Enums.IsBitFlag(et) {
+		// todo!
+		return nil
+	} else {
+		return SetEnumFromString(eval, noq)
+	}
+}
+
 /////////////////////////////////////////////////////////////
 // Following is for testing..
 
@@ -510,3 +560,6 @@ const (
 //go:generate stringer -type=TestFlags
 
 var KiT_TestFlags = Enums.AddEnumAltLower(TestFlagsN, false, nil, "Test")
+
+func (ev TestFlags) MarshalJSON() ([]byte, error)  { return EnumMarshalJSON(ev) }
+func (ev *TestFlags) UnmarshalJSON(b []byte) error { return EnumUnmarshalJSON(ev, b) }

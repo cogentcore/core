@@ -564,15 +564,7 @@ func (n *Node) NewOfType(typ reflect.Type) Ki {
 	if typ == nil {
 		typ = n.Type() // make us by default
 	}
-	inst := kit.Types.Inst(typ)
-	if inst == nil {
-		log.Printf("ki.NewOfType: type %v was not found in kit.Types type registry -- all Ki types must be registered there!\n", typ.String())
-		return nil // almost certainly will crash now..
-	} else {
-		nkid := inst.(Ki).New()
-		kid, _ := nkid.(Ki)
-		return kid
-	}
+	return NewOfType(typ)
 }
 
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
@@ -1538,6 +1530,7 @@ func (n *Node) LoadJSON(b []byte) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
+	bitflag.Set(&n.Flag, int(ChildAdded)) // this might not be set..
 	n.UpdateEnd(updt)
 	return err
 }

@@ -42,6 +42,7 @@ import (
 	// "fmt"
 	// "log"
 	"log"
+	"path"
 	"reflect"
 )
 
@@ -73,9 +74,17 @@ type TypeRegistry struct {
 // Types is master registry of types that embed Ki Nodes
 var Types TypeRegistry
 
-// the full package-qualified type name -- this is what is used for encoding
-// type names in the registry
+// if ShortTypeNames is true, we just use the standard "base".TypeName instead
+// of the full path that PgkPath returns -- this should work unless there are
+// conflicts but the savings in JSON files etc is probably worth it..
+var ShortTypeNames = true
+
+// FullTypeName returns the full package-qualified type name -- this is what
+// is used for encoding type names in the registry
 func FullTypeName(typ reflect.Type) string {
+	if ShortTypeNames {
+		return path.Base(typ.PkgPath()) + "." + typ.Name()
+	}
 	return typ.PkgPath() + "." + typ.Name()
 }
 

@@ -5,6 +5,7 @@
 package ki
 
 import (
+	"log"
 	"reflect"
 
 	"github.com/rcoreilly/goki/ki/kit"
@@ -683,7 +684,23 @@ func KiType() reflect.Type {
 // IsKi returns true if the given type implements the Ki interface at any
 // level of embedded structure
 func IsKi(typ reflect.Type) bool {
+	if typ == nil {
+		return false
+	}
 	return kit.EmbeddedTypeImplements(typ, KiType())
+}
+
+// NewOfType makes a new Ki struct of given type
+func NewOfType(typ reflect.Type) Ki {
+	inst := kit.Types.Inst(typ)
+	if inst == nil {
+		log.Printf("ki.NewOfType: type %v was not found in kit.Types type registry -- all Ki types must be registered there!\n", typ.String())
+		return nil // almost certainly will crash now..
+	} else {
+		nkid := inst.(Ki).New()
+		kid, _ := nkid.(Ki)
+		return kid
+	}
 }
 
 // Flags are bit flags for efficient core state of nodes -- see bitflag
