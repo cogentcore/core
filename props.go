@@ -153,7 +153,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 				if err != nil {
 					log.Printf("ki.Props failed to load struct of type %v with error: %v\n", typ.String(), err)
 				}
-				(*p)[pkey] = stval
+				(*p)[pkey] = reflect.ValueOf(stval).Elem().Interface()
 			}
 		}
 	}
