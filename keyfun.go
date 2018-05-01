@@ -58,6 +58,9 @@ const (
 
 var KiT_KeyFunctions = kit.Enums.AddEnumAltLower(KeyFunctionsN, false, StylePropProps, "KeyFun")
 
+func (ev KeyFunctions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *KeyFunctions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // todo: need to have multiple functions possible per key, depending on context?
 
 type KeyMap map[string]KeyFunctions

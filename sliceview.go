@@ -73,8 +73,8 @@ func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
 	// config.Add(KiT_Label, "title")
 	// config.Add(KiT_Space, "title-space")
 	config.Add(KiT_Layout, "slice-grid")
-	// config.Add(KiT_Space, "grid-space")
-	// config.Add(KiT_Layout, "buttons")
+	config.Add(KiT_Space, "grid-space")
+	config.Add(KiT_Layout, "buttons")
 	return config
 }
 
@@ -202,7 +202,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	sg.UpdateEnd(updt)
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice
+// SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
 func (sv *SliceView) SliceNewAt(idx int) {
 	updt := sv.UpdateStart()
 	svl := reflect.ValueOf(sv.Slice)
@@ -211,7 +211,7 @@ func (sv *SliceView) SliceNewAt(idx int) {
 	nval := reflect.New(svtyp.Elem())
 	sz := svnp.Len()
 	svnp = reflect.Append(svnp, nval.Elem())
-	if idx < sz-1 {
+	if idx >= 0 && idx < sz-1 {
 		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
 		svnp.Index(idx).Set(nval.Elem())
 	}
@@ -243,11 +243,34 @@ func (sv *SliceView) SliceDelete(idx int) {
 	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
+// ConfigSliceButtons configures the buttons for map functions
+func (sv *SliceView) ConfigSliceButtons() {
+	if kit.IfaceIsNil(sv.Slice) {
+		return
+	}
+	bb, _ := sv.ButtonBox()
+	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config.Add(KiT_Button, "Add")
+	mods, updt := bb.ConfigChildren(config, false)
+	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	addb.SetText("Add")
+	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			svv.SliceNewAt(-1)
+		}
+	})
+	if mods {
+		bb.UpdateEnd(updt)
+	}
+}
+
 func (sv *SliceView) UpdateFromSlice() {
 	mods, updt := sv.StdConfig()
 	// typ := kit.NonPtrType(reflect.TypeOf(sv.Slice))
 	// sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	sv.ConfigSliceGrid()
+	sv.ConfigSliceButtons()
 	if mods {
 		sv.UpdateEnd(updt)
 	}

@@ -60,7 +60,7 @@ type SliderBase struct {
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
-	State       SliderStates         `desc:"state of slider"`
+	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	SliderSig   ki.Signal            `json:"-" xml:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml

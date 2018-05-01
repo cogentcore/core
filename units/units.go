@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rcoreilly/goki/ki"
 	"github.com/rcoreilly/goki/ki/kit"
 	"golang.org/x/image/math/fixed"
 )
@@ -103,6 +104,9 @@ const (
 //go:generate stringer -type=Unit
 
 var KiT_Unit = kit.Enums.AddEnumAltLower(UnitN, false, nil, "")
+
+func (ev Unit) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Unit) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 var UnitNames = [...]string{
 	Px:   "px",
@@ -243,6 +247,12 @@ type Value struct {
 	Val  float32
 	Un   Unit
 	Dots float32
+}
+
+var KiT_Value = kit.Types.AddType(&Value{}, ValueProps)
+
+var ValueProps = ki.Props{
+	"style-prop": true,
 }
 
 // convenience for not having to specify the Dots member

@@ -26,7 +26,7 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	// turn this on to see a trace of the rendering
+	// turn these on to see a traces of various stages of processing..
 	// gi.Update2DTrace = true
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true

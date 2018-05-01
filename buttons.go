@@ -93,6 +93,9 @@ const (
 
 var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
 
+func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
 var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
 
@@ -109,8 +112,8 @@ type ButtonBase struct {
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
-	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
-	MakeMenuFunc MakeMenuFunc         `desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	Menu         ki.Slice             `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -261,7 +264,7 @@ func (g *ButtonBase) OpenMenu() bool {
 // AddMenuText adds an action to the menu with a text label -- todo: shortcuts
 func (g *ButtonBase) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
 	if g.Menu == nil {
-		g.Menu = make(Menu, 0, 10)
+		g.Menu = make(ki.Slice, 0, 10)
 	}
 	ac := Action{}
 	ac.InitName(&ac, txt)
@@ -278,7 +281,7 @@ func (g *ButtonBase) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun 
 // AddSeparator adds a separator at the next point in the menu
 func (g *ButtonBase) AddSeparator(name string) *Separator {
 	if g.Menu == nil {
-		g.Menu = make(Menu, 0, 10)
+		g.Menu = make(ki.Slice, 0, 10)
 	}
 	sp := Separator{}
 	if name == "" {
@@ -294,7 +297,7 @@ func (g *ButtonBase) AddSeparator(name string) *Separator {
 
 // ResetMenu removes all items in the menu
 func (g *ButtonBase) ResetMenu() {
-	g.Menu = make(Menu, 0, 10)
+	g.Menu = make(ki.Slice, 0, 10)
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if there is a menu present,

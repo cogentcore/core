@@ -669,6 +669,9 @@ func (tv *TreeView) ConfigParts() {
 }
 
 func (tv *TreeView) MakeMenu(mb *ButtonBase) {
+	if len(mb.Menu) > 0 {
+		return
+	}
 	// todo: shortcuts!
 	mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)

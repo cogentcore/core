@@ -22,6 +22,9 @@ const (
 
 var KiT_FillRule = kit.Enums.AddEnumAltLower(FillRuleN, false, StylePropProps, "FillRule")
 
+func (ev FillRule) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FillRule) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // FillStyle contains all the properties specific to filling a region
 type FillStyle struct {
 	On      bool        `desc:"is fill active -- if property is none then false"`

@@ -48,6 +48,9 @@ const (
 
 var KiT_Align = kit.Enums.AddEnumAltLower(AlignN, false, StylePropProps, "Align")
 
+func (ev Align) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Align) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // is this a generalized alignment to start of container?
 func IsAlignStart(a Align) bool {
 	return (a == AlignLeft || a == AlignTop || a == AlignFlexStart || a == AlignTextTop)
@@ -79,6 +82,9 @@ const (
 )
 
 var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, false, StylePropProps, "Overflow")
+
+func (ev Overflow) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 //go:generate stringer -type=Overflow
 
@@ -274,6 +280,9 @@ const (
 
 var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, false, StylePropProps, "Layout")
 
+func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Layouts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // row / col for grid data
 type RowCol int32
 
@@ -284,6 +293,9 @@ const (
 )
 
 var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, StylePropProps, "")
+
+func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 //go:generate stringer -type=RowCol
 
@@ -301,7 +313,7 @@ type Layout struct {
 	Node2DBase
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
 	CSS       ki.Props              `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
-	CSSAgg    ki.Props              `desc:"aggregated css properties from all higher nodes down to me"`
+	CSSAgg    ki.Props              `json:"-" xml:"-" desc:"aggregated css properties from all higher nodes down to me"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize Vec2D                 `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`

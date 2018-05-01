@@ -172,6 +172,9 @@ const (
 
 var KiT_Dims2D = kit.Enums.AddEnumAltLower(Dims2DN, false, nil, "")
 
+func (ev Dims2D) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Dims2D) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 //go:generate stringer -type=Dims2D
 
 // 2D vector -- a point or size in 2D

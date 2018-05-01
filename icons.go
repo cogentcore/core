@@ -160,6 +160,9 @@ const (
 
 var KiT_IconContexts = kit.Enums.AddEnum(IconContextsN, false, nil)
 
+func (ev IconContexts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *IconContexts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // list of standard icon names that we expect to find in an IconSet
 var StdIconNames = [IconContextsN][]string{
 	{ // WidgetIcons

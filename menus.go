@@ -17,7 +17,6 @@ import (
 // Menu is a list of Node2D actions, which can contain sub-actions (though it
 // can contain anything -- it is just added to a column layout and displayed
 // in a popup) -- don't use stretchy sizes in general for these items!
-type Menu []Node2D
 
 // MakeMenuFunc is a callback for making the menu on demand
 type MakeMenuFunc func(mb *ButtonBase)
@@ -121,7 +120,7 @@ var MenuFrameProps = ki.Props{
 // PopupMenu just pops up a viewport with a layout that draws the supplied
 // actions positions are relative to given viewport -- name is relevant base
 // name to which Menu is appended
-func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+func PopupMenu(menu ki.Slice, x, y int, parVp *Viewport2D, name string) *Viewport2D {
 	win := parVp.Win
 	mainVp := win.Viewport
 	if len(menu) == 0 {
@@ -142,8 +141,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.Lay = LayoutCol
 	frame.SetProps(MenuFrameProps, false)
 	for _, ac := range menu {
-		acn := ac.AsNode2D()
-		frame.AddChild(acn.This)
+		acn, _ := KiToNode2D(ac)
+		frame.AddChild(acn)
 	}
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes

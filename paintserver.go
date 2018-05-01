@@ -55,6 +55,9 @@ const (
 
 var KiT_PaintServers = kit.Enums.AddEnumAltLower(PaintServersN, false, StylePropProps, "Paint")
 
+func (ev PaintServers) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *PaintServers) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // todo: implement all the other types of paint servers
 
 // todo: this is not SVG standard and needs to be updated

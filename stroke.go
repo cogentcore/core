@@ -25,6 +25,9 @@ const (
 
 var KiT_LineCap = kit.Enums.AddEnumAltLower(LineCapN, false, StylePropProps, "LineCap")
 
+func (ev LineCap) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *LineCap) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // the way in which lines are joined together: stroke-linejoin property in SVG
 type LineJoin int
 
@@ -40,6 +43,9 @@ const (
 //go:generate stringer -type=LineJoin
 
 var KiT_LineJoin = kit.Enums.AddEnumAltLower(LineJoinN, false, StylePropProps, "LineJoin")
+
+func (ev LineJoin) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *LineJoin) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // StrokeStyle contains all the properties specific to painting a line -- the svg elements define the corresponding SVG style attributes, which are processed in StrokeStyle
 type StrokeStyle struct {

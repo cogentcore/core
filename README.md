@@ -74,13 +74,13 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### For release
 
-* word wrap in widgets demo
-
 * override ki.Props json to save type names
 * saving non-string properties not working -- doesn't know the type for
   loading.. converts to a map.
 
 * get all json save / load working
+
+* style parsing crash on font-family
 
 * tab widget basic fix
 
@@ -93,7 +93,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 * MenuBar / Toolbar -- just a layout really, with some styling?
 
 * basic rich text formatting -- , and bold / italic styles for fonts?
-* style parsing crash on font-family
+* word wrap in widgets demo
 
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
 

@@ -15,8 +15,8 @@ import (
 // Widget base type -- manages control elements and provides standard box model rendering
 type WidgetBase struct {
 	Node2DBase
-	CSS    ki.Props `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
-	CSSAgg ki.Props `desc:"aggregated css properties from all higher nodes down to me"`
+	CSS    ki.Props `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
+	CSSAgg ki.Props `json:"-" xml:"-" desc:"aggregated css properties from all higher nodes down to me"`
 	Parts  Layout   `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 

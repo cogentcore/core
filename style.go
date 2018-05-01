@@ -101,6 +101,9 @@ const (
 
 var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, false, StylePropProps, "Box")
 
+func (ev BoxSides) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *BoxSides) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // how to draw the border
 type BorderDrawStyle int32
 
@@ -121,6 +124,9 @@ const (
 //go:generate stringer -type=BorderDrawStyle
 
 var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, false, StylePropProps, "Border")
+
+func (ev BorderDrawStyle) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *BorderDrawStyle) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // style parameters for borders
 type BorderStyle struct {
