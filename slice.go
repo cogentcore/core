@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/json-iterator/go"
+	"github.com/rcoreilly/goki/ki/bitflag"
 	"github.com/rcoreilly/goki/ki/kit"
 )
 
@@ -242,7 +243,99 @@ func (k *Slice) UniqueNameToIndexMap() map[string]int {
 	return nim
 }
 
-// MarshalJSON saves the length and type information for each object in a
+///////////////////////////////////////////////////////////////////////////
+// Config
+
+// Config is a major work-horse routine for minimally-destructive reshaping of
+// a tree structure to fit a target configuration, specified in terms of a
+// type-and-name list.  If the node is != nil, then it has UpdateStart / End
+// logic applied to it, only if necessary, as indicated by mods, updt return
+// values
+func (k *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
+	mods, updt = false, false
+	// first make a map for looking up the indexes of the names
+	nm := make(map[string]int)
+	for i, tn := range config {
+		nm[tn.Name] = i
+	}
+	// first remove any children not in the config
+	sz := len(*k)
+	for i := sz - 1; i >= 0; i-- {
+		kid := (*k)[i]
+		var knm string
+		if uniqNm {
+			knm = kid.UniqueName()
+		} else {
+			knm = kid.Name()
+		}
+		ti, ok := nm[knm]
+		if !ok {
+			k.configDeleteKid(kid, i, n, &mods, &updt)
+		} else if kid.Type() != config[ti].Type {
+			k.configDeleteKid(kid, i, n, &mods, &updt)
+		}
+	}
+	// next add and move items as needed -- in order so guaranteed
+	for i, tn := range config {
+		var kidx int
+		if uniqNm {
+			kidx = k.IndexByUniqueName(tn.Name, i)
+		} else {
+			kidx = k.IndexByName(tn.Name, i)
+		}
+		if kidx < 0 {
+			if !mods {
+				mods = true
+				if n != nil {
+					updt = n.UpdateStart()
+				}
+			}
+			nkid := NewOfType(tn.Type)
+			nkid.Init(nkid)
+			k.Insert(nkid, i)
+			if n != nil {
+				nkid.SetParent(n)
+				bitflag.Set(n.Flags(), int(ChildAdded))
+				fmt.Printf("set parent of %v to: %v\n", nkid.PathUnique(), n.PathUnique())
+			}
+			if uniqNm {
+				nkid.SetNameRaw(tn.Name)
+				nkid.SetUniqueName(tn.Name)
+			} else {
+				nkid.SetName(tn.Name)
+			}
+		} else {
+			if kidx != i {
+				if !mods {
+					mods = true
+					if n != nil {
+						updt = n.UpdateStart()
+					}
+				}
+				k.Move(kidx, i)
+			}
+		}
+	}
+	return
+}
+
+func (k *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
+	if !*mods {
+		*mods = true
+		if n != nil {
+			*updt = n.UpdateStart()
+			bitflag.Set(n.Flags(), int(ChildDeleted))
+		}
+	}
+	bitflag.Set(kid.Flags(), int(NodeDeleted))
+	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
+	kid.SetParent(nil)
+	k.DeleteAtIndex(i)
+	DelMgr.Add(kid)
+	kid.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
+}
+
+// MarshalJSON saves the length and type, name information for each object in a
 // slice, as a separate struct-like record at the start, followed by the
 // structs for each element in the slice -- this allows the Unmarshal to first
 // create all the elements and then load them
@@ -258,7 +351,7 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	for i, kid := range k {
 		// fmt.Printf("json out of %v\n", kid.PathUnique())
 		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
-		tstr := fmt.Sprintf("\"type\":\"%v\"", knm)
+		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.UniqueName()) // todo: escape names!
 		b = append(b, []byte(tstr)...)
 		if i < nk-1 {
 			b = append(b, []byte(",")...)
@@ -291,6 +384,9 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+///////////////////////////////////////////////////////////////////////////
+// JSON
+
 // UnmarshalJSON parses the length and type information for each object in the
 // slice, creates the new slice with those elements, and then loads based on
 // the remaining bytes which represent each element
@@ -305,6 +401,7 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 	if lb < 0 || rb < 0 { // probably null
 		return nil
 	}
+	// todo: if name contains "," this won't work..
 	flds := bytes.Split(b[lb+1:rb], []byte(","))
 	if len(flds) == 0 {
 		return errors.New("Slice UnmarshalJSON: no child data found")
@@ -323,26 +420,31 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	nwk := make([]Ki, 0, n) // allocate new slice
+	tnl := make(kit.TypeAndNameList, n)
 
 	for i := 0; i < n; i++ {
-		fld := flds[i+1]
+		fld := flds[2*i+1]
 		// fmt.Printf("fld:\n%v\n", string(fld))
 		ti := bytes.Index(fld, []byte("\"type\":"))
 		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
+		fld = flds[2*i+2]
+		ni := bytes.Index(fld, []byte("\"name\":"))
+		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
 		typ := kit.Types.Type(tn)
 		if typ == nil {
 			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
 		}
-		nkid := reflect.New(typ).Interface()
-		kid, ok := nkid.(Ki)
-		if !ok {
-			return fmt.Errorf("ki.Slice UnmarshalJSON: New child of type %v cannot convert to Ki", tn)
-		}
-		kid.Init(kid)
-		fmt.Printf("kid is new obj of type %T\n", kid)
-		nwk = append(nwk, kid)
+		tnl[i].Type = typ
+		tnl[i].Name = nm
+	}
+
+	k.Config(nil, tnl, true) // true = uniq names
+
+	nwk := make([]Ki, n) // allocate new slice containing *pointers* to kids
+
+	for i, kid := range *k {
+		nwk[i] = kid
 	}
 
 	cb := make([]byte, 0, 1+len(b)-rb)
@@ -359,7 +461,6 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*k = append(*k, nwk...)
 	return nil
 }
 
