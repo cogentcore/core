@@ -1,15 +1,15 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package main
 
 import (
-	"github.com/rcoreilly/goki/gi"
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/driver"
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/goki/goki/gi"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver"
+	"github.com/goki/goki/gi/units"
+	"github.com/goki/goki/ki"
 )
 
 func main() {
@@ -73,7 +73,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
-			fr.SetProp("background-color", gi.HSLAf32{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -82,7 +82,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
-			fr.SetProp("background-color", gi.HSLAf32{hu, sat, lt, 0.5})
+			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 0.5})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -92,7 +92,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for sat := float32(0.0); sat <= 1.01; sat += 0.1 {
 			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
-			fr.SetProp("background-color", gi.HSLAf32{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -100,8 +100,8 @@ func mainrun() {
 	// then doing it with colors -- tests the "there and back again" round trip..
 	for _, hu := range hues {
 		clr := gi.Color{}
-		clr.SetHSLA(hu, 1.0, 0.5, 1.0)
-		for lt := float32(0.0); lt <= 2.01; lt += 0.2 {
+		clr.SetHSLA(hu, 1.0, 0.2, 1)
+		for lt := float32(0.0); lt <= 100.01; lt += 10 {
 			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
 			fr.SetProp("background-color", clr.Lighter(lt))
 			fr.SetProp("max-width", -1)

@@ -1,10 +1,16 @@
+// Copyright 2018 The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/exp/shiny:
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package driver provides the default driver for accessing a screen.
-package driver // import "github.com/rcoreilly/goki/gi/oswin/driver"
-import "github.com/rcoreilly/goki/gi/oswin"
+package driver
+
+import "github.com/goki/goki/gi/oswin"
 
 // TODO: figure out what to say about the responsibility for users of this
 // package to check any implicit dependencies' LICENSEs. For example, the

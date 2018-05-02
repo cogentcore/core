@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -13,8 +13,8 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"github.com/rcoreilly/goki/ki/bitflag"
-	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/goki/goki/ki/bitflag"
+	"github.com/goki/goki/ki/kit"
 )
 
 // Window is a double-buffered OS-specific hardware window

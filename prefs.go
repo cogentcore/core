@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,10 +11,10 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/mouse"
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/units"
+	"github.com/goki/goki/ki"
 )
 
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for

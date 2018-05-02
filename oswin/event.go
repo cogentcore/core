@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import (
 	"image"
 	"time"
 
-	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/goki/goki/ki/kit"
 )
 
 // GoGi event structure is dervied from go.wde and golang/x/mobile/event

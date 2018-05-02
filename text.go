@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/goki/goki/gi/units"
+	"github.com/goki/goki/ki"
+	"github.com/goki/goki/ki/kit"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )

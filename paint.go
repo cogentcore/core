@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -10,10 +10,10 @@ import (
 	"image/color"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/goki/gi/units"
+	"github.com/goki/goki/ki"
+	"github.com/goki/prof"
 	"github.com/golang/freetype/raster"
-	"github.com/rcoreilly/goki/gi/units"
-	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/prof"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"

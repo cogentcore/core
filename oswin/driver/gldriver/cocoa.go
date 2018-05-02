@@ -1,3 +1,8 @@
+// Copyright 2018 The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/exp/shiny:
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -43,12 +48,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/driver/internal/lifecycler"
-	"github.com/rcoreilly/goki/gi/oswin/key"
-	"github.com/rcoreilly/goki/gi/oswin/mouse"
-	"github.com/rcoreilly/goki/gi/oswin/paint"
-	"github.com/rcoreilly/goki/gi/oswin/window"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
 	"golang.org/x/mobile/gl"
 )
 

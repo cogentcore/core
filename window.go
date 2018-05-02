@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -12,16 +12,16 @@ import (
 	"runtime"
 	"runtime/pprof"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/key"
-	"github.com/rcoreilly/goki/gi/oswin/lifecycle"
-	"github.com/rcoreilly/goki/gi/oswin/mouse"
-	"github.com/rcoreilly/goki/gi/oswin/paint"
-	"github.com/rcoreilly/goki/gi/oswin/window"
-	"github.com/rcoreilly/goki/ki"
-	"github.com/rcoreilly/goki/ki/bitflag"
-	"github.com/rcoreilly/goki/ki/kit"
-	"github.com/rcoreilly/prof"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/lifecycle"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
+	"github.com/goki/goki/ki"
+	"github.com/goki/goki/ki/bitflag"
+	"github.com/goki/goki/ki/kit"
+	"github.com/goki/prof"
 
 	"time"
 )

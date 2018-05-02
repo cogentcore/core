@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -18,9 +18,9 @@ import (
 	"image"
 	"time"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/gi/oswin/key"
-	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/ki/kit"
 )
 
 // DoubleClickMSec is the maximum time interval in msec between button press

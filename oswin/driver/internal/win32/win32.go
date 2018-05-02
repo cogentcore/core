@@ -1,3 +1,8 @@
+// Copyright 2018 The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/exp/shiny:
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -7,7 +12,7 @@
 // Package win32 implements a partial shiny screen driver using the Win32 API.
 // It provides window, lifecycle, key, and mouse management, but no drawing.
 // That is left to windriver (using GDI) or gldriver (using DirectX via ANGLE).
-package win32 // import "github.com/rcoreilly/goki/gi/oswin/driver/internal/win32"
+package win32
 
 import (
 	"fmt"
@@ -16,12 +21,12 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/lifecycle"
-	"golang.org/x/mobile/event/mouse"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/lifecycle"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
 	"golang.org/x/mobile/geom"
 )
 
@@ -160,7 +165,7 @@ func sendSize(hwnd syscall.Handle) {
 	height := int(r.Bottom - r.Top)
 
 	// TODO(andlabs): don't assume that PixelsPerPt == 1
-	SizeEvent(hwnd, size.Event{
+	SizeEvent(hwnd, window.Event{
 		WidthPx:     width,
 		HeightPx:    height,
 		WidthPt:     geom.Pt(width),
@@ -264,11 +269,11 @@ func keyModifiers() (m key.Modifiers) {
 var (
 	MouseEvent     func(hwnd syscall.Handle, e mouse.Event)
 	PaintEvent     func(hwnd syscall.Handle, e paint.Event)
-	SizeEvent      func(hwnd syscall.Handle, e size.Event)
+	SizeEvent      func(hwnd syscall.Handle, e window.Event)
 	KeyEvent       func(hwnd syscall.Handle, e key.Event)
 	LifecycleEvent func(hwnd syscall.Handle, e lifecycle.Stage)
 
-	// TODO: use the github.com/rcoreilly/goki/gi/oswin/driver/internal/lifecycler package
+	// TODO: use the github.com/goki/goki/gi/oswin/driver/internal/lifecycler package
 	// instead of or together with the LifecycleEvent callback?
 )
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -7,22 +7,22 @@ package main
 import (
 	"fmt"
 
-	"github.com/rcoreilly/goki/gi"
-	"github.com/rcoreilly/goki/gi/oswin"
-	_ "github.com/rcoreilly/goki/gi/oswin/init"
-	"github.com/rcoreilly/goki/gi/units"
+	"github.com/goki/goki/gi"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver"
+	"github.com/goki/goki/gi/units"
 )
 
 func main() {
-	go mainrun()
-	oswin.RunBackendEventLoop() // this needs to run in main loop
+	driver.Main(func(app oswin.App) {
+		mainrun()
+	})
 }
 
 func mainrun() {
-	width := 800
-	height := 800
-	win := gi.NewWindow2D("test window", width, height)
-	win.UpdateStart()
+	width := 1024
+	height := 768
+	win := gi.NewWindow2D("test window", width, height, true)
 
 	gi.Layout2DTrace = true
 
@@ -41,7 +41,7 @@ func mainrun() {
 	// }
 
 	vp := win.WinViewport2D()
-	vp.SetProp("background-color", "#FFF")
+	updt := vp.UpdateStart()
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
@@ -140,7 +140,7 @@ func mainrun() {
 		// fr.SetProp("max-width", -1) // spacer
 	}
 
-	win.UpdateEnd()
+	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
 }

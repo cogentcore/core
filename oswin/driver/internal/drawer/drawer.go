@@ -1,15 +1,20 @@
+// Copyright 2016 The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/exp/shiny:
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package drawer provides functions that help implement screen.Drawer methods.
-package drawer // import "github.com/rcoreilly/goki/gi/oswin/driver/internal/drawer"
+package drawer
 
 import (
 	"image"
 	"image/draw"
 
-	"github.com/rcoreilly/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin"
 	"golang.org/x/image/math/f64"
 )
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -26,40 +26,35 @@
 // explicitly invoked by calling that driver's Main function. To use the
 // default driver:
 //
-//  TODO: following is out-of-date
 //
 //	package main
 //
 //	import (
-//		"github.com/rcoreilly/goki/gi/oswin/driver"
-//		"github.com/rcoreilly/goki/gi/oswin"
-//		"github.com/rcoreilly/goki/gi/oswin/lifecycle"
+//		"github.com/goki/goki/gi"
+//		"github.com/goki/goki/gi/oswin/driver"
+//		"github.com/goki/goki/gi/oswin"
 //	)
 //
 //	func main() {
 //		driver.Main(func(app oswin.App) {
-//			w, err := app.NewWindow(nil)
-//			if err != nil {
-//				handleError(err)
-//				return
-//			}
-//			defer w.Release()
+// 		mainrun()
+// 	})
+// }
 //
-//			for {
-//				switch e := w.NextEvent().(type) {
-//				case lifecycle.Event:
-//					if e.To == lifecycle.StageDead {
-//						return
-//					}
-//					etc
-//				case etc:
-//					etc
-//				}
-//			}
-//		})
-//	}
+// func mainrun() {
+// 	width := 1024
+// 	height := 768
 //
-// Complete examples can be found in the gi/example directory.
+// 	// turn these on to see a traces of various stages of processing..
+// 	// gi.Update2DTrace = true
+// 	// gi.Render2DTrace = true
+// 	// gi.Layout2DTrace = true
+// 	// ki.SignalTrace = true
+//
+// 	win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
+//  ...
+//
+// Complete examples can be found in the gi/examples directory.
 //
 // Each driver package provides App, Screen, Image, Texture and Window
 // implementations that work together. Such types are interface types because

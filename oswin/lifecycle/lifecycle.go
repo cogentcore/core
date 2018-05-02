@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -22,14 +22,14 @@
 // Crosses can be in a positive or negative direction. A positive crossing of
 // StageFocused means that the app has gained the focus. A negative crossing
 // means it has lost the focus.
-package lifecycle // import "github.com/rcoreilly/goki/gi/oswin/lifecycle"
+package lifecycle
 
 import (
 	"fmt"
 	"image"
 
-	"github.com/rcoreilly/goki/gi/oswin"
-	"github.com/rcoreilly/goki/ki/kit"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/ki/kit"
 )
 
 // lifecycle.Event is a lifecycle change from an old stage to a new stage.
