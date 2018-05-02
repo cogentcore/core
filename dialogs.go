@@ -449,6 +449,38 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	return n, typ
 }
 
+// StringPromptDialog prompts the user for a string value -- optionally
+// connects to given signal receiving object and function for dialog signals
+// (nil to ignore)
+func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("string-prompt", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "str-space").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	tf := frame.InsertNewChild(KiT_TextField, prIdx+2, "str-field").(*TextField)
+	tf.Text = strval
+	tf.SetStretchMaxWidth()
+	tf.SetMinPrefWidth(units.NewValue(20, units.Em))
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// StringPromptValue gets the string value the user set
+func StringPromptDialogValue(dlg *Dialog) string {
+	frame := dlg.Frame()
+	tf := frame.ChildByName("str-field", 0).(*TextField)
+	return tf.Text
+}
+
 // StructViewDialog is for editing fields of a structure using a StructView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
