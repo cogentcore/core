@@ -152,16 +152,16 @@ func (tv *TreeView) SyncToSrc() {
 	idx := 0
 	for i, fld := range flds {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if vk.SrcNode.Ptr != fld {
-			vk.SetSrcNode(fld)
+		vk.SetSrcNode(fld)
+		if mods {
 			vk.SetClosedState(fldClosed[i])
 		}
 		idx++
 	}
 	for _, skid := range sk.Children() {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if vk.SrcNode.Ptr != skid {
-			vk.SetSrcNode(skid)
+		vk.SetSrcNode(skid)
+		if mods {
 			if vc, ok := kit.ToBool(skid.Prop(vcprop, false, true)); vc && ok {
 				vk.SetClosed()
 			}
