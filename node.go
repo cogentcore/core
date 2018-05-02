@@ -641,66 +641,7 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, 
 }
 
 func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
-	mods, updt = false, false
-	// first make a map for looking up the indexes of the names
-	nm := make(map[string]int)
-	for i, tn := range config {
-		nm[tn.Name] = i
-	}
-	// first remove any children not in the config
-	sz := len(n.Kids)
-	for i := sz - 1; i >= 0; i-- {
-		kid := n.Kids[i]
-		var knm string
-		if uniqNm {
-			knm = kid.UniqueName()
-		} else {
-			knm = kid.Name()
-		}
-		ti, ok := nm[knm]
-		if !ok {
-			if !mods {
-				mods = true
-				updt = n.UpdateStart()
-			}
-			n.DeleteChildAtIndex(i, true) // assume destroy
-		} else if kid.Type() != config[ti].Type {
-			if !mods {
-				mods = true
-				updt = n.UpdateStart()
-			}
-			n.DeleteChildAtIndex(i, true) // assume destroy
-		}
-	}
-	// next add and move items as needed -- in order so guaranteed
-	for i, tn := range config {
-		var kidx int
-		if uniqNm {
-			kidx = n.ChildIndexByUniqueName(tn.Name, i)
-		} else {
-			kidx = n.ChildIndexByName(tn.Name, i)
-		}
-		if kidx < 0 {
-			if !mods {
-				mods = true
-				updt = n.UpdateStart()
-			}
-			if uniqNm {
-				n.InsertNewChildUnique(tn.Type, i, tn.Name) // here we are making uniqNm -> Name
-			} else {
-				n.InsertNewChild(tn.Type, i, tn.Name)
-			}
-		} else {
-			if kidx != i {
-				if !mods {
-					mods = true
-					updt = n.UpdateStart()
-				}
-				n.Kids.Move(kidx, i)
-			}
-		}
-	}
-	return
+	return n.Kids.Config(n.This, config, uniqNm)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -855,10 +796,10 @@ func (n *Node) Delete(destroy bool) {
 }
 
 func (n *Node) Destroy() {
+	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This, n.This, len(n.Kids))
 	if n.This == nil { // already dead!
 		return
 	}
-	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This, n.This, len(n.Kids))
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
 	bitflag.Set(&n.Flag, int(NodeDestroyed))
 	n.DisconnectAll()
@@ -1611,7 +1552,8 @@ func (dm *Deleted) Add(kis ...Ki) {
 
 func (dm *Deleted) DestroyDeleted() {
 	dm.Mu.Lock()
-	curdels := dm.Dels
+	curdels := make([]Ki, len(dm.Dels))
+	copy(curdels, dm.Dels)
 	dm.Dels = dm.Dels[:0]
 	dm.Mu.Unlock()
 	for _, ki := range curdels {

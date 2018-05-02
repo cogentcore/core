@@ -296,7 +296,6 @@ func (k *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, upd
 			if n != nil {
 				nkid.SetParent(n)
 				bitflag.Set(n.Flags(), int(ChildAdded))
-				fmt.Printf("set parent of %v to: %v\n", nkid.PathUnique(), n.PathUnique())
 			}
 			if uniqNm {
 				nkid.SetNameRaw(tn.Name)
@@ -330,8 +329,8 @@ func (k *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 	bitflag.Set(kid.Flags(), int(NodeDeleted))
 	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
 	kid.SetParent(nil)
-	k.DeleteAtIndex(i)
 	DelMgr.Add(kid)
+	k.DeleteAtIndex(i)
 	kid.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
 }
 
