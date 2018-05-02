@@ -815,11 +815,11 @@ func (sv *ColorView) UpdateRGBSlider(sl *Slider, rgb int) {
 	}
 	switch rgb {
 	case 0:
-		sl.SetValueNoSig(float32(sv.Color.R))
+		sl.SetValue(float32(sv.Color.R))
 	case 1:
-		sl.SetValueNoSig(float32(sv.Color.G))
+		sl.SetValue(float32(sv.Color.G))
 	case 2:
-		sl.SetValueNoSig(float32(sv.Color.B))
+		sl.SetValue(float32(sv.Color.B))
 	}
 }
 
@@ -872,11 +872,11 @@ func (sv *ColorView) UpdateHSLSlider(sl *Slider, hsl int) {
 	h, s, l, _ := sv.Color.ToHSLA()
 	switch hsl {
 	case 0:
-		sl.SetValueNoSig(h)
+		sl.SetValue(h)
 	case 1:
-		sl.SetValueNoSig(s * 360.0)
+		sl.SetValue(s * 360.0)
 	case 2:
-		sl.SetValueNoSig(l * 360.0)
+		sl.SetValue(l * 360.0)
 	}
 }
 

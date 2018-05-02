@@ -7,27 +7,30 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 [![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/gi)](https://goreportcard.com/report/github.com/rcoreilly/goki/gi)
 [![GoDoc](https://godoc.org/github.com/rcoreilly/goki/gi?status.svg)](http://godoc.org/github.com/rcoreilly/goki/gi)
 
+GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  Rendering HTML and SVG is directly supported by the GoGi 2D scenegraph, with enhanced functionality for interactive GUI's.  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
+
+GoGi also incorporates reflection-based View elements that enable automatic representation and editing of all native Go data structures, providing a built-in native first-order GUI framework with no additional coding.  This enables built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+E` (or `I`) on any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
 
 # Code Map
 
 * `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try -- see README there for more info
 * `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
 * `geom2d.go` -- `Vec2D` is main geom type used for 2D, plus transform matrix
-* `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg`
+* `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg` (todo: update to `oksvg`)
 	+ `stroke.go`, `fill.go` -- `StrokeStyle` and `FillStyle` structs for stroke, fill settings
 * `style.go` -- `Style` and associated structs for CSS-based `Widget` styling
 * `viewport2d.go` -- `Viewport2D` that has an `Image.RGBA` that `Paint` renders onto
-* `window.go` -- `Window` is the top-level window that uses (our own version of) `go.wde` to open a gui window and send events to nodes
+* `window.go` -- `Window` is the top-level window that manages an OS-specific `oswin.Window` and handles the event loop.
+	+ `oswin` is a modified version of the back-end OS-specific code from Shiny: https://github.com/golang/exp/tree/master/shiny -- originally used https://github.com/skelterjohn/go.wde but shiny is much faster for updating the window because it is gl-based, and doesn't have any other dependencies (removed dependencies on mobile, changed the event structure to better fit needs here).
 * `shapes2d.go` -- All the basic 2D SVG-based shapes: `Rect`, `Circle` etc
 * `font.go`, `text.go` -- `FontStyle`, `TextStyle`, `Text2D` node
-* `layout.go` -- main `Layout` object with various ways of arranging widget elements
+* `layout.go` -- main `Layout` object with various ways of arranging widget elements, and `Frame` which does layout and renders a surrounding frame
 * `widget.go` -- `WidgetBase` for all widgets
 * `buttons.go` -- `ButtonBase`, `Button` and other basic command button types
-* `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
+* `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `textwidgets.go` -- `Label`, `TextField`, `ComboBox` -- also defines the `gi.Labeler` interface and `ToLabel` converter method (which falls back on kit.ToString using Stringer), which is used for generating a gui-appropriate label for an object -- e.g., for reflect.Type it just presents the raw type name without prefix.
 * `*view.go` -- `TreeView` widget shows a graphical view of a tree, `StructView` for editing structs, `MapView`, `SliceView`, etc.  `ValueView` framework for managing mapping between `reflect.Value`'s and gui widgets for displaying them.
-* `oswin` is a modified version of the back-end OS-specific code from Shiny: https://github.com/golang/exp/tree/master/shiny -- originally used https://github.com/skelterjohn/go.wde but shiny is much faster for updating the window because it is gl-based, and doesn't have any other dependencies (removed dependencies on mobile, changed the event structure to better fit needs here).
 
 # Design notes
 
@@ -52,9 +55,10 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ `Widget` nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a `Layout` -- they use `units` system with arbitrary DPI to transform sizes into actual rendered `dots` (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point).  Widgets have non-overlapping bounding boxes (`BBox`).
 	+ `SVG` rendering nodes that directly set properties on the `Paint` object and typically have their own geometry etc -- they should be within a parent `SVG` viewport, and their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float values.
 
-* Rendering: there are 2 major render frameworks:
+* Rendering: there are ~2~ 3 major render frameworks:
 	+ https://godoc.org/github.com/golang/freetype/raster
 	+ https://godoc.org/golang.org/x/image/vector
+	+ https://github.com/srwiley/rasterx -- todo: probably move over to this and attempt to integrate with https://github.com/srwiley/oksvg
 	+ This code: https://github.com/fogleman/gg uses freetype and handles the majority of SVG.  Freetype has a `Painter` interface that is key for supporting the more flexible types of patterns, images, etc that can be used for the final render step.  It also directly supports line joins (round, bevel) and caps: square, butt, round.  It uses fixed.Int26_6 values.  The `image/vector` code is highly optimized based on this rust-based rasterizer: https://medium.com/@raphlinus/inside-the-fastest-font-renderer-in-the-world-75ae5270c445 and uses SIMD instructions.  It switches between float32 and fixed.Int22_10 values depending on size.  Presumably the optimal case would be a merge of these different technologies for the best-of-all but I'm not sure how the Painter flexibility could be incorporated.  Also, the freetype system is already supported for fonts -- would need to integrate that.  This is clearly a job for nigeltao.. :)
 	+ Converted the gg system to float32 instead of 64, using the `geom.go Vec2D` core element.  Note that the `github.com/go-gl/mathgl/mgl32/` math elements (vectors, matricies) which build on the basic `golang.org/x/image/math/f32` do not have appropriate 2D rendering transforms etc.
 
@@ -110,12 +114,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
+* add a new icon for color editor..
+
 * Reminder: grep all todo: in code -- lots!
 
 #### Missing Widgets
 
 see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
++ FileView view and dialog
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 + ProgressBar -- very simple
 + ToolTip

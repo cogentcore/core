@@ -192,7 +192,8 @@ func (g *SliderBase) SizeFromAlloc() {
 	g.DragPos = g.Pos
 }
 
-// set the position of the slider at the given position in pixels -- updates the corresponding Value
+// SetSliderPos sets the position of the slider at the given position in
+// pixels -- updates the corresponding Value
 func (g *SliderBase) SetSliderPos(pos float32) {
 	updt := g.UpdateStart()
 	g.Pos = pos
@@ -233,31 +234,31 @@ func (g *SliderBase) UpdatePosFromValue() {
 	g.Pos = g.Size * (g.Value - g.Min) / (g.Max - g.Min)
 }
 
-// SetValueNoSig sets the value and updates the slider position, but does not
+// SetValue sets the value and updates the slider position, but does not
 // emit an updated signal
-func (g *SliderBase) SetValueNoSig(val float32) {
+func (g *SliderBase) SetValue(val float32) {
+	updt := g.UpdateStart()
 	val = Min32(val, g.Max)
 	if g.ValThumb {
 		val = Min32(val, g.Max-g.ThumbVal)
 	}
 	val = Max32(val, g.Min)
-	if g.Value == val {
-		return
+	if g.Value != val {
+		g.Value = val
+		g.UpdatePosFromValue()
+		g.DragPos = g.Pos
 	}
-	g.Value = val
-	g.UpdatePosFromValue()
-	g.DragPos = g.Pos
+	g.UpdateEnd(updt)
 }
 
-// SetValue sets the value and updates the slider representation, and emits a changed signal
-func (g *SliderBase) SetValue(val float32) {
+// SetValueAction sets the value and updates the slider representation, and
+// emits a changed signal
+func (g *SliderBase) SetValueAction(val float32) {
 	if g.Value == val {
 		return
 	}
-	updt := g.UpdateStart()
-	g.SetValueNoSig(val)
+	g.SetValue(val)
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
-	g.UpdateEnd(updt)
 }
 
 func (g *SliderBase) SetThumbValue(val float32) {
@@ -281,34 +282,34 @@ func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
 	switch kf {
 	case KeyFunMoveUp:
-		g.SetValue(g.Value - g.Step)
+		g.SetValueAction(g.Value - g.Step)
 		kt.SetProcessed()
 	case KeyFunMoveLeft:
-		g.SetValue(g.Value - g.Step)
+		g.SetValueAction(g.Value - g.Step)
 		kt.SetProcessed()
 	case KeyFunMoveDown:
-		g.SetValue(g.Value + g.Step)
+		g.SetValueAction(g.Value + g.Step)
 		kt.SetProcessed()
 	case KeyFunMoveRight:
-		g.SetValue(g.Value + g.Step)
+		g.SetValueAction(g.Value + g.Step)
 		kt.SetProcessed()
 	case KeyFunPageUp:
-		g.SetValue(g.Value - g.PageStep)
+		g.SetValueAction(g.Value - g.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageLeft:
-		g.SetValue(g.Value - g.PageStep)
+		g.SetValueAction(g.Value - g.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageDown:
-		g.SetValue(g.Value + g.PageStep)
+		g.SetValueAction(g.Value + g.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageRight:
-		g.SetValue(g.Value + g.PageStep)
+		g.SetValueAction(g.Value + g.PageStep)
 		kt.SetProcessed()
 	case KeyFunHome:
-		g.SetValue(g.Min)
+		g.SetValueAction(g.Min)
 		kt.SetProcessed()
 	case KeyFunEnd:
-		g.SetValue(g.Max)
+		g.SetValueAction(g.Max)
 		kt.SetProcessed()
 	}
 }

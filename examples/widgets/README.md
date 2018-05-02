@@ -1,6 +1,6 @@
 # GoGi Widgets Demo
 
-This is the main demo.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+E` or hit the button with the `GoGi Editor` on it.
+This is the main demo.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+E` or hit the button with the `GoGi Editor` on it.  Also try changing the preferences using `Control+Alt+P`.
 
 ## GoGi Editor
 
