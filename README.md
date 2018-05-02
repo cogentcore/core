@@ -7,11 +7,10 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 [![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/gi)](https://goreportcard.com/report/github.com/rcoreilly/goki/gi)
 [![GoDoc](https://godoc.org/github.com/rcoreilly/goki/gi?status.svg)](http://godoc.org/github.com/rcoreilly/goki/gi)
 
-Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and type "make" to build the core OS-specific GUI C interface for windows and events -- speeds up subsequent `go build` steps significantly.
 
 # Code Map
 
-* `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try
+* `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try -- see README there for more info
 * `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
 * `geom2d.go` -- `Vec2D` is main geom type used for 2D, plus transform matrix
 * `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg`
@@ -27,7 +26,7 @@ Building: cd to OS-specific dir (`cocoa` for mac, `win` for windows, etc) and ty
 * `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionTriggered` signal
 * `textwidgets.go` -- `Label`, `TextField`, `ComboBox` -- also defines the `gi.Labeler` interface and `ToLabel` converter method (which falls back on kit.ToString using Stringer), which is used for generating a gui-appropriate label for an object -- e.g., for reflect.Type it just presents the raw type name without prefix.
-* `*view.go` -- `TreeView` widget shows a graphical view of a tree, `TabView` widget for tabbed panels.  Todo: `StructView` for editing structs
+* `*view.go` -- `TreeView` widget shows a graphical view of a tree, `StructView` for editing structs, `MapView`, `SliceView`, etc.  `ValueView` framework for managing mapping between `reflect.Value`'s and gui widgets for displaying them.
 * `oswin` is a modified version of the back-end OS-specific code from Shiny: https://github.com/golang/exp/tree/master/shiny -- originally used https://github.com/skelterjohn/go.wde but shiny is much faster for updating the window because it is gl-based, and doesn't have any other dependencies (removed dependencies on mobile, changed the event structure to better fit needs here).
 
 # Design notes
@@ -72,13 +71,11 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ SetValueAction calls SetValue and emits the signal
 	+ this allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  ValueView in particular requires this kind of behavior.  todo: go back and make this more consistent.
 
-### For release
+### TODO
 
-* style parsing crash on font-family
+* style parsing crash on font-family?  now just seems to ignore it?a
 
 * tab widget basic fix
-
-### TODO
 
 * tab widget and integrate with tree view editor? Popups show up in a separate tab?
 

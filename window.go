@@ -515,7 +515,7 @@ func (w *Window) EventLoop() {
 		lagMs := int(lag / time.Millisecond)
 		// fmt.Printf("et %v lag %v\n", et, lag)
 
-		if et == lastEt {
+		if et == lastEt || lastEt == oswin.WindowResizeEvent && et == oswin.PaintEvent {
 			switch et {
 			case oswin.MouseScrollEvent:
 				me := evi.(*mouse.ScrollEvent)
@@ -551,7 +551,7 @@ func (w *Window) EventLoop() {
 				}
 			case oswin.WindowResizeEvent:
 				we := evi.(*window.Event)
-				fmt.Printf("resize %v\n", we.Size)
+				// fmt.Printf("resize %v\n", we.Size)
 				if lagMs > EventSkipLagMSec {
 					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					lastSkipped = true
@@ -564,6 +564,9 @@ func (w *Window) EventLoop() {
 					skippedResize = nil
 					continue
 				}
+			case oswin.PaintEvent:
+				// fmt.Printf("skipped paint\n")
+				continue
 			}
 		}
 		lastSkipped = false
@@ -574,21 +577,6 @@ func (w *Window) EventLoop() {
 			w.DoFullRender = true
 			skippedResize = nil
 		}
-
-		// if rs, ok := evi.(*window.Event); ok {
-		// 	if rs.Action == window.Resize {
-		// 		resizing = true
-		// 		lastResize = rs
-		// 		continue
-		// 	}
-		// } else {
-		// 	if resizing {
-		// 		w.Resized(lastResize.Size.X, lastResize.Size.Y)
-		// 		resizing = false
-		// 		lastResize = nil
-		// 		w.DoFullRender = true
-		// 	}
-		// }
 
 		switch e := evi.(type) {
 		case *lifecycle.Event:
@@ -604,9 +592,11 @@ func (w *Window) EventLoop() {
 			}
 		case *paint.Event:
 			w.FullReRender()
+			// fmt.Println("doing paint")
 			continue
 		case *window.Event:
 			if e.Action == window.Open || e.Action == window.Resize {
+				// fmt.Printf("doing resize for action %v \n", e.Action)
 				w.Resized(e.Size)
 				w.FullReRender()
 			}

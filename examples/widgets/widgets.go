@@ -70,6 +70,7 @@ func mainrun() {
 	title.Text = "This is a demonstration of the various GoGi Widgets"
 	title.SetProp("text-align", gi.AlignTop)
 	title.SetProp("align-vert", gi.AlignTop)
+	title.SetProp("font-size", units.NewValue(24, units.Pt))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	irow := vlay.AddNewChild(gi.KiT_Layout, "irow").(*gi.Layout)

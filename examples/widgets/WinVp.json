@@ -1,0 +1,919 @@
+{
+  "Nm": "WinVp",
+  "UniqueNm": "WinVp",
+  "Props": null,
+  "Kids": [
+    {
+      "n": 1,
+      "type": "gi.Frame",
+      "name": "vlay"
+    },
+    {
+      "Nm": "vlay",
+      "UniqueNm": "vlay",
+      "Props": null,
+      "Kids": [
+        {
+          "n": 11,
+          "type": "gi.Layout",
+          "name": "trow",
+          "type": "gi.Layout",
+          "name": "irow",
+          "type": "gi.Space",
+          "name": "blspc",
+          "type": "gi.Layout",
+          "name": "blrow",
+          "type": "gi.Layout",
+          "name": "brow",
+          "type": "gi.Space",
+          "name": "slspc",
+          "type": "gi.Layout",
+          "name": "slrow",
+          "type": "gi.Layout",
+          "name": "srow",
+          "type": "gi.Space",
+          "name": "tlspc",
+          "type": "gi.Layout",
+          "name": "txlrow",
+          "type": "gi.Layout",
+          "name": "txrow"
+        },
+        {
+          "Nm": "trow",
+          "UniqueNm": "trow",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            }
+          },
+          "Kids": [
+            {
+              "n": 3,
+              "type": "gi.Stretch",
+              "name": "str1",
+              "type": "gi.Label",
+              "name": "title",
+              "type": "gi.Stretch",
+              "name": "str2"
+            },
+            {
+              "Nm": "str1",
+              "UniqueNm": "str1",
+              "Props": null,
+              "Kids": null,
+              "Class": ""
+            },
+            {
+              "Nm": "title",
+              "UniqueNm": "title",
+              "Props": {
+                "__type:font-size": "units.Value",
+                "font-size": {
+                  "Val": 24,
+                  "Un": "Pt",
+                  "Dots": 0
+                },
+                "text-align": "__enum:(gi.Align)AlignTop",
+                "align-vert": "__enum:(gi.Align)AlignTop"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "This is a demonstration of the various GoGi Widgets"
+            },
+            {
+              "Nm": "str2",
+              "UniqueNm": "str2",
+              "Props": null,
+              "Kids": null,
+              "Class": ""
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "irow",
+          "UniqueNm": "irow",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            }
+          },
+          "Kids": [
+            {
+              "n": 3,
+              "type": "gi.Stretch",
+              "name": "str1",
+              "type": "gi.Label",
+              "name": "instr",
+              "type": "gi.Stretch",
+              "name": "str2"
+            },
+            {
+              "Nm": "str1",
+              "UniqueNm": "str1",
+              "Props": null,
+              "Kids": null,
+              "Class": ""
+            },
+            {
+              "Nm": "instr",
+              "UniqueNm": "instr",
+              "Props": {
+                "text-align": "__enum:(gi.Align)AlignTop",
+                "align-vert": "__enum:(gi.Align)AlignTop"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Shortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
+            },
+            {
+              "Nm": "str2",
+              "UniqueNm": "str2",
+              "Props": null,
+              "Kids": null,
+              "Class": ""
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "blspc",
+          "UniqueNm": "blspc",
+          "Props": null,
+          "Kids": null,
+          "Class": ""
+        },
+        {
+          "Nm": "blrow",
+          "UniqueNm": "blrow",
+          "Props": null,
+          "Kids": [
+            {
+              "n": 1,
+              "type": "gi.Label",
+              "name": "blab"
+            },
+            {
+              "Nm": "blab",
+              "UniqueNm": "blab",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Buttons:"
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "brow",
+          "UniqueNm": "brow",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            },
+            "align-horiz": "__enum:(gi.Align)AlignLeft"
+          },
+          "Kids": [
+            {
+              "n": 4,
+              "type": "gi.Button",
+              "name": "button1",
+              "type": "gi.Button",
+              "name": "button2",
+              "type": "gi.CheckBox",
+              "name": "checkbox",
+              "type": "gi.MenuButton",
+              "name": "menubutton1"
+            },
+            {
+              "Nm": "button1",
+              "UniqueNm": "button1",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "",
+              "Indicator": "",
+              "Shortcut": "",
+              "Menu": null
+            },
+            {
+              "Nm": "button2",
+              "UniqueNm": "button2",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Open GoGiEditor",
+              "Indicator": "",
+              "Shortcut": "",
+              "Menu": null
+            },
+            {
+              "Nm": "checkbox",
+              "UniqueNm": "checkbox",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Toggle",
+              "Indicator": "",
+              "Shortcut": "",
+              "Menu": null
+            },
+            {
+              "Nm": "menubutton1",
+              "UniqueNm": "menubutton1",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Menu Button",
+              "Indicator": "",
+              "Shortcut": "",
+              "Menu": [
+                {
+                  "n": 4,
+                  "type": "gi.Action",
+                  "name": "Menu Item 1",
+                  "type": "gi.Action",
+                  "name": "Menu Item 2",
+                  "type": "gi.Separator",
+                  "name": "sep1",
+                  "type": "gi.Action",
+                  "name": "Menu Item 3"
+                },
+                {
+                  "Nm": "Menu Item 1",
+                  "UniqueNm": "Menu Item 1",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Text": "Menu Item 1",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": null
+                },
+                {
+                  "Nm": "Menu Item 2",
+                  "UniqueNm": "Menu Item 2",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Text": "Menu Item 2",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": [
+                    {
+                      "n": 1,
+                      "type": "gi.Action",
+                      "name": "Sub Menu Item 2"
+                    },
+                    {
+                      "Nm": "Sub Menu Item 2",
+                      "UniqueNm": "Sub Menu Item 2",
+                      "Props": null,
+                      "Kids": null,
+                      "Class": "",
+                      "CSS": null,
+                      "Text": "Sub Menu Item 2",
+                      "Indicator": "",
+                      "Shortcut": "",
+                      "Menu": null
+                    }
+                  ]
+                },
+                {
+                  "Nm": "sep1",
+                  "UniqueNm": "sep1",
+                  "Props": {
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 0.5,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "max-width": -1
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Horiz": true
+                },
+                {
+                  "Nm": "Menu Item 3",
+                  "UniqueNm": "Menu Item 3",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Text": "Menu Item 3",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": null
+                }
+              ]
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "slspc",
+          "UniqueNm": "slspc",
+          "Props": null,
+          "Kids": null,
+          "Class": ""
+        },
+        {
+          "Nm": "slrow",
+          "UniqueNm": "slrow",
+          "Props": null,
+          "Kids": [
+            {
+              "n": 2,
+              "type": "gi.Label",
+              "name": "slab",
+              "type": "gi.SVG",
+              "name": "NewSVG0"
+            },
+            {
+              "Nm": "slab",
+              "UniqueNm": "slab",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Sliders:"
+            },
+            {
+              "Nm": "NewSVG0",
+              "UniqueNm": "NewSVG0",
+              "Props": {
+                "min-width": "20em",
+                "min-height": "20em"
+              },
+              "Kids": [
+                {
+                  "n": 2,
+                  "type": "gi.Circle",
+                  "name": "NewCircle0",
+                  "type": "gi.Circle",
+                  "name": "NewCircle0Copy"
+                },
+                {
+                  "Nm": "NewCircle0",
+                  "UniqueNm": "NewCircle0",
+                  "Props": {
+                    "fill": "blue"
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "Pos": {
+                    "X": 50,
+                    "Y": 50
+                  },
+                  "Radius": 20
+                },
+                {
+                  "Nm": "NewCircle0Copy",
+                  "UniqueNm": "NewCircle0Copy",
+                  "Props": {
+                    "fill": "red"
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "Pos": {
+                    "X": 100,
+                    "Y": 100
+                  },
+                  "Radius": 20
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Fill": true,
+              "ViewBox": {
+                "Min": {
+                  "X": 72,
+                  "Y": 184
+                },
+                "Size": {
+                  "X": 320,
+                  "Y": 320
+                },
+                "PreserveAspectRatio": {
+                  "Align": 0,
+                  "MeetOrSlice": 0
+                }
+              }
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "srow",
+          "UniqueNm": "srow",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            },
+            "align-horiz": "left"
+          },
+          "Kids": [
+            {
+              "n": 4,
+              "type": "gi.Slider",
+              "name": "slider1",
+              "type": "gi.Slider",
+              "name": "slider2",
+              "type": "gi.ScrollBar",
+              "name": "scrollbar1",
+              "type": "gi.ScrollBar",
+              "name": "scrollbar2"
+            },
+            {
+              "Nm": "slider1",
+              "UniqueNm": "slider1",
+              "Props": {
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:height": "units.Value",
+                "height": {
+                  "Val": 2,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
+                  "Val": 2,
+                  "Un": "Em",
+                  "Dots": 0
+                }
+              },
+              "Kids": null,
+              "Class": "hslides",
+              "CSS": null,
+              "Value": 0.5,
+              "EmitValue": 0,
+              "Min": 0,
+              "Max": 1,
+              "Step": 0.1,
+              "PageStep": 0.2,
+              "Size": 274,
+              "ThSize": 24,
+              "ThumbSize": {
+                "Val": 1.5,
+                "Un": "Em",
+                "Dots": 24
+              },
+              "Prec": 9,
+              "ValThumb": false,
+              "ThumbVal": 0,
+              "Pos": 137,
+              "DragPos": 137,
+              "VisPos": 0,
+              "Dim": "X",
+              "Tracking": true,
+              "TrackThr": 0,
+              "Snap": true
+            },
+            {
+              "Nm": "slider2",
+              "UniqueNm": "slider2",
+              "Props": {
+                "__type:height": "units.Value",
+                "height": {
+                  "Val": 10,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
+                  "Val": 10,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:max-height": "units.Value",
+                "max-height": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                }
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Value": 0.5,
+              "EmitValue": 0,
+              "Min": 0,
+              "Max": 1,
+              "Step": 0.1,
+              "PageStep": 0.2,
+              "Size": 114,
+              "ThSize": 24,
+              "ThumbSize": {
+                "Val": 1.5,
+                "Un": "Em",
+                "Dots": 24
+              },
+              "Prec": 9,
+              "ValThumb": false,
+              "ThumbVal": 0,
+              "Pos": 57,
+              "DragPos": 57,
+              "VisPos": 0,
+              "Dim": "Y",
+              "Tracking": false,
+              "TrackThr": 0,
+              "Snap": false
+            },
+            {
+              "Nm": "scrollbar1",
+              "UniqueNm": "scrollbar1",
+              "Props": {
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:height": "units.Value",
+                "height": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                }
+              },
+              "Kids": null,
+              "Class": "hslides",
+              "CSS": null,
+              "Value": 0.25,
+              "EmitValue": 0,
+              "Min": 0,
+              "Max": 1,
+              "Step": 0.1,
+              "PageStep": 0.2,
+              "Size": 314,
+              "ThSize": 78.5,
+              "ThumbSize": {
+                "Val": 1,
+                "Un": "Ex",
+                "Dots": 8
+              },
+              "Prec": 9,
+              "ValThumb": true,
+              "ThumbVal": 0.25,
+              "Pos": 78.5,
+              "DragPos": 78.5,
+              "VisPos": 0,
+              "Dim": "X",
+              "Tracking": true,
+              "TrackThr": 0,
+              "Snap": false
+            },
+            {
+              "Nm": "scrollbar2",
+              "UniqueNm": "scrollbar2",
+              "Props": {
+                "__type:height": "units.Value",
+                "height": {
+                  "Val": 10,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
+                  "Val": 10,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:max-height": "units.Value",
+                "max-height": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                }
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Value": 0.5,
+              "EmitValue": 0,
+              "Min": 0,
+              "Max": 1,
+              "Step": 0.1,
+              "PageStep": 0.2,
+              "Size": 154,
+              "ThSize": 15.400001,
+              "ThumbSize": {
+                "Val": 1,
+                "Un": "Ex",
+                "Dots": 8
+              },
+              "Prec": 9,
+              "ValThumb": true,
+              "ThumbVal": 0.1,
+              "Pos": 77,
+              "DragPos": 77,
+              "VisPos": 0,
+              "Dim": "Y",
+              "Tracking": false,
+              "TrackThr": 0,
+              "Snap": false
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "tlspc",
+          "UniqueNm": "tlspc",
+          "Props": null,
+          "Kids": null,
+          "Class": ""
+        },
+        {
+          "Nm": "txlrow",
+          "UniqueNm": "txlrow",
+          "Props": null,
+          "Kids": [
+            {
+              "n": 1,
+              "type": "gi.Label",
+              "name": "txlab"
+            },
+            {
+              "Nm": "txlab",
+              "UniqueNm": "txlab",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Text Widgets:"
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        },
+        {
+          "Nm": "txrow",
+          "UniqueNm": "txrow",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            }
+          },
+          "Kids": [
+            {
+              "n": 3,
+              "type": "gi.TextField",
+              "name": "edit1",
+              "type": "gi.SpinBox",
+              "name": "spin",
+              "type": "gi.ComboBox",
+              "name": "combo"
+            },
+            {
+              "Nm": "edit1",
+              "UniqueNm": "edit1",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "min-width": "20em",
+                "align-vert": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "StartPos": 0,
+              "EndPos": 0,
+              "CursorPos": 0,
+              "CharWidth": 34,
+              "SelectMode": false
+            },
+            {
+              "Nm": "spin",
+              "UniqueNm": "spin",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "align-vert": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Value": 0,
+              "HasMin": true,
+              "Min": 0,
+              "HasMax": false,
+              "Max": 1,
+              "Step": 0.1,
+              "PageStep": 0.2,
+              "Prec": 6
+            },
+            {
+              "Nm": "combo",
+              "UniqueNm": "combo",
+              "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
+                "align-vert": "__enum:(gi.Align)AlignMiddle"
+              },
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Text": "Action",
+              "Indicator": "",
+              "Shortcut": "",
+              "Menu": null,
+              "Editable": false,
+              "MaxLength": 16
+            }
+          ],
+          "Class": "",
+          "Lay": "LayoutRow",
+          "CSS": null,
+          "StackTop": null
+        }
+      ],
+      "Class": "",
+      "Lay": "LayoutCol",
+      "CSS": null,
+      "StackTop": null
+    }
+  ],
+  "Class": "",
+  "CSS": {
+    "#combo": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 240,
+        "G": 255,
+        "B": 240,
+        "A": 255
+      }
+    },
+    ".hslides": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 240,
+        "G": 225,
+        "B": 255,
+        "A": 255
+      }
+    },
+    "button": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 255,
+        "G": 240,
+        "B": 240,
+        "A": 255
+      }
+    }
+  },
+  "Fill": true,
+  "ViewBox": {
+    "Min": {
+      "X": 0,
+      "Y": 0
+    },
+    "Size": {
+      "X": 1024,
+      "Y": 768
+    },
+    "PreserveAspectRatio": {
+      "Align": 0,
+      "MeetOrSlice": 0
+    }
+  }
+}

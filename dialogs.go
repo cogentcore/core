@@ -77,6 +77,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		win = NewDialogWin(dlg.Title, 100, 100, dlg.Modal)
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
+		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
 
 	dlg.Win = win
@@ -97,6 +98,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	stw := int(dlg.Style.Layout.MinWidth.Dots)
 	sth := int(dlg.Style.Layout.MinHeight.Dots)
+	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Style.UnContext.DPI, vpsz)
 	vpsz.X = kit.MaxInt(vpsz.X, stw)
 	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
 

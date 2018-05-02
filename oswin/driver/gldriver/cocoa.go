@@ -217,7 +217,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	} else if w.Pos != ps {
 		act = window.Move
 	} else {
-		act = window.Open // todo: not clear
+		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
 	}
 
 	w.sizeMu.Lock()
