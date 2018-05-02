@@ -47,13 +47,13 @@ func mainrun() {
 	// style sheet!
 	var css = ki.Props{
 		"button": ki.Props{
-			"background-color": "#FEE",
+			"background-color": gi.Color{255, 240, 240, 255},
 		},
 		"#combo": ki.Props{
-			"background-color": "#EFE",
+			"background-color": gi.Color{240, 255, 240, 255},
 		},
 		".hslides": ki.Props{
-			"background-color": "#EDF",
+			"background-color": gi.Color{240, 225, 255, 255},
 		},
 	}
 	vp.CSS = css

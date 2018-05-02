@@ -474,7 +474,7 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, titl
 	return dlg
 }
 
-// MapViewDialog is for editing fields of a map using a MapView -- optionally
+// MapViewDialog is for editing elements of a map using a MapView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
@@ -499,7 +499,7 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, pr
 	return dlg
 }
 
-// SliceViewDialog for editing fields of a slice using a SliceView --
+// SliceViewDialog for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
@@ -519,6 +519,31 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// ColorViewDialog for editing a color using a ColorView -- optionally
+// connects to given signal receiving object and function for dialog signals
+// (nil to ignore)
+func ColorViewDialog(avp *Viewport2D, clr *Color, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("color-view", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	sv := frame.InsertNewChild(KiT_ColorView, prIdx+2, "color-view").(*ColorView)
+	sv.SetColor(clr, tmpSave)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	// dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	// dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg

@@ -233,12 +233,9 @@ func (g *SliderBase) UpdatePosFromValue() {
 	g.Pos = g.Size * (g.Value - g.Min) / (g.Max - g.Min)
 }
 
-// set a value
-func (g *SliderBase) SetValue(val float32) {
-	if g.Value == val {
-		return
-	}
-	updt := g.UpdateStart()
+// SetValueNoSig sets the value and updates the slider position, but does not
+// emit an updated signal
+func (g *SliderBase) SetValueNoSig(val float32) {
 	val = Min32(val, g.Max)
 	if g.ValThumb {
 		val = Min32(val, g.Max-g.ThumbVal)
@@ -250,6 +247,15 @@ func (g *SliderBase) SetValue(val float32) {
 	g.Value = val
 	g.UpdatePosFromValue()
 	g.DragPos = g.Pos
+}
+
+// SetValue sets the value and updates the slider representation, and emits a changed signal
+func (g *SliderBase) SetValue(val float32) {
+	if g.Value == val {
+		return
+	}
+	updt := g.UpdateStart()
+	g.SetValueNoSig(val)
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
 	g.UpdateEnd(updt)
 }

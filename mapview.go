@@ -52,11 +52,6 @@ var MapViewProps = ki.Props{
 		"text-align":     AlignCenter,
 		"vertical-align": AlignTop,
 	},
-	"#prompt": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignLeft,
-		"vertical-align": AlignTop,
-	},
 }
 
 // SetFrame configures view as a frame
@@ -453,7 +448,7 @@ func (mv *MapViewInline) ConfigParts() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(KiT_Action, "EditAction")
+	config.Add(KiT_Action, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = mv.Parts.UpdateStart()

@@ -263,6 +263,18 @@ func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
+// Zoom -- positive steps increase logical DPI, negative steps decrease it
+func (w *Window) ZoomDPI(steps int) {
+	pdpi := w.OSWin.PhysicalDPI()
+	dpi := oswin.LogicalFmPhysicalDPI(pdpi)
+	dpi += float32(6 * steps)
+	oswin.LogicalDPIScale = dpi / pdpi
+	w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
+	fmt.Printf("LogicalDPI now: %v  PhysicalDPI: %v  Scale: %v\n", dpi, pdpi, oswin.LogicalDPIScale)
+	w.FullReRender()
+}
+
+// ReceiveEventType adds a Signal connection for given event type to given receiver
 func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
 	if et >= oswin.EventTypeN {
 		log.Printf("Window ReceiveEventType type: %v is not a known event type\n", et)
@@ -539,6 +551,7 @@ func (w *Window) EventLoop() {
 				}
 			case oswin.WindowResizeEvent:
 				we := evi.(*window.Event)
+				fmt.Printf("resize %v\n", we.Size)
 				if lagMs > EventSkipLagMSec {
 					// fmt.Printf("skipped et %v lag %v\n", et, lag)
 					lastSkipped = true
@@ -592,6 +605,12 @@ func (w *Window) EventLoop() {
 		case *paint.Event:
 			w.FullReRender()
 			continue
+		case *window.Event:
+			if e.Action == window.Open || e.Action == window.Resize {
+				w.Resized(e.Size)
+				w.FullReRender()
+			}
+			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
 			switch kf {
@@ -618,20 +637,10 @@ func (w *Window) EventLoop() {
 				GoGiEditorOf(w.Viewport.This)
 				e.SetProcessed()
 			case KeyFunZoomIn:
-				oswin.LogicalDPIScale *= 1.1
-				pdpi := w.OSWin.PhysicalDPI()
-				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
-				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
-				fmt.Printf("DPI now: %v\n", dpi)
-				w.FullReRender()
+				w.ZoomDPI(1)
 				e.SetProcessed()
 			case KeyFunZoomOut:
-				oswin.LogicalDPIScale *= 0.9
-				pdpi := w.OSWin.PhysicalDPI()
-				dpi := oswin.LogicalFmPhysicalDPI(pdpi)
-				w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
-				fmt.Printf("DPI now: %v\n", dpi)
-				w.FullReRender()
+				w.ZoomDPI(-1)
 				e.SetProcessed()
 			case KeyFunPrefs:
 				Prefs.Edit()

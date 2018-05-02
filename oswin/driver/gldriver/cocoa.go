@@ -207,10 +207,22 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
 
+	act := window.ActionN
+
 	sz := image.Point{widthPx, heightPx}
+	ps := image.Point{leftPx, topPx}
+
+	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
+		act = window.Resize
+	} else if w.Pos != ps {
+		act = window.Move
+	} else {
+		act = window.Open // todo: not clear
+	}
+
 	w.sizeMu.Lock()
 	w.Sz = sz
-	w.Pos = image.Point{leftPx, topPx}
+	w.Pos = ps
 	w.PhysDPI = dpi
 	w.LogDPI = ldpi
 
@@ -223,7 +235,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	winEv := window.Event{
 		Size:       sz,
 		LogicalDPI: ldpi,
-		Action:     window.Resize,
+		Action:     act,
 	}
 	winEv.Init()
 	w.Send(&winEv)
@@ -260,6 +272,10 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 
 //export windowClosing
 func windowClosing(id uintptr) {
+	winEv := window.Event{
+		Action: window.Close,
+	}
+	sendWindowEvent(id, &winEv)
 	sendLifecycle(id, (*lifecycler.State).SetDead, true)
 }
 
@@ -501,6 +517,10 @@ func lifecycleVisible(id uintptr, val bool) {
 
 //export lifecycleFocused
 func lifecycleFocused(id uintptr, val bool) {
+	// winEv := window.Event{
+	// 	Action: window.Enter,
+	// }
+	// sendWindowEvent(id, &winEv)
 	sendLifecycle(id, (*lifecycler.State).SetFocused, val)
 }
 

@@ -54,11 +54,6 @@ var SliceViewProps = ki.Props{
 		"text-align":     AlignCenter,
 		"vertical-align": AlignTop,
 	},
-	"#prompt": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignLeft,
-		"vertical-align": AlignTop,
-	},
 }
 
 // SetFrame configures view as a frame

@@ -74,11 +74,6 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### For release
 
-* dead label after load in treeview
-
-* some key diff in Slice Config vs. Node.ConfigChildren -- icon crashing --
-  parent .This pointer is not right or something.  has to do with passing n.This?
-
 * style parsing crash on font-family
 
 * tab widget basic fix

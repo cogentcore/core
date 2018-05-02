@@ -91,13 +91,18 @@ const (
 	Open Action = iota
 	Close
 	Iconify
+
+	// Resize includes changes in DPI
 	Resize
+
 	Maximize
 	Minimize
-	// Move of window across physical screens can trigger changes in DPI..
+
 	Move
+
 	// Enter indicates that the user focus / mouse has entered the window
 	Enter
+
 	// Leave indicates that the user focus / mouse has left the window
 	Leave
 

@@ -18,7 +18,10 @@ import (
 
 // todo: sub-editor panels with shared menubutton panel at bottom.. not clear that that is necc -- probably better to have each sub-panel fully separate
 
-// StructView represents a struct, creating a property editor of the fields -- constructs Children widgets to show the field names and editor fields for each field, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
+// StructView represents a struct, creating a property editor of the fields --
+// constructs Children widgets to show the field names and editor fields for
+// each field, within an overall frame with an optional title, and a button
+// box at the bottom where methods can be invoked
 type StructView struct {
 	Frame
 	Struct     interface{} `desc:"the struct that we are a view onto"`
@@ -35,14 +38,8 @@ func (n *StructView) New() ki.Ki { return &StructView{} }
 var StructViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
-		// todo: add "bigger" font
 		"max-width":      units.NewValue(-1, units.Px),
 		"text-align":     AlignCenter,
-		"vertical-align": AlignTop,
-	},
-	"#prompt": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignLeft,
 		"vertical-align": AlignTop,
 	},
 }
@@ -104,7 +101,8 @@ func (sv *StructView) SetTitle(title string) {
 	}
 }
 
-// Title returns the title label widget, and its index, within frame -- nil, -1 if not found
+// Title returns the title label widget, and its index, within frame -- nil,
+// -1 if not found
 func (sv *StructView) TitleWidget() (*Label, int) {
 	idx := sv.ChildIndexByName("title", 0)
 	if idx < 0 {
@@ -113,7 +111,8 @@ func (sv *StructView) TitleWidget() (*Label, int) {
 	return sv.Child(idx).(*Label), idx
 }
 
-// StructGrid returns the StructGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
+// StructGrid returns the grid layout widget, which contains all the fields
+// and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) StructGrid() (*Layout, int) {
 	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
@@ -122,7 +121,8 @@ func (sv *StructView) StructGrid() (*Layout, int) {
 	return sv.Child(idx).(*Layout), idx
 }
 
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
+// ButtonBox returns the ButtonBox layout widget, and its index, within frame
+// -- nil, -1 if not found
 func (sv *StructView) ButtonBox() (*Layout, int) {
 	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
@@ -239,10 +239,14 @@ var _ Node2D = &StructView{}
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructViewInline
 
-// StructViewInline represents a struct as a single line widget, for smaller structs and those explicitly marked inline in the kit type registry type properties -- constructs widgets in Parts to show the field names and editor fields for each field
+// StructViewInline represents a struct as a single line widget, for smaller
+// structs and those explicitly marked inline in the kit type registry type
+// properties -- constructs widgets in Parts to show the field names and
+// editor fields for each field
 type StructViewInline struct {
 	WidgetBase
 	Struct     interface{} `desc:"the struct that we are a view onto"`
+	AddAction  bool        `desc:"if true add an ... action button at the end -- other users of this widget can then configure that -- it is called 'extra-action'"`
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
@@ -306,6 +310,9 @@ func (sv *StructViewInline) ConfigParts() {
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
+	if sv.AddAction {
+		config.Add(KiT_Action, "edit-action")
+	}
 	mods, updt := sv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
@@ -352,7 +359,6 @@ func (sv *StructViewInline) Render2D() {
 	}
 }
 
-// todo: see notes on treeview
 func (sv *StructViewInline) ReRender2D() (node Node2D, layout bool) {
 	node = sv.This.(Node2D)
 	layout = true

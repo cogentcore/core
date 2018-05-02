@@ -640,10 +640,6 @@ func (tv *TreeView) ConfigParts() {
 		tv.StylePart(lbl.This)
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
-			if lb.Viewport == nil {
-				fmt.Printf("nil viewport on label: %v %p\n", lb.PathUnique(), lb)
-				return
-			}
 			me := d.(*mouse.Event)
 			me.SetProcessed()
 			if me.Action == mouse.Release {
@@ -653,10 +649,6 @@ func (tv *TreeView) ConfigParts() {
 		})
 		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*Label)
-			if lb.Viewport == nil {
-				fmt.Printf("nil viewport on label: %v %p\n", lb.PathUnique(), lb)
-				return
-			}
 			me := d.(*mouse.Event)
 			me.SetProcessed()
 			if me.Action == mouse.DoubleClick {
