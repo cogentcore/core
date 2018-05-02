@@ -3,8 +3,8 @@ Part of the GoKi Go language (golang) full strength tree structure system (ki = 
 
 `package ki` -- core `Ki` interface (`ki.go`) and `Node` struct (`node.go`), plus other supporting players.
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/ki)](https://goreportcard.com/report/github.com/rcoreilly/goki/ki)
-[![GoDoc](https://godoc.org/github.com/rcoreilly/goki/ki?status.svg)](http://godoc.org/github.com/rcoreilly/goki/ki)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goki/goki/ki)](https://goreportcard.com/report/github.com/goki/goki/ki)
+[![GoDoc](https://godoc.org/github.com/goki/goki/ki?status.svg)](http://godoc.org/github.com/goki/goki/ki)
 
 A `Ki` tree is recursively composed of Ki `Node` structs, in a one-Parent / multiple-Child structure.  The typical use is to embed Node in other structs that then implement specific tree-based functionality.  See other packages in GoKi for examples, and top-level README in GoKi for overall motivation and design.
 
@@ -57,7 +57,7 @@ https://golang.org/doc/effective_go.html#names
 
 * Use plural for enum type, instead of using a "Type" suffix -- e.g., `NodeSignals` instead of `NodeSignalType`, and in general use a consistent prefix for all enum values: NodeSignalAdded etc 
 
-* my version of gp generate stringer utility generates conversions back from string to given type: https://github.com/rcoreilly/stringer
+* version of go generate stringer utility generates conversions back from string to given type: https://github.com/goki/stringer
 
 * ki.EnumRegister (kit.AddEnum) -- see kit/types.go -- adds a lot of important functionality to enums
 

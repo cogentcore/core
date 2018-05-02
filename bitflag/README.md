@@ -1,7 +1,7 @@
 # bitflag
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/rcoreilly/goki/ki/bitflag)](https://goreportcard.com/report/github.com/rcoreilly/goki/ki/bitflag)
-[![GoDoc](https://godoc.org/github.com/rcoreilly/goki/ki/bitflag?status.svg)](http://godoc.org/github.com/rcoreilly/goki/ki/bitflag)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goki/goki/ki/bitflag)](https://goreportcard.com/report/github.com/goki/goki/ki/bitflag)
+[![GoDoc](https://godoc.org/github.com/goki/goki/ki/bitflag?status.svg)](http://godoc.org/github.com/goki/goki/ki/bitflag)
 
 Package `bitflag` provides simple bit flag setting, checking, and clearing
 methods that take bit position args as ints (from const int eunum iota's)

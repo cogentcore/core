@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Randall C. O'Reilly. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,12 +8,6 @@
 // convenience of maintaining ordinal lists of bit positions greatly outweighs
 // that cost -- see kit type registry for further enum management functions
 package bitflag
-
-// github.com/rcoreily/ki/bitflag
-
-import (
-// "fmt"
-)
 
 // todo: can add a global debug level setting and test for overflow in bits --
 // or maybe better in the enum type registry constructor?
