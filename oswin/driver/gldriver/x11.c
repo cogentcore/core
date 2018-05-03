@@ -157,19 +157,20 @@ startDriver() {
 			keysyms[(k-key_lo)*keysyms_per_keycode + 1]);
 	}
 
-        getScreens()
+        getScreens();
 }
 
 
 void getScreens() {
-  int nscr = ScreenCount(x_dpy)
+  int nscr = ScreenCount(x_dpy);
   resetScreens();
   int i;
   for (i=0; i < nscr; i++) {
-    int screenPixW = DisplayWidth(x_dpy, ScreenOfDisplay(x_dpy, i));
-    int screenPixH = DisplayHeight(x_dpy, ScreenOfDisplay(x_dpy, i));
-    int screenWdMM = DisplayWidthMM(x_dpy, ScreenOfDisplay(x_dpy, i));
-    int screenHtMM = DisplayHeightMM(x_dpy, ScreenOfDisplay(x_dpy, i));
+    int scrid = i;
+    int screenPixW = DisplayWidth(x_dpy, scrid);
+    int screenPixH = DisplayHeight(x_dpy, scrid);
+    int screenWdMM = DisplayWidthMM(x_dpy, scrid);
+    int screenHtMM = DisplayHeightMM(x_dpy, scrid);
     float dpi = 25.4 * screenPixW / screenWdMM;
 
     // todo:

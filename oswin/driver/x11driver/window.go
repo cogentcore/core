@@ -16,21 +16,21 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"golang.org/x/exp/shiny/driver/internal/drawer"
-	"golang.org/x/exp/shiny/driver/internal/event"
-	"golang.org/x/exp/shiny/driver/internal/lifecycler"
-	"golang.org/x/exp/shiny/driver/internal/x11key"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/drawer"
+	"github.com/goki/goki/oswin/driver/internal/event"
+	"github.com/goki/goki/oswin/driver/internal/lifecycler"
+	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"github.com/goki/goki/oswin/app"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/mouse"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
 	"golang.org/x/mobile/geom"
 )
 
 type windowImpl struct {
-	s *screenImpl
+	s *appImpl
 
 	xw xproto.Window
 	xg xproto.Gcontext
@@ -40,7 +40,7 @@ type windowImpl struct {
 	xevents chan xgb.Event
 
 	// This next group of variables are mutable, but are only modified in the
-	// screenImpl.run goroutine.
+	// appImpl.run goroutine.
 	width, height int
 
 	lifecycler lifecycler.State
@@ -66,7 +66,7 @@ func (w *windowImpl) Release() {
 	xproto.DestroyWindow(w.s.xc, w.xw)
 }
 
-func (w *windowImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
+func (w *windowImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
 	src.(*bufferImpl).upload(xproto.Drawable(w.xw), w.xg, w.s.xsi.RootDepth, dp, sr)
 }
 
@@ -74,23 +74,23 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	fill(w.s.xc, w.xp, dr, src, op)
 }
 
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	w.s.drawUniform(w.xp, &src2dst, src, sr, op, opts)
 }
 
-func (w *windowImpl) Draw(src2dst f64.Aff3, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	src.(*textureImpl).draw(w.xp, &src2dst, sr, op, opts)
 }
 
-func (w *windowImpl) Copy(dp image.Point, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Copy(dp image.Point, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	drawer.Copy(w, dp, src, sr, op, opts)
 }
 
-func (w *windowImpl) Scale(dr image.Rectangle, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Scale(dr image.Rectangle, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	drawer.Scale(w, dr, src, sr, op, opts)
 }
 
-func (w *windowImpl) Publish() screen.PublishResult {
+func (w *windowImpl) Publish() app.PublishResult {
 	// TODO: implement a back buffer, and copy or flip that here to the front
 	// buffer.
 
@@ -103,11 +103,11 @@ func (w *windowImpl) Publish() screen.PublishResult {
 	// server can serve.
 	w.s.xc.Sync()
 
-	return screen.PublishResult{}
+	return app.PublishResult{}
 }
 
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
-	// TODO: does the order of these lifecycle and size events matter? Should
+	// TODO: does the order of these lifecycle and window events matter? Should
 	// they really be a single, atomic event?
 	w.lifecycler.SetVisible((int(ev.X)+int(ev.Width)) > 0 && (int(ev.Y)+int(ev.Height)) > 0)
 	w.lifecycler.SendEvent(w, nil)
@@ -117,7 +117,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 		return
 	}
 	w.width, w.height = newWidth, newHeight
-	w.Send(size.Event{
+	w.Send(window.Event{
 		WidthPx:     newWidth,
 		HeightPx:    newHeight,
 		WidthPt:     geom.Pt(newWidth),

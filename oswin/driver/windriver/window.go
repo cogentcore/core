@@ -17,16 +17,15 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/exp/shiny/driver/internal/drawer"
-	"golang.org/x/exp/shiny/driver/internal/event"
-	"golang.org/x/exp/shiny/driver/internal/win32"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/drawer"
+	"github.com/goki/goki/oswin/driver/internal/event"
+	"github.com/goki/goki/oswin/driver/internal/win32"
+	"github.com/goki/goki/oswin/app"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/lifecycle"
-	"golang.org/x/mobile/event/mouse"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
 )
 
 type windowImpl struct {
@@ -34,7 +33,7 @@ type windowImpl struct {
 
 	event.Deque
 
-	sz             size.Event
+	sz             window.Event
 	lifecycleStage lifecycle.Stage
 }
 
@@ -42,7 +41,7 @@ func (w *windowImpl) Release() {
 	win32.Release(w.hwnd)
 }
 
-func (w *windowImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
+func (w *windowImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
 	src.(*bufferImpl).preUpload()
 	defer src.(*bufferImpl).postUpload()
 
@@ -63,7 +62,7 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	})
 }
 
-func (w *windowImpl) Draw(src2dst f64.Aff3, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	if op != draw.Src && op != draw.Over {
 		// TODO:
 		return
@@ -77,7 +76,7 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src screen.Texture, sr image.Rectang
 	})
 }
 
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	if op != draw.Src && op != draw.Over {
 		// TODO:
 		return
@@ -157,24 +156,24 @@ func drawWindow(dc syscall.Handle, src2dst f64.Aff3, src interface{}, sr image.R
 	return fmt.Errorf("unsupported type %T", src)
 }
 
-func (w *windowImpl) Copy(dp image.Point, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Copy(dp image.Point, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	drawer.Copy(w, dp, src, sr, op, opts)
 }
 
-func (w *windowImpl) Scale(dr image.Rectangle, src screen.Texture, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (w *windowImpl) Scale(dr image.Rectangle, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	drawer.Scale(w, dr, src, sr, op, opts)
 }
 
-func (w *windowImpl) Publish() screen.PublishResult {
+func (w *windowImpl) Publish() app.PublishResult {
 	// TODO
-	return screen.PublishResult{}
+	return app.PublishResult{}
 }
 
 func init() {
 	send := func(hwnd syscall.Handle, e interface{}) {
-		theScreen.mu.Lock()
-		w := theScreen.windows[hwnd]
-		theScreen.mu.Unlock()
+		theApp.mu.Lock()
+		w := theApp.windows[hwnd]
+		theApp.mu.Unlock()
 
 		w.Send(e)
 	}
@@ -182,13 +181,13 @@ func init() {
 	win32.PaintEvent = func(hwnd syscall.Handle, e paint.Event) { send(hwnd, e) }
 	win32.KeyEvent = func(hwnd syscall.Handle, e key.Event) { send(hwnd, e) }
 	win32.LifecycleEvent = lifecycleEvent
-	win32.SizeEvent = sizeEvent
+	win32.WindowEvent = windowEvent
 }
 
 func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[hwnd]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
 
 	if w.lifecycleStage == to {
 		return
@@ -200,10 +199,10 @@ func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
 	w.lifecycleStage = to
 }
 
-func sizeEvent(hwnd syscall.Handle, e size.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[hwnd]
-	theScreen.mu.Unlock()
+func windowEvent(hwnd syscall.Handle, e window.Event) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
 
 	w.Send(e)
 

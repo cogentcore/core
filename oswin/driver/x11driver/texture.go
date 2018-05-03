@@ -14,14 +14,14 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/app"
 	"golang.org/x/image/math/f64"
 )
 
 const textureDepth = 32
 
 type textureImpl struct {
-	s *screenImpl
+	s *appImpl
 
 	size image.Point
 	xm   xproto.Pixmap
@@ -55,7 +55,7 @@ func (t *textureImpl) Release() {
 	xproto.FreePixmap(t.s.xc, t.xm)
 }
 
-func (t *textureImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
+func (t *textureImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
 	if t.degenerate() {
 		return
 	}
@@ -86,7 +86,7 @@ func inv(x *f64.Aff3) f64.Aff3 {
 	}
 }
 
-func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	sr = sr.Intersect(t.Bounds())
 	if sr.Empty() {
 		return

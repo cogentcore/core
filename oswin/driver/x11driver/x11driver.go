@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package x11driver provides the X11 driver for accessing a screen.
-package x11driver // import "golang.org/x/exp/shiny/driver/x11driver"
+// Package x11driver provides the X11 driver for accessing a app.
+package x11driver
 
 // TODO: figure out what to say about the responsibility for users of this
 // package to check any implicit dependencies' LICENSEs. For example, the
@@ -17,23 +17,23 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/shm"
 
-	"golang.org/x/exp/shiny/driver/internal/errscreen"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/errapp"
+	"github.com/goki/goki/oswin/app"
 )
 
 // Main is called by the program's main function to run the graphical
 // application.
 //
-// It calls f on the Screen, possibly in a separate goroutine, as some OS-
+// It calls f on the App, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(screen.Screen)) {
+func Main(f func(app.App)) {
 	if err := main(f); err != nil {
-		f(errscreen.Stub(err))
+		f(errapp.Stub(err))
 	}
 }
 
-func main(f func(screen.Screen)) (retErr error) {
+func main(f func(app.App)) (retErr error) {
 	xc, err := xgb.NewConn()
 	if err != nil {
 		return fmt.Errorf("x11driver: xgb.NewConn failed: %v", err)
@@ -51,7 +51,7 @@ func main(f func(screen.Screen)) (retErr error) {
 		return fmt.Errorf("x11driver: shm.Init failed: %v", err)
 	}
 
-	s, err := newScreenImpl(xc)
+	s, err := newAppImpl(xc)
 	if err != nil {
 		return err
 	}

@@ -17,8 +17,8 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"golang.org/x/exp/shiny/driver/internal/x11key"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"github.com/goki/goki/oswin/app"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/mouse"
@@ -28,9 +28,9 @@ import (
 // For example, its Conn.WaitForEvent concept is a method, not a channel, so
 // it's not obvious how to interrupt it to service a NewWindow request.
 
-type screenImpl struct {
+type appImpl struct {
 	xc      *xgb.Conn
-	xsi     *xproto.ScreenInfo
+	xsi     *xproto.AppInfo
 	keysyms x11key.KeysymTable
 
 	atomNETWMName      xproto.Atom
@@ -64,10 +64,10 @@ type screenImpl struct {
 	completionKeys  []uint16
 }
 
-func newScreenImpl(xc *xgb.Conn) (*screenImpl, error) {
-	s := &screenImpl{
+func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
+	s := &appImpl{
 		xc:      xc,
-		xsi:     xproto.Setup(xc).DefaultScreen(xc),
+		xsi:     xproto.Setup(xc).DefaultApp(xc),
 		buffers: map[shm.Seg]*bufferImpl{},
 		uploads: map[uint16]chan struct{}{},
 		windows: map[xproto.Window]*windowImpl{},
@@ -112,7 +112,7 @@ func newScreenImpl(xc *xgb.Conn) (*screenImpl, error) {
 	return s, nil
 }
 
-func (s *screenImpl) run() {
+func (s *appImpl) run() {
 	for {
 		ev, err := s.xc.WaitForEvent()
 		if err != nil {
@@ -231,14 +231,14 @@ func (s *screenImpl) run() {
 
 // TODO: is findBuffer and the s.buffers field unused? Delete?
 
-func (s *screenImpl) findBuffer(key shm.Seg) *bufferImpl {
+func (s *appImpl) findBuffer(key shm.Seg) *bufferImpl {
 	s.mu.Lock()
 	b := s.buffers[key]
 	s.mu.Unlock()
 	return b
 }
 
-func (s *screenImpl) findWindow(key xproto.Window) *windowImpl {
+func (s *appImpl) findWindow(key xproto.Window) *windowImpl {
 	s.mu.Lock()
 	w := s.windows[key]
 	s.mu.Unlock()
@@ -246,7 +246,7 @@ func (s *screenImpl) findWindow(key xproto.Window) *windowImpl {
 }
 
 // handleCompletions must only be called while holding s.mu.
-func (s *screenImpl) handleCompletions() {
+func (s *appImpl) handleCompletions() {
 	if s.nPendingUploads != 0 {
 		return
 	}
@@ -267,7 +267,7 @@ const (
 	maxShmSize = 0x10000000 // 268,435,456 bytes.
 )
 
-func (s *screenImpl) NewBuffer(size image.Point) (retBuf screen.Buffer, retErr error) {
+func (s *appImpl) NewBuffer(size image.Point) (retBuf app.Buffer, retErr error) {
 	// TODO: detect if the X11 server or connection cannot support SHM pixmaps,
 	// and fall back to regular pixmaps.
 
@@ -323,7 +323,7 @@ func (s *screenImpl) NewBuffer(size image.Point) (retBuf screen.Buffer, retErr e
 	return b, nil
 }
 
-func (s *screenImpl) NewTexture(size image.Point) (screen.Texture, error) {
+func (s *appImpl) NewTexture(size image.Point) (app.Texture, error) {
 	w, h := int64(size.X), int64(size.Y)
 	if w < 0 || maxShmSide < w || h < 0 || maxShmSide < h || maxShmSize < 4*w*h {
 		return nil, fmt.Errorf("x11driver: invalid texture size %v", size)
@@ -360,7 +360,7 @@ func (s *screenImpl) NewTexture(size image.Point) (screen.Texture, error) {
 	}, nil
 }
 
-func (s *screenImpl) NewWindow(opts *screen.NewWindowOptions) (screen.Window, error) {
+func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 	width, height := 1024, 768
 	if opts != nil {
 		if opts.Width > 0 {
@@ -434,7 +434,7 @@ func (s *screenImpl) NewWindow(opts *screen.NewWindowOptions) (screen.Window, er
 	return w, nil
 }
 
-func (s *screenImpl) initAtoms() (err error) {
+func (s *appImpl) initAtoms() (err error) {
 	s.atomNETWMName, err = s.internAtom("_NET_WM_NAME")
 	if err != nil {
 		return err
@@ -458,7 +458,7 @@ func (s *screenImpl) initAtoms() (err error) {
 	return nil
 }
 
-func (s *screenImpl) internAtom(name string) (xproto.Atom, error) {
+func (s *appImpl) internAtom(name string) (xproto.Atom, error) {
 	r, err := xproto.InternAtom(s.xc, false, uint16(len(name)), name).Reply()
 	if err != nil {
 		return 0, fmt.Errorf("x11driver: xproto.InternAtom failed: %v", err)
@@ -469,7 +469,7 @@ func (s *screenImpl) internAtom(name string) (xproto.Atom, error) {
 	return r.Atom, nil
 }
 
-func (s *screenImpl) initKeyboardMapping() error {
+func (s *appImpl) initKeyboardMapping() error {
 	const keyLo, keyHi = 8, 255
 	km, err := xproto.GetKeyboardMapping(s.xc, keyLo, keyHi-keyLo+1).Reply()
 	if err != nil {
@@ -486,7 +486,7 @@ func (s *screenImpl) initKeyboardMapping() error {
 	return nil
 }
 
-func (s *screenImpl) initPictformats() error {
+func (s *appImpl) initPictformats() error {
 	pformats, err := render.QueryPictFormats(s.xc).Reply()
 	if err != nil {
 		return fmt.Errorf("x11driver: render.QueryPictFormats failed: %v", err)
@@ -526,7 +526,7 @@ func findPictformat(fs []render.Pictforminfo, depth byte) (render.Pictformat, er
 	return 0, fmt.Errorf("x11driver: no matching Pictformat for depth %d", depth)
 }
 
-func (s *screenImpl) initWindow32() error {
+func (s *appImpl) initWindow32() error {
 	visualid, err := findVisual(s.xsi, 32)
 	if err != nil {
 		return err
@@ -560,7 +560,7 @@ func (s *screenImpl) initWindow32() error {
 	return nil
 }
 
-func findVisual(xsi *xproto.ScreenInfo, depth byte) (xproto.Visualid, error) {
+func findVisual(xsi *xproto.AppInfo, depth byte) (xproto.Visualid, error) {
 	for _, d := range xsi.AllowedDepths {
 		if d.Depth != depth {
 			continue
@@ -574,7 +574,7 @@ func findVisual(xsi *xproto.ScreenInfo, depth byte) (xproto.Visualid, error) {
 	return 0, fmt.Errorf("x11driver: no matching Visualid")
 }
 
-func (s *screenImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...xproto.Atom) {
+func (s *appImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...xproto.Atom) {
 	b := make([]byte, len(values)*4)
 	for i, v := range values {
 		b[4*i+0] = uint8(v >> 0)
@@ -585,7 +585,7 @@ func (s *screenImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...x
 	xproto.ChangeProperty(s.xc, xproto.PropModeReplace, xw, prop, xproto.AtomAtom, 32, uint32(len(values)), b)
 }
 
-func (s *screenImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *screen.DrawOptions) {
+func (s *appImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
 	if sr.Empty() {
 		return
 	}

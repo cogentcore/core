@@ -96,7 +96,7 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 				p.FaceName = fallback
 				p.LoadFont(ctxt, "") // try again
 			} else {
-				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
+//				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
 				p.Face = basicfont.Face7x13
 			}
 		}

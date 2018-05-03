@@ -60,20 +60,34 @@ func (t *KeysymTable) Lookup(detail uint8, state uint16) (rune, key.Code) {
 	return r, c
 }
 
-func KeyModifiers(state uint16) (m key.Modifiers) {
+// note: don't support chords -- just go in order..
+func ButtonFromState(state uint16) int {
+	switch {
+	case state & Button1Mask != 0:
+		return 1
+	case state & Button2Mask != 0:
+		return 2
+	case state & Button3Mask != 0:
+		return 3
+	}
+	return 0
+}
+
+func KeyModifiers(state uint16) int32 {
+     	var m key.Modifiers
 	if state&ShiftMask != 0 {
-		m |= key.ModShift
+		m |= key.Shift
 	}
 	if state&ControlMask != 0 {
-		m |= key.ModControl
+		m |= key.Control
 	}
 	if state&Mod1Mask != 0 {
-		m |= key.ModAlt
+		m |= key.Alt
 	}
 	if state&Mod4Mask != 0 {
-		m |= key.ModMeta
+		m |= key.Meta
 	}
-	return m
+	return int32(m)
 }
 
 // These constants come from /usr/include/X11/{keysymdef,XF86keysym}.h

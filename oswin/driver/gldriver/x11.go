@@ -37,6 +37,10 @@ import (
 	"errors"
 	"image"
 	"runtime"
+	"os/user"
+	"log"
+	"os"
+	"path/filepath"
 	"time"
 	"unsafe"
 
@@ -69,7 +73,7 @@ func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
 	retc := make(chan uintptr)
 	uic <- uiClosure{
 		f: func() uintptr {
-			return uintptr(C.doNewWindow(C.int(width), C.int(height), C.int(opts.Size.X), C.int(opts.Size.Y), C.int(opts.Pos.X), C.int(opts.Pos.Y), ctitle, C.int(len(title), C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))))
+			return uintptr(C.doNewWindow(C.int(opts.Size.X), C.int(opts.Size.Y), C.int(opts.Pos.X), C.int(opts.Pos.Y), ctitle, C.int(len(title)), C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen)))
 		},
 		retc: retc,
 	}
@@ -90,6 +94,10 @@ func showWindow(w *windowImpl) {
 	}
 	w.ctx = <-retc
 	go drawLoop(w)
+}
+
+func resizeWindow(w *windowImpl, sz image.Point) {
+//	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
 func closeWindow(id uintptr) {
@@ -138,6 +146,8 @@ func main(f func(oswin.App)) error {
 	}
 	C.startDriver()
 	glctx, worker = gl.NewContext()
+
+	oswin.TheApp = theApp
 
 	closec := make(chan struct{})
 	go func() {
@@ -222,7 +232,7 @@ func onExpose(id uintptr) {
 		return
 	}
 
-	w.Send(paint.Event{External: true})
+	w.Send(&paint.Event{External: true})
 }
 
 //export onKeysym
@@ -256,19 +266,6 @@ func onKey(id uintptr, state uint16, detail, act uint8) {
 var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
 
-// note: don't support chords -- just go in order..
-func buttonFromState(state uint16) int {
-	switch {
-	case state & Button1Mask:
-		return 1
-	case state & Button2Mask:
-		return 2
-	case state & Button3Mask:
-		return 3
-	}
-	return 0
-}
-
 //export onMouse
 func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 	theApp.mu.Lock()
@@ -283,11 +280,11 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 		from = lastMouseEvent.Pos()
 	}
 	mods := x11key.KeyModifiers(state)
+	stb := mouse.Button(x11key.ButtonFromState(state))
 
 	var event oswin.Event
 	switch {
 	case button == 0: // moved
-		stb := buttonFromState(state)
 		if stb > 0 { // drag
 			event = &mouse.DragEvent{
 				MoveEvent: mouse.MoveEvent{
@@ -335,7 +332,7 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 			return
 		}
 		del := image.Point{}
-		switch btn {
+		switch button {
 		case 4: // up
 			del.Y = -mouse.ScrollWheelRate
 		case 5: // down
@@ -348,7 +345,7 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 		event = &mouse.ScrollEvent{
 			Event: mouse.Event{
 				Where:     where,
-				Button:    mouse.Button(buttonFromState(state)),
+				Button:    stb,
 				Action:    mouse.Scroll,
 				Modifiers: mods,
 			},
@@ -375,7 +372,7 @@ func onFocus(id uintptr, focused bool) {
 }
 
 //export onConfigure
-func onConfigure(id uintptr, srcno, x, y, width, height, displayWidth, displayWidthMM int32) {
+func onConfigure(id uintptr, scrno, x, y, width, height, displayWidth, displayWidthMM int32) {
 	theApp.mu.Lock()
 	w := theApp.windows[id]
 	theApp.mu.Unlock()
@@ -390,8 +387,8 @@ func onConfigure(id uintptr, srcno, x, y, width, height, displayWidth, displayWi
 	dpi := 25.4 * (float32(displayWidth) / float32(displayWidthMM))
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
 
-	sz := image.Point{widthPx, heightPx}
-	ps := image.Point{x, y}
+	sz := image.Point{int(width), int(height)}
+	ps := image.Point{int(x), int(y)}
 
 	act := window.ActionN
 
@@ -409,7 +406,7 @@ func onConfigure(id uintptr, srcno, x, y, width, height, displayWidth, displayWi
 	w.PhysDPI = dpi
 	w.LogDPI = ldpi
 
-	if scrno > 0 && len(theApp.screens) > scrno {
+	if scrno > 0 && len(theApp.screens) > int(scrno) {
 		w.Scrn = theApp.screens[scrno]
 	}
 
@@ -443,4 +440,29 @@ func surfaceCreate() error {
 		return errors.New("gldriver: surface creation failed")
 	}
 	return nil
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, ".config")
+}
+
+func (app *appImpl) GoGiPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), "GoGi")
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) AppPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), app.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/usr/share/fonts/truetype", "/usr/local/share/fonts"}
 }

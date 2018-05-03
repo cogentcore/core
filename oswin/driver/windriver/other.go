@@ -10,17 +10,17 @@ import (
 	"fmt"
 	"runtime"
 
-	"golang.org/x/exp/shiny/driver/internal/errscreen"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/errapp"
+	"github.com/goki/goki/oswin/app"
 )
 
 // Main is called by the program's main function to run the graphical
 // application.
 //
-// It calls f on the Screen, possibly in a separate goroutine, as some OS-
+// It calls f on the App, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(screen.Screen)) {
-	f(errscreen.Stub(fmt.Errorf(
+func Main(f func(app.App)) {
+	f(errapp.Stub(fmt.Errorf(
 		"windriver: unsupported GOOS/GOARCH %s/%s", runtime.GOOS, runtime.GOARCH)))
 }

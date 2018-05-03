@@ -13,20 +13,20 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/exp/shiny/driver/internal/win32"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/win32"
+	"github.com/goki/goki/oswin/app"
 )
 
-var theScreen = &screenImpl{
+var theApp = &appImpl{
 	windows: make(map[syscall.Handle]*windowImpl),
 }
 
-type screenImpl struct {
+type appImpl struct {
 	mu      sync.Mutex
 	windows map[syscall.Handle]*windowImpl
 }
 
-func (*screenImpl) NewBuffer(size image.Point) (screen.Buffer, error) {
+func (*appImpl) NewBuffer(size image.Point) (app.Buffer, error) {
 	// Buffer length must fit in BITMAPINFO.Header.SizeImage (uint32), as
 	// well as in Go slice length (int). It's easiest to be consistent
 	// between 32-bit and 64-bit, so we just use int32.
@@ -57,11 +57,11 @@ func (*screenImpl) NewBuffer(size image.Point) (screen.Buffer, error) {
 	}, nil
 }
 
-func (*screenImpl) NewTexture(size image.Point) (screen.Texture, error) {
+func (*appImpl) NewTexture(size image.Point) (app.Texture, error) {
 	return newTexture(size)
 }
 
-func (s *screenImpl) NewWindow(opts *screen.NewWindowOptions) (screen.Window, error) {
+func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 	w := &windowImpl{}
 
 	var err error

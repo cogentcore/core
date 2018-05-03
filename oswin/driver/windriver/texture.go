@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/exp/shiny/driver/internal/win32"
-	"golang.org/x/exp/shiny/screen"
+	"github.com/goki/goki/oswin/driver/internal/win32"
+	"github.com/goki/goki/oswin/app"
 )
 
 type textureImpl struct {
@@ -35,11 +35,11 @@ type handleCreateTextureParams struct {
 	err    error
 }
 
-var msgCreateTexture = win32.AddScreenMsg(handleCreateTexture)
+var msgCreateTexture = win32.AddAppMsg(handleCreateTexture)
 
-func newTexture(size image.Point) (screen.Texture, error) {
+func newTexture(size image.Point) (app.Texture, error) {
 	p := handleCreateTextureParams{size: size}
-	win32.SendScreenMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
+	win32.SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
 	if p.err != nil {
 		return nil, p.err
 	}
@@ -63,19 +63,19 @@ func handleCreateTexture(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintpt
 	// live as long as we want to.
 	p := (*handleCreateTextureParams)(unsafe.Pointer(lParam))
 
-	screenDC, err := win32.GetDC(0)
+	appDC, err := win32.GetDC(0)
 	if err != nil {
 		p.err = err
 		return
 	}
-	defer win32.ReleaseDC(0, screenDC)
+	defer win32.ReleaseDC(0, appDC)
 
-	dc, err := _CreateCompatibleDC(screenDC)
+	dc, err := _CreateCompatibleDC(appDC)
 	if err != nil {
 		p.err = err
 		return
 	}
-	bitmap, err := _CreateCompatibleBitmap(screenDC, int32(p.size.X), int32(p.size.Y))
+	bitmap, err := _CreateCompatibleBitmap(appDC, int32(p.size.X), int32(p.size.Y))
 	if err != nil {
 		_DeleteDC(dc)
 		p.err = err
@@ -124,7 +124,7 @@ func (t *textureImpl) Size() image.Point {
 	return t.size
 }
 
-func (t *textureImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
+func (t *textureImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
 	err := t.update(func(dc syscall.Handle) error {
 		return src.(*bufferImpl).blitToDC(dc, dp, sr)
 	})
