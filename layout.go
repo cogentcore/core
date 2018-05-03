@@ -1055,18 +1055,18 @@ func (ly *Layout) RenderScrolls() {
 // scroll was processed
 func (ly *Layout) ScrollDelta(del image.Point) bool {
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(del.Y))
-		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(del.X))
+		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
+		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
 		return true
 	} else if ly.HasScroll[Y] {
-		ly.Scrolls[Y].SetValue(ly.Scrolls[Y].Value + float32(del.Y))
+		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
 		return true
 	} else if ly.HasScroll[X] {
 		d := del.X
 		if d == 0 { // often don't get X
 			d = del.Y
 		}
-		ly.Scrolls[X].SetValue(ly.Scrolls[X].Value + float32(d))
+		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(d))
 		return true
 	} else {
 		return false

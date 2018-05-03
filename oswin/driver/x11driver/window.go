@@ -27,7 +27,6 @@ import (
 	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/geom"
 )
 
 type windowImpl struct {
@@ -69,8 +68,8 @@ func (w *windowImpl) Release() {
 	xproto.DestroyWindow(w.app.xc, w.xw)
 }
 
-func (w *windowImpl) Upload(dp image.Point, src oswin.Buffer, sr image.Rectangle) {
-	src.(*bufferImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsi.RootDepth, dp, sr)
+func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
+	src.(*imageImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsi.RootDepth, dp, sr)
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
@@ -115,22 +114,44 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	w.lifecycler.SetVisible((int(ev.X)+int(ev.Width)) > 0 && (int(ev.Y)+int(ev.Height)) > 0)
 	w.lifecycler.SendEvent(w, nil)
 
-	newWidth, newHeight := int(ev.Width), int(ev.Height)
-	if w.width == newWidth && w.height == newHeight {
-		return
+	// todo:
+	// dpi := 25.4 * (float32(displayWidth) / float32(displayWidthMM))
+	dpi := float32(96)
+	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+
+	sz := image.Point{int(ev.Width), int(ev.Height)}
+	ps := image.Point{int(ev.X), int(ev.Y)}
+
+	act := window.ActionN
+
+	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
+		act = window.Resize
+	} else if w.Pos != ps {
+		act = window.Move
+	} else {
+		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
 	}
-	w.width, w.height = newWidth, newHeight
-	w.Send(window.Event{
-		WidthPx:     newWidth,
-		HeightPx:    newHeight,
-		WidthPt:     geom.Pt(newWidth),
-		HeightPt:    geom.Pt(newHeight),
-		PixelsPerPt: w.app.pixelsPerPt,
-	})
+
+	w.Sz = sz
+	w.Pos = ps
+	w.PhysDPI = dpi
+	w.LogDPI = ldpi
+
+	// if scrno > 0 && len(theApp.screens) > int(scrno) {
+	// 	w.Scrn = theApp.screens[scrno]
+	// }
+
+	winEv := &window.Event{
+		Size:       sz,
+		LogicalDPI: ldpi,
+		Action:     act,
+	}
+	winEv.Init()
+	w.Send(winEv)
 }
 
 func (w *windowImpl) handleExpose() {
-	w.Send(paint.Event{})
+	w.Send(&paint.Event{})
 }
 
 func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Action) {
@@ -142,14 +163,24 @@ func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Acti
 		Modifiers: x11key.KeyModifiers(state),
 		Action:    act,
 	}
-	event.SetTime()
-	w.Send(&event)
+	event.Init()
+	w.Send(event)
+
+	// do ChordEvent -- only for non-modifier key presses -- call
+	// key.ChordString to convert the event into a parsable string for GUI
+	// events
+	if act == key.Press && !key.CodeIsModifier(c) {
+		che := &key.ChordEvent{Event: *event}
+		w.Send(che)
+	}
+
 }
+
 
 var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
 
-func (w *windowImpl) handleMouse(x, y int16, b xproto.Button, state uint16, dir mouse.Action) {
+func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16, dir mouse.Action) {
 	where := image.Point{int(x), int(y)}
 	from := image.ZP
 	if lastMouseEvent != nil {
@@ -204,7 +235,7 @@ func (w *windowImpl) handleMouse(x, y int16, b xproto.Button, state uint16, dir 
 			lastMouseClickEvent = event
 		}
 	default: // scroll wheel, 4-7
-		if dir != uint8(mouse.Press) { // only care about these for scrolling
+		if dir != mouse.Press { // only care about these for scrolling
 			return
 		}
 		del := image.Point{}
@@ -232,3 +263,8 @@ func (w *windowImpl) handleMouse(x, y int16, b xproto.Button, state uint16, dir 
 	lastMouseEvent = event
 	w.Send(event)
 }
+
+func (w *windowImpl) SetSize(sz image.Point) {
+     // todo
+}
+

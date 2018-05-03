@@ -51,11 +51,11 @@ func main(f func(oswin.App)) (retErr error) {
 		return fmt.Errorf("x11driver: shm.Init failed: %v", err)
 	}
 
-	s, err := newAppImpl(xc)
+	app, err := newAppImpl(xc)
 	if err != nil {
 		return err
 	}
-	f(s)
+	f(app)
 	// TODO: tear down the s.run goroutine? It's probably not worth the
 	// complexity of doing it cleanly, if the app is about to exit anyway.
 	return nil

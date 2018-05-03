@@ -25,7 +25,7 @@ import (
 	"github.com/goki/goki/gi/oswin/driver/internal/swizzle"
 )
 
-type bufferImpl struct {
+type imageImpl struct {
 	app *appImpl
 
 	addr unsafe.Pointer
@@ -40,26 +40,26 @@ type bufferImpl struct {
 	cleanedUp bool
 }
 
-func (b *bufferImpl) degenerate() bool        { return b.size.X == 0 || b.size.Y == 0 }
-func (b *bufferImpl) Size() image.Point       { return b.size }
-func (b *bufferImpl) Bounds() image.Rectangle { return image.Rectangle{Max: b.size} }
-func (b *bufferImpl) RGBA() *image.RGBA       { return &b.rgba }
+func (b *imageImpl) degenerate() bool        { return b.size.X == 0 || b.size.Y == 0 }
+func (b *imageImpl) Size() image.Point       { return b.size }
+func (b *imageImpl) Bounds() image.Rectangle { return image.Rectangle{Max: b.size} }
+func (b *imageImpl) RGBA() *image.RGBA       { return &b.rgba }
 
-func (b *bufferImpl) preUpload() {
+func (b *imageImpl) preUpload() {
 	// Check that the program hasn't tried to modify the rgba field via the
-	// pointer returned by the bufferImpl.RGBA method. This check doesn't catch
+	// pointer returned by the imageImpl.RGBA method. This check doesn't catch
 	// 100% of all cases; it simply tries to detect some invalid uses of a
-	// oswin.Buffer such as:
-	//	*buffer.RGBA() = anotherImageRGBA
+	// oswin.Image such as:
+	//	*image.RGBA() = anotherImageRGBA
 	if len(b.buf) != 0 && len(b.rgba.Pix) != 0 && &b.buf[0] != &b.rgba.Pix[0] {
-		panic("x11driver: invalid Buffer.RGBA modification")
+		panic("x11driver: invalid Image.RGBA modification")
 	}
 
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	if b.released {
-		panic("x11driver: Buffer.Upload called after Buffer.Release")
+		panic("x11driver: Image.Upload called after Image.Release")
 	}
 	if b.nUpload == 0 {
 		swizzle.BGRA(b.buf)
@@ -67,7 +67,7 @@ func (b *bufferImpl) preUpload() {
 	b.nUpload++
 }
 
-func (b *bufferImpl) postUpload() {
+func (b *imageImpl) postUpload() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -83,7 +83,7 @@ func (b *bufferImpl) postUpload() {
 	}
 }
 
-func (b *bufferImpl) Release() {
+func (b *imageImpl) Release() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -93,17 +93,17 @@ func (b *bufferImpl) Release() {
 	b.released = true
 }
 
-func (b *bufferImpl) cleanUp() {
+func (b *imageImpl) cleanUp() {
 	b.mu.Lock()
 	if b.cleanedUp {
 		b.mu.Unlock()
-		panic("x11driver: Buffer clean-up occurred twice")
+		panic("x11driver: Image clean-up occurred twice")
 	}
 	b.cleanedUp = true
 	b.mu.Unlock()
 
 	b.app.mu.Lock()
-	delete(b.app.buffers, b.xs)
+	delete(b.app.images, b.xs)
 	b.app.mu.Unlock()
 
 	if b.degenerate() {
@@ -115,7 +115,7 @@ func (b *bufferImpl) cleanUp() {
 	}
 }
 
-func (b *bufferImpl) upload(xd xproto.Drawable, xg xproto.Gcontext, depth uint8, dp image.Point, sr image.Rectangle) {
+func (b *imageImpl) upload(xd xproto.Drawable, xg xproto.Gcontext, depth uint8, dp image.Point, sr image.Rectangle) {
 	originalSRMin := sr.Min
 	sr = sr.Intersect(b.Bounds())
 	if sr.Empty() {

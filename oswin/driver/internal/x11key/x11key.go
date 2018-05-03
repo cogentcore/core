@@ -76,16 +76,16 @@ func ButtonFromState(state uint16) int {
 func KeyModifiers(state uint16) int32 {
      	var m key.Modifiers
 	if state&ShiftMask != 0 {
-		m |= key.Shift
+		m |= 1 << uint32(key.Shift)
 	}
 	if state&ControlMask != 0 {
-		m |= key.Control
+		m |= 1 << uint32(key.Control)
 	}
 	if state&Mod1Mask != 0 {
-		m |= key.Alt
+		m |= 1 << uint32(key.Alt)
 	}
 	if state&Mod4Mask != 0 {
-		m |= key.Meta
+		m |= 1 << uint32(key.Meta)
 	}
 	return int32(m)
 }

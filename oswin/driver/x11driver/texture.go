@@ -26,7 +26,7 @@ import (
 const textureDepth = 32
 
 type textureImpl struct {
-	s *appImpl
+	app *appImpl
 
 	size image.Point
 	xm   xproto.Pixmap
@@ -56,22 +56,22 @@ func (t *textureImpl) Release() {
 	if released || t.degenerate() {
 		return
 	}
-	render.FreePicture(t.s.xc, t.xp)
-	xproto.FreePixmap(t.s.xc, t.xm)
+	render.FreePicture(t.app.xc, t.xp)
+	xproto.FreePixmap(t.app.xc, t.xm)
 }
 
-func (t *textureImpl) Upload(dp image.Point, src oswin.Buffer, sr image.Rectangle) {
+func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
 	if t.degenerate() {
 		return
 	}
-	src.(*bufferImpl).upload(xproto.Drawable(t.xm), t.s.gcontext32, textureDepth, dp, sr)
+	src.(*imageImpl).upload(xproto.Drawable(t.xm), t.app.gcontext32, textureDepth, dp, sr)
 }
 
 func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	if t.degenerate() {
 		return
 	}
-	fill(t.s.xc, t.xp, dr, src, op)
+	fill(t.app.xc, t.xp, dr, src, op)
 }
 
 // f64ToFixed converts from float64 to X11/Render's 16.16 fixed point.
@@ -123,12 +123,12 @@ func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectan
 		dYMin := int(math.Floor(dstYMin))
 		dYMax := int(math.Ceil(dstYMax))
 
-		render.SetPictureTransform(t.s.xc, t.xp, render.Transform{
+		render.SetPictureTransform(t.app.xc, t.xp, render.Transform{
 			f64ToFixed(1 / src2dst[0]), 0, 0,
 			0, f64ToFixed(1 / src2dst[4]), 0,
 			0, 0, 1 << 16,
 		})
-		render.Composite(t.s.xc, renderOp(op), t.xp, 0, xp,
+		render.Composite(t.app.xc, renderOp(op), t.xp, 0, xp,
 			int16(sr.Min.X), int16(sr.Min.Y), // SrcX, SrcY,
 			0, 0, // MaskX, MaskY,
 			int16(dXMin), int16(dYMin), // DstX, DstY,
@@ -140,7 +140,7 @@ func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectan
 	// The X11/Render transform matrix maps from destination pixels to source
 	// pixels, so we invert src2dst.
 	dst2src := inv(src2dst)
-	render.SetPictureTransform(t.s.xc, t.xp, render.Transform{
+	render.SetPictureTransform(t.app.xc, t.xp, render.Transform{
 		f64ToFixed(dst2src[0]), f64ToFixed(dst2src[1]), render.Fixed(sr.Min.X << 16),
 		f64ToFixed(dst2src[3]), f64ToFixed(dst2src[4]), render.Fixed(sr.Min.Y << 16),
 		0, 0, 1 << 16,
@@ -172,9 +172,9 @@ func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectan
 		// What X11/Render calls PictOpOutReverse is also known as dst-out. See
 		// http://www.w3.org/TR/SVGCompositing/examples/compop-porterduff-examples.png
 		// for a visualization.
-		render.TriFan(t.s.xc, render.PictOpOutReverse, t.s.opaqueP, xp, 0, 0, 0, points[:])
+		render.TriFan(t.app.xc, render.PictOpOutReverse, t.app.opaqueP, xp, 0, 0, 0, points[:])
 	}
-	render.TriFan(t.s.xc, render.PictOpOver, t.xp, xp, 0, 0, 0, points[:])
+	render.TriFan(t.app.xc, render.PictOpOver, t.xp, xp, 0, 0, 0, points[:])
 }
 
 func trifanPoints(src2dst *f64.Aff3, sr image.Rectangle) [4]render.Pointfix {

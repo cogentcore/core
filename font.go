@@ -90,7 +90,7 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	intDots := math.Round(float64(p.Size.Dots))
 	face, err := FontLibrary.Font(p.FaceName, intDots)
 	if err != nil {
-		log.Printf("%v\n", err)
+		// log.Printf("%v\n", err)
 		if p.Face == nil {
 			if fallback != "" {
 				p.FaceName = fallback

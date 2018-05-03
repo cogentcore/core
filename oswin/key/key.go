@@ -103,7 +103,11 @@ func (e *Event) ChordString() string {
 		return modstr + "Spacebar"
 	}
 	if unicode.IsPrint(e.Rune) {
+	   if len(modstr) > 0 {
+	      return modstr + string(unicode.ToUpper(e.Rune)) // all modded keys are uppercase!
+	      } else {
 		return modstr + string(e.Rune)
+		}
 	}
 	// now convert code
 	codestr := strings.TrimPrefix(interface{}(e.Code).(fmt.Stringer).String(), "Code")

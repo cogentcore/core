@@ -65,7 +65,7 @@ type appImpl struct {
 	uniformP  render.Picture
 
 	mu              sync.Mutex
-	buffers         map[shm.Seg]*bufferImpl
+	images         map[shm.Seg]*imageImpl
 	uploads         map[uint16]chan struct{}
 	windows         map[xproto.Window]*windowImpl
 	winlist         []*windowImpl
@@ -79,7 +79,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	app := &appImpl{
 		xc:      xc,
 		xsi:     xproto.Setup(xc).DefaultScreen(xc),
-		buffers: map[shm.Seg]*bufferImpl{},
+		images: map[shm.Seg]*imageImpl{},
 		uploads: map[uint16]chan struct{}{},
 		windows: map[xproto.Window]*windowImpl{},
 		winlist: make([]*windowImpl, 0),
@@ -121,6 +121,30 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		Alpha: 0xffff,
 	})
 	render.CreateSolidFill(app.xc, app.uniformP, render.Color{})
+
+	app.screens = make([]*oswin.Screen, 1)
+	sc := &oswin.Screen{}
+	app.screens[0] = sc
+
+	widthPx := app.xsi.WidthInPixels
+	heightPx := app.xsi.HeightInPixels
+	widthMM := app.xsi.WidthInMillimeters
+	heightMM := app.xsi.WidthInMillimeters
+
+	dpi := 25.4 * (float32(widthPx) / float32(widthMM))
+	depth := 32
+	pixratio := float32(1.0)
+
+	sc.ScreenNumber = 0
+	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
+	sc.Depth = depth
+	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
+	sc.PhysicalDPI = dpi
+	sc.DevicePixelRatio = pixratio
+	sc.PhysicalSize = image.Point{int(widthMM), int(heightMM)}
+	// todo: rest of the fields
+
+	oswin.TheApp = app
 
 	go app.run()
 	return app, nil
@@ -243,11 +267,11 @@ func (app *appImpl) run() {
 	}
 }
 
-// TODO: is findBuffer and the app.buffers field unused? Delete?
+// TODO: is findImage and the app.images field unused? Delete?
 
-func (app *appImpl) findBuffer(key shm.Seg) *bufferImpl {
+func (app *appImpl) findImage(key shm.Seg) *imageImpl {
 	app.mu.Lock()
-	b := app.buffers[key]
+	b := app.images[key]
 	app.mu.Unlock()
 	return b
 }
@@ -281,17 +305,17 @@ const (
 	maxShmSize = 0x10000000 // 268,435,456 bytes.
 )
 
-func (app *appImpl) NewBuffer(size image.Point) (retBuf oswin.Buffer, retErr error) {
+func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
 	// TODO: detect if the X11 server or connection cannot support SHM pixmaps,
 	// and fall back to regular pixmaps.
 
 	w, h := int64(size.X), int64(size.Y)
 	if w < 0 || maxShmSide < w || h < 0 || maxShmSide < h || maxShmSize < 4*w*h {
-		return nil, fmt.Errorf("x11driver: invalid buffer size %v", size)
+		return nil, fmt.Errorf("x11driver: invalid image size %v", size)
 	}
 
-	b := &bufferImpl{
-		s: s,
+	b := &imageImpl{
+		app: app,
 		rgba: image.RGBA{
 			Stride: 4 * size.X,
 			Rect:   image.Rectangle{Max: size},
@@ -331,20 +355,20 @@ func (app *appImpl) NewBuffer(size image.Point) (retBuf oswin.Buffer, retErr err
 	}
 
 	app.mu.Lock()
-	app.buffers[b.xs] = b
+	app.images[b.xs] = b
 	app.mu.Unlock()
 
 	return b, nil
 }
 
-func (app *appImpl) NewTexture(size image.Point) (oswin.Texture, error) {
+func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
 	w, h := int64(size.X), int64(size.Y)
 	if w < 0 || maxShmSide < w || h < 0 || maxShmSide < h || maxShmSize < 4*w*h {
 		return nil, fmt.Errorf("x11driver: invalid texture size %v", size)
 	}
 	if w == 0 || h == 0 {
 		return &textureImpl{
-			s:    s,
+			app:    app,
 			size: size,
 		}, nil
 	}
@@ -367,14 +391,14 @@ func (app *appImpl) NewTexture(size image.Point) (oswin.Texture, error) {
 	}})
 
 	return &textureImpl{
-		s:    s,
+		app:    app,
 		size: size,
 		xm:   xm,
 		xp:   xp,
 	}, nil
 }
 
-func (app *appImpl) NewWindow(optapp *oswin.NewWindowOptions) (oswin.Window, error) {
+func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	if opts == nil {
 		opts = &oswin.NewWindowOptions{}
 	}
@@ -404,7 +428,7 @@ func (app *appImpl) NewWindow(optapp *oswin.NewWindowOptions) (oswin.Window, err
 	}
 
 	w := &windowImpl{
-		s:       s,
+		app:     app,
 		xw:      xw,
 		xg:      xg,
 		xp:      xp,
@@ -418,7 +442,7 @@ func (app *appImpl) NewWindow(optapp *oswin.NewWindowOptions) (oswin.Window, err
 	w.lifecycler.SendEvent(w, nil)
 
 	xproto.CreateWindow(app.xc, app.xsi.RootDepth, xw, app.xsi.Root,
-		uint16(opts.Pos.X), uint16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
+		int16(opts.Pos.X), int16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
 		xproto.WindowClassInputOutput, app.xsi.RootVisual,
 		xproto.CwEventMask,
 		[]uint32{0 |

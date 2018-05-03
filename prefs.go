@@ -50,7 +50,7 @@ type Preferences struct {
 var Prefs = Preferences{}
 
 func (p *Preferences) Defaults() {
-	p.LogicalDPIScale = 0.6 // most people have Hi-DPI these days?
+	p.LogicalDPIScale = oswin.LogicalDPIScale
 	p.DialogsSepWindow = true
 	p.DoubleClickMSec = 500
 	p.FontColor.SetColor(color.Black)
