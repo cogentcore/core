@@ -11,13 +11,13 @@
 
 package driver
 
-//	"github.com/goki/goki/gi/oswin/driver/x11driver"
-
 import (
 	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/gldriver"
+	//	"github.com/goki/goki/gi/oswin/driver/gldriver"
+	"github.com/goki/goki/gi/oswin/driver/x11driver"
 )
 
 func main(f func(oswin.App)) {
-     	gldriver.Main(f)
+	//     	gldriver.Main(f)
+	x11driver.Main(f)
 }

@@ -1,3 +1,8 @@
+// Copyright 2018 The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// based on golang.org/x/exp/shiny:
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -10,6 +15,9 @@ import (
 	"image/color"
 	"image/draw"
 	"log"
+	"os"
+	"os/user"
+	"path/filepath"
 	"sync"
 
 	"github.com/BurntSushi/xgb"
@@ -17,11 +25,12 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/oswin/driver/internal/x11key"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/mouse"
 )
 
 // TODO: check that xgb is safe to use concurrently from multiple goroutines.
@@ -60,6 +69,8 @@ type appImpl struct {
 	buffers         map[shm.Seg]*bufferImpl
 	uploads         map[uint16]chan struct{}
 	windows         map[xproto.Window]*windowImpl
+	winlist         []*windowImpl
+	screens         []*oswin.Screen
 	nPendingUploads int
 	completionKeys  []uint16
 }
@@ -71,6 +82,9 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		buffers: map[shm.Seg]*bufferImpl{},
 		uploads: map[uint16]chan struct{}{},
 		windows: map[xproto.Window]*windowImpl{},
+		winlist: make([]*windowImpl, 0),
+		screens: make([]*oswin.Screen, 0),
+		name:    "GoGi",
 	}
 	if err := s.initAtoms(); err != nil {
 		return nil, err
@@ -124,7 +138,7 @@ func (s *appImpl) run() {
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
 			s.mu.Lock()
-			delete(s.windows, ev.Window)
+			s.DeleteWin(ev.Window)
 			s.mu.Unlock()
 
 		case shm.CompletionEvent:
@@ -189,35 +203,35 @@ func (s *appImpl) run() {
 
 		case xproto.KeyPressEvent:
 			if w := s.findWindow(ev.Event); w != nil {
-				w.handleKey(ev.Detail, ev.State, key.DirPress)
+				w.handleKey(ev.Detail, ev.State, key.Press)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.KeyReleaseEvent:
 			if w := s.findWindow(ev.Event); w != nil {
-				w.handleKey(ev.Detail, ev.State, key.DirRelease)
+				w.handleKey(ev.Detail, ev.State, key.Release)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.ButtonPressEvent:
 			if w := s.findWindow(ev.Event); w != nil {
-				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.DirPress)
+				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.Press)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.ButtonReleaseEvent:
 			if w := s.findWindow(ev.Event); w != nil {
-				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.DirRelease)
+				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.Release)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.MotionNotifyEvent:
 			if w := s.findWindow(ev.Event); w != nil {
-				w.handleMouse(ev.EventX, ev.EventY, 0, ev.State, mouse.DirNone)
+				w.handleMouse(ev.EventX, ev.EventY, 0, ev.State, mouse.NoAction)
 			} else {
 				noWindowFound = true
 			}
@@ -361,15 +375,11 @@ func (s *appImpl) NewTexture(size image.Point) (app.Texture, error) {
 }
 
 func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
-	width, height := 1024, 768
-	if opts != nil {
-		if opts.Width > 0 {
-			width = opts.Width
-		}
-		if opts.Height > 0 {
-			height = opts.Height
-		}
+	if opts == nil {
+		opts = &oswin.NewWindowOptions{}
 	}
+	opts.Fixup()
+	// can also apply further tuning here..
 
 	xw, err := xproto.NewWindowId(s.xc)
 	if err != nil {
@@ -408,7 +418,7 @@ func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 	w.lifecycler.SendEvent(w, nil)
 
 	xproto.CreateWindow(s.xc, s.xsi.RootDepth, xw, s.xsi.Root,
-		0, 0, uint16(width), uint16(height), 0,
+		uint16(opts.Pos.X), uint16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
 		xproto.WindowClassInputOutput, s.xsi.RootVisual,
 		xproto.CwEventMask,
 		[]uint32{0 |
@@ -423,6 +433,9 @@ func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 		},
 	)
 	s.setProperty(xw, s.atomWMProtocols, s.atomWMDeleteWindow, s.atomWMTakeFocus)
+
+	// todo: opts
+	// dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
 	title := []byte(opts.GetTitle())
 	xproto.ChangeProperty(s.xc, xproto.PropModeReplace, xw, s.atomNETWMName, s.atomUTF8String, 8, uint32(len(title)), title)
@@ -619,4 +632,86 @@ func (s *appImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Co
 		render.TriFan(s.xc, render.PictOpOutReverse, s.opaqueP, xp, 0, 0, 0, points[:])
 	}
 	render.TriFan(s.xc, render.PictOpOver, s.uniformP, xp, 0, 0, 0, points[:])
+}
+
+func (app *appImpl) DeleteWin(id xproto.Window) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	win, ok := app.windows[id]
+	if !ok {
+		return
+	}
+	for i, w := range app.winlist {
+		if w == win {
+			app.winlist = append(app.winlist[:i], app.winlist[i+1:]...)
+			break
+		}
+	}
+	delete(app.windows, id)
+}
+
+func (app *appImpl) NScreens() int {
+	return len(app.screens)
+}
+
+func (app *appImpl) Screen(scrN int) *oswin.Screen {
+	sz := len(app.screens)
+	if scrN < sz {
+		return app.screens[scrN]
+	}
+	return nil
+}
+
+func (app *appImpl) NWindows() int {
+	return len(app.winlist)
+}
+
+func (app *appImpl) Window(win int) oswin.Window {
+	sz := len(app.winlist)
+	if win < sz {
+		return app.winlist[win]
+	}
+	return nil
+}
+
+func (app *appImpl) WindowByName(name string) oswin.Window {
+	for _, win := range app.winlist {
+		if win.Name() == name {
+			return win
+		}
+	}
+	return nil
+}
+
+func (app *appImpl) Name() string {
+	return app.name
+}
+
+func (app *appImpl) SetName(name string) {
+	app.name = name
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, ".config")
+}
+
+func (app *appImpl) GoGiPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), "GoGi")
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) AppPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), app.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/usr/share/fonts/truetype", "/usr/local/share/fonts"}
 }

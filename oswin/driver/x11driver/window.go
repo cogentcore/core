@@ -11,27 +11,32 @@ import (
 	"image/color"
 	"image/draw"
 	"sync"
+	"time"
 
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/goki/oswin/driver/internal/drawer"
-	"github.com/goki/goki/oswin/driver/internal/event"
-	"github.com/goki/goki/oswin/driver/internal/lifecycler"
-	"github.com/goki/goki/oswin/driver/internal/x11key"
-	"github.com/goki/goki/oswin/app"
-	"golang.org/x/image/math/f64"
+	"github.com/goki/goki/gi/oswin"
 	"github.com/goki/goki/gi/oswin/key"
 	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
+	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/oswin/driver/internal/drawer"
+	"github.com/goki/goki/oswin/driver/internal/event"
+	"github.com/goki/goki/oswin/driver/internal/lifecycler"
+	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/geom"
 )
 
 type windowImpl struct {
-	s *appImpl
+	oswin.WindowBase
 
+	app *appImpl
+
+	// xw this is the id for windows
 	xw xproto.Window
 	xg xproto.Gcontext
 	xp render.Picture
@@ -41,7 +46,6 @@ type windowImpl struct {
 
 	// This next group of variables are mutable, but are only modified in the
 	// appImpl.run goroutine.
-	width, height int
 
 	lifecycler lifecycler.State
 
@@ -61,21 +65,21 @@ func (w *windowImpl) Release() {
 	if released {
 		return
 	}
-	render.FreePicture(w.s.xc, w.xp)
-	xproto.FreeGC(w.s.xc, w.xg)
-	xproto.DestroyWindow(w.s.xc, w.xw)
+	render.FreePicture(w.app.xc, w.xp)
+	xproto.FreeGC(w.app.xc, w.xg)
+	xproto.DestroyWindow(w.app.xc, w.xw)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
-	src.(*bufferImpl).upload(xproto.Drawable(w.xw), w.xg, w.s.xsi.RootDepth, dp, sr)
+	src.(*bufferImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsi.RootDepth, dp, sr)
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
-	fill(w.s.xc, w.xp, dr, src, op)
+	fill(w.app.xc, w.xp, dr, src, op)
 }
 
 func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
-	w.s.drawUniform(w.xp, &src2dst, src, sr, op, opts)
+	w.app.drawUniform(w.xp, &src2dst, src, sr, op, opts)
 }
 
 func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
@@ -101,7 +105,7 @@ func (w *windowImpl) Publish() app.PublishResult {
 	// million source and destination pixels). Without this sync, the Go X11
 	// client could easily end up sending work at a faster rate than the X11
 	// server can serve.
-	w.s.xc.Sync()
+	w.app.xc.Sync()
 
 	return app.PublishResult{}
 }
@@ -122,7 +126,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 		HeightPx:    newHeight,
 		WidthPt:     geom.Pt(newWidth),
 		HeightPt:    geom.Pt(newHeight),
-		PixelsPerPt: w.s.pixelsPerPt,
+		PixelsPerPt: w.app.pixelsPerPt,
 	})
 }
 
@@ -130,41 +134,102 @@ func (w *windowImpl) handleExpose() {
 	w.Send(paint.Event{})
 }
 
-func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, dir key.Direction) {
-	r, c := w.s.keysyms.Lookup(uint8(detail), state)
-	w.Send(key.Event{
+func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Action) {
+	r, c := w.app.keysyms.Lookup(uint8(detail), state)
+
+	event := &key.Event{
 		Rune:      r,
 		Code:      c,
 		Modifiers: x11key.KeyModifiers(state),
-		Direction: dir,
-	})
+		Action:    act,
+	}
+	event.SetTime()
+	w.Send(&event)
 }
 
-func (w *windowImpl) handleMouse(x, y int16, b xproto.Button, state uint16, dir mouse.Direction) {
-	// TODO: should a mouse.Event have a separate MouseModifiers field, for
-	// which buttons are pressed during a mouse move?
-	btn := mouse.Button(b)
-	switch btn {
-	case 4:
-		btn = mouse.ButtonWheelUp
-	case 5:
-		btn = mouse.ButtonWheelDown
-	case 6:
-		btn = mouse.ButtonWheelLeft
-	case 7:
-		btn = mouse.ButtonWheelRight
+var lastMouseClickEvent oswin.Event
+var lastMouseEvent oswin.Event
+
+func (w *windowImpl) handleMouse(x, y int16, b xproto.Button, state uint16, dir mouse.Action) {
+	where := image.Point{int(x), int(y)}
+	from := image.ZP
+	if lastMouseEvent != nil {
+		from = lastMouseEvent.Pos()
 	}
-	if btn.IsWheel() {
-		if dir != mouse.DirPress {
+	mods := x11key.KeyModifiers(state)
+	stb := mouse.Button(x11key.ButtonFromState(state))
+
+	var event oswin.Event
+	switch {
+	case button == 0: // moved
+		if stb > 0 { // drag
+			event = &mouse.DragEvent{
+				MoveEvent: mouse.MoveEvent{
+					Event: mouse.Event{
+						Where:     where,
+						Button:    stb,
+						Action:    mouse.Drag,
+						Modifiers: mods,
+					},
+					From: from,
+				},
+			}
+		} else {
+			event = &mouse.MoveEvent{
+				Event: mouse.Event{
+					Where:     where,
+					Button:    mouse.NoButton,
+					Action:    mouse.Move,
+					Modifiers: mods,
+				},
+				From: from,
+			}
+		}
+	case button < 4: // regular click
+		act := mouse.Action(dir)
+		if act == mouse.Press && lastMouseClickEvent != nil {
+			interval := time.Now().Sub(lastMouseClickEvent.Time())
+			// fmt.Printf("interval: %v\n", interval)
+			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
+				act = mouse.DoubleClick
+			}
+		}
+		event = &mouse.Event{
+			Where:     where,
+			Button:    mouse.Button(button),
+			Action:    act,
+			Modifiers: mods,
+		}
+		if act == mouse.Press {
+			event.SetTime()
+			lastMouseClickEvent = event
+		}
+	default: // scroll wheel, 4-7
+		if dir != uint8(mouse.Press) { // only care about these for scrolling
 			return
 		}
-		dir = mouse.DirStep
+		del := image.Point{}
+		switch button {
+		case 4: // up
+			del.Y = -mouse.ScrollWheelRate
+		case 5: // down
+			del.Y = mouse.ScrollWheelRate
+		case 6: // left
+			del.X = -mouse.ScrollWheelRate
+		case 7: // right
+			del.X = mouse.ScrollWheelRate
+		}
+		event = &mouse.ScrollEvent{
+			Event: mouse.Event{
+				Where:     where,
+				Button:    stb,
+				Action:    mouse.Scroll,
+				Modifiers: mods,
+			},
+			Delta: del,
+		}
 	}
-	w.Send(mouse.Event{
-		X:         float32(x),
-		Y:         float32(y),
-		Button:    btn,
-		Modifiers: x11key.KeyModifiers(state),
-		Direction: dir,
-	})
+	event.Init()
+	lastMouseEvent = event
+	w.Send(event)
 }

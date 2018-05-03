@@ -36,11 +36,11 @@ import "C"
 import (
 	"errors"
 	"image"
-	"runtime"
-	"os/user"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
+	"runtime"
 	"time"
 	"unsafe"
 
@@ -97,7 +97,7 @@ func showWindow(w *windowImpl) {
 }
 
 func resizeWindow(w *windowImpl, sz image.Point) {
-//	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
+	//	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
 func closeWindow(id uintptr) {
@@ -259,7 +259,7 @@ func onKey(id uintptr, state uint16, detail, act uint8) {
 		Modifiers: x11key.KeyModifiers(state),
 		Action:    key.Action(act),
 	}
-
+	event.Init()
 	w.Send(event)
 }
 
@@ -352,7 +352,7 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 			Delta: del,
 		}
 	}
-	event.SetTime()
+	event.Init()
 	lastMouseEvent = event
 	w.Send(event)
 }
