@@ -28,8 +28,7 @@ import (
 	"github.com/goki/goki/gi/oswin"
 	"github.com/goki/goki/gi/oswin/key"
 	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/oswin/app"
-	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
 	"golang.org/x/image/math/f64"
 )
 
@@ -39,7 +38,7 @@ import (
 
 type appImpl struct {
 	xc      *xgb.Conn
-	xsi     *xproto.AppInfo
+	xsi     *xproto.ScreenInfo
 	keysyms x11key.KeysymTable
 
 	atomNETWMName      xproto.Atom
@@ -73,12 +72,13 @@ type appImpl struct {
 	screens         []*oswin.Screen
 	nPendingUploads int
 	completionKeys  []uint16
+	name    string
 }
 
 func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
-	s := &appImpl{
+	app := &appImpl{
 		xc:      xc,
-		xsi:     xproto.Setup(xc).DefaultApp(xc),
+		xsi:     xproto.Setup(xc).DefaultScreen(xc),
 		buffers: map[shm.Seg]*bufferImpl{},
 		uploads: map[uint16]chan struct{}{},
 		windows: map[xproto.Window]*windowImpl{},
@@ -86,49 +86,49 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		screens: make([]*oswin.Screen, 0),
 		name:    "GoGi",
 	}
-	if err := s.initAtoms(); err != nil {
+	if err := app.initAtoms(); err != nil {
 		return nil, err
 	}
-	if err := s.initKeyboardMapping(); err != nil {
+	if err := app.initKeyboardMapping(); err != nil {
 		return nil, err
 	}
 	const (
 		mmPerInch = 25.4
 		ptPerInch = 72
 	)
-	pixelsPerMM := float32(s.xsi.WidthInPixels) / float32(s.xsi.WidthInMillimeters)
-	s.pixelsPerPt = pixelsPerMM * mmPerInch / ptPerInch
-	if err := s.initPictformats(); err != nil {
+	pixelsPerMM := float32(app.xsi.WidthInPixels) / float32(app.xsi.WidthInMillimeters)
+	app.pixelsPerPt = pixelsPerMM * mmPerInch / ptPerInch
+	if err := app.initPictformats(); err != nil {
 		return nil, err
 	}
-	if err := s.initWindow32(); err != nil {
+	if err := app.initWindow32(); err != nil {
 		return nil, err
 	}
 
 	var err error
-	s.opaqueP, err = render.NewPictureId(xc)
+	app.opaqueP, err = render.NewPictureId(xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewPictureId failed: %v", err)
 	}
-	s.uniformP, err = render.NewPictureId(xc)
+	app.uniformP, err = render.NewPictureId(xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewPictureId failed: %v", err)
 	}
-	render.CreateSolidFill(s.xc, s.opaqueP, render.Color{
+	render.CreateSolidFill(app.xc, app.opaqueP, render.Color{
 		Red:   0xffff,
 		Green: 0xffff,
 		Blue:  0xffff,
 		Alpha: 0xffff,
 	})
-	render.CreateSolidFill(s.xc, s.uniformP, render.Color{})
+	render.CreateSolidFill(app.xc, app.uniformP, render.Color{})
 
-	go s.run()
-	return s, nil
+	go app.run()
+	return app, nil
 }
 
-func (s *appImpl) run() {
+func (app *appImpl) run() {
 	for {
-		ev, err := s.xc.WaitForEvent()
+		ev, err := app.xc.WaitForEvent()
 		if err != nil {
 			log.Printf("x11driver: xproto.WaitForEvent: %v", err)
 			continue
@@ -137,41 +137,41 @@ func (s *appImpl) run() {
 		noWindowFound := false
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
-			s.mu.Lock()
-			s.DeleteWin(ev.Window)
-			s.mu.Unlock()
+			app.mu.Lock()
+			app.DeleteWin(ev.Window)
+			app.mu.Unlock()
 
 		case shm.CompletionEvent:
-			s.mu.Lock()
-			s.completionKeys = append(s.completionKeys, ev.Sequence)
-			s.handleCompletions()
-			s.mu.Unlock()
+			app.mu.Lock()
+			app.completionKeys = append(app.completionKeys, ev.Sequence)
+			app.handleCompletions()
+			app.mu.Unlock()
 
 		case xproto.ClientMessageEvent:
-			if ev.Type != s.atomWMProtocols || ev.Format != 32 {
+			if ev.Type != app.atomWMProtocols || ev.Format != 32 {
 				break
 			}
 			switch xproto.Atom(ev.Data.Data32[0]) {
-			case s.atomWMDeleteWindow:
-				if w := s.findWindow(ev.Window); w != nil {
+			case app.atomWMDeleteWindow:
+				if w := app.findWindow(ev.Window); w != nil {
 					w.lifecycler.SetDead(true)
 					w.lifecycler.SendEvent(w, nil)
 				} else {
 					noWindowFound = true
 				}
-			case s.atomWMTakeFocus:
-				xproto.SetInputFocus(s.xc, xproto.InputFocusParent, ev.Window, xproto.Timestamp(ev.Data.Data32[1]))
+			case app.atomWMTakeFocus:
+				xproto.SetInputFocus(app.xc, xproto.InputFocusParent, ev.Window, xproto.Timestamp(ev.Data.Data32[1]))
 			}
 
 		case xproto.ConfigureNotifyEvent:
-			if w := s.findWindow(ev.Window); w != nil {
+			if w := app.findWindow(ev.Window); w != nil {
 				w.handleConfigureNotify(ev)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.ExposeEvent:
-			if w := s.findWindow(ev.Window); w != nil {
+			if w := app.findWindow(ev.Window); w != nil {
 				// A non-zero Count means that there are more expose events
 				// coming. For example, a non-rectangular exposure (e.g. from a
 				// partially overlapped window) will result in multiple expose
@@ -186,7 +186,7 @@ func (s *appImpl) run() {
 			}
 
 		case xproto.FocusInEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.lifecycler.SetFocused(true)
 				w.lifecycler.SendEvent(w, nil)
 			} else {
@@ -194,7 +194,7 @@ func (s *appImpl) run() {
 			}
 
 		case xproto.FocusOutEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.lifecycler.SetFocused(false)
 				w.lifecycler.SendEvent(w, nil)
 			} else {
@@ -202,35 +202,35 @@ func (s *appImpl) run() {
 			}
 
 		case xproto.KeyPressEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.handleKey(ev.Detail, ev.State, key.Press)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.KeyReleaseEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.handleKey(ev.Detail, ev.State, key.Release)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.ButtonPressEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.Press)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.ButtonReleaseEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.handleMouse(ev.EventX, ev.EventY, ev.Detail, ev.State, mouse.Release)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.MotionNotifyEvent:
-			if w := s.findWindow(ev.Event); w != nil {
+			if w := app.findWindow(ev.Event); w != nil {
 				w.handleMouse(ev.EventX, ev.EventY, 0, ev.State, mouse.NoAction)
 			} else {
 				noWindowFound = true
@@ -243,37 +243,37 @@ func (s *appImpl) run() {
 	}
 }
 
-// TODO: is findBuffer and the s.buffers field unused? Delete?
+// TODO: is findBuffer and the app.buffers field unused? Delete?
 
-func (s *appImpl) findBuffer(key shm.Seg) *bufferImpl {
-	s.mu.Lock()
-	b := s.buffers[key]
-	s.mu.Unlock()
+func (app *appImpl) findBuffer(key shm.Seg) *bufferImpl {
+	app.mu.Lock()
+	b := app.buffers[key]
+	app.mu.Unlock()
 	return b
 }
 
-func (s *appImpl) findWindow(key xproto.Window) *windowImpl {
-	s.mu.Lock()
-	w := s.windows[key]
-	s.mu.Unlock()
+func (app *appImpl) findWindow(key xproto.Window) *windowImpl {
+	app.mu.Lock()
+	w := app.windows[key]
+	app.mu.Unlock()
 	return w
 }
 
-// handleCompletions must only be called while holding s.mu.
-func (s *appImpl) handleCompletions() {
-	if s.nPendingUploads != 0 {
+// handleCompletions must only be called while holding app.mu.
+func (app *appImpl) handleCompletions() {
+	if app.nPendingUploads != 0 {
 		return
 	}
-	for _, ck := range s.completionKeys {
-		completion, ok := s.uploads[ck]
+	for _, ck := range app.completionKeys {
+		completion, ok := app.uploads[ck]
 		if !ok {
 			log.Printf("x11driver: no matching upload for a SHM completion event")
 			continue
 		}
-		delete(s.uploads, ck)
+		delete(app.uploads, ck)
 		close(completion)
 	}
-	s.completionKeys = s.completionKeys[:0]
+	app.completionKeys = app.completionKeys[:0]
 }
 
 const (
@@ -281,7 +281,7 @@ const (
 	maxShmSize = 0x10000000 // 268,435,456 bytes.
 )
 
-func (s *appImpl) NewBuffer(size image.Point) (retBuf app.Buffer, retErr error) {
+func (app *appImpl) NewBuffer(size image.Point) (retBuf oswin.Buffer, retErr error) {
 	// TODO: detect if the X11 server or connection cannot support SHM pixmaps,
 	// and fall back to regular pixmaps.
 
@@ -303,7 +303,7 @@ func (s *appImpl) NewBuffer(size image.Point) (retBuf app.Buffer, retErr error) 
 		// No-op, but we can't take the else path because the minimum shmget
 		// size is 1.
 	} else {
-		xs, err := shm.NewSegId(s.xc)
+		xs, err := shm.NewSegId(app.xc)
 		if err != nil {
 			return nil, fmt.Errorf("x11driver: shm.NewSegId: %v", err)
 		}
@@ -326,18 +326,18 @@ func (s *appImpl) NewBuffer(size image.Point) (retBuf app.Buffer, retErr error) 
 		// readOnly is whether the shared memory is read-only from the X11 server's
 		// point of view. We need false to use SHM pixmaps.
 		const readOnly = false
-		shm.Attach(s.xc, xs, uint32(shmid), readOnly)
+		shm.Attach(app.xc, xs, uint32(shmid), readOnly)
 		b.xs = xs
 	}
 
-	s.mu.Lock()
-	s.buffers[b.xs] = b
-	s.mu.Unlock()
+	app.mu.Lock()
+	app.buffers[b.xs] = b
+	app.mu.Unlock()
 
 	return b, nil
 }
 
-func (s *appImpl) NewTexture(size image.Point) (app.Texture, error) {
+func (app *appImpl) NewTexture(size image.Point) (oswin.Texture, error) {
 	w, h := int64(size.X), int64(size.Y)
 	if w < 0 || maxShmSide < w || h < 0 || maxShmSide < h || maxShmSize < 4*w*h {
 		return nil, fmt.Errorf("x11driver: invalid texture size %v", size)
@@ -349,19 +349,19 @@ func (s *appImpl) NewTexture(size image.Point) (app.Texture, error) {
 		}, nil
 	}
 
-	xm, err := xproto.NewPixmapId(s.xc)
+	xm, err := xproto.NewPixmapId(app.xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewPixmapId failed: %v", err)
 	}
-	xp, err := render.NewPictureId(s.xc)
+	xp, err := render.NewPictureId(app.xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewPictureId failed: %v", err)
 	}
-	xproto.CreatePixmap(s.xc, textureDepth, xm, xproto.Drawable(s.window32), uint16(w), uint16(h))
-	render.CreatePicture(s.xc, xp, xproto.Drawable(xm), s.pictformat32, render.CpRepeat, []uint32{render.RepeatPad})
-	render.SetPictureFilter(s.xc, xp, uint16(len("bilinear")), "bilinear", nil)
+	xproto.CreatePixmap(app.xc, textureDepth, xm, xproto.Drawable(app.window32), uint16(w), uint16(h))
+	render.CreatePicture(app.xc, xp, xproto.Drawable(xm), app.pictformat32, render.CpRepeat, []uint32{render.RepeatPad})
+	render.SetPictureFilter(app.xc, xp, uint16(len("bilinear")), "bilinear", nil)
 	// The X11 server doesn't zero-initialize the pixmap. We do it ourselves.
-	render.FillRectangles(s.xc, render.PictOpSrc, xp, render.Color{}, []xproto.Rectangle{{
+	render.FillRectangles(app.xc, render.PictOpSrc, xp, render.Color{}, []xproto.Rectangle{{
 		Width:  uint16(w),
 		Height: uint16(h),
 	}})
@@ -374,33 +374,33 @@ func (s *appImpl) NewTexture(size image.Point) (app.Texture, error) {
 	}, nil
 }
 
-func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
+func (app *appImpl) NewWindow(optapp *oswin.NewWindowOptions) (oswin.Window, error) {
 	if opts == nil {
 		opts = &oswin.NewWindowOptions{}
 	}
 	opts.Fixup()
 	// can also apply further tuning here..
 
-	xw, err := xproto.NewWindowId(s.xc)
+	xw, err := xproto.NewWindowId(app.xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewWindowId failed: %v", err)
 	}
-	xg, err := xproto.NewGcontextId(s.xc)
+	xg, err := xproto.NewGcontextId(app.xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: xproto.NewGcontextId failed: %v", err)
 	}
-	xp, err := render.NewPictureId(s.xc)
+	xp, err := render.NewPictureId(app.xc)
 	if err != nil {
 		return nil, fmt.Errorf("x11driver: render.NewPictureId failed: %v", err)
 	}
 	pictformat := render.Pictformat(0)
-	switch s.xsi.RootDepth {
+	switch app.xsi.RootDepth {
 	default:
-		return nil, fmt.Errorf("x11driver: unsupported root depth %d", s.xsi.RootDepth)
+		return nil, fmt.Errorf("x11driver: unsupported root depth %d", app.xsi.RootDepth)
 	case 24:
-		pictformat = s.pictformat24
+		pictformat = app.pictformat24
 	case 32:
-		pictformat = s.pictformat32
+		pictformat = app.pictformat32
 	}
 
 	w := &windowImpl{
@@ -411,15 +411,15 @@ func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 		xevents: make(chan xgb.Event),
 	}
 
-	s.mu.Lock()
-	s.windows[xw] = w
-	s.mu.Unlock()
+	app.mu.Lock()
+	app.windows[xw] = w
+	app.mu.Unlock()
 
 	w.lifecycler.SendEvent(w, nil)
 
-	xproto.CreateWindow(s.xc, s.xsi.RootDepth, xw, s.xsi.Root,
+	xproto.CreateWindow(app.xc, app.xsi.RootDepth, xw, app.xsi.Root,
 		uint16(opts.Pos.X), uint16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
-		xproto.WindowClassInputOutput, s.xsi.RootVisual,
+		xproto.WindowClassInputOutput, app.xsi.RootVisual,
 		xproto.CwEventMask,
 		[]uint32{0 |
 			xproto.EventMaskKeyPress |
@@ -432,47 +432,47 @@ func (s *appImpl) NewWindow(opts *app.NewWindowOptions) (app.Window, error) {
 			xproto.EventMaskFocusChange,
 		},
 	)
-	s.setProperty(xw, s.atomWMProtocols, s.atomWMDeleteWindow, s.atomWMTakeFocus)
+	app.setProperty(xw, app.atomWMProtocols, app.atomWMDeleteWindow, app.atomWMTakeFocus)
 
 	// todo: opts
 	// dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
 	title := []byte(opts.GetTitle())
-	xproto.ChangeProperty(s.xc, xproto.PropModeReplace, xw, s.atomNETWMName, s.atomUTF8String, 8, uint32(len(title)), title)
+	xproto.ChangeProperty(app.xc, xproto.PropModeReplace, xw, app.atomNETWMName, app.atomUTF8String, 8, uint32(len(title)), title)
 
-	xproto.CreateGC(s.xc, xg, xproto.Drawable(xw), 0, nil)
-	render.CreatePicture(s.xc, xp, xproto.Drawable(xw), pictformat, 0, nil)
-	xproto.MapWindow(s.xc, xw)
+	xproto.CreateGC(app.xc, xg, xproto.Drawable(xw), 0, nil)
+	render.CreatePicture(app.xc, xp, xproto.Drawable(xw), pictformat, 0, nil)
+	xproto.MapWindow(app.xc, xw)
 
 	return w, nil
 }
 
-func (s *appImpl) initAtoms() (err error) {
-	s.atomNETWMName, err = s.internAtom("_NET_WM_NAME")
+func (app *appImpl) initAtoms() (err error) {
+	app.atomNETWMName, err = app.internAtom("_NET_WM_NAME")
 	if err != nil {
 		return err
 	}
-	s.atomUTF8String, err = s.internAtom("UTF8_STRING")
+	app.atomUTF8String, err = app.internAtom("UTF8_STRING")
 	if err != nil {
 		return err
 	}
-	s.atomWMDeleteWindow, err = s.internAtom("WM_DELETE_WINDOW")
+	app.atomWMDeleteWindow, err = app.internAtom("WM_DELETE_WINDOW")
 	if err != nil {
 		return err
 	}
-	s.atomWMProtocols, err = s.internAtom("WM_PROTOCOLS")
+	app.atomWMProtocols, err = app.internAtom("WM_PROTOCOLS")
 	if err != nil {
 		return err
 	}
-	s.atomWMTakeFocus, err = s.internAtom("WM_TAKE_FOCUS")
+	app.atomWMTakeFocus, err = app.internAtom("WM_TAKE_FOCUS")
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *appImpl) internAtom(name string) (xproto.Atom, error) {
-	r, err := xproto.InternAtom(s.xc, false, uint16(len(name)), name).Reply()
+func (app *appImpl) internAtom(name string) (xproto.Atom, error) {
+	r, err := xproto.InternAtom(app.xc, false, uint16(len(name)), name).Reply()
 	if err != nil {
 		return 0, fmt.Errorf("x11driver: xproto.InternAtom failed: %v", err)
 	}
@@ -482,9 +482,9 @@ func (s *appImpl) internAtom(name string) (xproto.Atom, error) {
 	return r.Atom, nil
 }
 
-func (s *appImpl) initKeyboardMapping() error {
+func (app *appImpl) initKeyboardMapping() error {
 	const keyLo, keyHi = 8, 255
-	km, err := xproto.GetKeyboardMapping(s.xc, keyLo, keyHi-keyLo+1).Reply()
+	km, err := xproto.GetKeyboardMapping(app.xc, keyLo, keyHi-keyLo+1).Reply()
 	if err != nil {
 		return err
 	}
@@ -493,22 +493,22 @@ func (s *appImpl) initKeyboardMapping() error {
 		return fmt.Errorf("x11driver: too few keysyms per keycode: %d", n)
 	}
 	for i := keyLo; i <= keyHi; i++ {
-		s.keysyms[i][0] = uint32(km.Keysyms[(i-keyLo)*n+0])
-		s.keysyms[i][1] = uint32(km.Keysyms[(i-keyLo)*n+1])
+		app.keysyms[i][0] = uint32(km.Keysyms[(i-keyLo)*n+0])
+		app.keysyms[i][1] = uint32(km.Keysyms[(i-keyLo)*n+1])
 	}
 	return nil
 }
 
-func (s *appImpl) initPictformats() error {
-	pformats, err := render.QueryPictFormats(s.xc).Reply()
+func (app *appImpl) initPictformats() error {
+	pformats, err := render.QueryPictFormats(app.xc).Reply()
 	if err != nil {
 		return fmt.Errorf("x11driver: render.QueryPictFormats failed: %v", err)
 	}
-	s.pictformat24, err = findPictformat(pformats.Formats, 24)
+	app.pictformat24, err = findPictformat(pformats.Formats, 24)
 	if err != nil {
 		return err
 	}
-	s.pictformat32, err = findPictformat(pformats.Formats, 32)
+	app.pictformat32, err = findPictformat(pformats.Formats, 32)
 	if err != nil {
 		return err
 	}
@@ -539,29 +539,29 @@ func findPictformat(fs []render.Pictforminfo, depth byte) (render.Pictformat, er
 	return 0, fmt.Errorf("x11driver: no matching Pictformat for depth %d", depth)
 }
 
-func (s *appImpl) initWindow32() error {
-	visualid, err := findVisual(s.xsi, 32)
+func (app *appImpl) initWindow32() error {
+	visualid, err := findVisual(app.xsi, 32)
 	if err != nil {
 		return err
 	}
-	colormap, err := xproto.NewColormapId(s.xc)
+	colormap, err := xproto.NewColormapId(app.xc)
 	if err != nil {
 		return fmt.Errorf("x11driver: xproto.NewColormapId failed: %v", err)
 	}
 	if err := xproto.CreateColormapChecked(
-		s.xc, xproto.ColormapAllocNone, colormap, s.xsi.Root, visualid).Check(); err != nil {
+		app.xc, xproto.ColormapAllocNone, colormap, app.xsi.Root, visualid).Check(); err != nil {
 		return fmt.Errorf("x11driver: xproto.CreateColormap failed: %v", err)
 	}
-	s.window32, err = xproto.NewWindowId(s.xc)
+	app.window32, err = xproto.NewWindowId(app.xc)
 	if err != nil {
 		return fmt.Errorf("x11driver: xproto.NewWindowId failed: %v", err)
 	}
-	s.gcontext32, err = xproto.NewGcontextId(s.xc)
+	app.gcontext32, err = xproto.NewGcontextId(app.xc)
 	if err != nil {
 		return fmt.Errorf("x11driver: xproto.NewGcontextId failed: %v", err)
 	}
 	const depth = 32
-	xproto.CreateWindow(s.xc, depth, s.window32, s.xsi.Root,
+	xproto.CreateWindow(app.xc, depth, app.window32, app.xsi.Root,
 		0, 0, 1, 1, 0,
 		xproto.WindowClassInputOutput, visualid,
 		// The CwBorderPixel attribute seems necessary for depth == 32. See
@@ -569,11 +569,11 @@ func (s *appImpl) initWindow32() error {
 		xproto.CwBorderPixel|xproto.CwColormap,
 		[]uint32{0, uint32(colormap)},
 	)
-	xproto.CreateGC(s.xc, s.gcontext32, xproto.Drawable(s.window32), 0, nil)
+	xproto.CreateGC(app.xc, app.gcontext32, xproto.Drawable(app.window32), 0, nil)
 	return nil
 }
 
-func findVisual(xsi *xproto.AppInfo, depth byte) (xproto.Visualid, error) {
+func findVisual(xsi *xproto.ScreenInfo, depth byte) (xproto.Visualid, error) {
 	for _, d := range xsi.AllowedDepths {
 		if d.Depth != depth {
 			continue
@@ -587,7 +587,7 @@ func findVisual(xsi *xproto.AppInfo, depth byte) (xproto.Visualid, error) {
 	return 0, fmt.Errorf("x11driver: no matching Visualid")
 }
 
-func (s *appImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...xproto.Atom) {
+func (app *appImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...xproto.Atom) {
 	b := make([]byte, len(values)*4)
 	for i, v := range values {
 		b[4*i+0] = uint8(v >> 0)
@@ -595,16 +595,16 @@ func (s *appImpl) setProperty(xw xproto.Window, prop xproto.Atom, values ...xpro
 		b[4*i+2] = uint8(v >> 16)
 		b[4*i+3] = uint8(v >> 24)
 	}
-	xproto.ChangeProperty(s.xc, xproto.PropModeReplace, xw, prop, xproto.AtomAtom, 32, uint32(len(values)), b)
+	xproto.ChangeProperty(app.xc, xproto.PropModeReplace, xw, prop, xproto.AtomAtom, 32, uint32(len(values)), b)
 }
 
-func (s *appImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (app *appImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	if sr.Empty() {
 		return
 	}
 
 	if opts == nil && *src2dst == (f64.Aff3{1, 0, 0, 0, 1, 0}) {
-		fill(s.xc, xp, sr, src, op)
+		fill(app.xc, xp, sr, src, op)
 		return
 	}
 
@@ -617,21 +617,21 @@ func (s *appImpl) drawUniform(xp render.Picture, src2dst *f64.Aff3, src color.Co
 	}
 	points := trifanPoints(src2dst, sr)
 
-	s.uniformMu.Lock()
-	defer s.uniformMu.Unlock()
+	app.uniformMu.Lock()
+	defer app.uniformMu.Unlock()
 
-	if s.uniformC != c {
-		s.uniformC = c
-		render.FreePicture(s.xc, s.uniformP)
-		render.CreateSolidFill(s.xc, s.uniformP, c)
+	if app.uniformC != c {
+		app.uniformC = c
+		render.FreePicture(app.xc, app.uniformP)
+		render.CreateSolidFill(app.xc, app.uniformP, c)
 	}
 
 	if op == draw.Src {
 		// We implement draw.Src as render.PictOpOutReverse followed by
 		// render.PictOpOver, for the same reason as in textureImpl.draw.
-		render.TriFan(s.xc, render.PictOpOutReverse, s.opaqueP, xp, 0, 0, 0, points[:])
+		render.TriFan(app.xc, render.PictOpOutReverse, app.opaqueP, xp, 0, 0, 0, points[:])
 	}
-	render.TriFan(s.xc, render.PictOpOver, s.uniformP, xp, 0, 0, 0, points[:])
+	render.TriFan(app.xc, render.PictOpOver, app.uniformP, xp, 0, 0, 0, points[:])
 }
 
 func (app *appImpl) DeleteWin(id xproto.Window) {

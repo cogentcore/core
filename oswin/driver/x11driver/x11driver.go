@@ -17,8 +17,8 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/shm"
 
-	"github.com/goki/goki/oswin/driver/internal/errapp"
-	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/gi/oswin/driver/internal/errapp"
+	"github.com/goki/goki/gi/oswin"
 )
 
 // Main is called by the program's main function to run the graphical
@@ -27,13 +27,13 @@ import (
 // It calls f on the App, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(app.App)) {
+func Main(f func(oswin.App)) {
 	if err := main(f); err != nil {
 		f(errapp.Stub(err))
 	}
 }
 
-func main(f func(app.App)) (retErr error) {
+func main(f func(oswin.App)) (retErr error) {
 	xc, err := xgb.NewConn()
 	if err != nil {
 		return fmt.Errorf("x11driver: xgb.NewConn failed: %v", err)

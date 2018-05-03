@@ -22,11 +22,11 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/goki/oswin/driver/internal/swizzle"
+	"github.com/goki/goki/gi/oswin/driver/internal/swizzle"
 )
 
 type bufferImpl struct {
-	s *appImpl
+	app *appImpl
 
 	addr unsafe.Pointer
 	buf  []byte
@@ -49,7 +49,7 @@ func (b *bufferImpl) preUpload() {
 	// Check that the program hasn't tried to modify the rgba field via the
 	// pointer returned by the bufferImpl.RGBA method. This check doesn't catch
 	// 100% of all cases; it simply tries to detect some invalid uses of a
-	// app.Buffer such as:
+	// oswin.Buffer such as:
 	//	*buffer.RGBA() = anotherImageRGBA
 	if len(b.buf) != 0 && len(b.rgba.Pix) != 0 && &b.buf[0] != &b.rgba.Pix[0] {
 		panic("x11driver: invalid Buffer.RGBA modification")
@@ -102,14 +102,14 @@ func (b *bufferImpl) cleanUp() {
 	b.cleanedUp = true
 	b.mu.Unlock()
 
-	b.s.mu.Lock()
-	delete(b.s.buffers, b.xs)
-	b.s.mu.Unlock()
+	b.app.mu.Lock()
+	delete(b.app.buffers, b.xs)
+	b.app.mu.Unlock()
 
 	if b.degenerate() {
 		return
 	}
-	shm.Detach(b.s.xc, b.xs)
+	shm.Detach(b.app.xc, b.xs)
 	if err := shmClose(b.addr); err != nil {
 		log.Printf("x11driver: shmClose: %v", err)
 	}
@@ -124,12 +124,12 @@ func (b *bufferImpl) upload(xd xproto.Drawable, xg xproto.Gcontext, depth uint8,
 	dp = dp.Add(sr.Min.Sub(originalSRMin))
 	b.preUpload()
 
-	b.s.mu.Lock()
-	b.s.nPendingUploads++
-	b.s.mu.Unlock()
+	b.app.mu.Lock()
+	b.app.nPendingUploads++
+	b.app.mu.Unlock()
 
 	cookie := shm.PutImage(
-		b.s.xc, xd, xg,
+		b.app.xc, xd, xg,
 		uint16(b.size.X), uint16(b.size.Y), // TotalWidth, TotalHeight,
 		uint16(sr.Min.X), uint16(sr.Min.Y), // SrcX, SrcY,
 		uint16(sr.Dx()), uint16(sr.Dy()), // SrcWidth, SrcHeight,
@@ -140,11 +140,11 @@ func (b *bufferImpl) upload(xd xproto.Drawable, xg xproto.Gcontext, depth uint8,
 
 	completion := make(chan struct{})
 
-	b.s.mu.Lock()
-	b.s.uploads[cookie.Sequence] = completion
-	b.s.nPendingUploads--
-	b.s.handleCompletions()
-	b.s.mu.Unlock()
+	b.app.mu.Lock()
+	b.app.uploads[cookie.Sequence] = completion
+	b.app.nPendingUploads--
+	b.app.handleCompletions()
+	b.app.mu.Unlock()
 
 	<-completion
 

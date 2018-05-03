@@ -22,11 +22,10 @@ import (
 	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
-	"github.com/goki/goki/oswin/app"
-	"github.com/goki/goki/oswin/driver/internal/drawer"
-	"github.com/goki/goki/oswin/driver/internal/event"
-	"github.com/goki/goki/oswin/driver/internal/lifecycler"
-	"github.com/goki/goki/oswin/driver/internal/x11key"
+	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
+	"github.com/goki/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
+	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/geom"
 )
@@ -70,7 +69,7 @@ func (w *windowImpl) Release() {
 	xproto.DestroyWindow(w.app.xc, w.xw)
 }
 
-func (w *windowImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
+func (w *windowImpl) Upload(dp image.Point, src oswin.Buffer, sr image.Rectangle) {
 	src.(*bufferImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsi.RootDepth, dp, sr)
 }
 
@@ -78,23 +77,23 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	fill(w.app.xc, w.xp, dr, src, op)
 }
 
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	w.app.drawUniform(w.xp, &src2dst, src, sr, op, opts)
 }
 
-func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	src.(*textureImpl).draw(w.xp, &src2dst, sr, op, opts)
 }
 
-func (w *windowImpl) Copy(dp image.Point, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	drawer.Copy(w, dp, src, sr, op, opts)
 }
 
-func (w *windowImpl) Scale(dr image.Rectangle, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	drawer.Scale(w, dr, src, sr, op, opts)
 }
 
-func (w *windowImpl) Publish() app.PublishResult {
+func (w *windowImpl) Publish() oswin.PublishResult {
 	// TODO: implement a back buffer, and copy or flip that here to the front
 	// buffer.
 
@@ -107,7 +106,7 @@ func (w *windowImpl) Publish() app.PublishResult {
 	// server can serve.
 	w.app.xc.Sync()
 
-	return app.PublishResult{}
+	return oswin.PublishResult{}
 }
 
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {

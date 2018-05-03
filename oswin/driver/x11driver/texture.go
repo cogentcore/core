@@ -19,7 +19,7 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/gi/oswin"
 	"golang.org/x/image/math/f64"
 )
 
@@ -60,7 +60,7 @@ func (t *textureImpl) Release() {
 	xproto.FreePixmap(t.s.xc, t.xm)
 }
 
-func (t *textureImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
+func (t *textureImpl) Upload(dp image.Point, src oswin.Buffer, sr image.Rectangle) {
 	if t.degenerate() {
 		return
 	}
@@ -91,7 +91,7 @@ func inv(x *f64.Aff3) f64.Aff3 {
 	}
 }
 
-func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (t *textureImpl) draw(xp render.Picture, src2dst *f64.Aff3, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sr = sr.Intersect(t.Bounds())
 	if sr.Empty() {
 		return
