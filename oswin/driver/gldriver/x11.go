@@ -27,13 +27,15 @@ void processEvents();
 void makeCurrent(uintptr_t ctx);
 void swapBuffers(uintptr_t ctx);
 void doCloseWindow(uintptr_t id);
-uintptr_t doNewWindow(int width, int height, char* title, int title_len);
+uintptr_t doNewWindow(int width, int height, int left, int top, char* title, int title_len, bool dialog, bool modal, bool tool, bool fullscreen);
 uintptr_t doShowWindow(uintptr_t id);
+void getScreens();
 uintptr_t surfaceCreate();
 */
 import "C"
 import (
 	"errors"
+	"image"
 	"runtime"
 	"time"
 	"unsafe"
@@ -44,7 +46,6 @@ import (
 	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
-	"golang.org/x/mobile/geom"
 	"golang.org/x/mobile/gl"
 )
 
@@ -59,7 +60,7 @@ func init() {
 }
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
-	width, height := optsSize(opts)
+	dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
 	title := opts.GetTitle()
 	ctitle := C.CString(title)
@@ -68,7 +69,7 @@ func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
 	retc := make(chan uintptr)
 	uic <- uiClosure{
 		f: func() uintptr {
-			return uintptr(C.doNewWindow(C.int(width), C.int(height), ctitle, C.int(len(title))))
+			return uintptr(C.doNewWindow(C.int(width), C.int(height), C.int(opts.Size.X), C.int(opts.Size.Y), C.int(opts.Pos.X), C.int(opts.Pos.Y), ctitle, C.int(len(title), C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))))
 		},
 		retc: retc,
 	}
@@ -131,7 +132,7 @@ type uiClosure struct {
 	retc chan uintptr
 }
 
-func main(f func(oswin.Screen)) error {
+func main(f func(oswin.App)) error {
 	if gl.Version() == "GL_ES_2_0" {
 		return errors.New("gldriver: ES 3 required on X11")
 	}
@@ -140,7 +141,7 @@ func main(f func(oswin.Screen)) error {
 
 	closec := make(chan struct{})
 	go func() {
-		f(theScreen)
+		f(theApp)
 		close(closec)
 	}()
 
@@ -182,11 +183,40 @@ func main(f func(oswin.Screen)) error {
 	}
 }
 
+//export resetScreens
+func resetScreens() {
+	theApp.mu.Lock()
+	theApp.screens = make([]*oswin.Screen, 0)
+	theApp.mu.Unlock()
+}
+
+//export setScreen
+func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int) {
+	theApp.mu.Lock()
+	var sc *oswin.Screen
+	if scrIdx < len(theApp.screens) {
+		sc = theApp.screens[scrIdx]
+	} else {
+		sc = &oswin.Screen{}
+		theApp.screens = append(theApp.screens, sc)
+	}
+	theApp.mu.Unlock()
+
+	sc.ScreenNumber = scrIdx
+	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
+	sc.Depth = depth
+	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
+	sc.PhysicalDPI = dpi
+	sc.DevicePixelRatio = pixratio
+	sc.PhysicalSize = image.Point{widthMM, heightMM}
+	// todo: rest of the fields
+}
+
 //export onExpose
 func onExpose(id uintptr) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return
@@ -202,67 +232,139 @@ func onKeysym(k, unshifted, shifted uint32) {
 }
 
 //export onKey
-func onKey(id uintptr, state uint16, detail, dir uint8) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+func onKey(id uintptr, state uint16, detail, act uint8) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return
 	}
 
 	r, c := theKeysyms.Lookup(detail, state)
-	w.Send(key.Event{
+
+	event := &key.Event{
 		Rune:      r,
 		Code:      c,
 		Modifiers: x11key.KeyModifiers(state),
-		Direction: key.Direction(dir),
-	})
+		Action:    key.Action(act),
+	}
+
+	w.Send(event)
+}
+
+var lastMouseClickEvent oswin.Event
+var lastMouseEvent oswin.Event
+
+// note: don't support chords -- just go in order..
+func buttonFromState(state uint16) int {
+	switch {
+	case state & Button1Mask:
+		return 1
+	case state & Button2Mask:
+		return 2
+	case state & Button3Mask:
+		return 3
+	}
+	return 0
 }
 
 //export onMouse
 func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
-
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 	if w == nil {
 		return
 	}
-
-	// TODO: should a mouse.Event have a separate MouseModifiers field, for
-	// which buttons are pressed during a mouse move?
-	btn := mouse.Button(button)
-	switch btn {
-	case 4:
-		btn = mouse.ButtonWheelUp
-	case 5:
-		btn = mouse.ButtonWheelDown
-	case 6:
-		btn = mouse.ButtonWheelLeft
-	case 7:
-		btn = mouse.ButtonWheelRight
+	where := image.Point{int(x), int(y)}
+	from := image.ZP
+	if lastMouseEvent != nil {
+		from = lastMouseEvent.Pos()
 	}
-	if btn.IsWheel() {
-		if dir != uint8(mouse.DirPress) {
+	mods := x11key.KeyModifiers(state)
+
+	var event oswin.Event
+	switch {
+	case button == 0: // moved
+		stb := buttonFromState(state)
+		if stb > 0 { // drag
+			event = &mouse.DragEvent{
+				MoveEvent: mouse.MoveEvent{
+					Event: mouse.Event{
+						Where:     where,
+						Button:    stb,
+						Action:    mouse.Drag,
+						Modifiers: mods,
+					},
+					From: from,
+				},
+			}
+		} else {
+			event = &mouse.MoveEvent{
+				Event: mouse.Event{
+					Where:     where,
+					Button:    mouse.NoButton,
+					Action:    mouse.Move,
+					Modifiers: mods,
+				},
+				From: from,
+			}
+		}
+	case button < 4: // regular click
+		act := mouse.Action(dir)
+		if act == mouse.Press && lastMouseClickEvent != nil {
+			interval := time.Now().Sub(lastMouseClickEvent.Time())
+			// fmt.Printf("interval: %v\n", interval)
+			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
+				act = mouse.DoubleClick
+			}
+		}
+		event = &mouse.Event{
+			Where:     where,
+			Button:    mouse.Button(button),
+			Action:    act,
+			Modifiers: mods,
+		}
+		if act == mouse.Press {
+			event.SetTime()
+			lastMouseClickEvent = event
+		}
+	default: // scroll wheel, 4-7
+		if dir != uint8(mouse.Press) { // only care about these for scrolling
 			return
 		}
-		dir = uint8(mouse.DirStep)
+		del := image.Point{}
+		switch btn {
+		case 4: // up
+			del.Y = -mouse.ScrollWheelRate
+		case 5: // down
+			del.Y = mouse.ScrollWheelRate
+		case 6: // left
+			del.X = -mouse.ScrollWheelRate
+		case 7: // right
+			del.X = mouse.ScrollWheelRate
+		}
+		event = &mouse.ScrollEvent{
+			Event: mouse.Event{
+				Where:     where,
+				Button:    mouse.Button(buttonFromState(state)),
+				Action:    mouse.Scroll,
+				Modifiers: mods,
+			},
+			Delta: del,
+		}
 	}
-	w.Send(mouse.Event{
-		X:         float32(x),
-		Y:         float32(y),
-		Button:    btn,
-		Modifiers: x11key.KeyModifiers(state),
-		Direction: mouse.Direction(dir),
-	})
+	event.SetTime()
+	lastMouseEvent = event
+	w.Send(event)
 }
 
 //export onFocus
 func onFocus(id uintptr, focused bool) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return
@@ -273,10 +375,10 @@ func onFocus(id uintptr, focused bool) {
 }
 
 //export onConfigure
-func onConfigure(id uintptr, x, y, width, height, displayWidth, displayWidthMM int32) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+func onConfigure(id uintptr, srcno, x, y, width, height, displayWidth, displayWidthMM int32) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return
@@ -285,25 +387,48 @@ func onConfigure(id uintptr, x, y, width, height, displayWidth, displayWidthMM i
 	w.lifecycler.SetVisible(x+width > 0 && y+height > 0)
 	w.lifecycler.SendEvent(w, w.glctx)
 
-	const (
-		mmPerInch = 25.4
-		ptPerInch = 72
-	)
-	pixelsPerMM := float32(displayWidth) / float32(displayWidthMM)
-	w.Send(window.Event{
-		WidthPx:     int(width),
-		HeightPx:    int(height),
-		WidthPt:     geom.Pt(width),
-		HeightPt:    geom.Pt(height),
-		PixelsPerPt: pixelsPerMM * mmPerInch / ptPerInch,
-	})
+	dpi := 25.4 * (float32(displayWidth) / float32(displayWidthMM))
+	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+
+	sz := image.Point{widthPx, heightPx}
+	ps := image.Point{x, y}
+
+	act := window.ActionN
+
+	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
+		act = window.Resize
+	} else if w.Pos != ps {
+		act = window.Move
+	} else {
+		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
+	}
+
+	w.sizeMu.Lock()
+	w.Sz = sz
+	w.Pos = ps
+	w.PhysDPI = dpi
+	w.LogDPI = ldpi
+
+	if scrno > 0 && len(theApp.screens) > scrno {
+		w.Scrn = theApp.screens[scrno]
+	}
+
+	w.sizeMu.Unlock()
+
+	winEv := window.Event{
+		Size:       sz,
+		LogicalDPI: ldpi,
+		Action:     act,
+	}
+	winEv.Init()
+	w.Send(&winEv)
 }
 
 //export onDeleteWindow
 func onDeleteWindow(id uintptr) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[id]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
 
 	if w == nil {
 		return

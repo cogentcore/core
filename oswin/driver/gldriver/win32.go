@@ -31,8 +31,8 @@ import (
 // TODO: change this to true, after manual testing on Win32.
 const useLifecycler = false
 
-func main(f func(oswin.Screen)) error {
-	return win32.Main(func() { f(theScreen) })
+func main(f func(oswin.App)) error {
+	return win32.Main(func() { f(theApp) })
 }
 
 var (
@@ -134,9 +134,9 @@ func init() {
 }
 
 func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[uintptr(hwnd)]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[uintptr(hwnd)]
+	theApp.mu.Unlock()
 
 	if w.lifecycleStage == to {
 		return
@@ -150,25 +150,25 @@ func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
 }
 
 func mouseEvent(hwnd syscall.Handle, e mouse.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[uintptr(hwnd)]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[uintptr(hwnd)]
+	theApp.mu.Unlock()
 
 	w.Send(e)
 }
 
 func keyEvent(hwnd syscall.Handle, e key.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[uintptr(hwnd)]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[uintptr(hwnd)]
+	theApp.mu.Unlock()
 
 	w.Send(e)
 }
 
 func paintEvent(hwnd syscall.Handle, e paint.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[uintptr(hwnd)]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[uintptr(hwnd)]
+	theApp.mu.Unlock()
 
 	if w.ctx == nil {
 		// Sometimes a paint event comes in before initial
@@ -181,9 +181,9 @@ func paintEvent(hwnd syscall.Handle, e paint.Event) {
 }
 
 func sizeEvent(hwnd syscall.Handle, e window.Event) {
-	theScreen.mu.Lock()
-	w := theScreen.windows[uintptr(hwnd)]
-	theScreen.mu.Unlock()
+	theApp.mu.Lock()
+	w := theApp.windows[uintptr(hwnd)]
+	theApp.mu.Unlock()
 
 	if w.ctx == nil {
 		// This is the initial size event on window creation.

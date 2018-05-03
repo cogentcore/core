@@ -9,13 +9,14 @@
 
 // +build windows
 
-// Package win32 implements a partial shiny screen driver using the Win32 API.
+// Package win32 implements a partial shiny app driver using the Win32 API.
 // It provides window, lifecycle, key, and mouse management, but no drawing.
 // That is left to windriver (using GDI) or gldriver (using DirectX via ANGLE).
 package win32
 
 import (
 	"fmt"
+	"image"
 	"runtime"
 	"sync"
 	"syscall"
@@ -30,12 +31,12 @@ import (
 	"golang.org/x/mobile/geom"
 )
 
-// screenHWND is the handle to the "Screen window".
-// The Screen window encapsulates all oswin.Screen operations
+// appHWND is the handle to the "App window".
+// The App window encapsulates all oswin.App operations
 // in an actual Windows window so they all run on the main thread.
 // Since any messages sent to a window will be executed on the
 // main thread, we can safely use the messages below.
-var screenHWND syscall.Handle
+var appHWND syscall.Handle
 
 const (
 	msgCreateWindow = _WM_USER + iota
@@ -46,7 +47,7 @@ const (
 )
 
 // userWM is used to generate private (WM_USER and above) window message IDs
-// for use by screenWindowWndProc and windowWndProc.
+// for use by appWindowWndProc and windowWndProc.
 type userWM struct {
 	sync.Mutex
 	id uint32
@@ -179,67 +180,83 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	return 0
 }
 
+var lastMouseClickEvent oswin.Event
+var lastMouseEvent oswin.Event
+
 func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	e := mouse.Event{
-		X:         float32(_GET_X_LPARAM(lParam)),
-		Y:         float32(_GET_Y_LPARAM(lParam)),
-		Modifiers: keyModifiers(),
-	}
 
-	switch uMsg {
-	case _WM_MOUSEMOVE:
-		e.Direction = mouse.DirNone
-	case _WM_LBUTTONDOWN, _WM_MBUTTONDOWN, _WM_RBUTTONDOWN:
-		e.Direction = mouse.DirPress
-	case _WM_LBUTTONUP, _WM_MBUTTONUP, _WM_RBUTTONUP:
-		e.Direction = mouse.DirRelease
-	case _WM_MOUSEWHEEL:
-		// TODO: On a trackpad, a scroll can be a drawn-out affair with a
-		// distinct beginning and end. Should the intermediate events be
-		// DirNone?
-		e.Direction = mouse.DirStep
+	where := image.Point{int(_GET_X_LPARAM(lParam)), int(_GET_Y_LPARAM(lParam))}
+	mods := keyModifiers()
 
-		// Convert from screen to window coordinates.
-		p := _POINT{
-			int32(e.X),
-			int32(e.Y),
-		}
-		_ScreenToClient(hwnd, &p)
-		e.X = float32(p.X)
-		e.Y = float32(p.Y)
-	default:
-		panic("sendMouseEvent() called on non-mouse message")
-	}
-
+	button := mouse.NoButton
 	switch uMsg {
 	case _WM_MOUSEMOVE:
 		// No-op.
 	case _WM_LBUTTONDOWN, _WM_LBUTTONUP:
-		e.Button = mouse.ButtonLeft
+		button = mouse.Left
 	case _WM_MBUTTONDOWN, _WM_MBUTTONUP:
-		e.Button = mouse.ButtonMiddle
+		button = mouse.Middle
 	case _WM_RBUTTONDOWN, _WM_RBUTTONUP:
-		e.Button = mouse.ButtonRight
+		button = mouse.Right
+	}
+
+	var event oswin.Event
+	switch uMsg {
+	case _WM_MOUSEMOVE:
+		// todo: drag!
+		event = &mouse.MoveEvent{
+			Event: mouse.Event{
+				Where:     where,
+				Button:    button,
+				Action:    mouse.Move,
+				Modifiers: mods,
+			},
+			From: from,
+		}
+	case _WM_LBUTTONDOWN, _WM_MBUTTONDOWN, _WM_RBUTTONDOWN:
+		event = &mouse.Event{
+			Where:     where,
+			Button:    button,
+			Action:    mouse.Press,
+			Modifiers: mods,
+		}
+		event.SetTime()
+		lastMouseClickEvent = event
+	case _WM_LBUTTONUP, _WM_MBUTTONUP, _WM_RBUTTONUP:
+		event = &mouse.Event{
+			Where:     where,
+			Button:    button,
+			Action:    mouse.Release,
+			Modifiers: mods,
+		}
+		event.SetTime()
+		lastMouseClickEvent = event
 	case _WM_MOUSEWHEEL:
 		// TODO: handle horizontal scrolling
 		delta := _GET_WHEEL_DELTA_WPARAM(wParam) / _WHEEL_DELTA
-		switch {
-		case delta > 0:
-			e.Button = mouse.ButtonWheelUp
-		case delta < 0:
-			e.Button = mouse.ButtonWheelDown
-			delta = -delta
-		default:
-			return
+		// Convert from screen to window coordinates.
+		p := _POINT{
+			int32(where.X),
+			int32(where.Y),
 		}
-		for delta > 0 {
-			MouseEvent(hwnd, e)
-			delta--
+		_ScreenToClient(hwnd, &p)
+		where.X = float32(p.X)
+		where.Y = float32(p.Y)
+
+		event = &mouse.ScrollEvent{
+			Event: mouse.Event{
+				Where:     where,
+				Button:    button,
+				Action:    mouse.Scroll,
+				Modifiers: mods,
+			},
+			Delta: image.Point{0, delta}, // only vert
 		}
-		return
+	default:
+		panic("sendMouseEvent() called on non-mouse message")
 	}
 
-	MouseEvent(hwnd, e)
+	MouseEvent(hwnd, event)
 
 	return 0
 }

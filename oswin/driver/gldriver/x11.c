@@ -156,7 +156,37 @@ startDriver() {
 			keysyms[(k-key_lo)*keysyms_per_keycode + 0],
 			keysyms[(k-key_lo)*keysyms_per_keycode + 1]);
 	}
+
+        getScreens()
 }
+
+
+void getScreens() {
+  int nscr = ScreenCount(x_dpy)
+  resetScreens();
+  int i;
+  for (i=0; i < nscr; i++) {
+    int screenPixW = DisplayWidth(x_dpy, ScreenOfDisplay(x_dpy, i));
+    int screenPixH = DisplayHeight(x_dpy, ScreenOfDisplay(x_dpy, i));
+    int screenWdMM = DisplayWidthMM(x_dpy, ScreenOfDisplay(x_dpy, i));
+    int screenHtMM = DisplayHeightMM(x_dpy, ScreenOfDisplay(x_dpy, i));
+    float dpi = 25.4 * screenPixW / screenWdMM;
+
+    // todo:
+    // https://stackoverflow.com/questions/49071914/how-to-get-system-scale-factor-in-x11
+    float pixelratio = 1.0;
+
+    float depth = 32; // todo:
+
+    // todo: to get screen name:
+    // https://stackoverflow.com/questions/29625442/how-to-find-the-dpi-of-a-monitor-on-which-a-specific-window-is-placed-in-linux
+    /* XRRScreenResources * res = XRRGetScreenResourcesCurrent(x_dpy, root); */
+    /* output_info = XRRGetOutputInfo (dpy, res, res->outputs[i]); */
+    /* output_info->name */
+    setScreen(i, dpi, pixelratio, screenPixW, screenPixH, screenWdMM, screenHtMM, depth);
+  }
+}
+
 
 void
 processEvents() {
@@ -191,7 +221,7 @@ processEvents() {
 			}
 			break;
 		case ConfigureNotify:
-			onConfigure(ev.xconfigure.window, ev.xconfigure.x, ev.xconfigure.y,
+                  onConfigure(ev.xconfigure.window, DefaultScreen(x_dpy), ev.xconfigure.x, ev.xconfigure.y,
 				ev.xconfigure.width, ev.xconfigure.height,
 				DisplayWidth(x_dpy, DefaultScreen(x_dpy)),
 				DisplayWidthMM(x_dpy, DefaultScreen(x_dpy)));
@@ -236,7 +266,7 @@ doCloseWindow(uintptr_t id) {
 }
 
 uintptr_t
-doNewWindow(int width, int height, char* title, int title_len) {
+doNewWindow(int width, int height, int left, int top, char* title, int title_len, bool dialog, bool modal, bool tool, bool fullscreen) {
 	XSetWindowAttributes attr;
 	attr.colormap = x_colormap;
 	attr.event_mask =
@@ -250,7 +280,7 @@ doNewWindow(int width, int height, char* title, int title_len) {
 		FocusChangeMask;
 
 	Window win = XCreateWindow(
-		x_dpy, x_root, 0, 0, width, height, 0, x_visual_info->depth, InputOutput,
+		x_dpy, x_root, left, top, width, height, 0, x_visual_info->depth, InputOutput,
 		x_visual_info->visual, CWColormap | CWEventMask, &attr);
 
 	XSizeHints sizehints;
@@ -266,6 +296,8 @@ doNewWindow(int width, int height, char* title, int title_len) {
 
 	XSetStandardProperties(x_dpy, win, "", "App", None, (char **)NULL, 0, &sizehints);
 	XChangeProperty(x_dpy, win, net_wm_name, utf8_string, 8, PropModeReplace, title, title_len);
+
+        // todo: use the props..
 
 	return win;
 }

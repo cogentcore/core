@@ -28,8 +28,19 @@ import (
 // This is also in gi.Prefs and updated from there
 var DoubleClickMSec = 500
 
-// DoubleClickWait causes the event system to wait for a possible double-click event before sending single clicks.  This causes a delay, but avoids many sources of potential difficulty in dealing with double-clicking, as described here: https://blogs.msdn.microsoft.com/oldnewthing/20041015-00/?p=37553
-var DoubleClickWait = true
+// TODO: implement DoubleClickWait
+
+// DoubleClickWait causes the event system to wait for a possible double-click
+// event before sending single clicks.  This causes a delay, but avoids many
+// sources of potential difficulty in dealing with double-clicking, as
+// described here:
+// https://blogs.msdn.microsoft.com/oldnewthing/20041015-00/?p=37553
+var DoubleClickWait = false
+
+// ScrollWheelRate controls how fast the scroll wheel moves (typically
+// interpreted as pixels per wheel step) -- only relevant for some OS's which
+// do not have a native preference for this setting, e.g., X11
+var ScrollWheelRate = 2
 
 // mouse.Event is a basic mouse event for button presses, but not motion or scrolling
 type Event struct {

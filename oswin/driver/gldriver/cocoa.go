@@ -447,9 +447,9 @@ func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
 
 	event := &key.Event{
 		Rune:      er,
-		Action:    ea,
 		Code:      ec,
 		Modifiers: em,
+		Action:    ea,
 	}
 
 	sendWindowEvent(id, event)
