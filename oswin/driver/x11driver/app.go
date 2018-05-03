@@ -26,9 +26,9 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 
 	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/goki/gi/oswin/key"
 	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
 	"golang.org/x/image/math/f64"
 )
 
@@ -65,21 +65,21 @@ type appImpl struct {
 	uniformP  render.Picture
 
 	mu              sync.Mutex
-	images         map[shm.Seg]*imageImpl
+	images          map[shm.Seg]*imageImpl
 	uploads         map[uint16]chan struct{}
 	windows         map[xproto.Window]*windowImpl
 	winlist         []*windowImpl
 	screens         []*oswin.Screen
 	nPendingUploads int
 	completionKeys  []uint16
-	name    string
+	name            string
 }
 
 func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	app := &appImpl{
 		xc:      xc,
 		xsi:     xproto.Setup(xc).DefaultScreen(xc),
-		images: map[shm.Seg]*imageImpl{},
+		images:  map[shm.Seg]*imageImpl{},
 		uploads: map[uint16]chan struct{}{},
 		windows: map[xproto.Window]*windowImpl{},
 		winlist: make([]*windowImpl, 0),
@@ -368,7 +368,7 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	}
 	if w == 0 || h == 0 {
 		return &textureImpl{
-			app:    app,
+			app:  app,
 			size: size,
 		}, nil
 	}
@@ -391,7 +391,7 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	}})
 
 	return &textureImpl{
-		app:    app,
+		app:  app,
 		size: size,
 		xm:   xm,
 		xp:   xp,

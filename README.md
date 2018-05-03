@@ -11,6 +11,8 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI frame
 
 GoGi also incorporates reflection-based View elements that enable automatic representation and editing of all native Go data structures, providing a built-in native first-order GUI framework with no additional coding.  This enables built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+E` (or `I`) on any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
 
+**IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu
+
 # Code Map
 
 * `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try -- see README there for more info
@@ -76,6 +78,15 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 	+ this allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  ValueView in particular requires this kind of behavior.  todo: go back and make this more consistent.
 
 ### TODO
+
+* startup size is using the builtin default scale or something -- now opening very big on mac. 
+
+* scroll should go to the sub-widget first before going to the layout.. 
+
+* Linux: we need the SetSize in x11/window.go -- that is key for dialog window
+  sizing, and also close windows..
+
+* and probably just need to go ahead and impl windows :(  at least try
 
 * style parsing crash on font-family?  now just seems to ignore it?a
 

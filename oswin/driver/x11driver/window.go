@@ -18,14 +18,14 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 
 	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/key"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/oswin/paint"
-	"github.com/goki/goki/gi/oswin/window"
 	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
+	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/goki/gi/oswin/paint"
+	"github.com/goki/goki/gi/oswin/window"
 	"golang.org/x/image/math/f64"
 )
 
@@ -114,9 +114,10 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	w.lifecycler.SetVisible((int(ev.X)+int(ev.Width)) > 0 && (int(ev.Y)+int(ev.Height)) > 0)
 	w.lifecycler.SendEvent(w, nil)
 
-	// todo:
-	// dpi := 25.4 * (float32(displayWidth) / float32(displayWidthMM))
-	dpi := float32(96)
+	// todo: support multple screens
+	sc := oswin.TheApp.Screen(0)
+
+	dpi := sc.PhysicalDPI
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
 
 	sz := image.Point{int(ev.Width), int(ev.Height)}
@@ -175,7 +176,6 @@ func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Acti
 	}
 
 }
-
 
 var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
@@ -265,6 +265,5 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-     // todo
+	// todo: actually essential
 }
-
