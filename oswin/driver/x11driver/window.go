@@ -141,7 +141,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	w.LogDPI = ldpi
 
 	// if scrno > 0 && len(theApp.screens) > int(scrno) {
-	// 	w.Scrn = theApp.screens[scrno]
+	w.Scrn = sc
 	// }
 
 	winEv := &window.Event{

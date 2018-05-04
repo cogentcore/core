@@ -10,9 +10,10 @@
 package driver
 
 import (
+        "github.com/goki/goki/gi/oswin"
 	"github.com/goki/goki/gi/oswin/driver/windriver"
 )
 
-func main(f func(oswin.Ap)) {
+func main(f func(oswin.App)) {
 	windriver.Main(f)
 }

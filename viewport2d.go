@@ -73,6 +73,9 @@ func NewViewport2D(width, height int) *Viewport2D {
 // triggers update -- wrap in other UpdateStart/End calls as appropriate
 func (vp *Viewport2D) Resize(width, height int) {
 	nwsz := image.Point{width, height}
+	if width == 0 && height == 0 {
+		return
+	}
 	if vp.Pixels != nil {
 		ib := vp.Pixels.Bounds().Size()
 		if ib == nwsz {

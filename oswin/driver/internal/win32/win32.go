@@ -20,6 +20,7 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/goki/goki/gi/oswin"
@@ -28,7 +29,6 @@ import (
 	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
-	"golang.org/x/mobile/geom"
 )
 
 // appWND is the handle to the "AppWindow".  The window encapsulates all
@@ -39,6 +39,7 @@ var appHWND syscall.Handle
 
 const (
 	msgCreateWindow = _WM_USER + iota
+	msgDeleteWindow
 	msgMainCallback
 	msgShow
 	msgQuit
@@ -90,8 +91,8 @@ func newWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 	return hwnd, nil
 }
 
-// ResizeClientRect makes hwnd client rectangle opts.Width by opts.Height in size.
-func ResizeClientRect(hwnd syscall.Handle, opts *oswin.NewWindowOptions) error {
+// ResizeClientRect makes hwnd client rectangle given size
+func ResizeClientRect(hwnd syscall.Handle, size image.Point) error {
 	var cr, wr _RECT
 	err := _GetClientRect(hwnd, &cr)
 	if err != nil {
@@ -101,8 +102,8 @@ func ResizeClientRect(hwnd syscall.Handle, opts *oswin.NewWindowOptions) error {
 	if err != nil {
 		return err
 	}
-	w := (wr.Right - wr.Left) - (cr.Right - int32(opts.Size.X))
-	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(opts.Size.Y))
+	w := (wr.Right - wr.Left) - (cr.Right - int32(size.X))
+	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(size.Y))
 	return _MoveWindow(hwnd, wr.Left, wr.Top, w, h, false)
 }
 
@@ -120,8 +121,13 @@ func Show(hwnd syscall.Handle) {
 func Release(hwnd syscall.Handle) {
 	// TODO(andlabs): check for errors from this?
 	// TODO(andlabs): remove unsafe
-	_DestroyWindow(hwnd)
+	DeleteWindow(hwnd)
 	// TODO(andlabs): what happens if we're still painting?
+}
+
+// this must be called in original app thread..
+func deleteWindow(hwnd syscall.Handle) {
+	_DestroyWindow(hwnd)
 }
 
 func sendFocus(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
@@ -161,18 +167,37 @@ func sendSize(hwnd syscall.Handle) {
 	width := int(r.Right - r.Left)
 	height := int(r.Bottom - r.Top)
 
-	// TODO(andlabs): don't assume that PixelsPerPt == 1
-	SizeEvent(hwnd, window.Event{
-		WidthPx:     width,
-		HeightPx:    height,
-		WidthPt:     geom.Pt(width),
-		HeightPt:    geom.Pt(height),
-		PixelsPerPt: 1,
-	})
+	if width < 100 {
+	   width = 1000
+	}
+	if height < 100 {
+	   height = 1000
+	}
+
+	// todo: support multple screens
+	sc := oswin.TheApp.Screen(0)
+
+	dpi := sc.PhysicalDPI
+	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+
+	sz := image.Point{int(width), int(height)}
+//	ps := image.Point{int(r.Left), int(r.Top)}
+
+//	fmt.Printf("sendsize: %v %v sc %+v rect %+v\n",	width, height, sc, r)
+
+	act := window.ActionN
+
+	winEv := &window.Event{
+		Size:       sz,
+		LogicalDPI: ldpi,
+		Action:     act,
+	}
+	WindowEvent(hwnd, winEv)
 }
 
 func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
 	LifecycleEvent(hwnd, lifecycle.StageDead)
+	Release(hwnd)
 	return 0
 }
 
@@ -180,14 +205,23 @@ var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
 
 func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-
 	where := image.Point{int(_GET_X_LPARAM(lParam)), int(_GET_Y_LPARAM(lParam))}
+	from := image.ZP
+	if lastMouseEvent != nil {
+		from = lastMouseEvent.Pos()
+	}
 	mods := keyModifiers()
 
 	button := mouse.NoButton
 	switch uMsg {
 	case _WM_MOUSEMOVE:
-		// No-op.
+	     if wParam & _MK_LBUTTON != 0 {
+	     	button = mouse.Left
+	     } else if wParam & _MK_MBUTTON != 0 {
+	       button = mouse.Middle
+	     } else if wParam & _MK_RBUTTON != 0 {
+	       button = mouse.Right
+	     }
 	case _WM_LBUTTONDOWN, _WM_LBUTTONUP:
 		button = mouse.Left
 	case _WM_MBUTTONDOWN, _WM_MBUTTONUP:
@@ -199,7 +233,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 	var event oswin.Event
 	switch uMsg {
 	case _WM_MOUSEMOVE:
-		// todo: drag!
+	     if button == mouse.NoButton {	     
 		event = &mouse.MoveEvent{
 			Event: mouse.Event{
 				Where:     where,
@@ -209,11 +243,32 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 			},
 			From: from,
 		}
+	} else {
+			event = &mouse.DragEvent{
+				MoveEvent: mouse.MoveEvent{
+					Event: mouse.Event{
+						Where:     where,
+						Button:    button,
+						Action:    mouse.Drag,
+						Modifiers: mods,
+					},
+					From: from,
+				},
+			}
+		}
 	case _WM_LBUTTONDOWN, _WM_MBUTTONDOWN, _WM_RBUTTONDOWN:
+	     act := mouse.Press
+		if lastMouseClickEvent != nil {
+			interval := time.Now().Sub(lastMouseClickEvent.Time())
+			// fmt.Printf("interval: %v\n", interval)
+			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
+				act = mouse.DoubleClick
+			}
+		}
 		event = &mouse.Event{
 			Where:     where,
 			Button:    button,
-			Action:    mouse.Press,
+			Action:    act,
 			Modifiers: mods,
 		}
 		event.SetTime()
@@ -225,19 +280,18 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 			Action:    mouse.Release,
 			Modifiers: mods,
 		}
-		event.SetTime()
-		lastMouseClickEvent = event
 	case _WM_MOUSEWHEEL:
 		// TODO: handle horizontal scrolling
-		delta := _GET_WHEEL_DELTA_WPARAM(wParam) / _WHEEL_DELTA
+		delta := _GET_WHEEL_DELTA_WPARAM(wParam)
+		// fmt.Printf("delta %v\n", delta)
 		// Convert from screen to window coordinates.
 		p := _POINT{
 			int32(where.X),
 			int32(where.Y),
 		}
 		_ScreenToClient(hwnd, &p)
-		where.X = float32(p.X)
-		where.Y = float32(p.Y)
+		where.X = int(p.X)
+		where.Y = int(p.Y)
 
 		event = &mouse.ScrollEvent{
 			Event: mouse.Event{
@@ -246,57 +300,60 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 				Action:    mouse.Scroll,
 				Modifiers: mods,
 			},
-			Delta: image.Point{0, delta}, // only vert
+			Delta: image.Point{0, int(delta)}, // only vert
 		}
 	default:
 		panic("sendMouseEvent() called on non-mouse message")
 	}
 
+	event.Init()
+	lastMouseEvent = event
 	MouseEvent(hwnd, event)
 
 	return 0
 }
 
 // Precondition: this is called in immediate response to the message that triggered the event (so not after w.Send).
-func keyModifiers() (m key.Modifiers) {
+func keyModifiers() int32 {
+        var m key.Modifiers
 	down := func(x int32) bool {
 		// GetKeyState gets the key state at the time of the message, so this is what we want.
 		return _GetKeyState(x)&0x80 != 0
 	}
 
 	if down(_VK_CONTROL) {
-		m |= 1 << key.Control
+		m |= 1 << uint32(key.Control)
 	}
 	if down(_VK_MENU) {
-		m |= 1 << key.Alt
+		m |= 1 << uint32(key.Alt)
 	}
 	if down(_VK_SHIFT) {
-		m |= 1 << key.Shift
+		m |= 1 << uint32(key.Shift)
 	}
 	if down(_VK_LWIN) || down(_VK_RWIN) {
-		m |= 1 << key.Meta
+		m |= 1 << uint32(key.Meta)
 	}
-	return m
+	return int32(m)
 }
 
 var (
-	MouseEvent     func(hwnd syscall.Handle, e *mouse.Event)
-	PaintEvent     func(hwnd syscall.Handle, e *paint.Event)
-	SizeEvent      func(hwnd syscall.Handle, e *window.Event)
-	KeyEvent       func(hwnd syscall.Handle, e *key.Event)
-	LifecycleEvent func(hwnd syscall.Handle, e *lifecycle.Stage)
+	MouseEvent     func(hwnd syscall.Handle, e oswin.Event)
+	PaintEvent     func(hwnd syscall.Handle, e oswin.Event)
+	WindowEvent    func(hwnd syscall.Handle, e oswin.Event)
+	KeyEvent       func(hwnd syscall.Handle, e oswin.Event)
+	LifecycleEvent func(hwnd syscall.Handle, e lifecycle.Stage)
 )
 
 func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	PaintEvent(hwnd, paint.Event{})
+	PaintEvent(hwnd, &paint.Event{})
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }
 
-var screenMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr){}
+var appMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr){}
 
-func AddScreenMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr)) uint32 {
+func AddAppMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr)) uint32 {
 	uMsg := currentUserWM.next()
-	screenMsgs[uMsg] = func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) uintptr {
+	appMsgs[uMsg] = func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) uintptr {
 		fn(hwnd, uMsg, wParam, lParam)
 		return 0
 	}
@@ -308,15 +365,18 @@ func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam u
 	case msgCreateWindow:
 		p := (*newWindowParams)(unsafe.Pointer(lParam))
 		p.w, p.err = newWindow(p.opts)
+	case msgDeleteWindow:
+		hwnd := (syscall.Handle)(unsafe.Pointer(lParam))
+		deleteWindow(hwnd)
 	case msgMainCallback:
 		go func() {
 			mainCallback()
-			SendScreenMessage(msgQuit, 0, 0)
+			SendAppMessage(msgQuit, 0, 0)
 		}()
 	case msgQuit:
 		_PostQuitMessage(0)
 	}
-	fn := screenMsgs[uMsg]
+	fn := appMsgs[uMsg]
 	if fn != nil {
 		return fn(hwnd, uMsg, wParam, lParam)
 	}
@@ -325,7 +385,7 @@ func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam u
 
 //go:uintptrescapes
 
-func SendScreenMessage(uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+func SendAppMessage(uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
 	return SendMessage(appHWND, uMsg, wParam, lParam)
 }
 
@@ -377,8 +437,12 @@ type newWindowParams struct {
 func NewWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 	var p newWindowParams
 	p.opts = opts
-	SendScreenMessage(msgCreateWindow, 0, uintptr(unsafe.Pointer(&p)))
+	SendAppMessage(msgCreateWindow, 0, uintptr(unsafe.Pointer(&p)))
 	return p.w, p.err
+}
+
+func DeleteWindow(hwnd syscall.Handle) {
+	SendAppMessage(msgDeleteWindow, 0, uintptr(unsafe.Pointer(hwnd)))
 }
 
 const windowClass = "GoGi_Window"
@@ -439,7 +503,7 @@ func ScreenSize() (width, height int) {
 	width = 1024
 	height = 768
 	var wr _RECT
-	err = _GetWindowRect(appHWND, &wr)
+	err := _GetWindowRect(appHWND, &wr)
 	if err != nil {
 		width = int(wr.Right - wr.Left)
 		height = int(wr.Bottom - wr.Top)

@@ -331,25 +331,42 @@ func readRune(vKey uint32, scanCode uint8) rune {
 }
 
 func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	e := key.Event{
-		Rune:      readRune(uint32(wParam), uint8(lParam>>16)),
-		Code:      convVirtualKeyCode(uint32(wParam)),
-		Modifiers: keyModifiers(),
-	}
+	r := readRune(uint32(wParam), uint8(lParam>>16))
+	c := convVirtualKeyCode(uint32(wParam))
+	mod := int32(keyModifiers())
+	var act key.Action
+	
 	switch uMsg {
 	case _WM_KEYDOWN:
 		const prevMask = 1 << 30
 		if repeat := lParam&prevMask == prevMask; repeat {
-			e.Action = key.None
+			act = key.None
 		} else {
-			e.Action = key.Press
+			act = key.Press
 		}
 	case _WM_KEYUP:
-		e.Direction = key.DirRelease
+		act = key.Release
 	default:
 		panic(fmt.Sprintf("win32: unexpected key message: %d", uMsg))
 	}
 
-	KeyEvent(hwnd, &e)
+	event := &key.Event{
+		Rune:      r,
+		Code:      c,
+		Modifiers: mod,
+		Action:    act,
+	}
+
+	KeyEvent(hwnd, event)
+
+	// do ChordEvent -- only for non-modifier key presses -- call
+	// key.ChordString to convert the event into a parsable string for GUI
+	// events
+	if act == key.Press && !key.CodeIsModifier(c) {
+		che := &key.ChordEvent{Event: *event}
+		KeyEvent(hwnd, che)
+	}
+
+
 	return 0
 }

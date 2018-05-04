@@ -67,7 +67,7 @@ func (*appImpl) NewImage(size image.Point) (oswin.Image, error) {
 	}, nil
 }
 
-func (*appImpl) NewTexture(size image.Point) (oswin.Texture, error) {
+func (*appImpl) NewTexture(w oswin.Window, size image.Point) (oswin.Texture, error) {
 	return newTexture(size)
 }
 
@@ -101,7 +101,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.windows[w.hwnd] = w
 	app.mu.Unlock()
 
-	err = win32.ResizeClientRect(w.hwnd, opts)
+	err = win32.ResizeClientRect(w.hwnd, opts.Size)
 	if err != nil {
 		return nil, err
 	}
@@ -137,12 +137,21 @@ func (app *appImpl) initScreens() {
 	sc := &oswin.Screen{}
 	app.screens[0] = sc
 
+	// todo: this is not working at all!
 	widthPx, heightPx := win32.ScreenSize()
+
+	if widthPx == 0 {
+	   widthPx = 1200
+   	}
+	if heightPx == 0 {
+	   heightPx = 800
+ 	}
+
 	// widthMM := app.xsi.WidthInMillimeters
 	// heightMM := app.xsi.WidthInMillimeters
 	// dpi := 25.4 * (float32(widthPx) / float32(widthMM))
 
-	dpi = float32(96)
+	dpi := float32(96)
 
 	depth := 32
 	pixratio := float32(1.0)
@@ -155,7 +164,7 @@ func (app *appImpl) initScreens() {
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{int(widthPx), int(heightPx)} // don't know yet..
 	// todo: rest of the fields
-
+//	fmt.Printf("screen: %+v\n", sc)
 }
 
 func (app *appImpl) NScreens() int {

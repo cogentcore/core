@@ -21,15 +21,13 @@ import (
 	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/goki/gi/oswin/driver/internal/win32"
-	"github.com/goki/goki/gi/oswin/key"
 	"github.com/goki/goki/gi/oswin/lifecycle"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
 	"golang.org/x/image/math/f64"
 )
 
 type windowImpl struct {
+        oswin.WindowBase
 	hwnd syscall.Handle
 
 	event.Deque
@@ -39,6 +37,7 @@ type windowImpl struct {
 }
 
 func (w *windowImpl) Release() {
+        theApp.DeleteWin(w.hwnd)
 	win32.Release(w.hwnd)
 }
 
@@ -170,6 +169,10 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	return oswin.PublishResult{}
 }
 
+func (w *windowImpl) SetSize(sz image.Point) {
+     	win32.ResizeClientRect(w.hwnd, sz)
+}
+
 func init() {
 	send := func(hwnd syscall.Handle, e oswin.Event) {
 		theApp.mu.Lock()
@@ -179,9 +182,9 @@ func init() {
 		e.Init()
 		w.Send(e)
 	}
-	win32.MouseEvent = func(hwnd syscall.Handle, e *mouse.Event) { send(hwnd, e) }
-	win32.PaintEvent = func(hwnd syscall.Handle, e *paint.Event) { send(hwnd, e) }
-	win32.KeyEvent = func(hwnd syscall.Handle, e *key.Event) { send(hwnd, e) }
+	win32.MouseEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
+	win32.PaintEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
+	win32.KeyEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
 	win32.LifecycleEvent = lifecycleEvent
 	win32.WindowEvent = windowEvent
 }
@@ -190,29 +193,60 @@ func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
+	if w == nil {
+	   return
+	}
 
 	if w.lifecycleStage == to {
 		return
 	}
-	w.Send(lifecycle.Event{
+	le := &lifecycle.Event{
 		From: w.lifecycleStage,
 		To:   to,
-	})
+	}
+	le.Init()
+	w.Send(le)
 	w.lifecycleStage = to
 }
 
-func windowEvent(hwnd syscall.Handle, e *window.Event) {
+func windowEvent(hwnd syscall.Handle, e oswin.Event) {
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
 
-	e.Init()
-	w.Send(&e)
+	we := e.(*window.Event)
+	sz := we.Size
+	ldpi := we.LogicalDPI
 
-	if e != w.sz {
-		w.sz = e
-		w.Send(&paint.Event{})
+	// todo: multiple screens
+	sc := oswin.TheApp.Screen(0)
+	
+	act := window.ActionN
+	
+	if w.Sz != sz || w.LogDPI != ldpi {
+		act = window.Resize
+//	} else if w.Pos != ps {
+//		act = window.Move
+//	} else {
+//		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
 	}
+
+	w.Sz = we.Size
+	// todo: extend event to include position
+// 	w.Pos = ps
+	w.PhysDPI = sc.PhysicalDPI
+	w.LogDPI = we.LogicalDPI
+	w.Scrn = sc
+
+	we.Action = act
+	we.Init()
+	w.Send(we)
+
+	// todo: redundant?
+//	if e != w.sz {
+//		w.sz = sz
+//		w.Send(&paint.Event{})
+//	}
 }
 
 // cmd is used to carry parameters between user code

@@ -124,41 +124,6 @@ func (p *FontStyle) SetUnitContext(ctxt *units.Context) {
 	}
 }
 
-// update the font settings from the style info on the node
-// func (pf *FontStyle) SetFromNode(g *Node2DBase) {
-// 	// always check if property has been set before setting -- otherwise defaults to empty -- true = inherit props
-
-// 	loadFont := false
-
-// 	prevFaceName := pf.FaceName
-
-// 	if sz, got := g.PropNumber("font-size"); got {
-// 		if pf.Points != sz {
-// 			loadFont = true
-// 		}
-// 		pf.Points = sz
-// 	}
-// 	if nm, got := g.PropEnum("font-face"); got {
-// 		if len(nm) != 0 {
-// 			if pf.FaceName != nm {
-// 				pf.FaceName = nm
-// 				loadFont = true
-// 			}
-// 		}
-// 	}
-// 	if nm, got := g.PropEnum("font-family"); got {
-// 		if len(nm) != 0 {
-// 			if pf.FaceName != nm {
-// 				pf.FaceName = nm
-// 				loadFont = true
-// 			}
-// 		}
-// 	}
-// 	if loadFont {
-// 		pf.LoadFont(prevFaceName)
-// 	}
-// }
-
 func LoadFontFace(path string, points float64) (font.Face, error) {
 	fontBytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -236,7 +201,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			}
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
-				basefn := strings.TrimRight(fn, ext)
+				basefn := strings.ToLower(strings.TrimRight(fn, ext))
 				fl.FontsAvail[basefn] = path
 				// fmt.Printf("added font: %v at path %q\n", basefn, path)
 			}
@@ -252,6 +217,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 
 // get a particular font
 func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
+        fontnm = strings.ToLower(fontnm)
 	fl.Init()
 	if facemap := fl.Faces[fontnm]; facemap != nil {
 		if face := facemap[points]; face != nil {

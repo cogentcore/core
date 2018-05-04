@@ -55,7 +55,7 @@ func (e Event) Bounds() image.Rectangle {
 	return image.Rectangle{Max: e.Size}
 }
 
-// ScreenData returns the screen data associated with the screen on which this
+// Screen returns the screen associated with the screen on which this
 // window is displayed
 func (e Event) Screen() *oswin.Screen {
 	return oswin.TheApp.Screen(e.ScreenNumber)
