@@ -12,10 +12,10 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/goki/goki/oswin/driver/internal/swizzle"
+	"github.com/goki/goki/gi/oswin/driver/internal/swizzle"
 )
 
-type bufferImpl struct {
+type imageImpl struct {
 	hbitmap syscall.Handle
 	buf     []byte
 	rgba    image.RGBA
@@ -27,25 +27,25 @@ type bufferImpl struct {
 	cleanedUp bool
 }
 
-func (b *bufferImpl) Size() image.Point       { return b.size }
-func (b *bufferImpl) Bounds() image.Rectangle { return image.Rectangle{Max: b.size} }
-func (b *bufferImpl) RGBA() *image.RGBA       { return &b.rgba }
+func (b *imageImpl) Size() image.Point       { return b.size }
+func (b *imageImpl) Bounds() image.Rectangle { return image.Rectangle{Max: b.size} }
+func (b *imageImpl) RGBA() *image.RGBA       { return &b.rgba }
 
-func (b *bufferImpl) preUpload() {
+func (b *imageImpl) preUpload() {
 	// Check that the program hasn't tried to modify the rgba field via the
-	// pointer returned by the bufferImpl.RGBA method. This check doesn't catch
+	// pointer returned by the imageImpl.RGBA method. This check doesn't catch
 	// 100% of all cases; it simply tries to detect some invalid uses of a
-	// app.Buffer such as:
-	//	*buffer.RGBA() = anotherImageRGBA
+	// oswin.Image such as:
+	//	*image.RGBA() = anotherImageRGBA
 	if len(b.buf) != 0 && len(b.rgba.Pix) != 0 && &b.buf[0] != &b.rgba.Pix[0] {
-		panic("windriver: invalid Buffer.RGBA modification")
+		panic("windriver: invalid Image.RGBA modification")
 	}
 
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	if b.released {
-		panic("windriver: Buffer.Upload called after Buffer.Release")
+		panic("windriver: Image.Upload called after Image.Release")
 	}
 	if b.nUpload == 0 {
 		swizzle.BGRA(b.buf)
@@ -53,7 +53,7 @@ func (b *bufferImpl) preUpload() {
 	b.nUpload++
 }
 
-func (b *bufferImpl) postUpload() {
+func (b *imageImpl) postUpload() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -69,7 +69,7 @@ func (b *bufferImpl) postUpload() {
 	}
 }
 
-func (b *bufferImpl) Release() {
+func (b *imageImpl) Release() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -79,11 +79,11 @@ func (b *bufferImpl) Release() {
 	b.released = true
 }
 
-func (b *bufferImpl) cleanUp() {
+func (b *imageImpl) cleanUp() {
 	b.mu.Lock()
 	if b.cleanedUp {
 		b.mu.Unlock()
-		panic("windriver: Buffer clean-up occurred twice")
+		panic("windriver: Image clean-up occurred twice")
 	}
 	b.cleanedUp = true
 	b.mu.Unlock()
@@ -92,7 +92,7 @@ func (b *bufferImpl) cleanUp() {
 	_DeleteObject(b.hbitmap)
 }
 
-func (b *bufferImpl) blitToDC(dc syscall.Handle, dp image.Point, sr image.Rectangle) error {
+func (b *imageImpl) blitToDC(dc syscall.Handle, dp image.Point, sr image.Rectangle) error {
 	b.preUpload()
 	defer b.postUpload()
 

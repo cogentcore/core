@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/goki/goki/oswin/driver/internal/errapp"
-	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver/internal/errapp"
 )
 
 // Main is called by the program's main function to run the graphical
@@ -20,7 +20,7 @@ import (
 // It calls f on the App, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(app.App)) {
+func Main(f func(oswin.App)) {
 	f(errapp.Stub(fmt.Errorf(
 		"windriver: unsupported GOOS/GOARCH %s/%s", runtime.GOOS, runtime.GOARCH)))
 }

@@ -17,15 +17,16 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/goki/oswin/driver/internal/drawer"
-	"github.com/goki/goki/oswin/driver/internal/event"
-	"github.com/goki/goki/oswin/driver/internal/win32"
-	"github.com/goki/goki/oswin/app"
-	"golang.org/x/image/math/f64"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
+	"github.com/goki/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/goki/gi/oswin/driver/internal/win32"
 	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/goki/gi/oswin/lifecycle"
 	"github.com/goki/goki/gi/oswin/mouse"
 	"github.com/goki/goki/gi/oswin/paint"
 	"github.com/goki/goki/gi/oswin/window"
+	"golang.org/x/image/math/f64"
 )
 
 type windowImpl struct {
@@ -41,15 +42,15 @@ func (w *windowImpl) Release() {
 	win32.Release(w.hwnd)
 }
 
-func (w *windowImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
-	src.(*bufferImpl).preUpload()
-	defer src.(*bufferImpl).postUpload()
+func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
+	src.(*imageImpl).preUpload()
+	defer src.(*imageImpl).postUpload()
 
 	w.execCmd(&cmd{
-		id:     cmdUpload,
-		dp:     dp,
-		buffer: src.(*bufferImpl),
-		sr:     sr,
+		id:    cmdUpload,
+		dp:    dp,
+		image: src.(*imageImpl),
+		sr:    sr,
 	})
 }
 
@@ -62,7 +63,7 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	})
 }
 
-func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	if op != draw.Src && op != draw.Over {
 		// TODO:
 		return
@@ -76,7 +77,7 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src app.Texture, sr image.Rectangle,
 	})
 }
 
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	if op != draw.Src && op != draw.Over {
 		// TODO:
 		return
@@ -156,30 +157,31 @@ func drawWindow(dc syscall.Handle, src2dst f64.Aff3, src interface{}, sr image.R
 	return fmt.Errorf("unsupported type %T", src)
 }
 
-func (w *windowImpl) Copy(dp image.Point, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	drawer.Copy(w, dp, src, sr, op, opts)
 }
 
-func (w *windowImpl) Scale(dr image.Rectangle, src app.Texture, sr image.Rectangle, op draw.Op, opts *app.DrawOptions) {
+func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	drawer.Scale(w, dr, src, sr, op, opts)
 }
 
-func (w *windowImpl) Publish() app.PublishResult {
+func (w *windowImpl) Publish() oswin.PublishResult {
 	// TODO
-	return app.PublishResult{}
+	return oswin.PublishResult{}
 }
 
 func init() {
-	send := func(hwnd syscall.Handle, e interface{}) {
+	send := func(hwnd syscall.Handle, e oswin.Event) {
 		theApp.mu.Lock()
 		w := theApp.windows[hwnd]
 		theApp.mu.Unlock()
 
+		e.Init()
 		w.Send(e)
 	}
-	win32.MouseEvent = func(hwnd syscall.Handle, e mouse.Event) { send(hwnd, e) }
-	win32.PaintEvent = func(hwnd syscall.Handle, e paint.Event) { send(hwnd, e) }
-	win32.KeyEvent = func(hwnd syscall.Handle, e key.Event) { send(hwnd, e) }
+	win32.MouseEvent = func(hwnd syscall.Handle, e *mouse.Event) { send(hwnd, e) }
+	win32.PaintEvent = func(hwnd syscall.Handle, e *paint.Event) { send(hwnd, e) }
+	win32.KeyEvent = func(hwnd syscall.Handle, e *key.Event) { send(hwnd, e) }
 	win32.LifecycleEvent = lifecycleEvent
 	win32.WindowEvent = windowEvent
 }
@@ -199,16 +201,17 @@ func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
 	w.lifecycleStage = to
 }
 
-func windowEvent(hwnd syscall.Handle, e window.Event) {
+func windowEvent(hwnd syscall.Handle, e *window.Event) {
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
 
-	w.Send(e)
+	e.Init()
+	w.Send(&e)
 
 	if e != w.sz {
 		w.sz = e
-		w.Send(paint.Event{})
+		w.Send(&paint.Event{})
 	}
 }
 
@@ -225,7 +228,7 @@ type cmd struct {
 	color   color.Color
 	op      draw.Op
 	texture syscall.Handle
-	buffer  *bufferImpl
+	image   *imageImpl
 }
 
 const (
@@ -262,9 +265,9 @@ func handleCmd(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) {
 	case cmdFill:
 		c.err = fill(dc, c.dr, c.color, c.op)
 	case cmdUpload:
-		// TODO: adjust if dp is outside dst bounds, or sr is outside buffer bounds.
+		// TODO: adjust if dp is outside dst bounds, or sr is outside image bounds.
 		dr := c.sr.Add(c.dp.Sub(c.sr.Min))
-		c.err = copyBitmapToDC(dc, dr, c.buffer.hbitmap, c.sr, draw.Src)
+		c.err = copyBitmapToDC(dc, dr, c.image.hbitmap, c.sr, draw.Src)
 	default:
 		c.err = fmt.Errorf("unknown command id=%d", c.id)
 	}

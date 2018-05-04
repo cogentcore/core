@@ -9,7 +9,7 @@
 
 // +build windows
 
-// Package win32 implements a partial shiny app driver using the Win32 API.
+// Package win32 implements a partial oswin app driver using the Win32 API.
 // It provides window, lifecycle, key, and mouse management, but no drawing.
 // That is left to windriver (using GDI) or gldriver (using DirectX via ANGLE).
 package win32
@@ -31,10 +31,9 @@ import (
 	"golang.org/x/mobile/geom"
 )
 
-// appHWND is the handle to the "App window".
-// The App window encapsulates all oswin.App operations
-// in an actual Windows window so they all run on the main thread.
-// Since any messages sent to a window will be executed on the
+// appWND is the handle to the "AppWindow".  The window encapsulates all
+// oswin.Window operations in an actual Windows window so they all run on the
+// main thread.  Since any messages sent to a window will be executed on the
 // main thread, we can safely use the messages below.
 var appHWND syscall.Handle
 
@@ -79,8 +78,8 @@ func newWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 	hwnd, err := _CreateWindowEx(0,
 		wcname, title,
 		_WS_OVERLAPPEDWINDOW,
-		_CW_USEDEFAULT, _CW_USEDEFAULT,
-		_CW_USEDEFAULT, _CW_USEDEFAULT,
+		int32(opts.Pos.X), int32(opts.Pos.Y),
+		int32(opts.Size.X), int32(opts.Size.Y),
 		0, 0, hThisInstance, 0)
 	if err != nil {
 		return 0, err
@@ -93,9 +92,6 @@ func newWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 
 // ResizeClientRect makes hwnd client rectangle opts.Width by opts.Height in size.
 func ResizeClientRect(hwnd syscall.Handle, opts *oswin.NewWindowOptions) error {
-	if opts == nil || opts.Width <= 0 || opts.Height <= 0 {
-		return nil
-	}
 	var cr, wr _RECT
 	err := _GetClientRect(hwnd, &cr)
 	if err != nil {
@@ -105,8 +101,8 @@ func ResizeClientRect(hwnd syscall.Handle, opts *oswin.NewWindowOptions) error {
 	if err != nil {
 		return err
 	}
-	w := (wr.Right - wr.Left) - (cr.Right - int32(opts.Width))
-	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(opts.Height))
+	w := (wr.Right - wr.Left) - (cr.Right - int32(opts.Size.X))
+	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(opts.Size.Y))
 	return _MoveWindow(hwnd, wr.Left, wr.Top, w, h, false)
 }
 
@@ -269,29 +265,26 @@ func keyModifiers() (m key.Modifiers) {
 	}
 
 	if down(_VK_CONTROL) {
-		m |= key.ModControl
+		m |= 1 << key.Control
 	}
 	if down(_VK_MENU) {
-		m |= key.ModAlt
+		m |= 1 << key.Alt
 	}
 	if down(_VK_SHIFT) {
-		m |= key.ModShift
+		m |= 1 << key.Shift
 	}
 	if down(_VK_LWIN) || down(_VK_RWIN) {
-		m |= key.ModMeta
+		m |= 1 << key.Meta
 	}
 	return m
 }
 
 var (
-	MouseEvent     func(hwnd syscall.Handle, e mouse.Event)
-	PaintEvent     func(hwnd syscall.Handle, e paint.Event)
-	SizeEvent      func(hwnd syscall.Handle, e window.Event)
-	KeyEvent       func(hwnd syscall.Handle, e key.Event)
-	LifecycleEvent func(hwnd syscall.Handle, e lifecycle.Stage)
-
-	// TODO: use the github.com/goki/goki/gi/oswin/driver/internal/lifecycler package
-	// instead of or together with the LifecycleEvent callback?
+	MouseEvent     func(hwnd syscall.Handle, e *mouse.Event)
+	PaintEvent     func(hwnd syscall.Handle, e *paint.Event)
+	SizeEvent      func(hwnd syscall.Handle, e *window.Event)
+	KeyEvent       func(hwnd syscall.Handle, e *key.Event)
+	LifecycleEvent func(hwnd syscall.Handle, e *lifecycle.Stage)
 )
 
 func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
@@ -310,7 +303,7 @@ func AddScreenMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintp
 	return uMsg
 }
 
-func screenWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
 	switch uMsg {
 	case msgCreateWindow:
 		p := (*newWindowParams)(unsafe.Pointer(lParam))
@@ -333,7 +326,7 @@ func screenWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lPara
 //go:uintptrescapes
 
 func SendScreenMessage(uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
-	return SendMessage(screenHWND, uMsg, wParam, lParam)
+	return SendMessage(appHWND, uMsg, wParam, lParam)
 }
 
 var windowMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr){
@@ -388,7 +381,7 @@ func NewWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 	return p.w, p.err
 }
 
-const windowClass = "shiny_Window"
+const windowClass = "GoGi_Window"
 
 func initWindowClass() (err error) {
 	wcname, err := syscall.UTF16PtrFromString(windowClass)
@@ -407,9 +400,9 @@ func initWindowClass() (err error) {
 	return err
 }
 
-func initScreenWindow() (err error) {
-	const screenWindowClass = "shiny_ScreenWindow"
-	swc, err := syscall.UTF16PtrFromString(screenWindowClass)
+func initAppWindow() (err error) {
+	const appWindowClass = "GoGi_AppWindow"
+	swc, err := syscall.UTF16PtrFromString(appWindowClass)
 	if err != nil {
 		return err
 	}
@@ -419,7 +412,7 @@ func initScreenWindow() (err error) {
 	}
 	wc := _WNDCLASS{
 		LpszClassName: swc,
-		LpfnWndProc:   syscall.NewCallback(screenWindowWndProc),
+		LpfnWndProc:   syscall.NewCallback(appWindowWndProc),
 		HIcon:         hDefaultIcon,
 		HCursor:       hDefaultCursor,
 		HInstance:     hThisInstance,
@@ -429,7 +422,7 @@ func initScreenWindow() (err error) {
 	if err != nil {
 		return err
 	}
-	screenHWND, err = _CreateWindowEx(0,
+	appHWND, err = _CreateWindowEx(0,
 		swc, emptyString,
 		_WS_OVERLAPPEDWINDOW,
 		_CW_USEDEFAULT, _CW_USEDEFAULT,
@@ -438,7 +431,20 @@ func initScreenWindow() (err error) {
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func ScreenSize() (width, height int) {
+	width = 1024
+	height = 768
+	var wr _RECT
+	err = _GetWindowRect(appHWND, &wr)
+	if err != nil {
+		width = int(wr.Right - wr.Left)
+		height = int(wr.Bottom - wr.Top)
+	}
+	return
 }
 
 var (
@@ -478,12 +484,12 @@ func Main(f func()) (retErr error) {
 		return err
 	}
 
-	if err := initScreenWindow(); err != nil {
+	if err := initAppWindow(); err != nil {
 		return err
 	}
 	defer func() {
 		// TODO(andlabs): log an error if this fails?
-		_DestroyWindow(screenHWND)
+		_DestroyWindow(appHWND)
 		// TODO(andlabs): unregister window class
 	}()
 
@@ -493,7 +499,7 @@ func Main(f func()) (retErr error) {
 
 	// Prime the pump.
 	mainCallback = f
-	_PostMessage(screenHWND, msgMainCallback, 0, 0)
+	_PostMessage(appHWND, msgMainCallback, 0, 0)
 
 	// Main message pump.
 	var m _MSG

@@ -340,9 +340,9 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 	case _WM_KEYDOWN:
 		const prevMask = 1 << 30
 		if repeat := lParam&prevMask == prevMask; repeat {
-			e.Direction = key.DirNone
+			e.Action = key.None
 		} else {
-			e.Direction = key.DirPress
+			e.Action = key.Press
 		}
 	case _WM_KEYUP:
 		e.Direction = key.DirRelease
@@ -350,6 +350,6 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 		panic(fmt.Sprintf("win32: unexpected key message: %d", uMsg))
 	}
 
-	KeyEvent(hwnd, e)
+	KeyEvent(hwnd, &e)
 	return 0
 }

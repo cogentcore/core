@@ -14,7 +14,7 @@ Any thread that hosts GUI must handle incoming window messages through
 a "message loop".
 
 windriver designates the thread that calls Main as the GUI thread.
-It locks this thread, creates a special window to handle screen.Screen
+It locks this thread, creates a special window to handle oswin.App
 calls and runs message loop. All new windows are created by the
 same thread, so message loop above handles all their window messages.
 

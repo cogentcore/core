@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/goki/oswin/driver/internal/win32"
-	"github.com/goki/goki/oswin/app"
+	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/goki/gi/oswin/driver/internal/win32"
 )
 
 type textureImpl struct {
@@ -37,7 +37,7 @@ type handleCreateTextureParams struct {
 
 var msgCreateTexture = win32.AddAppMsg(handleCreateTexture)
 
-func newTexture(size image.Point) (app.Texture, error) {
+func newTexture(size image.Point) (oswin.Texture, error) {
 	p := handleCreateTextureParams{size: size}
 	win32.SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
 	if p.err != nil {
@@ -124,9 +124,9 @@ func (t *textureImpl) Size() image.Point {
 	return t.size
 }
 
-func (t *textureImpl) Upload(dp image.Point, src app.Buffer, sr image.Rectangle) {
+func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
 	err := t.update(func(dc syscall.Handle) error {
-		return src.(*bufferImpl).blitToDC(dc, dp, sr)
+		return src.(*imageImpl).blitToDC(dc, dp, sr)
 	})
 	if err != nil {
 		panic(err) // TODO handle error
