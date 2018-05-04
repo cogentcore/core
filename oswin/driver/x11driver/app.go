@@ -165,7 +165,7 @@ func (app *appImpl) run() {
 		case xproto.DestroyNotifyEvent:
 			app.mu.Lock()
 			if w := app.findWindow(ev.Window); w != nil {
-			   w.Release()
+				w.Release()
 			}
 			app.mu.Unlock()
 
@@ -182,11 +182,11 @@ func (app *appImpl) run() {
 			switch xproto.Atom(ev.Data.Data32[0]) {
 			case app.atomWMDeleteWindow:
 				if w := app.findWindow(ev.Window); w != nil {
-				 	w.lifecycler.SetDead(true)
-				 	w.lifecycler.SendEvent(w, nil)
+					w.lifecycler.SetDead(true)
+					w.lifecycler.SendEvent(w, nil)
 					w.Release()
 				} else {
-				 	noWindowFound = true
+					noWindowFound = true
 				}
 			case app.atomWMTakeFocus:
 				xproto.SetInputFocus(app.xc, xproto.InputFocusParent, ev.Window, xproto.Timestamp(ev.Data.Data32[1]))
@@ -437,17 +437,17 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	sc := app.Screen(0)
 	dpi := sc.PhysicalDPI
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
-	
+
 	w := &windowImpl{
 		app:     app,
 		xw:      xw,
 		xg:      xg,
 		xp:      xp,
 		xevents: make(chan xgb.Event),
-		WindowBase: oswin.WindowBase {
-		Pos: opts.Pos,
-		PhysDPI: dpi,
-		LogDPI: ldpi,
+		WindowBase: oswin.WindowBase{
+			Pos:     opts.Pos,
+			PhysDPI: dpi,
+			LogDPI:  ldpi,
 		},
 	}
 
