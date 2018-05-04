@@ -81,7 +81,7 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 * startup size is using the builtin default scale or something -- now opening very big on mac. 
 
-* scroll should go to the sub-widget first before going to the layout.. 
+* scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
 
 * Linux: we need the SetSize in x11/window.go -- that is key for dialog window
   sizing, and also close windows..

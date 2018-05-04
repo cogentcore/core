@@ -107,6 +107,11 @@ func (p *Preferences) Apply() {
 	} else {
 		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
 	}
+	n := oswin.TheApp.NScreens()
+	for i := 0; i < n; i++ {
+		sc := oswin.TheApp.Screen(i)
+		sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(sc.PhysicalDPI)
+	}
 }
 
 // Update everything with current preferences -- triggers rebuild of default styles

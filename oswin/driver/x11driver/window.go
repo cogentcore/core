@@ -265,5 +265,19 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-	// todo: actually essential
+	// todo: could used checked
+
+	valmask := uint16(xproto.ConfigWindowWidth + xproto.ConfigWindowHeight)
+	vallist := []uint32{uint32(sz.X), uint32(sz.Y)}
+
+	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
+}
+
+func (w *windowImpl) SetPos(pos image.Point) {
+	// todo: could used checked
+
+	valmask := uint16(xproto.ConfigWindowX + xproto.ConfigWindowY)
+	vallist := []uint32{uint32(pos.X), uint32(pos.Y)}
+
+	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
 }
