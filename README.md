@@ -13,6 +13,8 @@ GoGi also incorporates reflection-based View elements that enable automatic repr
 
 **IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu
 
+![Screenshot of Widgets demo](screenshot.png?raw=true "Screenshot of Widgets demo")
+
 # Code Map
 
 * `examples/widgets` -- main example widget gallery -- `go build ...` in there to give it a try -- see README there for more info
