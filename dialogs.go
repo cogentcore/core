@@ -5,6 +5,7 @@
 package gi
 
 import (
+//       "fmt"
 	"image"
 	"reflect"
 
@@ -116,6 +117,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
+		// fmt.Printf("setsz: %v\n", vpsz)
 		win.SetSize(vpsz)
 		win.StartEventLoopNoWait()
 	} else {

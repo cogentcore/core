@@ -60,6 +60,8 @@ func (w *windowImpl) Release() {
 	// TODO: call w.lifecycler.SetDead and w.lifecycler.SendEvent, a la
 	// handling atomWMDeleteWindow?
 
+	w.app.DeleteWin(w.xw)
+
 	if released {
 		return
 	}

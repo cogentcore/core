@@ -152,7 +152,9 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 
 func (app *appImpl) run() {
 	for {
+		// fmt.Printf("wait..\n")
 		ev, err := app.xc.WaitForEvent()
+		// fmt.Printf("got..\n")
 		if err != nil {
 			log.Printf("x11driver: xproto.WaitForEvent: %v", err)
 			continue
@@ -162,7 +164,9 @@ func (app *appImpl) run() {
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
 			app.mu.Lock()
-			app.DeleteWin(ev.Window)
+			if w := app.findWindow(ev.Window); w != nil {
+			   w.Release()
+			}
 			app.mu.Unlock()
 
 		case shm.CompletionEvent:
@@ -178,10 +182,11 @@ func (app *appImpl) run() {
 			switch xproto.Atom(ev.Data.Data32[0]) {
 			case app.atomWMDeleteWindow:
 				if w := app.findWindow(ev.Window); w != nil {
-					w.lifecycler.SetDead(true)
-					w.lifecycler.SendEvent(w, nil)
+				 	w.lifecycler.SetDead(true)
+				 	w.lifecycler.SendEvent(w, nil)
+					w.Release()
 				} else {
-					noWindowFound = true
+				 	noWindowFound = true
 				}
 			case app.atomWMTakeFocus:
 				xproto.SetInputFocus(app.xc, xproto.InputFocusParent, ev.Window, xproto.Timestamp(ev.Data.Data32[1]))
@@ -265,6 +270,7 @@ func (app *appImpl) run() {
 			log.Printf("x11driver: no window found for event %T", ev)
 		}
 	}
+	fmt.Printf("out of event loop\n")
 }
 
 // TODO: is findImage and the app.images field unused? Delete?
@@ -427,12 +433,22 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		pictformat = app.pictformat32
 	}
 
+	// todo: multiple screens..
+	sc := app.Screen(0)
+	dpi := sc.PhysicalDPI
+	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+	
 	w := &windowImpl{
 		app:     app,
 		xw:      xw,
 		xg:      xg,
 		xp:      xp,
 		xevents: make(chan xgb.Event),
+		WindowBase: oswin.WindowBase {
+		Pos: opts.Pos,
+		PhysDPI: dpi,
+		LogDPI: ldpi,
+		},
 	}
 
 	app.mu.Lock()
