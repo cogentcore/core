@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // Widget base type -- manages control elements and provides standard box model rendering

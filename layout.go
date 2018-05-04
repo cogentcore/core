@@ -9,11 +9,11 @@ import (
 	"image"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // all different types of alignment -- only some are applicable to different

@@ -15,8 +15,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/errapp"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/errapp"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )

@@ -7,8 +7,8 @@ package gi
 import (
 	"fmt"
 
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 )
 
 // open an interactive editor of the given Ki tree, at its root

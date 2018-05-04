@@ -18,8 +18,8 @@ package driver
 import (
 	"errors"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/errscreen"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/errscreen"
 )
 
 func main(f func(oswin.App)) {

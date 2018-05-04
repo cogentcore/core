@@ -13,7 +13,7 @@ import (
 	"image"
 	"math"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 // note: fields obtained from QScreen in Qt

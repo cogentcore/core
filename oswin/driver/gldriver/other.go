@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/gi/oswin"
 )
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) { return 0, nil }

@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 	"golang.org/x/image/math/fixed"
 )
 

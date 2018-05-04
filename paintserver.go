@@ -8,7 +8,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 	"github.com/golang/freetype/raster"
 )
 

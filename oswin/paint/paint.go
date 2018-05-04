@@ -14,7 +14,7 @@ package paint
 import (
 	"image"
 
-	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/gi/oswin"
 )
 
 // Event indicates that the app is ready to paint the next frame of the GUI.

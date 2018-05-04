@@ -7,8 +7,8 @@ This is the main demo.  You can try each of the widgets.  The most advanced feat
 For Go newbies.. 
 
 ``` bash
-> go get github.com/goki/goki
-> cd ~/go/src/github.com/goki/goki/gi/examples/widgets
+> go get github.com/goki
+> cd ~/go/src/github.com/goki/gi/examples/widgets
 > go get ...
 > go build
 > ./widgets

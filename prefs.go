@@ -11,10 +11,10 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 )
 
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for

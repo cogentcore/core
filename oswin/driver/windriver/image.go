@@ -12,7 +12,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/goki/goki/gi/oswin/driver/internal/swizzle"
+	"github.com/goki/gi/oswin/driver/internal/swizzle"
 )
 
 type imageImpl struct {

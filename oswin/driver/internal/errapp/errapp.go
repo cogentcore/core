@@ -13,7 +13,7 @@ package errapp
 import (
 	"image"
 
-	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/gi/oswin"
 )
 
 // Stub returns an App whose methods all return the given error.

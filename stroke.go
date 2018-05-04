@@ -7,8 +7,8 @@ package gi
 import (
 	"image/color"
 
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki/kit"
 )
 
 // end-cap of a line: stroke-linecap property in SVG

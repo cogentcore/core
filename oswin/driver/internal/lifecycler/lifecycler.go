@@ -19,8 +19,8 @@ package lifecycler
 import (
 	"sync"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/lifecycle"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/lifecycle"
 )
 
 // State is a window's lifecycle state.

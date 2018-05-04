@@ -7,9 +7,9 @@
 package windriver
 
 import (
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/errapp"
-	"github.com/goki/goki/gi/oswin/driver/internal/win32"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/errapp"
+	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
 // Main is called by the program's main function to run the graphical

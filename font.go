@@ -14,8 +14,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki/kit"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"

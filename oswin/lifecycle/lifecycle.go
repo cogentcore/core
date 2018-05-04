@@ -28,8 +28,8 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/ki/kit"
 )
 
 // lifecycle.Event is a lifecycle change from an old stage to a new stage.

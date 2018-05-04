@@ -7,7 +7,7 @@ package gi
 import (
 	"image/color"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 type FillRule int

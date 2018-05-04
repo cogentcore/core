@@ -8,7 +8,7 @@ import (
 	"image"
 	"time"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 // GoGi event structure is dervied from go.wde and golang/x/mobile/event

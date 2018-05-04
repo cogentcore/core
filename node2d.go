@@ -10,10 +10,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 )
 

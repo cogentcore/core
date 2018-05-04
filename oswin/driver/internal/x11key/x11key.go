@@ -11,7 +11,7 @@
 package x11key
 
 import (
-	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/key"
 )
 
 // These constants come from /usr/include/X11/X.h

@@ -17,8 +17,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/win32"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
 var theApp = &appImpl{

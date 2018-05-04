@@ -25,10 +25,10 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/x11key"
-	"github.com/goki/goki/gi/oswin/key"
-	"github.com/goki/goki/gi/oswin/mouse"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/x11key"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
 	"golang.org/x/image/math/f64"
 )
 

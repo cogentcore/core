@@ -48,12 +48,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
-	"github.com/goki/goki/gi/oswin/key"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/oswin/paint"
-	"github.com/goki/goki/gi/oswin/window"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/lifecycler"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/oswin/paint"
+	"github.com/goki/gi/oswin/window"
 	"golang.org/x/mobile/gl"
 )
 

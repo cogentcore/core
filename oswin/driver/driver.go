@@ -10,7 +10,7 @@
 // Package driver provides the default driver for accessing a screen.
 package driver
 
-import "github.com/goki/goki/gi/oswin"
+import "github.com/goki/gi/oswin"
 
 // TODO: figure out what to say about the responsibility for users of this
 // package to check any implicit dependencies' LICENSEs. For example, the

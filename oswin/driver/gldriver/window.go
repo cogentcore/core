@@ -15,11 +15,11 @@ import (
 	"image/draw"
 	"sync"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
-	"github.com/goki/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/goki/gi/oswin/driver/internal/lifecycler"
-	"github.com/goki/goki/gi/oswin/lifecycle"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/drawer"
+	"github.com/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/gi/oswin/driver/internal/lifecycler"
+	"github.com/goki/gi/oswin/lifecycle"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )

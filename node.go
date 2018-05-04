@@ -8,10 +8,10 @@ import (
 	"image"
 	"log"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/bitflag"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/kit"
 )
 
 // NodeBase is the base struct type for GoGi graphical interface system, containing infrastructure for both 2D and 3D scene graph nodes

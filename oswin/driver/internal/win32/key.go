@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"unicode/utf16"
 
-	"github.com/goki/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/key"
 )
 
 // convVirtualKeyCode converts a Win32 virtual key code number

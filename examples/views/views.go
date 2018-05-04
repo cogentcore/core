@@ -7,10 +7,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/goki/goki/gi"
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver"
-	"github.com/goki/goki/gi/units"
+	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver"
+	"github.com/goki/gi/units"
 )
 
 func main() {

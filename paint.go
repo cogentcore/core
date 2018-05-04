@@ -10,8 +10,8 @@ import (
 	"image/color"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/prof"
 	"github.com/golang/freetype/raster"
 	"golang.org/x/image/draw"

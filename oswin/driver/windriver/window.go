@@ -17,12 +17,12 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/internal/drawer"
-	"github.com/goki/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/goki/gi/oswin/driver/internal/win32"
-	"github.com/goki/goki/gi/oswin/lifecycle"
-	"github.com/goki/goki/gi/oswin/window"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/drawer"
+	"github.com/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/gi/oswin/driver/internal/win32"
+	"github.com/goki/gi/oswin/lifecycle"
+	"github.com/goki/gi/oswin/window"
 	"golang.org/x/image/math/f64"
 )
 

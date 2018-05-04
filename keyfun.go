@@ -4,7 +4,7 @@
 
 package gi
 
-import "github.com/goki/goki/ki/kit"
+import "github.com/goki/ki/kit"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  KeyFun is for mapping Keys to Functions

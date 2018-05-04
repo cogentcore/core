@@ -14,7 +14,7 @@ import (
 	"image"
 	"sync"
 
-	"github.com/goki/goki/gi/oswin"
+	"github.com/goki/gi/oswin"
 	"golang.org/x/mobile/gl"
 )
 

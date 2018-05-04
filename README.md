@@ -4,8 +4,8 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 
 `package gi` -- scenegraph based 2D and 3D GUI / graphics interface (Gi) in Go
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/goki/goki/gi)](https://goreportcard.com/report/github.com/goki/goki/gi)
-[![GoDoc](https://godoc.org/github.com/goki/goki/gi?status.svg)](http://godoc.org/github.com/goki/goki/gi)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
+[![GoDoc](https://godoc.org/github.com/goki/gi?status.svg)](http://godoc.org/github.com/goki/gi)
 
 GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  Rendering in SVG is directly supported by the GoGi 2D scenegraph, with enhanced functionality for interactive GUI's, and the layout etc should be able to support at least a decent subset of HTML.  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
 

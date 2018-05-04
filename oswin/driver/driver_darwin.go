@@ -12,8 +12,8 @@
 package driver
 
 import (
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/driver/gldriver"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/gldriver"
 )
 
 func main(f func(oswin.App)) {

@@ -13,8 +13,8 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"github.com/goki/goki/ki/bitflag"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/kit"
 )
 
 // Window is a double-buffered OS-specific hardware window

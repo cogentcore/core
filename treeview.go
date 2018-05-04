@@ -10,13 +10,13 @@ import (
 	"image/color"
 	"reflect"
 
-	"github.com/goki/goki/gi/oswin"
-	"github.com/goki/goki/gi/oswin/key"
-	"github.com/goki/goki/gi/oswin/mouse"
-	"github.com/goki/goki/gi/units"
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/bitflag"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 )
 

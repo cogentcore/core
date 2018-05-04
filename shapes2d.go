@@ -10,8 +10,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/goki/ki"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // shapes2d contains all the SVG-based objects for drawing shapes, paths, etc
