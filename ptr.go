@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 // key fact of Go: interface such as Ki is implicitly a pointer!

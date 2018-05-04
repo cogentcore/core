@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 	// "time"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 type TestNode struct {

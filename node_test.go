@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 type NodeEmbed struct {

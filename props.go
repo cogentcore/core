@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 	jsoniter "github.com/json-iterator/go"
 )
 

@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/goki/ki/bitflag"
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/jinzhu/copier"
 	"github.com/json-iterator/go"

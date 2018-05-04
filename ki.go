@@ -8,7 +8,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 // The Ki interface provides the core functionality for the GoKi tree --

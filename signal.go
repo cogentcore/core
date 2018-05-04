@@ -10,7 +10,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goki/goki/ki/kit"
+	"github.com/goki/ki/kit"
 )
 
 // Implements general signal passing between Ki objects, like Qt's Signal /
