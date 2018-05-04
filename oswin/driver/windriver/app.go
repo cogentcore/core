@@ -141,11 +141,11 @@ func (app *appImpl) initScreens() {
 	widthPx, heightPx := win32.ScreenSize()
 
 	if widthPx == 0 {
-	   widthPx = 1200
-   	}
+		widthPx = 1200
+	}
 	if heightPx == 0 {
-	   heightPx = 800
- 	}
+		heightPx = 800
+	}
 
 	// widthMM := app.xsi.WidthInMillimeters
 	// heightMM := app.xsi.WidthInMillimeters
@@ -164,7 +164,7 @@ func (app *appImpl) initScreens() {
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{int(widthPx), int(heightPx)} // don't know yet..
 	// todo: rest of the fields
-//	fmt.Printf("screen: %+v\n", sc)
+	//	fmt.Printf("screen: %+v\n", sc)
 }
 
 func (app *appImpl) NScreens() int {

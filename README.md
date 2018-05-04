@@ -79,14 +79,9 @@ The overall parent Window can either provide a 2D or 3D viewport, which map dire
 
 ### TODO
 
-* startup size is using the builtin default scale or something -- now opening very big on mac. 
+* linux: closing windows is causing event loop to exit -- haven't been able to figure that one out!
 
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
-
-* Linux: we need the SetSize in x11/window.go -- that is key for dialog window
-  sizing, and also close windows..
-
-* and probably just need to go ahead and impl windows :(  at least try
 
 * style parsing crash on font-family?  now just seems to ignore it?a
 

@@ -168,10 +168,10 @@ func sendSize(hwnd syscall.Handle) {
 	height := int(r.Bottom - r.Top)
 
 	if width < 100 {
-	   width = 1000
+		width = 1000
 	}
 	if height < 100 {
-	   height = 1000
+		height = 1000
 	}
 
 	// todo: support multple screens
@@ -181,9 +181,9 @@ func sendSize(hwnd syscall.Handle) {
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
 
 	sz := image.Point{int(width), int(height)}
-//	ps := image.Point{int(r.Left), int(r.Top)}
+	//	ps := image.Point{int(r.Left), int(r.Top)}
 
-//	fmt.Printf("sendsize: %v %v sc %+v rect %+v\n",	width, height, sc, r)
+	//	fmt.Printf("sendsize: %v %v sc %+v rect %+v\n",	width, height, sc, r)
 
 	act := window.ActionN
 
@@ -215,13 +215,13 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 	button := mouse.NoButton
 	switch uMsg {
 	case _WM_MOUSEMOVE:
-	     if wParam & _MK_LBUTTON != 0 {
-	     	button = mouse.Left
-	     } else if wParam & _MK_MBUTTON != 0 {
-	       button = mouse.Middle
-	     } else if wParam & _MK_RBUTTON != 0 {
-	       button = mouse.Right
-	     }
+		if wParam&_MK_LBUTTON != 0 {
+			button = mouse.Left
+		} else if wParam&_MK_MBUTTON != 0 {
+			button = mouse.Middle
+		} else if wParam&_MK_RBUTTON != 0 {
+			button = mouse.Right
+		}
 	case _WM_LBUTTONDOWN, _WM_LBUTTONUP:
 		button = mouse.Left
 	case _WM_MBUTTONDOWN, _WM_MBUTTONUP:
@@ -233,17 +233,17 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 	var event oswin.Event
 	switch uMsg {
 	case _WM_MOUSEMOVE:
-	     if button == mouse.NoButton {	     
-		event = &mouse.MoveEvent{
-			Event: mouse.Event{
-				Where:     where,
-				Button:    button,
-				Action:    mouse.Move,
-				Modifiers: mods,
-			},
-			From: from,
-		}
-	} else {
+		if button == mouse.NoButton {
+			event = &mouse.MoveEvent{
+				Event: mouse.Event{
+					Where:     where,
+					Button:    button,
+					Action:    mouse.Move,
+					Modifiers: mods,
+				},
+				From: from,
+			}
+		} else {
 			event = &mouse.DragEvent{
 				MoveEvent: mouse.MoveEvent{
 					Event: mouse.Event{
@@ -257,7 +257,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 			}
 		}
 	case _WM_LBUTTONDOWN, _WM_MBUTTONDOWN, _WM_RBUTTONDOWN:
-	     act := mouse.Press
+		act := mouse.Press
 		if lastMouseClickEvent != nil {
 			interval := time.Now().Sub(lastMouseClickEvent.Time())
 			// fmt.Printf("interval: %v\n", interval)
@@ -315,7 +315,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 
 // Precondition: this is called in immediate response to the message that triggered the event (so not after w.Send).
 func keyModifiers() int32 {
-        var m key.Modifiers
+	var m key.Modifiers
 	down := func(x int32) bool {
 		// GetKeyState gets the key state at the time of the message, so this is what we want.
 		return _GetKeyState(x)&0x80 != 0

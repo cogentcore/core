@@ -2,6 +2,25 @@
 
 This is the main demo.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+E` or hit the button with the `GoGi Editor` on it.  Also try changing the preferences using `Control+Alt+P`.
 
+## Installation
+
+For Go newbies.. 
+
+``` bash
+> go get github.com/goki/goki
+> cd ~/go/src/github.com/goki/goki/gi/examples/widgets
+> go get ...
+> go build
+> ./widgets
+```
+
+**IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu.  Also, there is a known bug where closing windows exits the event loop!  You'll have to restart..
+
+``` bash
+> sudo apt-get install ttf-mscorefonts-installer
+> sudo fc-cache
+```
+
 ## GoGi Editor
 
 This editor allows you to interactively build new GUI designs, and save / load them from JSON files.

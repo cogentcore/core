@@ -27,7 +27,7 @@ import (
 )
 
 type windowImpl struct {
-        oswin.WindowBase
+	oswin.WindowBase
 	hwnd syscall.Handle
 
 	event.Deque
@@ -37,7 +37,7 @@ type windowImpl struct {
 }
 
 func (w *windowImpl) Release() {
-        theApp.DeleteWin(w.hwnd)
+	theApp.DeleteWin(w.hwnd)
 	win32.Release(w.hwnd)
 }
 
@@ -170,7 +170,7 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-     	win32.ResizeClientRect(w.hwnd, sz)
+	win32.ResizeClientRect(w.hwnd, sz)
 }
 
 func init() {
@@ -194,7 +194,7 @@ func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
 	if w == nil {
-	   return
+		return
 	}
 
 	if w.lifecycleStage == to {
@@ -220,20 +220,20 @@ func windowEvent(hwnd syscall.Handle, e oswin.Event) {
 
 	// todo: multiple screens
 	sc := oswin.TheApp.Screen(0)
-	
+
 	act := window.ActionN
-	
+
 	if w.Sz != sz || w.LogDPI != ldpi {
 		act = window.Resize
-//	} else if w.Pos != ps {
-//		act = window.Move
-//	} else {
-//		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
+		//	} else if w.Pos != ps {
+		//		act = window.Move
+		//	} else {
+		//		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
 	}
 
 	w.Sz = we.Size
 	// todo: extend event to include position
-// 	w.Pos = ps
+	// 	w.Pos = ps
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = we.LogicalDPI
 	w.Scrn = sc
@@ -243,10 +243,10 @@ func windowEvent(hwnd syscall.Handle, e oswin.Event) {
 	w.Send(we)
 
 	// todo: redundant?
-//	if e != w.sz {
-//		w.sz = sz
-//		w.Send(&paint.Event{})
-//	}
+	//	if e != w.sz {
+	//		w.sz = sz
+	//		w.Send(&paint.Event{})
+	//	}
 }
 
 // cmd is used to carry parameters between user code
