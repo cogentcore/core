@@ -77,19 +77,19 @@ var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
 /////////////////////////////
 // oswin.Event interface
 
-func (ev Event) EventType() oswin.EventType {
+func (ev Event) Type() oswin.EventType {
 	return oswin.TouchEvent
 }
 
-func (ev Event) EventHasPos() bool {
+func (ev Event) HasPos() bool {
 	return true
 }
 
-func (ev Event) EventPos() image.Point {
+func (ev Event) Pos() image.Point {
 	return ev.Where
 }
 
-func (ev Event) EventOnFocus() bool {
+func (ev Event) OnFocus() bool {
 	return false
 }
 

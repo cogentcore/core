@@ -753,5 +753,5 @@ func (app *appImpl) AppPrefsDir() string {
 }
 
 func (app *appImpl) FontPaths() []string {
-	return []string{"/usr/share/fonts/truetype", "/usr/local/share/fonts"}
+	return []string{"/usr/share/fonts/truetype"}
 }
