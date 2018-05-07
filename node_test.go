@@ -29,16 +29,12 @@ var NodeEmbedProps = Props{
 
 var KiT_NodeEmbed = kit.Types.AddType(&NodeEmbed{}, NodeEmbedProps)
 
-func (n *NodeEmbed) New() Ki { return &NodeEmbed{} }
-
 type NodeWithField struct {
 	NodeEmbed
 	Field1 NodeEmbed
 }
 
 var KiT_NodeWithField = kit.Types.AddType(&NodeWithField{}, nil)
-
-func (n *NodeWithField) New() Ki { return &NodeWithField{} }
 
 type NodeField2 struct {
 	NodeWithField
@@ -47,8 +43,6 @@ type NodeField2 struct {
 }
 
 var KiT_NodeField2 = kit.Types.AddType(&NodeField2{}, nil)
-
-func (n *NodeField2) New() Ki { return &NodeField2{} }
 
 func TestNodeAddChild(t *testing.T) {
 	parent := NodeEmbed{}

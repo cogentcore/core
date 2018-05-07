@@ -59,8 +59,6 @@ type Node struct {
 // must register all new types so type names can be looked up by name -- also props
 var KiT_Node = kit.Types.AddType(&Node{}, nil)
 
-func (n *Node) New() Ki { return &Node{} }
-
 // check for interface implementation
 var _ Ki = &Node{}
 
@@ -564,7 +562,9 @@ func (n *Node) NewOfType(typ reflect.Type) Ki {
 	if typ == nil {
 		typ = n.Type() // make us by default
 	}
-	return NewOfType(typ)
+	nkid := reflect.New(typ).Interface()
+	kid, _ := nkid.(Ki)
+	return kid
 }
 
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {

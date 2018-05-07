@@ -35,12 +35,6 @@ type Ki interface {
 	// parent.
 	Init(this Ki)
 
-	// New creates a new object of this type -- MUST be defined for each
-	// new type instance -- can also set any essential default values when
-	// creating, but the Go style is to use 0 initial values wherever possible
-	// -- do NOT call Init() on it as that will happen automatically later
-	New() Ki
-
 	// InitName initializes this node and set its name -- used for root nodes
 	// which don't otherwise have their This pointer set (typically happens in
 	// Add, Insert Child)
@@ -666,10 +660,8 @@ type Ki interface {
 // see node.go for struct implementing this interface
 
 // IMPORTANT: all types must initialize entry in package kit Types Registry
-// and define a New method for each type
 //
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
-// func (n *TypeName) New() Ki { return &TypeName{} }
 
 // Func is a function to call on ki objects walking the tree -- return bool
 // = false means don't continue processing this branch of the tree, but other
@@ -690,17 +682,16 @@ func IsKi(typ reflect.Type) bool {
 	return kit.EmbeddedTypeImplements(typ, KiType())
 }
 
-// NewOfType makes a new Ki struct of given type
+// NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
+// return nil if not
 func NewOfType(typ reflect.Type) Ki {
-	inst := kit.Types.Inst(typ)
-	if inst == nil {
-		log.Printf("ki.NewOfType: type %v was not found in kit.Types type registry -- all Ki types must be registered there!\n", typ.String())
-		return nil // almost certainly will crash now..
-	} else {
-		nkid := inst.(Ki).New()
-		kid, _ := nkid.(Ki)
-		return kid
+	nkid := reflect.New(typ).Interface()
+	kid, ok := nkid.(Ki)
+	if !ok {
+		log.Printf("ki.NewOfType: type %v cannot be converted into a Ki interface type\n", typ.String())
+		return nil
 	}
+	return kid
 }
 
 // Flags are bit flags for efficient core state of nodes -- see bitflag
