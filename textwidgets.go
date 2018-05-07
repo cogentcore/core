@@ -69,8 +69,6 @@ type Label struct {
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
-func (n *Label) New() ki.Ki { return &Label{} }
-
 var LabelProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
@@ -152,8 +150,6 @@ type TextField struct {
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
-
-func (n *TextField) New() ki.Ki { return &TextField{} }
 
 var TextFieldProps = ki.Props{
 	"border-width":                      units.NewValue(1, units.Px),
@@ -640,8 +636,6 @@ type SpinBox struct {
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
-func (n *SpinBox) New() ki.Ki { return &SpinBox{} }
-
 var SpinBoxProps = ki.Props{
 	"#buttons": ki.Props{
 		"vert-align": AlignMiddle,
@@ -871,8 +865,6 @@ type ComboBox struct {
 }
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
-
-func (n *ComboBox) New() ki.Ki { return &ComboBox{} }
 
 var ComboBoxProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),

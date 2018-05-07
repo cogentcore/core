@@ -69,8 +69,6 @@ type SliderBase struct {
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
-func (n *SliderBase) New() ki.Ki { return &SliderBase{} }
-
 var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
@@ -435,8 +433,6 @@ type Slider struct {
 
 var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 
-func (n *Slider) New() ki.Ki { return &Slider{} }
-
 var SliderProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
@@ -622,8 +618,6 @@ type ScrollBar struct {
 }
 
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
-
-func (n *ScrollBar) New() ki.Ki { return &ScrollBar{} }
 
 var ScrollBarProps = ki.Props{
 	"border-width":                units.NewValue(1, units.Px),

@@ -22,8 +22,6 @@ type WidgetBase struct {
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
-func (n *WidgetBase) New() ki.Ki { return &WidgetBase{} }
-
 var WidgetBaseProps = ki.Props{
 	"base-type": true,
 }

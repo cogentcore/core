@@ -64,8 +64,6 @@ type Node2DBase struct {
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
-func (n *Node2DBase) New() ki.Ki { return &Node2DBase{} }
-
 var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }

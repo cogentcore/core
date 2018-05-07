@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -102,8 +101,6 @@ type Text2D struct {
 }
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
-
-func (n *Text2D) New() ki.Ki { return &Text2D{} }
 
 func (g *Text2D) Style2D() {
 	g.Style2DSVG()

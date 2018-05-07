@@ -48,8 +48,6 @@ type TabView struct {
 
 var KiT_TabView = kit.Types.AddType(&TabView{}, nil)
 
-func (n *TabView) New() ki.Ki { return &TabView{} }
-
 // set the source Ki Node that generates our tabs
 func (g *TabView) SetSrcNode(k ki.Ki) {
 	g.SrcNode.Ptr = k

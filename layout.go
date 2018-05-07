@@ -325,8 +325,6 @@ type Layout struct {
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
 
-func (n *Layout) New() ki.Ki { return &Layout{} }
-
 // do we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
 	if (d == X && ly.Lay == LayoutRow) || (d == Y && ly.Lay == LayoutCol) {
@@ -1239,8 +1237,6 @@ type Frame struct {
 
 var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 
-func (n *Frame) New() ki.Ki { return &Frame{} }
-
 var FrameProps = ki.Props{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
@@ -1315,8 +1311,6 @@ type Stretch struct {
 
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
 
-func (n *Stretch) New() ki.Ki { return &Stretch{} }
-
 var StretchProps = ki.Props{
 	"max-width":  -1.0,
 	"max-height": -1.0,
@@ -1340,8 +1334,6 @@ type Space struct {
 }
 
 var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
-
-func (n *Space) New() ki.Ki { return &Space{} }
 
 var SpaceProps = ki.Props{
 	"width":  units.NewValue(1, units.Em),

@@ -5,7 +5,7 @@
 package gi
 
 import (
-//       "fmt"
+	//       "fmt"
 	"image"
 	"reflect"
 
@@ -57,8 +57,6 @@ type Dialog struct {
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
-
-func (n *Dialog) New() ki.Ki { return &Dialog{} }
 
 // Open this dialog, in given location (0 = middle of window), finding window from given viewport -- returns false if it fails for any reason
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {

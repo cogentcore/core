@@ -33,8 +33,6 @@ type StructView struct {
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
-func (n *StructView) New() ki.Ki { return &StructView{} }
-
 var StructViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
@@ -253,8 +251,6 @@ type StructViewInline struct {
 }
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
-
-func (n *StructViewInline) New() ki.Ki { return &StructViewInline{} }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
 func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {

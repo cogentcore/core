@@ -25,8 +25,6 @@ type NodeBase struct {
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
-func (n *NodeBase) New() ki.Ki { return &NodeBase{} }
-
 var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
@@ -225,5 +223,3 @@ type Node3DBase struct {
 }
 
 var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, nil)
-
-func (n *Node3DBase) New() ki.Ki { return &Node3DBase{} }

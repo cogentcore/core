@@ -41,8 +41,6 @@ type Icon struct {
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
 
-func (n *Icon) New() ki.Ki { return &Icon{} }
-
 func (vp *Icon) Init2D() {
 	vp.SVG.Init2D()
 	vp.Fill = true

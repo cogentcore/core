@@ -23,8 +23,6 @@ type Action struct {
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
 
-func (n *Action) New() ki.Ki { return &Action{} }
-
 var ActionProps = ki.Props{
 	"border-width":     units.NewValue(0, units.Px), // todo: should be default
 	"border-radius":    units.NewValue(0, units.Px),

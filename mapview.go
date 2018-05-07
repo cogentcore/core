@@ -30,8 +30,6 @@ type MapView struct {
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 
-func (n *MapView) New() ki.Ki { return &MapView{} }
-
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
 
@@ -389,8 +387,6 @@ type MapViewInline struct {
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
-
-func (n *MapViewInline) New() ki.Ki { return &MapViewInline{} }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
 func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {

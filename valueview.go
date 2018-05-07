@@ -276,8 +276,6 @@ type ValueViewBase struct {
 
 var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
 
-func (n *ValueViewBase) New() ki.Ki { return &ValueViewBase{} }
-
 var ValueViewBaseProps = ki.Props{
 	"base-type": true,
 }
@@ -471,8 +469,6 @@ type StructValueView struct {
 
 var KiT_StructValueView = kit.Types.AddType(&StructValueView{}, nil)
 
-func (n *StructValueView) New() ki.Ki { return &StructValueView{} }
-
 func (vv *StructValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_MenuButton
 	return vv.WidgetTyp
@@ -510,8 +506,6 @@ type StructInlineValueView struct {
 
 var KiT_StructInlineValueView = kit.Types.AddType(&StructInlineValueView{}, nil)
 
-func (n *StructInlineValueView) New() ki.Ki { return &StructInlineValueView{} }
-
 func (vv *StructInlineValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_StructViewInline
 	return vv.WidgetTyp
@@ -544,8 +538,6 @@ type SliceValueView struct {
 }
 
 var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
-
-func (n *SliceValueView) New() ki.Ki { return &SliceValueView{} }
 
 func (vv *SliceValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_MenuButton
@@ -594,8 +586,6 @@ type MapValueView struct {
 
 var KiT_MapValueView = kit.Types.AddType(&MapValueView{}, nil)
 
-func (n *MapValueView) New() ki.Ki { return &MapValueView{} }
-
 func (vv *MapValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_MenuButton
 	return vv.WidgetTyp
@@ -643,8 +633,6 @@ type MapInlineValueView struct {
 
 var KiT_MapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
 
-func (n *MapInlineValueView) New() ki.Ki { return &MapInlineValueView{} }
-
 func (vv *MapInlineValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_MapViewInline
 	return vv.WidgetTyp
@@ -677,8 +665,6 @@ type KiPtrValueView struct {
 }
 
 var KiT_KiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
-
-func (n *KiPtrValueView) New() ki.Ki { return &KiPtrValueView{} }
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_MenuButton
@@ -758,8 +744,6 @@ type BoolValueView struct {
 
 var KiT_BoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
 
-func (n *BoolValueView) New() ki.Ki { return &BoolValueView{} }
-
 func (vv *BoolValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_CheckBox
 	return vv.WidgetTyp
@@ -795,8 +779,6 @@ type IntValueView struct {
 }
 
 var KiT_IntValueView = kit.Types.AddType(&IntValueView{}, nil)
-
-func (n *IntValueView) New() ki.Ki { return &IntValueView{} }
 
 func (vv *IntValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_SpinBox
@@ -868,8 +850,6 @@ type FloatValueView struct {
 
 var KiT_FloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
 
-func (n *FloatValueView) New() ki.Ki { return &FloatValueView{} }
-
 func (vv *FloatValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_SpinBox
 	return vv.WidgetTyp
@@ -936,8 +916,6 @@ type EnumValueView struct {
 
 var KiT_EnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
 
-func (n *EnumValueView) New() ki.Ki { return &EnumValueView{} }
-
 func (vv *EnumValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_ComboBox
 	return vv.WidgetTyp
@@ -996,8 +974,6 @@ type TypeValueView struct {
 }
 
 var KiT_TypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
-
-func (n *TypeValueView) New() ki.Ki { return &TypeValueView{} }
 
 func (vv *TypeValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_ComboBox

@@ -30,8 +30,6 @@ type MenuButton struct {
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 
-func (n *MenuButton) New() ki.Ki { return &MenuButton{} }
-
 var MenuButtonProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
@@ -170,8 +168,6 @@ type Separator struct {
 }
 
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
-
-func (n *Separator) New() ki.Ki { return &Separator{} }
 
 var SeparatorProps = ki.Props{
 	"padding":      units.NewValue(2, units.Px),

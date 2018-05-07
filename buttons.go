@@ -118,8 +118,6 @@ type ButtonBase struct {
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
-func (n *ButtonBase) New() ki.Ki { return &ButtonBase{} }
-
 var ButtonBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
@@ -542,8 +540,6 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 
-func (n *Button) New() ki.Ki { return &Button{} }
-
 var ButtonProps = ki.Props{
 	"border-width":        units.NewValue(1, units.Px),
 	"border-radius":       units.NewValue(4, units.Px),
@@ -619,8 +615,6 @@ type CheckBox struct {
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
-
-func (n *CheckBox) New() ki.Ki { return &CheckBox{} }
 
 var CheckBoxProps = ki.Props{
 	"text-align":       AlignLeft,

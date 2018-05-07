@@ -30,8 +30,6 @@ type TestNodeA struct {
 
 var KiT_TestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
 
-func (n *TestNodeA) New() ki.Ki { return &TestNodeA{} }
-
 // B node for testing
 type TestNodeB struct {
 	ki.Node
@@ -45,8 +43,6 @@ type TestNodeB struct {
 }
 
 var KiT_TestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
-
-func (n *TestNodeB) New() ki.Ki { return &TestNodeB{} }
 
 func main() {
 	driver.Main(func(app oswin.App) {

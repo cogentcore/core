@@ -28,8 +28,6 @@ type SliceView struct {
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
-func (n *SliceView) New() ki.Ki { return &SliceView{} }
-
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
 
@@ -317,8 +315,6 @@ type SliceViewInline struct {
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
-
-func (n *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {

@@ -26,8 +26,6 @@ type SplitView struct {
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
-func (n *SplitView) New() ki.Ki { return &SplitView{} }
-
 // auto-max-stretch
 var SplitViewProps = ki.Props{
 	"max-width":  -1.0,
@@ -246,8 +244,6 @@ type Splitter struct {
 }
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
-
-func (n *Splitter) New() ki.Ki { return &Splitter{} }
 
 var SplitterProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),

@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 
-	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
@@ -22,8 +21,6 @@ type SVG struct {
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
-
-func (n *SVG) New() ki.Ki { return &SVG{} }
 
 // set a normalized 0-1 scaling transform so svg's use 0-1 coordinates that
 // map to actual size of the viewport -- used e.g. for Icon

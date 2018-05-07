@@ -97,8 +97,6 @@ type TreeView struct {
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
 
-func (n *TreeView) New() ki.Ki { return &TreeView{} }
-
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
 

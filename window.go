@@ -56,8 +56,6 @@ type Window struct {
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
-func (n *Window) New() ki.Ki { return &Window{} }
-
 // NewWindow creates a new window with given name and options
 func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization

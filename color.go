@@ -616,8 +616,6 @@ type ColorView struct {
 
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
 
-func (n *ColorView) New() ki.Ki { return &ColorView{} }
-
 var ColorViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 	"#title": ki.Props{
@@ -974,8 +972,6 @@ type ColorValueView struct {
 }
 
 var KiT_ColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
-
-func (n *ColorValueView) New() ki.Ki { return &ColorValueView{} }
 
 func (vv *ColorValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = KiT_StructViewInline
