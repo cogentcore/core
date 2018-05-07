@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/goki/ki/kit"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // Props is the type used for holding generic properties -- the actual Go type
@@ -74,11 +73,7 @@ func (p Props) MarshalJSON() ([]byte, error) {
 		b = append(b, []byte(kstr)...)
 
 		var kb []byte
-		if UseJsonIter {
-			kb, err = jsoniter.Marshal(val)
-		} else {
-			kb, err = json.Marshal(val)
-		}
+		kb, err = json.Marshal(val)
 		if err != nil {
 			log.Printf("error doing json.Marshall from val: %v\n%v\n", val, err)
 			log.Printf("output to point of error: %v\n", string(b))

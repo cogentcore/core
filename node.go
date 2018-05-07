@@ -26,13 +26,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/jinzhu/copier"
-	"github.com/json-iterator/go"
 )
-
-// use this to switch between using standard json vs. faster jsoniter right
-// now jsoniter does not continue with the MarshalIndent beyond first level,
-// even when called specifically in the Slice code
-var UseJsonIter bool = false
 
 // The Node implements the Ki interface and provides the core functionality
 // for the GoKi tree -- use the Node as an embedded struct or as a struct
@@ -1428,17 +1422,9 @@ func (n *Node) SaveJSON(indent bool) ([]byte, error) {
 		return nil, err
 	}
 	if indent {
-		if UseJsonIter {
-			return jsoniter.MarshalIndent(n.This, "", "  ")
-		} else {
-			return json.MarshalIndent(n.This, "", "  ")
-		}
+		return json.MarshalIndent(n.This, "", "  ")
 	} else {
-		if UseJsonIter {
-			return jsoniter.Marshal(n.This)
-		} else {
-			return json.Marshal(n.This)
-		}
+		return json.Marshal(n.This)
 	}
 }
 
@@ -1463,11 +1449,7 @@ func (n *Node) LoadJSON(b []byte) error {
 		log.Println(err)
 	}
 	updt := n.UpdateStart()
-	if UseJsonIter {
-		err = jsoniter.Unmarshal(b, n.This) // key use of this!
-	} else {
-		err = json.Unmarshal(b, n.This) // key use of this!
-	}
+	err = json.Unmarshal(b, n.This) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()
 	}

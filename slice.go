@@ -17,7 +17,6 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"github.com/json-iterator/go"
 )
 
 // Slice provides JSON marshal / unmarshal with encoding of underlying types
@@ -360,11 +359,7 @@ func (k Slice) MarshalJSON() ([]byte, error) {
 	for i, kid := range k {
 		var err error
 		var kb []byte
-		if UseJsonIter {
-			kb, err = jsoniter.Marshal(kid)
-		} else {
-			kb, err = json.Marshal(kid)
-		}
+		kb, err = json.Marshal(kid)
 		if err == nil {
 			b = append(b, []byte("{")...)
 			b = append(b, kb[1:len(kb)-1]...)
@@ -452,11 +447,7 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 
 	// fmt.Printf("loading:\n%v", string(cb))
 
-	if UseJsonIter {
-		err = jsoniter.Unmarshal(cb, &nwk)
-	} else {
-		err = json.Unmarshal(cb, &nwk)
-	}
+	err = json.Unmarshal(cb, &nwk)
 	if err != nil {
 		return err
 	}
