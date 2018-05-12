@@ -53,9 +53,6 @@ type Node struct {
 // must register all new types so type names can be looked up by name -- also props
 var KiT_Node = kit.Types.AddType(&Node{}, nil)
 
-// check for interface implementation
-var _ Ki = &Node{}
-
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
 
