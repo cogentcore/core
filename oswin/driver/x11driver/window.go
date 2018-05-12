@@ -60,14 +60,13 @@ func (w *windowImpl) Release() {
 	// TODO: call w.lifecycler.SetDead and w.lifecycler.SendEvent, a la
 	// handling atomWMDeleteWindow?
 
-	w.app.DeleteWin(w.xw)
-
-	if released {
-		return
+	if !released {
+		render.FreePicture(w.app.xc, w.xp)
+		xproto.FreeGC(w.app.xc, w.xg)
+		xproto.DestroyWindow(w.app.xc, w.xw)
 	}
-	render.FreePicture(w.app.xc, w.xp)
-	xproto.FreeGC(w.app.xc, w.xg)
-	xproto.DestroyWindow(w.app.xc, w.xw)
+
+	w.app.DeleteWin(w.xw)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
