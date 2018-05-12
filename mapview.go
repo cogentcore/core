@@ -370,9 +370,6 @@ func (mv *MapView) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &MapView{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  MapViewInline
 
@@ -506,6 +503,3 @@ func (mv *MapViewInline) ReRender2D() (node Node2D, layout bool) {
 	layout = true
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &MapViewInline{}

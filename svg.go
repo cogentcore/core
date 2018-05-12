@@ -66,8 +66,5 @@ func (vp *SVG) Render2D() {
 	}
 }
 
-// check for interface implementation
-var _ Node2D = &SVG{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  todo parsing code etc

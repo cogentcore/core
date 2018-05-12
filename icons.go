@@ -114,9 +114,6 @@ func (vp *Icon) Render2D() {
 	}
 }
 
-// check for interface implementation
-var _ Node2D = &Icon{}
-
 // icon lists
 // https://fontawesome.com/
 // https://joekuan.wordpress.com/2015/09/23/list-of-qt-icons/

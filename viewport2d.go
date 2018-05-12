@@ -373,9 +373,6 @@ func (vp *Viewport2D) ReRender2D() (node Node2D, layout bool) {
 func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
 }
 
-// check for interface implementation
-var _ Node2D = &Viewport2D{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 

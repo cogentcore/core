@@ -299,9 +299,6 @@ func (sv *SliceView) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &SliceView{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  SliceViewInline
 
@@ -428,6 +425,3 @@ func (sv *SliceViewInline) ReRender2D() (node Node2D, layout bool) {
 	layout = true
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &SliceViewInline{}

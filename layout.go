@@ -1223,9 +1223,6 @@ func (ly *Layout) ReRender2D() (node Node2D, layout bool) {
 func (ly *Layout) FocusChanged2D(gotFocus bool) {
 }
 
-// check for interface implementation
-var _ Node2D = &Layout{}
-
 ///////////////////////////////////////////////////////////
 //    Frame -- generic container that is also a Layout
 
@@ -1296,9 +1293,6 @@ func (g *Frame) Render2D() {
 	}
 }
 
-// check for interface implementation
-var _ Node2D = &Frame{}
-
 ///////////////////////////////////////////////////////////
 //    Stretch and Space -- dummy elements for layouts
 
@@ -1325,9 +1319,6 @@ func (g *Stretch) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DChildren()
 }
 
-// check for interface implementation
-var _ Node2D = &Stretch{}
-
 // Space adds a fixed sized (1 em by default) blank space to a layout -- set width / height property to change
 type Space struct {
 	Node2DBase
@@ -1348,6 +1339,3 @@ func (g *Space) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DChildren()
 }
-
-// check for interface implementation
-var _ Node2D = &Space{}

@@ -456,9 +456,6 @@ func (vv *ValueViewBase) ViewFieldTag(tagName string) string {
 	return vv.Field.Tag.Get(tagName)
 }
 
-// check for interface implementation
-var _ ValueView = &ValueViewBase{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructValueView
 

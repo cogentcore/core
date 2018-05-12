@@ -960,9 +960,6 @@ func (sv *ColorView) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &ColorView{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorValueView
 

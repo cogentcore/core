@@ -142,6 +142,3 @@ func (g *Action) ConfigParts() {
 		g.ConfigPartsButton()
 	}
 }
-
-// check for interface implementation
-var _ Node2D = &Action{}

@@ -98,9 +98,6 @@ func (g *MenuButton) ConfigParts() {
 	}
 }
 
-// check for interface implementation
-var _ Node2D = &MenuButton{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 
@@ -209,6 +206,3 @@ func (g *Separator) Render2D() {
 		g.PopBounds()
 	}
 }
-
-// check for interface implementation
-var _ Node2D = &Separator{}

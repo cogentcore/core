@@ -65,9 +65,6 @@ func (g *Rect) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &Rect{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Viewport2DFill
 
@@ -101,9 +98,6 @@ func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
 	layout = false
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &Viewport2DFill{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Circle
@@ -149,9 +143,6 @@ func (g *Circle) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &Circle{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Ellipse
 
@@ -196,9 +187,6 @@ func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &Ellipse{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Line
 
@@ -242,9 +230,6 @@ func (g *Line) ReRender2D() (node Node2D, layout bool) {
 	layout = false
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &Line{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Polyline
@@ -292,9 +277,6 @@ func (g *Polyline) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &Polyline{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Polygon
 
@@ -340,9 +322,6 @@ func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
 	layout = false
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &Polygon{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Path
@@ -940,8 +919,5 @@ func (g *Path) ReRender2D() (node Node2D, layout bool) {
 	layout = false
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &Path{}
 
 // todo: new in SVG2: mesh

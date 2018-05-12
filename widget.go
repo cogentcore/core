@@ -308,6 +308,3 @@ func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
 
 func (g *WidgetBase) FocusChanged2D(gotFocus bool) {
 }
-
-// check for interface implementation
-var _ Node2D = &WidgetBase{}

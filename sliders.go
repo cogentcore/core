@@ -606,9 +606,6 @@ func (g *Slider) FocusChanged2D(gotFocus bool) {
 	g.UpdateSig()
 }
 
-// check for interface implementation
-var _ Node2D = &Slider{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ScrollBar
 
@@ -742,6 +739,3 @@ func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
 	}
 	g.UpdateSig()
 }
-
-// check for interface implementation
-var _ Node2D = &ScrollBar{}

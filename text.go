@@ -152,9 +152,6 @@ func (g *Text2D) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &Text2D{}
-
 //////////////////////////////////////////////////////////////////////////////////
 //  Utilities
 

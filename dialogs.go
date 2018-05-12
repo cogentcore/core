@@ -388,9 +388,6 @@ func (dlg *Dialog) HasFocus2D() bool {
 	return true // dialog ALWAYS gets all the events!
 }
 
-// check for interface implementation
-var _ Node2D = &Dialog{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // more specialized types of dialogs
 

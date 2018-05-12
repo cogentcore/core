@@ -955,9 +955,6 @@ func (tv *TreeView) FocusChanged2D(gotFocus bool) {
 	tv.UpdateSig()
 }
 
-// check for interface implementation
-var _ Node2D = &TreeView{}
-
 // TreeViewDefault is default obj that can be used when property specifies "default"
 var TreeViewDefault TreeView
 

@@ -232,9 +232,6 @@ func (g *SplitView) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &SplitView{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
@@ -432,6 +429,3 @@ func (g *Splitter) FocusChanged2D(gotFocus bool) {
 	}
 	g.UpdateSig()
 }
-
-// check for interface implementation
-var _ Node2D = &Splitter{}

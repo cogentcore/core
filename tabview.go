@@ -216,6 +216,3 @@ func (g *TabView) InitTabView() {
 
 ////////////////////////////////////////////////////
 // Node2D interface
-
-// check for interface implementation
-var _ Node2D = &TabView{}

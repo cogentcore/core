@@ -602,9 +602,6 @@ func (g *Button) ButtonAsBase() *ButtonBase {
 	return &(g.ButtonBase)
 }
 
-// check for interface implementation
-var _ Node2D = &Button{}
-
 ///////////////////////////////////////////////////////////
 // CheckBox
 
@@ -756,6 +753,3 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 		ist.ShowChildAtIndex(1)
 	}
 }
-
-// check for interface implementation
-var _ Node2D = &CheckBox{}

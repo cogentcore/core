@@ -95,9 +95,6 @@ func (g *Label) Render2D() {
 	}
 }
 
-// check for interface implementation
-var _ Node2D = &Label{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // TextField
 
@@ -609,9 +606,6 @@ func (g *TextField) FocusChanged2D(gotFocus bool) {
 	}
 	g.UpdateSig()
 }
-
-// check for interface implementation
-var _ Node2D = &TextField{}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SpinBox
@@ -1199,6 +1193,3 @@ func (g *ComboBox) FocusChanged2D(gotFocus bool) {
 	}
 	g.UpdateSig()
 }
-
-// check for interface implementation
-var _ Node2D = &ComboBox{}

@@ -257,9 +257,6 @@ func (g *Node2DBase) HasFocus2D() bool {
 	return g.HasFocus()
 }
 
-// check for interface implementation
-var _ Node2D = &Node2DBase{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 

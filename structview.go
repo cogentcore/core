@@ -231,9 +231,6 @@ func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
 	return
 }
 
-// check for interface implementation
-var _ Node2D = &StructView{}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructViewInline
 
@@ -360,6 +357,3 @@ func (sv *StructViewInline) ReRender2D() (node Node2D, layout bool) {
 	layout = true
 	return
 }
-
-// check for interface implementation
-var _ Node2D = &StructViewInline{}
