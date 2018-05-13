@@ -263,9 +263,9 @@ func (app *appImpl) run() {
 			}
 		}
 
-		// if noWindowFound { // we expect this actually
-		// 	log.Printf("x11driver: no window found for event %T", ev)
-		// }
+		if noWindowFound { // we expect this actually
+			// log.Printf("x11driver: no window found for event %T", ev)
+		}
 	}
 	fmt.Printf("out of event loop\n")
 }
