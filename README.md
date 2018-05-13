@@ -63,15 +63,19 @@ The best way to see how the system works are in the `examples` directory, and by
 
 Currently at an **alpha** level release:
 
-* Core code is all functional, and on the Mac (main dev) platform, everything should work smoothly, but there are some issues on Windows.
+* Core code is all functional, and on the Mac (main dev) platform, everything should work smoothly, but there are some issues on Linux and Windows.
 
 * Many things are missing and only skeletally present -- the initial release goal was to get the full set of interdependent parts up and running, and obtain any input about overall design issues.  Will be fleshing out all this stuff in the next couple of months, and then transition to a more standard issue-tracker based management of tasks.
 
 # TODO
 
-## Platforms
+## Platforms / oswin
 
-* windows: support the current HiDPI framework -- right now it is always stuck at 96dpi..
+* windows: support the current HiDPI framework -- right now it is always stuck at 96dpi.  and support SetPos window method (and probably need to track movement)
+
+* mac: impl setPos -- and new win pos is not updating? on linux at least
+
+* lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
 

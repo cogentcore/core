@@ -173,6 +173,11 @@ func (w *windowImpl) SetSize(sz image.Point) {
 	win32.ResizeClientRect(w.hwnd, sz)
 }
 
+func (w *windowImpl) SetPos(pos image.Point) {
+	// todo: need this in base win32
+	w.Pos = pos
+}
+
 func init() {
 	send := func(hwnd syscall.Handle, e oswin.Event) {
 		theApp.mu.Lock()

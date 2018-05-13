@@ -280,5 +280,6 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	valmask := uint16(xproto.ConfigWindowX + xproto.ConfigWindowY)
 	vallist := []uint32{uint32(pos.X), uint32(pos.Y)}
 
+	w.Pos = pos
 	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
 }

@@ -479,7 +479,11 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	xproto.CreateGC(app.xc, xg, xproto.Drawable(xw), 0, nil)
 	render.CreatePicture(app.xc, xp, xproto.Drawable(xw), pictformat, 0, nil)
+
 	xproto.MapWindow(app.xc, xw)
+
+	w.SetPos(opts.Pos)
+	w.SetSize(opts.Size)
 
 	return w, nil
 }

@@ -96,6 +96,8 @@ func resizeWindow(w *windowImpl, sz image.Point) {
 	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
+// todo: add posWindow(w, pos)
+
 func getGeometry(w *windowImpl) {
 
 }
