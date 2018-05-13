@@ -482,8 +482,10 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	xproto.MapWindow(app.xc, xw)
 
-	w.SetPos(opts.Pos)
-	w.SetSize(opts.Size)
+	if opts.Pos != image.ZP {
+		w.SetPos(opts.Pos)
+		w.SetSize(opts.Size)
+	}
 
 	return w, nil
 }

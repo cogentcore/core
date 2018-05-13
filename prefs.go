@@ -33,6 +33,7 @@ type Preferences struct {
 	ScreenPrefs      map[string]Preferences
 	DialogsSepWindow bool     `desc:"do dialog windows open in a separate OS-level window, or do they open within the same parent window"`
 	DoubleClickMSec  int      `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelRate  int      `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
 	FontColor        Color    `desc:"default font / pen color"`
 	BackgroundColor  Color    `desc:"default background color"`
 	ShadowColor      Color    `desc:"color for shadows -- should generally be a darker shade of the background color"`
@@ -53,6 +54,7 @@ func (p *Preferences) Defaults() {
 	p.LogicalDPIScale = oswin.LogicalDPIScale
 	p.DialogsSepWindow = true
 	p.DoubleClickMSec = 500
+	p.ScrollWheelRate = 20
 	p.FontColor.SetColor(color.Black)
 	p.BorderColor.SetString("#666", nil)
 	p.BackgroundColor.SetColor(color.White)
@@ -97,6 +99,7 @@ func (p *Preferences) Save() error {
 func (p *Preferences) Apply() {
 	oswin.LogicalDPIScale = p.LogicalDPIScale
 	mouse.DoubleClickMSec = p.DoubleClickMSec
+	mouse.ScrollWheelRate = p.ScrollWheelRate
 	DialogsSepWindow = p.DialogsSepWindow
 	if p.CustomKeyMap != nil {
 		ActiveKeyMap = &Prefs.CustomKeyMap
