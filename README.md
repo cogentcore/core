@@ -63,7 +63,7 @@ The best way to see how the system works are in the `examples` directory, and by
 
 Currently at an **alpha** level release:
 
-* Core code is all functional, and on the Mac (main dev) platform, everything should work smoothly, but there are some issues on Linux and Windows.
+* Core code is all functional, and on the Mac (main dev) platform, everything should work smoothly, but there are some issues on Windows.
 
 * Many things are missing and only skeletally present -- the initial release goal was to get the full set of interdependent parts up and running, and obtain any input about overall design issues.  Will be fleshing out all this stuff in the next couple of months, and then transition to a more standard issue-tracker based management of tasks.
 
