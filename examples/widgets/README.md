@@ -14,7 +14,7 @@ For Go newbies..
 > ./widgets
 ```
 
-**IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu.  Also, there is a known bug where closing windows exits the event loop!  You'll have to restart..
+**IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu. 
 
 ``` bash
 > sudo apt-get install ttf-mscorefonts-installer

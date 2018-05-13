@@ -163,12 +163,9 @@ func (app *appImpl) run() {
 		noWindowFound := false
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
-			app.mu.Lock()
 			if w := app.findWindow(ev.Window); w != nil {
 				w.Release()
 			}
-			app.mu.Unlock()
-
 		case shm.CompletionEvent:
 			app.mu.Lock()
 			app.completionKeys = append(app.completionKeys, ev.Sequence)
@@ -266,9 +263,9 @@ func (app *appImpl) run() {
 			}
 		}
 
-		if noWindowFound {
-			log.Printf("x11driver: no window found for event %T", ev)
-		}
+		// if noWindowFound { // we expect this actually
+		// 	log.Printf("x11driver: no window found for event %T", ev)
+		// }
 	}
 	fmt.Printf("out of event loop\n")
 }

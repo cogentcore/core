@@ -156,6 +156,9 @@ func (w *Window) SetSize(sz image.Point) {
 }
 
 func (w *Window) Resized(sz image.Point) {
+	if w.IsInactive() || w.Viewport == nil {
+		return
+	}
 	// if w.WinTex.Size() == sz {
 	// 	return
 	// }
@@ -169,7 +172,7 @@ func (w *Window) Resized(sz image.Point) {
 
 // FullReRender can be called to trigger a full re-render of the window
 func (w *Window) FullReRender() {
-	if w.Viewport == nil {
+	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
 	pdpi := w.OSWin.PhysicalDPI()
@@ -188,6 +191,9 @@ func (w *Window) FullReRender() {
 // changes to the underlying OSWindow -- wrap updates in win.UpdateStart /
 // win.UpdateEnd to actually flush the updates to be visible
 func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	if w.IsInactive() {
+		return
+	}
 	pr := prof.Start("win.UpdateVpRegion")
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
@@ -195,6 +201,9 @@ func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 
 // UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
 func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	if w.IsInactive() {
+		return
+	}
 	pr := prof.Start("win.UpdateFullVpRegion")
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
@@ -203,6 +212,9 @@ func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectan
 // UpdateVpRegionFromMain basically clears the region where the vp would show
 // up, from the main
 func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
+	if w.IsInactive() {
+		return
+	}
 	pr := prof.Start("win.UpdateVpRegionFromMain")
 	w.WinTex.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
 	pr.End()
@@ -211,6 +223,9 @@ func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
 // FullUpdate does a complete update of window pixels -- grab pixels from all
 // the different active viewports
 func (w *Window) FullUpdate() {
+	if w.IsInactive() {
+		return
+	}
 	pr := prof.Start("win.FullUpdate")
 	updt := w.UpdateStart()
 	if Render2DTrace {
@@ -244,6 +259,9 @@ func (w *Window) FullUpdate() {
 }
 
 func (w *Window) Publish() {
+	if w.IsInactive() {
+		return
+	}
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)

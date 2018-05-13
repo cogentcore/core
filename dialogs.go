@@ -141,6 +141,7 @@ func (dlg *Dialog) Close() {
 	win := dlg.Win
 	if win != nil {
 		if DialogsSepWindow {
+			win.SetInactive()   // indicates closed
 			win.OSWin.Release() // close..
 		} else {
 			win.ClosePopup(dlg.This)
