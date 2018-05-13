@@ -73,7 +73,9 @@ Currently at an **alpha** level release:
 
 * windows: support the current HiDPI framework -- right now it is always stuck at 96dpi.  and support SetPos window method (and probably need to track movement)
 
-* mac: impl setPos -- and new win pos is not updating? on linux at least
+* mac: impl setPos, key repeat not working
+
+* linux: moving window isn't updating pos of new windows
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -111,6 +113,8 @@ Currently at an **alpha** level release:
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
 * add a new icon for color editor..
+
+* button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
 * Reminder: grep all todo: in code -- lots!
 
