@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextFieldSignals_name = "TextFieldDoneTextFieldSignalsN"
+const _TextFieldSignals_name = "TextFieldDoneTextFieldSelectedTextFieldSignalsN"
 
-var _TextFieldSignals_index = [...]uint8{0, 13, 30}
+var _TextFieldSignals_index = [...]uint8{0, 13, 30, 47}
 
 func (i TextFieldSignals) String() string {
 	if i < 0 || i >= TextFieldSignals(len(_TextFieldSignals_index)-1) {

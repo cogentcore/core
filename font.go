@@ -206,7 +206,7 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 	return face, nil
 }
 
-type FontLibFont struct {
+type FontInfo struct {
 	Name   string      `desc:"name of font"`
 	Style  FontStyles  `xml:"style" inherit:"true","desc:"style -- normal, italic, etc"`
 	Weight FontWeights `xml:"weight" inherit:"true","desc:"weight: normal, bold, etc"`
@@ -215,7 +215,7 @@ type FontLibFont struct {
 type FontLib struct {
 	FontPaths  []string
 	FontsAvail map[string]string `desc:"map of font name to path to file"`
-	FontInfo   []FontLibFont     `desc:"information about each font"`
+	FontInfo   []FontInfo        `desc:"information about each font"`
 	Faces      map[string]map[float64]font.Face
 	initMu     sync.Mutex
 	loadMu     sync.Mutex
@@ -230,7 +230,7 @@ func (fl *FontLib) Init() {
 		// fmt.Printf("Initializing font lib\n")
 		fl.FontPaths = make([]string, 0, 100)
 		fl.FontsAvail = make(map[string]string)
-		fl.FontInfo = make([]FontLibFont, 0, 100)
+		fl.FontInfo = make([]FontInfo, 0, 100)
 		fl.Faces = make(map[string]map[float64]font.Face)
 	} else if len(fl.FontsAvail) == 0 {
 		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
@@ -279,7 +279,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 				basefn := strings.ToLower(fn)
 				if _, ok := fl.FontsAvail[basefn]; !ok {
 					fl.FontsAvail[basefn] = path
-					fi := FontLibFont{fn, FontNormal, WeightNormal} // todo: get info
+					fi := FontInfo{fn, FontNormal, WeightNormal} // todo: get info
 					if strings.Contains(basefn, "bold") {
 						fi.Weight = WeightBold
 					}

@@ -70,7 +70,8 @@ func mainrun() {
 	title.Text = "This is a demonstration of the various GoGi Widgets"
 	title.SetProp("text-align", gi.AlignTop)
 	title.SetProp("align-vert", gi.AlignTop)
-	title.SetProp("font-family", "Times New Roman Bold")
+	title.SetProp("font-family", "Times New Roman, serif")
+	title.SetProp("font-weight", "bold")
 	title.SetProp("font-size", units.NewValue(24, units.Pt))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
@@ -104,8 +105,7 @@ func mainrun() {
 	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
-			// gi.PromptDialog(vp, "Button1 Dialog", "This is a dialog!  Various specific types of dialogs are available.", true, true, nil, nil)
-			gi.FontChooserDialog(vp, "Choose a font", "", nil, nil)
+			gi.PromptDialog(vp, "Button1 Dialog", "This is a dialog!  Various specific types of dialogs are available.", true, true, nil, nil)
 		}
 	})
 

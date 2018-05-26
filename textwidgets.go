@@ -29,12 +29,18 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 // Labeler Interface and ToLabel method
 
-// the labeler interface provides a GUI-appropriate label (todo: rich text html tags!?) for an item -- use ToLabel converter to attempt to use this interface and then fall back on Stringer via kit.ToString conversion function
+// the labeler interface provides a GUI-appropriate label (todo: rich text
+// html tags!?) for an item -- use ToLabel converter to attempt to use this
+// interface and then fall back on Stringer via kit.ToString conversion
+// function
 type Labeler interface {
 	Label() string
 }
 
-// ToLabel returns the gui-appropriate label for an item, using the Labeler interface if it is defined, and falling back on kit.ToString converter otherwise -- also contains label impls for basic interface types for which we cannot easily define the Labeler interface
+// ToLabel returns the gui-appropriate label for an item, using the Labeler
+// interface if it is defined, and falling back on kit.ToString converter
+// otherwise -- also contains label impls for basic interface types for which
+// we cannot easily define the Labeler interface
 func ToLabel(it interface{}) string {
 	lbler, ok := it.(Labeler)
 	if !ok {
@@ -50,12 +56,6 @@ func ToLabel(it interface{}) string {
 	}
 	return lbler.Label()
 }
-
-// Labeler interface for some key types
-// note: this doesn't work b/c reflect.Type is an interface..
-// func (ty reflect.Type) Label() string {
-// 	return ty.Name() //  stringer adds the prefix -- we drop that..
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Label
@@ -104,6 +104,10 @@ type TextFieldSignals int64
 const (
 	// main signal -- return was pressed and an edit was completed -- data is the text
 	TextFieldDone TextFieldSignals = iota
+
+	// some text was selected or for Inactive state, entire field was selected
+	TextFieldSelected
+
 	TextFieldSignalsN
 )
 
@@ -122,24 +126,30 @@ const (
 	// inactive -- not editable
 	TextFieldInactive
 
+	// selected -- for inactive state, can select entire element
+	TextFieldSelect
+
 	TextFieldStatesN
 )
 
 //go:generate stringer -type=TextFieldStates
 
 // Style selector names for the different states
-var TextFieldSelectors = []string{":active", ":focus", ":inactive"}
+var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
 	Text          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	EditText      string                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications"`
-	StartPos      int                     `xml:"start-pos" desc:"starting display position in the string"`
-	EndPos        int                     `xml:"end-pos" desc:"ending display position in the string"`
-	CursorPos     int                     `xml:"cursor-pos" desc:"current cursor position"`
-	CharWidth     int                     `xml:"char-width" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectMode    bool                    `xml:"select-mode" desc:"if true, select text as cursor moves"`
+	StartPos      int                     `xml:"-" desc:"starting display position in the string"`
+	EndPos        int                     `xml:"-" desc:"ending display position in the string"`
+	CursorPos     int                     `xml:"-" desc:"current cursor position"`
+	CharWidth     int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart   int                     `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd     int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode    bool                    `xml:"-" desc:"if true, select text as cursor moves"`
+	Selected      bool                    `xml:"-" desc:"entire field is selected, for Inactive mode"`
 	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
@@ -164,6 +174,9 @@ var TextFieldProps = ki.Props{
 	},
 	TextFieldSelectors[TextFieldInactive]: ki.Props{
 		"background-color": "darker-20",
+	},
+	TextFieldSelectors[TextFieldSelect]: ki.Props{
+		"background-color": &Prefs.SelectColor,
 	},
 }
 
@@ -375,11 +388,18 @@ func (g *TextField) Init2D() {
 	bitflag.Set(&g.Flag, int(InactiveEvents))
 	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tf := recv.(*TextField)
-		if tf.IsInactive() { // todo: need more subtle inactive behavior here -- can select but not edit
-			return
-		}
 		me := d.(*mouse.Event)
 		me.SetProcessed()
+		if tf.IsInactive() {
+			if me.Action == mouse.Press {
+				g.Selected = !g.Selected
+				if g.Selected {
+					g.TextFieldSig.Emit(g.This, int64(TextFieldSelected), g.Text)
+				}
+				g.UpdateSig()
+			}
+			return
+		}
 		if !tf.HasFocus() {
 			tf.GrabFocus()
 		}
@@ -583,7 +603,11 @@ func (g *TextField) Render2D() {
 	if g.PushBounds() {
 		g.AutoScroll()
 		if g.IsInactive() {
-			g.Style = g.StateStyles[TextFieldInactive]
+			if g.Selected {
+				g.Style = g.StateStyles[TextFieldSelect]
+			} else {
+				g.Style = g.StateStyles[TextFieldInactive]
+			}
 		} else if g.HasFocus() {
 			g.Style = g.StateStyles[TextFieldFocus]
 		} else {
@@ -591,6 +615,9 @@ func (g *TextField) Render2D() {
 		}
 		g.RenderStdBox(&g.Style)
 		cur := g.EditText[g.StartPos:g.EndPos]
+		if g.SelectEnd > g.SelectStart {
+			// todo: render select background
+		}
 		g.Render2DText(cur)
 		if g.HasFocus() {
 			g.RenderCursor()
@@ -1132,22 +1159,6 @@ func (g *ComboBox) ConfigParts() {
 func (g *ComboBox) ConfigPartsIfNeeded() {
 	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
 		return
-	}
-	g.ConfigParts()
-}
-
-func (g *ComboBox) Style2D() {
-	g.SetCanFocusIfActive()
-	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.ConfigParts()
 }

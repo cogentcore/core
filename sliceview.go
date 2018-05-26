@@ -19,11 +19,13 @@ import (
 // SliceView represents a slice, creating a property editor of the values -- constructs Children widgets to show the index / value pairs, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
 type SliceView struct {
 	Frame
-	Slice   interface{} `desc:"the slice that we are a view onto"`
-	Title   string      `desc:"title / prompt to show above the editor fields"`
-	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Slice      interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	Title      string      `desc:"title / prompt to show above the editor fields"`
+	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	builtSlice interface{}
+	builtSize  int
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -98,13 +100,14 @@ func (sv *SliceView) TitleWidget() (*Label, int) {
 	return sv.Child(idx).(*Label), idx
 }
 
-// SliceGrid returns the SliceGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) SliceGrid() (*Layout, int) {
+// SliceGrid returns the SliceGrid grid frame widget, which contains all the
+// fields and values, and its index, within frame -- nil, -1 if not found
+func (sv *SliceView) SliceGrid() (*Frame, int) {
 	idx := sv.ChildIndexByName("slice-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
@@ -121,18 +124,25 @@ func (sv *SliceView) ConfigSliceGrid() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
+	mv := reflect.ValueOf(sv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+
+	if sv.builtSlice == sv.Slice && sv.builtSize == sz {
+		return
+	}
+	sv.builtSlice = sv.Slice
+	sv.builtSize = sz
+
 	sg, _ := sv.SliceGrid()
 	if sg == nil {
 		return
 	}
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 4)
+	sg.SetProp("max-height", units.NewValue(40, units.Em))
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
-
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
 
 	sv.Values = make([]ValueView, sz)
 

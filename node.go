@@ -146,8 +146,8 @@ func (g *NodeBase) SetInactive() {
 }
 
 // set inactive state of the node
-func (g *NodeBase) SetInactiveState(readOnly bool) {
-	bitflag.SetState(&g.Flag, readOnly, int(Inactive))
+func (g *NodeBase) SetInactiveState(inact bool) {
+	bitflag.SetState(&g.Flag, inact, int(Inactive))
 }
 
 // set CanFocus only if not inactive

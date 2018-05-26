@@ -70,6 +70,7 @@ func GoGiEditorOf(obj ki.Ki) {
 	brow.SetStretchMaxWidth()
 
 	updtobj := brow.AddNewChild(KiT_Button, "updtobj").(*Button)
+	updtobj.SetProp("vertical-align", AlignMiddle)
 	updtobj.SetText("Update")
 	updtobj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
@@ -78,6 +79,7 @@ func GoGiEditorOf(obj ki.Ki) {
 	})
 
 	savej := brow.AddNewChild(KiT_Button, "savejson").(*Button)
+	savej.SetProp("vertical-align", AlignMiddle)
 	savej.SetText("Save JSON")
 	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
@@ -92,6 +94,7 @@ func GoGiEditorOf(obj ki.Ki) {
 	})
 
 	loadj := brow.AddNewChild(KiT_Button, "loadjson").(*Button)
+	loadj.SetProp("vertical-align", AlignMiddle)
 	loadj.SetText("Load JSON")
 	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
@@ -100,6 +103,26 @@ func GoGiEditorOf(obj ki.Ki) {
 					dlg, _ := send.(*Dialog)
 					fnm := StringPromptDialogValue(dlg)
 					recv.LoadJSONFromFile(fnm)
+				}
+			})
+		}
+	})
+
+	fontsel := brow.AddNewChild(KiT_Button, "fontsel").(*Button)
+	fontsel.SetProp("vertical-align", AlignMiddle)
+	fontnm := brow.AddNewChild(KiT_TextField, "selfont").(*TextField)
+	fontnm.SetMinPrefWidth(units.NewValue(20, units.Em))
+	fontnm.SetProp("vertical-align", AlignMiddle)
+
+	fontsel.SetText("Select Font")
+	fontsel.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			FontChooserDialog(vp, "Select a Font", "", win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				sv, _ := send.(*StructTableView)
+				si := sv.SelectedIdx
+				if si >= 0 {
+					fi := FontLibrary.FontInfo[si]
+					fontnm.SetText(fi.Name)
 				}
 			})
 		}

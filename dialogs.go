@@ -43,7 +43,7 @@ const (
 //go:generate stringer -type=DialogState
 
 // standard vertical space between elements in a dialog, in Em units
-var StdDialogVSpace = float32(2.0)
+var StdDialogVSpace = float32(1.0)
 var StdDialogVSpaceUnits = units.Value{StdDialogVSpace, units.Em, 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either be rendered in a separate window or on top of an existing one
@@ -556,10 +556,12 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	return dlg
 }
 
-// StructTableViewDialog is for editing fields of a structure using a StructTableView --
-// optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore)
-func StructTableViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+// StructTableViewDialog is for editing fields of a structure using a
+// StructTableView -- optionally connects to given signal receiving object and
+// function for signals (nil to ignore) -- selectOnly turns it into a selector
+// with no editing of fields, and signal connection is to the selection
+// signal, not the overall dialog signal
+func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("struct-table-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
@@ -569,21 +571,28 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView,
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_StructTableView, prIdx+2, "struct-view").(*StructTableView)
+	sv.SetInactiveState(selectOnly)
 	sv.SetSlice(stru, tmpSave)
 
 	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+		if selectOnly {
+			sv.SelectSig.Connect(recv, fun)
+		} else {
+			dlg.DialogSig.Connect(recv, fun)
+		}
 	}
-	dlg.SetProp("min-width", units.NewValue(30, units.Em))
+	dlg.SetProp("min-width", units.NewValue(40, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
 }
 
-// FontChooserDialog for choosing a font
+// FontChooserDialog for choosing a font -- the recv and fun signal receivers
+// if non-nil are connected to the selection signal for the struct table view,
+// so they are updated with that
 func FontChooserDialog(avp *Viewport2D, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := StructTableViewDialog(avp, FontLibrary.FontInfo, nil, title, prompt, recv, fun)
+	dlg := StructTableViewDialog(avp, &FontLibrary.FontInfo, true, nil, title, prompt, recv, fun)
 	return dlg
 }
 

@@ -489,6 +489,7 @@ func (g *ButtonBase) Style2D() {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.This.(ButtonWidget).ConfigParts()
+	g.SetButtonState(ButtonActive) // initial default
 }
 
 func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
