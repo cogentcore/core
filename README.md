@@ -73,7 +73,7 @@ Currently at an **alpha** level release:
 
 * windows: support the current HiDPI framework -- right now it is always stuck at 96dpi.  and support SetPos window method (and probably need to track movement)
 
-* mac: impl setPos, key repeat not working
+* mac: impl setPos
 
 * linux: moving window isn't updating pos of new windows
 
@@ -82,8 +82,6 @@ Currently at an **alpha** level release:
 ## General / Widgets
 
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
-
-* style parsing crash on font-family?  now just seems to ignore it?
 
 * tab widget basic fix
 
@@ -103,8 +101,6 @@ Currently at an **alpha** level release:
 * arg view / dialog and button tags
 
 * DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
-
-* fix issue with tiny window and dialog not scrolling and blocking interface
 
 * Structview: condshow / edit
 	

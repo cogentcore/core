@@ -192,7 +192,7 @@ uint64 threadID() {
 
 	uint8_t action;
 	if ([theEvent isARepeat]) {
-		action = 0;
+		action = 1;
 	} else if (theEvent.type == NSEventTypeKeyDown) {
 		action = 1;
 	} else {
