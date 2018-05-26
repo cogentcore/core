@@ -252,6 +252,14 @@ type ValueView interface {
 	SaveTmp()
 }
 
+// TODO: need a more efficient way to represent the different owner type data
+// (Key vs. Field vs. Idx), instead of just having everything for everything?
+// issue is that ValueView itself gets customized for different target value
+// types, but those are orthogonal to the owner type, so need a separate
+// ValueViewOwner class that encodes these options more efficiently -- but
+// that introduces another struct alloc and pointer -- not clear if it is
+// worth it?
+
 // ValueViewBase provides the basis for implementations of the ValueView
 // interface, representing values in the interface -- it implements a generic
 // TextField representation of the string value, and provides the generic

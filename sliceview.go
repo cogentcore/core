@@ -129,11 +129,13 @@ func (sv *SliceView) ConfigSliceGrid() {
 	sg.SetProp("columns", 4)
 	config := kit.TypeAndNameList{} // note: slice is already a pointer
 	// always start fresh!
-	sv.Values = make([]ValueView, 0)
 
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
+
+	sv.Values = make([]ValueView, sz)
+
 	for i := 0; i < sz; i++ {
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
@@ -151,7 +153,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 		config.Add(vtyp, valnm)
 		config.Add(KiT_Action, addnm)
 		config.Add(KiT_Action, delnm)
-		sv.Values = append(sv.Values, vv)
+		sv.Values[i] = vv
 	}
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {

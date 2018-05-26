@@ -549,10 +549,41 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-width", units.NewValue(30, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// StructTableViewDialog is for editing fields of a structure using a StructTableView --
+// optionally connects to given signal receiving object and function for
+// dialog signals (nil to ignore)
+func StructTableViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("struct-table-view", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	sv := frame.InsertNewChild(KiT_StructTableView, prIdx+2, "struct-view").(*StructTableView)
+	sv.SetSlice(stru, tmpSave)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.SetProp("min-width", units.NewValue(30, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// FontChooserDialog for choosing a font
+func FontChooserDialog(avp *Viewport2D, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := StructTableViewDialog(avp, FontLibrary.FontInfo, nil, title, prompt, recv, fun)
 	return dlg
 }
 

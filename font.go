@@ -84,9 +84,75 @@ func (p *FontStyle) Defaults() {
 func (p *FontStyle) SetStylePost() {
 }
 
+// FaceNm returns the full FaceName to use for the current FontStyle spec
+func (p *FontStyle) FaceNm() string {
+	if p.Family == "" {
+		return "Arial" // built-in default
+	}
+	fnm := "Arial"
+	nms := strings.Split(p.Family, ",")
+	for _, fn := range nms {
+		fn = strings.TrimSpace(fn)
+		if FontLibrary.FontAvail(fn) {
+			fnm = fn
+			break
+		}
+		switch fn {
+		case "times":
+			fnm = "Times New Roman"
+			break
+		case "serif":
+			fnm = "Times New Roman"
+			break
+		case "sans-serif":
+			fnm = "Arial"
+			break
+		case "courier":
+			fnm = "Courier New" // this is the tt name
+			break
+		case "monospace":
+			if FontLibrary.FontAvail("Andale Mono") {
+				fnm = "Andale Mono"
+			} else {
+				fnm = "Courier New"
+			}
+			break
+		case "cursive":
+			if FontLibrary.FontAvail("Comic Sans") {
+				fnm = "Comic Sans"
+			} else if FontLibrary.FontAvail("Comic Sans MS") {
+				fnm = "Comic Sans MS"
+			}
+			break
+		case "fantasy":
+			if FontLibrary.FontAvail("Impact") {
+				fnm = "Impact"
+			} else if FontLibrary.FontAvail("Impac") {
+				fnm = "Impac"
+			}
+			break
+		}
+	}
+	mods := ""
+	if p.Style == FontItalic && p.Weight == WeightBold {
+		mods = "Bold Italic"
+	} else if p.Style == FontItalic {
+		mods = "Italic"
+	} else if p.Weight == WeightBold {
+		mods = "Bold"
+	}
+	if mods != "" {
+		if FontLibrary.FontAvail(fnm + " " + mods) {
+			fnm += " " + mods
+		}
+	}
+	return fnm
+}
+
 var lastDots = 0.0
 
 func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
+	p.FaceName = p.FaceNm()
 	intDots := math.Round(float64(p.Size.Dots))
 	face, err := FontLibrary.Font(p.FaceName, intDots)
 	if err != nil {
@@ -96,7 +162,7 @@ func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 				p.FaceName = fallback
 				p.LoadFont(ctxt, "") // try again
 			} else {
-//				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
+				//				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
 				p.Face = basicfont.Face7x13
 			}
 		}
@@ -140,9 +206,16 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 	return face, nil
 }
 
+type FontLibFont struct {
+	Name   string      `desc:"name of font"`
+	Style  FontStyles  `xml:"style" inherit:"true","desc:"style -- normal, italic, etc"`
+	Weight FontWeights `xml:"weight" inherit:"true","desc:"weight: normal, bold, etc"`
+}
+
 type FontLib struct {
 	FontPaths  []string
 	FontsAvail map[string]string `desc:"map of font name to path to file"`
+	FontInfo   []FontLibFont     `desc:"information about each font"`
 	Faces      map[string]map[float64]font.Face
 	initMu     sync.Mutex
 	loadMu     sync.Mutex
@@ -157,6 +230,7 @@ func (fl *FontLib) Init() {
 		// fmt.Printf("Initializing font lib\n")
 		fl.FontPaths = make([]string, 0, 100)
 		fl.FontsAvail = make(map[string]string)
+		fl.FontInfo = make([]FontLibFont, 0, 100)
 		fl.Faces = make(map[string]map[float64]font.Face)
 	} else if len(fl.FontsAvail) == 0 {
 		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
@@ -201,9 +275,22 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			}
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
-				basefn := strings.ToLower(strings.TrimRight(fn, ext))
-				fl.FontsAvail[basefn] = path
-				// fmt.Printf("added font: %v at path %q\n", basefn, path)
+				fn = strings.TrimRight(fn, ext)
+				basefn := strings.ToLower(fn)
+				if _, ok := fl.FontsAvail[basefn]; !ok {
+					fl.FontsAvail[basefn] = path
+					fi := FontLibFont{fn, FontNormal, WeightNormal} // todo: get info
+					if strings.Contains(basefn, "bold") {
+						fi.Weight = WeightBold
+					}
+					if strings.Contains(basefn, "italic") {
+						fi.Style = FontItalic
+					} else if strings.Contains(basefn, "oblique") {
+						fi.Style = FontOblique
+					}
+					fl.FontInfo = append(fl.FontInfo, fi)
+					// fmt.Printf("added font: %v at path %q\n", basefn, path)
+				}
 			}
 			return nil
 		})
@@ -215,9 +302,9 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	return len(fl.FontsAvail) > 0
 }
 
-// get a particular font
+// Font gets a particular font
 func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
-        fontnm = strings.ToLower(fontnm)
+	fontnm = strings.ToLower(fontnm)
 	fl.Init()
 	if facemap := fl.Faces[fontnm]; facemap != nil {
 		if face := facemap[points]; face != nil {
@@ -243,4 +330,11 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 		return face, nil
 	}
 	return nil, fmt.Errorf("FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
+}
+
+// FontAvail determines if a given font name is available (case insensitive)
+func (fl *FontLib) FontAvail(fontnm string) bool {
+	fontnm = strings.ToLower(fontnm)
+	_, ok := FontLibrary.FontsAvail[fontnm]
+	return ok
 }
