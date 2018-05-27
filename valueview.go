@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -69,6 +70,7 @@ func ToValueView(it interface{}) ValueView {
 			return vvo
 		}
 	}
+
 	typ := reflect.TypeOf(it)
 	nptyp := kit.NonPtrType(typ)
 	typrops := kit.Types.Properties(typ, false) // don't make
@@ -79,11 +81,23 @@ func ToValueView(it interface{}) ValueView {
 			vv := EnumValueView{}
 			vv.Init(&vv)
 			return &vv
+		} else if _, ok := it.(fmt.Stringer); ok { // use stringer
+			vv := ValueViewBase{}
+			vv.Init(&vv)
+			return &vv
 		} else {
 			vv := IntValueView{}
 			vv.Init(&vv)
 			return &vv
 		}
+	case nptyp == reflect.TypeOf(time.Time{}): // todo: could do better..
+		vv := ValueViewBase{}
+		vv.Init(&vv)
+		return &vv
+	case nptyp == reflect.TypeOf(FileTime{}): // todo: could do better..
+		vv := ValueViewBase{}
+		vv.Init(&vv)
+		return &vv
 	case vk == reflect.Bool:
 		vv := BoolValueView{}
 		vv.Init(&vv)

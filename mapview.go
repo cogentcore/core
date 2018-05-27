@@ -17,11 +17,12 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  MapView
 
-// MapView represents a map, creating a property editor of the values -- constructs Children widgets to show the key / value pairs, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
+// MapView represents a map, creating a property editor of the values --
+// constructs Children widgets to show the key / value pairs, within an
+// overall frame with a button box at the bottom where methods can be invoked
 type MapView struct {
 	Frame
 	Map     interface{} `desc:"the map that we are a view onto"`
-	Title   string      `desc:"title / prompt to show above the editor fields"`
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -45,11 +46,6 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 
 var MapViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
-	"#title": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignCenter,
-		"vertical-align": AlignTop,
-	},
 }
 
 // SetFrame configures view as a frame
@@ -60,9 +56,7 @@ func (mv *MapView) SetFrame() {
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (mv *MapView) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	// config.Add(KiT_Label, "title")
-	// config.Add(KiT_Space, "title-space")
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_Layout, "map-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
@@ -76,24 +70,6 @@ func (mv *MapView) StdConfig() (mods, updt bool) {
 	config := mv.StdFrameConfig()
 	mods, updt = mv.ConfigChildren(config, false)
 	return
-}
-
-// SetTitle sets the title and updates the Title label
-func (mv *MapView) SetTitle(title string) {
-	mv.Title = title
-	lab, _ := mv.TitleWidget()
-	if lab != nil {
-		lab.Text = title
-	}
-}
-
-// Title returns the title label widget, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) TitleWidget() (*Label, int) {
-	idx := mv.ChildIndexByName("title", 0)
-	if idx < 0 {
-		return nil, -1
-	}
-	return mv.Child(idx).(*Label), idx
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
@@ -124,7 +100,7 @@ func (mv *MapView) ConfigMapGrid() {
 		return
 	}
 	sg.Lay = LayoutGrid
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)
@@ -316,7 +292,7 @@ func (mv *MapView) ConfigMapButtons() {
 		return
 	}
 	bb, _ := mv.ButtonBox()
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
 	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
@@ -334,8 +310,6 @@ func (mv *MapView) ConfigMapButtons() {
 
 func (mv *MapView) UpdateFromMap() {
 	mods, updt := mv.StdConfig()
-	// typ := kit.NonPtrType(reflect.TypeOf(mv.Map))
-	// mv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	mv.ConfigMapGrid()
 	mv.ConfigMapButtons()
 	if mods {
@@ -406,7 +380,7 @@ func (mv *MapViewInline) ConfigParts() {
 		return
 	}
 	mv.Parts.Lay = LayoutRow
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)

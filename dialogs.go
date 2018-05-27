@@ -291,7 +291,7 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 // be arranged on the right -- a space element is added between buttons if
 // more than one
 func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList {
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	if stretch {
 		config.Add(KiT_Stretch, "stretch")
 	}
@@ -556,11 +556,11 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	return dlg
 }
 
-// StructTableViewDialog is for editing fields of a structure using a
-// StructTableView -- optionally connects to given signal receiving object and
-// function for signals (nil to ignore) -- selectOnly turns it into a selector
-// with no editing of fields, and signal connection is to the selection
-// signal, not the overall dialog signal
+// StructTableViewDialog is for editing / selecting fields of a
+// slice-of-struct using a StructTableView -- optionally connects to given
+// signal receiving object and function for signals (nil to ignore) --
+// selectOnly turns it into a selector with no editing of fields, and signal
+// connection is to the selection signal, not the overall dialog signal
 func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("struct-table-view", title, prompt, true, true)
 
@@ -619,4 +619,35 @@ func ColorViewDialog(avp *Viewport2D, clr *Color, tmpSave ValueView, title, prom
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
+}
+
+// FileViewDialog is for selecting / manipulating files -- if recv and fun are
+// non-nil, they connect to the dialog signals
+func FileViewDialog(avp *Viewport2D, path, file string, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog("file-view", title, prompt, true, true)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "view-space").(*Space)
+	nspc.SetFixedHeight(StdDialogVSpaceUnits)
+
+	fv := frame.InsertNewChild(KiT_FileView, prIdx+2, "file-view").(*FileView)
+	fv.SetPathFile(path, file)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.SetProp("min-width", units.NewValue(40, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp)
+	return dlg
+}
+
+// FileViewDialogValue gets the full path of selected file
+func FileViewDialogValue(dlg *Dialog) string {
+	frame := dlg.Frame()
+	fv := frame.ChildByName("file-view", 0).(*FileView)
+	return fv.SelectedFile()
 }

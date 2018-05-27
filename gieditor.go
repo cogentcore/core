@@ -83,10 +83,10 @@ func GoGiEditorOf(obj ki.Ki) {
 	savej.SetText("Save JSON")
 	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
-			StringPromptDialog(vp, obj.Name()+".json", "Save JSON Filename", "Please enter a filename to save to", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(DialogAccepted) {
 					dlg, _ := send.(*Dialog)
-					fnm := StringPromptDialogValue(dlg)
+					fnm := FileViewDialogValue(dlg)
 					recv.SaveJSONToFile(fnm)
 				}
 			})
@@ -98,10 +98,10 @@ func GoGiEditorOf(obj ki.Ki) {
 	loadj.SetText("Load JSON")
 	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(ButtonClicked) {
-			StringPromptDialog(vp, obj.Name()+".json", "Load JSON Filename", "Please enter a filename to load from", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(DialogAccepted) {
 					dlg, _ := send.(*Dialog)
-					fnm := StringPromptDialogValue(dlg)
+					fnm := FileViewDialogValue(dlg)
 					recv.LoadJSONFromFile(fnm)
 				}
 			})

@@ -72,7 +72,7 @@ func (sv *StructView) SetFrame() {
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_Label, "title")
 	config.Add(KiT_Space, "title-space")
 	config.Add(KiT_Layout, "struct-grid")
@@ -140,7 +140,7 @@ func (sv *StructView) ConfigStructGrid() {
 	}
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 2)
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
@@ -279,7 +279,7 @@ func (sv *StructViewInline) ConfigParts() {
 		return
 	}
 	sv.Parts.Lay = LayoutRow
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
 	kit.FlatFieldsValueFun(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {

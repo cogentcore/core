@@ -16,11 +16,12 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  SliceView
 
-// SliceView represents a slice, creating a property editor of the values -- constructs Children widgets to show the index / value pairs, within an overall frame with an optional title, and a button box at the bottom where methods can be invoked
+// SliceView represents a slice, creating a property editor of the values --
+// constructs Children widgets to show the index / value pairs, within an
+// overall frame with a button box at the bottom where methods can be invoked
 type SliceView struct {
 	Frame
 	Slice      interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	Title      string      `desc:"title / prompt to show above the editor fields"`
 	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
@@ -48,12 +49,6 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 
 var SliceViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
-	"#title": ki.Props{
-		// todo: add "bigger" font
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignCenter,
-		"vertical-align": AlignTop,
-	},
 }
 
 // SetFrame configures view as a frame
@@ -64,9 +59,7 @@ func (sv *SliceView) SetFrame() {
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
-	// config.Add(KiT_Label, "title")
-	// config.Add(KiT_Space, "title-space")
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_Layout, "slice-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
@@ -80,24 +73,6 @@ func (sv *SliceView) StdConfig() (mods, updt bool) {
 	config := sv.StdFrameConfig()
 	mods, updt = sv.ConfigChildren(config, false)
 	return
-}
-
-// SetTitle sets the title and updates the Title label
-func (sv *SliceView) SetTitle(title string) {
-	sv.Title = title
-	lab, _ := sv.TitleWidget()
-	if lab != nil {
-		lab.Text = title
-	}
-}
-
-// Title returns the title label widget, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) TitleWidget() (*Label, int) {
-	idx := sv.ChildIndexByName("title", 0)
-	if idx < 0 {
-		return nil, -1
-	}
-	return sv.Child(idx).(*Label), idx
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
@@ -141,7 +116,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 4)
 	sg.SetProp("max-height", units.NewValue(40, units.Em))
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 
 	sv.Values = make([]ValueView, sz)
@@ -254,7 +229,7 @@ func (sv *SliceView) ConfigSliceButtons() {
 		return
 	}
 	bb, _ := sv.ButtonBox()
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
 	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
@@ -272,8 +247,6 @@ func (sv *SliceView) ConfigSliceButtons() {
 
 func (sv *SliceView) UpdateFromSlice() {
 	mods, updt := sv.StdConfig()
-	// typ := kit.NonPtrType(reflect.TypeOf(sv.Slice))
-	// sv.SetTitle(fmt.Sprintf("%v Values", typ.Name()))
 	sv.ConfigSliceGrid()
 	sv.ConfigSliceButtons()
 	if mods {
@@ -347,7 +320,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		return
 	}
 	sv.Parts.Lay = LayoutRow
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
 

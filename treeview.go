@@ -609,7 +609,7 @@ var TVBranchProps = ki.Props{
 
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = LayoutRow
-	config := kit.TypeAndNameList{} // note: slice is already a pointer
+	config := kit.TypeAndNameList{}
 	config.Add(KiT_CheckBox, "branch")
 	config.Add(KiT_Space, "space")
 	config.Add(KiT_Label, "label")
