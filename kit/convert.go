@@ -213,6 +213,10 @@ func ToString(it interface{}) string {
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
+
+	if strer, ok := it.(fmt.Stringer); ok {
+		return strer.String()
+	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return strconv.FormatInt(v.Int(), 10)
@@ -229,11 +233,7 @@ func ToString(it interface{}) string {
 	case vk == reflect.String: // todo: what about []byte?
 		return v.String()
 	default:
-		strer, ok := it.(fmt.Stringer) // will fail if not impl
-		if !ok {
-			return fmt.Sprintf("%v", it)
-		}
-		return strer.String()
+		return fmt.Sprintf("%v", it)
 	}
 }
 

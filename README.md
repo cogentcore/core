@@ -64,6 +64,8 @@ The first and most important application of GoKi is the `GoGi` graphical interfa
 
 Status: Stable and feature-complete.  Just a few improvements on the todo list:
 
+* for gi.FileView, finally got NameUnique to become a significant slowdown -- need a diff
+strategy for larger lists, e.g., just using the index directly is probably best, with no checking -- also maybe want an opt-out of this in general?  or just use size as opt-out?  that is currently the case.
 * what about Kind == reflect.Interface fields in structs -- should they be set to zero?  probably..
 * XML IO -- first pass done, but more should be in attr instead of full elements
 * FindChildRecursive functions?
