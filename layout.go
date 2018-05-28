@@ -173,7 +173,7 @@ func (ls *LayoutStyle) MinSizeDots() Vec2D {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Layout Data for actually computing the layout
 
-// size preferences
+// SizePrefs represents size preferences
 type SizePrefs struct {
 	Need Vec2D `desc:"minimum size needed -- set to at least computed allocsize"`
 	Pref Vec2D `desc:"preferred size -- start here for layout"`
@@ -203,7 +203,9 @@ func (m *Margins) SetMargin(marg float32) {
 	m.bottom = marg
 }
 
-// LayoutData contains all the data needed to specify the layout of an item within a layout -- includes computed values of style prefs -- everything is concrete and specified here, whereas style may not be fully resolved
+// LayoutData contains all the data needed to specify the layout of an item
+// within a layout -- includes computed values of style prefs -- everything is
+// concrete and specified here, whereas style may not be fully resolved
 type LayoutData struct {
 	Size         SizePrefs   `desc:"size constraints for this item -- from layout style"`
 	Margins      Margins     `desc:"margins around this item"`
@@ -340,7 +342,7 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 // second me-first Layout2D pass: each layout allocates AllocSize for its
 // children based on aggregated size data, and so on down the tree
 
-// first pass: gather the size information from the children
+// GatherSizes is size first pass: gather the size information from the children
 func (ly *Layout) GatherSizes() {
 	if len(ly.Kids) == 0 {
 		return
@@ -360,20 +362,22 @@ func (ly *Layout) GatherSizes() {
 	}
 
 	for d := X; d <= Y; d++ {
-		if ly.SumDim(d) { // our layout now updated to sum
-			ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
-			ly.LayData.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
-		} else { // use max for other dir
-			ly.LayData.Size.Need.SetMaxDim(d, maxNeed.Dim(d))
-			ly.LayData.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
+		if ly.LayData.Size.Pref.Dim(d) == 0 {
+			if ly.SumDim(d) { // our layout now updated to sum
+				ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
+				ly.LayData.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
+			} else { // use max for other dir
+				ly.LayData.Size.Need.SetMaxDim(d, maxNeed.Dim(d))
+				ly.LayData.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
+			}
+		} else { // use target size from style
+			ly.LayData.Size.Need.SetDim(d, ly.LayData.Size.Pref.Dim(d))
 		}
 	}
 
 	spc := ly.Style.BoxSpace()
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
-
-	// todo: something entirely different needed for grids..
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
@@ -383,7 +387,8 @@ func (ly *Layout) GatherSizes() {
 
 // todo: grid does not process spans at all yet -- assumes = 1
 
-// first pass: gather the size information from the children, grid version
+// GatherSizesGrid is size first pass: gather the size information from the
+// children, grid version
 func (ly *Layout) GatherSizesGrid() {
 	if len(ly.Kids) == 0 {
 		return
@@ -505,8 +510,18 @@ func (ly *Layout) GatherSizesGrid() {
 		sumPref.SetAddDim(X, ld.Size.Pref.X)
 	}
 
-	ly.LayData.Size.Need.SetMax(sumNeed)
-	ly.LayData.Size.Pref.SetMax(sumPref)
+	if ly.LayData.Size.Pref.X == 0 {
+		ly.LayData.Size.Need.X = Max32(ly.LayData.Size.Need.X, sumNeed.X)
+		ly.LayData.Size.Pref.X = Max32(ly.LayData.Size.Pref.X, sumPref.X)
+	} else { // use target size from style otherwise
+		ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
+	}
+	if ly.LayData.Size.Pref.Y == 0 {
+		ly.LayData.Size.Need.Y = Max32(ly.LayData.Size.Need.Y, sumNeed.Y)
+		ly.LayData.Size.Pref.Y = Max32(ly.LayData.Size.Pref.Y, sumPref.Y)
+	} else { // use target size from style otherwise
+		ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
+	}
 
 	spc := ly.Style.BoxSpace()
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
@@ -979,6 +994,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.TrackThr = sc.Step
+	sc.Value = Min32(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	sc.SliderSig.ConnectOnly(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return

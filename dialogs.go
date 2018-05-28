@@ -494,6 +494,8 @@ func StructViewDialog(avp *Viewport2D, stru interface{}, tmpSave ValueView, titl
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "struct-view").(*StructView)
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
 	sv.SetStruct(stru, tmpSave)
 
 	if recv != nil && fun != nil {
@@ -519,6 +521,8 @@ func MapViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, pr
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "map-view").(*MapView)
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
 	sv.SetMap(mp, tmpSave)
 
 	if recv != nil && fun != nil {
@@ -544,12 +548,14 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
 	sv.SetSlice(mp, tmpSave)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.SetProp("min-width", units.NewValue(30, units.Em))
+	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
@@ -571,6 +577,8 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, t
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	sv := frame.InsertNewChild(KiT_StructTableView, prIdx+2, "struct-view").(*StructTableView)
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(selectOnly)
 	sv.SetSlice(stru, tmpSave)
 
@@ -614,8 +622,6 @@ func ColorViewDialog(avp *Viewport2D, clr *Color, tmpSave ValueView, title, prom
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	// dlg.SetProp("min-width", units.NewValue(60, units.Em))
-	// dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg
@@ -633,13 +639,17 @@ func FileViewDialog(avp *Viewport2D, path, file string, title, prompt string, re
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	fv := frame.InsertNewChild(KiT_FileView, prIdx+2, "file-view").(*FileView)
+	fv.SetStretchMaxHeight()
+	fv.SetStretchMaxWidth()
 	fv.SetPathFile(path, file)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.SetProp("min-width", units.NewValue(40, units.Em))
-	dlg.SetProp("min-height", units.NewValue(30, units.Em))
+	// dlg.SetMinPrefWidth(units.NewValue(40, units.Em))
+	// dlg.SetMinPrefHeight(units.NewValue(35, units.Em))
+	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-height", units.NewValue(35, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
 	return dlg

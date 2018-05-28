@@ -81,6 +81,8 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
+* general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
+
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
 
 * tab widget basic fix
@@ -94,8 +96,6 @@ Currently at an **alpha** level release:
 * basic rich text formatting -- , and bold / italic styles for fonts?
 * word wrap in widgets demo
 
-* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property
-
 * main menu (mac, other platforms?)
 
 * arg view / dialog and button tags
@@ -104,8 +104,6 @@ Currently at an **alpha** level release:
 
 * Structview: condshow / edit
 	
-* Layout flow types
-
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
 * add a new icon for color editor..
@@ -113,6 +111,17 @@ Currently at an **alpha** level release:
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
 * Reminder: grep all todo: in code -- lots!
+
+## layout
+
+* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property -- easy
+
+* add option to fix top row(s) / left col(s) of a grid layout, to create a table -- for StructTableView -- tricky as need diff location of scrollbars etc..
+
+* grid not using spans
+
+* Layout flow types
+
 
 ## Rendering
 
@@ -131,7 +140,6 @@ Currently at an **alpha** level release:
 
 see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
-+ FileView view and dialog
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 + ProgressBar -- very simple
 + ToolTip
@@ -139,6 +147,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
 ## Remaining features for widgets
 
++ FileView view and dialog -- various, see todo in fileview.go
 + TextField -- needs selection / clipboard, constraints
 + TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
 + TabWidget -- needs updating

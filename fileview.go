@@ -42,21 +42,23 @@ type FileInfo struct {
 }
 
 // todo:
-// * structtableview: sort by diff cols
+// * structtableview: sort by diff cols, keep col header pinned at top!
+// * busy cursor when loading
 // * NewFolder -- does everyone call it folder now?  Folder is the gui version of the name..
 // * reset scroll position in structtableview when it rebuilds
 // * tree view of directory on left of files view
-// * favorites, with DND
+// * prior paths, saved to prefs dir
+// * favorites, with DND, saved to prefs dir
 // * icons!  key in this kind of view -- shouldn't be too hard in terms of valueview type -- just define it!
 // * filter(s) for types of files to highlight as selectable?  useful or not?
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
 	Frame
-	DirPath string     `desc:"path to directory of files to display"`
-	SelFile string     `desc:"selected file"`
-	Files   []FileInfo `desc:"files for current directory"`
-	FileSig ki.Signal  `desc:"signal for file actions"`
+	DirPath string      `desc:"path to directory of files to display"`
+	SelFile string      `desc:"selected file"`
+	Files   []*FileInfo `desc:"files for current directory"`
+	FileSig ki.Signal   `desc:"signal for file actions"`
 }
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
@@ -125,6 +127,7 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 func (fv *FileView) ConfigPathRow() {
 	pr := fv.ChildByName("path-row", 0).(*Layout)
 	pr.Lay = LayoutRow
+	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Label, "path-lbl")
 	config.Add(KiT_TextField, "path")
@@ -134,6 +137,7 @@ func (fv *FileView) ConfigPathRow() {
 	pl.Text = "Path:"
 	pf := fv.PathField()
 	pf.SetMinPrefWidth(units.NewValue(30.0, units.Em))
+	pf.SetStretchMaxWidth()
 	pf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
@@ -155,13 +159,16 @@ func (fv *FileView) ConfigPathRow() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.ChildByName("files-row", 2).(*Layout)
+	fr.SetStretchMaxHeight()
+	fr.SetStretchMaxWidth()
 	fr.Lay = LayoutRow
 	config := kit.TypeAndNameList{}
 	// todo: add favorites, dir tree
 	config.Add(KiT_StructTableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
 	sv := fv.FilesView()
-	sv.SetProp("max-height", units.NewValue(30, units.Em))
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
 	sv.SetInactive() // select only
 	sv.SetSlice(&fv.Files, nil)
 	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -174,6 +181,7 @@ func (fv *FileView) ConfigFilesRow() {
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.ChildByName("sel-row", 4).(*Layout)
 	sr.Lay = LayoutRow
+	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Label, "sel-lbl")
 	config.Add(KiT_TextField, "sel")
@@ -182,6 +190,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sf := fv.SelField()
 	sf.SetMinPrefWidth(units.NewValue(30.0, units.Em))
+	sf.SetStretchMaxWidth()
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
@@ -235,7 +244,7 @@ func (fv *FileView) UpdateFiles() {
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 
-	fv.Files = make([]FileInfo, 0, 1000)
+	fv.Files = make([]*FileInfo, 0, 1000)
 	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", fv.DirPath, err)
@@ -258,7 +267,7 @@ func (fv *FileView) UpdateFiles() {
 			ext := filepath.Ext(fn)
 			fi.Kind = mime.TypeByExtension(ext)
 		}
-		fv.Files = append(fv.Files, fi)
+		fv.Files = append(fv.Files, &fi)
 		if info.IsDir() {
 			return filepath.SkipDir
 		}

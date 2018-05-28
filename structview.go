@@ -75,7 +75,7 @@ func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Label, "title")
 	config.Add(KiT_Space, "title-space")
-	config.Add(KiT_Layout, "struct-grid")
+	config.Add(KiT_Frame, "struct-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
 	return config
@@ -111,12 +111,12 @@ func (sv *StructView) TitleWidget() (*Label, int) {
 
 // StructGrid returns the grid layout widget, which contains all the fields
 // and values, and its index, within frame -- nil, -1 if not found
-func (sv *StructView) StructGrid() (*Layout, int) {
+func (sv *StructView) StructGrid() (*Frame, int) {
 	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame
@@ -139,6 +139,11 @@ func (sv *StructView) ConfigStructGrid() {
 		return
 	}
 	sg.Lay = LayoutGrid
+	// setting a pref here is key for giving it a scrollbar in larger context
+	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
+	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
 	// always start fresh!

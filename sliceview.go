@@ -60,7 +60,7 @@ func (sv *SliceView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Layout, "slice-grid")
+	config.Add(KiT_Frame, "slice-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
 	return config
@@ -115,7 +115,11 @@ func (sv *SliceView) ConfigSliceGrid() {
 	}
 	sg.Lay = LayoutGrid
 	sg.SetProp("columns", 4)
-	sg.SetProp("max-height", units.NewValue(40, units.Em))
+	// setting a pref here is key for giving it a scrollbar in larger context
+	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
+	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 

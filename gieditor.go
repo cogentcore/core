@@ -49,6 +49,8 @@ func GoGiEditorOf(obj ki.Ki) {
 	tv.SetSrcNode(obj)
 
 	sv := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv.SetStretchMaxWidth()
+	sv.SetStretchMaxHeight()
 	sv.SetStruct(obj, nil)
 
 	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

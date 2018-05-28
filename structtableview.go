@@ -43,14 +43,23 @@ var KiT_StructTableView = kit.Types.AddType(&StructTableView{}, StructTableViewP
 func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false
 	if sv.Slice != sl {
-		struTyp := reflect.TypeOf(sl).Elem().Elem()
+		slpTyp := reflect.TypeOf(sl)
+		if slpTyp.Kind() != reflect.Ptr {
+			log.Printf("StructTableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
+			return
+		}
+		if slpTyp.Elem().Kind() != reflect.Slice {
+			log.Printf("StructTableView requires that you pass a pointer to a slice of struct elements -- ptr doesn't point to a slice: %v\n", slpTyp.Elem().String())
+			return
+		}
+		sv.Slice = sl
+		struTyp := sv.StructType()
 		if struTyp.Kind() != reflect.Struct {
 			log.Printf("StructTableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
 			return
 		}
 		updt = sv.UpdateStart()
 		sv.SelectedIdx = -1
-		sv.Slice = sl
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
@@ -59,6 +68,11 @@ func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 
 var StructTableViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
+}
+
+// StructType returns the type of the struct within the slice
+func (sv *StructTableView) StructType() reflect.Type {
+	return kit.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 }
 
 // SetFrame configures view as a frame
@@ -122,7 +136,7 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	sv.SelectedIdx = -1
 
 	// this is the type of element within slice -- already checked that it is a struct
-	struTyp := reflect.TypeOf(sv.Slice).Elem().Elem()
+	struTyp := sv.StructType()
 	nfld := struTyp.NumField()
 
 	// always start fresh!
@@ -136,7 +150,11 @@ func (sv *StructTableView) ConfigSliceGrid() {
 		return
 	}
 	sg.Lay = LayoutGrid
-	sg.SetProp("max-height", units.NewValue(40, units.Em))
+	// setting a pref here is key for giving it a scrollbar in larger context
+	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
+	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	if sv.IsInactive() {
 		sg.SetProp("columns", nfld+1)
 	} else {
@@ -278,7 +296,7 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 		return
 	}
 
-	struTyp := reflect.TypeOf(sv.Slice).Elem().Elem()
+	struTyp := sv.StructType()
 	nfld := struTyp.NumField()
 	sg, _ := sv.SliceGrid()
 

@@ -57,7 +57,7 @@ func (mv *MapView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (mv *MapView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Layout, "map-grid")
+	config.Add(KiT_Frame, "map-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
 	return config
@@ -73,12 +73,12 @@ func (mv *MapView) StdConfig() (mods, updt bool) {
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) MapGrid() (*Layout, int) {
+func (mv *MapView) MapGrid() (*Frame, int) {
 	idx := mv.ChildIndexByName("map-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return mv.Child(idx).(*Layout), idx
+	return mv.Child(idx).(*Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
@@ -100,6 +100,11 @@ func (mv *MapView) ConfigMapGrid() {
 		return
 	}
 	sg.Lay = LayoutGrid
+	// setting a pref here is key for giving it a scrollbar in larger context
+	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
+	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
