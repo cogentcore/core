@@ -24,7 +24,7 @@ GoGi also incorporates reflection-based View elements that enable automatic repr
 * `examples/widgets` -- main example widget gallery -- `go get ...` `go build` in there to give it a try -- see README there for more info
 * `node*.go` -- `NodeBase`, `Node2DBase`, `3D` structs and interfaces -- all Gi nodes are of this type
 * `geom2d.go` -- `Vec2D` is main geom type used for 2D, plus transform matrix
-* `paint.go` -- `Paint` struct that does all the direct rendering, based on `gg` (todo: update to `oksvg`)
+* `paint.go` -- `Paint` struct that does all the direct rendering, uses `gg`-based API but now uses the `srwiley/renderx` rendering system which supports SVG 2.0, and is very fast
 	+ `stroke.go`, `fill.go` -- `StrokeStyle` and `FillStyle` structs for stroke, fill settings
 * `style.go` -- `Style` and associated structs for CSS-based `Widget` styling
 * `viewport2d.go` -- `Viewport2D` that has an `Image.RGBA` that `Paint` renders onto
@@ -116,7 +116,9 @@ Currently at an **alpha** level release:
 
 * really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property -- easy
 
-* add option to fix top row(s) / left col(s) of a grid layout, to create a table -- for StructTableView -- tricky as need diff location of scrollbars etc..
+* add new TableGrid widget that combines a Frame Grid Layout with a top row of
+  header action labels that just grab the sizes from the grid, and also supports clicking to
+  select sort order
 
 * grid not using spans
 
@@ -124,8 +126,6 @@ Currently at an **alpha** level release:
 
 
 ## Rendering
-
-* investigate `renderx` / `oksvg` and look into migrating
 
 * highlight, lowlight versions of lighter-darker that are relative to current
   lightness for dark-style themes.
