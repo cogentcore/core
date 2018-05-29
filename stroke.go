@@ -18,6 +18,10 @@ const (
 	LineCapButt LineCap = iota
 	LineCapRound
 	LineCapSquare
+	// rasterx extension
+	LineCapCubic
+	// rasterx extension
+	LineCapQuadratic
 	LineCapN
 )
 
@@ -32,11 +36,13 @@ func (ev *LineCap) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 type LineJoin int
 
 const (
-	LineJoinMiter     LineJoin = iota
-	LineJoinMiterClip          // SVG2 -- not yet supported
+	LineJoinMiter LineJoin = iota
+	LineJoinMiterClip
 	LineJoinRound
 	LineJoinBevel
-	LineJoinArcs // SVG2 -- not yet supported
+	LineJoinArcs
+	// rasterx extension
+	LineJoinArcsClip
 	LineJoinN
 )
 

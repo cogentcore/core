@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _LineCap_name = "LineCapButtLineCapRoundLineCapSquareLineCapN"
+const _LineCap_name = "LineCapButtLineCapRoundLineCapSquareLineCapCubicLineCapQuadraticLineCapN"
 
-var _LineCap_index = [...]uint8{0, 11, 23, 36, 44}
+var _LineCap_index = [...]uint8{0, 11, 23, 36, 48, 64, 72}
 
 func (i LineCap) String() string {
 	if i < 0 || i >= LineCap(len(_LineCap_index)-1) {

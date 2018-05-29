@@ -395,7 +395,7 @@ func (pc *Paint) NewSubPath(rs *RenderState) {
 
 // Path Drawing
 
-func (pc *Paint) capper() rasterx.CapFunc {
+func (pc *Paint) capfunc() rasterx.CapFunc {
 	switch pc.StrokeStyle.Cap {
 	case LineCapButt:
 		return rasterx.ButtCap
@@ -403,16 +403,28 @@ func (pc *Paint) capper() rasterx.CapFunc {
 		return rasterx.RoundCap
 	case LineCapSquare:
 		return rasterx.SquareCap
+	case LineCapCubic:
+		return rasterx.CubicCap
+	case LineCapQuadratic:
+		return rasterx.QuadraticCap
 	}
 	return nil
 }
 
-func (pc *Paint) joiner() rasterx.JoinMode {
+func (pc *Paint) joinmode() rasterx.JoinMode {
 	switch pc.StrokeStyle.Join {
+	case LineJoinMiter:
+		return rasterx.Miter
+	case LineJoinMiterClip:
+		return rasterx.MiterClip
 	case LineJoinRound:
 		return rasterx.Round
-	default: // all others for now.. -- todo: support more joiners!!??
+	case LineJoinBevel:
 		return rasterx.Bevel
+	case LineJoinArcs:
+		return rasterx.Arc
+	case LineJoinArcsClip:
+		return rasterx.ArcClip
 	}
 	return rasterx.Arc
 }
@@ -423,7 +435,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 	rs.Raster.SetStroke(
 		Float32ToFixed(pc.StrokeStyle.Width.Dots),
 		Float32ToFixed(pc.StrokeStyle.MiterLimit),
-		pc.capper(), nil, rasterx.RoundGap, pc.joiner(),
+		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		pc.StrokeStyle.Dashes, 0,
 	)
 	rs.Raster.SetColor(pc.StrokeStyle.Color) // todo
