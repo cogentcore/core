@@ -41,7 +41,8 @@ string, other render things.  Main conclusions:
 
 ### GoGi Editor on widgets.go
 
-* now using srwiley/rasterx, based on freetype rasterizer
+* now using srwiley/rasterx, based on freetype rasterizer -- fill is over 2x
+  faster, and stroke is also faster -- in addition there is only one path so overall memory etc will be faster
 
 * at start of benchmarking, full render total was 28s, and re-render was 12s -- major factors of improvement
 
