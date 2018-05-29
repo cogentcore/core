@@ -13,11 +13,11 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/prof"
-	"github.com/golang/freetype/raster"
+	"github.com/srwiley/rasterx"
+	"github.com/srwiley/scanFT"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/image/math/fixed"
 )
 
 /*
@@ -181,11 +181,13 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 //////////////////////////////////////////////////////////////////////////////////
 // RenderState
 
-// The RenderState holds all the current rendering state information used while painting -- a viewport just has one of these
+// The RenderState holds all the current rendering state information used
+// while painting -- a viewport just has one of these
 type RenderState struct {
 	XForm       XFormMatrix2D     `desc:"current transform"`
-	StrokePath  raster.Path       `desc:"current stroke path"`
-	FillPath    raster.Path       `desc:"current fill path"`
+	Path        rasterx.Path      `desc:"current path"`
+	Raster      *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
+	Scanner     *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
 	Start       Vec2D             `desc:"starting point, for close path"`
 	Current     Vec2D             `desc:"current point"`
 	HasCurrent  bool              `desc:"is current point current?"`
@@ -197,8 +199,16 @@ type RenderState struct {
 	ClipStack   []*image.Alpha    `desc:"stack of clips, if needed"`
 }
 
-func (rs *RenderState) Defaults() {
+// Init initializes RenderState -- must be called whenever image size changes
+func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 	rs.XForm = Identity2D()
+	rs.Image = img
+	// to use the golang.org/x/image/vector scanner, do this:
+	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
+	// and cut out painter:
+	painter := scanFT.NewRGBAPainter(img)
+	rs.Scanner = scanFT.NewScannerFT(width, height, painter)
+	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
 }
 
 // push current xform onto stack and apply new xform on top of it
@@ -309,11 +319,10 @@ func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Re
 // specified point.
 func (pc *Paint) MoveTo(rs *RenderState, x, y float32) {
 	if rs.HasCurrent {
-		rs.FillPath.Add1(rs.Start.Fixed())
+		rs.Path.Stop(false) // note: used to add a point to separate FillPath..
 	}
 	p := pc.TransformPoint(rs, x, y)
-	rs.StrokePath.Start(p.Fixed())
-	rs.FillPath.Start(p.Fixed())
+	rs.Path.Start(p.Fixed())
 	rs.Start = p
 	rs.Current = p
 	rs.HasCurrent = true
@@ -326,8 +335,7 @@ func (pc *Paint) LineTo(rs *RenderState, x, y float32) {
 		pc.MoveTo(rs, x, y)
 	} else {
 		p := pc.TransformPoint(rs, x, y)
-		rs.StrokePath.Add1(p.Fixed())
-		rs.FillPath.Add1(p.Fixed())
+		rs.Path.Line(p.Fixed())
 		rs.Current = p
 	}
 }
@@ -341,44 +349,30 @@ func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float32) {
 	}
 	p1 := pc.TransformPoint(rs, x1, y1)
 	p2 := pc.TransformPoint(rs, x2, y2)
-	rs.StrokePath.Add2(p1.Fixed(), p2.Fixed())
-	rs.FillPath.Add2(p1.Fixed(), p2.Fixed())
+	rs.Path.QuadBezier(p1.Fixed(), p2.Fixed())
 	rs.Current = p2
 }
 
 // CubicTo adds a cubic bezier curve to the current path starting at the
 // current point. If there is no current point, it first performs
-// MoveTo(x1, y1). Because freetype/raster does not support cubic beziers,
-// this is emulated with many small line segments.
+// MoveTo(x1, y1).
 func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
-	x0, y0 := rs.Current.X, rs.Current.Y
-	x1, y1 = rs.XForm.TransformPoint(x1, y1)
-	x2, y2 = rs.XForm.TransformPoint(x2, y2)
-	x3, y3 = rs.XForm.TransformPoint(x3, y3)
-	points := CubicBezier(x0, y0, x1, y1, x2, y2, x3, y3)
-	previous := rs.Current.Fixed()
-	for _, p := range points[1:] {
-		f := p.Fixed()
-		if f == previous {
-			// TODO: this fixes some rendering issues but not all
-			continue
-		}
-		previous = f
-		rs.StrokePath.Add1(f)
-		rs.FillPath.Add1(f)
-		rs.Current = p
-	}
+	// x0, y0 := rs.Current.X, rs.Current.Y
+	b := pc.TransformPoint(rs, x1, y1)
+	c := pc.TransformPoint(rs, x2, y2)
+	d := pc.TransformPoint(rs, x3, y3)
+
+	rs.Path.CubeBezier(b.Fixed(), c.Fixed(), d.Fixed())
 }
 
 // ClosePath adds a line segment from the current point to the beginning
 // of the current subpath. If there is no current point, this is a no-op.
 func (pc *Paint) ClosePath(rs *RenderState) {
 	if rs.HasCurrent {
-		rs.StrokePath.Add1(rs.Start.Fixed())
-		rs.FillPath.Add1(rs.Start.Fixed())
+		rs.Path.Stop(true)
 		rs.Current = rs.Start
 	}
 }
@@ -386,75 +380,72 @@ func (pc *Paint) ClosePath(rs *RenderState) {
 // ClearPath clears the current path. There is no current point after this
 // operation.
 func (pc *Paint) ClearPath(rs *RenderState) {
-	rs.StrokePath.Clear()
-	rs.FillPath.Clear()
+	rs.Path.Clear()
 	rs.HasCurrent = false
 }
 
 // NewSubPath starts a new subpath within the current path. There is no current
 // point after this operation.
 func (pc *Paint) NewSubPath(rs *RenderState) {
-	if rs.HasCurrent {
-		rs.FillPath.Add1(rs.Start.Fixed())
-	}
+	// if rs.HasCurrent {
+	// 	rs.FillPath.Add1(rs.Start.Fixed())
+	// }
 	rs.HasCurrent = false
 }
 
 // Path Drawing
 
-func (pc *Paint) capper() raster.Capper {
+func (pc *Paint) capper() rasterx.CapFunc {
 	switch pc.StrokeStyle.Cap {
 	case LineCapButt:
-		return raster.ButtCapper
+		return rasterx.ButtCap
 	case LineCapRound:
-		return raster.RoundCapper
+		return rasterx.RoundCap
 	case LineCapSquare:
-		return raster.SquareCapper
+		return rasterx.SquareCap
 	}
 	return nil
 }
 
-func (pc *Paint) joiner() raster.Joiner {
+func (pc *Paint) joiner() rasterx.JoinMode {
 	switch pc.StrokeStyle.Join {
 	case LineJoinRound:
-		return raster.RoundJoiner
+		return rasterx.Round
 	default: // all others for now.. -- todo: support more joiners!!??
-		return raster.BevelJoiner
+		return rasterx.Bevel
 	}
-	return nil
+	return rasterx.Arc
 }
 
-func (pc *Paint) stroke(rs *RenderState, painter raster.Painter) {
+func (pc *Paint) stroke(rs *RenderState) {
 	pr := prof.Start("Paint.stroke")
-	path := rs.StrokePath
-	if len(pc.StrokeStyle.Dashes) > 0 {
-		path = dashed(path, pc.StrokeStyle.Dashes)
-	} else {
-		// TODO: this is a temporary workaround to remove tiny segments
-		// that result in rendering issues
-		path = rasterPath(flattenPath(path))
-	}
-	sz := rs.Image.Bounds().Size()
-	r := raster.NewRasterizer(sz.X, sz.Y)
-	r.UseNonZeroWinding = true
-	r.AddStroke(path, Float32ToFixed(pc.StrokeStyle.Width.Dots), pc.capper(), pc.joiner())
-	r.Rasterize(painter)
+
+	rs.Raster.SetStroke(
+		Float32ToFixed(pc.StrokeStyle.Width.Dots),
+		Float32ToFixed(pc.StrokeStyle.MiterLimit),
+		pc.capper(), nil, rasterx.RoundGap, pc.joiner(),
+		pc.StrokeStyle.Dashes, 0,
+	)
+	rs.Raster.SetColor(pc.StrokeStyle.Color) // todo
+
+	rs.Path.AddTo(rs.Raster)
+	rs.Raster.Draw()
+	rs.Raster.Clear()
+
 	pr.End()
 }
 
-func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
+func (pc *Paint) fill(rs *RenderState) {
 	pr := prof.Start("Paint.fill")
-	path := rs.FillPath
-	if rs.HasCurrent {
-		path = make(raster.Path, len(rs.FillPath))
-		copy(path, rs.FillPath)
-		path.Add1(rs.Start.Fixed())
-	}
-	sz := rs.Image.Bounds().Size()
-	r := raster.NewRasterizer(sz.X, sz.Y)
-	r.UseNonZeroWinding = (pc.FillStyle.Rule == FillRuleNonZero)
-	r.AddPath(path)
-	r.Rasterize(painter)
+
+	rf := &rs.Raster.Filler
+	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
+	rf.SetColor(pc.FillStyle.Color) // todo
+
+	rs.Path.AddTo(rf)
+	rf.Draw()
+	rf.Clear()
+
 	pr.End()
 }
 
@@ -462,8 +453,8 @@ func (pc *Paint) fill(rs *RenderState, painter raster.Painter) {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Paint) StrokePreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server, rs.Bounds)
-	pc.stroke(rs, painter)
+	// painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server, rs.Bounds)
+	pc.stroke(rs)
 }
 
 // Stroke strokes the current path with the current color, line width,
@@ -477,8 +468,8 @@ func (pc *Paint) Stroke(rs *RenderState) {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicity closed. The path is preserved after this operation.
 func (pc *Paint) FillPreserve(rs *RenderState) {
-	painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server, rs.Bounds)
-	pc.fill(rs, painter)
+	// painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server, rs.Bounds)
+	pc.fill(rs)
 }
 
 // Fill fills the current path with the current color. Open subpaths
@@ -500,8 +491,8 @@ func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr color.Color) {
 // The path is preserved after this operation.
 func (pc *Paint) ClipPreserve(rs *RenderState) {
 	clip := image.NewAlpha(rs.Image.Bounds())
-	painter := raster.NewAlphaOverPainter(clip)
-	pc.fill(rs, painter)
+	// painter := raster.NewAlphaOverPainter(clip) // todo!
+	pc.fill(rs)
 	if rs.Mask == nil {
 		rs.Mask = clip
 	} else { // todo: this one operation MASSIVELY slows down clip usage -- unclear why
@@ -911,141 +902,4 @@ func (pc *Paint) ShearAbout(sx, sy, x, y float32) {
 func (pc *Paint) InvertY(rs *RenderState) {
 	pc.Translate(0, float32(rs.Image.Bounds().Size().Y))
 	pc.Scale(1, -1)
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-// Internal -- might want to export these later depending
-
-func flattenPath(p raster.Path) [][]Vec2D {
-	var result [][]Vec2D
-	var path []Vec2D
-	var cx, cy float32
-	for i := 0; i < len(p); {
-		switch p[i] {
-		case 0:
-			if len(path) > 0 {
-				result = append(result, path)
-				path = nil
-			}
-			x := FixedToFloat32(p[i+1])
-			y := FixedToFloat32(p[i+2])
-			path = append(path, Vec2D{x, y})
-			cx, cy = x, y
-			i += 4
-		case 1:
-			x := FixedToFloat32(p[i+1])
-			y := FixedToFloat32(p[i+2])
-			path = append(path, Vec2D{x, y})
-			cx, cy = x, y
-			i += 4
-		case 2:
-			x1 := FixedToFloat32(p[i+1])
-			y1 := FixedToFloat32(p[i+2])
-			x2 := FixedToFloat32(p[i+3])
-			y2 := FixedToFloat32(p[i+4])
-			points := QuadraticBezier(cx, cy, x1, y1, x2, y2)
-			path = append(path, points...)
-			cx, cy = x2, y2
-			i += 6
-		case 3:
-			x1 := FixedToFloat32(p[i+1])
-			y1 := FixedToFloat32(p[i+2])
-			x2 := FixedToFloat32(p[i+3])
-			y2 := FixedToFloat32(p[i+4])
-			x3 := FixedToFloat32(p[i+5])
-			y3 := FixedToFloat32(p[i+6])
-			points := CubicBezier(cx, cy, x1, y1, x2, y2, x3, y3)
-			path = append(path, points...)
-			cx, cy = x3, y3
-			i += 8
-		default:
-			panic("bad path")
-		}
-	}
-	if len(path) > 0 {
-		result = append(result, path)
-	}
-	return result
-}
-
-func dashPath(paths [][]Vec2D, dashes []float32) [][]Vec2D {
-	var result [][]Vec2D
-	if len(dashes) == 0 {
-		return paths
-	}
-	if len(dashes) == 1 {
-		dashes = append(dashes, dashes[0])
-	}
-	for _, path := range paths {
-		if len(path) < 2 {
-			continue
-		}
-		previous := path[0]
-		pathIndex := 1
-		dashIndex := 0
-		segmentLength := float32(0.0)
-		var segment []Vec2D
-		segment = append(segment, previous)
-		for pathIndex < len(path) {
-			dashLength := dashes[dashIndex]
-			point := path[pathIndex]
-			d := previous.Distance(point)
-			maxd := dashLength - segmentLength
-			if d > maxd {
-				t := maxd / d
-				p := previous.Interpolate(point, t)
-				segment = append(segment, p)
-				if dashIndex%2 == 0 && len(segment) > 1 {
-					result = append(result, segment)
-				}
-				segment = nil
-				segment = append(segment, p)
-				segmentLength = 0
-				previous = p
-				dashIndex = (dashIndex + 1) % len(dashes)
-			} else {
-				segment = append(segment, point)
-				previous = point
-				segmentLength += d
-				pathIndex++
-			}
-		}
-		if dashIndex%2 == 0 && len(segment) > 1 {
-			result = append(result, segment)
-		}
-	}
-	return result
-}
-
-func rasterPath(paths [][]Vec2D) raster.Path {
-	var result raster.Path
-	for _, path := range paths {
-		var previous fixed.Point26_6
-		for i, point := range path {
-			f := point.Fixed()
-			if i == 0 {
-				result.Start(f)
-			} else {
-				dx := f.X - previous.X
-				dy := f.Y - previous.Y
-				if dx < 0 {
-					dx = -dx
-				}
-				if dy < 0 {
-					dy = -dy
-				}
-				if dx+dy > 8 {
-					// TODO: this is a hack for cases where two points are
-					// too close - causes rendering issues with joins / caps
-					result.Add1(f)
-				}
-			}
-			previous = f
-		}
-	}
-	return result
-}
-
-func dashed(path raster.Path, dashes []float32) raster.Path {
-	return rasterPath(dashPath(flattenPath(path), dashes))
 }

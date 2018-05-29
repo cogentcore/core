@@ -11,6 +11,10 @@
 	+ list Style2D to see all the stuff happening in Style2D
 	+ pprof -http=localhost:5555 cpu.prof
 
+## 2018 - 05 - 29 -- switch to rasterx
+
+
+
 ## 2018 - 04 - 24
 
 * style is now much faster by just looking at props and compiling all the fields into maps
@@ -30,70 +34,91 @@ string, other render things.  Main conclusions:
 * measurestring seems to be happening way too much, especially on re-render, where it shouldn't happen at all!
 * Style is also way too slow -- working on that by caching everything.
 
-### widgets.go main
 
-```
-Starting BenchmarkFullRender
-Time for 50 Re-Renders:         1.59 s
-     Node2D.Render2DTree:	Tot:	     1398.89	Avg:	       27.98	N:	    50	Pct:	49.76
-              Paint.fill:	Tot:	      988.34	Avg:	        1.41	N:	   700	Pct:	35.15
-        Paint.drawString:	Tot:	      142.94	Avg:	        0.29	N:	   500	Pct:	 5.08
-            Paint.stroke:	Tot:	       83.11	Avg:	        0.07	N:	  1250	Pct:	 2.96
-      Node2D.Style2DTree:	Tot:	       71.01	Avg:	        1.42	N:	    50	Pct:	 2.53
-     Node2D.Layout2DTree:	Tot:	       43.10	Avg:	        0.43	N:	   100	Pct:	 1.53
-          win.FullUpdate:	Tot:	       27.62	Avg:	        0.55	N:	    50	Pct:	 0.98
-     win.Publish.Publish:	Tot:	       21.92	Avg:	        0.44	N:	    50	Pct:	 0.78
-       Node2D.Init2DTree:	Tot:	       12.20	Avg:	        0.24	N:	    50	Pct:	 0.43
-     Paint.MeasureString:	Tot:	       10.85	Avg:	        0.01	N:	   900	Pct:	 0.39
-       Node2D.Size2DTree:	Tot:	        5.84	Avg:	        0.12	N:	    50	Pct:	 0.21
-        win.Publish.Copy:	Tot:	        5.68	Avg:	        0.11	N:	    50	Pct:	 0.20
-```
+## Current Benchmark Results
 
-```
-Starting BenchmarkReRender
-Time for 50 Re-Renders:         1.37 s
-     Node2D.Render2DTree:	Tot:	     1373.74	Avg:	       27.47	N:	    50	Pct:	52.41
-              Paint.fill:	Tot:	      965.07	Avg:	        1.38	N:	   700	Pct:	36.82
-        Paint.drawString:	Tot:	      138.89	Avg:	        0.28	N:	   500	Pct:	 5.30
-            Paint.stroke:	Tot:	       81.46	Avg:	        0.07	N:	  1250	Pct:	 3.11
-          win.FullUpdate:	Tot:	       26.86	Avg:	        0.54	N:	    50	Pct:	 1.02
-     win.Publish.Publish:	Tot:	       22.63	Avg:	        0.45	N:	    50	Pct:	 0.86
-     Paint.MeasureString:	Tot:	        5.92	Avg:	        0.01	N:	   500	Pct:	 0.23
-        win.Publish.Copy:	Tot:	        5.63	Avg:	        0.11	N:	    50	Pct:	 0.21
-     Node2D.Layout2DTree:	Tot:	        0.83	Avg:	        0.02	N:	    50	Pct:	 0.03
-```
+(git history can track prior results.. just keep the current reference results in here, plus perhaps some key transition points)
 
 ### GoGi Editor on widgets.go
 
-(at start of benchmarking, full render total was 28s, and re-render was 12s -- major factors of improvement)
+* now using srwiley/rasterx, based on freetype rasterizer
+
+* at start of benchmarking, full render total was 28s, and re-render was 12s -- major factors of improvement
 
 ```
 Starting BenchmarkFullRender
-Time for 50 Re-Renders:         7.72 s
-     Node2D.Render2DTree:	Tot:	     4569.74	Avg:	       91.39	N:	    50	Pct:	38.12
-              Paint.fill:	Tot:	     3279.54	Avg:	        1.49	N:	  2200	Pct:	27.36
-      Node2D.Style2DTree:	Tot:	     1466.13	Avg:	       29.32	N:	    50	Pct:	12.23
-     Node2D.Layout2DTree:	Tot:	     1007.39	Avg:	       10.07	N:	   100	Pct:	 8.40
-        Paint.drawString:	Tot:	      724.50	Avg:	        0.10	N:	  7150	Pct:	 6.04
-       Node2D.Init2DTree:	Tot:	      516.63	Avg:	       10.33	N:	    50	Pct:	 4.31
-            Paint.stroke:	Tot:	      202.36	Avg:	        0.05	N:	  3800	Pct:	 1.69
-       Node2D.Size2DTree:	Tot:	       79.57	Avg:	        1.59	N:	    50	Pct:	 0.66
-     Paint.MeasureString:	Tot:	       57.79	Avg:	        0.00	N:	 18400	Pct:	 0.48
-          win.FullUpdate:	Tot:	       52.58	Avg:	        1.05	N:	    50	Pct:	 0.44
-     win.Publish.Publish:	Tot:	       25.39	Avg:	        0.51	N:	    50	Pct:	 0.21
-        win.Publish.Copy:	Tot:	        6.63	Avg:	        0.13	N:	    50	Pct:	 0.06
+Starting Std CPU / Mem Profiling
+Starting Targeted Profiling, window has 2447 nodes
+Time for 50 Re-Renders:         4.28 s
+     Node2D.Render2DTree:	Tot:	     2228.51	Avg:	       44.57	N:	    50	Pct:	30.62
+              Paint.fill:	Tot:	     1325.77	Avg:	        0.58	N:	  2300	Pct:	18.22
+      Node2D.Style2DTree:	Tot:	     1185.75	Avg:	       23.71	N:	    50	Pct:	16.29
+     StyleFields.Inherit:	Tot:	      543.99	Avg:	        0.00	N:	135700	Pct:	 7.48
+        Paint.drawString:	Tot:	      543.43	Avg:	        0.06	N:	  8500	Pct:	 7.47
+       Node2D.Init2DTree:	Tot:	      335.12	Avg:	        6.70	N:	    50	Pct:	 4.60
+     Node2D.Layout2DTree:	Tot:	      318.65	Avg:	        3.19	N:	   100	Pct:	 4.38
+      StyleFields.ToDots:	Tot:	      294.34	Avg:	        0.00	N:	729600	Pct:	 4.04
+            Paint.stroke:	Tot:	      135.76	Avg:	        0.02	N:	  7000	Pct:	 1.87
+       Node2D.Size2DTree:	Tot:	      127.64	Avg:	        2.55	N:	    50	Pct:	 1.75
+       StyleFields.Style:	Tot:	      106.39	Avg:	        0.00	N:	179300	Pct:	 1.46
+     Paint.MeasureString:	Tot:	       73.46	Avg:	        0.00	N:	 22100	Pct:	 1.01
+     win.Publish.Publish:	Tot:	       27.49	Avg:	        0.55	N:	    50	Pct:	 0.38
+          win.FullUpdate:	Tot:	       25.07	Avg:	        0.50	N:	    50	Pct:	 0.34
+        win.Publish.Copy:	Tot:	        6.01	Avg:	        0.12	N:	    50	Pct:	 0.08
 ```
 
 ```
 Starting BenchmarkReRender
-Time for 50 Re-Renders:         4.56 s
-     Node2D.Render2DTree:	Tot:	     4558.45	Avg:	       91.17	N:	    50	Pct:	51.38
-              Paint.fill:	Tot:	     3277.28	Avg:	        1.49	N:	  2200	Pct:	36.94
-        Paint.drawString:	Tot:	      721.19	Avg:	        0.10	N:	  7150	Pct:	 8.13
-            Paint.stroke:	Tot:	      202.33	Avg:	        0.05	N:	  3800	Pct:	 2.28
-          win.FullUpdate:	Tot:	       52.56	Avg:	        1.05	N:	    50	Pct:	 0.59
-     Paint.MeasureString:	Tot:	       27.85	Avg:	        0.00	N:	  7250	Pct:	 0.31
-     win.Publish.Publish:	Tot:	       24.86	Avg:	        0.50	N:	    50	Pct:	 0.28
-        win.Publish.Copy:	Tot:	        6.54	Avg:	        0.13	N:	    50	Pct:	 0.07
-     Node2D.Layout2DTree:	Tot:	        0.69	Avg:	        0.01	N:	    50	Pct:	 0.01
+Starting Targeted Profiling, window has 2447 nodes
+Time for 50 Re-Renders:         2.18 s
+     Node2D.Render2DTree:	Tot:	     2179.82	Avg:	       43.60	N:	    50	Pct:	51.52
+              Paint.fill:	Tot:	     1291.70	Avg:	        0.56	N:	  2300	Pct:	30.53
+        Paint.drawString:	Tot:	      532.70	Avg:	        0.06	N:	  8500	Pct:	12.59
+            Paint.stroke:	Tot:	      134.13	Avg:	        0.02	N:	  7000	Pct:	 3.17
+     Paint.MeasureString:	Tot:	       35.30	Avg:	        0.00	N:	  8500	Pct:	 0.83
+     win.Publish.Publish:	Tot:	       26.13	Avg:	        0.52	N:	    50	Pct:	 0.62
+          win.FullUpdate:	Tot:	       25.21	Avg:	        0.50	N:	    50	Pct:	 0.60
+        win.Publish.Copy:	Tot:	        5.74	Avg:	        0.11	N:	    50	Pct:	 0.14
+     Node2D.Layout2DTree:	Tot:	        0.41	Avg:	        0.01	N:	    50	Pct:	 0.01
+      StyleFields.ToDots:	Tot:	        0.14	Avg:	        0.00	N:	   100	Pct:	 0.00
+```
+
+
+### GoGi Editor on widgets.go:  OLD bare FreeType renderer
+
+```
+Starting BenchmarkFullRender
+Starting Targeted Profiling, window has 2447 nodes
+Time for 50 Re-Renders:         5.47 s
+     Node2D.Render2DTree:	Tot:	     3577.71	Avg:	       71.55	N:	    50	Pct:	36.74
+              Paint.fill:	Tot:	     2657.87	Avg:	        1.16	N:	  2300	Pct:	27.29
+      Node2D.Style2DTree:	Tot:	     1089.17	Avg:	       21.78	N:	    50	Pct:	11.19
+        Paint.drawString:	Tot:	      524.10	Avg:	        0.06	N:	  8500	Pct:	 5.38
+     StyleFields.Inherit:	Tot:	      500.25	Avg:	        0.00	N:	135700	Pct:	 5.14
+       Node2D.Init2DTree:	Tot:	      304.51	Avg:	        6.09	N:	    50	Pct:	 3.13
+     Node2D.Layout2DTree:	Tot:	      293.09	Avg:	        2.93	N:	   100	Pct:	 3.01
+      StyleFields.ToDots:	Tot:	      272.50	Avg:	        0.00	N:	729600	Pct:	 2.80
+            Paint.stroke:	Tot:	      182.86	Avg:	        0.03	N:	  7000	Pct:	 1.88
+       Node2D.Size2DTree:	Tot:	      120.24	Avg:	        2.40	N:	    50	Pct:	 1.23
+       StyleFields.Style:	Tot:	       96.65	Avg:	        0.00	N:	179300	Pct:	 0.99
+     Paint.MeasureString:	Tot:	       68.24	Avg:	        0.00	N:	 22100	Pct:	 0.70
+          win.FullUpdate:	Tot:	       25.30	Avg:	        0.51	N:	    50	Pct:	 0.26
+     win.Publish.Publish:	Tot:	       19.03	Avg:	        0.38	N:	    50	Pct:	 0.20
+        win.Publish.Copy:	Tot:	        6.07	Avg:	        0.12	N:	    50	Pct:	 0.06
+```
+
+```
+Starting BenchmarkReRender
+Starting Targeted Profiling, window has 2447 nodes
+Time for 50 Re-Renders:         3.57 s
+     Node2D.Render2DTree:	Tot:	     3566.55	Avg:	       71.33	N:	    50	Pct:	50.92
+              Paint.fill:	Tot:	     2653.58	Avg:	        1.15	N:	  2300	Pct:	37.89
+        Paint.drawString:	Tot:	      515.26	Avg:	        0.06	N:	  8500	Pct:	 7.36
+            Paint.stroke:	Tot:	      181.06	Avg:	        0.03	N:	  7000	Pct:	 2.59
+     Paint.MeasureString:	Tot:	       33.33	Avg:	        0.00	N:	  8500	Pct:	 0.48
+     win.Publish.Publish:	Tot:	       23.53	Avg:	        0.47	N:	    50	Pct:	 0.34
+          win.FullUpdate:	Tot:	       23.46	Avg:	        0.47	N:	    50	Pct:	 0.33
+        win.Publish.Copy:	Tot:	        6.81	Avg:	        0.14	N:	    50	Pct:	 0.10
+     Node2D.Layout2DTree:	Tot:	        0.39	Avg:	        0.01	N:	    50	Pct:	 0.01
+      StyleFields.ToDots:	Tot:	        0.14	Avg:	        0.00	N:	   100	Pct:	 0.00
 ```

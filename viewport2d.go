@@ -61,8 +61,7 @@ func NewViewport2D(width, height int) *Viewport2D {
 		return nil
 	}
 	vp.Pixels = vp.OSImage.RGBA()
-	vp.Render.Defaults()
-	vp.Render.Image = vp.Pixels
+	vp.Render.Init(width, height, vp.Pixels)
 	return vp
 }
 
@@ -91,9 +90,8 @@ func (vp *Viewport2D) Resize(width, height int) {
 		return
 	}
 	vp.Pixels = vp.OSImage.RGBA()
-	vp.Render.Defaults()
-	vp.ViewBox.Size = nwsz // make sure
-	vp.Render.Image = vp.Pixels
+	vp.Render.Init(width, height, vp.Pixels)
+	vp.ViewBox.Size = nwsz  // make sure
 	if vp.Viewport == nil { // parent
 		vp.FullRender2DTree()
 	}
