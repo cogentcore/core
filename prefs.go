@@ -176,6 +176,8 @@ func (p *Preferences) Edit() {
 
 	sv := vlay.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStruct(p, nil)
+	sv.SetStretchMaxWidth()
+	sv.SetStretchMaxHeight()
 
 	bspc := vlay.AddNewChild(KiT_Space, "ButSpc").(*Space)
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))

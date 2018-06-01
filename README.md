@@ -71,11 +71,17 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
-* windows: support the current HiDPI framework -- right now it is always stuck at 96dpi.  and support SetPos window method (and probably need to track movement)
+* windows:
+    + clip.Board impl
+	+ support the current HiDPI framework -- right now it is always stuck at 96dpi.
+	+ support SetPos window method (and probably need to track movement)
 
-* mac: impl setPos
+* mac:
+	+ impl setPos
 
-* linux: moving window isn't updating pos of new windows
+* linux:
+	+ clip.Board impl
+	+ moving window isn't updating pos of new windows
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -148,7 +154,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 ## Remaining features for widgets
 
 + FileView view and dialog -- various, see todo in fileview.go
-+ TextField -- needs selection / clipboard, constraints, and to use runes instead of bytes
++ TextField -- constraints
 + TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
 + TabWidget -- needs updating
 + Label -- done -- could make lots of H1, etc alts
@@ -160,6 +166,3 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 	+ Lots of redundant ToDots is happening, but it is difficult to figure out exactly when minimal recompute is necessary.  right now only for nil props.  computing prop diffs might be more expensive and complex than just redoing everything.
 	+ 4.6sec on FindConnectionIndex when making new Connections -- hash map? -- this is most of the time in Init2D
 	
-
-
-

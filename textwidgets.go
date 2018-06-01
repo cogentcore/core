@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"math"
 	"reflect"
 	"sort"
 	"strconv"
@@ -141,7 +140,8 @@ var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 type TextField struct {
 	WidgetBase
 	Text          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	EditText      string                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications"`
+	Edited        bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditText      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	StartPos      int                     `xml:"-" desc:"starting display position in the string"`
 	EndPos        int                     `xml:"-" desc:"ending display position in the string"`
 	CursorPos     int                     `xml:"-" desc:"current cursor position"`
@@ -153,7 +153,7 @@ type TextField struct {
 	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
-	lastSizedText string                  `json:"-" xml:"-" the last text string we got charpos for"`
+	lastSizedText []rune                  `json:"-" xml:"-" the last text string we got charpos for"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -181,408 +181,506 @@ var TextFieldProps = ki.Props{
 }
 
 // SetText sets the text to be edited and reverts any current edit to reflect this new text
-func (g *TextField) SetText(txt string) {
-	if g.Text == txt && g.EditText == txt {
+func (tf *TextField) SetText(txt string) {
+	if tf.Text == txt && !tf.Edited {
 		return
 	}
-	g.Text = txt
-	g.RevertEdit()
+	tf.Text = txt
+	tf.RevertEdit()
 }
 
-// todo: all of this must be redone with runes!
-
-// done editing: return key pressed or out of focus
-func (g *TextField) EditDone() {
-	if g.Text != g.EditText {
-		g.Text = g.EditText
-		g.TextFieldSig.Emit(g.This, int64(TextFieldDone), g.Text)
+// EditDone completes editing and copies the active edited text to the text --
+// called when the return key is pressed or goes out of focus
+func (tf *TextField) EditDone() {
+	if tf.Edited {
+		tf.Text = string(tf.EditText)
+		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Text)
+		tf.Edited = false
 	}
 }
 
-// abort editing -- revert to last saved text
-func (g *TextField) RevertEdit() {
-	updt := g.UpdateStart()
-	g.EditText = g.Text
-	g.StartPos = 0
-	g.EndPos = g.CharWidth
-	g.SelectReset()
-	g.UpdateEnd(updt)
+// RevertEdit aborts editing and reverts to last saved text
+func (tf *TextField) RevertEdit() {
+	updt := tf.UpdateStart()
+	tf.EditText = []rune(tf.Text)
+	tf.Edited = false
+	tf.StartPos = 0
+	tf.EndPos = tf.CharWidth
+	tf.SelectReset()
+	tf.UpdateEnd(updt)
 }
 
 // CursorForward moves the cursor forward
-func (g *TextField) CursorForward(steps int) {
-	updt := g.UpdateStart()
-	g.CursorPos += steps
-	if g.CursorPos > len(g.EditText) {
-		g.CursorPos = len(g.EditText)
+func (tf *TextField) CursorForward(steps int) {
+	updt := tf.UpdateStart()
+	tf.CursorPos += steps
+	if tf.CursorPos > len(tf.EditText) {
+		tf.CursorPos = len(tf.EditText)
 	}
-	if g.CursorPos > g.EndPos {
-		inc := g.CursorPos - g.EndPos
-		g.EndPos += inc
+	if tf.CursorPos > tf.EndPos {
+		inc := tf.CursorPos - tf.EndPos
+		tf.EndPos += inc
 	}
-	if g.SelectMode {
-		if g.CursorPos > g.SelectStart {
-			g.SelectEnd = g.CursorPos
+	if tf.SelectMode {
+		if tf.CursorPos-steps < tf.SelectStart {
+			tf.SelectStart = tf.CursorPos
+		} else if tf.CursorPos > tf.SelectStart {
+			tf.SelectEnd = tf.CursorPos
 		} else {
-			g.SelectStart = g.CursorPos
+			tf.SelectStart = tf.CursorPos
 		}
-		g.SelectUpdate()
+		tf.SelectUpdate()
 	}
-	g.UpdateEnd(updt)
+	tf.UpdateEnd(updt)
 }
 
 // CursorForward moves the cursor backward
-func (g *TextField) CursorBackward(steps int) {
-	updt := g.UpdateStart()
-	g.CursorPos -= steps
-	if g.CursorPos < 0 {
-		g.CursorPos = 0
+func (tf *TextField) CursorBackward(steps int) {
+	updt := tf.UpdateStart()
+	tf.CursorPos -= steps
+	if tf.CursorPos < 0 {
+		tf.CursorPos = 0
 	}
-	if g.CursorPos <= g.StartPos {
-		dec := kit.MinInt(g.StartPos, 8)
-		g.StartPos -= dec
+	if tf.CursorPos <= tf.StartPos {
+		dec := kit.MinInt(tf.StartPos, 8)
+		tf.StartPos -= dec
 	}
-	if g.SelectMode {
-		if g.CursorPos > g.SelectStart {
-			g.SelectEnd = g.CursorPos
+	if tf.SelectMode {
+		if tf.CursorPos+steps < tf.SelectStart {
+			tf.SelectStart = tf.CursorPos
+		} else if tf.CursorPos > tf.SelectStart {
+			tf.SelectEnd = tf.CursorPos
 		} else {
-			g.SelectStart = g.CursorPos
+			tf.SelectStart = tf.CursorPos
 		}
-		g.SelectUpdate()
+		tf.SelectUpdate()
 	}
-	g.UpdateEnd(updt)
+	tf.UpdateEnd(updt)
 }
 
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
-func (g *TextField) CursorStart() {
-	updt := g.UpdateStart()
-	g.CursorPos = 0
-	g.StartPos = 0
-	g.EndPos = kit.MinInt(len(g.EditText), g.StartPos+g.CharWidth)
-	if g.SelectMode {
-		g.SelectStart = 0
-		g.SelectUpdate()
+func (tf *TextField) CursorStart() {
+	updt := tf.UpdateStart()
+	tf.CursorPos = 0
+	tf.StartPos = 0
+	tf.EndPos = kit.MinInt(len(tf.EditText), tf.StartPos+tf.CharWidth)
+	if tf.SelectMode {
+		tf.SelectStart = 0
+		tf.SelectUpdate()
 	}
-	g.UpdateEnd(updt)
+	tf.UpdateEnd(updt)
 }
 
 // CursorEnd moves the cursor to the end of the text
-func (g *TextField) CursorEnd() {
-	updt := g.UpdateStart()
-	ed := len(g.EditText)
-	g.CursorPos = ed
-	g.EndPos = len(g.EditText) // try -- display will adjust
-	g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
-	if g.SelectMode {
-		g.SelectEnd = ed
-		g.SelectUpdate()
+func (tf *TextField) CursorEnd() {
+	updt := tf.UpdateStart()
+	ed := len(tf.EditText)
+	tf.CursorPos = ed
+	tf.EndPos = len(tf.EditText) // try -- display will adjust
+	tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
+	if tf.SelectMode {
+		tf.SelectEnd = ed
+		tf.SelectUpdate()
 	}
-	g.UpdateEnd(updt)
+	tf.UpdateEnd(updt)
 }
 
 // CursorBackspace deletes character(s) immediately before cursor
-func (g *TextField) CursorBackspace(steps int) {
-	if g.CursorPos < steps {
-		steps = g.CursorPos
+func (tf *TextField) CursorBackspace(steps int) {
+	if tf.CursorPos < steps {
+		steps = tf.CursorPos
 	}
 	if steps <= 0 {
 		return
 	}
-	updt := g.UpdateStart()
-	g.EditText = g.EditText[:g.CursorPos-steps] + g.EditText[g.CursorPos:]
-	g.CursorBackward(steps)
-	if g.CursorPos > g.SelectStart && g.CursorPos <= g.SelectEnd {
-		g.SelectEnd -= steps
-	} else if g.CursorPos < g.SelectStart {
-		g.SelectStart -= steps
-		g.SelectEnd -= steps
+	updt := tf.UpdateStart()
+	tf.Edited = true
+	tf.EditText = append(tf.EditText[:tf.CursorPos-steps], tf.EditText[tf.CursorPos:]...)
+	tf.CursorBackward(steps)
+	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
+		tf.SelectEnd -= steps
+	} else if tf.CursorPos < tf.SelectStart {
+		tf.SelectStart -= steps
+		tf.SelectEnd -= steps
 	}
-	g.SelectUpdate()
-	g.UpdateEnd(updt)
+	tf.SelectUpdate()
+	tf.UpdateEnd(updt)
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
-func (g *TextField) CursorDelete(steps int) {
-	if g.CursorPos+steps > len(g.EditText) {
-		steps = len(g.EditText) - g.CursorPos
+func (tf *TextField) CursorDelete(steps int) {
+	if tf.CursorPos+steps > len(tf.EditText) {
+		steps = len(tf.EditText) - tf.CursorPos
 	}
 	if steps <= 0 {
 		return
 	}
-	updt := g.UpdateStart()
-	g.EditText = g.EditText[:g.CursorPos] + g.EditText[g.CursorPos+steps:]
-	if g.CursorPos > g.SelectStart && g.CursorPos <= g.SelectEnd {
-		g.SelectEnd -= steps
-	} else if g.CursorPos < g.SelectStart {
-		g.SelectStart -= steps
-		g.SelectEnd -= steps
+	updt := tf.UpdateStart()
+	tf.Edited = true
+	tf.EditText = append(tf.EditText[:tf.CursorPos], tf.EditText[tf.CursorPos+steps:]...)
+	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
+		tf.SelectEnd -= steps
+	} else if tf.CursorPos < tf.SelectStart {
+		tf.SelectStart -= steps
+		tf.SelectEnd -= steps
 	}
-	g.SelectUpdate()
-	g.UpdateEnd(updt)
+	tf.SelectUpdate()
+	tf.UpdateEnd(updt)
 }
 
 // CursorKill deletes text from cursor to end of text
-func (g *TextField) CursorKill() {
-	steps := len(g.EditText) - g.CursorPos
-	g.CursorDelete(steps)
+func (tf *TextField) CursorKill() {
+	steps := len(tf.EditText) - tf.CursorPos
+	tf.CursorDelete(steps)
+}
+
+// HasSelection returns whether there is a selected region of text
+func (tf *TextField) HasSelection() bool {
+	tf.SelectUpdate()
+	if tf.SelectStart < tf.SelectEnd {
+		return true
+	}
+	return false
 }
 
 // Selection returns the currently selected text
-func (g *TextField) Selection() string {
-	g.SelectUpdate()
-	if g.SelectStart < g.SelectEnd {
-		return g.EditText[g.SelectStart:g.SelectEnd]
+func (tf *TextField) Selection() string {
+	if tf.HasSelection() {
+		return string(tf.EditText[tf.SelectStart:tf.SelectEnd])
 	}
 	return ""
 }
 
 // SelectModeToggle toggles the SelectMode, updating selection with cursor movement
-func (g *TextField) SelectModeToggle() {
-	if g.SelectMode {
-		g.SelectMode = false
+func (tf *TextField) SelectModeToggle() {
+	if tf.SelectMode {
+		tf.SelectMode = false
 	} else {
-		g.SelectMode = true
-		g.SelectStart = g.CursorPos
-		g.SelectEnd = g.SelectStart
+		tf.SelectMode = true
+		tf.SelectStart = tf.CursorPos
+		tf.SelectEnd = tf.SelectStart
 	}
 }
 
 // SelectAll selects all the text
-func (g *TextField) SelectAll() {
-	updt := g.UpdateStart()
-	g.SelectStart = 0
-	g.SelectEnd = len(g.EditText)
-	g.UpdateEnd(updt)
+func (tf *TextField) SelectAll() {
+	updt := tf.UpdateStart()
+	tf.SelectStart = 0
+	tf.SelectEnd = len(tf.EditText)
+	tf.UpdateEnd(updt)
+}
+
+// SelectWord selects the word (whitespace delimited) that the cursor is on
+func (tf *TextField) SelectWord() {
+	updt := tf.UpdateStart()
+	sz := len(tf.EditText)
+	if sz <= 3 {
+		tf.SelectAll()
+		return
+	}
+	tf.SelectStart = tf.CursorPos
+	if tf.SelectStart >= sz {
+		tf.SelectStart = sz - 2
+	}
+	if !unicode.IsSpace(tf.EditText[tf.SelectStart]) {
+		for tf.SelectStart > 0 {
+			if unicode.IsSpace(tf.EditText[tf.SelectStart-1]) {
+				break
+			}
+			tf.SelectStart--
+		}
+		tf.SelectEnd = tf.CursorPos + 1
+		for tf.SelectEnd < sz {
+			if unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+				break
+			}
+			tf.SelectEnd++
+		}
+	} else { // keep the space start -- go to next space..
+		tf.SelectEnd = tf.CursorPos + 1
+		for tf.SelectEnd < sz {
+			if !unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+				break
+			}
+			tf.SelectEnd++
+		}
+		for tf.SelectEnd < sz {
+			if unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+				break
+			}
+			tf.SelectEnd++
+		}
+	}
+	tf.UpdateEnd(updt)
 }
 
 // SelectReset resets the selection
-func (g *TextField) SelectReset() {
-	g.SelectMode = false
-	if g.SelectStart == 0 && g.SelectEnd == 0 {
+func (tf *TextField) SelectReset() {
+	tf.SelectMode = false
+	if tf.SelectStart == 0 && tf.SelectEnd == 0 {
 		return
 	}
-	updt := g.UpdateStart()
-	g.SelectStart = 0
-	g.SelectEnd = 0
-	g.UpdateEnd(updt)
+	updt := tf.UpdateStart()
+	tf.SelectStart = 0
+	tf.SelectEnd = 0
+	tf.UpdateEnd(updt)
 }
 
 // SelectUpdate updates the select region after any change to the text, to keep it in range
-func (g *TextField) SelectUpdate() {
-	if g.SelectStart < g.SelectEnd {
-		ed := len(g.EditText)
-		if g.SelectStart < 0 {
-			g.SelectStart = 0
+func (tf *TextField) SelectUpdate() {
+	if tf.SelectStart < tf.SelectEnd {
+		ed := len(tf.EditText)
+		if tf.SelectStart < 0 {
+			tf.SelectStart = 0
 		}
-		if g.SelectEnd > ed {
-			g.SelectEnd = ed
+		if tf.SelectEnd > ed {
+			tf.SelectEnd = ed
 		}
 	} else {
-		g.SelectReset()
+		tf.SelectReset()
 	}
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (g *TextField) Cut() string {
-	g.SelectUpdate()
-	if g.SelectStart >= g.SelectEnd {
+func (tf *TextField) Cut() string {
+	tf.SelectUpdate()
+	if !tf.HasSelection() {
 		return ""
 	}
-	updt := g.UpdateStart()
-	cut := g.Selection()
-	g.EditText = g.EditText[:g.SelectStart] + g.EditText[g.SelectEnd:]
-	if g.CursorPos > g.SelectStart {
-		if g.CursorPos < g.SelectEnd {
-			g.CursorPos = g.SelectStart
+	updt := tf.UpdateStart()
+	cut := tf.Selection()
+	tf.Edited = true
+	tf.EditText = append(tf.EditText[:tf.SelectStart], tf.EditText[tf.SelectEnd:]...)
+	if tf.CursorPos > tf.SelectStart {
+		if tf.CursorPos < tf.SelectEnd {
+			tf.CursorPos = tf.SelectStart
 		} else {
-			g.CursorPos -= g.SelectEnd - g.SelectStart
+			tf.CursorPos -= tf.SelectEnd - tf.SelectStart
 		}
 	}
-	g.SelectReset()
+	tf.SelectReset()
 	oswin.TheApp.ClipBoard().Write(([]byte)(cut), "text/plain")
-	g.UpdateEnd(updt)
+	tf.UpdateEnd(updt)
 	return cut
 }
 
-// Copy copies any selected text to the clipboard, and returns that text
-func (g *TextField) Copy() string {
-	g.SelectUpdate()
-	if g.SelectStart >= g.SelectEnd {
+// Copy copies any selected text to the clipboard, and returns that text,
+// optionaly resetting the current selection
+func (tf *TextField) Copy(reset bool) string {
+	tf.SelectUpdate()
+	if !tf.HasSelection() {
 		return ""
 	}
-	cpy := g.Selection()
+	cpy := tf.Selection()
 	oswin.TheApp.ClipBoard().Write(([]byte)(cpy), "text/plain")
-	// don't reset?
+	if reset {
+		tf.SelectReset()
+	}
 	return cpy
 }
 
 // Paste inserts text from the clipboard at current cursor position
-func (g *TextField) Paste() {
+func (tf *TextField) Paste() {
 	data, _, err := oswin.TheApp.ClipBoard().Read()
 	if data != nil && err == nil {
-		g.InsertAtCursor(string(data))
+		tf.InsertAtCursor(string(data))
 	}
 }
 
 // InsertAtCursor inserts given text at current cursor position
-func (g *TextField) InsertAtCursor(str string) {
-	updt := g.UpdateStart()
-	g.EditText = g.EditText[:g.CursorPos] + str + g.EditText[g.CursorPos:]
-	g.EndPos += len(str)
-	g.CursorForward(len(str))
-	g.UpdateEnd(updt)
+func (tf *TextField) InsertAtCursor(str string) {
+	updt := tf.UpdateStart()
+	tf.Edited = true
+	rs := []rune(str)
+	rsl := len(rs)
+	nt := make([]rune, 0, cap(tf.EditText)+cap(rs))
+	nt = append(nt, tf.EditText[:tf.CursorPos]...)
+	nt = append(nt, rs...)
+	nt = append(nt, tf.EditText[tf.CursorPos:]...)
+	tf.EditText = nt
+	tf.EndPos += rsl
+	tf.CursorForward(rsl)
+	tf.UpdateEnd(updt)
 }
 
-func (g *TextField) KeyInput(kt *key.ChordEvent) {
+func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
 	switch kf {
 	case KeyFunSelectItem:
-		g.EditDone() // not processed, others could consume
+		tf.EditDone() // not processed, others could consume
 	case KeyFunAccept:
-		g.EditDone() // not processed, others could consume
+		tf.EditDone() // not processed, others could consume
 	case KeyFunAbort:
-		g.RevertEdit() // not processed, others could consume
+		tf.RevertEdit() // not processed, others could consume
 	case KeyFunMoveRight:
-		g.CursorForward(1)
+		tf.CursorForward(1)
 		kt.SetProcessed()
 	case KeyFunMoveLeft:
-		g.CursorBackward(1)
+		tf.CursorBackward(1)
 		kt.SetProcessed()
 	case KeyFunHome:
-		g.CursorStart()
+		tf.CursorStart()
 		kt.SetProcessed()
 	case KeyFunEnd:
-		g.CursorEnd()
+		tf.CursorEnd()
 		kt.SetProcessed()
 	case KeyFunSelectText:
-		g.SelectModeToggle()
+		tf.SelectModeToggle()
 		kt.SetProcessed()
 	case KeyFunCancelSelect:
-		g.SelectReset()
+		tf.SelectReset()
 		kt.SetProcessed()
 	case KeyFunSelectAll:
-		g.SelectAll()
+		tf.SelectAll()
 		kt.SetProcessed()
 	case KeyFunBackspace:
-		g.CursorBackspace(1)
+		tf.CursorBackspace(1)
 		kt.SetProcessed()
 	case KeyFunKill:
-		g.CursorKill()
+		tf.CursorKill()
 		kt.SetProcessed()
 	case KeyFunDelete:
-		g.CursorDelete(1)
+		tf.CursorDelete(1)
 		kt.SetProcessed()
 	case KeyFunCopy:
-		g.Copy()
+		tf.Copy(true) // reset
 		kt.SetProcessed()
 	case KeyFunCut:
-		g.Cut()
+		tf.Cut()
 		kt.SetProcessed()
 	case KeyFunPaste:
-		g.Paste()
+		tf.Paste()
 		kt.SetProcessed()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
-			g.InsertAtCursor(string(kt.Rune))
+			tf.InsertAtCursor(string(kt.Rune))
 		}
 	}
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
-func (g *TextField) PixelToCursor(pixOff float32) int {
-	st := &g.Style
+func (tf *TextField) PixelToCursor(pixOff float32) int {
+	st := &tf.Style
 
 	spc := st.BoxSpace()
 	px := pixOff - spc
 
 	if px <= 0 {
-		return g.StartPos
+		return tf.StartPos
 	}
 
-	// todo: we're getting the wrong sizes here -- not sure why..
-	// fmt.Printf("em %v ex %v ch %v\n", st.UnContext.ToDotsFactor(units.Em), st.UnContext.ToDotsFactor(units.Ex), st.UnContext.ToDotsFactor(units.Ch))
+	// for selection to work correctly, we need this to be deterministic
 
-	sz := len(g.EditText)
-	c := g.StartPos + int(math.Round(float64(px/st.UnContext.ToDotsFactor(units.Ch))))
+	sz := len(tf.EditText)
+	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.Ch)))
 	c = kit.MinInt(c, sz)
 
-	lastbig := false
-	lastsm := false
-	for {
-		w := g.TextWidth(g.StartPos, c)
-		if w > px {
-			if lastsm { // last was smaller, break
-				break
-			}
+	w := tf.TextWidth(tf.StartPos, c)
+	if w > px {
+		for w > px {
 			c--
-			if c <= g.StartPos {
-				c = g.StartPos
+			if c <= tf.StartPos {
+				c = tf.StartPos
 				break
 			}
-			lastbig = true
-			// fmt.Printf("dec c: %v, w: %v, px: %v\n", c, w, px)
-		} else if w < px { // last was bigger, brea
-			if lastbig {
+			w = tf.TextWidth(tf.StartPos, c)
+		}
+	} else if w < px {
+		for c < tf.EndPos {
+			wn := tf.TextWidth(tf.StartPos, c+1)
+			if wn > px {
+				break
+			} else if wn == px {
+				c++
 				break
 			}
 			c++
-			// fmt.Printf("inc c: %v, w: %v, px: %v\n", c, w, px)
-			if c > sz {
-				c = sz
-				break
-			}
-			lastsm = true
 		}
 	}
 	return c
 }
 
-func (g *TextField) SetCursorFromPixel(pixOff float32) {
-	updt := g.UpdateStart()
-	g.CursorPos = g.PixelToCursor(pixOff)
-	g.UpdateEnd(updt)
+func (tf *TextField) SetCursorFromPixel(pixOff float32) {
+	updt := tf.UpdateStart()
+	tf.CursorPos = tf.PixelToCursor(pixOff)
+	if tf.SelectMode {
+		if !tf.IsDragging() && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+			tf.SelectReset()
+		} else if tf.CursorPos > tf.SelectStart {
+			tf.SelectEnd = tf.CursorPos
+		} else {
+			tf.SelectStart = tf.CursorPos
+		}
+		tf.SelectUpdate()
+	} else if tf.HasSelection() {
+		tf.SelectReset()
+	}
+	tf.UpdateEnd(updt)
 }
 
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (g *TextField) Init2D() {
-	g.Init2DWidget()
-	g.EditText = g.Text
-	bitflag.Set(&g.Flag, int(InactiveEvents))
-	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tf := recv.(*TextField)
-		me := d.(*mouse.Event)
+func (tf *TextField) Init2D() {
+	tf.Init2DWidget()
+	tf.EditText = []rune(tf.Text)
+	tf.Edited = false
+	bitflag.Set(&tf.Flag, int(InactiveEvents))
+	tf.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		if tf.IsInactive() {
-			if me.Action == mouse.Press {
-				g.Selected = !g.Selected
-				if g.Selected {
-					g.TextFieldSig.Emit(g.This, int64(TextFieldSelected), g.Text)
-				}
-				g.UpdateSig()
+		tf := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+		if tf.IsDragging() {
+			if !tf.SelectMode {
+				tf.SelectModeToggle()
 			}
-			return
-		}
-		if !tf.HasFocus() {
-			tf.GrabFocus()
-		}
-		if me.Action == mouse.Press {
 			pt := tf.PointToRelPos(me.Pos())
 			tf.SetCursorFromPixel(float32(pt.X))
 		}
 	})
-	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tf := recv.(*TextField)
-		if tf.IsInactive() {
+	tf.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		if tff.IsInactive() {
+			if me.Action == mouse.Press {
+				tff.Selected = !tff.Selected
+				if tff.Selected {
+					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Text)
+				}
+				tff.UpdateSig()
+			}
+			return
+		}
+		if !tff.HasFocus() {
+			tff.GrabFocus()
+		}
+		if me.Action == mouse.Press {
+			pt := tff.PointToRelPos(me.Pos())
+			tff.SetCursorFromPixel(float32(pt.X))
+		} else if me.Action == mouse.DoubleClick {
+			if tff.HasSelection() {
+				if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditText) {
+					tff.SelectReset()
+				} else {
+					tff.SelectAll()
+				}
+			} else {
+				tff.SelectWord()
+			}
+		}
+	})
+	tf.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+		if tff.IsInactive() {
 			return
 		}
 		kt := d.(*key.ChordEvent)
-		tf.KeyInput(kt)
+		tff.KeyInput(kt)
 	})
-	if dlg, ok := g.Viewport.This.(*Dialog); ok {
-		dlg.DialogSig.Connect(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	if dlg, ok := tf.Viewport.This.(*Dialog); ok {
+		dlg.DialogSig.Connect(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff, _ := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 			if sig == int64(DialogAccepted) {
 				tff.EditDone()
@@ -591,239 +689,239 @@ func (g *TextField) Init2D() {
 	}
 }
 
-func (g *TextField) Style2D() {
-	g.SetCanFocusIfActive()
-	g.Style2DWidget()
+func (tf *TextField) Style2D() {
+	tf.SetCanFocusIfActive()
+	tf.Style2DWidget()
 	var pst *Style
-	_, pg := KiToNode2D(g.Par)
+	_, pg := KiToNode2D(tf.Par)
 	if pg != nil {
 		pst = &pg.Style
 	}
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(TextFieldSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		tf.StateStyles[i].CopyFrom(&tf.Style)
+		tf.StateStyles[i].SetStyle(pst, tf.StyleProps(TextFieldSelectors[i]))
+		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
 }
 
-func (g *TextField) UpdateCharPos() bool {
-	if g.EditText == g.lastSizedText && len(g.EditText) == len(g.CharPos) {
-		return false
-	}
-	g.CharPos = g.Paint.MeasureChars(g.EditText)
-	g.lastSizedText = g.EditText
+func (tf *TextField) UpdateCharPos() bool {
+	tf.CharPos = tf.Paint.MeasureChars(tf.EditText)
+	tf.lastSizedText = tf.EditText
 	return true
 }
 
-func (g *TextField) Size2D() {
-	g.EditText = g.Text
-	g.StartPos = 0
-	g.EndPos = len(g.EditText)
-	g.UpdateCharPos()
-	h := g.Paint.FontHeight()
+func (tf *TextField) Size2D() {
+	tf.EditText = []rune(tf.Text)
+	tf.Edited = false
+	tf.StartPos = 0
+	tf.EndPos = len(tf.EditText)
+	tf.UpdateCharPos()
+	h := tf.Paint.FontHeight()
 	w := float32(10.0)
-	sz := len(g.CharPos)
+	sz := len(tf.CharPos)
 	if sz > 0 {
-		w = g.CharPos[sz-1]
+		w = tf.CharPos[sz-1]
 	}
 	w += 2.0 // give some extra buffer
-	g.Size2DFromWH(w, h)
+	tf.Size2DFromWH(w, h)
 }
 
-func (g *TextField) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
+func (tf *TextField) Layout2D(parBBox image.Rectangle) {
+	tf.Layout2DWidget(parBBox)
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
-	g.Layout2DChildren()
+	tf.Layout2DChildren()
 }
 
 // StartCharPos returns the starting position of the given character -- CharPos contains the ending positions
-func (g *TextField) StartCharPos(idx int) float32 {
+func (tf *TextField) StartCharPos(idx int) float32 {
 	if idx <= 0 {
 		return 0.0
 	}
-	sz := len(g.CharPos)
+	sz := len(tf.CharPos)
 	if sz == 0 {
 		return 0.0
 	}
 	if idx > sz {
-		return g.CharPos[sz-1]
+		return tf.CharPos[sz-1]
 	}
-	return g.CharPos[idx-1]
+	return tf.CharPos[idx-1]
 }
 
 // TextWidth returns the text width in dots between the two text string
 // positions (ed is exclusive -- +1 beyond actual char)
-func (g *TextField) TextWidth(st, ed int) float32 {
-	return g.StartCharPos(ed) - g.StartCharPos(st)
+func (tf *TextField) TextWidth(st, ed int) float32 {
+	return tf.StartCharPos(ed) - tf.StartCharPos(st)
 }
 
-func (g *TextField) RenderCursor() {
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	st := &g.Style
+func (tf *TextField) RenderCursor() {
+	pc := &tf.Paint
+	rs := &tf.Viewport.Render
+	st := &tf.Style
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	spc := st.BoxSpace()
-	pos := g.LayData.AllocPos.AddVal(spc)
+	pos := tf.LayData.AllocPos.AddVal(spc)
 
-	cpos := g.TextWidth(g.StartPos, g.CursorPos)
+	cpos := tf.TextWidth(tf.StartPos, tf.CursorPos)
 
 	h := pc.FontHeight()
 	pc.DrawLine(rs, pos.X+cpos, pos.Y, pos.X+cpos, pos.Y+h)
 	pc.Stroke(rs)
 }
 
-func (g *TextField) RenderSelect() {
-	if g.SelectEnd <= g.SelectStart {
+func (tf *TextField) RenderSelect() {
+	if tf.SelectEnd <= tf.SelectStart {
 		return
 	}
-	effst := kit.MaxInt(g.StartPos, g.SelectStart)
-	if effst >= g.EndPos {
+	effst := kit.MaxInt(tf.StartPos, tf.SelectStart)
+	if effst >= tf.EndPos {
 		return
 	}
-	effed := kit.MinInt(g.EndPos, g.SelectEnd)
-	if effed < g.StartPos {
+	effed := kit.MinInt(tf.EndPos, tf.SelectEnd)
+	if effed < tf.StartPos {
 		return
 	}
 	if effed <= effst {
 		return
 	}
 
-	pc := &g.Paint
-	rs := &g.Viewport.Render
-	st := &g.StateStyles[TextFieldSelect]
+	pc := &tf.Paint
+	rs := &tf.Viewport.Render
+	st := &tf.StateStyles[TextFieldSelect]
+	pc.FontStyle = st.Font
+	pc.TextStyle = st.Text
 	spc := st.BoxSpace()
-	pos := g.LayData.AllocPos.AddVal(spc)
+	pos := tf.LayData.AllocPos.AddVal(spc)
 
-	spos := g.TextWidth(g.StartPos, effst)
-	tsz := g.TextWidth(effst, effed)
+	spos := tf.TextWidth(tf.StartPos, effst)
+	tsz := tf.TextWidth(effst, effed)
 	h := pc.FontHeight()
 
 	pc.FillBox(rs, Vec2D{pos.X + spos, pos.Y}, Vec2D{tsz, h}, &st.Background.Color)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
-func (g *TextField) AutoScroll() {
-	st := &g.Style
+func (tf *TextField) AutoScroll() {
+	st := &tf.Style
 
-	g.UpdateCharPos()
+	tf.UpdateCharPos()
 
-	sz := len(g.EditText)
+	sz := len(tf.EditText)
 
 	if sz == 0 {
-		g.CursorPos = 0
-		g.EndPos = 0
-		g.StartPos = 0
+		tf.CursorPos = 0
+		tf.EndPos = 0
+		tf.StartPos = 0
 		return
 	}
 	spc := st.BoxSpace()
-	maxw := g.LayData.AllocSize.X - 2.0*spc
-	g.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
+	maxw := tf.LayData.AllocSize.X - 2.0*spc
+	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
 
 	// first rationalize all the values
-	if g.EndPos == 0 || g.EndPos > sz { // not init
-		g.EndPos = sz
+	if tf.EndPos == 0 || tf.EndPos > sz { // not init
+		tf.EndPos = sz
 	}
-	if g.StartPos >= g.EndPos {
-		g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
+	if tf.StartPos >= tf.EndPos {
+		tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
 	}
-	g.CursorPos = InRangeInt(g.CursorPos, 0, sz)
+	tf.CursorPos = InRangeInt(tf.CursorPos, 0, sz)
 
-	inc := int(math32.Ceil(.1 * float32(g.CharWidth)))
+	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = kit.MaxInt(4, inc)
 
 	// keep cursor in view with buffer
 	startIsAnchor := true
-	if g.CursorPos < (g.StartPos + inc) {
-		g.StartPos -= inc
-		g.StartPos = kit.MaxInt(g.StartPos, 0)
-		g.EndPos = g.StartPos + g.CharWidth
-		g.EndPos = kit.MinInt(sz, g.EndPos)
-	} else if g.CursorPos > (g.EndPos - inc) {
-		g.EndPos += inc
-		g.EndPos = kit.MinInt(g.EndPos, sz)
-		g.StartPos = g.EndPos - g.CharWidth
-		g.StartPos = kit.MaxInt(0, g.StartPos)
+	if tf.CursorPos < (tf.StartPos + inc) {
+		tf.StartPos -= inc
+		tf.StartPos = kit.MaxInt(tf.StartPos, 0)
+		tf.EndPos = tf.StartPos + tf.CharWidth
+		tf.EndPos = kit.MinInt(sz, tf.EndPos)
+	} else if tf.CursorPos > (tf.EndPos - inc) {
+		tf.EndPos += inc
+		tf.EndPos = kit.MinInt(tf.EndPos, sz)
+		tf.StartPos = tf.EndPos - tf.CharWidth
+		tf.StartPos = kit.MaxInt(0, tf.StartPos)
 		startIsAnchor = false
 	}
 
 	if startIsAnchor {
 		gotWidth := false
-		spos := g.StartCharPos(g.StartPos)
+		spos := tf.StartCharPos(tf.StartPos)
 		for {
-			w := g.StartCharPos(g.EndPos) - spos
+			w := tf.StartCharPos(tf.EndPos) - spos
 			if w < maxw {
-				if g.EndPos == sz {
+				if tf.EndPos == sz {
 					break
 				}
-				nw := g.StartCharPos(g.EndPos+1) - spos
+				nw := tf.StartCharPos(tf.EndPos+1) - spos
 				if nw >= maxw {
 					gotWidth = true
 					break
 				}
-				g.EndPos++
+				tf.EndPos++
 			} else {
-				g.EndPos--
+				tf.EndPos--
 			}
 		}
-		if gotWidth || g.StartPos == 0 {
+		if gotWidth || tf.StartPos == 0 {
 			return
 		}
 		// otherwise, try getting some more chars by moving up start..
 	}
 
 	// end is now anchor
-	epos := g.StartCharPos(g.EndPos)
+	epos := tf.StartCharPos(tf.EndPos)
 	for {
-		w := epos - g.StartCharPos(g.StartPos)
+		w := epos - tf.StartCharPos(tf.StartPos)
 		if w < maxw {
-			if g.StartPos == 0 {
+			if tf.StartPos == 0 {
 				break
 			}
-			nw := epos - g.StartCharPos(g.StartPos-1)
+			nw := epos - tf.StartCharPos(tf.StartPos-1)
 			if nw >= maxw {
 				break
 			}
-			g.StartPos--
+			tf.StartPos--
 		} else {
-			g.StartPos++
+			tf.StartPos++
 		}
 	}
 }
 
-func (g *TextField) Render2D() {
-	if g.PushBounds() {
-		g.AutoScroll()
-		if g.IsInactive() {
-			if g.Selected {
-				g.Style = g.StateStyles[TextFieldSelect]
+func (tf *TextField) Render2D() {
+	if tf.PushBounds() {
+		tf.AutoScroll()
+		if tf.IsInactive() {
+			if tf.Selected {
+				tf.Style = tf.StateStyles[TextFieldSelect]
 			} else {
-				g.Style = g.StateStyles[TextFieldInactive]
+				tf.Style = tf.StateStyles[TextFieldInactive]
 			}
-		} else if g.HasFocus() {
-			g.Style = g.StateStyles[TextFieldFocus]
+		} else if tf.HasFocus() {
+			tf.Style = tf.StateStyles[TextFieldFocus]
 		} else {
-			g.Style = g.StateStyles[TextFieldActive]
+			tf.Style = tf.StateStyles[TextFieldActive]
 		}
-		g.RenderStdBox(&g.Style)
-		cur := g.EditText[g.StartPos:g.EndPos]
-		g.RenderSelect()
-		g.Render2DText(cur)
-		if g.HasFocus() {
-			g.RenderCursor()
+		tf.RenderStdBox(&tf.Style)
+		cur := tf.EditText[tf.StartPos:tf.EndPos]
+		tf.RenderSelect()
+		tf.Render2DText(string(cur))
+		if tf.HasFocus() {
+			tf.RenderCursor()
 		}
-		g.Render2DChildren()
-		g.PopBounds()
+		tf.Render2DChildren()
+		tf.PopBounds()
 	}
 }
 
-func (g *TextField) FocusChanged2D(gotFocus bool) {
-	if !gotFocus && !g.IsInactive() {
-		g.EditDone() // lose focus
+func (tf *TextField) FocusChanged2D(gotFocus bool) {
+	if !gotFocus && !tf.IsInactive() {
+		tf.EditDone() // lose focus
 	}
-	g.UpdateSig()
+	tf.UpdateSig()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

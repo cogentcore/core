@@ -821,14 +821,14 @@ func (pc *Paint) MeasureString(s string) (w, h float32) {
 	return math32.Ceil(FixedToFloat32(a)), pc.FontStyle.Height
 }
 
-// MeasureChars measures the rendered character positions of the given text in
+// MeasureChars measures the rendered character (rune) positions of the given text in
 // the current font
-func (pc *Paint) MeasureChars(s string) []float32 {
+func (pc *Paint) MeasureChars(s []rune) []float32 {
 	pr := prof.Start("Paint.MeasureChars")
 	if pc.FontStyle.Face == nil {
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 	}
-	chrs := MeasureChars(pc.FontStyle.Face, s)
+	chrs := MeasureChars(pc.FontStyle.Face, s) // in text.go
 	pr.End()
 	return chrs
 }

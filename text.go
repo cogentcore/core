@@ -8,12 +8,21 @@ import (
 	"image"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
+
+// NextRuneAt returns the next rune starting from given index -- could be at
+// that index or some point thereafter -- returns utf8.RuneError if no valid
+// rune could be found -- this should be a standard function!
+func NextRuneAt(str string, idx int) rune {
+	r, _ := utf8.DecodeRuneInString(str[idx:])
+	return r
+}
 
 // note: most of these are inherited
 
@@ -155,8 +164,8 @@ func (g *Text2D) ReRender2D() (node Node2D, layout bool) {
 //////////////////////////////////////////////////////////////////////////////////
 //  Utilities
 
-// MeasureChars returns inter-character points for each char, in float32
-func MeasureChars(f font.Face, s string) []float32 {
+// MeasureChars returns inter-character points for each rune, in float32
+func MeasureChars(f font.Face, s []rune) []float32 {
 	chrs := make([]float32, len(s))
 	prevC := rune(-1)
 	var advance fixed.Int26_6

@@ -125,6 +125,8 @@ func GoGiEditorOf(obj ki.Ki) {
 				if si >= 0 {
 					fi := FontLibrary.FontInfo[si]
 					fontnm.SetText(fi.Name)
+					fontnm.SelectAll()
+					fontnm.Copy(false) // don't reset
 				}
 			})
 		}
