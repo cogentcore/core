@@ -11,6 +11,8 @@ package oswin
 
 import (
 	"image"
+
+	"github.com/goki/gi/oswin/clip"
 )
 
 // TheApp is the current oswin App -- only ever one in effect
@@ -62,6 +64,9 @@ type App interface {
 	// then Draw that texture to the window when it is time to update (call
 	// Publish on window after drawing)
 	NewTexture(win Window, size image.Point) (Texture, error)
+
+	// ClipBoard returns the clip.Board handler for the system -- see clip.Board interface
+	ClipBoard() clip.Board
 
 	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ?

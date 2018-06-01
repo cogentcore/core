@@ -32,6 +32,7 @@ const (
 	KeyFunCancelSelect
 	KeyFunExtendSelect
 	KeyFunSelectText
+	KeyFunSelectAll
 	KeyFunEditItem
 	KeyFunCopy
 	KeyFunCut
@@ -78,7 +79,8 @@ var DefaultKeyMap = KeyMap{
 	"Control+UpArrow":     KeyFunPageUp,
 	"Control+U":           KeyFunPageUp,
 	"Control+DownArrow":   KeyFunPageDown,
-	"Control+V":           KeyFunPageDown,
+	"Shift+Control+V":     KeyFunPageDown,
+	"Alt+V":               KeyFunPageDown,
 	"Control+RightArrow":  KeyFunPageRight,
 	"Control+LeftArrow":   KeyFunPageLeft,
 	"Home":                KeyFunHome,
@@ -91,6 +93,8 @@ var DefaultKeyMap = KeyMap{
 	"Shift+Tab":           KeyFunFocusPrev,
 	"ReturnEnter":         KeyFunSelectItem,
 	"KeypadEnter":         KeyFunSelectItem,
+	"Shift+Control+A":     KeyFunSelectAll,
+	"Meta+A":              KeyFunSelectAll,
 	"Control+ReturnEnter": KeyFunAccept,
 	"Escape":              KeyFunAbort,
 	"Control+G":           KeyFunCancelSelect,
@@ -101,6 +105,15 @@ var DefaultKeyMap = KeyMap{
 	"Control+D":        KeyFunDelete,
 	"Control+H":        KeyFunBackspace,
 	"Control+K":        KeyFunKill,
+	"Alt+W":            KeyFunCopy,
+	"Control+C":        KeyFunCopy,
+	"Meta+C":           KeyFunCopy,
+	"Control+W":        KeyFunCut,
+	"Control+X":        KeyFunCut,
+	"Meta+X":           KeyFunCut,
+	"Control+Y":        KeyFunPaste,
+	"Control+V":        KeyFunPaste,
+	"Meta+V":           KeyFunPaste,
 	"Control+M":        KeyFunDuplicate,
 	"Control+I":        KeyFunInsert,
 	"Control+O":        KeyFunInsertAfter,

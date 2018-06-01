@@ -411,3 +411,45 @@ void getScreens() {
 	  setScreen(i, dpi, pixratio, (int)screenPixW, (int)screenPixH, (int)screenSizeMM.width, (int)screenSizeMM.height, depth);
 	}
 }
+
+// https://developer.apple.com/documentation/appkit/nspasteboard
+// https://github.com/jtanx/libclipboard/blob/master/src/clipboard_cocoa.c
+void clipAvail() {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+	// NSArray *itms = [pb pasteboardItems];
+	NSString *ns_clip = [pb stringForType:NSPasteboardTypeString];
+	if (ns_clip == NULL) {
+	  setClipAvail(false);
+	  return;
+	}
+	setClipAvail(true);
+}
+
+void clipRead() {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+	// NSArray *itms = [pb pasteboardItems];
+	NSString *ns_clip = [pb stringForType:NSPasteboardTypeString];
+	if (ns_clip == NULL) {
+	  setClipData(NULL, 0);
+	  return;
+	}
+	const char* utf8_clip = [ns_clip UTF8String];
+	int len = (int)strlen(utf8_clip);
+	setClipData((char*)utf8_clip, len);
+}
+
+void clipWrite(char* str, int len) {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+
+	NSString *ns_clip;
+	bool ret;
+
+	ns_clip = [[NSString alloc] initWithBytes:str length:len encoding:NSUTF8StringEncoding];
+
+	[pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+	ret = [pb setString:ns_clip forType:NSStringPboardType];
+	[ns_clip release];
+
+	// long serial = [pb changeCount];
+	// OSAtomicCompareAndSwapLong(cb->last_cb_serial, serial, &cb->last_cb_serial);
+}	

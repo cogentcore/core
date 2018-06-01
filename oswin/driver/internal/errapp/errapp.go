@@ -14,6 +14,7 @@ import (
 	"image"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/clip"
 )
 
 // Stub returns an App whose methods all return the given error.
@@ -33,6 +34,7 @@ func (s stub) Screen(scrN int) *oswin.Screen                                    
 func (s stub) NWindows() int                                                        { return 0 }
 func (s stub) Window(win int) oswin.Window                                          { return nil }
 func (s stub) WindowByName(name string) oswin.Window                                { return nil }
+func (s stub) ClipBoard() clip.Board                                                { return nil }
 
 func (s stub) Name() string         { return "" }
 func (s stub) SetName(name string)  {}

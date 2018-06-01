@@ -18,6 +18,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
@@ -236,4 +237,8 @@ func (app *appImpl) AppPrefsDir() string {
 
 func (app *appImpl) FontPaths() []string {
 	return []string{"C:\\Windows\\Fonts"}
+}
+
+func (app *appImpl) ClipBoard() clip.Board {
+	return nil // todo!
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -757,4 +758,8 @@ func (app *appImpl) AppPrefsDir() string {
 
 func (app *appImpl) FontPaths() []string {
 	return []string{"/usr/share/fonts/truetype"}
+}
+
+func (app *appImpl) ClipBoard() clip.Board {
+	return nil // todo!
 }

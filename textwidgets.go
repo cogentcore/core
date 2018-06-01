@@ -180,6 +180,7 @@ var TextFieldProps = ki.Props{
 	},
 }
 
+// SetText sets the text to be edited and reverts any current edit to reflect this new text
 func (g *TextField) SetText(txt string) {
 	if g.Text == txt && g.EditText == txt {
 		return
@@ -187,6 +188,8 @@ func (g *TextField) SetText(txt string) {
 	g.Text = txt
 	g.RevertEdit()
 }
+
+// todo: all of this must be redone with runes!
 
 // done editing: return key pressed or out of focus
 func (g *TextField) EditDone() {
@@ -202,9 +205,11 @@ func (g *TextField) RevertEdit() {
 	g.EditText = g.Text
 	g.StartPos = 0
 	g.EndPos = g.CharWidth
+	g.SelectReset()
 	g.UpdateEnd(updt)
 }
 
+// CursorForward moves the cursor forward
 func (g *TextField) CursorForward(steps int) {
 	updt := g.UpdateStart()
 	g.CursorPos += steps
@@ -215,12 +220,20 @@ func (g *TextField) CursorForward(steps int) {
 		inc := g.CursorPos - g.EndPos
 		g.EndPos += inc
 	}
+	if g.SelectMode {
+		if g.CursorPos > g.SelectStart {
+			g.SelectEnd = g.CursorPos
+		} else {
+			g.SelectStart = g.CursorPos
+		}
+		g.SelectUpdate()
+	}
 	g.UpdateEnd(updt)
 }
 
+// CursorForward moves the cursor backward
 func (g *TextField) CursorBackward(steps int) {
 	updt := g.UpdateStart()
-	// todo: select mode
 	g.CursorPos -= steps
 	if g.CursorPos < 0 {
 		g.CursorPos = 0
@@ -229,26 +242,46 @@ func (g *TextField) CursorBackward(steps int) {
 		dec := kit.MinInt(g.StartPos, 8)
 		g.StartPos -= dec
 	}
+	if g.SelectMode {
+		if g.CursorPos > g.SelectStart {
+			g.SelectEnd = g.CursorPos
+		} else {
+			g.SelectStart = g.CursorPos
+		}
+		g.SelectUpdate()
+	}
 	g.UpdateEnd(updt)
 }
 
+// CursorStart moves the cursor to the start of the text, updating selection
+// if select mode is active
 func (g *TextField) CursorStart() {
 	updt := g.UpdateStart()
-	// todo: select mode
 	g.CursorPos = 0
 	g.StartPos = 0
 	g.EndPos = kit.MinInt(len(g.EditText), g.StartPos+g.CharWidth)
+	if g.SelectMode {
+		g.SelectStart = 0
+		g.SelectUpdate()
+	}
 	g.UpdateEnd(updt)
 }
 
+// CursorEnd moves the cursor to the end of the text
 func (g *TextField) CursorEnd() {
 	updt := g.UpdateStart()
-	g.CursorPos = len(g.EditText)
+	ed := len(g.EditText)
+	g.CursorPos = ed
 	g.EndPos = len(g.EditText) // try -- display will adjust
 	g.StartPos = kit.MaxInt(0, g.EndPos-g.CharWidth)
+	if g.SelectMode {
+		g.SelectEnd = ed
+		g.SelectUpdate()
+	}
 	g.UpdateEnd(updt)
 }
 
+// CursorBackspace deletes character(s) immediately before cursor
 func (g *TextField) CursorBackspace(steps int) {
 	if g.CursorPos < steps {
 		steps = g.CursorPos
@@ -259,9 +292,17 @@ func (g *TextField) CursorBackspace(steps int) {
 	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos-steps] + g.EditText[g.CursorPos:]
 	g.CursorBackward(steps)
+	if g.CursorPos > g.SelectStart && g.CursorPos <= g.SelectEnd {
+		g.SelectEnd -= steps
+	} else if g.CursorPos < g.SelectStart {
+		g.SelectStart -= steps
+		g.SelectEnd -= steps
+	}
+	g.SelectUpdate()
 	g.UpdateEnd(updt)
 }
 
+// CursorDelete deletes character(s) immediately after the cursor
 func (g *TextField) CursorDelete(steps int) {
 	if g.CursorPos+steps > len(g.EditText) {
 		steps = len(g.EditText) - g.CursorPos
@@ -271,14 +312,120 @@ func (g *TextField) CursorDelete(steps int) {
 	}
 	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + g.EditText[g.CursorPos+steps:]
+	if g.CursorPos > g.SelectStart && g.CursorPos <= g.SelectEnd {
+		g.SelectEnd -= steps
+	} else if g.CursorPos < g.SelectStart {
+		g.SelectStart -= steps
+		g.SelectEnd -= steps
+	}
+	g.SelectUpdate()
 	g.UpdateEnd(updt)
 }
 
+// CursorKill deletes text from cursor to end of text
 func (g *TextField) CursorKill() {
 	steps := len(g.EditText) - g.CursorPos
 	g.CursorDelete(steps)
 }
 
+// Selection returns the currently selected text
+func (g *TextField) Selection() string {
+	g.SelectUpdate()
+	if g.SelectStart < g.SelectEnd {
+		return g.EditText[g.SelectStart:g.SelectEnd]
+	}
+	return ""
+}
+
+// SelectModeToggle toggles the SelectMode, updating selection with cursor movement
+func (g *TextField) SelectModeToggle() {
+	if g.SelectMode {
+		g.SelectMode = false
+	} else {
+		g.SelectMode = true
+		g.SelectStart = g.CursorPos
+		g.SelectEnd = g.SelectStart
+	}
+}
+
+// SelectAll selects all the text
+func (g *TextField) SelectAll() {
+	updt := g.UpdateStart()
+	g.SelectStart = 0
+	g.SelectEnd = len(g.EditText)
+	g.UpdateEnd(updt)
+}
+
+// SelectReset resets the selection
+func (g *TextField) SelectReset() {
+	g.SelectMode = false
+	if g.SelectStart == 0 && g.SelectEnd == 0 {
+		return
+	}
+	updt := g.UpdateStart()
+	g.SelectStart = 0
+	g.SelectEnd = 0
+	g.UpdateEnd(updt)
+}
+
+// SelectUpdate updates the select region after any change to the text, to keep it in range
+func (g *TextField) SelectUpdate() {
+	if g.SelectStart < g.SelectEnd {
+		ed := len(g.EditText)
+		if g.SelectStart < 0 {
+			g.SelectStart = 0
+		}
+		if g.SelectEnd > ed {
+			g.SelectEnd = ed
+		}
+	} else {
+		g.SelectReset()
+	}
+}
+
+// Cut cuts any selected text and adds it to the clipboard, also returns cut text
+func (g *TextField) Cut() string {
+	g.SelectUpdate()
+	if g.SelectStart >= g.SelectEnd {
+		return ""
+	}
+	updt := g.UpdateStart()
+	cut := g.Selection()
+	g.EditText = g.EditText[:g.SelectStart] + g.EditText[g.SelectEnd:]
+	if g.CursorPos > g.SelectStart {
+		if g.CursorPos < g.SelectEnd {
+			g.CursorPos = g.SelectStart
+		} else {
+			g.CursorPos -= g.SelectEnd - g.SelectStart
+		}
+	}
+	g.SelectReset()
+	oswin.TheApp.ClipBoard().Write(([]byte)(cut), "text/plain")
+	g.UpdateEnd(updt)
+	return cut
+}
+
+// Copy copies any selected text to the clipboard, and returns that text
+func (g *TextField) Copy() string {
+	g.SelectUpdate()
+	if g.SelectStart >= g.SelectEnd {
+		return ""
+	}
+	cpy := g.Selection()
+	oswin.TheApp.ClipBoard().Write(([]byte)(cpy), "text/plain")
+	// don't reset?
+	return cpy
+}
+
+// Paste inserts text from the clipboard at current cursor position
+func (g *TextField) Paste() {
+	data, _, err := oswin.TheApp.ClipBoard().Read()
+	if data != nil && err == nil {
+		g.InsertAtCursor(string(data))
+	}
+}
+
+// InsertAtCursor inserts given text at current cursor position
 func (g *TextField) InsertAtCursor(str string) {
 	updt := g.UpdateStart()
 	g.EditText = g.EditText[:g.CursorPos] + str + g.EditText[g.CursorPos:]
@@ -308,6 +455,15 @@ func (g *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunEnd:
 		g.CursorEnd()
 		kt.SetProcessed()
+	case KeyFunSelectText:
+		g.SelectModeToggle()
+		kt.SetProcessed()
+	case KeyFunCancelSelect:
+		g.SelectReset()
+		kt.SetProcessed()
+	case KeyFunSelectAll:
+		g.SelectAll()
+		kt.SetProcessed()
 	case KeyFunBackspace:
 		g.CursorBackspace(1)
 		kt.SetProcessed()
@@ -316,6 +472,15 @@ func (g *TextField) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case KeyFunDelete:
 		g.CursorDelete(1)
+		kt.SetProcessed()
+	case KeyFunCopy:
+		g.Copy()
+		kt.SetProcessed()
+	case KeyFunCut:
+		g.Cut()
+		kt.SetProcessed()
+	case KeyFunPaste:
+		g.Paste()
 		kt.SetProcessed()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
@@ -510,6 +675,35 @@ func (g *TextField) RenderCursor() {
 	pc.Stroke(rs)
 }
 
+func (g *TextField) RenderSelect() {
+	if g.SelectEnd <= g.SelectStart {
+		return
+	}
+	effst := kit.MaxInt(g.StartPos, g.SelectStart)
+	if effst >= g.EndPos {
+		return
+	}
+	effed := kit.MinInt(g.EndPos, g.SelectEnd)
+	if effed < g.StartPos {
+		return
+	}
+	if effed <= effst {
+		return
+	}
+
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	st := &g.StateStyles[TextFieldSelect]
+	spc := st.BoxSpace()
+	pos := g.LayData.AllocPos.AddVal(spc)
+
+	spos := g.TextWidth(g.StartPos, effst)
+	tsz := g.TextWidth(effst, effed)
+	h := pc.FontHeight()
+
+	pc.FillBox(rs, Vec2D{pos.X + spos, pos.Y}, Vec2D{tsz, h}, &st.Background.Color)
+}
+
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (g *TextField) AutoScroll() {
 	st := &g.Style
@@ -615,9 +809,7 @@ func (g *TextField) Render2D() {
 		}
 		g.RenderStdBox(&g.Style)
 		cur := g.EditText[g.StartPos:g.EndPos]
-		if g.SelectEnd > g.SelectStart {
-			// todo: render select background
-		}
+		g.RenderSelect()
 		g.Render2DText(cur)
 		if g.HasFocus() {
 			g.RenderCursor()

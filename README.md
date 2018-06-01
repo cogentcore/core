@@ -148,7 +148,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 ## Remaining features for widgets
 
 + FileView view and dialog -- various, see todo in fileview.go
-+ TextField -- needs selection / clipboard, constraints
++ TextField -- needs selection / clipboard, constraints, and to use runes instead of bytes
 + TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
 + TabWidget -- needs updating
 + Label -- done -- could make lots of H1, etc alts

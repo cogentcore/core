@@ -32,6 +32,9 @@ void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
 void doCloseWindow(uintptr_t id);
 void getScreens();
+void clipAvail();
+void clipRead();
+void clipWrite(char* str, int len);
 uint64_t threadID();
 */
 import "C"
@@ -49,6 +52,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -827,4 +831,58 @@ func (app *appImpl) AppPrefsDir() string {
 
 func (app *appImpl) FontPaths() []string {
 	return []string{"/Library/Fonts"}
+}
+
+func (app *appImpl) ClipBoard() clip.Board {
+	return &theClip
+}
+
+/////////////////////////////////////////////////////////////////
+// clip.Board impl
+
+type clipImpl struct {
+	avail bool
+	fmt   string
+	data  []byte
+}
+
+var theClip = clipImpl{}
+
+func (ci *clipImpl) Avail() (av bool, fmt string) {
+	ci.avail = false
+	C.clipAvail()
+	return ci.avail, ci.fmt
+}
+
+func (ci *clipImpl) Read() (data []byte, fmt string, err error) {
+	C.clipRead()
+	return ci.data, ci.fmt, nil
+}
+
+func (ci *clipImpl) Write(data []byte, fmt string) error {
+	str := string(data)
+	cstr := C.CString(str)
+	defer C.free(unsafe.Pointer(cstr))
+	C.clipWrite(cstr, C.int(len(str)))
+	return nil
+}
+
+func (ci *clipImpl) Clear() error {
+	return nil
+}
+
+//export setClipAvail
+func setClipAvail(avail bool) {
+	theClip.avail = avail
+}
+
+//export setClipData
+func setClipData(cstr *C.char, len C.int) {
+	if cstr == nil {
+		theClip.data = nil
+	} else {
+		str := C.GoStringN(cstr, len)
+		theClip.data = ([]byte)(str)
+		theClip.fmt = "text/plain"
+	}
 }
