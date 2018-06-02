@@ -44,6 +44,7 @@ type Window struct {
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
 	OverlayVp     Viewport2D                  `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
 	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive bool                        `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
 	OverTex       oswin.Texture               `json:"-" xml:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
@@ -271,7 +272,29 @@ func (w *Window) UploadAllViewports() {
 		}
 	}
 	pr.End()
-	w.UpdateEnd(updt) // drives the flush
+	w.UpdateEnd(updt) // drives the publish
+}
+
+// RenderOverlays -- clears overlay viewport to transparent, renders all
+// overlays, uploads result to OverTex
+func (w *Window) RenderOverlays() {
+	if !w.OverlayVp.HasChildren() {
+		w.OverTexActive = false
+		return
+	}
+	updt := w.UpdateStart()
+	wsz := w.WinTex.Bounds().Size()
+	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
+		if w.OverTex != nil {
+			w.OverTex.Release()
+		}
+		w.OverTex, _ = oswin.TheApp.NewTexture(w.OSWin, wsz)
+	}
+	w.OverlayVp.Win = w
+	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
+	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+	w.OverTexActive = true
+	w.UpdateEnd(updt) // drives the publish
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -283,7 +306,7 @@ func (w *Window) Publish() {
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
-	if w.OverTex != nil {
+	if w.OverTex != nil && w.OverTexActive {
 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 	}
 	pr.End()
@@ -297,7 +320,7 @@ func (w *Window) Publish() {
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.EmbeddedStruct(KiT_Window).(*Window)
 	if Render2DTrace {
-		fmt.Printf("Window: %v flushing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 	win.Publish()
 }

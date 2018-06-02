@@ -112,6 +112,9 @@ const (
 	// set to this node
 	NodeDragging
 
+	// Overlay indicates this node is an overlay -- affects how it renders
+	Overlay
+
 	// can extend node flags from here
 	NodeFlagsN
 )
@@ -120,67 +123,82 @@ const (
 
 var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 
-// can this node focus?
+// CanFocus checks if this node can recieve keyboard focus
 func (g *NodeBase) CanFocus() bool {
 	return bitflag.Has(g.Flag, int(CanFocus))
 }
 
-// does the current node have keyboard focus
+// HasFocus checks if the current node is flagged as having keyboard focus
 func (g *NodeBase) HasFocus() bool {
 	return bitflag.Has(g.Flag, int(HasFocus))
 }
 
-// is the current node currently receiving dragging events?  set by window
+// IsDragging tests if the current node is currently flagged as receiving
+// dragging events -- flag set by window
 func (g *NodeBase) IsDragging() bool {
 	return bitflag.Has(g.Flag, int(NodeDragging))
 }
 
-// is this node Inactive?  if so, behave (ignore events) and style appropriately
+// IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,
+// ignore events) and style appropriately
 func (g *NodeBase) IsInactive() bool {
 	return bitflag.Has(g.Flag, int(Inactive))
 }
 
-// set the node as inactive
+// SetInactive sets the node as inactive
 func (g *NodeBase) SetInactive() {
 	bitflag.Set(&g.Flag, int(Inactive))
 }
 
-// set inactive state of the node
+// SetInactiveState set flag as inactive or not based on inact flag
 func (g *NodeBase) SetInactiveState(inact bool) {
 	bitflag.SetState(&g.Flag, inact, int(Inactive))
 }
 
-// set CanFocus only if not inactive
+// SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
+// nodes don't need focus typically)
 func (g *NodeBase) SetCanFocusIfActive() {
 	bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
 }
 
-// node needs full re-render?
+// NeedsFullReRender checks if node has said it needs full re-render
 func (g *NodeBase) NeedsFullReRender() bool {
 	return bitflag.Has(g.Flag, int(FullReRender))
 }
 
-// set node as needing a full ReRender
+// SetFullReRender sets node as needing a full ReRender
 func (g *NodeBase) SetFullReRender() {
 	bitflag.Set(&g.Flag, int(FullReRender))
 }
 
-// clear node as needing a full ReRender
+// ClearFullReRender clears node as needing a full ReRender
 func (g *NodeBase) ClearFullReRender() {
 	bitflag.Clear(&g.Flag, int(FullReRender))
 }
 
-// is the current node a ReRenderAnchor?
+// IsReRenderAnchor returns whethers the current node is a ReRenderAnchor
 func (g *NodeBase) IsReRenderAnchor() bool {
 	return bitflag.Has(g.Flag, int(ReRenderAnchor))
 }
 
-// set node as a ReRenderAnchor
+// SetReRenderAnchor sets node as a ReRenderAnchor
 func (g *NodeBase) SetReRenderAnchor() {
 	bitflag.Set(&g.Flag, int(ReRenderAnchor))
 }
 
-// set node as focus node
+// IsOverlay returns whether node is an overlay -- lives in special viewport
+// and renders without bounds
+func (g *NodeBase) IsOverlay() bool {
+	return bitflag.Has(g.Flag, int(Overlay))
+}
+
+// SetOverlay flags this node as an overlay -- lives in special viewport and
+// renders without bounds
+func (g *NodeBase) SetAsOverlay() {
+	bitflag.Set(&g.Flag, int(Overlay))
+}
+
+// GrabFocus sets node as focus node
 func (g *NodeBase) GrabFocus() {
 	win := g.ParentWindow()
 	if win != nil {

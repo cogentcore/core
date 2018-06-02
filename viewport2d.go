@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"io"
@@ -65,9 +66,7 @@ func NewViewport2D(width, height int) *Viewport2D {
 	return vp
 }
 
-// Resize resizes the viewport, creating a new image (no point in trying to
-// resize the image -- need to re-render) -- updates ViewBox Size too --
-// triggers update -- wrap in other UpdateStart/End calls as appropriate
+// Resize resizes the viewport, creating a new image -- updates ViewBox Size
 func (vp *Viewport2D) Resize(width, height int) {
 	nwsz := image.Point{width, height}
 	if width == 0 && height == 0 {
@@ -91,10 +90,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 	}
 	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Init(width, height, vp.Pixels)
-	vp.ViewBox.Size = nwsz  // make sure
-	if vp.Viewport == nil { // parent
-		vp.FullRender2DTree()
-	}
+	vp.ViewBox.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
@@ -167,6 +163,12 @@ func (vp *Viewport2D) UploadToWin() {
 // DrawIntoParent draws our viewport image into parent's image -- this is the
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
+	if vp.IsOverlay() {
+		pos := vp.LayData.AllocPos.ToPoint()
+		draw.Draw(parVp.Pixels, parVp.Pixels.Bounds(), vp.Pixels, pos, draw.Over)
+		vp.Paint.FillBox(&parVp.Render, vp.LayData.AllocPos, Vec2D{5, 20}, color.Black)
+		return
+	}
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
@@ -316,6 +318,12 @@ func (vp *Viewport2D) RenderViewport2D() {
 
 // we use our own render for these -- Viewport member is our parent!
 func (vp *Viewport2D) PushBounds() bool {
+	if vp.IsOverlay() {
+		if vp.Viewport != nil {
+			vp.Viewport.Render.PushBounds(vp.Viewport.Pixels.Bounds())
+		}
+		return true
+	}
 	if vp.VpBBox.Empty() {
 		return false
 	}
@@ -448,6 +456,36 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	// don't do anything on deleting or destroying, and
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//  Overlay rendering
+
+// RenderOverlays is main call from window for OverlayVp to render overlay nodes within it
+func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
+	vp.SetAsOverlay()
+	vp.Resize(wsz.X, wsz.Y)
+
+	// fill to transparent
+	draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
+
+	// just do top-level objects here
+	for _, k := range vp.Kids {
+		gii, gi := KiToNode2D(k)
+		if gii == nil {
+			continue
+		}
+		if !gi.IsOverlay() { // has not been initialized
+			gi.SetAsOverlay()
+			gii.Init2D()
+			gii.Style2D()
+		}
+		// note: skipping sizing, layout -- can only put basic elements here (so far..)
+		gii.Render2D()
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  Image utilities
+
 // SavePNG encodes the image as a PNG and writes it to disk.
 func (vp *Viewport2D) SavePNG(path string) error {
 	return SavePNG(path, vp.Pixels)
@@ -457,9 +495,6 @@ func (vp *Viewport2D) SavePNG(path string) error {
 func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 	return png.Encode(w, vp.Pixels)
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-//  Image utilities
 
 func LoadImage(path string) (image.Image, error) {
 	file, err := os.Open(path)

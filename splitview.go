@@ -16,7 +16,16 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //    SplitView
 
-// SplitView allocates a fixed proportion of space to each child, along given dimension, always using only the available space given to it by its parent (i.e., it will force its children, which should be layouts (typically Frame's), to have their own scroll bars as necesssary).  It should generally be used as a main outer-level structure within a window, providing a framework for inner elements -- it allows individual child elements to update indpendently and thus is important for speeding update performance.  It uses the Widget Parts to hold the splitter widgets separately from the children that contain the rest of the scenegraph to be displayed within each region.
+// SplitView allocates a fixed proportion of space to each child, along given
+// dimension, always using only the available space given to it by its parent
+// (i.e., it will force its children, which should be layouts (typically
+// Frame's), to have their own scroll bars as necesssary).  It should
+// generally be used as a main outer-level structure within a window,
+// providing a framework for inner elements -- it allows individual child
+// elements to update indpendently and thus is important for speeding update
+// performance.  It uses the Widget Parts to hold the splitter widgets
+// separately from the children that contain the rest of the scenegraph to be
+// displayed within each region.
 type SplitView struct {
 	WidgetBase
 	Splits      []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
@@ -307,11 +316,6 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 			pad := g.Style.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
-			if g.IsDragging() {
-				// 	bitflag.Set(&ic.Flag, int(VpFlagDrawIntoWin))
-				// } else {
-				// 	bitflag.Clear(&ic.Flag, int(VpFlagDrawIntoWin))
-			}
 			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
 			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThSize)
@@ -357,16 +361,53 @@ func (g *Splitter) Layout2D(parBBox image.Rectangle) {
 	g.origWinBBox = g.WinBBox
 }
 
+func (g *Splitter) UpdateSplitterPos() {
+	pos := int(g.Pos)
+	if g.Dim == X {
+		g.VpBBox = image.Rect(pos, g.VpBBox.Min.Y, pos+10, g.VpBBox.Max.Y)
+		g.WinBBox = image.Rect(pos, g.WinBBox.Min.Y, pos+10, g.WinBBox.Max.Y)
+	} else {
+		g.VpBBox = image.Rect(g.VpBBox.Min.X, pos, g.VpBBox.Max.X, pos+10)
+		g.WinBBox = image.Rect(g.WinBBox.Min.X, pos, g.WinBBox.Max.X, pos+10)
+	}
+}
+
 func (g *Splitter) Render2D() {
-	if g.PushBounds() {
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
+	vp := g.Viewport
+	win := vp.Win
+	if g.IsDragging() {
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
+		if ic == nil {
+			return
 		}
-		g.Render2DChildren()
-		g.PopBounds()
+		ovk := win.OverlayVp.ChildByName(g.UniqueName(), 0)
+		if ovk == nil {
+			ovk = ic.Clone()
+			ovk.SetName(g.UniqueName())
+			win.OverlayVp.AddChild(ovk)
+		}
+		ovi := ovk.(*Icon)
+		ovi.LayData = ic.LayData // copy
+		g.UpdateSplitterPos()
+		ovi.LayData.AllocPos.SetPoint(g.VpBBox.Min)
+		// fmt.Printf("set pos: %v %p\n", g.VpBBox.Min, ovi)
+		win.RenderOverlays()
+	} else {
+		ovk := win.OverlayVp.ChildIndexByName(g.UniqueName(), 0)
+		if ovk >= 0 {
+			win.OverlayVp.DeleteChildAtIndex(ovk, true)
+			win.RenderOverlays()
+		}
+		if g.PushBounds() {
+			if !g.HasChildren() {
+				g.Render2DDefaultStyle()
+			} else {
+				// todo: manage stacked layout to select appropriate image based on state
+				// return
+			}
+			g.Render2DChildren()
+			g.PopBounds()
+		}
 	}
 }
 
@@ -376,17 +417,7 @@ func (g *Splitter) Render2DDefaultStyle() {
 	st := &g.Style
 	// rs := &g.Viewport.Render
 
-	{ // update bboxes to
-		pos := int(g.Pos)
-		if g.Dim == X {
-			g.VpBBox = image.Rect(pos, g.VpBBox.Min.Y, pos+10, g.VpBBox.Max.Y)
-			g.WinBBox = image.Rect(pos, g.WinBBox.Min.Y, pos+10, g.WinBBox.Max.Y)
-		} else {
-			g.VpBBox = image.Rect(g.VpBBox.Min.X, pos, g.VpBBox.Max.X, pos+10)
-			g.WinBBox = image.Rect(g.WinBBox.Min.X, pos, g.WinBBox.Max.X, pos+10)
-		}
-	}
-
+	g.UpdateSplitterPos()
 	g.ConfigPartsIfNeeded(true)
 
 	if g.Icon != nil && g.Parts.HasChildren() {
@@ -403,17 +434,6 @@ func (g *Splitter) Render2DDefaultStyle() {
 }
 
 func (g *Splitter) ReRender2D() (node Node2D, layout bool) {
-	// if g.IsDragging() {
-	// 	if g.Icon != nil && g.Parts.HasChildren() {
-	// 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
-	// 		if ic != nil {
-	// 			g.ConfigPartsIfNeeded(true)
-	// 			node = ic.This.(Node2D)
-	// 			layout = false
-	// 			return
-	// 		}
-	// 	}
-	// }
 	node = g.This.(Node2D)
 	layout = false
 	return

@@ -554,6 +554,12 @@ func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 // as first step in Render2D returns whether the new bounds are empty or not
 // -- if empty then don't render!
 func (g *Node2DBase) PushBounds() bool {
+	if g.IsOverlay() {
+		if g.Viewport != nil {
+			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds())
+		}
+		return true
+	}
 	if g.VpBBox.Empty() {
 		return false
 	}
