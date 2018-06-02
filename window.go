@@ -40,9 +40,11 @@ var EventSkipLagMSec = 50
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
+	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
-	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface"`
-	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which then updates the window"`
+	OverlayVp     Viewport2D                  `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTex       oswin.Texture               `json:"-" xml:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
@@ -61,7 +63,7 @@ func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization
 	win := &Window{}
 	win.InitName(win, name)
-	win.SetOnlySelfUpdate() // has its own FlushImage update logic
+	win.SetOnlySelfUpdate() // has its own PublishImage update logic
 	var err error
 	win.OSWin, err = oswin.TheApp.NewWindow(opts)
 	if err != nil {
@@ -75,7 +77,7 @@ func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
 	}
 	win.OSWin.SetName(name)
 	win.OSWin.SetParent(win.This)
-	win.NodeSig.Connect(win.This, SignalWindowFlush)
+	win.NodeSig.Connect(win.This, SignalWindowPublish)
 	return win
 }
 
@@ -116,11 +118,18 @@ func NewDialogWin(name string, width, height int, modal bool) *Window {
 	return win
 }
 
+// StartEventLoop is the main startup method to call after the initial window
+// configuration is setup -- does any necessary final initialization and then
+// starts the event loop in this same goroutine, and does not return until the
+// window is closed -- see GoStartEventLoop for a version that starts in a
+// separate goroutine and returns immediately
 func (w *Window) StartEventLoop() {
 	w.EventLoop()
 }
 
-func (w *Window) StartEventLoopNoWait() {
+// GoStartEventLoop starts the event processing loop for this window in a new
+// goroutine, and returns immediately
+func (w *Window) GoStartEventLoop() {
 	go w.EventLoop()
 }
 
@@ -143,34 +152,55 @@ func (w *Window) LogicalDPI() float32 {
 	return w.OSWin.LogicalDPI()
 }
 
+// WinViewport2D returns the viewport directly under this window that serves
+// as the master viewport for the entire window
 func (w *Window) WinViewport2D() *Viewport2D {
 	vpi := w.ChildByType(KiT_Viewport2D, true, 0)
 	vp, _ := vpi.EmbeddedStruct(KiT_Viewport2D).(*Viewport2D)
 	return vp
 }
 
+// SetSize requests that the window be resized to the given size -- it will
+// trigger a resize event and be processed that way when it occurs
 func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
-	// wait for resize event for us to update?
-	// w.Resized(sz.X, sz.Y)
 }
 
+// Resized updates internal buffers after a window has been resized
 func (w *Window) Resized(sz image.Point) {
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
-	// if w.WinTex.Size() == sz {
-	// 	return
-	// }
-	// fmt.Printf("resized to: %v\n", sz)
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
+	if w.OverTex != nil {
+		w.OverTex.Release()
+	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
+	w.OverTex = nil // dynamically allocated when needed
 	w.Viewport.Resize(sz.X, sz.Y)
 }
 
-// FullReRender can be called to trigger a full re-render of the window
+// Closed frees any resources after the window has been closed
+func (w *Window) Closed() {
+	if w.IsInactive() || w.Viewport == nil {
+		return
+	}
+	if w.WinTex != nil {
+		w.WinTex.Release()
+		w.WinTex = nil
+	}
+	if w.OverTex != nil {
+		w.OverTex.Release()
+		w.OverTex = nil
+	}
+}
+
+// FullReRender performs a full re-render of the window -- each node renders
+// into its viewport, aggregating into the main window viewport, which will
+// drive an UploadAllViewports call after all the rendering is done, and
+// signal the publishing of the window after that
 func (w *Window) FullReRender() {
 	if w.IsInactive() || w.Viewport == nil {
 		return
@@ -184,56 +214,42 @@ func (w *Window) FullReRender() {
 	}
 }
 
-// UpdateVpRegion updates pixels for one viewport region on the screen, using
+// UploadVpRegion uploads image for one viewport region on the screen, using
 // vpBBox bounding box for the viewport, and winBBox bounding box for the
-// window (which should not be empty given the overall logic driving updates)
-// -- the Window has a its OnlySelfUpdate logic for determining when to flush
-// changes to the underlying OSWindow -- wrap updates in win.UpdateStart /
-// win.UpdateEnd to actually flush the updates to be visible
-func (w *Window) UpdateVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+// window -- called after re-rendering specific nodes to update only the
+// relevant part of the overall viewport image
+func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
 	if w.IsInactive() {
 		return
 	}
-	pr := prof.Start("win.UpdateVpRegion")
+	pr := prof.Start("win.UploadVpRegion")
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
 }
 
-// UpdateVpPixels updates pixels for one viewport region on the screen, in its entirety
-func (w *Window) UpdateFullVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+// UploadVp uploads entire viewport image for given viewport -- e.g., for
+// popups etc updating separately
+func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	if w.IsInactive() {
 		return
 	}
-	pr := prof.Start("win.UpdateFullVpRegion")
-	w.WinTex.Upload(winBBox.Min, vp.OSImage, vp.OSImage.Bounds())
+	pr := prof.Start("win.UploadVp")
+	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
 }
 
-// UpdateVpRegionFromMain basically clears the region where the vp would show
-// up, from the main
-func (w *Window) UpdateVpRegionFromMain(winBBox image.Rectangle) {
+// UploadAllViewports does a complete upload of all active viewports, in the
+// proper order, so as to completely refresh the window texture based on
+// everything rendered
+func (w *Window) UploadAllViewports() {
 	if w.IsInactive() {
 		return
 	}
-	pr := prof.Start("win.UpdateVpRegionFromMain")
-	w.WinTex.Upload(winBBox.Min, w.Viewport.OSImage, winBBox)
-	pr.End()
-}
-
-// FullUpdate does a complete update of window pixels -- grab pixels from all
-// the different active viewports
-func (w *Window) FullUpdate() {
-	if w.IsInactive() {
-		return
-	}
-	pr := prof.Start("win.FullUpdate")
+	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading full Vp, image bound: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
 	}
-	// if w.Viewport.Fill {
-	// 	w.WinTex.Fill(w.Viewport.OSImage.Bounds(), &w.Viewport.Style.Background.Color, oswin.Src)
-	// }
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	if w.PopupStack != nil {
@@ -258,6 +274,8 @@ func (w *Window) FullUpdate() {
 	w.UpdateEnd(updt) // drives the flush
 }
 
+// Publish does the final step of updating of the window based on the current
+// texture (and overlay texture if active)
 func (w *Window) Publish() {
 	if w.IsInactive() {
 		return
@@ -265,13 +283,18 @@ func (w *Window) Publish() {
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
+	if w.OverTex != nil {
+		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+	}
 	pr.End()
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
 	pr2.End()
 }
 
-func SignalWindowFlush(winki, node ki.Ki, sig int64, data interface{}) {
+// SignalWindowPublish is the signal receiver function that publishes the
+// window updates when the window update signal (UpdateEnd) occurs
+func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.EmbeddedStruct(KiT_Window).(*Window)
 	if Render2DTrace {
 		fmt.Printf("Window: %v flushing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
@@ -599,6 +622,7 @@ func (w *Window) EventLoop() {
 			if e.To == lifecycle.StageDead {
 				// fmt.Println("close")
 				evi.SetProcessed()
+				w.Closed()
 				break
 			} else {
 				// fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
@@ -888,7 +912,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 func (w *Window) DisconnectPopup(pop ki.Ki) {
 	w.DisconnectNode(pop)
 	pop.SetParent(nil) // don't redraw the popup anymore
-	w.Viewport.DrawIntoWindow()
+	w.Viewport.UploadToWin()
 }
 
 // close given popup -- must be the current one -- returns false if not
@@ -929,7 +953,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 		}
 		// do nothing
 	}
-	w.FullUpdate()
+	w.UploadAllViewports()
 }
 
 // push current focus onto stack and set new focus

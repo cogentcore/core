@@ -133,5 +133,5 @@ func GoGiEditorOf(obj ki.Ki) {
 	})
 
 	vp.UpdateEndNoSig(updt)
-	go win.StartEventLoopNoWait()
+	win.GoStartEventLoop() // in a separate goroutine
 }

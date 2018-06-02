@@ -86,10 +86,6 @@ type Uploader interface {
 	// contents can be further modified, once all outstanding calls to Upload
 	// have returned.
 	//
-	// TODO: make it optional that a Image's contents is preserved after
-	// Upload? Undoing a swizzle is a non-trivial amount of work, and can be
-	// redundant if the next paint cycle starts by clearing the buffer.
-	//
 	// When uploading to a Window, there will not be any visible effect until
 	// Publish is called.
 	Upload(dp image.Point, src Image, sr image.Rectangle)

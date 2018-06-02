@@ -308,10 +308,9 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
 			if g.IsDragging() {
-				bitflag.Set(&ic.Flag, int(VpFlagDrawIntoWin))
-				// ic.DrawMainVpOverMe()
-			} else {
-				bitflag.Clear(&ic.Flag, int(VpFlagDrawIntoWin))
+				// 	bitflag.Set(&ic.Flag, int(VpFlagDrawIntoWin))
+				// } else {
+				// 	bitflag.Clear(&ic.Flag, int(VpFlagDrawIntoWin))
 			}
 			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)

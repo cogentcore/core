@@ -220,5 +220,5 @@ func (p *Preferences) Edit() {
 	})
 
 	vp.UpdateEndNoSig(updt)
-	go win.StartEventLoopNoWait()
+	win.GoStartEventLoop()
 }

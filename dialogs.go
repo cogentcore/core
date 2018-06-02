@@ -5,7 +5,6 @@
 package gi
 
 import (
-	//       "fmt"
 	"image"
 	"reflect"
 
@@ -46,7 +45,8 @@ const (
 var StdDialogVSpace = float32(1.0)
 var StdDialogVSpaceUnits = units.Value{StdDialogVSpace, units.Em, 0}
 
-// Dialog supports dialog functionality -- based on a viewport that can either be rendered in a separate window or on top of an existing one
+// Dialog supports dialog functionality -- based on a viewport that can either
+// be rendered in a separate window or on top of an existing one
 type Dialog struct {
 	Viewport2D
 	Title     string      `desc:"title text displayed at the top row of the dialog"`
@@ -58,7 +58,8 @@ type Dialog struct {
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
-// Open this dialog, in given location (0 = middle of window), finding window from given viewport -- returns false if it fails for any reason
+// Open this dialog, in given location (0 = middle of window), finding window
+// from given viewport -- returns false if it fails for any reason
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	win := avp.Win
 	if win == nil {
@@ -117,7 +118,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		dlg.UpdateEndNoSig(updt)
 		// fmt.Printf("setsz: %v\n", vpsz)
 		win.SetSize(vpsz)
-		win.StartEventLoopNoWait()
+		win.GoStartEventLoop()
 	} else {
 		if x == 0 && y == 0 {
 			x = win.Viewport.ViewBox.Size.X / 3
@@ -143,6 +144,7 @@ func (dlg *Dialog) Close() {
 		if DialogsSepWindow {
 			win.SetInactive()   // indicates closed
 			win.OSWin.Release() // close..
+			win.Closed()
 		} else {
 			win.ClosePopup(dlg.This)
 		}

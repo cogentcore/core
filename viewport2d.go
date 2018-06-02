@@ -117,10 +117,6 @@ const (
 	// VpFlagSVG mans that this viewport is an SVG viewport -- SVG elements
 	// look for this for re-rendering
 	VpFlagSVG
-
-	// VpFlagDrawIntoWin means it should draw into window directly instead of
-	// drawing into parent -- i.e., as a sprite
-	VpFlagDrawIntoWin
 )
 
 func (vp *Viewport2D) IsPopup() bool {
@@ -147,7 +143,29 @@ func (vp *Viewport2D) SetCurWin() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Main Rendering code
 
-// draw our image into parents -- called at right place in Render
+// UploadMainToWin is the update call for the main viewport for a window --
+// calls UploadAllViewports in parent window, which uploads the main viewport
+// and any active popups etc over the top of that
+func (vp *Viewport2D) UploadMainToWin() {
+	if vp.Win == nil {
+		return
+	}
+	vp.Win.UploadAllViewports()
+}
+
+// UploadToWin uploads our viewport image into the parent window -- e.g., called
+// by popups when updating separately
+func (vp *Viewport2D) UploadToWin() {
+	if vp.Win == nil {
+		return
+	}
+	updt := vp.Win.UpdateStart()
+	vp.Win.UploadVp(vp, vp.WinBBox.Min)
+	vp.Win.UpdateEnd(updt)
+}
+
+// DrawIntoParent draws our viewport image into parent's image -- this is the
+// typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.ViewBox.Bounds()
 	sp := image.ZP
@@ -160,36 +178,21 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
 
-// draw main viewport into window -- needs to redraw popups over top of it, so does a full update
-func (vp *Viewport2D) DrawMainViewport() {
-	if vp.Win == nil {
-		return
+// ReRender2DNode re-renders a specific node that has said it can re-render
+func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
+	gn := gni.AsNode2D()
+	pr := prof.Start("vp.ReRender2DNode")
+	gn.Render2DTree()
+	pr.End()
+	if vp.Win != nil {
+		updt := vp.Win.UpdateStart()
+		vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		vp.Win.UpdateEnd(updt)
 	}
-	vp.Win.FullUpdate()
 }
 
-// draw a vp into window directly -- for most non-main vp's
-func (vp *Viewport2D) DrawIntoWindow() {
-	if vp.Win == nil {
-		return
-	}
-	updt := vp.Win.UpdateStart()
-	vp.Win.UpdateFullVpRegion(vp, vp.VpBBox, vp.WinBBox)
-	vp.Win.UpdateEnd(updt)
-}
-
-// draw main window vp into region of this vp
-func (vp *Viewport2D) DrawMainVpOverMe() {
-	if vp.Win == nil {
-		return
-	}
-	updt := vp.Win.UpdateStart()
-	vp.Win.UpdateVpRegionFromMain(vp.WinBBox)
-	vp.Win.UpdateEnd(updt)
-}
-
-// Delete this viewport -- has already been disconnected from window events
-// and parent is nil -- called by window when a popup is deleted -- it
+// Delete this popup viewport -- has already been disconnected from window
+// events and parent is nil -- called by window when a popup is deleted -- it
 // destroys the vp and its main layout, see VpFlagPopupDestroyAll for whether
 // children are destroyed
 func (vp *Viewport2D) DeletePopup() {
@@ -289,30 +292,25 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 	return vp.VpBBox
 }
 
+// RenderViewport2D is the render action for the viewport itself -- either
+// uploads image to window or draws into parent viewport
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawPopup into Window\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v Popup UploadToWin\n", vp.PathUnique())
 		}
-		vp.DrawIntoWindow()
+		vp.UploadToWin()
 	} else if vp.Viewport != nil { // sub-vp
-		if bitflag.Has(vp.Flag, int(VpFlagDrawIntoWin)) {
-			if Render2DTrace {
-				fmt.Printf("Render: %v at %v DrawIntoWindow\n", vp.PathUnique(), vp.VpBBox)
-			}
-			vp.DrawIntoWindow()
-		} else {
-			if Render2DTrace {
-				fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
-			}
-			vp.DrawIntoParent(vp.Viewport)
+		if Render2DTrace {
+			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
 		}
+		vp.DrawIntoParent(vp.Viewport)
 	} else { // we are the main vp
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawMainViewport, full render\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v UploadMainToWin\n", vp.PathUnique(), vp.VpBBox)
 		}
-		vp.DrawMainViewport()
+		vp.UploadMainToWin()
 	}
 }
 
@@ -437,7 +435,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
 				}
 				gi.Style2DTree() // restyle only from affected node downward
-				vp.ReRender2DAnchor(anchor.AsNode2D())
+				vp.ReRender2DNode(anchor.AsNode2D())
 			} else {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
@@ -450,38 +448,6 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	// don't do anything on deleting or destroying, and
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Root-level Viewport API -- does all the recursive calls
-
-// re-render a specific node that has said it can re-render
-func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
-	gn := gni.AsNode2D()
-	pr := prof.Start("vp.ReRender2DNode")
-	gn.Render2DTree()
-	pr.End()
-	gnvp := gn.AsViewport2D()
-	if !(gnvp != nil && bitflag.Has(gnvp.Flag, int(VpFlagDrawIntoWin))) {
-		if vp.Win != nil {
-			updt := vp.Win.UpdateStart()
-			vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-			vp.Win.UpdateEnd(updt)
-		}
-	}
-}
-
-// re-render a specific node that has said it can re-render
-func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
-	gn := gni.AsNode2D()
-	pr := prof.Start("vp.ReRender2DAnchor")
-	gn.ReRender2DTree()
-	pr.End()
-	if vp.Win != nil {
-		updt := vp.Win.UpdateStart()
-		vp.Win.UpdateVpRegion(vp, gn.VpBBox, gn.WinBBox)
-		vp.Win.UpdateEnd(updt)
-	}
-}
-
 // SavePNG encodes the image as a PNG and writes it to disk.
 func (vp *Viewport2D) SavePNG(path string) error {
 	return SavePNG(path, vp.Pixels)
@@ -491,19 +457,6 @@ func (vp *Viewport2D) SavePNG(path string) error {
 func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 	return png.Encode(w, vp.Pixels)
 }
-
-// todo:
-
-// DrawPoint is like DrawCircle but ensures that a circle of the specified
-// size is drawn regardless of the current transformation matrix. The position
-// is still transformed, but not the shape of the point.
-// func (vp *Viewport2D) DrawPoint(x, y, r float32) {
-// 	pc := vp.PushNewPaint()
-// 	p := pc.TransformPoint(x, y)
-// 	pc.Identity()
-// 	pc.DrawCircle(p.X, p.Y, r)
-// 	vp.PopPaint()
-// }
 
 //////////////////////////////////////////////////////////////////////////////////
 //  Image utilities
