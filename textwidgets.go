@@ -371,6 +371,14 @@ func (tf *TextField) SelectAll() {
 	tf.UpdateEnd(updt)
 }
 
+// IsWordBreak defines what counts as a word break for the purposes of selecting words
+func (tf *TextField) IsWordBreak(r rune) bool {
+	if unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) {
+		return true
+	}
+	return false
+}
+
 // SelectWord selects the word (whitespace delimited) that the cursor is on
 func (tf *TextField) SelectWord() {
 	updt := tf.UpdateStart()
@@ -383,16 +391,16 @@ func (tf *TextField) SelectWord() {
 	if tf.SelectStart >= sz {
 		tf.SelectStart = sz - 2
 	}
-	if !unicode.IsSpace(tf.EditText[tf.SelectStart]) {
+	if !tf.IsWordBreak(tf.EditText[tf.SelectStart]) {
 		for tf.SelectStart > 0 {
-			if unicode.IsSpace(tf.EditText[tf.SelectStart-1]) {
+			if tf.IsWordBreak(tf.EditText[tf.SelectStart-1]) {
 				break
 			}
 			tf.SelectStart--
 		}
 		tf.SelectEnd = tf.CursorPos + 1
 		for tf.SelectEnd < sz {
-			if unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+			if tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
@@ -400,13 +408,13 @@ func (tf *TextField) SelectWord() {
 	} else { // keep the space start -- go to next space..
 		tf.SelectEnd = tf.CursorPos + 1
 		for tf.SelectEnd < sz {
-			if !unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+			if !tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
 		}
 		for tf.SelectEnd < sz {
-			if unicode.IsSpace(tf.EditText[tf.SelectEnd]) {
+			if tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
