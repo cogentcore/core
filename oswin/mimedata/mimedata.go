@@ -20,6 +20,7 @@ type Data struct {
 // various standard MIME types -- see http://www.iana.org/assignments/media-types/media-types.xhtml for a big list
 var (
 	// for ALL text formats, Go standard utf8 encoding is assumed -- standard for most?
+	TextAny   = "text/*"
 	TextPlain = "text/plain"
 	TextHTML  = "text/html"
 	TextURL   = "text/uri-list"
@@ -30,12 +31,14 @@ var (
 	// text version of XML is for human-readable xml
 	TextXML = "text/xml"
 
+	ImageAny  = "image/*"
 	ImageJPEG = "image/jepg"
 	ImagePNG  = "image/png"
 	ImageGIF  = "image/gif"
 	ImageTIFF = "image/tiff"
 	ImageSVG  = "image/svg+xml"
 
+	AudioAny  = "audio/*"
 	AudioWAV  = "audio/wav"
 	AudioMIDI = "audio/midi"
 	AudioOGG  = "audio/ogg"
@@ -43,6 +46,7 @@ var (
 	AudioMPEG = "audio/mpeg"
 	AudioMP4  = "audio/mp4"
 
+	VideoAny       = "video/*"
 	VideoMPEG      = "video/mpeg"
 	VideoAVI       = "video/x-msvideo"
 	VideoOGG       = "video/ogg"
@@ -50,6 +54,7 @@ var (
 	VideoH264      = "video/h264"
 	VideoQuicktime = "video/quicktime"
 
+	FontAny = "font/*"
 	FontTTF = "font/ttf"
 
 	AppRTF  = "application/rtf"

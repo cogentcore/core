@@ -32,11 +32,9 @@ void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
 void doCloseWindow(uintptr_t id);
 void getScreens();
-void clipAvail();
-void clipAvailFmt(char* fmt, int len);
-void clipRead();
-void clipReadFmt(char* fmt, int len);
-void clipWrite(char* fmt, int fmtlen, char* data, int dlen);
+void clipClear();
+void clipRead(char* typ, int len);
+void clipWrite(char* typ, int typlen, char* data, int dlen);
 uint64_t threadID();
 */
 import "C"
@@ -57,6 +55,7 @@ import (
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
@@ -843,84 +842,57 @@ func (app *appImpl) ClipBoard() clip.Board {
 // clip.Board impl
 
 type clipImpl struct {
-	avail bool
-	fmt   string
-	data  []byte
+	data mimedata.Mimes
 }
 
 var theClip = clipImpl{}
 
-func (ci *clipImpl) Avail() (av bool, fmt string) {
-	ci.avail = false
-	C.clipAvail()
-	return ci.avail, ci.fmt
-}
+// curpMimeData is the current mime data to write to from cocoa side
+var curMimeData *mimedata.Mimes
 
-func (ci *clipImpl) AvailFmt(fmt string) bool {
-	ci.avail = false
-	cfmt := C.CString(fmt)
-	defer C.free(unsafe.Pointer(cfmt))
-	C.clipAvailFmt(cfmt, C.int(len(fmt)))
-	return ci.avail
-}
-
-func (ci *clipImpl) Read() (data []byte, fmt string, err error) {
-	ci.data = nil
-	ci.fmt = ""
-	C.clipRead()
-	if ci.data == nil {
-		return nil, "", clip.ErrNotAvail
+func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+	if types == nil {
+		return nil
 	}
-	return ci.data, ci.fmt, nil
-}
-
-func (ci *clipImpl) ReadFmt(fmt string) (data []byte, err error) {
 	ci.data = nil
-	ci.fmt = fmt
-	cfmt := C.CString(fmt)
-	defer C.free(unsafe.Pointer(cfmt))
-	C.clipReadFmt(cfmt, C.int(len(fmt)))
-	if ci.data == nil {
-		return nil, clip.ErrNotAvail
+	curMimeData = &ci.data
+	for _, typ := range types {
+		ctyp := C.CString(typ)
+		C.clipRead(ctyp, C.int(len(typ)))
+		C.free(unsafe.Pointer(ctyp))
+		if ci.data != nil {
+			return ci.data
+		}
 	}
-	return ci.data, nil
-}
-
-func (ci *clipImpl) Write(data []byte, fmt string) error {
-	sz := len(data)
-	cfmt := C.CString(fmt)
-	defer C.free(unsafe.Pointer(cfmt))
-	cdata := C.malloc(C.size_t(sz))
-	defer C.free(unsafe.Pointer(cdata))
-	copy((*[1 << 24]byte)(cdata)[0:sz], data)
-	C.clipWrite((*C.char)(cdata), C.int(sz), cfmt, C.int(len(fmt)))
 	return nil
 }
 
-func (ci *clipImpl) Clear() error {
+func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
+	if clearFirst {
+		ci.Clear()
+	}
+	for _, d := range data {
+		ctyp := C.CString(d.Type)
+		sz := len(d.Data)
+		cdata := C.malloc(C.size_t(sz))
+		copy((*[1 << 30]byte)(cdata)[0:sz], d.Data)
+		C.clipWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(d.Type)))
+		C.free(unsafe.Pointer(ctyp))
+		C.free(unsafe.Pointer(cdata))
+	}
 	return nil
 }
 
-//export setClipAvail
-func setClipAvail(avail bool) {
-	theClip.avail = avail
+func (ci *clipImpl) Clear() {
+	C.clipClear()
 }
 
-//export setClipFmt
-func setClipFmt(cstr *C.char, len C.int) {
-	if cstr == nil {
-		theClip.fmt = ""
-	} else {
-		str := C.GoStringN(cstr, len)
-		theClip.fmt = str
+//export addMimeData
+func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
+	if *curMimeData == nil {
+		*curMimeData = make(mimedata.Mimes, 0)
 	}
-}
-
-//export setClipData
-func setClipData(cstr *C.char, len C.int) {
-	if cstr == nil {
-		theClip.data = nil
-	} else {
-		theClip.data = C.GoBytes(unsafe.Pointer(cstr), len)
-	}
+	typ := C.GoStringN(ctyp, typlen)
+	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
+	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
 }

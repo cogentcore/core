@@ -18,6 +18,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -468,7 +469,7 @@ func (tf *TextField) Cut() string {
 		}
 	}
 	tf.SelectReset()
-	oswin.TheApp.ClipBoard().Write(([]byte)(cut), "text/plain")
+	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut), true)
 	tf.UpdateEnd(updt)
 	return cut
 }
@@ -481,7 +482,7 @@ func (tf *TextField) Copy(reset bool) string {
 		return ""
 	}
 	cpy := tf.Selection()
-	oswin.TheApp.ClipBoard().Write(([]byte)(cpy), "text/plain")
+	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cpy), true)
 	if reset {
 		tf.SelectReset()
 	}
@@ -490,9 +491,9 @@ func (tf *TextField) Copy(reset bool) string {
 
 // Paste inserts text from the clipboard at current cursor position
 func (tf *TextField) Paste() {
-	data, err := oswin.TheApp.ClipBoard().ReadFmt("text/plain")
-	if data != nil && err == nil {
-		tf.InsertAtCursor(string(data))
+	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
+	if data != nil {
+		tf.InsertAtCursor(data.Text())
 	}
 }
 
