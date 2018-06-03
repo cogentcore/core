@@ -82,6 +82,13 @@ const (
 	// special treatment
 	WindowResizeEvent
 
+	// DNDEvent is for the drop event
+	DNDEvent
+	// DNDMoveEvent is when the DND position has changed
+	DNDMoveEvent
+	// DNDFocusEvent is for Enter / Exit events of the DND into / out of a given widget
+	DNDFocusEvent
+
 	// LifeCycleEvent for app window activation, focus, and startup / termination
 	LifeCycleEvent
 

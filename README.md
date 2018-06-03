@@ -71,6 +71,13 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
+* update clip on mac to support new mimedata interface
+
+* DND: store mimedata.Mimes plus a node representing current drag in the
+  gi.Window, and add a method to start the drag passing those two -- add all other assoc mgmt etc
+  
+* add dnd recv to textfield, treeviews
+
 * windows:
     + clip.Board impl
 	+ support the current HiDPI framework -- right now it is always stuck at 96dpi.
