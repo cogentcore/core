@@ -490,7 +490,7 @@ func (tf *TextField) Copy(reset bool) string {
 
 // Paste inserts text from the clipboard at current cursor position
 func (tf *TextField) Paste() {
-	data, _, err := oswin.TheApp.ClipBoard().Read()
+	data, err := oswin.TheApp.ClipBoard().ReadFmt("text/plain")
 	if data != nil && err == nil {
 		tf.InsertAtCursor(string(data))
 	}

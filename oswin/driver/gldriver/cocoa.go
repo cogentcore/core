@@ -33,8 +33,10 @@ void doResizeWindow(uintptr_t id, int width, int height);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 void clipAvail();
+void clipAvailFmt(char* fmt, int len);
 void clipRead();
-void clipWrite(char* str, int len);
+void clipReadFmt(char* fmt, int len);
+void clipWrite(char* fmt, int fmtlen, char* data, int dlen);
 uint64_t threadID();
 */
 import "C"
@@ -854,16 +856,44 @@ func (ci *clipImpl) Avail() (av bool, fmt string) {
 	return ci.avail, ci.fmt
 }
 
+func (ci *clipImpl) AvailFmt(fmt string) bool {
+	ci.avail = false
+	cfmt := C.CString(fmt)
+	defer C.free(unsafe.Pointer(cfmt))
+	C.clipAvailFmt(cfmt, C.int(len(fmt)))
+	return ci.avail
+}
+
 func (ci *clipImpl) Read() (data []byte, fmt string, err error) {
+	ci.data = nil
+	ci.fmt = ""
 	C.clipRead()
+	if ci.data == nil {
+		return nil, "", clip.ErrNotAvail
+	}
 	return ci.data, ci.fmt, nil
 }
 
+func (ci *clipImpl) ReadFmt(fmt string) (data []byte, err error) {
+	ci.data = nil
+	ci.fmt = fmt
+	cfmt := C.CString(fmt)
+	defer C.free(unsafe.Pointer(cfmt))
+	C.clipReadFmt(cfmt, C.int(len(fmt)))
+	if ci.data == nil {
+		return nil, clip.ErrNotAvail
+	}
+	return ci.data, nil
+}
+
 func (ci *clipImpl) Write(data []byte, fmt string) error {
-	str := string(data)
-	cstr := C.CString(str)
-	defer C.free(unsafe.Pointer(cstr))
-	C.clipWrite(cstr, C.int(len(str)))
+	sz := len(data)
+	cfmt := C.CString(fmt)
+	defer C.free(unsafe.Pointer(cfmt))
+	cdata := C.malloc(C.size_t(sz))
+	defer C.free(unsafe.Pointer(cdata))
+	copy((*[1 << 24]byte)(cdata)[0:sz], data)
+	C.clipWrite((*C.char)(cdata), C.int(sz), cfmt, C.int(len(fmt)))
 	return nil
 }
 
@@ -876,13 +906,21 @@ func setClipAvail(avail bool) {
 	theClip.avail = avail
 }
 
+//export setClipFmt
+func setClipFmt(cstr *C.char, len C.int) {
+	if cstr == nil {
+		theClip.fmt = ""
+	} else {
+		str := C.GoStringN(cstr, len)
+		theClip.fmt = str
+	}
+}
+
 //export setClipData
 func setClipData(cstr *C.char, len C.int) {
 	if cstr == nil {
 		theClip.data = nil
 	} else {
-		str := C.GoStringN(cstr, len)
-		theClip.data = ([]byte)(str)
-		theClip.fmt = "text/plain"
+		theClip.data = C.GoBytes(unsafe.Pointer(cstr), len)
 	}
 }

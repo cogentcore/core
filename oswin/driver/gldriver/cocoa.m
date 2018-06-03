@@ -412,17 +412,40 @@ void getScreens() {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////
+//   Clipboard
+
 // https://developer.apple.com/documentation/appkit/nspasteboard
 // https://github.com/jtanx/libclipboard/blob/master/src/clipboard_cocoa.c
+
 void clipAvail() {
         NSPasteboard *pb = [NSPasteboard generalPasteboard];
 	// NSArray *itms = [pb pasteboardItems];
+	char *fmt = NULL;
+	// todo: decode actual format!
 	NSString *ns_clip = [pb stringForType:NSPasteboardTypeString];
 	if (ns_clip == NULL) {
 	  setClipAvail(false);
 	  return;
 	}
+	fmt = "text/plain";
+	setClipFmt(fmt, strlen(fmt));
 	setClipAvail(true);
+}
+
+void clipAvailFmt(char* fmt, int len) {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+	// NSArray *itms = [pb pasteboardItems];
+	// todo: support more formats!
+	if (strncmp(fmt, "text/plain", len) == 0) {
+	  NSString *ns_clip = [pb stringForType:NSPasteboardTypeString];
+	  if (ns_clip == NULL) {
+	    setClipAvail(false);
+	    return;
+	  }
+	  setClipAvail(true);
+	  return;
+	}
 }
 
 void clipRead() {
@@ -433,23 +456,42 @@ void clipRead() {
 	  setClipData(NULL, 0);
 	  return;
 	}
+	char* fmt = "text/plain";
+	setClipFmt(fmt, strlen(fmt));
 	const char* utf8_clip = [ns_clip UTF8String];
 	int len = (int)strlen(utf8_clip);
 	setClipData((char*)utf8_clip, len);
 }
 
-void clipWrite(char* str, int len) {
+void clipReadFmt(char* fmt, int len) {
         NSPasteboard *pb = [NSPasteboard generalPasteboard];
+	// NSArray *itms = [pb pasteboardItems];
+	// todo: support more formats!
+	if (strncmp(fmt, "text/plain", len) == 0) {
+	  NSString *ns_clip = [pb stringForType:NSPasteboardTypeString];
+	  if (ns_clip == NULL) {
+	    return;
+	  }
+	  const char* utf8_clip = [ns_clip UTF8String];
+	  int len = (int)strlen(utf8_clip);
+	  setClipData((char*)utf8_clip, len);
+	}
+}
 
+void clipWrite(char* data, int len, char* fmt, int fmtlen) {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
 	NSString *ns_clip;
 	bool ret;
 
-	ns_clip = [[NSString alloc] initWithBytes:str length:len encoding:NSUTF8StringEncoding];
+	// todo: support more formats!
+	if (strncmp(fmt, "text/plain", fmtlen) == 0) {
+	  ns_clip = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
 
-	[pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-	ret = [pb setString:ns_clip forType:NSStringPboardType];
-	[ns_clip release];
+	  [pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+	  ret = [pb setString:ns_clip forType:NSStringPboardType];
+	  [ns_clip release];
 
-	// long serial = [pb changeCount];
-	// OSAtomicCompareAndSwapLong(cb->last_cb_serial, serial, &cb->last_cb_serial);
+	  // long serial = [pb changeCount];
+	  // OSAtomicCompareAndSwapLong(cb->last_cb_serial, serial, &cb->last_cb_serial);
+	}
 }	
