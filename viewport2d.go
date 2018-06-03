@@ -162,7 +162,7 @@ func (vp *Viewport2D) UploadToWin() {
 // DrawIntoParent draws our viewport image into parent's image -- this is the
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
-	if vp.IsOverlay() {
+	if vp.IsOverlay() { // don't check for any parent bounds etc -- just draw entire pixels
 		if parVp == nil {
 			return
 		}
@@ -510,7 +510,6 @@ func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
 		sz := givp.Pixels.Bounds().Size()
 		bm.Resize(sz)
 		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, image.ZP, draw.Src)
-		bm.SavePNG("grabbed.png")
 		return true
 	}
 	givp = gi.Viewport
@@ -522,7 +521,6 @@ func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
 		return false // offscreen -- can happen -- no warning -- just check rval
 	}
 	draw.Draw(bm.Pixels, gi.VpBBox, givp.Pixels, image.ZP, draw.Src)
-	bm.SavePNG("grabbed.png")
 	return true
 }
 

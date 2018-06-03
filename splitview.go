@@ -393,7 +393,6 @@ func (g *Splitter) Render2D() {
 		ovb.LayData = ic.LayData // copy
 		g.UpdateSplitterPos()
 		ovb.LayData.AllocPos.SetPoint(g.VpBBox.Min)
-		// fmt.Printf("set pos: %v %p\n", g.VpBBox.Min, ovi)
 		win.RenderOverlays()
 	} else {
 		ovk := win.OverlayVp.ChildIndexByName(g.UniqueName(), 0)
