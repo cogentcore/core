@@ -67,9 +67,8 @@ func NewViewport2D(width, height int) *Viewport2D {
 }
 
 // Resize resizes the viewport, creating a new image -- updates ViewBox Size
-func (vp *Viewport2D) Resize(width, height int) {
-	nwsz := image.Point{width, height}
-	if width == 0 && height == 0 {
+func (vp *Viewport2D) Resize(nwsz image.Point) {
+	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
 	if vp.Pixels != nil {
@@ -89,7 +88,7 @@ func (vp *Viewport2D) Resize(width, height int) {
 		return
 	}
 	vp.Pixels = vp.OSImage.RGBA()
-	vp.Render.Init(width, height, vp.Pixels)
+	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
 	vp.ViewBox.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
@@ -164,9 +163,13 @@ func (vp *Viewport2D) UploadToWin() {
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	if vp.IsOverlay() {
-		pos := vp.LayData.AllocPos.ToPoint()
-		draw.Draw(parVp.Pixels, parVp.Pixels.Bounds(), vp.Pixels, pos, draw.Over)
-		vp.Paint.FillBox(&parVp.Render, vp.LayData.AllocPos, Vec2D{5, 20}, color.Black)
+		if parVp == nil {
+			return
+		}
+		r := vp.Pixels.Bounds()
+		pos := vp.LayData.AllocPos.ToPoint() // get updated pos
+		r = r.Add(pos)
+		draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Over)
 		return
 	}
 	r := vp.ViewBox.Bounds()
@@ -229,8 +232,9 @@ func (vp *Viewport2D) Init2D() {
 		if Update2DTrace {
 			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
 		}
-		// todo: don't re-render if deleting!
-		rvp.FullRender2DTree()
+		if !vp.IsDeleted() && !vp.IsDestroyed() {
+			rvp.FullRender2DTree()
+		}
 	})
 }
 
@@ -271,10 +275,9 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
 		if !vp.LayData.AllocSize.IsZero() {
 			asz := vp.LayData.AllocSize.ToPointCeil()
-			vp.Resize(asz.X, asz.Y)
-			// fmt.Printf("vp %v resized to %v\n", vp.Nm, asz)
+			vp.Resize(asz)
 		} else if vp.Pixels == nil {
-			vp.Resize(64, 64) // gotta have something..
+			vp.Resize(image.Point{64, 64}) // gotta have something..
 		}
 	}
 	return vp.Pixels.Bounds()
@@ -462,7 +465,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 // RenderOverlays is main call from window for OverlayVp to render overlay nodes within it
 func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 	vp.SetAsOverlay()
-	vp.Resize(wsz.X, wsz.Y)
+	vp.Resize(wsz)
 
 	// fill to transparent
 	draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
@@ -478,8 +481,55 @@ func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 			gii.Init2D()
 			gii.Style2D()
 		}
-		// note: skipping sizing, layout -- can only put basic elements here (so far..)
+		// note: skipping sizing, layout -- use simple elements here, esp Bitmap
 		gii.Render2D()
+	}
+}
+
+// Bitmap is a Viewport2D that is optimized to render a static bitmap image --
+// it expects to be a terminal node and does NOT call rendering etc on its
+// children.  It is particularly useful for overlays in drag-n-drop uses --
+// can grab the image of another vp and show that
+type Bitmap struct {
+	Viewport2D
+}
+
+var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
+
+var BitmapProps = ki.Props{
+	"background-color": &Prefs.BackgroundColor,
+}
+
+// GrabRenderFrom grabs the rendered image from given node -- copies the
+// vpBBox from parent viewport of node (or from viewport directly if node is a
+// viewport) -- returns success
+func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
+	gi := gii.AsNode2D()
+	givp := gii.AsViewport2D()
+	if givp != nil && givp.Pixels != nil {
+		sz := givp.Pixels.Bounds().Size()
+		bm.Resize(sz)
+		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, image.ZP, draw.Src)
+		bm.SavePNG("grabbed.png")
+		return true
+	}
+	givp = gi.Viewport
+	if givp == nil || givp.Pixels == nil {
+		log.Printf("Bitmap GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", gi.PathUnique())
+		return false
+	}
+	if gi.VpBBox.Empty() {
+		return false // offscreen -- can happen -- no warning -- just check rval
+	}
+	draw.Draw(bm.Pixels, gi.VpBBox, givp.Pixels, image.ZP, draw.Src)
+	bm.SavePNG("grabbed.png")
+	return true
+}
+
+func (bm *Bitmap) Render2D() {
+	if bm.PushBounds() {
+		bm.DrawIntoParent(bm.Viewport)
+		bm.PopBounds()
 	}
 }
 

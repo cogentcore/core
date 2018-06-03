@@ -59,7 +59,7 @@ func (vp *Icon) CopyFromIcon(cp *Icon) {
 	vp.Style = oldIc.Style
 	vp.Fill = oldIc.Fill
 	vp.Pixels = nil
-	vp.Resize(vp.ViewBox.Size.X, vp.ViewBox.Size.Y)
+	vp.Resize(vp.ViewBox.Size)
 	// vp.FullRender2DTree()
 	vp.LayData = oldIc.LayData
 	vp.VpBBox = oldIc.VpBBox

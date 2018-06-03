@@ -180,7 +180,7 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
-	w.Viewport.Resize(sz.X, sz.Y)
+	w.Viewport.Resize(sz)
 }
 
 // Closed frees any resources after the window has been closed

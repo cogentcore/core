@@ -147,7 +147,7 @@ func PopupMenu(menu ki.Slice, x, y int, parVp *Viewport2D, name string) *Viewpor
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, mainVp.ViewBox.Size.X-vpsz.X) // fit
 	y = kit.MinInt(y, mainVp.ViewBox.Size.Y-vpsz.Y) // fit
-	pvp.Resize(vpsz.X, vpsz.Y)
+	pvp.Resize(vpsz)
 	pvp.ViewBox.Min = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 

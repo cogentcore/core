@@ -381,15 +381,18 @@ func (g *Splitter) Render2D() {
 			return
 		}
 		ovk := win.OverlayVp.ChildByName(g.UniqueName(), 0)
+		var ovb *Bitmap
 		if ovk == nil {
-			ovk = ic.Clone()
-			ovk.SetName(g.UniqueName())
-			win.OverlayVp.AddChild(ovk)
+			ovb = &Bitmap{}
+			ovb.SetName(g.UniqueName())
+			win.OverlayVp.AddChild(ovb)
+			ovk = ovb.This
 		}
-		ovi := ovk.(*Icon)
-		ovi.LayData = ic.LayData // copy
+		ovb = ovk.(*Bitmap)
+		ovb.GrabRenderFrom(ic)
+		ovb.LayData = ic.LayData // copy
 		g.UpdateSplitterPos()
-		ovi.LayData.AllocPos.SetPoint(g.VpBBox.Min)
+		ovb.LayData.AllocPos.SetPoint(g.VpBBox.Min)
 		// fmt.Printf("set pos: %v %p\n", g.VpBBox.Min, ovi)
 		win.RenderOverlays()
 	} else {

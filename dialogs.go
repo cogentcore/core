@@ -129,7 +129,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		frame := dlg.Child(0).(*Frame)
 		dlg.StylePart(frame.This) // use special styles
 		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
-		dlg.Resize(vpsz.X, vpsz.Y)
+		dlg.Resize(vpsz)
 		dlg.ViewBox.Min = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
 		win.NextPopup = dlg.This

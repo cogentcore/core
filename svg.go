@@ -24,7 +24,7 @@ var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
 
 // set a normalized 0-1 scaling transform so svg's use 0-1 coordinates that
 // map to actual size of the viewport -- used e.g. for Icon
-func (vp *Icon) SetNormXForm() {
+func (vp *SVG) SetNormXForm() {
 	pc := &vp.Paint
 	pc.Identity()
 	vps := Vec2D{}

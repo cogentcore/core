@@ -549,10 +549,10 @@ func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 	g.This.(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
-// if non-empty, push our bounding-box bounds onto the bounds stack -- this
-// limits our drawing to our own bounding box, automatically -- must be called
-// as first step in Render2D returns whether the new bounds are empty or not
-// -- if empty then don't render!
+// PusBounds pushes our bounding-box bounds onto the bounds stack if non-empty
+// -- this limits our drawing to our own bounding box, automatically -- must
+// be called as first step in Render2D returns whether the new bounds are
+// empty or not -- if empty then don't render!
 func (g *Node2DBase) PushBounds() bool {
 	if g.IsOverlay() {
 		if g.Viewport != nil {
