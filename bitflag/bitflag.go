@@ -9,20 +9,63 @@
 // that cost -- see kit type registry for further enum management functions
 package bitflag
 
+import "sync/atomic"
+
 // todo: can add a global debug level setting and test for overflow in bits --
 // or maybe better in the enum type registry constructor?
 // see also https://github.com/sirupsen/logrus
 
 // we assume 64bit bitflags by default -- 32 bit methods specifically marked
 
-// set bit value(s) for ordinal bit position flags
-func Set(bits *int64, flags ...int) {
+// Mask makes a mask for checking multiple different flags
+func Mask(flags ...int) int64 {
+	var mask int64
 	for _, f := range flags {
-		*bits |= 1 << uint32(f)
+		mask |= int64(f) << uint32(f)
+	}
+	return mask
+}
+
+// Set sets bit value(s) for ordinal bit position flags
+func Set(bits *int64, flags ...int) {
+	mask := Mask(flags...)
+	*bits |= mask
+}
+
+// SetAtomic sets bit value(s) for ordinal bit position flags, using atomic
+// compare-and-swap loop, safe for concurrent access
+func SetAtomic(bits *int64, flags ...int) {
+	mask := Mask(flags...)
+	for {
+		cr := *bits
+		nw := cr | mask
+		if atomic.CompareAndSwapInt64(bits, cr, nw) {
+			break
+		}
 	}
 }
 
-// set or clear bit value(s) depending on state (on / off) for ordinal bit position flags
+// Clear clears bit value(s) for ordinal bit position flags
+func Clear(bits *int64, flags ...int) {
+	mask := Mask(flags...)
+	*bits = *bits & ^mask
+}
+
+// ClearAtomic clears bit value(s) for ordinal bit position flags, using atomic
+// compare-and-swap loop, safe for concurrent access
+func ClearAtomic(bits *int64, flags ...int) {
+	mask := Mask(flags...)
+	for {
+		cr := *bits
+		nw := cr & ^mask
+		if atomic.CompareAndSwapInt64(bits, cr, nw) {
+			break
+		}
+	}
+}
+
+// SetState sets or clears bit value(s) depending on state (on / off) for
+// ordinal bit position flags
 func SetState(bits *int64, state bool, flags ...int) {
 	if state {
 		Set(bits, flags...)
@@ -31,14 +74,17 @@ func SetState(bits *int64, state bool, flags ...int) {
 	}
 }
 
-// clear bit value(s) for ordinal bit position flags
-func Clear(bits *int64, flags ...int) {
-	for _, f := range flags {
-		*bits = *bits & ^(1 << uint32(f)) // note: ^ is unary bitwise negation, not ~ as in C
+// SetStateAtomic sets or clears bit value(s) depending on state (on / off)
+// for ordinal bit position flags, protected by atomic -- safe for concurrent access
+func SetStateAtomic(bits *int64, state bool, flags ...int) {
+	if state {
+		SetAtomic(bits, flags...)
+	} else {
+		ClearAtomic(bits, flags...)
 	}
 }
 
-// toggle state of bit value(s) for ordinal bit position flags
+// Toggle toggles state of bit value(s) for ordinal bit position flags
 func Toggle(bits *int64, flags ...int) {
 	for _, f := range flags {
 		if Has(*bits, f) {
@@ -49,12 +95,18 @@ func Toggle(bits *int64, flags ...int) {
 	}
 }
 
-// check if given bit value is set for ordinal bit position flag
+// Has checks if given bit value is set for ordinal bit position flag
 func Has(bits int64, flag int) bool {
 	return bits&(1<<uint32(flag)) != 0
 }
 
-// check if any of a set of flags are set for ordinal bit position flags (logical OR)
+// HasAtomic checks if given bit value is set for ordinal bit position flag,
+// using an atomic load, safe for concurrent access
+func HasAtomic(bits *int64, flag int) bool {
+	return atomic.LoadInt64(bits)&(1<<uint32(flag)) != 0
+}
+
+// HasAny checks if any of a set of flags are set for ordinal bit position flags (logical OR)
 func HasAny(bits int64, flags ...int) bool {
 	for _, f := range flags {
 		if Has(bits, f) {
@@ -64,7 +116,7 @@ func HasAny(bits int64, flags ...int) bool {
 	return false
 }
 
-// check if all of a set of flags are set for ordinal bit position flags (logical AND)
+// HasAll checks if all of a set of flags are set for ordinal bit position flags (logical AND)
 func HasAll(bits int64, flags ...int) bool {
 	for _, f := range flags {
 		if !Has(bits, f) {
@@ -74,36 +126,36 @@ func HasAll(bits int64, flags ...int) bool {
 	return true
 }
 
-// make a mask for checking multiple different flags
-func Mask(flags ...int) int64 {
-	var mask int64
-	for _, f := range flags {
-		Set(&mask, f)
-	}
-	return mask
-}
-
-// check if any of the bits in mask are set
+// HasMask checks if any of the bits in mask are set
 func HasMask(bits, mask int64) bool {
 	return bits&mask != 0
 }
 
-// clear all of the bits in the mask
+// ClearMask clears all of the bits in the mask
 func ClearMask(bits *int64, mask int64) {
 	*bits = *bits & ^mask
 }
 
-//////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 //   32 bit
 
-// set bit value(s) for ordinal bit position flags
-func Set32(bits *int32, flags ...int) {
+// Mask32 makes a mask for checking multiple different flags
+func Mask32(flags ...int) int32 {
+	var mask int32
 	for _, f := range flags {
-		*bits |= 1 << uint32(f)
+		mask |= int32(f) << uint32(f)
 	}
+	return mask
 }
 
-// set or clear bit value(s) depending on state (on / off) for ordinal bit position flags
+// Set32 sets bit value(s) for ordinal bit position flags
+func Set32(bits *int32, flags ...int) {
+	mask := Mask32(flags...)
+	*bits |= mask
+}
+
+// SetState32 sets or clears bit value(s) depending on state (on / off) for
+// ordinal bit position flags
 func SetState32(bits *int32, state bool, flags ...int) {
 	if state {
 		Set32(bits, flags...)
@@ -112,14 +164,13 @@ func SetState32(bits *int32, state bool, flags ...int) {
 	}
 }
 
-// clear bit value(s) for ordinal bit position flags
+// Clear32 clears bit value(s) for ordinal bit position flags
 func Clear32(bits *int32, flags ...int) {
-	for _, f := range flags {
-		*bits = *bits & ^(1 << uint32(f)) // note: ^ is unary bitwise negation, not ~ as in C
-	}
+	mask := Mask32(flags...)
+	*bits = *bits & ^mask
 }
 
-// toggle state of bit value(s) for ordinal bit position flags
+// Toggle32 toggles state of bit value(s) for ordinal bit position flags
 func Toggle32(bits *int32, flags ...int) {
 	for _, f := range flags {
 		if Has32(*bits, f) {
@@ -130,12 +181,12 @@ func Toggle32(bits *int32, flags ...int) {
 	}
 }
 
-// check if given bit value is set for ordinal bit position flag
+// Has32 checks if given bit value is set for ordinal bit position flag
 func Has32(bits int32, flag int) bool {
 	return bits&(1<<uint32(flag)) != 0
 }
 
-// check if any of a set of flags are set for ordinal bit position flags
+// HasAny32 checks if any of a set of flags are set for ordinal bit position flags
 func HasAny32(bits int32, flags ...int) bool {
 	for _, f := range flags {
 		if Has32(bits, f) {
@@ -145,7 +196,7 @@ func HasAny32(bits int32, flags ...int) bool {
 	return false
 }
 
-// check if all of a set of flags are set for ordinal bit position flags
+// HasAll32 checks if all of a set of flags are set for ordinal bit position flags
 func HasAll32(bits int32, flags ...int) bool {
 	for _, f := range flags {
 		if !Has32(bits, f) {
@@ -155,21 +206,12 @@ func HasAll32(bits int32, flags ...int) bool {
 	return true
 }
 
-// make a mask for checking multiple different flags
-func Mask32(flags ...int) int32 {
-	var mask int32
-	for _, f := range flags {
-		Set32(&mask, f)
-	}
-	return mask
-}
-
-// check if any of the bits in mask are set
+// HasMask32 checks if any of the bits in mask are set
 func HasMask32(bits, mask int32) bool {
 	return bits&mask != 0
 }
 
-// clear all of the bits in the mask
+// ClearMask32 clears all of the bits in the mask
 func ClearMask32(bits *int32, mask int32) {
 	*bits = *bits & ^mask
 }

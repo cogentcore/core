@@ -463,12 +463,12 @@ func (k *Slice) UnmarshalJSON(b []byte) error {
 func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	tokens := []xml.Token{start}
 	nk := len(k)
-	nt := xml.StartElement{Name: xml.Name{"", "N"}}
-	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{nt.Name})
+	nt := xml.StartElement{Name: xml.Name{Space: "", Local: "N"}}
+	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{Name: nt.Name})
 	for _, kid := range k {
 		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
-		t := xml.StartElement{Name: xml.Name{"", "Type"}}
-		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{t.Name})
+		t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
+		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
 	}
 	for _, t := range tokens {
 		err := e.EncodeToken(t)
@@ -482,13 +482,13 @@ func (k Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 	for _, kid := range k {
 		knm := reflect.TypeOf(kid).Elem().Name()
-		ct := xml.StartElement{Name: xml.Name{"", knm}}
+		ct := xml.StartElement{Name: xml.Name{Space: "", Local: knm}}
 		err := e.EncodeElement(kid, ct)
 		if err != nil {
 			return err
 		}
 	}
-	err = e.EncodeToken(xml.EndElement{start.Name})
+	err = e.EncodeToken(xml.EndElement{Name: start.Name})
 	if err != nil {
 		return err
 	}

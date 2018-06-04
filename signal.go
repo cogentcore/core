@@ -142,6 +142,16 @@ func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFunc) int {
 	return -1
 }
 
+// Find any existing signal connection for given recv
+func (sig *Signal) FindReceiverIndex(recv Ki) int {
+	for i, con := range sig.Cons {
+		if con.Recv == recv {
+			return i
+		}
+	}
+	return -1
+}
+
 // Disconnect all connections for receiver and/or function if they exist in
 // our list -- can pass nil for either (or both) to match only on one or the
 // other -- both nil means disconnect from all, but more efficient to use

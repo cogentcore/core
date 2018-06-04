@@ -293,9 +293,9 @@ func TestNodeConfig(t *testing.T) {
 	parent.AddNewChild(nil, "child3")
 
 	config1 := kit.TypeAndNameList{
-		{KiT_NodeEmbed, "child2"},
-		{KiT_NodeEmbed, "child3"},
-		{KiT_NodeEmbed, "child1"},
+		{Type: KiT_NodeEmbed, Name: "child2"},
+		{Type: KiT_NodeEmbed, Name: "child3"},
+		{Type: KiT_NodeEmbed, Name: "child1"},
 	}
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)

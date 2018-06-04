@@ -132,17 +132,17 @@ type Ki interface {
 	// -- can be extended from FlagsN up to 64 bit capacity
 	Flags() *int64
 
-	// SetFlagMu provides a mutex-locked bit flag update -- use this whenever
+	// SetFlagAtomic provides an atomic bit flag update -- use this whenever
 	// there might be concurrent access
-	SetFlagMu(flag ...int)
+	SetFlagAtomic(flag ...int)
 
-	// SetFlagState provides a mutex-locked bit flag update -- use this
+	// SetFlagState provides an atomic bit flag update -- use this
 	// whenever there might be concurrent access
-	SetFlagStateMu(on bool, flag ...int)
+	SetFlagStateAtomic(on bool, flag ...int)
 
-	// ClearFlag provides a mutex-locked bit flag update -- use this whenever
+	// ClearFlag provides an atomic bit flag update -- use this whenever
 	// there might be concurrent access
-	ClearFlagMu(flag ...int)
+	ClearFlagAtomic(flag ...int)
 
 	// IsField checks if this is a field on a parent struct (via IsField
 	// Flag), as opposed to a child in Children -- Ki nodes can be added as
@@ -155,8 +155,8 @@ type Ki interface {
 	// IsUpdating checks if node is currently updating
 	IsUpdating() bool
 
-	// IsUpdatingMu checks if node is currently updating, protected by flag mutex
-	IsUpdatingMu() bool
+	// IsUpdatingAtomic checks if node is currently updating, protected by atomic flag
+	IsUpdatingAtomic() bool
 
 	// OnlySelfUpdate checks if this node only applies UpdateStart / End logic
 	// to itself, not its children (which is the default) (via Flag of same
@@ -628,17 +628,21 @@ type Ki interface {
 	//  IO: Marshal / Unmarshal support -- see also Slice, Ptr
 
 	// SaveJSON saves the tree to a JSON-encoded byte string -- wraps
-	// MarshalJSON
+	// MarshalJSON -- also saves a critical starting record that allows file
+	// to be loaded de-novo and recreate the proper root type for the tree
 	SaveJSON(indent bool) ([]byte, error)
 
 	// SaveJSONToFile saves the tree to a JSON-encoded file
 	SaveJSONToFile(filename string) error
 
-	// LoadJSON loads the tree from a JSON-encoded byte string -- wraps
-	// UnmarshalJSON and calls UnmarshalPost to recover pointers from paths
+	// LoadJSON loads over this tree from a JSON-encoded byte string, using
+	// ConfigureChildren to minimize changes from current tree relative to
+	// loading one -- wraps UnmarshalJSON and calls UnmarshalPost to recover
+	// pointers from paths -- see LoadNewJSON function to load a new tree
 	LoadJSON(b []byte) error
 
-	// SaveJSONFromFile loads the tree from a JSON-encoded file
+	// LoadJSONFromFile loads over this tree from a JSON-encoded file -- see
+	// LoadJSON for details
 	LoadJSONFromFile(filename string) error
 
 	// SaveXML saves the tree to an XML-encoded byte string

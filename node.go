@@ -38,16 +38,15 @@ import (
 // -- Ki makes extensive use of such tags.
 //
 type Node struct {
-	Nm       string     `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm string     `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag     int64      `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
-	Props    Props      `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par      Ki         `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	Kids     Slice      `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	NodeSig  Signal     `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	This     Ki         `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
-	FlagMu   sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting flag updates"`
-	index    int        `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method`
+	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm string `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag     int64  `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
+	Props    Props  `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par      Ki     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	Kids     Slice  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	NodeSig  Signal `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	This     Ki     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	index    int    `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -56,17 +55,9 @@ var KiT_Node = kit.Types.AddType(&Node{}, nil)
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
 
-// fmt.stringer interface -- basic indented tree representation
+// String implements the fmt.stringer interface -- returns the PathUnique of the node
 func (n Node) String() string {
-	str := ""
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		for i := 0; i < level; i++ {
-			str += "\t"
-		}
-		str += k.Name() + "\n"
-		return true
-	})
-	return str
+	return n.PathUnique()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -239,28 +230,20 @@ func (n *Node) Flags() *int64 {
 	return &n.Flag
 }
 
-func (n *Node) SetFlagMu(flag ...int) {
-	n.FlagMu.Lock()
-	bitflag.Set(&n.Flag, flag...)
-	n.FlagMu.Unlock()
+func (n *Node) SetFlagAtomic(flag ...int) {
+	bitflag.SetAtomic(&n.Flag, flag...)
 }
 
-func (n *Node) SetFlagStateMu(on bool, flag ...int) {
-	n.FlagMu.Lock()
-	bitflag.SetState(&n.Flag, on, flag...)
-	n.FlagMu.Unlock()
+func (n *Node) SetFlagStateAtomic(on bool, flag ...int) {
+	bitflag.SetStateAtomic(&n.Flag, on, flag...)
 }
 
-func (n *Node) ClearFlagMu(flag ...int) {
-	n.FlagMu.Lock()
-	bitflag.Clear(&n.Flag, flag...)
-	n.FlagMu.Unlock()
+func (n *Node) ClearFlagAtomic(flag ...int) {
+	bitflag.ClearAtomic(&n.Flag, flag...)
 }
 
-func (n *Node) IsUpdatingMu() bool {
-	n.FlagMu.Lock()
-	rval := bitflag.Has(n.Flag, int(Updating))
-	n.FlagMu.Unlock()
+func (n *Node) IsUpdatingAtomic() bool {
+	rval := bitflag.HasAtomic(&n.Flag, int(Updating))
 	return rval
 }
 
@@ -1076,19 +1059,19 @@ func (n *Node) NodeSignal() *Signal {
 }
 
 func (n *Node) UpdateStart() bool {
-	if n.IsUpdatingMu() {
+	if n.IsUpdatingAtomic() {
 		return false
 	}
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
 		return false
 	}
 	if n.OnlySelfUpdate() {
-		n.SetFlagMu(int(Updating))
+		n.SetFlagAtomic(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
 				bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
-				k.SetFlagMu(int(Updating))
+				k.SetFlagAtomic(int(Updating))
 				return true // keep going down
 			} else {
 				return false // bail -- already updating
@@ -1109,11 +1092,11 @@ func (n *Node) UpdateEnd(updt bool) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
-		n.ClearFlagMu(int(Updating))
+		n.ClearFlagAtomic(int(Updating))
 		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlagAtomic(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
 		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
@@ -1131,11 +1114,11 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
-		n.ClearFlagMu(int(Updating))
+		n.ClearFlagAtomic(int(Updating))
 		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagMu(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlagAtomic(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
 		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
@@ -1143,7 +1126,7 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 }
 
 func (n *Node) UpdateSig() bool {
-	if n.IsUpdatingMu() {
+	if n.IsUpdatingAtomic() {
 		return false
 	}
 	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
@@ -1155,10 +1138,10 @@ func (n *Node) UpdateSig() bool {
 
 func (n *Node) UpdateReset() {
 	if n.OnlySelfUpdate() {
-		n.ClearFlagMu(int(Updating))
+		n.ClearFlagAtomic(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagMu(int(Updating))
+			k.ClearFlagAtomic(int(Updating))
 			return true
 		})
 	}
@@ -1445,8 +1428,8 @@ func (n *Node) SaveJSONToFile(filename string) error {
 func (n *Node) LoadJSON(b []byte) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
-		return err
 		log.Println(err)
+		return err
 	}
 	updt := n.UpdateStart()
 	err = json.Unmarshal(b, n.This) // key use of this!
@@ -1466,6 +1449,15 @@ func (n *Node) LoadJSONFromFile(filename string) error {
 	}
 	return n.LoadJSON(b)
 }
+
+// // LoadNewJSON loads a new Ki tree from a JSON-encoded byte string
+// func LoadNewJSON(b []byte) (Ki, error) {
+// }
+
+// // LoadNewJSONFromFile loads a new Ki tree from a JSON-encoded file
+// func LoadNewJSONFromFile(filename string) (Ki, error) {
+
+// }
 
 func (n *Node) SaveXML(indent bool) ([]byte, error) {
 	if err := n.ThisCheck(); err != nil {

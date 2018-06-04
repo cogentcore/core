@@ -97,7 +97,7 @@ func (k Ptr) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		k.GetPath()
 		tokens = append(tokens, xml.CharData(k.Path))
 	}
-	tokens = append(tokens, xml.EndElement{start.Name})
+	tokens = append(tokens, xml.EndElement{Name: start.Name})
 	for _, t := range tokens {
 		err := e.EncodeToken(t)
 		if err != nil {
