@@ -82,7 +82,7 @@ const (
 	// special treatment
 	WindowResizeEvent
 
-	// DNDEvent is for the drop event
+	// DNDEvent is for the Drag-n-Drop (DND) drop event
 	DNDEvent
 	// DNDMoveEvent is when the DND position has changed
 	DNDMoveEvent

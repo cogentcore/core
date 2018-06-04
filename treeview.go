@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -710,41 +712,63 @@ func (tv *TreeView) Init2D() {
 	tv.Init2DWidget()
 	tv.ConfigParts()
 	tv.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		// fmt.Printf("TreeView key: %v\n", kt.Chord)
 		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunSelectItem:
-			tv.SelectAction()
+			tvv.SelectAction()
 			kt.SetProcessed()
 		case KeyFunCancelSelect:
-			tv.RootUnselectAll()
+			tvv.RootUnselectAll()
 			kt.SetProcessed()
 		case KeyFunMoveRight:
-			tv.Open()
+			tvv.Open()
 			kt.SetProcessed()
 		case KeyFunMoveLeft:
-			tv.Close()
+			tvv.Close()
 			kt.SetProcessed()
 		case KeyFunMoveDown:
-			tv.MoveDown()
+			tvv.MoveDown()
 			kt.SetProcessed()
 		case KeyFunMoveUp:
-			tv.MoveUp()
+			tvv.MoveUp()
 			kt.SetProcessed()
 		case KeyFunDelete:
-			tv.SrcDelete()
+			tvv.SrcDelete()
 			kt.SetProcessed()
 		case KeyFunDuplicate:
-			tv.SrcDuplicate()
+			tvv.SrcDuplicate()
 			kt.SetProcessed()
 		case KeyFunInsert:
-			tv.SrcInsertBefore()
+			tvv.SrcInsertBefore()
 			kt.SetProcessed()
 		case KeyFunInsertAfter:
-			tv.SrcInsertAfter()
+			tvv.SrcInsertAfter()
 			kt.SetProcessed()
+		}
+	})
+	tv.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if tvv.IsDragging() {
+			ovb := &Bitmap{}
+			ovb.SetName(tvv.UniqueName())
+			ovb.GrabRenderFrom(tvv)
+			tvv.Viewport.Win.StartDragNDrop(tvv.This, mimedata.NewText(tvv.Nm), ovb)
+		}
+	})
+	tv.ReceiveEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.Event)
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if de.Action == dnd.DropOnTarget {
+			fmt.Printf("dnd targ: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Source.Name())
+			de.Target = tvv.This
+			de.SetProcessed()
+		} else if de.Action == dnd.DropFmSource {
+			fmt.Printf("dnd source: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Target.Name())
 		}
 	})
 }

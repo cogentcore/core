@@ -74,6 +74,26 @@ func (e *Event) SetModifiers(mods ...key.Modifiers) {
 	}
 }
 
+// HasAnyModifier tests whether any of given modifier(s) were set
+func (e *Event) HasAnyModifier(mods ...key.Modifiers) bool {
+	for _, m := range mods {
+		if e.Modifiers&(1<<uint32(m)) != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// HasAllModifiers tests whether all of given modifier(s) were set
+func (e *Event) HasAllModifier(mods ...key.Modifiers) bool {
+	for _, m := range mods {
+		if e.Modifiers&(1<<uint32(m)) == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 /////////////////////////////////////////////////////////////////
 
 // mouse.MoveEvent is for mouse movement, without button down -- action is Move
@@ -191,9 +211,6 @@ func (ev Event) Pos() image.Point {
 func (ev Event) OnFocus() bool {
 	return false
 }
-
-// check for interface implementation
-var _ oswin.Event = &Event{}
 
 func (ev MoveEvent) Type() oswin.EventType {
 	return oswin.MouseMoveEvent

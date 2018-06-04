@@ -520,7 +520,10 @@ func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
 	if gi.VpBBox.Empty() {
 		return false // offscreen -- can happen -- no warning -- just check rval
 	}
-	draw.Draw(bm.Pixels, gi.VpBBox, givp.Pixels, image.ZP, draw.Src)
+	sz := gi.VpBBox.Size()
+	bm.Resize(sz)
+	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, gi.VpBBox.Min, draw.Src)
+	// todo: option to make it semi-transparent
 	return true
 }
 

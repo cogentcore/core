@@ -13,8 +13,10 @@ import (
 	"runtime/pprof"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/lifecycle"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
@@ -48,7 +50,10 @@ type Window struct {
 	OverTex       oswin.Texture               `json:"-" xml:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events"`
+	DNDData       mimedata.Mimes              `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
 	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
@@ -132,6 +137,11 @@ func (w *Window) StartEventLoop() {
 // goroutine, and returns immediately
 func (w *Window) GoStartEventLoop() {
 	go w.EventLoop()
+}
+
+// tell the event loop to stop running
+func (w *Window) StopEventLoop() {
+	w.stopEventLoop = true
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
@@ -352,11 +362,6 @@ func (w *Window) DisconnectNode(recv ki.Ki) {
 	}
 }
 
-// tell the event loop to stop running
-func (w *Window) StopEventLoop() {
-	w.stopEventLoop = true
-}
-
 // IsInScope returns true if the given object is in scope for receiving events
 func (w *Window) IsInScope(gii Node2D, gi *Node2DBase) bool {
 	if w.Popup == nil {
@@ -539,7 +544,9 @@ func (w *Window) DeletePopupMenu(pop ki.Ki) bool {
 	return true
 }
 
-// start the event loop running -- runs in a separate goroutine
+// EventLoop runs the event processing loop for the Window -- grabs oswin
+// events for the window and dispatches them to receiving nodes, and manages
+// other state etc (popups, etc)
 func (w *Window) EventLoop() {
 	var skippedResize *window.Event
 
@@ -549,16 +556,10 @@ func (w *Window) EventLoop() {
 
 	for {
 		evi := w.OSWin.NextEvent()
-
-		// format := "got %#v\n"
-		// if _, ok := evi.(fmt.Stringer); ok {
-		// 	format = "got %v\n"
-		// }
-		// fmt.Printf(format, evi)
-
 		if w.stopEventLoop {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
+			break
 		}
 		if w.DoFullRender {
 			// fmt.Printf("Doing full render\n")
@@ -640,6 +641,7 @@ func (w *Window) EventLoop() {
 			skippedResize = nil
 		}
 
+		// Window gets first crack at the events, and handles window-specific ones
 		switch e := evi.(type) {
 		case *lifecycle.Event:
 			if e.To == lifecycle.StageDead {
@@ -723,6 +725,14 @@ func (w *Window) EventLoop() {
 				}
 			}
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+		case *mouse.DragEvent:
+			if w.DNDData != nil {
+				w.DNDMove(e)
+			}
+		case *mouse.Event:
+			if w.DNDData != nil && e.Action == mouse.Release {
+				w.DNDDrop(e)
+			}
 		}
 
 		if !evi.IsProcessed() {
@@ -1001,7 +1011,73 @@ func (w *Window) PopFocus() {
 }
 
 ///////////////////////////////////////////////////////
-// Profiling and Benchmarking, controlled by hot-keys (or buttons :)
+// Drag-n-drop
+
+// StartDragNDrop starts a drag-n-drop operation on given source node, which
+// is responsible for providing the data and image representation of the node
+func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
+	// todo: 3d version later..
+	w.DNDSource = src
+	w.DNDData = data
+	gimg := img.AsNode2D()
+	_, sgi := KiToNode2D(src)
+	if sgi != nil { // 2d case
+		gimg.LayData.AllocPos.SetPoint(sgi.LayData.AllocPos.ToPoint())
+	}
+	kimg := (ki.Ki)(img)
+	kimg.SetName(src.UniqueName())
+	w.OverlayVp.AddChild(kimg)
+	w.DNDImage = kimg
+	// fmt.Printf("starting dnd: %v\n", src.Name())
+}
+
+// DNDMove handles drag-n-drop move events
+func (w *Window) DNDMove(e *mouse.DragEvent) {
+	_, gi := KiToNode2D(w.DNDImage)
+	if gi != nil { // 2d case
+		gi.LayData.AllocPos.SetPoint(e.Where)
+	} // else 3d..
+	// todo: when e.Where goes negative, transition to OS DND
+	// todo: send move / enter / exit events to anyone listening
+	w.RenderOverlays()
+	e.SetProcessed()
+}
+
+// DNDDrop handles drag-n-drop drop event (action = release)
+func (w *Window) DNDDrop(e *mouse.Event) {
+	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
+	et := de.Type()
+	de.DefaultMod()
+	de.Action = dnd.DropOnTarget
+	de.Data = w.DNDData
+	de.Source = w.DNDSource
+	bitflag.Clear(w.DNDSource.Flags(), int(NodeDragging))
+	w.Dragging = nil
+	w.SendEventSignal(&de)
+	if !de.IsProcessed() || de.Mod == dnd.DropIgnore { // the target did not accept it
+	} else { // send info back to source
+		ridx := w.EventSigs[et].FindReceiverIndex(w.DNDSource)
+		if ridx >= 0 { // should be
+			de.Action = dnd.DropFmSource
+			w.EventSigs[de.Type()].Cons[ridx].SendSig(w, int64(et), (oswin.Event)(&de))
+		}
+	}
+	w.ClearDragNDrop()
+	e.SetProcessed()
+}
+
+// ClearDragNDrop clears any existing DND values
+func (w *Window) ClearDragNDrop() {
+	w.DNDSource = nil
+	w.DNDData = nil
+	w.OverlayVp.DeleteChild(w.DNDImage, true)
+	w.DNDImage = nil
+	w.Dragging = nil
+	w.RenderOverlays()
+}
+
+///////////////////////////////////////////////////////
+// Profiling and Benchmarking, controlled by hot-keys
 
 func (w *Window) StartCPUMemProfile() {
 	fmt.Println("Starting Std CPU / Mem Profiling")

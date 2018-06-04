@@ -88,6 +88,26 @@ func (e *Event) SetModifiers(mods ...Modifiers) {
 	}
 }
 
+// HasAnyModifier tests whether any of given modifier(s) were set
+func (e *Event) HasAnyModifier(mods ...Modifiers) bool {
+	for _, m := range mods {
+		if e.Modifiers&(1<<uint32(m)) != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// HasAllModifiers tests whether all of given modifier(s) were set
+func (e *Event) HasAllModifier(mods ...Modifiers) bool {
+	for _, m := range mods {
+		if e.Modifiers&(1<<uint32(m)) == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 // ChordString returns a string representation of the keyboard event suitable
 // for keyboard function maps, etc -- printable runes are sent directly, and
 // non-printable ones are converted to their corresponding code names without
@@ -103,10 +123,10 @@ func (e *Event) ChordString() string {
 		return modstr + "Spacebar"
 	}
 	if unicode.IsPrint(e.Rune) {
-	   if len(modstr) > 0 {
-	      return modstr + string(unicode.ToUpper(e.Rune)) // all modded keys are uppercase!
-	      } else {
-		return modstr + string(e.Rune)
+		if len(modstr) > 0 {
+			return modstr + string(unicode.ToUpper(e.Rune)) // all modded keys are uppercase!
+		} else {
+			return modstr + string(e.Rune)
 		}
 	}
 	// now convert code
