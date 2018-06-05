@@ -634,7 +634,7 @@ func Degrees(radians float32) float32 {
 }
 
 func Float32ToFixedPoint(x, y float32) fixed.Point26_6 {
-	return fixed.Point26_6{Float32ToFixed(x), Float32ToFixed(y)}
+	return fixed.Point26_6{X: Float32ToFixed(x), Y: Float32ToFixed(y)}
 }
 
 func Float32ToFixed(x float32) fixed.Int26_6 {

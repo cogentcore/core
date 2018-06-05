@@ -316,7 +316,7 @@ func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v Popup UploadToWin\n", vp.PathUnique())
+			fmt.Printf("Render: %v at Popup UploadToWin\n", vp.PathUnique())
 		}
 		vp.UploadToWin()
 	} else if vp.Viewport != nil { // sub-vp

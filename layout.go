@@ -108,7 +108,7 @@ func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 
 // style preferences on the layout of the element
 type LayoutStyle struct {
-	z_index   int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	ZIndex    int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	AlignH    Align       `xml:"align-self" alt:"horiz-align,align-horiz" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
 	AlignV    Align       `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
 	PosX      units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`

@@ -827,14 +827,14 @@ func (tv *TreeView) Init2D() {
 			kt.SetProcessed()
 		}
 	})
-	// tv.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-	// 	me := d.(*mouse.DragEvent)
-	// 	me.SetProcessed()
-	// 	tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-	// 	if tvv.IsDragging() {
-	// 		tvv.StartDragNDrop()
-	// 	}
-	// })
+	tv.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if tvv.IsDragging() {
+			tvv.StartDragNDrop()
+		}
+	})
 	tv.ReceiveEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)

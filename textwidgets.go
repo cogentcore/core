@@ -154,7 +154,7 @@ type TextField struct {
 	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
-	lastSizedText []rune                  `json:"-" xml:"-" the last text string we got charpos for"`
+	lastSizedText []rune
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)

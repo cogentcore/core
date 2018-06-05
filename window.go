@@ -58,8 +58,8 @@ type Window struct {
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
 	NextPopup     ki.Ki                       `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	stopEventLoop bool                        `json:"-" xml:"-" desc:"signal for communicating all user events (mouse, keyboard, etc)"`
 	DoFullRender  bool                        `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	stopEventLoop bool
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)

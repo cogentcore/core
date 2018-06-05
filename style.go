@@ -301,7 +301,7 @@ func initStyle() *StyledFields {
 // few with ad-hoc styled fields)
 type StyledFields struct {
 	Fields   map[string]*StyledField `desc:"the compiled stylable fields, mapped for the xml and alt tags for the field"`
-	Inherits []*StyledField          `desc:"the compiled stylable fields that have inherit:"true" tags and should thus be inherited from parent objects"`
+	Inherits []*StyledField          `desc:"the compiled stylable fields that have inherit:true tags and should thus be inherited from parent objects"`
 	Units    []*StyledField          `desc:"the compiled stylable fields of the unit.Value type, which should have ToDots run on them"`
 	Default  interface{}             `desc:"points to the Default instance of this type, initialized with the default values used for 'initial' keyword"`
 }

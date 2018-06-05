@@ -150,7 +150,7 @@ func (g *Circle) ReRender2D() (node Node2D, layout bool) {
 type Ellipse struct {
 	Node2DBase
 	Pos   Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
-	Radii Vec2D `xml:"{rx, ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Radii Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
@@ -194,7 +194,7 @@ func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
 type Line struct {
 	Node2DBase
 	Start Vec2D `xml:"{x1,y1}" desc:"position of the start of the line"`
-	End   Vec2D `xml:"{x2, y2}" desc:"position of the end of the line"`
+	End   Vec2D `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)

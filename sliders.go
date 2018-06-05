@@ -51,8 +51,8 @@ type SliderBase struct {
 	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
 	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
-	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" "desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
-	ThumbVal    float32              `xml:thumb-val" desc:"value that the thumb represents, in the same units"`
+	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`

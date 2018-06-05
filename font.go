@@ -68,8 +68,8 @@ type FontStyle struct {
 	FaceName string      `desc:"name corresponding to Face"`
 	Size     units.Value `xml:"size" desc:"size of font to render -- convert to points when getting font to use"`
 	Family   string      `xml:"family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
-	Style    FontStyles  `xml:"style" inherit:"true","desc:"style -- normal, italic, etc"`
-	Weight   FontWeights `xml:"weight" inherit:"true","desc:"weight: normal, bold, etc"`
+	Style    FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
+	Weight   FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
 	// todo: size also includes things like: medium, xx-small...xx-large, smaller, larger, etc
 	// todo: kerning
 	// todo: stretch -- css 3 -- not supported
@@ -208,8 +208,8 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 
 type FontInfo struct {
 	Name   string      `desc:"name of font"`
-	Style  FontStyles  `xml:"style" inherit:"true","desc:"style -- normal, italic, etc"`
-	Weight FontWeights `xml:"weight" inherit:"true","desc:"weight: normal, bold, etc"`
+	Style  FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
+	Weight FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
 }
 
 type FontLib struct {

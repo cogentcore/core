@@ -63,7 +63,7 @@ type StrokeStyle struct {
 	Dashes     []float64   `xml:"stroke-dasharray" desc:"dash pattern"`
 	Cap        LineCap     `xml:"stroke-linecap" desc:"how to draw the end cap of lines"`
 	Join       LineJoin    `xml:"stroke-linejoin" desc:"how to join line segments"`
-	MiterLimit float32     `xml:"stroke-miterlimit,min:"1" desc:"limit of how far to miter -- must be 1 or larger"`
+	MiterLimit float32     `xml:"stroke-miterlimit" min:"1" desc:"limit of how far to miter -- must be 1 or larger"`
 }
 
 // initialize default values for paint stroke
