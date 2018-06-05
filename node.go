@@ -32,7 +32,7 @@ import (
 // for the GoKi tree -- use the Node as an embedded struct or as a struct
 // field -- the embedded version supports full JSON save / load.
 //
-// The desc: key for fields is used by the GoGr GUI viewer for help / tooltip
+// The desc: key for fields is used by the GoGi GUI viewer for help / tooltip
 // info -- add these to all your derived struct's fields.  See relevant docs
 // for other such tags controlling a wide range of GUI and other functionality
 // -- Ki makes extensive use of such tags.
@@ -90,7 +90,7 @@ func (n *Node) InitName(ki Ki, name string) {
 
 func (n *Node) ThisCheck() error {
 	if n.This == nil {
-		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call SetThis/Name on root nodes!", n.PathUnique())
+		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", n.PathUnique())
 		log.Print(err)
 		return err
 	}
@@ -1400,15 +1400,33 @@ func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
 //////////////////////////////////////////////////////////////////////////
 //  IO Marshal / Unmarshal support -- mostly in Slice
 
-func (n *Node) SaveJSON(indent bool) ([]byte, error) {
+// JSONTypePrefix is the first thing output in a ki tree JSON output file,
+// specifying the type of the root node of the ki tree -- this info appears
+// all on one { } bracketed line at the start of the file, and can also be
+// used to identify the file as a ki tree JSON file
+var JSONTypePrefix = []byte("{\"ki.RootType\": ")
+
+// JSONTypeSuffix is just the } and \n at the end of the prefix line
+var JSONTypeSuffix = []byte("}\n")
+
+func (n *Node) SaveJSON(indent bool) (b []byte, err error) {
 	if err := n.ThisCheck(); err != nil {
 		return nil, err
 	}
 	if indent {
-		return json.MarshalIndent(n.This, "", "  ")
+		b, err = json.MarshalIndent(n.This, "", "  ")
 	} else {
-		return json.Marshal(n.This)
+		b, err = json.Marshal(n.This)
 	}
+	if err == nil { // save type of root node
+		knm := kit.FullTypeName(n.Type())
+		tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
+		nwb := make([]byte, len(b)+len(tstr))
+		copy(nwb, []byte(tstr))
+		copy(nwb[len(tstr):], b) // is there a way to avoid this?
+		b = nwb
+	}
+	return b, err
 }
 
 func (n *Node) SaveJSONToFile(filename string) error {
@@ -1432,7 +1450,11 @@ func (n *Node) LoadJSON(b []byte) error {
 		return err
 	}
 	updt := n.UpdateStart()
-	err = json.Unmarshal(b, n.This) // key use of this!
+	stidx := 0
+	if bytes.HasPrefix(b, JSONTypePrefix) { // skip type
+		stidx = bytes.Index(b, JSONTypeSuffix) + len(JSONTypeSuffix)
+	}
+	err = json.Unmarshal(b[stidx:], n.This) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()
 	}
@@ -1450,14 +1472,35 @@ func (n *Node) LoadJSONFromFile(filename string) error {
 	return n.LoadJSON(b)
 }
 
-// // LoadNewJSON loads a new Ki tree from a JSON-encoded byte string
-// func LoadNewJSON(b []byte) (Ki, error) {
-// }
+// LoadNewJSON loads a new Ki tree from a JSON-encoded byte string, using type
+// information at start of file to create an object of the proper type
+func LoadNewJSON(b []byte) (Ki, error) {
+	if bytes.HasPrefix(b, JSONTypePrefix) {
+		stidx := len(JSONTypePrefix) + 1
+		eidx := bytes.Index(b, JSONTypeSuffix)
+		tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
+		typ := kit.Types.Type(tn)
+		if typ == nil {
+			return nil, fmt.Errorf("ki.LoadNewJSON: kit.Types type name not found: %v", tn)
+		}
+		root := NewOfType(typ)
+		root.Init(root)
+		return root, root.LoadJSON(b)
+	} else {
+		return nil, fmt.Errorf("ki.LoadNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree\n")
+	}
+}
 
-// // LoadNewJSONFromFile loads a new Ki tree from a JSON-encoded file
-// func LoadNewJSONFromFile(filename string) (Ki, error) {
-
-// }
+// LoadNewJSONFromFile loads a new Ki tree from a JSON-encoded file, using type
+// information at start of file to create an object of the proper type
+func LoadNewJSONFromFile(filename string) (Ki, error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return LoadNewJSON(b)
+}
 
 func (n *Node) SaveXML(indent bool) ([]byte, error) {
 	if err := n.ThisCheck(); err != nil {

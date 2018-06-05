@@ -232,45 +232,25 @@ func TestNodeMove(t *testing.T) {
 	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Kids)
 
 	bft := `mv before:
-[child0
- child1
-	subchild1
- child2
- child3
-]
+[/par1/child0 /par1/child1 /par1/child2 /par1/child3]
 `
 	if bf != bft {
 		t.Errorf("move error\n%v !=\n%v", bf, bft)
 	}
 	a31t := `mv 3 -> 1:
-[child0
- child3
- child1
-	subchild1
- child2
-]
+[/par1/child0 /par1/child3 /par1/child1 /par1/child2]
 `
 	if a31 != a31t {
 		t.Errorf("move error\n%v !=\n%v", a31, a31t)
 	}
 	a03t := `mv 0 -> 3:
-[child3
- child1
-	subchild1
- child2
- child0
-]
+[/par1/child3 /par1/child1 /par1/child2 /par1/child0]
 `
 	if a03 != a03t {
 		t.Errorf("move error\n%v !=\n%v", a03, a03t)
 	}
 	a12t := `mv 1 -> 2:
-[child3
- child2
- child1
-	subchild1
- child0
-]
+[/par1/child3 /par1/child2 /par1/child1 /par1/child0]
 `
 	if a12 != a12t {
 		t.Errorf("move error\n%v !=\n%v", a12, a12t)
@@ -332,23 +312,14 @@ func TestNodeConfig(t *testing.T) {
 	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 
 	cf1t := `config1:
-[child2
- child3
- child1
-	subchild1
-]
+[/par1/child2 /par1/child3 /par1/child1]
 `
 	if cf1 != cf1t {
 		t.Errorf("config error\n%v !=\n%v", cf1, cf1t)
 	}
 
 	cf2t := `config2:
-[child4
- child1
- child5
- child3
- child6
-]
+[/par1/child4 /par1/child1 /par1/child5 /par1/child3 /par1/child6]
 `
 	if cf2 != cf2t {
 		t.Errorf("config error\n%v !=\n%v", cf2, cf2t)
@@ -377,7 +348,7 @@ func TestNodeJSonSave(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		// } else {
-		// 	fmt.Printf("json output: %v\n", string(b))
+		// 	fmt.Printf("json output:\n%v\n", string(b))
 	}
 
 	tstload := NodeEmbed{}
@@ -387,6 +358,17 @@ func TestNodeJSonSave(t *testing.T) {
 		t.Error(err)
 	} else {
 		tstb, _ := tstload.SaveJSON(true)
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd json rep are not equivalent")
+		}
+	}
+
+	nwnd, err := LoadNewJSON(b)
+	if err != nil {
+		t.Error(err)
+	} else {
+		tstb, _ := nwnd.SaveJSON(true)
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")

@@ -18,11 +18,12 @@ func (i NodeSignals) String() string {
 	return _NodeSignals_name[_NodeSignals_index[i]:_NodeSignals_index[i+1]]
 }
 
-func StringToNodeSignals(s string) (NodeSignals, error) {
-	for i := 0; i < len(_NodeSignals_index)-1; i++ {
-		if s == _NodeSignals_name[_NodeSignals_index[i]:_NodeSignals_index[i+1]] {
-			return NodeSignals(i), nil
+func (i *NodeSignals) FromString(s string) error {
+	for j := 0; j < len(_NodeSignals_index)-1; j++ {
+		if s == _NodeSignals_name[_NodeSignals_index[j]:_NodeSignals_index[j+1]] {
+			*i = NodeSignals(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type NodeSignals", s)
+	return fmt.Errorf("String %v is not a valid option for type NodeSignals", s)
 }

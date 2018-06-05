@@ -21,7 +21,7 @@ import "sync/atomic"
 func Mask(flags ...int) int64 {
 	var mask int64
 	for _, f := range flags {
-		mask |= int64(f) << uint32(f)
+		mask |= 1 << uint32(f)
 	}
 	return mask
 }
@@ -143,7 +143,7 @@ func ClearMask(bits *int64, mask int64) {
 func Mask32(flags ...int) int32 {
 	var mask int32
 	for _, f := range flags {
-		mask |= int32(f) << uint32(f)
+		mask |= 1 << uint32(f)
 	}
 	return mask
 }

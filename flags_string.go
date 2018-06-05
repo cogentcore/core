@@ -18,11 +18,12 @@ func (i Flags) String() string {
 	return _Flags_name[_Flags_index[i]:_Flags_index[i+1]]
 }
 
-func StringToFlags(s string) (Flags, error) {
-	for i := 0; i < len(_Flags_index)-1; i++ {
-		if s == _Flags_name[_Flags_index[i]:_Flags_index[i+1]] {
-			return Flags(i), nil
+func (i *Flags) FromString(s string) error {
+	for j := 0; j < len(_Flags_index)-1; j++ {
+		if s == _Flags_name[_Flags_index[j]:_Flags_index[j+1]] {
+			*i = Flags(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Flags", s)
+	return fmt.Errorf("String %v is not a valid option for type Flags", s)
 }
