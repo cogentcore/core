@@ -88,10 +88,7 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	}
 	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
-	vp.ViewBox.Size = nwsz  // make sure
-	if vp.Viewport == nil { // parent
-		vp.FullRender2DTree()
-	}
+	vp.ViewBox.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
@@ -190,6 +187,20 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
 	pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
+	pr.End()
+	if vp.Win != nil {
+		updt := vp.Win.UpdateStart()
+		vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		vp.Win.UpdateEnd(updt)
+	}
+}
+
+// ReRender2DAnchor re-renders an anchor node -- the KEY diff from
+// ReRender2DNOde is that it calls ReRender2DTree and not just Render2DTree!
+func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
+	gn := gni.AsNode2D()
+	pr := prof.Start("vp.ReRender2DNode")
+	gn.ReRender2DTree()
 	pr.End()
 	if vp.Win != nil {
 		updt := vp.Win.UpdateStart()
@@ -448,7 +459,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
 				}
 				gi.Style2DTree() // restyle only from affected node downward
-				vp.ReRender2DNode(anchor.AsNode2D())
+				vp.ReRender2DAnchor(anchor.AsNode2D())
 			} else {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())

@@ -536,7 +536,7 @@ func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 		if gii.AsViewport2D() == nil {
 			gii.Init2D()
 			gii.Style2D()
-			fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
+			// fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
 		}
 	}
 	psize := g.AddParentPos()
