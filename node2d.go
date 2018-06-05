@@ -286,6 +286,8 @@ func (g *Node2DBase) Init2DBase() {
 	if g.Viewport != nil { // default for most cases -- delete connection of not
 		// fmt.Printf("node %v connect to viewport %v\n", g.Nm, g.Viewport.Nm)
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
+		// } else {
+		// 	log.Printf("node %v nil viewport\n", g.PathUnique())
 	}
 	g.Style.Defaults()
 	g.Paint.Defaults()
@@ -529,15 +531,23 @@ func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poin
 
 // basic Layout2D functions -- good for most cases
 func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
+	gii, _ := g.This.(Node2D)
+	if g.Viewport == nil { // robust
+		if gii.AsViewport2D() == nil {
+			gii.Init2D()
+			gii.Style2D()
+			fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
+		}
+	}
 	psize := g.AddParentPos()
 	g.LayData.AllocPosOrig = g.LayData.AllocPos
 	if initStyle {
 		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}
 	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
-	g.BBox = g.This.(Node2D).BBox2D()         // only compute once, at this point
+	g.BBox = gii.BBox2D()                     // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	g.This.(Node2D).ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
+	gii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
 	// typically Layout2DChildren must be called after this!
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)

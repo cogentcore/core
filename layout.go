@@ -1001,7 +1001,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		}
 		li, _ := KiToNode2D(recv) // note: avoid using closures
 		ls := li.AsLayout2D()
-		if !ls.IsUpdatingMu() {
+		if !ls.IsUpdatingAtomic() {
 			ls.Move2DTree()
 			ls.Viewport.ReRender2DNode(li)
 		} else {

@@ -12,7 +12,6 @@ import (
 	"image/png"
 	"io"
 	"log"
-	"os"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
@@ -89,7 +88,10 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	}
 	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
-	vp.ViewBox.Size = nwsz // make sure
+	vp.ViewBox.Size = nwsz  // make sure
+	if vp.Viewport == nil { // parent
+		vp.FullRender2DTree()
+	}
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
@@ -400,7 +402,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	if gi.IsDeleted() || gi.IsDestroyed() { // skip these for sure
 		return
 	}
-	if gi.IsUpdatingMu() {
+	if gi.IsUpdatingAtomic() {
 		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", gi.PathUnique())
 		return
 	}
@@ -486,54 +488,6 @@ func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 	}
 }
 
-// Bitmap is a Viewport2D that is optimized to render a static bitmap image --
-// it expects to be a terminal node and does NOT call rendering etc on its
-// children.  It is particularly useful for overlays in drag-n-drop uses --
-// can grab the image of another vp and show that
-type Bitmap struct {
-	Viewport2D
-}
-
-var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
-
-var BitmapProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
-}
-
-// GrabRenderFrom grabs the rendered image from given node -- copies the
-// vpBBox from parent viewport of node (or from viewport directly if node is a
-// viewport) -- returns success
-func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
-	gi := gii.AsNode2D()
-	givp := gii.AsViewport2D()
-	if givp != nil && givp.Pixels != nil {
-		sz := givp.Pixels.Bounds().Size()
-		bm.Resize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, image.ZP, draw.Src)
-		return true
-	}
-	givp = gi.Viewport
-	if givp == nil || givp.Pixels == nil {
-		log.Printf("Bitmap GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", gi.PathUnique())
-		return false
-	}
-	if gi.VpBBox.Empty() {
-		return false // offscreen -- can happen -- no warning -- just check rval
-	}
-	sz := gi.VpBBox.Size()
-	bm.Resize(sz)
-	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, gi.VpBBox.Min, draw.Src)
-	// todo: option to make it semi-transparent
-	return true
-}
-
-func (bm *Bitmap) Render2D() {
-	if bm.PushBounds() {
-		bm.DrawIntoParent(bm.Viewport)
-		bm.PopBounds()
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 //  Image utilities
 
@@ -545,38 +499,4 @@ func (vp *Viewport2D) SavePNG(path string) error {
 // EncodePNG encodes the image as a PNG and writes it to the provided io.Writer.
 func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 	return png.Encode(w, vp.Pixels)
-}
-
-func LoadImage(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	im, _, err := image.Decode(file)
-	return im, err
-}
-
-func LoadPNG(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return png.Decode(file)
-}
-
-func SavePNG(path string, im image.Image) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return png.Encode(file, im)
-}
-
-func imageToRGBA(src image.Image) *image.RGBA {
-	dst := image.NewRGBA(src.Bounds())
-	draw.Draw(dst, dst.Rect, src, image.ZP, draw.Src)
-	return dst
 }

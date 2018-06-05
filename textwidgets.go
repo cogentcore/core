@@ -819,7 +819,7 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditText)
 
-	if sz == 0 {
+	if sz == 0 || tf.LayData.AllocSize.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
