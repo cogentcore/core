@@ -625,10 +625,15 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 	return c
 }
 
-func (tf *TextField) SetCursorFromPixel(pixOff float32) {
+func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
 	updt := tf.UpdateStart()
+	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
-	if tf.SelectMode {
+	if tf.SelectMode || selMode != mouse.NoSelectMode {
+		if !tf.SelectMode && selMode != mouse.NoSelectMode {
+			tf.SelectStart = oldPos
+			tf.SelectMode = true
+		}
 		if !tf.IsDragging() && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
 		} else if tf.CursorPos > tf.SelectStart {
@@ -653,7 +658,7 @@ func (tf *TextField) TextFieldEvents() {
 				tf.SelectModeToggle()
 			}
 			pt := tf.PointToRelPos(me.Pos())
-			tf.SetCursorFromPixel(float32(pt.X))
+			tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 		}
 	})
 	tf.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -675,7 +680,7 @@ func (tf *TextField) TextFieldEvents() {
 		}
 		if me.Action == mouse.Press {
 			pt := tff.PointToRelPos(me.Pos())
-			tff.SetCursorFromPixel(float32(pt.X))
+			tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 		} else if me.Action == mouse.DoubleClick {
 			if tff.HasSelection() {
 				if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditText) {

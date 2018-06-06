@@ -32,12 +32,11 @@ const (
 	KeyFunFocusNext
 	KeyFunFocusPrev
 	KeyFunSelectItem // enter
-	KeyFunAccept     // accept any changes and close dialog / move to next
-	KeyFunAbort
 	KeyFunCancelSelect
-	KeyFunExtendSelect
 	KeyFunSelectText
 	KeyFunSelectAll
+	KeyFunAccept // accept any changes and close dialog / move to next
+	KeyFunAbort
 	KeyFunEditItem
 	KeyFunCopy
 	KeyFunCut
@@ -75,8 +74,16 @@ type KeyMap map[string]KeyFunctions
 var DefaultKeyMap = KeyMap{
 	"UpArrow":             KeyFunMoveUp,
 	"Control+P":           KeyFunMoveUp,
+	"Shift+UpArrow":       KeyFunMoveUp,
+	"Shift+Control+P":     KeyFunMoveUp,
+	"Meta+UpArrow":        KeyFunMoveUp,
+	"Meta+Control+P":      KeyFunMoveUp,
 	"DownArrow":           KeyFunMoveDown,
 	"Control+N":           KeyFunMoveDown,
+	"Shift+DownArrow":     KeyFunMoveDown,
+	"Shift+Control+N":     KeyFunMoveDown,
+	"Meta+DownArrow":      KeyFunMoveDown,
+	"Meta+Control+N":      KeyFunMoveDown,
 	"RightArrow":          KeyFunMoveRight,
 	"Control+F":           KeyFunMoveRight,
 	"LeftArrow":           KeyFunMoveLeft,
@@ -100,11 +107,10 @@ var DefaultKeyMap = KeyMap{
 	"KeypadEnter":         KeyFunSelectItem,
 	"Shift+Control+A":     KeyFunSelectAll,
 	"Meta+A":              KeyFunSelectAll,
+	"Control+G":           KeyFunCancelSelect,
+	"Control+Spacebar":    KeyFunSelectText,
 	"Control+ReturnEnter": KeyFunAccept,
 	"Escape":              KeyFunAbort,
-	"Control+G":           KeyFunCancelSelect,
-	"Alt+DownArrow":       KeyFunExtendSelect,
-	"Control+Spacebar":    KeyFunSelectText,
 	"DeleteBackspace":     KeyFunBackspace,
 	"DeleteForward":       KeyFunDelete,
 	"Control+D":           KeyFunDelete,

@@ -38,6 +38,12 @@ const (
 	// TreeView unselected
 	TreeViewUnselected
 
+	// TreeView all items were selected
+	TreeViewAllSelected
+
+	// TreeView all items were unselected
+	TreeViewAllUnselected
+
 	// closed TreeView was opened
 	TreeViewOpened
 
@@ -314,8 +320,6 @@ func (tv *TreeView) Select() {
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
 		tv.SetSelectedViews(sl)
-		tv.GrabFocus()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
 		tv.UpdateSig()
 	}
 }
@@ -334,7 +338,6 @@ func (tv *TreeView) Unselect() {
 			}
 		}
 		tv.SetSelectedViews(sl)
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewUnselected), tv.This)
 		tv.UpdateSig()
 	}
 }
@@ -355,6 +358,26 @@ func (tv *TreeView) UnselectAll() {
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewAllUnselected), tv.This)
+}
+
+// SelectAll all items in view
+func (tv *TreeView) SelectAll() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	tv.UnselectAll()
+	nn := tv.RootView
+	nn.Select()
+	for nn != nil {
+		nn = nn.MoveDown(mouse.SelectModesN) // just select
+	}
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewAllSelected), tv.This)
 }
 
 // SelectAction is called when a select action has been received (e.g., a
@@ -373,26 +396,70 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 		sl := tv.SelectedViews()
 		if len(sl) == 0 {
 			tv.Select()
+			tv.GrabFocus()
+			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
 		} else {
-			for {
+			minIdx := -1
+			maxIdx := 0
+			for _, v := range sl {
+				if minIdx < 0 {
+					minIdx = v.ViewIdx
+				} else {
+					minIdx = kit.MinInt(minIdx, v.ViewIdx)
+				}
+				maxIdx = kit.MaxInt(maxIdx, v.ViewIdx)
+			}
+			cidx := tv.ViewIdx
+			nn := tv
+			tv.Select()
+			if tv.ViewIdx < minIdx {
+				for cidx < minIdx {
+					nn = nn.MoveDown(mouse.SelectModesN) // just select
+					cidx = nn.ViewIdx
+				}
+			} else if tv.ViewIdx > maxIdx {
+				for cidx > maxIdx {
+					nn = nn.MoveUp(mouse.SelectModesN) // just select
+					cidx = nn.ViewIdx
+				}
 			}
 		}
 	case mouse.ExtendOne:
 		if tv.IsSelected() {
-			tv.Unselect()
+			tv.UnselectAction()
 		} else {
 			tv.Select()
+			tv.GrabFocus()
+			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
 		}
 	case mouse.NoSelectMode:
 		if tv.IsSelected() {
-			// nothing..
+			sl := tv.SelectedViews()
+			if len(sl) > 1 {
+				tv.UnselectAll()
+				tv.Select()
+				tv.GrabFocus()
+				tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+			}
 		} else {
 			tv.UnselectAll()
 			tv.Select()
+			tv.GrabFocus()
+			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
 		}
+	default: // anything else
+		tv.Select()
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
+	}
+}
+
+// UnselectAction unselects this node (if selected) -- and emits a signal
+func (tv *TreeView) UnselectAction() {
+	if tv.IsSelected() {
+		tv.Unselect()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewUnselected), tv.This)
 	}
 }
 
@@ -400,79 +467,109 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 //    Moving
 
 // MoveDown moves the selection down to next element in the tree, using given
-// select mode (from keyboard modifiers)
-func (tv *TreeView) MoveDown(selMode mouse.SelectModes) {
+// select mode (from keyboard modifiers) -- returns newly selected node
+func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil {
-		return
+		return nil
 	}
 	if tv.IsClosed() || !tv.HasChildren() { // next sibling
-		tv.MoveDownSibling(selMode)
+		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
 			nn := tv.Child(0).EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectAction(selMode)
+				return nn
 			}
 		}
 	}
+	return nil
+}
+
+// MoveDownAction moves the selection down to next element in the tree, using given
+// select mode (from keyboard modifiers) -- and emits select event for newly selected item
+func (tv *TreeView) MoveDownAction(selMode mouse.SelectModes) *TreeView {
+	nn := tv.MoveDown(selMode)
+	if nn != nil && nn != tv {
+		nn.GrabFocus()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
+	}
+	return nn
 }
 
 // MoveDownSibling moves down only to siblings, not down into children, using
 // given select mode (from keyboard modifiers)
-func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) {
+func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil {
-		return
+		return nil
 	}
 	if tv == tv.RootView {
-		return
+		return nil
 	}
 	myidx := tv.Index()
 	if myidx < len(tv.Par.Children())-1 {
 		nn := tv.Par.Child(myidx + 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			nn.SelectAction(selMode)
+			return nn
 		}
 	} else {
-		tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView).MoveDownSibling(selMode) // try up
+		return tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView).MoveDownSibling(selMode) // try up
 	}
+	return nil
 }
 
 // MoveUp moves selection up to previous element in the tree, using given
-// select mode (from keyboard modifiers)
-func (tv *TreeView) MoveUp(selMode mouse.SelectModes) {
+// select mode (from keyboard modifiers) -- returns newly selected node
+func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
-		return
+		return nil
 	}
 	myidx := tv.Index()
 	if myidx > 0 {
 		nn := tv.Par.Child(myidx - 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.MoveToLastChild(selMode)
+			return nn.MoveToLastChild(selMode)
 		}
 	} else {
 		if tv.Par != nil {
 			nn := tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectAction(selMode)
+				return nn
 			}
 		}
 	}
+	return nil
+}
+
+// MoveUpAction moves the selection down to next element in the tree, using given
+// select mode (from keyboard modifiers) -- and emits select event for newly selected item
+func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
+	nn := tv.MoveUp(selMode)
+	if nn != nil && nn != tv {
+		nn.GrabFocus()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
+	}
+	return nn
 }
 
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
-func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) {
+func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
-		return
+		return nil
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
 		nn := tv.Child(-1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.MoveToLastChild(selMode)
+			return nn.MoveToLastChild(selMode)
 		}
 	} else {
 		tv.SelectAction(selMode)
+		return tv
 	}
+	return nil
 }
 
 // Close closes the given node and updates the view accordingly (if it is not already closed)
@@ -726,10 +823,13 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.Close()
 			kt.SetProcessed()
 		case KeyFunMoveDown:
-			tvv.MoveDown(selMode)
+			tvv.MoveDownAction(selMode)
 			kt.SetProcessed()
 		case KeyFunMoveUp:
-			tvv.MoveUp(selMode)
+			tvv.MoveUpAction(selMode)
+			kt.SetProcessed()
+		case KeyFunSelectAll:
+			tvv.SelectAll()
 			kt.SetProcessed()
 		case KeyFunDelete:
 			tvv.SrcDelete()
