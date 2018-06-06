@@ -280,10 +280,12 @@ func (tv *TreeView) IsSelected() bool {
 // the entire tree, using a list maintained by the root node
 func (tv *TreeView) SelectedViews() []*TreeView {
 	var sl []*TreeView
-	sl = tv.RootView.Prop(TreeViewSelProp, false, false).([]*TreeView)
-	if sl == nil {
+	slp := tv.RootView.Prop(TreeViewSelProp, false, false)
+	if slp == nil {
 		sl = make([]*TreeView, 0)
 		tv.SetSelectedViews(sl)
+	} else {
+		sl = slp.([]*TreeView)
 	}
 	return sl
 }
@@ -337,6 +339,24 @@ func (tv *TreeView) Unselect() {
 	}
 }
 
+// UnselectAll unselects all selected items in the view
+func (tv *TreeView) UnselectAll() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	sl := tv.SelectedViews()
+	sz := len(sl)
+	for i := sz - 1; i >= 0; i-- {
+		v := sl[i]
+		v.Unselect()
+	}
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+}
+
 // SelectAction is called when a select action has been received (e.g., a
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne) -- only multiple sibling
@@ -348,7 +368,6 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	rn := tv.RootView
 	switch mode {
 	case mouse.ExtendContinuous:
 		sl := tv.SelectedViews()
@@ -368,7 +387,7 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 		if tv.IsSelected() {
 			// nothing..
 		} else {
-			rn.UnselectAll()
+			tv.UnselectAll()
 			tv.Select()
 		}
 	}
@@ -377,35 +396,8 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 	}
 }
 
-// UnselectAll unselects everything below me -- call on Root to clear all
-func (tv *TreeView) UnselectAll() {
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	tv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if k.TypeEmbeds(KiT_TreeView) {
-			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			nw.Unselect()
-			return true
-		} else {
-			return false
-		}
-	})
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// RootUnselectAll unselects everything in the view
-func (tv *TreeView) RootUnselectAll() {
-	tv.RootView.UnselectAll()
-}
+//////////////////////////////////////////////////////////////////////////////
+//    Moving
 
 // MoveDown moves the selection down to next element in the tree, using given
 // select mode (from keyboard modifiers)
@@ -725,7 +717,7 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.SelectAction(selMode)
 			kt.SetProcessed()
 		case KeyFunCancelSelect:
-			tvv.RootUnselectAll()
+			tvv.UnselectAll()
 			kt.SetProcessed()
 		case KeyFunMoveRight:
 			tvv.Open()
@@ -784,18 +776,12 @@ func (tv *TreeView) TreeViewEvents() {
 		lb, _ := recv.(*Label)
 		me := d.(*mouse.Event)
 		me.SetProcessed()
-		if me.Action == mouse.Release {
-			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SelectAction(me.SelectMode())
-		}
-	})
-	lbl.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		lb, _ := recv.(*Label)
-		me := d.(*mouse.Event)
-		me.SetProcessed()
 		if me.Action == mouse.DoubleClick {
 			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tv.ToggleClose()
+		} else if me.Action == mouse.Release {
+			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SelectAction(me.SelectMode())
 		}
 	})
 }

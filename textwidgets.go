@@ -92,6 +92,8 @@ func (g *Label) Render2D() {
 		g.Render2DText(g.Text)
 		g.Render2DChildren()
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 
