@@ -107,6 +107,11 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 	if bitFlag {
 		tp := tr.Properties(tn)
 		tp["BitFlag"] = true
+		if n >= 64 {
+			log.Printf("kit.AddEnum ERROR: enum: %v is a bitflag with more than 64 bits defined -- will likely not work: n: %v\n", tn, n)
+			// } else { // if debug:
+			// 	fmt.Printf("kit.AddEnum added bitflag enum: %v with n: %v\n", tn, n)
+		}
 	}
 	// fmt.Printf("added enum: %v with n: %v\n", tn, n)
 	return typ
@@ -126,7 +131,6 @@ func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[
 	for i := int64(0); i < n; i++ {
 		str := EnumInt64ToString(i, typ)
 		str = strings.ToLower(strings.TrimPrefix(str, prefix))
-		// fmt.Printf("adding enum: %v\n", str)
 		alts[i] = str
 	}
 	tp["AltStrings"] = alts
@@ -142,9 +146,6 @@ func (tr *EnumRegistry) Enum(name string) reflect.Type {
 func (tr *EnumRegistry) TypeRegistered(typ reflect.Type) bool {
 	enumName := FullTypeName(typ)
 	_, ok := tr.Enums[enumName]
-	// if ok {
-	// 	fmt.Printf("enum type: %v registered\n", enumName)
-	// }
 	return ok
 }
 

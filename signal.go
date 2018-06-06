@@ -5,25 +5,12 @@
 package ki
 
 import (
-	"errors"
 	"fmt"
-	"log"
-	"reflect"
 
 	"github.com/goki/ki/kit"
 )
 
-// Implements general signal passing between Ki objects, like Qt's Signal /
-// Slot system started from: github.com/tucnak/meta/
-//
-// todo: Once I learn more about channels and concurrency, could add a channel
-// as an alternative method of sending signals too, perhaps
-//
-// A receivier has to connect to a given signal on a sender to receive those
-// signals, when the signal is emitted.  To make more efficient use of signal
-// connections, we also support a signal type int64 that the receiver can
-// decode depending on the type of signal that it is receiving -- completely
-// up to the semantics of that particular signal.
+// note: Started this code based on: github.com/tucnak/meta/
 
 // NodeSignals are signals that a Ki node sends about updates to the tree
 // structure using the NodeSignal (convert sig int64 to NodeSignals to get the
@@ -58,11 +45,13 @@ const (
 
 //go:generate stringer -type=NodeSignals
 
-// set this to true to automatically print out a trace of the signals as they are sent
+// SignalTrace can be set to true to automatically print out a trace of the
+// signals as they are sent
 var SignalTrace bool = false
 
-// set this to a string to receive trace in a string that can be compared for testing
-// otherwise just goes to stdout
+// SignalTraceString can be set to a string that will then accumulate the
+// trace of signals sent, for use in testing -- otherwise the trace just goes
+// to stdout
 var SignalTraceString *string
 
 // RecvFunc is a receiver function type for signals -- gets the full
@@ -72,113 +61,73 @@ var SignalTraceString *string
 // types and referring to them directly
 type RecvFunc func(recv, send Ki, sig int64, data interface{})
 
-// Signal structure -- add one of these to your struct for each signal a node
-// can emit
+// Signal implements general signal passing between Ki objects, like Qt's
+// Signal / Slot system.
+//
+// This design pattern separates three different factors:
+// * when to signal that something has happened
+// * who should receive that signal
+// * what should the receiver do in response to the signal
+//
+// Keeping these three things entirely separate greatly simplifies the overall
+// logic.
+//
+// A receiver connects in advance to a given signal on a sender to receive its
+// signals -- these connections are typically established in an initialization
+// step.  There can be multiple different signals on a given sender, and to
+// make more efficient use of signal connections, the sender can also send an
+// int64 signal value that further discriminates the nature of the event, as
+// documented in the code associated with the sender (typically an enum is
+// used).  Furthermore, arbitrary data as an interface{} can be passed as
+// well.
+//
+// The Signal uses a map indexed by the receiver pointer to hold the
+// connections -- this means that there can only be one such connection per
+// receiver, and the order of signal emission to different receiveres will be random.
+//
+// Typically an inline anonymous closure receiver function is used to keep all
+// the relevant code in one place.  Due to the typically long-standing nature
+// of these connections, it is more efficient to avoid capturing external
+// variables, and rely instead on appropriately interpreting the sent argument
+// values.  e.g.:
+//
+// send := sender.EmbeddedStruct(KiT_SendType).(*SendType)
+//
+// is guaranteed to result in a usable pointer to the sender of known type at
+// least SendType, in a case where that sender might actually embed that
+// SendType (otherwise if it is known to be of a given type, just directly
+// converting as such is fine)
 type Signal struct {
-	Cons []Connection
+	Cons map[Ki]RecvFunc
 }
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
 
-// Connection represents one connection between a signal and a receiving Ki
-// and function to call
-type Connection struct {
-	// node that will receive the signal
-	Recv Ki
-	// function on the receiver node that will receive the signal
-	Func RecvFunc
-	// todo: path to Recv node (PathUnique), used for copying / moving nodes -- not copying yet
-	// RecvPath string
-}
-
-// SendSig sends the signal over this connection
-func (con *Connection) SendSig(sender Ki, sig int64, data interface{}) {
-	con.Func(con.Recv, sender, sig, data)
-}
-
 // ConnectOnly first deletes any existing connections and then attaches a new
-// receiver to the signal -- checks to make sure connection does not already
-// exist -- error if not ok
-func (sig *Signal) ConnectOnly(recv Ki, fun RecvFunc) error {
-	sig.DisconnectAll()
-	return sig.Connect(recv, fun)
+// receiver to the signal
+func (s *Signal) ConnectOnly(recv Ki, fun RecvFunc) {
+	s.DisconnectAll()
+	s.Connect(recv, fun)
 }
 
-// Connect attaches a new receiver to the signal -- checks to make sure
-// connection does not already exist -- error if not ok
-func (sig *Signal) Connect(recv Ki, fun RecvFunc) error {
-	if recv == nil {
-		err := errors.New("ki Signal Connect: no recv node provided\n")
-		log.Println(err)
-		return err
+// Connect attaches a new receiver and function to the signal -- only one such
+// connection per receiver can be made, so any existing connection to that
+// receiver will be overwritten
+func (s *Signal) Connect(recv Ki, fun RecvFunc) {
+	if s.Cons == nil {
+		s.Cons = make(map[Ki]RecvFunc)
 	}
-	if fun == nil {
-		err := errors.New("ki Signal Connect: no recv func provided\n")
-		log.Println(err)
-		return err
-	}
-
-	if sig.FindConnectionIndex(recv, fun) >= 0 {
-		// fmt.Printf("Already found connection to recv %v fun %v\n", recv.Name(), reflect.ValueOf(fun))
-		return nil
-	}
-
-	con := Connection{recv, fun}
-	sig.Cons = append(sig.Cons, con)
-
-	// fmt.Printf("added connection to recv %v fun %v", recv.Name(), reflect.ValueOf(fun))
-
-	return nil
+	s.Cons[recv] = fun
 }
 
-// Find any existing signal connection for given recv and fun
-func (sig *Signal) FindConnectionIndex(recv Ki, fun RecvFunc) int {
-	rfref := reflect.ValueOf(fun).Pointer()
-	for i, con := range sig.Cons {
-		if con.Recv == recv && rfref == reflect.ValueOf(con.Func).Pointer() {
-			return i
-		}
-	}
-	return -1
+// Disconnect disconnects (deletes) the connection for a given receiver
+func (s *Signal) Disconnect(recv Ki) {
+	delete(s.Cons, recv)
 }
 
-// Find any existing signal connection for given recv
-func (sig *Signal) FindReceiverIndex(recv Ki) int {
-	for i, con := range sig.Cons {
-		if con.Recv == recv {
-			return i
-		}
-	}
-	return -1
-}
-
-// Disconnect all connections for receiver and/or function if they exist in
-// our list -- can pass nil for either (or both) to match only on one or the
-// other -- both nil means disconnect from all, but more efficient to use
-// DisconnectAll
-func (sig *Signal) Disconnect(recv Ki, fun RecvFunc) bool {
-	rfref := reflect.ValueOf(fun).Pointer()
-	sz := len(sig.Cons)
-	got := false
-	for i := sz - 1; i >= 0; i-- {
-		con := sig.Cons[i]
-		if recv != nil && con.Recv != recv {
-			continue
-		}
-		if fun != nil && rfref != reflect.ValueOf(con.Func).Pointer() {
-			continue
-		}
-		// this copy makes sure there are no memory leaks
-		copy(sig.Cons[i:], sig.Cons[i+1:])
-		sig.Cons = sig.Cons[:len(sig.Cons)-1]
-		got = true
-	}
-	return got
-}
-
-// Disconnect all connections
-func (sig *Signal) DisconnectAll() {
-	sig.Cons = sig.Cons[:0]
+// DisconnectAll removes all connections
+func (s *Signal) DisconnectAll() {
+	s.Cons = make(map[Ki]RecvFunc)
 }
 
 // EmitTrace records a trace of signal being emitted
@@ -190,7 +139,8 @@ func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 	}
 }
 
-// Emit sends the signal across all the connections to the receivers -- sequential
+// Emit sends the signal across all the connections to the receivers --
+// sequentially but in random order due to the randomization of map iteration
 func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
@@ -198,21 +148,18 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	deleted := 0 // using this construct from https://stackoverflow.com/questions/20545743/delete-entries-from-a-slice-while-iterating-over-it-in-go
-	for i := range s.Cons {
-		j := i - deleted
-		con := s.Cons[j]
-		if con.Recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", con.Recv.Name(), con.Recv)
-			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
-			deleted++
+	for recv, fun := range s.Cons {
+		if recv.IsDestroyed() {
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
+			delete(s.Cons, recv)
 			continue
 		}
-		con.Func(con.Recv, sender, sig, data)
+		fun(recv, sender, sig, data)
 	}
 }
 
-// EmitGo concurrent version -- sends the signal across all the connections to the receivers
+// EmitGo is the concurrent version of Emit -- sends the signal across all the
+// connections to the receivers as separate goroutines
 func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
@@ -220,54 +167,56 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	deleted := 0
-	for i := range s.Cons {
-		j := i - deleted
-		con := s.Cons[j]
-		if con.Recv.IsDestroyed() {
-			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
-			deleted++
+	for recv, fun := range s.Cons {
+		if recv.IsDestroyed() {
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
+			delete(s.Cons, recv)
 			continue
 		}
-		go con.Func(con.Recv, sender, sig, data)
+		go fun(recv, sender, sig, data)
 	}
 }
 
 // SignalFilterFunc is the function type for filtering signals before they are
 // sent -- returns false to prevent sending, and true to allow sending
-type SignalFilterFunc func(ki Ki, idx int, con *Connection) bool
+type SignalFilterFunc func(recv Ki) bool
 
-// EmitFiltered calls function on each item only sends signal if function returns true
-func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
-	deleted := 0
-	for i := range s.Cons {
-		j := i - deleted
-		con := s.Cons[j]
-		if con.Recv.IsDestroyed() {
-			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
-			deleted++
+// EmitFiltered calls function on each potential receiver, and only sends
+// signal if function returns true
+func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
+	for recv, fun := range s.Cons {
+		if recv.IsDestroyed() {
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
+			delete(s.Cons, recv)
 			continue
 		}
-		if fun(con.Recv, j, &con) {
-			con.Func(con.Recv, sender, sig, data)
+		if filtFun(recv) {
+			fun(recv, sender, sig, data)
 		}
 	}
 }
 
-// EmitGoFiltered calls function on each item only sends signal if function
-// returns true -- concurrent version
-func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, fun SignalFilterFunc) {
-	deleted := 0
-	for i := range s.Cons {
-		j := i - deleted
-		con := s.Cons[j]
-		if con.Recv.IsDestroyed() {
-			s.Cons = s.Cons[:j+copy(s.Cons[j:], s.Cons[j+1:])]
-			deleted++
+// EmitGoFiltered is the concurrent version of EmitFiltered -- calls function
+// on each potential receiver, and only sends signal if function returns true
+// (filtering is sequential iteration over receivers)
+func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
+	for recv, fun := range s.Cons {
+		if recv.IsDestroyed() {
+			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
+			delete(s.Cons, recv)
 			continue
 		}
-		if fun(con.Recv, j, &con) {
-			go con.Func(con.Recv, sender, sig, data)
+		if filtFun(recv) {
+			go fun(recv, sender, sig, data)
 		}
+	}
+}
+
+// SendSig sends a signal to one given receiver -- receiver must already be
+// connected so that its receiving function is available
+func (s *Signal) SendSig(recv, sender Ki, sig int64, data interface{}) {
+	fun := s.Cons[recv]
+	if fun != nil {
+		fun(recv, sender, sig, data)
 	}
 }
