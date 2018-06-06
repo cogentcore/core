@@ -37,21 +37,21 @@ type Event struct {
 	Sequence Sequence
 
 	// Action is the touch action
-	Action Action
+	Action Actions
 }
 
 // Sequence identifies a sequence of touch events.
 type Sequence int64
 
-// Action describes the action taken for a touch event.
-type Action int32
+// Actions describes the action taken for a touch event.
+type Actions int32
 
 const (
 	// Begin is a user first touching the device.
 	//
 	// On Android, this is a AMOTION_EVENT_ACTION_DOWN.
 	// On iOS, this is a call to touchesBegan.
-	Begin Action = iota
+	Begin Actions = iota
 
 	// Move is a user dragging across the device.
 	//
@@ -67,12 +67,12 @@ const (
 	// On iOS, this is a call to touchesEnded.
 	End
 
-	ActionN
+	ActionsN
 )
 
-//go:generate stringer -type=Action
+//go:generate stringer -type=Actions
 
-var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 
 /////////////////////////////
 // oswin.Event interface

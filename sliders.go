@@ -317,9 +317,8 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(g.origWinBBox.Min)
 }
 
-func (g *SliderBase) Init2DSlider() {
-	g.Init2DWidget()
-	g.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (g *SliderBase) SliderEvents() {
+	g.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -333,7 +332,7 @@ func (g *SliderBase) Init2DSlider() {
 			}
 		}
 	})
-	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -350,7 +349,7 @@ func (g *SliderBase) Init2DSlider() {
 			sl.SliderReleased()
 		}
 	})
-	g.ReceiveEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -360,7 +359,7 @@ func (g *SliderBase) Init2DSlider() {
 			sl.SliderExitHover()
 		}
 	})
-	g.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		cur := float32(sl.Pos)
@@ -371,10 +370,14 @@ func (g *SliderBase) Init2DSlider() {
 		}
 		me.SetProcessed()
 	})
-	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		sl.KeyInput(d.(*key.ChordEvent))
 	})
+}
+
+func (g *SliderBase) Init2DSlider() {
+	g.Init2DWidget()
 }
 
 func (g *SliderBase) ConfigParts() {
@@ -531,6 +534,7 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 
 func (g *Slider) Render2D() {
 	if g.PushBounds() {
+		g.SliderEvents()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
@@ -539,6 +543,8 @@ func (g *Slider) Render2D() {
 		}
 		g.Render2DChildren()
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 
@@ -695,6 +701,7 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 
 func (g *ScrollBar) Render2D() {
 	if g.PushBounds() {
+		g.SliderEvents()
 		if !g.HasChildren() {
 			g.Render2DDefaultStyle()
 		} else {
@@ -703,6 +710,8 @@ func (g *ScrollBar) Render2D() {
 		}
 		g.Render2DChildren()
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 

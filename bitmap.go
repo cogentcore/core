@@ -100,9 +100,15 @@ func SavePNG(path string, im image.Image) error {
 //////////////////////////////////////////////////////////////////////////////////
 //  Image Manipulations
 
+// see https://github.com/anthonynsimon/bild for a great image manip library
+// with parallel speedup
+
+// only put gi-specific, specialized utilities here
+
 // ImageClearer makes an image more transparent -- pct is amount to alter
 // alpha transparency factor by -- 100 = fully transparent, 0 = no change --
 // affects the image itself -- make a copy of you want to keept the original
+// or see bild/blend/multiply -- this is specifically used for gi DND etc
 func ImageClearer(im *image.RGBA, pct float32) {
 	pct = InRange32(pct, 0, 100.0)
 	fact := pct / 100.0

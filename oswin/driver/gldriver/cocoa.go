@@ -219,7 +219,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
 
-	act := window.ActionN
+	act := window.ActionsN
 
 	sz := image.Point{widthPx, heightPx}
 	ps := image.Point{leftPx, topPx}
@@ -331,7 +331,7 @@ func cocoaMods(flags uint32) (m int32) {
 	return m
 }
 
-func cocoaMouseAct(ty int32) mouse.Action {
+func cocoaMouseAct(ty int32) mouse.Actions {
 	switch ty {
 	case C.NSLeftMouseDown, C.NSRightMouseDown, C.NSOtherMouseDown:
 		return mouse.Press
@@ -342,7 +342,7 @@ func cocoaMouseAct(ty int32) mouse.Action {
 	}
 }
 
-func cocoaMouseButton(button int32) mouse.Button {
+func cocoaMouseButton(button int32) mouse.Buttons {
 	switch button {
 	case 0:
 		return mouse.Left
@@ -448,7 +448,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 //export keyEvent
 func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
 	er := cocoaRune(runeVal)
-	ea := key.Action(act)
+	ea := key.Actions(act)
 	ec := cocoaKeyCode(code)
 	em := cocoaMods(flags)
 
@@ -552,7 +552,7 @@ func cocoaRune(r rune) rune {
 //
 // To get a sense of the key map, see the diagram on
 //	http://boredzo.org/blog/archives/2007-05-22/virtual-key-codes
-func cocoaKeyCode(vkcode uint16) key.Code {
+func cocoaKeyCode(vkcode uint16) key.Codes {
 	switch vkcode {
 	case C.kVK_ANSI_A:
 		return key.CodeA

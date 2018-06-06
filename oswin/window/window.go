@@ -41,10 +41,10 @@ type Event struct {
 
 	// Visibility is the visibility status of the window: Closed, NotVisible,
 	// Visible, Iconified
-	Visibility Visibility
+	Visibility Visibilities
 
 	// Action taken on the window -- what has changed
-	Action Action
+	Action Actions
 }
 
 // Bounds returns the window's bounds in raw display dots (pixels), at the
@@ -61,12 +61,12 @@ func (e Event) Screen() *oswin.Screen {
 	return oswin.TheApp.Screen(e.ScreenNumber)
 }
 
-// Visibility is the visibility status of the window
-type Visibility int32
+// Visibilities is the visibility status of the window
+type Visibilities int32
 
 const (
 	// Closed means the window is closed -- has not been opened yet or is now closed
-	Closed Visibility = iota
+	Closed Visibilities = iota
 
 	// NotVisible means the window is not visible for various reasons (occluded by other windows, off the screen), but not specifically Iconfied
 	NotVisible
@@ -77,18 +77,18 @@ const (
 	// Iconified means the window has been iconified
 	Iconified
 
-	VisibilityN
+	VisibilitiesN
 )
 
-//go:generate stringer -type=Visibility
+//go:generate stringer -type=Visibilities
 
-var KiT_Visibility = kit.Enums.AddEnum(VisibilityN, false, nil)
+var KiT_Visibilities = kit.Enums.AddEnum(VisibilitiesN, false, nil)
 
-// Action is the action taken on the window by the user
-type Action int32
+// Actions is the action taken on the window by the user
+type Actions int32
 
 const (
-	Open Action = iota
+	Open Actions = iota
 	Close
 	Iconify
 
@@ -106,12 +106,12 @@ const (
 	// Leave indicates that the user focus / mouse has left the window
 	Leave
 
-	ActionN
+	ActionsN
 )
 
-//go:generate stringer -type=Action
+//go:generate stringer -type=Actions
 
-var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 
 /////////////////////////////
 // oswin.Event interface

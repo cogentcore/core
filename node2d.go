@@ -24,7 +24,10 @@ import (
 Base struct node for 2D rendering tree -- renders to a bitmap using Paint
 rendering functions operating on the RenderState in the parent Viewport
 
-Rendering is done in 4 separate passes:
+Rendering is done in 5 separate passes:
+
+	0. Init2D: In a MeFirst downward pass, Viewport pointer is set, styles are
+	initialized, and any other widget-specific init is done.
 
 	1. Style2D: In a MeFirst downward pass, all properties are cached out in
 	an inherited manner, and incorporating any css styles, into either the
@@ -33,7 +36,7 @@ Rendering is done in 4 separate passes:
 
 	2. Size2D: DepthFirst downward pass, each node first calls
 	g.Layout.Reset(), then sets their LayoutSize according to their own
-	intrinsic size parameters, and/or those of its children if it is a Layout
+	intrinsic size parameters, and/or those of its children if it is a Layout.
 
 	3. Layout2D: MeFirst downward pass (each node calls on its children at
 	appropriate point) with relevant parent BBox that the children are
@@ -41,13 +44,14 @@ Rendering is done in 4 separate passes:
 	own BBox (from BBox2D) -- typically just call Layout2DBase for default
 	behavior -- and add parent position to AllocPos -- Layout does all its
 	sizing and positioning of children in this pass, based on the Size2D data
-	gathered bottom-up and constraints applied top-down from higher levels
+	gathered bottom-up and constraints applied top-down from higher levels.
 
 	4. Render2D: Final rendering pass, each node is fully responsible for
 	rendering its own children, to provide maximum flexibility (see
 	Render2DChildren) -- bracket the render calls in PushBounds / PopBounds
 	and a false from PushBounds indicates that VpBBox is empty and no
-	rendering should occur
+	rendering should occur.  Nodes typically connect / disconnect to receive
+	events from the window based on this visibility here.
 
     * Move2D: optional pass invoked by scrollbars to move elements relative to
       their previously-assigned positions.
@@ -68,16 +72,19 @@ var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
-// set this variable to true to obtain a trace of updates that trigger re-rendering
+// Update2DTrace can be set to true to obtain a trace of updates that trigger re-rendering
 var Update2DTrace bool = false
 
-// set this variable to true to obtain a trace of the nodes rendering (just printfs to stdout)
+// Render2DTrace can be set to true to obtain a trace of the nodes rendering
+// (just printfs to stdout)
 var Render2DTrace bool = false
 
-// set this variable to true to obtain a trace of all layouts (just printfs to stdout)
+// Layout2DTrace can be set to true to obtain a trace of all layouts (just
+// printfs to stdout)
 var Layout2DTrace bool = false
 
-// primary interface for all Node2D nodes
+// Node2D is the interface for all 2D nodes -- defines the stages of building
+// and rendering the 2D scenegraph
 type Node2D interface {
 	// nodes are Ki elements -- this comes for free by embedding ki.Node in all Node2D elements
 	ki.Ki
@@ -155,7 +162,9 @@ type Node2D interface {
 	// calling Render2D on its own children, to provide maximum flexibility
 	// (see Render2DChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// VpBBox is empty and no rendering should occur
+	// VpBBox is empty and no rendering should occur.  Typically call a method
+	// that sets up connections to receive window events if visible, and
+	// disconnect if not.
 	Render2D()
 
 	// ReRender2D: returns the node that should be re-rendered when an Update
@@ -239,8 +248,11 @@ func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (g *Node2DBase) Render2D() {
 	if g.PushBounds() {
+		// connect to events here
 		g.Render2DChildren()
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 
@@ -255,6 +267,14 @@ func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
 
 func (g *Node2DBase) HasFocus2D() bool {
 	return g.HasFocus()
+}
+
+// GrabFocus sets node as focus node
+func (g *Node2DBase) GrabFocus() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.SetFocusItem(g.This)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -272,23 +292,65 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 	return nil, nil
 }
 
-// redefining this here gives access to the much faster ParentWindow method!
-func (g *Node2DBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
+// ConnectEventType connects this node to receive a given type of GUI event
+// signal from the parent window -- typically connect only visible nodes, and
+// disconnect when not visible
+func (g *Node2DBase) ConnectEventType(et oswin.EventType, fun ki.RecvFunc) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.ReceiveEventType(g.This, et, fun)
+		win.ConnectEventType(g.This, et, fun)
 	}
 }
 
-// handles basic node initialization -- Init2D can then do special things
+// DisconnectEventType disconnects this receiver from receiving given event
+// type -- see also DisconnectAllEvents
+func (g *Node2DBase) DisconnectEventType(et oswin.EventType) {
+	win := g.ParentWindow()
+	if win != nil {
+		win.DisconnectEventType(g.This, et)
+	}
+}
+
+// DisconnectAllEvents disconnects node from all window events -- typically
+// disconnect when not visible
+func (g *Node2DBase) DisconnectAllEvents() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.DisconnectAllEvents(g.This)
+	}
+	if g.Viewport != nil {
+		g.NodeSig.Disconnect(g.Viewport.This)
+	}
+}
+
+// DisconnectAllEventsTree disconnect node and all of its children (and so on)
+// from all events -- call for to-be-destroyed nodes (will happen in Ki
+// destroy anyway, but more efficient here)
+func (g *Node2DBase) DisconnectAllEventsTree(win *Window) {
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			return false // going into a different type of thing, bail
+		}
+		win.DisconnectAllEvents(gi.This)
+		gi.NodeSig.DisconnectAll()
+		return true
+	})
+}
+
+// ConnectToViewport connects the view node's update signal to the viewport as
+// a receiver, so that when the view is updated, it triggers the viewport to
+// re-render it -- this is automatically called in PushBounds, and
+// disconnected with DisconnectAllEvents, so it only occurs for rendered nodes
+func (g *Node2DBase) ConnectToViewport() {
+	if g.Viewport != nil {
+		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
+	}
+}
+
+// Init2DBase handles basic node initialization -- Init2D can then do special things
 func (g *Node2DBase) Init2DBase() {
 	g.Viewport = g.ParentViewport()
-	if g.Viewport != nil { // default for most cases -- delete connection of not
-		// fmt.Printf("node %v connect to viewport %v\n", g.Nm, g.Viewport.Nm)
-		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
-		// } else {
-		// 	log.Printf("node %v nil viewport\n", g.PathUnique())
-	}
 	g.Style.Defaults()
 	g.Paint.Defaults()
 	g.LayData.Defaults() // doesn't overwrite
@@ -566,6 +628,7 @@ func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 func (g *Node2DBase) PushBounds() bool {
 	if g.IsOverlay() {
 		if g.Viewport != nil {
+			g.ConnectToViewport()
 			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds())
 		}
 		return true
@@ -575,6 +638,7 @@ func (g *Node2DBase) PushBounds() bool {
 	}
 	rs := &g.Viewport.Render
 	rs.PushBounds(g.VpBBox)
+	g.ConnectToViewport()
 	if Render2DTrace {
 		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
 	}
@@ -803,7 +867,6 @@ func (g *Node2DBase) ParentWindow() *Window {
 	}
 	wini := g.ParentByType(KiT_Window, true)
 	if wini == nil {
-		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
 		return nil
 	}
 	return wini.EmbeddedStruct(KiT_Window).(*Window)

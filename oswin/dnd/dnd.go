@@ -27,7 +27,7 @@ type Event struct {
 	Where image.Point
 
 	// Action associated with the specific drag event: Drop, Move, Enter, Exit
-	Action Action
+	Action Actions
 
 	// Modifiers is a bitmask representing a set of modifier keys:
 	// key.ModShift, key.ModAlt, etc. -- bit positions are key.Modifiers
@@ -43,7 +43,7 @@ type Event struct {
 	// DropMove requires the drop source to delete itself once the event has
 	// been received -- otherwise it (typically) doesn't do anything, so just
 	// be careful about that particular case.
-	Mod DropMod
+	Mod DropMods
 
 	// Data contains the MIME-typed data -- multiple different types are
 	// possible (and encouraged)
@@ -112,11 +112,11 @@ type FocusEvent struct {
 	Event
 }
 
-// Action associated with the DND event -- this is the nature of the event
-type Action int32
+// Actions associated with the DND event -- this is the nature of the event
+type Actions int32
 
 const (
-	NoAction Action = iota
+	NoAction Actions = iota
 
 	// DropOnTarget is set when event is sent to the target where the item is dropped
 	DropOnTarget
@@ -131,20 +131,20 @@ const (
 	Enter
 	Exit
 
-	ActionN
+	ActionsN
 )
 
-//go:generate stringer -type=Action
+//go:generate stringer -type=Actions
 
-var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 
-// DropMod indicates the modifier associated with the drop action (affected by
+// DropMods indicates the modifier associated with the drop action (affected by
 // holding down modifier keys), suggesting what to do with the dropped item,
 // where appropriate
-type DropMod int32
+type DropMods int32
 
 const (
-	NoDropMod DropMod = iota
+	NoDropMod DropMods = iota
 
 	// Copy is the default and implies data is just copied -- receiver can do
 	// with it as they please and source does not need to take any further
@@ -164,12 +164,12 @@ const (
 	// Ignore means that the receiver chose to not process this drop
 	DropIgnore
 
-	DropModN
+	DropModsN
 )
 
-//go:generate stringer -type=DropMod
+//go:generate stringer -type=DropMods
 
-var KiT_DropMod = kit.Enums.AddEnum(DropModN, false, nil)
+var KiT_DropMods = kit.Enums.AddEnum(DropModsN, false, nil)
 
 /////////////////////////////
 // oswin.Event interface

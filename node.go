@@ -8,13 +8,13 @@ import (
 	"image"
 	"log"
 
-	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
-// NodeBase is the base struct type for GoGi graphical interface system, containing infrastructure for both 2D and 3D scene graph nodes
+// NodeBase is the base struct type for GoGi graphical interface system,
+// containing infrastructure for both 2D and 3D scene graph nodes
 type NodeBase struct {
 	ki.Node
 	Class   string          `desc:"user-defined class name used primarily for attaching CSS styles to different display elements"`
@@ -29,48 +29,19 @@ var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
-func (g *NodeBase) ParentWindow() *Window {
-	wini := g.ParentByType(KiT_Window, true)
-	if wini == nil {
-		// log.Printf("Node %v ReceiveEventType -- cannot find parent window -- must be called after adding to the scenegraph\n", g.PathUnique())
-		return nil
-	}
-	return wini.EmbeddedStruct(KiT_Window).(*Window)
-}
-
-// register this node to receive a given type of GUI event signal from the parent window
-func (g *NodeBase) ReceiveEventType(et oswin.EventType, fun ki.RecvFunc) {
-	win := g.ParentWindow()
-	if win != nil {
-		win.ReceiveEventType(g.This, et, fun)
-	}
-}
-
-// disconnect node from all events
-func (g *NodeBase) DisconnectAllEvents(win *Window) {
-	win.DisconnectNode(g.This)
-}
-
-// disconnect node from all events - todo: need a more generic Ki version of this
-func (g *NodeBase) DisconnectAllEventsTree(win *Window) {
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
-			return false // going into a different type of thing, bail
-		}
-		gi.DisconnectAllEvents(win)
-		gi.NodeSig.DisconnectAll()
-		return true
-	})
-}
-
-// gi node flags are bitflags for tracking common high-frequency GUI state,
-// mostly having to do with event processing -- use properties map for less
-// frequently used information -- uses ki Flags field
+// NodeFlags define gi node bitflags for tracking common high-frequency GUI
+// state, mostly having to do with event processing -- use properties map for
+// less frequently used information -- uses ki Flags field (64 bit capacity)
 type NodeFlags int32
 
 const (
 	NodeFlagsNil NodeFlags = NodeFlags(ki.FlagsN) + iota
+
+	// EventsConnected: this node has been connected to receive events from
+	// the window -- to optimize event processing, connections are typically
+	// only established for visible nodes during render, and disconnected when
+	// not visible
+	EventsConnected
 
 	// CanFocus: can this node accept focus to receive keyboard input events
 	// -- set by default for typical nodes that do so, but can be overridden,
@@ -196,14 +167,6 @@ func (g *NodeBase) IsOverlay() bool {
 // renders without bounds
 func (g *NodeBase) SetAsOverlay() {
 	bitflag.Set(&g.Flag, int(Overlay))
-}
-
-// GrabFocus sets node as focus node
-func (g *NodeBase) GrabFocus() {
-	win := g.ParentWindow()
-	if win != nil {
-		win.SetFocusItem(g.This)
-	}
 }
 
 // translate a point in global pixel coords into relative position within node

@@ -453,6 +453,16 @@ func (tf *TextField) SelectUpdate() {
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tf *TextField) Cut() string {
+	cut := tf.DeleteSelection()
+	if cut != "" {
+		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut), true)
+	}
+	return cut
+}
+
+// DeleteSelection deletes any selected text, without adding to clipboard --
+// returns text deleted
+func (tf *TextField) DeleteSelection() string {
 	tf.SelectUpdate()
 	if !tf.HasSelection() {
 		return ""
@@ -469,7 +479,6 @@ func (tf *TextField) Cut() string {
 		}
 	}
 	tf.SelectReset()
-	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut), true)
 	tf.UpdateEnd(updt)
 	return cut
 }
@@ -489,10 +498,14 @@ func (tf *TextField) Copy(reset bool) string {
 	return cpy
 }
 
-// Paste inserts text from the clipboard at current cursor position
+// Paste inserts text from the clipboard at current cursor position -- if
+// cursor is within a current selection, that selection is
 func (tf *TextField) Paste() {
 	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
 	if data != nil {
+		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+			tf.DeleteSelection()
+		}
 		tf.InsertAtCursor(data.Text())
 	}
 }
@@ -628,15 +641,8 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32) {
 	tf.UpdateEnd(updt)
 }
 
-////////////////////////////////////////////////////
-//  Node2D Interface
-
-func (tf *TextField) Init2D() {
-	tf.Init2DWidget()
-	tf.EditText = []rune(tf.Text)
-	tf.Edited = false
-	bitflag.Set(&tf.Flag, int(InactiveEvents))
-	tf.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (tf *TextField) TextFieldEvents() {
+	tf.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tf := recv.EmbeddedStruct(KiT_TextField).(*TextField)
@@ -648,7 +654,7 @@ func (tf *TextField) Init2D() {
 			tf.SetCursorFromPixel(float32(pt.X))
 		}
 	})
-	tf.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
 		me.SetProcessed()
@@ -680,7 +686,7 @@ func (tf *TextField) Init2D() {
 			}
 		}
 	})
-	tf.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		if tff.IsInactive() {
 			return
@@ -696,6 +702,16 @@ func (tf *TextField) Init2D() {
 			}
 		})
 	}
+}
+
+////////////////////////////////////////////////////
+//  Node2D Interface
+
+func (tf *TextField) Init2D() {
+	tf.Init2DWidget()
+	tf.EditText = []rune(tf.Text)
+	tf.Edited = false
+	bitflag.Set(&tf.Flag, int(InactiveEvents))
 }
 
 func (tf *TextField) Style2D() {
@@ -902,6 +918,7 @@ func (tf *TextField) AutoScroll() {
 
 func (tf *TextField) Render2D() {
 	if tf.PushBounds() {
+		tf.TextFieldEvents()
 		tf.AutoScroll()
 		if tf.IsInactive() {
 			if tf.Selected {
@@ -923,6 +940,8 @@ func (tf *TextField) Render2D() {
 		}
 		tf.Render2DChildren()
 		tf.PopBounds()
+	} else {
+		tf.DisconnectAllEvents()
 	}
 }
 
@@ -1130,15 +1149,18 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 	}
 }
 
-func (g *SpinBox) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
-	g.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (g *SpinBox) SpinBoxEvents() {
+	g.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 		sb.IncrValue(float32(me.NonZeroDelta(false)))
 		me.SetProcessed()
 	})
+}
+
+func (g *SpinBox) Init2D() {
+	g.Init2DWidget()
+	g.ConfigParts()
 }
 
 func (g *SpinBox) Style2D() {
@@ -1162,11 +1184,14 @@ func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
 
 func (g *SpinBox) Render2D() {
 	if g.PushBounds() {
+		g.SpinBoxEvents()
 		// g.Style = g.StateStyles[g.State] // get current styles
 		g.ConfigPartsIfNeeded()
 		g.Render2DChildren()
 		g.Render2DParts()
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 
@@ -1421,7 +1446,6 @@ func (g *ComboBox) MakeItemsMenu() {
 func (g *ComboBox) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
-	Init2DButtonEvents(g)
 }
 
 func (g *ComboBox) ConfigParts() {
@@ -1477,6 +1501,7 @@ func (g *ComboBox) Layout2D(parBBox image.Rectangle) {
 
 func (g *ComboBox) Render2D() {
 	if g.PushBounds() {
+		ButtonEvents(g)
 		g.Style = g.StateStyles[g.State] // get current styles
 		g.ConfigPartsIfNeeded()
 		if !g.HasChildren() {
@@ -1485,6 +1510,8 @@ func (g *ComboBox) Render2D() {
 			g.Render2DChildren()
 		}
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 

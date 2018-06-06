@@ -379,10 +379,10 @@ func SetButtonIcon(bw ButtonWidget, ic *Icon) {
 	g.UpdateEnd(updt)
 }
 
-// handles all the basic button events
-func Init2DButtonEvents(bw ButtonWidget) {
+// ButtonEvents handles all the basic button events
+func ButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
-	g.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
@@ -395,7 +395,7 @@ func Init2DButtonEvents(bw ButtonWidget) {
 			ab.ButtonRelease() // special one
 		}
 	})
-	g.ReceiveEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
@@ -406,7 +406,7 @@ func Init2DButtonEvents(bw ButtonWidget) {
 			bb.ButtonExitHover()
 		}
 	})
-	g.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
@@ -444,7 +444,6 @@ func (g *ButtonBase) ButtonAsBase() *ButtonBase {
 func (g *ButtonBase) Init2D() {
 	g.Init2DWidget()
 	g.This.(ButtonWidget).ConfigParts()
-	Init2DButtonEvents(g)
 }
 
 func (g *ButtonBase) ButtonRelease() {
@@ -503,6 +502,7 @@ func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
 
 func (g *ButtonBase) Render2D() {
 	if g.PushBounds() {
+		ButtonEvents(g)
 		g.Style = g.StateStyles[g.State] // get current styles
 		g.This.(ButtonWidget).ConfigPartsIfNeeded()
 		if !g.HasChildren() {
@@ -511,6 +511,8 @@ func (g *ButtonBase) Render2D() {
 			g.Render2DChildren()
 		}
 		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
 	}
 }
 
@@ -686,7 +688,6 @@ func (g *CheckBox) Init2D() {
 	g.SetCheckable(true)
 	g.Init2DWidget()
 	g.ConfigParts()
-	Init2DButtonEvents(g)
 }
 
 func (g *CheckBox) ConfigParts() {

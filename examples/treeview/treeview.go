@@ -107,7 +107,7 @@ func mainrun() {
 	split.SetSplits(.3, .7)
 
 	tv := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
-	tv.SetSrcNode(&srctree)
+	tv.SetRootNode(&srctree)
 
 	sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
 	sv.SetStruct(&srctree, nil)

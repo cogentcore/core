@@ -18,11 +18,12 @@ func (i Modifiers) String() string {
 	return _Modifiers_name[_Modifiers_index[i]:_Modifiers_index[i+1]]
 }
 
-func StringToModifiers(s string) (Modifiers, error) {
-	for i := 0; i < len(_Modifiers_index)-1; i++ {
-		if s == _Modifiers_name[_Modifiers_index[i]:_Modifiers_index[i+1]] {
-			return Modifiers(i), nil
+func (i *Modifiers) FromString(s string) error {
+	for j := 0; j < len(_Modifiers_index)-1; j++ {
+		if s == _Modifiers_name[_Modifiers_index[j]:_Modifiers_index[j+1]] {
+			*i = Modifiers(j)
+			return nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type Modifiers", s)
+	return fmt.Errorf("String %v is not a valid option for type Modifiers", s)
 }

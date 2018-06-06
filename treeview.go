@@ -26,19 +26,24 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TreeView -- a widget that graphically represents / manipulates a Ki Tree
 
-// signals that treeview can send -- these are all sent from the root tree
-// view widget node, with data being the relevant node widget
+// TreeViewSignals are signals that treeview can send -- these are all sent
+// from the root tree view widget node, with data being the relevant node
+// widget
 type TreeViewSignals int64
 
 const (
 	// node was selected
 	TreeViewSelected TreeViewSignals = iota
+
 	// TreeView unselected
 	TreeViewUnselected
+
 	// closed TreeView was opened
 	TreeViewOpened
+
 	// open TreeView was closed -- children not visible
 	TreeViewClosed
+
 	TreeViewSignalsN
 )
 
@@ -50,30 +55,30 @@ const (
 const (
 	// node is closed
 	TreeViewFlagClosed NodeFlags = NodeFlagsN + iota
+
 	// node is selected
 	TreeViewFlagSelected
-	// the shift key was pressed, putting the selection mode into continous selection mode
-	TreeViewFlagContinuousSelect
-	// the ctrl / cmd key was pressed, putting the selection mode into continous selection mode
-	TreeViewFlagExtendSelect
 )
 
-// mutually-exclusive tree view states -- determines appearance
+// TreeViewStates are mutually-exclusive tree view states -- determines appearance
 type TreeViewStates int32
 
 const (
 	// normal state -- there but not being interacted with
 	TreeViewActive TreeViewStates = iota
+
 	// selected
 	TreeViewSel
+
 	// in focus -- will respond to keyboard input
 	TreeViewFocus
+
 	TreeViewStatesN
 )
 
 //go:generate stringer -type=TreeViewStates
 
-// Style selector names for the different states:
+// TreeViewSelectors are Style selector names for the different states:
 var TreeViewSelectors = []string{":active", ":selected", ":focus"}
 
 // internal indexes for accessing elements of the widget -- todo: icon!
@@ -85,17 +90,29 @@ const (
 	tvMenuIdx
 )
 
-// TreeView represents one node in the tree -- fully recursive -- creates
-//  sub-nodes
+// These are special properties established on the RootView for maintaining
+// overall tree state
+const (
+	// TreeViewSelected is a slice of tree views that are currently selected
+	// -- much more efficient to update the list rather than regenerate it,
+	// especially for a large tree
+	TreeViewSelProp = "__Selected"
+)
+
+// TreeView provides a graphical representation of source tree structure
+// (which can be any type of Ki nodes), providing full manipulation abilities
+// of that source tree (move, cut, add, etc) through drag-n-drop and
+// cut/copy/paste and menu actions.
 type TreeView struct {
 	WidgetBase
 	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	ViewIdx     int                    `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
 	Indent      units.Value            `xml:"indent" desc:"styled amount to indent children relative to this node"`
 	TreeViewSig ki.Signal              `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles [TreeViewStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 	Icon        *Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
-	RootWidget  *TreeView              `json:"-" xml:"-" view:"-" desc:"cached root widget"`
+	RootView    *TreeView              `json:"-" xml:"-" view:"-" desc:"cached root of the view"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
@@ -103,26 +120,47 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
 
-// SetSrcNode sets the source node that we are viewing, and builds-out the view of its tree
-func (tv *TreeView) SetSrcNode(sk ki.Ki) {
+// SetRootNode sets the root view to the root of the source node that we are
+// viewing, and builds-out the view of its tree
+func (tv *TreeView) SetRootNode(sk ki.Ki) {
 	updt := false
 	if tv.SrcNode.Ptr != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode.Ptr = sk
+		sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
 	}
-	sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
-	tv.SyncToSrc()
+	tv.RootView = tv
+	tvIdx := 0
+	tv.SyncToSrc(&tvIdx)
+	tv.UpdateEnd(updt)
+}
+
+// SetSrcNode sets the source node that we are viewing, and builds-out the view of its tree
+func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
+	updt := false
+	if tv.SrcNode.Ptr != sk {
+		updt = tv.UpdateStart()
+		tv.SrcNode.Ptr = sk
+		sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
+	}
+	tv.SyncToSrc(tvIdx)
 	tv.UpdateEnd(updt)
 }
 
 // SyncToSrc updates the view tree to match the source tree, using
 // ConfigChildren to maximally preserve existing tree elements
-func (tv *TreeView) SyncToSrc() {
+func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	pr := prof.Start("TreeView.SyncToSrc")
 	sk := tv.SrcNode.Ptr
 	nm := "ViewOf_" + sk.UniqueName()
 	tv.SetNameRaw(nm) // guaranteed to be unique
 	tv.SetUniqueName(nm)
+	tv.ViewIdx = *tvIdx
+	(*tvIdx)++
+	tvPar := tv.TreeViewParent()
+	if tvPar != nil {
+		tv.RootView = tvPar.RootView
+	}
 	vcprop := "view-closed"
 	skids := sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
@@ -154,7 +192,7 @@ func (tv *TreeView) SyncToSrc() {
 	idx := 0
 	for i, fld := range flds {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
-		vk.SetSrcNode(fld)
+		vk.SetSrcNode(fld, tvIdx)
 		if mods {
 			vk.SetClosedState(fldClosed[i])
 		}
@@ -162,7 +200,7 @@ func (tv *TreeView) SyncToSrc() {
 	}
 	for _, skid := range sk.Children() {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
-		vk.SetSrcNode(skid)
+		vk.SetSrcNode(skid, tvIdx)
 		if mods {
 			if vc, ok := kit.ToBool(skid.Prop(vcprop, false, true)); vc && ok {
 				vk.SetClosed()
@@ -181,91 +219,12 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	if data != nil {
 		dflags := data.(int64)
 		if bitflag.HasMask(dflags, int64(ki.ChildUpdateFlagsMask)) {
-			tv.SyncToSrc()
+			tvIdx := tv.ViewIdx
+			tv.SyncToSrc(&tvIdx)
 		} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
 			tv.UpdateSig()
 		}
 	}
-}
-
-// SelectedSrcNodes returns a slice of the currently-selected source nodes
-// under this node -- call on root to get all selected source nodes
-func (tv *TreeView) SelectedSrcNodes() ki.Slice {
-	sn := make(ki.Slice, 0)
-	tv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if k.TypeEmbeds(KiT_TreeView) {
-			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			sn = append(sn, nw.SrcNode.Ptr)
-			return true
-		} else {
-			return false
-		}
-	})
-	return sn
-}
-
-// SelectedViews returns a slice of the currently-selected TreeViews under
-// this node -- call on root to get all selected views
-func (tv *TreeView) SelectedViews() []*TreeView {
-	sn := make([]*TreeView, 0)
-	tv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
-			return false
-		}
-		if k.TypeEmbeds(KiT_TreeView) {
-			nw := k.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			sn = append(sn, nw)
-			return true
-		} else {
-			return false
-		}
-	})
-	return sn
-}
-
-// SelectedViewSiblings returns a slice of the currently-selected TreeViews
-// that are siblings of this node -- these are source of drag-n-drop for
-// example -- typically only makes sense to call this on a node that is itself
-// selected, but that is not enforced
-func (tv *TreeView) SelectedViewSiblings() []*TreeView {
-	par := tv.Parent()
-	if par == nil {
-		return nil
-	}
-	sn := make([]*TreeView, 0)
-	// for _, n := range par.Children() {
-	// 	// if n.IsSelected() {
-	// 	// 	sn = append(sn, n)
-	// 	// }
-	// }
-	return sn
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Implementation
-
-// RootTreeView returns the root node of TreeView tree -- several properties
-// for the overall view are stored there
-func (tv *TreeView) RootTreeView() *TreeView {
-	rn := tv
-	tv.FuncUp(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, pg := KiToNode2D(k)
-		if pg == nil {
-			return false
-		}
-		if k.TypeEmbeds(KiT_TreeView) {
-			rn = k.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			return true
-		} else {
-			return false
-		}
-	})
-	return rn
 }
 
 // IsClosed returns whether this node itself closed?
@@ -304,32 +263,108 @@ func (tv *TreeView) HasClosedParent() bool {
 	return pcol
 }
 
-// IsSelected returns if this node selected?
-func (tv *TreeView) IsSelected() bool {
-	return bitflag.Has(tv.Flag, int(TreeViewFlagSelected))
-}
-
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TreeView) Label() string {
 	return tv.SrcNode.Ptr.Name()
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//    Selection
+
+// IsSelected returns if this node selected?
+func (tv *TreeView) IsSelected() bool {
+	return bitflag.Has(tv.Flag, int(TreeViewFlagSelected))
+}
+
+// SelectedViews returns a slice of the currently-selected TreeViews within
+// the entire tree, using a list maintained by the root node
+func (tv *TreeView) SelectedViews() []*TreeView {
+	var sl []*TreeView
+	sl = tv.RootView.Prop(TreeViewSelProp, false, false).([]*TreeView)
+	if sl == nil {
+		sl = make([]*TreeView, 0)
+		tv.SetSelectedViews(sl)
+	}
+	return sl
+}
+
+// SetSelectedViews updates the selected views to given list
+func (tv *TreeView) SetSelectedViews(sl []*TreeView) {
+	tv.RootView.SetProp(TreeViewSelProp, sl)
+}
+
+// SelectedSrcNodes returns a slice of the currently-selected source nodes
+// in the entire tree view
+func (tv *TreeView) SelectedSrcNodes() ki.Slice {
+	sn := make(ki.Slice, 0)
+	sl := tv.SelectedViews()
+	for _, v := range sl {
+		sn = append(sn, v.SrcNode.Ptr)
+	}
+	return sn
+}
+
+// Select selects this node (if not already selected) -- must use this method
+// to update global selection list
+func (tv *TreeView) Select() {
+	if !tv.IsSelected() {
+		bitflag.Set(&tv.Flag, int(TreeViewFlagSelected))
+		sl := tv.SelectedViews()
+		sl = append(sl, tv)
+		tv.SetSelectedViews(sl)
+		tv.GrabFocus()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+		tv.UpdateSig()
+	}
+}
+
+// Unselect unselects this node (if selected) -- must use this method
+// to update global selection list
+func (tv *TreeView) Unselect() {
+	if tv.IsSelected() {
+		bitflag.Clear(&tv.Flag, int(TreeViewFlagSelected))
+		sl := tv.SelectedViews()
+		sz := len(sl)
+		for i := 0; i < sz; i++ {
+			if sl[i] == tv {
+				sl = append(sl[:i], sl[i+1:]...)
+				break
+			}
+		}
+		tv.SetSelectedViews(sl)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewUnselected), tv.This)
+		tv.UpdateSig()
+	}
+}
+
 // SelectAction is called when a select action has been received (e.g., a
-// mouse click) -- translates into selection updates
-func (tv *TreeView) SelectAction() {
+// mouse click) -- translates into selection updates -- gets selection mode
+// from mouse event (ExtendContinuous, ExtendOne) -- only multiple sibling
+// nodes can be selected -- otherwise the paste / drop implications don't make
+// sense
+func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 	win := tv.Viewport.Win
 	updt := false
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	rn := tv.RootWidget
-	if bitflag.Has(rn.Flag, int(TreeViewFlagExtendSelect)) {
+	rn := tv.RootView
+	switch mode {
+	case mouse.ExtendContinuous:
+		sl := tv.SelectedViews()
+		if len(sl) == 0 {
+			tv.Select()
+		} else {
+			for {
+			}
+		}
+	case mouse.ExtendOne:
 		if tv.IsSelected() {
 			tv.Unselect()
 		} else {
 			tv.Select()
 		}
-	} else { // todo: continuous a bit trickier
+	case mouse.NoSelectMode:
 		if tv.IsSelected() {
 			// nothing..
 		} else {
@@ -339,25 +374,6 @@ func (tv *TreeView) SelectAction() {
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
-	}
-}
-
-// Select selects this node (if not already selected)
-func (tv *TreeView) Select() {
-	if !tv.IsSelected() {
-		bitflag.Set(&tv.Flag, int(TreeViewFlagSelected))
-		tv.GrabFocus() // focus always follows select  todo: option
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewSelected), tv.This)
-		tv.UpdateSig()
-	}
-}
-
-// Unselect unselects this node (if selected)
-func (tv *TreeView) Unselect() {
-	if tv.IsSelected() {
-		bitflag.Clear(&tv.Flag, int(TreeViewFlagSelected))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewUnselected), tv.This)
-		tv.UpdateSig()
 	}
 }
 
@@ -388,78 +404,82 @@ func (tv *TreeView) UnselectAll() {
 
 // RootUnselectAll unselects everything in the view
 func (tv *TreeView) RootUnselectAll() {
-	tv.RootWidget.UnselectAll()
+	tv.RootView.UnselectAll()
 }
 
-// MoveDown moves the selection down to next element in the tree
-func (tv *TreeView) MoveDown() {
+// MoveDown moves the selection down to next element in the tree, using given
+// select mode (from keyboard modifiers)
+func (tv *TreeView) MoveDown(selMode mouse.SelectModes) {
 	if tv.Par == nil {
 		return
 	}
 	if tv.IsClosed() || !tv.HasChildren() { // next sibling
-		tv.MoveDownSibling()
+		tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
 			nn := tv.Child(0).EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if nn != nil {
-				nn.SelectAction()
+				nn.SelectAction(selMode)
 			}
 		}
 	}
 }
 
-// MoveDownSibling moves down only to siblings, not down into children
-func (tv *TreeView) MoveDownSibling() {
+// MoveDownSibling moves down only to siblings, not down into children, using
+// given select mode (from keyboard modifiers)
+func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) {
 	if tv.Par == nil {
 		return
 	}
-	if tv == tv.RootWidget {
+	if tv == tv.RootView {
 		return
 	}
 	myidx := tv.Index()
 	if myidx < len(tv.Par.Children())-1 {
 		nn := tv.Par.Child(myidx + 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.SelectAction()
+			nn.SelectAction(selMode)
 		}
 	} else {
-		tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView).MoveDownSibling() // try up
+		tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView).MoveDownSibling(selMode) // try up
 	}
 }
 
-// MoveUp moves selection up to previous element in the tree
-func (tv *TreeView) MoveUp() {
-	if tv.Par == nil || tv == tv.RootWidget {
+// MoveUp moves selection up to previous element in the tree, using given
+// select mode (from keyboard modifiers)
+func (tv *TreeView) MoveUp(selMode mouse.SelectModes) {
+	if tv.Par == nil || tv == tv.RootView {
 		return
 	}
 	myidx := tv.Index()
 	if myidx > 0 {
 		nn := tv.Par.Child(myidx - 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.MoveToLastChild()
+			nn.MoveToLastChild(selMode)
 		}
 	} else {
 		if tv.Par != nil {
 			nn := tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if nn != nil {
-				nn.SelectAction()
+				nn.SelectAction(selMode)
 			}
 		}
 	}
 }
 
-// MoveToLastChild moves to the last child under me
-func (tv *TreeView) MoveToLastChild() {
-	if tv.Par == nil || tv == tv.RootWidget {
+// MoveToLastChild moves to the last child under me, using given select mode
+// (from keyboard modifiers)
+func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) {
+	if tv.Par == nil || tv == tv.RootView {
 		return
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
 		nn := tv.Child(-1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.MoveToLastChild()
+			nn.MoveToLastChild(selMode)
 		}
 	} else {
-		tv.SelectAction()
+		tv.SelectAction(selMode)
 	}
 }
 
@@ -471,7 +491,7 @@ func (tv *TreeView) Close() {
 			tv.SetFullReRender()
 		}
 		bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewClosed), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewClosed), tv.This)
 		tv.UpdateEnd(updt)
 	}
 }
@@ -484,7 +504,7 @@ func (tv *TreeView) Open() {
 			tv.SetFullReRender()
 		}
 		bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
-		tv.RootWidget.TreeViewSig.Emit(tv.RootWidget.This, int64(TreeViewOpened), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewOpened), tv.This)
 		tv.UpdateEnd(updt)
 	}
 }
@@ -591,11 +611,11 @@ func (tv *TreeView) SrcDelete() {
 		PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete fields", true, false, nil, nil)
 		return
 	}
-	if tv.RootWidget.This == tv.This {
+	if tv.RootView.This == tv.This {
 		PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil)
 		return
 	}
-	tv.MoveDown()
+	tv.MoveDown(mouse.NoSelectMode)
 	sk := tv.SrcNode.Ptr
 	sk.Delete(true)
 }
@@ -639,7 +659,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 func (tv *TreeView) StartDragNDrop() {
 	var md mimedata.Mimes
 	if tv.IsSelected() {
-		sels := tv.SelectedViewSiblings()
+		sels := tv.SelectedViews()
 		md = make(mimedata.Mimes, 0, len(sels)*2)
 		if len(sels) > 1 {
 			for _, sn := range sels {
@@ -660,20 +680,124 @@ func (tv *TreeView) StartDragNDrop() {
 	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
 }
 
-func (tv *TreeView) SetContinuousSelect() {
-	rn := tv.RootWidget
-	bitflag.Set(&rn.Flag, int(TreeViewFlagContinuousSelect))
+////////////////////////////////////////////////////
+// Infrastructure
+
+func (tv *TreeView) TreeViewParent() *TreeView {
+	if tv.Par == nil {
+		return nil
+	}
+	if tv.Par.TypeEmbeds(KiT_TreeView) {
+		return tv.Par.EmbeddedStruct(KiT_TreeView).(*TreeView)
+	}
+	// I am rootview!
+	return nil
 }
 
-func (tv *TreeView) SetExtendSelect() {
-	rn := tv.RootWidget
-	bitflag.Set(&rn.Flag, int(TreeViewFlagExtendSelect))
+// RootTreeView returns the root node of TreeView tree -- several properties
+// for the overall view are stored there -- cached..
+func (tv *TreeView) RootTreeView() *TreeView {
+	rn := tv
+	tv.FuncUp(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
+		_, pg := KiToNode2D(k)
+		if pg == nil {
+			return false
+		}
+		if k.TypeEmbeds(KiT_TreeView) {
+			rn = k.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			return true
+		} else {
+			return false
+		}
+	})
+	return rn
 }
 
-func (tv *TreeView) ClearSelectMods() {
-	rn := tv.RootWidget
-	bitflag.Clear(&rn.Flag, int(TreeViewFlagContinuousSelect))
-	bitflag.Clear(&rn.Flag, int(TreeViewFlagExtendSelect))
+func (tv *TreeView) TreeViewEvents() {
+	tv.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		kt := d.(*key.ChordEvent)
+		// fmt.Printf("TreeView key: %v\n", kt.Chord)
+		kf := KeyFun(kt.ChordString())
+		selMode := mouse.SelectModeMod(kt.Modifiers)
+		switch kf {
+		case KeyFunSelectItem:
+			tvv.SelectAction(selMode)
+			kt.SetProcessed()
+		case KeyFunCancelSelect:
+			tvv.RootUnselectAll()
+			kt.SetProcessed()
+		case KeyFunMoveRight:
+			tvv.Open()
+			kt.SetProcessed()
+		case KeyFunMoveLeft:
+			tvv.Close()
+			kt.SetProcessed()
+		case KeyFunMoveDown:
+			tvv.MoveDown(selMode)
+			kt.SetProcessed()
+		case KeyFunMoveUp:
+			tvv.MoveUp(selMode)
+			kt.SetProcessed()
+		case KeyFunDelete:
+			tvv.SrcDelete()
+			kt.SetProcessed()
+		case KeyFunDuplicate:
+			tvv.SrcDuplicate()
+			kt.SetProcessed()
+		case KeyFunInsert:
+			tvv.SrcInsertBefore()
+			kt.SetProcessed()
+		case KeyFunInsertAfter:
+			tvv.SrcInsertAfter()
+			kt.SetProcessed()
+		}
+	})
+	tv.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if tvv.IsDragging() {
+			tvv.StartDragNDrop()
+		}
+	})
+	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.Event)
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		if de.Action == dnd.DropOnTarget {
+			fmt.Printf("dnd targ: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Source.Name())
+			de.Target = tvv.This
+			de.SetProcessed()
+		} else if de.Action == dnd.DropFmSource {
+			fmt.Printf("dnd source: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Target.Name())
+		}
+	})
+	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
+	wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonToggled) {
+			tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvr.ToggleClose()
+		}
+	})
+	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
+	lbl.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		lb, _ := recv.(*Label)
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		if me.Action == mouse.Release {
+			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SelectAction(me.SelectMode())
+		}
+	})
+	lbl.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		lb, _ := recv.(*Label)
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		if me.Action == mouse.DoubleClick {
+			tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.ToggleClose()
+		}
+	})
 }
 
 ////////////////////////////////////////////////////
@@ -704,36 +828,12 @@ func (tv *TreeView) ConfigParts() {
 		wb.SetProp("#icon0", TVBranchProps)
 		wb.SetProp("#icon1", TVBranchProps)
 		tv.StylePart(wb.This)
-		wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(ButtonToggled) {
-				tvr, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-				tvr.ToggleClose()
-			}
-		})
 	}
 
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	if mods {
 		tv.StylePart(lbl.This)
-		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-			lb, _ := recv.(*Label)
-			me := d.(*mouse.Event)
-			me.SetProcessed()
-			if me.Action == mouse.Release {
-				tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
-				tv.SelectAction()
-			}
-		})
-		lbl.ReceiveEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-			lb, _ := recv.(*Label)
-			me := d.(*mouse.Event)
-			me.SetProcessed()
-			if me.Action == mouse.DoubleClick {
-				tv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
-				tv.ToggleClose()
-			}
-		})
 	}
 
 	mb := tv.Parts.Child(tvMenuIdx).(*Action)
@@ -787,65 +887,16 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 func (tv *TreeView) Init2D() {
-	tv.Init2DWidget()
+	// // optimized init -- avoid tree walking
+	if tv.RootView != tv {
+		tv.Viewport = tv.RootView.Viewport
+	} else {
+		tv.Viewport = tv.ParentViewport()
+	}
+	tv.Style.Defaults()
+	tv.Paint.Defaults()
+	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
-	tv.ReceiveEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		kt := d.(*key.ChordEvent)
-		// fmt.Printf("TreeView key: %v\n", kt.Chord)
-		kf := KeyFun(kt.ChordString())
-		switch kf {
-		case KeyFunSelectItem:
-			tvv.SelectAction()
-			kt.SetProcessed()
-		case KeyFunCancelSelect:
-			tvv.RootUnselectAll()
-			kt.SetProcessed()
-		case KeyFunMoveRight:
-			tvv.Open()
-			kt.SetProcessed()
-		case KeyFunMoveLeft:
-			tvv.Close()
-			kt.SetProcessed()
-		case KeyFunMoveDown:
-			tvv.MoveDown()
-			kt.SetProcessed()
-		case KeyFunMoveUp:
-			tvv.MoveUp()
-			kt.SetProcessed()
-		case KeyFunDelete:
-			tvv.SrcDelete()
-			kt.SetProcessed()
-		case KeyFunDuplicate:
-			tvv.SrcDuplicate()
-			kt.SetProcessed()
-		case KeyFunInsert:
-			tvv.SrcInsertBefore()
-			kt.SetProcessed()
-		case KeyFunInsertAfter:
-			tvv.SrcInsertAfter()
-			kt.SetProcessed()
-		}
-	})
-	tv.ReceiveEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
-		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if tvv.IsDragging() {
-			tvv.StartDragNDrop()
-		}
-	})
-	tv.ReceiveEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		de := d.(*dnd.Event)
-		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if de.Action == dnd.DropOnTarget {
-			fmt.Printf("dnd targ: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Source.Name())
-			de.Target = tvv.This
-			de.SetProcessed()
-		} else if de.Action == dnd.DropFmSource {
-			fmt.Printf("dnd source: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Target.Name())
-		}
-	})
 }
 
 var TreeViewProps = ki.Props{
@@ -916,8 +967,6 @@ func (tv *TreeView) Style2D() {
 // maintain its own bbox for its own widget.
 
 func (tv *TreeView) Size2D() {
-	tv.RootWidget = tv.RootTreeView() // cache
-
 	tv.InitLayout2D()
 	if tv.HasClosedParent() {
 		return // nothing
@@ -956,7 +1005,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 
-	rn := tv.RootWidget
+	rn := tv.RootView
 	// our alloc size is root's size minus our total indentation
 	tv.LayData.AllocSize.X = rn.LayData.AllocSize.X - (tv.LayData.AllocPos.X - rn.LayData.AllocPos.X)
 	tv.WidgetSize.X = tv.LayData.AllocSize.X
@@ -1005,6 +1054,7 @@ func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 
 func (tv *TreeView) Render2D() {
 	if tv.HasClosedParent() {
+		tv.DisconnectAllEvents()
 		return // nothing
 	}
 	if tv.PushBounds() {
@@ -1019,6 +1069,7 @@ func (tv *TreeView) Render2D() {
 			tv.Style = tv.StateStyles[TreeViewActive]
 		}
 		tv.ConfigPartsIfNeeded()
+		tv.TreeViewEvents()
 
 		// note: this is std except using WidgetSize instead of AllocSize
 		pc := &tv.Paint
@@ -1034,6 +1085,8 @@ func (tv *TreeView) Render2D() {
 		tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		tv.Render2DParts()
 		tv.PopBounds()
+	} else {
+		tv.DisconnectAllEvents()
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.Render2DChildren()

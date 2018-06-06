@@ -1016,10 +1016,7 @@ func (ly *Layout) DeleteScroll(d Dims2D) {
 		return
 	}
 	sc := ly.Scrolls[d]
-	win := ly.ParentWindow()
-	if win != nil {
-		sc.DisconnectAllEvents(win)
-	}
+	sc.DisconnectAllEvents()
 	sc.Destroy()
 	ly.Scrolls[d] = nil
 }
@@ -1115,6 +1112,16 @@ func (ly *Layout) ShowChildAtIndex(idx int) error {
 	return nil
 }
 
+func (ly *Layout) LayoutEvents() {
+	ly.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
+		if li.ScrollDelta(me.Delta) {
+			me.SetProcessed()
+		}
+	})
+}
+
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
@@ -1132,13 +1139,6 @@ func (g *Layout) AsLayout2D() *Layout {
 
 func (ly *Layout) Init2D() {
 	ly.Init2DBase()
-	ly.ReceiveEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
-		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
-		if li.ScrollDelta(me.Delta) {
-			me.SetProcessed()
-		}
-	})
 }
 
 func (ly *Layout) BBox2D() image.Rectangle {
@@ -1224,9 +1224,12 @@ func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (ly *Layout) Render2D() {
 	if ly.PushBounds() {
+		ly.LayoutEvents()
 		ly.RenderScrolls()
 		ly.Render2DChildren()
 		ly.PopBounds()
+	} else {
+		ly.DisconnectAllEvents()
 	}
 }
 
@@ -1261,19 +1264,19 @@ var FrameProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 }
 
-func (g *Frame) Style2D() {
-	g.Style2DWidget()
+func (fr *Frame) Style2D() {
+	fr.Style2DWidget()
 }
 
-func (g *Frame) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		st := &g.Style
-		rs := &g.Viewport.Render
+func (fr *Frame) Render2D() {
+	if fr.PushBounds() {
+		pc := &fr.Paint
+		st := &fr.Style
+		rs := &fr.Viewport.Render
 		// first draw a background rectangle in our full area
 
-		pos := g.LayData.AllocPos
-		sz := g.LayData.AllocSize
+		pos := fr.LayData.AllocPos
+		sz := fr.LayData.AllocSize
 		// todo: won't work for gradients..
 		pc.FillBox(rs, pos, sz, &st.Background.Color)
 
@@ -1304,8 +1307,10 @@ func (g *Frame) Render2D() {
 		}
 		pc.FillStrokeClear(rs)
 
-		g.Layout.Render2D()
-		g.PopBounds()
+		fr.Layout.Render2D()
+		fr.PopBounds()
+	} else {
+		fr.DisconnectAllEvents()
 	}
 }
 

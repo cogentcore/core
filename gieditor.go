@@ -46,7 +46,7 @@ func GoGiEditorOf(obj ki.Ki) {
 	split.SetSplits(.3, .7)
 
 	tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
-	tv.SetSrcNode(obj)
+	tv.SetRootNode(obj)
 
 	sv := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStretchMaxWidth()

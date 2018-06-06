@@ -20,6 +20,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -52,10 +53,10 @@ type Event struct {
 
 	// Button is the mouse button being pressed or released. Its value may be
 	// ButtonNone (zero), for a mouse move with no button
-	Button Button
+	Button Buttons
 
 	// Action taken on the mouse button: Press, Release, DoubleClick, Drag or Move
-	Action Action
+	Action Actions
 
 	// TODO: have a field to hold what other buttons are down, for detecting
 	// drags or button-chords.
@@ -92,6 +93,28 @@ func (e *Event) HasAllModifier(mods ...key.Modifiers) bool {
 		}
 	}
 	return true
+}
+
+// SelectMode returns the selection mode based on given modifiers on event
+func (e *Event) SelectMode() SelectModes {
+	if e.HasAnyModifier(key.Shift) {
+		return ExtendContinuous
+	}
+	if e.HasAnyModifier(key.Meta) {
+		return ExtendOne
+	}
+	return NoSelectMode
+}
+
+// SelectModeMod returns the selection mode based on given modifiers bitflags
+func SelectModeMod(mods int32) SelectModes {
+	if bitflag.Has32(mods, int(key.Shift)) {
+		return ExtendContinuous
+	}
+	if bitflag.Has32(mods, int(key.Meta)) {
+		return ExtendOne
+	}
+	return NoSelectMode
 }
 
 /////////////////////////////////////////////////////////////////
@@ -152,31 +175,31 @@ type FocusEvent struct {
 	Event
 }
 
-// Button is a mouse button.
-type Button int32
+// Buttons is a mouse button.
+type Buttons int32
 
 // TODO: have a separate axis concept for wheel up/down? How does that relate
 // to joystick events?
 
 const (
-	NoButton Button = iota
+	NoButton Buttons = iota
 	Left
 	Middle
 	Right
 
-	ButtonN
+	ButtonsN
 )
 
-//go:generate stringer -type=Button
+//go:generate stringer -type=Buttons
 
-var KiT_Button = kit.Enums.AddEnum(ButtonN, false, nil)
+var KiT_Buttons = kit.Enums.AddEnum(ButtonsN, false, nil)
 
-// Action taken with the mouse button -- different ones are applicable to
+// Actions taken with the mouse button -- different ones are applicable to
 // different mouse event types
-type Action int32
+type Actions int32
 
 const (
-	NoAction Action = iota
+	NoAction Actions = iota
 	Press
 	Release
 	DoubleClick
@@ -186,12 +209,35 @@ const (
 	Enter
 	Exit
 
-	ActionN
+	ActionsN
 )
 
-//go:generate stringer -type=Action
+//go:generate stringer -type=Actions
 
-var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
+
+// SelectModes interprets the modifier keys to determine what type of selection mode to use
+type SelectModes int32
+
+const (
+	// NoSelectMode means no modifier was pressed -- use the standard selection behavior
+	NoSelectMode SelectModes = iota
+
+	// ExtendContinuous, activated by Shift key, extends the selection to
+	// select a continuous region of selected items, with no gaps
+	ExtendContinuous
+
+	// ExtendOne, activated by Control or Meta / Commmand, extends the
+	// selection by adding the one additional item just clicked on, creating a
+	// potentially discontinuous set of selected items
+	ExtendOne
+
+	SelectModesN
+)
+
+//go:generate stringer -type=SelectModes
+
+var KiT_SelectModes = kit.Enums.AddEnum(SelectModesN, false, nil)
 
 /////////////////////////////
 // oswin.Event interface

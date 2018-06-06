@@ -375,6 +375,7 @@ func (g *Splitter) UpdateSplitterPos() {
 func (g *Splitter) Render2D() {
 	vp := g.Viewport
 	win := vp.Win
+	g.SliderEvents()
 	if g.IsDragging() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic == nil {

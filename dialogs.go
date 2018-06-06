@@ -102,7 +102,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	vpsz.X = kit.MaxInt(vpsz.X, stw)
 	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
 
-	win.ReceiveEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
 		kf := KeyFun(kt.ChordString())

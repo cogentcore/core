@@ -346,19 +346,28 @@ func (w *Window) ZoomDPI(steps int) {
 	w.FullReRender()
 }
 
-// ReceiveEventType adds a Signal connection for given event type to given receiver
-func (w *Window) ReceiveEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
+// ConnectEventType adds a Signal connection for given event type to given receiver
+func (w *Window) ConnectEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
 	if et >= oswin.EventTypeN {
-		log.Printf("Window ReceiveEventType type: %v is not a known event type\n", et)
+		log.Printf("Window ConnectEventType type: %v is not a known event type\n", et)
 		return
 	}
 	w.EventSigs[et].Connect(recv, fun)
 }
 
-// disconnect node from all signals
-func (w *Window) DisconnectNode(recv ki.Ki) {
+// DisconnectEventType removes Signal connection for given event type to given receiver
+func (w *Window) DisconnectEventType(recv ki.Ki, et oswin.EventType) {
+	if et >= oswin.EventTypeN {
+		log.Printf("Window DisconnectEventType type: %v is not a known event type\n", et)
+		return
+	}
+	w.EventSigs[et].Disconnect(recv)
+}
+
+// DisconnectAllEvents disconnect node from all event signals
+func (w *Window) DisconnectAllEvents(recv ki.Ki) {
 	for _, es := range w.EventSigs {
-		es.Disconnect(recv, nil)
+		es.Disconnect(recv)
 	}
 }
 
@@ -394,11 +403,11 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	}
 
 	// always process the popup last as a second pass -- this is index if found
-	var popupCon *ki.Connection
+	var popup ki.Ki
 
 	// fmt.Printf("got event type: %v\n", et)
 	// first just process all the events straight-up
-	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki, idx int, con *ki.Connection) bool {
+	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
 		}
@@ -411,7 +420,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 				return false
 			}
 			if gi.This == w.Popup || gi.This == w.Viewport.This { // do this last
-				popupCon = con
+				popup = gi.This
 				return false
 			}
 			if !w.IsInScope(gii, gi) { // no
@@ -459,10 +468,9 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 
 	// send events to the popup last so e.g., dialog can do Accept / Cancel
 	// after other events have been processed
-	if popupCon != nil {
-		popupCon.Func(popupCon.Recv, w.Popup, int64(et), evi)
+	if popup != nil {
+		w.EventSigs[et].SendSig(popup, w.Popup, int64(et), evi)
 	}
-
 }
 
 // process mouse.MoveEvent to generate mouse.FocusEvent events
@@ -472,7 +480,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	ftyp := oswin.MouseFocusEvent
 	updated := false
 	updt := false
-	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki, idx int, con *ki.Connection) bool {
+	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
 		if k.IsDeleted() { // destroyed is filtered upstream
 			return false
 		}
@@ -943,7 +951,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 
 // disconnect given popup -- typically the current one
 func (w *Window) DisconnectPopup(pop ki.Ki) {
-	w.DisconnectNode(pop)
+	w.DisconnectAllEvents(pop)
 	pop.SetParent(nil) // don't redraw the popup anymore
 	w.Viewport.UploadToWin()
 }
@@ -1056,11 +1064,8 @@ func (w *Window) DNDDrop(e *mouse.Event) {
 	w.SendEventSignal(&de)
 	if !de.IsProcessed() || de.Mod == dnd.DropIgnore { // the target did not accept it
 	} else { // send info back to source
-		ridx := w.EventSigs[et].FindReceiverIndex(w.DNDSource)
-		if ridx >= 0 { // should be
-			de.Action = dnd.DropFmSource
-			w.EventSigs[de.Type()].Cons[ridx].SendSig(w, int64(et), (oswin.Event)(&de))
-		}
+		de.Action = dnd.DropFmSource
+		w.EventSigs[de.Type()].SendSig(w.DNDSource, w, int64(et), (oswin.Event)(&de))
 	}
 	w.ClearDragNDrop()
 	e.SetProcessed()

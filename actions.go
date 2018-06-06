@@ -106,7 +106,6 @@ func (g *Action) ButtonRelease() {
 func (g *Action) Init2D() {
 	g.Init2DWidget()
 	g.ConfigParts()
-	Init2DButtonEvents(g)
 }
 
 func (g *Action) ConfigPartsButton() {

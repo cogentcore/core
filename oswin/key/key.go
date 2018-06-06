@@ -54,14 +54,14 @@ type Event struct {
 	//
 	// Pressing the regular '2' key and number-pad '2' key (with Num-Lock)
 	// generate different Codes (but the same Rune).
-	Code Code
+	Code Codes
 
 	// Modifiers is bitflags representing a set of modifier keys: ModShift,
 	// ModAlt, etc. -- bit positions are key.Modifiers
 	Modifiers int32
 
 	// Action is the key action taken: Press, Release, or None (for key repeats).
-	Action Action
+	Action Actions
 
 	// TODO: add a Device ID, for multiple input devices?
 }
@@ -135,27 +135,27 @@ func (e *Event) ChordString() string {
 }
 
 // CodeIsModifier returns true if given code is a modifier key
-func CodeIsModifier(c Code) bool {
+func CodeIsModifier(c Codes) bool {
 	if c >= CodeLeftControl && c <= CodeRightGUI {
 		return true
 	}
 	return false
 }
 
-// Action is the action taken on the key
-type Action int32
+// Actions is the action taken on the key
+type Actions int32
 
 const (
-	None Action = iota
+	None Actions = iota
 	Press
 	Release
 
-	ActionN
+	ActionsN
 )
 
-//go:generate stringer -type=Action
+//go:generate stringer -type=Actions
 
-var KiT_Action = kit.Enums.AddEnum(ActionN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 
 // Modifiers are used as bitflags representing a set of modifier keys -- see
 // SetModifiers method
@@ -174,144 +174,144 @@ const (
 
 var KiT_Modifiers = kit.Enums.AddEnum(ModifiersN, true, nil) // true = bitflag
 
-// Code is the identity of a key relative to a notional "standard" keyboard.
-type Code uint32
+// Codes is the identity of a key relative to a notional "standard" keyboard.
+type Codes uint32
 
 // Physical key codes.
 //
 // For standard key codes, its value matches USB HID key codes.
 // TODO: add missing codes.
 const (
-	CodeUnknown Code = 0
+	CodeUnknown Codes = 0
 
-	CodeA Code = 4
-	CodeB Code = 5
-	CodeC Code = 6
-	CodeD Code = 7
-	CodeE Code = 8
-	CodeF Code = 9
-	CodeG Code = 10
-	CodeH Code = 11
-	CodeI Code = 12
-	CodeJ Code = 13
-	CodeK Code = 14
-	CodeL Code = 15
-	CodeM Code = 16
-	CodeN Code = 17
-	CodeO Code = 18
-	CodeP Code = 19
-	CodeQ Code = 20
-	CodeR Code = 21
-	CodeS Code = 22
-	CodeT Code = 23
-	CodeU Code = 24
-	CodeV Code = 25
-	CodeW Code = 26
-	CodeX Code = 27
-	CodeY Code = 28
-	CodeZ Code = 29
+	CodeA Codes = 4
+	CodeB Codes = 5
+	CodeC Codes = 6
+	CodeD Codes = 7
+	CodeE Codes = 8
+	CodeF Codes = 9
+	CodeG Codes = 10
+	CodeH Codes = 11
+	CodeI Codes = 12
+	CodeJ Codes = 13
+	CodeK Codes = 14
+	CodeL Codes = 15
+	CodeM Codes = 16
+	CodeN Codes = 17
+	CodeO Codes = 18
+	CodeP Codes = 19
+	CodeQ Codes = 20
+	CodeR Codes = 21
+	CodeS Codes = 22
+	CodeT Codes = 23
+	CodeU Codes = 24
+	CodeV Codes = 25
+	CodeW Codes = 26
+	CodeX Codes = 27
+	CodeY Codes = 28
+	CodeZ Codes = 29
 
-	Code1 Code = 30
-	Code2 Code = 31
-	Code3 Code = 32
-	Code4 Code = 33
-	Code5 Code = 34
-	Code6 Code = 35
-	Code7 Code = 36
-	Code8 Code = 37
-	Code9 Code = 38
-	Code0 Code = 39
+	Code1 Codes = 30
+	Code2 Codes = 31
+	Code3 Codes = 32
+	Code4 Codes = 33
+	Code5 Codes = 34
+	Code6 Codes = 35
+	Code7 Codes = 36
+	Code8 Codes = 37
+	Code9 Codes = 38
+	Code0 Codes = 39
 
-	CodeReturnEnter        Code = 40
-	CodeEscape             Code = 41
-	CodeDeleteBackspace    Code = 42
-	CodeTab                Code = 43
-	CodeSpacebar           Code = 44
-	CodeHyphenMinus        Code = 45 // -
-	CodeEqualSign          Code = 46 // =
-	CodeLeftSquareBracket  Code = 47 // [
-	CodeRightSquareBracket Code = 48 // ]
-	CodeBackslash          Code = 49 // \
-	CodeSemicolon          Code = 51 // ;
-	CodeApostrophe         Code = 52 // '
-	CodeGraveAccent        Code = 53 // `
-	CodeComma              Code = 54 // ,
-	CodeFullStop           Code = 55 // .
-	CodeSlash              Code = 56 // /
-	CodeCapsLock           Code = 57
+	CodeReturnEnter        Codes = 40
+	CodeEscape             Codes = 41
+	CodeDeleteBackspace    Codes = 42
+	CodeTab                Codes = 43
+	CodeSpacebar           Codes = 44
+	CodeHyphenMinus        Codes = 45 // -
+	CodeEqualSign          Codes = 46 // =
+	CodeLeftSquareBracket  Codes = 47 // [
+	CodeRightSquareBracket Codes = 48 // ]
+	CodeBackslash          Codes = 49 // \
+	CodeSemicolon          Codes = 51 // ;
+	CodeApostrophe         Codes = 52 // '
+	CodeGraveAccent        Codes = 53 // `
+	CodeComma              Codes = 54 // ,
+	CodeFullStop           Codes = 55 // .
+	CodeSlash              Codes = 56 // /
+	CodeCapsLock           Codes = 57
 
-	CodeF1  Code = 58
-	CodeF2  Code = 59
-	CodeF3  Code = 60
-	CodeF4  Code = 61
-	CodeF5  Code = 62
-	CodeF6  Code = 63
-	CodeF7  Code = 64
-	CodeF8  Code = 65
-	CodeF9  Code = 66
-	CodeF10 Code = 67
-	CodeF11 Code = 68
-	CodeF12 Code = 69
+	CodeF1  Codes = 58
+	CodeF2  Codes = 59
+	CodeF3  Codes = 60
+	CodeF4  Codes = 61
+	CodeF5  Codes = 62
+	CodeF6  Codes = 63
+	CodeF7  Codes = 64
+	CodeF8  Codes = 65
+	CodeF9  Codes = 66
+	CodeF10 Codes = 67
+	CodeF11 Codes = 68
+	CodeF12 Codes = 69
 
-	CodePause         Code = 72
-	CodeInsert        Code = 73
-	CodeHome          Code = 74
-	CodePageUp        Code = 75
-	CodeDeleteForward Code = 76
-	CodeEnd           Code = 77
-	CodePageDown      Code = 78
+	CodePause         Codes = 72
+	CodeInsert        Codes = 73
+	CodeHome          Codes = 74
+	CodePageUp        Codes = 75
+	CodeDeleteForward Codes = 76
+	CodeEnd           Codes = 77
+	CodePageDown      Codes = 78
 
-	CodeRightArrow Code = 79
-	CodeLeftArrow  Code = 80
-	CodeDownArrow  Code = 81
-	CodeUpArrow    Code = 82
+	CodeRightArrow Codes = 79
+	CodeLeftArrow  Codes = 80
+	CodeDownArrow  Codes = 81
+	CodeUpArrow    Codes = 82
 
-	CodeKeypadNumLock     Code = 83
-	CodeKeypadSlash       Code = 84 // /
-	CodeKeypadAsterisk    Code = 85 // *
-	CodeKeypadHyphenMinus Code = 86 // -
-	CodeKeypadPlusSign    Code = 87 // +
-	CodeKeypadEnter       Code = 88
-	CodeKeypad1           Code = 89
-	CodeKeypad2           Code = 90
-	CodeKeypad3           Code = 91
-	CodeKeypad4           Code = 92
-	CodeKeypad5           Code = 93
-	CodeKeypad6           Code = 94
-	CodeKeypad7           Code = 95
-	CodeKeypad8           Code = 96
-	CodeKeypad9           Code = 97
-	CodeKeypad0           Code = 98
-	CodeKeypadFullStop    Code = 99  // .
-	CodeKeypadEqualSign   Code = 103 // =
+	CodeKeypadNumLock     Codes = 83
+	CodeKeypadSlash       Codes = 84 // /
+	CodeKeypadAsterisk    Codes = 85 // *
+	CodeKeypadHyphenMinus Codes = 86 // -
+	CodeKeypadPlusSign    Codes = 87 // +
+	CodeKeypadEnter       Codes = 88
+	CodeKeypad1           Codes = 89
+	CodeKeypad2           Codes = 90
+	CodeKeypad3           Codes = 91
+	CodeKeypad4           Codes = 92
+	CodeKeypad5           Codes = 93
+	CodeKeypad6           Codes = 94
+	CodeKeypad7           Codes = 95
+	CodeKeypad8           Codes = 96
+	CodeKeypad9           Codes = 97
+	CodeKeypad0           Codes = 98
+	CodeKeypadFullStop    Codes = 99  // .
+	CodeKeypadEqualSign   Codes = 103 // =
 
-	CodeF13 Code = 104
-	CodeF14 Code = 105
-	CodeF15 Code = 106
-	CodeF16 Code = 107
-	CodeF17 Code = 108
-	CodeF18 Code = 109
-	CodeF19 Code = 110
-	CodeF20 Code = 111
-	CodeF21 Code = 112
-	CodeF22 Code = 113
-	CodeF23 Code = 114
-	CodeF24 Code = 115
+	CodeF13 Codes = 104
+	CodeF14 Codes = 105
+	CodeF15 Codes = 106
+	CodeF16 Codes = 107
+	CodeF17 Codes = 108
+	CodeF18 Codes = 109
+	CodeF19 Codes = 110
+	CodeF20 Codes = 111
+	CodeF21 Codes = 112
+	CodeF22 Codes = 113
+	CodeF23 Codes = 114
+	CodeF24 Codes = 115
 
-	CodeHelp Code = 117
+	CodeHelp Codes = 117
 
-	CodeMute       Code = 127
-	CodeVolumeUp   Code = 128
-	CodeVolumeDown Code = 129
+	CodeMute       Codes = 127
+	CodeVolumeUp   Codes = 128
+	CodeVolumeDown Codes = 129
 
-	CodeLeftControl  Code = 224
-	CodeLeftShift    Code = 225
-	CodeLeftAlt      Code = 226
-	CodeLeftGUI      Code = 227 // Command on mac, ? on windows, ? on linux
-	CodeRightControl Code = 228
-	CodeRightShift   Code = 229
-	CodeRightAlt     Code = 230
-	CodeRightGUI     Code = 231
+	CodeLeftControl  Codes = 224
+	CodeLeftShift    Codes = 225
+	CodeLeftAlt      Codes = 226
+	CodeLeftGUI      Codes = 227 // Command on mac, ? on windows, ? on linux
+	CodeRightControl Codes = 228
+	CodeRightShift   Codes = 229
+	CodeRightAlt     Codes = 230
+	CodeRightGUI     Codes = 231
 
 	// The following codes are not part of the standard USB HID Usage IDs for
 	// keyboards. See http://www.usb.org/developers/hidpage/Hut1_12v2.pdf
@@ -322,10 +322,12 @@ const (
 	// used to input non-ASCII characters such as ñ being composed of n and ~.
 	//
 	// See https://en.wikipedia.org/wiki/Compose_key
-	CodeCompose Code = 0x10000
+	CodeCompose Codes = 0x10000
 )
 
-// // go: generate stringer -type=Code
+// note: have to use official go stringer for this, not custom one, which doesn't currently
+// handle discontinuities
+// // go: generate stringer -type=Codes
 
 // TODO: Given we use runes outside the unicode space, should we provide a
 // printing function? Related: it's a little unfortunate that printing a
