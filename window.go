@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -32,6 +33,14 @@ import (
 // event was sent to the time it is being processed, above which a repeated
 // event type (scroll, drag, resize) is skipped
 var EventSkipLagMSec = 50
+
+// DNDStartDelayMSec is the number of milliseconds to wait before initiating a
+// drag-n-drop event -- gotta drag it like you mean it
+var DNDStartDelayMSec = 200
+
+// DNDStartDistPix is the number of pixels that must be moved before
+// initiating a drag-n-drop event -- gotta drag it like you mean it
+var DNDStartDistPix = 20
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
@@ -562,6 +571,9 @@ func (w *Window) EventLoop() {
 	var skipDelta image.Point
 	lastSkipped := false
 
+	var startDrag *mouse.DragEvent
+	dndStarted := false
+
 	for {
 		evi := w.OSWin.NextEvent()
 		if w.stopEventLoop {
@@ -581,8 +593,8 @@ func (w *Window) EventLoop() {
 			continue
 		}
 
-		nw := time.Now()
-		lag := nw.Sub(evi.Time())
+		now := time.Now()
+		lag := now.Sub(evi.Time())
 		lagMs := int(lag / time.Millisecond)
 		// fmt.Printf("et %v lag %v\n", et, lag)
 
@@ -647,6 +659,28 @@ func (w *Window) EventLoop() {
 			w.Resized(skippedResize.Size)
 			w.DoFullRender = true
 			skippedResize = nil
+		}
+
+		// detect start of DND -- DND events sent in parallel with regular drag event
+		if et == oswin.MouseDragEvent {
+			if !dndStarted {
+				if startDrag == nil {
+					startDrag = evi.(*mouse.DragEvent)
+				} else {
+					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
+					if delayMs >= DNDStartDelayMSec {
+						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
+						if dst >= DNDStartDistPix {
+							dndStarted = true
+							w.DNDStartEvent(startDrag)
+							startDrag = nil
+						}
+					}
+				}
+			}
+		} else {
+			dndStarted = false
+			startDrag = nil
 		}
 
 		// Window gets first crack at the events, and handles window-specific ones
@@ -735,11 +769,11 @@ func (w *Window) EventLoop() {
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		case *mouse.DragEvent:
 			if w.DNDData != nil {
-				w.DNDMove(e)
+				w.DNDMoveEvent(e)
 			}
 		case *mouse.Event:
 			if w.DNDData != nil && e.Action == mouse.Release {
-				w.DNDDrop(e)
+				w.DNDDropEvent(e)
 			}
 		}
 
@@ -1021,8 +1055,9 @@ func (w *Window) PopFocus() {
 ///////////////////////////////////////////////////////
 // Drag-n-drop
 
-// StartDragNDrop starts a drag-n-drop operation on given source node, which
-// is responsible for providing the data and image representation of the node
+// StartDragNDrop is called by a node to start a drag-n-drop operation on
+// given source node, which is responsible for providing the data and image
+// representation of the node
 func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	// todo: 3d version later..
 	w.DNDSource = src
@@ -1039,8 +1074,16 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
-// DNDMove handles drag-n-drop move events
-func (w *Window) DNDMove(e *mouse.DragEvent) {
+// DNDStartEvent handles drag-n-drop start events
+func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
+	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
+	de.Action = dnd.Start
+	w.SendEventSignal(&de)
+	// now up to receiver to call StartDragNDrop if they want to..
+}
+
+// DNDMoveEvent handles drag-n-drop move events
+func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	_, gi := KiToNode2D(w.DNDImage)
 	if gi != nil { // 2d case
 		gi.LayData.AllocPos.SetPoint(e.Where)
@@ -1051,8 +1094,8 @@ func (w *Window) DNDMove(e *mouse.DragEvent) {
 	e.SetProcessed()
 }
 
-// DNDDrop handles drag-n-drop drop event (action = release)
-func (w *Window) DNDDrop(e *mouse.Event) {
+// DNDDropEvent handles drag-n-drop drop event (action = release)
+func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	et := de.Type()
 	de.DefaultMod()

@@ -112,7 +112,7 @@ type ButtonBase struct {
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
-	Menu         ki.Slice             `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
@@ -242,7 +242,7 @@ func (g *ButtonBase) OpenMenu() bool {
 		return false
 	}
 	if g.MakeMenuFunc != nil {
-		g.MakeMenuFunc(g)
+		g.MakeMenuFunc(&g.Menu)
 	}
 	pos := g.WinBBox.Max
 	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
@@ -259,43 +259,9 @@ func (g *ButtonBase) OpenMenu() bool {
 	return false
 }
 
-// AddMenuText adds an action to the menu with a text label -- todo: shortcuts
-func (g *ButtonBase) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
-	if g.Menu == nil {
-		g.Menu = make(ki.Slice, 0, 10)
-	}
-	ac := Action{}
-	ac.InitName(&ac, txt)
-	ac.Text = txt
-	ac.Data = data
-	ac.SetAsMenu()
-	g.Menu = append(g.Menu, ac.This.(Node2D))
-	if sigTo != nil && fun != nil {
-		ac.ActionSig.Connect(sigTo, fun)
-	}
-	return &ac
-}
-
-// AddSeparator adds a separator at the next point in the menu
-func (g *ButtonBase) AddSeparator(name string) *Separator {
-	if g.Menu == nil {
-		g.Menu = make(ki.Slice, 0, 10)
-	}
-	sp := Separator{}
-	if name == "" {
-		name = "sep"
-	}
-	sp.InitName(&sp, name)
-	sp.SetProp("min-height", units.NewValue(0.5, units.Em))
-	sp.SetProp("max-width", -1)
-	sp.Horiz = true
-	g.Menu = append(g.Menu, sp.This.(Node2D))
-	return &sp
-}
-
 // ResetMenu removes all items in the menu
 func (g *ButtonBase) ResetMenu() {
-	g.Menu = make(ki.Slice, 0, 10)
+	g.Menu = make(Menu, 0, 10)
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if there is a menu present,

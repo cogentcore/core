@@ -26,7 +26,7 @@ type Event struct {
 	// Where is the mouse location, in raw display dots (raw, actual pixels)
 	Where image.Point
 
-	// Action associated with the specific drag event: Drop, Move, Enter, Exit
+	// Action associated with the specific drag event: Start, Drop*, Move, Enter, Exit
 	Action Actions
 
 	// Modifiers is a bitmask representing a set of modifier keys:
@@ -117,6 +117,10 @@ type Actions int32
 
 const (
 	NoAction Actions = iota
+
+	// Start is triggered when criteria for DND starting have been met -- it
+	// is the chance for potential sources to start a DND event
+	Start
 
 	// DropOnTarget is set when event is sent to the target where the item is dropped
 	DropOnTarget

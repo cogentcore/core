@@ -14,15 +14,109 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Menu is a list of Node2D actions, which can contain sub-actions (though it
-// can contain anything -- it is just added to a column layout and displayed
-// in a popup) -- don't use stretchy sizes in general for these items!
+// Menu is a slice list of Node2D actions, which can contain sub-actions
+// (though it can contain anything -- it is just added to a column layout and
+// displayed in a popup) -- don't use stretchy sizes in general for these
+// items!
+type Menu ki.Slice
 
-// MakeMenuFunc is a callback for making the menu on demand
-type MakeMenuFunc func(mb *ButtonBase)
+// MakeMenuFunc is a callback for making a menu on demand
+type MakeMenuFunc func(m *Menu)
+
+// AddMenuText adds an action to the menu with a text label -- todo: shortcuts
+func (m *Menu) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
+	if m == nil {
+		*m = make(Menu, 0, 10)
+	}
+	ac := Action{}
+	ac.InitName(&ac, txt)
+	ac.Text = txt
+	ac.Data = data
+	ac.SetAsMenu()
+	*m = append(*m, ac.This.(Node2D))
+	if sigTo != nil && fun != nil {
+		ac.ActionSig.Connect(sigTo, fun)
+	}
+	return &ac
+}
+
+// AddSeparator adds a separator at the next point in the menu (name is just
+// internal label of element, defaults to 'sep' if empty)
+func (m *Menu) AddSeparator(name string) *Separator {
+	if m == nil {
+		*m = make(Menu, 0, 10)
+	}
+	sp := Separator{}
+	if name == "" {
+		name = "sep"
+	}
+	sp.InitName(&sp, name)
+	sp.SetProp("min-height", units.NewValue(0.5, units.Em))
+	sp.SetProp("max-width", -1)
+	sp.Horiz = true
+	*m = append(*m, sp.This.(Node2D))
+	return &sp
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// MenuButton pops up a menu
+// PopupMenu function
+
+var MenuFrameProps = ki.Props{
+	"border-width":        units.NewValue(0, units.Px),
+	"border-color":        "none",
+	"margin":              units.NewValue(4, units.Px),
+	"padding":             units.NewValue(2, units.Px),
+	"box-shadow.h-offset": units.NewValue(2, units.Px),
+	"box-shadow.v-offset": units.NewValue(2, units.Px),
+	"box-shadow.blur":     units.NewValue(2, units.Px),
+	"box-shadow.color":    &Prefs.ShadowColor,
+}
+
+// PopupMenu just pops up a viewport with a layout that draws the supplied
+// actions positions are relative to given viewport -- name is relevant base
+// name to which Menu is appended
+func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+	win := parVp.Win
+	mainVp := win.Viewport
+	if len(menu) == 0 {
+		log.Printf("GoGi PopupMenu: empty menu given\n")
+		return nil
+	}
+	pvp := Viewport2D{}
+	pvp.InitName(&pvp, name+"Menu")
+	pvp.Win = win
+	updt := pvp.UpdateStart()
+	pvp.Fill = true
+	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
+	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
+
+	pvp.ViewBox.Min = image.Point{x, y}
+	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
+	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
+	frame.Lay = LayoutCol
+	frame.SetProps(MenuFrameProps, false)
+	for _, ac := range menu {
+		acn, _ := KiToNode2D(ac)
+		frame.AddChild(acn)
+	}
+	frame.Init2DTree()
+	frame.Style2DTree()                                // sufficient to get sizes
+	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
+	frame.Size2DTree()                                 // collect sizes
+	pvp.Win = nil
+	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	x = kit.MinInt(x, mainVp.ViewBox.Size.X-vpsz.X) // fit
+	y = kit.MinInt(y, mainVp.ViewBox.Size.Y-vpsz.Y) // fit
+	pvp.Resize(vpsz)
+	pvp.ViewBox.Min = image.Point{x, y}
+	pvp.UpdateEndNoSig(updt)
+
+	win.NextPopup = pvp.This
+	return &pvp
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// MenuButton pops up a menu, has an indicator by default
 
 type MenuButton struct {
 	ButtonBase
@@ -96,63 +190,6 @@ func (g *MenuButton) ConfigParts() {
 	if mods {
 		g.UpdateEnd(updt)
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// PopupMenu function
-
-var MenuFrameProps = ki.Props{
-	"border-width":        units.NewValue(0, units.Px),
-	"border-color":        "none",
-	"margin":              units.NewValue(4, units.Px),
-	"padding":             units.NewValue(2, units.Px),
-	"box-shadow.h-offset": units.NewValue(2, units.Px),
-	"box-shadow.v-offset": units.NewValue(2, units.Px),
-	"box-shadow.blur":     units.NewValue(2, units.Px),
-	"box-shadow.color":    &Prefs.ShadowColor,
-}
-
-// PopupMenu just pops up a viewport with a layout that draws the supplied
-// actions positions are relative to given viewport -- name is relevant base
-// name to which Menu is appended
-func PopupMenu(menu ki.Slice, x, y int, parVp *Viewport2D, name string) *Viewport2D {
-	win := parVp.Win
-	mainVp := win.Viewport
-	if len(menu) == 0 {
-		log.Printf("GoGi PopupMenu: empty menu given\n")
-		return nil
-	}
-	pvp := Viewport2D{}
-	pvp.InitName(&pvp, name+"Menu")
-	pvp.Win = win
-	updt := pvp.UpdateStart()
-	pvp.Fill = true
-	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
-	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
-
-	pvp.ViewBox.Min = image.Point{x, y}
-	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
-	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
-	frame.Lay = LayoutCol
-	frame.SetProps(MenuFrameProps, false)
-	for _, ac := range menu {
-		acn, _ := KiToNode2D(ac)
-		frame.AddChild(acn)
-	}
-	frame.Init2DTree()
-	frame.Style2DTree()                                // sufficient to get sizes
-	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree()                                 // collect sizes
-	pvp.Win = nil
-	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
-	x = kit.MinInt(x, mainVp.ViewBox.Size.X-vpsz.X) // fit
-	y = kit.MinInt(y, mainVp.ViewBox.Size.Y-vpsz.Y) // fit
-	pvp.Resize(vpsz)
-	pvp.ViewBox.Min = image.Point{x, y}
-	pvp.UpdateEndNoSig(updt)
-
-	win.NextPopup = pvp.This
-	return &pvp
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

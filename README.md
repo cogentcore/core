@@ -71,12 +71,7 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
-* update clip on mac to support new mimedata interface
-
-* DND: store mimedata.Mimes plus a node representing current drag in the
-  gi.Window, and add a method to start the drag passing those two -- add all other assoc mgmt etc
-  
-* add dnd recv to textfield, treeviews
+* enable dnd to use OS DND when moves outside window
 
 * windows:
     + clip.Board impl
@@ -85,6 +80,7 @@ Currently at an **alpha** level release:
 
 * mac:
 	+ impl setPos
+	+ more clip data types, esp JSON
 
 * linux:
 	+ clip.Board impl
@@ -93,6 +89,14 @@ Currently at an **alpha** level release:
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
+
+* add NodeSelected as a basic flag in node.go -- very general -- get rid of special cases
+
+* dnd move events -- treeview needs to watch and scroll appropriately
+* treeview auto-scroll based on selection, mouse
+* treeview cut / copy / paste -- already there just needs glue
+* structview is rendering over top of treeview during updates (without bounds in place) - should fix that anyway for efficiency
+* change ... menu to a simple invisible right-mouse-button popup menu -- much lighter weight
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 
@@ -113,8 +117,6 @@ Currently at an **alpha** level release:
 
 * arg view / dialog and button tags
 
-* DND for slices, trees: need the restore under vp, draw vp sequence to work right -- maybe after new rendering.
-
 * Structview: condshow / edit
 	
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
@@ -122,6 +124,8 @@ Currently at an **alpha** level release:
 * add a new icon for color editor..
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
+
+* translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
 
 * Reminder: grep all todo: in code -- lots!
 
@@ -162,7 +166,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
 + FileView view and dialog -- various, see todo in fileview.go
 + TextField -- constraints
-+ TreeView (NodeWidget) -- needs dnd, clip, -- see about LI, UL lists..
++ TreeView -- needs clip copy / paste, -- see about LI, UL lists..
 + TabWidget -- needs updating
 + Label -- done -- could make lots of H1, etc alts
 
@@ -171,5 +175,5 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 * Styling and ToDots
 	+ currently compiling default of main style, but derived state / sub styles MUST be styled dynamically otherwise css and props changes don't propagate -- this doesn't add much -- was previously caching those but then they were not responsive to overall changes.
 	+ Lots of redundant ToDots is happening, but it is difficult to figure out exactly when minimal recompute is necessary.  right now only for nil props.  computing prop diffs might be more expensive and complex than just redoing everything.
-	+ 4.6sec on FindConnectionIndex when making new Connections -- hash map? -- this is most of the time in Init2D
+	+ switched to map!  old: 4.6sec on FindConnectionIndex when making new Connections -- this is most of the time in Init2D
 	

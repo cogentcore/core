@@ -55,8 +55,6 @@ const (
 
 //go:generate stringer -type=TreeViewSignals
 
-// todo: continuous select, extend select can now be read directly from mouse event
-
 // these extend NodeBase NodeFlags to hold TreeView state
 const (
 	// node is closed
@@ -612,7 +610,6 @@ func (tv *TreeView) ToggleClose() {
 func (tv *TreeView) SrcInsertAfter() {
 	ttl := "TreeView Insert After"
 	if tv.IsField() {
-		// todo: disable menu!
 		PromptDialog(tv.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
 		return
 	}
@@ -645,7 +642,6 @@ func (tv *TreeView) SrcInsertAfter() {
 func (tv *TreeView) SrcInsertBefore() {
 	ttl := "TreeView Insert Before"
 	if tv.IsField() {
-		// todo: disable menu!
 		PromptDialog(tv.Viewport, ttl, "Cannot insert before fields", true, false, nil, nil)
 		return
 	}
@@ -743,30 +739,149 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// StartDragNDrop starts a drag-n-drop on this node -- it includes any
-// selected siblings as well, each as additional records in mimedata
-func (tv *TreeView) StartDragNDrop() {
-	var md mimedata.Mimes
-	if tv.IsSelected() {
-		sels := tv.SelectedViews()
-		md = make(mimedata.Mimes, 0, len(sels)*2)
-		if len(sels) > 1 {
-			for _, sn := range sels {
-				if sn.This != tv.This {
-					tv.MimeData(&md)
-				}
+// NodesFromMimeData creates a slice of Ki node(s) from given mime data
+func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
+	sl := make(ki.Slice, 0, len(md)/2)
+	for _, d := range md {
+		if d.Type == mimedata.AppJSON {
+			nki, err := ki.LoadNewJSON(d.Data)
+			if err == nil {
+				sl = append(sl, nki)
+			} else {
+				log.Printf("TreeView NodesFromMimeData: JSON load error: %v\n", err)
 			}
 		}
-	} else {
-		md = make(mimedata.Mimes, 0, 2)
 	}
-	// just the one node
-	tv.MimeData(&md)
+	return sl
+}
+
+// DragNDropStart starts a drag-n-drop on this node -- it includes any other
+// selected nodes as well, each as additional records in mimedata
+func (tv *TreeView) DragNDropStart() {
+	sels := tv.SelectedViews()
+	nitms := kit.MaxInt(1, len(sels))
+	md := make(mimedata.Mimes, 0, 2*nitms)
+	tv.MimeData(&md) // source is always first..
+	if nitms > 1 {
+		for _, sn := range sels {
+			if sn.This != tv.This {
+				tv.MimeData(&md)
+			}
+		}
+	}
 	bi := &Bitmap{}
 	bi.SetName(tv.UniqueName())
-	bi.GrabRenderFrom(tv)
+	bi.GrabRenderFrom(tv) // todo: show number of items?
 	ImageClearer(bi.Pixels, 50.0)
 	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+}
+
+// DragNDropTarget handles a drag-n-drop onto this node
+func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
+	de.Target = tv.This
+	de.SetProcessed()
+	switch de.Mod {
+	case dnd.DropCopy:
+		tv.PasteAction(de.Data)
+	}
+}
+
+// MakePasteMenu makes the menu of options for copy events
+func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}) {
+	if len(*m) > 0 {
+		return
+	}
+	m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.PasteAssign(data.(mimedata.Mimes))
+	})
+	m.AddMenuText("Add Copy to Children", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tv.PasteChildren(data.(mimedata.Mimes))
+	})
+	if !tv.IsField() && tv.RootView.This != tv.This {
+		m.AddMenuText("Insert Copy Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.PasteBefore(data.(mimedata.Mimes))
+		})
+		m.AddMenuText("Insert Copy After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.PasteAfter(data.(mimedata.Mimes))
+		})
+	}
+	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	})
+	// todo: compare, etc..
+}
+
+// PasteAction performs a copy from the clipboard or drag-n-drop using given
+// data -- pops up a menu to determine what specifically to do
+func (tv *TreeView) PasteAction(md mimedata.Mimes) {
+	var men Menu
+	tv.MakePasteMenu(&men, md)
+	xp := tv.WinBBox.Min.X + int(tv.Indent.Dots)
+	yp := (tv.WinBBox.Min.Y + tv.WinBBox.Max.Y) / 2
+	PopupMenu(men, xp, yp, tv.Viewport, "tvPasteMenu")
+}
+
+// PasteAssign assigns mime data (only the first one!) to this node
+func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
+	sl := tv.NodesFromMimeData(md)
+	if len(sl) == 0 {
+		return
+	}
+	sk := tv.SrcNode.Ptr
+	sk.CopyFrom(sl[0])
+}
+
+// PasteBefore inserts object(s) from mime data before this node
+func (tv *TreeView) PasteBefore(md mimedata.Mimes) {
+	ttl := "Paste Before"
+	sl := tv.NodesFromMimeData(md)
+
+	sk := tv.SrcNode.Ptr
+	par := sk.Parent()
+	if par == nil {
+		PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
+		return
+	}
+	myidx := sk.Index()
+	updt := par.UpdateStart()
+	for i, ns := range sl {
+		par.InsertChild(ns, myidx+i)
+	}
+	par.UpdateEnd(updt)
+}
+
+// PasteAfter inserts object(s) from mime data after this node
+func (tv *TreeView) PasteAfter(md mimedata.Mimes) {
+	ttl := "Paste After"
+	sl := tv.NodesFromMimeData(md)
+
+	sk := tv.SrcNode.Ptr
+	par := sk.Parent()
+	if par == nil {
+		PromptDialog(tv.Viewport, ttl, "Cannot after before the root of the tree", true, false, nil, nil)
+		return
+	}
+	myidx := sk.Index()
+	updt := par.UpdateStart()
+	for i, ns := range sl {
+		par.InsertChild(ns, myidx+1+i)
+	}
+	par.UpdateEnd(updt)
+}
+
+// PasteChildren inserts object(s) from mime data at end of children of this node
+func (tv *TreeView) PasteChildren(md mimedata.Mimes) {
+	sl := tv.NodesFromMimeData(md)
+
+	sk := tv.SrcNode.Ptr
+	updt := sk.UpdateStart()
+	for _, ns := range sl {
+		sk.AddChild(ns)
+	}
+	sk.UpdateEnd(updt)
 }
 
 ////////////////////////////////////////////////////
@@ -845,22 +960,15 @@ func (tv *TreeView) TreeViewEvents() {
 			kt.SetProcessed()
 		}
 	})
-	tv.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
-		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if tvv.IsDragging() {
-			tvv.StartDragNDrop()
-		}
-	})
 	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if de.Action == dnd.DropOnTarget {
-			fmt.Printf("dnd targ: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Source.Name())
-			de.Target = tvv.This
-			de.SetProcessed()
-		} else if de.Action == dnd.DropFmSource {
+		switch de.Action {
+		case dnd.Start:
+			tvv.DragNDropStart()
+		case dnd.DropOnTarget:
+			tvv.DragNDropTarget(de)
+		case dnd.DropFmSource:
 			fmt.Printf("dnd source: %v Mod: %v from: %v\n", tvv.Name(), de.Mod, de.Target.Name())
 		}
 	})
@@ -927,38 +1035,43 @@ func (tv *TreeView) ConfigParts() {
 		mb.Text = "..."
 		mb.SetProp("indicator", "none")
 		tv.StylePart(mb.This)
-		mb.MakeMenuFunc = func(mbb *ButtonBase) {
-			tv.MakeMenu(mbb)
+		mb.MakeMenuFunc = func(m *Menu) {
+			tv.MakeActionMenu(m)
 		}
 	}
 	tv.Parts.UpdateEnd(updt)
 }
 
-func (tv *TreeView) MakeMenu(mb *ButtonBase) {
-	if len(mb.Menu) > 0 {
+// MakeActionMenu makes the menu of actions that can be performed on each
+// node.  TODO: check methods on src object for additional actions to
+// insert.. need comment directives for that..
+func (tv *TreeView) MakeActionMenu(m *Menu) {
+	if len(*m) > 0 {
 		return
 	}
 	// todo: shortcuts!
-	mb.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		tv.SrcAddChild()
 	})
-	mb.AddMenuText("Insert Before", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.SrcInsertBefore()
-	})
-	mb.AddMenuText("Insert After", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.SrcInsertAfter()
-	})
-	mb.AddMenuText("Duplicate", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.SrcDuplicate()
-	})
-	mb.AddMenuText("Delete", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.SrcDelete()
-	})
+	if !tv.IsField() && tv.RootView.This != tv.This {
+		m.AddMenuText("Insert Before", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SrcInsertBefore()
+		})
+		m.AddMenuText("Insert After", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SrcInsertAfter()
+		})
+		m.AddMenuText("Duplicate", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SrcDuplicate()
+		})
+		m.AddMenuText("Delete", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tv.SrcDelete()
+		})
+	}
 }
 
 func (tv *TreeView) ConfigPartsIfNeeded() {

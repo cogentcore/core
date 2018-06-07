@@ -124,21 +124,21 @@ func mainrun() {
 
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
-	mb1.AddMenuText("Menu Item 1", rec.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 1", rec.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2 := mb1.AddMenuText("Menu Item 2", rec.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mi2 := mb1.Menu.AddMenuText("Menu Item 2", rec.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2.AddMenuText("Sub Menu Item 2", rec.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mi2.Menu.AddMenuText("Sub Menu Item 2", rec.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mb1.AddSeparator("sep1")
+	mb1.Menu.AddSeparator("sep1")
 
-	mb1.AddMenuText("Menu Item 3", rec.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 3", rec.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 

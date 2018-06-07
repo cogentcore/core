@@ -1211,7 +1211,7 @@ type ComboBox struct {
 	CurVal    interface{}   `json:"-" xml:"-" desc:"current selected value"`
 	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
 	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
-	ItemsMenu ki.Slice      `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
 	ComboSig  ki.Signal     `json:"-" xml:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
@@ -1423,7 +1423,7 @@ func (g *ComboBox) SetIcon(ic *Icon) {
 // make menu of all the items
 func (g *ComboBox) MakeItemsMenu() {
 	if g.ItemsMenu == nil {
-		g.ItemsMenu = make(ki.Slice, 0, len(g.Items))
+		g.ItemsMenu = make(Menu, 0, len(g.Items))
 	}
 	sz := len(g.ItemsMenu)
 	for i, it := range g.Items {
