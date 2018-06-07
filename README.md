@@ -92,8 +92,7 @@ Currently at an **alpha** level release:
 
 * add NodeSelected as a basic flag in node.go -- very general -- get rid of special cases
 
-* dnd move events -- treeview needs to watch and scroll appropriately
-* treeview auto-scroll based on selection, mouse
+* dnd move events -- *layout* needs to watch and scroll appropriately
 * treeview cut / copy / paste -- already there just needs glue
 * structview is rendering over top of treeview during updates (without bounds in place) - should fix that anyway for efficiency
 * change ... menu to a simple invisible right-mouse-button popup menu -- much lighter weight
