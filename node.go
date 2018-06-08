@@ -1011,6 +1011,10 @@ func (n *Node) PathFromUnique(par Ki) string {
 }
 
 func (n *Node) FindPathUnique(path string) Ki {
+	if n.Par != nil { // we are not root..
+		myp := n.PathUnique()
+		path = strings.TrimLeft(path, myp)
+	}
 	curn := Ki(n)
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
 	for i, pe := range pels {

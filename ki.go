@@ -491,7 +491,9 @@ type Ki interface {
 	PathFromUnique(par Ki) string
 
 	// FindPathUnique returns Ki object at given unique path, starting from
-	// this node (e.g., Root()) -- returns nil if not found
+	// this node (e.g., Root()) -- if this node is not the root, then the path
+	// to this node is subtracted from the start of the path.  returns nil if
+	// not found
 	FindPathUnique(path string) Ki
 
 	//////////////////////////////////////////////////////////////////////////
