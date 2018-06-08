@@ -1118,6 +1118,7 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 		return
 	}
 	de := w.DNDFinalEvent
+	de.Processed = false
 	de.Mod = action
 	if de.Source != nil {
 		et := de.Type()
@@ -1130,6 +1131,7 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 // DNDStartEvent handles drag-n-drop start events
 func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
+	de.Processed = false
 	de.Action = dnd.Start
 	w.SendEventSignal(&de)
 	// now up to receiver to call StartDragNDrop if they want to..
@@ -1144,8 +1146,8 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
 	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
+	de.Processed = false
 	de.Action = dnd.Move
-	fmt.Printf("sending dnd move: %v\n", de.Pos())
 	w.SendEventSignal(&de)
 	w.RenderOverlays()
 	e.SetProcessed()
@@ -1154,6 +1156,7 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 // DNDDropEvent handles drag-n-drop drop event (action = release)
 func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
+	de.Processed = false
 	de.DefaultMod()
 	de.Action = dnd.DropOnTarget
 	de.Data = w.DNDData

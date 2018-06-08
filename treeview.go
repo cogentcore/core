@@ -1049,7 +1049,6 @@ func (tv *TreeView) DragNDropSource(de *dnd.Event) {
 		if d.Type == mimedata.TextPlain { // link
 			path := string(d.Data)
 			sn := sroot.FindPathUnique(path)
-			fmt.Printf("attempting to find at path %v found %p\n", path, sn)
 			if sn != nil {
 				sn.Delete(true)
 			}

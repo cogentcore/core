@@ -1113,29 +1113,32 @@ func (ly *Layout) ShowChildAtIndex(idx int) error {
 	return nil
 }
 
-var AutoScrollRate = float32(4.0)
+// AutoScrollRate determines the rate of auto-scrolling of layouts
+var AutoScrollRate = float32(1.0)
 
 // AutoScrollDim auto-scrolls along one dimension
 func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
 	sc := ly.Scrolls[dim]
-	scmax := sc.Max - sc.ThumbVal
+	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+	vissz := sc.ThumbVal            // amount visible
+
+	h := ly.Paint.FontHeight()
+	dst := h * AutoScrollRate
 
 	mind := kit.MaxInt(0, pos-st)
-	maxd := kit.MaxInt(0, (st+int(scmax))-pos)
+	maxd := kit.MaxInt(0, (st+int(vissz))-pos)
 
 	if mind <= maxd {
-		pct := float32(mind) / float32(scmax)
+		pct := float32(mind) / float32(vissz)
 		if pct < .1 && sc.Value > 0 {
-			dst := Min32(AutoScrollRate, sc.Value)
+			dst = Min32(dst, sc.Value)
 			sc.SetValueAction(sc.Value - dst)
-			fmt.Printf("autoscrolled min dim %v dst %v\n", dim, dst)
 		}
 	} else {
-		pct := float32(maxd) / float32(scmax)
-		if pct < .1 && sc.Value < scmax {
-			dst := Min32(AutoScrollRate, (scmax - sc.Value))
+		pct := float32(maxd) / float32(vissz)
+		if pct < .1 && sc.Value < scrange {
+			dst = Min32(dst, (scrange - sc.Value))
 			sc.SetValueAction(sc.Value + dst)
-			fmt.Printf("autoscrolled max dim %v dst %v\n", dim, dst)
 		}
 	}
 }
@@ -1164,6 +1167,13 @@ func (ly *Layout) LayoutEvents() {
 		me := d.(*dnd.MoveEvent)
 		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
 		li.AutoScroll(me.Pos())
+	})
+	ly.ConnectEventType(oswin.MouseMoveEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.MoveEvent)
+		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
+		if li.Viewport.IsMenu() {
+			li.AutoScroll(me.Pos())
+		}
 	})
 }
 
