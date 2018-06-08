@@ -254,13 +254,13 @@ func (sv *StructTableView) ConfigSliceGrid() {
 				if widg.TypeEmbeds(KiT_TextField) {
 					tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
 					tf.SetProp("stv-index", i)
-					tf.Selected = false
+					tf.ClearSelected()
 					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 						if sig == int64(TextFieldSelected) {
 							tff := send.(*TextField)
 							idx := tff.Prop("stv-index", false, false).(int)
 							svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
-							svv.UpdateSelect(idx, tff.Selected)
+							svv.UpdateSelect(idx, tff.IsSelected())
 						}
 					})
 				}
@@ -308,7 +308,7 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 			widg := sg.Child(stidx + sv.SelectedIdx*nWidgPerRow + 1 + fli).(Node2D)
 			if widg.TypeEmbeds(KiT_TextField) {
 				tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
-				tf.Selected = false
+				tf.ClearSelected()
 				tf.UpdateSig()
 			}
 		}
@@ -319,7 +319,7 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 			widg := sg.Child(stidx + sv.SelectedIdx*nWidgPerRow + 1 + fli).(Node2D)
 			if widg.TypeEmbeds(KiT_TextField) {
 				tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
-				tf.Selected = true
+				tf.SetSelected()
 				tf.UpdateSig()
 			}
 		}

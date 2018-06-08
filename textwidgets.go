@@ -76,6 +76,17 @@ var LabelProps = ki.Props{
 	"background-color": color.Transparent,
 }
 
+// SetText just sets the text (todo: perform translation?)
+func (g *Label) SetText(txt string) {
+	g.Text = txt
+}
+
+// SetTextAction sets the text and triggers an update action
+func (g *Label) SetTextAction(txt string) {
+	g.SetText(txt)
+	g.UpdateSig()
+}
+
 func (g *Label) Style2D() {
 	g.Style2DWidget()
 }
@@ -115,7 +126,7 @@ const (
 
 //go:generate stringer -type=TextFieldSignals
 
-// mutually-exclusive textfield states -- determines appearance
+// TextFieldStates are mutually-exclusive textfield states -- determines appearance
 type TextFieldStates int32
 
 const (
@@ -129,7 +140,7 @@ const (
 	TextFieldInactive
 
 	// selected -- for inactive state, can select entire element
-	TextFieldSelect
+	TextFieldSel
 
 	TextFieldStatesN
 )
@@ -152,7 +163,6 @@ type TextField struct {
 	SelectStart   int                     `xml:"-" desc:"starting position of selection in the string"`
 	SelectEnd     int                     `xml:"-" desc:"ending position of selection in the string"`
 	SelectMode    bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	Selected      bool                    `xml:"-" desc:"entire field is selected, for Inactive mode"`
 	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
@@ -178,7 +188,7 @@ var TextFieldProps = ki.Props{
 	TextFieldSelectors[TextFieldInactive]: ki.Props{
 		"background-color": "darker-20",
 	},
-	TextFieldSelectors[TextFieldSelect]: ki.Props{
+	TextFieldSelectors[TextFieldSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
 	},
 }
@@ -336,6 +346,12 @@ func (tf *TextField) CursorDelete(steps int) {
 func (tf *TextField) CursorKill() {
 	steps := len(tf.EditText) - tf.CursorPos
 	tf.CursorDelete(steps)
+}
+
+// ClearSelected resets both the global selected flag and any current selection
+func (tf *TextField) ClearSelected() {
+	tf.WidgetBase.ClearSelected()
+	tf.SelectReset()
 }
 
 // HasSelection returns whether there is a selected region of text
@@ -528,15 +544,41 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.UpdateEnd(updt)
 }
 
+// ActionMenu pops up a menu of various actions to perform
+func (tf *TextField) ActionMenu() {
+	var men Menu
+	tf.MakeActionMenu(&men)
+	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
+	PopupMenu(men, cpos.X, cpos.Y, tf.Viewport, "tfActionMenu")
+}
+
+// MakeActionMenu makes the menu of actions that can be performed on each
+// node.
+func (tf *TextField) MakeActionMenu(m *Menu) {
+	if len(*m) > 0 {
+		return
+	}
+	// todo: add shortcuts
+	m.AddMenuText("Copy", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+		tff.Copy(true)
+	})
+	if !tf.IsInactive() {
+		m.AddMenuText("Cut", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+			tff.Cut()
+		})
+		m.AddMenuText("Paste", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+			tff.Paste()
+		})
+	}
+}
+
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
+	// first all the keys that work for both inactive and active
 	switch kf {
-	case KeyFunSelectItem:
-		tf.EditDone() // not processed, others could consume
-	case KeyFunAccept:
-		tf.EditDone() // not processed, others could consume
-	case KeyFunAbort:
-		tf.RevertEdit() // not processed, others could consume
 	case KeyFunMoveRight:
 		tf.CursorForward(1)
 		kt.SetProcessed()
@@ -549,7 +591,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunEnd:
 		tf.CursorEnd()
 		kt.SetProcessed()
-	case KeyFunSelectText:
+	case KeyFunSelectMode:
 		tf.SelectModeToggle()
 		kt.SetProcessed()
 	case KeyFunCancelSelect:
@@ -558,6 +600,20 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunSelectAll:
 		tf.SelectAll()
 		kt.SetProcessed()
+	case KeyFunCopy:
+		tf.Copy(true) // reset
+		kt.SetProcessed()
+	}
+	if tf.IsInactive() || kt.IsProcessed() {
+		return
+	}
+	switch kf {
+	case KeyFunSelectItem:
+		tf.EditDone() // not processed, others could consume
+	case KeyFunAccept:
+		tf.EditDone() // not processed, others could consume
+	case KeyFunAbort:
+		tf.RevertEdit() // not processed, others could consume
 	case KeyFunBackspace:
 		tf.CursorBackspace(1)
 		kt.SetProcessed()
@@ -566,9 +622,6 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case KeyFunDelete:
 		tf.CursorDelete(1)
-		kt.SetProcessed()
-	case KeyFunCopy:
-		tf.Copy(true) // reset
 		kt.SetProcessed()
 	case KeyFunCut:
 		tf.Cut()
@@ -667,8 +720,8 @@ func (tf *TextField) TextFieldEvents() {
 		me.SetProcessed()
 		if tff.IsInactive() {
 			if me.Action == mouse.Press {
-				tff.Selected = !tff.Selected
-				if tff.Selected {
+				tff.SetSelectedState(!tff.IsSelected())
+				if tff.IsSelected() {
 					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Text)
 				}
 				tff.UpdateSig()
@@ -678,19 +731,28 @@ func (tf *TextField) TextFieldEvents() {
 		if !tff.HasFocus() {
 			tff.GrabFocus()
 		}
-		if me.Action == mouse.Press {
+		switch me.Button {
+		case mouse.Left:
+			if me.Action == mouse.Press {
+				pt := tff.PointToRelPos(me.Pos())
+				tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
+			} else if me.Action == mouse.DoubleClick {
+				if tff.HasSelection() {
+					if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditText) {
+						tff.SelectReset()
+					} else {
+						tff.SelectAll()
+					}
+				} else {
+					tff.SelectWord()
+				}
+			}
+		case mouse.Middle:
 			pt := tff.PointToRelPos(me.Pos())
 			tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
-		} else if me.Action == mouse.DoubleClick {
-			if tff.HasSelection() {
-				if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditText) {
-					tff.SelectReset()
-				} else {
-					tff.SelectAll()
-				}
-			} else {
-				tff.SelectWord()
-			}
+			tff.Paste()
+		case mouse.Right:
+			tff.ActionMenu()
 		}
 	})
 	tf.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -787,19 +849,26 @@ func (tf *TextField) TextWidth(st, ed int) float32 {
 	return tf.StartCharPos(ed) - tf.StartCharPos(st)
 }
 
-func (tf *TextField) RenderCursor() {
+// CharStartPos returns the starting render coords for the given character
+// position in string -- makes no attempt to rationalize that pos (i.e., if
+// not in visible range, position will be out of range too)
+func (tf *TextField) CharStartPos(charidx int) Vec2D {
 	pc := &tf.Paint
-	rs := &tf.Viewport.Render
 	st := &tf.Style
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	spc := st.BoxSpace()
 	pos := tf.LayData.AllocPos.AddVal(spc)
+	cpos := tf.TextWidth(tf.StartPos, charidx)
+	return Vec2D{pos.X + cpos, pos.Y}
+}
 
-	cpos := tf.TextWidth(tf.StartPos, tf.CursorPos)
-
+func (tf *TextField) RenderCursor() {
+	cpos := tf.CharStartPos(tf.CursorPos)
+	pc := &tf.Paint
+	rs := &tf.Viewport.Render
 	h := pc.FontHeight()
-	pc.DrawLine(rs, pos.X+cpos, pos.Y, pos.X+cpos, pos.Y+h)
+	pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+h)
 	pc.Stroke(rs)
 }
 
@@ -819,19 +888,14 @@ func (tf *TextField) RenderSelect() {
 		return
 	}
 
+	spos := tf.CharStartPos(effst)
+
 	pc := &tf.Paint
 	rs := &tf.Viewport.Render
-	st := &tf.StateStyles[TextFieldSelect]
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddVal(spc)
-
-	spos := tf.TextWidth(tf.StartPos, effst)
+	st := &tf.StateStyles[TextFieldSel]
 	tsz := tf.TextWidth(effst, effed)
 	h := pc.FontHeight()
-
-	pc.FillBox(rs, Vec2D{pos.X + spos, pos.Y}, Vec2D{tsz, h}, &st.Background.Color)
+	pc.FillBox(rs, spos, Vec2D{tsz, h}, &st.Background.Color)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -928,8 +992,8 @@ func (tf *TextField) Render2D() {
 		tf.TextFieldEvents()
 		tf.AutoScroll()
 		if tf.IsInactive() {
-			if tf.Selected {
-				tf.Style = tf.StateStyles[TextFieldSelect]
+			if tf.IsSelected() {
+				tf.Style = tf.StateStyles[TextFieldSel]
 			} else {
 				tf.Style = tf.StateStyles[TextFieldInactive]
 			}
@@ -1440,7 +1504,7 @@ func (g *ComboBox) MakeItemsMenu() {
 		ac.SetName(nm)
 		ac.Text = txt
 		ac.Data = i // index is the data
-		ac.SetSelected(i == g.CurIndex)
+		ac.SetSelectedState(i == g.CurIndex)
 		ac.SetAsMenu()
 		ac.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)

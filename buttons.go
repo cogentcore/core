@@ -22,11 +22,8 @@ import (
 
 // these extend NodeBase NodeFlags to hold button state
 const (
-	// button is selected
-	ButtonFlagSelected NodeFlags = NodeFlagsN + iota
-
 	// button is checkable -- enables display of check control
-	ButtonFlagCheckable
+	ButtonFlagCheckable NodeFlags = NodeFlagsN + iota
 
 	// button is checked
 	ButtonFlagChecked
@@ -124,11 +121,6 @@ var ButtonBaseProps = ki.Props{
 
 // see menus.go for MakeMenuFunc, etc
 
-// is this button selected?
-func (g *ButtonBase) IsSelected() bool {
-	return bitflag.Has(g.Flag, int(ButtonFlagSelected))
-}
-
 // is this button checkable
 func (g *ButtonBase) IsCheckable() bool {
 	return bitflag.Has(g.Flag, int(ButtonFlagCheckable))
@@ -145,9 +137,9 @@ func (g *ButtonBase) IsChecked() bool {
 }
 
 // set the selected state of this button -- does not emit signal or update
-func (g *ButtonBase) SetSelected(sel bool) {
-	bitflag.SetState(&g.Flag, sel, int(ButtonFlagSelected))
-	g.SetButtonState(ButtonActive) // update style
+func (g *ButtonBase) SetSelectedState(sel bool) {
+	g.WidgetBase.SetSelectedState(sel)
+	g.SetButtonState(ButtonActive) // update style -- will sort through all state
 }
 
 // set the checked state of this button -- does not emit signal or update
@@ -353,12 +345,15 @@ func ButtonEvents(bw ButtonWidget) {
 		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
-		if me.Action == mouse.DoubleClick { // we just count as a regular click
-			bb.ButtonPressed()
-		} else if me.Action == mouse.Press {
-			bb.ButtonPressed()
-		} else {
-			ab.ButtonRelease() // special one
+		if me.Button == mouse.Left {
+			switch me.Action {
+			case mouse.DoubleClick: // we just count as a regular click
+				fallthrough
+			case mouse.Press:
+				bb.ButtonPressed()
+			case mouse.Release:
+				ab.ButtonRelease() // special one
+			}
 		}
 	})
 	g.ConnectEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {

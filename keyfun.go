@@ -33,7 +33,7 @@ const (
 	KeyFunFocusPrev
 	KeyFunSelectItem // enter
 	KeyFunCancelSelect
-	KeyFunSelectText
+	KeyFunSelectMode
 	KeyFunSelectAll
 	KeyFunAccept // accept any changes and close dialog / move to next
 	KeyFunAbort
@@ -108,7 +108,7 @@ var DefaultKeyMap = KeyMap{
 	"Shift+Control+A":     KeyFunSelectAll,
 	"Meta+A":              KeyFunSelectAll,
 	"Control+G":           KeyFunCancelSelect,
-	"Control+Spacebar":    KeyFunSelectText,
+	"Control+Spacebar":    KeyFunSelectMode,
 	"Control+ReturnEnter": KeyFunAccept,
 	"Escape":              KeyFunAbort,
 	"DeleteBackspace":     KeyFunBackspace,

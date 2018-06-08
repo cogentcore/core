@@ -59,9 +59,6 @@ const (
 const (
 	// node is closed
 	TreeViewFlagClosed NodeFlags = NodeFlagsN + iota
-
-	// node is selected
-	TreeViewFlagSelected
 )
 
 // TreeViewStates are mutually-exclusive tree view states -- determines appearance
@@ -118,7 +115,7 @@ type TreeView struct {
 	StateStyles [TreeViewStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 	Icon        *Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
-	RootView    *TreeView              `json:"-" xml:"-" view:"-" desc:"cached root of the view"`
+	RootView    *TreeView              `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
@@ -277,11 +274,6 @@ func (tv *TreeView) Label() string {
 //////////////////////////////////////////////////////////////////////////////
 //    Selection
 
-// IsSelected returns if this node selected?
-func (tv *TreeView) IsSelected() bool {
-	return bitflag.Has(tv.Flag, int(TreeViewFlagSelected))
-}
-
 // SelectMode returns true if keyboard movements should automatically select nodes
 func (tv *TreeView) SelectMode() bool {
 	smp := tv.RootView.Prop(TreeViewSelModeProp, false, false)
@@ -298,9 +290,21 @@ func (tv *TreeView) SetSelectMode(selMode bool) {
 	tv.RootView.SetProp(TreeViewSelModeProp, selMode)
 }
 
+// SelectModeToggle toggles the SelectMode
+func (tv *TreeView) SelectModeToggle() {
+	if tv.SelectMode() {
+		tv.SetSelectMode(false)
+	} else {
+		tv.SetSelectMode(true)
+	}
+}
+
 // SelectedViews returns a slice of the currently-selected TreeViews within
 // the entire tree, using a list maintained by the root node
 func (tv *TreeView) SelectedViews() []*TreeView {
+	if tv.RootView == nil {
+		return nil
+	}
 	var sl []*TreeView
 	slp := tv.RootView.Prop(TreeViewSelProp, false, false)
 	if slp == nil {
@@ -314,7 +318,9 @@ func (tv *TreeView) SelectedViews() []*TreeView {
 
 // SetSelectedViews updates the selected views to given list
 func (tv *TreeView) SetSelectedViews(sl []*TreeView) {
-	tv.RootView.SetProp(TreeViewSelProp, sl)
+	if tv.RootView != nil {
+		tv.RootView.SetProp(TreeViewSelProp, sl)
+	}
 }
 
 // SelectedSrcNodes returns a slice of the currently-selected source nodes
@@ -332,7 +338,7 @@ func (tv *TreeView) SelectedSrcNodes() ki.Slice {
 // to update global selection list
 func (tv *TreeView) Select() {
 	if !tv.IsSelected() {
-		bitflag.Set(&tv.Flag, int(TreeViewFlagSelected))
+		tv.SetSelected()
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
 		tv.SetSelectedViews(sl)
@@ -344,7 +350,7 @@ func (tv *TreeView) Select() {
 // to update global selection list
 func (tv *TreeView) Unselect() {
 	if tv.IsSelected() {
-		bitflag.Clear(&tv.Flag, int(TreeViewFlagSelected))
+		tv.ClearSelected()
 		sl := tv.SelectedViews()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
@@ -366,10 +372,10 @@ func (tv *TreeView) UnselectAll() {
 		updt = win.UpdateStart()
 	}
 	sl := tv.SelectedViews()
-	sz := len(sl)
-	for i := sz - 1; i >= 0; i-- {
-		v := sl[i]
-		v.Unselect()
+	tv.SetSelectedViews(nil) // clear in advance
+	for _, v := range sl {
+		v.ClearSelected()
+		v.UpdateSig()
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -661,42 +667,42 @@ func (tv *TreeView) MakeActionMenu(m *Menu) {
 	}
 	// todo: shortcuts!
 	m.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.SrcAddChild()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.SrcAddChild()
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		m.AddMenuText("Insert Before", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcInsertBefore()
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.SrcInsertBefore()
 		})
 		m.AddMenuText("Insert After", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcInsertAfter()
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.SrcInsertAfter()
 		})
 		m.AddMenuText("Duplicate", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcDuplicate()
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.SrcDuplicate()
 		})
 		m.AddMenuText("Delete", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.SrcDelete()
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.SrcDelete()
 		})
 	}
 	m.AddSeparator("")
 	// todo: get shortcuts from keyfun
 	m.AddMenuText("Copy", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.Copy()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.Copy(true)
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		m.AddMenuText("Cut", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.Cut()
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.Cut()
 		})
 	}
 	m.AddMenuText("Paste", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.Paste()
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.Paste()
 	})
 }
 
@@ -822,13 +828,13 @@ func (tv *TreeView) SrcDuplicate() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//    Copy / Paste / DND
+//    Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the PathUnique, and
 // an application/json of the source node
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	src := tv.SrcNode.Ptr
-	*md = append(*md, mimedata.NewTextData(tv.PathUnique()))
+	*md = append(*md, mimedata.NewTextData(src.PathUnique()))
 	jb, err := src.SaveJSON(true) // true = pretty for clipboard..
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: jb})
@@ -853,53 +859,8 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 	return sl
 }
 
-// DragNDropStart starts a drag-n-drop on this node -- it includes any other
-// selected nodes as well, each as additional records in mimedata
-func (tv *TreeView) DragNDropStart() {
-	sels := tv.SelectedViews()
-	nitms := kit.MaxInt(1, len(sels))
-	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.MimeData(&md) // source is always first..
-	if nitms > 1 {
-		for _, sn := range sels {
-			if sn.This != tv.This {
-				tv.MimeData(&md)
-			}
-		}
-	}
-	bi := &Bitmap{}
-	bi.SetName(tv.UniqueName())
-	bi.GrabRenderFrom(tv) // todo: show number of items?
-	ImageClearer(bi.Pixels, 50.0)
-	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
-}
-
-// DragNDropTarget handles a drag-n-drop onto this node
-func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
-	de.Target = tv.This
-	if de.Mod == dnd.DropLink {
-		de.Mod = dnd.DropCopy // link not supported -- revert to copy
-	}
-	de.SetProcessed()
-	tv.PasteAction(de.Data, de.Mod)
-}
-
-// DragNDropSource is called after target accepts the drop -- we just remove
-// elements that were moved
-func (tv *TreeView) DragNDropSource(de *dnd.Event) {
-	if de.Mod != dnd.DropMove {
-		return
-	}
-	md := de.Data
-	for _, d := range md {
-		if d.Type == mimedata.TextPlain { // link
-			// todo: find link, delete
-		}
-	}
-}
-
-// Copy copies to clip.Board
-func (tv *TreeView) Copy() {
+// Copy copies to clip.Board, optionally resetting the selection
+func (tv *TreeView) Copy(reset bool) {
 	sels := tv.SelectedViews()
 	nitms := kit.MaxInt(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -912,45 +873,50 @@ func (tv *TreeView) Copy() {
 		}
 	}
 	oswin.TheApp.ClipBoard().Write(md, true)
+	if reset {
+		tv.UnselectAll()
+	}
 }
 
 // Cut copies to clip.Board and deletes selected items
 func (tv *TreeView) Cut() {
-	tv.Copy()
-	// todo: cut
+	tv.Copy(false)
+	sels := tv.SelectedSrcNodes()
+	tv.UnselectAll()
+	for _, sn := range sels {
+		sn.Delete(true)
+	}
 }
 
 // Paste pastes clipboard at given node
 func (tv *TreeView) Paste() {
 	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
 	if md != nil {
-		tv.PasteAction(md, dnd.DropCopy)
+		tv.PasteAction(md)
 	}
 }
 
-// MakePasteMenu makes the menu of options for copy events
-func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}, mod dnd.DropMods) {
+// MakePasteMenu makes the menu of options for paste events
+func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}) {
 	if len(*m) > 0 {
 		return
 	}
-	if mod == dnd.DropCopy {
-		m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.PasteAssign(data.(mimedata.Mimes))
-		})
-	}
+	m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.PasteAssign(data.(mimedata.Mimes))
+	})
 	m.AddMenuText("Add to Children", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tv.PasteChildren(data.(mimedata.Mimes))
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.PasteChildren(data.(mimedata.Mimes))
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.PasteBefore(data.(mimedata.Mimes))
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.PasteBefore(data.(mimedata.Mimes))
 		})
 		m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tv.PasteAfter(data.(mimedata.Mimes))
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.PasteAfter(data.(mimedata.Mimes))
 		})
 	}
 	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -958,12 +924,12 @@ func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}, mod dnd.DropMods) {
 	// todo: compare, etc..
 }
 
-// PasteAction performs a copy from the clipboard or drag-n-drop using given
-// data -- pops up a menu to determine what specifically to do -- use mod =
-// dnd.DropCopy for clip regular clip paste
-func (tv *TreeView) PasteAction(md mimedata.Mimes, mod dnd.DropMods) {
+// PasteAction performs a paste from the clipboard using given data -- pops up
+// a menu to determine what specifically to do
+func (tv *TreeView) PasteAction(md mimedata.Mimes) {
+	tv.UnselectAll()
 	var men Menu
-	tv.MakePasteMenu(&men, md, mod)
+	tv.MakePasteMenu(&men, md)
 	pos := tv.MenuPosition()
 	PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
 }
@@ -1028,6 +994,145 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes) {
 	sk.UpdateEnd(updt)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//    Drag-n-Drop
+
+// DragNDropStart starts a drag-n-drop on this node -- it includes any other
+// selected nodes as well, each as additional records in mimedata
+func (tv *TreeView) DragNDropStart() {
+	sels := tv.SelectedViews()
+	nitms := kit.MaxInt(1, len(sels))
+	md := make(mimedata.Mimes, 0, 2*nitms)
+	tv.MimeData(&md) // source is always first..
+	if nitms > 1 {
+		for _, sn := range sels {
+			if sn.This != tv.This {
+				tv.MimeData(&md)
+			}
+		}
+	}
+	bi := &Bitmap{}
+	bi.SetName(tv.UniqueName())
+	bi.GrabRenderFrom(tv) // todo: show number of items?
+	ImageClearer(bi.Pixels, 50.0)
+	fmt.Printf("dnd started in treeview\n")
+	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+}
+
+// DragNDropTarget handles a drag-n-drop onto this node
+func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
+	de.Target = tv.This
+	if de.Mod == dnd.DropLink {
+		de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	}
+	de.SetProcessed()
+	tv.DropAction(de.Data, de.Mod)
+}
+
+// DragNDropFinalize is called to finalize actions on the Source node prior to
+// performing target actions -- mod must indicate actual action taken by the
+// target, including ignore
+func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
+	tv.UnselectAll()
+	tv.Viewport.Win.FinalizeDragNDrop(mod)
+}
+
+// DragNDropSource is called after target accepts the drop -- we just remove
+// elements that were moved
+func (tv *TreeView) DragNDropSource(de *dnd.Event) {
+	if de.Mod != dnd.DropMove {
+		return
+	}
+	sroot := tv.RootView.SrcNode.Ptr
+	md := de.Data
+	for _, d := range md {
+		if d.Type == mimedata.TextPlain { // link
+			path := string(d.Data)
+			sn := sroot.FindPathUnique(path)
+			fmt.Printf("attempting to find at path %v found %p\n", path, sn)
+			if sn != nil {
+				sn.Delete(true)
+			}
+		}
+	}
+}
+
+// MakeDropMenu makes the menu of options for dropping on a target
+func (tv *TreeView) MakeDropMenu(m *Menu, data interface{}, mod dnd.DropMods) {
+	if len(*m) > 0 {
+		return
+	}
+	switch mod {
+	case dnd.DropCopy:
+		m.AddLabel("Copy (Shift=Move):")
+	case dnd.DropMove:
+		m.AddLabel("Move:")
+	}
+	if mod == dnd.DropCopy {
+		m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.DropAssign(data.(mimedata.Mimes))
+		})
+	}
+	m.AddMenuText("Add to Children", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
+	})
+	if !tv.IsField() && tv.RootView.This != tv.This {
+		m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
+		})
+		m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
+		})
+	}
+	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
+		tvv.DropCancel()
+	})
+	// todo: compare, etc..
+}
+
+// DropAction pops up a menu to determine what specifically to do with dropped items
+func (tv *TreeView) DropAction(md mimedata.Mimes, mod dnd.DropMods) {
+	var men Menu
+	tv.MakeDropMenu(&men, md, mod)
+	pos := tv.MenuPosition()
+	PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
+}
+
+// DropAssign assigns mime data (only the first one!) to this node
+func (tv *TreeView) DropAssign(md mimedata.Mimes) {
+	tv.DragNDropFinalize(dnd.DropCopy)
+	tv.PasteAssign(md)
+}
+
+// DropBefore inserts object(s) from mime data before this node
+func (tv *TreeView) DropBefore(md mimedata.Mimes, mod dnd.DropMods) {
+	tv.DragNDropFinalize(mod)
+	tv.PasteBefore(md)
+}
+
+// DropAfter inserts object(s) from mime data after this node
+func (tv *TreeView) DropAfter(md mimedata.Mimes, mod dnd.DropMods) {
+	tv.DragNDropFinalize(mod)
+	tv.PasteAfter(md)
+}
+
+// DropChildren inserts object(s) from mime data at end of children of this node
+func (tv *TreeView) DropChildren(md mimedata.Mimes, mod dnd.DropMods) {
+	tv.DragNDropFinalize(mod)
+	tv.PasteChildren(md)
+}
+
+// DropCancel cancels the drop action e.g., preventing deleting of source
+// items in a Move case
+func (tv *TreeView) DropCancel() {
+	tv.DragNDropFinalize(dnd.DropIgnore)
+}
+
 ////////////////////////////////////////////////////
 // Infrastructure
 
@@ -1061,57 +1166,63 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
+func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
+	kf := KeyFun(kt.ChordString())
+	selMode := mouse.SelectModeMod(kt.Modifiers)
+	switch kf {
+	case KeyFunSelectItem:
+		tf.SelectAction(selMode)
+		kt.SetProcessed()
+	case KeyFunCancelSelect:
+		tf.UnselectAll()
+		kt.SetProcessed()
+	case KeyFunMoveRight:
+		tf.Open()
+		kt.SetProcessed()
+	case KeyFunMoveLeft:
+		tf.Close()
+		kt.SetProcessed()
+	case KeyFunMoveDown:
+		tf.MoveDownAction(selMode)
+		kt.SetProcessed()
+	case KeyFunMoveUp:
+		tf.MoveUpAction(selMode)
+		kt.SetProcessed()
+	case KeyFunSelectMode:
+		tf.SelectModeToggle()
+		kt.SetProcessed()
+	case KeyFunSelectAll:
+		tf.SelectAll()
+		kt.SetProcessed()
+	case KeyFunDelete:
+		tf.SrcDelete()
+		kt.SetProcessed()
+	case KeyFunDuplicate:
+		tf.SrcDuplicate()
+		kt.SetProcessed()
+	case KeyFunInsert:
+		tf.SrcInsertBefore()
+		kt.SetProcessed()
+	case KeyFunInsertAfter:
+		tf.SrcInsertAfter()
+		kt.SetProcessed()
+	case KeyFunCopy:
+		tf.Copy(true)
+		kt.SetProcessed()
+	case KeyFunCut:
+		tf.Cut()
+		kt.SetProcessed()
+	case KeyFunPaste:
+		tf.Paste()
+		kt.SetProcessed()
+	}
+}
+
 func (tv *TreeView) TreeViewEvents() {
 	tv.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
-		// fmt.Printf("TreeView key: %v\n", kt.Chord)
-		kf := KeyFun(kt.ChordString())
-		selMode := mouse.SelectModeMod(kt.Modifiers)
-		switch kf {
-		case KeyFunSelectItem:
-			tvv.SelectAction(selMode)
-			kt.SetProcessed()
-		case KeyFunCancelSelect:
-			tvv.UnselectAll()
-			kt.SetProcessed()
-		case KeyFunMoveRight:
-			tvv.Open()
-			kt.SetProcessed()
-		case KeyFunMoveLeft:
-			tvv.Close()
-			kt.SetProcessed()
-		case KeyFunMoveDown:
-			tvv.MoveDownAction(selMode)
-			kt.SetProcessed()
-		case KeyFunMoveUp:
-			tvv.MoveUpAction(selMode)
-			kt.SetProcessed()
-		case KeyFunSelectAll:
-			tvv.SelectAll()
-			kt.SetProcessed()
-		case KeyFunDelete:
-			tvv.SrcDelete()
-			kt.SetProcessed()
-		case KeyFunDuplicate:
-			tvv.SrcDuplicate()
-			kt.SetProcessed()
-		case KeyFunInsert:
-			tvv.SrcInsertBefore()
-			kt.SetProcessed()
-		case KeyFunInsertAfter:
-			tvv.SrcInsertAfter()
-			kt.SetProcessed()
-		case KeyFunCopy:
-			tvv.Copy()
-			kt.SetProcessed()
-		case KeyFunCut:
-			tvv.Cut()
-			kt.SetProcessed()
-		case KeyFunPaste:
-			tvv.Paste()
-			kt.SetProcessed()
-		}
+		tvv.KeyInput(kt)
 	})
 	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
@@ -1138,13 +1249,16 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
 		me := d.(*mouse.Event)
 		me.SetProcessed()
-		switch me.Action {
-		case mouse.DoubleClick:
-			tvv.ToggleClose()
-		case mouse.Release:
-			tvv.SelectAction(me.SelectMode())
-		case mouse.Press:
-			if me.Button == mouse.Right { // todo: mac alt?
+		switch me.Button {
+		case mouse.Left:
+			switch me.Action {
+			case mouse.DoubleClick:
+				tvv.ToggleClose()
+			case mouse.Release:
+				tvv.SelectAction(me.SelectMode())
+			}
+		case mouse.Right:
+			if me.Action == mouse.Press {
 				tvv.ActionMenu()
 			}
 		}

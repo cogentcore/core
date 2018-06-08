@@ -90,12 +90,8 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* add NodeSelected as a basic flag in node.go -- very general -- get rid of special cases
-
 * dnd move events -- *layout* needs to watch and scroll appropriately
-* treeview cut / copy / paste -- already there just needs glue
 * structview is rendering over top of treeview during updates (without bounds in place) - should fix that anyway for efficiency
-* change ... menu to a simple invisible right-mouse-button popup menu -- much lighter weight
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 

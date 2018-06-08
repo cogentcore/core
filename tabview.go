@@ -23,12 +23,16 @@ type TabViewSignals int64
 const (
 	// node was selected -- data is the tab widget
 	TabSelected TabViewSignals = iota
+
 	// tab widget unselected
 	TabUnselected
+
 	// collapsed tab widget was opened
 	TabOpened
+
 	// open tab widget was collapsed -- children not visible
 	TabCollapsed
+
 	TabViewSignalsN
 )
 
@@ -75,7 +79,7 @@ func (g *TabView) SelectTabIndex(idx int) error {
 	}
 	updt := g.UpdateStart()
 	g.UnselectAllTabButtons()
-	tb.SetSelected(true)
+	tb.SetSelectedState(true)
 	tabstack := g.TabStackLayout()
 	tabstack.ShowChildAtIndex(idx)
 	g.UpdateEnd(updt)
@@ -126,7 +130,7 @@ func (g *TabView) UnselectAllTabButtons() {
 		}
 		if tb.IsSelected() {
 			updt := tb.UpdateStart()
-			tb.SetSelected(false)
+			tb.SetSelectedState(false)
 			tb.UpdateEnd(updt)
 		}
 	}

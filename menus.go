@@ -58,6 +58,18 @@ func (m *Menu) AddSeparator(name string) *Separator {
 	return &sp
 }
 
+// AddLabel adds a label to the menu
+func (m *Menu) AddLabel(lbl string) *Label {
+	if m == nil {
+		*m = make(Menu, 0, 10)
+	}
+	lb := Label{}
+	lb.InitName(&lb, lbl)
+	lb.SetText(lbl)
+	*m = append(*m, lb.This.(Node2D))
+	return &lb
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 

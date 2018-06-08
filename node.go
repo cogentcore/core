@@ -75,6 +75,10 @@ const (
 	// still be selected and copied when inactive
 	InactiveEvents
 
+	// Selected indicates that this node has been selected by the user --
+	// widely supported across different nodes
+	Selected
+
 	// MouseHasEntered indicates that the MouseEnteredEvent was previously
 	// registered on this node
 	MouseHasEntered
@@ -121,7 +125,7 @@ func (g *NodeBase) SetInactive() {
 	bitflag.Set(&g.Flag, int(Inactive))
 }
 
-// SetInactiveState set flag as inactive or not based on inact flag
+// SetInactiveState set flag as inactive or not based on inact arg
 func (g *NodeBase) SetInactiveState(inact bool) {
 	bitflag.SetState(&g.Flag, inact, int(Inactive))
 }
@@ -130,6 +134,26 @@ func (g *NodeBase) SetInactiveState(inact bool) {
 // nodes don't need focus typically)
 func (g *NodeBase) SetCanFocusIfActive() {
 	bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
+}
+
+// IsSelected tests if this node is flagged as Selected
+func (g *NodeBase) IsSelected() bool {
+	return bitflag.Has(g.Flag, int(Selected))
+}
+
+// SetSelected sets the node as selected
+func (g *NodeBase) SetSelected() {
+	bitflag.Set(&g.Flag, int(Selected))
+}
+
+// ClearSelected sets the node as not selected
+func (g *NodeBase) ClearSelected() {
+	bitflag.Clear(&g.Flag, int(Selected))
+}
+
+// SetSelectedState set flag as selected or not based on sel arg
+func (g *NodeBase) SetSelectedState(sel bool) {
+	bitflag.SetState(&g.Flag, sel, int(Selected))
 }
 
 // NeedsFullReRender checks if node has said it needs full re-render

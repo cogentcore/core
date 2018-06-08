@@ -34,6 +34,14 @@ import (
 // event type (scroll, drag, resize) is skipped
 var EventSkipLagMSec = 50
 
+// DragStartDelayMSec is the number of milliseconds to wait before initiating a
+// regular mouse drag event (as opposed to a basic mouse.Press)
+var DragStartDelayMSec = 50
+
+// DragStartDistPix is the number of pixels that must be moved before
+// initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+var DragStartDistPix = 4
+
 // DNDStartDelayMSec is the number of milliseconds to wait before initiating a
 // drag-n-drop event -- gotta drag it like you mean it
 var DNDStartDelayMSec = 200
@@ -62,6 +70,7 @@ type Window struct {
 	DNDData       mimedata.Mimes              `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource     ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event                  `json:"-" xml:"-" desc:"final event for DND which is sent if a finalize is received"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
 	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
@@ -551,11 +560,14 @@ func PopupIsMenu(pop ki.Ki) bool {
 }
 
 // DeletePopupMenu returns true if the given popup item should be deleted
-func (w *Window) DeletePopupMenu(pop ki.Ki) bool {
+func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
 	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // poping up another menu
+		return false
+	}
+	if me.Button != mouse.Left && w.Dragging == nil { // probably menu activation in first place
 		return false
 	}
 	return true
@@ -572,6 +584,9 @@ func (w *Window) EventLoop() {
 	lastSkipped := false
 
 	var startDrag *mouse.DragEvent
+	dragStarted := false
+
+	var startDND *mouse.DragEvent
 	dndStarted := false
 
 	for {
@@ -661,26 +676,43 @@ func (w *Window) EventLoop() {
 			skippedResize = nil
 		}
 
-		// detect start of DND -- DND events sent in parallel with regular drag event
+		// detect start of drag and DND -- both require delays in starting due
+		// to minor wiggles when pressing the mouse button
 		if et == oswin.MouseDragEvent {
-			if !dndStarted {
+			if !dragStarted {
 				if startDrag == nil {
 					startDrag = evi.(*mouse.DragEvent)
 				} else {
 					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
-					if delayMs >= DNDStartDelayMSec {
+					if delayMs >= DragStartDelayMSec {
 						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
-						if dst >= DNDStartDistPix {
-							dndStarted = true
-							w.DNDStartEvent(startDrag)
+						if dst >= DragStartDistPix {
+							dragStarted = true
 							startDrag = nil
 						}
 					}
 				}
 			}
+			if !dndStarted {
+				if startDND == nil {
+					startDND = evi.(*mouse.DragEvent)
+				} else {
+					delayMs := int(now.Sub(startDND.Time()) / time.Millisecond)
+					if delayMs >= DNDStartDelayMSec {
+						dst := int(math32.Hypot(float32(startDND.Where.X-evi.Pos().X), float32(startDND.Where.Y-evi.Pos().Y)))
+						if dst >= DNDStartDistPix {
+							dndStarted = true
+							w.DNDStartEvent(startDND)
+							startDND = nil
+						}
+					}
+				}
+			}
 		} else {
-			dndStarted = false
+			dragStarted = false
 			startDrag = nil
+			dndStarted = false
+			startDND = nil
 		}
 
 		// Window gets first crack at the events, and handles window-specific ones
@@ -770,6 +802,10 @@ func (w *Window) EventLoop() {
 		case *mouse.DragEvent:
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
+			} else {
+				if !dragStarted {
+					e.SetProcessed() // ignore
+				}
 			}
 		case *mouse.Event:
 			if w.DNDData != nil && e.Action == mouse.Release {
@@ -787,7 +823,7 @@ func (w *Window) EventLoop() {
 		if w.Popup != nil {
 			if me, ok := evi.(*mouse.Event); ok {
 				if me.Action == mouse.Release {
-					if w.DeletePopupMenu(w.Popup) {
+					if w.DeletePopupMenu(w.Popup, me) {
 						delPop = true
 					}
 				}
@@ -1074,6 +1110,23 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
+// FinalizeDragNDrop is called by a node to finalize the drag-n-drop
+// operation, after given action has been performed on the target -- allows
+// target to cancel, by sending dnd.DropIgnore
+func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
+	if w.DNDFinalEvent == nil { // shouldn't happen...
+		return
+	}
+	de := w.DNDFinalEvent
+	de.Mod = action
+	if de.Source != nil {
+		et := de.Type()
+		de.Action = dnd.DropFmSource
+		w.EventSigs[et].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
+	}
+	w.DNDFinalEvent = nil
+}
+
 // DNDStartEvent handles drag-n-drop start events
 func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
@@ -1090,6 +1143,10 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	} // else 3d..
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
+	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
+	de.Action = dnd.Move
+	fmt.Printf("sending dnd move: %v\n", de.Pos())
+	w.SendEventSignal(&de)
 	w.RenderOverlays()
 	e.SetProcessed()
 }
@@ -1097,7 +1154,6 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 // DNDDropEvent handles drag-n-drop drop event (action = release)
 func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	et := de.Type()
 	de.DefaultMod()
 	de.Action = dnd.DropOnTarget
 	de.Data = w.DNDData
@@ -1105,11 +1161,7 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 	bitflag.Clear(w.DNDSource.Flags(), int(NodeDragging))
 	w.Dragging = nil
 	w.SendEventSignal(&de)
-	if !de.IsProcessed() || de.Mod == dnd.DropIgnore { // the target did not accept it
-	} else { // send info back to source
-		de.Action = dnd.DropFmSource
-		w.EventSigs[de.Type()].SendSig(w.DNDSource, w, int64(et), (oswin.Event)(&de))
-	}
+	w.DNDFinalEvent = &de
 	w.ClearDragNDrop()
 	e.SetProcessed()
 }

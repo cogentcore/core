@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextFieldStates_name = "TextFieldActiveTextFieldFocusTextFieldInactiveTextFieldSelectTextFieldStatesN"
+const _TextFieldStates_name = "TextFieldActiveTextFieldFocusTextFieldInactiveTextFieldSelTextFieldStatesN"
 
-var _TextFieldStates_index = [...]uint8{0, 15, 29, 46, 61, 77}
+var _TextFieldStates_index = [...]uint8{0, 15, 29, 46, 58, 74}
 
 func (i TextFieldStates) String() string {
 	if i < 0 || i >= TextFieldStates(len(_TextFieldStates_index)-1) {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -1102,7 +1103,7 @@ func (ly *Layout) Render2DChildren() {
 	}
 }
 
-// convenience for LayoutStacked to show child node at a given index
+// ShowChildAtIndex is a convenience for LayoutStacked to show child node at a given index
 func (ly *Layout) ShowChildAtIndex(idx int) error {
 	idx, err := ly.Kids.ValidIndex(idx)
 	if err != nil {
@@ -1112,6 +1113,45 @@ func (ly *Layout) ShowChildAtIndex(idx int) error {
 	return nil
 }
 
+var AutoScrollRate = float32(4.0)
+
+// AutoScrollDim auto-scrolls along one dimension
+func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
+	sc := ly.Scrolls[dim]
+	scmax := sc.Max - sc.ThumbVal
+
+	mind := kit.MaxInt(0, pos-st)
+	maxd := kit.MaxInt(0, (st+int(scmax))-pos)
+
+	if mind <= maxd {
+		pct := float32(mind) / float32(scmax)
+		if pct < .1 && sc.Value > 0 {
+			dst := Min32(AutoScrollRate, sc.Value)
+			sc.SetValueAction(sc.Value - dst)
+			fmt.Printf("autoscrolled min dim %v dst %v\n", dim, dst)
+		}
+	} else {
+		pct := float32(maxd) / float32(scmax)
+		if pct < .1 && sc.Value < scmax {
+			dst := Min32(AutoScrollRate, (scmax - sc.Value))
+			sc.SetValueAction(sc.Value + dst)
+			fmt.Printf("autoscrolled max dim %v dst %v\n", dim, dst)
+		}
+	}
+}
+
+// AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
+func (ly *Layout) AutoScroll(pos image.Point) {
+	if ly.HasScroll[Y] && ly.HasScroll[X] {
+		ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
+		ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+	} else if ly.HasScroll[Y] {
+		ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
+	} else if ly.HasScroll[X] {
+		ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+	}
+}
+
 func (ly *Layout) LayoutEvents() {
 	ly.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
@@ -1119,6 +1159,11 @@ func (ly *Layout) LayoutEvents() {
 		if li.ScrollDelta(me.Delta) {
 			me.SetProcessed()
 		}
+	})
+	ly.ConnectEventType(oswin.DNDMoveEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*dnd.MoveEvent)
+		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
+		li.AutoScroll(me.Pos())
 	})
 }
 
