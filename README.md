@@ -80,7 +80,6 @@ Currently at an **alpha** level release:
 
 * mac:
 	+ impl setPos
-	+ more clip data types, esp JSON
 
 * linux:
 	+ clip.Board impl
@@ -89,6 +88,8 @@ Currently at an **alpha** level release:
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
+
+* icon property mgmt should all be by name, not pointers -- works for json!
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 

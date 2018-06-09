@@ -34,7 +34,8 @@ void doCloseWindow(uintptr_t id);
 void getScreens();
 void clipClear();
 void clipRead(char* typ, int len);
-void clipWrite(char* typ, int typlen, char* data, int dlen);
+void clipAddWrite(char* typ, int typlen, char* data, int dlen);
+void clipWrite();
 uint64_t threadID();
 */
 import "C"
@@ -860,11 +861,19 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		ctyp := C.CString(typ)
 		C.clipRead(ctyp, C.int(len(typ)))
 		C.free(unsafe.Pointer(ctyp))
-		if ci.data != nil {
-			return ci.data
-		}
 	}
-	return nil
+	return ci.data
+}
+
+func clipWriteMimeType(mtyp string) {
+	ctyp := C.CString(mimedata.TextPlain)
+	mhdr := []byte(fmt.Sprintf("MIME-Version: 1.0\nContent-type: %v", mtyp))
+	sz := len(mhdr)
+	cdata := C.malloc(C.size_t(sz))
+	copy((*[1 << 30]byte)(cdata)[0:sz], mhdr)
+	C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(mimedata.TextPlain)))
+	C.free(unsafe.Pointer(ctyp))
+	C.free(unsafe.Pointer(cdata))
 }
 
 func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
@@ -872,14 +881,19 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 		ci.Clear()
 	}
 	for _, d := range data {
+		switch d.Type {
+		case mimedata.AppJSON:
+			clipWriteMimeType(d.Type)
+		}
 		ctyp := C.CString(d.Type)
 		sz := len(d.Data)
 		cdata := C.malloc(C.size_t(sz))
 		copy((*[1 << 30]byte)(cdata)[0:sz], d.Data)
-		C.clipWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(d.Type)))
+		C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(d.Type)))
 		C.free(unsafe.Pointer(ctyp))
 		C.free(unsafe.Pointer(cdata))
 	}
+	C.clipWrite()
 	return nil
 }
 

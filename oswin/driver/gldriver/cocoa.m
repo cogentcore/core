@@ -417,19 +417,75 @@ void getScreens() {
 
 // https://developer.apple.com/documentation/appkit/nspasteboard
 // https://github.com/jtanx/libclipboard/blob/master/src/clipboard_cocoa.c
+// https://developer.apple.com/documentation/appkit/nspasteboardreading
+// last one shows that the list is -- basic classes, not fine-grained uti's
+
+// for anything that is not a basic type (NSString, NSAttributedString,
+// NSIMage, etc) we encode a NSString that gives the mimetype, e.g.,
+// application/json, using standard mime format header
+
+static const char* mime_hdr = "MIME-Version: 1.0\nContent-type: ";
 
 void pasteRead(NSPasteboard* pb, char* typ, int len) {
     NSDictionary *options = [NSDictionary dictionary];
     NSArray *classes;
 
-    if (strncmp(typ, "text/plain", len) == 0 || strncmp(typ, "text/*", len) == 0) {
-        classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
-        NSArray *itms = [pb readObjectsForClasses:classes options:options];
-        if (itms != nil) {
-            int n = [itms count];
+    const char* read_mimetype = NULL;
+    int mimetype_idx = -1;
+    int hdrlen = strlen(mime_hdr);
+
+    int exclude_idx = -1;
+    
+    // first look for the mimetype string
+    NSArray *strclasses = [[NSArray alloc] initWithObjects:[NSString class], nil];
+    NSArray *stritms = [pb readObjectsForClasses:strclasses options:options];
+    if (stritms != nil) {
+        int n = [stritms count];
+        int i;
+        for (i=0; i<n; i++) {
+            NSString* clip = [stritms objectAtIndex: i];
+            const char* utf8_clip = [clip UTF8String];
+            int datalen = (int)strlen(utf8_clip);
+            if (datalen > hdrlen) {
+                // printf(utf8_clip);
+                if (strncmp(utf8_clip, mime_hdr, hdrlen) == 0) {
+                    read_mimetype = utf8_clip + hdrlen;
+                    mimetype_idx = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (read_mimetype != NULL) {
+        int mtlen = strlen(read_mimetype);
+        bool typ_match = (mtlen == len && strncmp(typ, read_mimetype, len) == 0);
+        if (typ_match && strncmp("application/json", typ, len) == 0) {
+            int n = [stritms count];
             int i;
             for (i=0; i<n; i++) {
-                NSString* clip = [itms objectAtIndex: i];
+                if (i == mimetype_idx) {
+                    continue;
+                }
+                NSString* clip = [stritms objectAtIndex: i];
+                const char* utf8_clip = [clip UTF8String];
+                int datalen = (int)strlen(utf8_clip);
+                if (datalen > 0 && utf8_clip[0] == '{') { // JSON must start with {
+                    addMimeData(typ, len, (char*)utf8_clip, datalen);
+                    exclude_idx = i; // todo: need array..
+                }
+            }
+        }
+    }
+    if (strncmp(typ, "text/plain", len) == 0 || strncmp(typ, "text/*", len) == 0) {
+        if (stritms != nil) {
+            int n = [stritms count];
+            int i;
+            for (i=0; i<n; i++) {
+                if (i == mimetype_idx || i == exclude_idx) {
+                    continue;
+                }
+                NSString* clip = [stritms objectAtIndex: i];
                 const char* utf8_clip = [clip UTF8String];
                 int datalen = (int)strlen(utf8_clip);
                 addMimeData(typ, len, (char*)utf8_clip, datalen);
@@ -457,24 +513,43 @@ void pasteRead(NSPasteboard* pb, char* typ, int len) {
                 free(bytedata);
             }
         }
+        [classes release];
+        [itms release];
     }
+    [strclasses release];
+    [stritms release];
 }
 
-void pasteWrite(NSPasteboard* pb, char* data, int len, char* typ, int typlen) {
+static NSMutableArray *clipPasteItems = NULL;
+
+void pasteAddWrite(NSPasteboard* pb, char* data, int len, char* typ, int typlen) {
     NSString *ns_clip;
     bool ret;
 
+    if(clipPasteItems == NULL) {
+        clipPasteItems = [NSMutableArray array];
+    }
+    
     // long serial = [pb changeCount];
     // OSAtomicCompareAndSwapLong(cb->last_cb_serial, serial, &cb->last_cb_serial);
 
     // todo: support more formats!
     if (strncmp(typ, "text/plain", typlen) == 0) {
         ns_clip = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
-
-        [pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        ret = [pb setString:ns_clip forType:NSStringPboardType];
-        [ns_clip release];
+        [clipPasteItems addObject:ns_clip];
     }
+    else if (strncmp(typ, "application/json", typlen) == 0) { // .go file wrote header!
+        ns_clip = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
+        [clipPasteItems addObject:ns_clip];
+    }
+}	
+
+void pasteWrite(NSPasteboard* pb) {
+    if(clipPasteItems == NULL) {
+        return;
+    }
+    [pb writeObjects: clipPasteItems];
+    [clipPasteItems removeAllObjects];
 }	
 
 void clipRead(char* typ, int len) {
@@ -483,12 +558,18 @@ void clipRead(char* typ, int len) {
 }
 
 
-void clipWrite(char* data, int len, char* typ, int typlen) {
+void clipAddWrite(char* data, int len, char* typ, int typlen) {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    pasteWrite(pb, data, len, typ, typlen);
+    pasteAddWrite(pb, data, len, typ, typlen);
+}
+
+void clipWrite() {
+    NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    pasteWrite(pb);
 }
 
 void clipClear() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
     [pb clearContents];
+    [clipPasteItems removeAllObjects];
 }
