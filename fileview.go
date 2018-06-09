@@ -238,6 +238,7 @@ func (fv *FileView) UpdatePath() {
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
+	fv.SetFullReRender()
 	fv.UpdatePath()
 	pf := fv.PathField()
 	pf.SetText(fv.DirPath)
@@ -274,6 +275,8 @@ func (fv *FileView) UpdateFiles() {
 		return nil
 	})
 
+	sv := fv.FilesView()
+	sv.UpdateFromSlice()
 	fv.UpdateEnd(updt)
 }
 
@@ -319,12 +322,6 @@ func (fv *FileView) ConfigButtons() {
 	// if mods {
 	// 	bb.UpdateEnd(updt)
 	// }
-}
-
-// needs full rebuild and this is where we do it:
-func (fv *FileView) Style2D() {
-	// fv.UpdateFromPath()
-	fv.Frame.Style2D()
 }
 
 func (fv *FileView) Render2D() {

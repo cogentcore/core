@@ -155,7 +155,7 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	pr := prof.Start("TreeView.SyncToSrc")
 	sk := tv.SrcNode.Ptr
-	nm := "ViewOf_" + sk.UniqueName()
+	nm := "tv_" + sk.UniqueName()
 	tv.SetNameRaw(nm) // guaranteed to be unique
 	tv.SetUniqueName(nm)
 	tv.ViewIdx = *tvIdx
@@ -172,7 +172,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	fldClosed := make([]bool, 0)
 	sk.FuncFields(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		flds = append(flds, k)
-		tnl.Add(typ, "ViewOf_"+k.Name())
+		tnl.Add(typ, "tv_"+k.Name())
 		ft := sk.FieldTag(k.Name(), vcprop)
 		cls := false
 		if vc, ok := kit.ToBool(ft); ok && vc {
@@ -186,11 +186,12 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		return true
 	})
 	for _, skid := range skids {
-		tnl.Add(typ, "ViewOf_"+skid.UniqueName())
+		tnl.Add(typ, "tv_"+skid.UniqueName())
 	}
 	mods, updt := tv.ConfigChildren(tnl, false)
 	if mods {
 		tv.SetFullReRender()
+		// fmt.Printf("got mod on %v\n", tv.PathUnique())
 	}
 	idx := 0
 	for i, fld := range flds {
@@ -218,10 +219,12 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 // SrcNodeSignal is the function for receiving node signals from our SrcNode
 func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
-	// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), data, *send.Flags())
 	if data != nil {
 		dflags := data.(int64)
-		if bitflag.HasMask(dflags, int64(ki.ChildUpdateFlagsMask)) {
+		if Update2DTrace {
+			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(*send.Flags(), ki.FlagsN))
+		}
+		if bitflag.HasMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
 			tv.SyncToSrc(&tvIdx)
 		} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
@@ -868,7 +871,7 @@ func (tv *TreeView) Copy(reset bool) {
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This != tv.This {
-				tv.MimeData(&md)
+				sn.MimeData(&md)
 			}
 		}
 	}
@@ -907,16 +910,16 @@ func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}) {
 	})
 	m.AddMenuText("Add to Children", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-		tvv.PasteChildren(data.(mimedata.Mimes))
+		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tvv.PasteBefore(data.(mimedata.Mimes))
+			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 		m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
-			tvv.PasteAfter(data.(mimedata.Mimes))
+			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 	}
 	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -944,8 +947,9 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	sk.CopyFrom(sl[0])
 }
 
-// PasteBefore inserts object(s) from mime data before this node
-func (tv *TreeView) PasteBefore(md mimedata.Mimes) {
+// PasteBefore inserts object(s) from mime data before this node -- mod =
+// DropCopy will append _Copy on the name of the inserted object
+func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 	ttl := "Paste Before"
 	sl := tv.NodesFromMimeData(md)
 
@@ -958,13 +962,17 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes) {
 	myidx := sk.Index()
 	updt := par.UpdateStart()
 	for i, ns := range sl {
+		if mod == dnd.DropCopy {
+			ns.SetName(ns.Name() + "_Copy")
+		}
 		par.InsertChild(ns, myidx+i)
 	}
 	par.UpdateEnd(updt)
 }
 
-// PasteAfter inserts object(s) from mime data after this node
-func (tv *TreeView) PasteAfter(md mimedata.Mimes) {
+// PasteAfter inserts object(s) from mime data after this node -- mod =
+// DropCopy will append _Copy on the name of the inserted objects
+func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	ttl := "Paste After"
 	sl := tv.NodesFromMimeData(md)
 
@@ -977,18 +985,26 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes) {
 	myidx := sk.Index()
 	updt := par.UpdateStart()
 	for i, ns := range sl {
+		if mod == dnd.DropCopy {
+			ns.SetName(ns.Name() + "_Copy")
+		}
 		par.InsertChild(ns, myidx+1+i)
 	}
 	par.UpdateEnd(updt)
 }
 
-// PasteChildren inserts object(s) from mime data at end of children of this node
-func (tv *TreeView) PasteChildren(md mimedata.Mimes) {
+// PasteChildren inserts object(s) from mime data at end of children of this
+// node -- mod = DropCopy will append _Copy on the name of the inserted
+// objects
+func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode.Ptr
 	updt := sk.UpdateStart()
 	for _, ns := range sl {
+		if mod == dnd.DropCopy {
+			ns.SetName(ns.Name() + "_Copy")
+		}
 		sk.AddChild(ns)
 	}
 	sk.UpdateEnd(updt)
@@ -1007,7 +1023,7 @@ func (tv *TreeView) DragNDropStart() {
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This != tv.This {
-				tv.MimeData(&md)
+				sn.MimeData(&md)
 			}
 		}
 	}
@@ -1015,7 +1031,6 @@ func (tv *TreeView) DragNDropStart() {
 	bi.SetName(tv.UniqueName())
 	bi.GrabRenderFrom(tv) // todo: show number of items?
 	ImageClearer(bi.Pixels, 50.0)
-	fmt.Printf("dnd started in treeview\n")
 	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
 }
 
@@ -1111,19 +1126,19 @@ func (tv *TreeView) DropAssign(md mimedata.Mimes) {
 // DropBefore inserts object(s) from mime data before this node
 func (tv *TreeView) DropBefore(md mimedata.Mimes, mod dnd.DropMods) {
 	tv.DragNDropFinalize(mod)
-	tv.PasteBefore(md)
+	tv.PasteBefore(md, mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
 func (tv *TreeView) DropAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	tv.DragNDropFinalize(mod)
-	tv.PasteAfter(md)
+	tv.PasteAfter(md, mod)
 }
 
 // DropChildren inserts object(s) from mime data at end of children of this node
 func (tv *TreeView) DropChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	tv.DragNDropFinalize(mod)
-	tv.PasteChildren(md)
+	tv.PasteChildren(md, mod)
 }
 
 // DropCancel cancels the drop action e.g., preventing deleting of source
@@ -1322,6 +1337,7 @@ func (tv *TreeView) Init2D() {
 	tv.Paint.Defaults()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
+	tv.ConnectToViewport()
 }
 
 var TreeViewProps = ki.Props{
@@ -1519,9 +1535,15 @@ func (tv *TreeView) Render2D() {
 
 func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
 	if tv.NeedsFullReRender() {
+		if Render2DTrace {
+			fmt.Printf("Render: treeview full re-render on: %v\n", tv.PathUnique())
+		}
 		node = nil
 		layout = false
 	} else {
+		if Render2DTrace {
+			fmt.Printf("Render: treeview non-full re-render on: %v\n", tv.PathUnique())
+		}
 		node = tv.This.(Node2D)
 		layout = false
 	}

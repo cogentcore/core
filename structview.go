@@ -215,11 +215,6 @@ func (sv *StructView) UpdateFields() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *StructView) Style2D() {
-	sv.Frame.Style2D()
-	sv.UpdateFromStruct()
-}
-
 func (sv *StructView) Render2D() {
 	sv.ClearFullReRender()
 	sv.Frame.Render2D()
@@ -227,9 +222,15 @@ func (sv *StructView) Render2D() {
 
 func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
 	if sv.NeedsFullReRender() {
+		if Render2DTrace {
+			fmt.Printf("Render: struct view full re-render at vp: %v win: %v on: %v\n", sv.VpBBox, sv.WinBBox, sv.PathUnique())
+		}
 		node = nil
 		layout = false
 	} else {
+		if Render2DTrace {
+			fmt.Printf("Render: struct view non-full re-render at vp: %v win: %v on: %v\n", sv.VpBBox, sv.WinBBox, sv.PathUnique())
+		}
 		node = sv.This.(Node2D)
 		layout = true
 	}

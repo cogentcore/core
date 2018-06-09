@@ -318,9 +318,9 @@ func (g *Node2DBase) DisconnectAllEvents() {
 	if win != nil {
 		win.DisconnectAllEvents(g.This)
 	}
-	if g.Viewport != nil {
-		g.NodeSig.Disconnect(g.Viewport.This)
-	}
+	// if g.Viewport != nil {
+	// 	g.NodeSig.Disconnect(g.Viewport.This)
+	// }
 }
 
 // DisconnectAllEventsTree disconnect node and all of its children (and so on)
@@ -354,6 +354,7 @@ func (g *Node2DBase) Init2DBase() {
 	g.Style.Defaults()
 	g.Paint.Defaults()
 	g.LayData.Defaults() // doesn't overwrite
+	g.ConnectToViewport()
 }
 
 // Style2DSVG styles the Paint values directly from node properties -- for
@@ -707,6 +708,7 @@ func (g *Node2DBase) FullRender2DTree() {
 func (g *Node2DBase) ReRender2DTree() {
 	ld := g.LayData // save our current layout data
 	updt := g.UpdateStart()
+	g.Init2DTree()
 	g.Style2DTree()
 	g.Size2DTree()
 	g.LayData = ld // restore

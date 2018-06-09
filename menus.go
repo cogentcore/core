@@ -20,6 +20,16 @@ import (
 // items!
 type Menu ki.Slice
 
+func (m Menu) MarshalJSON() ([]byte, error) {
+	ks := (ki.Slice)(m)
+	return ks.MarshalJSON()
+}
+
+func (m *Menu) UnmarshalJSON(b []byte) error {
+	ks := (*ki.Slice)(m)
+	return ks.UnmarshalJSON(b)
+}
+
 // MakeMenuFunc is a callback for making a menu on demand
 type MakeMenuFunc func(m *Menu)
 
@@ -66,6 +76,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb := Label{}
 	lb.InitName(&lb, lbl)
 	lb.SetText(lbl)
+	lb.SetProp("background-color", &Prefs.ControlColor)
 	*m = append(*m, lb.This.(Node2D))
 	return &lb
 }

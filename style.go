@@ -437,6 +437,9 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 	hasPar := !kit.IfaceIsNil(par)
 	// fewer props than fields, esp with alts!
 	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}

@@ -60,6 +60,7 @@ func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 		}
 		updt = sv.UpdateStart()
 		sv.SelectedIdx = -1
+		sv.SetFullReRender()
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
@@ -400,6 +401,7 @@ func (sv *StructTableView) UpdateFromSlice() {
 	sv.ConfigSliceGrid()
 	sv.ConfigSliceButtons()
 	if mods {
+		sv.SetFullReRender()
 		sv.UpdateEnd(updt)
 	}
 }
@@ -412,12 +414,6 @@ func (sv *StructTableView) UpdateValues() {
 		}
 	}
 	sv.UpdateEnd(updt)
-}
-
-// needs full rebuild and this is where we do it:
-func (sv *StructTableView) Style2D() {
-	sv.ConfigSliceGrid()
-	sv.Frame.Style2D()
 }
 
 func (sv *StructTableView) Render2D() {

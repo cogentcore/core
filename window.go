@@ -252,6 +252,9 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		return
 	}
 	pr := prof.Start("win.UploadVpRegion")
+	if Render2DTrace {
+		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
+	}
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
 }
@@ -263,6 +266,9 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		return
 	}
 	pr := prof.Start("win.UploadVp")
+	if Render2DTrace {
+		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.WinTex.Bounds())
+	}
 	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
 }
@@ -277,7 +283,7 @@ func (w *Window) UploadAllViewports() {
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
-		fmt.Printf("Window: %v uploading full Vp, image bound: %v, bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
+		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
@@ -287,6 +293,9 @@ func (w *Window) UploadAllViewports() {
 			if gii != nil {
 				vp := gii.AsViewport2D()
 				r := vp.ViewBox.Bounds()
+				if Render2DTrace {
+					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
+				}
 				w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 			}
 		}
@@ -296,6 +305,9 @@ func (w *Window) UploadAllViewports() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.ViewBox.Bounds()
+			if Render2DTrace {
+				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
+			}
 			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
@@ -775,7 +787,8 @@ func (w *Window) EventLoop() {
 				Prefs.Edit()
 				e.SetProcessed()
 			case KeyFunRefresh:
-				w.FullReRender()
+				// w.FullReRender()
+				w.UploadAllViewports()
 				e.SetProcessed()
 			}
 			if !e.IsProcessed() {

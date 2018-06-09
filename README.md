@@ -90,9 +90,6 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* dnd move events -- *layout* needs to watch and scroll appropriately
-* structview is rendering over top of treeview during updates (without bounds in place) - should fix that anyway for efficiency
-
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
@@ -101,7 +98,7 @@ Currently at an **alpha** level release:
 
 * tab widget and integrate with tree view editor? Popups show up in a separate tab?
 
-* separator not rendering..
+* menu separator not rendering..
 
 * add MenuBar / Toolbar -- just a layout really, with some styling?
 
@@ -120,7 +117,9 @@ Currently at an **alpha** level release:
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
-* translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
+* text translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
+
+* DND needs enter / exit events so nodes can signal their ability to accept drop..  later..
 
 * Reminder: grep all todo: in code -- lots!
 
@@ -160,7 +159,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 ## Remaining features for widgets
 
 + FileView view and dialog -- various, see todo in fileview.go
-+ TextField -- constraints
++ TextField -- undo, constraints
 + TreeView -- needs clip copy / paste, -- see about LI, UL lists..
 + TabWidget -- needs updating
 + Label -- done -- could make lots of H1, etc alts

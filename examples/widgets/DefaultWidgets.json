@@ -1,3 +1,4 @@
+{"ki.RootType": "gi.Viewport2D"}
 {
   "Nm": "WinVp",
   "UniqueNm": "WinVp",
@@ -70,6 +71,7 @@
               "Nm": "title",
               "UniqueNm": "title",
               "Props": {
+                "font-weight": "bold",
                 "__type:font-size": "units.Value",
                 "font-size": {
                   "Val": 24,
@@ -78,8 +80,7 @@
                 },
                 "text-align": "__enum:(gi.Align)AlignTop",
                 "align-vert": "__enum:(gi.Align)AlignTop",
-                "font-family": "Times New Roman, serif",
-                "font-weight": "bold"
+                "font-family": "Times New Roman, serif"
               },
               "Kids": null,
               "Class": "",
@@ -437,12 +438,6 @@
               "Nm": "slider1",
               "UniqueNm": "slider1",
               "Props": {
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
                 "__type:min-width": "units.Value",
                 "min-width": {
                   "Val": 20,
@@ -458,6 +453,12 @@
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 2,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 20,
                   "Un": "Em",
                   "Dots": 0
                 }
@@ -493,12 +494,6 @@
               "Nm": "slider2",
               "UniqueNm": "slider2",
               "Props": {
-                "__type:height": "units.Value",
-                "height": {
-                  "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 10,
@@ -521,6 +516,12 @@
                 "max-height": {
                   "Val": -1,
                   "Un": "Px",
+                  "Dots": 0
+                },
+                "__type:height": "units.Value",
+                "height": {
+                  "Val": 10,
+                  "Un": "Em",
                   "Dots": 0
                 }
               },
@@ -555,12 +556,6 @@
               "Nm": "scrollbar1",
               "UniqueNm": "scrollbar1",
               "Props": {
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
                 "__type:width": "units.Value",
                 "width": {
                   "Val": 20,
@@ -575,6 +570,12 @@
                 },
                 "__type:height": "units.Value",
                 "height": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
                   "Val": 1,
                   "Un": "Em",
                   "Dots": 0
@@ -750,8 +751,7 @@
               "CharWidth": 34,
               "SelectStart": 0,
               "SelectEnd": 0,
-              "SelectMode": false,
-              "Selected": false
+              "SelectMode": false
             },
             {
               "Nm": "spin",

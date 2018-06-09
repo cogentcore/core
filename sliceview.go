@@ -266,12 +266,6 @@ func (sv *SliceView) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
-// needs full rebuild and this is where we do it:
-func (sv *SliceView) Style2D() {
-	sv.ConfigSliceGrid()
-	sv.Frame.Style2D()
-}
-
 func (sv *SliceView) Render2D() {
 	sv.ClearFullReRender()
 	sv.Frame.Render2D()
@@ -392,11 +386,6 @@ func (sv *SliceViewInline) UpdateValues() {
 		vv.UpdateWidget()
 	}
 	sv.UpdateEnd(updt)
-}
-
-func (sv *SliceViewInline) Style2D() {
-	sv.ConfigParts()
-	sv.WidgetBase.Style2D()
 }
 
 func (sv *SliceViewInline) Render2D() {

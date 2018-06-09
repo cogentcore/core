@@ -244,7 +244,9 @@ func (g *SplitView) ReRender2D() (node Node2D, layout bool) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
-// Splitter provides the splitter handle and line separating two elements in a SplitView, with draggable resizing of the splitter -- parent is Parts layout of the SplitView -- based on SliderBase
+// Splitter provides the splitter handle and line separating two elements in a
+// SplitView, with draggable resizing of the splitter -- parent is Parts
+// layout of the SplitView -- based on SliderBase
 type Splitter struct {
 	SliderBase
 }
