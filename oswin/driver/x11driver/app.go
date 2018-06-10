@@ -47,6 +47,8 @@ type appImpl struct {
 	atomWMDeleteWindow xproto.Atom
 	atomWMProtocols    xproto.Atom
 	atomWMTakeFocus    xproto.Atom
+	atomPrimarySel     xproto.Atom
+	atomClipboardSel   xproto.Atom
 
 	pixelsPerPt  float32
 	pictformat24 render.Pictformat
@@ -512,6 +514,14 @@ func (app *appImpl) initAtoms() (err error) {
 	if err != nil {
 		return err
 	}
+	app.atomPrimarySel, err = app.internAtom("PRIMARY")
+	if err != nil {
+		return err
+	}
+	app.atomClipboardSel, err = app.internAtom("CLIPBOARD")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -761,5 +771,5 @@ func (app *appImpl) FontPaths() []string {
 }
 
 func (app *appImpl) ClipBoard() clip.Board {
-	return nil // todo!
+	return &theClip
 }
