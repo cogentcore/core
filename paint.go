@@ -439,7 +439,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 		pc.StrokeStyle.Dashes, 0,
 	)
 	rs.Raster.SetColor(pc.StrokeStyle.Color) // todo
-	// rs.Scanner.SetClip(rs.Bounds) // todo: reactivate when rasterx updated
+	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rs.Raster)
 	rs.Raster.Draw()
 	rs.Raster.Clear()
@@ -453,7 +453,7 @@ func (pc *Paint) fill(rs *RenderState) {
 	rf := &rs.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
 	rf.SetColor(pc.FillStyle.Color) // todo
-	// rs.Scanner.SetClip(rs.Bounds) // todo: reactivate when rasterx updated
+	rs.Scanner.SetClip(rs.Bounds)
 
 	rs.Path.AddTo(rf)
 	rf.Draw()
