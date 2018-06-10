@@ -75,19 +75,21 @@ type appImpl struct {
 	screens         []*oswin.Screen
 	nPendingUploads int
 	completionKeys  []uint16
+	selNotifyChan   chan xproto.SelectionNotifyEvent
 	name            string
 }
 
 func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	app := &appImpl{
-		xc:      xc,
-		xsi:     xproto.Setup(xc).DefaultScreen(xc),
-		images:  map[shm.Seg]*imageImpl{},
-		uploads: map[uint16]chan struct{}{},
-		windows: map[xproto.Window]*windowImpl{},
-		winlist: make([]*windowImpl, 0),
-		screens: make([]*oswin.Screen, 0),
-		name:    "GoGi",
+		xc:            xc,
+		xsi:           xproto.Setup(xc).DefaultScreen(xc),
+		images:        map[shm.Seg]*imageImpl{},
+		uploads:       map[uint16]chan struct{}{},
+		windows:       map[xproto.Window]*windowImpl{},
+		winlist:       make([]*windowImpl, 0),
+		screens:       make([]*oswin.Screen, 0),
+		selNotifyChan: make(chan xproto.SelectionNotifyEvent),
+		name:          "GoGi",
 	}
 	if err := app.initAtoms(); err != nil {
 		return nil, err
@@ -148,6 +150,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	// todo: rest of the fields
 
 	oswin.TheApp = app
+	theClip.app = app
 
 	go app.run()
 	return app, nil
@@ -264,6 +267,9 @@ func (app *appImpl) run() {
 			} else {
 				noWindowFound = true
 			}
+
+		case xproto.SelectionNotifyEvent:
+			app.selNotifyChan <- ev
 		}
 
 		if noWindowFound { // we expect this actually

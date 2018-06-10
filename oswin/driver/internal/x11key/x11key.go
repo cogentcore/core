@@ -33,7 +33,7 @@ const (
 
 type KeysymTable [256][2]uint32
 
-func (t *KeysymTable) Lookup(detail uint8, state uint16) (rune, key.Code) {
+func (t *KeysymTable) Lookup(detail uint8, state uint16) (rune, key.Codes) {
 	// The key event's rune depends on whether the shift key is down.
 	unshifted := rune(t[detail][0])
 	r := unshifted
@@ -47,7 +47,7 @@ func (t *KeysymTable) Lookup(detail uint8, state uint16) (rune, key.Code) {
 	}
 
 	// The key event's code is independent of whether the shift key is down.
-	var c key.Code
+	var c key.Codes
 	if 0 <= unshifted && unshifted < 0x80 {
 		// TODO: distinguish the regular '2' key and number-pad '2' key (with
 		// Num-Lock).
@@ -63,18 +63,18 @@ func (t *KeysymTable) Lookup(detail uint8, state uint16) (rune, key.Code) {
 // note: don't support chords -- just go in order..
 func ButtonFromState(state uint16) int {
 	switch {
-	case state & Button1Mask != 0:
+	case state&Button1Mask != 0:
 		return 1
-	case state & Button2Mask != 0:
+	case state&Button2Mask != 0:
 		return 2
-	case state & Button3Mask != 0:
+	case state&Button3Mask != 0:
 		return 3
 	}
 	return 0
 }
 
 func KeyModifiers(state uint16) int32 {
-     	var m key.Modifiers
+	var m key.Modifiers
 	if state&ShiftMask != 0 {
 		m |= 1 << uint32(key.Shift)
 	}
@@ -137,8 +137,8 @@ const (
 
 // nonUnicodeKeycodes maps from those xproto.Keysym values (converted to runes)
 // that do not correspond to a Unicode code point, such as "Page Up", "F1" or
-// "Left Shift", to key.Code values.
-var nonUnicodeKeycodes = map[rune]key.Code{
+// "Left Shift", to key.Codes values.
+var nonUnicodeKeycodes = map[rune]key.Codes{
 	xkISOLeftTab: key.CodeTab,
 	xkBackSpace:  key.CodeDeleteBackspace,
 	xkTab:        key.CodeTab,
@@ -186,7 +186,7 @@ var nonUnicodeKeycodes = map[rune]key.Code{
 }
 
 // asciiKeycodes maps lower-case ASCII runes to key.Code values.
-var asciiKeycodes = [0x80]key.Code{
+var asciiKeycodes = [0x80]key.Codes{
 	'a': key.CodeA,
 	'b': key.CodeB,
 	'c': key.CodeC,

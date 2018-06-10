@@ -124,7 +124,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	sz := image.Point{int(ev.Width), int(ev.Height)}
 	ps := image.Point{int(ev.X), int(ev.Y)}
 
-	act := window.ActionN
+	act := window.ActionsN
 
 	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
 		act = window.Resize
@@ -156,7 +156,7 @@ func (w *windowImpl) handleExpose() {
 	w.Send(&paint.Event{})
 }
 
-func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Action) {
+func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Actions) {
 	r, c := w.app.keysyms.Lookup(uint8(detail), state)
 
 	event := &key.Event{
@@ -181,14 +181,14 @@ func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Acti
 var lastMouseClickEvent oswin.Event
 var lastMouseEvent oswin.Event
 
-func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16, dir mouse.Action) {
+func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16, dir mouse.Actions) {
 	where := image.Point{int(x), int(y)}
 	from := image.ZP
 	if lastMouseEvent != nil {
 		from = lastMouseEvent.Pos()
 	}
 	mods := x11key.KeyModifiers(state)
-	stb := mouse.Button(x11key.ButtonFromState(state))
+	stb := mouse.Buttons(x11key.ButtonFromState(state))
 
 	var event oswin.Event
 	switch {
@@ -217,7 +217,7 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 			}
 		}
 	case button < 4: // regular click
-		act := mouse.Action(dir)
+		act := mouse.Actions(dir)
 		if act == mouse.Press && lastMouseClickEvent != nil {
 			interval := time.Now().Sub(lastMouseClickEvent.Time())
 			// fmt.Printf("interval: %v\n", interval)
@@ -227,7 +227,7 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 		}
 		event = &mouse.Event{
 			Where:     where,
-			Button:    mouse.Button(button),
+			Button:    mouse.Buttons(button),
 			Action:    act,
 			Modifiers: mods,
 		}

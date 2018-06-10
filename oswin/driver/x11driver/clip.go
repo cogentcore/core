@@ -37,15 +37,15 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		log.Printf("X11 Clipboard Read error: %v\n", err)
 		return nil
 	}
-	if selown.Window == xproto.AtomNone {
-		useSel := ci.app.atomClipboardSel
+	if selown.Owner == xproto.AtomNone {
+		useSel = ci.app.atomClipboardSel
 		selown, err = xproto.GetSelectionOwner(ci.app.xc, ci.app.atomClipboardSel).Reply()
 		if err != nil {
 			log.Printf("X11 Clipboard Read error: %v\n", err)
 			return nil
 		}
 	}
-	if selown.Window == xproto.AtomNone { // nothing there..
+	if selown.Owner == xproto.AtomNone { // nothing there..
 		return nil
 	}
 
@@ -54,41 +54,33 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	// but example from jtanx just uses the name of the selection again, so...
 	xproto.ConvertSelection(ci.app.xc, ci.app.window32, useSel, ci.app.atomUTF8String, useSel, xproto.TimeCurrentTime)
 
-	transSz := 1048576 // how much to transfer per call, 1MB
+	transSz := uint32(1048576) // how much to transfer per call, 1MB
 	var ptyp xproto.Atom
-	b := make([]bytes, 0, 1024)
+	b := make([]byte, 0, 1024)
 
-	// now we have to wait for the reply -- to make this actually synchronous we have to
-	// do this here.. sheesh and it could just time out!?
-	for {
-		// fmt.Printf("wait..\n")
-		ev, err := ci.app.xc.WaitForEvent()
-		switch ev := ev.(type) {
-		case xproto.SelectionNotifyEvent:
-			bytesAfter := uint32(1)
-			bufsz := 0 // current buffer size
-			for bytesAfter > 0 {
-				// last two args are offset and amount to transfer, in 32bit "long" sizes
-				prop, err := xproto.GetProperty(ci.app.xc, true, ci.app.window32, ev.Property, xproto.AtomAny, bufsz/4, transSz/4).Reply()
-				if err != nil {
-					log.Printf("X11 Clipboard Read Property error: %v\n", err)
-					return nil
-				}
-				bytesAfter = prop.BytesAfter
-				if prop.Length > 0 {
-					b := append(b, prop.Value[0:prop.Length]...)
-					bufsz += prop.Length
-				}
-				ptyp = prop.Type
-			}
-			// now we have all the data in b, and the type in ptyp
-			break
+	// todo: need some kind of timeout on this!
+	ev := <-ci.app.selNotifyChan
+	bytesAfter := uint32(1)
+	bufsz := uint32(0) // current buffer size
+	for bytesAfter > 0 {
+		// last two args are offset and amount to transfer, in 32bit "long" sizes
+		prop, err := xproto.GetProperty(ci.app.xc, true, ci.app.window32, ev.Property, xproto.AtomAny, bufsz/4, transSz/4).Reply()
+		if err != nil {
+			log.Printf("X11 Clipboard Read Property error: %v\n", err)
+			return nil
 		}
+		bytesAfter = prop.BytesAfter
+		sz := len(prop.Value)
+		if sz > 0 {
+			b = append(b, prop.Value...)
+			bufsz += uint32(sz)
+		}
+		ptyp = prop.Type
 	}
 
+	// fmt.Printf("ptyp: %v and utf8: %v \n", ptyp, ci.app.atomUTF8String)
 	for _, typ := range types {
-		// todo: see if data type matches that returned
-		if typ == mimedata.TextPlain {
+		if typ == mimedata.TextPlain && ptyp == ci.app.atomUTF8String {
 			ci.data = mimedata.NewText(string(b))
 		}
 	}
@@ -110,6 +102,7 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 	if clearFirst {
 		ci.Clear()
 	}
+	return nil
 }
 
 // 	for _, d := range data {

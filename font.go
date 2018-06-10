@@ -276,6 +276,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
 				fn = strings.TrimRight(fn, ext)
+				fn = strings.Replace(fn, "_", " ", -1)
 				basefn := strings.ToLower(fn)
 				if _, ok := fl.FontsAvail[basefn]; !ok {
 					fl.FontsAvail[basefn] = path
