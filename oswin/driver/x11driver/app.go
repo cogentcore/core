@@ -270,6 +270,9 @@ func (app *appImpl) run() {
 
 		case xproto.SelectionNotifyEvent:
 			app.selNotifyChan <- ev
+
+		case xproto.SelectionRequestEvent:
+			theClip.SendLastWrite(ev)
 		}
 
 		if noWindowFound { // we expect this actually
