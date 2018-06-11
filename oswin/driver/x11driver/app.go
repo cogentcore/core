@@ -47,8 +47,13 @@ type appImpl struct {
 	atomWMDeleteWindow xproto.Atom
 	atomWMProtocols    xproto.Atom
 	atomWMTakeFocus    xproto.Atom
-	atomPrimarySel     xproto.Atom
 	atomClipboardSel   xproto.Atom
+	atomPrimarySel     xproto.Atom
+	atomTargets        xproto.Atom
+	atomMultiple       xproto.Atom
+	atomTimestamp      xproto.Atom
+	atomIncr           xproto.Atom
+	atomText           xproto.Atom
 
 	pixelsPerPt  float32
 	pictformat24 render.Pictformat
@@ -88,7 +93,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		windows:       map[xproto.Window]*windowImpl{},
 		winlist:       make([]*windowImpl, 0),
 		screens:       make([]*oswin.Screen, 0),
-		selNotifyChan: make(chan xproto.SelectionNotifyEvent),
+		selNotifyChan: make(chan xproto.SelectionNotifyEvent, 100),
 		name:          "GoGi",
 	}
 	if err := app.initAtoms(); err != nil {
@@ -523,11 +528,31 @@ func (app *appImpl) initAtoms() (err error) {
 	if err != nil {
 		return err
 	}
+	app.atomClipboardSel, err = app.internAtom("CLIPBOARD")
+	if err != nil {
+		return err
+	}
 	app.atomPrimarySel, err = app.internAtom("PRIMARY")
 	if err != nil {
 		return err
 	}
-	app.atomClipboardSel, err = app.internAtom("CLIPBOARD")
+	app.atomTargets, err = app.internAtom("TARGETS")
+	if err != nil {
+		return err
+	}
+	app.atomMultiple, err = app.internAtom("MULTIPLE")
+	if err != nil {
+		return err
+	}
+	app.atomTimestamp, err = app.internAtom("TIMESTAMP")
+	if err != nil {
+		return err
+	}
+	app.atomIncr, err = app.internAtom("INCR")
+	if err != nil {
+		return err
+	}
+	app.atomText, err = app.internAtom("TEXT")
 	if err != nil {
 		return err
 	}

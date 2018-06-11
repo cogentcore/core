@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/goki/gi/oswin/mimedata"
 )
@@ -15,6 +16,7 @@ import (
 // implements clipboard support for X11
 // https://github.com/jtanx/libclipboard/blob/master/src/clipboard_x11.c
 // https://www.uninformativ.de/blog/postings/2017-04-02/0/POSTING-en.html
+// Qt source: qtbase/src/plugins/platforms/xcb/qxcbwindow.cpp
 
 // favor CLIPBOARD for our writing and check it first -- standard explicit
 // cut/paste one PRIMARY is for mouse-selected text that usually pasted with
@@ -50,6 +52,10 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	}
 	if selown.Owner == xproto.AtomNone { // nothing there..
 		return nil
+	}
+
+	if selown.Owner == ci.app.window32 { // we are the owner -- just send our data
+		return ci.lastWrite
 	}
 
 	// this is the main call requesting the selection -- there are no apparent
@@ -107,12 +113,9 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 // }
 
 func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
-	// not relevant here -- always clears..
-	// if clearFirst {
-	// 	ci.Clear()
-	// }
-	// just advertise ourselves as clipboard owners and save the data until
-	// someone wants it..
+	// note: clear is not relevant here -- always replaces
+	// we just advertise ourselves as clipboard owners and save the data until
+	// someone requests it..
 	ci.lastWrite = data
 	useSel := ci.app.atomClipboardSel
 	xproto.SetSelectionOwner(ci.app.xc, ci.app.window32, useSel, xproto.TimeCurrentTime)
@@ -121,29 +124,49 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 
 func (ci *clipImpl) SendLastWrite(ev xproto.SelectionRequestEvent) {
 	reply := xproto.SelectionNotifyEvent{
-		Time:      xproto.TimeCurrentTime,
+		Time:      ev.Time,
 		Requestor: ev.Requestor,
 		Selection: ev.Selection,
 		Target:    ev.Target,
 		Property:  xproto.AtomNone,
 	}
 
+	mask := xproto.EventMaskNoEvent
 	if ci.lastWrite != nil {
-		if ev.Property == xproto.AtomNone {
-			ev.Property = ev.Target
+		reply.Property = ev.Property
+		if reply.Property == xproto.AtomNone {
+			reply.Property = reply.Target
 		}
-		// todo: switch on diff types
-		if ev.Target == ci.app.atomUTF8String {
+		switch reply.Target {
+		case ci.app.atomTargets: // requesting to know what targets we support
+			mask = xproto.EventMaskPropertyChange
+			targs := make([]byte, 4*3)
+			bi := 0
+			xgb.Put32(targs[bi:], uint32(ci.app.atomUTF8String))
+			bi += 4
+			xgb.Put32(targs[bi:], uint32(ci.app.atomTimestamp))
+			bi += 4
+			xgb.Put32(targs[bi:], uint32(ci.app.atomTargets))
+			xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
+				reply.Property, xproto.AtomAtom, 32, 3, targs)
+		case ci.app.atomTimestamp:
+			mask = xproto.EventMaskPropertyChange
+			targs := make([]byte, 4*1)
+			xgb.Put32(targs, uint32(xproto.TimeCurrentTime))
+			xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
+				reply.Property, xproto.AtomInteger, 32, 1, targs)
+		case ci.app.atomUTF8String:
 			for _, d := range ci.lastWrite {
 				if d.Type == mimedata.TextPlain {
-					xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, ev.Requestor,
-						ev.Property, ev.Target, 8, uint32(len(d.Data)), d.Data)
+					mask = xproto.EventMaskPropertyChange
+					xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
+						reply.Property, reply.Target, 8, uint32(len(d.Data)), d.Data)
 					break // first one for now -- todo: need to support MULTIPLE
 				}
 			}
 		}
 	}
-	xproto.SendEvent(ci.app.xc, false, reply.Requestor, xproto.EventMaskPropertyChange, string(reply.Bytes()))
+	xproto.SendEvent(ci.app.xc, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
 }
 
 // 	for _, d := range data {
