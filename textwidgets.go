@@ -299,8 +299,13 @@ func (tf *TextField) CursorEnd() {
 	tf.UpdateEnd(updt)
 }
 
+// todo: ctrl+backspace = delete word
+
 // CursorBackspace deletes character(s) immediately before cursor
 func (tf *TextField) CursorBackspace(steps int) {
+	if tf.HasSelection() {
+		tf.DeleteSelection()
+	}
 	if tf.CursorPos < steps {
 		steps = tf.CursorPos
 	}
@@ -323,6 +328,9 @@ func (tf *TextField) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tf *TextField) CursorDelete(steps int) {
+	if tf.HasSelection() {
+		tf.DeleteSelection()
+	}
 	if tf.CursorPos+steps > len(tf.EditText) {
 		steps = len(tf.EditText) - tf.CursorPos
 	}
@@ -531,6 +539,9 @@ func (tf *TextField) Paste() {
 // InsertAtCursor inserts given text at current cursor position
 func (tf *TextField) InsertAtCursor(str string) {
 	updt := tf.UpdateStart()
+	if tf.HasSelection() {
+		tf.Cut()
+	}
 	tf.Edited = true
 	rs := []rune(str)
 	rsl := len(rs)
