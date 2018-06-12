@@ -207,9 +207,10 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 }
 
 type FontInfo struct {
-	Name   string      `desc:"name of font"`
-	Style  FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
-	Weight FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
+	Name    string      `desc:"name of font"`
+	Style   FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
+	Weight  FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
+	Example string      `desc:"example text -- styled according to font params in chooser"`
 }
 
 type FontLib struct {
@@ -228,9 +229,9 @@ func (fl *FontLib) Init() {
 	fl.initMu.Lock()
 	if fl.FontPaths == nil {
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontPaths = make([]string, 0, 100)
+		fl.FontPaths = make([]string, 0, 1000)
 		fl.FontsAvail = make(map[string]string)
-		fl.FontInfo = make([]FontInfo, 0, 100)
+		fl.FontInfo = make([]FontInfo, 0, 1000)
 		fl.Faces = make(map[string]map[float64]font.Face)
 	} else if len(fl.FontsAvail) == 0 {
 		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
@@ -280,7 +281,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 				basefn := strings.ToLower(fn)
 				if _, ok := fl.FontsAvail[basefn]; !ok {
 					fl.FontsAvail[basefn] = path
-					fi := FontInfo{fn, FontNormal, WeightNormal} // todo: get info
+					fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
 					if strings.Contains(basefn, "bold") {
 						fi.Weight = WeightBold
 					}
@@ -339,3 +340,6 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 	_, ok := FontLibrary.FontsAvail[fontnm]
 	return ok
 }
+
+// FontInfoExample is example text to demonstrate fonts -- from Inkscape
+var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()"

@@ -569,7 +569,7 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 // signal receiving object and function for signals (nil to ignore) --
 // selectOnly turns it into a selector with no editing of fields, and signal
 // connection is to the selection signal, not the overall dialog signal
-func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun StructTableViewStyleFunc) *Dialog {
 	dlg := NewStdDialog("struct-table-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
@@ -582,6 +582,7 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, t
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(selectOnly)
+	sv.StyleFunc = stylefun
 	sv.SetSlice(stru, tmpSave)
 
 	if recv != nil && fun != nil {
@@ -591,7 +592,7 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, t
 			dlg.DialogSig.Connect(recv, fun)
 		}
 	}
-	dlg.SetProp("min-width", units.NewValue(40, units.Em))
+	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp)
@@ -602,8 +603,20 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, t
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *Viewport2D, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := StructTableViewDialog(avp, &FontLibrary.FontInfo, true, nil, title, prompt, recv, fun)
+	dlg := StructTableViewDialog(avp, &FontLibrary.FontInfo, true, nil, title, prompt, recv, fun, FontInfoStyleFunc)
 	return dlg
+}
+
+func FontInfoStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueView) {
+	if col == 3 {
+		finf, ok := slice.(*[]FontInfo)
+		if ok {
+			gi := widg.AsNode2D()
+			gi.SetProp("font-family", (*finf)[row].Name)
+			gi.SetProp("font-style", (*finf)[row].Style)
+			gi.SetProp("font-weight", (*finf)[row].Weight)
+		}
+	}
 }
 
 // ColorViewDialog for editing a color using a ColorView -- optionally

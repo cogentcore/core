@@ -90,6 +90,24 @@ var FileViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
 }
 
+// FileViewKindColorMap translates file Kinds into different colors for the file viewer
+var FileViewKindColorMap = map[string]string{
+	"Folder":           "blue",
+	"application/json": "purple",
+}
+
+func FileViewStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueView) {
+	finf, ok := slice.(*[]*FileInfo)
+	if ok {
+		gi := widg.AsNode2D()
+		if clr, got := FileViewKindColorMap[(*finf)[row].Kind]; got {
+			gi.SetProp("color", clr)
+		} else {
+			gi.DeleteProp("color")
+		}
+	}
+}
+
 // SetFrame configures view as a frame
 func (fv *FileView) SetFrame() {
 	fv.Lay = LayoutCol
@@ -170,6 +188,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactive() // select only
+	sv.StyleFunc = FileViewStyleFunc
 	sv.SetSlice(&fv.Files, nil)
 	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
@@ -191,6 +210,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf := fv.SelField()
 	sf.SetMinPrefWidth(units.NewValue(30.0, units.Em))
 	sf.SetStretchMaxWidth()
+	sf.GrabFocus()
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)

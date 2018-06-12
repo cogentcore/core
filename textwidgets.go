@@ -300,6 +300,8 @@ func (tf *TextField) CursorEnd() {
 }
 
 // todo: ctrl+backspace = delete word
+// shift+arrow = select
+// uparrow = start / down = end
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tf *TextField) CursorBackspace(steps int) {

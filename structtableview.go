@@ -23,12 +23,13 @@ import (
 // emits SelectSig signals when selection is updated
 type StructTableView struct {
 	Frame
-	Slice       interface{}   `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	Values      [][]ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	TmpSave     ValueView     `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig     ki.Signal     `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	SelectedIdx int           `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SelectSig   ki.Signal     `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
+	Slice       interface{}              `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	StyleFunc   StructTableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
+	Values      [][]ValueView            `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
+	TmpSave     ValueView                `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig     ki.Signal                `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	SelectedIdx int                      `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SelectSig   ki.Signal                `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
 	builtSlice  interface{}
 	builtSize   int
 }
@@ -37,6 +38,10 @@ var KiT_StructTableView = kit.Types.AddType(&StructTableView{}, StructTableViewP
 
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
+
+// StructTableViewStyleFunc is a styling function for custom styling /
+// configuration of elements in the view
+type StructTableViewStyleFunc func(slice interface{}, widg Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
@@ -286,6 +291,9 @@ func (sv *StructTableView) ConfigSliceGrid() {
 					svv.SliceDelete(act.Data.(int))
 				})
 			}
+			if sv.StyleFunc != nil {
+				sv.StyleFunc(sv.Slice, widg, i, fli, vv)
+			}
 		}
 	}
 	sg.UpdateEnd(updt)
@@ -293,10 +301,6 @@ func (sv *StructTableView) ConfigSliceGrid() {
 
 // UpdateSelect updates the selection for the given index
 func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
-	if sv.SelectedIdx == idx && sel { // already selected
-		return
-	}
-
 	struTyp := sv.StructType()
 	nfld := struTyp.NumField()
 	sg, _ := sv.SliceGrid()
