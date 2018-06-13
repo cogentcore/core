@@ -199,10 +199,10 @@ func _HIWORD(l uintptr) uint16 {
 //sys	OpenClipboard(hwnd syscall.Handle) (opened bool) = user32.OpenClipboard
 //sys	CloseClipboard() (closed bool) = user32.CloseClipboard
 //sys	EmptyClipboard() (empty bool) = user32.EmptyClipboard
-//sys	SetClipboardData(uFormat uint32, hMem syscall.Handle) = user32.SetClipboardData
+//sys	SetClipboardData(uFormat uint32, hMem syscall.Handle) (hRes syscall.Handle) = user32.SetClipboardData
 //sys	GetClipboardData(uFormat uint32) (hMem syscall.Handle) = user32.GetClipboardData
 //sys	GlobalLock(hMem syscall.Handle) (data *uint16) = kernel32.GlobalLock
 //sys	GlobalUnlock(hMem syscall.Handle) (unlocked bool) = kernel32.GlobalUnlock
 //sys	GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) = kernel32.GlobalAlloc
 //sys	GlobalFree(hMem syscall.Handle) = kernel32.GlobalFree
-//sys	CopyMemory(dest uintptr, src uintptr, sz uintptr) = kernel32.CopyMemory
+//sys	CopyMemory(dest uintptr, src uintptr, sz uintptr) = kernel32.RtlCopyMemory

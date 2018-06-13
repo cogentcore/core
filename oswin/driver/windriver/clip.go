@@ -6,6 +6,7 @@ package windriver
 
 import (
 	"fmt"
+	"log"
 	"syscall"
 	"time"
 	"unsafe"
@@ -59,18 +60,17 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	for _, typ := range types {
 		if typ == mimedata.TextPlain || typ == mimedata.TextAny || typ == mimedata.AppJSON {
 			hData := win32.GetClipboardData(win32.CF_UNICODETEXT)
-			// if hData == nil {
-			// 	return nil
-			// }
-
+			if hData == 0 {
+				log.Printf("clip.Board.Read couldn't get clip data\n")
+				return nil
+			}
 			wd := win32.GlobalLock(hData)
+			if wd == nil {
+				log.Printf("clip.Board.Read couldn't lock clip data\n")
+				return nil
+			}
+			defer win32.GlobalUnlock(hData)
 			txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
-			win32.GlobalUnlock(hData)
-
-			// if err != nil {
-			// 	log.Printf("clip.Board.Read text convert error: %v\n", err)
-			// 	return nil
-			// }
 			// todo: verify txt format for JSON etc
 			return mimedata.NewMime(typ, []byte(txt))
 		}
@@ -91,18 +91,24 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 
 	for _, d := range data {
 		if d.Type == mimedata.TextPlain || d.Type == mimedata.TextAny || d.Type == mimedata.AppJSON {
-			wc, _ := syscall.UTF16PtrFromString(string(d.Data))
-			sz := uintptr(len(d.Data)+1) * 2
+			wc, err := syscall.UTF16FromString(string(d.Data))
+			if err != nil {
+				return err
+			}
+			sz := uintptr(len(wc)*2)
 			hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
-			// if hData == nil {
-			// 	return fmt.Errorf("clip.Board.Write could not alloc string\n")
-			// }
-			defer win32.GlobalFree(hData)
 			wd := win32.GlobalLock(hData)
-			win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(wc)), sz)
+			if wd == nil {
+				log.Printf("clip.Board.Write couldn't lock clip data\n")
+				return nil
+			}
+			win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(&wc[0])), sz)
 			win32.GlobalUnlock(hData)
 
-			win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
+			hRes := win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
+			if hRes == 0 {
+				win32.GlobalFree(hData)
+			}
 			break // only 1
 		}
 	}

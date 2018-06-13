@@ -100,6 +100,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	app.mu.Lock()
 	app.windows[w.hwnd] = w
+	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
 	err = win32.ResizeClientRect(w.hwnd, opts.Size)

@@ -467,6 +467,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	app.mu.Lock()
 	app.windows[xw] = w
+	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
 	w.lifecycler.SendEvent(w, nil)

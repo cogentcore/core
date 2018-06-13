@@ -72,7 +72,7 @@ var (
 	procGlobalUnlock      = modkernel32.NewProc("GlobalUnlock")
 	procGlobalAlloc       = modkernel32.NewProc("GlobalAlloc")
 	procGlobalFree        = modkernel32.NewProc("GlobalFree")
-	procCopyMemory        = modkernel32.NewProc("CopyMemory")
+	procRtlCopyMemory     = modkernel32.NewProc("RtlCopyMemory")
 )
 
 func GetDC(hwnd syscall.Handle) (dc syscall.Handle, err error) {
@@ -314,8 +314,9 @@ func EmptyClipboard() (empty bool) {
 	return
 }
 
-func SetClipboardData(uFormat uint32, hMem syscall.Handle) {
-	syscall.Syscall(procSetClipboardData.Addr(), 2, uintptr(uFormat), uintptr(hMem), 0)
+func SetClipboardData(uFormat uint32, hMem syscall.Handle) (hRes syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procSetClipboardData.Addr(), 2, uintptr(uFormat), uintptr(hMem), 0)
+	hRes = syscall.Handle(r0)
 	return
 }
 
@@ -349,6 +350,6 @@ func GlobalFree(hMem syscall.Handle) {
 }
 
 func CopyMemory(dest uintptr, src uintptr, sz uintptr) {
-	syscall.Syscall(procCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(sz))
+	syscall.Syscall(procRtlCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(sz))
 	return
 }
