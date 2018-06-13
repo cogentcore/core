@@ -71,6 +71,17 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
+* clip.Board: windows only supports one item on the clipboard at once, and
+  linux has MULTIPLE but it is kind of a PITA.  Mac easily supports multiple.
+    + simple text is no big deal in any case -- issues are for more complex
+      JSON-based objects, e.g., TreeView nodes
+	+ within same app can just use lastPaste data -- BUT doesn't work on
+      windows -- it doesn't tell us the current clip owner.. so lastPaste will stay there
+      forever..
+	+ between-GoGi apps could just use a magic cookie and send entire JSON of mimedata
+	+ but this will not be readable to anything else.  but that is probably true anyway.
+	+ probably make this standard on all platforms, to keep it consistent?
+  
 * enable dnd to use OS DND when moves outside window
 
 * windows:
@@ -82,7 +93,6 @@ Currently at an **alpha** level release:
 	+ impl setPos
 
 * linux:
-	+ clip.Board impl
 	+ moving window isn't updating pos of new windows
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.

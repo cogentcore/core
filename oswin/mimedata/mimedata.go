@@ -100,6 +100,13 @@ func NewTextPlus(text, typ string, data []byte) Mimes {
 	return mi
 }
 
+// NewMime returns a Mimes representation of one element
+func NewMime(typ string, data []byte) Mimes {
+	mi := make(Mimes, 1)
+	mi[0] = &Data{typ, data}
+	return mi
+}
+
 // HasType returns true if Mimes has given type of data available
 func (mi Mimes) HasType(typ string) bool {
 	for _, d := range mi {

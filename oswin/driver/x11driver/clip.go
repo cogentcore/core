@@ -29,6 +29,13 @@ type clipImpl struct {
 
 var theClip = clipImpl{}
 
+// ClipTransSize determines how much data in bytes to transfer per call, 1MB
+var ClipTransSize = uint32(1048576)
+
+// ClipTimeOut determines how long to wait before timing out waiting for the
+// SelectionNotifyEvent
+var ClipTimeOut = 1 * time.Second
+
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if types == nil {
 		return nil
@@ -63,8 +70,6 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	// but example from jtanx just uses the name of the selection again, so...
 	xproto.ConvertSelection(ci.app.xc, ci.app.window32, useSel, ci.app.atomUTF8String, useSel, xproto.TimeCurrentTime)
 
-	transSz := uint32(1048576) // how much to transfer per call, 1MB
-	timeOut := 1 * time.Second
 	var ptyp xproto.Atom
 	b := make([]byte, 0, 1024)
 
@@ -74,7 +79,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		bufsz := uint32(0) // current buffer size
 		for bytesAfter > 0 {
 			// last two args are offset and amount to transfer, in 32bit "long" sizes
-			prop, err := xproto.GetProperty(ci.app.xc, true, ci.app.window32, ev.Property, xproto.AtomAny, bufsz/4, transSz/4).Reply()
+			prop, err := xproto.GetProperty(ci.app.xc, true, ci.app.window32, ev.Property, xproto.AtomAny, bufsz/4, ClipTransSize/4).Reply()
 			if err != nil {
 				log.Printf("X11 Clipboard Read Property error: %v\n", err)
 				return nil
@@ -87,7 +92,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 			}
 			ptyp = prop.Type
 		}
-	case <-time.After(timeOut):
+	case <-time.After(ClipTimeOut):
 		log.Printf("X11 Clipboard Read: unexpected timeout on receipt of SelectionNotifyEvent\n")
 		return nil
 	}
@@ -100,17 +105,6 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	}
 	return nil
 }
-
-// func clipWriteMimeType(mtyp string) {
-// 	ctyp := C.CString(mimedata.TextPlain)
-// 	mhdr := []byte(fmt.Sprintf("MIME-Version: 1.0\nContent-type: %v", mtyp))
-// 	sz := len(mhdr)
-// 	cdata := C.malloc(C.size_t(sz))
-// 	copy((*[1 << 30]byte)(cdata)[0:sz], mhdr)
-// 	C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(mimedata.TextPlain)))
-// 	C.free(unsafe.Pointer(ctyp))
-// 	C.free(unsafe.Pointer(cdata))
-// }
 
 func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 	// note: clear is not relevant here -- always replaces
@@ -169,36 +163,7 @@ func (ci *clipImpl) SendLastWrite(ev xproto.SelectionRequestEvent) {
 	xproto.SendEvent(ci.app.xc, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
 }
 
-// 	for _, d := range data {
-// 		switch d.Type {
-// 		case mimedata.AppJSON:
-// 			clipWriteMimeType(d.Type)
-// 		}
-// 		ctyp := C.CString(d.Type)
-// 		sz := len(d.Data)
-// 		cdata := C.malloc(C.size_t(sz))
-// 		copy((*[1 << 30]byte)(cdata)[0:sz], d.Data)
-// 		C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(d.Type)))
-// 		C.free(unsafe.Pointer(ctyp))
-// 		C.free(unsafe.Pointer(cdata))
-// 	}
-// 	C.clipWrite()
-// 	return nil
-// }
-
 func (ci *clipImpl) Clear() {
 	ci.lastWrite = nil
 	xproto.SetSelectionOwner(ci.app.xc, xproto.AtomNone, ci.app.atomClipboardSel, xproto.TimeCurrentTime)
-	// useSel := ci.app.atomPrimarySel
-	// xproto.SetSelectionOwner(ci.app.xc, xproto.AtomNone, ci.app.atomPrimarySel, xproto.TimeCurrentTime)
 }
-
-// //export addMimeData
-// func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
-// 	if *curMimeData == nil {
-// 		*curMimeData = make(mimedata.Mimes, 0)
-// 	}
-// 	typ := C.GoStringN(ctyp, typlen)
-// 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
-// 	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
-// }

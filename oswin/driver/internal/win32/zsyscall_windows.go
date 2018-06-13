@@ -37,7 +37,8 @@ func errnoErr(e syscall.Errno) error {
 }
 
 var (
-	moduser32 = windows.NewLazySystemDLL("user32.dll")
+	moduser32   = windows.NewLazySystemDLL("user32.dll")
+	modkernel32 = windows.NewLazySystemDLL("kernel32.dll")
 
 	procGetDC             = moduser32.NewProc("GetDC")
 	procReleaseDC         = moduser32.NewProc("ReleaseDC")
@@ -62,6 +63,16 @@ var (
 	procScreenToClient    = moduser32.NewProc("ScreenToClient")
 	procToUnicodeEx       = moduser32.NewProc("ToUnicodeEx")
 	procTranslateMessage  = moduser32.NewProc("TranslateMessage")
+	procOpenClipboard     = moduser32.NewProc("OpenClipboard")
+	procCloseClipboard    = moduser32.NewProc("CloseClipboard")
+	procEmptyClipboard    = moduser32.NewProc("EmptyClipboard")
+	procSetClipboardData  = moduser32.NewProc("SetClipboardData")
+	procGetClipboardData  = moduser32.NewProc("GetClipboardData")
+	procGlobalLock        = modkernel32.NewProc("GlobalLock")
+	procGlobalUnlock      = modkernel32.NewProc("GlobalUnlock")
+	procGlobalAlloc       = modkernel32.NewProc("GlobalAlloc")
+	procGlobalFree        = modkernel32.NewProc("GlobalFree")
+	procCopyMemory        = modkernel32.NewProc("CopyMemory")
 )
 
 func GetDC(hwnd syscall.Handle) (dc syscall.Handle, err error) {
@@ -282,5 +293,62 @@ func _ToUnicodeEx(wVirtKey uint32, wScanCode uint32, lpKeyState *byte, pwszBuff 
 func _TranslateMessage(msg *_MSG) (done bool) {
 	r0, _, _ := syscall.Syscall(procTranslateMessage.Addr(), 1, uintptr(unsafe.Pointer(msg)), 0, 0)
 	done = r0 != 0
+	return
+}
+
+func _OpenClipboard(hwnd syscall.Handle) (opened bool) {
+	r0, _, _ := syscall.Syscall(procOpenClipboard.Addr(), 1, uintptr(hwnd), 0, 0)
+	opened = r0 != 0
+	return
+}
+
+func _CloseClipboard() (closed bool) {
+	r0, _, _ := syscall.Syscall(procCloseClipboard.Addr(), 0, 0, 0, 0)
+	closed = r0 != 0
+	return
+}
+
+func _EmptyClipboard() (empty bool) {
+	r0, _, _ := syscall.Syscall(procEmptyClipboard.Addr(), 0, 0, 0, 0)
+	empty = r0 != 0
+	return
+}
+
+func _SetClipboardData(uFormat uint32, hMem syscall.Handle) {
+	syscall.Syscall(procSetClipboardData.Addr(), 2, uintptr(uFormat), uintptr(hMem), 0)
+	return
+}
+
+func _GetClipboardData(uFormat uint32) (hMem syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procGetClipboardData.Addr(), 1, uintptr(uFormat), 0, 0)
+	hMem = syscall.Handle(r0)
+	return
+}
+
+func _GlobalLock(hMem syscall.Handle) (data *uint16) {
+	r0, _, _ := syscall.Syscall(procGlobalLock.Addr(), 1, uintptr(hMem), 0, 0)
+	data = (*uint16)(unsafe.Pointer(r0))
+	return
+}
+
+func _GlobalUnlock(hMem syscall.Handle) (unlocked bool) {
+	r0, _, _ := syscall.Syscall(procGlobalUnlock.Addr(), 1, uintptr(hMem), 0, 0)
+	unlocked = r0 != 0
+	return
+}
+
+func _GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procGlobalAlloc.Addr(), 2, uintptr(uFlags), uintptr(size), 0)
+	hMem = syscall.Handle(r0)
+	return
+}
+
+func _GlobalFree(hMem syscall.Handle) {
+	syscall.Syscall(procGlobalFree.Addr(), 1, uintptr(hMem), 0, 0)
+	return
+}
+
+func _CopyMemory(dest uintptr, src uintptr, sz uintptr) {
+	syscall.Syscall(procCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(sz))
 	return
 }
