@@ -157,9 +157,15 @@ func (w *Window) GoStartEventLoop() {
 	go w.EventLoop()
 }
 
-// tell the event loop to stop running
+// StopEventLoop tells the event loop to stop running when the next event arrives
 func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true
+}
+
+// Quit exits out of the program, closing the window..
+func (w *Window) Quit() {
+	w.OSWin.Release()
+	os.Exit(0) // todo: should use lifecycle
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
