@@ -185,7 +185,7 @@ func sendSize(hwnd syscall.Handle) {
 
 	//	fmt.Printf("sendsize: %v %v sc %+v rect %+v\n",	width, height, sc, r)
 
-	act := window.ActionN
+	act := window.ActionsN
 
 	winEv := &window.Event{
 		Size:       sz,

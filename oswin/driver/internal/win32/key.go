@@ -21,7 +21,7 @@ import (
 
 // convVirtualKeyCode converts a Win32 virtual key code number
 // into the standard keycodes used by the key package.
-func convVirtualKeyCode(vKey uint32) key.Code {
+func convVirtualKeyCode(vKey uint32) key.Codes {
 	switch vKey {
 	case 0x01: // VK_LBUTTON left mouse button
 	case 0x02: // VK_RBUTTON right mouse button
@@ -334,7 +334,7 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 	r := readRune(uint32(wParam), uint8(lParam>>16))
 	c := convVirtualKeyCode(uint32(wParam))
 	mod := int32(keyModifiers())
-	var act key.Action
+	var act key.Actions
 	
 	switch uMsg {
 	case _WM_KEYDOWN:

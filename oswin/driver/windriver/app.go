@@ -240,5 +240,5 @@ func (app *appImpl) FontPaths() []string {
 }
 
 func (app *appImpl) ClipBoard() clip.Board {
-	return nil // todo!
+	return &theClip
 }

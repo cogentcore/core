@@ -140,11 +140,11 @@ const (
 )
 
 const (
-	_CF_UNICODETEXT = 13
+	CF_UNICODETEXT = 13
 )
 
 const (
-	_GMEM_MOVEABLE = 0x0002
+	GMEM_MOVEABLE = 0x0002
 )
 
 func _GET_X_LPARAM(lp uintptr) int32 {
@@ -196,13 +196,13 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_ScreenToClient(hwnd syscall.Handle, lpPoint *_POINT) (ok bool) = user32.ScreenToClient
 //sys   _ToUnicodeEx(wVirtKey uint32, wScanCode uint32, lpKeyState *byte, pwszBuff *uint16, cchBuff int32, wFlags uint32, dwhkl syscall.Handle) (ret int32) = user32.ToUnicodeEx
 //sys	_TranslateMessage(msg *_MSG) (done bool) = user32.TranslateMessage
-//sys	_OpenClipboard(hwnd syscall.Handle) (opened bool) = user32.OpenClipboard
-//sys	_CloseClipboard() (closed bool) = user32.CloseClipboard
-//sys	_EmptyClipboard() (empty bool) = user32.EmptyClipboard
-//sys	_SetClipboardData(uFormat uint32, hMem syscall.Handle) = user32.SetClipboardData
-//sys	_GetClipboardData(uFormat uint32) (hMem syscall.Handle) = user32.GetClipboardData
-//sys	_GlobalLock(hMem syscall.Handle) (data *uint16) = kernel32.GlobalLock
-//sys	_GlobalUnlock(hMem syscall.Handle) (unlocked bool) = kernel32.GlobalUnlock
-//sys	_GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) = kernel32.GlobalAlloc
-//sys	_GlobalFree(hMem syscall.Handle) = kernel32.GlobalFree
-//sys	_CopyMemory(dest uintptr, src uintptr, sz uintptr) = kernel32.CopyMemory
+//sys	OpenClipboard(hwnd syscall.Handle) (opened bool) = user32.OpenClipboard
+//sys	CloseClipboard() (closed bool) = user32.CloseClipboard
+//sys	EmptyClipboard() (empty bool) = user32.EmptyClipboard
+//sys	SetClipboardData(uFormat uint32, hMem syscall.Handle) = user32.SetClipboardData
+//sys	GetClipboardData(uFormat uint32) (hMem syscall.Handle) = user32.GetClipboardData
+//sys	GlobalLock(hMem syscall.Handle) (data *uint16) = kernel32.GlobalLock
+//sys	GlobalUnlock(hMem syscall.Handle) (unlocked bool) = kernel32.GlobalUnlock
+//sys	GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) = kernel32.GlobalAlloc
+//sys	GlobalFree(hMem syscall.Handle) = kernel32.GlobalFree
+//sys	CopyMemory(dest uintptr, src uintptr, sz uintptr) = kernel32.CopyMemory

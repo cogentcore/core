@@ -6,11 +6,12 @@ package windriver
 
 import (
 	"fmt"
-	"log"
 	"syscall"
 	"time"
+	"unsafe"
 
 	"github.com/goki/gi/oswin/mimedata"
+	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
 // implements clipboard support for Windows
@@ -21,7 +22,6 @@ import (
 // https://github.com/AllenDang/w32
 
 type clipImpl struct {
-	app *appImpl
 }
 
 var theClip = clipImpl{}
@@ -33,10 +33,10 @@ var ClipRetries = 5
 var ClipRetrySleep = 5 * time.Millisecond
 
 func (ci *clipImpl) OpenClipboard() bool {
-	if len(app.winlist) == 0 {
+	if len(theApp.winlist) == 0 {
 		return false
 	}
-	win := app.winlist[0]
+	win := theApp.winlist[0]
 	for retry := 0; retry < ClipRetries; retry++ {
 		got := win32.OpenClipboard(win.hwnd)
 		if got {
@@ -47,14 +47,6 @@ func (ci *clipImpl) OpenClipboard() bool {
 	return false
 }
 
-func (ci *clipImpl) CloseClipboard() bool {
-	if len(app.winlist) == 0 {
-		return false
-	}
-	win := app.winlist[0]
-	return win32.CloseClipboard()
-}
-
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if types == nil {
 		return nil
@@ -62,27 +54,28 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if !ci.OpenClipboard() {
 		return nil
 	}
-	defer ci.CloseClipboard()
+	defer win32.CloseClipboard()
 
 	for _, typ := range types {
 		if typ == mimedata.TextPlain || typ == mimedata.TextAny || typ == mimedata.AppJSON {
-			hData := win32.GetClipboardData(win32._CF_UNICODETEXT)
-			if hData == nil {
-				return nil
-			}
+			hData := win32.GetClipboardData(win32.CF_UNICODETEXT)
+			// if hData == nil {
+			// 	return nil
+			// }
 
 			wd := win32.GlobalLock(hData)
-			txt, err := syscall.UTF16PtrToString(wd)
+			txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
 			win32.GlobalUnlock(hData)
 
-			if err != nil {
-				log.Printf("clip.Board.Read text convert error: %v\n", err)
-				return nil
-			}
+			// if err != nil {
+			// 	log.Printf("clip.Board.Read text convert error: %v\n", err)
+			// 	return nil
+			// }
 			// todo: verify txt format for JSON etc
 			return mimedata.NewMime(typ, []byte(txt))
 		}
 	}
+	return nil
 }
 
 func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
@@ -90,29 +83,30 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 	if !ci.OpenClipboard() {
 		return fmt.Errorf("clip.Board.Write could not open clipboard\n")
 	}
-	defer ci.CloseClipboard()
+	defer win32.CloseClipboard()
 
 	if !win32.EmptyClipboard() {
 		return fmt.Errorf("clip.Board.Write could not empty clipboard\n")
 	}
 
 	for _, d := range data {
-		if typ == mimedata.TextPlain || typ == mimedata.TextAny || typ == mimedata.AppJSON {
-			wc := syscall.UTF16PtrFromString(string(d.Data))
-			sz := uintptr(len(wc)) * 2
-			hData = win32.GlobalAlloc(win32._GMEM_MOVEABLE, sz)
-			if hData == nil {
-				return fmt.Errorf("clip.Board.Write could not alloc string\n")
-			}
+		if d.Type == mimedata.TextPlain || d.Type == mimedata.TextAny || d.Type == mimedata.AppJSON {
+			wc, _ := syscall.UTF16PtrFromString(string(d.Data))
+			sz := uintptr(len(d.Data)+1) * 2
+			hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
+			// if hData == nil {
+			// 	return fmt.Errorf("clip.Board.Write could not alloc string\n")
+			// }
 			defer win32.GlobalFree(hData)
 			wd := win32.GlobalLock(hData)
-			win32.CopyMemory(wd, &wc[0], sz)
+			win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(wc)), sz)
 			win32.GlobalUnlock(hData)
 
-			win32.SetClipboardData(win32._CF_UNICODETEXT, hData)
+			win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
 			break // only 1
 		}
 	}
+	return nil
 }
 
 func (ci *clipImpl) Clear() {
@@ -120,5 +114,5 @@ func (ci *clipImpl) Clear() {
 		return
 	}
 	win32.EmptyClipboard()
-	ci.CloseClipboard()
+	win32.CloseClipboard()
 }

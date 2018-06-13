@@ -296,59 +296,59 @@ func _TranslateMessage(msg *_MSG) (done bool) {
 	return
 }
 
-func _OpenClipboard(hwnd syscall.Handle) (opened bool) {
+func OpenClipboard(hwnd syscall.Handle) (opened bool) {
 	r0, _, _ := syscall.Syscall(procOpenClipboard.Addr(), 1, uintptr(hwnd), 0, 0)
 	opened = r0 != 0
 	return
 }
 
-func _CloseClipboard() (closed bool) {
+func CloseClipboard() (closed bool) {
 	r0, _, _ := syscall.Syscall(procCloseClipboard.Addr(), 0, 0, 0, 0)
 	closed = r0 != 0
 	return
 }
 
-func _EmptyClipboard() (empty bool) {
+func EmptyClipboard() (empty bool) {
 	r0, _, _ := syscall.Syscall(procEmptyClipboard.Addr(), 0, 0, 0, 0)
 	empty = r0 != 0
 	return
 }
 
-func _SetClipboardData(uFormat uint32, hMem syscall.Handle) {
+func SetClipboardData(uFormat uint32, hMem syscall.Handle) {
 	syscall.Syscall(procSetClipboardData.Addr(), 2, uintptr(uFormat), uintptr(hMem), 0)
 	return
 }
 
-func _GetClipboardData(uFormat uint32) (hMem syscall.Handle) {
+func GetClipboardData(uFormat uint32) (hMem syscall.Handle) {
 	r0, _, _ := syscall.Syscall(procGetClipboardData.Addr(), 1, uintptr(uFormat), 0, 0)
 	hMem = syscall.Handle(r0)
 	return
 }
 
-func _GlobalLock(hMem syscall.Handle) (data *uint16) {
+func GlobalLock(hMem syscall.Handle) (data *uint16) {
 	r0, _, _ := syscall.Syscall(procGlobalLock.Addr(), 1, uintptr(hMem), 0, 0)
 	data = (*uint16)(unsafe.Pointer(r0))
 	return
 }
 
-func _GlobalUnlock(hMem syscall.Handle) (unlocked bool) {
+func GlobalUnlock(hMem syscall.Handle) (unlocked bool) {
 	r0, _, _ := syscall.Syscall(procGlobalUnlock.Addr(), 1, uintptr(hMem), 0, 0)
 	unlocked = r0 != 0
 	return
 }
 
-func _GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) {
+func GlobalAlloc(uFlags uint32, size uintptr) (hMem syscall.Handle) {
 	r0, _, _ := syscall.Syscall(procGlobalAlloc.Addr(), 2, uintptr(uFlags), uintptr(size), 0)
 	hMem = syscall.Handle(r0)
 	return
 }
 
-func _GlobalFree(hMem syscall.Handle) {
+func GlobalFree(hMem syscall.Handle) {
 	syscall.Syscall(procGlobalFree.Addr(), 1, uintptr(hMem), 0, 0)
 	return
 }
 
-func _CopyMemory(dest uintptr, src uintptr, sz uintptr) {
+func CopyMemory(dest uintptr, src uintptr, sz uintptr) {
 	syscall.Syscall(procCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(sz))
 	return
 }

@@ -226,7 +226,7 @@ func windowEvent(hwnd syscall.Handle, e oswin.Event) {
 	// todo: multiple screens
 	sc := oswin.TheApp.Screen(0)
 
-	act := window.ActionN
+	act := window.ActionsN
 
 	if w.Sz != sz || w.LogDPI != ldpi {
 		act = window.Resize
