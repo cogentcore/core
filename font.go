@@ -11,6 +11,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -222,8 +223,39 @@ type FontLib struct {
 	loadMu     sync.Mutex
 }
 
-// we export this font library
+// FontLibrary is the gi font library, initialized from fonts available on font paths
 var FontLibrary FontLib
+
+// AltFontMap is an alternative font map that maps file names to more standard
+// full names (e.g., Times -> Times New Roman) -- also looks for b,i suffixes
+// for these cases -- some are added here just to pick up those suffixes
+var AltFontMap = map[string]string{
+	"arial": "Arial",
+	"ariblk": "Arial Black",
+	"candara": "Candara",
+	"calibri": "Calibri",
+	"cambria": "Cambria",
+	"cour": "Courier New",
+	"constan": "Constantia",
+	"consola": "Console",
+	"comic": "Comic Sans MS",
+	"corbel": "Corbel",
+	"framd": "Franklin Gothic Medium",
+	"georgia": "Georgia",
+	"gadugi": "Gadugi",
+	"malgun": "Malgun Gothic",
+	"mmrtex": "Myanmar Text",
+	"pala": "Palatino",
+	"segoepr": "Segoe Print",
+	"segoesc": "Segoe Script",
+	"segoeui":  "Segoe UI",
+	"segui": "Segoe UI Historic",
+	"tahoma": "Tahoma",
+	"taile": "Traditional Arabic",
+	"times": "Times New Roman",
+	"trebuc": "Trebuchet",
+	"verdana": "Verdana",
+}
 
 func (fl *FontLib) Init() {
 	fl.initMu.Lock()
@@ -277,7 +309,28 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
 				fn = strings.TrimRight(fn, ext)
-				fn = strings.Replace(fn, "_", " ", -1)
+				bfn := strings.TrimRight(fn, "bd")
+				bfn = strings.TrimRight(bfn, "bi")
+				bfn = strings.TrimRight(bfn, "z")
+				bfn = strings.TrimRight(bfn, "b")
+				if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
+					bfn = strings.TrimRight(bfn, "i")
+				}
+				if afn, ok := AltFontMap[bfn]; ok {
+					sfx := ""
+					if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
+						sfx = " Bold"
+					} else if strings.HasSuffix(fn, "bi") || strings.HasSuffix(fn, "z") {
+						sfx = " Bold Italic"
+					} else if strings.HasSuffix(fn, "i") {
+						sfx = " Italic"
+					}
+					fn = afn + sfx
+				} else {
+					fn = strings.Replace(fn, "_", " ", -1)
+					fn = strings.Replace(fn, "-", " ", -1)
+					// fn = strings.Title(fn)
+				}
 				basefn := strings.ToLower(fn)
 				if _, ok := fl.FontsAvail[basefn]; !ok {
 					fl.FontsAvail[basefn] = path
@@ -292,6 +345,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 					}
 					fl.FontInfo = append(fl.FontInfo, fi)
 					// fmt.Printf("added font: %v at path %q\n", basefn, path)
+
 				}
 			}
 			return nil
@@ -301,6 +355,10 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			fmt.Printf("FontLib: error walking the path %q: %v\n", p, err)
 		}
 	}
+	sort.Slice(fl.FontInfo, func(i, j int) bool {
+		return fl.FontInfo[i].Name < fl.FontInfo[j].Name
+	})
+
 	return len(fl.FontsAvail) > 0
 }
 

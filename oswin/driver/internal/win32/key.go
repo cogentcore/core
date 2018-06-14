@@ -334,6 +334,50 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 	r := readRune(uint32(wParam), uint8(lParam>>16))
 	c := convVirtualKeyCode(uint32(wParam))
 	mod := int32(keyModifiers())
+
+	// these keys are fooled by presence of some modifiers -- restore 
+	if r == -1 {
+		shft := mod & (1<<uint32(key.Shift)) != 0
+		switch c {
+		case key.CodeEqualSign:
+			if shft {
+				r = '+'
+			} else {
+				r = '='
+			}
+		case key.CodeHyphenMinus:
+			if shft {
+				r = '_'
+			} else {
+				r = '-'
+			}
+		case key.CodeLeftSquareBracket:
+			if shft {
+				r = '{'
+			} else {
+				r = '['
+			}
+		case key.CodeRightSquareBracket:
+			if shft {
+				r = '}'
+			} else {
+				r = ']'
+			}
+		case key.CodeBackslash:
+			if shft {
+				r = '|'
+			} else {
+				r = '\\'
+			}
+		case key.CodeGraveAccent:
+			if shft {
+				r = '~'
+			} else {
+				r = '`'
+			}
+		}
+	}
+	
 	var act key.Actions
 	
 	switch uMsg {

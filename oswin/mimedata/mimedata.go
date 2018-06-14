@@ -8,6 +8,9 @@
 // in mimedata.Mimes which is just a []mimedata.Data slice
 package mimedata
 
+// standard MIME-encoded header 
+var MimeHeader = "MIME-Version: 1.0\nContent-type: %v\n"
+
 // Data represents one element of MIME data as a type string and byte slice
 type Data struct {
 	// MIME Type string representing the data, e.g., text/plain, text/html, text/xml, text/uri-list, image/jpg, png etc

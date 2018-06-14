@@ -11,10 +11,36 @@ import (
 
 var _ unsafe.Pointer
 
+// Do the interface allocations only once for common
+// Errno values.
+const (
+	errnoERROR_IO_PENDING = 997
+)
+
+var (
+	errERROR_IO_PENDING error = syscall.Errno(errnoERROR_IO_PENDING)
+)
+
+// errnoErr returns common boxed Errno values, to prevent
+// allocations at runtime.
+func errnoErr(e syscall.Errno) error {
+	switch e {
+	case 0:
+		return nil
+	case errnoERROR_IO_PENDING:
+		return errERROR_IO_PENDING
+	}
+	// TODO: add more here, after collecting data on the common
+	// error values see on Windows. (perhaps when running
+	// all.bat?)
+	return e
+}
+
 var (
 	modmsimg32 = windows.NewLazySystemDLL("msimg32.dll")
 	modgdi32   = windows.NewLazySystemDLL("gdi32.dll")
 	moduser32  = windows.NewLazySystemDLL("user32.dll")
+	modshcore  = windows.NewLazySystemDLL("shcore.dll")
 
 	procAlphaBlend             = modmsimg32.NewProc("AlphaBlend")
 	procBitBlt                 = modgdi32.NewProc("BitBlt")
@@ -31,13 +57,15 @@ var (
 	procSetWorldTransform      = modgdi32.NewProc("SetWorldTransform")
 	procStretchBlt             = modgdi32.NewProc("StretchBlt")
 	procGetDeviceCaps          = modgdi32.NewProc("GetDeviceCaps")
+	procSetProcessDpiAwareness = modshcore.NewProc("SetProcessDpiAwareness")
+	procGetDpiForWindow        = moduser32.NewProc("GetDpiForWindow")
 )
 
 func _AlphaBlend(dcdest syscall.Handle, xoriginDest int32, yoriginDest int32, wDest int32, hDest int32, dcsrc syscall.Handle, xoriginSrc int32, yoriginSrc int32, wsrc int32, hsrc int32, ftn uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall12(procAlphaBlend.Addr(), 11, uintptr(dcdest), uintptr(xoriginDest), uintptr(yoriginDest), uintptr(wDest), uintptr(hDest), uintptr(dcsrc), uintptr(xoriginSrc), uintptr(yoriginSrc), uintptr(wsrc), uintptr(hsrc), uintptr(ftn), 0)
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -49,7 +77,7 @@ func _BitBlt(dcdest syscall.Handle, xdest int32, ydest int32, width int32, heigh
 	r1, _, e1 := syscall.Syscall9(procBitBlt.Addr(), 9, uintptr(dcdest), uintptr(xdest), uintptr(ydest), uintptr(width), uintptr(height), uintptr(dcsrc), uintptr(xsrc), uintptr(ysrc), uintptr(rop))
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -62,7 +90,7 @@ func _CreateCompatibleBitmap(dc syscall.Handle, width int32, height int32) (bitm
 	bitmap = syscall.Handle(r0)
 	if bitmap == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -75,7 +103,7 @@ func _CreateCompatibleDC(dc syscall.Handle) (newdc syscall.Handle, err error) {
 	newdc = syscall.Handle(r0)
 	if newdc == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -88,7 +116,7 @@ func _CreateDIBSection(dc syscall.Handle, bmi *_BITMAPINFO, usage uint32, bits *
 	bitmap = syscall.Handle(r0)
 	if bitmap == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -101,7 +129,7 @@ func _CreateSolidBrush(color _COLORREF) (brush syscall.Handle, err error) {
 	brush = syscall.Handle(r0)
 	if brush == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -113,7 +141,7 @@ func _DeleteDC(dc syscall.Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procDeleteDC.Addr(), 1, uintptr(dc), 0, 0)
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -125,7 +153,7 @@ func _DeleteObject(object syscall.Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procDeleteObject.Addr(), 1, uintptr(object), 0, 0)
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -137,7 +165,7 @@ func _FillRect(dc syscall.Handle, rc *_RECT, brush syscall.Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procFillRect.Addr(), 3, uintptr(dc), uintptr(unsafe.Pointer(rc)), uintptr(brush))
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -149,7 +177,7 @@ func _ModifyWorldTransform(dc syscall.Handle, x *_XFORM, mode uint32) (err error
 	r1, _, e1 := syscall.Syscall(procModifyWorldTransform.Addr(), 3, uintptr(dc), uintptr(unsafe.Pointer(x)), uintptr(mode))
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -162,7 +190,7 @@ func _SelectObject(dc syscall.Handle, gdiobj syscall.Handle) (newobj syscall.Han
 	newobj = syscall.Handle(r0)
 	if newobj == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -175,7 +203,7 @@ func _SetGraphicsMode(dc syscall.Handle, mode int32) (oldmode int32, err error) 
 	oldmode = int32(r0)
 	if oldmode == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -187,7 +215,7 @@ func _SetWorldTransform(dc syscall.Handle, x *_XFORM) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetWorldTransform.Addr(), 2, uintptr(dc), uintptr(unsafe.Pointer(x)), 0)
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -199,7 +227,7 @@ func _StretchBlt(dcdest syscall.Handle, xdest int32, ydest int32, wdest int32, h
 	r1, _, e1 := syscall.Syscall12(procStretchBlt.Addr(), 11, uintptr(dcdest), uintptr(xdest), uintptr(ydest), uintptr(wdest), uintptr(hdest), uintptr(dcsrc), uintptr(xsrc), uintptr(ysrc), uintptr(wsrc), uintptr(hsrc), uintptr(rop), 0)
 	if r1 == 0 {
 		if e1 != 0 {
-			err = error(e1)
+			err = errnoErr(e1)
 		} else {
 			err = syscall.EINVAL
 		}
@@ -210,5 +238,17 @@ func _StretchBlt(dcdest syscall.Handle, xdest int32, ydest int32, wdest int32, h
 func _GetDeviceCaps(dc syscall.Handle, index int32) (ret int32) {
 	r0, _, _ := syscall.Syscall(procGetDeviceCaps.Addr(), 2, uintptr(dc), uintptr(index), 0)
 	ret = int32(r0)
+	return
+}
+
+func _SetProcessDpiAwareness(pdpi uint32) (ret int32) {
+	r0, _, _ := syscall.Syscall(procSetProcessDpiAwareness.Addr(), 1, uintptr(pdpi), 0, 0)
+	ret = int32(r0)
+	return
+}
+
+func _GetDpiForWindow(hwnd syscall.Handle) (ret uint32) {
+	r0, _, _ := syscall.Syscall(procGetDpiForWindow.Addr(), 1, uintptr(hwnd), 0, 0)
+	ret = uint32(r0)
 	return
 }

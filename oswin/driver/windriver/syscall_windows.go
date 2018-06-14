@@ -127,6 +127,8 @@ const (
 	_GM_ADVANCED   = 2
 
 	_MWT_IDENTITY = 1
+
+	_PROCESS_PER_MONITOR_DPI_AWARE  = 2
 )
 
 func _GET_X_LPARAM(lp uintptr) int32 {
@@ -165,3 +167,5 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_SetWorldTransform(dc syscall.Handle, x *_XFORM) (err error) = gdi32.SetWorldTransform
 //sys	_StretchBlt(dcdest syscall.Handle, xdest int32, ydest int32, wdest int32, hdest int32, dcsrc syscall.Handle, xsrc int32, ysrc int32, wsrc int32, hsrc int32, rop uint32) (err error) = gdi32.StretchBlt
 //sys	_GetDeviceCaps(dc syscall.Handle, index int32) (ret int32) = gdi32.GetDeviceCaps
+//sys	_SetProcessDpiAwareness(pdpi uint32) (ret int32) = shcore.SetProcessDpiAwareness
+//sys	_GetDpiForWindow(hwnd syscall.Handle) (ret uint32) = user32.GetDpiForWindow

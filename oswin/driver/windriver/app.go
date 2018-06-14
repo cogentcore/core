@@ -109,6 +109,18 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	}
 
 	win32.Show(w.hwnd)
+
+	if procGetDpiForWindow.Find() == nil { // has it
+		dpi = float32(_GetDpiForWindow(w.hwnd))
+		ldpi = oswin.LogicalFmPhysicalDPI(dpi)
+		w.PhysDPI = dpi
+		w.LogDPI = ldpi
+		if sc.PhysicalDPI == 96 {
+			sc.PhysicalDPI = dpi
+			sc.LogicalDPI = ldpi
+		}
+	}
+
 	return w, nil
 }
 
@@ -139,6 +151,8 @@ func (app *appImpl) initScreens() {
 	sc := &oswin.Screen{}
 	app.screens[0] = sc
 
+	_SetProcessDpiAwareness(_PROCESS_PER_MONITOR_DPI_AWARE)
+	
 	// todo: this is not working at all!
 	widthPx, heightPx := win32.ScreenSize()
 
