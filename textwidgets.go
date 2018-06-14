@@ -534,7 +534,7 @@ func (tf *TextField) Paste() {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text())
+		tf.InsertAtCursor(data.Text(mimedata.TextPlain))
 	}
 }
 

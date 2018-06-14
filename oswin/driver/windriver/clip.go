@@ -49,7 +49,7 @@ func (ci *clipImpl) OpenClipboard() bool {
 }
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	if types == nil {
+	if len(types) == 0 {
 		return nil
 	}
 	if !ci.OpenClipboard() {
@@ -57,28 +57,67 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	}
 	defer win32.CloseClipboard()
 
-	for _, typ := range types {
-		if typ == mimedata.TextPlain || typ == mimedata.TextAny || typ == mimedata.AppJSON {
-			hData := win32.GetClipboardData(win32.CF_UNICODETEXT)
-			if hData == 0 {
-				log.Printf("clip.Board.Read couldn't get clip data\n")
-				return nil
-			}
-			wd := win32.GlobalLock(hData)
-			if wd == nil {
-				log.Printf("clip.Board.Read couldn't lock clip data\n")
-				return nil
-			}
-			defer win32.GlobalUnlock(hData)
-			txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
-			// todo: verify txt format for JSON etc
-			return mimedata.NewMime(typ, []byte(txt))
+	wantText := mimedata.IsText(types[0])
+
+	if wantText {
+		hData := win32.GetClipboardData(win32.CF_UNICODETEXT)
+		if hData == 0 {
+			log.Printf("clip.Board.Read couldn't get clip data\n")
+			return nil
 		}
+		wd := win32.GlobalLock(hData)
+		if wd == nil {
+			log.Printf("clip.Board.Read couldn't lock clip data\n")
+			return nil
+		}
+		defer win32.GlobalUnlock(hData)
+		txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
+		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
+		if isMulti {
+			return mimedata.FromMultipart(body, boundary)
+		} else {
+			if mediaType != "" { // found a mime type encoding
+				return mimedata.NewMime(mediaType, []byte(txt))
+			} else {
+				// we can't really figure out type, so just assume..
+				return mimedata.NewMime(types[0], []byte(txt))
+			}
+		}
+	} else {
+		// todo: deal with image formats etc
 	}
 	return nil
 }
 
+func (ci *clipImpl) WriteText(b []byte) error {
+	wc, err := syscall.UTF16FromString(string(b))
+	if err != nil {
+		return err
+	}
+	sz := uintptr(len(wc)*2)
+	hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
+	wd := win32.GlobalLock(hData)
+	if wd == nil {
+		log.Printf("clip.Board.Write couldn't lock clip data\n")
+		return nil
+	}
+	win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(&wc[0])), sz)
+	win32.GlobalUnlock(hData)
+
+	hRes := win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
+	if hRes == 0 {
+		win32.GlobalFree(hData)
+		return fmt.Errorf("clip.Board.Write Could not set clip data\n")
+	}
+	return nil
+}
+
+
 func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
+	if len(data) == 0 {
+		return nil
+	}
+	
 	// clearFirst not relevant
 	if !ci.OpenClipboard() {
 		return fmt.Errorf("clip.Board.Write could not open clipboard\n")
@@ -89,27 +128,13 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 		return fmt.Errorf("clip.Board.Write could not empty clipboard\n")
 	}
 
-	for _, d := range data {
-		if d.Type == mimedata.TextPlain || d.Type == mimedata.TextAny || d.Type == mimedata.AppJSON {
-			wc, err := syscall.UTF16FromString(string(d.Data))
-			if err != nil {
-				return err
-			}
-			sz := uintptr(len(wc)*2)
-			hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
-			wd := win32.GlobalLock(hData)
-			if wd == nil {
-				log.Printf("clip.Board.Write couldn't lock clip data\n")
-				return nil
-			}
-			win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(&wc[0])), sz)
-			win32.GlobalUnlock(hData)
-
-			hRes := win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
-			if hRes == 0 {
-				win32.GlobalFree(hData)
-			}
-			break // only 1
+	if len(data) > 1 { // multipart
+		mpd := data.ToMultipart()
+		return ci.WriteText(mpd)
+	} else {
+		d := data[0]
+		if mimedata.IsText(d.Type) {
+			return ci.WriteText(d.Data)
 		}
 	}
 	return nil

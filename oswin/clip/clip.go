@@ -14,14 +14,14 @@ import (
 )
 
 // clip.Board interface defines the methods for reading and writing data to
-// the system clipboard -- uses mimedata to represent the data
+// the system clipboard -- uses mimedata to represent the data.  Due to limitations of Windows (and linux to a lesser extent), a multipart MIME formatted string is used if there are multiple elements in the mimedata -- this may be more appropriate for other non-GoGi consumers of the data as well
 type Board interface {
 
 	// Read attempts to read data of the given MIME type(s), in preference
 	// order, from the clipboard, returning mimedata.Mimes which can
 	// potentially have multiple different types for the same data if an "Any"
 	// mime type was used, or multiple items if multiple of the same type were
-	// on the clipboard
+	// encoded on the clipboard -- if first type listed is a text type, then text-based retrieval is pursued
 	Read(types []string) mimedata.Mimes
 
 	// Write writes given mimedata to the clipboard -- in general having a
