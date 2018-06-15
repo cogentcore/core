@@ -483,7 +483,7 @@ func (tf *TextField) SelectUpdate() {
 func (tf *TextField) Cut() string {
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut), true)
+		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut))
 	}
 	return cut
 }
@@ -519,7 +519,7 @@ func (tf *TextField) Copy(reset bool) string {
 		return ""
 	}
 	cpy := tf.Selection()
-	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cpy), true)
+	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cpy))
 	if reset {
 		tf.SelectReset()
 	}

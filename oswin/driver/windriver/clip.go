@@ -11,8 +11,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/driver/internal/win32"
+	"github.com/goki/gi/oswin/mimedata"
 )
 
 // implements clipboard support for Windows
@@ -94,7 +94,7 @@ func (ci *clipImpl) WriteText(b []byte) error {
 	if err != nil {
 		return err
 	}
-	sz := uintptr(len(wc)*2)
+	sz := uintptr(len(wc) * 2)
 	hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
 	wd := win32.GlobalLock(hData)
 	if wd == nil {
@@ -112,13 +112,11 @@ func (ci *clipImpl) WriteText(b []byte) error {
 	return nil
 }
 
-
-func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
+func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
-	
-	// clearFirst not relevant
+
 	if !ci.OpenClipboard() {
 		return fmt.Errorf("clip.Board.Write could not open clipboard\n")
 	}

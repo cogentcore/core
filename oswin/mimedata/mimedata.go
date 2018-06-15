@@ -3,26 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package mimedata defines MIME data support used in clipboard and
-// drag-and-drop functions in the GoGi GUI.  mimedata.Data struct contains format
-// and []byte data, and multiple representations of the same data are encoded
-// in mimedata.Mimes which is just a []mimedata.Data slice
+// drag-and-drop functions in the GoGi GUI.  mimedata.Data struct contains
+// format and []byte data, and multiple representations of the same data are
+// encoded in mimedata.Mimes which is just a []mimedata.Data slice -- it can
+// be encoded / decoded from mime multipart
 package mimedata
 
 import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"mime"
 	"mime/multipart"
-	"io"
 	"net/textproto"
 	"strings"
 )
 
 const (
-	ContentType = "Content-Type"
+	MIMEVersion1            = "MIME-Version: 1.0"
+	ContentType             = "Content-Type"
 	ContentTransferEncoding = "Content-Transfer-Encoding"
 )
 
@@ -174,7 +176,7 @@ func (mi Mimes) Text(typ string) string {
 func (mi Mimes) ToMultipart() []byte {
 	var b bytes.Buffer
 	mpw := multipart.NewWriter(io.Writer(&b))
-	hdr := fmt.Sprintf("%v: multipart/mixed; boundary=%v\n", ContentType, mpw.Boundary())
+	hdr := fmt.Sprintf("%v\n%v: multipart/mixed; boundary=%v\n", MIMEVersion1, ContentType, mpw.Boundary())
 	b.Write(([]byte)(hdr))
 	for _, d := range mi {
 		mh := textproto.MIMEHeader{ContentType: {d.Type}}
@@ -196,12 +198,12 @@ func (mi Mimes) ToMultipart() []byte {
 	return b.Bytes()
 }
 
-// IsMultipart examines a string to see if it has a ContentType: multipart/*
-// header -- returns the actual multipart media type, body of the data string
-// after the header (assumed to be a single \n terminated line at start of
-// string, and the boundary separating multipart elements (all from
-// mime.ParseMediaType) -- mediaType is the mediaType if it is another MIME
-// type -- can check that for non-empty string
+// IsMultipart examines a string to see if it has a MIME-Version: 1.0
+// ContentType: multipart/* header -- returns the actual multipart media type,
+// body of the data string after the header (assumed to be a single \n
+// terminated line at start of string, and the boundary separating multipart
+// elements (all from mime.ParseMediaType) -- mediaType is the mediaType if it
+// is another MIME type -- can check that for non-empty string
 func IsMultipart(str string) (isMulti bool, mediaType, body, boundary string) {
 	isMulti = false
 	mediaType = ""
@@ -209,21 +211,28 @@ func IsMultipart(str string) (isMulti bool, mediaType, body, boundary string) {
 	boundary = ""
 	var pars map[string]string
 	var err error
-	if strings.HasPrefix(str, ContentType) {
+	if strings.HasPrefix(str, MIMEVersion1) {
 		cri := strings.IndexRune(str, '\n')
 		if cri < 0 { // shouldn't happen
 			return
 		}
-		hdr := str[len(ContentType)+1:cri]
-		mediaType, pars, err = mime.ParseMediaType(hdr)
-		if err != nil { // shouldn't happen
-			log.Printf("mimedata.IsMultipart: malformed MIME header: %v\n", err)
-			return
-		}
-		if strings.HasPrefix(mediaType, "multipart/") {
-			isMulti = true
-			body = str[cri+1:]
-			boundary = pars["boundary"]
+		ctln := str[cri+1:]
+		if strings.HasPrefix(ctln, ContentType) { // should
+			cri2 := strings.IndexRune(ctln, '\n')
+			if cri2 < 0 { // shouldn't happen
+				return
+			}
+			hdr := ctln[len(ContentType)+1 : cri2]
+			mediaType, pars, err = mime.ParseMediaType(hdr)
+			if err != nil { // shouldn't happen
+				log.Printf("mimedata.IsMultipart: malformed MIME header: %v\n", err)
+				return
+			}
+			if strings.HasPrefix(mediaType, "multipart/") {
+				isMulti = true
+				body = str[cri2+1:]
+				boundary = pars["boundary"]
+			}
 		}
 	}
 	return

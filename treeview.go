@@ -875,7 +875,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	oswin.TheApp.ClipBoard().Write(md, true)
+	oswin.TheApp.ClipBoard().Write(md)
 	if reset {
 		tv.UnselectAll()
 	}

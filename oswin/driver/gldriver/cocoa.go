@@ -33,8 +33,8 @@ void doResizeWindow(uintptr_t id, int width, int height);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 void clipClear();
-void clipRead(char* typ, int len);
-void clipAddWrite(char* typ, int typlen, char* data, int dlen);
+void clipReadText();
+void pasteWriteAddText(char* data, int dlen);
 void clipWrite();
 uint64_t threadID();
 */
@@ -852,46 +852,55 @@ var theClip = clipImpl{}
 var curMimeData *mimedata.Mimes
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	if types == nil {
+	if len(types) == 0 {
 		return nil
 	}
 	ci.data = nil
 	curMimeData = &ci.data
-	for _, typ := range types {
-		ctyp := C.CString(typ)
-		C.clipRead(ctyp, C.int(len(typ)))
-		C.free(unsafe.Pointer(ctyp))
+
+	wantText := mimedata.IsText(types[0])
+
+	if wantText {
+		C.clipReadText() // calls addMimeText
+		if len(ci.data) == 0 {
+			return nil
+		}
+		txt := string(ci.data[0].Data)
+		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
+		if isMulti {
+			return mimedata.FromMultipart(body, boundary)
+		} else {
+			if mediaType != "" { // found a mime type encoding
+				return mimedata.NewMime(mediaType, []byte(txt))
+			} else {
+				// we can't really figure out type, so just assume..
+				return mimedata.NewMime(types[0], []byte(txt))
+			}
+		}
+	} else {
+		// todo: deal with image formats etc
 	}
 	return ci.data
 }
 
-func clipWriteMimeType(mtyp string) {
-	ctyp := C.CString(mimedata.TextPlain)
-	mhdr := []byte(fmt.Sprintf("MIME-Version: 1.0\nContent-type: %v", mtyp))
-	sz := len(mhdr)
+func (ci *clipImpl) WriteText(b []byte) {
+	sz := len(b)
 	cdata := C.malloc(C.size_t(sz))
-	copy((*[1 << 30]byte)(cdata)[0:sz], mhdr)
-	C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(mimedata.TextPlain)))
-	C.free(unsafe.Pointer(ctyp))
+	copy((*[1 << 30]byte)(cdata)[0:sz], b)
+	C.pasteWriteAddText((*C.char)(cdata), C.int(sz))
 	C.free(unsafe.Pointer(cdata))
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
-	if clearFirst {
-		ci.Clear()
-	}
-	for _, d := range data {
-		switch d.Type {
-		case mimedata.AppJSON:
-			clipWriteMimeType(d.Type)
+func (ci *clipImpl) Write(data mimedata.Mimes) error {
+	ci.Clear()
+	if len(data) > 1 { // multipart
+		mpd := data.ToMultipart()
+		ci.WriteText(mpd)
+	} else {
+		d := data[0]
+		if mimedata.IsText(d.Type) {
+			ci.WriteText(d.Data)
 		}
-		ctyp := C.CString(d.Type)
-		sz := len(d.Data)
-		cdata := C.malloc(C.size_t(sz))
-		copy((*[1 << 30]byte)(cdata)[0:sz], d.Data)
-		C.clipAddWrite((*C.char)(cdata), C.int(sz), ctyp, C.int(len(d.Type)))
-		C.free(unsafe.Pointer(ctyp))
-		C.free(unsafe.Pointer(cdata))
 	}
 	C.clipWrite()
 	return nil
@@ -899,6 +908,20 @@ func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
 
 func (ci *clipImpl) Clear() {
 	C.clipClear()
+}
+
+//export addMimeText
+func addMimeText(cdata *C.char, datalen C.int) {
+	if *curMimeData == nil {
+		*curMimeData = make(mimedata.Mimes, 1)
+		(*curMimeData)[0] = &mimedata.Data{Type: mimedata.TextPlain}
+	}
+	md := (*curMimeData)[0]
+	if len(md.Type) == 0 {
+		md.Type = mimedata.TextPlain
+	}
+	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
+	md.Data = append(md.Data, data...)
 }
 
 //export addMimeData

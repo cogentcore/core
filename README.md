@@ -63,7 +63,7 @@ The best way to see how the system works are in the `examples` directory, and by
 
 Currently at an **alpha** level release:
 
-* Core code is all functional, and on the Mac (main dev) platform, everything should work smoothly, but there are some issues on Windows.
+* Core code is all functional, and on the Mac (main dev) platform, everything should generally always work smoothly -- linux and windows tend to lag a bit, but the OS-specific changes are getting less and less as things mature, so they should generally be more stable and similarly functional.
 
 * Many things are missing and only skeletally present -- the initial release goal was to get the full set of interdependent parts up and running, and obtain any input about overall design issues.  Will be fleshing out all this stuff in the next couple of months, and then transition to a more standard issue-tracker based management of tasks.
 
@@ -71,43 +71,34 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
-* clip.Board: windows only supports one item on the clipboard at once, and
-  linux has MULTIPLE but it is kind of a PITA.  Mac easily supports multiple.
-    + simple text is no big deal in any case -- issues are for more complex
-      JSON-based objects, e.g., TreeView nodes
-	+ within same app can just use lastPaste data -- BUT doesn't work on
-      windows -- it doesn't tell us the current clip owner.. so lastPaste will stay there
-      forever..
-	+ between-GoGi apps could just use a magic cookie and send entire JSON of mimedata
-	+ but this will not be readable to anything else.  but that is probably true anyway.
-	+ probably make this standard on all platforms, to keep it consistent?
+* clip.Board: windows converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- will update linux and mac to use the same so everything is consistent, and much simpler!
   
 * enable dnd to use OS DND when moves outside window
 
 * windows:
-    + clip.Board impl
-	+ support the current HiDPI framework -- right now it is always stuck at 96dpi.
 	+ support SetPos window method (and probably need to track movement)
+
+* linux:
+	+ moving window isn't updating pos of new windows (now fixed? test)
+	+ do similar font name updating as done on Windows now
 
 * mac:
 	+ impl setPos
-
-* linux:
-	+ moving window isn't updating pos of new windows
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
 
-* icon property mgmt should all be by name, not pointers -- works for json!
+* icon property mgmt should all be by name, not pointers -- works for json!  Just a string -- optional path kind of syntax for specifying the collection of icons: "[icon_set/]icon_name" -- create a special type for it that pops up a chooser.  Use same technique for FontName and that can be used to trigger chooser for font_family.
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 
+* search for structtableview, treeview
+* DND and copy/paste for structtableview
+
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
 
-* tab widget basic fix
-
-* tab widget and integrate with tree view editor? Popups show up in a separate tab?
+* tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?
 
 * menu separator not rendering..
 

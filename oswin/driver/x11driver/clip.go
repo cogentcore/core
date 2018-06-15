@@ -106,8 +106,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	return nil
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes, clearFirst bool) error {
-	// note: clear is not relevant here -- always replaces
+func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	// we just advertise ourselves as clipboard owners and save the data until
 	// someone requests it..
 	ci.lastWrite = data
