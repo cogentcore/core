@@ -1299,8 +1299,8 @@ func (tv *TreeView) ConfigParts() {
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
-	wb.Icon = IconByName("widget-wedge-down") // todo: style
-	wb.IconOff = IconByName("widget-wedge-right")
+	wb.Icon = IconName("widget-wedge-down") // todo: style
+	wb.IconOff = IconName("widget-wedge-right")
 	if mods {
 		wb.SetProp("#icon0", TVBranchProps)
 		wb.SetProp("#icon1", TVBranchProps)

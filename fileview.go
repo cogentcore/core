@@ -167,7 +167,7 @@ func (fv *FileView) ConfigPathRow() {
 	})
 
 	pu := pr.ChildByName("path-up", 0).(*Action)
-	pu.Icon = IconByName("widget-wedge-up")
+	pu.Icon = IconName("widget-wedge-up")
 	pu.SetProp("vertical-align", AlignMiddle)
 	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)

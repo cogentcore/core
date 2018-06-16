@@ -26,15 +26,6 @@ var WidgetBaseProps = ki.Props{
 	"base-type": true,
 }
 
-// Styling notes:
-// simple elemental widgets (buttons etc) have a DefaultRender method that renders based on
-// Style, with full css styling support -- code has built-in initial defaults for a default
-// style
-
-// TODO: Alternatively they support custom svg code for rendering each state
-// as appropriate in a Stack more complex widgets such as a TreeView
-// automatically render and don't support custom svg
-
 // WidgetBase supports full Box rendering model, so Button just calls these
 // methods to render -- base function needs to take a Style arg.
 
@@ -189,12 +180,12 @@ func (g *WidgetBase) Render2DParts() {
 // ConfigParts building-blocks
 
 // ConfigPartsIconLabel returns a standard config for creating parts, of icon and label left-to right in a row, based on whether items are nil or empty
-func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
+func (g *WidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
 	// todo: add some styles for button layout
 	config = kit.TypeAndNameList{}
 	icIdx = -1
 	lbIdx = -1
-	if icn != nil {
+	if IconNameValid(icnm) {
 		config.Add(KiT_Icon, "icon")
 		icIdx = 0
 		if txt != "" {
@@ -208,13 +199,14 @@ func (g *WidgetBase) ConfigPartsIconLabel(icn *Icon, txt string) (config kit.Typ
 	return
 }
 
-// set the icon and text values in parts, and get part style props, using given props if not set in object props
-func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx int) {
+// ConfigPartsSetIconLabel sets the icon and text values in parts, and get
+// part style props, using given props if not set in object props
+func (g *WidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm { // can't use nm b/c config does
-			ic.CopyFromIcon(icn)
-			ic.UniqueNm = icn.UniqueNm
+		if !ic.HasChildren() || ic.UniqueNm != icnm { // can't use nm b/c config does
+			ic.InitFromName(icnm)
+			ic.UniqueNm = icnm
 			g.StylePart(ic.This)
 		}
 	}
@@ -230,15 +222,15 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icn *Icon, txt string, icIdx, lbIdx
 	}
 }
 
-// check if parts need to be updated -- for ConfigPartsIfNeeded
-func (g *WidgetBase) PartsNeedUpdateIconLabel(icn *Icon, txt string) bool {
-	if icn != nil {
+// PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
+func (g *WidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
+	if IconNameValid(icnm) {
 		ick := g.Parts.ChildByName("icon", 0)
 		if ick == nil {
 			return true
 		}
 		ic := ick.(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icn.UniqueNm {
+		if !ic.HasChildren() || ic.UniqueNm != icnm {
 			return true
 		}
 	} else {

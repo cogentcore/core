@@ -71,7 +71,7 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
-* clip.Board: windows converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- will update linux and mac to use the same so everything is consistent, and much simpler!
+* clip.Board: windows converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- update linux to use the same so everything is consistent, and much simpler!
   
 * enable dnd to use OS DND when moves outside window
 
@@ -89,7 +89,7 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* icon property mgmt should all be by name, not pointers -- works for json!  Just a string -- optional path kind of syntax for specifying the collection of icons: "[icon_set/]icon_name" -- create a special type for it that pops up a chooser.  Use same technique for FontName and that can be used to trigger chooser for font_family.
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
 

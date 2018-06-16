@@ -109,10 +109,10 @@ func (g *Action) Init2D() {
 }
 
 func (g *Action) ConfigPartsButton() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
 	if mods {
 		g.UpdateEnd(updt)
@@ -120,14 +120,14 @@ func (g *Action) ConfigPartsButton() {
 }
 
 func (g *Action) ConfigPartsMenu() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
 		g.SetProp("max-width", -1)
 		g.SetProp("indicator", "widget-wedge-right")
 	}
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
 	if mods {
 		g.UpdateEnd(updt)

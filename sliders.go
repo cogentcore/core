@@ -50,7 +50,7 @@ type SliderBase struct {
 	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
 	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Icon        *Icon                `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
+	Icon        IconName             `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
@@ -382,19 +382,19 @@ func (g *SliderBase) Init2DSlider() {
 
 func (g *SliderBase) ConfigParts() {
 	g.Parts.Lay = LayoutNil
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, "")
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), "")
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, "", icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), "", icIdx, lbIdx)
 	if mods {
 		g.UpdateEnd(updt)
 	}
 }
 
 func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
-	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
+	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
 		g.ConfigParts()
 	}
-	if g.Icon != nil && g.Parts.HasChildren() {
+	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			mrg := g.Style.Layout.Margin.Dots
@@ -535,12 +535,7 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 func (g *Slider) Render2D() {
 	if g.PushBounds() {
 		g.SliderEvents()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
-		}
+		g.Render2DDefaultStyle()
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
@@ -595,7 +590,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColor(&st.Background.Color)
 
-	if g.Icon != nil && g.Parts.HasChildren() {
+	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)

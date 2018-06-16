@@ -793,8 +793,8 @@ func (w *Window) EventLoop() {
 				Prefs.Edit()
 				e.SetProcessed()
 			case KeyFunRefresh:
-				// w.FullReRender()
-				w.UploadAllViewports()
+				w.FullReRender()
+				// w.UploadAllViewports()
 				e.SetProcessed()
 			}
 			if !e.IsProcessed() {

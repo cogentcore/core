@@ -103,8 +103,8 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 type ButtonBase struct {
 	WidgetBase
 	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         *Icon                `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Indicator    string               `xml:"indicator" desc:"name of the menu indicator icon to present, or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Icon         IconName             `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    IconName             `xml:"indicator" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
@@ -168,9 +168,10 @@ func (g *ButtonBase) SetText(txt string) {
 	SetButtonText(g, txt)
 }
 
-// SetIcon sets the Icon (could be nil) and updates the button
-func (g *ButtonBase) SetIcon(ic *Icon) {
-	SetButtonIcon(g, ic)
+// SetIcon sets the Icon to given icon name (could be empty or 'none') and
+// updates the button
+func (g *ButtonBase) SetIcon(iconName string) {
+	SetButtonIcon(g, iconName)
 }
 
 // set the button state to target
@@ -262,7 +263,8 @@ func (g *ButtonBase) ResetMenu() {
 // Parts of the indicator object, which is named "indicator" -- an
 // "indic-stretch" is added as well to put on the right by default
 func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
-	if !g.HasMenu() && !defOn || g.Indicator == "none" {
+	needInd := (g.HasMenu() || defOn) && g.Indicator != "none"
+	if !needInd {
 		return -1
 	}
 	indIdx := -1
@@ -277,12 +279,12 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 		return
 	}
 	ic := g.Parts.Child(indIdx).(*Icon)
-	icnm := g.Indicator
-	if icnm == "" || icnm == "nil" {
+	icnm := string(g.Indicator)
+	if IconNameNil(icnm) {
 		icnm = "widget-wedge-down"
 	}
 	if !ic.HasChildren() || ic.UniqueNm != icnm {
-		ic.CopyFromIcon(IconByName(icnm))
+		ic.InitFromName(icnm)
 		ic.UniqueNm = icnm
 		g.StylePart(ic.This)
 	}
@@ -319,21 +321,22 @@ type ButtonWidget interface {
 	ConfigPartsIfNeeded()
 }
 
-// set the text and update button
+// SetButtonText set the text and update button
 func SetButtonText(bw ButtonWidget, txt string) {
 	g := bw.ButtonAsBase()
 	updt := g.UpdateStart()
 	g.Text = txt
-	bw.ConfigParts()
+	g.This.(ButtonWidget).ConfigParts()
 	g.UpdateEnd(updt)
 }
 
-// set the Icon (could be nil) and update button
-func SetButtonIcon(bw ButtonWidget, ic *Icon) {
+// SetButtonIcon sets the Icon (looked up by name) (could be empty or 'nil' or
+// 'none') and updates button
+func SetButtonIcon(bw ButtonWidget, iconName string) {
 	g := bw.ButtonAsBase()
 	updt := g.UpdateStart()
-	g.Icon = ic // this is jut the pointer
-	bw.ConfigParts()
+	g.Icon = IconName(iconName)
+	g.This.(ButtonWidget).ConfigParts()
 	g.UpdateEnd(updt)
 }
 
@@ -412,10 +415,10 @@ func (g *ButtonBase) ButtonRelease() {
 }
 
 func (g *ButtonBase) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
 	if mods {
 		g.UpdateEnd(updt)
@@ -423,7 +426,7 @@ func (g *ButtonBase) ConfigParts() {
 }
 
 func (g *ButtonBase) ConfigPartsIfNeeded() {
-	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
+	if !g.PartsNeedUpdateIconLabel(string(g.Icon), g.Text) {
 		return
 	}
 	g.This.(ButtonWidget).ConfigParts()
@@ -466,21 +469,14 @@ func (g *ButtonBase) Render2D() {
 		ButtonEvents(g)
 		g.Style = g.StateStyles[g.State] // get current styles
 		g.This.(ButtonWidget).ConfigPartsIfNeeded()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			g.Render2DChildren()
-		}
+		st := &g.Style
+		g.RenderStdBox(st)
+		g.Render2DParts()
+		g.Render2DChildren()
 		g.PopBounds()
 	} else {
 		g.DisconnectAllEvents()
 	}
-}
-
-func (g *ButtonBase) Render2DDefaultStyle() {
-	st := &g.Style
-	g.RenderStdBox(st)
-	g.Render2DParts()
 }
 
 func (g *ButtonBase) FocusChanged2D(gotFocus bool) {
@@ -572,7 +568,7 @@ func (g *Button) ButtonAsBase() *ButtonBase {
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff *Icon `json:"-" xml:"-" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
+	IconOff IconName `json:"-" xml:"-" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
@@ -636,28 +632,29 @@ func (g *CheckBox) ButtonRelease() {
 	g.ButtonReleased()
 }
 
-// set the Icons for the On (checked) and Off (unchecked) states, and updates button
-func (g *CheckBox) SetIcons(icOn, icOff *Icon) {
+// SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
+// states, and updates button
+func (g *CheckBox) SetIcons(icOn, icOff string) {
 	updt := g.UpdateStart()
-	g.Icon = icOn
-	g.IconOff = icOff
-	g.ConfigParts()
+	g.Icon = IconName(icOn)
+	g.IconOff = IconName(icOff)
+	g.This.(ButtonWidget).ConfigParts()
 	g.UpdateEnd(updt)
 }
 
 func (g *CheckBox) Init2D() {
 	g.SetCheckable(true)
 	g.Init2DWidget()
-	g.ConfigParts()
+	g.This.(ButtonWidget).ConfigParts()
 }
 
 func (g *CheckBox) ConfigParts() {
 	g.SetCheckable(true)
-	if g.Icon == nil { // todo: just use style
-		g.Icon = IconByName("widget-checked-box")
+	if !IconNameValid(string(g.Icon)) { // todo: just use style
+		g.Icon = "widget-checked-box"
 	}
-	if g.IconOff == nil {
-		g.IconOff = IconByName("widget-unchecked-box")
+	if !IconNameValid(string(g.IconOff)) {
+		g.IconOff = "widget-unchecked-box"
 	}
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
@@ -674,15 +671,17 @@ func (g *CheckBox) ConfigParts() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		if !icon.HasChildren() || icon.UniqueNm != g.Icon.UniqueNm { // can't use nm b/c config does
-			icon.CopyFromIcon(g.Icon)
-			icon.UniqueNm = g.Icon.UniqueNm
+		onnm := string(g.Icon)
+		if !icon.HasChildren() || icon.UniqueNm != onnm {
+			icon.InitFromName(onnm)
+			icon.UniqueNm = onnm
 			g.StylePart(icon.This)
 		}
 		icoff := ist.Child(1).(*Icon)
-		if !icoff.HasChildren() || icoff.UniqueNm != g.IconOff.UniqueNm { // can't use nm b/c config does
-			icoff.CopyFromIcon(g.IconOff)
-			icoff.UniqueNm = g.IconOff.UniqueNm
+		offnm := string(g.IconOff)
+		if !icoff.HasChildren() || icoff.UniqueNm != offnm {
+			icoff.InitFromName(offnm)
+			icoff.UniqueNm = offnm
 			g.StylePart(icoff.This)
 		}
 	}
@@ -706,7 +705,7 @@ func (g *CheckBox) ConfigParts() {
 
 func (g *CheckBox) ConfigPartsIfNeeded() {
 	if !g.Parts.HasChildren() {
-		g.ConfigParts()
+		g.This.(ButtonWidget).ConfigParts()
 	}
 	icIdx := 0 // always there
 	ist := g.Parts.Child(icIdx).(*Layout)

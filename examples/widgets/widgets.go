@@ -38,7 +38,6 @@ func mainrun() {
 	win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
 
 	icnm := "widget-wedge-down"
-	wdicon := gi.IconByName(icnm)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -101,7 +100,7 @@ func mainrun() {
 	brow.SetStretchMaxWidth()
 
 	button1 := brow.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
-	button1.SetIcon(wdicon)
+	button1.SetIcon(icnm)
 	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
@@ -168,7 +167,7 @@ func mainrun() {
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = gi.IconByName("widget-circlebutton-on")
+	slider1.Icon = gi.IconName("widget-circlebutton-on")
 
 	slider2 := srow.AddNewChild(gi.KiT_Slider, "slider2").(*gi.Slider)
 	slider2.Dim = gi.Y

@@ -1041,7 +1041,8 @@ func (tf *TextField) FocusChanged2D(gotFocus bool) {
 
 //go:generate stringer -type=TextFieldSignals
 
-// SpinBox combines a TextField with up / down buttons for incrementing / decrementing values -- all configured within the Parts of the widget
+// SpinBox combines a TextField with up / down buttons for incrementing /
+// decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
 	WidgetBase
 	Value      float32   `xml:"value" desc:"current value"`
@@ -1052,8 +1053,8 @@ type SpinBox struct {
 	Step       float32   `xml:"step" desc:"smallest step size to increment"`
 	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	UpIcon     *Icon     `json:"-" xml:"-" desc:"icon to use for up button -- defaults to widget-wedge-up"`
-	DownIcon   *Icon     `json:"-" xml:"-" desc:"icon to use for down button -- defaults to widget-wedge-down"`
+	UpIcon     IconName  `json:"-" xml:"-" desc:"icon to use for up button -- defaults to widget-wedge-up"`
+	DownIcon   IconName  `json:"-" xml:"-" desc:"icon to use for down button -- defaults to widget-wedge-down"`
 	SpinBoxSig ki.Signal `json:"-" xml:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
@@ -1157,11 +1158,11 @@ const (
 )
 
 func (g *SpinBox) ConfigParts() {
-	if g.UpIcon == nil {
-		g.UpIcon = IconByName("widget-wedge-up")
+	if IconNameNil(string(g.UpIcon)) {
+		g.UpIcon = IconName("widget-wedge-up")
 	}
-	if g.DownIcon == nil {
-		g.DownIcon = IconByName("widget-wedge-down")
+	if IconNameNil(string(g.DownIcon)) {
+		g.DownIcon = IconName("widget-wedge-down")
 	}
 	g.Parts.Lay = LayoutRow
 	g.Parts.SetProp("vert-align", AlignMiddle) // todo: style..
@@ -1375,7 +1376,23 @@ func (g *ComboBox) ButtonRelease() {
 	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
 }
 
-// MakeItems makes sure the Items list is made, and if not, or reset is true, creates one with the given capacity
+func (g *ComboBox) ConfigParts() {
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
+	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
+	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
+	g.ConfigPartsIndicator(indIdx)
+	if g.MaxLength > 0 && lbIdx >= 0 {
+		lbl := g.Parts.Child(lbIdx).(*Label)
+		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
+	}
+	if mods {
+		g.UpdateEnd(updt)
+	}
+}
+
+// MakeItems makes sure the Items list is made, and if not, or reset is true,
+// creates one with the given capacity
 func (g *ComboBox) MakeItems(reset bool, capacity int) {
 	if g.Items == nil || reset {
 		g.Items = make([]interface{}, 0, capacity)
@@ -1393,7 +1410,10 @@ func (g *ComboBox) SortItems(ascending bool) {
 	})
 }
 
-// SetToMaxLength gets the maximum label length so that the width of the button label is automatically set according to the max length of all items in the list -- if maxLen > 0 then it is used as an upper do-not-exceed length
+// SetToMaxLength gets the maximum label length so that the width of the
+// button label is automatically set according to the max length of all items
+// in the list -- if maxLen > 0 then it is used as an upper do-not-exceed
+// length
 func (g *ComboBox) SetToMaxLength(maxLen int) {
 	ml := 0
 	for _, it := range g.Items {
@@ -1405,7 +1425,11 @@ func (g *ComboBox) SetToMaxLength(maxLen int) {
 	g.MaxLength = ml
 }
 
-// ItemsFromTypes sets the Items list from a list of types -- see e.g., AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then set current item to the first item in the list, sort sorts the list in ascending order, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+// ItemsFromTypes sets the Items list from a list of types -- see e.g.,
+// AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then
+// set current item to the first item in the list, sort sorts the list in
+// ascending order, and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit
 func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
 	sz := len(tl)
 	g.Items = make([]interface{}, sz)
@@ -1423,7 +1447,28 @@ func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen
 	}
 }
 
-// ItemsFromEnumList sets the Items list from a list of enum values (see kit.EnumRegistry) -- if setFirst then set current item to the first item in the list, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+// ItemsFromStringList sets the Items list from a list of string values -- if
+// setFirst then set current item to the first item in the list, and maxLen if
+// > 0 auto-sets the width of the button to the contents, with the given upper
+// limit
+func (g *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
+	sz := len(el)
+	g.Items = make([]interface{}, sz)
+	for i, str := range el {
+		g.Items[i] = str
+	}
+	if maxLen > 0 {
+		g.SetToMaxLength(maxLen)
+	}
+	if setFirst {
+		g.SetCurIndex(0)
+	}
+}
+
+// ItemsFromEnumList sets the Items list from a list of enum values (see
+// kit.EnumRegistry) -- if setFirst then set current item to the first item in
+// the list, and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit
 func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
 	sz := len(el)
 	g.Items = make([]interface{}, sz)
@@ -1438,7 +1483,12 @@ func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen i
 	}
 }
 
-// ItemsFromEnum sets the Items list from an enum type, which must be registered on kit.EnumRegistry -- if setFirst then set current item to the first item in the list, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit -- see kit.EnumRegistry, and maxLen if > 0 auto-sets the width of the button to the contents, with the given upper limit
+// ItemsFromEnum sets the Items list from an enum type, which must be
+// registered on kit.EnumRegistry -- if setFirst then set current item to the
+// first item in the list, and maxLen if > 0 auto-sets the width of the button
+// to the contents, with the given upper limit -- see kit.EnumRegistry, and
+// maxLen if > 0 auto-sets the width of the button to the contents, with the
+// given upper limit
 func (g *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
 	g.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
 }
@@ -1456,7 +1506,10 @@ func (g *ComboBox) FindItem(it interface{}) int {
 	return -1
 }
 
-// SetCurVal sets the current value (CurVal) and the corresponding CurIndex for that item on the current Items list (adds to items list if not found) -- returns that index -- and sets the text to the string value of that value (using standard Stringer string conversion)
+// SetCurVal sets the current value (CurVal) and the corresponding CurIndex
+// for that item on the current Items list (adds to items list if not found)
+// -- returns that index -- and sets the text to the string value of that
+// value (using standard Stringer string conversion)
 func (g *ComboBox) SetCurVal(it interface{}) int {
 	g.CurVal = it
 	g.CurIndex = g.FindItem(it)
@@ -1468,7 +1521,10 @@ func (g *ComboBox) SetCurVal(it interface{}) int {
 	return g.CurIndex
 }
 
-// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal for that item on the current Items list (-1 if not found) -- returns value -- and sets the text to the string value of that value (using standard Stringer string conversion)
+// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal
+// for that item on the current Items list (-1 if not found) -- returns value
+// -- and sets the text to the string value of that value (using standard
+// Stringer string conversion)
 func (g *ComboBox) SetCurIndex(idx int) interface{} {
 	g.CurIndex = idx
 	if idx < 0 || idx >= len(g.Items) {
@@ -1481,23 +1537,16 @@ func (g *ComboBox) SetCurIndex(idx int) interface{} {
 	return g.CurVal
 }
 
-// SelectItem selects a given item and emits the index as the ComboSig signal and the selected item as the data
+// SelectItem selects a given item and emits the index as the ComboSig signal
+// and the selected item as the data
 func (g *ComboBox) SelectItem(idx int) {
+	updt := g.UpdateStart()
 	g.SetCurIndex(idx)
 	g.ComboSig.Emit(g.This, int64(g.CurIndex), g.CurVal)
+	g.UpdateEnd(updt)
 }
 
-// set the text and update button -- does NOT change the currently-selected value or index
-func (g *ComboBox) SetText(txt string) {
-	SetButtonText(g, txt)
-}
-
-// set the Icon (could be nil) and update button
-func (g *ComboBox) SetIcon(ic *Icon) {
-	SetButtonIcon(g, ic)
-}
-
-// make menu of all the items
+// MakeItemsMenu makes menu of all the items
 func (g *ComboBox) MakeItemsMenu() {
 	if g.ItemsMenu == nil {
 		g.ItemsMenu = make(Menu, 0, len(g.Items))
@@ -1525,92 +1574,4 @@ func (g *ComboBox) MakeItemsMenu() {
 			cb.SelectItem(idx)
 		})
 	}
-}
-
-func (g *ComboBox) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
-}
-
-func (g *ComboBox) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
-	wrIdx := -1
-	icnm := kit.ToString(g.Prop("indicator", false, false))
-	if icnm == "" || icnm == "nil" {
-		icnm = "widget-wedge-down"
-	}
-	if icnm != "none" {
-		config.Add(KiT_Stretch, "indic-stretch")
-		wrIdx = len(config)
-		config.Add(KiT_Icon, "indicator")
-	}
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
-	if g.MaxLength > 0 && lbIdx >= 0 {
-		lbl := g.Parts.Child(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
-	}
-	if wrIdx >= 0 {
-		ic := g.Parts.Child(wrIdx).(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icnm {
-			ic.CopyFrom(IconByName(icnm))
-			ic.UniqueNm = icnm
-			g.StylePart(ic.This)
-		}
-	}
-	if mods {
-		g.UpdateEnd(updt)
-	}
-}
-
-func (g *ComboBox) ConfigPartsIfNeeded() {
-	if !g.PartsNeedUpdateIconLabel(g.Icon, g.Text) {
-		return
-	}
-	g.ConfigParts()
-}
-
-func (g *ComboBox) Size2D() {
-	g.Size2DWidget()
-}
-
-func (g *ComboBox) Layout2D(parBBox image.Rectangle) {
-	g.ConfigParts()
-	g.Layout2DWidget(parBBox)
-	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
-	}
-	g.Layout2DChildren()
-}
-
-func (g *ComboBox) Render2D() {
-	if g.PushBounds() {
-		ButtonEvents(g)
-		g.Style = g.StateStyles[g.State] // get current styles
-		g.ConfigPartsIfNeeded()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			g.Render2DChildren()
-		}
-		g.PopBounds()
-	} else {
-		g.DisconnectAllEvents()
-	}
-}
-
-// render using a default style if not otherwise styled
-func (g *ComboBox) Render2DDefaultStyle() {
-	st := &g.Style
-	g.RenderStdBox(st)
-	g.Render2DParts()
-}
-
-func (g *ComboBox) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
-		g.SetButtonState(ButtonFocus)
-	} else {
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
-	}
-	g.UpdateSig()
 }

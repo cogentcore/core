@@ -70,14 +70,15 @@ func mainrun() {
 
 	il := gi.IconListSorted(*gi.CurIconSet)
 
-	for _, ic := range il {
+	for _, icnm := range il {
+		if icnm == "none" {
+			continue
+		}
 		vb := grid.AddNewChild(gi.KiT_Layout, "vb").(*gi.Layout)
 		vb.Lay = gi.LayoutCol
 
-		nm := ic.Name()
-
-		smico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
-		smico.CopyFrom(ic)
+		smico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
+		smico.InitFromName(icnm)
 		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
 		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
 		smico.SetProp("background-color", color.Transparent)
@@ -85,8 +86,8 @@ func mainrun() {
 		smico.SetProp("stroke", "black")
 		smico.SetProp("align-horiz", gi.AlignCenter)
 
-		ico := vb.AddNewChild(gi.KiT_Icon, nm).(*gi.Icon)
-		ico.CopyFrom(ic)
+		ico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
+		ico.InitFromName(icnm)
 		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
 		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
 		ico.SetProp("background-color", color.Transparent)
@@ -94,7 +95,7 @@ func mainrun() {
 		ico.SetProp("stroke", "black")
 		ico.SetProp("align-horiz", gi.AlignCenter)
 		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-		nmlbl.Text = nm
+		nmlbl.Text = icnm
 	}
 
 	vp.UpdateEndNoSig(updt)

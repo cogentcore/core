@@ -145,7 +145,7 @@ func (g *SplitView) ConfigSplitters() {
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	osz := float32(50.0)
 	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
-	spicon := IconByName("widget-handle-circles")
+	spicon := IconName("widget-handle-circles")
 	for i, spk := range g.Parts.Children() {
 		sp := spk.(*Splitter)
 		sp.Defaults()
@@ -308,10 +308,10 @@ func (g *Splitter) Init2D() {
 }
 
 func (g *Splitter) ConfigPartsIfNeeded(render bool) {
-	if g.PartsNeedUpdateIconLabel(g.Icon, "") {
+	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
 		g.ConfigParts()
 	}
-	if g.Icon != nil && g.Parts.HasChildren() {
+	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			mrg := g.Style.Layout.Margin.Dots
@@ -404,12 +404,7 @@ func (g *Splitter) Render2D() {
 			win.RenderOverlays()
 		}
 		if g.PushBounds() {
-			if !g.HasChildren() {
-				g.Render2DDefaultStyle()
-			} else {
-				// todo: manage stacked layout to select appropriate image based on state
-				// return
-			}
+			g.Render2DDefaultStyle()
 			g.Render2DChildren()
 			g.PopBounds()
 		}
@@ -425,7 +420,7 @@ func (g *Splitter) Render2DDefaultStyle() {
 	g.UpdateSplitterPos()
 	g.ConfigPartsIfNeeded(true)
 
-	if g.Icon != nil && g.Parts.HasChildren() {
+	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
 	} else {
 		pc.StrokeStyle.SetColor(nil)

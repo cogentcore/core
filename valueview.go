@@ -22,7 +22,8 @@ import (
 // ValueViewer interface supplies the appropriate type of ValueView -- called
 // on a given receiver item if defined for that receiver type (tries both
 // pointer and non-pointer receivers) -- can use this for custom types to
-// provide alternative custom interfaces
+// provide alternative custom interfaces -- must call Init on ValueView before
+// returning it
 type ValueViewer interface {
 	ValueView() ValueView
 }

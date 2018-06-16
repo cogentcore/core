@@ -205,10 +205,10 @@ func (g *MenuButton) ButtonAsBase() *ButtonBase {
 }
 
 func (g *MenuButton) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(g.Icon, g.Text)
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(g.Icon, g.Text, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
 	if mods {
 		g.UpdateEnd(updt)

@@ -8,20 +8,13 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"reflect"
 	"sort"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
-
-// Qt has different icon states -- seems over-complicated -- just use a map of icons
-
-// different types of icon state
-// QIcon::Normal	0	Display the pixmap when the user is not interacting with the icon, but the functionality represented by the icon is available.
-// QIcon::Disabled	1	Display the pixmap when the functionality represented by the icon is not available.
-// QIcon::Active	2	Display the pixmap when the functionality represented by the icon is available and the user is interacting with the icon, for example, moving the mouse over it or clicking it.
-// QIcon::Selected	3	Display the pixmap when the item represented by the icon is selected.
 
 // Plan: modern gui icons do NOT specify any color and are colored by the
 // user, applying either transparency or tinting etc to indicate different
@@ -35,84 +28,179 @@ import (
 // for a given set of fill / stroke paint values, as an optimization.
 type Icon struct {
 	SVG
-	Rendered     bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
-	RenderedSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
+	Rendered            bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+	RenderedSize        image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
+	RenderedStrokeColor Color       `json:"-" xml:"-" desc:"stroke color rendered"`
+	RenderedFillColor   Color       `json:"-" xml:"-" desc:"fill color rendered"`
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
 
-func (vp *Icon) Init2D() {
-	vp.SVG.Init2D()
-	vp.Fill = true
+func (ic *Icon) Init2D() {
+	ic.SVG.Init2D()
+	ic.Fill = true
 }
 
-// copy from a source icon, typically one from a library -- preserves all the exisiting render state etc for the current icon, so that only a new render is required
-func (vp *Icon) CopyFromIcon(cp *Icon) {
-	oldIc := *vp
-	vp.CopyFrom(cp)
-	vp.Rendered = false
-	vp.Viewport = oldIc.Viewport
-	vp.LayData = oldIc.LayData
-	vp.VpBBox = oldIc.VpBBox
-	vp.WinBBox = oldIc.WinBBox
-	vp.ViewBox = oldIc.ViewBox
-	vp.Style = oldIc.Style
-	vp.Fill = oldIc.Fill
-	vp.Pixels = nil
-	vp.Resize(vp.ViewBox.Size)
-	vp.FullRender2DTree()
-	vp.LayData = oldIc.LayData
-	vp.VpBBox = oldIc.VpBBox
-	vp.WinBBox = oldIc.WinBBox
-	vp.ViewBox = oldIc.ViewBox
-	vp.Rendered = false // not yet..
+// InitFromName initializes icon from an icon looked up by name -- returns
+// false if name is not valid
+func (ic *Icon) InitFromName(iconName string) bool {
+	cp := IconByName(iconName)
+	if cp == nil {
+		return false
+	}
+	ic.CopyFromIcon(cp)
+	return true
+}
+
+// CopyFromIcon copies from a source icon, typically one from a library --
+// preserves all the exisiting render state etc for the current icon, so that
+// only a new render is required
+func (ic *Icon) CopyFromIcon(cp *Icon) {
+	if cp == nil {
+		return
+	}
+	oldIc := *ic
+	ic.CopyFrom(cp)
+	ic.Rendered = false
+	ic.Viewport = oldIc.Viewport
+	ic.LayData = oldIc.LayData
+	ic.VpBBox = oldIc.VpBBox
+	ic.WinBBox = oldIc.WinBBox
+	ic.ViewBox = oldIc.ViewBox
+	ic.Style = oldIc.Style
+	ic.Fill = oldIc.Fill
+	ic.Pixels = nil
+	ic.Resize(ic.ViewBox.Size)
+	ic.FullRender2DTree()
+	ic.LayData = oldIc.LayData
+	ic.VpBBox = oldIc.VpBBox
+	ic.WinBBox = oldIc.WinBBox
+	ic.ViewBox = oldIc.ViewBox
+	ic.Rendered = false // not yet..
 }
 
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }
 
-func (vp *Icon) Style2D() {
-	vp.Style2DWidget()
-	vp.Style2DSVG() // this must come second
+func (ic *Icon) Style2D() {
+	ic.Style2DWidget()
+	ic.Style2DSVG() // this must come second
 }
 
-func (vp *Icon) Size2D() {
-	vp.SVG.Size2D()
+func (ic *Icon) Size2D() {
+	ic.SVG.Size2D()
 }
 
-func (vp *Icon) Layout2D(parBBox image.Rectangle) {
-	vp.Layout2DBase(parBBox, true)
-	pc := &vp.Paint
-	rs := &vp.Render
-	vp.SetNormXForm()
+func (ic *Icon) Layout2D(parBBox image.Rectangle) {
+	ic.Layout2DBase(parBBox, true)
+	pc := &ic.Paint
+	rs := &ic.Render
+	ic.SetNormXForm()
 	rs.PushXForm(pc.XForm) // need xforms to get proper bboxes during layout
-	vp.Layout2DChildren()
+	ic.Layout2DChildren()
 	rs.PopXForm()
 }
 
-func (vp *Icon) Render2D() {
-	if vp.PushBounds() {
-		if !(vp.Rendered && vp.RenderedSize == vp.ViewBox.Size) {
-			pc := &vp.Paint
-			rs := &vp.Render
-			if vp.Fill {
-				// fmt.Printf("icon %v fill bg %v\n", vp.PathUnique(), vp.Style.Background.Color)
-				vp.FillViewport()
+// NeedsReRender tests whether the last render parameters (size, color) have changed or not
+func (ic *Icon) NeedsReRender() bool {
+	pc := &ic.Paint
+	return !ic.Rendered || ic.RenderedSize != ic.ViewBox.Size || ic.RenderedStrokeColor != pc.StrokeStyle.Color || ic.RenderedFillColor != pc.FillStyle.Color
+}
+
+func (ic *Icon) Render2D() {
+	if ic.PushBounds() {
+		if ic.NeedsReRender() {
+			pc := &ic.Paint
+			rs := &ic.Render
+			if ic.Fill {
+				// fmt.Printf("icon %v fill bg %v\n", ic.PathUnique(), ic.Style.Background.Color)
+				ic.FillViewport()
 			}
-			vp.SetNormXForm()
+			ic.SetNormXForm()
 			rs.PushXForm(pc.XForm)
 			// fmt.Printf("IconRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
-			// 	vp.PathUnique(), vp.Style.Background.Color, vp.Paint.FillStyle.Color, vp.Style.Color, vp.Paint.StrokeStyle.Color)
-			vp.Render2DChildren() // we must do children first, then us!
-			vp.PopBounds()
+			// 	ic.PathUnique(), ic.Style.Background.Color, ic.Paint.FillStyle.Color, ic.Style.Color, ic.Paint.StrokeStyle.Color)
+			ic.Render2DChildren() // we must do children first, then us!
+			ic.PopBounds()
 			rs.PopXForm()
-			vp.Rendered = true
-			vp.RenderedSize = vp.ViewBox.Size
+			ic.Rendered = true
+			ic.RenderedSize = ic.ViewBox.Size
+			ic.RenderedStrokeColor = pc.StrokeStyle.Color
+			ic.RenderedFillColor = pc.FillStyle.Color
 		}
-		vp.RenderViewport2D() // update our parent image
+		ic.RenderViewport2D() // update our parent image
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// IconName
+
+// IconName is used to specify an icon -- currently just the unique name of
+// the icon -- automtically provides a chooser menu for icons using ValueView
+// system
+type IconName string
+
+// Icon() returns the icon from current IconSet of the given name, or nil if
+// not available -- icon should be copied before inserting into a widget
+func (inm IconName) Icon() *Icon {
+	return IconByName(string(inm))
+}
+
+// ValueView() returns the ValueView representation for the icon name --
+// presents a chooser
+func (inm IconName) ValueView() ValueView {
+	vv := IconValueView{}
+	vv.Init(&vv)
+	return &vv
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  IconValueView
+
+// IconValueView presents a StructViewInline for a struct plus a IconView button..
+type IconValueView struct {
+	ValueViewBase
+}
+
+var KiT_IconValueView = kit.Types.AddType(&IconValueView{}, nil)
+
+func (vv *IconValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_ComboBox
+	return vv.WidgetTyp
+}
+
+func (vv *IconValueView) UpdateWidget() {
+	cb := vv.Widget.(*ComboBox)
+	txt := kit.ToString(vv.Value.Interface())
+	cb.SetCurVal(txt)
+}
+
+func (vv *IconValueView) ConfigWidget(widg Node2D) {
+	vv.Widget = widg
+
+	cb := vv.Widget.(*ComboBox)
+	cb.ItemsFromStringList(IconListSorted(*CurIconSet), false, 30)
+
+	vv.UpdateWidget()
+
+	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.EmbeddedStruct(KiT_IconValueView).(*IconValueView)
+		cbb := vvv.Widget.(*ComboBox)
+		eval := cbb.CurVal.(string)
+		if vvv.SetValue(eval) {
+			vvv.UpdateWidget()
+		}
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// IconContexts, IconSets
+
+// TODO: not clear if there is actual value in organizing everything into
+// these contexts, etc, as opposed to just using a flat unique name, which is
+// simpler as a basic map.  for the time being, using the flat map but have
+// copied the context here for further consideration..
 
 // icon lists
 // https://fontawesome.com/
@@ -120,34 +208,67 @@ func (vp *Icon) Render2D() {
 // https://leungwensen.github.io/svg-icon/
 // golang.org/x/exp/shiny/materialdesign/icons/ -- material encoded icons
 
-// different types of standard icon name spaces, from https://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html -- we organize our IconSets into these different contexts
+// different types of standard icon name spaces, from
+// https://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+// -- we organize our IconSets into these different contexts
 type IconContexts int32
 
 const (
-	// Icons that are used as parts of standard widgets -- these are available built-in
+	// WidgetIcons are used as parts of standard widgets -- these are
+	// available built-in
 	WidgetIcons IconContexts = iota
-	// Icons which are generally used in menus and dialogs for interacting with the user.
+
+	// ActionIcons are generally used in menus and dialogs for interacting
+	// with the user.
 	ActionIcons
-	// Animated images used to represent loading web sites, or other background processing which may be less suited to more verbose progress reporting in the user interface.
+
+	// AnimationIcons are images used to represent loading web sites, or other
+	// background processing which may be less suited to more verbose progress
+	// reporting in the user interface.
 	AnimationIcons
-	// Icons that describe what an application is, for use in the Programs menu, window decorations, and the task list. These may or may not be generic depending on the application and its purpose.
+
+	// ApplicationIcons describe what an application is, for use in the
+	// Programs menu, window decorations, and the task list. These may or may
+	// not be generic depending on the application and its purpose.
 	ApplicationIcons
-	// Icons that are used for categories in the Programs menu, or the Control Center, for separating applications, preferences, and settings for display to the user.
+
+	// CategoryIcons are used for categories in the Programs menu, or the
+	// Control Center, for separating applications, preferences, and settings
+	// for display to the user.
 	CategoryIcons
-	// Icons for hardware that is contained within or connected to the computing device. Naming for extended devices in this group, is of the form <primary function>-<manufacturer>-<model>. This allows ease of fallback to the primary function device name, or ones more targeted for a specific series of models from a manufacturer.
+
+	// DeviceIcons are for hardware that is contained within or connected to the
+	// computing device. Naming for extended devices in this group, is of the
+	// form <primary function>-<manufacturer>-<model>. This allows ease of
+	// fallback to the primary function device name, or ones more targeted for
+	// a specific series of models from a manufacturer.
 	DeviceIcons
-	// Icons for tags and properties of files, that are displayed in the file manager. This context contains emblems for such things as read-only or photos
+
+	// EmblemIcons are for tags and properties of files, that are displayed in
+	// the file manager. This context contains emblems for such things as
+	// read-only or photos
 	EmblemIcons
-	// Icons for emotions that are expressed through text chat applications such as :-) or :-P in IRC or instant messengers.
+
+	// EmoteIcons for emotions that are expressed through text chat
+	// applications such as :-) or :-P in IRC or instant messengers.
 	EmoteIcons
-	// Icons for international denominations such as flags.
+
+	// IntnlIcons for international denominations such as flags.
 	IntnlIcons
-	// Icons for different types of data, such as audio or image files.
+
+	// MimeIcons for different types of data, such as audio or image files.
 	MimeIcons
-	// Icons used to represent locations, either on the local filesystem, or through remote connections. Folders, trash, and workgroups are some example.
+
+	// PlaceIcons used to represent locations, either on the local filesystem,
+	// or through remote connections. Folders, trash, and workgroups are some
+	// example.
 	PlaceIcons
-	// Icons for presenting status to the user. This context contains icons for warning and error dialogs, as well as for the current weather, appointment alarms, and battery status
+
+	// StatusIcons for presenting status to the user. This context contains
+	// icons for warning and error dialogs, as well as for the current
+	// weather, appointment alarms, and battery status
 	StatusIcons
+
 	IconContextsN
 )
 
@@ -158,7 +279,8 @@ var KiT_IconContexts = kit.Enums.AddEnum(IconContextsN, false, nil)
 func (ev IconContexts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *IconContexts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// list of standard icon names that we expect to find in an IconSet
+// StdIconNames is a list of standard icon names that we expect to find in an
+// IconSet -- used for loookup
 var StdIconNames = [IconContextsN][]string{
 	{ // WidgetIcons
 		"widget-wedge-down",
@@ -206,8 +328,24 @@ var DefaultIconSet *IconSet = MakeDefaultIcons()
 // the current icon set can be set to any icon set
 var CurIconSet *IconSet = DefaultIconSet
 
-// IconByName is main function to get icon by name -- looks in CurIconSet and falls back to DefaultIconSet if not found there -- logs a message and returns nil if not found
+// IconNameNil tests whether the icon name is empty, 'none' or 'nil' --
+// indicates to not use a icon
+func IconNameNil(name string) bool {
+	return name == "" || name == "none" || name == "nil"
+}
+
+// IconNameValid tests whether the icon name refers to a valid icon in current IconSet
+func IconNameValid(name string) bool {
+	return IconByName(name) != nil
+}
+
+// IconByName is main function to get icon by name -- looks in CurIconSet and
+// falls back to DefaultIconSet if not found there -- logs a message and
+// returns nil if not found
 func IconByName(name string) *Icon {
+	if IconNameNil(name) {
+		return nil
+	}
 	ic, ok := (*CurIconSet)[name]
 	if !ok {
 		ic, ok = (*DefaultIconSet)[name]
@@ -221,16 +359,18 @@ func IconByName(name string) *Icon {
 	return ic
 }
 
-// IconListSorted returns a slice of all the icons in the icon set sorted by name
-func IconListSorted(is IconSet) []*Icon {
-	il := make([]*Icon, len(is))
-	idx := 0
+// IconListSorted returns a slice of all the icon names in the icon set alpha
+// sorted, including 'none'
+func IconListSorted(is IconSet) []string {
+	il := make([]string, len(is)+1)
+	il[0] = "none"
+	idx := 1
 	for _, ic := range is {
-		il[idx] = ic
+		il[idx] = ic.Nm
 		idx++
 	}
 	sort.Slice(il, func(i, j int) bool {
-		return il[i].Name() < il[j].Name()
+		return il[i] < il[j]
 	})
 	return il
 }
