@@ -311,7 +311,7 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
 		g.ConfigParts()
 	}
-	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
+	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			mrg := g.Style.Layout.Margin.Dots
@@ -420,7 +420,7 @@ func (g *Splitter) Render2DDefaultStyle() {
 	g.UpdateSplitterPos()
 	g.ConfigPartsIfNeeded(true)
 
-	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
+	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
 	} else {
 		pc.StrokeStyle.SetColor(nil)

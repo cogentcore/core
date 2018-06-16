@@ -25,42 +25,38 @@ var KiT_FillRule = kit.Enums.AddEnumAltLower(FillRuleN, false, StylePropProps, "
 func (ev FillRule) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FillRule) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// FillStyle contains all the properties specific to filling a region
+// FillStyle contains all the properties for filling a region
 type FillStyle struct {
-	On      bool        `desc:"is fill active -- if property is none then false"`
-	Color   Color       `xml:"fill" desc:"default fill color when such a color is needed -- Server could be anything"`
-	Opacity float64     `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
-	Server  PaintServer `view:"-" desc:"paint server for the fill -- if solid color, defines fill color"`
-	Rule    FillRule    `xml:"fill-rule" desc:"rule for how to fill more complex shapes with crossing lines"`
+	On      bool      `desc:"is fill active -- if property is none then false"`
+	Color   ColorSpec `xml:"fill" desc:"fill color specification"`
+	Opacity float64   `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
+	Rule    FillRule  `xml:"fill-rule" desc:"rule for how to fill more complex shapes with crossing lines"`
 }
 
-// initialize default values for paint fill
+// Defaults initializes default values for paint fill
 func (pf *FillStyle) Defaults() {
 	pf.On = false // svg says fill is off by default
-	pf.Color.SetColor(color.White)
-	pf.Server = NewSolidcolorPaintServer(&pf.Color)
+	pf.SetColor(color.White)
 	pf.Rule = FillRuleNonZero
 	pf.Opacity = 1.0
 }
 
-// need to do some updating after setting the style from user properties
+// SetStylePost does some updating after setting the style from user properties
 func (pf *FillStyle) SetStylePost() {
 	if pf.Color.IsNil() {
 		pf.On = false
 	} else {
 		pf.On = true
-		// for now -- todo: find a more efficient way of doing this, and only updating when necc
-		pf.Server = NewSolidcolorPaintServer(&pf.Color)
-		// todo: incorporate opacity
 	}
 }
 
-func (pf *FillStyle) SetColor(cl *Color) {
-	if cl == nil || cl.IsNil() {
+// SetColor sets a solid fill color -- nil turns off filling
+func (pf *FillStyle) SetColor(cl color.Color) {
+	if cl == nil {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color = *cl
-		pf.Server = NewSolidcolorPaintServer(&pf.Color)
+		pf.Color.Color.SetColor(cl)
+		pf.Color.Source = SolidColor
 	}
 }

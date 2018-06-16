@@ -506,6 +506,8 @@ func (sf *StyledField) FieldIface(obj interface{}) interface{} {
 	switch {
 	case npt == KiT_Color:
 		return (*Color)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npt == KiT_ColorSpec:
+		return (*ColorSpec)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npt.Name() == "Value":
 		return (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npk >= reflect.Int && npk <= reflect.Uint64:
@@ -559,6 +561,15 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 	npk := npt.Kind()
 
 	switch fiv := fi.(type) {
+	case *ColorSpec:
+		switch valv := val.(type) {
+		case string:
+			fiv.Parse(valv, nil) // todo: need tree context
+		case *Color:
+			fiv.SetColor(*valv)
+		case color.Color:
+			fiv.SetColor(valv)
+		}
 	case *Color:
 		switch valv := val.(type) {
 		case string:
@@ -658,7 +669,7 @@ func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun Walk
 		// fmt.Printf("processing field named: %v\n", struf.Nm)
 		vf := vo.Field(i)
 		vfi := vf.Addr().Interface()
-		if ft.Kind() == reflect.Struct && ft.Name() != "Value" && ft.Name() != "Color" {
+		if ft.Kind() == reflect.Struct && ft.Name() != "Value" && ft.Name() != "Color" && ft.Name() != "ColorSpec" {
 			WalkStyleStruct(vfi, tag, baseoff+struf.Offset, fun)
 		} else {
 			if tag == "" { // non-struct = don't process

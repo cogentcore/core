@@ -16,11 +16,65 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/srwiley/rasterx"
 	"golang.org/x/image/colornames"
 )
 
 // Color defines a standard color object for GUI use, with RGBA values, and
 // all the usual necessary conversion functions to / from names, strings, etc
+
+// ColorSources determine how the color is generated -- used in FillStyle and StrokeStyle
+type ColorSources int32
+
+const (
+	SolidColor ColorSources = iota
+	LinearGradient
+	RadialGradient
+	ColorSourcesN
+)
+
+//go:generate stringer -type=ColorSources
+
+var KiT_ColorSources = kit.Enums.AddEnumAltLower(ColorSourcesN, false, StylePropProps, "")
+
+func (ev ColorSources) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *ColorSources) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// GradientPoints defines points within the gradient
+type GradientPoints int32
+
+const (
+	GpX1 GradientPoints = iota
+	GpY1
+	GpX2
+	GpY2
+	GradientPointsN
+)
+
+// ColorSpec fully specifies the color for rendering -- used in FillStyle and
+// StrokeStyle
+type ColorSpec struct {
+	Source   ColorSources      `desc:"source of color (solid, gradient)"`
+	Color    Color             `desc:"color for solid color source"`
+	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
+}
+
+var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
+
+// see colorparse.go for ColorSpec.Parse() method
+
+func (cs *ColorSpec) IsNil() bool {
+	if cs.Source == SolidColor {
+		return cs.Color.IsNil()
+	}
+	return cs.Gradient == nil
+}
+
+// SetColor sets a solid color
+func (cs *ColorSpec) SetColor(cl color.Color) {
+	cs.Color.SetColor(cl)
+	cs.Source = SolidColor
+}
 
 // Color extends image/color.RGBA with more methods for converting to / from
 // strings etc -- it has standard uint8 0..255 color values

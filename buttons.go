@@ -650,10 +650,10 @@ func (g *CheckBox) Init2D() {
 
 func (g *CheckBox) ConfigParts() {
 	g.SetCheckable(true)
-	if !IconNameValid(string(g.Icon)) { // todo: just use style
+	if !g.Icon.IsValid() { // todo: just use style
 		g.Icon = "widget-checked-box"
 	}
-	if !IconNameValid(string(g.IconOff)) {
+	if !g.IconOff.IsValid() {
 		g.IconOff = "widget-unchecked-box"
 	}
 	config := kit.TypeAndNameList{}

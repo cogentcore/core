@@ -394,7 +394,7 @@ func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
 	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
 		g.ConfigParts()
 	}
-	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
+	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			mrg := g.Style.Layout.Margin.Dots
@@ -590,7 +590,7 @@ func (g *Slider) Render2DDefaultStyle() {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColor(&st.Background.Color)
 
-	if IconNameValid(string(g.Icon)) && g.Parts.HasChildren() {
+	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)

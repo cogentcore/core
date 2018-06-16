@@ -1158,10 +1158,10 @@ const (
 )
 
 func (g *SpinBox) ConfigParts() {
-	if IconNameNil(string(g.UpIcon)) {
+	if g.UpIcon.IsNil() {
 		g.UpIcon = IconName("widget-wedge-up")
 	}
-	if IconNameNil(string(g.DownIcon)) {
+	if g.DownIcon.IsNil() {
 		g.DownIcon = IconName("widget-wedge-down")
 	}
 	g.Parts.Lay = LayoutRow

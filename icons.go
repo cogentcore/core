@@ -104,8 +104,8 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	pc := &ic.Paint
-	return !ic.Rendered || ic.RenderedSize != ic.ViewBox.Size || ic.RenderedStrokeColor != pc.StrokeStyle.Color || ic.RenderedFillColor != pc.FillStyle.Color
+	// pc := &ic.Paint
+	return !ic.Rendered || ic.RenderedSize != ic.ViewBox.Size // || ic.RenderedStrokeColor != pc.StrokeStyle.Color || ic.RenderedFillColor != pc.FillStyle.Color
 }
 
 func (ic *Icon) Render2D() {
@@ -126,8 +126,8 @@ func (ic *Icon) Render2D() {
 			rs.PopXForm()
 			ic.Rendered = true
 			ic.RenderedSize = ic.ViewBox.Size
-			ic.RenderedStrokeColor = pc.StrokeStyle.Color
-			ic.RenderedFillColor = pc.FillStyle.Color
+			// ic.RenderedStrokeColor = pc.StrokeStyle.Color
+			// ic.RenderedFillColor = pc.FillStyle.Color
 		}
 		ic.RenderViewport2D() // update our parent image
 	}
@@ -145,6 +145,18 @@ type IconName string
 // not available -- icon should be copied before inserting into a widget
 func (inm IconName) Icon() *Icon {
 	return IconByName(string(inm))
+}
+
+// IsNil tests whether the icon name is empty, 'none' or 'nil' -- indicates to
+// not use a icon
+func (inm IconName) IsNil() bool {
+	return IconNameNil(string(inm))
+}
+
+// IsValid tests whether the icon name is valid -- represents a non-nil icon
+// available in the current or default icon set
+func (inm IconName) IsValid() bool {
+	return IconNameValid(string(inm))
 }
 
 // ValueView() returns the ValueView representation for the icon name --
