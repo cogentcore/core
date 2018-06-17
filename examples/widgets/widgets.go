@@ -60,6 +60,9 @@ func mainrun() {
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 	// vlay.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
+	// vlay.SetProp("background-color", "linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet)")
+	// vlay.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
+	// vlay.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
 	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutRow

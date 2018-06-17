@@ -44,22 +44,26 @@ func (cs *ColorSpec) Parse(clrstr string, tree ki.Ki) bool {
 			log.Printf("gi.ColorSpec.Parse gradient parameters not found\n")
 			return false
 		}
-		gr := &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity}
-		cs.Gradient = gr
 		pars := rmdr[pidx+1:]
 		pars = strings.TrimSuffix(pars, ");")
 		pars = strings.TrimSuffix(pars, ")")
 		switch gtyp {
 		case "repeating-linear":
+			cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.RepeatSpread}
 			cs.Source = LinearGradient
-			cs.Gradient.IsRadial = false
-			cs.Gradient.Spread = rasterx.ReflectSpread
 			cs.parseLinearGrad(pars)
 		case "linear":
+			cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
 			cs.Source = LinearGradient
-			cs.Gradient.IsRadial = false
-			cs.Gradient.Spread = rasterx.PadSpread
 			cs.parseLinearGrad(pars)
+		case "repeating-radial":
+			cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.RepeatSpread}
+			cs.Source = RadialGradient
+			cs.parseRadialGrad(pars)
+		case "radial":
+			cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+			cs.Source = RadialGradient
+			cs.parseRadialGrad(pars)
 		}
 		FixGradientStops(cs.Gradient)
 	} else {
@@ -91,11 +95,11 @@ var GradientDegToSides = map[string]string{
 }
 
 func (cs *ColorSpec) parseLinearGrad(pars string) bool {
-	plist := strings.Split(pars, ",")
+	plist := strings.Split(pars, ", ")
 	var prevColor color.Color
 	stopIdx := 0
 	for pidx := 0; pidx < len(plist); pidx++ {
-		par := strings.TrimSpace(plist[pidx])
+		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		origPar := par
 		switch {
 		case strings.Contains(par, "deg"):
@@ -124,6 +128,67 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 				case "left":
 					cs.Gradient.Points[GpX1] = 1
 					cs.Gradient.Points[GpX2] = 0
+				}
+			}
+		case strings.HasPrefix(par, ")"):
+			break
+		default: // must be a color stop
+			var stop *rasterx.GradStop
+			if len(cs.Gradient.Stops) > stopIdx {
+				stop = cs.Gradient.Stops[stopIdx]
+			} else {
+				stop = &rasterx.GradStop{Opacity: 1.0}
+			}
+			if stopIdx == 0 {
+				prevColor = cs.Color // base color
+				// fmt.Printf("starting prev color: %v\n", prevColor)
+			}
+			if parseColorStop(stop, prevColor, par) {
+				if len(cs.Gradient.Stops) <= stopIdx {
+					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+				}
+				if stopIdx == 0 {
+					cs.Color.SetColor(stop.StopColor) // keep first one
+				}
+				prevColor = stop.StopColor
+				stopIdx++
+			}
+		}
+	}
+	if len(cs.Gradient.Stops) > stopIdx {
+		cs.Gradient.Stops = cs.Gradient.Stops[:stopIdx]
+	}
+	return true
+}
+
+// todo: this is complex:
+// https://www.w3.org/TR/css3-images/#radial-gradients
+
+func (cs *ColorSpec) parseRadialGrad(pars string) bool {
+	plist := strings.Split(pars, ", ")
+	var prevColor color.Color
+	stopIdx := 0
+	for pidx := 0; pidx < len(plist); pidx++ {
+		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
+		// origPar := par
+		switch {
+		case strings.Contains(par, "circle"):
+			cs.Gradient.Points = [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}
+		case strings.Contains(par, "ellipse"):
+			cs.Gradient.Points = [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}
+		case strings.HasPrefix(par, "at "):
+			sides := strings.Split(par[3:], " ")
+			cs.Gradient.Points = [5]float64{0, 0, 0, 0, 0}
+			for _, side := range sides {
+				switch side {
+				case "bottom":
+					cs.Gradient.Points[GpY1] = 0
+				case "top":
+					cs.Gradient.Points[GpY1] = 1
+				case "right":
+					cs.Gradient.Points[GpX1] = 0
+				case "left":
+					cs.Gradient.Points[GpX1] = 1
 				}
 			}
 		case strings.HasPrefix(par, ")"):

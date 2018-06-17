@@ -296,6 +296,14 @@ func (c *Color) SetString(str string, base color.Color) error {
 			fmt.Sscanf(val, format, &r, &g, &b)
 		}
 		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
+	case strings.HasPrefix(low, "rgba("):
+		val := low[5:]
+		val = strings.TrimRight(val, ")")
+		val = strings.Trim(val, "%")
+		var r, g, b, a int
+		format := "%d,%d,%d,%d"
+		fmt.Sscanf(val, format, &r, &g, &b, &a)
+		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
 	case strings.HasPrefix(low, "pref("):
 		val := low[5:]
 		val = strings.TrimRight(val, ")")
