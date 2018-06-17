@@ -95,3 +95,13 @@ func (ps *StrokeStyle) SetColor(cl color.Color) {
 		ps.Color.Source = SolidColor
 	}
 }
+
+// SetColorSpec sets full color spec from source
+func (ps *StrokeStyle) SetColorSpec(cl *ColorSpec) {
+	if cl == nil {
+		ps.On = false
+	} else {
+		ps.On = true
+		ps.Color = *cl
+	}
+}

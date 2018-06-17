@@ -110,6 +110,8 @@ func mainrun() {
 	tv.SetRootNode(&srctree)
 
 	sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
+	sv.SetStretchMaxWidth()
+	sv.SetStretchMaxHeight()
 	sv.SetStruct(&srctree, nil)
 
 	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

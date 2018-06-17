@@ -29,7 +29,7 @@ func (ev *FillRule) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 type FillStyle struct {
 	On      bool      `desc:"is fill active -- if property is none then false"`
 	Color   ColorSpec `xml:"fill" desc:"fill color specification"`
-	Opacity float64   `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
+	Opacity float32   `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
 	Rule    FillRule  `xml:"fill-rule" desc:"rule for how to fill more complex shapes with crossing lines"`
 }
 
@@ -58,5 +58,15 @@ func (pf *FillStyle) SetColor(cl color.Color) {
 		pf.On = true
 		pf.Color.Color.SetColor(cl)
 		pf.Color.Source = SolidColor
+	}
+}
+
+// SetColorSpec sets full color spec from source
+func (pf *FillStyle) SetColorSpec(cl *ColorSpec) {
+	if cl == nil {
+		pf.On = false
+	} else {
+		pf.On = true
+		pf.Color = *cl
 	}
 }

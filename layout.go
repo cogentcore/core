@@ -939,7 +939,7 @@ func (ly *Layout) AvailSize() Vec2D {
 
 // process any overflow according to overflow settings
 func (ly *Layout) ManageOverflow() {
-	if len(ly.Kids) == 0 {
+	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
 		return
 	}
 	avail := ly.AvailSize()
@@ -1355,7 +1355,7 @@ func (fr *Frame) Render2D() {
 			pc.FillStrokeClear(rs)
 		}
 
-		pc.FillStyle.SetColor(&st.Background.Color)
+		pc.FillStyle.SetColorSpec(&st.Background.Color)
 		pc.StrokeStyle.SetColor(&st.Border.Color)
 		pc.StrokeStyle.Width = st.Border.Width
 		if rad == 0.0 {

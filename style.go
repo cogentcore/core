@@ -71,7 +71,7 @@ var StylePropProps = ki.Props{
 
 // style parameters for backgrounds
 type BackgroundStyle struct {
-	Color Color `xml:"color" desc:"background color"`
+	Color ColorSpec `xml:"color" desc:"background color"`
 	// todo: all the properties not yet implemented -- mostly about images
 	// Image is like a PaintServer -- includes gradients etc
 	// Attachment -- how the image moves
@@ -547,6 +547,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 				val = pfi
 				// fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, val)
 			} else {
+				// fmt.Printf("StyleField %v tried to inherit but par null: %v\n", fld.Field.Name, val)
 				return
 			}
 		}

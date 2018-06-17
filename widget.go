@@ -52,8 +52,11 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 	if st.BoxShadow.HasShadow() {
 		spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColor(&st.BoxShadow.Color)
+		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
+		// todo: this is not rendering a transparent gradient
+		// pc.FillStyle.Opacity = .5
 		g.RenderBoxImpl(spos, sz, st.Border.Radius.Dots)
+		// pc.FillStyle.Opacity = 1.0
 	}
 	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
 	if !st.Background.Color.IsNil() {

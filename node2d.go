@@ -60,7 +60,7 @@ Rendering is done in 5 separate passes:
 type Node2DBase struct {
 	NodeBase
 	Style    Style       `json:"-" xml:"-" desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle *Style      `json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	DefStyle *Style      `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	Paint    Paint       `json:"-" xml:"-" desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-" xml:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
 	LayData  LayoutData  `json:"-" xml:"-" desc:"all the layout information for this item"`
@@ -586,9 +586,11 @@ func (g *Node2DBase) AddParentPos() Vec2D {
 	return Vec2DZero
 }
 
-// ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with whatever delta may be in effect
+// ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
+// whatever delta may be in effect
 func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
-	g.VpBBox = parBBox.Intersect(g.BBox.Add(delta))
+	g.ObjBBox = g.BBox.Add(delta)
+	g.VpBBox = parBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
 }
 
@@ -630,7 +632,7 @@ func (g *Node2DBase) PushBounds() bool {
 	if g.IsOverlay() {
 		if g.Viewport != nil {
 			g.ConnectToViewport()
-			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds())
+			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds(), g.ObjBBox)
 		}
 		return true
 	}
@@ -638,7 +640,7 @@ func (g *Node2DBase) PushBounds() bool {
 		return false
 	}
 	rs := &g.Viewport.Render
-	rs.PushBounds(g.VpBBox)
+	rs.PushBounds(g.VpBBox, g.ObjBBox)
 	g.ConnectToViewport()
 	if Render2DTrace {
 		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)

@@ -179,24 +179,26 @@ var MenuButtonProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
-	ButtonSelectors[ButtonActive]: ki.Props{},
+	ButtonSelectors[ButtonActive]: ki.Props{
+		"background-color": "linear-gradient(lighter-0, darker-10)",
+	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "linear-gradient(darker-10, darker-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-40",
+		"background-color": "linear-gradient(lighter-40, darker-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
 		"color":            "lighter-90",
-		"background-color": "darker-30",
+		"background-color": "linear-gradient(darker-30, darker-10)",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": "linear-gradient(pref(SelectColor), darker-10)",
 	},
 }
 

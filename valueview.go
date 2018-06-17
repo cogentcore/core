@@ -118,13 +118,15 @@ func ToValueView(it interface{}) ValueView {
 			vv.Init(&vv)
 			return &vv
 		}
-		if it == nil {
+		if kit.IfaceIsNil(it) {
 			return nil
 		}
 		v := reflect.ValueOf(it)
 		if !kit.ValueIsZero(v) {
 			return ToValueView(v.Elem().Interface())
 		}
+	case nptyp == ki.KiT_Signal:
+		return nil
 	case vk == reflect.Slice:
 		vv := SliceValueView{}
 		vv.Init(&vv)

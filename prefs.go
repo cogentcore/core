@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
@@ -221,4 +222,27 @@ func (p *Preferences) Edit() {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
+}
+
+// PrefColor returns preference color of given name (case insensitive)
+func (p *Preferences) PrefColor(clrName string) *Color {
+	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
+	switch lc {
+	case "fontcolor":
+		return &p.FontColor
+	case "backgroundcolor":
+		return &p.BackgroundColor
+	case "shadowcolor":
+		return &p.ShadowColor
+	case "bordercolor":
+		return &p.BorderColor
+	case "controlcolor":
+		return &p.ControlColor
+	case "iconcolor":
+		return &p.IconColor
+	case "selectcolor":
+		return &p.SelectColor
+	}
+	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
+	return nil
 }

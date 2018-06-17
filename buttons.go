@@ -501,19 +501,19 @@ type Button struct {
 var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 
 var ButtonProps = ki.Props{
-	"border-width":        units.NewValue(1, units.Px),
-	"border-radius":       units.NewValue(4, units.Px),
-	"border-color":        &Prefs.BorderColor,
-	"border-style":        BorderSolid,
-	"padding":             units.NewValue(4, units.Px),
-	"margin":              units.NewValue(4, units.Px),
-	"box-shadow.h-offset": units.NewValue(4, units.Px),
-	"box-shadow.v-offset": units.NewValue(4, units.Px),
-	"box-shadow.blur":     units.NewValue(4, units.Px),
-	"box-shadow.color":    &Prefs.ShadowColor,
-	"text-align":          AlignCenter,
-	"vertical-align":      AlignTop,
-	"background-color":    &Prefs.ControlColor,
+	"border-width":  units.NewValue(1, units.Px),
+	"border-radius": units.NewValue(4, units.Px),
+	"border-color":  &Prefs.BorderColor,
+	"border-style":  BorderSolid,
+	"padding":       units.NewValue(4, units.Px),
+	"margin":        units.NewValue(4, units.Px),
+	// "box-shadow.h-offset": units.NewValue(10, units.Px),
+	// "box-shadow.v-offset": units.NewValue(10, units.Px),
+	// "box-shadow.blur":     units.NewValue(4, units.Px),
+	"box-shadow.color": &Prefs.ShadowColor,
+	"text-align":       AlignCenter,
+	"vertical-align":   AlignTop,
+	"background-color": &Prefs.ControlColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -535,24 +535,26 @@ var ButtonProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
-	ButtonSelectors[ButtonActive]: ki.Props{},
+	ButtonSelectors[ButtonActive]: ki.Props{
+		"background-color": "linear-gradient(lighter-0, darker-10)",
+	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "linear-gradient(darker-10, darker-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-40",
+		"background-color": "linear-gradient(lighter-40, darker-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
 		"color":            "lighter-90",
-		"background-color": "darker-30",
+		"background-color": "linear-gradient(darker-30, darker-10)",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": "linear-gradient(pref(SelectColor), darker-10)",
 	},
 }
 
@@ -601,7 +603,9 @@ var CheckBoxProps = ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
 	},
-	ButtonSelectors[ButtonActive]: ki.Props{},
+	ButtonSelectors[ButtonActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",

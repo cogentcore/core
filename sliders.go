@@ -452,7 +452,9 @@ var SliderProps = ki.Props{
 		"fill":    &Prefs.IconColor,
 		"stroke":  &Prefs.FontColor,
 	},
-	SliderSelectors[SliderActive]: ki.Props{},
+	SliderSelectors[SliderActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
 	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -556,7 +558,7 @@ func (g *Slider) Render2DDefaultStyle() {
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColor(&st.Background.Color)
+	pc.FillStyle.SetColorSpec(&st.Background.Color)
 
 	// layout is as follows, for width dimension
 	// |      bw             bw     |
@@ -583,12 +585,12 @@ func (g *Slider) Render2DDefaultStyle() {
 	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	bsz.SetDim(g.Dim, g.Pos)
-	pc.FillStyle.SetColor(&g.StateStyles[SliderValue].Background.Color)
+	pc.FillStyle.SetColorSpec(&g.StateStyles[SliderValue].Background.Color)
 	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	tpos.SetDim(g.Dim, bpos.Dim(g.Dim)+g.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-	pc.FillStyle.SetColor(&st.Background.Color)
+	pc.FillStyle.SetColorSpec(&st.Background.Color)
 
 	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		g.Parts.Render2DTree()
@@ -618,14 +620,16 @@ type ScrollBar struct {
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
 var ScrollBarProps = ki.Props{
-	"border-width":                units.NewValue(1, units.Px),
-	"border-radius":               units.NewValue(4, units.Px),
-	"border-color":                &Prefs.BorderColor,
-	"border-style":                BorderSolid,
-	"padding":                     units.NewValue(0, units.Px),
-	"margin":                      units.NewValue(2, units.Px),
-	"background-color":            &Prefs.ControlColor,
-	SliderSelectors[SliderActive]: ki.Props{},
+	"border-width":     units.NewValue(1, units.Px),
+	"border-radius":    units.NewValue(4, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(0, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"background-color": &Prefs.ControlColor,
+	SliderSelectors[SliderActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
 	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",
@@ -721,7 +725,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColor(&st.Background.Color)
+	pc.FillStyle.SetColorSpec(&st.Background.Color)
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
@@ -731,7 +735,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(g.Dim, g.Pos)                     // start of thumb
 	sz.SetDim(g.Dim, g.ThSize)
-	pc.FillStyle.SetColor(&g.StateStyles[SliderValue].Background.Color)
+	pc.FillStyle.SetColorSpec(&g.StateStyles[SliderValue].Background.Color)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 

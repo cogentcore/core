@@ -13,13 +13,16 @@ package gi
 import (
 	"bytes"
 	"encoding/xml"
+	"image/color"
 	"io"
 	"log"
 	"strconv"
 	"strings"
 
 	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 	"github.com/srwiley/rasterx"
+	// "github.com/rcoreilly/rasterx"
 	"golang.org/x/net/html/charset"
 )
 
@@ -36,19 +39,21 @@ func (cs *ColorSpec) Parse(clrstr string, tree ki.Ki) bool {
 	if gidx := strings.Index(clrstr, grad); gidx > 0 {
 		gtyp := clrstr[:gidx]
 		rmdr := clrstr[gidx+len(grad):]
-		pidx := strings.IndexRune(rmdr, '(')
+		pidx := strings.IndexByte(rmdr, '(')
 		if pidx < 0 {
 			log.Printf("gi.ColorSpec.Parse gradient parameters not found\n")
 			return false
 		}
-		cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0},
-			IsRadial: false, Matrix: rasterx.Identity}
+		gr := &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity}
+		cs.Gradient = gr
 		pars := rmdr[pidx+1:]
+		pars = strings.TrimSuffix(pars, ");")
+		pars = strings.TrimSuffix(pars, ")")
 		switch gtyp {
 		case "repeating-linear":
 			cs.Source = LinearGradient
 			cs.Gradient.IsRadial = false
-			cs.Gradient.Spread = rasterx.RepeatSpread
+			cs.Gradient.Spread = rasterx.ReflectSpread
 			cs.parseLinearGrad(pars)
 		case "linear":
 			cs.Source = LinearGradient
@@ -67,28 +72,29 @@ func (cs *ColorSpec) Parse(clrstr string, tree ki.Ki) bool {
 
 // GradientDegToSides maps gradient degree notation to side notation
 var GradientDegToSides = map[string]string{
-	"0deg":    "up",
-	"360deg":  "up",
-	"45deg":   "up right",
-	"-315deg": "up right",
+	"0deg":    "top",
+	"360deg":  "top",
+	"45deg":   "top right",
+	"-315deg": "top right",
 	"90deg":   "right",
 	"-270deg": "right",
-	"135deg":  "down right",
-	"-225deg": "down right",
-	"180deg":  "down",
-	"-180deg": "down",
-	"225deg":  "down left",
-	"-135deg": "down left",
+	"135deg":  "bottom right",
+	"-225deg": "bottom right",
+	"180deg":  "bottom",
+	"-180deg": "bottom",
+	"225deg":  "bottom left",
+	"-135deg": "bottom left",
 	"270deg":  "left",
 	"-90deg":  "left",
-	"315deg":  "up left",
-	"-45deg":  "up left",
+	"315deg":  "top left",
+	"-45deg":  "top left",
 }
 
 func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 	plist := strings.Split(pars, ",")
-	pidx := 0
-	for pidx < len(plist) {
+	var prevColor color.Color
+	stopIdx := 0
+	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimSpace(plist[pidx])
 		origPar := par
 		switch {
@@ -99,9 +105,10 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 			if !ok {
 				log.Printf("gi.ColorSpec.Parse invalid gradient angle -- must be at 45 degree increments: %v\n", origPar)
 			}
+			par = "to " + par
 			fallthrough
 		case strings.HasPrefix(par, "to "):
-			sides := strings.Split(strings.TrimLeft(par, "to "), " ")
+			sides := strings.Split(par[3:], " ")
 			cs.Gradient.Points = [5]float64{0, 0, 0, 0, 0}
 			for _, side := range sides {
 				switch side {
@@ -119,17 +126,38 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 					cs.Gradient.Points[GpX2] = 0
 				}
 			}
+		case strings.HasPrefix(par, ")"):
+			break
 		default: // must be a color stop
-			stop := rasterx.GradStop{Opacity: 1.0}
-			if parseColorStop(&stop, par) {
-				cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+			var stop *rasterx.GradStop
+			if len(cs.Gradient.Stops) > stopIdx {
+				stop = cs.Gradient.Stops[stopIdx]
+			} else {
+				stop = &rasterx.GradStop{Opacity: 1.0}
+			}
+			if stopIdx == 0 {
+				prevColor = cs.Color // base color
+				// fmt.Printf("starting prev color: %v\n", prevColor)
+			}
+			if parseColorStop(stop, prevColor, par) {
+				if len(cs.Gradient.Stops) <= stopIdx {
+					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+				}
+				if stopIdx == 0 {
+					cs.Color.SetColor(stop.StopColor) // keep first one
+				}
+				prevColor = stop.StopColor
+				stopIdx++
 			}
 		}
+	}
+	if len(cs.Gradient.Stops) > stopIdx {
+		cs.Gradient.Stops = cs.Gradient.Stops[:stopIdx]
 	}
 	return true
 }
 
-func parseColorStop(stop *rasterx.GradStop, par string) bool {
+func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) bool {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
@@ -141,12 +169,24 @@ func parseColorStop(stop *rasterx.GradStop, par string) bool {
 		}
 		stop.Offset = off
 	}
-	clr, err := ColorFromString(cnm, nil)
-	if err != nil {
-		log.Printf("gi.ColorSpec.Parse invalid color string: %v\n", err)
-		return false
+	// color blending doesn't work well in pre-multiplied alpha RGB space!
+	if prevColor != nil && strings.HasPrefix(cnm, "clearer-") {
+		pcts := strings.TrimPrefix(cnm, "clearer-")
+		pct, _ := kit.ToFloat(pcts)
+		stop.Opacity = (100.0 - pct) / 100.0
+		stop.StopColor = prevColor
+	} else if prevColor != nil && cnm == "transparent" {
+		stop.Opacity = 0
+		stop.StopColor = prevColor
+	} else {
+		clr, err := ColorFromString(cnm, prevColor)
+		if err != nil {
+			log.Printf("gi.ColorSpec.Parse invalid color string: %v\n", err)
+			return false
+		}
+		stop.StopColor = clr
 	}
-	stop.StopColor = clr
+	// fmt.Printf("color: %v from: %v\n", stop.StopColor, par)
 	return true
 }
 
@@ -256,7 +296,7 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 						return false
 					}
 				}
-				cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+				cs.Gradient.Stops = append(cs.Gradient.Stops, &stop)
 			default:
 				errStr := "Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
@@ -327,27 +367,40 @@ func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
 
 func FixGradientStops(grad *rasterx.Gradient) {
 	sz := len(grad.Stops)
+	if sz == 0 {
+		return
+	}
 	splitSt := -1
 	last := 0.0
 	for i := 0; i < sz; i++ {
 		st := grad.Stops[i]
+		if i == sz-1 && st.Offset == 0 {
+			if last < 1.0 {
+				st.Offset = 1.0
+			} else {
+				st.Offset = last
+			}
+		}
 		if i > 0 && st.Offset == 0 && splitSt < 0 {
 			splitSt = i
 			st.Offset = last
 			continue
-		} else if i == sz-1 && st.Offset == 0 {
-			st.Offset = 1
 		}
 		if splitSt > 0 {
 			start := grad.Stops[splitSt].Offset
 			end := st.Offset
 			per := (end - start) / float64(1+(i-splitSt))
 			cur := start + per
-			for j := splitSt + 1; j < i; j++ {
+			for j := splitSt; j < i; j++ {
 				grad.Stops[j].Offset = cur
 				cur += per
 			}
 		}
 		last = st.Offset
 	}
+	// fmt.Printf("grad stops:\n")
+	// for i := 0; i < sz; i++ {
+	// 	st := grad.Stops[i]
+	// 	fmt.Printf("%v\t%v opacity: %v\n", i, st.Offset, st.Opacity)
+	// }
 }

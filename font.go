@@ -230,30 +230,30 @@ var FontLibrary FontLib
 // full names (e.g., Times -> Times New Roman) -- also looks for b,i suffixes
 // for these cases -- some are added here just to pick up those suffixes
 var AltFontMap = map[string]string{
-	"arial": "Arial",
-	"ariblk": "Arial Black",
+	"arial":   "Arial",
+	"ariblk":  "Arial Black",
 	"candara": "Candara",
 	"calibri": "Calibri",
 	"cambria": "Cambria",
-	"cour": "Courier New",
+	"cour":    "Courier New",
 	"constan": "Constantia",
 	"consola": "Console",
-	"comic": "Comic Sans MS",
-	"corbel": "Corbel",
-	"framd": "Franklin Gothic Medium",
+	"comic":   "Comic Sans MS",
+	"corbel":  "Corbel",
+	"framd":   "Franklin Gothic Medium",
 	"georgia": "Georgia",
-	"gadugi": "Gadugi",
-	"malgun": "Malgun Gothic",
-	"mmrtex": "Myanmar Text",
-	"pala": "Palatino",
+	"gadugi":  "Gadugi",
+	"malgun":  "Malgun Gothic",
+	"mmrtex":  "Myanmar Text",
+	"pala":    "Palatino",
 	"segoepr": "Segoe Print",
 	"segoesc": "Segoe Script",
-	"segoeui":  "Segoe UI",
-	"segui": "Segoe UI Historic",
-	"tahoma": "Tahoma",
-	"taile": "Traditional Arabic",
-	"times": "Times New Roman",
-	"trebuc": "Trebuchet",
+	"segoeui": "Segoe UI",
+	"segui":   "Segoe UI Historic",
+	"tahoma":  "Tahoma",
+	"taile":   "Traditional Arabic",
+	"times":   "Times New Roman",
+	"trebuc":  "Trebuchet",
 	"verdana": "Verdana",
 }
 
@@ -308,13 +308,14 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 			}
 			if filepath.Ext(path) == ext {
 				_, fn := filepath.Split(path)
-				fn = strings.TrimRight(fn, ext)
-				bfn := strings.TrimRight(fn, "bd")
-				bfn = strings.TrimRight(bfn, "bi")
-				bfn = strings.TrimRight(bfn, "z")
-				bfn = strings.TrimRight(bfn, "b")
+				fn = fn[:len(fn)-len(ext)]
+				bfn := fn
+				bfn = strings.TrimSuffix(fn, "bd")
+				bfn = strings.TrimSuffix(bfn, "bi")
+				bfn = strings.TrimSuffix(bfn, "z")
+				bfn = strings.TrimSuffix(bfn, "b")
 				if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
-					bfn = strings.TrimRight(bfn, "i")
+					bfn = strings.TrimSuffix(bfn, "i")
 				}
 				if afn, ok := AltFontMap[bfn]; ok {
 					sfx := ""

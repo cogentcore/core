@@ -7,13 +7,13 @@ package gi
 import (
 	"errors"
 	"image"
-	"image/color"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/prof"
 	"github.com/srwiley/rasterx"
+	//"github.com/rcoreilly/rasterx"
 	"github.com/srwiley/scanFT"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
@@ -194,6 +194,7 @@ type RenderState struct {
 	Image       *image.RGBA       `desc:"pointer to image to render into"`
 	Mask        *image.Alpha      `desc:"current mask"`
 	Bounds      image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
+	ObjBounds   image.Rectangle   `desc:"object boundaries -- for gradient sizing"`
 	XFormStack  []XFormMatrix2D   `desc:"stack of transforms"`
 	BoundsStack []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack   []*image.Alpha    `desc:"stack of clips, if needed"`
@@ -232,7 +233,7 @@ func (rs *RenderState) PopXForm() {
 }
 
 // push current bounds onto stack and set new bounds
-func (rs *RenderState) PushBounds(b image.Rectangle) {
+func (rs *RenderState) PushBounds(b, objb image.Rectangle) {
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
 	}
@@ -241,6 +242,7 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
 	rs.Bounds = b
+	rs.ObjBounds = objb // todo: don't need stack?
 }
 
 // pop bounds off the stack and set to current bounds
@@ -438,7 +440,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		pc.StrokeStyle.Dashes, 0,
 	)
-	rs.Raster.SetColor(pc.StrokeStyle.Color) // todo
+	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.ObjBounds))
 	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rs.Raster)
 	rs.Raster.Draw()
@@ -452,7 +454,7 @@ func (pc *Paint) fill(rs *RenderState) {
 
 	rf := &rs.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
-	rf.SetColor(pc.FillStyle.Color) // todo
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
 	rs.Scanner.SetClip(rs.Bounds)
 
 	rs.Path.AddTo(rf)
@@ -466,7 +468,6 @@ func (pc *Paint) fill(rs *RenderState) {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Paint) StrokePreserve(rs *RenderState) {
-	// painter := newPaintServerPainter(rs.Image, rs.Mask, pc.StrokeStyle.Server, rs.Bounds)
 	pc.stroke(rs)
 }
 
@@ -481,7 +482,6 @@ func (pc *Paint) Stroke(rs *RenderState) {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicity closed. The path is preserved after this operation.
 func (pc *Paint) FillPreserve(rs *RenderState) {
-	// painter := newPaintServerPainter(rs.Image, rs.Mask, pc.FillStyle.Server, rs.Bounds)
 	pc.fill(rs)
 }
 
@@ -494,9 +494,15 @@ func (pc *Paint) Fill(rs *RenderState) {
 
 // Fill box is an optimized fill of a square region with a uniform color --
 // currently Fill is the major bottleneck on performance..
-func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr color.Color) {
-	b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
-	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
+func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
+	if clr.Source == SolidColor {
+		b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
+		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
+	} else {
+		pc.FillStyle.SetColorSpec(clr)
+		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
+		pc.Fill(rs)
+	}
 }
 
 // ClipPreserve updates the clipping region by intersecting the current

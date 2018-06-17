@@ -345,7 +345,7 @@ func (vp *Viewport2D) RenderViewport2D() {
 func (vp *Viewport2D) PushBounds() bool {
 	if vp.IsOverlay() {
 		if vp.Viewport != nil {
-			vp.Viewport.Render.PushBounds(vp.Viewport.Pixels.Bounds())
+			vp.Viewport.Render.PushBounds(vp.Viewport.Pixels.Bounds(), vp.ObjBBox)
 		}
 		return true
 	}
@@ -361,7 +361,7 @@ func (vp *Viewport2D) PushBounds() bool {
 		}
 	}
 	rs := &vp.Render
-	rs.PushBounds(vp.VpBBox)
+	rs.PushBounds(vp.VpBBox, vp.ObjBBox)
 	if Render2DTrace {
 		fmt.Printf("Render: %v at %v\n", vp.PathUnique(), vp.VpBBox)
 	}

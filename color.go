@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image"
 	"reflect"
 
 	"image/color"
@@ -17,6 +18,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/srwiley/rasterx"
+	// "github.com/rcoreilly/rasterx"
 	"golang.org/x/image/colornames"
 )
 
@@ -74,6 +76,54 @@ func (cs *ColorSpec) IsNil() bool {
 func (cs *ColorSpec) SetColor(cl color.Color) {
 	cs.Color.SetColor(cl)
 	cs.Source = SolidColor
+	cs.Gradient = nil
+}
+
+// SetShadowGradient sets a linear gradient starting at given color and going
+// down to transparent based on given color and direction spec (defaults to
+// "to down")
+func (cs *ColorSpec) SetShadowGradient(cl color.Color, dir string) {
+	cs.Color.SetColor(cl)
+	if dir == "" {
+		dir = "to down"
+	}
+	cs.Parse(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir), nil)
+	cs.Source = LinearGradient
+}
+
+// SetGradientBounds sets bounds of the gradient
+func SetGradientBounds(grad *rasterx.Gradient, bounds image.Rectangle) {
+	grad.Bounds.X = float64(bounds.Min.X)
+	grad.Bounds.Y = float64(bounds.Min.Y)
+	sz := bounds.Size()
+	grad.Bounds.W = float64(sz.X)
+	grad.Bounds.H = float64(sz.Y)
+}
+
+// CopyGradient copies a gradient, making new copies of the stops instead of re-using pointers
+func CopyGradient(dst, src *rasterx.Gradient) {
+	*dst = *src
+	sn := len(src.Stops)
+	dst.Stops = make([]*rasterx.GradStop, sn)
+	for si := 0; si < sn; si++ {
+		gs := rasterx.GradStop{}
+		gs = *(src.Stops[si])
+		dst.Stops[si] = &gs
+	}
+}
+
+// RenderColor gets the color for rendering, applying opacity and bounds for gradients
+func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle) interface{} {
+	switch cs.Source {
+	case SolidColor:
+		return rasterx.ApplyOpacity(cs.Color, float64(opacity))
+	default:
+		if cs.Gradient == nil {
+			return nil
+		}
+		SetGradientBounds(cs.Gradient, bounds)
+		return cs.Gradient.GetColorFunction(float64(opacity))
+	}
 }
 
 // Color extends image/color.RGBA with more methods for converting to / from
@@ -222,17 +272,18 @@ func (c *Color) SetString(str string, base color.Color) error {
 		c.SetToNil()
 	}
 	low := strings.ToLower(str)
-	if low[0] == '#' {
+	switch {
+	case low[0] == '#':
 		return c.ParseHex(str)
-	} else if strings.HasPrefix(low, "hsl(") {
-		val := strings.TrimLeft(low, "hsl(")
+	case strings.HasPrefix(low, "hsl("):
+		val := low[4:]
 		val = strings.TrimRight(val, ")")
 		format := "%d,%d,%d"
 		var h, s, l int
 		fmt.Sscanf(val, format, &h, &s, &l)
 		c.SetHSL(float32(h), float32(s)/100.0, float32(l)/100.0)
-	} else if strings.HasPrefix(low, "rgb(") {
-		val := strings.TrimLeft(low, "rgb(")
+	case strings.HasPrefix(low, "rgb("):
+		val := low[4:]
 		val = strings.TrimRight(val, ")")
 		val = strings.Trim(val, "%")
 		var r, g, b, a int
@@ -245,7 +296,14 @@ func (c *Color) SetString(str string, base color.Color) error {
 			fmt.Sscanf(val, format, &r, &g, &b)
 		}
 		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
-	} else {
+	case strings.HasPrefix(low, "pref("):
+		val := low[5:]
+		val = strings.TrimRight(val, ")")
+		clr := Prefs.PrefColor(val)
+		if clr != nil {
+			*c = *clr
+		}
+	default:
 		if hidx := strings.Index(low, "-"); hidx > 0 {
 			cmd := low[:hidx]
 			pctstr := low[hidx+1:]
@@ -987,7 +1045,7 @@ func (sv *ColorView) Update() {
 	sv.UpdateSliderGrid()
 	if sv.Color != nil {
 		v, _ := sv.Value()
-		v.Style.Background.Color = *sv.Color // direct copy
+		v.Style.Background.Color.Color = *sv.Color // direct copy
 	}
 	sv.UpdateEnd(updt)
 }

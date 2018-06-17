@@ -55,7 +55,9 @@ var ActionProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
-	ButtonSelectors[ButtonActive]: ki.Props{},
+	ButtonSelectors[ButtonActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
 		"border-color": "lighter-50",
 		"color":        "lighter-50",

@@ -1519,7 +1519,7 @@ func (tv *TreeView) Render2D() {
 		pc.TextStyle = st.Text
 		pc.StrokeStyle.SetColor(&st.Border.Color)
 		pc.StrokeStyle.Width = st.Border.Width
-		pc.FillStyle.SetColor(&st.Background.Color)
+		pc.FillStyle.SetColorSpec(&st.Background.Color)
 		// tv.RenderStdBox()
 		pos := tv.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 		sz := tv.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
