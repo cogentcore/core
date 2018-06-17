@@ -1368,9 +1368,7 @@ var TreeViewProps = ki.Props{
 	"#menu": ki.Props{
 		"indicator": "none",
 	},
-	TreeViewSelectors[TreeViewActive]: ki.Props{
-		"background-color": "inherit",
-	},
+	TreeViewSelectors[TreeViewActive]: ki.Props{},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
 	},
@@ -1386,6 +1384,7 @@ func (tv *TreeView) Style2D() {
 	}
 	tv.SetCanFocusIfActive()
 	tv.Style2DWidget()
+
 	var pst *Style
 	_, pg := KiToNode2D(tv.Par)
 	if pg != nil {
@@ -1396,8 +1395,6 @@ func (tv *TreeView) Style2D() {
 		tv.StateStyles[i].SetStyle(pst, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
-	tv.Style = tv.StateStyles[TreeViewActive] // get this so our children will get proper inherited color
-
 	tv.Indent = units.NewValue(2, units.Ch) // default
 	TreeViewFields.Style(tv, nil, tv.Props)
 	TreeViewFields.ToDots(tv, &tv.Style.UnContext)

@@ -156,7 +156,7 @@ func (p *Preferences) Edit() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.SetProp("background-color", color.White)
+	vp.SetProp("background-color", &p.BackgroundColor)
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(KiT_Frame, "vlay").(*Frame)

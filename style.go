@@ -199,6 +199,7 @@ func (s *Style) CopyFrom(cp *Style) {
 	ds := s.dotsSet
 	lu := s.lastUnCtxt
 	*s = *cp
+	s.Background.Color = cp.Background.Color
 	s.IsSet = is
 	s.PropsNil = pn
 	s.dotsSet = ds
@@ -568,6 +569,8 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 			fiv.Parse(valv, nil) // todo: need tree context
 		case *Color:
 			fiv.SetColor(*valv)
+		case *ColorSpec:
+			*fiv = *valv
 		case color.Color:
 			fiv.SetColor(valv)
 		}

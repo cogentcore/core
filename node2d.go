@@ -410,7 +410,12 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 			}
 			*dsty = *baseStyle
 		}
-		dsty.SetStyle(nil, styprops)
+		_, pg := KiToNode2D(g.Par)
+		if pg != nil {
+			dsty.SetStyle(&pg.Style, styprops)
+		} else {
+			dsty.SetStyle(nil, styprops)
+		}
 		dsty.IsSet = false // keep as non-set
 		tprops[pnm] = dsty
 	} else {
