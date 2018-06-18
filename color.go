@@ -104,12 +104,8 @@ func SetGradientBounds(grad *rasterx.Gradient, bounds image.Rectangle) {
 func CopyGradient(dst, src *rasterx.Gradient) {
 	*dst = *src
 	sn := len(src.Stops)
-	dst.Stops = make([]*rasterx.GradStop, sn)
-	for si := 0; si < sn; si++ {
-		gs := rasterx.GradStop{}
-		gs = *(src.Stops[si])
-		dst.Stops[si] = &gs
-	}
+	dst.Stops = make([]rasterx.GradStop, sn)
+	copy(dst.Stops, src.Stops)
 }
 
 // RenderColor gets the color for rendering, applying opacity and bounds for gradients

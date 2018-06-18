@@ -135,7 +135,7 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 		default: // must be a color stop
 			var stop *rasterx.GradStop
 			if len(cs.Gradient.Stops) > stopIdx {
-				stop = cs.Gradient.Stops[stopIdx]
+				stop = &(cs.Gradient.Stops[stopIdx])
 			} else {
 				stop = &rasterx.GradStop{Opacity: 1.0}
 			}
@@ -145,7 +145,7 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 			}
 			if parseColorStop(stop, prevColor, par) {
 				if len(cs.Gradient.Stops) <= stopIdx {
-					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
 					cs.Color.SetColor(stop.StopColor) // keep first one
@@ -196,7 +196,7 @@ func (cs *ColorSpec) parseRadialGrad(pars string) bool {
 		default: // must be a color stop
 			var stop *rasterx.GradStop
 			if len(cs.Gradient.Stops) > stopIdx {
-				stop = cs.Gradient.Stops[stopIdx]
+				stop = &(cs.Gradient.Stops[stopIdx])
 			} else {
 				stop = &rasterx.GradStop{Opacity: 1.0}
 			}
@@ -206,7 +206,7 @@ func (cs *ColorSpec) parseRadialGrad(pars string) bool {
 			}
 			if parseColorStop(stop, prevColor, par) {
 				if len(cs.Gradient.Stops) <= stopIdx {
-					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
 					cs.Color.SetColor(stop.StopColor) // keep first one
@@ -255,7 +255,7 @@ func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) b
 	return true
 }
 
-// ParseXL parses the given XML-formatted string to set the color
+// ParseXML parses the given XML-formatted string to set the color
 // specification -- recognizes svg and css gradient specifications -- tree is
 // used to find url references if non-nil
 func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
@@ -361,7 +361,7 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 						return false
 					}
 				}
-				cs.Gradient.Stops = append(cs.Gradient.Stops, &stop)
+				cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
 			default:
 				errStr := "Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
@@ -430,6 +430,7 @@ func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
 	return nil
 }
 
+// FixGradientStops applies the CSS rules to regularize the gradient stops: https://www.w3.org/TR/css3-images/#color-stop-syntax
 func FixGradientStops(grad *rasterx.Gradient) {
 	sz := len(grad.Stops)
 	if sz == 0 {
@@ -438,7 +439,7 @@ func FixGradientStops(grad *rasterx.Gradient) {
 	splitSt := -1
 	last := 0.0
 	for i := 0; i < sz; i++ {
-		st := grad.Stops[i]
+		st := &(grad.Stops[i])
 		if i == sz-1 && st.Offset == 0 {
 			if last < 1.0 {
 				st.Offset = 1.0
