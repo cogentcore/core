@@ -284,6 +284,10 @@ type Group2D struct {
 
 var KiT_Group2D = kit.Types.AddType(&Group2D{}, nil)
 
+func (g *Group2D) AsNode2D() *Node2DBase {
+	return &g.Node2DBase
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
@@ -770,7 +774,9 @@ func (g *Node2DBase) Size2DTree() {
 			// this is for testing whether to process node
 			_, gi := KiToNode2D(k)
 			if gi == nil || gi.Paint.Off {
-				// fmt.Printf("bailing depth first size on %v\n", gi.PathUnique())
+				if gi == nil {
+					fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", gi, gi.PathUnique())
+				}
 				return false
 			}
 			return true
