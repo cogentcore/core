@@ -770,7 +770,7 @@ func (g *Node2DBase) Size2DTree() {
 			// this is for testing whether to process node
 			_, gi := KiToNode2D(k)
 			if gi == nil || gi.Paint.Off {
-				fmt.Printf("bailing depth first size on %v\n", gi.PathUnique())
+				// fmt.Printf("bailing depth first size on %v\n", gi.PathUnique())
 				return false
 			}
 			return true
