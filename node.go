@@ -13,7 +13,9 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"sync"
 	"unsafe"
 
@@ -1404,6 +1406,11 @@ func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
 //////////////////////////////////////////////////////////////////////////
 //  IO Marshal / Unmarshal support -- mostly in Slice
 
+// see https://github.com/goki/ki/wiki/Naming for IO naming conventions
+
+// Note: it is unfortunate that [Un]MarshalJSON uses byte[] instead of
+// io.Reader / Writer..
+
 // JSONTypePrefix is the first thing output in a ki tree JSON output file,
 // specifying the type of the root node of the ki tree -- this info appears
 // all on one { } bracketed line at the start of the file, and can also be
@@ -1413,43 +1420,56 @@ var JSONTypePrefix = []byte("{\"ki.RootType\": ")
 // JSONTypeSuffix is just the } and \n at the end of the prefix line
 var JSONTypeSuffix = []byte("}\n")
 
-func (n *Node) SaveJSON(indent bool) (b []byte, err error) {
-	if err := n.ThisCheck(); err != nil {
-		return nil, err
+func (n *Node) SendJSON(writer io.Writer, indent bool) error {
+	err := n.ThisCheck()
+	if err != nil {
+		return err
 	}
+	var b []byte
 	if indent {
 		b, err = json.MarshalIndent(n.This, "", "  ")
 	} else {
 		b, err = json.Marshal(n.This)
 	}
-	if err == nil { // save type of root node
-		knm := kit.FullTypeName(n.Type())
-		tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
-		nwb := make([]byte, len(b)+len(tstr))
-		copy(nwb, []byte(tstr))
-		copy(nwb[len(tstr):], b) // is there a way to avoid this?
-		b = nwb
-	}
-	return b, err
-}
-
-func (n *Node) SaveJSONToFile(filename string) error {
-	b, err := n.SaveJSON(true) // use indent by default
 	if err != nil {
 		log.Println(err)
-		fmt.Println(b)
 		return err
 	}
-	err = ioutil.WriteFile(filename, b, 0644) // todo: permissions??
+	knm := kit.FullTypeName(n.Type())
+	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
+	nwb := make([]byte, len(b)+len(tstr))
+	copy(nwb, []byte(tstr))
+	copy(nwb[len(tstr):], b) // is there a way to avoid this?
+	_, err = writer.Write(nwb)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (n *Node) SaveJSON(filename string) error {
+	fp, err := os.Create(filename)
+	defer fp.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = n.SendJSON(fp, true) // use indent by default
 	if err != nil {
 		log.Println(err)
 	}
 	return err
 }
 
-func (n *Node) LoadJSON(b []byte) error {
-	var err error
-	if err = n.ThisCheck(); err != nil {
+func (n *Node) RecvJSON(reader io.Reader) error {
+	err := n.ThisCheck()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	b, err := ioutil.ReadAll(reader)
+	if err != nil {
 		log.Println(err)
 		return err
 	}
@@ -1467,21 +1487,28 @@ func (n *Node) LoadJSON(b []byte) error {
 	return err
 }
 
-func (n *Node) LoadJSONFromFile(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+func (n *Node) LoadJSON(filename string) error {
+	fp, err := os.Open(filename)
+	defer fp.Close()
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	return n.LoadJSON(b)
+	return n.RecvJSON(fp)
 }
 
-// LoadNewJSON loads a new Ki tree from a JSON-encoded byte string, using type
+// RecvNewJSON receives a new Ki tree from a JSON-encoded byte string, using type
 // information at start of file to create an object of the proper type
-func LoadNewJSON(b []byte) (Ki, error) {
+func RecvNewJSON(reader io.Reader) (Ki, error) {
+	b, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 	if bytes.HasPrefix(b, JSONTypePrefix) {
 		stidx := len(JSONTypePrefix) + 1
 		eidx := bytes.Index(b, JSONTypeSuffix)
+		bodyidx := eidx + len(JSONTypeSuffix)
 		tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
 		typ := kit.Types.Type(tn)
 		if typ == nil {
@@ -1489,38 +1516,64 @@ func LoadNewJSON(b []byte) (Ki, error) {
 		}
 		root := NewOfType(typ)
 		root.Init(root)
-		return root, root.LoadJSON(b)
+
+		updt := root.UpdateStart()
+		err = json.Unmarshal(b[bodyidx:], root)
+		if err == nil {
+			root.UnmarshalPost()
+		}
+		bitflag.Set(root.Flags(), int(ChildAdded)) // this might not be set..
+		root.UpdateEnd(updt)
+		return root, nil
 	} else {
 		return nil, fmt.Errorf("ki.LoadNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree\n")
 	}
 }
 
-// LoadNewJSONFromFile loads a new Ki tree from a JSON-encoded file, using type
+// LoadNewJSON loads a new Ki tree from a JSON-encoded file, using type
 // information at start of file to create an object of the proper type
-func LoadNewJSONFromFile(filename string) (Ki, error) {
-	b, err := ioutil.ReadFile(filename)
+func LoadNewJSON(filename string) (Ki, error) {
+	fp, err := os.Open(filename)
+	defer fp.Close()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	return LoadNewJSON(b)
+	return RecvNewJSON(fp)
 }
 
-func (n *Node) SaveXML(indent bool) ([]byte, error) {
-	if err := n.ThisCheck(); err != nil {
+func (n *Node) SendXML(writer io.Writer, indent bool) error {
+	err := n.ThisCheck()
+	if err != nil {
 		log.Println(err)
-		return nil, err
+		return err
 	}
+	var b []byte
 	if indent {
-		return xml.MarshalIndent(n.This, "", "  ")
+		b, err = xml.MarshalIndent(n.This, "", "  ")
 	} else {
-		return xml.Marshal(n.This)
+		b, err = xml.Marshal(n.This)
 	}
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = writer.Write(b)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
-func (n *Node) LoadXML(b []byte) error {
+func (n *Node) RecvXML(reader io.Reader) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
+		log.Println(err)
+		return err
+	}
+	b, err := ioutil.ReadAll(reader)
+	if err != nil {
 		log.Println(err)
 		return err
 	}

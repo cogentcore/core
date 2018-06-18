@@ -134,7 +134,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 				if kival != nil {
 					// fmt.Printf("stored new ki of type %v in key: %v\n", typ.String(), pkey)
 					tmpb, _ := json.Marshal(rval) // string rep of this
-					err = kival.LoadJSON(tmpb)
+					err = kival.RecvJSON(bytes.NewReader(tmpb))
 					if err != nil {
 						log.Printf("ki.Props failed to load Ki struct of type %v with error: %v\n", typ.String(), err)
 					}

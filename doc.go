@@ -3,7 +3,9 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and "Key" in English -- powerful tree structures supporting scenegraphs, programs, parsing, etc.
+Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and
+"Key" in English -- powerful tree structures supporting scenegraphs, programs,
+parsing, etc.
 
 The Node struct that implements the Ki interface, which can be used as an
 embedded type (or a struct field) in other structs to provide core tree
@@ -39,10 +41,6 @@ functionality, including:
 
 	* Properties (as a string-keyed map) with property inheritance, including
       type-level properties via kit type registry.
-
-	* Garbage collection is performed at optimized point at end of updates
-      after tree objects have been destroyed (and all pointers reset),
-      minimizing impact and need for unplanned GC interruptions.
 
 */
 package ki

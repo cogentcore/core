@@ -98,7 +98,7 @@ type RecvFunc func(recv, send Ki, sig int64, data interface{})
 // SendType (otherwise if it is known to be of a given type, just directly
 // converting as such is fine)
 type Signal struct {
-	Cons map[Ki]RecvFunc `json:"-" xml:"-" desc:"map of receivers and their functions"`
+	Cons map[Ki]RecvFunc `view:"-" json:"-" xml:"-" desc:"map of receivers and their functions"`
 }
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)

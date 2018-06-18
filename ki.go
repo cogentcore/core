@@ -5,6 +5,7 @@
 package ki
 
 import (
+	"io"
 	"log"
 	"reflect"
 
@@ -628,31 +629,35 @@ type Ki interface {
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: Marshal / Unmarshal support -- see also Slice, Ptr
+	//  see https://github.com/goki/ki/wiki/Naming for IO naming conventions
 
-	// SaveJSON saves the tree to a JSON-encoded byte string -- wraps
-	// MarshalJSON -- also saves a critical starting record that allows file
-	// to be loaded de-novo and recreate the proper root type for the tree
-	SaveJSON(indent bool) ([]byte, error)
+	// SendJSON sends the tree to an io.Writer, using MarshalJSON -- also
+	// saves a critical starting record that allows file to be loaded de-novo
+	// and recreate the proper root type for the tree
+	SendJSON(writer io.Writer, indent bool) error
 
-	// SaveJSONToFile saves the tree to a JSON-encoded file
-	SaveJSONToFile(filename string) error
+	// SaveJSON saves the tree to a JSON-encoded file, using SendJSON
+	SaveJSON(filename string) error
 
-	// LoadJSON loads over this tree from a JSON-encoded byte string, using
-	// ConfigureChildren to minimize changes from current tree relative to
-	// loading one -- wraps UnmarshalJSON and calls UnmarshalPost to recover
-	// pointers from paths -- see LoadNewJSON function to load a new tree
-	LoadJSON(b []byte) error
+	// RecvJSON receives and unmarshalls tree starting at this node, from a
+	// JSON-encoded byte stream via io.Reader.  First element in the stream
+	// must be of same type as this node -- see RecvNewJSON function to
+	// construct a new tree.  Uses ConfigureChildren to minimize changes from
+	// current tree relative to loading one -- wraps UnmarshalJSON and calls
+	// UnmarshalPost to recover pointers from paths.
+	RecvJSON(reader io.Reader) error
 
-	// LoadJSONFromFile loads over this tree from a JSON-encoded file -- see
-	// LoadJSON for details
-	LoadJSONFromFile(filename string) error
+	// LoadJSON loads over this tree from a JSON-encoded file -- see RecvJSON
+	// for details, and LoadNewJSON for loading a new tree de-novo
+	LoadJSON(filename string) error
 
-	// SaveXML saves the tree to an XML-encoded byte string
-	SaveXML(indent bool) ([]byte, error)
+	// SendXML sends the tree to an XML-encoded byte string over io.Writer
+	// using MarshalXML
+	SendXML(writer io.Writer, indent bool) error
 
-	// LoadXML loads the tree from an XML-encoded byte string, calls
+	// RecvXML receives the tree from an XML-encoded byte string over io.Reader, calls
 	// UnmarshalPost to recover pointers from paths
-	LoadXML(b []byte) error
+	RecvXML(reader io.Reader) error
 
 	// ParentAllChildren walks the tree down from current node and call
 	// SetParent on all children -- needed after an Unmarshal

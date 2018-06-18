@@ -344,31 +344,43 @@ func TestNodeJSonSave(t *testing.T) {
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
 
-	b, err := parent.SaveJSON(true)
+	var buf bytes.Buffer
+	err := parent.SendJSON(&buf, true)
 	if err != nil {
 		t.Error(err)
 		// } else {
-		// 	fmt.Printf("json output:\n%v\n", string(b))
+		// 	fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
 	}
+	b := buf.Bytes()
 
 	tstload := NodeEmbed{}
 	tstload.InitName(&tstload, "")
-	err = tstload.LoadJSON(b)
+	err = tstload.RecvJSON(bytes.NewReader(b))
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstb, _ := tstload.SaveJSON(true)
+		var buf2 bytes.Buffer
+		err = tstload.SendJSON(&buf2, true)
+		if err != nil {
+			t.Error(err)
+		}
+		tstb := buf2.Bytes()
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
 
-	nwnd, err := LoadNewJSON(b)
+	nwnd, err := RecvNewJSON(bytes.NewReader(b))
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstb, _ := nwnd.SaveJSON(true)
+		var buf2 bytes.Buffer
+		err = nwnd.SendJSON(&buf2, true)
+		if err != nil {
+			t.Error(err)
+		}
+		tstb := buf2.Bytes()
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
@@ -391,25 +403,25 @@ func TestNodeXMLSave(t *testing.T) {
 	parent.Ptr.Ptr = child2
 	child2.Ptr.Ptr = schild2
 
-	b, err := parent.SaveXML(true)
-	if err != nil {
-		t.Error(err)
-		// } else {
-		// 	fmt.Printf("xml output:\n%v\n", string(b))
-	}
+	// b, err := parent.SaveXML(true)
+	// if err != nil {
+	// 	t.Error(err)
+	// 	// } else {
+	// 	// 	fmt.Printf("xml output:\n%v\n", string(b))
+	// }
 
-	tstload := NodeEmbed{}
-	tstload.InitName(&tstload, "")
-	err = tstload.LoadXML(b)
-	if err != nil {
-		t.Error(err)
-	} else {
-		tstb, _ := tstload.SaveXML(true)
-		// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd XML rep are not equivalent")
-		}
-	}
+	// tstload := NodeEmbed{}
+	// tstload.InitName(&tstload, "")
+	// err = tstload.LoadXML(b)
+	// if err != nil {
+	// 	t.Error(err)
+	// } else {
+	// 	tstb, _ := tstload.SaveXML(true)
+	// 	// fmt.Printf("test loaded json output:\n%v\n", string(tstb))
+	// 	if !bytes.Equal(tstb, b) {
+	// 		t.Error("original and unmarshal'd XML rep are not equivalent")
+	// 	}
+	// }
 }
 
 //////////////////////////////////////////
@@ -701,25 +713,48 @@ func TestNodeFieldJSonSave(t *testing.T) {
 	parent.Ptr.Ptr = &child2.Field1
 	child2.Ptr.Ptr = &schild2.Field2
 
-	b, err := parent.SaveJSON(true)
+	var buf bytes.Buffer
+	err := parent.SendJSON(&buf, true)
 	if err != nil {
 		t.Error(err)
 		// } else {
-		// 	fmt.Printf("json output: %v\n", string(b))
+		// 	fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
 	}
+	b := buf.Bytes()
 
 	tstload := NodeField2{}
 	tstload.InitName(&tstload, "")
-	err = tstload.LoadJSON(b)
+	err = tstload.RecvJSON(bytes.NewReader(b))
 	if err != nil {
 		t.Error(err)
 	} else {
-		tstb, _ := tstload.SaveJSON(true)
+		var buf2 bytes.Buffer
+		err = tstload.SendJSON(&buf2, true)
+		if err != nil {
+			t.Error(err)
+		}
+		tstb := buf2.Bytes()
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 			ioutil.WriteFile("/tmp/jsonout1", b, 0644)
 			ioutil.WriteFile("/tmp/jsonout2", tstb, 0644)
+		}
+	}
+
+	nwnd, err := RecvNewJSON(bytes.NewReader(b))
+	if err != nil {
+		t.Error(err)
+	} else {
+		var buf2 bytes.Buffer
+		err = nwnd.SendJSON(&buf2, true)
+		if err != nil {
+			t.Error(err)
+		}
+		tstb := buf2.Bytes()
+		// fmt.Printf("test loaded json output: %v\n", string(tstb))
+		if !bytes.Equal(tstb, b) {
+			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
 	}
 }
@@ -769,15 +804,22 @@ func TestClone(t *testing.T) {
 	parent.Ptr.Ptr = &child2.Field1
 	child2.Ptr.Ptr = &schild2.Field2
 
-	b, err := parent.SaveJSON(true)
+	var buf bytes.Buffer
+	err := parent.SendJSON(&buf, true)
 	if err != nil {
 		t.Error(err)
 		// } else {
-		// 	fmt.Printf("json output: %v\n", string(b))
+		// 	fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
 	}
+	b := buf.Bytes()
 
 	tstload := parent.Clone()
-	tstb, _ := tstload.SaveJSON(true)
+	var buf2 bytes.Buffer
+	err = tstload.SendJSON(&buf2, true)
+	if err != nil {
+		t.Error(err)
+	}
+	tstb := buf2.Bytes()
 	// fmt.Printf("test loaded json output: %v\n", string(tstb))
 	if !bytes.Equal(tstb, b) {
 		t.Error("original and unmarshal'd json rep are not equivalent")
