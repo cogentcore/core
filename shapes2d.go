@@ -326,7 +326,38 @@ func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Path
 
-// the commands within the path SVG drawing data type
+// 2D Path, using SVG-style data that can render just about anything
+type Path struct {
+	Node2DBase
+	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+	DataStr  string     `xml:"d" desc:"string version of the path data"`
+	MinCoord Vec2D      `desc:"minimum coord in path -- computed in BBox2D"`
+	MaxCoord Vec2D      `desc:"maximum coord in path -- computed in BBox2D"`
+}
+
+var KiT_Path = kit.Types.AddType(&Path{}, nil)
+
+// SetData sets the path data to given string, parsing it into an optimized
+// form used for rendering
+func (g *Path) SetData(data string) error {
+	g.DataStr = data
+	var err error
+	g.Data, err = PathDataParse(data)
+	return err
+}
+
+func (g *Path) BBox2D() image.Rectangle {
+	// todo: cache values, only update when path is updated..
+	rs := &g.Viewport.Render
+	rs.PushXForm(g.Paint.XForm)
+	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
+	bb := g.Paint.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
+	rs.PopXForm()
+	return bb
+	// return vp.Viewport.VpBBox
+}
+
+// PathCmds are the commands within the path SVG drawing data type
 type PathCmds byte
 
 const (
@@ -372,13 +403,13 @@ const (
 	Pcz
 )
 
-// to encode the data, we use 32-bit floats which are converted into int32 for
-// path commands, which contain the number of data points following the path
-// command to interpret as numbers, in the lower and upper 2 bytes of the
-// converted int32 number we don't need that many bits, but keeping 32-bit
-// alignment is probably good and really these things don't need to be crazy
-// compact as it is unlikely to make a relevant diff in size or perf to pack
-// down further
+// PathData encodes the svg path data, using 32-bit floats which are converted
+// into int32 for path commands, which contain the number of data points
+// following the path command to interpret as numbers, in the lower and upper
+// 2 bytes of the converted int32 number.  We don't need that many bits, but
+// keeping 32-bit alignment is probably good and really these things don't
+// need to be crazy compact as it is unlikely to make a relevant diff in size
+// or perf to pack down further
 type PathData float32
 
 // decode path data as a command and a number of subsequent values for that command
@@ -394,27 +425,6 @@ func (pc PathCmds) EncCmd(n int) PathData {
 	nb := int32(n << 8) // n up-shifted
 	pd := PathData(int32(pc) | nb)
 	return pd
-}
-
-// 2D Path, using SVG-style data that can render just about anything
-type Path struct {
-	Node2DBase
-	Data     []PathData `xml:"d" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
-	MinCoord Vec2D      `desc:"minimum coord in path -- computed in BBox2D"`
-	MaxCoord Vec2D      `desc:"maximum coord in path -- computed in BBox2D"`
-}
-
-var KiT_Path = kit.Types.AddType(&Path{}, nil)
-
-func (g *Path) BBox2D() image.Rectangle {
-	// todo: cache values, only update when path is updated..
-	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
-	bb := g.Paint.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
-	rs.PopXForm()
-	return bb
-	// return vp.Viewport.VpBBox
 }
 
 // PathDataNext gets the next path data element, incrementing the index -- ++ not an
@@ -759,7 +769,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 	return
 }
 
-func PathDataParse(d string) []PathData {
+func PathDataParse(d string) ([]PathData, error) {
 	dt := strings.Replace(d, ",", " ", -1) // replace commas with spaces
 	ds := strings.Fields(dt)               // split by whitespace
 	pd := make([]PathData, 0, 20)
@@ -888,7 +898,8 @@ func PathDataParse(d string) []PathData {
 			pd[cmdIdx] = pc
 		}
 	}
-	return pd
+	return pd, nil
+	// todo: add some error checking..
 }
 
 func (g *Path) Render2D() {

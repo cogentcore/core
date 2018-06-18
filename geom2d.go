@@ -591,8 +591,14 @@ const (
 type ViewBoxMeetOrSlice int32
 
 const (
-	Meet  ViewBoxMeetOrSlice = iota // the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints
-	Slice ViewBoxMeetOrSlice = iota // the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints
+	// Mett means the entire ViewBox is visible within Viewport, and it is
+	// scaled up as much as possible to meet the align constraints
+	Meet ViewBoxMeetOrSlice = iota
+
+	// Slice means the entire ViewBox is covered by the ViewBox, and the
+	// ViewBox is scaled down as much as possible, while still meeting the
+	// align constraints
+	Slice
 )
 
 //go:generate stringer -type=ViewBoxMeetOrSlice
@@ -612,14 +618,22 @@ type ViewBox2D struct {
 
 // todo: need to implement the viewbox preserve aspect ratio logic!
 
-// convert viewbox to bounds
+// Bounds converts viewbox to bounds
 func (vb *ViewBox2D) Bounds() image.Rectangle {
 	return image.Rect(vb.Min.X, vb.Min.Y, vb.Min.X+vb.Size.X, vb.Min.Y+vb.Size.Y)
 }
 
-// convert viewbox to rect version of size
+// SizeRect converts viewbox to rect version of size
 func (vb *ViewBox2D) SizeRect() image.Rectangle {
 	return image.Rect(0, 0, vb.Size.X, vb.Size.Y)
+}
+
+// Defaults returns viewbox to defaults
+func (vb *ViewBox2D) Defaults() {
+	vb.Min = image.ZP
+	vb.Size = image.ZP
+	vb.PreserveAspectRatio.Align = None
+	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
 
 ///////////////////////////////////////////////////////////

@@ -277,6 +277,13 @@ func (g *Node2DBase) GrabFocus() {
 	}
 }
 
+// Group2D is a generic group element -- doesn't render on its own
+type Group2D struct {
+	Node2DBase
+}
+
+var KiT_Group2D = kit.Types.AddType(&Group2D{}, nil)
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 

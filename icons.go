@@ -394,28 +394,28 @@ func MakeDefaultIcons() *IconSet {
 		wd := Icon{}
 		wd.InitName(&wd, "widget-wedge-down")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = PathDataParse("M 0.05 0.05 .95 0.05 .5 .95 Z")
+		p.SetData("M 0.05 0.05 .95 0.05 .5 .95 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-wedge-up")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = PathDataParse("M 0.05 0.95 .95 0.95 .5 .05 Z")
+		p.SetData("M 0.05 0.95 .95 0.95 .5 .05 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-wedge-left")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = PathDataParse("M 0.95 0.05 .95 0.95 .05 .5 Z")
+		p.SetData("M 0.95 0.05 .95 0.95 .05 .5 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
 		wd := Icon{}
 		wd.InitName(&wd, "widget-wedge-right")
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
-		p.Data = PathDataParse("M 0.05 0.05 .05 0.95 .95 .5 Z")
+		p.SetData("M 0.05 0.05 .05 0.95 .95 .5 Z")
 		iset[wd.Nm] = &wd
 	}
 	{
@@ -424,7 +424,7 @@ func MakeDefaultIcons() *IconSet {
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
 		p.SetProp("fill", "none")
-		p.Data = PathDataParse("M 0.1 0.5 .5 0.9 .9 .1")
+		p.SetData("M 0.1 0.5 .5 0.9 .9 .1")
 		iset[wd.Nm] = &wd
 	}
 	{
@@ -437,7 +437,7 @@ func MakeDefaultIcons() *IconSet {
 		p := wd.AddNewChild(KiT_Path, "p").(*Path)
 		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
 		p.SetProp("fill", "none")
-		p.Data = PathDataParse("M 0.2 0.5 .5 0.8 .8 .2")
+		p.SetData("M 0.2 0.5 .5 0.8 .8 .2")
 		iset[wd.Nm] = &wd
 	}
 	{
