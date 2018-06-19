@@ -5,9 +5,10 @@
 package gi
 
 import (
+	"fmt"
 	"image"
+	"log"
 	"strconv"
-	"strings"
 	"unicode"
 
 	"github.com/goki/ki/kit"
@@ -401,6 +402,8 @@ const (
 	PcZ
 	// close path
 	Pcz
+	// errror -- invalid command
+	PcErr
 )
 
 // PathData encodes the svg path data, using 32-bit floats which are converted
@@ -769,134 +772,105 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 	return
 }
 
+// PathDecodeCmd decodes rune into corresponding command
+func PathDecodeCmd(r rune) PathCmds {
+	cmd := PcErr
+	switch r {
+	case 'M':
+		cmd = PcM
+	case 'm':
+		cmd = Pcm
+	case 'L':
+		cmd = PcL
+	case 'l':
+		cmd = Pcl
+	case 'H':
+		cmd = PcH
+	case 'h':
+		cmd = Pch
+	case 'V':
+		cmd = PcV
+	case 'v':
+		cmd = Pcv
+	case 'C':
+		cmd = PcC
+	case 'c':
+		cmd = Pcc
+	case 'S':
+		cmd = PcS
+	case 's':
+		cmd = Pcs
+	case 'Q':
+		cmd = PcQ
+	case 'q':
+		cmd = Pcq
+	case 'T':
+		cmd = PcT
+	case 't':
+		cmd = Pct
+	case 'A':
+		cmd = PcA
+	case 'a':
+		cmd = Pca
+	case 'Z':
+		cmd = PcZ
+	case 'z':
+		cmd = Pcz
+	}
+	return cmd
+}
+
+// PathDataParse parses a string representation of the path data into compiled path data
 func PathDataParse(d string) ([]PathData, error) {
-	dt := strings.Replace(d, ",", " ", -1) // replace commas with spaces
-	ds := strings.Fields(dt)               // split by whitespace
-	pd := make([]PathData, 0, 20)
-	sz := len(ds)
-	cmd := PcM
-	cmdIdx := 0 // last command index
-	for i := 0; i < sz; {
-		cf := ds[i]
-		c := cf[0]
-		mn := 0 // minimum n associated with current cmd
-		switch c {
-		case 'M':
-			cmd = PcM
-			mn = 2
-		case 'm':
-			cmd = Pcm
-			mn = 2
-		case 'L':
-			cmd = PcL
-			mn = 2
-		case 'l':
-			cmd = Pcl
-			mn = 2
-		case 'H':
-			cmd = PcH
-			mn = 1
-		case 'h':
-			cmd = Pch
-			mn = 1
-		case 'V':
-			cmd = PcV
-			mn = 1
-		case 'v':
-			cmd = Pcv
-			mn = 1
-		case 'C':
-			cmd = PcC
-			mn = 6
-		case 'c':
-			cmd = Pcc
-			mn = 6
-		case 'S':
-			cmd = PcS
-			mn = 4
-		case 's':
-			cmd = Pcs
-			mn = 4
-		case 'Q':
-			cmd = PcQ
-			mn = 4
-		case 'q':
-			cmd = Pcq
-			mn = 4
-		case 'T':
-			cmd = PcT
-			mn = 2
-		case 't':
-			cmd = Pct
-			mn = 2
-		case 'A':
-			cmd = PcA
-			mn = 7
-		case 'a':
-			cmd = Pca
-			mn = 7
-		case 'Z':
-			cmd = PcZ
-			mn = 0
-		case 'z':
-			cmd = Pcz
-			mn = 0
-		}
-		pc := cmd.EncCmd(mn) // start with mn
-		cmdIdx = len(pd)
-		pd = append(pd, pc) // push on
-
-		if mn == 0 {
-			if i >= sz-1 {
-				break
+	var pd []PathData
+	endi := len(d) - 1
+	numSt := -1
+	lr := ' '
+	lstCmd := -1
+	// first pass: just do the raw parse into commands and numbers
+	for i, r := range d {
+		notn := unicode.IsNumber(r) == false && r != '.' && !(r == '-' && lr == 'e') && r != 'e'
+		if i == endi || notn {
+			if numSt != -1 {
+				nstr := d[numSt:i]
+				if i == endi && !notn {
+					nstr = d[numSt : i+1]
+				}
+				p, err := strconv.ParseFloat(nstr, 32)
+				if err != nil {
+					log.Printf("gi.PathDataParse could not parse string: %v into float\n", nstr)
+					return nil, err
+				}
+				pd = append(pd, PathData(p))
 			}
-			continue
-		}
-
-		if len(cf) > 1 {
-			cf = cf[1:]
-		} else {
-			i++
-			cf = ds[i]
-		}
-		vl, _ := strconv.ParseFloat(cf, 32)
-		pd = append(pd, PathData(vl)) // push on
-
-		// get rest of numbers
-		for np := 1; np < mn; np++ {
-			i++
-			cf = ds[i]
-			vl, _ := strconv.ParseFloat(cf, 32)
-			pd = append(pd, PathData(vl)) // push on
-		}
-		if i >= sz-1 {
-			break
-		}
-
-		ntot := mn
-		for {
-			i++
-			cf = ds[i]
-			if unicode.IsLetter(rune(cf[0])) {
-				break
+			if r == '-' {
+				numSt = i
+			} else {
+				numSt = -1
+				if lstCmd != -1 { // update number of args for previous command
+					lcm, _ := pd[lstCmd].Cmd()
+					n := (len(pd) - lstCmd) - 1
+					pd[lstCmd] = lcm.EncCmd(n)
+				}
+				if !unicode.IsSpace(r) && r != ',' {
+					cmd := PathDecodeCmd(r)
+					if cmd == PcErr {
+						if i != endi {
+							err := fmt.Errorf("gi.PathDataParse invalid command rune: %v\n", r)
+							log.Println(err)
+							return nil, err
+						}
+					} else {
+						pc := cmd.EncCmd(0) // encode with 0 length to start
+						lstCmd = len(pd)
+						pd = append(pd, pc) // push on
+					}
+				}
 			}
-			i--
-			for np := 0; np < mn; np++ {
-				i++
-				cf = ds[i]
-				vl, _ := strconv.ParseFloat(cf, 32)
-				pd = append(pd, PathData(vl)) // push on
-			}
-			ntot += mn
-			if i >= sz-1 {
-				i++
-				break
-			}
+		} else if numSt == -1 { // got start of a number
+			numSt = i
 		}
-		if ntot > mn {
-			pc = cmd.EncCmd(ntot)
-			pd[cmdIdx] = pc
-		}
+		lr = r
 	}
 	return pd, nil
 	// todo: add some error checking..

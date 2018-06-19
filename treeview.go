@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -838,9 +839,10 @@ func (tv *TreeView) SrcDuplicate() {
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	src := tv.SrcNode.Ptr
 	*md = append(*md, mimedata.NewTextData(src.PathUnique()))
-	jb, err := src.SaveJSON(true) // true = pretty for clipboard..
+	var buf bytes.Buffer
+	err := src.WriteJSON(&buf, true) // true = pretty for clipboard..
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: jb})
+		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: buf.Bytes()})
 	} else {
 		log.Printf("gi.TreeView MimeData SaveJSON error: %v\n", err)
 	}
@@ -851,7 +853,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 	sl := make(ki.Slice, 0, len(md)/2)
 	for _, d := range md {
 		if d.Type == mimedata.AppJSON {
-			nki, err := ki.LoadNewJSON(d.Data)
+			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {

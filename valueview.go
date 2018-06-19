@@ -371,7 +371,7 @@ func (vv *ValueViewBase) UpdateWidget() {
 func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*TextField)
-	tf.SetProp("max-width", -1)
+	tf.SetProp("max-width", units.NewValue(100, units.Ex))
 	tf.SetProp("min-width", units.NewValue(16, units.Ex))
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(Inactive))
 	vv.UpdateWidget()

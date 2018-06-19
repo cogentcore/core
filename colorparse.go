@@ -11,7 +11,6 @@
 package gi
 
 import (
-	"bytes"
 	"encoding/xml"
 	"image/color"
 	"io"
@@ -19,22 +18,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/srwiley/rasterx"
 	// "github.com/rcoreilly/rasterx"
 	"golang.org/x/net/html/charset"
 )
 
-// Parse parses the given color string to set the color specification --
-// recognizes svg (XML) and css gradient specifications -- tree is used to find url
-// references if non-nil
-func (cs *ColorSpec) Parse(clrstr string, tree ki.Ki) bool {
-	clrstr = strings.TrimSpace(clrstr)
-	if strings.HasPrefix(clrstr, "<") {
-		return cs.ParseXML(clrstr, tree)
-	}
-	clrstr = strings.ToLower(clrstr)
+// SetString sets the color spec from a standard CSS-formatted string -- see
+// https://www.w3schools.com/css/css3_gradients.asp -- see UnmarshalXML for
+// XML-based version
+func (cs *ColorSpec) SetString(clrstr string) bool {
+	clrstr = strings.ToLower(strings.TrimSpace(clrstr))
 	grad := "-gradient"
 	if gidx := strings.Index(clrstr, grad); gidx > 0 {
 		gtyp := clrstr[:gidx]
@@ -255,20 +249,42 @@ func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) b
 	return true
 }
 
-// ParseXML parses the given XML-formatted string to set the color
-// specification -- recognizes svg and css gradient specifications -- tree is
-// used to find url references if non-nil
-func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
-	decoder := xml.NewDecoder(bytes.NewReader([]byte(clrstr)))
+// ReadXML reads XML-formatted ColorSpec from io.Reader
+func (cs *ColorSpec) ReadXML(reader io.Reader) error {
+	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
+	se, err := decoder.Token()
+	if err != nil {
+		if err == io.EOF {
+			log.Println("gi.ColorSpec.ReadXML empty input")
+		} else {
+			log.Printf("gi.ColorSpec parsing error: %v\n", err)
+		}
+		return err
+	}
+	return cs.UnmarshalXML(decoder, se.(xml.StartElement))
+}
+
+// UnmarshalXML parses the given XML-formatted string to set the color
+// specification
+func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
+	start := &se
+
 	for {
-		t, err := decoder.Token()
+		var t xml.Token
+		var err error
+		if start != nil {
+			t = start
+			start = nil
+		} else {
+			t, err = decoder.Token()
+		}
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.ColorSpec.ParseXML color parsing error: %v\n", err)
-			return false
+			log.Printf("gi.ColorSpec.UmarshalXML color parsing error: %v\n", err)
+			return err
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
@@ -278,13 +294,7 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 					IsRadial: false, Matrix: rasterx.Identity}
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
-					case "id":
-						// id := attr.Value
-						// if len(id) >= 0 {
-						// 	icon.Ids[id] = cursor.grad
-						// } else {
-						// 	return icon, zeroLengthIdError
-						// }
+					// note: id not processed here - must be done externally
 					case "x1":
 						cs.Gradient.Points[0], err = readFraction(attr.Value)
 					case "y1":
@@ -297,8 +307,8 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 						err = cs.ReadGradAttr(attr)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.ParseXML linear gradient parsing error: %v\n", err)
-						return false
+						log.Printf("gi.ColorSpec.UnmarshalXML linear gradient parsing error: %v\n", err)
+						return err
 					}
 				}
 			case "radialGradient":
@@ -307,13 +317,7 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
-					case "id":
-						// id := attr.Value
-						// if len(id) >= 0 {
-						// 	icon.Ids[id] = cursor.grad
-						// } else {
-						// 	return icon, zeroLengthIdError
-						// }
+					// note: id not processed here - must be done externally
 					case "r":
 						cs.Gradient.Points[4], err = readFraction(attr.Value)
 					case "cx":
@@ -330,8 +334,8 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 						err = cs.ReadGradAttr(attr)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.ParseXML radial gradient parsing error: %v\n", err)
-						return false
+						log.Printf("gi.ColorSpec.UnmarshalXML radial gradient parsing error: %v\n", err)
+						return err
 					}
 				}
 				if setFx == false { // set fx to cx by default
@@ -349,28 +353,31 @@ func (cs *ColorSpec) ParseXML(clrstr string, tree ki.Ki) bool {
 					case "stop-color":
 						clr, err := ColorFromString(attr.Value, nil)
 						if err != nil {
-							log.Printf("gi.ColorSpec.ParseXML invalid color string: %v\n", err)
-							return false
+							log.Printf("gi.ColorSpec.UnmarshalXML invalid color string: %v\n", err)
+							return err
 						}
 						stop.StopColor = clr
 					case "stop-opacity":
 						stop.Opacity, err = strconv.ParseFloat(attr.Value, 64)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.ParseXML color stop parsing error: %v\n", err)
-						return false
+						log.Printf("gi.ColorSpec.UnmarshalXML color stop parsing error: %v\n", err)
+						return err
 					}
 				}
 				cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
 			default:
-				errStr := "Cannot process svg element " + se.Name.Local
+				errStr := "gi.GolorSpec Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
 			}
 		case xml.EndElement:
+			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {
+				break // done
+			}
 		case xml.CharData:
 		}
 	}
-	return true
+	return nil
 }
 
 func readFraction(v string) (f float64, err error) {

@@ -63,7 +63,7 @@ type ColorSpec struct {
 
 var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
 
-// see colorparse.go for ColorSpec.Parse() method
+// see colorparse.go for ColorSpec.SetString() method
 
 func (cs *ColorSpec) IsNil() bool {
 	if cs.Source == SolidColor {
@@ -87,7 +87,7 @@ func (cs *ColorSpec) SetShadowGradient(cl color.Color, dir string) {
 	if dir == "" {
 		dir = "to down"
 	}
-	cs.Parse(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir), nil)
+	cs.SetString(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir))
 	cs.Source = LinearGradient
 }
 

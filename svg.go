@@ -17,6 +17,7 @@ import (
 	"image"
 	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -96,7 +97,22 @@ func (svg *SVG) Render2D() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-//   Parsing
+// Misc SVG-specific nodes
+
+// Gradient is used for holding a specified color gradient -- name is id for
+// lookup in url
+type Gradient struct {
+	Node2D
+	Grad ColorSpec `desc:"the color gradient"`
+}
+
+var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
+
+/////////////////////////////////////////////////////////////////////////////////
+//   SVG IO
+
+// see https://github.com/goki/ki/wiki/Naming for IO naming conventions
+// using standard XML marshal / unmarshal
 
 var (
 	paramMismatchError  = errors.New("gi.SVG Parse: Param mismatch")
@@ -109,6 +125,7 @@ var (
 func SVGParseFloat32(pstr string) (float32, error) {
 	r, err := strconv.ParseFloat(pstr, 32)
 	if err != nil {
+		log.Printf("gi.SVGParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
 		return float32(0.0), err
 	}
 	return float32(r), nil
@@ -126,7 +143,6 @@ func SVGReadPoints(pstr string) []float32 {
 				s := pstr[lastIdx:i]
 				p, err := SVGParseFloat32(s)
 				if err != nil {
-					log.Printf("gi.ReadPoints error parsing float32 number from: %v, %v\n", s, err)
 					return nil
 				}
 				pts = append(pts, p)
@@ -145,7 +161,6 @@ func SVGReadPoints(pstr string) []float32 {
 		s := pstr[lastIdx:len(pstr)]
 		p, err := SVGParseFloat32(s)
 		if err != nil {
-			log.Printf("gi.ReadPoints error parsing float32 number from: %v, %v\n", s, err)
 			return nil
 		}
 		pts = append(pts, p)
@@ -166,13 +181,58 @@ func SVGSetStyle(el ki.Ki, style string) {
 	}
 }
 
-// ParseXML parses the given XML-formatted SVG input, creating the
-// corresponding SVG drawing -- removes any existing content in SVG first --
-// to process a byte slice, pass: bytes.NewReader([]byte(str)) -- all errors
-// are logged and also returned
-func (svg *SVG) ParseXML(fin io.Reader) error {
+// XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
+func XMLAttr(name string, attrs []xml.Attr) string {
+	for _, attr := range attrs {
+		if attr.Name.Local == name {
+			return attr.Value
+		}
+	}
+	return ""
+}
+
+// LoadXML Loads XML-formatted SVG input from given file
+func (svg *SVG) LoadXML(filename string) error {
+	fp, err := os.Open(filename)
+	defer fp.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return svg.ReadXML(fp)
+}
+
+// ReadXML reads XML-formatted SVG input from io.Reader, and uses
+// xml.Decoder to create the SVG scenegraph for corresponding SVG drawing.
+// Removes any existing content in SVG first. To process a byte slice, pass:
+// bytes.NewReader([]byte(str)) -- all errors are logged and also returned.
+func (svg *SVG) ReadXML(reader io.Reader) error {
+	decoder := xml.NewDecoder(reader)
+	decoder.CharsetReader = charset.NewReaderLabel
+	for {
+		t, err := decoder.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Printf("gi.SVG parsing error: %v\n", err)
+			return err
+		}
+		switch se := t.(type) {
+		case xml.StartElement:
+			return svg.UnmarshalXML(decoder, se)
+			// todo: ignore rest?
+		}
+	}
+	return nil
+}
+
+// UnmarshalXML unmarshals the svg using xml.Decoder
+func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	updt := svg.UpdateStart()
 	defer svg.UpdateEnd(updt)
+
+	start := &se
 
 	svg.DeleteAll()
 
@@ -181,13 +241,17 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 	inTitle := false
 	inDesc := false
 	inDef := false
-	inGrad := false
 	var defPrevPar ki.Ki // previous parent before a def encountered
 
-	decoder := xml.NewDecoder(fin)
-	decoder.CharsetReader = charset.NewReaderLabel
 	for {
-		t, err := decoder.Token()
+		var t xml.Token
+		var err error
+		if start != nil {
+			t = *start
+			start = nil
+		} else {
+			t, err = decoder.Token()
+		}
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -202,8 +266,9 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 				if curPar != svg.This {
 					curPar = curPar.AddNewChild(KiT_SVG, "svg")
 				}
-				csvg := curPar.(*SVG)
+				csvg := curPar.EmbeddedStruct(KiT_SVG).(*SVG)
 				curSvg = csvg
+				fmt.Printf("svg: %v\n", csvg.PathUnique())
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "viewBox":
@@ -217,6 +282,7 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 						csvg.ViewBox.Size.Y = int(pts[3])
 						csvg.SetProp("width", units.NewValue(float32(csvg.ViewBox.Size.X), units.Dot))
 						csvg.SetProp("height", units.NewValue(float32(csvg.ViewBox.Size.Y), units.Dot))
+						fmt.Printf("set viewbox: %v pts: %v\n", csvg.ViewBox, pts)
 					case "width":
 						csvg.SetProp("width", attr.Value)
 					case "height":
@@ -236,9 +302,9 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 			case "defs":
 				inDef = true
 				defPrevPar = curPar
-				curPar = &svg.Defs
+				curPar = &curSvg.Defs
 			case "g":
-				curPar := curPar.AddNewChild(KiT_Group2D, "g")
+				curPar = curPar.AddNewChild(KiT_Group2D, "g")
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "id":
@@ -249,6 +315,7 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
+				fmt.Printf("new g: %v\n", curPar.PathUnique())
 			case "rect":
 				rect := curPar.AddNewChild(KiT_Rect, "rect").(*Rect)
 				var x, y, w, h, rx, ry float32
@@ -433,97 +500,28 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 						return err
 					}
 				}
-			// case "linearGradient":
-			// 	cs.Gradient = &rasterx.Gradient{Points: [5]float32{0, 0, 0, 1, 0},
-			// 		IsRadial: false, Matrix: rasterx.Identity}
-			// 	for _, attr := range se.Attr {
-			// 		switch attr.Name.Local {
-			// 		case "id":
-			// 			// id := attr.Value
-			// 			// if len(id) >= 0 {
-			// 			// 	svg.Ids[id] = cursor.grad
-			// 			// } else {
-			// 			// 	return icon, zeroLengthIdError
-			// 			// }
-			// 		case "x1":
-			// 			cs.Gradient.Points[0], err = readFraction(attr.Value)
-			// 		case "y1":
-			// 			cs.Gradient.Points[1], err = readFraction(attr.Value)
-			// 		case "x2":
-			// 			cs.Gradient.Points[2], err = readFraction(attr.Value)
-			// 		case "y2":
-			// 			cs.Gradient.Points[3], err = readFraction(attr.Value)
-			// 		default:
-			// 			err = cs.ReadGradAttr(attr)
-			// 		}
-			// 		if err != nil {
-			// 			log.Printf("gi.ColorSpec.ParseXML linear gradient parsing error: %v\n", err)
-			// 			return false
-			// 		}
-			// 	}
-			// case "radialGradient":
-			// 	cs.Gradient = &rasterx.Gradient{Points: [5]float32{0.5, 0.5, 0.5, 0.5, 0.5},
-			// 		IsRadial: true, Matrix: rasterx.Identity}
-			// 	var setFx, setFy bool
-			// 	for _, attr := range se.Attr {
-			// 		switch attr.Name.Local {
-			// 		case "id":
-			// 			// id := attr.Value
-			// 			// if len(id) >= 0 {
-			// 			// 	svg.Ids[id] = cursor.grad
-			// 			// } else {
-			// 			// 	return icon, zeroLengthIdError
-			// 			// }
-			// 		case "r":
-			// 			cs.Gradient.Points[4], err = readFraction(attr.Value)
-			// 		case "cx":
-			// 			cs.Gradient.Points[0], err = readFraction(attr.Value)
-			// 		case "cy":
-			// 			cs.Gradient.Points[1], err = readFraction(attr.Value)
-			// 		case "fx":
-			// 			setFx = true
-			// 			cs.Gradient.Points[2], err = readFraction(attr.Value)
-			// 		case "fy":
-			// 			setFy = true
-			// 			cs.Gradient.Points[3], err = readFraction(attr.Value)
-			// 		default:
-			// 			err = cs.ReadGradAttr(attr)
-			// 		}
-			// 		if err != nil {
-			// 			log.Printf("gi.ColorSpec.ParseXML radial gradient parsing error: %v\n", err)
-			// 			return false
-			// 		}
-			// 	}
-			// 	if setFx == false { // set fx to cx by default
-			// 		cs.Gradient.Points[2] = cs.Gradient.Points[0]
-			// 	}
-			// 	if setFy == false { // set fy to cy by default
-			// 		cs.Gradient.Points[3] = cs.Gradient.Points[1]
-			// 	}
-			// case "stop":
-			// 	stop := rasterx.GradStop{Opacity: 1.0}
-			// 	for _, attr := range se.Attr {
-			// 		switch attr.Name.Local {
-			// 		case "offset":
-			// 			stop.Offset, err = readFraction(attr.Value)
-			// 		case "stop-color":
-			// 			clr, err := ColorFromString(attr.Value, nil)
-			// 			if err != nil {
-			// 				log.Printf("gi.ColorSpec.ParseXML invalid color string: %v\n", err)
-			// 				return false
-			// 			}
-			// 			stop.StopColor = clr
-			// 		case "stop-opacity":
-			// 			stop.Opacity, err = strconv.ParseFloat(attr.Value, 64)
-			// 		}
-			// 		if err != nil {
-			// 			log.Printf("gi.ColorSpec.ParseXML color stop parsing error: %v\n", err)
-			// 			return false
-			// 		}
-			// 	}
-			// 	cs.Gradient.Stops = append(cs.Gradient.Stops, &stop)
+			case "linearGradient":
+				id := XMLAttr("id", se.Attr)
+				if id == "" {
+					id = "lin-grad"
+				}
+				grad := curPar.AddNewChild(KiT_Gradient, id).(*Gradient)
+				err = grad.Grad.UnmarshalXML(decoder, se)
+				if err != nil {
+					return err
+				}
+			case "radialGradient":
+				id := XMLAttr("id", se.Attr)
+				if id == "" {
+					id = "rad-grad"
+				}
+				grad := curPar.AddNewChild(KiT_Gradient, id).(*Gradient)
+				err = grad.Grad.UnmarshalXML(decoder, se)
+				if err != nil {
+					return err
+				}
 			default:
-				errStr := "Cannot process svg element " + se.Name.Local
+				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
 			}
 		case xml.EndElement:
@@ -534,22 +532,21 @@ func (svg *SVG) ParseXML(fin io.Reader) error {
 				inDesc = false
 			case "def":
 				if inDef {
+					inDef = false
+					curPar = defPrevPar
 				}
-				inDef = false
-				curPar = defPrevPar
-			case "radialGradient", "linearGradient":
-				if inGrad {
-				}
-				inGrad = false
-				curPar = curPar.Parent()
+			case "g":
+				fallthrough
 			case "svg":
+				if curPar == svg.This {
+					break
+				}
 				curPar = curPar.Parent()
 				if curPar == svg.This {
 					break
 				}
-				curSvg = curPar.ParentByType(KiT_SVG, true).(*SVG)
+				curSvg = curPar.ParentByType(KiT_SVG, true).EmbeddedStruct(KiT_SVG).(*SVG)
 			default:
-				curPar = curPar.Parent()
 			}
 		case xml.CharData:
 			if inTitle {

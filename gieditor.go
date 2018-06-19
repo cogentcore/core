@@ -89,7 +89,7 @@ func GoGiEditorOf(obj ki.Ki) {
 				if sig == int64(DialogAccepted) {
 					dlg, _ := send.(*Dialog)
 					fnm := FileViewDialogValue(dlg)
-					recv.SaveJSONToFile(fnm)
+					recv.SaveJSON(fnm)
 				}
 			})
 		}
@@ -104,7 +104,7 @@ func GoGiEditorOf(obj ki.Ki) {
 				if sig == int64(DialogAccepted) {
 					dlg, _ := send.(*Dialog)
 					fnm := FileViewDialogValue(dlg)
-					recv.LoadJSONFromFile(fnm)
+					recv.LoadJSON(fnm)
 				}
 			})
 		}

@@ -28,6 +28,7 @@ import (
 // for a given set of fill / stroke paint values, as an optimization.
 type Icon struct {
 	SVG
+	Filename            string      `desc:"file name (typically with relevant path -- todo: special paths for finding installed defaults) for icon -- lazy loading is used, so icon files are loaded only when needed"`
 	Rendered            bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
 	RenderedSize        image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
 	RenderedStrokeColor Color       `json:"-" xml:"-" desc:"stroke color rendered"`
@@ -35,11 +36,6 @@ type Icon struct {
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
-
-func (ic *Icon) Init2D() {
-	ic.SVG.Init2D()
-	ic.Fill = true
-}
 
 // InitFromName initializes icon from an icon looked up by name -- returns
 // false if name is not valid
@@ -83,6 +79,14 @@ var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }
 
+func (ic *Icon) Init2D() {
+	if ic.Filename != "" && !ic.HasChildren() {
+		ic.LoadXML(ic.Filename)
+	}
+	ic.SVG.Init2D()
+	ic.Fill = true
+}
+
 func (ic *Icon) Style2D() {
 	ic.Style2DWidget()
 	ic.Style2DSVG() // this must come second
@@ -104,8 +108,8 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	// pc := &ic.Paint
-	return !ic.Rendered || ic.RenderedSize != ic.ViewBox.Size // || ic.RenderedStrokeColor != pc.StrokeStyle.Color || ic.RenderedFillColor != pc.FillStyle.Color
+	pc := &ic.Paint
+	return !ic.Rendered || ic.RenderedSize != ic.ViewBox.Size || ic.RenderedStrokeColor != pc.StrokeStyle.Color.Color || ic.RenderedFillColor != pc.FillStyle.Color.Color
 }
 
 func (ic *Icon) Render2D() {
@@ -126,8 +130,8 @@ func (ic *Icon) Render2D() {
 			rs.PopXForm()
 			ic.Rendered = true
 			ic.RenderedSize = ic.ViewBox.Size
-			// ic.RenderedStrokeColor = pc.StrokeStyle.Color
-			// ic.RenderedFillColor = pc.FillStyle.Color
+			ic.RenderedStrokeColor = pc.StrokeStyle.Color.Color
+			ic.RenderedFillColor = pc.FillStyle.Color.Color
 		}
 		ic.RenderViewport2D() // update our parent image
 	}
@@ -484,6 +488,12 @@ func MakeDefaultIcons() *IconSet {
 		c2 := wd.AddNewChild(KiT_Circle, "c2").(*Circle)
 		c2.Pos.Set(0.5, 0.85)
 		c2.Radius = 0.1
+		iset[wd.Nm] = &wd
+	}
+	{
+		wd := Icon{}
+		wd.InitName(&wd, "astronaut")
+		wd.Filename = "/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg"
 		iset[wd.Nm] = &wd
 	}
 	return &iset

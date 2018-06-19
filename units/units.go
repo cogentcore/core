@@ -287,8 +287,8 @@ func (v *Value) String() string {
 	return fmt.Sprintf("%f%s", v.Val, UnitNames[v.Un])
 }
 
-// parse string into a value
-func (v *Value) SetFromString(str string) {
+// SetString sets value from a string
+func (v *Value) SetString(str string) {
 	trstr := strings.TrimSpace(str)
 	sz := len(trstr)
 	if sz < 2 {
@@ -325,6 +325,6 @@ func (v *Value) SetFromString(str string) {
 
 func StringToValue(str string) Value {
 	var v Value
-	v.SetFromString(str)
+	v.SetString(str)
 	return v
 }

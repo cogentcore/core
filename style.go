@@ -566,7 +566,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 	case *ColorSpec:
 		switch valv := val.(type) {
 		case string:
-			fiv.Parse(valv, nil) // todo: need tree context
+			fiv.SetString(valv)
 		case *Color:
 			fiv.SetColor(*valv)
 		case *ColorSpec:
@@ -602,7 +602,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 	case *units.Value:
 		switch valv := val.(type) {
 		case string:
-			fiv.SetFromString(valv)
+			fiv.SetString(valv)
 		case units.Value:
 			*fiv = valv
 		case *units.Value:
@@ -695,7 +695,7 @@ func StyleUnitsValue(tag string, uv *units.Value, props ki.Props) bool {
 	}
 	switch v := val.(type) {
 	case string:
-		uv.SetFromString(v)
+		uv.SetString(v)
 	case float64:
 		uv.Set(float32(v), units.Px) // assume px
 	case float32:
