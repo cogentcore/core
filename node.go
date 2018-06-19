@@ -186,7 +186,7 @@ func (n *Node) SetUniqueName(name string) {
 
 // make sure that the names are unique -- n^2 ish
 func (n *Node) UniquifyNames() {
-	if len(n.Kids) > 50 { // todo: figure out a better strategy for this many
+	if len(n.Kids) > 100 { // todo: figure out a better strategy for this many
 		return
 	}
 	pr := prof.Start("ki.Node.UniquifyNames")
