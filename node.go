@@ -1420,7 +1420,7 @@ var JSONTypePrefix = []byte("{\"ki.RootType\": ")
 // JSONTypeSuffix is just the } and \n at the end of the prefix line
 var JSONTypeSuffix = []byte("}\n")
 
-func (n *Node) SendJSON(writer io.Writer, indent bool) error {
+func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
 	err := n.ThisCheck()
 	if err != nil {
 		return err
@@ -1455,14 +1455,14 @@ func (n *Node) SaveJSON(filename string) error {
 		log.Println(err)
 		return err
 	}
-	err = n.SendJSON(fp, true) // use indent by default
+	err = n.WriteJSON(fp, true) // use indent by default
 	if err != nil {
 		log.Println(err)
 	}
 	return err
 }
 
-func (n *Node) RecvJSON(reader io.Reader) error {
+func (n *Node) ReadJSON(reader io.Reader) error {
 	err := n.ThisCheck()
 	if err != nil {
 		log.Println(err)
@@ -1494,12 +1494,12 @@ func (n *Node) LoadJSON(filename string) error {
 		log.Println(err)
 		return err
 	}
-	return n.RecvJSON(fp)
+	return n.ReadJSON(fp)
 }
 
-// RecvNewJSON receives a new Ki tree from a JSON-encoded byte string, using type
+// ReadNewJSON reads a new Ki tree from a JSON-encoded byte string, using type
 // information at start of file to create an object of the proper type
-func RecvNewJSON(reader io.Reader) (Ki, error) {
+func ReadNewJSON(reader io.Reader) (Ki, error) {
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println(err)
@@ -1539,10 +1539,10 @@ func LoadNewJSON(filename string) (Ki, error) {
 		log.Println(err)
 		return nil, err
 	}
-	return RecvNewJSON(fp)
+	return ReadNewJSON(fp)
 }
 
-func (n *Node) SendXML(writer io.Writer, indent bool) error {
+func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 	err := n.ThisCheck()
 	if err != nil {
 		log.Println(err)
@@ -1566,7 +1566,7 @@ func (n *Node) SendXML(writer io.Writer, indent bool) error {
 	return nil
 }
 
-func (n *Node) RecvXML(reader io.Reader) error {
+func (n *Node) ReadXML(reader io.Reader) error {
 	var err error
 	if err = n.ThisCheck(); err != nil {
 		log.Println(err)

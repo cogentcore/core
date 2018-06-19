@@ -628,42 +628,42 @@ type Ki interface {
 	SetPtrsFmPaths()
 
 	//////////////////////////////////////////////////////////////////////////
-	//  IO: Marshal / Unmarshal support -- see also Slice, Ptr
+	//  IO: for JSON and XML formats -- see also Slice, Ptr
 	//  see https://github.com/goki/ki/wiki/Naming for IO naming conventions
 
-	// SendJSON sends the tree to an io.Writer, using MarshalJSON -- also
+	// WriteJSON writes the tree to an io.Writer, using MarshalJSON -- also
 	// saves a critical starting record that allows file to be loaded de-novo
 	// and recreate the proper root type for the tree
-	SendJSON(writer io.Writer, indent bool) error
+	WriteJSON(writer io.Writer, indent bool) error
 
-	// SaveJSON saves the tree to a JSON-encoded file, using SendJSON
+	// SaveJSON saves the tree to a JSON-encoded file, using WriteJSON
 	SaveJSON(filename string) error
 
-	// RecvJSON receives and unmarshalls tree starting at this node, from a
+	// ReadJSON reads and unmarshals tree starting at this node, from a
 	// JSON-encoded byte stream via io.Reader.  First element in the stream
-	// must be of same type as this node -- see RecvNewJSON function to
+	// must be of same type as this node -- see ReadNewJSON function to
 	// construct a new tree.  Uses ConfigureChildren to minimize changes from
 	// current tree relative to loading one -- wraps UnmarshalJSON and calls
 	// UnmarshalPost to recover pointers from paths.
-	RecvJSON(reader io.Reader) error
+	ReadJSON(reader io.Reader) error
 
-	// LoadJSON loads over this tree from a JSON-encoded file -- see RecvJSON
-	// for details, and LoadNewJSON for loading a new tree de-novo
+	// LoadJSON loads over this tree from a JSON-encoded file -- see ReadJSON
+	// for details, and LoadNewJSON for loading an entirely new tree
 	LoadJSON(filename string) error
 
-	// SendXML sends the tree to an XML-encoded byte string over io.Writer
+	// WriteXML writes the tree to an XML-encoded byte string over io.Writer
 	// using MarshalXML
-	SendXML(writer io.Writer, indent bool) error
+	WriteXML(writer io.Writer, indent bool) error
 
-	// RecvXML receives the tree from an XML-encoded byte string over io.Reader, calls
+	// ReadXML reads the tree from an XML-encoded byte string over io.Reader, calls
 	// UnmarshalPost to recover pointers from paths
-	RecvXML(reader io.Reader) error
+	ReadXML(reader io.Reader) error
 
 	// ParentAllChildren walks the tree down from current node and call
 	// SetParent on all children -- needed after an Unmarshal
 	ParentAllChildren()
 
-	// UnmarshallPost must be called after an Unmarshal -- calls
+	// UnmarshalPost must be called after an Unmarshal -- calls
 	// SetPtrsFmPaths and ParentAllChildren
 	UnmarshalPost()
 }
