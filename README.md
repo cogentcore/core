@@ -71,7 +71,7 @@ Currently at an **alpha** level release:
 
 ## Platforms / oswin
 
-* clip.Board: windows converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- update linux to use the same so everything is consistent, and much simpler!
+* clip.Board: windows & mac converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- update linux to use the same so everything is consistent, and much simpler!
   
 * enable dnd to use OS DND when moves outside window
 
@@ -88,6 +88,14 @@ Currently at an **alpha** level release:
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
+
+* gieditor on astronaut icon not updating pos/ size properly
+
+* g group element is blocking size -- needs to get size from parent SVG automatically -- good idea in general
+
+* test SVG path rendering --- now doing with SVG loading!
+* need validator code -- parser seems to be working but needs validator with better err msgs
+* also re-render data string after parsing to be more human friendly.
 
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
@@ -144,8 +152,6 @@ Currently at an **alpha** level release:
   lightness for dark-style themes.
 
 * add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
-
-* test SVG path rendering 
 
 * property-based xforms for svg
 
