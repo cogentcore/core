@@ -223,6 +223,7 @@ func (vv *IconValueView) ConfigWidget(widg Node2D) {
 // https://joekuan.wordpress.com/2015/09/23/list-of-qt-icons/
 // https://leungwensen.github.io/svg-icon/
 // golang.org/x/exp/shiny/materialdesign/icons/ -- material encoded icons
+// https://community.kde.org/KDE_Visual_Design_Group/HIG/IconDesign https://github.com/KDE/breeze-icons
 
 // different types of standard icon name spaces, from
 // https://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html

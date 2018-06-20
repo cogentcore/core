@@ -18,6 +18,8 @@ import (
 type NodeBase struct {
 	ki.Node
 	Class   string          `desc:"user-defined class name used primarily for attaching CSS styles to different display elements"`
+	CSS     ki.Props        `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
+	CSSAgg  ki.Props        `json:"-" xml:"-" desc:"aggregated css properties from all higher nodes down to me"`
 	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
 	ObjBBox image.Rectangle `json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
 	VpBBox  image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`

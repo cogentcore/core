@@ -315,8 +315,6 @@ func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(e
 type Layout struct {
 	Node2DBase
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
-	CSS       ki.Props              `desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
-	CSSAgg    ki.Props              `json:"-" xml:"-" desc:"aggregated css properties from all higher nodes down to me"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize Vec2D                 `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
@@ -1213,12 +1211,6 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
-}
-
-func (g *Layout) CSSProps() (css, agg *ki.Props) {
-	css = &g.CSS
-	agg = &g.CSSAgg
-	return
 }
 
 func (ly *Layout) Size2D() {

@@ -114,11 +114,6 @@ type Node2D interface {
 	// changes -- styles are not for dynamic changes.
 	Style2D()
 
-	// CSSProps: returns pointers to the css properties for this node, if node
-	// supports css styles -- both the local CSS settings and the aggregated
-	// values down to it
-	CSSProps() (css, agg *ki.Props)
-
 	// Size2D: DepthFirst downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
@@ -211,12 +206,6 @@ func (g *Node2DBase) Style2D() {
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
 	}
-}
-
-func (g *Node2DBase) CSSProps() (css, agg *ki.Props) {
-	css = nil
-	agg = nil
-	return
 }
 
 func (g *Node2DBase) Size2D() {
@@ -450,22 +439,19 @@ func (g *Node2DBase) Style2DWidget() {
 		gii.Init2D()
 	}
 	var pagg *ki.Props
-	pgi, pg := KiToNode2D(g.Par)
+	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
 		g.Style.SetStyle(&pg.Style, g.Properties())
-		_, pagg = pgi.CSSProps()
+		pagg = &pg.CSSAgg
 	} else {
 		g.Style.SetStyle(nil, g.Properties())
 	}
 
-	css, agg := gii.CSSProps()
-	if agg != nil {
-		if pagg != nil {
-			AggCSS(agg, *pagg)
-		}
-		AggCSS(agg, *css)
-		StyleCSSWidget(gii, *agg)
+	if pagg != nil {
+		AggCSS(&g.CSSAgg, *pagg)
 	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSSWidget(gii, g.CSSAgg)
 
 	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.Paint.PropsNil = true                       // not using paint props
