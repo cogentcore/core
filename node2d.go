@@ -178,6 +178,9 @@ type Node2D interface {
 	// on the Window-managed HasFocus flag, but some types may want to monitor
 	// all keyboard activity for certain key keys..
 	HasFocus2D() bool
+
+	// FindNamedElement searches for given named element in this node or in parent nodes
+	FindNamedElement(name string) Node2D
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +261,6 @@ func (g *Node2DBase) HasFocus2D() bool {
 	return g.HasFocus()
 }
 
-// GrabFocus sets node as focus node
 func (g *Node2DBase) GrabFocus() {
 	win := g.ParentWindow()
 	if win != nil {
@@ -266,7 +268,24 @@ func (g *Node2DBase) GrabFocus() {
 	}
 }
 
-// Group2D is a generic group element -- doesn't render on its own
+func (g *Node2DBase) FindNamedElement(name string) Node2D {
+	if g.Nm == name {
+		return g.This.(Node2D)
+	}
+	if g.Par == nil {
+		return nil
+	}
+	pgi, _ := KiToNode2D(g.Par)
+	if pgi != nil {
+		return pgi.FindNamedElement(name)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Group2D
+
+// Group2D is a generic grouping element -- doesn't render on its own
 type Group2D struct {
 	Node2DBase
 }
@@ -411,6 +430,8 @@ func (g *Node2DBase) Style2DSVG() {
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
+	SetCurStyleNode2D(gii)
+	defer SetCurStyleNode2D(nil)
 	var pagg *ki.Props
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.StyleSet = false  // this is always first call, restart
@@ -481,6 +502,9 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 // Style2DWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes
 func (g *Node2DBase) Style2DWidget() {
+	gii, _ := g.This.(Node2D)
+	SetCurStyleNode2D(gii)
+	defer SetCurStyleNode2D(nil)
 	if !RebuildDefaultStyles && g.DefStyle != nil {
 		g.Style.CopyFrom(g.DefStyle)
 	} else {
@@ -488,7 +512,6 @@ func (g *Node2DBase) Style2DWidget() {
 	}
 	g.Style.IsSet = false // this is always first call, restart
 
-	gii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}

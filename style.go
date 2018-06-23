@@ -29,10 +29,6 @@ import (
 // * we process those properties dynamically when rendering (first pass only) into state
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
-// * todo: could we generalize this to not have to write the parsing code?  YES need to
-//
-// SVG Paint inheritance is probably NOT such a good idea for widgets??  fill = background?
-// may need to figure that part out a bit more..
 
 // todo: Animation
 
@@ -54,13 +50,20 @@ import (
 
 // visibility -- support more than just hidden  inherit:"true"
 
-// Transform -- can throw in any 2D or 3D transform!  we support that!  sort of..
-
 // transition -- animation of hover, etc
 
 // RebuildDefaultStyles is a global state var used by Prefs to trigger rebuild
 // of all the default styles, which are otherwise compiled and not updated
 var RebuildDefaultStyles bool
+
+// CurStyleNode2D is always set to the current node that is being styled --
+// used for finding url references -- only active during a Style pass
+var CurStyleNode2D Node2D
+
+// SetCurStyleNode2D sets the current styling node to given node, or nil when done
+func SetCurStyleNode2D(node Node2D) {
+	CurStyleNode2D = node
+}
 
 // StylePropProps should be set as type props for any enum (not struct types,
 // which must have their own props) that is useful as a styling property --

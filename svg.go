@@ -96,6 +96,26 @@ func (svg *SVG) Render2D() {
 	}
 }
 
+func (svg *SVG) FindNamedElement(name string) Node2D {
+	if svg.Nm == name {
+		return svg.This.(Node2D)
+	}
+
+	def := svg.Defs.ChildByName(name, 0)
+	if def != nil {
+		return def.(Node2D)
+	}
+
+	if svg.Par == nil {
+		return nil
+	}
+	pgi, _ := KiToNode2D(svg.Par)
+	if pgi != nil {
+		return pgi.FindNamedElement(name)
+	}
+	return nil
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // Misc SVG-specific nodes
 
