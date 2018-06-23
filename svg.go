@@ -23,7 +23,6 @@ import (
 	"unicode"
 
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"golang.org/x/net/html/charset"
@@ -33,9 +32,10 @@ import (
 // svg tag in html -- it provides its own bitmap for drawing into
 type SVG struct {
 	Viewport2D
-	Defs  Group2D `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title string  `xml:"title" desc:"the title of the svg"`
-	Desc  string  `xml:"desc" desc:"the description of the svg"`
+	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing"`
+	Defs    Group2D `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title   string  `xml:"title" desc:"the title of the svg"`
+	Desc    string  `xml:"desc" desc:"the description of the svg"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
@@ -52,14 +52,14 @@ func (svg *SVG) DeleteAll() {
 
 }
 
-// SetNormXForm sets a normalized 0-1 scaling transform so svg's use 0-1
-// coordinates that map to actual size of the viewport -- used e.g. for Icon
+// SetNormXForm scaling transform
 func (svg *SVG) SetNormXForm() {
 	pc := &svg.Paint
 	pc.Identity()
-	vps := Vec2D{}
-	vps.SetPoint(svg.ViewBox.Size)
-	pc.Scale(vps.X, vps.Y)
+	if svg.ViewBox.Size != Vec2DZero {
+		vps := NewVec2DFmPoint(svg.Geom.Size).Div(svg.ViewBox.Size)
+		pc.Scale(vps.X, vps.Y)
+	}
 }
 
 func (svg *SVG) Init2D() {
@@ -102,7 +102,7 @@ func (svg *SVG) Render2D() {
 // Gradient is used for holding a specified color gradient -- name is id for
 // lookup in url
 type Gradient struct {
-	Node2D
+	Node2DBase
 	Grad ColorSpec `desc:"the color gradient"`
 }
 
@@ -168,19 +168,6 @@ func SVGReadPoints(pstr string) []float32 {
 	return pts
 }
 
-// SVGSetStyle sets style attributes from svg style string
-func SVGSetStyle(el ki.Ki, style string) {
-	st := strings.Split(style, ";")
-	for _, s := range st {
-		kv := strings.Split(s, ":")
-		if len(kv) >= 2 {
-			k := strings.TrimSpace(strings.ToLower(kv[0]))
-			v := strings.TrimSpace(kv[1])
-			el.SetProp(k, v)
-		}
-	}
-}
-
 // XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
 func XMLAttr(name string, attrs []xml.Attr) string {
 	for _, attr := range attrs {
@@ -236,12 +223,14 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 	svg.DeleteAll()
 
-	curPar := svg.This // current parent node into which elements are created
+	curPar := svg.This.(Node2D) // current parent node into which elements are created
 	curSvg := svg
 	inTitle := false
 	inDesc := false
 	inDef := false
-	var defPrevPar ki.Ki // previous parent before a def encountered
+	inCSS := false
+	var curCSS *StyleSheet
+	var defPrevPar Node2D // previous parent before a def encountered
 
 	for {
 		var t xml.Token
@@ -264,33 +253,30 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			switch se.Name.Local {
 			case "svg":
 				if curPar != svg.This {
-					curPar = curPar.AddNewChild(KiT_SVG, "svg")
+					curPar = curPar.AddNewChild(KiT_SVG, "svg").(Node2D)
 				}
 				csvg := curPar.EmbeddedStruct(KiT_SVG).(*SVG)
 				curSvg = csvg
-				fmt.Printf("svg: %v\n", csvg.PathUnique())
 				for _, attr := range se.Attr {
+					if csvg.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "viewBox":
 						pts := SVGReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return paramMismatchError
 						}
-						csvg.ViewBox.Min.X = int(pts[0])
-						csvg.ViewBox.Min.Y = int(pts[1])
-						csvg.ViewBox.Size.X = int(pts[2])
-						csvg.ViewBox.Size.Y = int(pts[3])
+						csvg.ViewBox.Min.X = pts[0]
+						csvg.ViewBox.Min.Y = pts[1]
+						csvg.ViewBox.Size.X = pts[2]
+						csvg.ViewBox.Size.Y = pts[3]
 						csvg.SetProp("width", units.NewValue(float32(csvg.ViewBox.Size.X), units.Dot))
 						csvg.SetProp("height", units.NewValue(float32(csvg.ViewBox.Size.Y), units.Dot))
-						fmt.Printf("set viewbox: %v pts: %v\n", csvg.ViewBox, pts)
 					case "width":
 						csvg.SetProp("width", attr.Value)
 					case "height":
 						csvg.SetProp("height", attr.Value)
-					case "id":
-						curPar.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(curPar, attr.Value)
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -304,22 +290,23 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
 			case "g":
-				curPar = curPar.AddNewChild(KiT_Group2D, "g")
+				curPar = curPar.AddNewChild(KiT_Group2D, "g").(Node2D)
 				for _, attr := range se.Attr {
+					if curPar.AsNode2D().SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
-					case "id":
-						curPar.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(curPar, attr.Value)
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
-				fmt.Printf("new g: %v\n", curPar.PathUnique())
 			case "rect":
 				rect := curPar.AddNewChild(KiT_Rect, "rect").(*Rect)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
+					if rect.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "x":
 						x, err = SVGParseFloat32(attr.Value)
@@ -333,10 +320,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						rx, err = SVGParseFloat32(attr.Value)
 					case "ry":
 						ry, err = SVGParseFloat32(attr.Value)
-					case "id":
-						rect.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(rect.This, attr.Value)
 					default:
 						rect.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -351,6 +334,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				circle := curPar.AddNewChild(KiT_Circle, "circle").(*Circle)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
+					if circle.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "cx":
 						cx, err = SVGParseFloat32(attr.Value)
@@ -358,10 +344,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cy, err = SVGParseFloat32(attr.Value)
 					case "r":
 						r, err = SVGParseFloat32(attr.Value)
-					case "id":
-						circle.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(circle.This, attr.Value)
 					default:
 						circle.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -375,6 +357,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				ellipse := curPar.AddNewChild(KiT_Ellipse, "ellipse").(*Ellipse)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
+					if ellipse.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "cx":
 						cx, err = SVGParseFloat32(attr.Value)
@@ -384,10 +369,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						rx, err = SVGParseFloat32(attr.Value)
 					case "ry":
 						ry, err = SVGParseFloat32(attr.Value)
-					case "id":
-						ellipse.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(ellipse.This, attr.Value)
 					default:
 						ellipse.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -401,6 +382,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				line := curPar.AddNewChild(KiT_Line, "line").(*Line)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
+					if line.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "x1":
 						x1, err = SVGParseFloat32(attr.Value)
@@ -410,10 +394,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						x2, err = SVGParseFloat32(attr.Value)
 					case "y2":
 						y2, err = SVGParseFloat32(attr.Value)
-					case "id":
-						line.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(line.This, attr.Value)
 					default:
 						line.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -426,6 +406,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "polygon":
 				polygon := curPar.AddNewChild(KiT_Polygon, "polygon").(*Polygon)
 				for _, attr := range se.Attr {
+					if polygon.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "points":
 						pts := SVGReadPoints(attr.Value)
@@ -442,10 +425,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							}
 							polygon.Points = pvec
 						}
-					case "id":
-						polygon.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(polygon.This, attr.Value)
 					default:
 						polygon.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -456,6 +435,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "polyline":
 				polyline := curPar.AddNewChild(KiT_Polyline, "polyline").(*Polyline)
 				for _, attr := range se.Attr {
+					if polyline.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "points":
 						pts := SVGReadPoints(attr.Value)
@@ -472,10 +454,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							}
 							polyline.Points = pvec
 						}
-					case "id":
-						polyline.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(polyline.This, attr.Value)
 					default:
 						polyline.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -486,13 +464,12 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "path":
 				path := curPar.AddNewChild(KiT_Path, "path").(*Path)
 				for _, attr := range se.Attr {
+					if path.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
 					switch attr.Name.Local {
 					case "d":
 						path.SetData(attr.Value)
-					case "id":
-						path.SetName(attr.Value)
-					case "style":
-						SVGSetStyle(path.This, attr.Value)
 					default:
 						path.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -501,25 +478,65 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case "linearGradient":
-				id := XMLAttr("id", se.Attr)
-				if id == "" {
-					id = "lin-grad"
+				grad := curPar.AddNewChild(KiT_Gradient, "lin-grad").(*Gradient)
+				for _, attr := range se.Attr {
+					if grad.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "href":
+						nm := attr.Value
+						if strings.HasPrefix(nm, "#") {
+							nm = strings.TrimPrefix(nm, "#")
+						}
+						hr := curPar.ChildByName(nm, 0)
+						if hr != nil {
+							if hrg, ok := hr.(*Gradient); ok {
+								grad.Grad = hrg.Grad
+								// fmt.Printf("successful href: %v\n", nm)
+							}
+						}
+					}
 				}
-				grad := curPar.AddNewChild(KiT_Gradient, id).(*Gradient)
 				err = grad.Grad.UnmarshalXML(decoder, se)
 				if err != nil {
 					return err
 				}
 			case "radialGradient":
-				id := XMLAttr("id", se.Attr)
-				if id == "" {
-					id = "rad-grad"
+				grad := curPar.AddNewChild(KiT_Gradient, "rad-grad").(*Gradient)
+				for _, attr := range se.Attr {
+					if grad.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "href":
+						nm := attr.Value
+						if strings.HasPrefix(nm, "#") {
+							nm = strings.TrimPrefix(nm, "#")
+						}
+						hr := curPar.ChildByName(nm, 0)
+						if hr != nil {
+							if hrg, ok := hr.(*Gradient); ok {
+								grad.Grad = hrg.Grad
+								// fmt.Printf("successful href: %v\n", nm)
+							}
+						}
+					}
 				}
-				grad := curPar.AddNewChild(KiT_Gradient, id).(*Gradient)
 				err = grad.Grad.UnmarshalXML(decoder, se)
 				if err != nil {
 					return err
 				}
+			case "style":
+				sty := curPar.AddNewChild(KiT_StyleSheet, "style").(*StyleSheet)
+				for _, attr := range se.Attr {
+					if sty.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+				}
+				inCSS = true
+				curCSS = sty
+				// style code shows up in CharData below
 			default:
 				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
@@ -530,7 +547,10 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inTitle = false
 			case "desc":
 				inDesc = false
-			case "def":
+			case "style":
+				inCSS = false
+				curCSS = nil
+			case "defs":
 				if inDef {
 					inDef = false
 					curPar = defPrevPar
@@ -541,7 +561,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == svg.This {
 					break
 				}
-				curPar = curPar.Parent()
+				curPar = curPar.Parent().(Node2D)
 				if curPar == svg.This {
 					break
 				}
@@ -554,6 +574,17 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 			if inDesc {
 				curSvg.Desc += string(se)
+			}
+			if inCSS && curCSS != nil {
+				curCSS.ParseString(string(se))
+				cp := curCSS.CSSProps()
+				if cp != nil {
+					if inDef && defPrevPar != nil {
+						defPrevPar.AsNode2D().CSS = cp
+					} else {
+						curPar.AsNode2D().CSS = cp
+					}
+				}
 			}
 		}
 	}

@@ -89,9 +89,11 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* gieditor on astronaut icon not updating pos/ size properly
+* ViewBox is unclear!  for first-level SVG, we need to override whatever
+  viewbox that was specified, based on allocation.  within svg, it is real
+  coordinates relative to parent SVG..
 
-* g group element is blocking size -- needs to get size from parent SVG automatically -- good idea in general
+* gieditor on astronaut icon not updating pos/ size properly
 
 * test SVG path rendering --- now doing with SVG loading!
 * need validator code -- parser seems to be working but needs validator with better err msgs

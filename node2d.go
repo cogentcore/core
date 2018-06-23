@@ -277,6 +277,52 @@ func (g *Group2D) AsNode2D() *Node2DBase {
 	return &g.Node2DBase
 }
 
+// BBoxFromChildren sets the Group BBox from children
+func (g *Group2D) BBoxFromChildren() image.Rectangle {
+	bb := image.ZR
+	for i, kid := range g.Kids {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			if i == 0 {
+				bb = gi.BBox
+			} else {
+				bb = bb.Union(gi.BBox)
+			}
+		}
+	}
+	return bb
+}
+
+func (g *Group2D) Size2D() {
+	g.InitLayout2D()
+	svg := g.ParentSVG()
+	if svg != nil {
+		g.LayData = svg.LayData
+	}
+}
+
+func (g *Group2D) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, false) // no style
+	g.Layout2DChildren()
+	svg := g.ParentSVG()
+	if svg != nil {
+		g.LayData = svg.LayData
+	}
+}
+
+func (g *Group2D) BBox2D() image.Rectangle {
+	bb := g.BBoxFromChildren()
+	if bb == image.ZR {
+		svg := g.ParentSVG()
+		if svg != nil {
+			bb = svg.BBox
+		}
+	} else {
+		return bb
+	}
+	return bb
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
@@ -365,14 +411,22 @@ func (g *Node2DBase) Style2DSVG() {
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
+	var pagg *ki.Props
 	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
 	g.Paint.StyleSet = false  // this is always first call, restart
 	if pg != nil {
-		g.Paint.SetStyle(&pg.Paint, g.Properties())
+		g.Paint.SetStyleProps(&pg.Paint, g.Properties())
+		pagg = &pg.CSSAgg
 	} else {
-		g.Paint.SetStyle(nil, g.Properties())
+		g.Paint.SetStyleProps(nil, g.Properties())
 	}
 	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
+
+	if pagg != nil {
+		AggCSS(&g.CSSAgg, *pagg)
+	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSSSVG(gii, g.CSSAgg)
 }
 
 // DefaultStyle2DWidget retrieves default style object for the type, from type
@@ -412,9 +466,9 @@ func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *St
 		}
 		_, pg := KiToNode2D(g.Par)
 		if pg != nil {
-			dsty.SetStyle(&pg.Style, styprops)
+			dsty.SetStyleProps(&pg.Style, styprops)
 		} else {
-			dsty.SetStyle(nil, styprops)
+			dsty.SetStyleProps(nil, styprops)
 		}
 		dsty.IsSet = false // keep as non-set
 		tprops[pnm] = dsty
@@ -441,10 +495,11 @@ func (g *Node2DBase) Style2DWidget() {
 	var pagg *ki.Props
 	_, pg := KiToNode2D(g.Par)
 	if pg != nil {
-		g.Style.SetStyle(&pg.Style, g.Properties())
+		g.Style.SetStyleProps(&pg.Style, g.Properties())
 		pagg = &pg.CSSAgg
 	} else {
-		g.Style.SetStyle(nil, g.Properties())
+		g.CSSAgg = nil // restart
+		g.Style.SetStyleProps(nil, g.Properties())
 	}
 
 	if pagg != nil {
@@ -460,6 +515,7 @@ func (g *Node2DBase) Style2DWidget() {
 	if g.Style.Inactive {                   // inactive can only set, not clear
 		g.SetInactive()
 	}
+	g.Style.Use() // activates currentColor etc
 }
 
 // AggCSS aggregates css properties
@@ -472,9 +528,9 @@ func AggCSS(agg *ki.Props, css ki.Props) {
 	}
 }
 
-// ApplyCSS applies css styles to given node, using key to select sub-props
+// ApplyCSSWidget applies css styles to given node, using key to select sub-props
 // from overall properties list
-func ApplyCSS(node Node2D, key string, css ki.Props) bool {
+func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
 	pp, got := css[key]
 	if !got {
 		return false
@@ -487,20 +543,86 @@ func ApplyCSS(node Node2D, key string, css ki.Props) bool {
 	nb := node.AsNode2D()
 	_, pg := KiToNode2D(node.Parent())
 	if pg != nil {
-		nb.Style.SetStyle(&pg.Style, pmap)
+		nb.Style.SetStyleProps(&pg.Style, pmap)
 	} else {
-		nb.Style.SetStyle(nil, pmap)
+		nb.Style.SetStyleProps(nil, pmap)
 	}
 	return true
 }
 
+// StyleCSSWidget applies css style properties to given Widget node, parsing
+// out type, .class, and #name selectors
 func StyleCSSWidget(node Node2D, css ki.Props) {
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	ApplyCSS(node, tyn, css)
+	ApplyCSSWidget(node, tyn, css)
 	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	ApplyCSS(node, cln, css)
+	ApplyCSSWidget(node, cln, css)
 	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSS(node, idnm, css)
+	ApplyCSSWidget(node, idnm, css)
+}
+
+// ApplyCSSSVG applies css styles to given node, using key to select sub-props
+// from overall properties list
+func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+
+	nb := node.AsNode2D()
+	_, pg := KiToNode2D(node.Parent())
+	if pg != nil {
+		nb.Paint.SetStyleProps(&pg.Paint, pmap)
+	} else {
+		nb.Paint.SetStyleProps(nil, pmap)
+	}
+	return true
+}
+
+// StyleCSSSVG applies css style properties to given SVG node, parsing
+// out type, .class, and #name selectors
+func StyleCSSSVG(node Node2D, css ki.Props) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	ApplyCSSSVG(node, tyn, css)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	ApplyCSSSVG(node, cln, css)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	ApplyCSSSVG(node, idnm, css)
+}
+
+// SetStyleXML sets style attributes from XML style string, which contains ';'
+// separated name: value pairs
+func (g *Node2DBase) SetStyleXML(style string) {
+	st := strings.Split(style, ";")
+	for _, s := range st {
+		kv := strings.Split(s, ":")
+		if len(kv) >= 2 {
+			k := strings.TrimSpace(strings.ToLower(kv[0]))
+			v := strings.TrimSpace(kv[1])
+			g.SetProp(k, v)
+		}
+	}
+}
+
+// SetStdAttr sets standard attributes of node given XML-style name /
+// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
+func (g *Node2DBase) SetStdAttr(name, val string) bool {
+	switch name {
+	case "id":
+		g.SetName(val)
+		return true
+	case "class":
+		g.Class = val
+		return true
+	case "style":
+		g.SetStyleXML(val)
+		return true
+	}
+	return false
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -626,7 +748,7 @@ func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 	g.This.(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
-// PusBounds pushes our bounding-box bounds onto the bounds stack if non-empty
+// PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
 // -- this limits our drawing to our own bounding box, automatically -- must
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
@@ -668,24 +790,25 @@ func (g *Node2DBase) SetMinPrefHeight(val units.Value) {
 	g.SetProp("min-height", val)
 }
 
-// set stretchy max width -- can grow to take up avail room
+// SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
 func (g *Node2DBase) SetStretchMaxWidth() {
 	g.SetProp("max-width", units.NewValue(-1, units.Px))
 }
 
-// set stretchy max height -- can grow to take up avail room
+// SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
 func (g *Node2DBase) SetStretchMaxHeight() {
 	g.SetProp("max-height", units.NewValue(-1, units.Px))
 }
 
-// set all width options (width, min-width, max-width) to a fixed width value
+// SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
 func (g *Node2DBase) SetFixedWidth(val units.Value) {
 	g.SetProp("width", val)
 	g.SetProp("min-width", val)
 	g.SetProp("max-width", val)
 }
 
-// set all height options (height, min-height, max-height) to a fixed height value
+// SetFixedHeight sets all height options (height, min-height, max-height) to
+// a fixed height value
 func (g *Node2DBase) SetFixedHeight(val units.Value) {
 	g.SetProp("height", val)
 	g.SetProp("min-height", val)
@@ -696,7 +819,7 @@ func (g *Node2DBase) SetFixedHeight(val units.Value) {
 // Tree-walking code for the init, style, layout, render passes
 //  typically called by Viewport but can be called by others
 
-// full render of the tree
+// FullRender2DTree does a full render of the tree
 func (g *Node2DBase) FullRender2DTree() {
 	updt := g.UpdateStart()
 	g.Init2DTree()
@@ -707,8 +830,8 @@ func (g *Node2DBase) FullRender2DTree() {
 	g.UpdateEndNoSig(updt)
 }
 
-// re-render of the tree -- after it has already been initialized and styled
-// -- just does layout and render passes
+// ReRender2DTree does a re-render of the tree -- after it has already been
+// initialized and styled -- just does layout and render passes
 func (g *Node2DBase) ReRender2DTree() {
 	ld := g.LayData // save our current layout data
 	updt := g.UpdateStart()
@@ -721,9 +844,10 @@ func (g *Node2DBase) ReRender2DTree() {
 	g.UpdateEndNoSig(updt)
 }
 
-// initialize scene graph tree from node it is called on -- only needs to be
-// done once but must be robust to repeated calls -- use a flag if necessary
-// -- needed after structural updates to ensure all nodes are updated
+// Init2DTree initializes scene graph tree from node it is called on -- only
+// needs to be done once but must be robust to repeated calls -- use a flag if
+// necessary -- needed after structural updates to ensure all nodes are
+// updated
 func (g *Node2DBase) Init2DTree() {
 	pr := prof.Start("Node2D.Init2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -737,8 +861,8 @@ func (g *Node2DBase) Init2DTree() {
 	pr.End()
 }
 
-// style scene graph tree from node it is called on -- only needs to be
-// done after a structural update in case inherited options changed
+// Style2DTree styles scene graph tree from node it is called on -- only needs
+// to be done after a structural update in case inherited options changed
 func (g *Node2DBase) Style2DTree() {
 	pr := prof.Start("Node2D.Style2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -752,7 +876,7 @@ func (g *Node2DBase) Style2DTree() {
 	pr.End()
 }
 
-// do the sizing as a depth-first pass
+// Size2DTree does the sizing as a depth-first pass
 func (g *Node2DBase) Size2DTree() {
 	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
@@ -779,7 +903,8 @@ func (g *Node2DBase) Size2DTree() {
 	pr.End()
 }
 
-// layout pass -- each node iterates over children for maximum control -- this starts with parent VpBBox -- can be called de novo
+// Layout2DTree does layout pass -- each node iterates over children for
+// maximum control -- this starts with parent VpBBox -- can be called de novo
 func (g *Node2DBase) Layout2DTree() {
 	pr := prof.Start("Node2D.Layout2DTree")
 	parBBox := image.ZR
@@ -791,7 +916,9 @@ func (g *Node2DBase) Layout2DTree() {
 	pr.End()
 }
 
-// move2d pass -- each node iterates over children for maximum control -- this starts with parent VpBBox and current delta -- can be called de novo
+// Move2DTree does move2d pass -- each node iterates over children for maximum
+// control -- this starts with parent VpBBox and current delta -- can be
+// called de novo
 func (g *Node2DBase) Move2DTree() {
 	parBBox := image.ZR
 	_, pg := KiToNode2D(g.Par)
@@ -802,7 +929,7 @@ func (g *Node2DBase) Move2DTree() {
 	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
 }
 
-// render just calls on parent node and it takes full responsibility for
+// Render2DTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
 func (g *Node2DBase) Render2DTree() {
@@ -811,8 +938,8 @@ func (g *Node2DBase) Render2DTree() {
 	pr.End()
 }
 
-// this provides a basic widget box-model subtraction of margin and padding to
-// children -- call in ChildrenBBox2D for most widgets
+// ChildrenBBox2DWidget provides a basic widget box-model subtraction of
+// margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
 	nb := g.VpBBox
 	spc := int(g.Style.BoxSpace())
@@ -823,7 +950,8 @@ func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
 	return nb
 }
 
-// layout on all of node's children, giving them the ChildrenBBox2D -- default call at end of Layout2D
+// Layout2DChildren does layout on all of node's children, giving them the
+// ChildrenBBox2D -- default call at end of Layout2D
 func (g *Node2DBase) Layout2DChildren() {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
@@ -834,7 +962,8 @@ func (g *Node2DBase) Layout2DChildren() {
 	}
 }
 
-// move all of node's children, giving them the ChildrenBBox2D -- default call at end of Move2D
+// Move2dChildren moves all of node's children, giving them the ChildrenBBox2D
+// -- default call at end of Move2D
 func (g *Node2DBase) Move2DChildren(delta image.Point) {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
@@ -845,7 +974,7 @@ func (g *Node2DBase) Move2DChildren(delta image.Point) {
 	}
 }
 
-// render all of node's children -- default call at end of Render2D()
+// Render2DChildren renders all of node's children -- default call at end of Render2D()
 func (g *Node2DBase) Render2DChildren() {
 	for _, kid := range g.Kids {
 		gii, _ := KiToNode2D(kid)
@@ -855,7 +984,7 @@ func (g *Node2DBase) Render2DChildren() {
 	}
 }
 
-// report on all the bboxes for everything in the tree
+// BBoxReport reports on all the bboxes for everything in the tree
 func (g *Node2DBase) BBoxReport() string {
 	rpt := ""
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -869,6 +998,7 @@ func (g *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
+// ParentWindow returns the parent window for this node
 func (g *Node2DBase) ParentWindow() *Window {
 	if g.Viewport != nil && g.Viewport.Win != nil {
 		return g.Viewport.Win
@@ -880,7 +1010,8 @@ func (g *Node2DBase) ParentWindow() *Window {
 	return wini.EmbeddedStruct(KiT_Window).(*Window)
 }
 
-// find parent viewport -- uses AsViewport2D() method on Node2D interface
+// ParentViewport returns the parent viewport -- uses AsViewport2D() method on
+// Node2D interface
 func (g *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -898,17 +1029,19 @@ func (g *Node2DBase) ParentViewport() *Viewport2D {
 	return parVp
 }
 
+// ParentSVG returns the parent SVG -- for svg-rendering nodes
 func (g *Node2DBase) ParentSVG() *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
-			return pvp.This.(*SVG)
+			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
 		}
 		pvp = pvp.ParentViewport()
 	}
 	return nil
 }
 
+// ParentLayout returns the parent layout
 func (g *Node2DBase) ParentLayout() *Layout {
 	var parLy *Layout
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
@@ -926,7 +1059,8 @@ func (g *Node2DBase) ParentLayout() *Layout {
 	return parLy
 }
 
-// find parent that is a ReRenderAnchor
+// ParentReRenderAnchor returns parent that is a ReRenderAnchor -- for
+// optimized re-rendering
 func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {

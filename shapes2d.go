@@ -82,7 +82,7 @@ func (g *Viewport2DFill) Init2D() {
 	g.Init2DBase()
 	vp := g.Viewport
 	g.Pos = Vec2DZero
-	g.Size = Vec2D{float32(vp.ViewBox.Size.X), float32(vp.ViewBox.Size.Y)} // assuming no transforms..
+	g.Size = Vec2D{float32(vp.Geom.Size.X), float32(vp.Geom.Size.Y)} // assuming no transforms..
 }
 
 func (g *Viewport2DFill) Style2D() {
@@ -825,13 +825,18 @@ func PathDataParse(d string) ([]PathData, error) {
 	var pd []PathData
 	endi := len(d) - 1
 	numSt := -1
+	numGotDec := false // did last number already get a decimal point -- if so, then an additional decimal point now acts as a delimiter -- some crazy paths actually leverage that!
 	lr := ' '
 	lstCmd := -1
 	// first pass: just do the raw parse into commands and numbers
 	for i, r := range d {
-		notn := unicode.IsNumber(r) == false && r != '.' && !(r == '-' && lr == 'e') && r != 'e'
+		num := unicode.IsNumber(r) || (r == '.' && !numGotDec) || (r == '-' && lr == 'e') || r == 'e'
+		notn := !num
 		if i == endi || notn {
-			if numSt != -1 {
+			if numSt != -1 || (i == endi && !notn) {
+				if numSt == -1 {
+					numSt = i
+				}
 				nstr := d[numSt:i]
 				if i == endi && !notn {
 					nstr = d[numSt : i+1]
@@ -839,14 +844,21 @@ func PathDataParse(d string) ([]PathData, error) {
 				p, err := strconv.ParseFloat(nstr, 32)
 				if err != nil {
 					log.Printf("gi.PathDataParse could not parse string: %v into float\n", nstr)
+					IconAutoLoad = false
 					return nil, err
 				}
 				pd = append(pd, PathData(p))
 			}
-			if r == '-' {
+			if r == '-' || r == '.' {
 				numSt = i
+				if r == '.' {
+					numGotDec = true
+				} else {
+					numGotDec = false
+				}
 			} else {
 				numSt = -1
+				numGotDec = false
 				if lstCmd != -1 { // update number of args for previous command
 					lcm, _ := pd[lstCmd].Cmd()
 					n := (len(pd) - lstCmd) - 1
@@ -869,6 +881,15 @@ func PathDataParse(d string) ([]PathData, error) {
 			}
 		} else if numSt == -1 { // got start of a number
 			numSt = i
+			if r == '.' {
+				numGotDec = true
+			} else {
+				numGotDec = false
+			}
+		} else { // inside a number
+			if r == '.' {
+				numGotDec = true
+			}
 		}
 		lr = r
 	}

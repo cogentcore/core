@@ -1385,7 +1385,7 @@ func (tv *TreeView) Style2D() {
 		return
 	}
 	tv.SetCanFocusIfActive()
-	tv.Style2DWidget()
+	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
 
 	var pst *Style
 	_, pg := KiToNode2D(tv.Par)
@@ -1394,7 +1394,7 @@ func (tv *TreeView) Style2D() {
 	}
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Style)
-		tv.StateStyles[i].SetStyle(pst, tv.StyleProps(TreeViewSelectors[i]))
+		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.Indent = units.NewValue(2, units.Ch) // default

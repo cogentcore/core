@@ -121,16 +121,16 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		win.GoStartEventLoop()
 	} else {
 		if x == 0 && y == 0 {
-			x = win.Viewport.ViewBox.Size.X / 3
-			y = win.Viewport.ViewBox.Size.Y / 3
+			x = win.Viewport.Geom.Size.X / 3
+			y = win.Viewport.Geom.Size.Y / 3
 		}
-		x = kit.MinInt(x, win.Viewport.ViewBox.Size.X-vpsz.X) // fit
-		y = kit.MinInt(y, win.Viewport.ViewBox.Size.Y-vpsz.Y) // fit
+		x = kit.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
+		y = kit.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
 		frame := dlg.Child(0).(*Frame)
 		dlg.StylePart(frame.This) // use special styles
 		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
 		dlg.Resize(vpsz)
-		dlg.ViewBox.Min = image.Point{x, y}
+		dlg.Geom.Pos = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
 		win.NextPopup = dlg.This
 	}

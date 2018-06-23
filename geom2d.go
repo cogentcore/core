@@ -9,8 +9,10 @@ import (
 	"image"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/math/fixed"
 )
@@ -485,6 +487,12 @@ type XFormMatrix2D struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
 
+var KiT_XFormMatrix2D = kit.Types.AddType(&XFormMatrix2D{}, XFormMatrix2DProps)
+
+var XFormMatrix2DProps = ki.Props{
+	"style-prop": true,
+}
+
 func Identity2D() XFormMatrix2D {
 	return XFormMatrix2D{
 		1, 0,
@@ -572,6 +580,71 @@ func (a XFormMatrix2D) Shear(x, y float32) XFormMatrix2D {
 	return Shear2D(x, y).Multiply(a)
 }
 
+// SetString processes the standard SVG-style transform strings
+func (a *XFormMatrix2D) SetString(str string) bool {
+	cmd := str
+	vals := ""
+	pidx := strings.IndexByte(str, '(')
+	if pidx >= 0 {
+		cmd = str[:pidx]
+		vals = strings.TrimSuffix(str[pidx+1:], ")")
+	}
+	pts := SVGReadPoints(vals)
+	switch cmd {
+	case "translate":
+		*a = Translate2D(pts[0], pts[1])
+		// fmt.Printf("translate %v, %v\n", pts[0], pts[1])
+	}
+	return true
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Geom2DInt
+
+// Geom2DInt defines a geometry in 2D dots units (int) -- this is just a more
+// convenient format than image.Rectangle for cases where the size and
+// position are independently updated (e.g., Viewport)
+type Geom2DInt struct {
+	Pos  image.Point
+	Size image.Point
+}
+
+// Bounds converts geom to equivalent image.Rectangle
+func (gm *Geom2DInt) Bounds() image.Rectangle {
+	return image.Rect(gm.Pos.X, gm.Pos.Y, gm.Pos.X+gm.Size.X, gm.Pos.Y+gm.Size.Y)
+}
+
+// SizeRect converts geom to rect version of size at 0 pos
+func (gm *Geom2DInt) SizeRect() image.Rectangle {
+	return image.Rect(0, 0, gm.Size.X, gm.Size.Y)
+}
+
+// SetRect sets values from image.Rectangle
+func (gm *Geom2DInt) SetRect(r image.Rectangle) {
+	gm.Pos = r.Min
+	gm.Size = r.Size()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ViewBox defines the SVG viewbox
+
+// ViewBox is used in SVG to define the coordinate system
+type ViewBox struct {
+	Min                 Vec2D                      `desc:"offset or starting point in parent Viewport2D"`
+	Size                Vec2D                      `desc:"size of viewbox within parent Viewport2D"`
+	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"`
+}
+
+// todo: need to implement the viewbox preserve aspect ratio logic!
+
+// Defaults returns viewbox to defaults
+func (vb *ViewBox) Defaults() {
+	vb.Min = Vec2DZero
+	vb.Size = Vec2DZero
+	vb.PreserveAspectRatio.Align = None
+	vb.PreserveAspectRatio.MeetOrSlice = Meet
+}
+
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
 type ViewBoxAlign int32
 
@@ -607,33 +680,6 @@ const (
 type ViewBoxPreserveAspectRatio struct {
 	Align       ViewBoxAlign       `svg:"align" desc:"how to align x,y coordinates within viewbox"`
 	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice" desc:"how to scale the view box relative to the viewport"`
-}
-
-// ViewBox defines a region in 2D bitmap image space -- it must ALWAYS be in terms of underlying pixels
-type ViewBox2D struct {
-	Min                 image.Point                `svg:"{min-x,min-y}" desc:"offset or starting point in parent Viewport2D"`
-	Size                image.Point                `svg:"{width,height}" desc:"size of viewbox within parent Viewport2D"`
-	PreserveAspectRatio ViewBoxPreserveAspectRatio `svg:"preserveAspectRatio" desc:"how to scale the view box within parent Viewport2D"`
-}
-
-// todo: need to implement the viewbox preserve aspect ratio logic!
-
-// Bounds converts viewbox to bounds
-func (vb *ViewBox2D) Bounds() image.Rectangle {
-	return image.Rect(vb.Min.X, vb.Min.Y, vb.Min.X+vb.Size.X, vb.Min.Y+vb.Size.Y)
-}
-
-// SizeRect converts viewbox to rect version of size
-func (vb *ViewBox2D) SizeRect() image.Rectangle {
-	return image.Rect(0, 0, vb.Size.X, vb.Size.Y)
-}
-
-// Defaults returns viewbox to defaults
-func (vb *ViewBox2D) Defaults() {
-	vb.Min = image.ZP
-	vb.Size = image.ZP
-	vb.PreserveAspectRatio.Align = None
-	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
 
 ///////////////////////////////////////////////////////////

@@ -150,6 +150,10 @@ func (s *ShadowStyle) HasShadow() bool {
 	return (s.HOffset.Dots > 0 || s.VOffset.Dots > 0)
 }
 
+// CurrentColor is automatically updated from the Color setting of a Style and
+// accessible as a color name in any other style as currentColor
+var CurrentColor Color
+
 // Style has all the CSS-based style elements -- used for widget-type objects
 type Style struct {
 	IsSet         bool            `desc:"has this style been set from object values yet?"`
@@ -162,7 +166,7 @@ type Style struct {
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
 	Font          FontStyle       `xml:"font" desc:"font parameters"`
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
-	Color         Color           `xml:"color" inherit:"true" desc:"text color"`
+	Color         Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
 	Background    BackgroundStyle `xml:"background" desc:"background settings"`
 	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
@@ -206,9 +210,9 @@ func (s *Style) CopyFrom(cp *Style) {
 	s.lastUnCtxt = lu
 }
 
-// SetStyle sets style values based on given property map (name: value pairs),
+// SetStyleProps sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
-func (s *Style) SetStyle(parent *Style, props ki.Props) {
+func (s *Style) SetStyleProps(parent *Style, props ki.Props) {
 	if !s.IsSet && parent != nil { // first time
 		StyleFields.Inherit(s, parent)
 	}
@@ -219,6 +223,15 @@ func (s *Style) SetStyle(parent *Style, props ki.Props) {
 	s.Text.SetStylePost()
 	s.PropsNil = (len(props) == 0)
 	s.IsSet = true
+}
+
+// Use activates the style settings in this style for any general settings and
+// parameters -- typically specific style values are used directly in
+// particular rendering steps, but some settings also impact global variables,
+// such as CurrentColor -- this is automatically called for a successful
+// PushBounds in Node2DBase
+func (s *Style) Use() {
+	CurrentColor = s.Color
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -509,6 +522,8 @@ func (sf *StyledField) FieldIface(obj interface{}) interface{} {
 		return (*Color)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npt == KiT_ColorSpec:
 		return (*ColorSpec)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npt == KiT_XFormMatrix2D:
+		return (*XFormMatrix2D)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npt.Name() == "Value":
 		return (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npk >= reflect.Int && npk <= reflect.Uint64:
@@ -537,6 +552,10 @@ func (sf *StyledField) UnitsValue(obj interface{}) *units.Value {
 // FromProps styles given field from property value val, with optional parent object obj
 func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val interface{}, hasPar bool) {
 	fi := fld.FieldIface(obj)
+	if kit.IfaceIsNil(fi) {
+		fmt.Printf("StyleField %v of type %v has nil value\n", fld.Field.Name, fld.Field.Type.String())
+		return
+	}
 	var pfi interface{}
 	if hasPar {
 		pfi = fld.FieldIface(par)
@@ -615,6 +634,13 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", fld.Field.Name, val, val)
 			}
 		}
+	case *XFormMatrix2D:
+		switch valv := val.(type) {
+		case string:
+			fiv.SetString(valv)
+		case *XFormMatrix2D:
+			*fiv = *valv
+		}
 	default:
 		if npk >= reflect.Int && npk <= reflect.Uint64 {
 			switch valv := val.(type) {
@@ -645,6 +671,14 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 // this is the function to process a given field when walking the style
 type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
 
+// StyleValueTypes is a map of types that are used as value types in style structures
+var StyleValueTypes = map[reflect.Type]bool{
+	units.KiT_Value:   true,
+	KiT_Color:         true,
+	KiT_ColorSpec:     true,
+	KiT_XFormMatrix2D: true,
+}
+
 // WalkStyleStruct walks through a struct, calling a function on fields with
 // xml tags that are not "-", recursively through all the fields
 func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun WalkStyleFieldFunc) {
@@ -673,7 +707,8 @@ func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun Walk
 		// fmt.Printf("processing field named: %v\n", struf.Nm)
 		vf := vo.Field(i)
 		vfi := vf.Addr().Interface()
-		if ft.Kind() == reflect.Struct && ft.Name() != "Value" && ft.Name() != "Color" && ft.Name() != "ColorSpec" {
+		_, styvaltype := StyleValueTypes[ft]
+		if ft.Kind() == reflect.Struct && !styvaltype {
 			WalkStyleStruct(vfi, tag, baseoff+struf.Offset, fun)
 		} else {
 			if tag == "" { // non-struct = don't process

@@ -56,7 +56,7 @@ type Paint struct {
 	FillStyle   FillStyle
 	FontStyle   FontStyle
 	TextStyle   TextStyle
-	XForm       XFormMatrix2D `xml:"-" json:"-" desc:"our additions to transform -- pushed to render state"`
+	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
 }
@@ -90,10 +90,10 @@ func (pc *Paint) CopyFrom(cp *Paint) {
 	pc.lastUnCtxt = lu
 }
 
-// SetStyle sets paint values based on given property map (name: value pairs),
-// inheriting elements as appropriate from parent, and also having a default
-// style for the "initial" setting
-func (pc *Paint) SetStyle(parent *Paint, props ki.Props) {
+// SetStyleProps sets paint values based on given property map (name: value
+// pairs), inheriting elements as appropriate from parent, and also having a
+// default style for the "initial" setting
+func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
 	if !pc.StyleSet && parent != nil { // first time
 		PaintFields.Inherit(pc, parent)
 	}

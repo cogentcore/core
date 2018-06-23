@@ -12,6 +12,7 @@ package gi
 
 import (
 	"encoding/xml"
+	"fmt"
 	"image/color"
 	"io"
 	"log"
@@ -253,16 +254,22 @@ func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) b
 func (cs *ColorSpec) ReadXML(reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
-	se, err := decoder.Token()
-	if err != nil {
-		if err == io.EOF {
-			log.Println("gi.ColorSpec.ReadXML empty input")
-		} else {
+	for {
+		t, err := decoder.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			log.Printf("gi.ColorSpec parsing error: %v\n", err)
+			return err
 		}
-		return err
+		switch se := t.(type) {
+		case xml.StartElement:
+			return cs.UnmarshalXML(decoder, se)
+			// todo: ignore rest?
+		}
 	}
-	return cs.UnmarshalXML(decoder, se.(xml.StartElement))
+	return nil
 }
 
 // UnmarshalXML parses the given XML-formatted string to set the color
@@ -274,7 +281,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 		var t xml.Token
 		var err error
 		if start != nil {
-			t = start
+			t = *start
 			start = nil
 		} else {
 			t, err = decoder.Token()
@@ -292,7 +299,9 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 			case "linearGradient":
 				cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0},
 					IsRadial: false, Matrix: rasterx.Identity}
+				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
+					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "x1":
@@ -316,6 +325,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					IsRadial: true, Matrix: rasterx.Identity}
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
+					// fmt.Printf("stop attr: %v val: %v\n", attr.Name.Local, attr.Value)
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "r":
@@ -365,14 +375,23 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 						return err
 					}
 				}
-				cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+				if cs.Gradient == nil {
+					fmt.Printf("no gradient but stops in: %v stop: %v\n", cs, stop)
+				} else {
+					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+				}
 			default:
 				errStr := "gi.GolorSpec Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
+				IconAutoLoad = false
 			}
 		case xml.EndElement:
 			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {
-				break // done
+				// fmt.Printf("gi.ColorSpec got gradient end element: %v\n", se.Name.Local)
+				return nil
+			}
+			if se.Name.Local != "stop" {
+				fmt.Printf("gi.ColorSpec got unexpected end element: %v\n", se.Name.Local)
 			}
 		case xml.CharData:
 		}

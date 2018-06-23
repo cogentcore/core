@@ -289,78 +289,84 @@ func (fl *FontLib) AddFontPaths(paths ...string) bool {
 	return fl.UpdateFontsAvail()
 }
 
+// UpdateFontsAvail scans for all fonts we can use on the FontPaths
 func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
-		log.Print("FontLib: no font paths -- need to add some\n")
+		log.Print("gi.FontLib: no font paths -- need to add some\n")
 		return false
 	}
 	if len(fl.FontsAvail) > 0 {
 		fl.FontsAvail = make(map[string]string)
 	}
-
-	ext := ".ttf" // for now -- might need more
-
 	for _, p := range fl.FontPaths {
-		err := filepath.Walk(p, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				fmt.Printf("FontLib: error accessing path %q: %v\n", p, err)
-				return err
-			}
-			if filepath.Ext(path) == ext {
-				_, fn := filepath.Split(path)
-				fn = fn[:len(fn)-len(ext)]
-				bfn := fn
-				bfn = strings.TrimSuffix(fn, "bd")
-				bfn = strings.TrimSuffix(bfn, "bi")
-				bfn = strings.TrimSuffix(bfn, "z")
-				bfn = strings.TrimSuffix(bfn, "b")
-				if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
-					bfn = strings.TrimSuffix(bfn, "i")
-				}
-				if afn, ok := AltFontMap[bfn]; ok {
-					sfx := ""
-					if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
-						sfx = " Bold"
-					} else if strings.HasSuffix(fn, "bi") || strings.HasSuffix(fn, "z") {
-						sfx = " Bold Italic"
-					} else if strings.HasSuffix(fn, "i") {
-						sfx = " Italic"
-					}
-					fn = afn + sfx
-				} else {
-					fn = strings.Replace(fn, "_", " ", -1)
-					fn = strings.Replace(fn, "-", " ", -1)
-					// fn = strings.Title(fn)
-				}
-				basefn := strings.ToLower(fn)
-				if _, ok := fl.FontsAvail[basefn]; !ok {
-					fl.FontsAvail[basefn] = path
-					fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
-					if strings.Contains(basefn, "bold") {
-						fi.Weight = WeightBold
-					}
-					if strings.Contains(basefn, "italic") {
-						fi.Style = FontItalic
-					} else if strings.Contains(basefn, "oblique") {
-						fi.Style = FontOblique
-					}
-					fl.FontInfo = append(fl.FontInfo, fi)
-					// fmt.Printf("added font: %v at path %q\n", basefn, path)
-
-				}
-			}
-			return nil
-		})
-
-		if err != nil {
-			fmt.Printf("FontLib: error walking the path %q: %v\n", p, err)
-		}
+		fl.FontsAvailFromPath(p)
 	}
 	sort.Slice(fl.FontInfo, func(i, j int) bool {
 		return fl.FontInfo[i].Name < fl.FontInfo[j].Name
 	})
 
 	return len(fl.FontsAvail) > 0
+}
+
+// FontsAvailFromPath scans for all fonts we can use on a given path,
+// gathering info into FontsAvail and FontInfo
+func (fl *FontLib) FontsAvailFromPath(path string) error {
+	ext := ".ttf" // for now -- might need more
+
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("gi.FontLib: error accessing path %q: %v\n", path, err)
+			return err
+		}
+		if filepath.Ext(path) == ext {
+			_, fn := filepath.Split(path)
+			fn = fn[:len(fn)-len(ext)]
+			bfn := fn
+			bfn = strings.TrimSuffix(fn, "bd")
+			bfn = strings.TrimSuffix(bfn, "bi")
+			bfn = strings.TrimSuffix(bfn, "z")
+			bfn = strings.TrimSuffix(bfn, "b")
+			if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
+				bfn = strings.TrimSuffix(bfn, "i")
+			}
+			if afn, ok := AltFontMap[bfn]; ok {
+				sfx := ""
+				if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
+					sfx = " Bold"
+				} else if strings.HasSuffix(fn, "bi") || strings.HasSuffix(fn, "z") {
+					sfx = " Bold Italic"
+				} else if strings.HasSuffix(fn, "i") {
+					sfx = " Italic"
+				}
+				fn = afn + sfx
+			} else {
+				fn = strings.Replace(fn, "_", " ", -1)
+				fn = strings.Replace(fn, "-", " ", -1)
+				// fn = strings.Title(fn)
+			}
+			basefn := strings.ToLower(fn)
+			if _, ok := fl.FontsAvail[basefn]; !ok {
+				fl.FontsAvail[basefn] = path
+				fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
+				if strings.Contains(basefn, "bold") {
+					fi.Weight = WeightBold
+				}
+				if strings.Contains(basefn, "italic") {
+					fi.Style = FontItalic
+				} else if strings.Contains(basefn, "oblique") {
+					fi.Style = FontOblique
+				}
+				fl.FontInfo = append(fl.FontInfo, fi)
+				// fmt.Printf("added font: %v at path %q\n", basefn, path)
+
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("gi.FontLib: error walking the path %q: %v\n", path, err)
+	}
+	return err
 }
 
 // Font gets a particular font
@@ -376,7 +382,7 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 	if path := fl.FontsAvail[fontnm]; path != "" {
 		face, err := LoadFontFace(path, points)
 		if err != nil {
-			log.Printf("FontLib: error loading font %v\n", err)
+			log.Printf("gi.FontLib: error loading font %v\n", err)
 			return nil, err
 		}
 		fl.loadMu.Lock()
@@ -390,7 +396,7 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 		fl.loadMu.Unlock()
 		return face, nil
 	}
-	return nil, fmt.Errorf("FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
+	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
 }
 
 // FontAvail determines if a given font name is available (case insensitive)
@@ -401,4 +407,4 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 }
 
 // FontInfoExample is example text to demonstrate fonts -- from Inkscape
-var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()"
+var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国"

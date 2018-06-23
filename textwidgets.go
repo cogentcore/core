@@ -806,7 +806,7 @@ func (tf *TextField) Style2D() {
 	}
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Style)
-		tf.StateStyles[i].SetStyle(pst, tf.StyleProps(TextFieldSelectors[i]))
+		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]))
 		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
 }

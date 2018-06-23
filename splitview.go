@@ -339,7 +339,7 @@ func (g *Splitter) Style2D() {
 	}
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(SliderSelectors[i]))
+		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)

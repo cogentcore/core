@@ -61,7 +61,7 @@ func mainrun() {
 
 	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
-	grid.SetProp("columns", 5)
+	grid.SetProp("columns", 2)
 	grid.SetProp("align-vert", "center")
 	grid.SetProp("align-horiz", "center")
 	grid.SetProp("margin", 2.0)

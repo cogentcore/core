@@ -113,7 +113,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
 
-	pvp.ViewBox.Min = image.Point{x, y}
+	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutCol
@@ -128,10 +128,10 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.Size2DTree()                                 // collect sizes
 	pvp.Win = nil
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
-	x = kit.MinInt(x, mainVp.ViewBox.Size.X-vpsz.X) // fit
-	y = kit.MinInt(y, mainVp.ViewBox.Size.Y-vpsz.Y) // fit
+	x = kit.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = kit.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
-	pvp.ViewBox.Min = image.Point{x, y}
+	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 
 	win.NextPopup = pvp.This

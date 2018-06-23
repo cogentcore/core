@@ -307,6 +307,12 @@ func (c *Color) SetString(str string, base color.Color) error {
 		if clr != nil {
 			*c = *clr
 		}
+	case strings.HasPrefix(low, "url("):
+		val := low[4:]
+		val = strings.TrimRight(val, ")")
+		// todo: find name
+		fmt.Printf("todo: find color url -- need a node to look in..  %v\n", val)
+		c.SetColor(color.Black)
 	default:
 		if hidx := strings.Index(low, "-"); hidx > 0 {
 			cmd := low[:hidx]
@@ -379,6 +385,10 @@ func (c *Color) SetString(str string, base color.Color) error {
 			return nil
 		case "transparent":
 			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
+			return nil
+		case "currentcolor":
+			*c = CurrentColor // current style.Color value
+			// fmt.Printf("cur col: %v\n", *c)
 			return nil
 		default:
 			nc, ok := colornames.Map[low]

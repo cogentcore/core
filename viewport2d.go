@@ -32,7 +32,7 @@ import (
 type Viewport2D struct {
 	Node2DBase
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
-	ViewBox ViewBox2D   `xml:"viewBox" desc:"viewbox within any parent Viewport2D"`
+	Geom    Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 	Pixels  *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
 	OSImage oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
@@ -50,7 +50,7 @@ var Viewport2DProps = ki.Props{
 func NewViewport2D(width, height int) *Viewport2D {
 	sz := image.Point{width, height}
 	vp := &Viewport2D{
-		ViewBox: ViewBox2D{Size: sz},
+		Geom: Geom2DInt{Size: sz},
 	}
 	var err error
 	vp.OSImage, err = oswin.TheApp.NewImage(sz)
@@ -63,7 +63,7 @@ func NewViewport2D(width, height int) *Viewport2D {
 	return vp
 }
 
-// Resize resizes the viewport, creating a new image -- updates ViewBox Size
+// Resize resizes the viewport, creating a new image -- updates Geom Size
 func (vp *Viewport2D) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
@@ -71,8 +71,8 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	if vp.Pixels != nil {
 		ib := vp.Pixels.Bounds().Size()
 		if ib == nwsz {
-			vp.ViewBox.Size = nwsz // make sure
-			return                 // already good
+			vp.Geom.Size = nwsz // make sure
+			return              // already good
 		}
 	}
 	if vp.OSImage != nil {
@@ -86,7 +86,7 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	}
 	vp.Pixels = vp.OSImage.RGBA()
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
-	vp.ViewBox.Size = nwsz // make sure
+	vp.Geom.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
@@ -169,7 +169,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Over)
 		return
 	}
-	r := vp.ViewBox.Bounds()
+	r := vp.Geom.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
 		pgi, _ := KiToNode2D(vp.Par)
@@ -272,10 +272,10 @@ func (vp *Viewport2D) Size2D() {
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
 	pos := vp.Style.Layout.PosDots().ToPoint()
 	if pos != image.ZP {
-		vp.ViewBox.Min = pos
+		vp.Geom.Pos = pos
 	}
-	if !vp.IsSVG() && vp.ViewBox.Size != image.ZP {
-		vp.LayData.AllocSize.SetPoint(vp.ViewBox.Size)
+	if !vp.IsSVG() && vp.Geom.Size != image.ZP {
+		vp.LayData.AllocSize.SetPoint(vp.Geom.Size)
 	}
 }
 
@@ -301,9 +301,9 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 	vp.VpBBox = vp.Pixels.Bounds()
 	vp.SetWinBBox()    // this adds all PARENT offsets
 	if !vp.IsPopup() { // non-popups use allocated positions
-		vp.ViewBox.Min = vp.LayData.AllocPos.ToPointFloor()
+		vp.Geom.Pos = vp.LayData.AllocPos.ToPointFloor()
 	}
-	vp.WinBBox = vp.WinBBox.Add(vp.ViewBox.Min)
+	vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
 	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.PathUnique(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
 
@@ -371,7 +371,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 func (vp *Viewport2D) FillViewport() {
-	vp.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.ViewBox.Size), &vp.Style.Background.Color)
+	vp.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Style.Background.Color)
 }
 
 func (vp *Viewport2D) Render2D() {

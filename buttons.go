@@ -448,7 +448,7 @@ func (g *ButtonBase) Style2D() {
 	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
-		g.StateStyles[i].SetStyle(pst, g.StyleProps(ButtonSelectors[i]))
+		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
 	g.This.(ButtonWidget).ConfigParts()

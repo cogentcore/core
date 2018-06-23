@@ -298,7 +298,7 @@ func (w *Window) UploadAllViewports() {
 			gii, _ := KiToNode2D(pop)
 			if gii != nil {
 				vp := gii.AsViewport2D()
-				r := vp.ViewBox.Bounds()
+				r := vp.Geom.Bounds()
 				if Render2DTrace {
 					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
 				}
@@ -310,7 +310,7 @@ func (w *Window) UploadAllViewports() {
 		gii, _ := KiToNode2D(w.Popup)
 		if gii != nil {
 			vp := gii.AsViewport2D()
-			r := vp.ViewBox.Bounds()
+			r := vp.Geom.Bounds()
 			if Render2DTrace {
 				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
 			}
