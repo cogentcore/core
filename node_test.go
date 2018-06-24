@@ -114,10 +114,10 @@ func TestNodeUniqueNames(t *testing.T) {
 	if pth := child.PathUnique(); pth != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", pth)
 	}
-	if pth := child2.PathUnique(); pth != "/par1/child1_1" {
+	if pth := child2.PathUnique(); pth != "/par1/child1_001" {
 		t.Errorf("child2 path != correct, was %v", pth)
 	}
-	if pth := child3.PathUnique(); pth != "/par1/child1_2" {
+	if pth := child3.PathUnique(); pth != "/par1/child1_002" {
 		t.Errorf("child3 path != correct, was %v", pth)
 	}
 
@@ -170,7 +170,7 @@ func TestNodeFindName(t *testing.T) {
 }
 
 func TestNodeFindNameUnique(t *testing.T) {
-	names := [...]string{"child", "child_1", "child_2", "child_3", "child_4", "child_5"}
+	names := [...]string{"child", "child_001", "child_002", "child_003", "child_004", "child_005"}
 	parent := Node{}
 	parent.InitName(&parent, "par")
 	for range names {
@@ -456,7 +456,7 @@ func TestNodeCallFun(t *testing.T) {
 	})
 	// fmt.Printf("result: %v\n", res)
 
-	trg := []string{"par1, fun_down, lev 0", "child1, fun_down, lev 1", "child1_1, fun_down, lev 1", "subchild1, fun_down, lev 2", "child1_2, fun_down, lev 1"}
+	trg := []string{"par1, fun_down, lev 0", "child1, fun_down, lev 1", "child1_001, fun_down, lev 1", "subchild1, fun_down, lev 2", "child1_002, fun_down, lev 1"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FuncDown error -- results: %v != target: %v\n", res, trg)
 	}
@@ -468,7 +468,7 @@ func TestNodeCallFun(t *testing.T) {
 	})
 	//	fmt.Printf("result: %v\n", res)
 
-	trg = []string{"subchild1, fun_up", "child1_1, fun_up", "par1, fun_up"}
+	trg = []string{"subchild1, fun_up", "child1_001, fun_up", "par1, fun_up"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FuncUp error -- results: %v != target: %v\n", res, trg)
 	}
@@ -527,7 +527,7 @@ func TestNodeUpdate(t *testing.T) {
 	})
 	// fmt.Printf("res: %v\n", res)
 
-	trg = []string{"par1 false", "child1 false", "child1_1 false", "subchild1 false", "child1_2 false"}
+	trg = []string{"par1 false", "child1 false", "child1_001 false", "subchild1 false", "child1_002 false"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("update counts error -- results: %v != target: %v\n", res, trg)
 	}

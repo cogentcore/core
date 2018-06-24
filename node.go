@@ -21,7 +21,6 @@ import (
 
 	"log"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/goki/ki/bitflag"
@@ -184,45 +183,52 @@ func (n *Node) SetUniqueName(name string) {
 	n.UniqueNm = name
 }
 
-// make sure that the names are unique -- n^2 ish
+// UniquifyPreserveNameLimit is the number of children below which a more
+// expensive approach is taken to uniquify the names to guarantee unique
+// paths, which preserves the original name wherever possible -- formatting of
+// index assumes this limit is less than 1000
+var UniquifyPreserveNameLimit = 100
+
+// UniquifyNames makes sure that the names are unique -- the "deluxe" version
+// preserves the regular User-given name but is relatively expensive (creates
+// a map), so is only used below a certain size (UniquifyPreserveNameLimit =
+// 100), above which the index is appended, guaranteeing uniqueness at the
+// cost of making paths longer and less user-friendly
 func (n *Node) UniquifyNames() {
-	if len(n.Kids) > 100 { // todo: figure out a better strategy for this many
+	pr := prof.Start("ki.Node.UniquifyNames")
+	defer pr.End()
+
+	sz := len(n.Kids)
+	if sz > UniquifyPreserveNameLimit {
+		sfmt := "%v_%05d"
+		switch {
+		case sz > 9999999:
+			sfmt = "%v_%10d"
+		case sz > 999999:
+			sfmt = "%v_%07d"
+		case sz > 99999:
+			sfmt = "%v_%06d"
+		}
+		for i, child := range n.Kids {
+			child.SetUniqueName(fmt.Sprintf(sfmt, child.Name(), i))
+		}
 		return
 	}
-	pr := prof.Start("ki.Node.UniquifyNames")
+	nmap := make(map[string]int, sz)
 	for i, child := range n.Kids {
 		if len(child.UniqueName()) == 0 {
 			if n.Par != nil {
-				child.SetUniqueName(n.Par.UniqueName())
+				child.SetUniqueName(fmt.Sprintf("%v_%03d", n.Par.UniqueName(), i))
 			} else {
-				child.SetUniqueName(fmt.Sprintf("c%04d", i))
+				child.SetUniqueName(fmt.Sprintf("c%03d", i))
 			}
 		}
-		for { // changed
-			changed := false
-			for j := i - 1; j >= 0; j-- { // check all prior
-				if child.UniqueName() == n.Kids[j].UniqueName() {
-					if idx := strings.LastIndex(child.UniqueName(), "_"); idx >= 0 {
-						curnum, err := strconv.ParseInt(child.UniqueName()[idx+1:], 10, 64)
-						if err == nil { // it was a number
-							curnum++
-							child.SetUniqueName(child.UniqueName()[:idx+1] +
-								strconv.FormatInt(curnum, 10))
-							changed = true
-							break
-						}
-					}
-					child.SetUniqueName(child.UniqueName() + "_1")
-					changed = true
-					break
-				}
-			}
-			if !changed {
-				break
-			}
+		if _, taken := nmap[child.UniqueName()]; taken {
+			child.SetUniqueName(fmt.Sprintf("%v_%03d", child.UniqueName(), i))
+		} else {
+			nmap[child.UniqueName()] = i
 		}
 	}
-	pr.End()
 }
 
 //////////////////////////////////////////////////////////////////////////
