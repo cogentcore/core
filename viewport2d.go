@@ -269,7 +269,7 @@ func (vp *Viewport2D) Style2D() {
 func (vp *Viewport2D) Size2D() {
 	vp.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := vp.Style.Layout.PosDots().ToPoint()
+	pos := vp.Sty.Layout.PosDots().ToPoint()
 	if pos != image.ZP {
 		vp.Geom.Pos = pos
 	}
@@ -371,7 +371,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (vp *Viewport2D) FillViewport() {
 	rs := vp.Render
-	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Style.Background.Color)
+	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Sty.Background.Color)
 }
 
 func (vp *Viewport2D) Render2D() {

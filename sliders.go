@@ -129,7 +129,7 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 		state = SliderFocus
 	}
 	g.State = state
-	g.Style = g.StateStyles[state] // get relevant styles
+	g.Sty = g.StateStyles[state] // get relevant styles
 }
 
 // set the slider in the down state -- mouse clicked down but not yet up --
@@ -181,7 +181,7 @@ func (g *SliderBase) SizeFromAlloc() {
 	if g.LayData.AllocSize.IsZero() {
 		return
 	}
-	spc := g.Style.BoxSpace()
+	spc := g.Sty.BoxSpace()
 	g.Size = g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	if !g.ValThumb {
 		g.Size -= g.ThSize // half on each side
@@ -338,7 +338,7 @@ func (g *SliderBase) SliderEvents() {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		if me.Action == mouse.Press {
 			ed := sl.PointToRelPos(me.Where)
-			st := &sl.Style
+			st := &sl.Sty
 			spc := st.Layout.Margin.Dots + 0.5*g.ThSize
 			if sl.Dim == X {
 				sl.SliderPressed(float32(ed.X) - spc)
@@ -397,8 +397,8 @@ func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
 	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
-			mrg := g.Style.Layout.Margin.Dots
-			pad := g.Style.Layout.Padding.Dots
+			mrg := g.Sty.Layout.Margin.Dots
+			pad := g.Sty.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
 			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
@@ -496,14 +496,14 @@ func (g *Slider) Init2D() {
 func (g *Slider) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Style)
+	pst := &(g.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
+		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
-	SliderFields.ToDots(g, &g.Style.UnContext)
+	SliderFields.ToDots(g, &g.Sty.UnContext)
 	g.ThSize = g.ThumbSize.Dots
 	g.ConfigParts()
 }
@@ -513,7 +513,7 @@ func (g *Slider) Size2D() {
 	if g.ThSize == 0.0 {
 		g.Defaults()
 	}
-	st := &g.Style
+	st := &g.Sty
 	// get at least thumbsize + margin + border.size
 	sz := g.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
 	g.LayData.AllocSize.SetDim(OtherDim(g.Dim), sz)
@@ -524,7 +524,7 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DParts(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
@@ -544,7 +544,7 @@ func (g *Slider) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *Slider) Render2DDefaultStyle() {
-	st := &g.Style
+	st := &g.Sty
 	rs := &g.Viewport.Render
 	pc := &rs.Paint
 
@@ -667,14 +667,14 @@ func (g *ScrollBar) Init2D() {
 func (g *ScrollBar) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Style)
+	pst := &(g.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
+		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
-	SliderFields.ToDots(g, &g.Style.UnContext)
+	SliderFields.ToDots(g, &g.Sty.UnContext)
 }
 
 func (g *ScrollBar) Size2D() {
@@ -685,7 +685,7 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DParts(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
@@ -710,7 +710,7 @@ func (g *ScrollBar) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *ScrollBar) Render2DDefaultStyle() {
-	st := &g.Style
+	st := &g.Sty
 	rs := &g.Viewport.Render
 	pc := &rs.Paint
 

@@ -59,6 +59,7 @@ type StrokeStyle struct {
 	Color      ColorSpec   `xml:"stroke" desc:"stroke color specification"`
 	Opacity    float32     `xml:"stroke-opacity" desc:"global alpha opacity / transparency factor"`
 	Width      units.Value `xml:"stroke-width" desc:"line width"`
+	MinWidth   units.Value `xml:"stroke-min-width" desc:"minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"`
 	Dashes     []float64   `xml:"stroke-dasharray" desc:"dash pattern"`
 	Cap        LineCap     `xml:"stroke-linecap" desc:"how to draw the end cap of lines"`
 	Join       LineJoin    `xml:"stroke-linejoin" desc:"how to join line segments"`
@@ -69,7 +70,8 @@ type StrokeStyle struct {
 func (ps *StrokeStyle) Defaults() {
 	ps.On = false // svg says default is off
 	ps.SetColor(color.Black)
-	ps.Width.Set(1.0, units.Px)
+	ps.Width.Set(1.0, units.Pct)
+	ps.MinWidth.Set(.5, units.Dot)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
 	ps.MiterLimit = 4.0

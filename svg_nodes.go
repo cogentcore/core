@@ -9,214 +9,13 @@ import (
 	"image"
 	"log"
 	"strconv"
-	"strings"
 	"unicode"
 
-	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
-// shapes2d contains all the SVG-based objects for drawing shapes, paths, etc
-
-////////////////////////////////////////////////////////////////////////////////////////
-// SVGNodeBase
-
-// SVGNodeBase is an element within the SVG sub-scenegraph -- does not use
-// layout logic -- just renders into parent SVG viewport
-type SVGNodeBase struct {
-	Node2DBase
-	Paint Paint `json:"-" xml:"-" desc:"full paint information for this node"`
-}
-
-var KiT_SVGNodeBase = kit.Types.AddType(&SVGNodeBase{}, SVGNodeBaseProps)
-
-var SVGNodeBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
-}
-
-func (g *SVGNodeBase) AsSVGNode() *SVGNodeBase {
-	return g
-}
-
-// Init2DBase handles basic node initialization -- Init2D can then do special things
-func (g *SVGNodeBase) Init2DBase() {
-	g.Viewport = g.ParentViewport()
-	g.Paint.Defaults()
-	g.ConnectToViewport()
-}
-
-func (g *SVGNodeBase) Init2D() {
-	g.Init2DBase()
-}
-
-// Style2DSVG styles the Paint values directly from node properties -- for
-// SVG-style nodes -- no relevant default styling here -- parents can just set
-// props directly as needed
-func (g *SVGNodeBase) Style2DSVG() {
-	gii, _ := g.This.(Node2D)
-	if g.Viewport == nil { // robust
-		gii.Init2D()
-	}
-	SetCurStyleNode2D(gii)
-	defer SetCurStyleNode2D(nil)
-	var pagg *ki.Props
-	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
-	g.Paint.StyleSet = false  // this is always first call, restart
-	if pg != nil {
-		g.Paint.SetStyleProps(&pg.Paint, g.Properties())
-		pagg = &pg.CSSAgg
-	} else {
-		g.Paint.SetStyleProps(nil, g.Properties())
-	}
-	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
-
-	if pagg != nil {
-		AggCSS(&g.CSSAgg, *pagg)
-	}
-	AggCSS(&g.CSSAgg, g.CSS)
-	StyleCSSSVG(gii, g.CSSAgg)
-}
-
-// ApplyCSSSVG applies css styles to given node, using key to select sub-props
-// from overall properties list
-func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
-	pp, got := css[key]
-	if !got {
-		return false
-	}
-	pmap, ok := pp.(ki.Props) // must be a props map
-	if !ok {
-		return false
-	}
-
-	nb := node.AsSVGNode()
-	if nb == nil {
-		return false
-	}
-	if psvgi, _ := KiToNode2D(node.Parent()); psvgi != nil {
-		if psvg := psvgi.AsSVGNode(); psvg != nil {
-			nb.Paint.SetStyleProps(&psvg.Paint, pmap)
-		} else {
-			nb.Paint.SetStyleProps(nil, pmap)
-		}
-	} else {
-		nb.Paint.SetStyleProps(nil, pmap)
-	}
-	return true
-}
-
-// StyleCSSSVG applies css style properties to given SVG node, parsing
-// out type, .class, and #name selectors
-func StyleCSSSVG(node Node2D, css ki.Props) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	ApplyCSSSVG(node, tyn, css)
-	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	ApplyCSSSVG(node, cln, css)
-	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSSSVG(node, idnm, css)
-}
-
-func (g *SVGNodeBase) Style2D() {
-	g.Style2DSVG()
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-// CopyParentPaint copy our paint from our parents -- called during Style for
-// SVG
-func (g *SVGNodeBase) CopyParentPaint() *SVGNodeBase {
-	pgi, _ := KiToNode2D(g.Par)
-	if pgi == nil {
-		return nil
-	}
-	psvg := pgi.AsSVGNode()
-	if psvg == nil {
-		return nil
-	}
-	g.Paint.CopyFrom(&psvg.Paint)
-	return psvg
-}
-
-// ParentSVG returns the parent SVG viewport
-func (g *SVGNodeBase) ParentSVG() *SVG {
-	pvp := g.ParentViewport()
-	for pvp != nil {
-		if pvp.IsSVG() {
-			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
-		}
-		pvp = pvp.ParentViewport()
-	}
-	return nil
-}
-
-func (g *SVGNodeBase) Size2D() {
-}
-
-func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
-}
-
-func (g *SVGNodeBase) BBox2D() image.Rectangle {
-	return g.BBox
-}
-
-func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-}
-
-func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox
-}
-
-func (g *SVGNodeBase) Render2D() {
-	g.Render2DChildren()
-}
-
-func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
-}
-
-func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// SVGGroup
-
-// SVGGroup groups together SVG elements -- doesn't do much but provide a
-// locus for properties etc
-type SVGGroup struct {
-	SVGNodeBase
-}
-
-var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
-
-// BBoxFromChildren sets the Group BBox from children
-func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
-	bb := image.ZR
-	for i, kid := range g.Kids {
-		_, gi := KiToNode2D(kid)
-		if gi != nil {
-			if i == 0 {
-				bb = gi.BBox
-			} else {
-				bb = bb.Union(gi.BBox)
-			}
-		}
-	}
-	return bb
-}
-
-func (g *SVGGroup) BBox2D() image.Rectangle {
-	bb := g.BBoxFromChildren()
-	return bb
-}
+// svg_nodes contains all the SVG-based nodes for drawing shapes, paths, etc
+// see svg.go for the base class
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Rect
@@ -233,14 +32,14 @@ var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
 	rs.PopXForm()
 	return bb
 }
 
 func (g *Rect) Render2D() {
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
@@ -268,14 +67,14 @@ var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
 	rs.PopXForm()
 	return bb
 }
 
 func (g *Circle) Render2D() {
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
@@ -298,14 +97,14 @@ var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
 	rs.PopXForm()
 	return bb
 }
 
 func (g *Ellipse) Render2D() {
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
@@ -328,14 +127,14 @@ var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
 	rs.PopXForm()
 	return bb
 }
 
 func (g *Line) Render2D() {
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
@@ -357,8 +156,8 @@ var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
 	rs.PopXForm()
 	return bb
 }
@@ -367,7 +166,7 @@ func (g *Polyline) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolyline(rs, g.Points)
@@ -389,8 +188,8 @@ var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
-	bb := g.Paint.BoundingBoxFromPoints(rs, g.Points)
+	rs.PushXForm(g.Pnt.XForm)
+	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
 	rs.PopXForm()
 	return bb
 }
@@ -399,7 +198,7 @@ func (g *Polygon) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolygon(rs, g.Points)
@@ -434,10 +233,10 @@ func (g *Path) SetData(data string) error {
 func (g *Path) BBox2D() image.Rectangle {
 	// todo: cache values, only update when path is updated..
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Paint.XForm)
+	rs.PushXForm(g.Pnt.XForm)
 	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
-	bb := g.Paint.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
-	fmt.Printf("xform: %v min: %v max: %v bb: %v\n", g.Paint.XForm, g.MinCoord, g.MaxCoord, bb)
+	bb := g.Pnt.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
+	fmt.Printf("xform: %v min: %v max: %v bb: %v\n", g.Pnt.XForm, g.MinCoord, g.MaxCoord, bb)
 	rs.PopXForm()
 	return bb
 	// return vp.Viewport.VpBBox
@@ -994,15 +793,60 @@ func (g *Path) Render2D() {
 	if len(g.Data) < 2 {
 		return
 	}
-	pc := &g.Paint
+	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	PathDataRender(g.Data, pc, rs)
-	// fmt.Printf("PathRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
-	// 	g.PathUnique(), g.Style.Background.Color, g.Paint.FillStyle.Color, g.Style.Color, g.Paint.StrokeStyle.Color)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
 }
 
-// todo: new in SVG2: mesh
+////////////////////////////////////////////////////////////////////////////////////////
+// SVGText Node
+
+// todo: lots of work likely needed on laying-out text in proper way
+// https://www.w3.org/TR/SVG2/text.html#GlyphsMetrics
+// todo: tspan element
+
+// 2D Text
+type SVGText struct {
+	SVGNodeBase
+	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width       float32  `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text        string   `xml:"text" desc:"text string to render"`
+	WrappedText []string `json:"-" xml:"-" desc:"word-wrapped version of the string"`
+}
+
+var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
+
+// func (g *SVGText) Size2D() {
+// 	g.InitLayout2D()
+// 	pc := &g.Pnt
+// 	var w, h float32
+// 	// pre-wrap the text
+// 	if pc.TextStyle.WordWrap {
+// 		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
+// 	} else {
+// 		w, h = pc.MeasureString(g.Text)
+// 	}
+// 	g.LayData.AllocSize = Vec2D{w, h}
+// }
+
+// func (g *SVGText) BBox2D() image.Rectangle {
+// 	rs := &g.Viewport.Render
+// 	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
+// }
+
+func (g *SVGText) Render2D() {
+	pc := &g.Pnt
+	rs := &g.Viewport.Render
+	// fmt.Printf("rendering text %v\n", g.Text)
+	if pc.TextStyle.WordWrap {
+		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Width, 0)
+		// g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
+	} else {
+		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, 0) // g.LayData.AllocSize.X)
+	}
+	g.Render2DChildren()
+}

@@ -19,7 +19,7 @@ import (
 // managed by a containing Layout, and use all 5 rendering passes
 type WidgetBase struct {
 	Node2DBase
-	Style    Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	Sty      Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	DefStyle *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayData  LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
 }
@@ -34,10 +34,15 @@ func (g *WidgetBase) AsWidget() *WidgetBase {
 	return g
 }
 
+// Style satisfies the Styler interface
+func (g *WidgetBase) Style() *Style {
+	return &g.Sty
+}
+
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (g *WidgetBase) Init2DWidget() {
 	g.Viewport = g.ParentViewport()
-	g.Style.Defaults()
+	g.Sty.Defaults()
 	g.LayData.Defaults() // doesn't overwrite
 	g.ConnectToViewport()
 }
@@ -83,8 +88,8 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 		}
 
 		if pgi, _ := KiToNode2D(g.Par); pgi != nil {
-			if pw := pgi.AsWidget(); pw != nil {
-				dsty.SetStyleProps(&pw.Style, styprops)
+			if ps, ok := pgi.(Styler); ok {
+				dsty.SetStyleProps(ps.Style(), styprops)
 			} else {
 				dsty.SetStyleProps(nil, styprops)
 			}
@@ -106,27 +111,26 @@ func (g *WidgetBase) Style2DWidget() {
 	SetCurStyleNode2D(gii)
 	defer SetCurStyleNode2D(nil)
 	if !RebuildDefaultStyles && g.DefStyle != nil {
-		g.Style.CopyFrom(g.DefStyle)
+		g.Sty.CopyFrom(g.DefStyle)
 	} else {
-		g.Style.CopyFrom(g.DefaultStyle2DWidget("", nil))
+		g.Sty.CopyFrom(g.DefaultStyle2DWidget("", nil))
 	}
-	g.Style.IsSet = false // this is always first call, restart
+	g.Sty.IsSet = false // this is always first call, restart
 
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 	var pagg *ki.Props
-	if pgi, _ := KiToNode2D(g.Par); pgi != nil {
-		if pw := pgi.AsWidget(); pw != nil {
-			g.Style.SetStyleProps(&pw.Style, g.Properties())
-			pagg = &pw.CSSAgg
+	if pgi, pg := KiToNode2D(g.Par); pgi != nil {
+		pagg = &pg.CSSAgg
+		if ps, ok := pgi.(Styler); ok {
+			g.Sty.SetStyleProps(ps.Style(), g.Properties())
 		} else {
-			g.CSSAgg = nil // restart
-			g.Style.SetStyleProps(nil, g.Properties())
+			g.Sty.SetStyleProps(nil, g.Properties())
 		}
 	} else {
 		g.CSSAgg = nil // restart
-		g.Style.SetStyleProps(nil, g.Properties())
+		g.Sty.SetStyleProps(nil, g.Properties())
 	}
 
 	if pagg != nil {
@@ -135,17 +139,21 @@ func (g *WidgetBase) Style2DWidget() {
 	AggCSS(&g.CSSAgg, g.CSS)
 	StyleCSSWidget(gii, g.CSSAgg)
 
-	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
-	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
-	if g.Style.Inactive {                         // inactive can only set, not clear
+	g.Sty.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
+	g.LayData.SetFromStyle(&g.Sty.Layout)       // also does reset
+	if g.Sty.Inactive {                         // inactive can only set, not clear
 		g.SetInactive()
 	}
-	g.Style.Use() // activates currentColor etc
+	g.Sty.Use() // activates currentColor etc
 }
 
 // ApplyCSSWidget applies css styles to given node, using key to select sub-props
 // from overall properties list
 func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
+	stlr, ok := node.(Styler)
+	if !ok {
+		return false
+	}
 	pp, got := css[key]
 	if !got {
 		return false
@@ -155,18 +163,16 @@ func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
 		return false
 	}
 
-	nb := node.AsWidget()
-	if nb == nil {
-		return false
-	}
-	if pwi, _ := KiToNode2D(node.Parent()); pwi != nil {
-		if pw := pwi.AsWidget(); pw != nil {
-			nb.Style.SetStyleProps(&pw.Style, pmap)
+	st := stlr.Style()
+
+	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
+		if ps, ok := pgi.(Styler); ok {
+			st.SetStyleProps(ps.Style(), pmap)
 		} else {
-			nb.Style.SetStyleProps(nil, pmap)
+			st.SetStyleProps(nil, pmap)
 		}
 	} else {
-		nb.Style.SetStyleProps(nil, pmap)
+		st.SetStyleProps(nil, pmap)
 	}
 	return true
 }
@@ -235,7 +241,7 @@ func (g *WidgetBase) Style2D() {
 }
 
 func (g *WidgetBase) InitLayout2D() {
-	g.LayData.SetFromStyle(&g.Style.Layout)
+	g.LayData.SetFromStyle(&g.Sty.Layout)
 }
 
 func (g *WidgetBase) Size2DBase() {
@@ -288,7 +294,7 @@ func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 	psize := g.AddParentPos()
 	g.LayData.AllocPosOrig = g.LayData.AllocPos
 	if initStyle {
-		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
+		g.Sty.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}
 	g.BBox = gii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
@@ -308,7 +314,7 @@ func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (g *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
 	nb := g.VpBBox
-	spc := int(g.Style.BoxSpace())
+	spc := int(g.Sty.BoxSpace())
 	nb.Min.X += spc
 	nb.Min.Y += spc
 	nb.Max.X -= spc
@@ -474,7 +480,7 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 func (g *WidgetBase) MeasureTextSize(txt string) (w, h float32) {
 	rs := &g.Viewport.Render
 	pc := &rs.Paint
-	st := &g.Style
+	st := &g.Sty
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	w, h = pc.MeasureString(txt)
@@ -490,7 +496,7 @@ func (g *WidgetBase) Size2DFromText(txt string) {
 
 // set our LayData.AllocSize from constraints
 func (g *WidgetBase) Size2DFromWH(w, h float32) {
-	st := &g.Style
+	st := &g.Sty
 	if st.Layout.Width.Dots > 0 {
 		w = Max32(st.Layout.Width.Dots, w)
 	}
@@ -505,7 +511,7 @@ func (g *WidgetBase) Size2DFromWH(w, h float32) {
 
 // add space to existing AllocSize
 func (g *WidgetBase) Size2DAddSpace() {
-	spc := g.Style.BoxSpace()
+	spc := g.Sty.BoxSpace()
 	g.LayData.AllocSize.SetAddVal(2.0 * spc)
 }
 
@@ -513,7 +519,7 @@ func (g *WidgetBase) Size2DAddSpace() {
 func (g *WidgetBase) Render2DText(txt string) {
 	rs := &g.Viewport.Render
 	pc := &rs.Paint
-	st := &g.Style
+	st := &g.Sty
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	pc.StrokeStyle.SetColor(&st.Color) // ink color
@@ -615,7 +621,7 @@ func (g *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Poi
 }
 
 func (g *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle) {
-	spc := g.Style.BoxSpace()
+	spc := g.Sty.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.Layout2D(parBBox)
@@ -706,7 +712,7 @@ func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool
 		if lbl == nil {
 			return true
 		}
-		lbl.(*Label).Style.Color = g.Style.Color
+		lbl.(*Label).Sty.Color = g.Sty.Color
 		if lbl.(*Label).Text != txt {
 			return true
 		}

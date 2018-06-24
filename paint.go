@@ -11,6 +11,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/srwiley/rasterx"
 	//"github.com/rcoreilly/rasterx"
@@ -44,6 +45,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// Painter defines an interface for anything that has a Paint on it
+type Painter interface {
+	Paint() *Paint
+}
+
+// VectorEffect contains special effects for rendering
+type VectorEffect int32
+
+const (
+	VecEffNone VectorEffect = iota
+
+	// VecEffNonScalingStroke means that the stroke width is not affected by transform properties
+	VecEffNonScalingStroke
+
+	VecEffN
+)
+
+//go:generate stringer -type=VectorEffect
+
+var KiT_VectorEffect = kit.Enums.AddEnumAltLower(VecEffN, false, StylePropProps, "VecEff")
+
+func (ev VectorEffect) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *VectorEffect) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // The Paint object provides the full context (parameters) and functions for
 // painting onto an image -- image is always passed as an argument so it can be
 // applied to anything
@@ -56,6 +81,7 @@ type Paint struct {
 	FillStyle   FillStyle
 	FontStyle   FontStyle
 	TextStyle   TextStyle
+	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
 	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
@@ -118,6 +144,8 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
 			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
+		} else {
+			pc.UnContext.SetSizes(0, 0, el.X, el.Y)
 		}
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
@@ -295,7 +323,7 @@ func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) Vec2D {
 func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
 	if pc.HasStroke() {
-		sw = 0.5 * pc.StrokeStyle.Width.Dots
+		sw = 0.5 * pc.StrokeWidth(rs)
 	}
 	tx1, ty1 := rs.XForm.TransformPoint(minX, minY)
 	tx2, ty2 := rs.XForm.TransformPoint(maxX, maxY)
@@ -433,11 +461,26 @@ func (pc *Paint) joinmode() rasterx.JoinMode {
 	return rasterx.Arc
 }
 
+// StrokeWidth obtains the current stoke width subject to transform (or not
+// depending on VecEffNonScalingStroke)
+func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
+	dw := pc.StrokeStyle.Width.Dots
+	if dw == 0 {
+		return dw
+	}
+	if pc.VecEff == VecEffNonScalingStroke {
+		return dw
+	}
+	scf := 0.5 * (rs.XForm.XX + rs.XForm.YY)
+	lw := Max32(scf*dw, pc.StrokeStyle.MinWidth.Dots)
+	return lw
+}
+
 func (pc *Paint) stroke(rs *RenderState) {
 	pr := prof.Start("Paint.stroke")
 
 	rs.Raster.SetStroke(
-		Float32ToFixed(pc.StrokeStyle.Width.Dots),
+		Float32ToFixed(pc.StrokeWidth(rs)),
 		Float32ToFixed(pc.StrokeStyle.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		pc.StrokeStyle.Dashes, 0,

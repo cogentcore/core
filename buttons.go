@@ -186,7 +186,7 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 		}
 	}
 	g.State = state
-	g.Style = g.StateStyles[state] // get relevant styles
+	g.Sty = g.StateStyles[state] // get relevant styles
 }
 
 // set the button in the down state -- mouse clicked down but not yet up --
@@ -436,17 +436,17 @@ func (g *ButtonBase) ConfigPartsIfNeeded() {
 func (g *ButtonBase) Style2DWidget() {
 	g.WidgetBase.Style2DWidget()
 	ButtonBaseFields.Style(g, nil, g.Props)
-	ButtonBaseFields.ToDots(g, &g.Style.UnContext)
+	ButtonBaseFields.ToDots(g, &g.Sty.UnContext)
 }
 
 func (g *ButtonBase) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Style)
+	pst := &(g.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
+		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.This.(ButtonWidget).ConfigParts()
 	g.SetButtonState(ButtonActive) // initial default
@@ -457,7 +457,7 @@ func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DParts(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.Layout2DChildren()
 }
@@ -465,9 +465,9 @@ func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
 func (g *ButtonBase) Render2D() {
 	if g.PushBounds() {
 		ButtonEvents(g)
-		g.Style = g.StateStyles[g.State] // get current styles
+		g.Sty = g.StateStyles[g.State] // get current styles
 		g.This.(ButtonWidget).ConfigPartsIfNeeded()
-		st := &g.Style
+		st := &g.Sty
 		g.RenderStdBox(st)
 		g.Render2DParts()
 		g.Render2DChildren()

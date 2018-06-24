@@ -1053,7 +1053,7 @@ func (sv *ColorView) Update() {
 	sv.UpdateSliderGrid()
 	if sv.Color != nil {
 		v, _ := sv.Value()
-		v.Style.Background.Color.Color = *sv.Color // direct copy
+		v.Sty.Background.Color.Color = *sv.Color // direct copy
 	}
 	sv.UpdateEnd(updt)
 }
@@ -1113,7 +1113,14 @@ func (vv *ColorValueView) ConfigWidget(widg Node2D) {
 	edac.Text = "  ..."
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
-		clr := svv.Struct.(*Color)
+		clr, ok := svv.Struct.(*Color)
+		if !ok {
+			clrp, ok := svv.Struct.(**Color)
+			if !ok {
+				return
+			}
+			clr = *clrp
+		}
 		dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil)
 		cvvv := dlg.Frame().ChildByType(KiT_ColorView, true, 2).(*ColorView)
 		cvvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

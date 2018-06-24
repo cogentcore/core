@@ -18,11 +18,9 @@ import (
 	"github.com/goki/prof"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Widget Styling
-
-// using CSS style reference: https://www.w3schools.com/cssref/default.asp
-// which are inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
+// style implements CSS-based styling using ki.Props to hold name / vals
+// CSS style reference: https://www.w3schools.com/cssref/default.asp
+// list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
 // styling strategy:
 // * indiv objects specify styles using property map -- good b/c it is fully open-ended
@@ -72,6 +70,14 @@ var StylePropProps = ki.Props{
 	"style-prop": true,
 }
 
+// Styler defines an interface for anything that has a Style on it
+type Styler interface {
+	Style() *Style
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Style structs
+
 // style parameters for backgrounds
 type BackgroundStyle struct {
 	Color ColorSpec `xml:"color" desc:"background color"`
@@ -89,7 +95,8 @@ func (b *BackgroundStyle) Defaults() {
 	b.Color.SetColor(color.White)
 }
 
-// sides of a box -- some properties can be specified per each side (e.g., border) or not
+// BoxSides specifies sides of a box -- some properties can be specified per
+// each side (e.g., border) or not
 type BoxSides int32
 
 const (
@@ -107,7 +114,7 @@ var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, false, StylePropProps, "Box")
 func (ev BoxSides) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BoxSides) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// how to draw the border
+// BorderDrawStyle determines how to draw the border
 type BorderDrawStyle int32
 
 const (
@@ -131,7 +138,7 @@ var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, false, StylePropPro
 func (ev BorderDrawStyle) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BorderDrawStyle) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// style parameters for borders
+// BorderStyle contains style parameters for borders
 type BorderStyle struct {
 	Style  BorderDrawStyle `xml:"style" desc:"how to draw the border"`
 	Width  units.Value     `xml:"width" desc:"width of the border"`

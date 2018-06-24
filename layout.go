@@ -374,7 +374,7 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
@@ -393,7 +393,7 @@ func (ly *Layout) GatherSizesGrid() {
 		return
 	}
 
-	cols := ly.Style.Layout.Columns
+	cols := ly.Sty.Layout.Columns
 	rows := 0
 
 	sz := len(ly.Kids)
@@ -403,7 +403,7 @@ func (ly *Layout) GatherSizesGrid() {
 		if gi == nil {
 			continue
 		}
-		lst := gi.Style.Layout
+		lst := gi.Sty.Layout
 		if lst.Col > 0 {
 			cols = kit.MaxInt(cols, lst.Col+lst.ColSpan)
 		}
@@ -451,7 +451,7 @@ func (ly *Layout) GatherSizesGrid() {
 			continue
 		}
 		gi.LayData.UpdateSizes()
-		lst := gi.Style.Layout
+		lst := gi.Sty.Layout
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -522,7 +522,7 @@ func (ly *Layout) GatherSizesGrid() {
 		ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
 	}
 
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
@@ -611,14 +611,14 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align
 
 // layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutRow / Col
 func (ly *Layout) LayoutSingle(dim Dims2D) {
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
 		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
-		al := gi.Style.Layout.AlignDim(dim)
+		al := gi.Sty.Layout.AlignDim(dim)
 		pref := gi.LayData.Size.Pref.Dim(dim)
 		need := gi.LayData.Size.Need.Dim(dim)
 		max := gi.LayData.Size.Max.Dim(dim)
@@ -636,8 +636,8 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		return
 	}
 
-	al := ly.Style.Layout.AlignDim(dim)
-	spc := ly.Style.BoxSpace()
+	al := ly.Sty.Layout.AlignDim(dim)
+	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
 	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
@@ -747,8 +747,8 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 	if sz == 0 {
 		return
 	}
-	al := ly.Style.Layout.AlignDim(dim)
-	spc := ly.Style.BoxSpace()
+	al := ly.Sty.Layout.AlignDim(dim)
+	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
 	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
@@ -859,7 +859,7 @@ func (ly *Layout) LayoutGrid() {
 			continue
 		}
 
-		lst := gi.Style.Layout
+		lst := gi.Sty.Layout
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -924,7 +924,7 @@ func (ly *Layout) FinalizeLayout() {
 // AllocSize except for top-level layout which uses VpBBox in case less is
 // avail
 func (ly *Layout) AvailSize() Vec2D {
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.SubVal(spc)
 	pargi, _ := KiToNode2D(ly.Par)
 	if pargi != nil {
@@ -951,8 +951,8 @@ func (ly *Layout) ManageOverflow() {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Style.Layout.Overflow != OverflowHidden {
-		sbw := ly.Style.Layout.ScrollBarWidth.Dots
+	if ly.Sty.Layout.Overflow != OverflowHidden {
+		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 		for d := X; d < Dims2DN; d++ {
 			odim := OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
@@ -981,19 +981,19 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Tracking = true
 		sc.Min = 0.0
 	}
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	avail := ly.AvailSize().SubVal(spc * 2.0)
 	sc := ly.Scrolls[d]
 	if d == X {
-		sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
 		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.Dot))
 	} else {
-		sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedWidth(ly.Sty.Layout.ScrollBarWidth)
 		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.Dot))
 	}
 	sc.Style2D()
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
-	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
+	sc.Step = ly.Sty.Font.Size.Dots                    // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.TrackThr = sc.Step
@@ -1032,9 +1032,9 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 }
 
 func (ly *Layout) LayoutScrolls() {
-	sbw := ly.Style.Layout.ScrollBarWidth.Dots
+	sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 
-	spc := ly.Style.BoxSpace()
+	spc := ly.Sty.BoxSpace()
 	avail := ly.AvailSize()
 	for d := X; d < Dims2DN; d++ {
 		odim := OtherDim(d)
@@ -1124,7 +1124,7 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
 
-	h := ly.Style.Font.Size.Dots
+	h := ly.Sty.Font.Size.Dots
 	dst := h * AutoScrollRate
 
 	mind := kit.MaxInt(0, pos-st)
@@ -1316,7 +1316,7 @@ func (fr *Frame) Style2D() {
 
 func (fr *Frame) Render2D() {
 	if fr.PushBounds() {
-		st := &fr.Style
+		st := &fr.Sty
 		rs := &fr.Viewport.Render
 		pc := &rs.Paint
 		// first draw a background rectangle in our full area

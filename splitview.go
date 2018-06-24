@@ -141,7 +141,7 @@ func (g *SplitView) ConfigSplitters() {
 	sz := len(g.Kids)
 	mods, updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := OtherDim(g.Dim)
-	spc := g.Style.BoxSpace()
+	spc := g.Sty.BoxSpace()
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	osz := float32(50.0)
 	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
@@ -316,8 +316,8 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 	if g.Icon.IsValid() && g.Parts.HasChildren() {
 		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
-			mrg := g.Style.Layout.Margin.Dots
-			pad := g.Style.Layout.Padding.Dots
+			mrg := g.Sty.Layout.Margin.Dots
+			pad := g.Sty.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
 			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
@@ -334,14 +334,14 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 func (g *Splitter) Style2D() {
 	bitflag.Clear(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Style)
+	pst := &(g.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Style)
+		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	SliderFields.Style(g, nil, g.Props)
-	SliderFields.ToDots(g, &g.Style.UnContext)
+	SliderFields.ToDots(g, &g.Sty.UnContext)
 	g.ThSize = g.ThumbSize.Dots
 	g.ConfigParts()
 }
@@ -412,7 +412,7 @@ func (g *Splitter) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *Splitter) Render2DDefaultStyle() {
-	st := &g.Style
+	st := &g.Sty
 	rs := &g.Viewport.Render
 	pc := &rs.Paint
 

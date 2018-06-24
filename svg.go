@@ -14,6 +14,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"image"
 	"io"
 	"log"
 	"os"
@@ -22,54 +23,279 @@ import (
 	"unicode"
 
 	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"golang.org/x/net/html/charset"
 )
 
+////////////////////////////////////////////////////////////////////////////////////////
+// SVGNodeBase
+
+// SVGNodeBase is an element within the SVG sub-scenegraph -- does not use
+// layout logic -- just renders into parent SVG viewport
+type SVGNodeBase struct {
+	Node2DBase
+	Pnt Paint `json:"-" xml:"-" desc:"full paint information for this node"`
+}
+
+var KiT_SVGNodeBase = kit.Types.AddType(&SVGNodeBase{}, SVGNodeBaseProps)
+
+var SVGNodeBaseProps = ki.Props{
+	"base-type": true, // excludes type from user selections
+}
+
+func (g *SVGNodeBase) AsSVGNode() *SVGNodeBase {
+	return g
+}
+
+// Paint satisfies the painter interface
+func (g *SVGNodeBase) Paint() *Paint {
+	return &g.Pnt
+}
+
+// Init2DBase handles basic node initialization -- Init2D can then do special things
+func (g *SVGNodeBase) Init2DBase() {
+	g.Viewport = g.ParentViewport()
+	g.Pnt.Defaults()
+	g.ConnectToViewport()
+}
+
+func (g *SVGNodeBase) Init2D() {
+	g.Init2DBase()
+}
+
+// Style2DSVG styles the Paint values directly from node properties -- for
+// SVG-style nodes -- no relevant default styling here -- parents can just set
+// props directly as needed
+func Style2DSVG(gii Node2D) {
+	g := gii.AsNode2D()
+	if g.Viewport == nil { // robust
+		gii.Init2D()
+	}
+
+	pntr, ok := gii.(Painter)
+	if !ok {
+		return
+	}
+	pc := pntr.Paint()
+
+	SetCurStyleNode2D(gii)
+	defer SetCurStyleNode2D(nil)
+
+	pc.StyleSet = false // this is always first call, restart
+	var pagg *ki.Props
+	pgi, pg := KiToNode2D(gii.Parent())
+	if pgi != nil {
+		pagg = &pg.CSSAgg
+		if pp, ok := pgi.(Painter); ok {
+			pc.CopyFrom(pp.Paint())
+			pc.SetStyleProps(pp.Paint(), gii.Properties())
+		} else {
+			pc.SetStyleProps(nil, gii.Properties())
+		}
+	} else {
+		pc.SetStyleProps(nil, gii.Properties())
+	}
+	// pc.SetUnitContext(g.Viewport, Vec2DZero)
+	pc.ToDots() // we always inherit parent's unit context -- SVG sets it once-and-for-all
+	if pagg != nil {
+		AggCSS(&g.CSSAgg, *pagg)
+	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSSSVG(gii, g.CSSAgg)
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	} else {
+		pc.Off = false
+	}
+}
+
+// ApplyCSSSVG applies css styles to given node, using key to select sub-props
+// from overall properties list
+func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
+	pntr, ok := node.(Painter)
+	if !ok {
+		return false
+	}
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+
+	pc := pntr.Paint()
+
+	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
+		if pp, ok := pgi.(Painter); ok {
+			pc.SetStyleProps(pp.Paint(), pmap)
+		} else {
+			pc.SetStyleProps(nil, pmap)
+		}
+	} else {
+		pc.SetStyleProps(nil, pmap)
+	}
+	return true
+}
+
+// StyleCSSSVG applies css style properties to given SVG node, parsing
+// out type, .class, and #name selectors
+func StyleCSSSVG(node Node2D, css ki.Props) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	ApplyCSSSVG(node, tyn, css)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	ApplyCSSSVG(node, cln, css)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	ApplyCSSSVG(node, idnm, css)
+}
+
+func (g *SVGNodeBase) Style2D() {
+	Style2DSVG(g.This.(Node2D))
+}
+
+// ParentSVG returns the parent SVG viewport
+func (g *SVGNodeBase) ParentSVG() *SVG {
+	pvp := g.ParentViewport()
+	for pvp != nil {
+		if pvp.IsSVG() {
+			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
+		}
+		pvp = pvp.ParentViewport()
+	}
+	return nil
+}
+
+func (g *SVGNodeBase) Size2D() {
+}
+
+func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
+}
+
+func (g *SVGNodeBase) BBox2D() image.Rectangle {
+	return g.BBox
+}
+
+func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+}
+
+func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
+func (g *SVGNodeBase) Render2D() {
+	g.Render2DChildren()
+}
+
+func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
+}
+
+func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// SVGGroup
+
+// SVGGroup groups together SVG elements -- doesn't do much but provide a
+// locus for properties etc
+type SVGGroup struct {
+	SVGNodeBase
+}
+
+var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
+
+// BBoxFromChildren sets the Group BBox from children
+func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
+	bb := image.ZR
+	for i, kid := range g.Kids {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			if i == 0 {
+				bb = gi.BBox
+			} else {
+				bb = bb.Union(gi.BBox)
+			}
+		}
+	}
+	return bb
+}
+
+func (g *SVGGroup) BBox2D() image.Rectangle {
+	bb := g.BBoxFromChildren()
+	return bb
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// SVG -- the viewport
+
 // SVG is a viewport for containing SVG drawing objects, correponding to the
 // svg tag in html -- it provides its own bitmap for drawing into
 type SVG struct {
 	Viewport2D
-	ViewBox ViewBox       `desc:"viewbox defines the coordinate system for the drawing"`
-	XForm   XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
-	Defs    SVGGroup      `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title   string        `xml:"title" desc:"the title of the svg"`
-	Desc    string        `xml:"desc" desc:"the description of the svg"`
+	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`
+	Pnt     Paint    `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
+	Defs    SVGGroup `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title   string   `xml:"title" desc:"the title of the svg"`
+	Desc    string   `xml:"desc" desc:"the description of the svg"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
+
+// Paint satisfies the painter interface
+func (g *SVG) Paint() *Paint {
+	return &g.Pnt
+}
 
 // DeleteAll deletes any existing elements in this svg
 func (svg *SVG) DeleteAll() {
 	updt := svg.UpdateStart()
 	svg.DeleteChildren(true)
+	svg.ViewBox.Defaults()
+	svg.Pnt.Defaults()
 	svg.Defs.DeleteChildren(true)
 	svg.Title = ""
 	svg.Desc = ""
-	svg.ViewBox.Defaults()
-	svg.XForm = Identity2D()
 	svg.UpdateEnd(updt)
-
 }
 
 // SetNormXForm scaling transform
 func (svg *SVG) SetNormXForm() {
-	svg.XForm = Identity2D()
+	svg.Pnt.XForm = Identity2D()
 	if svg.ViewBox.Size != Vec2DZero {
 		// todo: deal with all the other options!
 		vps := NewVec2DFmPoint(svg.Geom.Size).Div(svg.ViewBox.Size)
-		svg.XForm = svg.XForm.Scale(vps.X, vps.Y)
+		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vps.X, vps.Y)
 	}
 }
 
 func (svg *SVG) Init2D() {
 	svg.Viewport2D.Init2D()
 	bitflag.Set(&svg.Flag, int(VpFlagSVG)) // we are an svg type
+	svg.Pnt.Defaults()
 }
 
 func (svg *SVG) Style2D() {
 	svg.Style2DWidget()
+	svg.Pnt.Defaults()
+	Style2DSVG(svg.This.(Node2D))
+	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
+}
+
+func (svg *SVG) Layout2D(parBBox image.Rectangle) {
+	svg.Layout2DBase(parBBox, true)
+	// do not call layout on children -- they don't do it
+	// this is too late to affect anything
+	// svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size)
 }
 
 func (svg *SVG) Render2D() {
@@ -78,7 +304,7 @@ func (svg *SVG) Render2D() {
 		if svg.Fill {
 			svg.FillViewport()
 		}
-		rs.PushXForm(svg.XForm)
+		rs.PushXForm(svg.Pnt.XForm)
 		svg.Render2DChildren() // we must do children first, then us!
 		svg.PopBounds()
 		rs.PopXForm()

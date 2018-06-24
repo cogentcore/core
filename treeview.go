@@ -1323,7 +1323,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	}
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
-	lbl.Style.Color = tv.Style.Color
+	lbl.Sty.Color = tv.Sty.Color
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.SetChecked(!tv.IsClosed())
 }
@@ -1335,7 +1335,7 @@ func (tv *TreeView) Init2D() {
 	} else {
 		tv.Viewport = tv.ParentViewport()
 	}
-	tv.Style.Defaults()
+	tv.Sty.Defaults()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	tv.ConnectToViewport()
@@ -1386,15 +1386,15 @@ func (tv *TreeView) Style2D() {
 	tv.SetCanFocusIfActive()
 	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
 
-	pst := &(tv.Par.(Node2D).AsWidget().Style)
+	pst := &(tv.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyFrom(&tv.Style)
+		tv.StateStyles[i].CopyFrom(&tv.Sty)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
-		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
+		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Indent = units.NewValue(2, units.Ch) // default
 	TreeViewFields.Style(tv, nil, tv.Props)
-	TreeViewFields.ToDots(tv, &tv.Style.UnContext)
+	TreeViewFields.ToDots(tv, &tv.Sty.UnContext)
 	tv.ConfigParts()
 }
 
@@ -1427,7 +1427,7 @@ func (tv *TreeView) Size2D() {
 }
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle) {
-	spc := tv.Style.BoxSpace()
+	spc := tv.Sty.BoxSpace()
 	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddVal(spc)
 	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddVal(-2.0 * spc)
 	tv.Parts.Layout2D(parBBox)
@@ -1447,8 +1447,8 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	tv.WidgetSize.X = tv.LayData.AllocSize.X
 
 	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
-	tv.Style.SetUnitContext(tv.Viewport, psize) // update units with final layout
-	tv.BBox = tv.This.(Node2D).BBox2D()         // only compute once, at this point
+	tv.Sty.SetUnitContext(tv.Viewport, psize) // update units with final layout
+	tv.BBox = tv.This.(Node2D).BBox2D()       // only compute once, at this point
 	tv.This.(Node2D).ComputeBBox2D(parBBox, image.ZP)
 
 	if Layout2DTrace {
@@ -1498,11 +1498,11 @@ func (tv *TreeView) Render2D() {
 		tv.ClearFullReRender()
 
 		if tv.IsSelected() {
-			tv.Style = tv.StateStyles[TreeViewSel]
+			tv.Sty = tv.StateStyles[TreeViewSel]
 		} else if tv.HasFocus() {
-			tv.Style = tv.StateStyles[TreeViewFocus]
+			tv.Sty = tv.StateStyles[TreeViewFocus]
 		} else {
-			tv.Style = tv.StateStyles[TreeViewActive]
+			tv.Sty = tv.StateStyles[TreeViewActive]
 		}
 		tv.ConfigPartsIfNeeded()
 		tv.TreeViewEvents()
@@ -1510,7 +1510,7 @@ func (tv *TreeView) Render2D() {
 		// note: this is std except using WidgetSize instead of AllocSize
 		rs := &tv.Viewport.Render
 		pc := &rs.Paint
-		st := &tv.Style
+		st := &tv.Sty
 		pc.FontStyle = st.Font
 		pc.TextStyle = st.Text
 		pc.StrokeStyle.SetColor(&st.Border.Color)

@@ -98,7 +98,7 @@ func (g *Label) Size2D() {
 
 func (g *Label) Render2D() {
 	if g.PushBounds() {
-		st := &g.Style
+		st := &g.Sty
 		g.RenderStdBox(st)
 		g.Render2DText(g.Text)
 		g.Render2DChildren()
@@ -652,7 +652,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pixOff float32) int {
-	st := &tf.Style
+	st := &tf.Sty
 
 	spc := st.BoxSpace()
 	px := pixOff - spc
@@ -800,18 +800,18 @@ func (tf *TextField) Init2D() {
 func (tf *TextField) Style2D() {
 	tf.SetCanFocusIfActive()
 	tf.Style2DWidget()
-	pst := &(tf.Par.(Node2D).AsWidget().Style)
+	pst := &(tf.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		tf.StateStyles[i].CopyFrom(&tf.Style)
+		tf.StateStyles[i].CopyFrom(&tf.Sty)
 		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]))
-		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
+		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
 }
 
 func (tf *TextField) UpdateCharPos() bool {
 	rs := &tf.Viewport.Render
 	pc := &rs.Paint
-	st := &tf.Style
+	st := &tf.Sty
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	tf.CharPos = pc.MeasureChars(tf.EditText)
@@ -838,7 +838,7 @@ func (tf *TextField) Size2D() {
 func (tf *TextField) Layout2D(parBBox image.Rectangle) {
 	tf.Layout2DBase(parBBox, true) // init style
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
+		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
 	tf.Layout2DChildren()
 }
@@ -868,7 +868,7 @@ func (tf *TextField) TextWidth(st, ed int) float32 {
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too)
 func (tf *TextField) CharStartPos(charidx int) Vec2D {
-	st := &tf.Style
+	st := &tf.Sty
 	spc := st.BoxSpace()
 	pos := tf.LayData.AllocPos.AddVal(spc)
 	cpos := tf.TextWidth(tf.StartPos, charidx)
@@ -910,7 +910,7 @@ func (tf *TextField) RenderSelect() {
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
-	st := &tf.Style
+	st := &tf.Sty
 
 	tf.UpdateCharPos()
 
@@ -1003,16 +1003,16 @@ func (tf *TextField) Render2D() {
 		tf.AutoScroll() // inits paint with our style
 		if tf.IsInactive() {
 			if tf.IsSelected() {
-				tf.Style = tf.StateStyles[TextFieldSel]
+				tf.Sty = tf.StateStyles[TextFieldSel]
 			} else {
-				tf.Style = tf.StateStyles[TextFieldInactive]
+				tf.Sty = tf.StateStyles[TextFieldInactive]
 			}
 		} else if tf.HasFocus() {
-			tf.Style = tf.StateStyles[TextFieldFocus]
+			tf.Sty = tf.StateStyles[TextFieldFocus]
 		} else {
-			tf.Style = tf.StateStyles[TextFieldActive]
+			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
-		tf.RenderStdBox(&tf.Style)
+		tf.RenderStdBox(&tf.Sty)
 		cur := tf.EditText[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
 		tf.Render2DText(string(cur))
@@ -1271,7 +1271,7 @@ func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
 func (g *SpinBox) Render2D() {
 	if g.PushBounds() {
 		g.SpinBoxEvents()
-		// g.Style = g.StateStyles[g.State] // get current styles
+		// g.Sty = g.StateStyles[g.State] // get current styles
 		g.ConfigPartsIfNeeded()
 		g.Render2DChildren()
 		g.Render2DParts()

@@ -96,9 +96,9 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
 	}
 
-	stw := int(dlg.Style.Layout.MinWidth.Dots)
-	sth := int(dlg.Style.Layout.MinHeight.Dots)
-	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Style.UnContext.DPI, vpsz)
+	stw := int(dlg.Sty.Layout.MinWidth.Dots)
+	sth := int(dlg.Sty.Layout.MinHeight.Dots)
+	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = kit.MaxInt(vpsz.X, stw)
 	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
 

@@ -243,7 +243,7 @@ func (g *Separator) Render2D() {
 	if g.PushBounds() {
 		rs := &g.Viewport.Render
 		pc := &rs.Paint
-		st := &g.Style
+		st := &g.Sty
 		pc.FontStyle = st.Font
 		pc.TextStyle = st.Text
 		g.RenderStdBox(st)

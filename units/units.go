@@ -172,8 +172,12 @@ func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float32) {
 
 // set the context values for non-font sizes -- el is ignored if zero
 func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
-	uc.VpW = vpw
-	uc.VpH = vph
+	if vpw != 0 {
+		uc.VpW = vpw
+	}
+	if vph != 0 {
+		uc.VpH = vph
+	}
 	if elw != 0 {
 		uc.ElW = elw
 	}
@@ -198,7 +202,7 @@ func (uc *Context) ToDotsFactor(un Unit) float32 {
 	}
 	switch un {
 	case Pct:
-		return uc.ElW // todo: height should be in terms of Elh.. sheesh
+		return 0.01 * uc.ElW // todo: height should be in terms of Elh.. but width is much more common
 	case Em:
 		return uc.DPI / (PtPerInch / uc.FontEm)
 	case Ex:
@@ -208,9 +212,9 @@ func (uc *Context) ToDotsFactor(un Unit) float32 {
 	case Rem:
 		return uc.DPI / (PtPerInch / uc.FontRem)
 	case Vw:
-		return uc.VpW
+		return 0.01 * uc.VpW
 	case Vh:
-		return uc.VpH
+		return 0.01 * uc.VpH
 	case Vmin:
 		return kit.Min32(uc.VpW, uc.VpH)
 	case Vmax:
@@ -289,7 +293,7 @@ func (v *Value) String() string {
 
 // SetString sets value from a string
 func (v *Value) SetString(str string) {
-	trstr := strings.TrimSpace(str)
+	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
 	sz := len(trstr)
 	if sz < 2 {
 		v.Set(0, Px)
