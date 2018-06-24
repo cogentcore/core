@@ -203,6 +203,7 @@ type RenderState struct {
 
 // Init initializes RenderState -- must be called whenever image size changes
 func (rs *RenderState) Init(width, height int, img *image.RGBA) {
+	rs.Paint.Defaults()
 	rs.XForm = Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
