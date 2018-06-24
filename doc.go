@@ -10,26 +10,23 @@ which in turn can be integrated within the other type of scenegraph.
 
 Within 2D scenegraph, the following are supported
 
-	* SVG-based rendering nodes for basic shapes, paths, curves, arcs
-	* Widget nodes for GUI actions (Buttons, Views etc)
+	* Widget nodes for GUI actions (Buttons, Views etc) -- render directly via Paint
 	* Layouts for placing widgets
-	* CSS-based styling, directly on Node Props (properties), and css sheets
-	* HTML elements -- the 2D scenegraph can render html documents
+	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
+	* optionally: HTML elements -- the 2D scenegraph can render html documents
+	* SVG container for SVG elements: shapes, paths, etc
+    * Icons are SVG elements
 
 Layout Logic
 
-For Widget-based displays, *everything* should be contained in a Layout,
-because a layout provides the primary logic for organizing widgets within the
-constraints of the display.  Typically start with a vertical LayoutCol in a
-viewport, with LayoutCol's within that, or a LayoutGrid for more complex
-layouts:
+All 2D scenegraphs are controlled by the Layout, which provides the logic for
+organizing widgets / elements within the constraints of the display.
+Typically start with a vertical LayoutCol in a viewport, with LayoutCol's
+within that, or a LayoutGrid for more complex layouts:
 
 	win := gi.NewWindow2D("test window", width, height)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-
-	vpfill := vp.AddNewChildNamed(gi.KiT_Viewport2DFill, "vpfill").(*gi.Viewport2DFill)
-	vpfill.SetProp("fill", "#FFF") // white background
 
 	vlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "vlay").(*gi.Layout)
 	vlay.Lay = gi.LayoutCol
@@ -71,6 +68,8 @@ Controlling the layout involves the following style properties:
       convenient for sizing the Space node which adds a fixed amount of space
       (1em by default).
 
+    * See the wiki for more detailed documentation.
+
 Signals
 
 All widgets send appropriate signals about user actions -- Connect to those
@@ -83,6 +82,21 @@ data, providing powerful GUI elements, with extensive property-based
 customization options.  They can easily provide the foundation for entire
 apps.
 
+ValueView
+
+The ValueView provides a common API for representing values (int, string, etc)
+in the GUI, and are used by more complex views (StructView, MapView,
+SliceView, etc) to represents the elements of those data structures.
+
+The ValueViewer interface provides a standard Go way of customizing the GUI
+display for any particular type -- just define a ValueView() ValueView method
+for any type and it will use that type of ValueView to display and interact
+with that type.
+
+Do Ctrl+Alt+E in any window to pull up the GiEditor which will show you ample
+examples of the ValueView interface in action, and also allow you to customize
+your GUI.
+
 TreeView
 
 The TreeView displays GoKi Node Trees, using a standard tree-browser with
@@ -91,17 +105,23 @@ deleting child nodes, along with full drag-n-drop and clipboard Copy/Cut/Paste
 functionality.  You can connect to the selection signal to e.g., display a
 StructView field / property editor of the selected node.
 
-The properties controlling the TreeView include:
+SVG for Icons, Displays, etc
 
-	* "view-closed" -- node starts out closed (default is open)
-	* "background-color" -- color of the background of node box
-	* "color" -- font color in rendering node label
-	* "inactive" -- do not display the editing menu actions
+SVG (Structured Vector Graphics) is used icons, and for rendering any kind of
+graphical output (drawing a graph, dial, etc).
 
-StructView
+SVGNodeBase is the base type for all SVG elements -- unlike Widget nodes, SVG
+nodes do not use layout logic, and just draw directly into a parent SVG
+viewport, with cumulative transforms determining drawing position, etc.  The
+BBox values are only valid after rendering for these nodes.
 
-The StructView displays an arbitrary struct object, showing its fields and
-values, in an editable form, with type-appropriate widgets.
+Overlay
+
+The gi.Window contains an OverlayVp viewport with nodes that are rendered on
+top of the regular scenegraph -- this is used for drag-n-drop and other kinds
+of transient control / manipulation functionality.  Overlay elements are not
+subject to the standard layout constraints (via having the Overlay NodeFlag
+set)
 
 */
 package gi

@@ -287,7 +287,7 @@ func (sv *SliceView) ReRender2D() (node Node2D, layout bool) {
 
 // SliceViewInline represents a slice as a single line widget, for smaller slices and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type SliceViewInline struct {
-	WidgetBase
+	PartsWidgetBase
 	Slice   interface{} `desc:"the slice that we are a view onto"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`

@@ -7,11 +7,9 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
 	"strings"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
@@ -24,7 +22,7 @@ import (
 Base struct node for 2D rendering tree -- renders to a bitmap using Paint
 rendering functions operating on the RenderState in the parent Viewport
 
-Rendering is done in 5 separate passes:
+For Widget / Layout nodes, rendering is done in 5 separate passes:
 
 	0. Init2D: In a MeFirst downward pass, Viewport pointer is set, styles are
 	initialized, and any other widget-specific init is done.
@@ -56,14 +54,13 @@ Rendering is done in 5 separate passes:
     * Move2D: optional pass invoked by scrollbars to move elements relative to
       their previously-assigned positions.
 
+    * SVG nodes skip the Size and Layout passes, and render directly into
+      parent SVG viewport
+
 */
 type Node2DBase struct {
 	NodeBase
-	Style    Style       `json:"-" xml:"-" desc:"styling settings for this item -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle *Style      `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	Paint    Paint       `json:"-" xml:"-" desc:"full paint information for this node"`
 	Viewport *Viewport2D `json:"-" xml:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
-	LayData  LayoutData  `json:"-" xml:"-" desc:"all the layout information for this item"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
@@ -100,6 +97,12 @@ type Node2D interface {
 
 	// AsLayout2D returns Layout if this is a Layout-derived node, else nil
 	AsLayout2D() *Layout
+
+	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil
+	AsWidget() *WidgetBase
+
+	// AsSVGNode returns SVGNodeBase if this is a SVGNodeBase-derived node, else nil
+	AsSVGNode() *SVGNodeBase
 
 	// Init2D initializes a node -- sets up event receiving connections etc --
 	// must call InitNodeBase as first step set basic inits including setting
@@ -199,59 +202,12 @@ func (g *Node2DBase) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Node2DBase) Init2D() {
-	g.Init2DBase()
+func (g *Node2DBase) AsWidget() *WidgetBase {
+	return nil
 }
 
-func (g *Node2DBase) Style2D() {
-	g.Style2DSVG() // base is used for SVG -- Widget overrides
-	pc := &g.Paint
-	if pc.HasNoStrokeOrFill() {
-		pc.Off = true
-	}
-}
-
-func (g *Node2DBase) Size2D() {
-	g.InitLayout2D()
-	g.LayData.AllocSize.SetPoint(g.BBox2D().Size()) // get size from bbox -- minimal case
-}
-
-func (g *Node2DBase) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-}
-
-func (g *Node2DBase) BBox2D() image.Rectangle {
-	return g.BBoxFromAlloc()
-}
-
-func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	g.ComputeBBox2DBase(parBBox, delta)
-}
-
-func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
-	return g.VpBBox // pass-thru
-}
-
-func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-	g.Move2DBase(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *Node2DBase) Render2D() {
-	if g.PushBounds() {
-		// connect to events here
-		g.Render2DChildren()
-		g.PopBounds()
-	} else {
-		g.DisconnectAllEvents()
-	}
-}
-
-func (g *Node2DBase) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
+func (g *Node2DBase) AsSVGNode() *SVGNodeBase {
+	return nil
 }
 
 func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
@@ -280,66 +236,6 @@ func (g *Node2DBase) FindNamedElement(name string) Node2D {
 		return pgi.FindNamedElement(name)
 	}
 	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Group2D
-
-// Group2D is a generic grouping element -- doesn't render on its own
-type Group2D struct {
-	Node2DBase
-}
-
-var KiT_Group2D = kit.Types.AddType(&Group2D{}, nil)
-
-func (g *Group2D) AsNode2D() *Node2DBase {
-	return &g.Node2DBase
-}
-
-// BBoxFromChildren sets the Group BBox from children
-func (g *Group2D) BBoxFromChildren() image.Rectangle {
-	bb := image.ZR
-	for i, kid := range g.Kids {
-		_, gi := KiToNode2D(kid)
-		if gi != nil {
-			if i == 0 {
-				bb = gi.BBox
-			} else {
-				bb = bb.Union(gi.BBox)
-			}
-		}
-	}
-	return bb
-}
-
-func (g *Group2D) Size2D() {
-	g.InitLayout2D()
-	svg := g.ParentSVG()
-	if svg != nil {
-		g.LayData = svg.LayData
-	}
-}
-
-func (g *Group2D) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, false) // no style
-	g.Layout2DChildren()
-	svg := g.ParentSVG()
-	if svg != nil {
-		g.LayData = svg.LayData
-	}
-}
-
-func (g *Group2D) BBox2D() image.Rectangle {
-	bb := g.BBoxFromChildren()
-	if bb == image.ZR {
-		svg := g.ParentSVG()
-		if svg != nil {
-			bb = svg.BBox
-		}
-	} else {
-		return bb
-	}
-	return bb
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -413,134 +309,6 @@ func (g *Node2DBase) ConnectToViewport() {
 	}
 }
 
-// Init2DBase handles basic node initialization -- Init2D can then do special things
-func (g *Node2DBase) Init2DBase() {
-	g.Viewport = g.ParentViewport()
-	g.Style.Defaults()
-	g.Paint.Defaults()
-	g.LayData.Defaults() // doesn't overwrite
-	g.ConnectToViewport()
-}
-
-// Style2DSVG styles the Paint values directly from node properties -- for
-// SVG-style nodes -- no relevant default styling here -- parents can just set
-// props directly as needed
-func (g *Node2DBase) Style2DSVG() {
-	gii, _ := g.This.(Node2D)
-	if g.Viewport == nil { // robust
-		gii.Init2D()
-	}
-	SetCurStyleNode2D(gii)
-	defer SetCurStyleNode2D(nil)
-	var pagg *ki.Props
-	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
-	g.Paint.StyleSet = false  // this is always first call, restart
-	if pg != nil {
-		g.Paint.SetStyleProps(&pg.Paint, g.Properties())
-		pagg = &pg.CSSAgg
-	} else {
-		g.Paint.SetStyleProps(nil, g.Properties())
-	}
-	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
-
-	if pagg != nil {
-		AggCSS(&g.CSSAgg, *pagg)
-	}
-	AggCSS(&g.CSSAgg, g.CSS)
-	StyleCSSSVG(gii, g.CSSAgg)
-}
-
-// DefaultStyle2DWidget retrieves default style object for the type, from type
-// properties -- selector is optional selector for state etc.  Property key is
-// "__DefStyle" + selector -- if part != nil, then use that obj for getting the
-// default style starting point when creating a new style
-func (g *Node2DBase) DefaultStyle2DWidget(selector string, part *Node2DBase) *Style {
-	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
-	styprops := tprops
-	if selector != "" {
-		sp, ok := tprops[selector]
-		if !ok {
-			log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, g.Type().Name())
-		} else {
-			spm, ok := sp.(ki.Props)
-			if !ok {
-				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, g.Type().Name())
-			} else {
-				styprops = spm
-			}
-		}
-	}
-	var dsty *Style
-	pnm := "__DefStyle" + selector
-	dstyi, ok := tprops[pnm]
-	if !ok || RebuildDefaultStyles {
-		dsty = &Style{}
-		dsty.Defaults()
-		if selector != "" {
-			var baseStyle *Style
-			if part != nil {
-				baseStyle = part.DefaultStyle2DWidget("", nil)
-			} else {
-				baseStyle = g.DefaultStyle2DWidget("", nil)
-			}
-			*dsty = *baseStyle
-		}
-		_, pg := KiToNode2D(g.Par)
-		if pg != nil {
-			dsty.SetStyleProps(&pg.Style, styprops)
-		} else {
-			dsty.SetStyleProps(nil, styprops)
-		}
-		dsty.IsSet = false // keep as non-set
-		tprops[pnm] = dsty
-	} else {
-		dsty, _ = dstyi.(*Style)
-	}
-	return dsty
-}
-
-// Style2DWidget styles the Style values from node properties and optional
-// base-level defaults -- for Widget-style nodes
-func (g *Node2DBase) Style2DWidget() {
-	gii, _ := g.This.(Node2D)
-	SetCurStyleNode2D(gii)
-	defer SetCurStyleNode2D(nil)
-	if !RebuildDefaultStyles && g.DefStyle != nil {
-		g.Style.CopyFrom(g.DefStyle)
-	} else {
-		g.Style.CopyFrom(g.DefaultStyle2DWidget("", nil))
-	}
-	g.Style.IsSet = false // this is always first call, restart
-
-	if g.Viewport == nil { // robust
-		gii.Init2D()
-	}
-	var pagg *ki.Props
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		g.Style.SetStyleProps(&pg.Style, g.Properties())
-		pagg = &pg.CSSAgg
-	} else {
-		g.CSSAgg = nil // restart
-		g.Style.SetStyleProps(nil, g.Properties())
-	}
-
-	if pagg != nil {
-		AggCSS(&g.CSSAgg, *pagg)
-	}
-	AggCSS(&g.CSSAgg, g.CSS)
-	StyleCSSWidget(gii, g.CSSAgg)
-
-	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
-	g.Paint.PropsNil = true                       // not using paint props
-	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
-	g.LayData.SetFromStyle(&g.Style.Layout) // also does reset
-	if g.Style.Inactive {                   // inactive can only set, not clear
-		g.SetInactive()
-	}
-	g.Style.Use() // activates currentColor etc
-}
-
 // AggCSS aggregates css properties
 func AggCSS(agg *ki.Props, css ki.Props) {
 	if *agg == nil {
@@ -551,75 +319,9 @@ func AggCSS(agg *ki.Props, css ki.Props) {
 	}
 }
 
-// ApplyCSSWidget applies css styles to given node, using key to select sub-props
-// from overall properties list
-func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
-	pp, got := css[key]
-	if !got {
-		return false
-	}
-	pmap, ok := pp.(ki.Props) // must be a props map
-	if !ok {
-		return false
-	}
-
-	nb := node.AsNode2D()
-	_, pg := KiToNode2D(node.Parent())
-	if pg != nil {
-		nb.Style.SetStyleProps(&pg.Style, pmap)
-	} else {
-		nb.Style.SetStyleProps(nil, pmap)
-	}
-	return true
-}
-
-// StyleCSSWidget applies css style properties to given Widget node, parsing
-// out type, .class, and #name selectors
-func StyleCSSWidget(node Node2D, css ki.Props) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	ApplyCSSWidget(node, tyn, css)
-	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	ApplyCSSWidget(node, cln, css)
-	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSSWidget(node, idnm, css)
-}
-
-// ApplyCSSSVG applies css styles to given node, using key to select sub-props
-// from overall properties list
-func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
-	pp, got := css[key]
-	if !got {
-		return false
-	}
-	pmap, ok := pp.(ki.Props) // must be a props map
-	if !ok {
-		return false
-	}
-
-	nb := node.AsNode2D()
-	_, pg := KiToNode2D(node.Parent())
-	if pg != nil {
-		nb.Paint.SetStyleProps(&pg.Paint, pmap)
-	} else {
-		nb.Paint.SetStyleProps(nil, pmap)
-	}
-	return true
-}
-
-// StyleCSSSVG applies css style properties to given SVG node, parsing
-// out type, .class, and #name selectors
-func StyleCSSSVG(node Node2D, css ki.Props) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	ApplyCSSSVG(node, tyn, css)
-	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	ApplyCSSSVG(node, cln, css)
-	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSSSVG(node, idnm, css)
-}
-
-// SetStyleXML sets style attributes from XML style string, which contains ';'
+// SetStylePropsXML sets style props from XML style string, which contains ';'
 // separated name: value pairs
-func (g *Node2DBase) SetStyleXML(style string) {
+func (g *Node2DBase) SetStylePropsXML(style string) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
@@ -642,71 +344,10 @@ func (g *Node2DBase) SetStdAttr(name, val string) bool {
 		g.Class = val
 		return true
 	case "style":
-		g.SetStyleXML(val)
+		g.SetStylePropsXML(val)
 		return true
 	}
 	return false
-}
-
-// StylePart sets the style properties for a child in parts (or any other
-// child) based on its name -- only call this when new parts were created --
-// name of properties is #partname (lower cased) and it should contain a
-// ki.Props which is then added to the part's props -- this provides built-in
-// defaults for parts, so it is separate from the CSS process
-func (g *Node2DBase) StylePart(pk ki.Ki) {
-	pgi, pg := KiToNode2D(pk)
-	if pg.DefStyle != nil { // already set
-		return
-	}
-	stynm := "#" + strings.ToLower(pk.Name())
-	// this is called on US (the parent object) so we store the #partname
-	// default style within our type properties..  that's good -- HOWEVER we
-	// cannot put any sub-selector properties within these part styles -- must
-	// all be in the base-level.. hopefully that works..
-	pdst := g.DefaultStyle2DWidget(stynm, pg)
-	pg.DefStyle = pdst // will use this as starting point for all styles now..
-
-	if vp := pgi.AsViewport2D(); vp != nil {
-		// this is typically an icon -- copy fill and stroke params to it
-		styprops := kit.Types.Properties(g.Type(), true)
-		sp := ki.SubProps(styprops, stynm)
-		if sp != nil {
-			if fill, ok := sp["fill"]; ok {
-				pg.SetProp("fill", fill)
-			}
-			if stroke, ok := sp["stroke"]; ok {
-				pg.SetProp("stroke", stroke)
-			}
-		}
-		sp = ki.SubProps(g.Properties(), stynm)
-		if sp != nil {
-			if fill, ok := sp["fill"]; ok {
-				pg.SetProp("fill", fill)
-			}
-			if stroke, ok := sp["stroke"]; ok {
-				pg.SetProp("stroke", stroke)
-			}
-		}
-	}
-}
-
-// CopyParentPaint copy our paint from our parents -- called during Style for
-// SVG
-func (g *Node2DBase) CopyParentPaint() *Node2DBase {
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		g.Paint.CopyFrom(&pg.Paint)
-	}
-	return pg
-}
-
-func (g *Node2DBase) InitLayout2D() {
-	g.LayData.SetFromStyle(&g.Style.Layout)
-}
-
-// get our bbox from Layout allocation
-func (g *Node2DBase) BBoxFromAlloc() image.Rectangle {
-	return RectFromPosSize(g.LayData.AllocPos, g.LayData.AllocSize)
 }
 
 // set our window-level BBox from vp and our bbox
@@ -718,124 +359,12 @@ func (g *Node2DBase) SetWinBBox() {
 	}
 }
 
-// add the position of our parent to our layout position -- layout
-// computations are all relative to parent position, so they are finally
-// cached out at this stage also returns the size of the parent for setting
-// units context relative to parent objects
-func (g *Node2DBase) AddParentPos() Vec2D {
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		if !g.IsField() {
-			g.LayData.AllocPos = pg.LayData.AllocPos.Add(g.LayData.AllocPosRel)
-		}
-		return pg.LayData.AllocSize
-	}
-	return Vec2DZero
-}
-
 // ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
 // whatever delta may be in effect
 func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
 	g.ObjBBox = g.BBox.Add(delta)
 	g.VpBBox = parBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
-}
-
-// basic Layout2D functions -- good for most cases
-func (g *Node2DBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
-	gii, _ := g.This.(Node2D)
-	if g.Viewport == nil { // robust
-		if gii.AsViewport2D() == nil {
-			gii.Init2D()
-			gii.Style2D()
-			// fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
-		}
-	}
-	psize := g.AddParentPos()
-	g.LayData.AllocPosOrig = g.LayData.AllocPos
-	if initStyle {
-		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
-	}
-	g.Paint.SetUnitContext(g.Viewport, psize) // always update paint
-	g.BBox = gii.BBox2D()                     // only compute once, at this point
-	// note: if other styles are maintained, they also need to be updated!
-	gii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
-	// typically Layout2DChildren must be called after this!
-	if Layout2DTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
-	}
-}
-
-func (g *Node2DBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
-	g.LayData.AllocPos = g.LayData.AllocPosOrig.Add(NewVec2DFmPoint(delta))
-	g.This.(Node2D).ComputeBBox2D(parBBox, delta)
-}
-
-// PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
-// -- this limits our drawing to our own bounding box, automatically -- must
-// be called as first step in Render2D returns whether the new bounds are
-// empty or not -- if empty then don't render!
-func (g *Node2DBase) PushBounds() bool {
-	if g.IsOverlay() {
-		if g.Viewport != nil {
-			g.ConnectToViewport()
-			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds(), g.ObjBBox)
-		}
-		return true
-	}
-	if g.VpBBox.Empty() {
-		return false
-	}
-	rs := &g.Viewport.Render
-	rs.PushBounds(g.VpBBox, g.ObjBBox)
-	g.ConnectToViewport()
-	if Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
-	}
-	return true
-}
-
-// pop our bounding-box bounds -- last step in Render2D after rendering children
-func (g *Node2DBase) PopBounds() {
-	rs := &g.Viewport.Render
-	rs.PopBounds()
-}
-
-// set minimum and preferred width -- will get at least this amount -- max unspecified
-func (g *Node2DBase) SetMinPrefWidth(val units.Value) {
-	g.SetProp("width", val)
-	g.SetProp("min-width", val)
-}
-
-// set minimum and preferred height-- will get at least this amount -- max unspecified
-func (g *Node2DBase) SetMinPrefHeight(val units.Value) {
-	g.SetProp("height", val)
-	g.SetProp("min-height", val)
-}
-
-// SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
-func (g *Node2DBase) SetStretchMaxWidth() {
-	g.SetProp("max-width", units.NewValue(-1, units.Px))
-}
-
-// SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
-func (g *Node2DBase) SetStretchMaxHeight() {
-	g.SetProp("max-height", units.NewValue(-1, units.Px))
-}
-
-// SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
-func (g *Node2DBase) SetFixedWidth(val units.Value) {
-	g.SetProp("width", val)
-	g.SetProp("min-width", val)
-	g.SetProp("max-width", val)
-}
-
-// SetFixedHeight sets all height options (height, min-height, max-height) to
-// a fixed height value
-func (g *Node2DBase) SetFixedHeight(val units.Value) {
-	g.SetProp("height", val)
-	g.SetProp("min-height", val)
-	g.SetProp("max-height", val)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -848,20 +377,6 @@ func (g *Node2DBase) FullRender2DTree() {
 	g.Init2DTree()
 	g.Style2DTree()
 	g.Size2DTree()
-	g.Layout2DTree()
-	g.Render2DTree()
-	g.UpdateEndNoSig(updt)
-}
-
-// ReRender2DTree does a re-render of the tree -- after it has already been
-// initialized and styled -- just does layout and render passes
-func (g *Node2DBase) ReRender2DTree() {
-	ld := g.LayData // save our current layout data
-	updt := g.UpdateStart()
-	g.Init2DTree()
-	g.Style2DTree()
-	g.Size2DTree()
-	g.LayData = ld // restore
 	g.Layout2DTree()
 	g.Render2DTree()
 	g.UpdateEndNoSig(updt)
@@ -903,21 +418,21 @@ func (g *Node2DBase) Style2DTree() {
 func (g *Node2DBase) Size2DTree() {
 	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
-		func(k ki.Ki, level int, d interface{}) bool {
-			// this is for testing whether to process node
-			_, gi := KiToNode2D(k)
-			if gi == nil || gi.Paint.Off {
-				if gi == nil {
-					fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", gi, gi.PathUnique())
-				}
+		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
+			gii, _ := KiToNode2D(k)
+			if gii == nil {
+				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", gii, gii.PathUnique())
+				return false
+			}
+			svg := gii.AsSVGNode() // no size for svg's
+			if svg != nil {
 				return false
 			}
 			return true
 		},
-		func(k ki.Ki, level int, d interface{}) bool {
-			// this one does the work
+		func(k ki.Ki, level int, d interface{}) bool { // this one does the work
 			gii, gi := KiToNode2D(k)
-			if gi == nil || gi.Paint.Off {
+			if gi == nil {
 				return false
 			}
 			gii.Size2D()
@@ -929,6 +444,10 @@ func (g *Node2DBase) Size2DTree() {
 // Layout2DTree does layout pass -- each node iterates over children for
 // maximum control -- this starts with parent VpBBox -- can be called de novo
 func (g *Node2DBase) Layout2DTree() {
+	svg := g.This.(Node2D).AsSVGNode()
+	if svg != nil { // no layout for svg
+		return
+	}
 	pr := prof.Start("Node2D.Layout2DTree")
 	parBBox := image.ZR
 	_, pg := KiToNode2D(g.Par)
@@ -939,19 +458,6 @@ func (g *Node2DBase) Layout2DTree() {
 	pr.End()
 }
 
-// Move2DTree does move2d pass -- each node iterates over children for maximum
-// control -- this starts with parent VpBBox and current delta -- can be
-// called de novo
-func (g *Node2DBase) Move2DTree() {
-	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		parBBox = pg.VpBBox
-	}
-	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig).ToPoint()
-	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
-}
-
 // Render2DTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
@@ -959,18 +465,6 @@ func (g *Node2DBase) Render2DTree() {
 	pr := prof.Start("Node2D.Render2DTree")
 	g.This.(Node2D).Render2D() // important to use interface version to get interface!
 	pr.End()
-}
-
-// ChildrenBBox2DWidget provides a basic widget box-model subtraction of
-// margin and padding to children -- call in ChildrenBBox2D for most widgets
-func (g *Node2DBase) ChildrenBBox2DWidget() image.Rectangle {
-	nb := g.VpBBox
-	spc := int(g.Style.BoxSpace())
-	nb.Min.X += spc
-	nb.Min.Y += spc
-	nb.Max.X -= spc
-	nb.Max.Y -= spc
-	return nb
 }
 
 // Layout2DChildren does layout on all of node's children, giving them the
@@ -1050,36 +544,6 @@ func (g *Node2DBase) ParentViewport() *Viewport2D {
 		return true
 	})
 	return parVp
-}
-
-// ParentSVG returns the parent SVG -- for svg-rendering nodes
-func (g *Node2DBase) ParentSVG() *SVG {
-	pvp := g.ParentViewport()
-	for pvp != nil {
-		if pvp.IsSVG() {
-			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
-		}
-		pvp = pvp.ParentViewport()
-	}
-	return nil
-}
-
-// ParentLayout returns the parent layout
-func (g *Node2DBase) ParentLayout() *Layout {
-	var parLy *Layout
-	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
-		if !ok {
-			return false // don't keep going up
-		}
-		ly := gii.AsLayout2D()
-		if ly != nil {
-			parLy = ly
-			return false // done
-		}
-		return true
-	})
-	return parLy
 }
 
 // ParentReRenderAnchor returns parent that is a ReRenderAnchor -- for

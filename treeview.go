@@ -108,7 +108,7 @@ const (
 // of that source tree (move, cut, add, etc) through drag-n-drop and
 // cut/copy/paste and menu actions.
 type TreeView struct {
-	WidgetBase
+	PartsWidgetBase
 	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
 	ViewIdx     int                    `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
 	Indent      units.Value            `xml:"indent" desc:"styled amount to indent children relative to this node"`
@@ -1306,13 +1306,13 @@ func (tv *TreeView) ConfigParts() {
 	if mods {
 		wb.SetProp("#icon0", TVBranchProps)
 		wb.SetProp("#icon1", TVBranchProps)
-		tv.StylePart(wb.This)
+		tv.StylePart(Node2D(wb))
 	}
 
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
 	if mods {
-		tv.StylePart(lbl.This)
+		tv.StylePart(Node2D(lbl))
 	}
 	tv.Parts.UpdateEnd(updt)
 }
@@ -1336,7 +1336,6 @@ func (tv *TreeView) Init2D() {
 		tv.Viewport = tv.ParentViewport()
 	}
 	tv.Style.Defaults()
-	tv.Paint.Defaults()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	tv.ConnectToViewport()
@@ -1387,11 +1386,7 @@ func (tv *TreeView) Style2D() {
 	tv.SetCanFocusIfActive()
 	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
 
-	var pst *Style
-	_, pg := KiToNode2D(tv.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(tv.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Style)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
@@ -1419,11 +1414,12 @@ func (tv *TreeView) Size2D() {
 	if !tv.IsClosed() {
 		// we layout children under us
 		for _, kid := range tv.Kids {
-			_, gi := KiToNode2D(kid)
-			if gi != nil {
-				h += gi.LayData.AllocSize.Y
-				w = Max32(w, tv.Indent.Dots+gi.LayData.AllocSize.X)
+			gi := kid.(Node2D).AsWidget()
+			if gi == nil {
+				continue
 			}
+			h += gi.LayData.AllocSize.Y
+			w = Max32(w, tv.Indent.Dots+gi.LayData.AllocSize.X)
 		}
 	}
 	tv.LayData.AllocSize = Vec2D{w, h}
@@ -1452,7 +1448,6 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 
 	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
 	tv.Style.SetUnitContext(tv.Viewport, psize) // update units with final layout
-	tv.Paint.SetUnitContext(tv.Viewport, psize) // always update paint
 	tv.BBox = tv.This.(Node2D).BBox2D()         // only compute once, at this point
 	tv.This.(Node2D).ComputeBBox2D(parBBox, image.ZP)
 
@@ -1465,12 +1460,13 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	h := tv.WidgetSize.Y
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
-			_, gi := KiToNode2D(kid)
-			if gi != nil {
-				gi.LayData.AllocPosRel.Y = h
-				gi.LayData.AllocPosRel.X = tv.Indent.Dots
-				h += gi.LayData.AllocSize.Y
+			gi := kid.(Node2D).AsWidget()
+			if gi == nil {
+				continue
 			}
+			gi.LayData.AllocPosRel.Y = h
+			gi.LayData.AllocPosRel.X = tv.Indent.Dots
+			h += gi.LayData.AllocSize.Y
 		}
 	}
 	tv.Layout2DChildren()
@@ -1512,7 +1508,8 @@ func (tv *TreeView) Render2D() {
 		tv.TreeViewEvents()
 
 		// note: this is std except using WidgetSize instead of AllocSize
-		pc := &tv.Paint
+		rs := &tv.Viewport.Render
+		pc := &rs.Paint
 		st := &tv.Style
 		pc.FontStyle = st.Font
 		pc.TextStyle = st.Text

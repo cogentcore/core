@@ -101,7 +101,7 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 // ButtonBase has common button functionality for all buttons, including
 // Button, Action, MenuButton, CheckBox, etc
 type ButtonBase struct {
-	WidgetBase
+	PartsWidgetBase
 	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
 	Icon         IconName             `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName             `xml:"indicator" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
@@ -138,7 +138,7 @@ func (g *ButtonBase) IsChecked() bool {
 
 // set the selected state of this button -- does not emit signal or update
 func (g *ButtonBase) SetSelectedState(sel bool) {
-	g.WidgetBase.SetSelectedState(sel)
+	g.PartsWidgetBase.SetSelectedState(sel)
 	g.SetButtonState(ButtonActive) // update style -- will sort through all state
 }
 
@@ -286,7 +286,7 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	if !ic.HasChildren() || ic.UniqueNm != icnm {
 		ic.InitFromName(icnm)
 		ic.UniqueNm = icnm
-		g.StylePart(ic.This)
+		g.StylePart(Node2D(ic))
 	}
 }
 
@@ -415,6 +415,7 @@ func (g *ButtonBase) ButtonRelease() {
 }
 
 func (g *ButtonBase) ConfigParts() {
+	g.Parts.Lay = LayoutRow
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
@@ -441,11 +442,7 @@ func (g *ButtonBase) Style2DWidget() {
 func (g *ButtonBase) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(g.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
@@ -457,7 +454,8 @@ func (g *ButtonBase) Style2D() {
 
 func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
 	g.This.(ButtonWidget).ConfigPartsIfNeeded()
-	g.Layout2DWidget(parBBox) // lays out parts
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -679,14 +677,14 @@ func (g *CheckBox) ConfigParts() {
 		if !icon.HasChildren() || icon.UniqueNm != onnm {
 			icon.InitFromName(onnm)
 			icon.UniqueNm = onnm
-			g.StylePart(icon.This)
+			g.StylePart(Node2D(icon))
 		}
 		icoff := ist.Child(1).(*Icon)
 		offnm := string(g.IconOff)
 		if !icoff.HasChildren() || icoff.UniqueNm != offnm {
 			icoff.InitFromName(offnm)
 			icoff.UniqueNm = offnm
-			g.StylePart(icoff.This)
+			g.StylePart(Node2D(icoff))
 		}
 	}
 	if g.IsChecked() {
@@ -697,8 +695,8 @@ func (g *CheckBox) ConfigParts() {
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != g.Text {
-			g.StylePart(g.Parts.Child(lbIdx - 1)) // also get the space
-			g.StylePart(lbl.This)
+			g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
+			g.StylePart(Node2D(lbl))
 			lbl.Text = g.Text
 		}
 	}

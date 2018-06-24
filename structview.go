@@ -245,7 +245,7 @@ func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
 // properties -- constructs widgets in Parts to show the field names and
 // editor fields for each field
 type StructViewInline struct {
-	WidgetBase
+	PartsWidgetBase
 	Struct     interface{} `desc:"the struct that we are a view onto"`
 	AddAction  bool        `desc:"if true add an ... action button at the end -- other users of this widget can then configure that -- it is called 'extra-action'"`
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`

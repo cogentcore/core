@@ -239,20 +239,17 @@ var SeparatorProps = ki.Props{
 	// todo: dotted
 }
 
-func (g *Separator) Style2D() {
-	g.Style2DWidget()
-	g.Style2DSVG()
-}
-
 func (g *Separator) Render2D() {
 	if g.PushBounds() {
-		pc := &g.Paint
 		rs := &g.Viewport.Render
+		pc := &rs.Paint
 		st := &g.Style
 		pc.FontStyle = st.Font
 		pc.TextStyle = st.Text
 		g.RenderStdBox(st)
 		pc.StrokeStyle.SetColor(&st.Color) // ink color
+		pc.StrokeStyle.Width = st.Border.Width
+		pc.FillStyle.SetColor(nil)
 
 		spc := st.BoxSpace()
 		pos := g.LayData.AllocPos.AddVal(spc)

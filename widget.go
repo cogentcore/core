@@ -7,15 +7,21 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
+	"strings"
 
+	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
-// Widget base type -- manages control elements and provides standard box model rendering
+// WidgetBase is the base type for all Widget Node2D elements, which are
+// managed by a containing Layout, and use all 5 rendering passes
 type WidgetBase struct {
 	Node2DBase
-	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
+	Style    Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	DefStyle *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	LayData  LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -24,12 +30,408 @@ var WidgetBaseProps = ki.Props{
 	"base-type": true,
 }
 
-// WidgetBase supports full Box rendering model, so Button just calls these
-// methods to render -- base function needs to take a Style arg.
+func (g *WidgetBase) AsWidget() *WidgetBase {
+	return g
+}
 
-func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
-	pc := &g.Paint
+// Init2DWidget handles basic node initialization -- Init2D can then do special things
+func (g *WidgetBase) Init2DWidget() {
+	g.Viewport = g.ParentViewport()
+	g.Style.Defaults()
+	g.LayData.Defaults() // doesn't overwrite
+	g.ConnectToViewport()
+}
+
+func (g *WidgetBase) Init2D() {
+	g.Init2DWidget()
+}
+
+// DefaultStyle2DWidget retrieves default style object for the type, from type
+// properties -- selector is optional selector for state etc.  Property key is
+// "__DefStyle" + selector -- if part != nil, then use that obj for getting the
+// default style starting point when creating a new style
+func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *Style {
+	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
+	styprops := tprops
+	if selector != "" {
+		sp, ok := tprops[selector]
+		if !ok {
+			log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, g.Type().Name())
+		} else {
+			spm, ok := sp.(ki.Props)
+			if !ok {
+				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, g.Type().Name())
+			} else {
+				styprops = spm
+			}
+		}
+	}
+	var dsty *Style
+	pnm := "__DefStyle" + selector
+	dstyi, ok := tprops[pnm]
+	if !ok || RebuildDefaultStyles {
+		dsty = &Style{}
+		dsty.Defaults()
+		if selector != "" {
+			var baseStyle *Style
+			if part != nil {
+				baseStyle = part.DefaultStyle2DWidget("", nil)
+			} else {
+				baseStyle = g.DefaultStyle2DWidget("", nil)
+			}
+			*dsty = *baseStyle
+		}
+
+		if pgi, _ := KiToNode2D(g.Par); pgi != nil {
+			if pw := pgi.AsWidget(); pw != nil {
+				dsty.SetStyleProps(&pw.Style, styprops)
+			} else {
+				dsty.SetStyleProps(nil, styprops)
+			}
+		} else {
+			dsty.SetStyleProps(nil, styprops)
+		}
+		dsty.IsSet = false // keep as non-set
+		tprops[pnm] = dsty
+	} else {
+		dsty, _ = dstyi.(*Style)
+	}
+	return dsty
+}
+
+// Style2DWidget styles the Style values from node properties and optional
+// base-level defaults -- for Widget-style nodes
+func (g *WidgetBase) Style2DWidget() {
+	gii, _ := g.This.(Node2D)
+	SetCurStyleNode2D(gii)
+	defer SetCurStyleNode2D(nil)
+	if !RebuildDefaultStyles && g.DefStyle != nil {
+		g.Style.CopyFrom(g.DefStyle)
+	} else {
+		g.Style.CopyFrom(g.DefaultStyle2DWidget("", nil))
+	}
+	g.Style.IsSet = false // this is always first call, restart
+
+	if g.Viewport == nil { // robust
+		gii.Init2D()
+	}
+	var pagg *ki.Props
+	if pgi, _ := KiToNode2D(g.Par); pgi != nil {
+		if pw := pgi.AsWidget(); pw != nil {
+			g.Style.SetStyleProps(&pw.Style, g.Properties())
+			pagg = &pw.CSSAgg
+		} else {
+			g.CSSAgg = nil // restart
+			g.Style.SetStyleProps(nil, g.Properties())
+		}
+	} else {
+		g.CSSAgg = nil // restart
+		g.Style.SetStyleProps(nil, g.Properties())
+	}
+
+	if pagg != nil {
+		AggCSS(&g.CSSAgg, *pagg)
+	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSSWidget(gii, g.CSSAgg)
+
+	g.Style.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
+	g.LayData.SetFromStyle(&g.Style.Layout)       // also does reset
+	if g.Style.Inactive {                         // inactive can only set, not clear
+		g.SetInactive()
+	}
+	g.Style.Use() // activates currentColor etc
+}
+
+// ApplyCSSWidget applies css styles to given node, using key to select sub-props
+// from overall properties list
+func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+
+	nb := node.AsWidget()
+	if nb == nil {
+		return false
+	}
+	if pwi, _ := KiToNode2D(node.Parent()); pwi != nil {
+		if pw := pwi.AsWidget(); pw != nil {
+			nb.Style.SetStyleProps(&pw.Style, pmap)
+		} else {
+			nb.Style.SetStyleProps(nil, pmap)
+		}
+	} else {
+		nb.Style.SetStyleProps(nil, pmap)
+	}
+	return true
+}
+
+// StyleCSSWidget applies css style properties to given Widget node, parsing
+// out type, .class, and #name selectors
+func StyleCSSWidget(node Node2D, css ki.Props) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	ApplyCSSWidget(node, tyn, css)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	ApplyCSSWidget(node, cln, css)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	ApplyCSSWidget(node, idnm, css)
+}
+
+// StylePart sets the style properties for a child in parts (or any other
+// child) based on its name -- only call this when new parts were created --
+// name of properties is #partname (lower cased) and it should contain a
+// ki.Props which is then added to the part's props -- this provides built-in
+// defaults for parts, so it is separate from the CSS process
+func (g *WidgetBase) StylePart(pk Node2D) {
+	if pk == nil {
+		return
+	}
+	pg := pk.AsWidget()
+	if pg == nil {
+		return
+	}
+	if pg.DefStyle != nil { // already set
+		return
+	}
+	stynm := "#" + strings.ToLower(pk.Name())
+	// this is called on US (the parent object) so we store the #partname
+	// default style within our type properties..  that's good -- HOWEVER we
+	// cannot put any sub-selector properties within these part styles -- must
+	// all be in the base-level.. hopefully that works..
+	pdst := g.DefaultStyle2DWidget(stynm, pg)
+	pg.DefStyle = pdst // will use this as starting point for all styles now..
+
+	if vp := pk.AsViewport2D(); vp != nil {
+		// this is typically an icon -- copy fill and stroke params to it
+		styprops := kit.Types.Properties(g.Type(), true)
+		sp := ki.SubProps(styprops, stynm)
+		if sp != nil {
+			if fill, ok := sp["fill"]; ok {
+				pg.SetProp("fill", fill)
+			}
+			if stroke, ok := sp["stroke"]; ok {
+				pg.SetProp("stroke", stroke)
+			}
+		}
+		sp = ki.SubProps(g.Properties(), stynm)
+		if sp != nil {
+			if fill, ok := sp["fill"]; ok {
+				pg.SetProp("fill", fill)
+			}
+			if stroke, ok := sp["stroke"]; ok {
+				pg.SetProp("stroke", stroke)
+			}
+		}
+	}
+}
+
+func (g *WidgetBase) Style2D() {
+	g.Style2DWidget()
+}
+
+func (g *WidgetBase) InitLayout2D() {
+	g.LayData.SetFromStyle(&g.Style.Layout)
+}
+
+func (g *WidgetBase) Size2DBase() {
+	g.InitLayout2D()
+}
+
+func (g *WidgetBase) Size2D() {
+	g.Size2DBase()
+}
+
+// AddParentPos adds the position of our parent to our layout position --
+// layout computations are all relative to parent position, so they are
+// finally cached out at this stage also returns the size of the parent for
+// setting units context relative to parent objects
+func (g *WidgetBase) AddParentPos() Vec2D {
+	if pgi, _ := KiToNode2D(g.Par); pgi != nil {
+		if pw := pgi.AsWidget(); pw != nil {
+			if !g.IsField() {
+				g.LayData.AllocPos = pw.LayData.AllocPos.Add(g.LayData.AllocPosRel)
+			}
+			return pw.LayData.AllocSize
+		}
+	}
+	return Vec2DZero
+}
+
+// get our bbox from Layout allocation
+func (g *WidgetBase) BBoxFromAlloc() image.Rectangle {
+	return RectFromPosSize(g.LayData.AllocPos, g.LayData.AllocSize)
+}
+
+func (g *WidgetBase) BBox2D() image.Rectangle {
+	return g.BBoxFromAlloc()
+}
+
+func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DBase(parBBox, delta)
+}
+
+// Layout2DBase provides basic Layout2D functions -- good for most cases
+func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
+	gii, _ := g.This.(Node2D)
+	if g.Viewport == nil { // robust
+		if gii.AsViewport2D() == nil {
+			gii.Init2D()
+			gii.Style2D()
+			// fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
+		}
+	}
+	psize := g.AddParentPos()
+	g.LayData.AllocPosOrig = g.LayData.AllocPos
+	if initStyle {
+		g.Style.SetUnitContext(g.Viewport, psize) // update units with final layout
+	}
+	g.BBox = gii.BBox2D() // only compute once, at this point
+	// note: if other styles are maintained, they also need to be updated!
+	gii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
+	// typically Layout2DChildren must be called after this!
+	if Layout2DTrace {
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
+	}
+}
+
+func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true)
+	g.Layout2DChildren()
+}
+
+// ChildrenBBox2DWidget provides a basic widget box-model subtraction of
+// margin and padding to children -- call in ChildrenBBox2D for most widgets
+func (g *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
+	nb := g.VpBBox
+	spc := int(g.Style.BoxSpace())
+	nb.Min.X += spc
+	nb.Min.Y += spc
+	nb.Max.X -= spc
+	nb.Max.Y -= spc
+	return nb
+}
+
+func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
+	return g.ChildrenBBox2DWidget()
+}
+
+// PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
+// -- this limits our drawing to our own bounding box, automatically -- must
+// be called as first step in Render2D returns whether the new bounds are
+// empty or not -- if empty then don't render!
+func (g *WidgetBase) PushBounds() bool {
+	if g.IsOverlay() {
+		if g.Viewport != nil {
+			g.ConnectToViewport()
+			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds(), g.ObjBBox)
+		}
+		return true
+	}
+	if g.VpBBox.Empty() {
+		return false
+	}
 	rs := &g.Viewport.Render
+	rs.PushBounds(g.VpBBox, g.ObjBBox)
+	g.ConnectToViewport()
+	if Render2DTrace {
+		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
+	}
+	return true
+}
+
+// PopBounds pops our bounding-box bounds -- last step in Render2D after
+// rendering children
+func (g *WidgetBase) PopBounds() {
+	rs := &g.Viewport.Render
+	rs.PopBounds()
+}
+
+func (g *WidgetBase) Render2D() {
+	if g.PushBounds() {
+		// connect to events here
+		g.Render2DChildren()
+		g.PopBounds()
+	} else {
+		g.DisconnectAllEvents()
+	}
+}
+
+func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
+	node = g.This.(Node2D)
+	layout = false
+	return
+}
+
+// ReRender2DTree does a re-render of the tree -- after it has already been
+// initialized and styled -- just does layout and render passes
+func (g *WidgetBase) ReRender2DTree() {
+	ld := g.LayData // save our current layout data
+	updt := g.UpdateStart()
+	g.Init2DTree()
+	g.Style2DTree()
+	g.Size2DTree()
+	g.LayData = ld // restore
+	g.Layout2DTree()
+	g.Render2DTree()
+	g.UpdateEndNoSig(updt)
+}
+
+// Move2DBase does the basic move on this node
+func (g *WidgetBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
+	g.LayData.AllocPos = g.LayData.AllocPosOrig.Add(NewVec2DFmPoint(delta))
+	g.This.(Node2D).ComputeBBox2D(parBBox, delta)
+}
+
+func (g *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+	g.Move2DBase(delta, parBBox)
+	g.Move2DChildren(delta)
+}
+
+// Move2DTree does move2d pass -- each node iterates over children for maximum
+// control -- this starts with parent VpBBox and current delta -- can be
+// called de novo
+func (g *WidgetBase) Move2DTree() {
+	svg := g.This.(Node2D).AsSVGNode()
+	if svg != nil { // no layout for svg
+		return
+	}
+	parBBox := image.ZR
+	_, pg := KiToNode2D(g.Par)
+	if pg != nil {
+		parBBox = pg.VpBBox
+	}
+	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig).ToPoint()
+	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
+}
+
+// ParentLayout returns the parent layout
+func (g *WidgetBase) ParentLayout() *Layout {
+	var parLy *Layout
+	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		gii, ok := k.(Node2D)
+		if !ok {
+			return false // don't keep going up
+		}
+		ly := gii.AsLayout2D()
+		if ly != nil {
+			parLy = ly
+			return false // done
+		}
+		return true
+	})
+	return parLy
+}
+
+// RenderBoxImpl implements the standard box model rendering -- assumes all
+// paint params have already been set
+func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
+	rs := &g.Viewport.Render
+	pc := &rs.Paint
 	if rad == 0.0 {
 		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
 	} else {
@@ -38,10 +440,10 @@ func (g *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
 	pc.FillStrokeClear(rs)
 }
 
-// draw standard box using given style
+// RenderStdBox draws standard box using given style
 func (g *WidgetBase) RenderStdBox(st *Style) {
-	pc := &g.Paint
 	rs := &g.Viewport.Render
+	pc := &rs.Paint
 
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
@@ -68,10 +470,11 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
-// measure given text string using current style
+// MeasureTextSize measures given text string using current style
 func (g *WidgetBase) MeasureTextSize(txt string) (w, h float32) {
+	rs := &g.Viewport.Render
+	pc := &rs.Paint
 	st := &g.Style
-	pc := &g.Paint
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
 	w, h = pc.MeasureString(txt)
@@ -108,8 +511,8 @@ func (g *WidgetBase) Size2DAddSpace() {
 
 // render a text string in standard box model (e.g., label for a button, etc)
 func (g *WidgetBase) Render2DText(txt string) {
-	pc := &g.Paint
 	rs := &g.Viewport.Render
+	pc := &rs.Paint
 	st := &g.Style
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
@@ -127,18 +530,65 @@ func (g *WidgetBase) Render2DText(txt string) {
 	pc.DrawString(rs, txt, pos.X, pos.Y, sz.X)
 }
 
+// set minimum and preferred width -- will get at least this amount -- max unspecified
+func (g *WidgetBase) SetMinPrefWidth(val units.Value) {
+	g.SetProp("width", val)
+	g.SetProp("min-width", val)
+}
+
+// set minimum and preferred height-- will get at least this amount -- max unspecified
+func (g *WidgetBase) SetMinPrefHeight(val units.Value) {
+	g.SetProp("height", val)
+	g.SetProp("min-height", val)
+}
+
+// SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
+func (g *WidgetBase) SetStretchMaxWidth() {
+	g.SetProp("max-width", units.NewValue(-1, units.Px))
+}
+
+// SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
+func (g *WidgetBase) SetStretchMaxHeight() {
+	g.SetProp("max-height", units.NewValue(-1, units.Px))
+}
+
+// SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
+func (g *WidgetBase) SetFixedWidth(val units.Value) {
+	g.SetProp("width", val)
+	g.SetProp("min-width", val)
+	g.SetProp("max-width", val)
+}
+
+// SetFixedHeight sets all height options (height, min-height, max-height) to
+// a fixed height value
+func (g *WidgetBase) SetFixedHeight(val units.Value) {
+	g.SetProp("height", val)
+	g.SetProp("min-height", val)
+	g.SetProp("max-height", val)
+}
+
 ///////////////////////////////////////////////////////////////////
-// Standard methods to call on the Parts
+// PartsWidgetBase
+
+// PartsWidgetBase is the base type for all Widget Node2D elements that manage
+// a set of constitutent parts
+type PartsWidgetBase struct {
+	WidgetBase
+	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
+}
+
+var KiT_PartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)
+
+var PartsWidgetBaseProps = ki.Props{
+	"base-type": true,
+}
 
 // standard FunDownMeFirst etc operate automaticaly on Field structs such as
 // Parts -- custom calls only needed for manually-recursive traversal in
 // Layout and Render
 
-func (g *WidgetBase) Init2DWidget() {
-	g.Init2DBase()
-}
-
-func (g *WidgetBase) SizeFromParts() {
+// SizeFromParts sets our size from those of our parts -- default..
+func (g *PartsWidgetBase) SizeFromParts() {
 	g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
 	g.Size2DAddSpace()
 	if Layout2DTrace {
@@ -146,42 +596,53 @@ func (g *WidgetBase) SizeFromParts() {
 	}
 }
 
-func (g *WidgetBase) Size2DWidget() {
+func (g *PartsWidgetBase) Size2DParts() {
 	g.InitLayout2D()
 	g.SizeFromParts() // get our size from parts
 }
 
-func (g *WidgetBase) Layout2DParts(parBBox image.Rectangle) {
+func (g *PartsWidgetBase) Size2D() {
+	g.Size2DParts()
+}
+
+func (g *PartsWidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DBase(parBBox, delta)
+	g.Parts.This.(Node2D).ComputeBBox2D(parBBox, delta)
+}
+
+func (g *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+	g.ComputeBBox2DParts(parBBox, delta)
+}
+
+func (g *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle) {
 	spc := g.Style.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
 	g.Parts.Layout2D(parBBox)
 }
 
-func (g *WidgetBase) Layout2DWidget(parBBox image.Rectangle) {
+func (g *PartsWidgetBase) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true) // init style
 	g.Layout2DParts(parBBox)
+	g.Layout2DChildren()
 }
 
-func (g *WidgetBase) ComputeBBox2DWidget(parBBox image.Rectangle, delta image.Point) {
-	g.ComputeBBox2DBase(parBBox, delta)
-	g.Parts.This.(Node2D).ComputeBBox2D(parBBox, delta)
+func (g *PartsWidgetBase) Render2DParts() {
+	g.Parts.Render2DTree()
 }
 
-func (g *WidgetBase) Move2DWidget(delta image.Point, parBBox image.Rectangle) {
+func (g *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	g.Move2DBase(delta, parBBox)
 	g.Parts.This.(Node2D).Move2D(delta, parBBox)
-}
-
-func (g *WidgetBase) Render2DParts() {
-	g.Parts.Render2DTree()
+	g.Move2DChildren(delta)
 }
 
 ///////////////////////////////////////////////////////////////////
 // ConfigParts building-blocks
 
-// ConfigPartsIconLabel returns a standard config for creating parts, of icon and label left-to right in a row, based on whether items are nil or empty
-func (g *WidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
+// ConfigPartsIconLabel returns a standard config for creating parts, of icon
+// and label left-to right in a row, based on whether items are nil or empty
+func (g *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
 	// todo: add some styles for button layout
 	config = kit.TypeAndNameList{}
 	icIdx = -1
@@ -202,21 +663,21 @@ func (g *WidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config kit.T
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (g *WidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
+func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
 		if !ic.HasChildren() || ic.UniqueNm != icnm { // can't use nm b/c config does
 			ic.InitFromName(icnm)
 			ic.UniqueNm = icnm
-			g.StylePart(ic.This)
+			g.StylePart(Node2D(ic))
 		}
 	}
 	if lbIdx >= 0 {
 		lbl := g.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
-			g.StylePart(lbl.This)
+			g.StylePart(Node2D(lbl))
 			if icIdx >= 0 {
-				g.StylePart(g.Parts.Child(lbIdx - 1)) // also get the space
+				g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			}
 			lbl.Text = txt
 		}
@@ -224,7 +685,7 @@ func (g *WidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbI
 }
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (g *WidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
+func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
 	if IconNameValid(icnm) {
 		ick := g.Parts.ChildByName("icon", 0)
 		if ick == nil {
@@ -256,42 +717,4 @@ func (g *WidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
 		}
 	}
 	return false
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Node2D impl for WidgetBase
-
-func (g *WidgetBase) Init2D() {
-	g.Init2DWidget()
-}
-
-func (g *WidgetBase) Size2D() {
-	g.Size2DWidget()
-}
-
-func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	g.ComputeBBox2DWidget(parBBox, delta)
-}
-
-func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
-	return g.ChildrenBBox2DWidget()
-}
-
-func (g *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-	g.Move2DWidget(delta, parBBox)
-	g.Move2DChildren(delta)
-}
-
-func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
-}
-
-func (g *WidgetBase) FocusChanged2D(gotFocus bool) {
 }

@@ -30,7 +30,7 @@ import (
 // Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
-	Node2DBase
+	WidgetBase
 	Fill    bool        `desc:"fill the viewport with background-color from style"`
 	Geom    Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
@@ -202,16 +202,19 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
 // ReRender2DNOde is that it calls ReRender2DTree and not just Render2DTree!
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
-	gn := gni.AsNode2D()
+	pw := gni.AsWidget()
+	if pw == nil {
+		return
+	}
 	if Render2DTrace {
-		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.PathUnique(), gn.PathUnique())
+		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.PathUnique(), pw.PathUnique())
 	}
 	pr := prof.Start("vp.ReRender2DNode")
-	gn.ReRender2DTree()
+	pw.ReRender2DTree()
 	pr.End()
 	if vp.Win != nil {
 		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
+		vp.Win.UploadVpRegion(vp, pw.VpBBox, pw.WinBBox)
 		vp.Win.UpdateEnd(updt)
 	}
 }
@@ -244,7 +247,7 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 
 func (vp *Viewport2D) Init2D() {
 	vp.SetCurWin()
-	vp.Init2DBase()
+	vp.Init2DWidget()
 	// we update oursleves whenever any node update event happens
 	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
@@ -261,10 +264,6 @@ func (vp *Viewport2D) Init2D() {
 func (vp *Viewport2D) Style2D() {
 	vp.SetCurWin()
 	vp.Style2DWidget()
-}
-
-func (g *Viewport2D) StyleCSS(node Node2D) {
-	StyleCSSWidget(node, g.CSS)
 }
 
 func (vp *Viewport2D) Size2D() {
@@ -371,7 +370,8 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 func (vp *Viewport2D) FillViewport() {
-	vp.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Style.Background.Color)
+	rs := vp.Render
+	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Style.Background.Color)
 }
 
 func (vp *Viewport2D) Render2D() {
@@ -443,7 +443,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 		}
 		anchor := gi.ParentReRenderAnchor()
 		if anchor != nil {
-			vp.ReRender2DAnchor(anchor.AsNode2D())
+			vp.ReRender2DAnchor(anchor)
 		} else {
 			vp.FullRender2DTree()
 		}
@@ -464,7 +464,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
 				}
-				vp.ReRender2DAnchor(anchor.AsNode2D())
+				vp.ReRender2DAnchor(anchor)
 			} else {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())

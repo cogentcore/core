@@ -313,7 +313,7 @@ func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(e
 // layout, to determine left, right, center, justified).  Layouts
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
-	Node2DBase
+	WidgetBase
 	Lay       Layouts               `xml:"lay" desc:"type of layout to use"`
 	StackTop  ki.Ptr                `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
 	ChildSize Vec2D                 `json:"-" xml:"-" desc:"total max size of children as laid out"`
@@ -349,7 +349,7 @@ func (ly *Layout) GatherSizes() {
 
 	var sumPref, sumNeed, maxPref, maxNeed Vec2D
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -399,7 +399,7 @@ func (ly *Layout) GatherSizesGrid() {
 	sz := len(ly.Kids)
 	// collect overal size
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -446,7 +446,7 @@ func (ly *Layout) GatherSizesGrid() {
 	col := 0
 	row := 0
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -542,7 +542,11 @@ func (ly *Layout) AllocFromParent() {
 	lyp := pgi.AsLayout2D()
 	if lyp == nil {
 		ly.FuncUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
-			_, pg := KiToNode2D(k)
+			pgi, _ := KiToNode2D(k)
+			if pgi == nil {
+				return false
+			}
+			pg := pgi.AsWidget()
 			if pg == nil {
 				return false
 			}
@@ -610,7 +614,7 @@ func (ly *Layout) LayoutSingle(dim Dims2D) {
 	spc := ly.Style.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -655,7 +659,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	addSpace := false           // apply extra toward spacing -- for justify
 	if usePref && extra > 0.0 { // have some stretch extra
 		for _, c := range ly.Kids {
-			_, gi := KiToNode2D(c)
+			gi := c.(Node2D).AsWidget()
 			if gi == nil {
 				continue
 			}
@@ -669,7 +673,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		}
 	} else if extra > 0.0 { // extra relative to Need
 		for _, c := range ly.Kids {
-			_, gi := KiToNode2D(c)
+			gi := c.(Node2D).AsWidget()
 			if gi == nil {
 				continue
 			}
@@ -703,7 +707,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	for i, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -850,7 +854,7 @@ func (ly *Layout) LayoutGrid() {
 	cols := ly.GridSize.X
 	rows := ly.GridSize.Y
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -908,7 +912,7 @@ func (ly *Layout) LayoutGrid() {
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
 	for _, c := range ly.Kids {
-		_, gi := KiToNode2D(c)
+		gi := c.(Node2D).AsWidget()
 		if gi == nil {
 			continue
 		}
@@ -1120,7 +1124,7 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
 
-	h := ly.Paint.FontHeight()
+	h := ly.Style.Font.Size.Dots
 	dst := h * AutoScrollRate
 
 	mind := kit.MaxInt(0, pos-st)
@@ -1178,20 +1182,12 @@ func (ly *Layout) LayoutEvents() {
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
-func (ly *Layout) AsNode2D() *Node2DBase {
-	return &ly.Node2DBase
-}
-
-func (ly *Layout) AsViewport2D() *Viewport2D {
-	return nil
-}
-
 func (g *Layout) AsLayout2D() *Layout {
 	return g
 }
 
 func (ly *Layout) Init2D() {
-	ly.Init2DBase()
+	ly.Init2DWidget()
 }
 
 func (ly *Layout) BBox2D() image.Rectangle {
@@ -1320,9 +1316,9 @@ func (fr *Frame) Style2D() {
 
 func (fr *Frame) Render2D() {
 	if fr.PushBounds() {
-		pc := &fr.Paint
 		st := &fr.Style
 		rs := &fr.Viewport.Render
+		pc := &rs.Paint
 		// first draw a background rectangle in our full area
 
 		pos := fr.LayData.AllocPos
@@ -1371,7 +1367,7 @@ func (fr *Frame) Render2D() {
 // (max-size = -1) set the width / height property to determine how much it
 // takes relative to other stretchy elements
 type Stretch struct {
-	Node2DBase
+	WidgetBase
 }
 
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
@@ -1392,7 +1388,7 @@ func (g *Stretch) Layout2D(parBBox image.Rectangle) {
 
 // Space adds a fixed sized (1 em by default) blank space to a layout -- set width / height property to change
 type Space struct {
-	Node2DBase
+	WidgetBase
 }
 
 var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)

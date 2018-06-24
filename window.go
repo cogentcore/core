@@ -881,9 +881,6 @@ func (w *Window) ClearNonFocus() {
 		if gi == nil {
 			return true
 		}
-		if gi.Paint.Off { // off below this
-			return false
-		}
 		if w.Focus == k {
 			return true
 		}
@@ -953,9 +950,6 @@ func (w *Window) SetNextFocusItem() bool {
 			if gi == nil {
 				return true
 			}
-			if gi.Paint.Off { // off below this
-				return false
-			}
 			if w.Focus == k { // current focus can be a non-can-focus item
 				focusNext = true
 				return true
@@ -1001,9 +995,6 @@ func (w *Window) SetPrevFocusItem() bool {
 		_, gi := KiToNode2D(k)
 		if gi == nil {
 			return true
-		}
-		if gi.Paint.Off { // off below this
-			return false
 		}
 		if w.Focus == k {
 			gotFocus = true
@@ -1117,15 +1108,15 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	// todo: 3d version later..
 	w.DNDSource = src
 	w.DNDData = data
-	gimg := img.AsNode2D()
-	_, sgi := KiToNode2D(src)
-	if sgi != nil { // 2d case
-		gimg.LayData.AllocPos.SetPoint(sgi.LayData.AllocPos.ToPoint())
+	wimg := img.AsWidget()
+	if _, sgi := KiToNode2D(src); sgi != nil { // 2d case
+		if sw := sgi.AsWidget(); sw != nil {
+			wimg.LayData.AllocPos.SetPoint(sw.LayData.AllocPos.ToPoint())
+		}
 	}
-	kimg := (ki.Ki)(img)
-	kimg.SetName(src.UniqueName())
-	w.OverlayVp.AddChild(kimg)
-	w.DNDImage = kimg
+	wimg.This.SetName(src.UniqueName())
+	w.OverlayVp.AddChild(wimg.This)
+	w.DNDImage = wimg.This
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
@@ -1158,9 +1149,10 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 
 // DNDMoveEvent handles drag-n-drop move events
 func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
-	_, gi := KiToNode2D(w.DNDImage)
-	if gi != nil { // 2d case
-		gi.LayData.AllocPos.SetPoint(e.Where)
+	if gii, _ := KiToNode2D(w.DNDImage); gii != nil { // 2d case
+		if wg := gii.AsWidget(); wg != nil {
+			wg.LayData.AllocPos.SetPoint(e.Where)
+		}
 	} // else 3d..
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening

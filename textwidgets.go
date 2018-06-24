@@ -166,6 +166,7 @@ type TextField struct {
 	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
+	FontHeight    float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	lastSizedText []rune
 }
 
@@ -799,11 +800,7 @@ func (tf *TextField) Init2D() {
 func (tf *TextField) Style2D() {
 	tf.SetCanFocusIfActive()
 	tf.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(tf.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(tf.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Style)
 		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]))
@@ -812,7 +809,13 @@ func (tf *TextField) Style2D() {
 }
 
 func (tf *TextField) UpdateCharPos() bool {
-	tf.CharPos = tf.Paint.MeasureChars(tf.EditText)
+	rs := &tf.Viewport.Render
+	pc := &rs.Paint
+	st := &tf.Style
+	pc.FontStyle = st.Font
+	pc.TextStyle = st.Text
+	tf.CharPos = pc.MeasureChars(tf.EditText)
+	tf.FontHeight = pc.FontHeight()
 	tf.lastSizedText = tf.EditText
 	return true
 }
@@ -823,18 +826,17 @@ func (tf *TextField) Size2D() {
 	tf.StartPos = 0
 	tf.EndPos = len(tf.EditText)
 	tf.UpdateCharPos()
-	h := tf.Paint.FontHeight()
 	w := float32(10.0)
 	sz := len(tf.CharPos)
 	if sz > 0 {
 		w = tf.CharPos[sz-1]
 	}
 	w += 2.0 // give some extra buffer
-	tf.Size2DFromWH(w, h)
+	tf.Size2DFromWH(w, tf.FontHeight)
 }
 
 func (tf *TextField) Layout2D(parBBox image.Rectangle) {
-	tf.Layout2DWidget(parBBox)
+	tf.Layout2DBase(parBBox, true) // init style
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
@@ -866,10 +868,7 @@ func (tf *TextField) TextWidth(st, ed int) float32 {
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too)
 func (tf *TextField) CharStartPos(charidx int) Vec2D {
-	pc := &tf.Paint
 	st := &tf.Style
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
 	spc := st.BoxSpace()
 	pos := tf.LayData.AllocPos.AddVal(spc)
 	cpos := tf.TextWidth(tf.StartPos, charidx)
@@ -878,10 +877,9 @@ func (tf *TextField) CharStartPos(charidx int) Vec2D {
 
 func (tf *TextField) RenderCursor() {
 	cpos := tf.CharStartPos(tf.CursorPos)
-	pc := &tf.Paint
 	rs := &tf.Viewport.Render
-	h := pc.FontHeight()
-	pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+h)
+	pc := &rs.Paint
+	pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tf.FontHeight)
 	pc.Stroke(rs)
 }
 
@@ -903,12 +901,11 @@ func (tf *TextField) RenderSelect() {
 
 	spos := tf.CharStartPos(effst)
 
-	pc := &tf.Paint
 	rs := &tf.Viewport.Render
+	pc := &rs.Paint
 	st := &tf.StateStyles[TextFieldSel]
 	tsz := tf.TextWidth(effst, effed)
-	h := pc.FontHeight()
-	pc.FillBox(rs, spos, Vec2D{tsz, h}, &st.Background.Color)
+	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Background.Color)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -1003,7 +1000,7 @@ func (tf *TextField) AutoScroll() {
 func (tf *TextField) Render2D() {
 	if tf.PushBounds() {
 		tf.TextFieldEvents()
-		tf.AutoScroll()
+		tf.AutoScroll() // inits paint with our style
 		if tf.IsInactive() {
 			if tf.IsSelected() {
 				tf.Style = tf.StateStyles[TextFieldSel]
@@ -1044,7 +1041,7 @@ func (tf *TextField) FocusChanged2D(gotFocus bool) {
 // SpinBox combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
-	WidgetBase
+	PartsWidgetBase
 	Value      float32   `xml:"value" desc:"current value"`
 	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
 	Min        float32   `xml:"min" desc:"minimum value in range"`
@@ -1126,6 +1123,9 @@ func (g *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) 
 // SetValue sets the value, enforcing any limits, and updates the display
 func (g *SpinBox) SetValue(val float32) {
 	updt := g.UpdateStart()
+	if g.Prec == 0 {
+		g.Defaults()
+	}
 	g.Value = val
 	if g.HasMax {
 		g.Value = Min32(g.Value, g.Max)
@@ -1174,14 +1174,14 @@ func (g *SpinBox) ConfigParts() {
 	if mods {
 		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
-		g.StylePart(buts.This)
+		g.StylePart(Node2D(buts))
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
 		up := buts.Child(0).(*Action)
 		up.SetName("up")
 		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
 		up.Icon = g.UpIcon
-		g.StylePart(up.This)
+		g.StylePart(Node2D(up))
 		if !g.IsInactive() {
 			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
@@ -1193,7 +1193,7 @@ func (g *SpinBox) ConfigParts() {
 		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.Icon = g.DownIcon
-		g.StylePart(dn.This)
+		g.StylePart(Node2D(dn))
 		if !g.IsInactive() {
 			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
@@ -1201,11 +1201,11 @@ func (g *SpinBox) ConfigParts() {
 			})
 		}
 		// space
-		g.StylePart(g.Parts.Child(sbSpaceIdx)) // also get the space
+		g.StylePart(g.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
-		g.StylePart(tf.This)
+		g.StylePart(Node2D(tf))
 		tf.Text = fmt.Sprintf("%g", g.Value)
 		if !g.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1257,13 +1257,14 @@ func (g *SpinBox) Style2D() {
 }
 
 func (g *SpinBox) Size2D() {
-	g.Size2DWidget()
+	g.Size2DParts()
 	g.ConfigParts()
 }
 
 func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
 	g.ConfigPartsIfNeeded()
-	g.Layout2DWidget(parBBox)
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	g.Layout2DChildren()
 }
 

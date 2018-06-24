@@ -39,7 +39,7 @@ const (
 // that represents a value, as in a scrollbar, and the scrolling range is size
 // - thumbsize
 type SliderBase struct {
-	WidgetBase
+	PartsWidgetBase
 	Value       float32              `xml:"value" desc:"current value"`
 	EmitValue   float32              `xml:"-" desc:"previous emitted value - don't re-emit if it is the same"`
 	Min         float32              `xml:"min" desc:"minimum value in range"`
@@ -496,11 +496,7 @@ func (g *Slider) Init2D() {
 func (g *Slider) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(g.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
@@ -525,7 +521,8 @@ func (g *Slider) Size2D() {
 
 func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	g.ConfigPartsIfNeeded(false)
-	g.Layout2DWidget(parBBox)
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -547,9 +544,9 @@ func (g *Slider) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *Slider) Render2DDefaultStyle() {
-	pc := &g.Paint
 	st := &g.Style
 	rs := &g.Viewport.Render
+	pc := &rs.Paint
 
 	g.ConfigPartsIfNeeded(true)
 
@@ -670,11 +667,7 @@ func (g *ScrollBar) Init2D() {
 func (g *ScrollBar) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(g.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
@@ -689,7 +682,8 @@ func (g *ScrollBar) Size2D() {
 }
 
 func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DWidget(parBBox)
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Style.UnContext)
 	}
@@ -716,9 +710,9 @@ func (g *ScrollBar) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *ScrollBar) Render2DDefaultStyle() {
-	pc := &g.Paint
 	st := &g.Style
-	// rs := &g.Viewport.Render
+	rs := &g.Viewport.Render
+	pc := &rs.Paint
 
 	// overall fill box
 	g.RenderStdBox(&g.StateStyles[SliderBox])

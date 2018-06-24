@@ -89,14 +89,9 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* ViewBox is unclear!  for first-level SVG, we need to override whatever
-  viewbox that was specified, based on allocation.  within svg, it is real
-  coordinates relative to parent SVG..
+* impl ViewBox options
 
-* gieditor on astronaut icon not updating pos/ size properly
-
-* test SVG path rendering --- now doing with SVG loading!
-* need validator code -- parser seems to be working but needs validator with better err msgs
+* need path validator code -- parser seems to be working but needs validator with better err msgs
 * also re-render data string after parsing to be more human friendly.
 
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.

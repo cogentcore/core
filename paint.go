@@ -184,6 +184,7 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 // The RenderState holds all the current rendering state information used
 // while painting -- a viewport just has one of these
 type RenderState struct {
+	Paint       Paint             `desc:"communal painter -- for widgets -- SVG have their own"`
 	XForm       XFormMatrix2D     `desc:"current transform"`
 	Path        rasterx.Path      `desc:"current path"`
 	Raster      *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`

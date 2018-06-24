@@ -354,7 +354,7 @@ func (mv *MapView) ReRender2D() (node Node2D, layout bool) {
 
 // MapViewInline represents a map as a single line widget, for smaller maps and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type MapViewInline struct {
-	WidgetBase
+	PartsWidgetBase
 	Map     interface{} `desc:"the map that we are a view onto"`
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`

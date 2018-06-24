@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -94,71 +93,57 @@ func (p *TextStyle) AlignFactors() (ax, ay float32) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Text2D Node
+// SVGText Node
 
 // todo: lots of work likely needed on laying-out text in proper way
 // https://www.w3.org/TR/SVG2/text.html#GlyphsMetrics
 // todo: tspan element
 
 // 2D Text
-type Text2D struct {
-	Node2DBase
+type SVGText struct {
+	SVGNodeBase
 	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
 	Width       float32  `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text        string   `xml:"text" desc:"text string to render"`
 	WrappedText []string `json:"-" xml:"-" desc:"word-wrapped version of the string"`
 }
 
-var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
+var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
 
-func (g *Text2D) Style2D() {
+func (g *SVGText) Style2D() {
 	g.Style2DSVG()
 }
 
-func (g *Text2D) Size2D() {
-	g.InitLayout2D()
+// func (g *SVGText) Size2D() {
+// 	g.InitLayout2D()
+// 	pc := &g.Paint
+// 	var w, h float32
+// 	// pre-wrap the text
+// 	if pc.TextStyle.WordWrap {
+// 		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
+// 	} else {
+// 		w, h = pc.MeasureString(g.Text)
+// 	}
+// 	g.LayData.AllocSize = Vec2D{w, h}
+// }
+
+// func (g *SVGText) BBox2D() image.Rectangle {
+// 	rs := &g.Viewport.Render
+// 	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
+// }
+
+func (g *SVGText) Render2D() {
 	pc := &g.Paint
-	var w, h float32
-	// pre-wrap the text
-	if pc.TextStyle.WordWrap {
-		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
-	} else {
-		w, h = pc.MeasureString(g.Text)
-	}
-	g.LayData.AllocSize = Vec2D{w, h}
-}
-
-func (g *Text2D) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	return g.Paint.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
-}
-
-func (g *Text2D) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		// pc.SetUnitContext(g.Viewport, Vec2DZero) // todo: not sure about el
-		// fmt.Printf("rendering text %v\n", g.Text)
-		if pc.TextStyle.WordWrap {
-			pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X,
-				g.LayData.AllocSize.Y)
-		} else {
-			pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, g.LayData.AllocSize.X)
-		}
-		g.Render2DChildren()
-		g.PopBounds()
-	}
-}
-
-func (g *Text2D) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
+	// pc.SetUnitContext(g.Viewport, Vec2DZero) // todo: not sure about el
+	// fmt.Printf("rendering text %v\n", g.Text)
+	if pc.TextStyle.WordWrap {
+		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Width, 0)
+		// g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
 	} else {
-		node = g.This.(Node2D) // no other option..
+		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, 0) // g.LayData.AllocSize.X)
 	}
-	layout = false
-	return
+	g.Render2DChildren()
 }
 
 //////////////////////////////////////////////////////////////////////////////////

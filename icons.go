@@ -89,7 +89,10 @@ var IconAutoLoad = true
 func (ic *Icon) Init2D() {
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
 		fmt.Printf("loading icon: %v\n", ic.Filename)
-		ic.LoadXML(ic.Filename)
+		err := ic.LoadXML(ic.Filename)
+		if err != nil {
+			IconAutoLoad = false
+		}
 	}
 	ic.SVG.Init2D()
 	ic.Fill = true
@@ -97,7 +100,6 @@ func (ic *Icon) Init2D() {
 
 func (ic *Icon) Style2D() {
 	ic.Style2DWidget()
-	ic.Style2DSVG() // this must come second
 }
 
 func (ic *Icon) Size2D() {
@@ -106,31 +108,25 @@ func (ic *Icon) Size2D() {
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 	ic.Layout2DBase(parBBox, true)
-	pc := &ic.Paint
-	rs := &ic.Render
 	ic.SetNormXForm()
-	rs.PushXForm(pc.XForm) // need xforms to get proper bboxes during layout
 	ic.Layout2DChildren()
-	rs.PopXForm()
 }
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	pc := &ic.Paint
-	return !ic.Rendered || ic.RenderedSize != ic.Geom.Size || ic.RenderedStrokeColor != pc.StrokeStyle.Color.Color || ic.RenderedFillColor != pc.FillStyle.Color.Color
+	return !ic.Rendered || ic.RenderedSize != ic.Geom.Size
+	// || ic.RenderedStrokeColor != pc.StrokeStyle.Color.Color || ic.RenderedFillColor != pc.FillStyle.Color.Color
 }
 
 func (ic *Icon) Render2D() {
 	if ic.PushBounds() {
 		if ic.NeedsReRender() {
-			pc := &ic.Paint
 			rs := &ic.Render
 			if ic.Fill {
-				// fmt.Printf("icon %v fill bg %v\n", ic.PathUnique(), ic.Style.Background.Color)
 				ic.FillViewport()
 			}
 			ic.SetNormXForm()
-			rs.PushXForm(pc.XForm)
+			rs.PushXForm(ic.XForm)
 			// fmt.Printf("IconRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
 			// 	ic.PathUnique(), ic.Style.Background.Color, ic.Paint.FillStyle.Color, ic.Style.Color, ic.Paint.StrokeStyle.Color)
 			ic.Render2DChildren() // we must do children first, then us!
@@ -138,8 +134,8 @@ func (ic *Icon) Render2D() {
 			rs.PopXForm()
 			ic.Rendered = true
 			ic.RenderedSize = ic.Geom.Size
-			ic.RenderedStrokeColor = pc.StrokeStyle.Color.Color
-			ic.RenderedFillColor = pc.FillStyle.Color.Color
+			// ic.RenderedStrokeColor = pc.StrokeStyle.Color.Color
+			// ic.RenderedFillColor = pc.FillStyle.Color.Color
 		}
 		ic.RenderViewport2D() // update our parent image
 	}
@@ -376,7 +372,7 @@ func IconByName(name string) *Icon {
 		ic, ok = (*DefaultIconSet)[name]
 		if !ok {
 			// todo: look on StdIconNames to see if it is not a standard name..
-			log.Printf("gi.IconByName: unable to find icon name in either CurIconSet or DefaultIconSet: %v\n", name)
+			// log.Printf("gi.IconByName: unable to find icon name in either CurIconSet or DefaultIconSet: %v\n", name)
 
 			return nil
 		}
@@ -402,111 +398,113 @@ func IconListSorted(is IconSet) []string {
 
 func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-wedge-down")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetData("M 0.05 0.05 .95 0.05 .5 .95 Z")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-wedge-up")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetData("M 0.05 0.95 .95 0.95 .5 .05 Z")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-wedge-left")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetData("M 0.95 0.05 .95 0.95 .05 .5 Z")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-wedge-right")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetData("M 0.05 0.05 .05 0.95 .95 .5 Z")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-checkmark")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
-		p.SetProp("fill", "none")
-		p.SetData("M 0.1 0.5 .5 0.9 .9 .1")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-checked-box")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
-		bx.Pos.Set(0.05, 0.05)
-		bx.Size.Set(0.9, 0.9)
-		// bx.Radius.Set(0.02, 0.02)
-		p := ic.AddNewChild(KiT_Path, "p").(*Path)
-		p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
-		p.SetProp("fill", "none")
-		p.SetData("M 0.2 0.5 .5 0.8 .8 .2")
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-unchecked-box")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
-		bx.Pos.Set(0.05, 0.05)
-		bx.Size.Set(0.9, 0.9)
-		// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-circlebutton-on")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
-		oc.Pos.Set(0.5, 0.5)
-		oc.Radius = 0.4
-		oc.SetProp("fill", "none")
-		oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
-		inc := ic.AddNewChild(KiT_Circle, "ic").(*Circle)
-		inc.Pos.Set(0.5, 0.5)
-		inc.Radius = 0.2
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-circlebutton-off")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
-		oc.Pos.Set(0.5, 0.5)
-		oc.Radius = 0.4
-		oc.SetProp("fill", "none")
-		oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
-		iset[ic.Nm] = &ic
-	}
-	{
-		ic := Icon{}
-		ic.InitName(&ic, "widget-handle-circles")
-		ic.ViewBox.Size = Vec2D{1, 1}
-		c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
-		c0.Pos.Set(0.5, 0.15)
-		c0.Radius = 0.1
-		c1 := ic.AddNewChild(KiT_Circle, "c1").(*Circle)
-		c1.Pos.Set(0.5, 0.5)
-		c1.Radius = 0.1
-		c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
-		c2.Pos.Set(0.5, 0.85)
-		c2.Radius = 0.1
-		iset[ic.Nm] = &ic
+	if true {
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-wedge-down")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetData("M 0.05 0.05 .95 0.05 .5 .95 Z")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-wedge-up")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetData("M 0.05 0.95 .95 0.95 .5 .05 Z")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-wedge-left")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetData("M 0.95 0.05 .95 0.95 .05 .5 Z")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-wedge-right")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetData("M 0.05 0.05 .05 0.95 .95 .5 Z")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-checkmark")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
+			p.SetProp("fill", "none")
+			p.SetData("M 0.1 0.5 .5 0.9 .9 .1")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-checked-box")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
+			bx.Pos.Set(0.05, 0.05)
+			bx.Size.Set(0.9, 0.9)
+			// bx.Radius.Set(0.02, 0.02)
+			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(0.15, units.Pct))
+			p.SetProp("fill", "none")
+			p.SetData("M 0.2 0.5 .5 0.8 .8 .2")
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-unchecked-box")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
+			bx.Pos.Set(0.05, 0.05)
+			bx.Size.Set(0.9, 0.9)
+			// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-circlebutton-on")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
+			oc.Pos.Set(0.5, 0.5)
+			oc.Radius = 0.4
+			oc.SetProp("fill", "none")
+			oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
+			inc := ic.AddNewChild(KiT_Circle, "ic").(*Circle)
+			inc.Pos.Set(0.5, 0.5)
+			inc.Radius = 0.2
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-circlebutton-off")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
+			oc.Pos.Set(0.5, 0.5)
+			oc.Radius = 0.4
+			oc.SetProp("fill", "none")
+			oc.SetProp("stroke-width", units.NewValue(0.1, units.Pct))
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-handle-circles")
+			ic.ViewBox.Size = Vec2D{1, 1}
+			c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
+			c0.Pos.Set(0.5, 0.15)
+			c0.Radius = 0.1
+			c1 := ic.AddNewChild(KiT_Circle, "c1").(*Circle)
+			c1.Pos.Set(0.5, 0.5)
+			c1.Radius = 0.1
+			c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
+			c2.Pos.Set(0.5, 0.85)
+			c2.Radius = 0.1
+			iset[ic.Nm] = &ic
+		}
 	}
 	// {
 	// 	ic := Icon{}
@@ -514,14 +512,14 @@ func MakeDefaultIcons() *IconSet {
 	// 	ic.Filename = "/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg"
 	// 	iset[ic.Nm] = &ic
 	// }
-	// {
-	// 	ic := Icon{}
-	// 	ic.InitName(&ic, "test")
-	// 	ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
-	// 	iset[ic.Nm] = &ic
-	// }
+	{
+		ic := Icon{}
+		ic.InitName(&ic, "test")
+		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
+		iset[ic.Nm] = &ic
+	}
 
-	iset.LoadDefaultIcons()
+	// iset.LoadDefaultIcons()
 
 	return &iset
 }

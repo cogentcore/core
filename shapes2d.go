@@ -9,19 +9,221 @@ import (
 	"image"
 	"log"
 	"strconv"
+	"strings"
 	"unicode"
 
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
 // shapes2d contains all the SVG-based objects for drawing shapes, paths, etc
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// SVGNodeBase
+
+// SVGNodeBase is an element within the SVG sub-scenegraph -- does not use
+// layout logic -- just renders into parent SVG viewport
+type SVGNodeBase struct {
+	Node2DBase
+	Paint Paint `json:"-" xml:"-" desc:"full paint information for this node"`
+}
+
+var KiT_SVGNodeBase = kit.Types.AddType(&SVGNodeBase{}, SVGNodeBaseProps)
+
+var SVGNodeBaseProps = ki.Props{
+	"base-type": true, // excludes type from user selections
+}
+
+func (g *SVGNodeBase) AsSVGNode() *SVGNodeBase {
+	return g
+}
+
+// Init2DBase handles basic node initialization -- Init2D can then do special things
+func (g *SVGNodeBase) Init2DBase() {
+	g.Viewport = g.ParentViewport()
+	g.Paint.Defaults()
+	g.ConnectToViewport()
+}
+
+func (g *SVGNodeBase) Init2D() {
+	g.Init2DBase()
+}
+
+// Style2DSVG styles the Paint values directly from node properties -- for
+// SVG-style nodes -- no relevant default styling here -- parents can just set
+// props directly as needed
+func (g *SVGNodeBase) Style2DSVG() {
+	gii, _ := g.This.(Node2D)
+	if g.Viewport == nil { // robust
+		gii.Init2D()
+	}
+	SetCurStyleNode2D(gii)
+	defer SetCurStyleNode2D(nil)
+	var pagg *ki.Props
+	pg := g.CopyParentPaint() // svg always inherits all paint settings from parent
+	g.Paint.StyleSet = false  // this is always first call, restart
+	if pg != nil {
+		g.Paint.SetStyleProps(&pg.Paint, g.Properties())
+		pagg = &pg.CSSAgg
+	} else {
+		g.Paint.SetStyleProps(nil, g.Properties())
+	}
+	g.Paint.SetUnitContext(g.Viewport, Vec2DZero)
+
+	if pagg != nil {
+		AggCSS(&g.CSSAgg, *pagg)
+	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSSSVG(gii, g.CSSAgg)
+}
+
+// ApplyCSSSVG applies css styles to given node, using key to select sub-props
+// from overall properties list
+func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+
+	nb := node.AsSVGNode()
+	if nb == nil {
+		return false
+	}
+	if psvgi, _ := KiToNode2D(node.Parent()); psvgi != nil {
+		if psvg := psvgi.AsSVGNode(); psvg != nil {
+			nb.Paint.SetStyleProps(&psvg.Paint, pmap)
+		} else {
+			nb.Paint.SetStyleProps(nil, pmap)
+		}
+	} else {
+		nb.Paint.SetStyleProps(nil, pmap)
+	}
+	return true
+}
+
+// StyleCSSSVG applies css style properties to given SVG node, parsing
+// out type, .class, and #name selectors
+func StyleCSSSVG(node Node2D, css ki.Props) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	ApplyCSSSVG(node, tyn, css)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	ApplyCSSSVG(node, cln, css)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	ApplyCSSSVG(node, idnm, css)
+}
+
+func (g *SVGNodeBase) Style2D() {
+	g.Style2DSVG()
+	pc := &g.Paint
+	if pc.HasNoStrokeOrFill() {
+		pc.Off = true
+	}
+}
+
+// CopyParentPaint copy our paint from our parents -- called during Style for
+// SVG
+func (g *SVGNodeBase) CopyParentPaint() *SVGNodeBase {
+	pgi, _ := KiToNode2D(g.Par)
+	if pgi == nil {
+		return nil
+	}
+	psvg := pgi.AsSVGNode()
+	if psvg == nil {
+		return nil
+	}
+	g.Paint.CopyFrom(&psvg.Paint)
+	return psvg
+}
+
+// ParentSVG returns the parent SVG viewport
+func (g *SVGNodeBase) ParentSVG() *SVG {
+	pvp := g.ParentViewport()
+	for pvp != nil {
+		if pvp.IsSVG() {
+			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
+		}
+		pvp = pvp.ParentViewport()
+	}
+	return nil
+}
+
+func (g *SVGNodeBase) Size2D() {
+}
+
+func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
+}
+
+func (g *SVGNodeBase) BBox2D() image.Rectangle {
+	return g.BBox
+}
+
+func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+}
+
+func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
+	return g.VpBBox
+}
+
+func (g *SVGNodeBase) Render2D() {
+	g.Render2DChildren()
+}
+
+func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
+	svg := g.ParentSVG()
+	if svg != nil {
+		node = svg
+	} else {
+		node = g.This.(Node2D) // no other option..
+	}
+	layout = false
+	return
+}
+
+func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// SVGGroup
+
+// SVGGroup groups together SVG elements -- doesn't do much but provide a
+// locus for properties etc
+type SVGGroup struct {
+	SVGNodeBase
+}
+
+var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
+
+// BBoxFromChildren sets the Group BBox from children
+func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
+	bb := image.ZR
+	for i, kid := range g.Kids {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			if i == 0 {
+				bb = gi.BBox
+			} else {
+				bb = bb.Union(gi.BBox)
+			}
+		}
+	}
+	return bb
+}
+
+func (g *SVGGroup) BBox2D() image.Rectangle {
+	bb := g.BBoxFromChildren()
+	return bb
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // Rect
 
 // 2D rectangle, optionally with rounded corners
 type Rect struct {
-	Node2DBase
+	SVGNodeBase
 	Pos    Vec2D `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
 	Size   Vec2D `xml:"{width,height}" desc:"size of the rectangle"`
 	Radius Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
@@ -38,66 +240,18 @@ func (g *Rect) BBox2D() image.Rectangle {
 }
 
 func (g *Rect) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		if g.Radius.X == 0 && g.Radius.Y == 0 {
-			pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
-		} else {
-			// todo: only supports 1 radius right now -- easy to add another
-			pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
-		}
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Rect) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	if g.Radius.X == 0 && g.Radius.Y == 0 {
+		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
-		node = g.This.(Node2D) // no other option..
+		// todo: only supports 1 radius right now -- easy to add another
+		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
 	}
-	layout = false
-	return
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Viewport2DFill
-
-// todo: for ViewportFill support an option to insert a HiDPI correction scaling factor at the top!
-
-// viewport fill fills entire viewport -- just a rect that automatically sets size to viewport
-type Viewport2DFill struct {
-	Rect
-}
-
-var KiT_Viewport2DFill = kit.Types.AddType(&Viewport2DFill{}, nil)
-
-func (g *Viewport2DFill) Init2D() {
-	g.Init2DBase()
-	vp := g.Viewport
-	g.Pos = Vec2DZero
-	g.Size = Vec2D{float32(vp.Geom.Size.X), float32(vp.Geom.Size.Y)} // assuming no transforms..
-}
-
-func (g *Viewport2DFill) Style2D() {
-	g.Style2DSVG()
-}
-
-func (g *Viewport2DFill) BBox2D() image.Rectangle {
-	g.Init2D() // keep up-to-date -- cheap
-	return g.Viewport.VpBBox
-}
-
-func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +259,7 @@ func (g *Viewport2DFill) ReRender2D() (node Node2D, layout bool) {
 
 // 2D circle
 type Circle struct {
-	Node2DBase
+	SVGNodeBase
 	Pos    Vec2D   `xml:"{cx,cy}" desc:"position of the center of the circle"`
 	Radius float32 `xml:"r" desc:"radius of the circle"`
 }
@@ -121,27 +275,13 @@ func (g *Circle) BBox2D() image.Rectangle {
 }
 
 func (g *Circle) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Circle) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +289,7 @@ func (g *Circle) ReRender2D() (node Node2D, layout bool) {
 
 // 2D ellipse
 type Ellipse struct {
-	Node2DBase
+	SVGNodeBase
 	Pos   Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
 	Radii Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
@@ -165,27 +305,13 @@ func (g *Ellipse) BBox2D() image.Rectangle {
 }
 
 func (g *Ellipse) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +319,7 @@ func (g *Ellipse) ReRender2D() (node Node2D, layout bool) {
 
 // a 2D line
 type Line struct {
-	Node2DBase
+	SVGNodeBase
 	Start Vec2D `xml:"{x1,y1}" desc:"position of the start of the line"`
 	End   Vec2D `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
@@ -209,27 +335,13 @@ func (g *Line) BBox2D() image.Rectangle {
 }
 
 func (g *Line) Render2D() {
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-		pc.Stroke(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Line) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
+	pc.Stroke(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +349,7 @@ func (g *Line) ReRender2D() (node Node2D, layout bool) {
 
 // 2D Polyline
 type Polyline struct {
-	Node2DBase
+	SVGNodeBase
 	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
@@ -255,27 +367,13 @@ func (g *Polyline) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		pc.DrawPolyline(rs, g.Points)
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Polyline) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	pc.DrawPolyline(rs, g.Points)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -283,7 +381,7 @@ func (g *Polyline) ReRender2D() (node Node2D, layout bool) {
 
 // 2D Polygon
 type Polygon struct {
-	Node2DBase
+	SVGNodeBase
 	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
@@ -301,27 +399,13 @@ func (g *Polygon) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		pc.DrawPolygon(rs, g.Points)
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	pc.DrawPolygon(rs, g.Points)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -329,7 +413,7 @@ func (g *Polygon) ReRender2D() (node Node2D, layout bool) {
 
 // 2D Path, using SVG-style data that can render just about anything
 type Path struct {
-	Node2DBase
+	SVGNodeBase
 	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
 	DataStr  string     `xml:"d" desc:"string version of the path data"`
 	MinCoord Vec2D      `desc:"minimum coord in path -- computed in BBox2D"`
@@ -353,6 +437,7 @@ func (g *Path) BBox2D() image.Rectangle {
 	rs.PushXForm(g.Paint.XForm)
 	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
 	bb := g.Paint.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
+	fmt.Printf("xform: %v min: %v max: %v bb: %v\n", g.Paint.XForm, g.MinCoord, g.MaxCoord, bb)
 	rs.PopXForm()
 	return bb
 	// return vp.Viewport.VpBBox
@@ -430,12 +515,20 @@ func (pc PathCmds) EncCmd(n int) PathData {
 	return pd
 }
 
-// PathDataNext gets the next path data element, incrementing the index -- ++ not an
-// expression so its clunky -- hopefully this is inlined..
-func PathDataNext(data []PathData, i *int) PathData {
+// PathDataNext gets the next path data point, incrementing the index -- ++
+// not an expression so its clunky
+func PathDataNext(data []PathData, i *int) float32 {
 	pd := data[*i]
 	(*i)++
-	return pd
+	return float32(pd)
+}
+
+// PathDataNextCmd gets the next path data command, incrementing the index -- ++
+// not an expression so its clunky
+func PathDataNextCmd(data []PathData, i *int) (PathCmds, int) {
+	pd := data[*i]
+	(*i)++
+	return pd.Cmd()
 }
 
 // PathDataRender traverses the path data and renders it using paint and render state --
@@ -445,59 +538,59 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 	if sz == 0 {
 		return
 	}
-	var cx, cy, x1, y1, x2, y2 PathData
+	var cx, cy, x1, y1, x2, y2 float32
 	for i := 0; i < sz; {
-		cmd, n := PathDataNext(data, &i).Cmd()
+		cmd, n := PathDataNextCmd(data, &i)
 		switch cmd {
 		case PcM:
 			cx = PathDataNext(data, &i)
 			cy = PathDataNext(data, &i)
-			pc.MoveTo(rs, float32(cx), float32(cy))
+			pc.MoveTo(rs, cx, cy)
 			for np := 1; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case Pcm:
 			cx += PathDataNext(data, &i)
 			cy += PathDataNext(data, &i)
-			pc.MoveTo(rs, float32(cx), float32(cy))
+			pc.MoveTo(rs, cx, cy)
 			for np := 1; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cx = PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cx += PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cy = PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cy += PathDataNext(data, &i)
-				pc.LineTo(rs, float32(cx), float32(cy))
+				pc.LineTo(rs, cx, cy)
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
@@ -507,7 +600,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
+				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
@@ -517,7 +610,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
+				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
@@ -527,7 +620,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
+				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
@@ -537,7 +630,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y2 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, float32(x1), float32(y1), float32(x2), float32(y2), float32(cx), float32(cy))
+				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
@@ -545,7 +638,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
+				pc.QuadraticTo(rs, x1, y1, cx, cy)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
@@ -553,7 +646,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
+				pc.QuadraticTo(rs, x1, y1, cx, cy)
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
@@ -561,7 +654,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = 2*cy - y1
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
+				pc.QuadraticTo(rs, x1, y1, cx, cy)
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
@@ -569,7 +662,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				y1 = 2*cy - y1
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, float32(x1), float32(y1), float32(cx), float32(cy))
+				pc.QuadraticTo(rs, x1, y1, cx, cy)
 			}
 		case PcA:
 			for np := 0; np < n/7; np++ {
@@ -582,7 +675,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cy = PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, float32(cx), float32(cy), float32(rx), float32(ry), float32(ang), 0)
+				pc.DrawEllipticalArc(rs, cx, cy, rx, ry, ang, 0)
 			}
 		case Pca:
 			for np := 0; np < n/7; np++ {
@@ -595,7 +688,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cy += PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, float32(cx), float32(cy), float32(rx), float32(ry), float32(ang), 0)
+				pc.DrawEllipticalArc(rs, cx, cy, rx, ry, ang, 0)
 			}
 		case PcZ:
 			pc.ClosePath(rs)
@@ -606,9 +699,9 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 }
 
 // update min max for given coord index and coords
-func minMaxUpdate(i int, cx, cy float32, min, max *Vec2D) {
-	c := Vec2D{float32(cx), float32(cy)}
-	if i == 0 {
+func minMaxUpdate(cx, cy float32, min, max *Vec2D) {
+	c := Vec2D{cx, cy}
+	if *min == Vec2DZero && *max == Vec2DZero {
 		*min = c
 		*max = c
 	} else {
@@ -623,59 +716,59 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 	if sz == 0 {
 		return
 	}
-	var cx, cy PathData
+	var cx, cy float32
 	for i := 0; i < sz; {
-		cmd, n := PathDataNext(data, &i).Cmd()
+		cmd, n := PathDataNextCmd(data, &i)
 		switch cmd {
 		case PcM:
 			cx = PathDataNext(data, &i)
 			cy = PathDataNext(data, &i)
-			minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			minMaxUpdate(cx, cy, &min, &max)
 			for np := 1; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcm:
 			cx += PathDataNext(data, &i)
 			cy += PathDataNext(data, &i)
-			minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+			minMaxUpdate(cx, cy, &min, &max)
 			for np := 1; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cx = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cx += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
@@ -685,7 +778,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
@@ -695,7 +788,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
@@ -703,7 +796,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
@@ -711,7 +804,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
@@ -719,7 +812,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
@@ -727,19 +820,19 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max)
+				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcA:
 			for np := 0; np < n/7; np++ {
@@ -752,7 +845,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				cy = PathDataNext(data, &i)
 				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max) // todo: not accurate
+				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
 			}
 		case Pca:
 			for np := 0; np < n/7; np++ {
@@ -763,7 +856,7 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i) // sweep-flag
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(i, float32(cx), float32(cy), &min, &max) // todo: not accurate
+				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
 			}
 		case PcZ:
 		case Pcz:
@@ -901,29 +994,15 @@ func (g *Path) Render2D() {
 	if len(g.Data) < 2 {
 		return
 	}
-	if g.PushBounds() {
-		pc := &g.Paint
-		rs := &g.Viewport.Render
-		rs.PushXForm(pc.XForm)
-		PathDataRender(g.Data, pc, rs)
-		// fmt.Printf("PathRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
-		// 	g.PathUnique(), g.Style.Background.Color, g.Paint.FillStyle.Color, g.Style.Color, g.Paint.StrokeStyle.Color)
-		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
-		rs.PopXForm()
-	}
-}
-
-func (g *Path) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
+	pc := &g.Paint
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	PathDataRender(g.Data, pc, rs)
+	// fmt.Printf("PathRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
+	// 	g.PathUnique(), g.Style.Background.Color, g.Paint.FillStyle.Color, g.Style.Color, g.Paint.StrokeStyle.Color)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 // todo: new in SVG2: mesh

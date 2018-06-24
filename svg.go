@@ -14,7 +14,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"image"
 	"io"
 	"log"
 	"os"
@@ -32,10 +31,11 @@ import (
 // svg tag in html -- it provides its own bitmap for drawing into
 type SVG struct {
 	Viewport2D
-	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing"`
-	Defs    Group2D `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title   string  `xml:"title" desc:"the title of the svg"`
-	Desc    string  `xml:"desc" desc:"the description of the svg"`
+	ViewBox ViewBox       `desc:"viewbox defines the coordinate system for the drawing"`
+	XForm   XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
+	Defs    SVGGroup      `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title   string        `xml:"title" desc:"the title of the svg"`
+	Desc    string        `xml:"desc" desc:"the description of the svg"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
@@ -48,17 +48,18 @@ func (svg *SVG) DeleteAll() {
 	svg.Title = ""
 	svg.Desc = ""
 	svg.ViewBox.Defaults()
+	svg.XForm = Identity2D()
 	svg.UpdateEnd(updt)
 
 }
 
 // SetNormXForm scaling transform
 func (svg *SVG) SetNormXForm() {
-	pc := &svg.Paint
-	pc.Identity()
+	svg.XForm = Identity2D()
 	if svg.ViewBox.Size != Vec2DZero {
+		// todo: deal with all the other options!
 		vps := NewVec2DFmPoint(svg.Geom.Size).Div(svg.ViewBox.Size)
-		pc.Scale(vps.X, vps.Y)
+		svg.XForm = svg.XForm.Scale(vps.X, vps.Y)
 	}
 }
 
@@ -69,26 +70,15 @@ func (svg *SVG) Init2D() {
 
 func (svg *SVG) Style2D() {
 	svg.Style2DWidget()
-	svg.Style2DSVG() // this must come second
-}
-
-func (svg *SVG) Layout2D(parBBox image.Rectangle) {
-	pc := &svg.Paint
-	rs := &svg.Render
-	svg.Layout2DBase(parBBox, true)
-	rs.PushXForm(pc.XForm) // need xforms to get proper bboxes during layout
-	svg.Layout2DChildren()
-	rs.PopXForm()
 }
 
 func (svg *SVG) Render2D() {
 	if svg.PushBounds() {
-		pc := &svg.Paint
 		rs := &svg.Render
 		if svg.Fill {
 			svg.FillViewport()
 		}
-		rs.PushXForm(pc.XForm)
+		rs.PushXForm(svg.XForm)
 		svg.Render2DChildren() // we must do children first, then us!
 		svg.PopBounds()
 		rs.PopXForm()
@@ -122,7 +112,7 @@ func (svg *SVG) FindNamedElement(name string) Node2D {
 // Gradient is used for holding a specified color gradient -- name is id for
 // lookup in url
 type Gradient struct {
-	Node2DBase
+	SVGNodeBase
 	Grad ColorSpec `desc:"the color gradient"`
 }
 
@@ -310,7 +300,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
 			case "g":
-				curPar = curPar.AddNewChild(KiT_Group2D, "g").(Node2D)
+				curPar = curPar.AddNewChild(KiT_SVGGroup, "g").(Node2D)
 				for _, attr := range se.Attr {
 					if curPar.AsNode2D().SetStdAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -560,6 +550,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			default:
 				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
+				IconAutoLoad = false
 			}
 		case xml.EndElement:
 			switch se.Name.Local {

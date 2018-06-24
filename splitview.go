@@ -27,7 +27,7 @@ import (
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
 type SplitView struct {
-	WidgetBase
+	PartsWidgetBase
 	Splits      []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
 	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
 	Dim         Dims2D    `desc:"dimension along which to split the space"`
@@ -181,7 +181,8 @@ func (g *SplitView) Style2D() {
 
 func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	g.ConfigSplitters()
-	g.Layout2DWidget(parBBox)
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	g.UpdateSplits()
 
 	handsz := float32(10.0)
@@ -195,23 +196,24 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	handval := 0.6 * handsz / size
 
 	for i, sp := range g.Splits {
-		_, gi := KiToNode2D(g.Kids[i])
-		if gi != nil {
-			if gi.TypeEmbeds(KiT_Frame) {
-				gi.SetReRenderAnchor()
-			}
-			size := sp * avail
-			gi.LayData.AllocSize.SetDim(g.Dim, size)
-			gi.LayData.AllocSize.SetDim(odim, osz)
-			gi.LayData.AllocPosRel.SetDim(g.Dim, pos)
-			gi.LayData.AllocPosRel.SetDim(odim, 0)
-			pos += size + handsz
+		gi := g.Kids[i].(Node2D).AsWidget()
+		if gi == nil {
+			continue
+		}
+		if gi.TypeEmbeds(KiT_Frame) {
+			gi.SetReRenderAnchor()
+		}
+		size := sp * avail
+		gi.LayData.AllocSize.SetDim(g.Dim, size)
+		gi.LayData.AllocSize.SetDim(odim, osz)
+		gi.LayData.AllocPosRel.SetDim(g.Dim, pos)
+		gi.LayData.AllocPosRel.SetDim(odim, 0)
+		pos += size + handsz
 
-			if i < sz-1 {
-				spl := g.Parts.Child(i).(*Splitter)
-				spl.Value = sp + handval
-				spl.UpdatePosFromValue()
-			}
+		if i < sz-1 {
+			spl := g.Parts.Child(i).(*Splitter)
+			spl.Value = sp + handval
+			spl.UpdatePosFromValue()
 		}
 	}
 
@@ -332,11 +334,7 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 func (g *Splitter) Style2D() {
 	bitflag.Clear(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
-	var pst *Style
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		pst = &pg.Style
-	}
+	pst := &(g.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Style)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
@@ -357,7 +355,8 @@ func (g *Splitter) Size2D() {
 
 func (g *Splitter) Layout2D(parBBox image.Rectangle) {
 	g.ConfigPartsIfNeeded(false)
-	g.Layout2DWidget(parBBox)
+	g.Layout2DBase(parBBox, true) // init style
+	g.Layout2DParts(parBBox)
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
 	g.origWinBBox = g.WinBBox
@@ -413,9 +412,9 @@ func (g *Splitter) Render2D() {
 
 // render using a default style if not otherwise styled
 func (g *Splitter) Render2DDefaultStyle() {
-	pc := &g.Paint
 	st := &g.Style
-	// rs := &g.Viewport.Render
+	rs := &g.Viewport.Render
+	pc := &rs.Paint
 
 	g.UpdateSplitterPos()
 	g.ConfigPartsIfNeeded(true)
