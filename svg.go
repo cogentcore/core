@@ -175,6 +175,8 @@ func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *SVGNodeBase) BBox2D() image.Rectangle {
+	// nodes should compute this in viewport rendering coords (not "user coords")
+	// transform has already been applied
 	return g.BBox
 }
 
@@ -185,8 +187,24 @@ func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
 }
 
+// ComputeBBoxSVG is called by default in render to compute bounding boxes for
+// gui interaction -- can only be done in rendering because that is when all
+// the proper xforms are all in place -- VpBBox is intersected with parent SVG
+func (g *SVGNodeBase) ComputeBBoxSVG() {
+	g.BBox = g.This.(Node2D).BBox2D()
+	g.ObjBBox = g.BBox // no diff
+	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
+	g.SetWinBBox()
+}
+
 func (g *SVGNodeBase) Render2D() {
+	pc := &g.Pnt
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
+	// render goes here
 	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
@@ -201,38 +219,6 @@ func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
 }
 
 func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// SVGGroup
-
-// SVGGroup groups together SVG elements -- doesn't do much but provide a
-// locus for properties etc
-type SVGGroup struct {
-	SVGNodeBase
-}
-
-var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
-
-// BBoxFromChildren sets the Group BBox from children
-func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
-	bb := image.ZR
-	for i, kid := range g.Kids {
-		_, gi := KiToNode2D(kid)
-		if gi != nil {
-			if i == 0 {
-				bb = gi.BBox
-			} else {
-				bb = bb.Union(gi.BBox)
-			}
-		}
-	}
-	return bb
-}
-
-func (g *SVGGroup) BBox2D() image.Rectangle {
-	bb := g.BBoxFromChildren()
-	return bb
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -338,25 +324,6 @@ func (svg *SVG) FindNamedElement(name string) Node2D {
 	log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
 	return nil
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-// Misc SVG-specific nodes
-
-// Gradient is used for holding a specified color gradient -- name is id for
-// lookup in url
-type Gradient struct {
-	SVGNodeBase
-	Grad ColorSpec `desc:"the color gradient"`
-}
-
-var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
-
-// ClipPath is used for holding a path that renders as a clip path
-type ClipPath struct {
-	SVGNodeBase
-}
-
-var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
 
 /////////////////////////////////////////////////////////////////////////////////
 //   SVG IO
@@ -488,6 +455,10 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	inDef := false
 	inCSS := false
 	var curCSS *StyleSheet
+	inTxt := false
+	var curTxt *SVGText
+	inTspn := false
+	var curTspn *SVGText
 	var defPrevPar Node2D // previous parent before a def encountered
 
 	for {
@@ -529,12 +500,18 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						csvg.ViewBox.Min.Y = pts[1]
 						csvg.ViewBox.Size.X = pts[2]
 						csvg.ViewBox.Size.Y = pts[3]
-						csvg.SetProp("width", units.NewValue(float32(csvg.ViewBox.Size.X), units.Dot))
-						csvg.SetProp("height", units.NewValue(float32(csvg.ViewBox.Size.Y), units.Dot))
+						// csvg.SetProp("width", units.NewValue(float32(csvg.ViewBox.Size.X), units.Dot))
+						// csvg.SetProp("height", units.NewValue(float32(csvg.ViewBox.Size.Y), units.Dot))
 					case "width":
-						csvg.SetProp("width", attr.Value)
+						wd := units.Value{}
+						wd.SetString(attr.Value)
+						wd.ToDots(&csvg.Pnt.UnContext)
+						csvg.ViewBox.Size.X = wd.Dots
 					case "height":
-						csvg.SetProp("height", attr.Value)
+						ht := units.Value{}
+						ht.SetString(attr.Value)
+						ht.ToDots(&csvg.Pnt.UnContext)
+						csvg.ViewBox.Size.Y = ht.Dots
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -735,6 +712,77 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
+			case "tspan":
+				fallthrough
+			case "text":
+				var txt *SVGText
+				if se.Name.Local == "text" {
+					txt = curPar.AddNewChild(KiT_SVGText, "txt").(*SVGText)
+					inTxt = true
+					curTxt = txt
+				} else {
+					if inTxt && curTxt != nil {
+						txt = curTxt.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
+					} else {
+						txt = curPar.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
+					}
+					inTspn = true
+					curTspn = txt
+				}
+				for _, attr := range se.Attr {
+					if txt.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "x":
+						pts := SVGReadPoints(attr.Value)
+						if len(pts) > 1 {
+							txt.CharPosX = pts
+						}
+						if len(pts) > 0 {
+							txt.Pos.X = pts[0]
+						}
+					case "y":
+						pts := SVGReadPoints(attr.Value)
+						if len(pts) > 1 {
+							txt.CharPosY = pts
+						}
+						if len(pts) > 0 {
+							txt.Pos.Y = pts[0]
+						}
+					case "dx":
+						pts := SVGReadPoints(attr.Value)
+						if len(pts) > 0 {
+							txt.CharPosDX = pts
+						}
+					case "dy":
+						pts := SVGReadPoints(attr.Value)
+						if len(pts) > 0 {
+							txt.CharPosDY = pts
+						}
+					case "rotate":
+						pts := SVGReadPoints(attr.Value)
+						if len(pts) > 0 {
+							txt.CharRots = pts
+						}
+					case "textLength":
+						tl, err := SVGParseFloat32(attr.Value)
+						if err != nil {
+							txt.TextLength = tl
+						}
+					case "lengthAdjust":
+						if attr.Value == "spacingAndGlyphs" {
+							txt.AdjustGlyphs = true
+						} else {
+							txt.AdjustGlyphs = false
+						}
+					default:
+						txt.SetProp(attr.Name.Local, attr.Value)
+					}
+					if err != nil {
+						return err
+					}
+				}
 			case "linearGradient":
 				grad := curPar.AddNewChild(KiT_Gradient, "lin-grad").(*Gradient)
 				for _, attr := range se.Attr {
@@ -868,6 +916,12 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "style":
 				inCSS = false
 				curCSS = nil
+			case "text":
+				inTxt = false
+				curTxt = nil
+			case "tspan":
+				inTspn = false
+				curTspn = nil
 			case "defs":
 				if inDef {
 					inDef = false
@@ -897,13 +951,16 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curSvg = curPar.ParentByType(KiT_SVG, true).EmbeddedStruct(KiT_SVG).(*SVG)
 			}
 		case xml.CharData:
-			if inTitle {
+			switch {
+			case inTitle:
 				curSvg.Title += string(se)
-			}
-			if inDesc {
+			case inDesc:
 				curSvg.Desc += string(se)
-			}
-			if inCSS && curCSS != nil {
+			case inTspn && curTspn != nil:
+				curTspn.Text = string(se)
+			case inTxt && curTxt != nil:
+				curTxt.Text = string(se)
+			case inCSS && curCSS != nil:
 				curCSS.ParseString(string(se))
 				cp := curCSS.CSSProps()
 				if cp != nil {

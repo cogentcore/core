@@ -5,9 +5,12 @@
 package main
 
 import (
+	"path/filepath"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
 
@@ -16,6 +19,8 @@ func main() {
 		mainrun()
 	})
 }
+
+var CurFilename = ""
 
 func mainrun() {
 	width := 1024
@@ -33,24 +38,59 @@ func mainrun() {
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
-	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
-	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	row1.SetStretchMaxWidth()
-	row1.SetStretchMaxHeight()
+	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutRow
+	brow.SetStretchMaxWidth()
 
-	svg := row1.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
+	svgrow := vlay.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
+	svgrow.Lay = gi.LayoutRow
+	svgrow.SetProp("align-vert", gi.AlignMiddle)
+	svgrow.SetProp("align-horiz", "center")
+	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	svgrow.SetStretchMaxWidth()
+	svgrow.SetStretchMaxHeight()
+
+	svg := svgrow.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
 	svg.Fill = true
+	svg.SetStretchMaxWidth()
+	svg.SetStretchMaxHeight()
 
-	svg.LoadXML("/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg")
+	loads := brow.AddNewChild(gi.KiT_Button, "loadsvg").(*gi.Button)
+	// loads.SetProp("vertical-align", gi.AlignMiddle)
+	loads.SetText("Load SVG")
+
+	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
+	fnm.SetMinPrefWidth(units.NewValue(20, units.Em))
+	// fnm.SetProp("vertical-align", AlignMiddle)
+
+	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			path, fn := filepath.Split(CurFilename)
+			gi.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					dlg, _ := send.(*gi.Dialog)
+					CurFilename := gi.FileViewDialogValue(dlg)
+					fnm.SetText(CurFilename)
+					svg.LoadXML(CurFilename)
+					svg.SetNormXForm()
+				}
+			})
+		}
+	})
+
+	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) {
+			tf := send.(*gi.TextField)
+			CurFilename = tf.Text()
+			svg.LoadXML(CurFilename)
+			svg.SetNormXForm()
+		}
+	})
 
 	vp.UpdateEndNoSig(updt)
 

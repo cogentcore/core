@@ -153,21 +153,22 @@ var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Text          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Edited        bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	EditText      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	StartPos      int                     `xml:"-" desc:"starting display position in the string"`
-	EndPos        int                     `xml:"-" desc:"ending display position in the string"`
-	CursorPos     int                     `xml:"-" desc:"current cursor position"`
-	CharWidth     int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart   int                     `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd     int                     `xml:"-" desc:"ending position of selection in the string"`
-	SelectMode    bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig  ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	StateStyles   [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	CharPos       []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
-	FontHeight    float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	lastSizedText []rune
+	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
+	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
+	CursorPos    int                     `xml:"-" desc:"current cursor position"`
+	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	CharPos      []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
+	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	lastSizedTxt []rune
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -194,12 +195,18 @@ var TextFieldProps = ki.Props{
 	},
 }
 
+// Text returns the current text -- applies any unapplied changes first
+func (tf *TextField) Text() string {
+	tf.EditDone()
+	return tf.Txt
+}
+
 // SetText sets the text to be edited and reverts any current edit to reflect this new text
 func (tf *TextField) SetText(txt string) {
-	if tf.Text == txt && !tf.Edited {
+	if tf.Txt == txt && !tf.Edited {
 		return
 	}
-	tf.Text = txt
+	tf.Txt = txt
 	tf.RevertEdit()
 }
 
@@ -207,29 +214,30 @@ func (tf *TextField) SetText(txt string) {
 // called when the return key is pressed or goes out of focus
 func (tf *TextField) EditDone() {
 	if tf.Edited {
-		tf.Text = string(tf.EditText)
-		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Text)
 		tf.Edited = false
+		tf.Txt = string(tf.EditTxt)
+		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Txt)
 	}
 }
 
 // RevertEdit aborts editing and reverts to last saved text
 func (tf *TextField) RevertEdit() {
 	updt := tf.UpdateStart()
-	tf.EditText = []rune(tf.Text)
+	defer tf.UpdateEnd(updt)
+	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 	tf.StartPos = 0
 	tf.EndPos = tf.CharWidth
 	tf.SelectReset()
-	tf.UpdateEnd(updt)
 }
 
 // CursorForward moves the cursor forward
 func (tf *TextField) CursorForward(steps int) {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	tf.CursorPos += steps
-	if tf.CursorPos > len(tf.EditText) {
-		tf.CursorPos = len(tf.EditText)
+	if tf.CursorPos > len(tf.EditTxt) {
+		tf.CursorPos = len(tf.EditTxt)
 	}
 	if tf.CursorPos > tf.EndPos {
 		inc := tf.CursorPos - tf.EndPos
@@ -245,12 +253,12 @@ func (tf *TextField) CursorForward(steps int) {
 		}
 		tf.SelectUpdate()
 	}
-	tf.UpdateEnd(updt)
 }
 
 // CursorForward moves the cursor backward
 func (tf *TextField) CursorBackward(steps int) {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	tf.CursorPos -= steps
 	if tf.CursorPos < 0 {
 		tf.CursorPos = 0
@@ -269,35 +277,34 @@ func (tf *TextField) CursorBackward(steps int) {
 		}
 		tf.SelectUpdate()
 	}
-	tf.UpdateEnd(updt)
 }
 
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tf *TextField) CursorStart() {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	tf.CursorPos = 0
 	tf.StartPos = 0
-	tf.EndPos = kit.MinInt(len(tf.EditText), tf.StartPos+tf.CharWidth)
+	tf.EndPos = kit.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectStart = 0
 		tf.SelectUpdate()
 	}
-	tf.UpdateEnd(updt)
 }
 
 // CursorEnd moves the cursor to the end of the text
 func (tf *TextField) CursorEnd() {
 	updt := tf.UpdateStart()
-	ed := len(tf.EditText)
+	defer tf.UpdateEnd(updt)
+	ed := len(tf.EditTxt)
 	tf.CursorPos = ed
-	tf.EndPos = len(tf.EditText) // try -- display will adjust
+	tf.EndPos = len(tf.EditTxt) // try -- display will adjust
 	tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectEnd = ed
 		tf.SelectUpdate()
 	}
-	tf.UpdateEnd(updt)
 }
 
 // todo: ctrl+backspace = delete word
@@ -316,8 +323,9 @@ func (tf *TextField) CursorBackspace(steps int) {
 		return
 	}
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	tf.Edited = true
-	tf.EditText = append(tf.EditText[:tf.CursorPos-steps], tf.EditText[tf.CursorPos:]...)
+	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos-steps], tf.EditTxt[tf.CursorPos:]...)
 	tf.CursorBackward(steps)
 	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
 		tf.SelectEnd -= steps
@@ -326,7 +334,6 @@ func (tf *TextField) CursorBackspace(steps int) {
 		tf.SelectEnd -= steps
 	}
 	tf.SelectUpdate()
-	tf.UpdateEnd(updt)
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -334,15 +341,16 @@ func (tf *TextField) CursorDelete(steps int) {
 	if tf.HasSelection() {
 		tf.DeleteSelection()
 	}
-	if tf.CursorPos+steps > len(tf.EditText) {
-		steps = len(tf.EditText) - tf.CursorPos
+	if tf.CursorPos+steps > len(tf.EditTxt) {
+		steps = len(tf.EditTxt) - tf.CursorPos
 	}
 	if steps <= 0 {
 		return
 	}
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	tf.Edited = true
-	tf.EditText = append(tf.EditText[:tf.CursorPos], tf.EditText[tf.CursorPos+steps:]...)
+	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
 	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
 		tf.SelectEnd -= steps
 	} else if tf.CursorPos < tf.SelectStart {
@@ -350,12 +358,11 @@ func (tf *TextField) CursorDelete(steps int) {
 		tf.SelectEnd -= steps
 	}
 	tf.SelectUpdate()
-	tf.UpdateEnd(updt)
 }
 
 // CursorKill deletes text from cursor to end of text
 func (tf *TextField) CursorKill() {
-	steps := len(tf.EditText) - tf.CursorPos
+	steps := len(tf.EditTxt) - tf.CursorPos
 	tf.CursorDelete(steps)
 }
 
@@ -377,7 +384,7 @@ func (tf *TextField) HasSelection() bool {
 // Selection returns the currently selected text
 func (tf *TextField) Selection() string {
 	if tf.HasSelection() {
-		return string(tf.EditText[tf.SelectStart:tf.SelectEnd])
+		return string(tf.EditTxt[tf.SelectStart:tf.SelectEnd])
 	}
 	return ""
 }
@@ -397,7 +404,7 @@ func (tf *TextField) SelectModeToggle() {
 func (tf *TextField) SelectAll() {
 	updt := tf.UpdateStart()
 	tf.SelectStart = 0
-	tf.SelectEnd = len(tf.EditText)
+	tf.SelectEnd = len(tf.EditTxt)
 	tf.UpdateEnd(updt)
 }
 
@@ -412,7 +419,8 @@ func (tf *TextField) IsWordBreak(r rune) bool {
 // SelectWord selects the word (whitespace delimited) that the cursor is on
 func (tf *TextField) SelectWord() {
 	updt := tf.UpdateStart()
-	sz := len(tf.EditText)
+	defer tf.UpdateEnd(updt)
+	sz := len(tf.EditTxt)
 	if sz <= 3 {
 		tf.SelectAll()
 		return
@@ -421,16 +429,16 @@ func (tf *TextField) SelectWord() {
 	if tf.SelectStart >= sz {
 		tf.SelectStart = sz - 2
 	}
-	if !tf.IsWordBreak(tf.EditText[tf.SelectStart]) {
+	if !tf.IsWordBreak(tf.EditTxt[tf.SelectStart]) {
 		for tf.SelectStart > 0 {
-			if tf.IsWordBreak(tf.EditText[tf.SelectStart-1]) {
+			if tf.IsWordBreak(tf.EditTxt[tf.SelectStart-1]) {
 				break
 			}
 			tf.SelectStart--
 		}
 		tf.SelectEnd = tf.CursorPos + 1
 		for tf.SelectEnd < sz {
-			if tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
+			if tf.IsWordBreak(tf.EditTxt[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
@@ -438,19 +446,18 @@ func (tf *TextField) SelectWord() {
 	} else { // keep the space start -- go to next space..
 		tf.SelectEnd = tf.CursorPos + 1
 		for tf.SelectEnd < sz {
-			if !tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
+			if !tf.IsWordBreak(tf.EditTxt[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
 		}
 		for tf.SelectEnd < sz {
-			if tf.IsWordBreak(tf.EditText[tf.SelectEnd]) {
+			if tf.IsWordBreak(tf.EditTxt[tf.SelectEnd]) {
 				break
 			}
 			tf.SelectEnd++
 		}
 	}
-	tf.UpdateEnd(updt)
 }
 
 // SelectReset resets the selection
@@ -468,7 +475,7 @@ func (tf *TextField) SelectReset() {
 // SelectUpdate updates the select region after any change to the text, to keep it in range
 func (tf *TextField) SelectUpdate() {
 	if tf.SelectStart < tf.SelectEnd {
-		ed := len(tf.EditText)
+		ed := len(tf.EditTxt)
 		if tf.SelectStart < 0 {
 			tf.SelectStart = 0
 		}
@@ -497,9 +504,10 @@ func (tf *TextField) DeleteSelection() string {
 		return ""
 	}
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	cut := tf.Selection()
 	tf.Edited = true
-	tf.EditText = append(tf.EditText[:tf.SelectStart], tf.EditText[tf.SelectEnd:]...)
+	tf.EditTxt = append(tf.EditTxt[:tf.SelectStart], tf.EditTxt[tf.SelectEnd:]...)
 	if tf.CursorPos > tf.SelectStart {
 		if tf.CursorPos < tf.SelectEnd {
 			tf.CursorPos = tf.SelectStart
@@ -508,7 +516,6 @@ func (tf *TextField) DeleteSelection() string {
 		}
 	}
 	tf.SelectReset()
-	tf.UpdateEnd(updt)
 	return cut
 }
 
@@ -542,20 +549,20 @@ func (tf *TextField) Paste() {
 // InsertAtCursor inserts given text at current cursor position
 func (tf *TextField) InsertAtCursor(str string) {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	if tf.HasSelection() {
 		tf.Cut()
 	}
 	tf.Edited = true
 	rs := []rune(str)
 	rsl := len(rs)
-	nt := make([]rune, 0, cap(tf.EditText)+cap(rs))
-	nt = append(nt, tf.EditText[:tf.CursorPos]...)
+	nt := make([]rune, 0, cap(tf.EditTxt)+cap(rs))
+	nt = append(nt, tf.EditTxt[:tf.CursorPos]...)
 	nt = append(nt, rs...)
-	nt = append(nt, tf.EditText[tf.CursorPos:]...)
-	tf.EditText = nt
+	nt = append(nt, tf.EditTxt[tf.CursorPos:]...)
+	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
-	tf.UpdateEnd(updt)
 }
 
 // ActionMenu pops up a menu of various actions to perform
@@ -663,7 +670,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 
 	// for selection to work correctly, we need this to be deterministic
 
-	sz := len(tf.EditText)
+	sz := len(tf.EditTxt)
 	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.Ch)))
 	c = kit.MinInt(c, sz)
 
@@ -694,6 +701,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
 	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
 	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
 	if tf.SelectMode || selMode != mouse.NoSelectMode {
@@ -712,7 +720,6 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 	} else if tf.HasSelection() {
 		tf.SelectReset()
 	}
-	tf.UpdateEnd(updt)
 }
 
 func (tf *TextField) TextFieldEvents() {
@@ -736,7 +743,7 @@ func (tf *TextField) TextFieldEvents() {
 			if me.Action == mouse.Press {
 				tff.SetSelectedState(!tff.IsSelected())
 				if tff.IsSelected() {
-					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Text)
+					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Txt)
 				}
 				tff.UpdateSig()
 			}
@@ -752,7 +759,7 @@ func (tf *TextField) TextFieldEvents() {
 				tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			} else if me.Action == mouse.DoubleClick {
 				if tff.HasSelection() {
-					if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditText) {
+					if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditTxt) {
 						tff.SelectReset()
 					} else {
 						tff.SelectAll()
@@ -792,7 +799,7 @@ func (tf *TextField) TextFieldEvents() {
 
 func (tf *TextField) Init2D() {
 	tf.Init2DWidget()
-	tf.EditText = []rune(tf.Text)
+	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 	bitflag.Set(&tf.Flag, int(InactiveEvents))
 }
@@ -814,17 +821,21 @@ func (tf *TextField) UpdateCharPos() bool {
 	st := &tf.Sty
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
-	tf.CharPos = pc.MeasureChars(tf.EditText)
+	tf.CharPos = pc.MeasureChars(tf.EditTxt)
 	tf.FontHeight = pc.FontHeight()
-	tf.lastSizedText = tf.EditText
+	tf.lastSizedTxt = tf.EditTxt
 	return true
 }
 
 func (tf *TextField) Size2D() {
-	tf.EditText = []rune(tf.Text)
+	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 	tf.StartPos = 0
-	tf.EndPos = len(tf.EditText)
+	maxlen := tf.MaxWidthReq
+	if maxlen <= 0 {
+		maxlen = 50
+	}
+	tf.EndPos = kit.MaxInt(len(tf.EditTxt), maxlen)
 	tf.UpdateCharPos()
 	w := float32(10.0)
 	sz := len(tf.CharPos)
@@ -914,7 +925,7 @@ func (tf *TextField) AutoScroll() {
 
 	tf.UpdateCharPos()
 
-	sz := len(tf.EditText)
+	sz := len(tf.EditTxt)
 
 	if sz == 0 || tf.LayData.AllocSize.X <= 0 {
 		tf.CursorPos = 0
@@ -1013,7 +1024,7 @@ func (tf *TextField) Render2D() {
 			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
 		tf.RenderStdBox(&tf.Sty)
-		cur := tf.EditText[tf.StartPos:tf.EndPos]
+		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
 		tf.Render2DText(string(cur))
 		if tf.HasFocus() {
@@ -1123,6 +1134,7 @@ func (g *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) 
 // SetValue sets the value, enforcing any limits, and updates the display
 func (g *SpinBox) SetValue(val float32) {
 	updt := g.UpdateStart()
+	defer g.UpdateEnd(updt)
 	if g.Prec == 0 {
 		g.Defaults()
 	}
@@ -1134,7 +1146,6 @@ func (g *SpinBox) SetValue(val float32) {
 		g.Value = Max32(g.Value, g.Min)
 	}
 	g.Value = Truncate32(g.Value, g.Prec)
-	g.UpdateEnd(updt)
 }
 
 // SetValueAction calls SetValue and also emits the signal
@@ -1206,13 +1217,13 @@ func (g *SpinBox) ConfigParts() {
 		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
 		g.StylePart(Node2D(tf))
-		tf.Text = fmt.Sprintf("%g", g.Value)
+		tf.Txt = fmt.Sprintf("%g", g.Value)
 		if !g.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) {
 					sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
-					vl, err := strconv.ParseFloat(tf.Text, 32)
+					vl, err := strconv.ParseFloat(tf.Text(), 32)
 					if err == nil {
 						sb.SetValueAction(float32(vl))
 					}
@@ -1229,7 +1240,7 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 	}
 	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
 	txt := fmt.Sprintf("%g", g.Value)
-	if tf.Text != txt {
+	if tf.Txt != txt {
 		tf.SetText(txt)
 	}
 }

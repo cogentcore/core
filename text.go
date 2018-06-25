@@ -64,7 +64,8 @@ func (p *TextStyle) EffLineHeight() float32 {
 	return p.LineHeight
 }
 
-// get basic text alignment factors for DrawString routines -- does not handle justified
+// AlignFactors gets basic text alignment factors for DrawString routines --
+// does not handle justified
 func (p *TextStyle) AlignFactors() (ax, ay float32) {
 	ax = 0.0
 	ay = 0.0

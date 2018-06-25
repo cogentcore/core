@@ -464,7 +464,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, recv ki.K
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	tf := frame.InsertNewChild(KiT_TextField, prIdx+2, "str-field").(*TextField)
-	tf.Text = strval
+	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
 	tf.SetMinPrefWidth(units.NewValue(20, units.Em))
 
@@ -480,7 +480,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, recv ki.K
 func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
 	tf := frame.ChildByName("str-field", 0).(*TextField)
-	return tf.Text
+	return tf.Text()
 }
 
 // StructViewDialog is for editing fields of a structure using a StructView --

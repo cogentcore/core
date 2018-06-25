@@ -160,7 +160,7 @@ func (fv *FileView) ConfigPathRow() {
 		if sig == int64(TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 			pff, _ := send.(*TextField)
-			fvv.DirPath = pff.Text
+			fvv.DirPath = pff.Text()
 			fvv.SetFullReRender()
 			fvv.UpdateFiles()
 		}
@@ -215,7 +215,7 @@ func (fv *FileView) ConfigSelRow() {
 		if sig == int64(TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 			pff, _ := send.(*TextField)
-			fvv.SelFile = pff.Text
+			fvv.SelFile = pff.Text()
 		}
 	})
 }

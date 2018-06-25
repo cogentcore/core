@@ -18,6 +18,47 @@ import (
 // see svg.go for the base class
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// SVGGroup
+
+// SVGGroup groups together SVG elements -- doesn't do much but provide a
+// locus for properties etc
+type SVGGroup struct {
+	SVGNodeBase
+}
+
+var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
+
+// BBoxFromChildren sets the Group BBox from children
+func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
+	bb := image.ZR
+	for i, kid := range g.Kids {
+		_, gi := KiToNode2D(kid)
+		if gi != nil {
+			if i == 0 {
+				bb = gi.BBox
+			} else {
+				bb = bb.Union(gi.BBox)
+			}
+		}
+	}
+	return bb
+}
+
+func (g *SVGGroup) BBox2D() image.Rectangle {
+	bb := g.BBoxFromChildren()
+	return bb
+}
+
+func (g *SVGGroup) Render2D() {
+	pc := &g.Pnt
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	g.Render2DChildren()
+	g.ComputeBBoxSVG()
+	rs.PopXForm()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // Rect
 
 // 2D rectangle, optionally with rounded corners
@@ -32,9 +73,7 @@ var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
-	rs.PopXForm()
 	return bb
 }
 
@@ -42,6 +81,7 @@ func (g *Rect) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
@@ -67,9 +107,7 @@ var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
-	rs.PopXForm()
 	return bb
 }
 
@@ -77,6 +115,7 @@ func (g *Circle) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
@@ -97,9 +136,7 @@ var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
-	rs.PopXForm()
 	return bb
 }
 
@@ -107,6 +144,7 @@ func (g *Ellipse) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
@@ -127,9 +165,7 @@ var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
-	rs.PopXForm()
 	return bb
 }
 
@@ -137,6 +173,7 @@ func (g *Line) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
 	g.Render2DChildren()
@@ -156,9 +193,7 @@ var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
-	rs.PopXForm()
 	return bb
 }
 
@@ -169,6 +204,7 @@ func (g *Polyline) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
@@ -188,9 +224,7 @@ var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
-	rs.PopXForm()
 	return bb
 }
 
@@ -201,6 +235,7 @@ func (g *Polygon) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
@@ -233,13 +268,23 @@ func (g *Path) SetData(data string) error {
 func (g *Path) BBox2D() image.Rectangle {
 	// todo: cache values, only update when path is updated..
 	rs := &g.Viewport.Render
-	rs.PushXForm(g.Pnt.XForm)
 	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
 	bb := g.Pnt.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
-	fmt.Printf("xform: %v min: %v max: %v bb: %v\n", g.Pnt.XForm, g.MinCoord, g.MaxCoord, bb)
-	rs.PopXForm()
 	return bb
-	// return vp.Viewport.VpBBox
+}
+
+func (g *Path) Render2D() {
+	if len(g.Data) < 2 {
+		return
+	}
+	pc := &g.Pnt
+	rs := &g.Viewport.Render
+	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
+	PathDataRender(g.Data, pc, rs)
+	pc.FillStrokeClear(rs)
+	g.Render2DChildren()
+	rs.PopXForm()
 }
 
 // PathCmds are the commands within the path SVG drawing data type
@@ -789,19 +834,6 @@ func PathDataParse(d string) ([]PathData, error) {
 	// todo: add some error checking..
 }
 
-func (g *Path) Render2D() {
-	if len(g.Data) < 2 {
-		return
-	}
-	pc := &g.Pnt
-	rs := &g.Viewport.Render
-	rs.PushXForm(pc.XForm)
-	PathDataRender(g.Data, pc, rs)
-	pc.FillStrokeClear(rs)
-	g.Render2DChildren()
-	rs.PopXForm()
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // SVGText Node
 
@@ -809,13 +841,21 @@ func (g *Path) Render2D() {
 // https://www.w3.org/TR/SVG2/text.html#GlyphsMetrics
 // todo: tspan element
 
-// 2D Text
+// SVGText renders 2D text within an SVG -- it handles both text and tspan
+// elements (a tspan is just nested under a parent text)
 type SVGText struct {
 	SVGNodeBase
-	Pos         Vec2D    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
-	Width       float32  `xml:"width" desc:"width of text to render if using word-wrapping"`
-	Text        string   `xml:"text" desc:"text string to render"`
-	WrappedText []string `json:"-" xml:"-" desc:"word-wrapped version of the string"`
+	Pos          Vec2D     `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width        float32   `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text         string    `xml:"text" desc:"text string to render"`
+	WrappedText  []string  `json:"-" xml:"-" desc:"word-wrapped version of the string"`
+	CharPosX     []float32 `desc:"character positions along X axis, if specified"`
+	CharPosY     []float32 `desc:"character positions along Y axis, if specified"`
+	CharPosDX    []float32 `desc:"character delta-positions along X axis, if specified"`
+	CharPosDY    []float32 `desc:"character delta-positions along Y axis, if specified"`
+	CharRots     []float32 `desc:"character rotations, if specified"`
+	TextLength   float32   `desc:"author's computed text length, if specified -- we attempt to match"`
+	AdjustGlyphs bool      `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
 }
 
 var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
@@ -833,15 +873,20 @@ var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
 // 	g.LayData.AllocSize = Vec2D{w, h}
 // }
 
-// func (g *SVGText) BBox2D() image.Rectangle {
-// 	rs := &g.Viewport.Render
-// 	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.LayData.AllocSize.X, g.Pos.Y+g.LayData.AllocSize.Y)
-// }
+func (g *SVGText) BBox2D() image.Rectangle {
+	rs := &g.Viewport.Render
+	// todo: this is not right -- update
+	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+20, g.Pos.Y+20)
+}
 
 func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	// fmt.Printf("rendering text %v\n", g.Text)
+	rs.PushXForm(pc.XForm)
+	g.ComputeBBoxSVG()
+	// fmt.Printf("rendering text %v\n", g.Text) todo: important: need a
+	// current text position from parent text -- these coords are relative to
+	// that!
 	if pc.TextStyle.WordWrap {
 		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Width, 0)
 		// g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
@@ -849,4 +894,24 @@ func (g *SVGText) Render2D() {
 		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, 0) // g.LayData.AllocSize.X)
 	}
 	g.Render2DChildren()
+	rs.PopXForm()
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+// Misc Nodes
+
+// Gradient is used for holding a specified color gradient -- name is id for
+// lookup in url
+type Gradient struct {
+	SVGNodeBase
+	Grad ColorSpec `desc:"the color gradient"`
+}
+
+var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
+
+// ClipPath is used for holding a path that renders as a clip path
+type ClipPath struct {
+	SVGNodeBase
+}
+
+var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)

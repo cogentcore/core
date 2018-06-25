@@ -319,7 +319,8 @@ func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) Vec2D {
 	return Vec2D{tx, ty}
 }
 
-// get the bounding box for an element in pixel int coordinates
+// BoundingBox computes the bounding box for an element in pixel int
+// coordinates, applying current transform
 func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
 	if pc.HasStroke() {
@@ -332,7 +333,7 @@ func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) im
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
-// get the bounding box for a slice of points
+// BoundingBoxFromPoints computes the bounding box for a slice of points
 func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
@@ -761,7 +762,7 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 	pr := prof.Start("Paint.drawString")
 	d := &font.Drawer{
 		Dst:  im,
-		Src:  image.NewUniform(&pc.StrokeStyle.Color.Color),
+		Src:  image.NewUniform(&pc.FillStyle.Color.Color),
 		Face: pc.FontStyle.Face,
 		Dot:  Float32ToFixedPoint(x, y),
 	}
@@ -798,6 +799,9 @@ func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectan
 	pr.End()
 }
 
+// todo: all of this requires some reworking -- too complicated and nested, and transform
+// needs to be applied to everything
+
 // DrawString according to current settings -- width is needed for alignment
 // -- if non-zero, then x position is for the left edge of the width box, and
 // alignment is WRT that width -- otherwise x position is as in
@@ -823,15 +827,16 @@ func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, h
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // text. Use ax=0.5, ay=0.5 to center the text at the specified point.
 func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, width float32) {
+	tx, ty := rs.XForm.TransformPoint(x, y)
 	w, h := pc.MeasureString(s)
-	x -= ax * w
-	y += ay * h
+	tx -= ax * w
+	ty += ay * h
 	// fmt.Printf("ds bounds: %v point x,y %v, %v\n", rs.Bounds, x, y)
 	if rs.Mask == nil {
-		pc.drawString(rs, rs.Image, rs.Bounds, s, x, y)
+		pc.drawString(rs, rs.Image, rs.Bounds, s, tx, ty)
 	} else {
 		im := image.NewRGBA(rs.Image.Bounds())
-		pc.drawString(rs, im, rs.Bounds, s, x, y)
+		pc.drawString(rs, im, rs.Bounds, s, tx, ty)
 		draw.DrawMask(rs.Image, rs.Image.Bounds(), im, image.ZP, rs.Mask, image.ZP, draw.Over)
 	}
 }

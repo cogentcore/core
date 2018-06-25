@@ -36,7 +36,6 @@ func mainrun() {
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
-	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)

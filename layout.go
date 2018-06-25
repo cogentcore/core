@@ -133,6 +133,7 @@ type LayoutStyle struct {
 }
 
 func (ls *LayoutStyle) Defaults() {
+	ls.AlignV = AlignMiddle
 	ls.MinWidth.Set(2.0, units.Px)
 	ls.MinHeight.Set(2.0, units.Px)
 	ls.ScrollBarWidth.Set(16.0, units.Px)

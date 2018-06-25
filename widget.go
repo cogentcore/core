@@ -522,7 +522,7 @@ func (g *WidgetBase) Render2DText(txt string) {
 	st := &g.Sty
 	pc.FontStyle = st.Font
 	pc.TextStyle = st.Text
-	pc.StrokeStyle.SetColor(&st.Color) // ink color
+	pc.FillStyle.SetColor(&st.Color) // text is rendered with fill color!
 
 	spc := st.BoxSpace()
 	pos := g.LayData.AllocPos.AddVal(spc)

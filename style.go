@@ -546,6 +546,8 @@ func (sf *StyledField) FieldIface(obj interface{}) interface{} {
 		return (*bool)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npk == reflect.String:
 		return (*string)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case sf.Field.Name == "Dashes":
+		return (*[]float64)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	default:
 		fmt.Printf("Field: %v type %v not processed in StyledField.FieldIface -- fixme!\n", sf.Field.Name, npt.String())
 		return nil
@@ -649,6 +651,13 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 		case string:
 			fiv.SetString(valv)
 		case *XFormMatrix2D:
+			*fiv = *valv
+		}
+	case *[]float64:
+		switch valv := val.(type) {
+		case string:
+			*fiv = ParseDashesString(valv)
+		case *[]float64:
 			*fiv = *valv
 		}
 	default:

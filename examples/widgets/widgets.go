@@ -229,7 +229,7 @@ func mainrun() {
 	// txrow.SetStretchMaxHeight()
 
 	edit1 := txrow.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
-	edit1.Text = "Edit this text"
+	edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)

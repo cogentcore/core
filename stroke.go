@@ -6,6 +6,9 @@ package gi
 
 import (
 	"image/color"
+	"log"
+	"strconv"
+	"strings"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
@@ -106,4 +109,22 @@ func (ps *StrokeStyle) SetColorSpec(cl *ColorSpec) {
 		ps.On = true
 		ps.Color = *cl
 	}
+}
+
+// ParseDashesString gets a dash slice from given string
+func ParseDashesString(str string) []float64 {
+	if len(str) == 0 || str == "none" {
+		return nil
+	}
+	ds := strings.Split(str, ",")
+	dl := make([]float64, len(ds))
+	for i, dstr := range ds {
+		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 64)
+		if err != nil {
+			log.Printf("gi.ParseDashesString parsing error: %v\n", err)
+			return nil
+		}
+		dl[i] = d
+	}
+	return dl
 }
