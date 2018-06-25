@@ -89,10 +89,10 @@ var IconAutoLoad = true
 func (ic *Icon) Init2D() {
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
 		fmt.Printf("loading icon: %v\n", ic.Filename)
-		err := ic.LoadXML(ic.Filename)
-		if err != nil {
-			IconAutoLoad = false
-		}
+		ic.LoadXML(ic.Filename)
+		// if err != nil {
+		// 	IconAutoLoad = false
+		// }
 	}
 	ic.SVG.Init2D()
 	ic.Fill = true
@@ -502,7 +502,7 @@ func MakeDefaultIcons() *IconSet {
 			iset[ic.Nm] = &ic
 		}
 	}
-	if true {
+	if false {
 		ic := Icon{}
 		ic.InitName(&ic, "astronaut")
 		ic.Filename = "/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg"
@@ -511,11 +511,11 @@ func MakeDefaultIcons() *IconSet {
 	if true {
 		ic := Icon{}
 		ic.InitName(&ic, "test")
-		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
+		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/colors-luma.svg"
 		iset[ic.Nm] = &ic
 	}
 
-	// iset.LoadDefaultIcons()
+	iset.LoadDefaultIcons()
 
 	return &iset
 }

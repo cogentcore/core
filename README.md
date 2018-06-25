@@ -89,11 +89,6 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* impl ViewBox options
-
-* need path validator code -- parser seems to be working but needs validator with better err msgs
-* also re-render data string after parsing to be more human friendly.
-
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
@@ -143,14 +138,22 @@ Currently at an **alpha** level release:
 * Layout flow types
 
 
-## Rendering
+## Rendering / SVG
+
+* add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
+
+* icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not rendering
+
+* clip-path and ClipPath element..
+
+* impl ViewBox options
+
+* need path validator code -- parser seems to be working but needs validator with better err msgs
+* also re-render data string after parsing to be more human friendly.
 
 * highlight, lowlight versions of lighter-darker that are relative to current
   lightness for dark-style themes.
 
-* add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
-
-* property-based xforms for svg
 
 ## Missing Widgets
 
@@ -159,7 +162,7 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 + ProgressBar -- very simple
 + ToolTip
-+ TextArea
++ TextArea -- go full editor..
 
 ## Remaining features for widgets
 

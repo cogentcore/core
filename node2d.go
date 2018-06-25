@@ -563,3 +563,47 @@ func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 	})
 	return par
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// MetaData2D
+
+// MetaData2D is used for holding meta data info
+type MetaData2D struct {
+	Node2DBase
+}
+
+var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
+
+func (g *MetaData2D) Init2D() {
+	g.Viewport = g.ParentViewport()
+}
+
+func (g *MetaData2D) Style2D() {
+}
+
+func (g *MetaData2D) Size2D() {
+}
+
+func (g *MetaData2D) Layout2D(parBBox image.Rectangle) {
+}
+
+func (g *MetaData2D) BBox2D() image.Rectangle {
+	return image.ZR
+}
+
+func (g *MetaData2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+}
+
+func (g *MetaData2D) ChildrenBBox2D() image.Rectangle {
+	return image.ZR
+}
+
+func (g *MetaData2D) Render2D() {
+}
+
+func (g *MetaData2D) ReRender2D() (node Node2D, layout bool) {
+	return g, false
+}
+
+func (g *MetaData2D) Move2D(delta image.Point, parBBox image.Rectangle) {
+}

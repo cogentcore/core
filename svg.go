@@ -313,6 +313,11 @@ func (svg *SVG) Render2D() {
 }
 
 func (svg *SVG) FindNamedElement(name string) Node2D {
+	name = strings.TrimPrefix(name, "#")
+	if name == "" {
+		log.Printf("gi.SVG FindNamedElement: name is empty\n")
+		return nil
+	}
 	if svg.Nm == name {
 		return svg.This.(Node2D)
 	}
@@ -323,12 +328,14 @@ func (svg *SVG) FindNamedElement(name string) Node2D {
 	}
 
 	if svg.Par == nil {
+		log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
 		return nil
 	}
 	pgi, _ := KiToNode2D(svg.Par)
 	if pgi != nil {
 		return pgi.FindNamedElement(name)
 	}
+	log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
 	return nil
 }
 
@@ -343,6 +350,13 @@ type Gradient struct {
 }
 
 var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
+
+// ClipPath is used for holding a path that renders as a clip path
+type ClipPath struct {
+	SVGNodeBase
+}
+
+var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
 
 /////////////////////////////////////////////////////////////////////////////////
 //   SVG IO
@@ -402,6 +416,14 @@ func SVGReadPoints(pstr string) []float32 {
 		pts = append(pts, p)
 	}
 	return pts
+}
+
+// SVGPointsCheckN checks the number of points read and emits an error if not equal to n
+func SVGPointsCheckN(pts []float32, n int, errmsg string) error {
+	if len(pts) != n {
+		return fmt.Errorf("%v incorrect number of points: %v != %v\n", errmsg, len(pts), n)
+	}
+	return nil
 }
 
 // XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
@@ -773,6 +795,65 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inCSS = true
 				curCSS = sty
 				// style code shows up in CharData below
+			case "clipPath":
+				curPar = curPar.AddNewChild(KiT_ClipPath, "clip-path").(Node2D)
+				cp := curPar.(*ClipPath)
+				for _, attr := range se.Attr {
+					if cp.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						cp.SetProp(attr.Name.Local, attr.Value)
+					}
+				}
+			case "use":
+				link := XMLAttr("href", se.Attr)
+				itm := curPar.FindNamedElement(link)
+				if itm != nil {
+					cln := itm.Clone().(Node2D)
+					if cln != nil {
+						curPar.AddChild(cln)
+						for _, attr := range se.Attr {
+							if cln.AsNode2D().SetStdAttr(attr.Name.Local, attr.Value) {
+								continue
+							}
+							switch attr.Name.Local {
+							default:
+								cln.SetProp(attr.Name.Local, attr.Value)
+							}
+						}
+					}
+				}
+			case "Work":
+				fallthrough
+			case "RDF":
+				fallthrough
+			case "format":
+				fallthrough
+			case "type":
+				fallthrough
+			case "namedview":
+				fallthrough
+			case "perspective":
+				fallthrough
+			case "grid":
+				fallthrough
+			case "guide":
+				fallthrough
+			case "metadata":
+				curPar = curPar.AddNewChild(KiT_MetaData2D, "metadata").(Node2D)
+				md := curPar.(*MetaData2D)
+				md.Class = se.Name.Local
+				for _, attr := range se.Attr {
+					if md.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						curPar.SetProp(attr.Name.Local, attr.Value)
+					}
+				}
 			default:
 				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
@@ -792,10 +873,21 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					inDef = false
 					curPar = defPrevPar
 				}
-			case "g":
-				fallthrough
-			case "svg":
+			case "rect":
+			case "circle":
+			case "ellipse":
+			case "line":
+			case "polygon":
+			case "polyline":
+			case "path":
+			case "use":
+			case "linearGradient":
+			case "radialGradient":
+			default:
 				if curPar == svg.This {
+					break
+				}
+				if curPar.Parent() == nil {
 					break
 				}
 				curPar = curPar.Parent().(Node2D)
@@ -803,7 +895,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					break
 				}
 				curSvg = curPar.ParentByType(KiT_SVG, true).EmbeddedStruct(KiT_SVG).(*SVG)
-			default:
 			}
 		case xml.CharData:
 			if inTitle {

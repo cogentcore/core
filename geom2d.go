@@ -535,6 +535,14 @@ func Shear2D(x, y float32) XFormMatrix2D {
 	}
 }
 
+func Skew2D(x, y float32) XFormMatrix2D {
+	return XFormMatrix2D{
+		1, math32.Tan(y),
+		math32.Tan(x), 1,
+		0, 0,
+	}
+}
+
 func (a XFormMatrix2D) Multiply(b XFormMatrix2D) XFormMatrix2D {
 	return XFormMatrix2D{
 		a.XX*b.XX + a.YX*b.XY,
@@ -580,22 +588,94 @@ func (a XFormMatrix2D) Shear(x, y float32) XFormMatrix2D {
 	return Shear2D(x, y).Multiply(a)
 }
 
+func (a XFormMatrix2D) Skew(x, y float32) XFormMatrix2D {
+	return Skew2D(x, y).Multiply(a)
+}
+
 // SetString processes the standard SVG-style transform strings
-func (a *XFormMatrix2D) SetString(str string) bool {
-	cmd := str
+func (a *XFormMatrix2D) SetString(str string) error {
+	errmsg := "gi.XFormMatrix2D SetString"
+	cmd := strings.ToLower(str)
 	vals := ""
 	pidx := strings.IndexByte(str, '(')
 	if pidx >= 0 {
 		cmd = str[:pidx]
 		vals = strings.TrimSuffix(str[pidx+1:], ")")
 	}
+	hasDeg := false
+	if strings.Contains(str, "deg") {
+		hasDeg = true
+	}
+
 	pts := SVGReadPoints(vals)
 	switch cmd {
+	case "none":
+		*a = Identity2D()
+	case "matrix":
+		if err := SVGPointsCheckN(pts, 6, errmsg); err != nil {
+			return err
+		}
+		*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 	case "translate":
+		if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+			return err
+		}
 		*a = Translate2D(pts[0], pts[1])
-		// fmt.Printf("translate %v, %v\n", pts[0], pts[1])
+	case "translatex":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Translate2D(pts[0], 0)
+	case "translatey":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Translate2D(0, pts[0])
+	case "scale":
+		if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+			return err
+		}
+		*a = Scale2D(pts[0], pts[1])
+	case "scalex":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Scale2D(pts[0], 1)
+	case "scaley":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Scale2D(1, pts[0])
+	case "rotate":
+		ang := pts[0]
+		if hasDeg {
+			ang *= math.Pi / 180
+		}
+		if len(pts) == 3 {
+			*a = Translate2D(pts[1], pts[2]).Rotate(ang).Translate(-pts[1], -pts[2])
+		} else if len(pts) == 1 {
+			*a = Rotate2D(ang)
+		} else {
+			return SVGPointsCheckN(pts, 1, errmsg)
+		}
+		// todo: rotate-origin?
+	case "skew":
+		if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+			return err
+		}
+		*a = Skew2D(pts[0], pts[1])
+	case "skewx":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Skew2D(pts[0], 0)
+	case "skewy":
+		if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			return err
+		}
+		*a = Skew2D(0, pts[0])
 	}
-	return true
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
