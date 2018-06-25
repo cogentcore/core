@@ -915,3 +915,10 @@ type ClipPath struct {
 }
 
 var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
+
+// Marker represents marker elements that can be drawn along paths (arrow heads, etc)
+type Marker struct {
+	SVGNodeBase
+}
+
+var KiT_Marker = kit.Types.AddType(&Marker{}, nil)

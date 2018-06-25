@@ -855,6 +855,18 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cp.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
+			case "marker":
+				curPar = curPar.AddNewChild(KiT_Marker, "marker").(Node2D)
+				cp := curPar.(*Marker)
+				for _, attr := range se.Attr {
+					if cp.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						cp.SetProp(attr.Name.Local, attr.Value)
+					}
+				}
 			case "use":
 				link := XMLAttr("href", se.Attr)
 				itm := curPar.FindNamedElement(link)
