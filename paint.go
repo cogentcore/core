@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"image"
+	"math"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
@@ -661,26 +662,165 @@ func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawEllipticalArc(rs *RenderState, x, y, rx, ry, angle1, angle2 float32) {
+// DrawElllipticalArc draws arc between angle1 and angle2 along an ellipse,
+// using quadratic bezier curves -- centers of ellipse are at cx, cy with
+// radii rx, ry -- see DrawEllipticalArcPath for a version compatible with SVG
+// A/a path drawing, which uses previous position instead of two angles
+func (pc *Paint) DrawEllipticalArc(rs *RenderState, cx, cy, rx, ry, angle1, angle2 float32) {
 	const n = 16
 	for i := 0; i < n; i++ {
 		p1 := float32(i+0) / n
 		p2 := float32(i+1) / n
 		a1 := angle1 + (angle2-angle1)*p1
 		a2 := angle1 + (angle2-angle1)*p2
-		x0 := x + rx*math32.Cos(a1)
-		y0 := y + ry*math32.Sin(a1)
-		x1 := x + rx*math32.Cos(a1+(a2-a1)/2)
-		y1 := y + ry*math32.Sin(a1+(a2-a1)/2)
-		x2 := x + rx*math32.Cos(a2)
-		y2 := y + ry*math32.Sin(a2)
-		cx := 2*x1 - x0/2 - x2/2
-		cy := 2*y1 - y0/2 - y2/2
+		x0 := cx + rx*math32.Cos(a1)
+		y0 := cy + ry*math32.Sin(a1)
+		x1 := cx + rx*math32.Cos(a1+(a2-a1)/2)
+		y1 := cy + ry*math32.Sin(a1+(a2-a1)/2)
+		x2 := cx + rx*math32.Cos(a2)
+		y2 := cy + ry*math32.Sin(a2)
+		ncx := 2*x1 - x0/2 - x2/2
+		ncy := 2*y1 - y0/2 - y2/2
 		if i == 0 && !rs.HasCurrent {
 			pc.MoveTo(rs, x0, y0)
 		}
-		pc.QuadraticTo(rs, cx, cy, x2, y2)
+		pc.QuadraticTo(rs, ncx, ncy, x2, y2)
 	}
+}
+
+// following ellipse path code is all directly from srwiley/oksvg
+
+// MaxDx is the Maximum radians a cubic splice is allowed to span
+// in ellipse parametric when approximating an off-axis ellipse.
+const MaxDx float32 = math.Pi / 8
+
+// ellipsePrime gives tangent vectors for parameterized elipse; a, b, radii,
+// eta parameter, center cx, cy
+func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
+	bCosEta := b * math32.Cos(eta)
+	aSinEta := a * math32.Sin(eta)
+	px = -aSinEta*cosTheta - bCosEta*sinTheta
+	py = -aSinEta*sinTheta + bCosEta*cosTheta
+	return
+}
+
+// ellipsePointAt gives points for parameterized elipse; a, b, radii, eta
+// parameter, center cx, cy
+func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
+	aCosEta := a * math32.Cos(eta)
+	bSinEta := b * math32.Sin(eta)
+	px = cx + aCosEta*cosTheta - bSinEta*sinTheta
+	py = cy + aCosEta*sinTheta + bSinEta*cosTheta
+	return
+}
+
+// FindEllipseCenter locates the center of the Ellipse if it exists. If it
+// does not exist, the radius values will be increased minimally for a
+// solution to be possible while preserving the rx to rb ratio.  rx and rb
+// arguments are pointers that can be checked after the call to see if the
+// values changed. This method uses coordinate transformations to reduce the
+// problem to finding the center of a circle that includes the origin and an
+// arbitrary point. The center of the circle is then transformed back to the
+// original coordinates and returned.
+func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32, sweep, largeArc bool) (cx, cy float32) {
+	cos, sin := math32.Cos(rotX), math32.Sin(rotX)
+
+	// Move origin to start point
+	nx, ny := endX-startX, endY-startY
+
+	// Rotate ellipse x-axis to coordinate x-axis
+	nx, ny = nx*cos+ny*sin, -nx*sin+ny*cos
+	// Scale X dimension so that rx = ry
+	nx *= *ry / *rx // Now the ellipse is a circle radius ry; therefore foci and center coincide
+
+	midX, midY := nx/2, ny/2
+	midlenSq := midX*midX + midY*midY
+
+	var hr float32 = 0.0
+	if *ry**ry < midlenSq {
+		// Requested ellipse does not exist; scale rx, ry to fit. Length of
+		// span is greater than max width of ellipse, must scale *rx, *ry
+		nry := math32.Sqrt(midlenSq)
+		if *rx == *ry {
+			*rx = nry // prevents roundoff
+		} else {
+			*rx = *rx * nry / *ry
+		}
+		*ry = nry
+	} else {
+		hr = math32.Sqrt(*ry**ry-midlenSq) / math32.Sqrt(midlenSq)
+	}
+	// Notice that if hr is zero, both answers are the same.
+	if (!sweep && !largeArc) || (sweep && largeArc) {
+		cx = midX + midY*hr
+		cy = midY - midX*hr
+	} else {
+		cx = midX - midY*hr
+		cy = midY + midX*hr
+	}
+
+	// reverse scale
+	cx *= *rx / *ry
+	//Reverse rotate and translate back to original coordinates
+	return cx*cos - cy*sin + startX, cx*sin + cy*cos + startY
+}
+
+// DrawEllipticalArcPath is draws an arc centered at cx,cy with radii rx, ry, through
+// given angle, either via the smaller or larger arc, depending on largeArc --
+// returns in lx, ly the last points which are then set to the current cx, cy
+// for the path drawer
+func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
+	rotX := angle * math.Pi / 180 // Convert degress to radians
+	startAngle := math32.Atan2(pcy-cy, pcx-cx) - rotX
+	endAngle := math32.Atan2(ocy-cy, ocx-cx) - rotX
+	deltaTheta := endAngle - startAngle
+	arcBig := math32.Abs(deltaTheta) > math.Pi
+
+	// Approximate ellipse using cubic bezeir splines
+	etaStart := math32.Atan2(math32.Sin(startAngle)/ry, math32.Cos(startAngle)/rx)
+	etaEnd := math32.Atan2(math32.Sin(endAngle)/ry, math32.Cos(endAngle)/rx)
+	deltaEta := etaEnd - etaStart
+	if (arcBig && !largeArc) || (!arcBig && largeArc) { // Go has no boolean XOR
+		if deltaEta < 0 {
+			deltaEta += math.Pi * 2
+		} else {
+			deltaEta -= math.Pi * 2
+		}
+	}
+	// This check might be needed if the center point of the elipse is
+	// at the midpoint of the start and end lines.
+	if deltaEta < 0 && sweep {
+		deltaEta += math.Pi * 2
+	} else if deltaEta >= 0 && !sweep {
+		deltaEta -= math.Pi * 2
+	}
+
+	// Round up to determine number of cubic splines to approximate bezier curve
+	segs := int(math32.Abs(deltaEta)/MaxDx) + 1
+	dEta := deltaEta / float32(segs) // span of each segment
+	// Approximate the ellipse using a set of cubic bezier curves by the method of
+	// L. Maisonobe, "Drawing an elliptical arc using polylines, quadratic
+	// or cubic Bezier curves", 2003
+	// https://www.spaceroots.org/documents/elllipse/elliptical-arc.pdf
+	tde := math32.Tan(dEta / 2)
+	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
+	lx, ly = pcx, pcy
+	sinTheta, cosTheta := math32.Sin(rotX), math32.Cos(rotX)
+	ldx, ldy := ellipsePrime(rx, ry, sinTheta, cosTheta, etaStart, cx, cy)
+
+	for i := 1; i <= segs; i++ {
+		eta := etaStart + dEta*float32(i)
+		var px, py float32
+		if i == segs {
+			px, py = ocx, ocy // Just makes the end point exact; no roundoff error
+		} else {
+			px, py = ellipsePointAt(rx, ry, sinTheta, cosTheta, eta, cx, cy)
+		}
+		dx, dy := ellipsePrime(rx, ry, sinTheta, cosTheta, eta, cx, cy)
+		pc.CubicTo(rs, lx+alpha*ldx, ly+alpha*ldy, px-alpha*dx, py-alpha*dy, px, py)
+		lx, ly, ldx, ldy = px, py, dx, dy
+	}
+	return lx, ly
 }
 
 func (pc *Paint) DrawEllipse(rs *RenderState, x, y, rx, ry float32) {

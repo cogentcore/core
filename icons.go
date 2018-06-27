@@ -511,7 +511,7 @@ func MakeDefaultIcons() *IconSet {
 	if true {
 		ic := Icon{}
 		ic.InitName(&ic, "test")
-		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/colors-luma.svg"
+		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
 		iset[ic.Nm] = &ic
 	}
 
@@ -526,6 +526,7 @@ func (iset *IconSet) LoadDefaultIcons() error {
 		gopath = build.Default.GOPATH
 	}
 	path := filepath.Join(gopath, "src/github.com/goki/gi/icons")
+	// path = "/Users/oreilly/github/svg-icon/dist/svg/awesome"
 	fmt.Printf("loading default icons: %v\n", path)
 	return iset.LoadIconsFromPath(path)
 }

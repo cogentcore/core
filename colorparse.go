@@ -316,8 +316,11 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
-				cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0},
-					IsRadial: false, Matrix: rasterx.Identity}
+				if cs.Gradient == nil {
+					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0},
+						IsRadial: false, Matrix: rasterx.Identity}
+				}
+				cs.Source = LinearGradient
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
@@ -340,8 +343,11 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					}
 				}
 			case "radialGradient":
-				cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
-					IsRadial: true, Matrix: rasterx.Identity}
+				if cs.Gradient == nil {
+					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
+						IsRadial: true, Matrix: rasterx.Identity}
+				}
+				cs.Source = RadialGradient
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					// fmt.Printf("stop attr: %v val: %v\n", attr.Name.Local, attr.Value)
@@ -375,7 +381,23 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 				}
 			case "stop":
 				stop := rasterx.GradStop{Opacity: 1.0}
-				for _, attr := range se.Attr {
+				ats := se.Attr
+				sty := XMLAttr("style", ats)
+				if sty != "" {
+					spl := strings.Split(sty, ";")
+					for _, s := range spl {
+						s := strings.TrimSpace(s)
+						ci := strings.IndexByte(s, ':')
+						if ci < 0 {
+							continue
+						}
+						a := xml.Attr{}
+						a.Name.Local = s[:ci]
+						a.Value = s[ci+1:]
+						ats = append(ats, a)
+					}
+				}
+				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
 						stop.Offset, err = readFraction(attr.Value)
@@ -388,6 +410,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 						stop.StopColor = clr
 					case "stop-opacity":
 						stop.Opacity, err = strconv.ParseFloat(attr.Value, 64)
+						// fmt.Printf("got opacity: %v\n", stop.Opacity)
 					}
 					if err != nil {
 						log.Printf("gi.ColorSpec.UnmarshalXML color stop parsing error: %v\n", err)

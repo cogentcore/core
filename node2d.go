@@ -570,6 +570,7 @@ func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 // MetaData2D is used for holding meta data info
 type MetaData2D struct {
 	Node2DBase
+	MetaData string
 }
 
 var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)

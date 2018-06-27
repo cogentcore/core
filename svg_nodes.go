@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"strconv"
 	"unicode"
 
@@ -385,6 +386,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 	var cx, cy, x1, y1, x2, y2 float32
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
+		rel := false
 		switch cmd {
 		case PcM:
 			cx = PathDataNext(data, &i)
@@ -508,31 +510,27 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cy += PathDataNext(data, &i)
 				pc.QuadraticTo(rs, x1, y1, cx, cy)
 			}
+		case Pca:
+			rel = true
+			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
 				rx := PathDataNext(data, &i)
 				ry := PathDataNext(data, &i)
 				ang := PathDataNext(data, &i)
-				_ = PathDataNext(data, &i) // large-arc-flag
-				_ = PathDataNext(data, &i) // sweep-flag
-				cx = PathDataNext(data, &i)
-				cy = PathDataNext(data, &i)
-				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, cx, cy, rx, ry, ang, 0)
-			}
-		case Pca:
-			for np := 0; np < n/7; np++ {
-				rx := PathDataNext(data, &i)
-				ry := PathDataNext(data, &i)
-				ang := PathDataNext(data, &i)
-				_ = PathDataNext(data, &i) // large-arc-flag
-				_ = PathDataNext(data, &i) // sweep-flag
-				cx += PathDataNext(data, &i)
-				cy += PathDataNext(data, &i)
-				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				pc.DrawEllipticalArc(rs, cx, cy, rx, ry, ang, 0)
+				largeArc := (PathDataNext(data, &i) != 0)
+				sweep := (PathDataNext(data, &i) != 0)
+				pcx := cx
+				pcy := cy
+				if rel {
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
+				} else {
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
+				}
+				ncx, ncy := FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
+				cx, cy = pc.DrawEllipticalArcPath(rs, ncx, ncy, cx, cy, pcx, pcy, rx, ry, ang, largeArc, sweep)
 			}
 		case PcZ:
 			pc.ClosePath(rs)
@@ -922,3 +920,19 @@ type Marker struct {
 }
 
 var KiT_Marker = kit.Types.AddType(&Marker{}, nil)
+
+// SVGFlow represents SVG flow* elements
+type SVGFlow struct {
+	SVGNodeBase
+	FlowType string
+}
+
+var KiT_SVGFlow = kit.Types.AddType(&SVGFlow{}, nil)
+
+// SVGFilter represents SVG filter* elements
+type SVGFilter struct {
+	SVGNodeBase
+	FilterType string
+}
+
+var KiT_SVGFilter = kit.Types.AddType(&SVGFilter{}, nil)

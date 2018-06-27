@@ -195,6 +195,8 @@ func (g *SVGNodeBase) ComputeBBoxSVG() {
 	g.ObjBBox = g.BBox // no diff
 	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
+	rs := &g.Viewport.Render
+	rs.ObjBounds = g.ObjBBox
 }
 
 func (g *SVGNodeBase) Render2D() {
@@ -479,8 +481,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			switch se.Name.Local {
-			case "svg":
+			nm := se.Name.Local
+			switch {
+			case nm == "svg":
 				if curPar != svg.This {
 					curPar = curPar.AddNewChild(KiT_SVG, "svg").(Node2D)
 				}
@@ -516,15 +519,15 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
-			case "desc":
+			case nm == "desc":
 				inDesc = true
-			case "title":
+			case nm == "title":
 				inTitle = true
-			case "defs":
+			case nm == "defs":
 				inDef = true
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
-			case "g":
+			case nm == "g":
 				curPar = curPar.AddNewChild(KiT_SVGGroup, "g").(Node2D)
 				for _, attr := range se.Attr {
 					if curPar.AsNode2D().SetStdAttr(attr.Name.Local, attr.Value) {
@@ -535,7 +538,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
-			case "rect":
+			case nm == "rect":
 				rect := curPar.AddNewChild(KiT_Rect, "rect").(*Rect)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
@@ -565,7 +568,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				rect.Pos.Set(x, y)
 				rect.Size.Set(w, h)
 				rect.Radius.Set(rx, ry)
-			case "circle":
+			case nm == "circle":
 				circle := curPar.AddNewChild(KiT_Circle, "circle").(*Circle)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
@@ -588,7 +591,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 				circle.Pos.Set(cx, cy)
 				circle.Radius = r
-			case "ellipse":
+			case nm == "ellipse":
 				ellipse := curPar.AddNewChild(KiT_Ellipse, "ellipse").(*Ellipse)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
@@ -613,7 +616,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 				ellipse.Pos.Set(cx, cy)
 				ellipse.Radii.Set(rx, ry)
-			case "line":
+			case nm == "line":
 				line := curPar.AddNewChild(KiT_Line, "line").(*Line)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
@@ -638,7 +641,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 				line.Start.Set(x1, y1)
 				line.End.Set(x2, y2)
-			case "polygon":
+			case nm == "polygon":
 				polygon := curPar.AddNewChild(KiT_Polygon, "polygon").(*Polygon)
 				for _, attr := range se.Attr {
 					if polygon.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -667,7 +670,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
-			case "polyline":
+			case nm == "polyline":
 				polyline := curPar.AddNewChild(KiT_Polyline, "polyline").(*Polyline)
 				for _, attr := range se.Attr {
 					if polyline.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -696,7 +699,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
-			case "path":
+			case nm == "path":
 				path := curPar.AddNewChild(KiT_Path, "path").(*Path)
 				for _, attr := range se.Attr {
 					if path.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -712,9 +715,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
-			case "tspan":
+			case nm == "tspan":
 				fallthrough
-			case "text":
+			case nm == "text":
 				var txt *SVGText
 				if se.Name.Local == "text" {
 					txt = curPar.AddNewChild(KiT_SVGText, "txt").(*SVGText)
@@ -783,7 +786,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
-			case "linearGradient":
+			case nm == "linearGradient":
 				grad := curPar.AddNewChild(KiT_Gradient, "lin-grad").(*Gradient)
 				for _, attr := range se.Attr {
 					if grad.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -808,7 +811,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if err != nil {
 					return err
 				}
-			case "radialGradient":
+			case nm == "radialGradient":
 				grad := curPar.AddNewChild(KiT_Gradient, "rad-grad").(*Gradient)
 				for _, attr := range se.Attr {
 					if grad.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -833,7 +836,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if err != nil {
 					return err
 				}
-			case "style":
+			case nm == "style":
 				sty := curPar.AddNewChild(KiT_StyleSheet, "style").(*StyleSheet)
 				for _, attr := range se.Attr {
 					if sty.SetStdAttr(attr.Name.Local, attr.Value) {
@@ -843,7 +846,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inCSS = true
 				curCSS = sty
 				// style code shows up in CharData below
-			case "clipPath":
+			case nm == "clipPath":
 				curPar = curPar.AddNewChild(KiT_ClipPath, "clip-path").(Node2D)
 				cp := curPar.(*ClipPath)
 				for _, attr := range se.Attr {
@@ -855,7 +858,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cp.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
-			case "marker":
+			case nm == "marker":
 				curPar = curPar.AddNewChild(KiT_Marker, "marker").(Node2D)
 				cp := curPar.(*Marker)
 				for _, attr := range se.Attr {
@@ -867,7 +870,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cp.SetProp(attr.Name.Local, attr.Value)
 					}
 				}
-			case "use":
+			case nm == "use":
 				link := XMLAttr("href", se.Attr)
 				itm := curPar.FindNamedElement(link)
 				if itm != nil {
@@ -885,26 +888,55 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					}
 				}
-			case "Work":
+			case nm == "Work":
 				fallthrough
-			case "RDF":
+			case nm == "RDF":
 				fallthrough
-			case "format":
+			case nm == "format":
 				fallthrough
-			case "type":
+			case nm == "type":
 				fallthrough
-			case "namedview":
+			case nm == "namedview":
 				fallthrough
-			case "perspective":
+			case nm == "perspective":
 				fallthrough
-			case "grid":
+			case nm == "grid":
 				fallthrough
-			case "guide":
+			case nm == "guide":
 				fallthrough
-			case "metadata":
-				curPar = curPar.AddNewChild(KiT_MetaData2D, "metadata").(Node2D)
+			case nm == "metadata":
+				curPar = curPar.AddNewChild(KiT_MetaData2D, nm).(Node2D)
 				md := curPar.(*MetaData2D)
-				md.Class = se.Name.Local
+				md.Class = nm
+				for _, attr := range se.Attr {
+					if md.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						curPar.SetProp(attr.Name.Local, attr.Value)
+					}
+				}
+			case strings.HasPrefix(nm, "flow"):
+				curPar = curPar.AddNewChild(KiT_SVGFlow, nm).(Node2D)
+				md := curPar.(*SVGFlow)
+				md.Class = nm
+				md.FlowType = nm
+				for _, attr := range se.Attr {
+					if md.SetStdAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						curPar.SetProp(attr.Name.Local, attr.Value)
+					}
+				}
+			case strings.HasPrefix(nm, "fe"):
+			case strings.HasPrefix(nm, "filter"):
+				curPar = curPar.AddNewChild(KiT_SVGFilter, nm).(Node2D)
+				md := curPar.(*SVGFilter)
+				md.Class = nm
+				md.FilterType = nm
 				for _, attr := range se.Attr {
 					if md.SetStdAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -963,7 +995,10 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curSvg = curPar.ParentByType(KiT_SVG, true).EmbeddedStruct(KiT_SVG).(*SVG)
 			}
 		case xml.CharData:
+			// (ok, md := curPar.(*MetaData2D); ok)
 			switch {
+			// case :
+			// 	md.MetaData = string(se)
 			case inTitle:
 				curSvg.Title += string(se)
 			case inDesc:
