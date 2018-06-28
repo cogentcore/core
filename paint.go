@@ -400,6 +400,7 @@ func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float32) {
 	d := pc.TransformPoint(rs, x3, y3)
 
 	rs.Path.CubeBezier(b.Fixed(), c.Fixed(), d.Fixed())
+	rs.Current = d
 }
 
 // ClosePath adds a line segment from the current point to the beginning

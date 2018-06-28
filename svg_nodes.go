@@ -376,6 +376,10 @@ func PathDataNextCmd(data []PathData, i *int) (PathCmds, int) {
 	return pd.Cmd()
 }
 
+func reflectPt(px, py, rx, ry float32) (x, y float32) {
+	return px*2 - rx, py*2 - ry
+}
+
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
 func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
@@ -383,7 +387,8 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 	if sz == 0 {
 		return
 	}
-	var cx, cy, x1, y1, x2, y2 float32
+	lastCmd := PcErr
+	var stx, sty, cx, cy, x1, y1, ctrlx, ctrly float32
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -392,6 +397,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			cx = PathDataNext(data, &i)
 			cy = PathDataNext(data, &i)
 			pc.MoveTo(rs, cx, cy)
+			stx, sty = cx, cy
 			for np := 1; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
@@ -401,6 +407,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			cx += PathDataNext(data, &i)
 			cy += PathDataNext(data, &i)
 			pc.MoveTo(rs, cx, cy)
+			stx, sty = cx, cy
 			for np := 1; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
@@ -442,73 +449,85 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			for np := 0; np < n/6; np++ {
 				x1 = PathDataNext(data, &i)
 				y1 = PathDataNext(data, &i)
-				x2 = PathDataNext(data, &i)
-				y2 = PathDataNext(data, &i)
+				ctrlx = PathDataNext(data, &i)
+				ctrly = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
+				pc.CubicTo(rs, x1, y1, ctrlx, ctrly, cx, cy)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
 				x1 = cx + PathDataNext(data, &i)
 				y1 = cy + PathDataNext(data, &i)
-				x2 = cx + PathDataNext(data, &i)
-				y2 = cy + PathDataNext(data, &i)
+				ctrlx = cx + PathDataNext(data, &i)
+				ctrly = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
-			}
-		case PcS:
-			for np := 0; np < n/4; np++ {
-				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
-				y1 = 2*cy - y2
-				x2 = PathDataNext(data, &i)
-				y2 = PathDataNext(data, &i)
-				cx = PathDataNext(data, &i)
-				cy = PathDataNext(data, &i)
-				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
+				pc.CubicTo(rs, x1, y1, ctrlx, ctrly, cx, cy)
 			}
 		case Pcs:
+			rel = true
+			fallthrough
+		case PcS:
 			for np := 0; np < n/4; np++ {
-				x1 = 2*cx - x2 // this is a reflection -- todo: need special case where x2 no existe
-				y1 = 2*cy - y2
-				x2 = cx + PathDataNext(data, &i)
-				y2 = cy + PathDataNext(data, &i)
-				cx += PathDataNext(data, &i)
-				cy += PathDataNext(data, &i)
-				pc.CubicTo(rs, x1, y1, x2, y2, cx, cy)
+				switch lastCmd {
+				case Pcc, PcC, Pcs, PcS:
+					ctrlx, ctrly = reflectPt(cx, cy, ctrlx, ctrly)
+				default:
+					ctrlx, ctrly = cx, cy
+				}
+				if rel {
+					x1 = cx + PathDataNext(data, &i)
+					y1 = cy + PathDataNext(data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
+				} else {
+					x1 = PathDataNext(data, &i)
+					y1 = PathDataNext(data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
+				}
+				pc.CubicTo(rs, ctrlx, ctrly, x1, y1, cx, cy)
+				lastCmd = cmd
+				ctrlx = x1
+				ctrly = y1
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				x1 = PathDataNext(data, &i)
-				y1 = PathDataNext(data, &i)
+				ctrlx = PathDataNext(data, &i)
+				ctrly = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, x1, y1, cx, cy)
+				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				x1 = cx + PathDataNext(data, &i)
-				y1 = cy + PathDataNext(data, &i)
+				ctrlx = cx + PathDataNext(data, &i)
+				ctrly = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, x1, y1, cx, cy)
-			}
-		case PcT:
-			for np := 0; np < n/2; np++ {
-				x1 = 2*cx - x1 // this is a reflection
-				y1 = 2*cy - y1
-				cx = PathDataNext(data, &i)
-				cy = PathDataNext(data, &i)
-				pc.QuadraticTo(rs, x1, y1, cx, cy)
+				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
 			}
 		case Pct:
+			rel = true
+			fallthrough
+		case PcT:
 			for np := 0; np < n/2; np++ {
-				x1 = 2*cx - x1 // this is a reflection
-				y1 = 2*cy - y1
-				cx += PathDataNext(data, &i)
-				cy += PathDataNext(data, &i)
-				pc.QuadraticTo(rs, x1, y1, cx, cy)
+				switch lastCmd {
+				case Pcq, PcQ, PcT, Pct:
+					ctrlx, ctrly = reflectPt(cx, cy, ctrlx, ctrly)
+				default:
+					ctrlx, ctrly = cx, cy
+				}
+				if rel {
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
+				} else {
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
+				}
+				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
+				lastCmd = cmd
 			}
 		case Pca:
 			rel = true
@@ -534,9 +553,12 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			}
 		case PcZ:
 			pc.ClosePath(rs)
+			cx, cy = stx, sty
 		case Pcz:
 			pc.ClosePath(rs)
+			cx, cy = stx, sty
 		}
+		lastCmd = cmd
 	}
 }
 

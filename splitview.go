@@ -295,7 +295,7 @@ var SplitterProps = ki.Props{
 
 func (g *Splitter) Defaults() { // todo: should just get these from props
 	g.ValThumb = false
-	g.ThumbSize = units.NewValue(1, units.Ex)
+	g.ThumbSize = units.NewValue(1, units.Em)
 	g.Step = 0.01
 	g.PageStep = 0.1
 	g.Max = 1.0
@@ -320,7 +320,7 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 			pad := g.Sty.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := OtherDim(g.Dim)
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
+			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.45*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
 			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThSize)
 			ic.LayData.AllocSize.SetDim(g.Dim, g.ThSize)

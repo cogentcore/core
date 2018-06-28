@@ -23,8 +23,8 @@ func main() {
 var CurFilename = ""
 
 func mainrun() {
-	width := 1024
-	height := 768
+	width := 1600
+	height := 1200
 
 	// turn this on to see a trace of the rendering
 	// gi.Update2DTrace = true

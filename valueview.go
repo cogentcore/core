@@ -380,7 +380,7 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 		if sig == int64(TextFieldDone) {
 			vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
 			tf := send.(*TextField)
-			if vvv.SetValue(tf.Text) {
+			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
 			}
 		}

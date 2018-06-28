@@ -104,6 +104,11 @@ func mainrun() {
 	brow.SetStretchMaxWidth()
 
 	button1 := brow.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
+	button1.SetProp("#icon", ki.Props{ // todo: not working
+		"width":  units.NewValue(2, units.Em),
+		"height": units.NewValue(2, units.Em),
+	})
+
 	button1.SetIcon(icnm)
 	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())

@@ -88,7 +88,7 @@ var IconAutoLoad = true
 
 func (ic *Icon) Init2D() {
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
-		fmt.Printf("loading icon: %v\n", ic.Filename)
+		// fmt.Printf("loading icon: %v\n", ic.Filename)
 		ic.LoadXML(ic.Filename)
 		// if err != nil {
 		// 	IconAutoLoad = false
@@ -127,7 +127,7 @@ func (ic *Icon) Render2D() {
 			ic.RenderedSize = ic.Geom.Size
 			// ic.RenderedStrokeColor = pc.StrokeStyle.Color.Color
 			// ic.RenderedFillColor = pc.FillStyle.Color.Color
-			ic.SavePNG(ic.Nm + ".png")
+			// ic.SavePNG(ic.Nm + ".png")
 		}
 		ic.RenderViewport2D() // update our parent image
 	}
@@ -508,10 +508,11 @@ func MakeDefaultIcons() *IconSet {
 		ic.Filename = "/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg"
 		iset[ic.Nm] = &ic
 	}
-	if true {
+	if false {
 		ic := Icon{}
 		ic.InitName(&ic, "test")
-		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
+		//		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
+		ic.Filename = "/Users/oreilly/github/svg-icon/dist/svg/awesome/adn.svg"
 		iset[ic.Nm] = &ic
 	}
 
@@ -526,7 +527,7 @@ func (iset *IconSet) LoadDefaultIcons() error {
 		gopath = build.Default.GOPATH
 	}
 	path := filepath.Join(gopath, "src/github.com/goki/gi/icons")
-	// path = "/Users/oreilly/github/svg-icon/dist/svg/awesome"
+	// path = "/Users/oreilly/github/svg-icon/dist/svg/simple"
 	fmt.Printf("loading default icons: %v\n", path)
 	return iset.LoadIconsFromPath(path)
 }
@@ -548,7 +549,9 @@ func (iset *IconSet) LoadIconsFromPath(path string) error {
 			pd := strings.TrimPrefix(ps, path)
 			if pd != "" {
 				pd = strings.ToLower(strings.Trim(strings.Trim(pd, string(filepath.Separator)), "/"))
-				nm = pd + "-" + nm
+				if pd != "" {
+					nm = pd + "-" + nm
+				}
 			}
 			ic := Icon{}
 			ic.InitName(&ic, nm)
