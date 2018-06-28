@@ -146,7 +146,8 @@ Currently at an **alpha** level release:
   xform?) and in general the Paint text interface needs a full redo to fit the
   constraints of svg and generally be simpler.
 
-* icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not rendering
+* icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
+  rendering -- unclear if any gradients are rendering properly
 
 * clip-path and ClipPath element..
 

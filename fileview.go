@@ -9,6 +9,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/c2h5oh/datasize"
@@ -34,6 +35,7 @@ func (ft FileTime) String() string {
 
 // FileInfo represents the information about a given file / directory
 type FileInfo struct {
+	Icon    IconName    `desc:"icon for file"`
 	Name    string      `desc:"name of the file"`
 	Size    FileSize    `desc:"size of the file in bytes"`
 	Kind    string      `desc:"type of file / directory -- including MIME type"`
@@ -41,11 +43,38 @@ type FileInfo struct {
 	ModTime FileTime    `desc:"time that contents (only) were last modified"`
 }
 
+// MimeToIconMap has special cases for mapping mime type to icon, for those that basic string doesn't work
+var MimeToIconMap = map[string]string{
+	"svg+xml": "svg",
+}
+
+// FileKindToIcon maps kinds to icon names
+func FileKindToIcon(kind string) IconName {
+	kind = strings.ToLower(kind)
+	icn := IconName(kind)
+	if icn.IsValid() {
+		return icn
+	}
+	if strings.Contains(kind, "/") {
+		icn = IconName(kind[strings.IndexByte(kind, '/')+1:])
+		if icn.IsValid() {
+			return icn
+		}
+		if ms, ok := MimeToIconMap[string(icn)]; ok {
+			icn = IconName(ms)
+			if icn.IsValid() {
+				return icn
+			}
+		}
+	}
+	icn = IconName("none")
+	return icn
+}
+
 // todo:
 // * structtableview: sort by diff cols, keep col header pinned at top!
 // * busy cursor when loading
 // * NewFolder -- does everyone call it folder now?  Folder is the gui version of the name..
-// * reset scroll position in structtableview when it rebuilds
 // * tree view of directory on left of files view
 // * prior paths, saved to prefs dir
 // * favorites, with DND, saved to prefs dir
@@ -288,6 +317,7 @@ func (fv *FileView) UpdateFiles() {
 			ext := filepath.Ext(fn)
 			fi.Kind = mime.TypeByExtension(ext)
 		}
+		fi.Icon = FileKindToIcon(fi.Kind)
 		fv.Files = append(fv.Files, &fi)
 		if info.IsDir() {
 			return filepath.SkipDir
