@@ -589,6 +589,20 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 	return kid
 }
 
+func (n *Node) SetChild(kid Ki, idx int, name string) error {
+	if !n.Kids.IsValidIndex(idx) {
+		return fmt.Errorf("ki.SetChild for node: %v index invalid: %v -- size: %v\n", n.PathUnique(), idx, len(n.Kids))
+	}
+	if name != "" {
+		kid.InitName(kid, name)
+	} else {
+		kid.Init(kid)
+	}
+	n.Kids[idx] = kid
+	kid.SetParent(n.This)
+	return nil
+}
+
 func (n *Node) MoveChild(from, to int) error {
 	updt := n.UpdateStart()
 	err := n.Kids.Move(from, to)

@@ -291,6 +291,13 @@ type Ki interface {
 	// name -- only when names are known to be unique (faster)
 	InsertNewChildUnique(typ reflect.Type, at int, name string) Ki
 
+	// SetChild sets child at given index to be the given item -- if name is
+	// non-empty then it sets the name of the child as well -- just calls Init
+	// (or InitName) on the child, and SetParent -- does NOT uniquify the
+	// names -- this is for high-volume child creation -- call UniquifyNames
+	// afterward if needed, but better to ensure that names are unique up front
+	SetChild(kid Ki, idx int, name string) error
+
 	// MoveChild moves child from one position to another in the list of
 	// children (see also corresponding Slice method)
 	MoveChild(from, to int) error
