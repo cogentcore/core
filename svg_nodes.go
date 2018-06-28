@@ -263,6 +263,10 @@ func (g *Path) SetData(data string) error {
 	g.DataStr = data
 	var err error
 	g.Data, err = PathDataParse(data)
+	if err != nil {
+		return err
+	}
+	err = PathDataValidate(&g.Data, g.PathUnique())
 	return err
 }
 
@@ -336,10 +340,17 @@ const (
 	PcErr
 )
 
+//go:generate stringer -type=PathCmds
+
+var KiT_PathCmds = kit.Enums.AddEnumAltLower(PcErr, false, nil, "Pc")
+
+func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 // PathData encodes the svg path data, using 32-bit floats which are converted
-// into int32 for path commands, which contain the number of data points
-// following the path command to interpret as numbers, in the lower and upper
-// 2 bytes of the converted int32 number.  We don't need that many bits, but
+// into uint32 for path commands, which contain the command as the first 8
+// bits, and the remaining 24 bits are the number of data points following the
+// path command to interpret as numbers.  We don't need that many bits, but
 // keeping 32-bit alignment is probably good and really these things don't
 // need to be crazy compact as it is unlikely to make a relevant diff in size
 // or perf to pack down further
@@ -347,9 +358,9 @@ type PathData float32
 
 // decode path data as a command and a number of subsequent values for that command
 func (pd PathData) Cmd() (PathCmds, int) {
-	iv := int32(pd)
-	cmd := PathCmds(iv & 0xFF)   // only the lowest byte for cmd
-	n := int((iv & 0xFF00) >> 8) // extract the n from next highest byte
+	iv := uint32(pd)
+	cmd := PathCmds(iv & 0xFF)       // only the lowest byte for cmd
+	n := int((iv & 0xFFFFFF00) >> 8) // extract the n from next highest byte
 	return cmd, n
 }
 
@@ -552,8 +563,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 				cx, cy = pc.DrawEllipticalArcPath(rs, ncx, ncy, cx, cy, pcx, pcy, rx, ry, ang, largeArc, sweep)
 			}
 		case PcZ:
-			pc.ClosePath(rs)
-			cx, cy = stx, sty
+			fallthrough
 		case Pcz:
 			pc.ClosePath(rs)
 			cx, cy = stx, sty
@@ -580,9 +590,10 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 	if sz == 0 {
 		return
 	}
-	var cx, cy float32
+	var cx, cy, x1, y1 float32
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
+		rel := false
 		switch cmd {
 		case PcM:
 			cx = PathDataNext(data, &i)
@@ -634,40 +645,46 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
+		case Pcc:
+			rel = true
+			fallthrough
 		case PcC:
 			for np := 0; np < n/6; np++ {
+				if rel {
+					x1 = PathDataNext(data, &i)
+					y1 = PathDataNext(data, &i)
+				} else {
+					x1 = cx + PathDataNext(data, &i)
+					y1 = cy + PathDataNext(data, &i)
+				}
 				PathDataNext(data, &i)
 				PathDataNext(data, &i)
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
-				cx = PathDataNext(data, &i)
-				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
-			}
-		case Pcc:
-			for np := 0; np < n/6; np++ {
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
-				cx += PathDataNext(data, &i)
-				cy += PathDataNext(data, &i)
+				if rel {
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
+				} else {
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
+				}
+				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
+				x1 = PathDataNext(data, &i)
+				y1 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
+				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
-				PathDataNext(data, &i)
-				PathDataNext(data, &i)
+				x1 = cx + PathDataNext(data, &i)
+				y1 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
+				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcQ:
@@ -698,6 +715,9 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
+		case Pca:
+			rel = true
+			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
 				PathDataNext(data, &i) // rx
@@ -705,21 +725,13 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 				PathDataNext(data, &i) // ang
 				PathDataNext(data, &i) // large-arc-flag
 				PathDataNext(data, &i) // sweep-flag
-				cx = PathDataNext(data, &i)
-				cy = PathDataNext(data, &i)
-				/// https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-				// todo: paint expresses in terms of 2 angles, SVG has these flags.. how to map?
-				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
-			}
-		case Pca:
-			for np := 0; np < n/7; np++ {
-				PathDataNext(data, &i) // rx
-				PathDataNext(data, &i) // ry
-				PathDataNext(data, &i) // ang
-				PathDataNext(data, &i) // large-arc-flag
-				PathDataNext(data, &i) // sweep-flag
-				cx += PathDataNext(data, &i)
-				cy += PathDataNext(data, &i)
+				if rel {
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
+				} else {
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
+				}
 				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
 			}
 		case PcZ:
@@ -729,52 +741,101 @@ func PathDataMinMax(data []PathData) (min, max Vec2D) {
 	return
 }
 
+// PathCmdNMap gives the number of points per each command
+var PathCmdNMap = map[PathCmds]int{
+	PcM: 2,
+	Pcm: 2,
+	PcL: 2,
+	Pcl: 2,
+	PcH: 1,
+	Pch: 1,
+	PcV: 1,
+	Pcv: 1,
+	PcC: 6,
+	Pcc: 6,
+	PcS: 4,
+	Pcs: 4,
+	PcQ: 4,
+	Pcq: 4,
+	PcT: 2,
+	Pct: 2,
+	PcA: 7,
+	Pca: 7,
+	PcZ: 0,
+	Pcz: 0,
+}
+
+// PathDataValidate validates the path data and emits error messages on log
+func PathDataValidate(data *[]PathData, errstr string) error {
+	sz := len(*data)
+	if sz == 0 {
+		return nil
+	}
+
+	di := 0
+	fcmd, _ := PathDataNextCmd(*data, &di)
+	if !(fcmd == Pcm || fcmd == PcM) {
+		log.Printf("gi.PathDataValidate on %v: doesn't start with M or m -- adding\n", errstr)
+		ns := make([]PathData, 3, sz+3)
+		ns[0] = PcM.EncCmd(2)
+		ns[1], ns[2] = (*data)[1], (*data)[2]
+		*data = append(ns, *data...)
+	}
+	sz = len(*data)
+
+	for i := 0; i < sz; {
+		cmd, n := PathDataNextCmd(*data, &i)
+		trgn, ok := PathCmdNMap[cmd]
+		if !ok {
+			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command not valid: %v\n", errstr, cmd)
+			log.Println(err)
+			return err
+		}
+		if (trgn == 0 && n > 0) || (trgn > 0 && n%trgn != 0) {
+			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %\n", errstr, cmd, n, trgn)
+			log.Println(err)
+			return err
+		}
+		for np := 0; np < n; np++ {
+			PathDataNext(*data, &i)
+		}
+	}
+	return nil
+}
+
+// PathCmdMap maps rune to path command
+var PathCmdMap = map[rune]PathCmds{
+	'M': PcM,
+	'm': Pcm,
+	'L': PcL,
+	'l': Pcl,
+	'H': PcH,
+	'h': Pch,
+	'V': PcV,
+	'v': Pcv,
+	'C': PcC,
+	'c': Pcc,
+	'S': PcS,
+	's': Pcs,
+	'Q': PcQ,
+	'q': Pcq,
+	'T': PcT,
+	't': Pct,
+	'A': PcA,
+	'a': Pca,
+	'Z': PcZ,
+	'z': Pcz,
+}
+
 // PathDecodeCmd decodes rune into corresponding command
 func PathDecodeCmd(r rune) PathCmds {
-	cmd := PcErr
-	switch r {
-	case 'M':
-		cmd = PcM
-	case 'm':
-		cmd = Pcm
-	case 'L':
-		cmd = PcL
-	case 'l':
-		cmd = Pcl
-	case 'H':
-		cmd = PcH
-	case 'h':
-		cmd = Pch
-	case 'V':
-		cmd = PcV
-	case 'v':
-		cmd = Pcv
-	case 'C':
-		cmd = PcC
-	case 'c':
-		cmd = Pcc
-	case 'S':
-		cmd = PcS
-	case 's':
-		cmd = Pcs
-	case 'Q':
-		cmd = PcQ
-	case 'q':
-		cmd = Pcq
-	case 'T':
-		cmd = PcT
-	case 't':
-		cmd = Pct
-	case 'A':
-		cmd = PcA
-	case 'a':
-		cmd = Pca
-	case 'Z':
-		cmd = PcZ
-	case 'z':
-		cmd = Pcz
+	cmd, ok := PathCmdMap[r]
+	if ok {
+		return cmd
+	} else {
+		// log.Printf("gi.PathDecodeCmd unrecognized path command: %v %v\n", string(r), r)
+		return PcErr
 	}
-	return cmd
 }
 
 // PathDataParse parses a string representation of the path data into compiled path data

@@ -442,7 +442,7 @@ func (g *ButtonBase) Style2DWidget() {
 func (g *ButtonBase) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Sty)
+	pst := g.Par.(Styler).Style()
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))

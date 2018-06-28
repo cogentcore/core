@@ -89,6 +89,8 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
+* #icon props not getting used for resizing icons in button.
+
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
@@ -140,7 +142,9 @@ Currently at an **alpha** level release:
 
 ## Rendering / SVG
 
-* add a painter guy based on that to generate gradients, and then we're in the shadow business, etc 
+* text rendering is definitely not right -- font scaling is off (not using
+  xform?) and in general the Paint text interface needs a full redo to fit the
+  constraints of svg and generally be simpler.
 
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not rendering
 
@@ -148,7 +152,6 @@ Currently at an **alpha** level release:
 
 * impl ViewBox options
 
-* need path validator code -- parser seems to be working but needs validator with better err msgs
 * also re-render data string after parsing to be more human friendly.
 
 * highlight, lowlight versions of lighter-darker that are relative to current

@@ -272,6 +272,14 @@ func (svg *SVG) Init2D() {
 	svg.Pnt.Defaults()
 }
 
+func (svg *SVG) Size2D() {
+	svg.InitLayout2D()
+	if svg.ViewBox.Size != Vec2DZero {
+		svg.LayData.AllocSize = svg.ViewBox.Size
+	}
+	svg.Size2DAddSpace()
+}
+
 func (svg *SVG) Style2D() {
 	svg.Style2DWidget()
 	svg.Pnt.Defaults()

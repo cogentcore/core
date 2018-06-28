@@ -98,6 +98,10 @@ func (ic *Icon) Init2D() {
 	ic.Fill = true
 }
 
+func (ic *Icon) Size2D() {
+	ic.Viewport.Size2D()
+}
+
 func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 	ic.SVG.Layout2D(parBBox)
 	ic.SetNormXForm()

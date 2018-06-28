@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/goki/gi"
@@ -21,6 +22,7 @@ func main() {
 }
 
 var CurFilename = ""
+var ZoomFactor = float32(1.0)
 
 func mainrun() {
 	width := 1600
@@ -57,16 +59,37 @@ func mainrun() {
 
 	svg := svgrow.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
 	svg.Fill = true
+	svg.SetProp("width", units.NewValue(float32(width-20), units.Px))
+	svg.SetProp("height", units.NewValue(float32(height-100), units.Px))
 	svg.SetStretchMaxWidth()
 	svg.SetStretchMaxHeight()
 
 	loads := brow.AddNewChild(gi.KiT_Button, "loadsvg").(*gi.Button)
-	// loads.SetProp("vertical-align", gi.AlignMiddle)
+	loads.SetProp("vertical-align", gi.AlignMiddle)
 	loads.SetText("Load SVG")
 
 	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	fnm.SetMinPrefWidth(units.NewValue(20, units.Em))
-	// fnm.SetProp("vertical-align", AlignMiddle)
+	fnm.SetProp("vertical-align", gi.AlignMiddle)
+
+	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
+	zoomin.SetProp("vertical-align", gi.AlignMiddle)
+	zoomin.SetProp("margin", 0)
+	zoomin.SetProp("padding", 0)
+	zoomin.SetIcon("zoom-in")
+	zoomin.SetProp("#icon", ki.Props{ // todo: not working
+		"width":  units.NewValue(2, units.Em),
+		"height": units.NewValue(2, units.Em),
+	})
+
+	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
+	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	zoom.SetProp("vertical-align", gi.AlignMiddle)
+	zoom.SetValue(ZoomFactor)
+
+	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
+	zoomout.SetProp("vertical-align", gi.AlignMiddle)
+	zoomout.SetIcon("zoom-out")
 
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -76,8 +99,11 @@ func mainrun() {
 					dlg, _ := send.(*gi.Dialog)
 					CurFilename := gi.FileViewDialogValue(dlg)
 					fnm.SetText(CurFilename)
+					updt := svg.UpdateStart()
+					fmt.Printf("Loading: %v\n", CurFilename)
 					svg.LoadXML(CurFilename)
 					svg.SetNormXForm()
+					svg.UpdateEnd(updt)
 				}
 			})
 		}
@@ -87,9 +113,40 @@ func mainrun() {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
 			CurFilename = tf.Text()
+			updt := svg.UpdateStart()
+			fmt.Printf("Loading: %v\n", CurFilename)
 			svg.LoadXML(CurFilename)
 			svg.SetNormXForm()
+			svg.UpdateEnd(updt)
 		}
+	})
+
+	zoomin.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			ZoomFactor *= 1.1
+			zoom.SetValue(ZoomFactor)
+			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, ZoomFactor))
+			// svg.ViewBox.Size.SetMulVal(ZoomFactor)
+			win.FullReRender()
+		}
+	})
+
+	zoomout.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			ZoomFactor *= 0.9
+			zoom.SetValue(ZoomFactor)
+			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, ZoomFactor))
+			// svg.ViewBox.Size.SetMulVal(ZoomFactor) // todo: svg should do this
+			win.FullReRender()
+		}
+	})
+
+	zoom.SpinBoxSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sp := send.(*gi.SpinBox)
+		ZoomFactor = sp.Value
+		svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, ZoomFactor))
+		// svg.ViewBox.Size.SetMulVal(ZoomFactor)
+		win.FullReRender()
 	})
 
 	vp.UpdateEndNoSig(updt)
