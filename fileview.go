@@ -36,9 +36,9 @@ func (ft FileTime) String() string {
 // FileInfo represents the information about a given file / directory
 type FileInfo struct {
 	Icon    IconName    `desc:"icon for file"`
-	Name    string      `desc:"name of the file"`
+	Name    string      `width:"30" desc:"name of the file"`
 	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `desc:"type of file / directory -- including MIME type"`
+	Kind    string      `width:"20" desc:"type of file / directory -- including MIME type"`
 	Mode    os.FileMode `desc:"file mode bits"`
 	ModTime FileTime    `desc:"time that contents (only) were last modified"`
 }

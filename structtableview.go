@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"reflect"
 
@@ -454,6 +455,26 @@ func (sv *StructTableView) UpdateValues() {
 		}
 	}
 	sv.UpdateEnd(updt)
+}
+
+func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
+	sv.Frame.Layout2D(parBBox)
+	sg, _ := sv.SliceGrid()
+	if sg == nil {
+		return
+	}
+	struTyp := sv.StructType()
+	nfld := struTyp.NumField()
+	sgh := sg.Child(0).(*Layout)
+	sgf := sg.Child(2).(*Frame)
+	if len(sgf.Kids) >= 1+nfld {
+		for fli := 0; fli < nfld; fli++ {
+			lbl := sgh.Child(1 + fli).(*Label)
+			widg := sgf.Child(1 + fli).(Node2D).AsWidget()
+			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
+		}
+		sgh.Layout2D(parBBox)
+	}
 }
 
 func (sv *StructTableView) Render2D() {

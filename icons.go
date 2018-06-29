@@ -182,30 +182,31 @@ type IconValueView struct {
 var KiT_IconValueView = kit.Types.AddType(&IconValueView{}, nil)
 
 func (vv *IconValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_ComboBox
+	vv.WidgetTyp = KiT_Action
 	return vv.WidgetTyp
 }
 
 func (vv *IconValueView) UpdateWidget() {
-	cb := vv.Widget.(*ComboBox)
+	cb := vv.Widget.(*Action)
 	txt := kit.ToString(vv.Value.Interface())
-	cb.SetCurVal(txt)
+
+	cb.SetIcon(txt)
 }
 
 func (vv *IconValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 
-	cb := vv.Widget.(*ComboBox)
-	cb.ItemsFromStringList(IconListSorted(*CurIconSet), false, 30)
-
+	cb := vv.Widget.(*Action)
 	vv.UpdateWidget()
 
-	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_IconValueView).(*IconValueView)
-		cbb := vvv.Widget.(*ComboBox)
-		eval := cbb.CurVal.(string)
-		if vvv.SetValue(eval) {
-			vvv.UpdateWidget()
+		if !vvv.IsInactive() {
+			// cbb := vvv.Widget.(*Action)
+			// eval := cbb.CurVal.(string)
+			// if vvv.SetIcon(eval) {
+			// vvv.UpdateWidget()
+			// }
 		}
 	})
 }

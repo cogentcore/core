@@ -166,7 +166,7 @@ type TextField struct {
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	CharPos      []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character -- todo there are likely issues with runes here -- need to test.."`
+	CharPos      []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	lastSizedTxt []rune
 }
@@ -835,12 +835,12 @@ func (tf *TextField) Size2D() {
 	if maxlen <= 0 {
 		maxlen = 50
 	}
-	tf.EndPos = kit.MaxInt(len(tf.EditTxt), maxlen)
+	tf.EndPos = kit.MinInt(len(tf.EditTxt), maxlen)
 	tf.UpdateCharPos()
 	w := float32(10.0)
 	sz := len(tf.CharPos)
 	if sz > 0 {
-		w = tf.CharPos[sz-1]
+		w = tf.TextWidth(tf.StartPos, tf.EndPos)
 	}
 	w += 2.0 // give some extra buffer
 	tf.Size2DFromWH(w, tf.FontHeight)

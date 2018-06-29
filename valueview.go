@@ -371,9 +371,15 @@ func (vv *ValueViewBase) UpdateWidget() {
 func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*TextField)
-	// tf.SetProp("max-width", units.NewValue(100, units.Ex))
 	tf.SetStretchMaxWidth()
+	widthtag := vv.ViewFieldTag("width")
 	tf.SetProp("min-width", units.NewValue(16, units.Ex))
+	if widthtag != "" {
+		width, err := strconv.ParseFloat(widthtag, 32)
+		if err == nil {
+			tf.MaxWidthReq = int(width)
+		}
+	}
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(Inactive))
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
