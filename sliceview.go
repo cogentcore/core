@@ -267,19 +267,7 @@ func (sv *SliceView) UpdateValues() {
 }
 
 func (sv *SliceView) Render2D() {
-	sv.ClearFullReRender()
 	sv.Frame.Render2D()
-}
-
-func (sv *SliceView) ReRender2D() (node Node2D, layout bool) {
-	if sv.NeedsFullReRender() {
-		node = nil
-		layout = false
-	} else {
-		node = sv.This.(Node2D)
-		layout = true
-	}
-	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -395,11 +383,4 @@ func (sv *SliceViewInline) Render2D() {
 		sv.Render2DChildren()
 		sv.PopBounds()
 	}
-}
-
-// todo: see notes on treeview
-func (sv *SliceViewInline) ReRender2D() (node Node2D, layout bool) {
-	node = sv.This.(Node2D)
-	layout = true
-	return
 }

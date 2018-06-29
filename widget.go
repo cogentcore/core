@@ -331,6 +331,7 @@ func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (g *WidgetBase) PushBounds() bool {
+	g.ClearFullReRender()
 	if g.IsOverlay() {
 		if g.Viewport != nil {
 			g.ConnectToViewport()
@@ -365,12 +366,6 @@ func (g *WidgetBase) Render2D() {
 	} else {
 		g.DisconnectAllEvents()
 	}
-}
-
-func (g *WidgetBase) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 // ReRender2DTree does a re-render of the tree -- after it has already been

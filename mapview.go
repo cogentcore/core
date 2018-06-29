@@ -334,19 +334,7 @@ func (mv *MapView) Style2D() {
 }
 
 func (mv *MapView) Render2D() {
-	mv.ClearFullReRender()
 	mv.Frame.Render2D()
-}
-
-func (mv *MapView) ReRender2D() (node Node2D, layout bool) {
-	if mv.NeedsFullReRender() {
-		node = nil
-		layout = false
-	} else {
-		node = mv.This.(Node2D)
-		layout = true
-	}
-	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -474,11 +462,4 @@ func (mv *MapViewInline) Render2D() {
 		mv.Render2DChildren()
 		mv.PopBounds()
 	}
-}
-
-// todo: see notes on treeview
-func (mv *MapViewInline) ReRender2D() (node Node2D, layout bool) {
-	node = mv.This.(Node2D)
-	layout = true
-	return
 }

@@ -1494,9 +1494,6 @@ func (tv *TreeView) Render2D() {
 		return // nothing
 	}
 	if tv.PushBounds() {
-		// reset for next update
-		tv.ClearFullReRender()
-
 		if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TreeViewSel]
 		} else if tv.HasFocus() {
@@ -1527,23 +1524,6 @@ func (tv *TreeView) Render2D() {
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.Render2DChildren()
-}
-
-func (tv *TreeView) ReRender2D() (node Node2D, layout bool) {
-	if tv.NeedsFullReRender() {
-		if Render2DTrace {
-			fmt.Printf("Render: treeview full re-render on: %v\n", tv.PathUnique())
-		}
-		node = nil
-		layout = false
-	} else {
-		if Render2DTrace {
-			fmt.Printf("Render: treeview non-full re-render on: %v\n", tv.PathUnique())
-		}
-		node = tv.This.(Node2D)
-		layout = false
-	}
-	return
 }
 
 func (tv *TreeView) FocusChanged2D(gotFocus bool) {

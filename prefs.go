@@ -103,7 +103,7 @@ func (p *Preferences) Apply() {
 	mouse.ScrollWheelRate = p.ScrollWheelRate
 	DialogsSepWindow = p.DialogsSepWindow
 	if p.CustomKeyMap != nil {
-		SetActiveKeyMap(&Prefs.CustomKeyMap) // fills in missing pieces
+		SetActiveKeyMap(Prefs.CustomKeyMap) // fills in missing pieces
 	}
 	if p.FontPaths != nil {
 		paths := append(p.FontPaths, oswin.TheApp.FontPaths()...)

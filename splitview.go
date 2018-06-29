@@ -237,12 +237,6 @@ func (g *SplitView) Render2D() {
 	}
 }
 
-func (g *SplitView) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = true
-	return
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
@@ -430,12 +424,6 @@ func (g *Splitter) Render2DDefaultStyle() {
 		sz := NewVec2DFmPoint(g.VpBBox.Size())
 		g.RenderBoxImpl(pos, sz, 0)
 	}
-}
-
-func (g *Splitter) ReRender2D() (node Node2D, layout bool) {
-	node = g.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *Splitter) FocusChanged2D(gotFocus bool) {

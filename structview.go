@@ -216,25 +216,7 @@ func (sv *StructView) UpdateFields() {
 }
 
 func (sv *StructView) Render2D() {
-	sv.ClearFullReRender()
 	sv.Frame.Render2D()
-}
-
-func (sv *StructView) ReRender2D() (node Node2D, layout bool) {
-	if sv.NeedsFullReRender() {
-		if Render2DTrace {
-			fmt.Printf("Render: struct view full re-render at vp: %v win: %v on: %v\n", sv.VpBBox, sv.WinBBox, sv.PathUnique())
-		}
-		node = nil
-		layout = false
-	} else {
-		if Render2DTrace {
-			fmt.Printf("Render: struct view non-full re-render at vp: %v win: %v on: %v\n", sv.VpBBox, sv.WinBBox, sv.PathUnique())
-		}
-		node = sv.This.(Node2D)
-		layout = true
-	}
-	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -356,10 +338,4 @@ func (sv *StructViewInline) Render2D() {
 		sv.Render2DChildren()
 		sv.PopBounds()
 	}
-}
-
-func (sv *StructViewInline) ReRender2D() (node Node2D, layout bool) {
-	node = sv.This.(Node2D)
-	layout = true
-	return
 }

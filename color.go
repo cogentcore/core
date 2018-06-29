@@ -1064,7 +1064,6 @@ func (sv *ColorView) Style2D() {
 }
 
 func (sv *ColorView) Render2D() {
-	sv.ClearFullReRender()
 	if sv.PushBounds() {
 		updt := sv.UpdateStart()
 		sv.Update()
@@ -1072,12 +1071,6 @@ func (sv *ColorView) Render2D() {
 		sv.PopBounds()
 	}
 	sv.Frame.Render2D()
-}
-
-func (sv *ColorView) ReRender2D() (node Node2D, layout bool) {
-	node = sv.This.(Node2D)
-	layout = false
-	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

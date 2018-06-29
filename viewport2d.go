@@ -183,7 +183,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
 
-// ReRender2DNode re-renders a specific node that has said it can re-render
+// ReRender2DNode re-renders a specific node
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	gn := gni.AsNode2D()
 	if Render2DTrace {
@@ -200,7 +200,7 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 }
 
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
-// ReRender2DNOde is that it calls ReRender2DTree and not just Render2DTree!
+// ReRender2DNode is that it calls ReRender2DTree and not just Render2DTree!
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	pw := gni.AsWidget()
 	if pw == nil {
@@ -448,17 +448,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 			vp.FullRender2DTree()
 		}
 	} else {
-		rr, layout := gii.ReRender2D()
-		if rr != nil {
-			rrn := rr.AsNode2D()
-			if Update2DTrace {
-				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v, layout: %v\n", vp.PathUnique(), rrn.PathUnique(), layout)
-			}
-			if layout {
-				rrn.Layout2DTree()
-			}
-			vp.ReRender2DNode(rr)
-		} else {
+		if gi.NeedsFullReRender() {
 			anchor := gi.ParentReRenderAnchor()
 			if anchor != nil {
 				if Update2DTrace {
@@ -472,6 +462,11 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 				gi.Style2DTree()    // restyle only from affected node downward
 				vp.ReRender2DTree() // need to re-render entirely from us
 			}
+		} else {
+			if Update2DTrace {
+				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), gi.PathUnique())
+			}
+			vp.ReRender2DNode(gii)
 		}
 	}
 	// don't do anything on deleting or destroying, and

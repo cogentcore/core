@@ -165,13 +165,6 @@ type Node2D interface {
 	// disconnect if not.
 	Render2D()
 
-	// ReRender2D: returns the node that should be re-rendered when an Update
-	// signal is received for a given node, and whether a new layout pass from
-	// that node down is needed) -- can be the node itself, any of its parents
-	// or children, or nil to indicate that a full re-render is necessary.
-	// For re-rendering to work, an opaque background should be painted first
-	ReRender2D() (node Node2D, layout bool)
-
 	// FocusChanged2D is called on node when it gets or loses focus -- focus
 	// flag has current state too
 	FocusChanged2D(gotFocus bool)
@@ -600,10 +593,6 @@ func (g *MetaData2D) ChildrenBBox2D() image.Rectangle {
 }
 
 func (g *MetaData2D) Render2D() {
-}
-
-func (g *MetaData2D) ReRender2D() (node Node2D, layout bool) {
-	return g, false
 }
 
 func (g *MetaData2D) Move2D(delta image.Point, parBBox image.Rectangle) {

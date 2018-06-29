@@ -9,6 +9,8 @@ import (
 	"image"
 	"log"
 	"reflect"
+	"sort"
+	"time"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -30,6 +32,8 @@ type StructTableView struct {
 	TmpSave     ValueView                `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig     ki.Signal                `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	SelectedIdx int                      `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SortIdx     int                      `desc:"current sort index"`
+	SortDesc    bool                     `desc:"whether current sort order is descending"`
 	SelectSig   ki.Signal                `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
 	builtSlice  interface{}
 	builtSize   int
@@ -49,6 +53,8 @@ type StructTableViewStyleFunc func(slice interface{}, widg Node2D, row, col int,
 func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false
 	if sv.Slice != sl {
+		sv.SortIdx = -1
+		sv.SortDesc = false
 		slpTyp := reflect.TypeOf(sl)
 		if slpTyp.Kind() != reflect.Ptr {
 			log.Printf("StructTableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
@@ -91,7 +97,7 @@ func (sv *StructTableView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructTableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Layout, "slice-grid")
+	config.Add(KiT_Frame, "slice-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
 	return config
@@ -106,14 +112,14 @@ func (sv *StructTableView) StdConfig() (mods, updt bool) {
 	return
 }
 
-// SliceGrid returns the SliceGrid grid layout widget, which contains all the
+// SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *StructTableView) SliceGrid() (*Layout, int) {
+func (sv *StructTableView) SliceGrid() (*Frame, int) {
 	idx := sv.ChildIndexByName("slice-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
@@ -171,6 +177,8 @@ func (sv *StructTableView) ConfigSliceGrid() {
 		return
 	}
 	sg.Lay = LayoutCol
+	// sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
@@ -195,7 +203,6 @@ func (sv *StructTableView) ConfigSliceGrid() {
 
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sgf.SetMinPrefHeight(units.NewValue(10, units.Em))
-	sgf.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sgf.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sgf.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	if sv.IsInactive() {
@@ -210,7 +217,7 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	for fli := 0; fli < nfld; fli++ {
 		fld := struTyp.Field(fli)
 		labnm := fmt.Sprintf("head-%v", fld.Name)
-		hcfg.Add(KiT_Label, labnm)
+		hcfg.Add(KiT_Action, labnm)
 	}
 	if !sv.IsInactive() {
 		hcfg.Add(KiT_Label, "head-add")
@@ -228,10 +235,16 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	lbl.Text = "Index"
 	for fli := 0; fli < nfld; fli++ {
 		fld := struTyp.Field(fli)
-		lbl := sgh.Child(1 + fli).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
-		idxtxt := fmt.Sprintf("%v", fld.Name) // todo: add RTF
-		lbl.Text = idxtxt
+		hdr := sgh.Child(1 + fli).(*Action)
+		hdr.SetProp("vertical-align", AlignMiddle)
+		hdr.SetText(fld.Name)
+		hdr.Data = fli
+		hdr.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
+			act := send.(*Action)
+			fldIdx := act.Data.(int)
+			svv.SortSliceAction(fldIdx)
+		})
 	}
 	if !sv.IsInactive() {
 		lbl := sgh.Child(nfld + 1).(*Label)
@@ -242,19 +255,52 @@ func (sv *StructTableView) ConfigSliceGrid() {
 		lbl.Text = "Del"
 	}
 
+	sgf.DeleteChildren(true)
 	sgf.Kids = make(ki.Slice, nWidgPerRow*sz)
 
-	// Render Data
+	if sv.SortIdx >= 0 {
+		sv.SortSlice()
+	}
+	sv.ConfigSliceGridRows()
+
+	sg.SetFullReRender()
+	sgh.UpdateEnd(updth)
+	sg.UpdateEnd(updtg)
+}
+
+// ConfigSliceGridRows configures the SliceGrid rows for the current slice --
+// assumes .Kids is created at the right size -- only call this for a direct
+// re-render e.g., after sorting
+func (sv *StructTableView) ConfigSliceGridRows() {
+	mv := reflect.ValueOf(sv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+	struTyp := sv.StructType()
+	nfld := struTyp.NumField()
+	nWidgPerRow := 1 + nfld
+	if !sv.IsInactive() {
+		nWidgPerRow += 2
+	}
+	sg, _ := sv.SliceGrid()
+	sgf := sg.Child(2).(*Frame)
+
+	updt := sgf.UpdateStart()
+	defer sgf.UpdateEnd(updt)
+
 	for i := 0; i < sz; i++ {
 		ridx := i * nWidgPerRow
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		stru := val.Interface()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
-		idxlab := Label{}
-		sgf.SetChild(&idxlab, ridx, labnm)
+		var idxlab *Label
+		if sgf.Kids[ridx] != nil {
+			idxlab = sgf.Kids[ridx].(*Label)
+		} else {
+			idxlab = &Label{}
+			sgf.SetChild(idxlab, ridx, labnm)
+		}
 		idxlab.Text = idxtxt
-		idxlab.SetProp("vertical-align", AlignMiddle)
 
 		for fli := 0; fli < nfld; fli++ {
 			fval := val.Elem().Field(fli)
@@ -266,10 +312,15 @@ func (sv *StructTableView) ConfigSliceGrid() {
 			vv.SetStructValue(fval.Addr(), stru, &field, sv.TmpSave)
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, idxtxt)
-			sv.Values[fli][i] = vv
-			widg := ki.NewOfType(vtyp).(Node2D)
-			sgf.SetChild(widg, ridx+1+fli, valnm)
-			widg.SetProp("vertical-align", AlignMiddle)
+			cidx := ridx + 1 + fli
+			var widg Node2D
+			if sgf.Kids[cidx] != nil {
+				widg = sgf.Kids[cidx].(Node2D)
+			} else {
+				sv.Values[fli][i] = vv
+				widg = ki.NewOfType(vtyp).(Node2D)
+				sgf.SetChild(widg, cidx, valnm)
+			}
 			vv.ConfigWidget(widg)
 			if sv.IsInactive() {
 				widg.AsNode2D().SetInactive()
@@ -322,12 +373,10 @@ func (sv *StructTableView) ConfigSliceGrid() {
 				}
 			}
 			if sv.StyleFunc != nil {
-				sv.StyleFunc(sv.Slice, widg, i, fli, vv)
+				sv.StyleFunc(mvnp.Interface(), widg, i, fli, vv)
 			}
 		}
 	}
-	sgh.UpdateEnd(updth)
-	sg.UpdateEnd(updtg)
 }
 
 // UpdateSelect updates the selection for the given index
@@ -412,6 +461,133 @@ func (sv *StructTableView) SliceDelete(idx int) {
 	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
+// SortSliceAction sorts the slice for given field index -- toggles ascending
+// vs. descending if already sorting on this dimension
+func (sv *StructTableView) SortSliceAction(fldIdx int) {
+	struTyp := sv.StructType()
+	nfld := struTyp.NumField()
+
+	sg, _ := sv.SliceGrid()
+	sgh := sg.Child(0).(*Layout)
+	sgh.SetFullReRender()
+
+	ascending := true
+
+	updt := sgh.UpdateStart()
+	for fli := 0; fli < nfld; fli++ {
+		hdr := sgh.Child(1 + fli).(*Action)
+		if fli == fldIdx {
+			if sv.SortIdx == fli {
+				sv.SortDesc = !sv.SortDesc
+				ascending = !sv.SortDesc
+			}
+			if ascending {
+				hdr.SetIcon("widget-wedge-up")
+			} else {
+				hdr.SetIcon("widget-wedge-down")
+			}
+		} else {
+			hdr.SetIcon("none")
+		}
+	}
+
+	sv.SortIdx = fldIdx
+
+	sgh.UpdateEnd(updt)
+
+	sv.SortSlice()
+	sv.ConfigSliceGridRows()
+}
+
+// SortSlice sorts the slice according to current sorting settings
+func (sv *StructTableView) SortSlice() {
+	fldIdx := sv.SortIdx
+	ascending := !sv.SortDesc
+
+	mv := reflect.ValueOf(sv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	struTyp := sv.StructType()
+	fld := struTyp.Field(fldIdx)
+	vk := fld.Type.Kind()
+
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := ival.Elem().Field(fldIdx).Int()
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := jval.Elem().Field(fldIdx).Int()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := ival.Elem().Field(fldIdx).Uint()
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := jval.Elem().Field(fldIdx).Uint()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := ival.Elem().Field(fldIdx).Float()
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := jval.Elem().Field(fldIdx).Float()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+	case vk == reflect.String:
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := ival.Elem().Field(fldIdx).String()
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := jval.Elem().Field(fldIdx).String()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "gi.FileTime":
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := (time.Time)(ival.Elem().Field(fldIdx).Interface().(FileTime))
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := (time.Time)(jval.Elem().Field(fldIdx).Interface().(FileTime))
+			if ascending {
+				return iv.Before(jv)
+			} else {
+				return jv.Before(iv)
+			}
+		})
+	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "time.Time":
+		sort.Slice(mvnp.Interface(), func(i, j int) bool {
+			ival := kit.OnePtrValue(mvnp.Index(i))
+			iv := ival.Elem().Field(fldIdx).Interface().(time.Time)
+			jval := kit.OnePtrValue(mvnp.Index(j))
+			jv := jval.Elem().Field(fldIdx).Interface().(time.Time)
+			if ascending {
+				return iv.Before(jv)
+			} else {
+				return jv.Before(iv)
+			}
+		})
+	default:
+		log.Printf("SliceSort: unable to sort on field of type: %v\n", fld.Type.String())
+	}
+}
+
 // ConfigSliceButtons configures the buttons for map functions
 func (sv *StructTableView) ConfigSliceButtons() {
 	if kit.IfaceIsNil(sv.Slice) {
@@ -469,7 +645,7 @@ func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
 	sgf := sg.Child(2).(*Frame)
 	if len(sgf.Kids) >= 1+nfld {
 		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(1 + fli).(*Label)
+			lbl := sgh.Child(1 + fli).(*Action)
 			widg := sgf.Child(1 + fli).(Node2D).AsWidget()
 			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
 		}
@@ -478,17 +654,5 @@ func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
 }
 
 func (sv *StructTableView) Render2D() {
-	sv.ClearFullReRender()
 	sv.Frame.Render2D()
-}
-
-func (sv *StructTableView) ReRender2D() (node Node2D, layout bool) {
-	if sv.NeedsFullReRender() {
-		node = nil
-		layout = false
-	} else {
-		node = sv.This.(Node2D)
-		layout = true
-	}
-	return
 }

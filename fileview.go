@@ -48,37 +48,57 @@ var MimeToIconMap = map[string]string{
 	"svg+xml": "svg",
 }
 
-// FileKindToIcon maps kinds to icon names
-func FileKindToIcon(kind string) IconName {
+// FileKindToIcon maps kinds to icon names, using extension directly from file as a last resort
+func FileKindToIcon(kind, name string) IconName {
 	kind = strings.ToLower(kind)
 	icn := IconName(kind)
 	if icn.IsValid() {
 		return icn
 	}
 	if strings.Contains(kind, "/") {
-		icn = IconName(kind[strings.IndexByte(kind, '/')+1:])
-		if icn.IsValid() {
+		si := strings.IndexByte(kind, '/')
+		typ := kind[:si]
+		subtyp := kind[si+1:]
+		if icn = "file-" + IconName(subtyp); icn.IsValid() {
 			return icn
 		}
-		if ms, ok := MimeToIconMap[string(icn)]; ok {
-			icn = IconName(ms)
-			if icn.IsValid() {
+		if icn = IconName(subtyp); icn.IsValid() {
+			return icn
+		}
+		if ms, ok := MimeToIconMap[string(subtyp)]; ok {
+			if icn = IconName(ms); icn.IsValid() {
+				return icn
+			}
+		}
+		if icn = "file-" + IconName(typ); icn.IsValid() {
+			return icn
+		}
+		if icn = IconName(typ); icn.IsValid() {
+			return icn
+		}
+		if ms, ok := MimeToIconMap[string(typ)]; ok {
+			if icn = IconName(ms); icn.IsValid() {
 				return icn
 			}
 		}
 	}
+	ext := filepath.Ext(name)
+	if ext != "" {
+		if icn = IconName(ext[1:]); icn.IsValid() {
+			return icn
+		}
+	}
+
 	icn = IconName("none")
 	return icn
 }
 
 // todo:
-// * structtableview: sort by diff cols, keep col header pinned at top!
 // * busy cursor when loading
 // * NewFolder -- does everyone call it folder now?  Folder is the gui version of the name..
 // * tree view of directory on left of files view
 // * prior paths, saved to prefs dir
 // * favorites, with DND, saved to prefs dir
-// * icons!  key in this kind of view -- shouldn't be too hard in terms of valueview type -- just define it!
 // * filter(s) for types of files to highlight as selectable?  useful or not?
 
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -126,10 +146,10 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func FileViewStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueView) {
-	finf, ok := slice.(*[]*FileInfo)
+	finf, ok := slice.([]*FileInfo)
 	if ok {
 		gi := widg.AsNode2D()
-		if clr, got := FileViewKindColorMap[(*finf)[row].Kind]; got {
+		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
 			gi.SetProp("color", clr)
 		} else {
 			gi.DeleteProp("color")
@@ -317,7 +337,7 @@ func (fv *FileView) UpdateFiles() {
 			ext := filepath.Ext(fn)
 			fi.Kind = mime.TypeByExtension(ext)
 		}
-		fi.Icon = FileKindToIcon(fi.Kind)
+		fi.Icon = FileKindToIcon(fi.Kind, fi.Name)
 		fv.Files = append(fv.Files, &fi)
 		if info.IsDir() {
 			return filepath.SkipDir
@@ -375,17 +395,5 @@ func (fv *FileView) ConfigButtons() {
 }
 
 func (fv *FileView) Render2D() {
-	fv.ClearFullReRender()
 	fv.Frame.Render2D()
-}
-
-func (fv *FileView) ReRender2D() (node Node2D, layout bool) {
-	if fv.NeedsFullReRender() {
-		node = nil
-		layout = false
-	} else {
-		node = fv.This.(Node2D)
-		layout = true
-	}
-	return
 }

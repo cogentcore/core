@@ -1277,15 +1277,6 @@ func (ly *Layout) Render2D() {
 	}
 }
 
-func (ly *Layout) ReRender2D() (node Node2D, layout bool) {
-	if ly.Nm == "svfr" {
-		fmt.Printf("svfr layout re-render at vp: %v win: %v on: %v\n", ly.VpBBox, ly.WinBBox, ly.PathUnique())
-	}
-	node = ly.This.(Node2D)
-	layout = true
-	return
-}
-
 func (ly *Layout) FocusChanged2D(gotFocus bool) {
 }
 

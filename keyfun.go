@@ -70,24 +70,33 @@ func (ev *KeyFunctions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 
 type KeyMap map[string]KeyFunctions
 
-// the default map has emacs-style navigation etc
-var DefaultKeyMap = KeyMap{
+// EmacsMacKeyMap defines emacs-based navigation with mac -- shift and meta
+// modifiers for navigation keys do select + move
+var EmacsMacKeyMap = KeyMap{
 	"UpArrow":             KeyFunMoveUp,
-	"Control+P":           KeyFunMoveUp,
 	"Shift+UpArrow":       KeyFunMoveUp,
-	"Shift+Control+P":     KeyFunMoveUp,
 	"Meta+UpArrow":        KeyFunMoveUp,
+	"Control+P":           KeyFunMoveUp,
+	"Shift+Control+P":     KeyFunMoveUp,
 	"Meta+Control+P":      KeyFunMoveUp,
 	"DownArrow":           KeyFunMoveDown,
-	"Control+N":           KeyFunMoveDown,
 	"Shift+DownArrow":     KeyFunMoveDown,
-	"Shift+Control+N":     KeyFunMoveDown,
 	"Meta+DownArrow":      KeyFunMoveDown,
+	"Control+N":           KeyFunMoveDown,
+	"Shift+Control+N":     KeyFunMoveDown,
 	"Meta+Control+N":      KeyFunMoveDown,
 	"RightArrow":          KeyFunMoveRight,
+	"Shift+RightArrow":    KeyFunMoveRight,
+	"Meta+RightArrow":     KeyFunMoveRight,
 	"Control+F":           KeyFunMoveRight,
+	"Shift+Control+F":     KeyFunMoveRight,
+	"Meta+Control+F":      KeyFunMoveRight,
 	"LeftArrow":           KeyFunMoveLeft,
+	"Shift+LeftArrow":     KeyFunMoveLeft,
+	"Meta+LeftArrow":      KeyFunMoveLeft,
 	"Control+B":           KeyFunMoveLeft,
+	"Shift+Control+B":     KeyFunMoveLeft,
+	"Meta+Control+B":      KeyFunMoveLeft,
 	"Control+UpArrow":     KeyFunPageUp,
 	"Control+U":           KeyFunPageUp,
 	"Control+DownArrow":   KeyFunPageDown,
@@ -97,10 +106,10 @@ var DefaultKeyMap = KeyMap{
 	"Control+LeftArrow":   KeyFunPageLeft,
 	"Home":                KeyFunHome,
 	"Control+A":           KeyFunHome,
-	"Meta+LeftArrow":      KeyFunHome,
+	"Alt+LeftArrow":       KeyFunHome,
 	"End":                 KeyFunEnd,
 	"Control+E":           KeyFunEnd,
-	"Meta+RightArrow":     KeyFunEnd,
+	"Alt+RightArrow":      KeyFunEnd,
 	"Tab":                 KeyFunFocusNext,
 	"Shift+Tab":           KeyFunFocusPrev,
 	"ReturnEnter":         KeyFunSelectItem,
@@ -130,6 +139,8 @@ var DefaultKeyMap = KeyMap{
 	"Control+O":           KeyFunInsertAfter,
 	"Control+Alt+I":       KeyFunGoGiEditor,
 	"Control+Alt+E":       KeyFunGoGiEditor,
+	"Shift+Control+I":     KeyFunGoGiEditor,
+	"Shift+Control+E":     KeyFunGoGiEditor,
 	"Shift+Meta+=":        KeyFunZoomIn,
 	"Meta+=":              KeyFunZoomIn,
 	"Meta+-":              KeyFunZoomOut,
@@ -142,9 +153,73 @@ var DefaultKeyMap = KeyMap{
 	"F5":                  KeyFunRefresh,
 }
 
+// ChromeKeyMap is a standard key map for google / chrome style bindings
+var ChromeKeyMap = KeyMap{
+	"UpArrow": KeyFunMoveUp,
+	// "Control+P":           KeyFunMoveUp, // Print
+	"Shift+UpArrow": KeyFunMoveUp,
+	"DownArrow":     KeyFunMoveDown,
+	// "Control+N":           KeyFunMoveDown, // New
+	"Shift+DownArrow":  KeyFunMoveDown,
+	"RightArrow":       KeyFunMoveRight,
+	"Shift+RightArrow": KeyFunMoveRight,
+	// "Control+F":           KeyFunMoveRight, // Find
+	"LeftArrow":       KeyFunMoveLeft,
+	"Shift+LeftArrow": KeyFunMoveLeft,
+	// "Control+B":           KeyFunMoveLeft, // bold
+	"Control+UpArrow": KeyFunPageUp,
+	// "Control+U":           KeyFunPageUp, // Underline
+	"Control+DownArrow":  KeyFunPageDown,
+	"Control+RightArrow": KeyFunPageRight,
+	"Control+LeftArrow":  KeyFunPageLeft,
+	"Home":               KeyFunHome,
+	"Alt+LeftArrow":      KeyFunHome,
+	"End":                KeyFunEnd,
+	// "Control+E":           KeyFunEnd, // Search Google
+	"Alt+RightArrow":  KeyFunEnd,
+	"Tab":             KeyFunFocusNext,
+	"Shift+Tab":       KeyFunFocusPrev,
+	"ReturnEnter":     KeyFunSelectItem,
+	"KeypadEnter":     KeyFunSelectItem,
+	"Control+A":       KeyFunSelectAll,
+	"Shift+Control+A": KeyFunCancelSelect,
+	// "Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+	"Control+ReturnEnter": KeyFunAccept,
+	"Escape":              KeyFunAbort,
+	"DeleteBackspace":     KeyFunBackspace,
+	"DeleteForward":       KeyFunDelete,
+	// "Control+D":           KeyFunDelete, // Bookmark
+	// "Control+H":       KeyFunBackspace, // Help
+	"Control+K": KeyFunKill,
+	"Control+C": KeyFunCopy,
+	// "Control+W":       KeyFunCut, // Close Current Tab
+	"Control+X": KeyFunCut,
+	"Control+V": KeyFunPaste,
+	"Control+M": KeyFunDuplicate,
+	// "Control+I":       KeyFunInsert, // Italic
+	// "Control+O":       KeyFunInsertAfter, // Open
+	"Shift+Control+I": KeyFunGoGiEditor,
+	"Shift+Control+E": KeyFunGoGiEditor,
+	"Control+=":       KeyFunZoomIn,
+	"Shift+Control++": KeyFunZoomIn,
+	"Control+-":       KeyFunZoomOut,
+	"Shift+Control+_": KeyFunZoomOut,
+	"Shift+Control+P": KeyFunPrefs,
+	"F5":              KeyFunRefresh,
+}
+
+// StdKeyMaps collects a list of standard keymap options
+var StdKeyMaps = []KeyMap{
+	EmacsMacKeyMap,
+	ChromeKeyMap,
+}
+
+// DefaultKeyMap is the overall default keymap
+var DefaultKeyMap = EmacsMacKeyMap
+
 // ActiveKeyMap points to the active map -- users can set this to an
 // alternative map in Prefs
-var ActiveKeyMap *KeyMap = &DefaultKeyMap
+var ActiveKeyMap = DefaultKeyMap
 
 // KeyMapItem records one element of the key map -- used for organizing the map
 type KeyMapItem struct {
@@ -205,7 +280,7 @@ func (km *KeyMap) Update() {
 
 // SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
 // prior to setting it to ensure that it is a valid, complete map
-func SetActiveKeyMap(km *KeyMap) {
+func SetActiveKeyMap(km KeyMap) {
 	km.Update()
 	ActiveKeyMap = km
 }
@@ -215,7 +290,7 @@ func SetActiveKeyMap(km *KeyMap) {
 func KeyFun(chord string) KeyFunctions {
 	kf := KeyFunNil
 	if chord != "" {
-		kf = (*ActiveKeyMap)[chord]
+		kf = (ActiveKeyMap)[chord]
 		// fmt.Printf("chord: %v = %v\n", chord, kf)
 	}
 	return kf
