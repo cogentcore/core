@@ -1030,7 +1030,7 @@ func (tv *TreeView) DragNDropStart() {
 		}
 	}
 	bi := &Bitmap{}
-	bi.SetName(tv.UniqueName())
+	bi.InitName(bi, tv.UniqueName())
 	bi.GrabRenderFrom(tv) // todo: show number of items?
 	ImageClearer(bi.Pixels, 50.0)
 	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)

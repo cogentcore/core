@@ -122,6 +122,7 @@ func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 
 func (g *SplitView) SetSplitsAction(idx int, nwval float32) {
 	updt := g.UpdateStart()
+	g.SetFullReRender()
 	g.Splits[idx+1] = 1.0 - nwval
 	g.Splits[idx] = nwval
 	// fmt.Printf("splits: %v value: %v\n", idx, spl.Value)
@@ -395,11 +396,12 @@ func (g *Splitter) Render2D() {
 		if ovk >= 0 {
 			win.OverlayVp.DeleteChildAtIndex(ovk, true)
 			win.RenderOverlays()
-		}
-		if g.PushBounds() {
-			g.Render2DDefaultStyle()
-			g.Render2DChildren()
-			g.PopBounds()
+		} else {
+			if g.PushBounds() {
+				g.Render2DDefaultStyle()
+				g.Render2DChildren()
+				g.PopBounds()
+			}
 		}
 	}
 }
