@@ -140,6 +140,7 @@ func (sv *StructView) ConfigStructGrid() {
 		return
 	}
 	sg.Lay = LayoutGrid
+	sg.Stripes = RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))

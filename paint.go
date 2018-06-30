@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/chewxy/math32"
@@ -540,8 +541,8 @@ func (pc *Paint) Fill(rs *RenderState) {
 	pc.ClearPath(rs)
 }
 
-// Fill box is an optimized fill of a square region with a uniform color --
-// currently Fill is the major bottleneck on performance..
+// FillBox is an optimized fill of a square region with a uniform color if
+// the given color spec is a solid color
 func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
 	if clr.Source == SolidColor {
 		b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
@@ -551,6 +552,12 @@ func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
 		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
 		pc.Fill(rs)
 	}
+}
+
+// FillBoxColor is an optimized fill of a square region with given uniform color
+func (pc *Paint) FillBoxColor(rs *RenderState, pos, size Vec2D, clr color.Color) {
+	b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
+	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
 }
 
 // ClipPreserve updates the clipping region by intersecting the current

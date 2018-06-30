@@ -1388,17 +1388,17 @@ func (fr *Frame) Render2D() {
 
 		if fr.Lay == LayoutGrid && fr.Stripes != NoStripes {
 			fr.RenderStripes()
-		} else {
-			pc.FillStyle.SetColor(nil)
-			pc.StrokeStyle.SetColor(&st.Border.Color)
-			pc.StrokeStyle.Width = st.Border.Width
-			if rad == 0.0 {
-				pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-			} else {
-				pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-			}
-			pc.FillStrokeClear(rs)
 		}
+
+		pc.FillStyle.SetColor(nil)
+		pc.StrokeStyle.SetColor(&st.Border.Color)
+		pc.StrokeStyle.Width = st.Border.Width
+		if rad == 0.0 {
+			pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+		} else {
+			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		}
+		pc.FillStrokeClear(rs)
 
 		fr.Layout.Render2D()
 		fr.PopBounds()
@@ -1408,17 +1408,49 @@ func (fr *Frame) Render2D() {
 }
 
 func (fr *Frame) RenderStripes() {
-	// st := &fr.Sty
-	// rs := &fr.Viewport.Render
-	// pc := &rs.Paint
+	st := &fr.Sty
+	rs := &fr.Viewport.Render
+	pc := &rs.Paint
 
-	// pos := fr.LayData.AllocPos
-	// sz := fr.LayData.AllocSize
+	pos := fr.LayData.AllocPos
+	sz := fr.LayData.AllocSize
 
-	// delta := fr.Move2DDelta(image.ZP)
+	delta := fr.Move2DDelta(image.ZP)
 
-	// dark := st.Background.Color.Color.Darker(20)
-
+	hic := st.Background.Color.Color.Highlight(10)
+	if fr.Stripes == RowStripes {
+		for r, gd := range fr.GridData[Row] {
+			if r%2 == 0 {
+				continue
+			}
+			pry := float32(delta.Y) + gd.AllocPosRel
+			szy := gd.AllocSize
+			if pry+szy < 0 || pry > sz.Y {
+				continue
+			}
+			pr := pos
+			pr.Y += pry
+			sr := sz
+			sr.Y = szy
+			pc.FillBoxColor(rs, pr, sr, hic)
+		}
+	} else if fr.Stripes == ColStripes {
+		for c, gd := range fr.GridData[Col] {
+			if c%2 == 0 {
+				continue
+			}
+			prx := float32(delta.X) + gd.AllocPosRel
+			szx := gd.AllocSize
+			if prx+szx < 0 || prx > sz.X {
+				continue
+			}
+			pr := pos
+			pr.X += prx
+			sr := sz
+			sr.X = szx
+			pc.FillBoxColor(rs, pr, sr, hic)
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////

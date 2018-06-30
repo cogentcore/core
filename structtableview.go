@@ -98,7 +98,7 @@ func (sv *StructTableView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructTableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Frame, "slice-grid")
+	config.Add(KiT_Frame, "struct-grid")
 	config.Add(KiT_Space, "grid-space")
 	config.Add(KiT_Layout, "buttons")
 	return config
@@ -116,7 +116,7 @@ func (sv *StructTableView) StdConfig() (mods, updt bool) {
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructTableView) SliceGrid() (*Frame, int) {
-	idx := sv.ChildIndexByName("slice-grid", 0)
+	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
@@ -132,7 +132,7 @@ func (sv *StructTableView) ButtonBox() (*Layout, int) {
 	return sv.Child(idx).(*Layout), idx
 }
 
-// StdGridConfig returns a TypeAndNameList for configuring the slice-grid
+// StdGridConfig returns a TypeAndNameList for configuring the struct-grid
 func (sv *StructTableView) StdGridConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Layout, "header")
@@ -201,6 +201,7 @@ func (sv *StructTableView) ConfigSliceGrid() {
 
 	sgf := sg.Child(2).(*Frame)
 	sgf.Lay = LayoutGrid
+	sgf.Stripes = RowStripes
 
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sgf.SetMinPrefHeight(units.NewValue(10, units.Em))
