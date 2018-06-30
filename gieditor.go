@@ -19,7 +19,6 @@ func GoGiEditorOf(obj ki.Ki) {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.SetProp("background-color", "#FFF")
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(KiT_Frame, "vlay").(*Frame)

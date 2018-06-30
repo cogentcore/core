@@ -257,6 +257,7 @@ var SplitterProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(0, units.Px),
 	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"max-width":  units.NewValue(1, units.Em),
 		"max-height": units.NewValue(5, units.Em),

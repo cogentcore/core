@@ -514,6 +514,7 @@ var ButtonProps = ki.Props{
 	"box-shadow.color": &Prefs.ShadowColor,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -577,6 +578,7 @@ var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
 var CheckBoxProps = ki.Props{
 	"text-align":       AlignLeft,
+	"color":            &Prefs.FontColor,
 	"background-color": &Prefs.ControlColor,
 	"#icon0": ki.Props{
 		"width":            units.NewValue(1, units.Em),

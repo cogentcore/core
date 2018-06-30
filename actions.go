@@ -33,6 +33,7 @@ var ActionProps = ki.Props{
 	"box-shadow.color": &Prefs.ShadowColor,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),

@@ -35,6 +35,7 @@ var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
 var StructViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.FontColor,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
 		"text-align":     AlignCenter,

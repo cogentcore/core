@@ -81,6 +81,7 @@ func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 
 var StructTableViewProps = ki.Props{
 	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.FontColor,
 }
 
 // StructType returns the type of the struct within the slice

@@ -73,6 +73,7 @@ var LabelProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
 	"vertical-align":   AlignTop,
+	"color":            &Prefs.FontColor,
 	"background-color": color.Transparent,
 }
 
@@ -183,6 +184,7 @@ var TextFieldProps = ki.Props{
 	"padding":          units.NewValue(4, units.Px),
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       AlignLeft,
+	"color":            &Prefs.FontColor,
 	"background-color": &Prefs.ControlColor,
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -1327,6 +1329,7 @@ var ComboBoxProps = ki.Props{
 	"margin":           units.NewValue(4, units.Px),
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),

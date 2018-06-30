@@ -444,6 +444,7 @@ var SliderProps = ki.Props{
 	"padding":          units.NewValue(6, units.Px),
 	"margin":           units.NewValue(4, units.Px),
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -627,6 +628,7 @@ var ScrollBarProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(2, units.Px),
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	SliderSelectors[SliderActive]: ki.Props{
 		"background-color": "lighter-0",
 	},

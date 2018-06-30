@@ -136,6 +136,7 @@ func (fv *FileView) UpdateFromPath() {
 }
 
 var FileViewProps = ki.Props{
+	"color":            &Prefs.FontColor,
 	"background-color": &Prefs.BackgroundColor,
 }
 

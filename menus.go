@@ -109,6 +109,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.InitName(&pvp, name+"Menu")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
+	pvp.SetProp("color", &Prefs.FontColor)
 	pvp.Fill = true
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
@@ -157,6 +158,7 @@ var MenuButtonProps = ki.Props{
 	"box-shadow.color": &Prefs.ShadowColor,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),

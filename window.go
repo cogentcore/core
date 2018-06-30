@@ -119,6 +119,8 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	}
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
+	vp.SetProp("color", &Prefs.FontColor) // everything inherits this..
+
 	win.AddChild(vp)
 	win.Viewport = vp
 	return win

@@ -42,6 +42,7 @@ type Viewport2D struct {
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
+	"color":            &Prefs.FontColor,
 	"background-color": &Prefs.BackgroundColor,
 }
 
