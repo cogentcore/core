@@ -65,11 +65,25 @@ func Max32(a, b float32) float32 {
 	return b
 }
 
+// SetMax32 sets arg a to Max(a,b)
+func SetMax32(a *float32, b float32) {
+	if *a < b {
+		*a = b
+	}
+}
+
 func Min32(a, b float32) float32 {
 	if a < b {
 		return a
 	}
 	return b
+}
+
+// SetMin32 sets arg a to Min(a,b)
+func SetMin32(a *float32, b float32) {
+	if *a > b {
+		*a = b
+	}
 }
 
 func MaxInt(a, b int) int {

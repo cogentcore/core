@@ -270,15 +270,15 @@ var SplitterProps = ki.Props{
 	},
 	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-20",
+		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{},
 	SliderSelectors[SliderValue]: ki.Props{

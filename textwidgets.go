@@ -177,20 +177,22 @@ type TextField struct {
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
 var TextFieldProps = ki.Props{
-	"border-width":                      units.NewValue(1, units.Px),
-	"border-color":                      &Prefs.BorderColor,
-	"border-style":                      BorderSolid,
-	"padding":                           units.NewValue(4, units.Px),
-	"margin":                            units.NewValue(1, units.Px),
-	"text-align":                        AlignLeft,
-	"background-color":                  &Prefs.ControlColor,
-	TextFieldSelectors[TextFieldActive]: ki.Props{},
+	"border-width":     units.NewValue(1, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(4, units.Px),
+	"margin":           units.NewValue(1, units.Px),
+	"text-align":       AlignLeft,
+	"background-color": &Prefs.ControlColor,
+	TextFieldSelectors[TextFieldActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
 	TextFieldSelectors[TextFieldFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-80",
+		"background-color": "samelight-80",
 	},
 	TextFieldSelectors[TextFieldInactive]: ki.Props{
-		"background-color": "darker-20",
+		"background-color": "highlight-20",
 	},
 	TextFieldSelectors[TextFieldSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
@@ -1347,26 +1349,26 @@ var ComboBoxProps = ki.Props{
 		"stroke":         &Prefs.FontColor,
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, darker-10)",
+		"background-color": "linear-gradient(lighter-0, highlight-10)",
 	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(darker-10, darker-10)",
+		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "linear-gradient(lighter-40, darker-10)",
+		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "linear-gradient(darker-30, darker-10)",
+		"color":            "highlight-90",
+		"background-color": "linear-gradient(highlight-30, highlight-10)",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(SelectColor), darker-10)",
-		"color":            "lighter-90",
+		"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+		"color":            "highlight-90",
 	},
 }
 

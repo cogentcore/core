@@ -456,18 +456,18 @@ var SliderProps = ki.Props{
 		"background-color": "lighter-0",
 	},
 	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-20",
+		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
-		"background-color": "lighter-20",
+		"background-color": "highlight-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
 		"border-color":     &Prefs.IconColor,
@@ -631,18 +631,18 @@ var ScrollBarProps = ki.Props{
 		"background-color": "lighter-0",
 	},
 	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
 	},
 	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-20",
+		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
-		"background-color": "lighter-20",
+		"background-color": "highlight-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
 		"border-color":     &Prefs.IconColor,

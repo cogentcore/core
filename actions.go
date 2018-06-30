@@ -58,19 +58,19 @@ var ActionProps = ki.Props{
 		"background-color": "lighter-0",
 	},
 	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
 	},
 	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "darker-10",
+		"background-color": "highlight-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "lighter-40",
+		"background-color": "samelight-50",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "darker-30",
+		"color":            "highlight-90",
+		"background-color": "highlight-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
 		"background-color": &Prefs.SelectColor,

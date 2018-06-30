@@ -117,8 +117,6 @@ Currently at an **alpha** level release:
 	
 * keyboard shortcuts -- need to register with window / event manager on a signal list..
 
-* add a new icon for color editor..
-
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
 * text translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
@@ -158,10 +156,6 @@ Currently at an **alpha** level release:
 * impl ViewBox options
 
 * also re-render data string after parsing to be more human friendly.
-
-* highlight, lowlight versions of lighter-darker that are relative to current
-  lightness for dark-style themes.
-
 
 ## Missing Widgets
 

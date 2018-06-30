@@ -61,7 +61,7 @@ func (p *Preferences) Defaults() {
 	p.BackgroundColor.SetColor(color.White)
 	p.ShadowColor.SetString("darker-10", &p.BackgroundColor)
 	p.ControlColor.SetString("#EEF", nil)
-	p.IconColor.SetString("darker-30", p.ControlColor)
+	p.IconColor.SetString("highlight-30", p.ControlColor)
 	p.SelectColor.SetString("#CFC", nil)
 }
 
