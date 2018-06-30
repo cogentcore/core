@@ -51,7 +51,6 @@ func mainrun() {
 
 	svgrow := vlay.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
 	svgrow.Lay = gi.LayoutRow
-	svgrow.SetProp("align-vert", gi.AlignMiddle)
 	svgrow.SetProp("align-horiz", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()
@@ -65,15 +64,12 @@ func mainrun() {
 	svg.SetStretchMaxHeight()
 
 	loads := brow.AddNewChild(gi.KiT_Button, "loadsvg").(*gi.Button)
-	loads.SetProp("vertical-align", gi.AlignMiddle)
 	loads.SetText("Load SVG")
 
 	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	fnm.SetMinPrefWidth(units.NewValue(20, units.Em))
-	fnm.SetProp("vertical-align", gi.AlignMiddle)
 
 	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
-	zoomin.SetProp("vertical-align", gi.AlignMiddle)
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
 	zoomin.SetIcon("zoom-in")
@@ -84,11 +80,9 @@ func mainrun() {
 
 	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	zoom.SetProp("vertical-align", gi.AlignMiddle)
 	zoom.SetValue(ZoomFactor)
 
 	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
-	zoomout.SetProp("vertical-align", gi.AlignMiddle)
 	zoomout.SetIcon("zoom-out")
 
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {

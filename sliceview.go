@@ -158,15 +158,12 @@ func (sv *SliceView) ConfigSliceGrid() {
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
 		lbl := sg.Child(i * 4).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		idxtxt := fmt.Sprintf("%05d", i)
 		lbl.Text = idxtxt
 		widg := sg.Child((i * 4) + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 		addact := sg.Child(i*4 + 2).(*Action)
-		addact.SetProp("vertical-align", AlignMiddle)
-		addact.Text = " + "
+		addact.SetIcon("plus")
 		addact.Data = i
 		addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -174,8 +171,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 			svv.SliceNewAt(act.Data.(int) + 1)
 		})
 		delact := sg.Child(i*4 + 3).(*Action)
-		delact.SetProp("vertical-align", AlignMiddle)
-		delact.Text = "  --"
+		delact.SetIcon("minus")
 		delact.Data = i
 		delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -338,16 +334,13 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
 		lbl := sv.Parts.Child(i * 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		idxtxt := fmt.Sprintf("%05d", i)
 		lbl.Text = idxtxt
 		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
 	edac := sv.Parts.Child(-1).(*Action)
-	edac.SetProp("vertical-align", AlignMiddle)
-	edac.Text = "  ..."
+	edac.SetIcon("edit")
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
 		dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil)

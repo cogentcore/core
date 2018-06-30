@@ -231,12 +231,10 @@ func (sv *StructTableView) ConfigSliceGrid() {
 		updth = sgh.UpdateStart()
 	}
 	lbl := sgh.Child(0).(*Label)
-	lbl.SetProp("vertical-align", AlignMiddle)
 	lbl.Text = "Index"
 	for fli := 0; fli < nfld; fli++ {
 		fld := struTyp.Field(fli)
 		hdr := sgh.Child(1 + fli).(*Action)
-		hdr.SetProp("vertical-align", AlignMiddle)
 		hdr.SetText(fld.Name)
 		hdr.Data = fli
 		hdr.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -248,10 +246,8 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	}
 	if !sv.IsInactive() {
 		lbl := sgh.Child(nfld + 1).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		lbl.Text = "Add"
 		lbl = sgh.Child(nfld + 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		lbl.Text = "Del"
 	}
 
@@ -259,7 +255,7 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	sgf.Kids = make(ki.Slice, nWidgPerRow*sz)
 
 	if sv.SortIdx >= 0 {
-		sv.SortSlice()
+		SortStructSlice(sv.Slice, sv.SortIdx, !sv.SortDesc)
 	}
 	sv.ConfigSliceGridRows()
 
@@ -341,7 +337,6 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 				sgf.SetChild(&addact, ridx+1+nfld, addnm)
 				sgf.SetChild(&delact, ridx+1+nfld+1, delnm)
 
-				addact.SetProp("vertical-align", AlignMiddle)
 				addact.SetIcon("plus")
 				addact.Data = i
 				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -349,7 +344,6 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 					svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 					svv.SliceNewAt(act.Data.(int) + 1)
 				})
-				delact.SetProp("vertical-align", AlignMiddle)
 				delact.SetIcon("minus")
 				delact.Data = i
 				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -495,18 +489,23 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 
 	sgh.UpdateEnd(updt)
 
-	sv.SortSlice()
+	SortStructSlice(sv.Slice, sv.SortIdx, !sv.SortDesc)
 	sv.ConfigSliceGridRows()
 }
 
-// SortSlice sorts the slice according to current sorting settings
-func (sv *StructTableView) SortSlice() {
-	fldIdx := sv.SortIdx
-	ascending := !sv.SortDesc
-
-	mv := reflect.ValueOf(sv.Slice)
+// SortStructSlice sorts a slice of a struct according to the given field and
+// sort direction, using int, float, string kind conversions through reflect,
+// and supporting time.Time as well -- todo: could extend with a function that
+// handles specific fields
+func SortStructSlice(struSlice interface{}, fldIdx int, ascending bool) error {
+	mv := reflect.ValueOf(struSlice)
 	mvnp := kit.NonPtrValue(mv)
-	struTyp := sv.StructType()
+	struTyp := kit.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
+	if fldIdx < 0 || fldIdx >= struTyp.NumField() {
+		err := fmt.Errorf("gi.SortStructSlice: field index out of range: %v must be < %v\n", fldIdx, struTyp.NumField())
+		log.Println(err)
+		return err
+	}
 	fld := struTyp.Field(fldIdx)
 	vk := fld.Type.Kind()
 
@@ -584,8 +583,11 @@ func (sv *StructTableView) SortSlice() {
 			}
 		})
 	default:
-		log.Printf("SliceSort: unable to sort on field of type: %v\n", fld.Type.String())
+		err := fmt.Errorf("SortStructSlice: unable to sort on field of type: %v\n", fld.Type.String())
+		log.Println(err)
+		return err
 	}
+	return nil
 }
 
 // ConfigSliceButtons configures the buttons for map functions

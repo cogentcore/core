@@ -1105,8 +1105,7 @@ func (vv *ColorValueView) ConfigWidget(widg Node2D) {
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 
 	edac := sv.Parts.Child(-1).(*Action) // action at end, from AddAction above
-	edac.SetProp("vertical-align", AlignMiddle)
-	edac.Text = "  ..."
+	edac.SetIcon("color")
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
 		clr, ok := svv.Struct.(*Color)

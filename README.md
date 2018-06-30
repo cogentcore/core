@@ -149,6 +149,10 @@ Currently at an **alpha** level release:
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering -- unclear if any gradients are rendering properly
 
+* dashes not scaling with transform
+
+* default join not looking right for some test cases..
+
 * clip-path and ClipPath element..
 
 * impl ViewBox options

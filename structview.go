@@ -177,7 +177,6 @@ func (sv *StructView) ConfigStructGrid() {
 	}
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
@@ -191,7 +190,6 @@ func (sv *StructView) ConfigStructGrid() {
 			lbl.Text = vvb.Field.Name
 		}
 		widg := sg.Child((i * 2) + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
@@ -296,7 +294,6 @@ func (sv *StructViewInline) ConfigParts() {
 	}
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Parts.Child(i * 2).(*Label)
-		lbl.SetProp("vertical-align", AlignMiddle)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
@@ -310,7 +307,6 @@ func (sv *StructViewInline) ConfigParts() {
 			lbl.Text = vvb.Field.Name
 		}
 		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		vv.ConfigWidget(widg)
 	}
 	sv.Parts.UpdateEnd(updt)

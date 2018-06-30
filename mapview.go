@@ -180,9 +180,7 @@ func (mv *MapView) ConfigMapGrid() {
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
 		keyw := sg.Child(i * ncol).(Node2D)
-		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := sg.Child(i*ncol + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
@@ -204,8 +202,7 @@ func (mv *MapView) ConfigMapGrid() {
 			})
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*Action)
-		delact.SetProp("vertical-align", AlignMiddle)
-		delact.Text = "  --"
+		delact.SetIcon("minus")
 		delact.Data = kv
 		delact.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -416,16 +413,13 @@ func (mv *MapViewInline) ConfigParts() {
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
 		keyw := mv.Parts.Child(i * 2).(Node2D)
-		keyw.SetProp("vertical-align", AlignMiddle)
 		widg := mv.Parts.Child((i * 2) + 1).(Node2D)
-		widg.SetProp("vertical-align", AlignMiddle)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 	}
 	edac := mv.Parts.Child(-1).(*Action)
-	edac.SetProp("vertical-align", AlignMiddle)
-	edac.Text = "  ..."
+	edac.SetIcon("edit")
 	edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 		dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)

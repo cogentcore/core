@@ -183,7 +183,6 @@ var TextFieldProps = ki.Props{
 	"padding":                           units.NewValue(4, units.Px),
 	"margin":                            units.NewValue(1, units.Px),
 	"text-align":                        AlignLeft,
-	"vertical-align":                    AlignTop,
 	"background-color":                  &Prefs.ControlColor,
 	TextFieldSelectors[TextFieldActive]: ki.Props{},
 	TextFieldSelectors[TextFieldFocus]: ki.Props{
@@ -1325,7 +1324,6 @@ var ComboBoxProps = ki.Props{
 	"padding":          units.NewValue(4, units.Px),
 	"margin":           units.NewValue(4, units.Px),
 	"text-align":       AlignCenter,
-	"vertical-align":   AlignMiddle,
 	"background-color": &Prefs.ControlColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),

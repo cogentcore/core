@@ -86,7 +86,7 @@ var IconAutoLoad = true
 
 func (ic *Icon) Init2D() {
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
-		// fmt.Printf("loading icon: %v\n", ic.Filename)
+		fmt.Printf("loading icon: %v\n", ic.Filename)
 		ic.LoadXML(ic.Filename)
 		// if err != nil {
 		// 	IconAutoLoad = false
@@ -365,6 +365,9 @@ func IconByName(name string) *Icon {
 
 			return nil
 		}
+	}
+	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
+		ic.LoadXML(ic.Filename)
 	}
 	return ic
 }

@@ -23,6 +23,7 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
+	nColumns := 5
 
 	// turn this on to see a trace of the rendering
 	// gi.Update2DTrace = true
@@ -43,8 +44,6 @@ func mainrun() {
 
 	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
@@ -60,8 +59,7 @@ func mainrun() {
 
 	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
-	grid.SetProp("columns", 4)
-	grid.SetProp("align-vert", "center")
+	grid.SetProp("columns", nColumns)
 	grid.SetProp("align-horiz", "center")
 	grid.SetProp("margin", 2.0)
 	grid.SetStretchMaxWidth()

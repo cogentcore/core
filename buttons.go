@@ -513,7 +513,6 @@ var ButtonProps = ki.Props{
 	// "box-shadow.blur":     units.NewValue(4, units.Px),
 	"box-shadow.color": &Prefs.ShadowColor,
 	"text-align":       AlignCenter,
-	"vertical-align":   AlignTop,
 	"background-color": &Prefs.ControlColor,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),

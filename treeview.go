@@ -1348,10 +1348,8 @@ var TreeViewProps = ki.Props{
 	"padding":          units.NewValue(1, units.Px),
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       AlignLeft,
-	"vertical-align":   AlignTop,
 	"background-color": "inherit",
 	"#branch": ki.Props{
-		"vertical-align":   AlignMiddle,
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,

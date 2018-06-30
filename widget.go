@@ -331,6 +331,9 @@ func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
 // Render2D
 func (g *WidgetBase) FullReRenderIfNeeded() bool {
 	if !g.VpBBox.Empty() && g.NeedsFullReRender() {
+		if Render2DTrace {
+			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", g.PathUnique(), g.VpBBox)
+		}
 		g.ClearFullReRender()
 		g.ReRender2DTree()
 		return true
