@@ -6,6 +6,7 @@ package gi
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 	"io/ioutil"
 	"log"
@@ -68,7 +69,6 @@ func (p *Preferences) Defaults() {
 // Load preferences from GoGi standard prefs directory
 func (p *Preferences) Load() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-
 	pnm := filepath.Join(pdir, "prefs.json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
@@ -81,9 +81,7 @@ func (p *Preferences) Load() error {
 // Save Preferences to GoGi standard prefs directory
 func (p *Preferences) Save() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-
 	pnm := filepath.Join(pdir, "prefs.json")
-
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -152,11 +150,10 @@ func (p *Preferences) DefaultKeyMap() {
 func (p *Preferences) Edit() {
 	width := 800
 	height := 600
-	win := NewWindow2D("GoGi Preferences", width, height, true)
+	win := NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.SetProp("background-color", &p.BackgroundColor)
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(KiT_Frame, "vlay").(*Frame)
@@ -220,8 +217,25 @@ func (p *Preferences) Edit() {
 		}
 	})
 
+	scrinfo := brow.AddNewChild(KiT_Button, "scrinfo").(*Button)
+	scrinfo.SetText("Screen Info")
+	scrinfo.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			p.ScreenInfo()
+		}
+	})
+
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
+}
+
+// ScreenInfo displays screen info for all screens on the console
+func (p *Preferences) ScreenInfo() {
+	ns := oswin.TheApp.NScreens()
+	for i := 0; i < ns; i++ {
+		sc := oswin.TheApp.Screen(i)
+		fmt.Printf("Screen number: %v name: %v\n%+v\n", i, sc.Name, sc)
+	}
 }
 
 // PrefColor returns preference color of given name (case insensitive)

@@ -32,7 +32,7 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	win := gi.NewWindow2D("TabView Window", width, height, true) // pixel sizes
+	win := gi.NewWindow2D("gogi-tabview-test", "GoGi TabView Test", width, height, true) // pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

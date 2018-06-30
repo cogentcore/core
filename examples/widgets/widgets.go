@@ -35,7 +35,7 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
+	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
 
 	icnm := "widget-wedge-down"
 

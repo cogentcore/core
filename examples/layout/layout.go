@@ -22,7 +22,6 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
-	win := gi.NewWindow2D("test window", width, height, true)
 
 	gi.Layout2DTrace = true
 
@@ -39,6 +38,8 @@ func mainrun() {
 	// 	{100, 100},
 	// 	{100, 100},
 	// }
+
+	win := gi.NewWindow2D("gogi-layout-test", "GoGi Layout Test", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

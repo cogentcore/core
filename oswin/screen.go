@@ -57,9 +57,10 @@ type Screen struct {
 
 	RefreshRate float32
 
-	AvailableGeometry        image.Rectangle
-	VirtualGeometry          image.Rectangle
-	AvailableVirtualGeometry image.Rectangle
+	// todo: not using these yet
+	// AvailableGeometry        image.Rectangle
+	// VirtualGeometry          image.Rectangle
+	// AvailableVirtualGeometry image.Rectangle
 
 	Orientation        ScreenOrientation
 	NativeOrientation  ScreenOrientation

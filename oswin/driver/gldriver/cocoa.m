@@ -18,6 +18,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <OpenGL/gl3.h>
+#import <IOKit/graphics/IOGraphicsLib.h>
 
 // The variables did not exist on older OS X releases,
 // we use the old variables deprecated on macOS to define them.
@@ -394,6 +395,67 @@ void stopDriver() {
         });
 }
 
+// this is directly from https://github.com/glfw/glfw/cocoa_monitor.m 
+static io_service_t IOServicePortFromCGDisplayID(CGDirectDisplayID displayID)
+{
+    io_iterator_t iter;
+    io_service_t serv, servicePort = 0;
+    
+    CFMutableDictionaryRef matching = IOServiceMatching("IODisplayConnect");
+    
+    // releases matching for us
+    kern_return_t err = IOServiceGetMatchingServices(kIOMasterPortDefault,
+                             matching,
+                             &iter);
+    if (err)
+    {
+        return 0;
+    }
+    
+    while ((serv = IOIteratorNext(iter)) != 0)
+    {
+        CFDictionaryRef info;
+        CFIndex vendorID, productID;
+        CFNumberRef vendorIDRef, productIDRef;
+        Boolean success;
+        
+        info = IODisplayCreateInfoDictionary(serv,
+                             kIODisplayOnlyPreferredName);
+        
+        vendorIDRef = CFDictionaryGetValue(info,
+                           CFSTR(kDisplayVendorID));
+        productIDRef = CFDictionaryGetValue(info,
+                            CFSTR(kDisplayProductID));
+        
+        success = CFNumberGetValue(vendorIDRef, kCFNumberCFIndexType,
+                                   &vendorID);
+        success &= CFNumberGetValue(productIDRef, kCFNumberCFIndexType,
+                                    &productID);
+
+        if (!success)
+        {
+            CFRelease(info);
+            continue;
+        }
+        
+        if (CGDisplayVendorNumber(displayID) != vendorID ||
+            CGDisplayModelNumber(displayID) != productID)
+        {
+            CFRelease(info);
+            continue;
+        }
+        
+        // we're a match
+        servicePort = serv;
+        CFRelease(info);
+        break;
+    }
+    
+    IOObjectRelease(iter);
+    return servicePort;
+}
+
+// https://github.com/glfw/glfw/cocoa_monitor.m has good code
 void getScreens() {
     NSArray *screens = [NSScreen screens];
     int nscr = [screens count];
@@ -408,7 +470,26 @@ void getScreens() {
         CGDirectDisplayID display = (CGDirectDisplayID)[[[screen deviceDescription] valueForKey:@"NSScreenNumber"] intValue];
         CGSize screenSizeMM = CGDisplayScreenSize(display); // in millimeters
         float dpi = 25.4 * screenPixW / screenSizeMM.width;
-        setScreen(i, dpi, pixratio, (int)screenPixW, (int)screenPixH, (int)screenSizeMM.width, (int)screenSizeMM.height, depth);
+
+        const char* screenName = NULL;
+        int snlen = 0;
+        NSDictionary *deviceInfo = NULL;
+        io_service_t serv = IOServicePortFromCGDisplayID(display);
+        if (serv != 0) {
+            deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(serv, kIODisplayOnlyPreferredName);
+            IOObjectRelease(serv);
+            NSDictionary *localizedNames = [deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
+            if ([localizedNames count] > 0) {
+                screenName = [[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String];
+                snlen = (int)strlen(screenName);
+            }
+        }
+
+        setScreen(i, dpi, pixratio, (int)screenPixW, (int)screenPixH, (int)screenSizeMM.width, (int)screenSizeMM.height, depth, (char*)screenName, snlen);
+
+        if(deviceInfo != NULL) {
+            [deviceInfo release];
+        }
     }
 }
 

@@ -15,7 +15,7 @@ package gldriver
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Cocoa -framework OpenGL
+#cgo LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit
 #include <OpenGL/gl3.h>
 #import <Carbon/Carbon.h> // for HIToolbox/Events.h
 #import <Cocoa/Cocoa.h>
@@ -262,7 +262,7 @@ func resetScreens() {
 }
 
 //export setScreen
-func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int) {
+func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int, sname *C.char, snlen C.int) {
 	theApp.mu.Lock()
 	var sc *oswin.Screen
 	if scrIdx < len(theApp.screens) {
@@ -280,6 +280,9 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{widthMM, heightMM}
+	if sname != nil && snlen > 0 {
+		sc.Name = C.GoStringN(sname, snlen)
+	}
 	// todo: rest of the fields
 }
 

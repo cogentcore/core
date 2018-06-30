@@ -33,10 +33,10 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	win := gi.NewWindow2D("GoGi Icons Window", width, height, true)
+	win := gi.NewWindow2D("gogi-icons-demo", "GoGi Icons", width, height, true)
+
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)

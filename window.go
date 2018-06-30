@@ -5,10 +5,13 @@
 package gi
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 
@@ -59,7 +62,9 @@ var DNDStartDistPix = 20
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
+	Title         string                      `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs  bool                        `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
 	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
 	OverlayVp     Viewport2D                  `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
 	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
@@ -82,11 +87,12 @@ type Window struct {
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
 
-// NewWindow creates a new window with given name and options
-func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
+// NewWindow creates a new window with given internal name handle, display name, and options
+func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization
 	win := &Window{}
 	win.InitName(win, name)
+	win.Title = title
 	win.SetOnlySelfUpdate() // has its own PublishImage update logic
 	var err error
 	win.OSWin, err = oswin.TheApp.NewWindow(opts)
@@ -99,23 +105,35 @@ func NewWindow(name string, opts *oswin.NewWindowOptions) *Window {
 		fmt.Printf("GoGi NewTexture error: %v \n", err)
 		return nil
 	}
-	win.OSWin.SetName(name)
+	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This)
 	win.NodeSig.Connect(win.This, SignalWindowPublish)
 	return win
 }
 
-// NewWindow2D creates a new standard 2D window with given name and sizing,
-// with default positioning, and initializes a 2D viewport within it --
-// stdPixels means use standardized "pixel" units for the display size (96 per
-// inch), not the actual underlying raw display dot pixels
-func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
+// NewWindow2D creates a new standard 2D window with given internal handle
+// name, display name, and sizing, with default positioning, and initializes a
+// 2D viewport within it -- stdPixels means use standardized "pixel" units for
+// the display size (96 per inch), not the actual underlying raw display dot
+// pixels
+func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window {
+	Init() // overall gogi system initialization
 	opts := &oswin.NewWindowOptions{
-		Title: name, Size: image.Point{width, height}, StdPixels: stdPixels,
+		Title: title, Size: image.Point{width, height}, StdPixels: stdPixels,
 	}
-	win := NewWindow(name, opts)
+	wgp := WinGeomPrefs.Pref(name, nil)
+	if wgp != nil {
+		opts.Size = wgp.Size
+		opts.Pos = wgp.Pos
+		opts.StdPixels = false
+		fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
+	}
+	win := NewWindow(name, title, opts)
 	if win == nil {
 		return nil
+	}
+	if wgp != nil {
+		win.HasGeomPrefs = true
 	}
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
@@ -126,20 +144,30 @@ func NewWindow2D(name string, width, height int, stdPixels bool) *Window {
 	return win
 }
 
-// NewDialogWin creates a new dialog window with given name and sizing
-// (assumed to be in raw dots), without setting its main viewport -- user
-// should do win.AddChild(vp); win.Viewport = vp to set their own viewport
-func NewDialogWin(name string, width, height int, modal bool) *Window {
+// NewDialogWin creates a new dialog window with given internal handle name,
+// display name, and sizing (assumed to be in raw dots), without setting its
+// main viewport -- user should do win.AddChild(vp); win.Viewport = vp to set
+// their own viewport
+func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	opts := &oswin.NewWindowOptions{
-		Title: name, Size: image.Point{width, height}, StdPixels: false,
+		Title: title, Size: image.Point{width, height}, StdPixels: false,
 	}
 	opts.SetDialog()
 	if modal {
 		opts.SetModal()
 	}
-	win := NewWindow(name, opts)
+	wgp := WinGeomPrefs.Pref(name, nil)
+	if wgp != nil {
+		opts.Size = wgp.Size
+		opts.Pos = wgp.Pos
+		opts.StdPixels = false
+	}
+	win := NewWindow(name, title, opts)
 	if win == nil {
 		return nil
+	}
+	if wgp != nil {
+		win.HasGeomPrefs = true
 	}
 	return win
 }
@@ -171,11 +199,14 @@ func (w *Window) Quit() {
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
+// -- automatically called when new window opened, but can be called before
+// then if pref info needed
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
 		Prefs.Defaults()
 		Prefs.Load()
 		Prefs.Apply()
+		WinGeomPrefs.Load()
 	}
 }
 
@@ -217,6 +248,7 @@ func (w *Window) Resized(sz image.Point) {
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
 	w.Viewport.Resize(sz)
+	WinGeomPrefs.RecordPref(w)
 }
 
 // Closed frees any resources after the window has been closed
@@ -681,6 +713,12 @@ func (w *Window) EventLoop() {
 					lastSkipped = false
 					skippedResize = nil
 					continue
+				}
+			case oswin.WindowEvent:
+				we := evi.(*window.Event)
+				if we.Action == window.Move {
+					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
+					WinGeomPrefs.RecordPref(w)
 				}
 			case oswin.PaintEvent:
 				// fmt.Printf("skipped paint\n")
@@ -1266,4 +1304,128 @@ func (w *Window) BenchmarkReRender() {
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	w.EndTargProfile()
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  WindowGeom
+
+var WinGeomPrefs = WindowGeomPrefs{}
+
+// WindowGeom records the geometry settings used for a given window
+type WindowGeom struct {
+	WinName    string
+	Screen     string
+	LogicalDPI float32
+	Size       image.Point
+	Pos        image.Point
+}
+
+// WindowGeomPrefs records the window geometry by window name, screen name --
+// looks up the info automatically for new windows and saves persistently
+type WindowGeomPrefs map[string]map[string]WindowGeom
+
+// Load Window Geom preferences from GoGi standard prefs directory
+func (wg *WindowGeomPrefs) Load() error {
+	if wg == nil {
+		*wg = make(WindowGeomPrefs, 100)
+	}
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, "win_geom_prefs.json")
+	b, err := ioutil.ReadFile(pnm)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = json.Unmarshal(b, wg)
+	if err != nil {
+		log.Println(err)
+	} else {
+		fmt.Printf("loaded win geom prefs:\n%+v\n", *wg)
+	}
+	return err
+}
+
+// Save Window Geom Preferences to GoGi standard prefs directory
+func (wg *WindowGeomPrefs) Save() error {
+	if wg == nil {
+		return nil
+	}
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, "win_geom_prefs.json")
+	b, err := json.MarshalIndent(wg, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = ioutil.WriteFile(pnm, b, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+// RecordPref records current state of window as preference
+func (wg *WindowGeomPrefs) RecordPref(win *Window) {
+	if wg == nil {
+		*wg = make(WindowGeomPrefs, 100)
+	}
+	sc := win.OSWin.Screen()
+	wgr := WindowGeom{WinName: win.Nm, Screen: sc.Name, LogicalDPI: win.LogicalDPI()}
+	wgr.Pos = win.OSWin.Position()
+	wgr.Size = win.OSWin.Size()
+	if (*wg)[win.Nm] == nil {
+		(*wg)[win.Nm] = make(map[string]WindowGeom, 10)
+	}
+	(*wg)[win.Nm][sc.Name] = wgr
+	wg.Save()
+}
+
+// Pref returns an existing preference for given window name, or one adapted
+// to given screen if only records are on a different screen -- if scrn is nil
+// then default (first) screen is used from oswin.TheApp
+func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom {
+	if wg == nil {
+		return nil
+	}
+	wps, ok := (*wg)[winName]
+	if !ok {
+		return nil
+	}
+
+	if scrn == nil {
+		scrn = oswin.TheApp.Screen(0)
+	}
+
+	wp, ok := wps[scrn.Name]
+	if ok {
+		return &wp
+	}
+
+	if len(wps) == 0 { // shouldn't happen
+		return nil
+	}
+
+	trgdpi := scrn.LogicalDPI
+
+	// try to find one with same logical dpi, else closest
+	var closest *WindowGeom
+	mindpid := float32(100000.0)
+	for _, wp = range wps {
+		if wp.LogicalDPI == trgdpi {
+			return &wp
+		}
+		dpid := math32.Abs(wp.LogicalDPI - trgdpi)
+		if dpid < mindpid {
+			mindpid = dpid
+			closest = &wp
+		}
+	}
+
+	wp = *closest
+	rescale := trgdpi / closest.LogicalDPI
+	wp.Pos.X = int(float32(wp.Pos.X) * rescale)
+	wp.Pos.Y = int(float32(wp.Pos.Y) * rescale)
+	wp.Size.X = int(float32(wp.Size.X) * rescale)
+	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
+	return &wp
 }

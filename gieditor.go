@@ -15,7 +15,7 @@ import (
 func GoGiEditorOf(obj ki.Ki) {
 	width := 1280
 	height := 920
-	win := NewWindow2D("GoGi Editor Window", width, height, true)
+	win := NewWindow2D("gogi-editor", "GoGi Editor", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

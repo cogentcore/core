@@ -84,6 +84,8 @@ Currently at an **alpha** level release:
 
 * mac:
 	+ impl setPos
+	+ win pos getting incremented by title.. so annoying
+	+ positioning not working for laptop display -- use non-dpi coords?
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -91,9 +93,12 @@ Currently at an **alpha** level release:
 
 * #icon props not getting used for resizing icons in button.
 
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
+* CSSAgg needs a tag for no-inline -- don't inline its map ever
+* also, inline choice could be smarter if we knew what was in the map, but...
 
-* general system for remembering, using last user-resized size / pos for each window, by window name.  could tag that by screen name as well, or use % values?  probably tag by screen name makes more sense, AND store screen info in this file, so can compute % on the fly for a new screen case, but then store what the user does after that point.
+* selector for different standard keyfun maps..
+
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * search for structtableview, treeview
 * DND and copy/paste for structtableview

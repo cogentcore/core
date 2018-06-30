@@ -39,7 +39,7 @@ func mainrun() {
 
 	width := 1024
 	height := 768
-	win := gi.NewWindow2D("Views Window", width, height, true)
+	win := gi.NewWindow2D("gogi-views-test", "GoGi Views Test", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -50,7 +50,6 @@ func mainrun() {
 
 	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutRow
-	trow.SetProp("align-vert", gi.AlignMiddle)
 	trow.SetProp("align-horiz", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()

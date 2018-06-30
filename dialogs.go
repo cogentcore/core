@@ -74,7 +74,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	}
 
 	if DialogsSepWindow {
-		win = NewDialogWin(dlg.Title, 100, 100, dlg.Modal)
+		win = NewDialogWin(dlg.Nm, dlg.Title, 100, 100, dlg.Modal)
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
@@ -117,7 +117,9 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
 		// fmt.Printf("setsz: %v\n", vpsz)
-		win.SetSize(vpsz)
+		if !win.HasGeomPrefs {
+			win.SetSize(vpsz)
+		}
 		win.GoStartEventLoop()
 	} else {
 		if x == 0 && y == 0 {
