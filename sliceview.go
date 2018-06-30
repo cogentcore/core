@@ -266,10 +266,6 @@ func (sv *SliceView) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *SliceView) Render2D() {
-	sv.Frame.Render2D()
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  SliceViewInline
 
@@ -377,6 +373,9 @@ func (sv *SliceViewInline) UpdateValues() {
 }
 
 func (sv *SliceViewInline) Render2D() {
+	if sv.FullReRenderIfNeeded() {
+		return
+	}
 	if sv.PushBounds() {
 		sv.ConfigParts()
 		sv.Render2DParts()

@@ -652,7 +652,3 @@ func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
 		sgh.Layout2D(parBBox)
 	}
 }
-
-func (sv *StructTableView) Render2D() {
-	sv.Frame.Render2D()
-}

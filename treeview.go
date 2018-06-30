@@ -1493,6 +1493,9 @@ func (tv *TreeView) Render2D() {
 		tv.DisconnectAllEvents()
 		return // nothing
 	}
+	// if tv.FullReRenderIfNeeded() { // custom stuff here
+	// 	return
+	// }
 	if tv.PushBounds() {
 		if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TreeViewSel]

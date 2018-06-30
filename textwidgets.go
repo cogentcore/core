@@ -97,6 +97,9 @@ func (g *Label) Size2D() {
 }
 
 func (g *Label) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		st := &g.Sty
 		g.RenderStdBox(st)
@@ -1009,6 +1012,9 @@ func (tf *TextField) AutoScroll() {
 }
 
 func (tf *TextField) Render2D() {
+	if tf.FullReRenderIfNeeded() {
+		return
+	}
 	if tf.PushBounds() {
 		tf.TextFieldEvents()
 		tf.AutoScroll() // inits paint with our style
@@ -1280,6 +1286,9 @@ func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *SpinBox) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		g.SpinBoxEvents()
 		// g.Sty = g.StateStyles[g.State] // get current styles

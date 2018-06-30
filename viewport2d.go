@@ -375,6 +375,9 @@ func (vp *Viewport2D) FillViewport() {
 }
 
 func (vp *Viewport2D) Render2D() {
+	if vp.FullReRenderIfNeeded() {
+		return
+	}
 	if vp.PushBounds() {
 		if vp.Fill {
 			vp.FillViewport()
@@ -383,12 +386,6 @@ func (vp *Viewport2D) Render2D() {
 		vp.RenderViewport2D() // update our parent image
 		vp.PopBounds()
 	}
-}
-
-func (vp *Viewport2D) ReRender2D() (node Node2D, layout bool) {
-	node = vp.This.(Node2D)
-	layout = false
-	return
 }
 
 func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
@@ -449,6 +446,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 		}
 	} else {
 		if gi.NeedsFullReRender() {
+			gi.ClearFullReRender()
 			anchor := gi.ParentReRenderAnchor()
 			if anchor != nil {
 				if Update2DTrace {

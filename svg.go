@@ -209,17 +209,6 @@ func (g *SVGNodeBase) Render2D() {
 	rs.PopXForm()
 }
 
-func (g *SVGNodeBase) ReRender2D() (node Node2D, layout bool) {
-	svg := g.ParentSVG()
-	if svg != nil {
-		node = svg
-	} else {
-		node = g.This.(Node2D) // no other option..
-	}
-	layout = false
-	return
-}
-
 func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 

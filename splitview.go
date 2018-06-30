@@ -222,6 +222,9 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *SplitView) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		for i, kid := range g.Kids {
 			gii, _ := KiToNode2D(kid)

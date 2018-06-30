@@ -463,6 +463,9 @@ func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *ButtonBase) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		ButtonEvents(g)
 		g.Sty = g.StateStyles[g.State] // get current styles

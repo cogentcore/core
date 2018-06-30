@@ -393,7 +393,3 @@ func (fv *FileView) ConfigButtons() {
 	// 	bb.UpdateEnd(updt)
 	// }
 }
-
-func (fv *FileView) Render2D() {
-	fv.Frame.Render2D()
-}

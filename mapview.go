@@ -333,10 +333,6 @@ func (mv *MapView) Style2D() {
 	mv.Frame.Style2D()
 }
 
-func (mv *MapView) Render2D() {
-	mv.Frame.Render2D()
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  MapViewInline
 
@@ -457,6 +453,9 @@ func (mv *MapViewInline) Style2D() {
 }
 
 func (mv *MapViewInline) Render2D() {
+	if mv.FullReRenderIfNeeded() {
+		return
+	}
 	if mv.PushBounds() {
 		mv.Render2DParts()
 		mv.Render2DChildren()

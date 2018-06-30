@@ -1267,6 +1267,9 @@ func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 func (ly *Layout) Render2D() {
+	if ly.FullReRenderIfNeeded() {
+		return
+	}
 	if ly.PushBounds() {
 		ly.LayoutEvents()
 		ly.RenderScrolls()
@@ -1307,6 +1310,9 @@ func (fr *Frame) Style2D() {
 }
 
 func (fr *Frame) Render2D() {
+	if fr.FullReRenderIfNeeded() {
+		return
+	}
 	if fr.PushBounds() {
 		st := &fr.Sty
 		rs := &fr.Viewport.Render

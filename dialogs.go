@@ -609,12 +609,12 @@ func FontChooserDialog(avp *Viewport2D, title, prompt string, recv ki.Ki, fun ki
 
 func FontInfoStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueView) {
 	if col == 3 {
-		finf, ok := slice.(*[]FontInfo)
+		finf, ok := slice.([]FontInfo)
 		if ok {
 			gi := widg.AsNode2D()
-			gi.SetProp("font-family", (*finf)[row].Name)
-			gi.SetProp("font-style", (*finf)[row].Style)
-			gi.SetProp("font-weight", (*finf)[row].Weight)
+			gi.SetProp("font-family", (finf)[row].Name)
+			gi.SetProp("font-style", (finf)[row].Style)
+			gi.SetProp("font-weight", (finf)[row].Weight)
 		}
 	}
 }

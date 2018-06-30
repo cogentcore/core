@@ -215,10 +215,6 @@ func (sv *StructView) UpdateFields() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *StructView) Render2D() {
-	sv.Frame.Render2D()
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructViewInline
 
@@ -333,6 +329,9 @@ func (sv *StructViewInline) UpdateFields() {
 }
 
 func (sv *StructViewInline) Render2D() {
+	if sv.FullReRenderIfNeeded() {
+		return
+	}
 	if sv.PushBounds() {
 		sv.Render2DParts()
 		sv.Render2DChildren()

@@ -532,6 +532,9 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *Slider) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		g.SliderEvents()
 		g.Render2DDefaultStyle()
@@ -693,14 +696,12 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *ScrollBar) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		g.SliderEvents()
-		if !g.HasChildren() {
-			g.Render2DDefaultStyle()
-		} else {
-			// todo: manage stacked layout to select appropriate image based on state
-			// return
-		}
+		g.Render2DDefaultStyle()
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {

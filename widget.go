@@ -326,13 +326,25 @@ func (g *WidgetBase) ChildrenBBox2D() image.Rectangle {
 	return g.ChildrenBBox2DWidget()
 }
 
+// FullReRenderIfNeeded tests if the FullReRender flag has been set, and if
+// so, calls ReRender2DTree and returns true -- call this at start of each
+// Render2D
+func (g *WidgetBase) FullReRenderIfNeeded() bool {
+	if !g.VpBBox.Empty() && g.NeedsFullReRender() {
+		g.ClearFullReRender()
+		g.ReRender2DTree()
+		return true
+	}
+	return false
+}
+
 // PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
 // -- this limits our drawing to our own bounding box, automatically -- must
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (g *WidgetBase) PushBounds() bool {
-	g.ClearFullReRender()
 	if g.IsOverlay() {
+		g.ClearFullReRender()
 		if g.Viewport != nil {
 			g.ConnectToViewport()
 			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds(), g.ObjBBox)
@@ -340,6 +352,7 @@ func (g *WidgetBase) PushBounds() bool {
 		return true
 	}
 	if g.VpBBox.Empty() {
+		g.ClearFullReRender()
 		return false
 	}
 	rs := &g.Viewport.Render
@@ -354,11 +367,15 @@ func (g *WidgetBase) PushBounds() bool {
 // PopBounds pops our bounding-box bounds -- last step in Render2D after
 // rendering children
 func (g *WidgetBase) PopBounds() {
+	g.ClearFullReRender()
 	rs := &g.Viewport.Render
 	rs.PopBounds()
 }
 
 func (g *WidgetBase) Render2D() {
+	if g.FullReRenderIfNeeded() {
+		return
+	}
 	if g.PushBounds() {
 		// connect to events here
 		g.Render2DChildren()

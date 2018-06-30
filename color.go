@@ -1064,6 +1064,9 @@ func (sv *ColorView) Style2D() {
 }
 
 func (sv *ColorView) Render2D() {
+	if sv.FullReRenderIfNeeded() {
+		return
+	}
 	if sv.PushBounds() {
 		updt := sv.UpdateStart()
 		sv.Update()

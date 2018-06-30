@@ -33,11 +33,9 @@ import (
 // for a given set of fill / stroke paint values, as an optimization.
 type Icon struct {
 	SVG
-	Filename            string      `desc:"file name (typically with relevant path -- todo: special paths for finding installed defaults) for icon -- lazy loading is used, so icon files are loaded only when needed"`
-	Rendered            bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
-	RenderedSize        image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
-	RenderedStrokeColor Color       `json:"-" xml:"-" desc:"stroke color rendered"`
-	RenderedFillColor   Color       `json:"-" xml:"-" desc:"fill color rendered"`
+	Filename     string      `desc:"file name (typically with relevant path -- todo: special paths for finding installed defaults) for icon -- lazy loading is used, so icon files are loaded only when needed"`
+	Rendered     bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+	RenderedSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
@@ -109,8 +107,7 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	return !ic.Rendered || ic.RenderedSize != ic.Geom.Size
-	// || ic.RenderedStrokeColor != pc.StrokeStyle.Color.Color || ic.RenderedFillColor != pc.FillStyle.Color.Color
+	return ic.FullReRenderIfNeeded() || !ic.Rendered || ic.RenderedSize != ic.Geom.Size
 }
 
 func (ic *Icon) Render2D() {
@@ -122,18 +119,13 @@ func (ic *Icon) Render2D() {
 			}
 			ic.SetNormXForm()
 			rs.PushXForm(ic.Pnt.XForm)
-			// fmt.Printf("IconRender: %v Bg: %v Fill: %v Clr: %v Stroke: %v\n",
-			// 	ic.PathUnique(), ic.Sty.Background.Color, ic.Pnt.FillStyle.Color, ic.Sty.Color, ic.Pnt.StrokeStyle.Color)
 			ic.Render2DChildren() // we must do children first, then us!
-			ic.PopBounds()
 			rs.PopXForm()
 			ic.Rendered = true
 			ic.RenderedSize = ic.Geom.Size
-			// ic.RenderedStrokeColor = pc.StrokeStyle.Color.Color
-			// ic.RenderedFillColor = pc.FillStyle.Color.Color
-			// ic.SavePNG(ic.Nm + ".png")
 		}
 		ic.RenderViewport2D() // update our parent image
+		ic.PopBounds()
 	}
 }
 
