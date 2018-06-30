@@ -467,7 +467,6 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 
 	ascending := true
 
-	updt := sgh.UpdateStart()
 	for fli := 0; fli < nfld; fli++ {
 		hdr := sgh.Child(1 + fli).(*Action)
 		if fli == fldIdx {
@@ -487,7 +486,8 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 
 	sv.SortIdx = fldIdx
 
-	sgh.UpdateEnd(updt)
+	sgf := sg.Child(2).(*Frame)
+	sgf.SetFullReRender()
 
 	SortStructSlice(sv.Slice, sv.SortIdx, !sv.SortDesc)
 	sv.ConfigSliceGridRows()
