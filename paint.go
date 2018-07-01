@@ -82,7 +82,7 @@ type Paint struct {
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
 	FontStyle   FontStyle
-	TextStyle   TextStyle
+	Opacity     float32       `xml:"opacity" desc:"alpha value to apply to all elements"`
 	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
 	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
@@ -95,7 +95,6 @@ func (pc *Paint) Defaults() {
 	pc.StrokeStyle.Defaults()
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
-	pc.TextStyle.Defaults()
 	pc.XForm = Identity2D()
 }
 
@@ -129,7 +128,6 @@ func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
 	pc.StrokeStyle.SetStylePost()
 	pc.FillStyle.SetStylePost()
 	pc.FontStyle.SetStylePost()
-	pc.TextStyle.SetStylePost()
 	pc.PropsNil = (len(props) == 0)
 	pc.StyleSet = true
 }
@@ -901,50 +899,6 @@ func (pc *Paint) LoadFontFace(path string, points float64) error {
 		pc.SetFontFace(face)
 	}
 	return err
-}
-
-func (pc *Paint) drawString(rs *RenderState, im *image.RGBA, bounds image.Rectangle, s string, x, y float32) {
-	if int(y) < bounds.Min.Y || int(y) > bounds.Max.Y {
-		return
-	}
-	pr := prof.Start("Paint.drawString")
-	d := &font.Drawer{
-		Dst:  im,
-		Src:  image.NewUniform(&pc.FillStyle.Color.Color),
-		Face: pc.FontStyle.Face,
-		Dot:  Float32ToFixedPoint(x, y),
-	}
-	// based on Drawer.DrawString() in golang.org/x/image/font/font.go
-	prevC := rune(-1)
-	for _, c := range s {
-		if prevC >= 0 {
-			d.Dot.X += d.Face.Kern(prevC, c)
-		}
-		dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, c)
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
-		}
-		nxt := d.Dot.X + advance
-		if nxt.Ceil() > bounds.Max.X || d.Dot.X.Floor() < bounds.Min.X {
-			d.Dot.X = nxt
-			continue
-		}
-		sr := dr.Sub(dr.Min)
-		transformer := draw.BiLinear
-		fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
-		m := rs.XForm.Translate(fx, fy)
-		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
-		transformer.Transform(d.Dst, s2d, d.Src, sr, draw.Over, &draw.Options{
-			SrcMask:  mask,
-			SrcMaskP: maskp,
-		})
-		d.Dot.X = nxt
-		prevC = c
-	}
-	pr.End()
 }
 
 // todo: all of this requires some reworking -- too complicated and nested, and transform
