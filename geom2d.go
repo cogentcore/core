@@ -211,6 +211,12 @@ func NewVec2DFmPoint(pt image.Point) Vec2D {
 	return v
 }
 
+func NewVec2DFmFixed(pt fixed.Point26_6) Vec2D {
+	v := Vec2D{}
+	v.SetFixed(pt)
+	return v
+}
+
 // return value along given dimension
 func (a Vec2D) Dim(d Dims2D) float32 {
 	switch d {
@@ -462,6 +468,11 @@ func (a Vec2D) Abs() Vec2D {
 func (a *Vec2D) SetPoint(pt image.Point) {
 	a.X = float32(pt.X)
 	a.Y = float32(pt.Y)
+}
+
+func (a *Vec2D) SetFixed(pt fixed.Point26_6) {
+	a.X = FixedToFloat32(pt.X)
+	a.Y = FixedToFloat32(pt.Y)
 }
 
 func (a Vec2D) ToPoint() image.Point {

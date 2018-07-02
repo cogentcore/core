@@ -491,24 +491,6 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
-// MeasureTextSize measures given text string using current style
-func (g *WidgetBase) MeasureTextSize(txt string) (w, h float32) {
-	rs := &g.Viewport.Render
-	pc := &rs.Paint
-	st := &g.Sty
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	w, h = pc.MeasureString(txt)
-	w += 4.0 // add a little buffer for text widths so things don't get cutoff
-	return
-}
-
-// set our LayData.AllocSize from measured text size
-func (g *WidgetBase) Size2DFromText(txt string) {
-	w, h := g.MeasureTextSize(txt)
-	g.Size2DFromWH(w, h)
-}
-
 // set our LayData.AllocSize from constraints
 func (g *WidgetBase) Size2DFromWH(w, h float32) {
 	st := &g.Sty
@@ -528,27 +510,6 @@ func (g *WidgetBase) Size2DFromWH(w, h float32) {
 func (g *WidgetBase) Size2DAddSpace() {
 	spc := g.Sty.BoxSpace()
 	g.LayData.AllocSize.SetAddVal(2.0 * spc)
-}
-
-// render a text string in standard box model (e.g., label for a button, etc)
-func (g *WidgetBase) Render2DText(txt string) {
-	rs := &g.Viewport.Render
-	pc := &rs.Paint
-	st := &g.Sty
-	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	pc.FillStyle.SetColor(&st.Color) // text is rendered with fill color!
-
-	spc := st.BoxSpace()
-	pos := g.LayData.AllocPos.AddVal(spc)
-	sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
-
-	// automatically compensate for alignment so top and middle = same thing
-	if IsAlignMiddle(st.Text.AlignV) {
-		pos.Y += 0.5 * sz.Y
-	}
-
-	pc.DrawString(rs, txt, pos.X, pos.Y, sz.X)
 }
 
 // set minimum and preferred width -- will get at least this amount -- max unspecified

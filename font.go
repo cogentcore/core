@@ -281,7 +281,7 @@ const (
 	// DecoSuper indicates super-scripted text
 	DecoSuper
 	// DecoSub indicates sub-scripted text
-	DecoSuper
+	DecoSub
 	TextDecorationsN
 )
 

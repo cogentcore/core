@@ -70,7 +70,7 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = "This is a demonstration of the various GoGi Widgets"
+	title.Text = "This is a <b>demonstration</b> of the various <i>GoGi</i> Widgets<br>Think about how cool multi-line text labels are!"
 	title.SetProp("text-align", gi.AlignTop)
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")

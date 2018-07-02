@@ -91,12 +91,19 @@ func (g *Label) SetTextAction(txt string) {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
-	g.Render.SetHTML(g.Text, &(g.Style.FontStyle), &(g.Style.UnContext), g.Style.Color)
+	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.Sty.Color)
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), Vec2DZero)
 }
 
 func (g *Label) Size2D() {
 	g.InitLayout2D()
-	g.Size2DFromText(g.Text)
+	g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
+}
+
+func (g *Label) Layout2D(parBBox image.Rectangle) {
+	g.Layout2DBase(parBBox, true)
+	g.Layout2DChildren()
+	// g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
 }
 
 func (g *Label) Render2D() {
@@ -105,8 +112,9 @@ func (g *Label) Render2D() {
 	}
 	if g.PushBounds() {
 		st := &g.Sty
+		rs := &g.Viewport.Render
 		g.RenderStdBox(st)
-		g.Render2DText(g.Text)
+		g.Render.Render(rs.Image, rs.Bounds, g.LayData.AllocPos.Fixed())
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
@@ -162,6 +170,7 @@ type TextField struct {
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	Render       TextRender              `desc:"render version of the text"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
 	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
@@ -828,9 +837,8 @@ func (tf *TextField) UpdateCharPos() bool {
 	pc := &rs.Paint
 	st := &tf.Sty
 	pc.FontStyle = st.Font
-	pc.TextStyle = st.Text
-	tf.CharPos = pc.MeasureChars(tf.EditTxt)
-	tf.FontHeight = pc.FontHeight()
+	// tf.CharPos = pc.MeasureChars(tf.EditTxt)
+	// tf.FontHeight = pc.FontHeight()
 	tf.lastSizedTxt = tf.EditTxt
 	return true
 }
@@ -1035,9 +1043,9 @@ func (tf *TextField) Render2D() {
 			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
 		tf.RenderStdBox(&tf.Sty)
-		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
+		// cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
-		tf.Render2DText(string(cur))
+		// tf.Render2DText(string(cur))
 		if tf.HasFocus() {
 			tf.RenderCursor()
 		}

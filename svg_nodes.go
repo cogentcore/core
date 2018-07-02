@@ -926,33 +926,20 @@ func PathDataParse(d string) ([]PathData, error) {
 // elements (a tspan is just nested under a parent text)
 type SVGText struct {
 	SVGNodeBase
-	Pos          Vec2D     `xml:"{x,y}" desc:"position of the left, baseline of the text"`
-	Width        float32   `xml:"width" desc:"width of text to render if using word-wrapping"`
-	Text         string    `xml:"text" desc:"text string to render"`
-	WrappedText  []string  `json:"-" xml:"-" desc:"word-wrapped version of the string"`
-	CharPosX     []float32 `desc:"character positions along X axis, if specified"`
-	CharPosY     []float32 `desc:"character positions along Y axis, if specified"`
-	CharPosDX    []float32 `desc:"character delta-positions along X axis, if specified"`
-	CharPosDY    []float32 `desc:"character delta-positions along Y axis, if specified"`
-	CharRots     []float32 `desc:"character rotations, if specified"`
-	TextLength   float32   `desc:"author's computed text length, if specified -- we attempt to match"`
-	AdjustGlyphs bool      `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+	Pos          Vec2D      `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width        float32    `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text         string     `xml:"text" desc:"text string to render"`
+	Render       TextRender `xml:"-" json:"-" desc:"render version of text"`
+	CharPosX     []float32  `desc:"character positions along X axis, if specified"`
+	CharPosY     []float32  `desc:"character positions along Y axis, if specified"`
+	CharPosDX    []float32  `desc:"character delta-positions along X axis, if specified"`
+	CharPosDY    []float32  `desc:"character delta-positions along Y axis, if specified"`
+	CharRots     []float32  `desc:"character rotations, if specified"`
+	TextLength   float32    `desc:"author's computed text length, if specified -- we attempt to match"`
+	AdjustGlyphs bool       `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
 }
 
 var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
-
-// func (g *SVGText) Size2D() {
-// 	g.InitLayout2D()
-// 	pc := &g.Pnt
-// 	var w, h float32
-// 	// pre-wrap the text
-// 	if pc.TextStyle.WordWrap {
-// 		g.WrappedText, h = pc.MeasureStringWrapped(g.Text, g.Width, pc.TextStyle.EffLineHeight())
-// 	} else {
-// 		w, h = pc.MeasureString(g.Text)
-// 	}
-// 	g.LayData.AllocSize = Vec2D{w, h}
-// }
 
 func (g *SVGText) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
@@ -964,16 +951,10 @@ func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	g.Render.SetHTML(g.Text, &(pc.FontStyle), &(pc.UnContext), pc.FillStyle.Color.Color)
+	// todo:
+	// g.Render.LayoutStdLR()
 	g.ComputeBBoxSVG()
-	// fmt.Printf("rendering text %v\n", g.Text) todo: important: need a
-	// current text position from parent text -- these coords are relative to
-	// that!
-	if pc.TextStyle.WordWrap {
-		pc.DrawStringLines(rs, g.WrappedText, g.Pos.X, g.Pos.Y, g.Width, 0)
-		// g.LayData.AllocSize.X, g.LayData.AllocSize.Y)
-	} else {
-		pc.DrawString(rs, g.Text, g.Pos.X, g.Pos.Y, 0) // g.LayData.AllocSize.X)
-	}
 	g.Render2DChildren()
 	rs.PopXForm()
 }

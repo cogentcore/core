@@ -1512,7 +1512,6 @@ func (tv *TreeView) Render2D() {
 		pc := &rs.Paint
 		st := &tv.Sty
 		pc.FontStyle = st.Font
-		pc.TextStyle = st.Text
 		pc.StrokeStyle.SetColor(&st.Border.Color)
 		pc.StrokeStyle.Width = st.Border.Width
 		pc.FillStyle.SetColorSpec(&st.Background.Color)
