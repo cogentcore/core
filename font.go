@@ -22,76 +22,55 @@ import (
 	"golang.org/x/image/font/basicfont"
 )
 
-// styles of font: normal, italic, etc
-type FontStyles int32
+// font.go contains all font and basic SVG-level text rendering styles, and the
+// font library.  see text.go for rendering code
 
-const (
-	FontNormal FontStyles = iota
-	FontItalic
-	FontOblique
-	FontStylesN
-)
-
-//go:generate stringer -type=FontStyles
-
-var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, StylePropProps, "Font")
-
-func (ev FontStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *FontStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// styles of font: normal, italic, etc
-type FontWeights int32
-
-const (
-	WeightNormal FontWeights = iota
-	WeightBold
-	WeightBolder
-	WeightLighter
-	//	Weight100...900  todo: seriously?  400 = normal, 700 = bold
-	FontWeightsN
-)
-
-//go:generate stringer -type=FontWeights
-
-var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, StylePropProps, "Weight")
-
-func (ev FontWeights) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *FontWeights) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// todo: Variant = normal / small-caps
-
-// note: most of font information is inherited
-
-// font style information -- used in Paint and in Style -- see style.go
+// FontStyle contains all font styling information, including everything that
+// is used in SVG text rendering -- used in Paint and in Style -- see style.go
+// -- most of font information is inherited
 type FontStyle struct {
-	Size     units.Value `xml:"size" desc:"size of font to render -- convert to points when getting font to use"`
-	Family   string      `xml:"family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
-	Style    FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
-	Weight   FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
-	Face     font.Face   `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
-	Height   float32     `desc:"recommended line height of font in dots -- computed from font"`
-	FaceName string      `desc:"name corresponding to Face"`
+	Size             units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
+	Family           string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
+	Style            FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
+	Weight           FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
+	Stretch          FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
+	Variant          FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
+	Decoration       TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
+	Shift            BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
+	LetterSpacing    units.Value     `xml:"letter-spacing" desc:"spacing between characters and lines"`
+	WordSpacing      units.Value     `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
+	Anchor           TextAnchors     `xml:"text-anchor" inherit:"true" desc:"for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
+	UnicodeBidi      UnicodeBidi     `xml:"unicode-bidi" inherit:"true" desc:"determines how to treat unicode bidirectional information"`
+	Direction        TextDirections  `xml:"direction" inherit:"true" desc:"direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
+	WritingMode      TextDirections  `xml:"writing-mode" inherit:"true" desc:"overall writing mode -- only for text elements, not tspan"`
+	OrientationVert  float32         `xml:"glyph-orientation-vertical" inherit:"true" desc:"for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
+	OrientationHoriz float32         `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
+	Face             font.Face       `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
+	Height           float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font"`
+	FaceName         string          `desc:"name corresponding to Face"`
 	// todo: size also includes things like: medium, xx-small...xx-large, smaller, larger, etc
 	// todo: kerning
 	// todo: stretch -- css 3 -- not supported
 }
 
-func (p *FontStyle) Defaults() {
-	p.FaceName = "Arial"
-	p.Size = units.NewValue(12, units.Pt)
+func (fs *FontStyle) Defaults() {
+	fs.FaceName = "Arial"
+	fs.Size = units.NewValue(12, units.Pt)
+	fs.Direction = LTR
+	fs.OrientationVert = 90
 }
 
 // any updates after generic xml-tag property setting?
-func (p *FontStyle) SetStylePost() {
+func (fs *FontStyle) SetStylePost() {
 }
 
 // FaceNm returns the full FaceName to use for the current FontStyle spec
-func (p *FontStyle) FaceNm() string {
-	if p.Family == "" {
+func (fs *FontStyle) FaceNm() string {
+	if fs.Family == "" {
 		return "Arial" // built-in default
 	}
 	fnm := "Arial"
-	nms := strings.Split(p.Family, ",")
+	nms := strings.Split(fs.Family, ",")
 	for _, fn := range nms {
 		fn = strings.TrimSpace(fn)
 		if FontLibrary.FontAvail(fn) {
@@ -135,61 +114,260 @@ func (p *FontStyle) FaceNm() string {
 		}
 	}
 	mods := ""
-	if p.Style == FontItalic && p.Weight == WeightBold {
+	if fs.Style == FontItalic && fs.Weight == WeightBold {
 		mods = "Bold Italic"
-	} else if p.Style == FontItalic {
+	} else if fs.Style == FontItalic {
 		mods = "Italic"
-	} else if p.Weight == WeightBold {
+	} else if fs.Weight == WeightBold {
 		mods = "Bold"
 	}
 	if mods != "" {
 		if FontLibrary.FontAvail(fnm + " " + mods) {
 			fnm += " " + mods
 		}
+		// todo: use similar style font fallback to get mods
 	}
 	return fnm
 }
 
 var lastDots = 0.0
 
-func (p *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
-	p.FaceName = p.FaceNm()
-	intDots := math.Round(float64(p.Size.Dots))
-	face, err := FontLibrary.Font(p.FaceName, intDots)
+func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
+	fs.FaceName = fs.FaceNm()
+	intDots := math.Round(float64(fs.Size.Dots))
+	face, err := FontLibrary.Font(fs.FaceName, intDots)
 	if err != nil {
 		// log.Printf("%v\n", err)
-		if p.Face == nil {
+		if fs.Face == nil {
 			if fallback != "" {
-				p.FaceName = fallback
-				p.LoadFont(ctxt, "") // try again
+				fs.FaceName = fallback
+				fs.LoadFont(ctxt, "") // try again
 			} else {
 				//				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
-				p.Face = basicfont.Face7x13
+				fs.Face = basicfont.Face7x13
 			}
 		}
 	} else {
-		p.Face = face
+		fs.Face = face
 	}
-	p.Height = FixedToFloat32(p.Face.Metrics().Height)
-	// if lastDots != p.Size.Dots {
-	// 	pts := p.Size.Convert(units.Pt, ctxt)
-	// 	fmt.Printf("LoadFont points: %v intDots: %v, origDots: %v, height %v, ctxt dpi: %v\n", pts.Val, intDots, pts.Dots, p.Height, ctxt.DPI)
-	// 	lastDots = p.Size.Dots
+	fs.Height = FixedToFloat32(fs.Face.Metrics().Height)
+	// if lastDots != fs.Size.Dots {
+	// 	pts := fs.Size.Convert(units.Pt, ctxt)
+	// 	fmt.Printf("LoadFont points: %v intDots: %v, origDots: %v, height %v, ctxt dpi: %v\n", pts.Val, intDots, pts.Dots, fs.Height, ctxt.DPI)
+	// 	lastDots = fs.Size.Dots
 	// }
-	p.SetUnitContext(ctxt)
-	// em := float32(p.Face.Metrics().Ascent+p.Face.Metrics().Descent) / 64.0
-	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, p.Height, em)
+	fs.SetUnitContext(ctxt)
+	// em := float32(fs.Face.Metrics().Ascent+fs.Face.Metrics().Descent) / 64.0
+	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, fs.Height, em)
 }
 
-func (p *FontStyle) SetUnitContext(ctxt *units.Context) {
+func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
 	// todo: could measure actual chars but just use defaults right now
-	if p.Face != nil {
-		em := FixedToFloat32(p.Face.Metrics().Ascent + p.Face.Metrics().Descent)
+	if fs.Face != nil {
+		em := FixedToFloat32(fs.Face.Metrics().Ascent + fs.Face.Metrics().Descent)
 		ctxt.SetFont(em, 0.5*em, .9*em, 12.0) // todo: rem!?  just using 12
 		// fmt.Printf("em %v ex %v ch %v\n", em, 0.5*em, 0.9*em)
 		// order is ex, ch, rem -- using .75 for ch
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+// Font Style enums
+
+// FontStyles styles of font: normal, italic, etc
+type FontStyles int32
+
+const (
+	FontNormal FontStyles = iota
+	FontItalic
+	FontOblique
+	FontStylesN
+)
+
+//go:generate stringer -type=FontStyles
+
+var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, StylePropProps, "Font")
+
+func (ev FontStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FontStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// FontWeights styles of font: normal, italic, etc
+type FontWeights int32
+
+const (
+	WeightNormal FontWeights = iota
+	WeightBold
+	WeightBolder
+	WeightLighter
+	Weight100
+	Weight200
+	Weight300
+	Weight400 // normal
+	Weight500
+	Weight600
+	Weight700
+	Weight800
+	Weight900 // bold
+	FontWeightsN
+)
+
+//go:generate stringer -type=FontWeights
+
+var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, StylePropProps, "Weight")
+
+func (ev FontWeights) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FontWeights) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// FontVariants is just normal vs. small caps. todo: not currently supported
+type FontVariants int32
+
+const (
+	FontVarNormal FontVariants = iota
+	FontVarSmallCaps
+	FontVariantsN
+)
+
+//go:generate stringer -type=FontVariants
+
+var KiT_FontVariants = kit.Enums.AddEnumAltLower(FontVariantsN, false, StylePropProps, "FontVar")
+
+func (ev FontVariants) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// FontStretch are different stretch levels of font.  todo: not currently supported
+type FontStretch int32
+
+const (
+	FontStrNormal FontStretch = iota
+	FontStrWider
+	FontStrNarrower
+	FontStrUltraCondensed
+	FontStrExtraCondensed
+	FontStrCondensed
+	FontStrSemiCondensed
+	FontStrSemiExpanded
+	FontStrExpanded
+	FontStrExtraExpanded
+	FontStrUltraExpanded
+	FontStretchN
+)
+
+//go:generate stringer -type=FontStretch
+
+var KiT_FontStretch = kit.Enums.AddEnumAltLower(FontStretchN, false, StylePropProps, "FontStr")
+
+func (ev FontStretch) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FontStretch) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// TextDecorations are underline, line-through, etc -- operates as bit flags
+// -- also used for additional layout hints for RuneRender
+type TextDecorations int32
+
+const (
+	DecoNone TextDecorations = iota
+	DecoUnderline
+	DecoOverline
+	DecoLineThrough
+	DecoBlink
+
+	// following are special case layout hints in RuneRender, to pass
+	// information from a styling pass to a subsequent layout pass -- they are
+	// NOT processed during final rendering
+
+	// DecoParaStart at start of a SpanRender indicates that it should be
+	// styled as the start of a new paragraph and not just the start of a new
+	// line
+	DecoParaStart
+	// DecoSuper indicates super-scripted text
+	DecoSuper
+	// DecoSub indicates sub-scripted text
+	DecoSuper
+	TextDecorationsN
+)
+
+//go:generate stringer -type=TextDecorations
+
+var KiT_TextDecorations = kit.Enums.AddEnumAltLower(TextDecorationsN, true, StylePropProps, "Deco") // true = bit flag
+
+func (ev TextDecorations) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *TextDecorations) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// BaselineShifts are for super / sub script
+type BaselineShifts int32
+
+const (
+	ShiftBaseline BaselineShifts = iota
+	ShiftSuper
+	ShiftSub
+	BaselineShiftsN
+)
+
+//go:generate stringer -type=BaselineShifts
+
+var KiT_BaselineShifts = kit.Enums.AddEnumAltLower(BaselineShiftsN, false, StylePropProps, "Shift")
+
+func (ev BaselineShifts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *BaselineShifts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// https://godoc.org/golang.org/x/text/unicode/bidi
+// UnicodeBidi determines how
+type UnicodeBidi int32
+
+const (
+	BidiNormal UnicodeBidi = iota
+	BidiEmbed
+	BidiBidiOverride
+	UnicodeBidiN
+)
+
+//go:generate stringer -type=UnicodeBidi
+
+var KiT_UnicodeBidi = kit.Enums.AddEnumAltLower(UnicodeBidiN, false, StylePropProps, "Bidi")
+
+func (ev UnicodeBidi) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *UnicodeBidi) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// TextDirections are for direction of text writing, used in direction and writing-mode styles
+type TextDirections int32
+
+const (
+	LRTB TextDirections = iota
+	RLTB
+	TBRL
+	LR
+	RL
+	TB
+	LTR
+	RTL
+	TextDirectionsN
+)
+
+//go:generate stringer -type=TextDirections
+
+var KiT_TextDirections = kit.Enums.AddEnumAltLower(TextDirectionsN, false, StylePropProps, "")
+
+func (ev TextDirections) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *TextDirections) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// TextAnchors are for direction of text writing, used in direction and writing-mode styles
+type TextAnchors int32
+
+const (
+	AnchorStart TextAnchors = iota
+	AnchorMiddle
+	AnchorEnd
+	TextAnchorsN
+)
+
+//go:generate stringer -type=TextAnchors
+
+var KiT_TextAnchors = kit.Enums.AddEnumAltLower(TextAnchorsN, false, StylePropProps, "Anchor")
+
+func (ev TextAnchors) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *TextAnchors) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+//////////////////////////////////////////////////////////////////////////////////
+// Font library
 
 func LoadFontFace(path string, points float64) (font.Face, error) {
 	fontBytes, err := ioutil.ReadFile(path)
@@ -406,5 +584,5 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 	return ok
 }
 
-// FontInfoExample is example text to demonstrate fonts -- from Inkscape
+// FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
 var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国"

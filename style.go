@@ -174,7 +174,7 @@ type Style struct {
 	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Font          FontStyle       `xml:"font" desc:"font parameters"`
+	Font          FontStyle       `desc:"font parameters -- no xml prefix"`
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
 	Color         Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
 	Background    BackgroundStyle `xml:"background" desc:"background settings"`

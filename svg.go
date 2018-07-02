@@ -419,6 +419,9 @@ func (svg *SVG) LoadXML(filename string) error {
 // bytes.NewReader([]byte(str)) -- all errors are logged and also returned.
 func (svg *SVG) ReadXML(reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
+	decoder.Strict = false
+	decoder.AutoClose = xml.HTMLAutoClose
+	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 	for {
 		t, err := decoder.Token()

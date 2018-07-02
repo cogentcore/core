@@ -19,7 +19,6 @@ import (
 	//"github.com/rcoreilly/rasterx"
 	"github.com/srwiley/scanFT"
 	"golang.org/x/image/draw"
-	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
 )
 
@@ -58,7 +57,8 @@ type VectorEffect int32
 const (
 	VecEffNone VectorEffect = iota
 
-	// VecEffNonScalingStroke means that the stroke width is not affected by transform properties
+	// VecEffNonScalingStroke means that the stroke width is not affected by
+	// transform properties
 	VecEffNonScalingStroke
 
 	VecEffN
@@ -96,6 +96,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.XForm = Identity2D()
+	pc.Opacity = 1
 }
 
 func NewPaint() Paint {
@@ -883,133 +884,6 @@ func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, 
 			DstMaskP: image.ZP,
 		})
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Text Functions
-
-func (pc *Paint) SetFontFace(fontFace font.Face) {
-	pc.FontStyle.Face = fontFace
-	pc.FontStyle.Height = float32(fontFace.Metrics().Height) / 64.0
-}
-
-func (pc *Paint) LoadFontFace(path string, points float64) error {
-	face, err := FontLibrary.Font(path, points)
-	if err == nil {
-		pc.SetFontFace(face)
-	}
-	return err
-}
-
-// todo: all of this requires some reworking -- too complicated and nested, and transform
-// needs to be applied to everything
-
-// DrawString according to current settings -- width is needed for alignment
-// -- if non-zero, then x position is for the left edge of the width box, and
-// alignment is WRT that width -- otherwise x position is as in
-// DrawStringAnchored
-func (pc *Paint) DrawString(rs *RenderState, s string, x, y, width float32) {
-	ax, ay := pc.TextStyle.AlignFactors()
-	if width > 0.0 {
-		x += ax * width // re-offset for width
-	}
-	if pc.TextStyle.WordWrap {
-		pc.DrawStringWrapped(rs, s, x, y, ax, ay, width, pc.TextStyle.EffLineHeight())
-	} else {
-		pc.DrawStringAnchored(rs, s, x, y, ax, ay, width)
-	}
-}
-
-func (pc *Paint) DrawStringLines(rs *RenderState, lines []string, x, y, width, height float32) {
-	ax, ay := pc.TextStyle.AlignFactors()
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, height, pc.TextStyle.EffLineHeight())
-}
-
-// DrawStringAnchored draws the specified text at the specified anchor point.
-// The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
-// text. Use ax=0.5, ay=0.5 to center the text at the specified point.
-func (pc *Paint) DrawStringAnchored(rs *RenderState, s string, x, y, ax, ay, width float32) {
-	tx, ty := rs.XForm.TransformPoint(x, y)
-	w, h := pc.MeasureString(s)
-	tx -= ax * w
-	ty += ay * h
-	// fmt.Printf("ds bounds: %v point x,y %v, %v\n", rs.Bounds, x, y)
-	if rs.Mask == nil {
-		pc.drawString(rs, rs.Image, rs.Bounds, s, tx, ty)
-	} else {
-		im := image.NewRGBA(rs.Image.Bounds())
-		pc.drawString(rs, im, rs.Bounds, s, tx, ty)
-		draw.DrawMask(rs.Image, rs.Image.Bounds(), im, image.ZP, rs.Mask, image.ZP, draw.Over)
-	}
-}
-
-// DrawStringWrapped word-wraps the specified string to the given max width
-// and then draws it at the specified anchor point using the given line
-// spacing and text alignment.
-func (pc *Paint) DrawStringWrapped(rs *RenderState, s string, x, y, ax, ay, width, lineHeight float32) {
-	lines, h := pc.MeasureStringWrapped(s, width, lineHeight)
-	pc.DrawStringLinesAnchored(rs, lines, x, y, ax, ay, width, h, lineHeight)
-}
-
-func (pc *Paint) DrawStringLinesAnchored(rs *RenderState, lines []string, x, y, ax, ay, width, h, lineHeight float32) {
-	x -= ax * width
-	y -= ay * h
-	ax, ay = pc.TextStyle.AlignFactors()
-	// ay = 1
-	for _, line := range lines {
-		pc.DrawStringAnchored(rs, line, x, y, ax, ay, width)
-		y += pc.FontStyle.Height * lineHeight
-	}
-}
-
-// todo: all of these measurements are failing to take into account transforms -- maybe that's ok -- keep the font non-scaled?  maybe add an option for that actually..
-
-// MeasureString returns the rendered width and height of the specified text
-// given the current font face.
-func (pc *Paint) MeasureString(s string) (w, h float32) {
-	pr := prof.Start("Paint.MeasureString")
-	if pc.FontStyle.Face == nil {
-		pc.FontStyle.LoadFont(&pc.UnContext, "")
-	}
-	d := &font.Drawer{
-		Face: pc.FontStyle.Face,
-	}
-	a := d.MeasureString(s)
-	pr.End()
-	return math32.Ceil(FixedToFloat32(a)), pc.FontStyle.Height
-}
-
-// MeasureChars measures the rendered character (rune) positions of the given text in
-// the current font
-func (pc *Paint) MeasureChars(s []rune) []float32 {
-	pr := prof.Start("Paint.MeasureChars")
-	if pc.FontStyle.Face == nil {
-		pc.FontStyle.LoadFont(&pc.UnContext, "")
-	}
-	chrs := MeasureChars(pc.FontStyle.Face, s) // in text.go
-	pr.End()
-	return chrs
-}
-
-// FontHeight -- returns the height of the current font
-func (pc *Paint) FontHeight() float32 {
-	if pc.FontStyle.Face == nil {
-		pc.FontStyle.LoadFont(&pc.UnContext, "")
-	}
-	return pc.FontStyle.Height
-}
-
-func (pc *Paint) MeasureStringWrapped(s string, width, lineHeight float32) ([]string, float32) {
-	lines := pc.WordWrap(s, width)
-	h := float32(len(lines)) * pc.FontStyle.Height * lineHeight
-	h -= (lineHeight - 1) * pc.FontStyle.Height
-	return lines, h
-}
-
-// WordWrap wraps the specified string to the given max width and current
-// font face.
-func (pc *Paint) WordWrap(s string, w float32) []string {
-	return wordWrap(pc, s, w)
 }
 
 //////////////////////////////////////////////////////////////////////////////////

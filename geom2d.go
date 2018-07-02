@@ -448,6 +448,17 @@ func (a *Vec2D) SetMinPosDim(d Dims2D, val float32) {
 	}
 }
 
+func (a Vec2D) Abs() Vec2D {
+	b := a
+	if b.X < 0 {
+		b.X = -b.X
+	}
+	if b.Y < 0 {
+		b.Y = -b.Y
+	}
+	return b
+}
+
 func (a *Vec2D) SetPoint(pt image.Point) {
 	a.X = float32(pt.X)
 	a.Y = float32(pt.Y)

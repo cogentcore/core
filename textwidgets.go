@@ -64,7 +64,8 @@ func ToLabel(it interface{}) string {
 // including box rendering
 type Label struct {
 	WidgetBase
-	Text string `xml:"text" desc:"label to display"`
+	Text   string     `xml:"text" desc:"label to display"`
+	Render TextRender `desc:"render data for text label"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -90,6 +91,7 @@ func (g *Label) SetTextAction(txt string) {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
+	g.Render.SetHTML(g.Text, &(g.Style.FontStyle), &(g.Style.UnContext), g.Style.Color)
 }
 
 func (g *Label) Size2D() {
