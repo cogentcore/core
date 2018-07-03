@@ -98,6 +98,14 @@ Currently at an **alpha** level release:
 
 * selector for different standard keyfun maps..
 
+* bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
+  general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
+  but key problem is how to associate the enum with the field then?  bit-set
+  values don't match the defined ints.. but who cares?  simplest to just use
+  type. but for bitflag never want consts to be int64, but often do want flags
+  field to be int64..  for 32bit case, not that big a deal, and for most
+  user-facing cases, int32 is sufficient, so focus on that case??
+
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * search for structtableview, treeview

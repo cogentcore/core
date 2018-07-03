@@ -1323,7 +1323,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	}
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
 	lbl.Text = tv.Label()
-	lbl.Sty.Color = tv.Sty.Color
+	lbl.Sty.Font.Color = tv.Sty.Font.Color
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.SetChecked(!tv.IsClosed())
 }

@@ -126,7 +126,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 		opts.Size = wgp.Size
 		opts.Pos = wgp.Pos
 		opts.StdPixels = false
-		fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
+		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
 	}
 	win := NewWindow(name, title, opts)
 	if win == nil {
@@ -1339,8 +1339,8 @@ func (wg *WindowGeomPrefs) Load() error {
 	err = json.Unmarshal(b, wg)
 	if err != nil {
 		log.Println(err)
-	} else {
-		fmt.Printf("loaded win geom prefs:\n%+v\n", *wg)
+		// } else {
+		// 	fmt.Printf("loaded win geom prefs:\n%+v\n", *wg)
 	}
 	return err
 }

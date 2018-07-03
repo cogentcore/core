@@ -78,9 +78,11 @@ var LabelProps = ki.Props{
 	"background-color": color.Transparent,
 }
 
-// SetText just sets the text (todo: perform translation?)
+// SetText sets the text and updates the rendered version
 func (g *Label) SetText(txt string) {
 	g.Text = txt
+	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext))
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
 }
 
 // SetTextAction sets the text and triggers an update action
@@ -91,7 +93,7 @@ func (g *Label) SetTextAction(txt string) {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.Sty.Color)
+	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext))
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), Vec2DZero)
 }
 
@@ -103,7 +105,7 @@ func (g *Label) Size2D() {
 func (g *Label) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true)
 	g.Layout2DChildren()
-	// g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
 }
 
 func (g *Label) Render2D() {

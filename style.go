@@ -176,7 +176,6 @@ type Style struct {
 	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
 	Font          FontStyle       `desc:"font parameters -- no xml prefix"`
 	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
-	Color         Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
 	Background    BackgroundStyle `xml:"background" desc:"background settings"`
 	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
@@ -193,7 +192,6 @@ func (s *Style) Defaults() {
 	s.Opacity = 1.0
 	s.Outline.Style = BorderNone
 	s.PointerEvents = true
-	s.Color.SetColor(color.Black)
 	s.Background.Defaults()
 	s.Layout.Defaults()
 	s.Font.Defaults()
@@ -241,7 +239,7 @@ func (s *Style) SetStyleProps(parent *Style, props ki.Props) {
 // such as CurrentColor -- this is automatically called for a successful
 // PushBounds in Node2DBase
 func (s *Style) Use() {
-	CurrentColor = s.Color
+	CurrentColor = s.Font.Color
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent

@@ -70,24 +70,13 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = "This is a <b>demonstration</b> of the various <i>GoGi</i> Widgets<br>Think about how cool multi-line text labels are!"
-	title.SetProp("text-align", gi.AlignTop)
+	title.Text = "This is a <b>demonstration</b> of the various <i>GoGi</i> Widgets<br><small><small>Shortcuts: <kbd>Control+Alt+P</kbd> = Preferences, <kbd>Control+Alt+E</kbd> = Editor, <kbd>Command +/-</kbd> = zoom</small></small>"
+	title.SetProp("text-align", gi.AlignLeft) // todo: center, right not working
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
-	title.SetProp("font-weight", "bold")
-	title.SetProp("font-size", units.NewValue(24, units.Pt))
+	// title.SetProp("font-weight", "bold")
+	title.SetProp("font-size", units.NewValue(20, units.Pt))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
-
-	irow := vlay.AddNewChild(gi.KiT_Layout, "irow").(*gi.Layout)
-	irow.Lay = gi.LayoutRow
-	irow.SetStretchMaxWidth()
-	irow.AddNewChild(gi.KiT_Stretch, "str1")
-	instr := irow.AddNewChild(gi.KiT_Label, "instr").(*gi.Label)
-	instr.Text = "Shortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
-	instr.SetProp("text-align", gi.AlignTop)
-	instr.SetProp("align-vert", gi.AlignTop)
-	// instr.SetMinPrefWidth(units.NewValue(30, units.Ch))
-	irow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	//////////////////////////////////////////
 	//      Buttons

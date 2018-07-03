@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"math"
@@ -16,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -29,13 +31,14 @@ import (
 // is used in SVG text rendering -- used in Paint and in Style -- see style.go
 // -- most of font information is inherited
 type FontStyle struct {
+	Color            Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
 	Size             units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
 	Family           string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
 	Style            FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
 	Weight           FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
 	Stretch          FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
 	Variant          FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
-	Decoration       TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
+	Deco             TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
 	Shift            BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
 	LetterSpacing    units.Value     `xml:"letter-spacing" desc:"spacing between characters and lines"`
 	WordSpacing      units.Value     `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
@@ -54,14 +57,25 @@ type FontStyle struct {
 }
 
 func (fs *FontStyle) Defaults() {
+	fs.Color.SetColor(color.Black)
 	fs.FaceName = "Arial"
 	fs.Size = units.NewValue(12, units.Pt)
 	fs.Direction = LTR
 	fs.OrientationVert = 90
 }
 
-// any updates after generic xml-tag property setting?
+// SetStylePost does any updates after generic xml-tag property setting
 func (fs *FontStyle) SetStylePost() {
+}
+
+// SetDeco sets decoration (underline, etc), which uses bitflag to allow multiple combinations
+func (fs *FontStyle) SetDeco(deco TextDecorations) {
+	bitflag.Set32((*int32)(&fs.Deco), int(deco))
+}
+
+// ClearDeco clears decoration (underline, etc), which uses bitflag to allow multiple combinations
+func (fs *FontStyle) ClearDeco(deco TextDecorations) {
+	bitflag.Clear32((*int32)(&fs.Deco), int(deco))
 }
 
 // FaceNm returns the full FaceName to use for the current FontStyle spec
@@ -174,6 +188,19 @@ func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
 //////////////////////////////////////////////////////////////////////////////////
 // Font Style enums
 
+// FontSizePoints maps standard font names to standard point sizes -- we use
+// dpi zoom scaling instead of rescaling "medium" font size, so generally use
+// these values as-is.  smaller and larger can move in 2pt increments
+var FontSizePoints = map[string]float32{
+	"xx-small": 7,
+	"x-small":  7.5,
+	"small":    10,
+	"medium":   12,
+	"large":    14,
+	"x-large":  18,
+	"xx-large": 24,
+}
+
 // FontStyles styles of font: normal, italic, etc
 type FontStyles int32
 
@@ -268,7 +295,11 @@ const (
 	DecoUnderline
 	DecoOverline
 	DecoLineThrough
+	// Blink is not currently supported (and probably a bad idea generally ;)
 	DecoBlink
+
+	// DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik
+	DecoDottedUnderline
 
 	// following are special case layout hints in RuneRender, to pass
 	// information from a styling pass to a subsequent layout pass -- they are

@@ -247,7 +247,7 @@ func (g *Separator) Render2D() {
 		st := &g.Sty
 		pc.FontStyle = st.Font
 		g.RenderStdBox(st)
-		pc.StrokeStyle.SetColor(&st.Color) // ink color
+		pc.StrokeStyle.SetColor(&st.Font.Color) // ink color
 		pc.StrokeStyle.Width = st.Border.Width
 		pc.FillStyle.SetColor(nil)
 

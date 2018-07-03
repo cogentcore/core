@@ -688,7 +688,7 @@ func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool
 		if lbl == nil {
 			return true
 		}
-		lbl.(*Label).Sty.Color = g.Sty.Color
+		lbl.(*Label).Sty.Font.Color = g.Sty.Font.Color
 		if lbl.(*Label).Text != txt {
 			return true
 		}

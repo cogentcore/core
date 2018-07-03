@@ -11,6 +11,7 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"math"
 
 	"log"
 	"unicode"
@@ -43,12 +44,13 @@ import (
 // non-nil is used -- likely slightly more efficient to avoid setting all
 // those pointers
 type RuneRender struct {
-	Face   font.Face       `desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
-	Color  color.Color     `desc:"color to draw characters in"`
-	Deco   TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., <P> vs <BR>)"`
-	RelPos fixed.Point26_6 `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
-	Size   fixed.Point26_6 `desc:"size of the rune itself, exclusive of spacing that might surround it"`
-	RotRad float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
+	Face    font.Face       `desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
+	Color   color.Color     `desc:"color to draw characters in"`
+	BgColor color.Color     `desc:"background color to fill background of color -- for highlighting, <mark> tag, etc"`
+	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., <P> vs <BR>)"`
+	RelPos  fixed.Point26_6 `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
+	Size    fixed.Point26_6 `desc:"size of the rune itself, exclusive of spacing that might surround it"`
+	RotRad  float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
 }
 
 // HasNil returns error if any of the key info (face, color) is nil -- only
@@ -406,6 +408,12 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 				continue
 			}
 			d.Dot = rp
+			curFace = rr.CurFace(curFace)
+			d.Face = curFace
+			if rr.Color != nil {
+				curColor = rr.Color
+				d.Src = image.NewUniform(curColor)
+			}
 			dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, r)
 			if !ok {
 				continue
@@ -441,7 +449,7 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 // NOT deal at all with layout (positioning) -- only sets font, color, and
 // decoration info, and strips out the tags it processes -- result can then be
 // processed by different layout algorithms as needed
-func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, clr color.Color) {
+func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) {
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -476,41 +484,114 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
+			curf := fstack[len(fstack)-1]
+			fs := *curf
 			nm := se.Name.Local
-			switch {
-			case nm == "b":
-				curf := fstack[len(fstack)-1]
-				fs := *curf
+			switch nm {
+			case "strong":
+				fallthrough
+			case "b":
 				fs.Weight = WeightBold
 				fs.LoadFont(ctxt, "")
 				fstack = append(fstack, &fs)
-			case nm == "i":
-				curf := fstack[len(fstack)-1]
-				fs := *curf
+			case "cite":
+				fallthrough
+			case "var":
+				fallthrough
+			case "em":
+				fallthrough
+			case "i":
 				fs.Style = FontItalic
 				fs.LoadFont(ctxt, "")
 				fstack = append(fstack, &fs)
+			case "ins":
+				fallthrough
+			case "u":
+				fs.SetDeco(DecoUnderline)
+				fstack = append(fstack, &fs)
+			case "strike": // deprecated
+				fallthrough
+			case "del":
+				fallthrough
+			case "s":
+				fs.SetDeco(DecoLineThrough)
+				fstack = append(fstack, &fs)
+			case "sup":
+				fs.SetDeco(DecoSuper)
+				fstack = append(fstack, &fs)
+			case "sub":
+				fs.SetDeco(DecoSub)
+				fstack = append(fstack, &fs)
+			case "small":
+				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+				curpts -= 2
+				fs.Size = units.NewValue(float32(curpts), units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt, "")
+				fstack = append(fstack, &fs)
+			case "big":
+				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+				curpts += 2
+				fs.Size = units.NewValue(float32(curpts), units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt, "")
+				fstack = append(fstack, &fs)
+
+			case "mark":
+				// todo: mark requires setting background color -- need a stack, etc, or add again to fontstyle..
+			case "acronym":
+				fallthrough
+			case "abbr":
+				// default style is a *dotted* underline.. sheesh
+				fs.SetDeco(DecoDottedUnderline)
+				fstack = append(fstack, &fs)
+			case "tt":
+				fallthrough
+			case "kbd":
+				fallthrough
+			case "samp":
+				fallthrough
+			case "code":
+				fs.Family = "monospace"
+				fs.LoadFont(ctxt, "")
+				fstack = append(fstack, &fs)
+			case "span":
+				// todo: need to process all the attributes -- collect in ki.Props, apply to
+				// FontStyle -- need a separate compiled set of styles for FontStyle
+				// same for css -- pass in CSSAgg
+				// for _, attr := range se.Attr {
+				// 	if txt.SetStdAttr(attr.Name.Local, attr.Value) {
+				// 		continue
+				// 	}
+				// 	switch attr.Name.Local {
+			case "q":
+				// quotation -- insert " " of proper unicode type
+			case "dfn":
+				// no default styling
+			case "bdo":
+				// bidirectional override..
 			}
 		case xml.EndElement:
-			if len(fstack) >= 1 {
-				fstack = fstack[:len(fstack)-1]
-			}
 			switch se.Name.Local {
 			case "p":
 				tr.Spans = append(tr.Spans, SpanRender{})
 				curSp = &(tr.Spans[len(tr.Spans)-1])
 				nextIsParaStart = true
-				// todo: could allocate..
 			case "br":
 				tr.Spans = append(tr.Spans, SpanRender{})
 				curSp = &(tr.Spans[len(tr.Spans)-1])
-				// todo: could allocate..
+			default:
+				if len(fstack) > 1 {
+					fstack = fstack[:len(fstack)-1]
+				}
 			}
 		case xml.CharData:
 			curf := fstack[len(fstack)-1]
 			atStart := len(curSp.Text) == 0
-			// fmt.Printf("got char data: %v\n", string(se))
-			curSp.AppendString(string(se), curf.Face, clr, curf.Decoration)
+			// todo: this is
+			// spcstr := strings.Join(strings.Fields(string(se)), " ")
+			spcstr := string(se)
+			curSp.AppendString(spcstr, curf.Face, curf.Color, curf.Deco)
 			if nextIsParaStart && atStart {
 				bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
 			}
