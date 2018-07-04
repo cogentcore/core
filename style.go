@@ -84,6 +84,9 @@ func SetStylePropsXML(style string, props ki.Props) {
 		if len(kv) >= 2 {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
+			if props == nil {
+				props = make(ki.Props)
+			}
 			props[k] = v
 		}
 	}
