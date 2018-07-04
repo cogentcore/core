@@ -18,6 +18,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
@@ -379,9 +380,13 @@ func (tr *TextRender) InsertSpan(at int, ns *SpanRender) {
 // the relative positions of the runes, and the overall font size, etc.  todo:
 // does not currently support stroking, only filling of text -- probably need
 // to grab path from font and use paint rendering for stroking
-func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.Point26_6) {
+func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 	pr := prof.Start("RenderText")
 	defer pr.End()
+
+	// todo: use renderstate for decoration rendering -- decide if always doing bg or not
+	// always doing is probably better, except if bg is transparent or nil -- i.e., let
+	// the user decide
 
 	for _, sr := range tr.Spans {
 		if sr.IsValid() != nil {
@@ -394,7 +399,7 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 		fht := curFace.Metrics().Ascent // just for bounds checking
 
 		d := &font.Drawer{
-			Dst:  im,
+			Dst:  rs.Image,
 			Src:  image.NewUniform(curColor),
 			Face: curFace,
 			Dot:  tpos,
@@ -404,7 +409,7 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
 			rp := tpos.Add(rr.RelPos)
-			if rp.X.Floor() > bounds.Max.X || rp.Y.Ceil() < bounds.Min.Y {
+			if rp.X.Floor() > rs.Bounds.Max.X || rp.Y.Ceil() < rs.Bounds.Min.Y {
 				continue
 			}
 			d.Dot = rp
@@ -420,7 +425,7 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 			}
 			rx := d.Dot.X + advance
 			ty := d.Dot.Y - fht
-			if rx.Floor() < bounds.Min.X || ty.Ceil() > bounds.Max.Y {
+			if rx.Floor() < rs.Bounds.Min.X || ty.Ceil() > rs.Bounds.Max.Y {
 				continue
 			}
 			srect := dr.Sub(dr.Min)
@@ -442,14 +447,16 @@ func (tr *TextRender) Render(im *image.RGBA, bounds image.Rectangle, pos fixed.P
 	}
 }
 
-// SetHTML sets text by decoding basic HTML text style formatting tags in the
-// string and sets the per-character font information appropriately, using
-// given font style info.  <P> and <BR> tags create new spans, with <P>
-// marking start of subsequent span with DecoParaStart.  Critically, it does
-// NOT deal at all with layout (positioning) -- only sets font, color, and
-// decoration info, and strips out the tags it processes -- result can then be
-// processed by different layout algorithms as needed
-func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) {
+// SetHTML sets text by decoding all standard inline HTML text style
+// formatting tags in the string and sets the per-character font information
+// appropriately, using given font style info.  <P> and <BR> tags create new
+// spans, with <P> marking start of subsequent span with DecoParaStart.
+// Critically, it does NOT deal at all with layout (positioning) -- only sets
+// font, color, and decoration info, and strips out the tags it processes --
+// result can then be processed by different layout algorithms as needed.
+// cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
+// special css styling of each element
+func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, cssAgg ki.Props) {
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -459,7 +466,9 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 	initsz := kit.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
-	reader := bytes.NewReader([]byte(str))
+	spcstr := bytes.Join(bytes.Fields([]byte(str)), []byte(" "))
+
+	reader := bytes.NewReader(spcstr)
 	decoder := xml.NewDecoder(reader)
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
@@ -493,7 +502,6 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 			case "b":
 				fs.Weight = WeightBold
 				fs.LoadFont(ctxt, "")
-				fstack = append(fstack, &fs)
 			case "cite":
 				fallthrough
 			case "var":
@@ -503,40 +511,32 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 			case "i":
 				fs.Style = FontItalic
 				fs.LoadFont(ctxt, "")
-				fstack = append(fstack, &fs)
 			case "ins":
 				fallthrough
 			case "u":
 				fs.SetDeco(DecoUnderline)
-				fstack = append(fstack, &fs)
 			case "strike": // deprecated
 				fallthrough
 			case "del":
 				fallthrough
 			case "s":
 				fs.SetDeco(DecoLineThrough)
-				fstack = append(fstack, &fs)
 			case "sup":
 				fs.SetDeco(DecoSuper)
-				fstack = append(fstack, &fs)
 			case "sub":
 				fs.SetDeco(DecoSub)
-				fstack = append(fstack, &fs)
 			case "small":
 				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 				curpts -= 2
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
 				fs.LoadFont(ctxt, "")
-				fstack = append(fstack, &fs)
 			case "big":
 				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 				curpts += 2
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
 				fs.LoadFont(ctxt, "")
-				fstack = append(fstack, &fs)
-
 			case "mark":
 				// todo: mark requires setting background color -- need a stack, etc, or add again to fontstyle..
 			case "acronym":
@@ -544,7 +544,6 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 			case "abbr":
 				// default style is a *dotted* underline.. sheesh
 				fs.SetDeco(DecoDottedUnderline)
-				fstack = append(fstack, &fs)
 			case "tt":
 				fallthrough
 			case "kbd":
@@ -554,16 +553,19 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 			case "code":
 				fs.Family = "monospace"
 				fs.LoadFont(ctxt, "")
-				fstack = append(fstack, &fs)
 			case "span":
-				// todo: need to process all the attributes -- collect in ki.Props, apply to
-				// FontStyle -- need a separate compiled set of styles for FontStyle
-				// same for css -- pass in CSSAgg
-				// for _, attr := range se.Attr {
-				// 	if txt.SetStdAttr(attr.Name.Local, attr.Value) {
-				// 		continue
-				// 	}
-				// 	switch attr.Name.Local {
+				if len(se.Attr) > 0 {
+					sprop := make(ki.Props, len(se.Attr))
+					for _, attr := range se.Attr {
+						if attr.Name.Local == "style" {
+							SetStylePropsXML(attr.Value, sprop)
+						} else {
+							sprop[attr.Name.Local] = attr.Value
+						}
+					}
+					fs.SetStyleProps(nil, sprop)
+					fs.LoadFont(ctxt, "")
+				}
 			case "q":
 				// quotation -- insert " " of proper unicode type
 			case "dfn":
@@ -571,6 +573,10 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 			case "bdo":
 				// bidirectional override..
 			}
+			if cssAgg != nil {
+				fs.StyleCSS(nm, cssAgg, ctxt)
+			}
+			fstack = append(fstack, &fs)
 		case xml.EndElement:
 			switch se.Name.Local {
 			case "p":
@@ -588,10 +594,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context) 
 		case xml.CharData:
 			curf := fstack[len(fstack)-1]
 			atStart := len(curSp.Text) == 0
-			// todo: this is
-			// spcstr := strings.Join(strings.Fields(string(se)), " ")
-			spcstr := string(se)
-			curSp.AppendString(spcstr, curf.Face, curf.Color, curf.Deco)
+			curSp.AppendString(string(se), curf.Face, curf.Color, curf.Deco)
 			if nextIsParaStart && atStart {
 				bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
 			}
@@ -775,6 +778,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		sr := &(tr.Spans[si])
 		sr.RelPos.Y = vpos
 		sr.RelPos.X = 0
+		// todo: handle indent here look at para start -- sets +X -- also need in size above
 		ssz := sr.SizeHV()
 		hextra := szf.X - ssz.X
 		if hextra > 0 {

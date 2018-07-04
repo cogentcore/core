@@ -119,9 +119,6 @@ Currently at an **alpha** level release:
 
 * add MenuBar / Toolbar -- just a layout really, with some styling?
 
-* basic rich text formatting -- , and bold / italic styles for fonts?
-* word wrap in widgets demo
-
 * main menu (mac, other platforms?)
 
 * arg view / dialog and button tags

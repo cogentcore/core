@@ -952,7 +952,7 @@ func (g *SVGText) Render2D() {
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.FontStyle.Color = pc.FillStyle.Color.Color
-	g.Render.SetHTML(g.Text, &(pc.FontStyle), &(pc.UnContext))
+	g.Render.SetHTML(g.Text, &(pc.FontStyle), &(pc.UnContext), g.CSSAgg)
 	// todo:
 	// g.Render.LayoutStdLR()
 	g.ComputeBBoxSVG()

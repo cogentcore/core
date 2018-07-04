@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"strings"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
@@ -300,47 +299,6 @@ func (g *Node2DBase) ConnectToViewport() {
 	if g.Viewport != nil {
 		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
 	}
-}
-
-// AggCSS aggregates css properties
-func AggCSS(agg *ki.Props, css ki.Props) {
-	if *agg == nil {
-		*agg = make(ki.Props, len(css))
-	}
-	for key, val := range css {
-		(*agg)[key] = val
-	}
-}
-
-// SetStylePropsXML sets style props from XML style string, which contains ';'
-// separated name: value pairs
-func (g *Node2DBase) SetStylePropsXML(style string) {
-	st := strings.Split(style, ";")
-	for _, s := range st {
-		kv := strings.Split(s, ":")
-		if len(kv) >= 2 {
-			k := strings.TrimSpace(strings.ToLower(kv[0]))
-			v := strings.TrimSpace(kv[1])
-			g.SetProp(k, v)
-		}
-	}
-}
-
-// SetStdAttr sets standard attributes of node given XML-style name /
-// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
-func (g *Node2DBase) SetStdAttr(name, val string) bool {
-	switch name {
-	case "id":
-		g.SetName(val)
-		return true
-	case "class":
-		g.Class = val
-		return true
-	case "style":
-		g.SetStylePropsXML(val)
-		return true
-	}
-	return false
 }
 
 // set our window-level BBox from vp and our bbox

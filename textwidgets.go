@@ -81,7 +81,7 @@ var LabelProps = ki.Props{
 // SetText sets the text and updates the rendered version
 func (g *Label) SetText(txt string) {
 	g.Text = txt
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext))
+	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
 }
 
@@ -93,7 +93,7 @@ func (g *Label) SetTextAction(txt string) {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext))
+	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), Vec2DZero)
 }
 
@@ -116,7 +116,7 @@ func (g *Label) Render2D() {
 		st := &g.Sty
 		rs := &g.Viewport.Render
 		g.RenderStdBox(st)
-		g.Render.Render(rs.Image, rs.Bounds, g.LayData.AllocPos.Fixed())
+		g.Render.Render(rs, g.LayData.AllocPos.Fixed())
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {

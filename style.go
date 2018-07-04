@@ -75,6 +75,20 @@ type Styler interface {
 	Style() *Style
 }
 
+// SetStylePropsXML sets style props from XML style string, which contains ';'
+// separated name: value pairs
+func SetStylePropsXML(style string, props ki.Props) {
+	st := strings.Split(style, ";")
+	for _, s := range st {
+		kv := strings.Split(s, ":")
+		if len(kv) >= 2 {
+			k := strings.TrimSpace(strings.ToLower(kv[0]))
+			v := strings.TrimSpace(kv[1])
+			props[k] = v
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Style structs
 
@@ -289,8 +303,7 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 }
 
 // ToDots calls ToDots on all units.Value fields in the style (recursively) --
-// need to have set the UnContext first -- only after layout at render time is
-// that possible
+// need to have set the UnContext first
 func (s *Style) ToDots() {
 	StyleFields.ToDots(s, &s.UnContext)
 }
@@ -309,7 +322,7 @@ var StyleDefault Style
 var StyleFields = initStyle()
 
 func initStyle() *StyledFields {
-	StyleDefault = NewStyle()
+	StyleDefault.Defaults()
 	sf := &StyledFields{}
 	sf.Init(&StyleDefault)
 	return sf

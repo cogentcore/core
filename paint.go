@@ -159,8 +159,7 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 }
 
 // ToDots calls ToDots on all units.Value fields in the style (recursively) --
-// need to have set the UnContext first -- only after layout at render time is
-// that possible
+// need to have set the UnContext first
 func (pc *Paint) ToDots() {
 	PaintFields.ToDots(pc, &pc.UnContext)
 }
@@ -172,7 +171,7 @@ var PaintDefault Paint
 var PaintFields = initPaint()
 
 func initPaint() *StyledFields {
-	PaintDefault = NewPaint()
+	PaintDefault.Defaults()
 	sf := &StyledFields{}
 	sf.Init(&PaintDefault)
 	return sf

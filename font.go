@@ -17,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/golang/freetype/truetype"
@@ -105,11 +106,11 @@ func (fs *FontStyle) FaceNm() string {
 			fnm = "Courier New" // this is the tt name
 			break
 		case "monospace":
-			if FontLibrary.FontAvail("Andale Mono") {
-				fnm = "Andale Mono"
-			} else {
-				fnm = "Courier New"
-			}
+			// if FontLibrary.FontAvail("Andale Mono") {
+			// 	fnm = "Andale Mono"
+			// } else {
+			fnm = "Courier New"
+			// }
 			break
 		case "cursive":
 			if FontLibrary.FontAvail("Comic Sans") {
@@ -144,8 +145,6 @@ func (fs *FontStyle) FaceNm() string {
 	return fnm
 }
 
-var lastDots = 0.0
-
 func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	fs.FaceName = fs.FaceNm()
 	intDots := math.Round(float64(fs.Size.Dots))
@@ -165,14 +164,7 @@ func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 		fs.Face = face
 	}
 	fs.Height = FixedToFloat32(fs.Face.Metrics().Height)
-	// if lastDots != fs.Size.Dots {
-	// 	pts := fs.Size.Convert(units.Pt, ctxt)
-	// 	fmt.Printf("LoadFont points: %v intDots: %v, origDots: %v, height %v, ctxt dpi: %v\n", pts.Val, intDots, pts.Dots, fs.Height, ctxt.DPI)
-	// 	lastDots = fs.Size.Dots
-	// }
 	fs.SetUnitContext(ctxt)
-	// em := float32(fs.Face.Metrics().Ascent+fs.Face.Metrics().Descent) / 64.0
-	// fmt.Printf("requested font size: %v got height: %v, em: %v\n", pts.Val, fs.Height, em)
 }
 
 func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
@@ -183,6 +175,55 @@ func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
 		// fmt.Printf("em %v ex %v ch %v\n", em, 0.5*em, 0.9*em)
 		// order is ex, ch, rem -- using .75 for ch
 	}
+}
+
+// Style CSS looks for "tag" name props in cssAgg props, and applies those to
+// style if found, and returns true -- false if no such tag found
+func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) bool {
+	if cssAgg == nil {
+		return false
+	}
+	tp, ok := cssAgg[tag]
+	if !ok {
+		return false
+	}
+	pmap, ok := tp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+	fs.SetStyleProps(nil, pmap)
+	fs.LoadFont(ctxt, "")
+	return true
+}
+
+// SetStyleProps sets font style values based on given property map (name:
+// value pairs), inheriting elements as appropriate from parent, and also
+// having a default style for the "initial" setting
+func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props) {
+	// direct font styling is used only for special cases -- don't do this:
+	// if !fs.StyleSet && parent != nil { // first time
+	// 	FontStyleFields.Inherit(fs, parent)
+	// }
+	FontStyleFields.Style(fs, parent, props)
+	fs.SetStylePost()
+}
+
+// ToDots calls ToDots on all units.Value fields in the style (recursively)
+func (fs *FontStyle) ToDots(ctxt *units.Context) {
+	FontStyleFields.ToDots(fs, ctxt)
+}
+
+// FontStyleDefault is default style can be used when property specifies "default"
+var FontStyleDefault FontStyle
+
+// FontStyleFields contain the StyledFields for FontStyle type
+var FontStyleFields = initFontStyle()
+
+func initFontStyle() *StyledFields {
+	FontStyleDefault.Defaults()
+	sf := &StyledFields{}
+	sf.Init(&FontStyleDefault)
+	return sf
 }
 
 //////////////////////////////////////////////////////////////////////////////////

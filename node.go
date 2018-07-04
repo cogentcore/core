@@ -18,7 +18,7 @@ import (
 type NodeBase struct {
 	ki.Node
 	Class   string          `desc:"user-defined class name used primarily for attaching CSS styles to different display elements"`
-	CSS     ki.Props        `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements"`
+	CSS     ki.Props        `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
 	CSSAgg  ki.Props        `json:"-" xml:"-" desc:"aggregated css properties from all higher nodes down to me"`
 	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
 	ObjBBox image.Rectangle `json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
@@ -216,6 +216,33 @@ func (g *NodeBase) StyleProps(selector string) ki.Props {
 	}
 	log.Printf("gi.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, g.PathUnique())
 	return nil
+}
+
+// AggCSS aggregates css properties
+func AggCSS(agg *ki.Props, css ki.Props) {
+	if *agg == nil {
+		*agg = make(ki.Props, len(css))
+	}
+	for key, val := range css {
+		(*agg)[key] = val
+	}
+}
+
+// SetStdXMLAttr sets standard attributes of node given XML-style name /
+// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
+func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
+	switch name {
+	case "id":
+		g.SetName(val)
+		return true
+	case "class":
+		g.Class = val
+		return true
+	case "style":
+		SetStylePropsXML(val, g.Props)
+		return true
+	}
+	return false
 }
 
 // standard css properties on nodes apply, including visible, etc.
