@@ -220,7 +220,7 @@ func (sr *SpanRender) SetRunes(str []rune, face font.Face, clr, bg color.Color) 
 // letter and word spacing parameters (which can be negative)
 func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
 	if err := sr.IsValid(); err != nil {
-		log.Println(err)
+		// log.Println(err)
 		return
 	}
 	sr.Dir = LRTB
@@ -407,11 +407,12 @@ func (tr *TextRender) InsertSpan(at int, ns *SpanRender) {
 }
 
 // Render does text rendering into given image, within given bounds, at given
-// absolute position offset -- any applicable transforms (aside from the
-// char-specific rotation in Render) must be applied in advance in computing
-// the relative positions of the runes, and the overall font size, etc.  todo:
-// does not currently support stroking, only filling of text -- probably need
-// to grab path from font and use paint rendering for stroking
+// absolute position offset (specifying position of text baseline) -- any
+// applicable transforms (aside from the char-specific rotation in Render)
+// must be applied in advance in computing the relative positions of the
+// runes, and the overall font size, etc.  todo: does not currently support
+// stroking, only filling of text -- probably need to grab path from font and
+// use paint rendering for stroking
 func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 	pr := prof.Start("RenderText")
 	defer pr.End()
@@ -547,6 +548,23 @@ func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 	}
 }
 
+// Render at given top position -- uses first font info to compute baseline
+// offset and calls overall Render -- convenience for simple widget rendering
+// without layouts
+func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
+	if len(tr.Spans) == 0 {
+		return
+	}
+	sr := &(tr.Spans[0])
+	if sr.IsValid() != nil {
+		return
+	}
+	curFace := sr.Render[0].Face
+	pos := tpos.Fixed()
+	pos.Y += curFace.Metrics().Ascent
+	tr.Render(rs, pos)
+}
+
 // SetString is for basic plain, non-styled rendering: configures a single
 // SpanRender with the entire string, and does standard layout (LR currently)
 func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color) {
@@ -556,6 +574,10 @@ func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color)
 	sr := &(tr.Spans[0])
 	sr.SetString(str, face, clr, bg)
 	sr.SetRunePosLR(0, 0)
+	ssz := sr.SizeHV()
+	vht := face.Metrics().Height
+	tr.Size = Vec2D{FixedToFloat32(ssz.X), FixedToFloat32(vht)}
+
 }
 
 // SetRunes is for basic plain, non-styled rendering: configures a single
@@ -567,6 +589,9 @@ func (tr *TextRender) SetRunes(str []rune, face font.Face, clr, bg color.Color) 
 	sr := &(tr.Spans[0])
 	sr.SetRunes(str, face, clr, bg)
 	sr.SetRunePosLR(0, 0)
+	ssz := sr.SizeHV()
+	vht := face.Metrics().Height
+	tr.Size = Vec2D{FixedToFloat32(ssz.X), FixedToFloat32(vht)}
 }
 
 // SetHTML sets text by decoding all standard inline HTML text style

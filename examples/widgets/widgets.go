@@ -229,7 +229,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	txrow.Lay = gi.LayoutRow
 	// txrow.SetProp("align-horiz", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
-	// txrow.SetStretchMaxHeight()
+	txrow.SetStretchMaxHeight()
 
 	edit1 := txrow.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 	edit1.SetText("Edit this text")
@@ -253,7 +253,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
 
-	txrow.SetPropChildren("margin", units.NewValue(2, units.Ex))
+	// txrow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	vp.UpdateEndNoSig(updt)
 

@@ -116,7 +116,8 @@ func (g *Label) Render2D() {
 		st := &g.Sty
 		rs := &g.Viewport.Render
 		g.RenderStdBox(st)
-		g.Render.Render(rs, g.LayData.AllocPos.Fixed())
+		pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
+		g.Render.Render(rs, pos.Fixed())
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
@@ -172,7 +173,8 @@ type TextField struct {
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	Render       TextRender              `desc:"render version of the text"`
+	RenderAll    TextRender              `desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `desc:"render version of just visible text"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
 	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
@@ -183,9 +185,7 @@ type TextField struct {
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	CharPos      []float32               `json:"-" xml:"-" desc:"character positions, for point just AFTER the given character"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	lastSizedTxt []rune
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -834,10 +834,10 @@ func (tf *TextField) Style2D() {
 	}
 }
 
-func (tf *TextField) UpdateRender() bool {
+func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
-	tf.Render.SetRunes(tf.EditTxt, st.Font.Face, st.Font.Color, nil)
-	tf.lastSizedTxt = tf.EditTxt
+	st.Font.LoadFont(&st.UnContext, "")
+	tf.RenderAll.SetRunes(tf.EditTxt, st.Font.Face, st.Font.Color, nil)
 	return true
 }
 
@@ -850,13 +850,11 @@ func (tf *TextField) Size2D() {
 		maxlen = 50
 	}
 	tf.EndPos = kit.MinInt(len(tf.EditTxt), maxlen)
-	tf.UpdateRender()
-	w := float32(10.0)
-	sz := len(tf.CharPos)
-	if sz > 0 {
-		w = tf.TextWidth(tf.StartPos, tf.EndPos)
-	}
+	tf.UpdateRenderAll()
+	tf.FontHeight = tf.RenderAll.Size.Y
+	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
+	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
 	tf.Size2DFromWH(w, tf.FontHeight)
 }
 
@@ -868,19 +866,20 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle) {
 	tf.Layout2DChildren()
 }
 
-// StartCharPos returns the starting position of the given character -- CharPos contains the ending positions
+// StartCharPos returns the starting position of the given rune
 func (tf *TextField) StartCharPos(idx int) float32 {
-	if idx <= 0 {
+	if idx <= 0 || len(tf.RenderAll.Spans) != 1 {
 		return 0.0
 	}
-	sz := len(tf.CharPos)
+	sr := &(tf.RenderAll.Spans[0])
+	sz := len(sr.Render)
 	if sz == 0 {
 		return 0.0
 	}
-	if idx > sz {
-		return tf.CharPos[sz-1]
+	if idx >= sz {
+		return FixedToFloat32(sr.LastPos.X)
 	}
-	return tf.CharPos[idx-1]
+	return FixedToFloat32(sr.Render[idx].RelPos.X)
 }
 
 // TextWidth returns the text width in dots between the two text string
@@ -937,7 +936,7 @@ func (tf *TextField) RenderSelect() {
 func (tf *TextField) AutoScroll() {
 	st := &tf.Sty
 
-	tf.UpdateRender()
+	tf.UpdateRenderAll()
 
 	sz := len(tf.EditTxt)
 
@@ -1040,10 +1039,15 @@ func (tf *TextField) Render2D() {
 		} else {
 			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
-		tf.RenderStdBox(&tf.Sty)
-		// cur := tf.EditTxt[tf.StartPos:tf.EndPos]
+		rs := &tf.Viewport.Render
+		st := &tf.Sty
+		st.Font.LoadFont(&st.UnContext, "")
+		tf.RenderStdBox(st)
+		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
+		tf.RenderVis.SetRunes(cur, st.Font.Face, st.Font.Color, nil)
 		tf.RenderSelect()
-		// tf.Render2DText(string(cur))
+		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
+		tf.RenderVis.RenderTopPos(rs, pos)
 		if tf.HasFocus() {
 			tf.RenderCursor()
 		}
