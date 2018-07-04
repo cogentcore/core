@@ -7,6 +7,7 @@ package gi
 import (
 	"image/color"
 
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -42,7 +43,7 @@ func (pf *FillStyle) Defaults() {
 }
 
 // SetStylePost does some updating after setting the style from user properties
-func (pf *FillStyle) SetStylePost() {
+func (pf *FillStyle) SetStylePost(props ki.Props) {
 	if pf.Color.IsNil() {
 		pf.On = false
 	} else {

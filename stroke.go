@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -82,7 +83,7 @@ func (ps *StrokeStyle) Defaults() {
 }
 
 // SetStylePost does some updating after setting the style from user properties
-func (ps *StrokeStyle) SetStylePost() {
+func (ps *StrokeStyle) SetStylePost(props ki.Props) {
 	if ps.Color.IsNil() {
 		ps.On = false
 	} else {

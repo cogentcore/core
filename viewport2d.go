@@ -372,7 +372,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (vp *Viewport2D) FillViewport() {
 	rs := vp.Render
-	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Sty.Background.Color)
+	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Sty.Font.BgColor)
 }
 
 func (vp *Viewport2D) Render2D() {

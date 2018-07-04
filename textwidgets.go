@@ -834,13 +834,9 @@ func (tf *TextField) Style2D() {
 	}
 }
 
-func (tf *TextField) UpdateCharPos() bool {
-	rs := &tf.Viewport.Render
-	pc := &rs.Paint
+func (tf *TextField) UpdateRender() bool {
 	st := &tf.Sty
-	pc.FontStyle = st.Font
-	// tf.CharPos = pc.MeasureChars(tf.EditTxt)
-	// tf.FontHeight = pc.FontHeight()
+	tf.Render.SetRunes(tf.EditTxt, st.Font.Face, st.Font.Color, nil)
 	tf.lastSizedTxt = tf.EditTxt
 	return true
 }
@@ -854,7 +850,7 @@ func (tf *TextField) Size2D() {
 		maxlen = 50
 	}
 	tf.EndPos = kit.MinInt(len(tf.EditTxt), maxlen)
-	tf.UpdateCharPos()
+	tf.UpdateRender()
 	w := float32(10.0)
 	sz := len(tf.CharPos)
 	if sz > 0 {
@@ -934,14 +930,14 @@ func (tf *TextField) RenderSelect() {
 	pc := &rs.Paint
 	st := &tf.StateStyles[TextFieldSel]
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Background.Color)
+	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Font.BgColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
 	st := &tf.Sty
 
-	tf.UpdateCharPos()
+	tf.UpdateRender()
 
 	sz := len(tf.EditTxt)
 

@@ -92,22 +92,24 @@ func SetStylePropsXML(style string, props ki.Props) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Style structs
 
-// style parameters for backgrounds
-type BackgroundStyle struct {
-	Color ColorSpec `xml:"color" desc:"background color"`
-	// todo: all the properties not yet implemented -- mostly about images
-	// Image is like a PaintServer -- includes gradients etc
-	// Attachment -- how the image moves
-	// Clip -- how to clip the image
-	// Origin
-	// Position
-	// Repeat
-	// Size
-}
+// note: background-color is in FontStyle as it is needed to make that the
+// only style needed for text render styling
 
-func (b *BackgroundStyle) Defaults() {
-	b.Color.SetColor(color.White)
-}
+// // BackgroundStyle has style parameters for backgrounds
+// type BackgroundStyle struct {
+// 	// todo: all the properties not yet implemented -- mostly about images
+// 	// Image is like a PaintServer -- includes gradients etc
+// 	// Attachment -- how the image moves
+// 	// Clip -- how to clip the image
+// 	// Origin
+// 	// Position
+// 	// Repeat
+// 	// Size
+// }
+
+// func (b *BackgroundStyle) Defaults() {
+// 	b.Color.SetColor(color.White)
+// }
 
 // BoxSides specifies sides of a box -- some properties can be specified per
 // each side (e.g., border) or not
@@ -180,21 +182,19 @@ var CurrentColor Color
 
 // Style has all the CSS-based style elements -- used for widget-type objects
 type Style struct {
-	IsSet         bool            `desc:"has this style been set from object values yet?"`
-	PropsNil      bool            `desc:"set to true if parent node has no props -- allows optimization of styling"`
-	Display       bool            `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool            `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	Inactive      bool            `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
-	Layout        LayoutStyle     `desc:"layout styles -- do not prefix with any xml"`
-	Border        BorderStyle     `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
-	BoxShadow     ShadowStyle     `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Font          FontStyle       `desc:"font parameters -- no xml prefix"`
-	Text          TextStyle       `desc:"text parameters -- no xml prefix"`
-	Background    BackgroundStyle `xml:"background" desc:"background settings"`
-	Opacity       float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
-	Outline       BorderStyle     `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
-	PointerEvents bool            `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
-	UnContext     units.Context   `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	Display       bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool          `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
+	Layout        LayoutStyle   `desc:"layout styles -- do not prefix with any xml"`
+	Border        BorderStyle   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	BoxShadow     ShadowStyle   `xml:"box-shadow" desc:"type of shadow to render around box"`
+	Font          FontStyle     `desc:"font parameters -- no xml prefix -- also has color, background-color"`
+	Text          TextStyle     `desc:"text parameters -- no xml prefix"`
+	Outline       BorderStyle   `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
+	PointerEvents bool          `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	UnContext     units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	IsSet         bool          `desc:"has this style been set from object values yet?"`
+	PropsNil      bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	dotsSet       bool
 	lastUnCtxt    units.Context
 }
@@ -203,10 +203,8 @@ func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.IsSet = false
 	s.UnContext.Defaults()
-	s.Opacity = 1.0
 	s.Outline.Style = BorderNone
 	s.PointerEvents = true
-	s.Background.Defaults()
 	s.Layout.Defaults()
 	s.Font.Defaults()
 	s.Text.Defaults()
@@ -225,7 +223,7 @@ func (s *Style) CopyFrom(cp *Style) {
 	ds := s.dotsSet
 	lu := s.lastUnCtxt
 	*s = *cp
-	s.Background.Color = cp.Background.Color
+	s.Font.BgColor = cp.Font.BgColor
 	s.IsSet = is
 	s.PropsNil = pn
 	s.dotsSet = ds
@@ -240,9 +238,9 @@ func (s *Style) SetStyleProps(parent *Style, props ki.Props) {
 	}
 	StyleFields.Style(s, parent, props)
 	s.Text.AlignV = s.Layout.AlignV
-	s.Layout.SetStylePost()
-	s.Font.SetStylePost()
-	s.Text.SetStylePost()
+	s.Layout.SetStylePost(props)
+	s.Font.SetStylePost(props)
+	s.Text.SetStylePost(props)
 	s.PropsNil = (len(props) == 0)
 	s.IsSet = true
 }

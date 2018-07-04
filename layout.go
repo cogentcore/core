@@ -140,7 +140,7 @@ func (ls *LayoutStyle) Defaults() {
 	ls.ScrollBarWidth.Set(16.0, units.Px)
 }
 
-func (ls *LayoutStyle) SetStylePost() {
+func (ls *LayoutStyle) SetStylePost(props ki.Props) {
 }
 
 // return the alignment for given dimension
@@ -1367,7 +1367,7 @@ func (fr *Frame) Render2D() {
 
 		pos := fr.LayData.AllocPos
 		sz := fr.LayData.AllocSize
-		pc.FillBox(rs, pos, sz, &st.Background.Color)
+		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
 		rad := st.Border.Radius.Dots
 		pos = pos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
@@ -1417,7 +1417,7 @@ func (fr *Frame) RenderStripes() {
 
 	delta := fr.Move2DDelta(image.ZP)
 
-	hic := st.Background.Color.Color.Highlight(10)
+	hic := st.Font.BgColor.Color.Highlight(10)
 	if fr.Stripes == RowStripes {
 		for r, gd := range fr.GridData[Row] {
 			if r%2 == 0 {

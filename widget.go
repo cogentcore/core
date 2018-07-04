@@ -480,13 +480,13 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 		// pc.FillStyle.Opacity = 1.0
 	}
 	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
-	if !st.Background.Color.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.Background.Color)
+	if !st.Font.BgColor.IsNil() {
+		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 	}
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetColor(&st.Background.Color)
+	// pc.FillStyle.SetColor(&st.Font.BgColor)
 	pc.FillStyle.SetColor(nil)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }

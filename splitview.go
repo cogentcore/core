@@ -423,7 +423,7 @@ func (g *Splitter) Render2DDefaultStyle() {
 		g.Parts.Render2DTree()
 	} else {
 		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColorSpec(&st.Background.Color)
+		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
 		pos := NewVec2DFmPoint(g.VpBBox.Min)
 		pos.SetSubDim(OtherDim(g.Dim), 10.0)

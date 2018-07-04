@@ -33,6 +33,8 @@ import (
 // -- most of font information is inherited
 type FontStyle struct {
 	Color            Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
+	BgColor          ColorSpec       `xml:"background-color" desc:"background color -- not inherited, transparent by default"`
+	Opacity          float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Size             units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
 	Family           string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
 	Style            FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
@@ -59,14 +61,27 @@ type FontStyle struct {
 
 func (fs *FontStyle) Defaults() {
 	fs.Color.SetColor(color.Black)
+	fs.Opacity = 1.0
 	fs.FaceName = "Arial"
 	fs.Size = units.NewValue(12, units.Pt)
 	fs.Direction = LTR
 	fs.OrientationVert = 90
 }
 
-// SetStylePost does any updates after generic xml-tag property setting
-func (fs *FontStyle) SetStylePost() {
+// SetStylePost does any updates after generic xml-tag property setting -- use
+// for anything that also has non-standard values that might not be processed
+// properly by default
+func (fs *FontStyle) SetStylePost(props ki.Props) {
+	pfs, ok := props["font-size"]
+	if ok {
+		fsz, ok := pfs.(string)
+		if ok {
+			psz, ok := FontSizePoints[fsz]
+			if ok {
+				fs.Size = units.NewValue(psz, units.Pt)
+			}
+		}
+	}
 }
 
 // SetDeco sets decoration (underline, etc), which uses bitflag to allow multiple combinations
@@ -205,7 +220,7 @@ func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props) {
 	// 	FontStyleFields.Inherit(fs, parent)
 	// }
 	FontStyleFields.Style(fs, parent, props)
-	fs.SetStylePost()
+	fs.SetStylePost(props)
 }
 
 // ToDots calls ToDots on all units.Value fields in the style (recursively)
@@ -235,7 +250,8 @@ func initFontStyle() *StyledFields {
 var FontSizePoints = map[string]float32{
 	"xx-small": 7,
 	"x-small":  7.5,
-	"small":    10,
+	"small":    10, // small is also "smaller"
+	"smallf":   10, // smallf = small font size..
 	"medium":   12,
 	"large":    14,
 	"x-large":  18,

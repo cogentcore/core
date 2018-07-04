@@ -73,14 +73,19 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = `<x-large>This is a <b>demonstration</b> of the
-<span style="color:red">various</span> <i>GoGi</i> Widgets</x-large><br>
+	title.Text = `This is a <b>demonstration</b> of the
+<span style="color:red">various</span> <i>GoGi</i> Widgets<br>
 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
-<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
+<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
+<q>and</q> <mark>marked text</mark> and <span style="text-decoration:blink">overline</span>
+and Sub<sub>script</sub> and Super<sup>script</sup>`
 	title.SetProp("text-align", gi.AlignCenter) // todo: center, right not working
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
-	title.SetProp("font-size", units.NewValue(20, units.Pt))
+	title.SetProp("font-size", "x-large")
+	// title.SetProp("letter-spacing", 2)
+	title.SetProp("line-height", 1.5)
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	//////////////////////////////////////////

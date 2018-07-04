@@ -81,8 +81,7 @@ type Paint struct {
 	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
-	FontStyle   FontStyle
-	Opacity     float32       `xml:"opacity" desc:"alpha value to apply to all elements"`
+	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
 	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
@@ -96,7 +95,6 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.XForm = Identity2D()
-	pc.Opacity = 1
 }
 
 func NewPaint() Paint {
@@ -126,9 +124,9 @@ func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
 		PaintFields.Inherit(pc, parent)
 	}
 	PaintFields.Style(pc, parent, props)
-	pc.StrokeStyle.SetStylePost()
-	pc.FillStyle.SetStylePost()
-	pc.FontStyle.SetStylePost()
+	pc.StrokeStyle.SetStylePost(props)
+	pc.FillStyle.SetStylePost(props)
+	pc.FontStyle.SetStylePost(props)
 	pc.PropsNil = (len(props) == 0)
 	pc.StyleSet = true
 }

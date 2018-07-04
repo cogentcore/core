@@ -65,11 +65,21 @@ var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
 
 // see colorparse.go for ColorSpec.SetString() method
 
+// IsNil tests for nil solid or gradient colors
 func (cs *ColorSpec) IsNil() bool {
 	if cs.Source == SolidColor {
 		return cs.Color.IsNil()
 	}
 	return cs.Gradient == nil
+}
+
+// ColorOrNil returns the solid color if non-nil, or nil otherwise -- for
+// consumers that handle nil colors
+func (cs *ColorSpec) ColorOrNil() color.Color {
+	if cs.Color.IsNil() {
+		return nil
+	}
+	return cs.Color
 }
 
 // SetColor sets a solid color
@@ -1096,7 +1106,7 @@ func (sv *ColorView) Update() {
 	sv.UpdateSliderGrid()
 	if sv.Color != nil {
 		v, _ := sv.Value()
-		v.Sty.Background.Color.Color = *sv.Color // direct copy
+		v.Sty.Font.BgColor.Color = *sv.Color // direct copy
 	}
 	sv.UpdateEnd(updt)
 }
