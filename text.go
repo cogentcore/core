@@ -208,7 +208,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
 	var fpos fixed.Int26_6
 	curFace := sr.Render[0].Face
 	for i, r := range sr.Text {
-		curFace := sr.Render[i].CurFace(curFace)
+		curFace = sr.Render[i].CurFace(curFace)
 		fht := curFace.Metrics().Ascent + curFace.Metrics().Descent
 		if prevR >= 0 {
 			fpos += curFace.Kern(prevR, r)
@@ -497,29 +497,17 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			fs := *curf
 			nm := se.Name.Local
 			switch nm {
-			case "strong":
-				fallthrough
-			case "b":
+			case "b", "strong":
 				fs.Weight = WeightBold
 				fs.LoadFont(ctxt, "")
-			case "cite":
-				fallthrough
-			case "var":
-				fallthrough
-			case "em":
-				fallthrough
-			case "i":
+			case "i", "em", "var", "cite":
 				fs.Style = FontItalic
 				fs.LoadFont(ctxt, "")
 			case "ins":
 				fallthrough
 			case "u":
 				fs.SetDeco(DecoUnderline)
-			case "strike": // deprecated
-				fallthrough
-			case "del":
-				fallthrough
-			case "s":
+			case "s", "del", "strike":
 				fs.SetDeco(DecoLineThrough)
 			case "sup":
 				fs.SetDeco(DecoSuper)
@@ -537,20 +525,16 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
 				fs.LoadFont(ctxt, "")
+			case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
+				fs.Size = units.NewValue(FontSizePoints[nm], units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt, "")
 			case "mark":
 				// todo: mark requires setting background color -- need a stack, etc, or add again to fontstyle..
-			case "acronym":
-				fallthrough
-			case "abbr":
+			case "abbr", "acronym":
 				// default style is a *dotted* underline.. sheesh
 				fs.SetDeco(DecoDottedUnderline)
-			case "tt":
-				fallthrough
-			case "kbd":
-				fallthrough
-			case "samp":
-				fallthrough
-			case "code":
+			case "tt", "kbd", "samp", "code":
 				fs.Family = "monospace"
 				fs.LoadFont(ctxt, "")
 			case "span":
@@ -705,7 +689,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	// first pass gets rune positions and wraps text as needed, and gets max width
 	si := 0
 	for si < len(tr.Spans) {
-		sr := tr.Spans[si]
+		sr := &(tr.Spans[si])
 		if sr.IsValid() != nil {
 			continue
 		}
@@ -724,7 +708,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 						maxw = ssz.X
 					}
 					si++
-					sr = tr.Spans[si] // keep going with nsr
+					sr = &(tr.Spans[si]) // keep going with nsr
 					ssz = sr.SizeHV()
 					if ssz.X <= szf.X {
 						if ssz.X > maxw {

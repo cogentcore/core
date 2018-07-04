@@ -55,7 +55,6 @@ func mainrun() {
 			"background-color": gi.Color{240, 225, 255, 255},
 		},
 		"kbd": ki.Props{
-			// "font-family": "Arial",
 			"color": "blue",
 		},
 	}
@@ -74,14 +73,13 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = `This is a <b>demonstration</b> of the
-<span style="color:red">various</span> <i>GoGi</i> Widgets<br>
-<small><small>Shortcuts: <kbd>Control+Alt+P</kbd> = Preferences,
-<kbd>Control+Alt+E</kbd> = Editor, <kbd>Command +/- </kbd> = zoom</small></small>`
-	title.SetProp("text-align", gi.AlignLeft) // todo: center, right not working
+	title.Text = `<x-large>This is a <b>demonstration</b> of the
+<span style="color:red">various</span> <i>GoGi</i> Widgets</x-large><br>
+<large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
+<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
+	title.SetProp("text-align", gi.AlignCenter) // todo: center, right not working
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
-	// title.SetProp("font-weight", "bold")
 	title.SetProp("font-size", units.NewValue(20, units.Pt))
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 

@@ -106,11 +106,11 @@ func (fs *FontStyle) FaceNm() string {
 			fnm = "Courier New" // this is the tt name
 			break
 		case "monospace":
-			// if FontLibrary.FontAvail("Andale Mono") {
-			// 	fnm = "Andale Mono"
-			// } else {
-			fnm = "Courier New"
-			// }
+			if FontLibrary.FontAvail("Andale Mono") {
+				fnm = "Andale Mono"
+			} else {
+				fnm = "Courier New"
+			}
 			break
 		case "cursive":
 			if FontLibrary.FontAvail("Comic Sans") {
@@ -231,7 +231,7 @@ func initFontStyle() *StyledFields {
 
 // FontSizePoints maps standard font names to standard point sizes -- we use
 // dpi zoom scaling instead of rescaling "medium" font size, so generally use
-// these values as-is.  smaller and larger can move in 2pt increments
+// these values as-is.  smaller and larger relative scaling can move in 2pt increments
 var FontSizePoints = map[string]float32{
 	"xx-small": 7,
 	"x-small":  7.5,
