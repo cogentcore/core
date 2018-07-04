@@ -69,6 +69,13 @@ func mainrun() {
 	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	fnm.SetMinPrefWidth(units.NewValue(20, units.Em))
 
+	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
+	zoomout.SetIcon("zoom-out")
+
+	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
+	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	zoom.SetValue(ZoomFactor)
+
 	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
@@ -77,13 +84,6 @@ func mainrun() {
 		"width":  units.NewValue(2, units.Em),
 		"height": units.NewValue(2, units.Em),
 	})
-
-	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
-	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	zoom.SetValue(ZoomFactor)
-
-	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
-	zoomout.SetIcon("zoom-out")
 
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {

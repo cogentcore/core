@@ -52,6 +52,7 @@ type RuneRender struct {
 	RelPos  fixed.Point26_6 `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
 	Size    fixed.Point26_6 `desc:"size of the rune itself, exclusive of spacing that might surround it"`
 	RotRad  float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
+	ScaleX  float32         `desc:"scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling"`
 }
 
 // HasNil returns error if any of the key info (face, color) is nil -- only

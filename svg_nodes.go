@@ -265,18 +265,19 @@ var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
 
 func (g *SVGText) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	// todo: this is not right -- update
-	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+20, g.Pos.Y+20)
+	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Render.Size.X, g.Pos.Y+g.Render.Size.Y)
 }
 
 func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	// tempting to support HTML here but not really compatible with layout..
 	pc.FontStyle.Color = pc.FillStyle.Color.Color
-	g.Render.SetHTML(g.Text, &(pc.FontStyle), &(pc.UnContext), g.CSSAgg)
-	// todo:
-	// g.Render.LayoutStdLR()
+	pc.FontStyle.LoadFont(&pc.UnContext, "")
+	g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil)
+	pos := pc.TransformPoint(rs, g.Pos.X, g.Pos.Y)
+	g.Render.Render(rs, pos.Fixed())
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()

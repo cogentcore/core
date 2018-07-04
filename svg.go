@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"io"
 	"log"
 	"os"
@@ -259,6 +260,7 @@ func (svg *SVG) Init2D() {
 	svg.Viewport2D.Init2D()
 	bitflag.Set(&svg.Flag, int(VpFlagSVG)) // we are an svg type
 	svg.Pnt.Defaults()
+	svg.Pnt.FontStyle.BgColor.SetColor(color.White)
 }
 
 func (svg *SVG) Size2D() {

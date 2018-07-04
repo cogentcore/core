@@ -65,7 +65,7 @@ func ToLabel(it interface{}) string {
 type Label struct {
 	WidgetBase
 	Text   string     `xml:"text" desc:"label to display"`
-	Render TextRender `desc:"render data for text label"`
+	Render TextRender `xml:"-" json:"-" desc:"render data for text label"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -173,8 +173,6 @@ type TextField struct {
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	RenderAll    TextRender              `desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender              `desc:"render version of just visible text"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
 	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
@@ -184,6 +182,8 @@ type TextField struct {
 	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 }
@@ -1044,9 +1044,9 @@ func (tf *TextField) Render2D() {
 		st.Font.LoadFont(&st.UnContext, "")
 		tf.RenderStdBox(st)
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
-		tf.RenderVis.SetRunes(cur, st.Font.Face, st.Font.Color, nil)
 		tf.RenderSelect()
 		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
+		tf.RenderVis.SetRunes(cur, st.Font.Face, st.Font.Color, nil)
 		tf.RenderVis.RenderTopPos(rs, pos)
 		if tf.HasFocus() {
 			tf.RenderCursor()
