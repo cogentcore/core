@@ -117,7 +117,7 @@ func (g *Label) Render2D() {
 		rs := &g.Viewport.Render
 		g.RenderStdBox(st)
 		pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
-		g.Render.Render(rs, pos.Fixed())
+		g.Render.Render(rs, pos)
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
@@ -877,9 +877,9 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 		return 0.0
 	}
 	if idx >= sz {
-		return FixedToFloat32(sr.LastPos.X)
+		return sr.LastPos.X
 	}
-	return FixedToFloat32(sr.Render[idx].RelPos.X)
+	return sr.Render[idx].RelPos.X
 }
 
 // TextWidth returns the text width in dots between the two text string

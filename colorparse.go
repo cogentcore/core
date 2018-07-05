@@ -477,7 +477,9 @@ func readFraction(v string) (f float64, err error) {
 func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
 	switch attr.Name.Local {
 	case "gradientTransform":
-		// cs.Gradient.Matrix, err = cursor.parseTransform(attr.Value)
+		// tx := Identity2D()
+		// tx.SetString(attr.Value)
+		// cs.Gradient.Matrix = tx.ToRasterx() // todo: not working
 	case "gradientUnits":
 		switch strings.TrimSpace(attr.Value) {
 		case "userSpaceOnUse":

@@ -274,26 +274,42 @@ func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
-	orgsz := pc.FontStyle.Size
-	pc.FontStyle.Size = units.Value{orgsz.Val * rs.XForm.YY, orgsz.Un, orgsz.Dots * rs.XForm.YY}
-	scalex := rs.XForm.XX / rs.XForm.YY
-	if scalex == 1 {
-		scalex = 0
-	}
-	pc.FontStyle.LoadFont(&pc.UnContext, "")
-	rot := math32.Atan2(-rs.XForm.XY, rs.XForm.XX)
-	g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil, rot, scalex)
-	pc.FontStyle.Size = orgsz
-	pos := pc.TransformPoint(rs, g.Pos.X, g.Pos.Y)
-	if rot != 0 {
-		tx := Rotate2D(rot)
-		sr := &(g.Render.Spans[0])
-		for i := range sr.Text {
-			sr.Render[i].RelPos = tx.TransformVec2D(NewVec2DFmFixed(sr.Render[i].RelPos)).Fixed()
+	if len(g.Text) > 0 {
+		rot := math32.Atan2(-rs.XForm.XY, rs.XForm.XX)
+		scx := rs.XForm.XX
+		scy := rs.XForm.YY
+		orgsz := pc.FontStyle.Size
+		pos := pc.TransformPoint(rs, g.Pos.X, g.Pos.Y)
+		if rot != 0 {
+			tx := rs.XForm.Rotate(-rot) // undo rotation
+			scx, _ = tx.TransformVector(1, 0)
+			_, scy = tx.TransformVector(0, 1)
+			scalex := scx / scy
+			if scalex == 1 {
+				scalex = 0
+			}
+			pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
+			g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil, rot, scalex)
+			pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
+			pc.FontStyle.LoadFont(&pc.UnContext, "")
+			sr := &(g.Render.Spans[0])
+			sr.Render[0].Face = pc.FontStyle.Face // upscale
+			for i := range sr.Text {
+				sr.Render[i].RelPos = rs.XForm.TransformVectorVec2D(sr.Render[i].RelPos)
+			}
+		} else {
+			pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
+			pc.FontStyle.LoadFont(&pc.UnContext, "")
+			scalex := scx / scy
+			if scalex == 1 {
+				scalex = 0
+			}
+			g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil, rot, scalex)
 		}
+		pc.FontStyle.Size = orgsz
+		g.Render.Render(rs, pos)
+		g.ComputeBBoxSVG()
 	}
-	g.Render.Render(rs, pos.Fixed())
-	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }

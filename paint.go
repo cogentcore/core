@@ -476,11 +476,18 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 func (pc *Paint) stroke(rs *RenderState) {
 	pr := prof.Start("Paint.stroke")
 
+	dash := pc.StrokeStyle.Dashes
+	if dash != nil {
+		sc := float64(0.5 * (rs.XForm.XX + rs.XForm.YY))
+		for i := range dash {
+			dash[i] *= sc
+		}
+	}
 	rs.Raster.SetStroke(
 		Float32ToFixed(pc.StrokeWidth(rs)),
 		Float32ToFixed(pc.StrokeStyle.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
-		pc.StrokeStyle.Dashes, 0,
+		dash, 0,
 	)
 	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.ObjBounds))
 	rs.Scanner.SetClip(rs.Bounds)
@@ -496,7 +503,15 @@ func (pc *Paint) fill(rs *RenderState) {
 
 	rf := &rs.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
+	if pc.FillStyle.Color.Source == RadialGradient {
+		// todo: none of this is working..
+		// orgm := pc.FillStyle.Color.Gradient.Matrix
+		// pc.FillStyle.Color.Gradient.Matrix = rs.XForm.ToRasterx().Mult(pc.FillStyle.Color.Gradient.Matrix)
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
+		// pc.FillStyle.Color.Gradient.Matrix = orgm
+	} else {
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
+	}
 	rs.Scanner.SetClip(rs.Bounds)
 
 	rs.Path.AddTo(rf)

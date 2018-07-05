@@ -15,6 +15,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -597,13 +598,19 @@ func (a XFormMatrix2D) TransformVector(x, y float32) (tx, ty float32) {
 	return
 }
 
+func (a XFormMatrix2D) TransformVectorVec2D(v Vec2D) Vec2D {
+	tx := a.XX*v.X + a.XY*v.Y
+	ty := a.YX*v.X + a.YY*v.Y
+	return Vec2D{tx, ty}
+}
+
 func (a XFormMatrix2D) TransformPoint(x, y float32) (tx, ty float32) {
 	tx = a.XX*x + a.XY*y + a.X0
 	ty = a.YX*x + a.YY*y + a.Y0
 	return
 }
 
-func (a XFormMatrix2D) TransformVec2D(v Vec2D) Vec2D {
+func (a XFormMatrix2D) TransformPointVec2D(v Vec2D) Vec2D {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return Vec2D{tx, ty}
@@ -633,6 +640,10 @@ func (a XFormMatrix2D) Shear(x, y float32) XFormMatrix2D {
 
 func (a XFormMatrix2D) Skew(x, y float32) XFormMatrix2D {
 	return Skew2D(x, y).Multiply(a)
+}
+
+func (a XFormMatrix2D) ToRasterx() rasterx.Matrix2D {
+	return rasterx.Matrix2D{float64(a.XX), float64(a.YX), float64(a.XY), float64(a.YY), float64(a.X0), float64(a.Y0)}
 }
 
 // SetString processes the standard SVG-style transform strings

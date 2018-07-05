@@ -127,6 +127,11 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle) interf
 		if cs.Gradient == nil {
 			return nil
 		}
+		if cs.Source == RadialGradient {
+			cs.Gradient.IsRadial = true
+		} else {
+			cs.Gradient.IsRadial = false
+		}
 		SetGradientBounds(cs.Gradient, bounds)
 		return cs.Gradient.GetColorFunction(float64(opacity))
 	}

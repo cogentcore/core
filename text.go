@@ -17,6 +17,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -25,7 +26,6 @@ import (
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/image/math/fixed"
 	"golang.org/x/net/html/charset"
 )
 
@@ -43,14 +43,15 @@ import (
 // RuneRender contains fully explicit data needed for rendering a single rune
 // -- Face and Color can be nil after first element, in which case the last
 // non-nil is used -- likely slightly more efficient to avoid setting all
-// those pointers
+// those pointers -- float32 values used to support better accuracy when
+// transforming points
 type RuneRender struct {
 	Face    font.Face       `desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
 	Color   color.Color     `desc:"color to draw characters in"`
 	BgColor color.Color     `desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
 	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., <P> vs <BR>)"`
-	RelPos  fixed.Point26_6 `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
-	Size    fixed.Point26_6 `desc:"size of the rune itself, exclusive of spacing that might surround it"`
+	RelPos  Vec2D           `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
+	Size    Vec2D           `desc:"size of the rune itself, exclusive of spacing that might surround it"`
 	RotRad  float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
 	ScaleX  float32         `desc:"scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling"`
 }
@@ -85,17 +86,17 @@ func (rr *RuneRender) CurColor(curColor color.Color) color.Color {
 }
 
 // RelPosAfterLR returns the relative position after given rune for LR order: RelPos.X + Size.X
-func (rr *RuneRender) RelPosAfterLR() fixed.Int26_6 {
+func (rr *RuneRender) RelPosAfterLR() float32 {
 	return rr.RelPos.X + rr.Size.X
 }
 
 // RelPosAfterRL returns the relative position after given rune for RL order: RelPos.X - Size.X
-func (rr *RuneRender) RelPosAfterRL() fixed.Int26_6 {
+func (rr *RuneRender) RelPosAfterRL() float32 {
 	return rr.RelPos.X - rr.Size.X
 }
 
 // RelPosAfterTB returns the relative position after given rune for TB order: RelPos.Y + Size.Y
-func (rr *RuneRender) RelPosAfterTB() fixed.Int26_6 {
+func (rr *RuneRender) RelPosAfterTB() float32 {
 	return rr.RelPos.Y + rr.Size.Y
 }
 
@@ -115,11 +116,11 @@ func (rr *RuneRender) RelPosAfterTB() fixed.Int26_6 {
 // span-as-line.  The first RuneRender RelPos for LR text should be at X=0
 // (LastPos = 0 for RL) -- i.e., relpos positions are minimal for given span.
 type SpanRender struct {
-	Text    []rune          `desc:"text as runes"`
-	Render  []RuneRender    `desc:"render info for each rune in one-to-one correspondence"`
-	RelPos  fixed.Point26_6 `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
-	LastPos fixed.Point26_6 `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations"`
-	Dir     TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Text    []rune         `desc:"text as runes"`
+	Render  []RuneRender   `desc:"render info for each rune in one-to-one correspondence"`
+	RelPos  Vec2D          `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+	LastPos Vec2D          `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations"`
+	Dir     TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
 }
 
 // Init initializes a new span with given capacity
@@ -143,9 +144,9 @@ func (sr *SpanRender) IsValid() error {
 // SizeHV computes the size of the text span from the first char to the last
 // position, which is valid for purely horizontal or vertical text lines --
 // either X or Y will be zero depending on orientation
-func (sr *SpanRender) SizeHV() fixed.Point26_6 {
+func (sr *SpanRender) SizeHV() Vec2D {
 	if sr.IsValid() != nil {
-		return fixed.Point26_6{}
+		return Vec2D{}
 	}
 	sz := sr.Render[0].RelPos.Sub(sr.LastPos)
 	if sz.X < 0 {
@@ -227,7 +228,7 @@ func (sr *SpanRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, 
 // SetRunePosLR sets relative positions of each rune using a flat
 // left-to-right text layout, based on font size info and additional extra
 // letter and word spacing parameters (which can be negative)
-func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
+func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 	if err := sr.IsValid(); err != nil {
 		// log.Println(err)
 		return
@@ -237,23 +238,23 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
 	prevR := rune(-1)
 	lspc := letterSpace
 	wspc := wordSpace
-	var fpos fixed.Int26_6
+	var fpos float32
 	curFace := sr.Render[0].Face
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
 		fht := curFace.Metrics().Ascent + curFace.Metrics().Descent
 		if prevR >= 0 {
-			fpos += curFace.Kern(prevR, r)
+			fpos += FixedToFloat32(curFace.Kern(prevR, r))
 		}
 		rr.RelPos.X = fpos
 		rr.RelPos.Y = 0
 
 		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
-			rr.RelPos.Y = -Float32ToFixed(0.45 * FixedToFloat32(curFace.Metrics().Ascent))
+			rr.RelPos.Y = -0.45 * FixedToFloat32(curFace.Metrics().Ascent)
 		}
 		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
-			rr.RelPos.Y = Float32ToFixed(0.15 * FixedToFloat32(curFace.Metrics().Ascent))
+			rr.RelPos.Y = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
 		}
 
 		a, ok := curFace.GlyphAdvance(r)
@@ -263,8 +264,9 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
 			// TODO: set prevC = '\ufffd'?
 			continue
 		}
-		rr.Size = fixed.Point26_6{a, fht}
-		fpos += a
+		a32 := FixedToFloat32(a)
+		rr.Size = Vec2D{a32, FixedToFloat32(fht)}
+		fpos += a32
 		if i < sz-1 {
 			fpos += lspc
 			if unicode.IsSpace(r) {
@@ -279,9 +281,9 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace fixed.Int26_6) {
 
 // FindWrapPosLR finds a position to do word wrapping to fit within trgSize --
 // RelPos positions must have already been set (e.g., SetRunePosLR)
-func (sr *SpanRender) FindWrapPosLR(trgSize, curSize fixed.Int26_6) int {
+func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	sz := len(sr.Text)
-	idx := int(float32(sz) * (FixedToFloat32(trgSize) / FixedToFloat32(curSize)))
+	idx := int(float32(sz) * (trgSize / curSize))
 	csz := sr.Render[idx].RelPos.X
 	lstgoodi := -1
 	for {
@@ -422,7 +424,7 @@ func (tr *TextRender) InsertSpan(at int, ns *SpanRender) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking
-func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
+func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 	pr := prof.Start("RenderText")
 	defer pr.End()
 
@@ -444,77 +446,75 @@ func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 			Dst:  rs.Image,
 			Src:  image.NewUniform(curColor),
 			Face: curFace,
-			Dot:  tpos,
 		}
 
 		// based on Drawer.DrawString() in golang.org/x/image/font/font.go
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
 			rp := tpos.Add(rr.RelPos)
-			if rp.X.Floor() > rs.Bounds.Max.X || rp.Y.Ceil() < rs.Bounds.Min.Y {
+			if int(math32.Floor(rp.X)) > rs.Bounds.Max.X || int(math32.Ceil(rp.Y)) < rs.Bounds.Min.Y {
 				continue
 			}
-			d.Dot = rp
+			d.Dot = rp.Fixed()
 			curFace = rr.CurFace(curFace)
 			d.Face = curFace
 			asc := curFace.Metrics().Ascent
+			asc32 := FixedToFloat32(asc)
 			if rr.Color != nil {
 				curColor = rr.Color
 				d.Src = image.NewUniform(curColor)
 			}
 
 			// decoration / background rendering
-			var rp32, sz, szn Vec2D
+			var szn Vec2D
 			var nxtdeco int32
 			chknxt := false
 			if rr.BgColor != nil || rr.Deco != 0 {
-				rp32 = NewVec2DFmFixed(rp)
-				sz = NewVec2DFmFixed(rr.Size)
-				dw := .05 * sz.Y
+				dw := .05 * rr.Size.Y
 				pc.StrokeStyle.Width.Dots = dw
 				pc.StrokeStyle.Color.SetColor(curColor)
-				szn = sz // to next char -- todo: this assumes LR
+				szn = rr.Size // to next char -- todo: this assumes LR
 				if i < len(sr.Text)-1 {
 					chknxt = true
 					nxtp := tpos.Add(sr.Render[i+1].RelPos)
-					szn.X = FixedToFloat32(nxtp.X) - rp32.X
+					szn.X = nxtp.X - rp.X
 					nxtdeco = int32(sr.Render[i+1].Deco)
 				}
 				if rr.BgColor != nil {
-					sp := rp32
-					sp.Y -= FixedToFloat32(curFace.Metrics().Ascent)
+					sp := rp
+					sp.Y -= asc32
 					if chknxt && sr.Render[i+1].BgColor != nil {
 						pc.FillBoxColor(rs, sp, szn, rr.BgColor)
 					} else {
-						pc.FillBoxColor(rs, sp, sz, rr.BgColor)
+						pc.FillBoxColor(rs, sp, rr.Size, rr.BgColor)
 					}
 				}
 				if bitflag.Has32(int32(rr.Deco), int(DecoUnderline)) {
-					yp := rp32.Y + dw
+					yp := rp.Y + dw
 					if chknxt && bitflag.Has32(nxtdeco, int(DecoUnderline)) {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+szn.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
 					} else {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+sz.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
 					}
 					pc.Stroke(rs)
 				}
 				if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
 					pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
-					yp := rp32.Y + pc.StrokeStyle.Width.Dots
+					yp := rp.Y + pc.StrokeStyle.Width.Dots
 					if chknxt && bitflag.Has32(nxtdeco, int(DecoDottedUnderline)) {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+szn.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
 					} else {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+sz.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
 					}
 					pc.Stroke(rs)
 					pc.StrokeStyle.Dashes = nil
 				}
 				if bitflag.Has32(int32(rr.Deco), int(DecoOverline)) {
-					yp := rp32.Y - 1.05*FixedToFloat32(asc)
+					yp := rp.Y - 1.05*asc32
 					if chknxt && bitflag.Has32(nxtdeco, int(DecoOverline)) {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+szn.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
 					} else {
-						pc.DrawLine(rs, rp32.X, yp, rp32.X+sz.X, yp)
+						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
 					}
 					pc.Stroke(rs)
 				}
@@ -532,12 +532,18 @@ func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 
 			// fmt.Printf("r: %v rp: %v dr: %v, srect: %v mp: %v\n", string(r), rp, dr, srect, maskp)
 
+			dbase := Vec2D{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
+
 			if rr.RotRad == 0 {
 				draw.DrawMask(d.Dst, dr, d.Src, image.ZP, mask, maskp, draw.Over)
 			} else {
 				transformer := draw.BiLinear
+				scx := float32(1)
+				if rr.ScaleX != 0 {
+					scx = rr.ScaleX
+				}
 				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
-				m := Translate2D(fx, fy).Rotate(rr.RotRad)
+				m := Translate2D(fx+dbase.X, fy+dbase.Y).Scale(scx, 1).Rotate(rr.RotRad).Translate(-dbase.X, -dbase.Y)
 				s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 				transformer.Transform(d.Dst, s2d, d.Src, srect, draw.Over, &draw.Options{
 					SrcMask:  mask,
@@ -546,11 +552,11 @@ func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 			}
 
 			if bitflag.Has32(int32(rr.Deco), int(DecoLineThrough)) {
-				yp := rp32.Y - 0.25*FixedToFloat32(asc)
+				yp := rp.Y - 0.25*asc32
 				if chknxt && bitflag.Has32(nxtdeco, int(DecoLineThrough)) {
-					pc.DrawLine(rs, rp32.X, yp, rp32.X+szn.X, yp)
+					pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
 				} else {
-					pc.DrawLine(rs, rp32.X, yp, rp32.X+sz.X, yp)
+					pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
 				}
 				pc.Stroke(rs)
 			}
@@ -570,8 +576,8 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 		return
 	}
 	curFace := sr.Render[0].Face
-	pos := tpos.Fixed()
-	pos.Y += curFace.Metrics().Ascent
+	pos := tpos
+	pos.Y += FixedToFloat32(curFace.Metrics().Ascent)
 	tr.Render(rs, pos)
 }
 
@@ -586,7 +592,7 @@ func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color,
 	sr.SetRunePosLR(0, 0)
 	ssz := sr.SizeHV()
 	vht := face.Metrics().Height
-	tr.Size = Vec2D{FixedToFloat32(ssz.X), FixedToFloat32(vht)}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
 }
 
@@ -601,7 +607,7 @@ func (tr *TextRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, 
 	sr.SetRunePosLR(0, 0)
 	ssz := sr.SizeHV()
 	vht := face.Metrics().Height
-	tr.Size = Vec2D{FixedToFloat32(ssz.X), FixedToFloat32(vht)}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 }
 
 // SetHTML sets text by decoding all standard inline HTML text style
@@ -851,15 +857,13 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 
 	tr.Dir = LRTB
 	fontSty.LoadFont(ctxt, "")
-	asc := fontSty.Face.Metrics().Ascent
-	dsc := fontSty.Face.Metrics().Descent
+	asc := FixedToFloat32(fontSty.Face.Metrics().Ascent)
+	dsc := FixedToFloat32(fontSty.Face.Metrics().Descent)
 	fht := asc + dsc
-	lspc := Float32ToFixed(fontSty.Height * txtSty.EffLineHeight())
+	lspc := fontSty.Height * txtSty.EffLineHeight()
 	lpad := (lspc - fht) / 2 // padding above / below text box for centering in line
 
-	szf := Vec2D.Fixed(size)
-
-	maxw := fixed.Int26_6(0)
+	maxw := float32(0)
 
 	// first pass gets rune positions and wraps text as needed, and gets max width
 	si := 0
@@ -869,12 +873,12 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 			continue
 		}
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
-			sr.SetRunePosLR(Float32ToFixed(fontSty.LetterSpacing.Dots), Float32ToFixed(fontSty.WordSpacing.Dots))
+			sr.SetRunePosLR(fontSty.LetterSpacing.Dots, fontSty.WordSpacing.Dots)
 		}
 		ssz := sr.SizeHV()
-		if szf.X > 0 && ssz.X > szf.X && txtSty.WordWrap {
+		if size.X > 0 && ssz.X > size.X && txtSty.WordWrap {
 			for {
-				wp := sr.FindWrapPosLR(szf.X, ssz.X)
+				wp := sr.FindWrapPosLR(size.X, ssz.X)
 				if wp > 0 {
 					nsr := sr.SplitAtLR(wp)
 					tr.InsertSpan(si+1, nsr)
@@ -885,7 +889,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					si++
 					sr = &(tr.Spans[si]) // keep going with nsr
 					ssz = sr.SizeHV()
-					if ssz.X <= szf.X {
+					if ssz.X <= size.X {
 						if ssz.X > maxw {
 							maxw = ssz.X
 						}
@@ -907,20 +911,20 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	}
 	// have maxw, can do alignment cases..
 
-	if maxw > szf.X {
-		szf.X = maxw
+	if maxw > size.X {
+		size.X = maxw
 	}
 
 	// vertical alignment
-	vht := lspc.Mul(Float32ToFixed(float32(len(tr.Spans))))
-	if vht > szf.Y {
-		szf.Y = vht
+	vht := lspc * float32(len(tr.Spans))
+	if vht > size.Y {
+		size.Y = vht
 	}
 
-	tr.Size = Vec2D{FixedToFloat32(maxw), FixedToFloat32(vht)}
+	tr.Size = Vec2D{maxw, vht}
 
-	vpad := fixed.Int26_6(0) // padding at top to achieve vertical alignment
-	vextra := szf.Y - vht
+	vpad := float32(0) // padding at top to achieve vertical alignment
+	vextra := size.Y - vht
 	if vextra > 0 {
 		switch {
 		case IsAlignMiddle(txtSty.AlignV):
@@ -939,7 +943,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		sr.RelPos.X = 0
 		// todo: handle indent here look at para start -- sets +X -- also need in size above
 		ssz := sr.SizeHV()
-		hextra := szf.X - ssz.X
+		hextra := size.X - ssz.X
 		if hextra > 0 {
 			switch {
 			case IsAlignMiddle(txtSty.Align):
@@ -950,7 +954,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		}
 		vpos += lspc
 	}
-	return NewVec2DFmFixed(szf)
+	return size
 }
 
 //////////////////////////////////////////////////////////////////////////////////
