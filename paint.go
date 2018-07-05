@@ -237,16 +237,16 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
 }
 
-// push current xform onto stack and apply new xform on top of it
+// PushXForm pushes current xform onto stack and apply new xform on top of it
 func (rs *RenderState) PushXForm(xf XFormMatrix2D) {
 	if rs.XFormStack == nil {
 		rs.XFormStack = make([]XFormMatrix2D, 0, 100)
 	}
 	rs.XFormStack = append(rs.XFormStack, rs.XForm)
-	rs.XForm = rs.XForm.Multiply(xf)
+	rs.XForm = xf.Multiply(rs.XForm)
 }
 
-// pop xform off the stack and set to current xform
+// PopXForm pops xform off the stack and set to current xform
 func (rs *RenderState) PopXForm() {
 	if rs.XFormStack == nil || len(rs.XFormStack) == 0 {
 		rs.XForm = Identity2D()

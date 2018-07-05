@@ -683,7 +683,7 @@ func (a *XFormMatrix2D) SetString(str string) error {
 			if err := SVGPointsCheckN(pts, 6, errmsg); err != nil {
 				return err
 			}
-			*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}.Multiply(*a)
+			*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
 			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
 				return err

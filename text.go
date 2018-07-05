@@ -528,15 +528,12 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			if rx.Floor() < rs.Bounds.Min.X || ty.Ceil() > rs.Bounds.Max.Y {
 				continue
 			}
-			srect := dr.Sub(dr.Min)
-
-			// fmt.Printf("r: %v rp: %v dr: %v, srect: %v mp: %v\n", string(r), rp, dr, srect, maskp)
-
-			dbase := Vec2D{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
-
-			if rr.RotRad == 0 {
+			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
 				draw.DrawMask(d.Dst, dr, d.Src, image.ZP, mask, maskp, draw.Over)
 			} else {
+				srect := dr.Sub(dr.Min)
+				dbase := Vec2D{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
+
 				transformer := draw.BiLinear
 				scx := float32(1)
 				if rr.ScaleX != 0 {
