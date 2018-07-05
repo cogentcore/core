@@ -182,7 +182,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 
 // SetRenders sets rendering parameters to match Text, for the first render
 // element (and all non-nil bg)
-func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color) {
+func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
@@ -191,9 +191,17 @@ func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color) {
 	sr.Render[0].Face = face
 	sr.Render[0].Color = clr
 	sr.Render[0].BgColor = bg
+	sr.Render[0].RotRad = rot
+	sr.Render[0].ScaleX = scalex
 	if bg != nil {
 		for i := range sr.Text {
 			sr.Render[i].BgColor = bg
+		}
+	}
+	if rot != 0 || scalex != 0 {
+		for i := range sr.Text {
+			sr.Render[i].RotRad = rot
+			sr.Render[i].ScaleX = scalex
 		}
 	}
 }
@@ -202,18 +210,18 @@ func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color) {
 // rendering parameters that are set for the first render element --
 // constructs Render slice of same size as Text -- see TextRender SetHTML for
 // formatted text
-func (sr *SpanRender) SetString(str string, face font.Face, clr, bg color.Color) {
+func (sr *SpanRender) SetString(str string, face font.Face, clr, bg color.Color, rot, scalex float32) {
 	sr.Text = []rune(str)
-	sr.SetRenders(face, clr, bg)
+	sr.SetRenders(face, clr, bg, rot, scalex)
 }
 
 // SetRunes initializes to given plain rune string, with given default
 // rendering parameters that are set for the first render element --
 // constructs Render slice of same size as Text -- see TextRender SetHTML for
 // formatted text
-func (sr *SpanRender) SetRunes(str []rune, face font.Face, clr, bg color.Color) {
+func (sr *SpanRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, rot, scalex float32) {
 	sr.Text = str
-	sr.SetRenders(face, clr, bg)
+	sr.SetRenders(face, clr, bg, rot, scalex)
 }
 
 // SetRunePosLR sets relative positions of each rune using a flat
@@ -522,19 +530,20 @@ func (tr *TextRender) Render(rs *RenderState, pos fixed.Point26_6) {
 			}
 			srect := dr.Sub(dr.Min)
 
-			// todo: decoration!
-			// if rr.RotRad == 0 {
-			// 	draw.Draw(d.Dst, sr, d.Src, image.ZP, draw.Over) // todo mask?
-			// } else {
-			transformer := draw.BiLinear
-			fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
-			m := Rotate2D(rr.RotRad).Translate(fx, fy)
-			s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
-			transformer.Transform(d.Dst, s2d, d.Src, srect, draw.Over, &draw.Options{
-				SrcMask:  mask,
-				SrcMaskP: maskp,
-			})
-			// }
+			// fmt.Printf("r: %v rp: %v dr: %v, srect: %v mp: %v\n", string(r), rp, dr, srect, maskp)
+
+			if rr.RotRad == 0 {
+				draw.DrawMask(d.Dst, dr, d.Src, image.ZP, mask, maskp, draw.Over)
+			} else {
+				transformer := draw.BiLinear
+				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
+				m := Translate2D(fx, fy).Rotate(rr.RotRad)
+				s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
+				transformer.Transform(d.Dst, s2d, d.Src, srect, draw.Over, &draw.Options{
+					SrcMask:  mask,
+					SrcMaskP: maskp,
+				})
+			}
 
 			if bitflag.Has32(int32(rr.Deco), int(DecoLineThrough)) {
 				yp := rp32.Y - 0.25*FixedToFloat32(asc)
@@ -568,12 +577,12 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 
 // SetString is for basic plain, non-styled rendering: configures a single
 // SpanRender with the entire string, and does standard layout (LR currently)
-func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color) {
+func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetString(str, face, clr, bg)
+	sr.SetString(str, face, clr, bg, rot, scalex)
 	sr.SetRunePosLR(0, 0)
 	ssz := sr.SizeHV()
 	vht := face.Metrics().Height
@@ -583,12 +592,12 @@ func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color)
 
 // SetRunes is for basic plain, non-styled rendering: configures a single
 // SpanRender with the entire rune string, and does standard layout (LR currently)
-func (tr *TextRender) SetRunes(str []rune, face font.Face, clr, bg color.Color) {
+func (tr *TextRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetRunes(str, face, clr, bg)
+	sr.SetRunes(str, face, clr, bg, rot, scalex)
 	sr.SetRunePosLR(0, 0)
 	ssz := sr.SizeHV()
 	vht := face.Metrics().Height

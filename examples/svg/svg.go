@@ -58,6 +58,7 @@ func mainrun() {
 
 	svg := svgrow.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
 	svg.Fill = true
+	svg.SetProp("background-color", "white")
 	svg.SetProp("width", units.NewValue(float32(width-20), units.Px))
 	svg.SetProp("height", units.NewValue(float32(height-100), units.Px))
 	svg.SetStretchMaxWidth()

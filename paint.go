@@ -103,17 +103,14 @@ func NewPaint() Paint {
 	return p
 }
 
-// CopyFrom copies from another Paint, while preserving relevant local state
-func (pc *Paint) CopyFrom(cp *Paint) {
-	is := pc.StyleSet
-	pn := pc.PropsNil
-	ds := pc.dotsSet
-	lu := pc.lastUnCtxt
-	*pc = *cp
-	pc.StyleSet = is
-	pc.PropsNil = pn
-	pc.dotsSet = ds
-	pc.lastUnCtxt = lu
+// CopyStyleFrom copies styles from another paint
+func (pc *Paint) CopyStyleFrom(cp *Paint) {
+	pc.Off = cp.Off
+	pc.UnContext = cp.UnContext
+	pc.StrokeStyle = cp.StrokeStyle
+	pc.FillStyle = cp.FillStyle
+	pc.FontStyle = cp.FontStyle
+	pc.VecEff = cp.VecEff
 }
 
 // SetStyleProps sets paint values based on given property map (name: value

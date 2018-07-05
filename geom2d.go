@@ -603,6 +603,12 @@ func (a XFormMatrix2D) TransformPoint(x, y float32) (tx, ty float32) {
 	return
 }
 
+func (a XFormMatrix2D) TransformVec2D(v Vec2D) Vec2D {
+	tx := a.XX*v.X + a.XY*v.Y + a.X0
+	ty := a.YX*v.X + a.YY*v.Y + a.Y0
+	return Vec2D{tx, ty}
+}
+
 func (a XFormMatrix2D) TransformPointToInt(x, y float32) (tx, ty int) {
 	tx = int(a.XX*x + a.XY*y + a.X0)
 	ty = int(a.YX*x + a.YY*y + a.Y0)

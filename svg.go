@@ -90,7 +90,7 @@ func Style2DSVG(gii Node2D) {
 	if pgi != nil {
 		pagg = &pg.CSSAgg
 		if pp, ok := pgi.(Painter); ok {
-			pc.CopyFrom(pp.Paint())
+			pc.CopyStyleFrom(pp.Paint())
 			pc.SetStyleProps(pp.Paint(), gii.Properties())
 		} else {
 			pc.SetStyleProps(nil, gii.Properties())

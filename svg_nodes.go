@@ -7,6 +7,8 @@ package gi
 import (
 	"image"
 
+	"github.com/chewxy/math32"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 )
 
@@ -272,11 +274,24 @@ func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
-	// tempting to support HTML here but not really compatible with layout..
-	pc.FontStyle.Color = pc.FillStyle.Color.Color
+	orgsz := pc.FontStyle.Size
+	pc.FontStyle.Size = units.Value{orgsz.Val * rs.XForm.YY, orgsz.Un, orgsz.Dots * rs.XForm.YY}
+	scalex := rs.XForm.XX / rs.XForm.YY
+	if scalex == 1 {
+		scalex = 0
+	}
 	pc.FontStyle.LoadFont(&pc.UnContext, "")
-	g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil)
+	rot := math32.Atan2(-rs.XForm.XY, rs.XForm.XX)
+	g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil, rot, scalex)
+	pc.FontStyle.Size = orgsz
 	pos := pc.TransformPoint(rs, g.Pos.X, g.Pos.Y)
+	if rot != 0 {
+		tx := Rotate2D(rot)
+		sr := &(g.Render.Spans[0])
+		for i := range sr.Text {
+			sr.Render[i].RelPos = tx.TransformVec2D(NewVec2DFmFixed(sr.Render[i].RelPos)).Fixed()
+		}
+	}
 	g.Render.Render(rs, pos.Fixed())
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
