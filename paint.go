@@ -16,7 +16,6 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/srwiley/rasterx"
-	//"github.com/rcoreilly/rasterx"
 	"github.com/srwiley/scanFT"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -51,6 +50,24 @@ type Painter interface {
 	Paint() *Paint
 }
 
+// Paint provides the styling parameters and methods for rendering on to an
+// RGBA image -- all dynamic rendering state is maintained in the RenderState.
+// Text rendering is handled separately in TextRender, but it depends
+// minimally on styling parameters in FontStyle
+type Paint struct {
+	Off         bool          `desc:"node and everything below it are off, non-rendering"`
+	StyleSet    bool          `desc:"have the styles already been set?"`
+	PropsNil    bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
+	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	StrokeStyle StrokeStyle
+	FillStyle   FillStyle
+	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
+	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
+	dotsSet     bool
+	lastUnCtxt  units.Context
+}
+
 // VectorEffect contains special effects for rendering
 type VectorEffect int32
 
@@ -70,23 +87,6 @@ var KiT_VectorEffect = kit.Enums.AddEnumAltLower(VecEffN, false, StylePropProps,
 
 func (ev VectorEffect) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *VectorEffect) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// The Paint object provides the full context (parameters) and functions for
-// painting onto an image -- image is always passed as an argument so it can be
-// applied to anything
-type Paint struct {
-	Off         bool          `desc:"node and everything below it are off, non-rendering"`
-	StyleSet    bool          `desc:"have the styles already been set?"`
-	PropsNil    bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
-	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
-	StrokeStyle StrokeStyle
-	FillStyle   FillStyle
-	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
-	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
-	dotsSet     bool
-	lastUnCtxt  units.Context
-}
 
 func (pc *Paint) Defaults() {
 	pc.Off = false
@@ -222,6 +222,7 @@ type RenderState struct {
 	XFormStack  []XFormMatrix2D   `desc:"stack of transforms"`
 	BoundsStack []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack   []*image.Alpha    `desc:"stack of clips, if needed"`
+	PaintBack   Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
 }
 
 // Init initializes RenderState -- must be called whenever image size changes
@@ -257,7 +258,7 @@ func (rs *RenderState) PopXForm() {
 	rs.XFormStack = rs.XFormStack[:sz-1]
 }
 
-// push current bounds onto stack and set new bounds
+// PushBounds pushes current bounds onto stack and set new bounds
 func (rs *RenderState) PushBounds(b, objb image.Rectangle) {
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
@@ -270,7 +271,7 @@ func (rs *RenderState) PushBounds(b, objb image.Rectangle) {
 	rs.ObjBounds = objb // todo: don't need stack?
 }
 
-// pop bounds off the stack and set to current bounds
+// PopBounds pops bounds off the stack and set to current bounds
 func (rs *RenderState) PopBounds() {
 	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
 		rs.Bounds = rs.Image.Bounds()
@@ -281,7 +282,7 @@ func (rs *RenderState) PopBounds() {
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
 }
 
-// push current Mask onto the clip stack
+// PushClip pushes current Mask onto the clip stack
 func (rs *RenderState) PushClip() {
 	if rs.Mask == nil {
 		return
@@ -292,7 +293,7 @@ func (rs *RenderState) PushClip() {
 	rs.ClipStack = append(rs.ClipStack, rs.Mask)
 }
 
-// pop Mask off the clip stack and set to current mask
+// PopClip pops Mask off the clip stack and set to current mask
 func (rs *RenderState) PopClip() {
 	if rs.ClipStack == nil || len(rs.ClipStack) == 0 {
 		rs.Mask = nil // implied
@@ -302,6 +303,16 @@ func (rs *RenderState) PopClip() {
 	rs.Mask = rs.ClipStack[sz-1]
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]
+}
+
+// BackupPaint copies style settings from Paint to PaintBack
+func (rs *RenderState) BackupPaint() {
+	rs.PaintBack.CopyStyleFrom(&rs.Paint)
+}
+
+// RestorePaint restores style settings from PaintBack to Paint
+func (rs *RenderState) RestorePaint() {
+	rs.Paint.CopyStyleFrom(&rs.PaintBack)
 }
 
 //////////////////////////////////////////////////////////////////////////////////

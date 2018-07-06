@@ -181,22 +181,27 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 	}
 }
 
-// SetRenders sets rendering parameters to match Text, for the first render
-// element (and all non-nil bg)
-func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color, rot, scalex float32) {
+// SetRenders sets rendering parameters based on style
+func (sr *SpanRender) SetRenders(sty *FontStyle, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
 	}
+
+	bgc := (color.Color)(&sty.BgColor.Color)
+	if noBG {
+		bgc = nil
+	}
+
 	sr.Render = make([]RuneRender, sz)
-	sr.Render[0].Face = face
-	sr.Render[0].Color = clr
-	sr.Render[0].BgColor = bg
+	sr.Render[0].Face = sty.Face
+	sr.Render[0].Color = sty.Color
+	sr.Render[0].BgColor = bgc
 	sr.Render[0].RotRad = rot
 	sr.Render[0].ScaleX = scalex
-	if bg != nil {
+	if bgc != nil {
 		for i := range sr.Text {
-			sr.Render[i].BgColor = bg
+			sr.Render[i].BgColor = bgc
 		}
 	}
 	if rot != 0 || scalex != 0 {
@@ -205,24 +210,27 @@ func (sr *SpanRender) SetRenders(face font.Face, clr, bg color.Color, rot, scale
 			sr.Render[i].ScaleX = scalex
 		}
 	}
+	if sty.Deco != DecoNone {
+		for i := range sr.Text {
+			sr.Render[i].Deco = sty.Deco
+		}
+	}
 }
 
-// SetString initializes to given plain text string, with given default
-// rendering parameters that are set for the first render element --
-// constructs Render slice of same size as Text -- see TextRender SetHTML for
-// formatted text
-func (sr *SpanRender) SetString(str string, face font.Face, clr, bg color.Color, rot, scalex float32) {
+// SetString initializes to given plain text string, with given default style
+// parameters that are set for the first render element -- constructs Render
+// slice of same size as Text
+func (sr *SpanRender) SetString(str string, sty *FontStyle, noBG bool, rot, scalex float32) {
 	sr.Text = []rune(str)
-	sr.SetRenders(face, clr, bg, rot, scalex)
+	sr.SetRenders(sty, noBG, rot, scalex)
 }
 
-// SetRunes initializes to given plain rune string, with given default
-// rendering parameters that are set for the first render element --
-// constructs Render slice of same size as Text -- see TextRender SetHTML for
-// formatted text
-func (sr *SpanRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, rot, scalex float32) {
+// SetRunes initializes to given plain rune string, with given default style
+// arameters that are set for the first render element -- constructs Render
+// slice of same size as Text
+func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, noBG bool, rot, scalex float32) {
 	sr.Text = str
-	sr.SetRenders(face, clr, bg, rot, scalex)
+	sr.SetRenders(sty, noBG, rot, scalex)
 }
 
 // SetRunePosLR sets relative positions of each rune using a flat
@@ -428,11 +436,11 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 	pr := prof.Start("RenderText")
 	defer pr.End()
 
-	pc := &rs.Paint
+	rs.BackupPaint()
+	defer rs.RestorePaint()
 
-	// todo: use renderstate for decoration rendering -- decide if always doing bg or not
-	// always doing is probably better, except if bg is transparent or nil -- i.e., let
-	// the user decide
+	rs.PushXForm(Identity2D()) // needed for SVG
+	rs.XForm = Identity2D()
 
 	for _, sr := range tr.Spans {
 		if sr.IsValid() != nil {
@@ -448,84 +456,31 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			Face: curFace,
 		}
 
-		// based on Drawer.DrawString() in golang.org/x/image/font/font.go
+		sr.RenderUnderline(rs, tpos)
+
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
+			curFace = rr.CurFace(curFace)
+			dsc32 := FixedToFloat32(curFace.Metrics().Descent)
 			rp := tpos.Add(rr.RelPos)
-			if int(math32.Floor(rp.X)) > rs.Bounds.Max.X || int(math32.Ceil(rp.Y)) < rs.Bounds.Min.Y {
+			scx := float32(1)
+			if rr.ScaleX != 0 {
+				scx = rr.ScaleX
+			}
+			tx := Scale2D(scx, 1).Rotate(rr.RotRad)
+			ll := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+			ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
+			if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+				int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 				continue
 			}
-			d.Dot = rp.Fixed()
-			curFace = rr.CurFace(curFace)
-			d.Face = curFace
-			asc := curFace.Metrics().Ascent
-			asc32 := FixedToFloat32(asc)
 			if rr.Color != nil {
 				curColor = rr.Color
 				d.Src = image.NewUniform(curColor)
 			}
-
-			// decoration / background rendering
-			var szn Vec2D
-			var nxtdeco int32
-			chknxt := false
-			if rr.BgColor != nil || rr.Deco != 0 {
-				dw := .05 * rr.Size.Y
-				pc.StrokeStyle.Width.Dots = dw
-				pc.StrokeStyle.Color.SetColor(curColor)
-				szn = rr.Size // to next char -- todo: this assumes LR
-				if i < len(sr.Text)-1 {
-					chknxt = true
-					nxtp := tpos.Add(sr.Render[i+1].RelPos)
-					szn.X = nxtp.X - rp.X
-					nxtdeco = int32(sr.Render[i+1].Deco)
-				}
-				if rr.BgColor != nil {
-					sp := rp
-					sp.Y -= asc32
-					if chknxt && sr.Render[i+1].BgColor != nil {
-						pc.FillBoxColor(rs, sp, szn, rr.BgColor)
-					} else {
-						pc.FillBoxColor(rs, sp, rr.Size, rr.BgColor)
-					}
-				}
-				if bitflag.Has32(int32(rr.Deco), int(DecoUnderline)) {
-					yp := rp.Y + dw
-					if chknxt && bitflag.Has32(nxtdeco, int(DecoUnderline)) {
-						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-					} else {
-						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-					}
-					pc.Stroke(rs)
-				}
-				if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
-					pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
-					yp := rp.Y + pc.StrokeStyle.Width.Dots
-					if chknxt && bitflag.Has32(nxtdeco, int(DecoDottedUnderline)) {
-						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-					} else {
-						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-					}
-					pc.Stroke(rs)
-					pc.StrokeStyle.Dashes = nil
-				}
-				if bitflag.Has32(int32(rr.Deco), int(DecoOverline)) {
-					yp := rp.Y - 1.05*asc32
-					if chknxt && bitflag.Has32(nxtdeco, int(DecoOverline)) {
-						pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-					} else {
-						pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-					}
-					pc.Stroke(rs)
-				}
-			}
-			dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, r)
+			d.Dot = rp.Fixed()
+			dr, mask, maskp, _, ok := d.Face.Glyph(d.Dot, r)
 			if !ok {
-				continue
-			}
-			rx := d.Dot.X + advance
-			ty := d.Dot.Y - asc
-			if rx.Floor() < rs.Bounds.Min.X || ty.Ceil() > rs.Bounds.Max.Y {
 				continue
 			}
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
@@ -535,10 +490,6 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 				dbase := Vec2D{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
 
 				transformer := draw.BiLinear
-				scx := float32(1)
-				if rr.ScaleX != 0 {
-					scx = rr.ScaleX
-				}
 				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
 				m := Translate2D(fx+dbase.X, fy+dbase.Y).Scale(scx, 1).Rotate(rr.RotRad).Translate(-dbase.X, -dbase.Y)
 				s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
@@ -547,17 +498,132 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 					SrcMaskP: maskp,
 				})
 			}
+		}
+		// todo: render linethrough
+	}
+	rs.PopXForm()
+}
 
-			if bitflag.Has32(int32(rr.Deco), int(DecoLineThrough)) {
-				yp := rp.Y - 0.25*asc32
-				if chknxt && bitflag.Has32(nxtdeco, int(DecoLineThrough)) {
-					pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-				} else {
-					pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-				}
-				pc.Stroke(rs)
+// RenderUnderline renders the underline for span -- ensures continuity to do it all at once
+func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
+	curFace := sr.Render[0].Face
+	curColor := sr.Render[0].Color
+	didLast := false
+	first := true
+	pc := &rs.Paint
+
+	for i := range sr.Text {
+		rr := &(sr.Render[i])
+		if !bitflag.HasAny32(int32(rr.Deco), int(DecoUnderline), int(DecoDottedUnderline)) {
+			didLast = false
+			continue
+		}
+		curFace = rr.CurFace(curFace)
+		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
+		rp := tpos.Add(rr.RelPos)
+		scx := float32(1)
+		if rr.ScaleX != 0 {
+			scx = rr.ScaleX
+		}
+		tx := Scale2D(scx, 1).Rotate(rr.RotRad)
+		ll := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+		ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
+		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+			didLast = false
+			continue
+		}
+		if rr.Color != nil {
+			curColor = rr.Color
+		}
+		dw := .05 * rr.Size.Y
+		if first {
+			pc.StrokeStyle.Width.Dots = dw
+			pc.StrokeStyle.Color.SetColor(curColor)
+			// todo: could have diff color underlines -- add logic later
+			if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
+				pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
 			}
 		}
+		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dw}))
+		ep := rp.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, dw}))
+
+		if didLast {
+			pc.LineTo(rs, sp.X, sp.Y)
+		} else {
+			pc.NewSubPath(rs)
+			pc.MoveTo(rs, sp.X, sp.Y)
+		}
+		pc.LineTo(rs, ep.X, ep.Y)
+		didLast = true
+		first = false
+	}
+	pc.Stroke(rs)
+	pc.StrokeStyle.Dashes = nil
+}
+
+// if bitflag.Has32(int32(rr.Deco), int(DecoOverline)) {
+// 	yp := rp.Y - 1.05*asc32
+// 	if chknxt && bitflag.Has32(nxtdeco, int(DecoOverline)) {
+// 		pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
+// 	} else {
+// 		pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
+// 	}
+// 	pc.Stroke(rs)
+// }
+
+// if bitflag.Has32(int32(rr.Deco), int(DecoLineThrough)) {
+// 	yp := rp.Y - 0.25*asc32
+// 	if chknxt && bitflag.Has32(nxtdeco, int(DecoLineThrough)) {
+// 		pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
+// 	} else {
+// 		pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
+// 	}
+// 	pc.Stroke(rs)
+// }
+
+// RenderBg renders the background behind chars
+func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
+	curFace := sr.Render[0].Face
+	curColor := sr.Render[0].Color
+	// didLast := false
+	// first := true
+	pc := &rs.Paint
+
+	for i := range sr.Text {
+		rr := &(sr.Render[i])
+		if rr.BgColor == nil {
+			// didLast = false
+			continue
+		}
+		rp := tpos.Add(rr.RelPos)
+		if int(math32.Floor(rp.X)) > rs.Bounds.Max.X || int(math32.Ceil(rp.Y)) < rs.Bounds.Min.Y {
+			continue
+		}
+		curFace = rr.CurFace(curFace)
+		// asc := curFace.Metrics().Ascent
+		// asc32 := FixedToFloat32(asc)
+		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
+		if rr.Color != nil {
+			curColor = rr.Color
+		}
+		scx := float32(1)
+		if rr.ScaleX != 0 {
+			scx = rr.ScaleX
+		}
+
+		dw := .05 * rr.Size.Y
+		pc.StrokeStyle.Width.Dots = dw
+		pc.StrokeStyle.Color.SetColor(curColor)
+		tx := Scale2D(scx, 1).Rotate(rr.RotRad)
+		pc.FillStyle.Color.SetColor(rr.BgColor)
+		szt := Vec2D{rr.Size.X, -rr.Size.Y}
+		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+		ul := sp.Add(tx.TransformVectorVec2D(Vec2D{0, szt.Y}))
+		ur := sp.Add(tx.TransformVectorVec2D(szt))
+		lr := sp.Add(tx.TransformVectorVec2D(Vec2D{szt.X, 0}))
+		pc.DrawPolygon(rs, []Vec2D{sp, ul, ur, lr})
+		pc.Fill(rs)
 	}
 }
 
@@ -578,32 +644,42 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 	tr.Render(rs, pos)
 }
 
-// SetString is for basic plain, non-styled rendering: configures a single
-// SpanRender with the entire string, and does standard layout (LR currently)
-func (tr *TextRender) SetString(str string, face font.Face, clr, bg color.Color, rot, scalex float32) {
+// SetString is for basic text rendering with a single style of text (see
+// SetHTML for tag-formatted text) -- configures a single SpanRender with the
+// entire string, and does standard layout (LR currently).  rot and scalex are
+// general rotation and x-scaling to apply to all chars -- alternatively can
+// apply these per character after.  Be sure that LoadFont has been run so a
+// valid Face is available.  noBG ignores any BgColor in font style, and never
+// renders background color
+func (tr *TextRender) SetString(str string, sty *FontStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetString(str, face, clr, bg, rot, scalex)
-	sr.SetRunePosLR(0, 0)
+	sr.SetString(str, sty, noBG, rot, scalex)
+	sr.SetRunePosLR(sty.LetterSpacing.Dots, sty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
-	vht := face.Metrics().Height
+	vht := sty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
 }
 
-// SetRunes is for basic plain, non-styled rendering: configures a single
-// SpanRender with the entire rune string, and does standard layout (LR currently)
-func (tr *TextRender) SetRunes(str []rune, face font.Face, clr, bg color.Color, rot, scalex float32) {
+// SetRunes is for basic text rendering with a single style of text (see
+// SetHTML for tag-formatted text) -- configures a single SpanRender with the
+// entire string, and does standard layout (LR currently).  rot and scalex are
+// general rotation and x-scaling to apply to all chars -- alternatively can
+// apply these per character after Be sure that LoadFont has been run so a
+// valid Face is available.  noBG ignores any BgColor in font style, and never
+// renders background color
+func (tr *TextRender) SetRunes(str []rune, sty *FontStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetRunes(str, face, clr, bg, rot, scalex)
-	sr.SetRunePosLR(0, 0)
+	sr.SetRunes(str, sty, noBG, rot, scalex)
+	sr.SetRunePosLR(sty.LetterSpacing.Dots, sty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
-	vht := face.Metrics().Height
+	vht := sty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 }
 

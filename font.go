@@ -72,13 +72,17 @@ func (fs *FontStyle) Defaults() {
 // for anything that also has non-standard values that might not be processed
 // properly by default
 func (fs *FontStyle) SetStylePost(props ki.Props) {
-	pfs, ok := props["font-size"]
-	if ok {
-		fsz, ok := pfs.(string)
-		if ok {
-			psz, ok := FontSizePoints[fsz]
-			if ok {
+	if pfs, ok := props["font-size"]; ok {
+		if fsz, ok := pfs.(string); ok {
+			if psz, ok := FontSizePoints[fsz]; ok {
 				fs.Size = units.NewValue(psz, units.Pt)
+			}
+		}
+	}
+	if tds, ok := props["text-decoration"]; ok {
+		if td, ok := tds.(string); ok {
+			if td == "none" {
+				fs.Deco = DecoNone // otherwise get a bit flag set
 			}
 		}
 	}

@@ -78,7 +78,7 @@ func mainrun() {
 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
 <kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
-<q>and</q> <mark>marked text</mark> and <span style="text-decoration:blink">overline</span>
+<q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 and Sub<sub>script</sub> and Super<sup>script</sup>`
 	title.SetProp("text-align", gi.AlignCenter) // todo: center, right not working
 	title.SetProp("align-vert", gi.AlignTop)

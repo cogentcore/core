@@ -678,7 +678,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 			case string:
 				tn := kit.FullTypeName(fld.Field.Type)
 				if kit.Enums.Enum(tn) != nil {
-					kit.Enums.SetEnumFromStringAltFirst(fi, valv)
+					kit.Enums.SetAnyEnumIfaceFromString(fi, valv)
 				} else {
 					fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
 				}
@@ -687,7 +687,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 				if !ok {
 					log.Printf("gi.StyledField.FromProps: for field: %v could not convert property to int: %v %T\n", fld.Field.Name, val, val)
 				} else {
-					kit.SetEnumFromInt64(fi, ival, npt)
+					kit.SetEnumIfaceFromInt64(fi, ival, npt)
 				}
 			}
 		} else {

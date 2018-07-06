@@ -9,7 +9,6 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -287,16 +286,15 @@ func (g *SVGText) Render2D() {
 			scalex = 0
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
-		g.Render.SetString(g.Text, pc.FontStyle.Face, pc.FontStyle.Color, nil, rot, scalex)
+		g.Render.SetString(g.Text, &pc.FontStyle, false, rot, scalex)
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 		sr := &(g.Render.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face // upscale
-		var deco TextDecorations
-		bitflag.Set32((*int32)(&deco), int(DecoUnderline))
 		for i := range sr.Text {
 			sr.Render[i].RelPos = rs.XForm.TransformVectorVec2D(sr.Render[i].RelPos)
-			// sr.Render[i].Deco = deco
+			sr.Render[i].Size.Y *= scy
+			sr.Render[i].Size.X *= scx
 		}
 		pc.FontStyle.Size = orgsz
 		g.Render.Render(rs, pos)

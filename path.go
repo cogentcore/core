@@ -564,7 +564,7 @@ func PathDataValidate(data *[]PathData, errstr string) error {
 			return err
 		}
 		if (trgn == 0 && n > 0) || (trgn > 0 && n%trgn != 0) {
-			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %\n", errstr, cmd, n, trgn)
+			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %v\n", errstr, cmd, n, trgn)
 			log.Println(err)
 			return err
 		}
