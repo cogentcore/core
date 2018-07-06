@@ -16,17 +16,17 @@ func TestEnums(t *testing.T) {
 
 	et := TestFlag1
 
-	i := EnumToInt64(et)
+	i := EnumIfaceToInt64(et)
 	if i != int64(et) {
-		t.Errorf("EnumToInt64 failed %v != %v", i, int64(et))
+		t.Errorf("EnumIfaceToInt64 failed %v != %v", i, int64(et))
 	}
 
-	err := SetEnumFromInt64(&et, 2, KiT_TestFlags)
+	err := SetEnumIfaceFromInt64(&et, 2, KiT_TestFlags)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 	if et != TestFlag2 {
-		t.Errorf("SetEnumFromInt64 failed %v != %v", et, TestFlag2)
+		t.Errorf("SetEnumIfaceFromInt64 failed %v != %v", et, TestFlag2)
 	}
 
 	ei := EnumIfaceFromInt64(1, KiT_TestFlags)
@@ -51,21 +51,14 @@ func TestEnums(t *testing.T) {
 	}
 
 	et = TestFlag2
-	es = EnumToString(et)
+	es = EnumIfaceToString(et)
 	if es != "TestFlag2" {
-		t.Errorf("EnumToString failed %v != %v", es, TestFlag2)
+		t.Errorf("EnumIfaceToString failed %v != %v", es, TestFlag2)
 	}
 
-	es = Enums.EnumToAltString(et)
+	es = Enums.EnumIfaceToAltString(et)
 	if es != "flag2" {
 		t.Errorf("EnumToAltString failed %v != %v", es, "flag2")
-	}
-
-	bf := int64(0)
-	bitflag.Set(&bf, int(TestFlag1), int(TestFlag2))
-	es = BitFlagsToString(bf, TestFlagsN)
-	if es != "TestFlag1|TestFlag2" {
-		t.Errorf("EnumToString failed %v != %v", es, "TestFlag1|TestFlag2")
 	}
 
 	err = SetEnumValueFromString(reflect.ValueOf(&et), "TestFlag1")
@@ -100,12 +93,29 @@ func TestEnums(t *testing.T) {
 		t.Errorf("SetEnumValueFromStringAltFirst failed %v != %v", et, TestFlag2)
 	}
 
-	err = Enums.SetEnumValueFromInt64(reflect.ValueOf(&et), 1)
+	err = SetEnumValueFromInt64(reflect.ValueOf(&et), 1)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 	if et != TestFlag1 {
 		t.Errorf("SetEnumValueFromInt64 failed %v != %v", et, TestFlag1)
+	}
+
+	bf := int64(0)
+	bitflag.Set(&bf, int(TestFlag1), int(TestFlag2))
+	es = BitFlagsToString(bf, TestFlagsN)
+	if es != "TestFlag1|TestFlag2" {
+		t.Errorf("BitFlagsToString failed %v != %v", es, "TestFlag1|TestFlag2")
+	}
+
+	bf2 := int64(0)
+	err = BitFlagsFromString(&bf2, es, TestFlagsN)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	es2 := BitFlagsToString(bf2, TestFlagsN)
+	if es2 != "TestFlag1|TestFlag2" {
+		t.Errorf("BitFlagsFromString failed %v != %v", es, "TestFlag1|TestFlag2")
 	}
 
 }

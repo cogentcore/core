@@ -91,7 +91,7 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 
 	// get the pointer-to version and elem so it is a settable type!
 	typ := PtrType(reflect.TypeOf(en)).Elem()
-	n := EnumToInt64(en)
+	n := EnumIfaceToInt64(en)
 	tn := FullTypeName(typ)
 	tr.Enums[tn] = typ
 	if props != nil {
@@ -124,7 +124,7 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 // the number of enums -- assumes starts at 0
 func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
 	typ := tr.AddEnum(en, bitFlag, props)
-	n := EnumToInt64(en)
+	n := EnumIfaceToInt64(en)
 	tn := FullTypeName(typ)
 	alts := make(map[int64]string)
 	tp := tr.Properties(tn)
@@ -193,7 +193,7 @@ func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
 	return m
 }
 
-// NVals returns the number of defined enum values
+// NVals returns the number of defined enum values for given enum interface
 func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 	typ := reflect.TypeOf(eval)
 	n, _ := ToInt(tr.Prop(FullTypeName(typ), "N"))
@@ -209,19 +209,23 @@ func (tr *EnumRegistry) IsBitFlag(typ reflect.Type) bool {
 	return b
 }
 
-// EnumToInt64 converts an enum into an int64 using reflect -- just use int64(eval) when you
-// have the enum in hand -- this is when you just have a generic item
-func EnumToInt64(eval interface{}) int64 {
+////////////////////////////////////////////////////////////////////////////////////////
+//   To / From Int64 for generic interface{} and reflect.Value
+
+// EnumIfaceToInt64 converts an enum interface{} into an int64 using reflect
+// -- just use int64(eval) when you have the enum value in hand -- this is
+// when you just have a generic interface{}
+func EnumIfaceToInt64(eval interface{}) int64 {
 	ev := NonPtrValue(reflect.ValueOf(eval))
 	var ival int64
 	reflect.ValueOf(&ival).Elem().Set(ev.Convert(reflect.TypeOf(ival)))
 	return ival
 }
 
-// SetEnumFromInt64 sets enum value from int64 value -- must pass a pointer to
-// the enum and also needs raw type of the enum as well -- can't get it from
-// the interface{} reliably
-func SetEnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
+// SetEnumIfaceFromInt64 sets enum interface{} value from int64 value -- must
+// pass a pointer to the enum and also needs raw type of the enum as well --
+// can't get it from the interface{} reliably
+func SetEnumIfaceFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 	if reflect.TypeOf(eval).Kind() != reflect.Ptr {
 		err := fmt.Errorf("kit.SetEnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
 		log.Printf("%v", err)
@@ -232,7 +236,8 @@ func SetEnumFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
 }
 
 // SetEnumValueFromInt64 sets enum value from int64 value, using a
-// reflect.Value representation of the enum
+// reflect.Value representation of the enum -- does more checking and can get
+// type from value compared to Iface version
 func SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
 	if eval.Kind() != reflect.Ptr {
 		err := fmt.Errorf("kit.SetEnumValueFromInt64: must pass a pointer value to the enum: Type: %v, Kind: %v\n", eval.Type().String(), eval.Kind())
@@ -252,63 +257,40 @@ func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
 	return evn.Elem().Interface()
 }
 
-// EnumIfaceFromString returns an interface{} value which is an enum value of
-// given type (not a pointer to it), set to given string value
-func EnumIfaceFromString(str string, typ reflect.Type) interface{} {
-	evn := reflect.New(typ)
-	SetEnumValueFromString(evn, str)
-	return evn.Elem().Interface()
+////////////////////////////////////////////////////////////////////////////////////////
+//   To / From String for generic interface{} and reflect.Value
+
+// EnumIfaceToString converts an enum interface{} value to its corresponding
+// string value, using fmt.Stringer interface directly -- same effect as
+// calling fmt.Sprintf("%v") but this is slightly faster
+func EnumIfaceToString(eval interface{}) string {
+	strer, ok := eval.(fmt.Stringer) // will fail if not impl
+	if !ok {
+		log.Printf("kit.EnumIfaceToString: fmt.Stringer interface not supported by type %v\n", reflect.TypeOf(eval).Name())
+		return ""
+	}
+	return strer.String()
 }
 
 // EnumInt64ToString first converts an int64 to enum of given type, and then
 // converts that to a string value
 func EnumInt64ToString(ival int64, typ reflect.Type) string {
 	ev := EnumIfaceFromInt64(ival, typ)
-	return EnumToString(ev)
+	return EnumIfaceToString(ev)
 }
 
-// EnumToString converts an enum value to its corresponding string value --
-// you could just call fmt.Sprintf("%v") too but this is slightly faster, and
-// it also works for bitflags which regular stringer does not
-func EnumToString(eval interface{}) string {
-	strer, ok := eval.(fmt.Stringer) // will fail if not impl
-	if !ok {
-		log.Printf("kit.EnumToString: fmt.Stringer interface not supported by type %v\n", reflect.TypeOf(eval).Name())
-		return ""
-	}
-	return strer.String()
+// EnumIfaceFromString returns an interface{} value which is an enum value of
+// given type (not a pointer to it), set to given string value -- requires
+// reflect type of enum
+func EnumIfaceFromString(str string, typ reflect.Type) interface{} {
+	evn := reflect.New(typ)
+	SetEnumValueFromString(evn, str)
+	return evn.Elem().Interface()
 }
 
-// BitFlagsToString converts an int64 of bit flags into a string
-// representation of the bits that are set -- en is number of defined bits,
-// and also provides the type name for looking up strings
-func BitFlagsToString(bflg int64, en interface{}) string {
-	et := PtrType(reflect.TypeOf(en)).Elem()
-	n := int(EnumToInt64(en))
-	str := ""
-	for i := 0; i < n; i++ {
-		if bitflag.Has(bflg, i) {
-			evs := EnumInt64ToString(int64(i), et)
-			if str == "" {
-				str = evs
-			} else {
-				str += "|" + evs
-			}
-		}
-	}
-	return str
-}
-
-// note: convenience methods b/c it is easier to find on registry type
-
-// EnumToString converts an enum value to its corresponding string value --
-// you could just call fmt.Sprintf("%v") too but this is slightly faster
-func (tr *EnumRegistry) EnumToString(eval interface{}) string {
-	return EnumToString(eval)
-}
-
-// EnumToAltString converts an enum value to its corresponding alternative string value
-func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
+// EnumIfaceToAltString converts an enum interface{} value to its
+// corresponding alternative string value from the enum registry
+func (tr *EnumRegistry) EnumIfaceToAltString(eval interface{}) string {
 	if reflect.TypeOf(eval).Kind() == reflect.Ptr {
 		eval = reflect.ValueOf(eval).Elem() // deref the pointer
 	}
@@ -320,14 +302,8 @@ func (tr *EnumRegistry) EnumToAltString(eval interface{}) string {
 		return ""
 	}
 	// convert to int64 for lookup
-	ival := EnumToInt64(eval)
+	ival := EnumIfaceToInt64(eval)
 	return alts[ival]
-}
-
-// EnumInt64ToAltString converts an int64 value to the enum of given type, and
-// then into corresponding string value
-func (tr *EnumRegistry) EnumInt64ToString(ival int64, typ reflect.Type) string {
-	return EnumInt64ToString(ival, typ)
 }
 
 // EnumInt64ToAltString converts an int64 value to the enum of given type, and
@@ -367,31 +343,11 @@ func SetEnumValueFromString(eval reflect.Value, str string) error {
 	return nil
 }
 
-// SetEnumValueFromString sets enum value from string, into a reflect.Value
-// IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
-func (tr *EnumRegistry) SetEnumValueFromString(eval reflect.Value, str string) error {
-	return SetEnumValueFromString(eval, str)
-}
-
-// SetEnumFromString sets enum value from string -- must pass a *pointer* to
-// the enum item. IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
-func SetEnumFromString(eptr interface{}, str string) error {
+// SetEnumIfaceFromString sets enum value from string -- must pass a *pointer*
+// to the enum item. IMPORTANT: requires the modified stringer go generate
+// utility that generates a StringToTypeName method
+func SetEnumIfaceFromString(eptr interface{}, str string) error {
 	return SetEnumValueFromString(reflect.ValueOf(eptr), str)
-}
-
-// SetEnumFromString sets enum value from string -- must pass a *pointer* to
-// the enum item. IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
-func (tr *EnumRegistry) SetEnumFromString(eptr interface{}, str string) error {
-	return SetEnumFromString(eptr, str)
-}
-
-// SetEnumFromAltString sets from alternative string list using an interface{}
-// to the enum -- must pass a *pointer* to the enum item.
-func (tr *EnumRegistry) SetEnumFromAltString(eptr interface{}, str string) error {
-	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), str)
 }
 
 // SetEnumValueFromAltString sets value from alternative string using a
@@ -413,12 +369,18 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 	}
 	for i, v := range alts {
 		if v == str {
-			return tr.SetEnumValueFromInt64(eval, int64(i))
+			return SetEnumValueFromInt64(eval, int64(i))
 		}
 	}
 	err := fmt.Errorf("kit.SetEnumValueFromAltString: string: %v not found in alt list of strings for type%v\n", str, tn)
 	// log.Printf("%v", err)
 	return err
+}
+
+// SetEnumIfaceFromAltString sets from alternative string list using an interface{}
+// to the enum -- must pass a *pointer* to the enum item.
+func (tr *EnumRegistry) SetEnumIfaceFromAltString(eptr interface{}, str string) error {
+	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), str)
 }
 
 // SetEnumValueFromStringAltFirst first attempts to set an enum from an
@@ -427,28 +389,117 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str string) error {
 	err := tr.SetEnumValueFromAltString(eval, str)
 	if err != nil {
-		return tr.SetEnumValueFromString(eval, str)
+		return SetEnumValueFromString(eval, str)
 	}
 	return err
 }
 
-// SetEnumFromStringAltFirst first attempts to set an enum from an
+// SetEnumIfaceFromStringAltFirst first attempts to set an enum from an
 // alternative string, and if that fails, then it tries to set from the
 // regular string representation func (tr *EnumRegistry)
-func (tr *EnumRegistry) SetEnumFromStringAltFirst(eptr interface{}, str string) error {
-	err := tr.SetEnumFromAltString(eptr, str)
+func (tr *EnumRegistry) SetEnumIfaceFromStringAltFirst(eptr interface{}, str string) error {
+	err := tr.SetEnumIfaceFromAltString(eptr, str)
 	if err != nil {
-		return tr.SetEnumFromString(eptr, str)
+		return SetEnumIfaceFromString(eptr, str)
 	}
 	return err
 }
 
-// SetEnumValueFromInt64 sets the enum value using reflect.Value
-// representation from a generic int64 value
-func (tr *EnumRegistry) SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
-	evi := eval.Interface()
-	et := eval.Type().Elem()
-	return SetEnumFromInt64(evi, ival, et)
+///////////////////////////////////////////////////////////////////////////////
+//  BitFlags
+
+// BitFlagsToString converts an int64 of bit flags into a string
+// representation of the bits that are set -- en is the number of defined
+// bits, and also provides the type name for looking up strings
+func BitFlagsToString(bflg int64, en interface{}) string {
+	et := PtrType(reflect.TypeOf(en)).Elem()
+	n := int(EnumIfaceToInt64(en))
+	str := ""
+	for i := 0; i < n; i++ {
+		if bitflag.Has(bflg, i) {
+			evs := EnumInt64ToString(int64(i), et)
+			if str == "" {
+				str = evs
+			} else {
+				str += "|" + evs
+			}
+		}
+	}
+	return str
+}
+
+// BitFlagsFromString sets an int64 of bit flags from a string representation
+// of the bits that are set -- en is the number of defined bits, and also
+// provides the type name for looking up strings
+func BitFlagsFromString(bflg *int64, str string, en interface{}) error {
+	et := PtrType(reflect.TypeOf(en)).Elem()
+	n := int(EnumIfaceToInt64(en))
+	return BitFlagsTypeFromString(bflg, str, et, n)
+}
+
+// BitFlagsTypeFromString sets an int64 of bit flags from a string representation
+// of the bits that are set -- gets enum type and n of defined elements directly
+func BitFlagsTypeFromString(bflg *int64, str string, et reflect.Type, n int) error {
+	flgs := strings.Split(str, "|")
+	evv := reflect.New(et)
+	var err error
+	for _, flg := range flgs {
+		err = SetEnumValueFromString(evv, flg)
+		if err == nil {
+			evi := EnumIfaceToInt64(evv.Interface())
+			bitflag.Set(bflg, int(evi))
+		}
+	}
+	return err
+}
+
+// BitFlagsFromStringAltFirst sets an int64 of bit flags from a string
+// representation of the bits that are set, using alt-strings first -- gets
+// enum type and n of defined elements directly
+func (tr *EnumRegistry) BitFlagsFromStringAltFirst(bflg *int64, str string, et reflect.Type, n int) error {
+	flgs := strings.Split(str, "|")
+	evv := reflect.New(et)
+	var err error
+	for _, flg := range flgs {
+		err = tr.SetEnumValueFromStringAltFirst(evv, flg)
+		if err == nil {
+			evi := EnumIfaceToInt64(evv.Interface())
+			bitflag.Set(bflg, int(evi))
+		}
+	}
+	return err
+}
+
+// SetAnyEnumValueFromString looks up enum type on registry, and if it is
+// registered as a bitflag, sets bits from string, otherwise tries to set from
+// alt strings if those exist, and finally tries direct set from string --
+// must pass a *pointer* value to the enum item.
+func (tr *EnumRegistry) SetAnyEnumValueFromString(eval reflect.Value, str string) error {
+	etp := eval.Type()
+	if etp.Kind() != reflect.Ptr {
+		err := fmt.Errorf("kit.SetAnyEnumValueFromString -- you must pass a pointer enum, not type: %v kind %v\n", etp, etp.Kind())
+		log.Printf("%v", err)
+		return err
+	}
+	et := etp.Elem()
+	if tr.IsBitFlag(et) {
+		var bf int64
+		err := tr.BitFlagsFromStringAltFirst(&bf, str, et, int(tr.NVals(eval.Interface())))
+		if err != nil {
+			return err
+		}
+		return SetEnumValueFromInt64(eval, bf)
+	} else {
+		return tr.SetEnumValueFromStringAltFirst(eval, str)
+	}
+}
+
+// SetAnyEnumIfaceFromString looks up enum type on registry, and if it is
+// registered as a bitflag, sets bits from string, otherwise tries to set from
+// alt strings if those exist, and finally tries direct set from string --
+// must pass a *pointer* value to the enum item.
+func (tr *EnumRegistry) SetAnyEnumIfaceFromString(eptr interface{}, str string) error {
+	return tr.SetAnyEnumValueFromString(reflect.ValueOf(eptr), str)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -524,9 +575,9 @@ func EnumMarshalJSON(eval interface{}) ([]byte, error) {
 	b := make([]byte, 0, 50)
 	b = append(b, []byte("\"")...)
 	if Enums.IsBitFlag(et) {
-		b = append(b, []byte(BitFlagsToString(EnumToInt64(eval), eval))...)
+		b = append(b, []byte(BitFlagsToString(EnumIfaceToInt64(eval), eval))...)
 	} else {
-		b = append(b, []byte(EnumToString(eval))...)
+		b = append(b, []byte(EnumIfaceToString(eval))...)
 	}
 	b = append(b, []byte("\"")...)
 	return b, nil
@@ -536,10 +587,14 @@ func EnumUnmarshalJSON(eval interface{}, b []byte) error {
 	et := reflect.TypeOf(eval)
 	noq := string(bytes.Trim(b, "\""))
 	if Enums.IsBitFlag(et) {
-		// todo!
-		return nil
+		bf := int64(0)
+		err := BitFlagsTypeFromString(&bf, noq, et, int(Enums.NVals(eval)))
+		if err == nil {
+			return SetEnumIfaceFromInt64(eval, bf, et)
+		}
+		return err
 	} else {
-		return SetEnumFromString(eval, noq)
+		return SetEnumIfaceFromString(eval, noq)
 	}
 }
 
