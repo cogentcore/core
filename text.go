@@ -459,6 +459,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 		// todo: cache flags if these are actually needed
 		sr.RenderBg(rs, tpos)
 		sr.RenderUnderline(rs, tpos)
+		sr.RenderLine(rs, tpos, DecoOverline, 1.1)
 
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
@@ -502,7 +503,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 				})
 			}
 		}
-		// todo: render linethrough
+		sr.RenderLine(rs, tpos, DecoLineThrough, 0.25)
 	}
 	rs.PopXForm()
 }
@@ -510,14 +511,17 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 // RenderBg renders the background behind chars
 func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
 	curFace := sr.Render[0].Face
-	// didLast := false
+	didLast := false
 	// first := true
 	pc := &rs.Paint
 
 	for i := range sr.Text {
 		rr := &(sr.Render[i])
 		if rr.BgColor == nil {
-			// didLast = false
+			if didLast {
+				pc.Fill(rs)
+			}
+			didLast = false
 			continue
 		}
 		curFace = rr.CurFace(curFace)
@@ -532,7 +536,10 @@ func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
 		ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
 		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
-			// didLast = false
+			if didLast {
+				pc.Fill(rs)
+			}
+			didLast = false
 			continue
 		}
 		pc.FillStyle.Color.SetColor(rr.BgColor)
@@ -541,6 +548,9 @@ func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
 		ul := sp.Add(tx.TransformVectorVec2D(Vec2D{0, szt.Y}))
 		lr := sp.Add(tx.TransformVectorVec2D(Vec2D{szt.X, 0}))
 		pc.DrawPolygon(rs, []Vec2D{sp, ul, ur, lr})
+		didLast = true
+	}
+	if didLast {
 		pc.Fill(rs)
 	}
 }
@@ -607,25 +617,65 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 	pc.StrokeStyle.Dashes = nil
 }
 
-// if bitflag.Has32(int32(rr.Deco), int(DecoOverline)) {
-// 	yp := rp.Y - 1.05*asc32
-// 	if chknxt && bitflag.Has32(nxtdeco, int(DecoOverline)) {
-// 		pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-// 	} else {
-// 		pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-// 	}
-// 	pc.Stroke(rs)
-// }
+// RenderLine renders overline or line-through -- anything that is a function of ascent
+func (sr *SpanRender) RenderLine(rs *RenderState, tpos Vec2D, deco TextDecorations, ascPct float32) {
+	curFace := sr.Render[0].Face
+	curColor := sr.Render[0].Color
+	didLast := false
+	pc := &rs.Paint
 
-// if bitflag.Has32(int32(rr.Deco), int(DecoLineThrough)) {
-// 	yp := rp.Y - 0.25*asc32
-// 	if chknxt && bitflag.Has32(nxtdeco, int(DecoLineThrough)) {
-// 		pc.DrawLine(rs, rp.X, yp, rp.X+szn.X, yp)
-// 	} else {
-// 		pc.DrawLine(rs, rp.X, yp, rp.X+rr.Size.X, yp)
-// 	}
-// 	pc.Stroke(rs)
-// }
+	for i := range sr.Text {
+		rr := &(sr.Render[i])
+		if !bitflag.Has32(int32(rr.Deco), int(deco)) {
+			if didLast {
+				pc.Stroke(rs)
+			}
+			didLast = false
+			continue
+		}
+		curFace = rr.CurFace(curFace)
+		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
+		asc32 := FixedToFloat32(curFace.Metrics().Ascent)
+		rp := tpos.Add(rr.RelPos)
+		scx := float32(1)
+		if rr.ScaleX != 0 {
+			scx = rr.ScaleX
+		}
+		tx := Scale2D(scx, 1).Rotate(rr.RotRad)
+		ll := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+		ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
+		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+			if didLast {
+				pc.Stroke(rs)
+			}
+			continue
+		}
+		if rr.Color != nil {
+			curColor = rr.Color
+		}
+		dw := 0.05 * rr.Size.Y
+		if !didLast {
+			pc.StrokeStyle.Width.Dots = dw
+			pc.StrokeStyle.Color.SetColor(curColor)
+		}
+		yo := ascPct * asc32
+		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, -yo}))
+		ep := rp.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -yo}))
+
+		if didLast {
+			pc.LineTo(rs, sp.X, sp.Y)
+		} else {
+			pc.NewSubPath(rs)
+			pc.MoveTo(rs, sp.X, sp.Y)
+		}
+		pc.LineTo(rs, ep.X, ep.Y)
+		didLast = true
+	}
+	if didLast {
+		pc.Stroke(rs)
+	}
+}
 
 // Render at given top position -- uses first font info to compute baseline
 // offset and calls overall Render -- convenience for simple widget rendering
