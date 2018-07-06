@@ -456,6 +456,8 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			Face: curFace,
 		}
 
+		// todo: cache flags if these are actually needed
+		sr.RenderBg(rs, tpos)
 		sr.RenderUnderline(rs, tpos)
 
 		for i, r := range sr.Text {
@@ -478,6 +480,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 				curColor = rr.Color
 				d.Src = image.NewUniform(curColor)
 			}
+			d.Face = curFace
 			d.Dot = rp.Fixed()
 			dr, mask, maskp, _, ok := d.Face.Glyph(d.Dot, r)
 			if !ok {
@@ -504,17 +507,57 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 	rs.PopXForm()
 }
 
+// RenderBg renders the background behind chars
+func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
+	curFace := sr.Render[0].Face
+	// didLast := false
+	// first := true
+	pc := &rs.Paint
+
+	for i := range sr.Text {
+		rr := &(sr.Render[i])
+		if rr.BgColor == nil {
+			// didLast = false
+			continue
+		}
+		curFace = rr.CurFace(curFace)
+		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
+		rp := tpos.Add(rr.RelPos)
+		scx := float32(1)
+		if rr.ScaleX != 0 {
+			scx = rr.ScaleX
+		}
+		tx := Scale2D(scx, 1).Rotate(rr.RotRad)
+		ll := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+		ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
+		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+			// didLast = false
+			continue
+		}
+		pc.FillStyle.Color.SetColor(rr.BgColor)
+		szt := Vec2D{rr.Size.X, -rr.Size.Y}
+		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
+		ul := sp.Add(tx.TransformVectorVec2D(Vec2D{0, szt.Y}))
+		lr := sp.Add(tx.TransformVectorVec2D(Vec2D{szt.X, 0}))
+		pc.DrawPolygon(rs, []Vec2D{sp, ul, ur, lr})
+		pc.Fill(rs)
+	}
+}
+
 // RenderUnderline renders the underline for span -- ensures continuity to do it all at once
 func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
-	first := true
 	pc := &rs.Paint
 
 	for i := range sr.Text {
 		rr := &(sr.Render[i])
 		if !bitflag.HasAny32(int32(rr.Deco), int(DecoUnderline), int(DecoDottedUnderline)) {
+			if didLast {
+				pc.Stroke(rs)
+			}
 			didLast = false
 			continue
 		}
@@ -530,23 +573,24 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 		ur := ll.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, -rr.Size.Y}))
 		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
 			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
-			didLast = false
+			if didLast {
+				pc.Stroke(rs)
+			}
 			continue
 		}
 		if rr.Color != nil {
 			curColor = rr.Color
 		}
 		dw := .05 * rr.Size.Y
-		if first {
+		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
 			pc.StrokeStyle.Color.SetColor(curColor)
-			// todo: could have diff color underlines -- add logic later
-			if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
-				pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
-			}
 		}
-		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dw}))
-		ep := rp.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, dw}))
+		if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
+			pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
+		}
+		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, 2 * dw}))
+		ep := rp.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, 2 * dw}))
 
 		if didLast {
 			pc.LineTo(rs, sp.X, sp.Y)
@@ -556,9 +600,10 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 		}
 		pc.LineTo(rs, ep.X, ep.Y)
 		didLast = true
-		first = false
 	}
-	pc.Stroke(rs)
+	if didLast {
+		pc.Stroke(rs)
+	}
 	pc.StrokeStyle.Dashes = nil
 }
 
@@ -581,51 +626,6 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 // 	}
 // 	pc.Stroke(rs)
 // }
-
-// RenderBg renders the background behind chars
-func (sr *SpanRender) RenderBg(rs *RenderState, tpos Vec2D) {
-	curFace := sr.Render[0].Face
-	curColor := sr.Render[0].Color
-	// didLast := false
-	// first := true
-	pc := &rs.Paint
-
-	for i := range sr.Text {
-		rr := &(sr.Render[i])
-		if rr.BgColor == nil {
-			// didLast = false
-			continue
-		}
-		rp := tpos.Add(rr.RelPos)
-		if int(math32.Floor(rp.X)) > rs.Bounds.Max.X || int(math32.Ceil(rp.Y)) < rs.Bounds.Min.Y {
-			continue
-		}
-		curFace = rr.CurFace(curFace)
-		// asc := curFace.Metrics().Ascent
-		// asc32 := FixedToFloat32(asc)
-		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
-		if rr.Color != nil {
-			curColor = rr.Color
-		}
-		scx := float32(1)
-		if rr.ScaleX != 0 {
-			scx = rr.ScaleX
-		}
-
-		dw := .05 * rr.Size.Y
-		pc.StrokeStyle.Width.Dots = dw
-		pc.StrokeStyle.Color.SetColor(curColor)
-		tx := Scale2D(scx, 1).Rotate(rr.RotRad)
-		pc.FillStyle.Color.SetColor(rr.BgColor)
-		szt := Vec2D{rr.Size.X, -rr.Size.Y}
-		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, dsc32}))
-		ul := sp.Add(tx.TransformVectorVec2D(Vec2D{0, szt.Y}))
-		ur := sp.Add(tx.TransformVectorVec2D(szt))
-		lr := sp.Add(tx.TransformVectorVec2D(Vec2D{szt.X, 0}))
-		pc.DrawPolygon(rs, []Vec2D{sp, ul, ur, lr})
-		pc.Fill(rs)
-	}
-}
 
 // Render at given top position -- uses first font info to compute baseline
 // offset and calls overall Render -- convenience for simple widget rendering
