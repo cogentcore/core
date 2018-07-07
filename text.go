@@ -116,17 +116,19 @@ func (rr *RuneRender) RelPosAfterTB() float32 {
 // span-as-line.  The first RuneRender RelPos for LR text should be at X=0
 // (LastPos = 0 for RL) -- i.e., relpos positions are minimal for given span.
 type SpanRender struct {
-	Text    []rune         `desc:"text as runes"`
-	Render  []RuneRender   `desc:"render info for each rune in one-to-one correspondence"`
-	RelPos  Vec2D          `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
-	LastPos Vec2D          `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations"`
-	Dir     TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Text    []rune          `desc:"text as runes"`
+	Render  []RuneRender    `desc:"render info for each rune in one-to-one correspondence"`
+	RelPos  Vec2D           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+	LastPos Vec2D           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations"`
+	Dir     TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	HasDeco TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
 }
 
 // Init initializes a new span with given capacity
 func (sr *SpanRender) Init(capsz int) {
 	sr.Text = make([]rune, 0, capsz)
 	sr.Render = make([]RuneRender, 0, capsz)
+	sr.HasDeco = 0
 }
 
 // IsValid ensures that at least some text is represented and the sizes of
@@ -159,10 +161,19 @@ func (sr *SpanRender) SizeHV() Vec2D {
 }
 
 // AppendRune adds one rune and associated formatting info
+func (sr *SpanRender) HasDecoUpdate(bg color.Color, deco TextDecorations) {
+	sr.HasDeco |= deco
+	if bg != nil {
+		bitflag.Set32((*int32)(&sr.HasDeco), int(DecoBgColor))
+	}
+}
+
+// AppendRune adds one rune and associated formatting info
 func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, deco TextDecorations) {
 	sr.Text = append(sr.Text, r)
 	rr := RuneRender{Face: face, Color: clr, BgColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
+	sr.HasDecoUpdate(bg, deco)
 }
 
 // AppendString adds string and associated formatting info, optimized with
@@ -174,6 +185,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 	}
 	sr.Text = append(sr.Text, []rune(str)...)
 	rr := RuneRender{Face: face, Color: clr, BgColor: bg, Deco: deco}
+	sr.HasDecoUpdate(bg, deco)
 	sr.Render = append(sr.Render, rr)
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := RuneRender{Deco: deco, BgColor: bg}
@@ -193,6 +205,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, noBG bool, rot, scalex float32)
 		bgc = nil
 	}
 
+	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
 	sr.Render[0].Face = sty.Face
 	sr.Render[0].Color = sty.Color
@@ -457,9 +470,15 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 		}
 
 		// todo: cache flags if these are actually needed
-		sr.RenderBg(rs, tpos)
-		sr.RenderUnderline(rs, tpos)
-		sr.RenderLine(rs, tpos, DecoOverline, 1.1)
+		if bitflag.Has32(int32(sr.HasDeco), int(DecoBgColor)) {
+			sr.RenderBg(rs, tpos)
+		}
+		if bitflag.HasAny32(int32(sr.HasDeco), int(DecoUnderline), int(DecoDottedUnderline)) {
+			sr.RenderUnderline(rs, tpos)
+		}
+		if bitflag.Has32(int32(sr.HasDeco), int(DecoOverline)) {
+			sr.RenderLine(rs, tpos, DecoOverline, 1.1)
+		}
 
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
@@ -487,8 +506,10 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			if !ok {
 				continue
 			}
+			idr := dr.Intersect(rs.Bounds)
+			soff := idr.Min.Sub(dr.Min)
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
-				draw.DrawMask(d.Dst, dr, d.Src, image.ZP, mask, maskp, draw.Over)
+				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
 				srect := dr.Sub(dr.Min)
 				dbase := Vec2D{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
@@ -503,7 +524,9 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 				})
 			}
 		}
-		sr.RenderLine(rs, tpos, DecoLineThrough, 0.25)
+		if bitflag.Has32(int32(sr.HasDeco), int(DecoLineThrough)) {
+			sr.RenderLine(rs, tpos, DecoLineThrough, 0.25)
+		}
 	}
 	rs.PopXForm()
 }

@@ -120,7 +120,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			ZoomFactor *= 1.1
 			zoom.SetValue(ZoomFactor)
-			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, .8*ZoomFactor))
+			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
 			// svg.ViewBox.Size.SetMulVal(ZoomFactor)
 			win.FullReRender()
 		}
@@ -130,7 +130,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			ZoomFactor *= 0.9
 			zoom.SetValue(ZoomFactor)
-			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, .8*ZoomFactor))
+			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
 			// svg.ViewBox.Size.SetMulVal(ZoomFactor) // todo: svg should do this
 			win.FullReRender()
 		}
