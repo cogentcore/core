@@ -150,11 +150,8 @@ Currently at an **alpha** level release:
 
 ## Rendering / SVG
 
-* hidpi issue: everything else rescales using styles, INCLUDING fonts used in
-  SVG rendering, but the points used for drawing are just raw points and are
-  NOT rescaled.  linewidths, etc are also all styled per dpi.  basically we
-  just need to pre-convert all points in SVG rendering to fit.
-  
+* enum chooser not working
+
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering -- unclear if any gradients are rendering properly
 

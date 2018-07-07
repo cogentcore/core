@@ -162,9 +162,11 @@ func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
 }
 
 func (g *SVGNodeBase) BBox2D() image.Rectangle {
-	// nodes should compute this in viewport rendering coords (not "user coords")
-	// transform has already been applied
-	return g.BBox
+	rs := &g.Viewport.Render
+	fbox := rs.Raster.Scanner.GetPathExtent()
+	bb := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	return bb
 }
 
 func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
@@ -190,8 +192,8 @@ func (g *SVGNodeBase) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
+	// render path elements, then compute bbox, then fill / stroke
 	g.ComputeBBoxSVG()
-	// render goes here
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -253,25 +255,18 @@ type Rect struct {
 
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
-func (g *Rect) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	// todo: all of these are wrong: not taking into account xforms -- get from renderx
-	bb := g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Size.X, g.Pos.Y+g.Size.Y)
-	return bb
-}
-
 func (g *Rect) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	g.ComputeBBoxSVG()
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Size.X), pu.PxToDots(g.Size.Y))
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
 		pc.DrawRoundedRectangle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Size.X), pu.PxToDots(g.Size.Y), pu.PxToDots(g.Radius.X))
 	}
+	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -289,19 +284,13 @@ type Circle struct {
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
-func (g *Circle) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radius, g.Pos.Y-g.Radius, g.Pos.X+g.Radius, g.Pos.Y+g.Radius)
-	return bb
-}
-
 func (g *Circle) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	g.ComputeBBoxSVG()
 	pc.DrawCircle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radius))
+	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -319,19 +308,13 @@ type Ellipse struct {
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
-func (g *Ellipse) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	bb := g.Pnt.BoundingBox(rs, g.Pos.X-g.Radii.X, g.Pos.Y-g.Radii.Y, g.Pos.X+g.Radii.X, g.Pos.Y+g.Radii.Y)
-	return bb
-}
-
 func (g *Ellipse) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	g.ComputeBBoxSVG()
 	pc.DrawEllipse(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radii.X), pu.PxToDots(g.Radii.Y))
+	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -349,19 +332,13 @@ type Line struct {
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
-func (g *Line) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	bb := g.Pnt.BoundingBox(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y).Canon()
-	return bb
-}
-
 func (g *Line) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	g.ComputeBBoxSVG()
 	pc.DrawLine(rs, pu.PxToDots(g.Start.X), pu.PxToDots(g.Start.Y), pu.PxToDots(g.End.X), pu.PxToDots(g.End.Y))
+	g.ComputeBBoxSVG()
 	pc.Stroke(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -378,22 +355,15 @@ type Polyline struct {
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
-func (g *Polyline) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
-	return bb
-}
-
 func (g *Polyline) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	// pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
+	pc.DrawPolylinePxToDots(rs, g.Points)
 	g.ComputeBBoxSVG()
-	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -410,22 +380,15 @@ type Polygon struct {
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
-func (g *Polygon) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	bb := g.Pnt.BoundingBoxFromPoints(rs, g.Points)
-	return bb
-}
-
 func (g *Polygon) Render2D() {
 	if len(g.Points) < 2 {
 		return
 	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	// pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
+	pc.DrawPolygonPxToDots(rs, g.Points)
 	g.ComputeBBoxSVG()
-	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()
@@ -459,6 +422,7 @@ var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
 
 func (g *SVGText) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
+	// todo: fix
 	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Render.Size.X, g.Pos.Y+g.Render.Size.Y)
 }
 

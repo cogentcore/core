@@ -659,8 +659,25 @@ func (pc *Paint) DrawPolyline(rs *RenderState, points []Vec2D) {
 	}
 }
 
+func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []Vec2D) {
+	pu := &pc.UnContext
+	sz := len(points)
+	if sz < 2 {
+		return
+	}
+	pc.MoveTo(rs, pu.PxToDots(points[0].X), pu.PxToDots(points[0].Y))
+	for i := 1; i < sz; i++ {
+		pc.LineTo(rs, pu.PxToDots(points[i].X), pu.PxToDots(points[i].Y))
+	}
+}
+
 func (pc *Paint) DrawPolygon(rs *RenderState, points []Vec2D) {
 	pc.DrawPolyline(rs, points)
+	pc.ClosePath(rs)
+}
+
+func (pc *Paint) DrawPolygonPxToDots(rs *RenderState, points []Vec2D) {
+	pc.DrawPolylinePxToDots(rs, points)
 	pc.ClosePath(rs)
 }
 

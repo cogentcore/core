@@ -328,6 +328,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					// note: id not processed here - must be done externally
 					case "x1":
 						cs.Gradient.Points[0], err = readFraction(attr.Value)
+						fmt.Printf("x1: %v val: %v\n", cs.Gradient.Points[0], attr.Value)
 					case "y1":
 						cs.Gradient.Points[1], err = readFraction(attr.Value)
 					case "x2":
@@ -450,9 +451,10 @@ func readFraction(v string) (f float64, err error) {
 	}
 	f, err = strconv.ParseFloat(v, 64)
 	f /= d
-	if f > 1 {
-		f = 1
-	} else if f < 0 {
+	// if f > 1 {
+	// 	f = 1
+	// } else
+	if f < 0 {
 		f = 0
 	}
 	return
