@@ -701,7 +701,7 @@ func (g *CheckBox) ConfigParts() {
 		if lbl.Text != g.Text {
 			g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			g.StylePart(Node2D(lbl))
-			lbl.Text = g.Text
+			lbl.SetText(g.Text)
 		}
 	}
 	if mods {
