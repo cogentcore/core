@@ -661,7 +661,7 @@ func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx
 			if icIdx >= 0 {
 				g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			}
-			lbl.Text = txt
+			lbl.SetText(txt)
 		}
 	}
 }

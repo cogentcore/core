@@ -374,6 +374,8 @@ const (
 	DecoSuper
 	// DecoSub indicates sub-scripted text
 	DecoSub
+	// DecoBgColor indicates that a bg color has been set -- for use in optimizing rendering
+	DecoBgColor
 	TextDecorationsN
 )
 

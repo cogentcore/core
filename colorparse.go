@@ -322,26 +322,26 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 				}
 				cs.Source = LinearGradient
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
-				for _, attr := range se.Attr {
-					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
-					switch attr.Name.Local {
-					// note: id not processed here - must be done externally
-					case "x1":
-						cs.Gradient.Points[0], err = readFraction(attr.Value)
-					case "y1":
-						cs.Gradient.Points[1], err = readFraction(attr.Value)
-					case "x2":
-						cs.Gradient.Points[2], err = readFraction(attr.Value)
-					case "y2":
-						cs.Gradient.Points[3], err = readFraction(attr.Value)
-					default:
-						err = cs.ReadGradAttr(attr)
-					}
-					if err != nil {
-						log.Printf("gi.ColorSpec.UnmarshalXML linear gradient parsing error: %v\n", err)
-						return err
-					}
-				}
+				// for _, attr := range se.Attr {
+				// 	// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
+				// 	switch attr.Name.Local {
+				// 	// note: id not processed here - must be done externally
+				// 	case "x1":
+				// 		cs.Gradient.Points[0], err = readFraction(attr.Value)
+				// 	case "y1":
+				// 		cs.Gradient.Points[1], err = readFraction(attr.Value)
+				// 	case "x2":
+				// 		cs.Gradient.Points[2], err = readFraction(attr.Value)
+				// 	case "y2":
+				// 		cs.Gradient.Points[3], err = readFraction(attr.Value)
+				// 	default:
+				// 		err = cs.ReadGradAttr(attr)
+				// 	}
+				// 	if err != nil {
+				// 		log.Printf("gi.ColorSpec.UnmarshalXML linear gradient parsing error: %v\n", err)
+				// 		return err
+				// 	}
+				// }
 			case "radialGradient":
 				if cs.Gradient == nil {
 					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
@@ -450,9 +450,10 @@ func readFraction(v string) (f float64, err error) {
 	}
 	f, err = strconv.ParseFloat(v, 64)
 	f /= d
-	if f > 1 {
-		f = 1
-	} else if f < 0 {
+	// if f > 1 {
+	// 	f = 1
+	// } else
+	if f < 0 {
 		f = 0
 	}
 	return

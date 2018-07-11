@@ -1310,7 +1310,7 @@ func (tv *TreeView) ConfigParts() {
 	}
 
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
-	lbl.Text = tv.Label()
+	lbl.SetText(tv.Label())
 	if mods {
 		tv.StylePart(Node2D(lbl))
 	}
@@ -1322,7 +1322,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 		tv.ConfigParts()
 	}
 	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
-	lbl.Text = tv.Label()
+	lbl.SetText(tv.Label())
 	lbl.Sty.Font.Color = tv.Sty.Font.Color
 	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
 	wb.SetChecked(!tv.IsClosed())

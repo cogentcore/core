@@ -246,6 +246,16 @@ func (uc *Context) ToDots(val float32, un Unit) float32 {
 	return val * uc.ToDotsFactor(un)
 }
 
+// PxToDots just converts a value from pixels to dots
+func (uc *Context) PxToDots(val float32) float32 {
+	return val * uc.ToDotsFactor(Px)
+}
+
+// DotsToPx just converts a value from dots to pixels
+func (uc *Context) DotsToPx(val float32) float32 {
+	return val / uc.ToDotsFactor(Px)
+}
+
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
 	Val  float32

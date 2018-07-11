@@ -150,9 +150,7 @@ Currently at an **alpha** level release:
 
 ## Rendering / SVG
 
-* text rendering is definitely not right -- font scaling is off (not using
-  xform?) and in general the Paint text interface needs a full redo to fit the
-  constraints of svg and generally be simpler.
+* enum chooser not working
 
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering -- unclear if any gradients are rendering properly
