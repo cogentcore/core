@@ -837,7 +837,7 @@ func (tf *TextField) Style2D() {
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
 	st.Font.LoadFont(&st.UnContext, "")
-	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, true, 0, 0)
+	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.Text, true, 0, 0)
 	return true
 }
 
@@ -1046,7 +1046,7 @@ func (tf *TextField) Render2D() {
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
 		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
-		tf.RenderVis.SetRunes(cur, &st.Font, true, 0, 0)
+		tf.RenderVis.SetRunes(cur, &st.Font, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 		if tf.HasFocus() {
 			tf.RenderCursor()

@@ -443,7 +443,7 @@ func (g *SVGText) Render2D() {
 			scalex = 0
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
-		g.Render.SetString(g.Text, &pc.FontStyle, true, rot, scalex)
+		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 		sr := &(g.Render.Spans[0])

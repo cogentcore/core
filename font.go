@@ -32,29 +32,20 @@ import (
 // is used in SVG text rendering -- used in Paint and in Style -- see style.go
 // -- most of font information is inherited
 type FontStyle struct {
-	Color            Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
-	BgColor          ColorSpec       `xml:"background-color" desc:"background color -- not inherited, transparent by default"`
-	Opacity          float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
-	Size             units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
-	Family           string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
-	Style            FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
-	Weight           FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
-	Stretch          FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
-	Variant          FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
-	Deco             TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
-	Shift            BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
-	LetterSpacing    units.Value     `xml:"letter-spacing" desc:"spacing between characters and lines"`
-	WordSpacing      units.Value     `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
-	Anchor           TextAnchors     `xml:"text-anchor" inherit:"true" desc:"for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
-	UnicodeBidi      UnicodeBidi     `xml:"unicode-bidi" inherit:"true" desc:"determines how to treat unicode bidirectional information"`
-	Direction        TextDirections  `xml:"direction" inherit:"true" desc:"direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
-	WritingMode      TextDirections  `xml:"writing-mode" inherit:"true" desc:"overall writing mode -- only for text elements, not tspan"`
-	OrientationVert  float32         `xml:"glyph-orientation-vertical" inherit:"true" desc:"for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
-	OrientationHoriz float32         `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
-	Face             font.Face       `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
-	Height           float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font"`
-	FaceName         string          `desc:"name corresponding to Face"`
-	// todo: size also includes things like: medium, xx-small...xx-large, smaller, larger, etc
+	Color    Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
+	BgColor  ColorSpec       `xml:"background-color" desc:"background color -- not inherited, transparent by default"`
+	Opacity  float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
+	Size     units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
+	Family   string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
+	Style    FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
+	Weight   FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
+	Stretch  FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
+	Variant  FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
+	Deco     TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
+	Shift    BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
+	Face     font.Face       `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
+	Height   float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font"`
+	FaceName string          `desc:"name corresponding to Face"`
 	// todo: kerning
 	// todo: stretch -- css 3 -- not supported
 }
@@ -64,8 +55,6 @@ func (fs *FontStyle) Defaults() {
 	fs.Opacity = 1.0
 	fs.FaceName = "Arial"
 	fs.Size = units.NewValue(12, units.Pt)
-	fs.Direction = LTR
-	fs.OrientationVert = 90
 }
 
 // SetStylePost does any updates after generic xml-tag property setting -- use

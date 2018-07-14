@@ -724,15 +724,15 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 // apply these per character after.  Be sure that LoadFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetString(str string, sty *FontStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetString(str string, fontSty *FontStyle, txtSty *TextStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetString(str, sty, noBG, rot, scalex)
-	sr.SetRunePosLR(sty.LetterSpacing.Dots, sty.WordSpacing.Dots)
+	sr.SetString(str, fontSty, noBG, rot, scalex)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
-	vht := sty.Face.Metrics().Height
+	vht := fontSty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
 }
@@ -744,15 +744,15 @@ func (tr *TextRender) SetString(str string, sty *FontStyle, noBG bool, rot, scal
 // apply these per character after Be sure that LoadFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetRunes(str []rune, sty *FontStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, txtSty *TextStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetRunes(str, sty, noBG, rot, scalex)
-	sr.SetRunePosLR(sty.LetterSpacing.Dots, sty.WordSpacing.Dots)
+	sr.SetRunes(str, fontSty, noBG, rot, scalex)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
-	vht := sty.Face.Metrics().Height
+	vht := fontSty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 }
 
@@ -921,15 +921,22 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 // FontStyle contains all the lower-level text rendering info used in SVG --
 // most of these are inherited
 type TextStyle struct {
-	Align      Align       `xml:"text-align" inherit:"true" desc:"how to align text"`
-	AlignV     Align       `xml:"-" json:"-" desc:"vertical alignment of text -- copied from layout style AlignV"`
-	LineHeight float32     `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (todo: specific values such as pixels are not supported, in order to properly support percentage) -- text is centered within the overall lineheight"`
-	Indent     units.Value `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
-	TabSize    units.Value `xml:"tab-size" inherit:"true" desc:"tab size"`
-	WordWrap   bool        `xml:"word-wrap" inherit:"true" desc:"wrap text within a given size"`
+	Align            Align          `xml:"text-align" inherit:"true" desc:"how to align text, horizontally"`
+	AlignV           Align          `xml:"-" json:"-" desc:"vertical alignment of text -- copied from layout style AlignV"`
+	Anchor           TextAnchors    `xml:"text-anchor" inherit:"true" desc:"for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
+	LetterSpacing    units.Value    `xml:"letter-spacing" desc:"spacing between characters and lines"`
+	WordSpacing      units.Value    `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
+	LineHeight       float32        `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (todo: specific values such as pixels are not supported, in order to properly support percentage) -- text is centered within the overall lineheight"`
+	UnicodeBidi      UnicodeBidi    `xml:"unicode-bidi" inherit:"true" desc:"determines how to treat unicode bidirectional information"`
+	Direction        TextDirections `xml:"direction" inherit:"true" desc:"direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
+	WritingMode      TextDirections `xml:"writing-mode" inherit:"true" desc:"overall writing mode -- only for text elements, not tspan"`
+	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
+	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
+	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
+	TabSize          units.Value    `xml:"tab-size" inherit:"true" desc:"tab size"`
+	WordWrap         bool           `xml:"word-wrap" inherit:"true" desc:"wrap text within a given size"`
 	// todo:
 	// page-break options
-	// text-decoration-line -- underline, overline, line-through, -style, -color inherit
 	// text-justify  inherit:"true" -- how to justify text
 	// text-overflow -- clip, ellipsis, string..
 	// text-shadow  inherit:"true"
@@ -943,6 +950,8 @@ func (ts *TextStyle) Defaults() {
 	ts.WordWrap = false
 	ts.Align = AlignLeft
 	ts.AlignV = AlignBaseline
+	ts.Direction = LTR
+	ts.OrientationVert = 90
 }
 
 // SetStylePost applies any updates after generic xml-tag property setting
@@ -1019,7 +1028,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 			continue
 		}
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
-			sr.SetRunePosLR(fontSty.LetterSpacing.Dots, fontSty.WordSpacing.Dots)
+			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 		}
 		ssz := sr.SizeHV()
 		if size.X > 0 && ssz.X > size.X && txtSty.WordWrap {

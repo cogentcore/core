@@ -150,8 +150,6 @@ Currently at an **alpha** level release:
 
 ## Rendering / SVG
 
-* enum chooser not working
-
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering -- unclear if any gradients are rendering properly
 

@@ -62,6 +62,7 @@ type Paint struct {
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
 	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	TextStyle   TextStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
 	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
