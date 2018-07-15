@@ -95,9 +95,9 @@ var MenuFrameProps = ki.Props{
 	"box-shadow.color":    &Prefs.ShadowColor,
 }
 
-// PopupMenu just pops up a viewport with a layout that draws the supplied
-// actions positions are relative to given viewport -- name is relevant base
-// name to which Menu is appended
+// PopupMenu pops up a viewport with a layout that draws the supplied actions
+// positions are relative to given viewport -- name is relevant base name to
+// which Menu is appended
 func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
 	win := parVp.Win
 	mainVp := win.Viewport

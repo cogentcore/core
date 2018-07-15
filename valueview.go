@@ -372,6 +372,7 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*TextField)
 	tf.SetStretchMaxWidth()
+	tf.Tooltip = vv.ViewFieldTag("desc")
 	widthtag := vv.ViewFieldTag("width")
 	tf.SetProp("min-width", units.NewValue(16, units.Ex))
 	if widthtag != "" {
@@ -515,6 +516,7 @@ func (vv *StructValueView) ConfigWidget(widg Node2D) {
 	vv.UpdateWidget()
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	mb := vv.Widget.(*MenuButton)
+	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
@@ -549,6 +551,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sv := vv.Widget.(*StructViewInline)
+	sv.Tooltip = vv.ViewFieldTag("desc")
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -636,6 +639,7 @@ func (vv *MapValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
+	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
@@ -676,6 +680,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sv := vv.Widget.(*MapViewInline)
+	sv.Tooltip = vv.ViewFieldTag("desc")
 	// npv := vv.Value.Elem()
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -738,6 +743,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
+	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
@@ -789,6 +795,7 @@ func (vv *BoolValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	cb := vv.Widget.(*CheckBox)
+	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
@@ -827,6 +834,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
+	sb.Tooltip = vv.ViewFieldTag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
@@ -897,6 +905,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sb := vv.Widget.(*SpinBox)
+	sb.Tooltip = vv.ViewFieldTag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
@@ -975,6 +984,7 @@ func (vv *EnumValueView) UpdateWidget() {
 func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
+	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.SetProp("padding", units.NewValue(2, units.Px))
 	cb.SetProp("margin", units.NewValue(2, units.Px))
@@ -1021,6 +1031,7 @@ func (vv *TypeValueView) UpdateWidget() {
 func (vv *TypeValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*ComboBox)
+	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 
 	typEmbeds := ki.KiT_Node

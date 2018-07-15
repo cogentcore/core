@@ -37,21 +37,29 @@ import (
 // event type (scroll, drag, resize) is skipped
 var EventSkipLagMSec = 50
 
-// DragStartDelayMSec is the number of milliseconds to wait before initiating a
+// DragStartMSec is the number of milliseconds to wait before initiating a
 // regular mouse drag event (as opposed to a basic mouse.Press)
-var DragStartDelayMSec = 50
+var DragStartMSec = 50
 
-// DragStartDistPix is the number of pixels that must be moved before
+// DragStartPix is the number of pixels that must be moved before
 // initiating a regular mouse drag event (as opposed to a basic mouse.Press)
-var DragStartDistPix = 4
+var DragStartPix = 4
 
-// DNDStartDelayMSec is the number of milliseconds to wait before initiating a
+// DNDStartMSec is the number of milliseconds to wait before initiating a
 // drag-n-drop event -- gotta drag it like you mean it
-var DNDStartDelayMSec = 200
+var DNDStartMSec = 200
 
-// DNDStartDistPix is the number of pixels that must be moved before
+// DNDStartPix is the number of pixels that must be moved before
 // initiating a drag-n-drop event -- gotta drag it like you mean it
-var DNDStartDistPix = 20
+var DNDStartPix = 20
+
+// HoverStartMSec is the number of milliseconds to wait before initiating a
+// hover event
+var HoverStartMSec = 2000
+
+// HoverStartPix is the maximum number of pixels that mouse can move and still
+// register a Hover event
+var HoverStartPix = 10
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
@@ -595,6 +603,15 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	}
 }
 
+// SendHoverEvent sends mouse hover event, based on last mouse move event
+func (w *Window) SendHoverEvent(e *mouse.MoveEvent) {
+	fmt.Printf("sending hover event\n")
+	he := mouse.HoverEvent{Event: e.Event}
+	he.Processed = false
+	he.Action = mouse.Hover
+	w.SendEventSignal(&he)
+}
+
 // PopupIsMenu returns true if the given popup item is a menu
 func PopupIsMenu(pop ki.Ki) bool {
 	gii, gi := KiToNode2D(pop)
@@ -640,6 +657,10 @@ func (w *Window) EventLoop() {
 
 	var startDND *mouse.DragEvent
 	dndStarted := false
+
+	var startHover *mouse.MoveEvent
+	hoverStarted := false
+	var hoverTimer *time.Timer
 
 	for {
 		evi := w.OSWin.NextEvent()
@@ -742,9 +763,9 @@ func (w *Window) EventLoop() {
 					startDrag = evi.(*mouse.DragEvent)
 				} else {
 					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
-					if delayMs >= DragStartDelayMSec {
+					if delayMs >= DragStartMSec {
 						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
-						if dst >= DragStartDistPix {
+						if dst >= DragStartPix {
 							dragStarted = true
 							startDrag = nil
 						}
@@ -756,9 +777,9 @@ func (w *Window) EventLoop() {
 					startDND = evi.(*mouse.DragEvent)
 				} else {
 					delayMs := int(now.Sub(startDND.Time()) / time.Millisecond)
-					if delayMs >= DNDStartDelayMSec {
+					if delayMs >= DNDStartMSec {
 						dst := int(math32.Hypot(float32(startDND.Where.X-evi.Pos().X), float32(startDND.Where.Y-evi.Pos().Y)))
-						if dst >= DNDStartDistPix {
+						if dst >= DNDStartPix {
 							dndStarted = true
 							w.DNDStartEvent(startDND)
 							startDND = nil
@@ -771,6 +792,40 @@ func (w *Window) EventLoop() {
 			startDrag = nil
 			dndStarted = false
 			startDND = nil
+		}
+
+		// detect hover event
+		if et == oswin.MouseMoveEvent {
+			if !hoverStarted {
+				if startHover == nil {
+					hoverStarted = true
+					startHover = evi.(*mouse.MoveEvent)
+					fmt.Printf("starting hover timer\n")
+					hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
+						w.SendHoverEvent(startHover)
+						hoverStarted = false
+						startHover = nil
+						hoverTimer = nil
+					})
+				} else {
+					dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
+					if dst > HoverStartPix {
+						fmt.Printf("canceled hover timer due to motion %v\n", dst)
+						hoverStarted = false
+						startHover = nil
+						hoverTimer.Stop()
+						hoverTimer = nil
+					}
+				}
+			}
+		} else {
+			fmt.Printf("canceled hover timer due to other event %v\n", et)
+			hoverStarted = false
+			startHover = nil
+			if hoverTimer != nil {
+				hoverTimer.Stop()
+				hoverTimer = nil
+			}
 		}
 
 		// Window gets first crack at the events, and handles window-specific ones

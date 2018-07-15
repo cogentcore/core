@@ -10,8 +10,11 @@ import (
 	"log"
 	"strings"
 
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -19,6 +22,7 @@ import (
 // managed by a containing Layout, and use all 5 rendering passes
 type WidgetBase struct {
 	Node2DBase
+	Tooltip  string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
 	Sty      Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	DefStyle *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayData  LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
@@ -447,6 +451,72 @@ func (g *WidgetBase) ParentLayout() *Layout {
 	})
 	return parLy
 }
+
+var TooltipFrameProps = ki.Props{
+	"border-width":        units.NewValue(0, units.Px),
+	"border-color":        "none",
+	"margin":              units.NewValue(4, units.Px),
+	"padding":             units.NewValue(2, units.Px),
+	"box-shadow.h-offset": units.NewValue(2, units.Px),
+	"box-shadow.v-offset": units.NewValue(2, units.Px),
+	"box-shadow.blur":     units.NewValue(2, units.Px),
+	"box-shadow.color":    &Prefs.ShadowColor,
+}
+
+// PopupTooltip pops up a viewport displaying the tooltip text
+func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+	win := parVp.Win
+	mainVp := win.Viewport
+	pvp := Viewport2D{}
+	pvp.InitName(&pvp, name+"Tooltip")
+	pvp.Win = win
+	updt := pvp.UpdateStart()
+	pvp.SetProp("color", &Prefs.FontColor)
+	pvp.SetProp("background-color", &Prefs.HighlightColor)
+	pvp.Fill = true
+	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
+	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
+
+	pvp.Geom.Pos = image.Point{x, y}
+	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
+	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
+	frame.Lay = LayoutCol
+	frame.SetProps(TooltipFrameProps, false)
+	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
+	lbl.SetText(tooltip)
+	frame.Init2DTree()
+	frame.Style2DTree()                                // sufficient to get sizes
+	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
+	frame.Size2DTree()                                 // collect sizes
+	pvp.Win = nil
+	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	x = kit.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = kit.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	pvp.Resize(vpsz)
+	pvp.Geom.Pos = image.Point{x, y}
+	pvp.UpdateEndNoSig(updt)
+
+	win.NextPopup = pvp.This
+	return &pvp
+}
+
+// WidgetEvents handles base widget events
+func (g *WidgetBase) WidgetEvents() {
+	g.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		me.SetProcessed()
+		ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+		if ab.Tooltip != "" {
+			pos := ab.WinBBox.Max
+			pos.Y -= 10
+			pos.X -= 10
+			PopupTooltip(ab.Tooltip, pos.X, pos.Y, g.Viewport, ab.Nm)
+		}
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Standard rendering
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set

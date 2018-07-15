@@ -43,6 +43,7 @@ type Preferences struct {
 	ControlColor     Color    `desc:"default main color for controls: buttons, etc"`
 	IconColor        Color    `desc:"color for icons or other solidly-colored, small elements"`
 	SelectColor      Color    `desc:"color for selected elements"`
+	HighlightColor   Color    `desc:"color for highlight background"`
 	CustomKeyMap     KeyMap   `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride    bool     `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles     ki.Props `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
@@ -64,6 +65,7 @@ func (p *Preferences) Defaults() {
 	p.ControlColor.SetString("#EEF", nil)
 	p.IconColor.SetString("highlight-30", p.ControlColor)
 	p.SelectColor.SetString("#CFC", nil)
+	p.HighlightColor.SetString("#FF0", nil)
 }
 
 // Load preferences from GoGi standard prefs directory
@@ -256,6 +258,8 @@ func (p *Preferences) PrefColor(clrName string) *Color {
 		return &p.IconColor
 	case "selectcolor":
 		return &p.SelectColor
+	case "highlightcolor":
+		return &p.HighlightColor
 	}
 	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
 	return nil

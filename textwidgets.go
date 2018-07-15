@@ -742,6 +742,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 }
 
 func (tf *TextField) TextFieldEvents() {
+	tf.WidgetEvents()
 	tf.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()

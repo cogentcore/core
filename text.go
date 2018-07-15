@@ -846,7 +846,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				fs.Size.ToDots(ctxt)
 				fs.LoadFont(ctxt, "")
 			case "mark":
-				fs.BgColor.SetString("#FF0")
+				fs.BgColor.SetColor(Prefs.HighlightColor)
 			case "abbr", "acronym":
 				fs.SetDeco(DecoDottedUnderline)
 			case "tt", "kbd", "samp", "code":

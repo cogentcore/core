@@ -343,6 +343,7 @@ func SetButtonIcon(bw ButtonWidget, iconName string) {
 // ButtonEvents handles all the basic button events
 func ButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
+	g.WidgetEvents()
 	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()

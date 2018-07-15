@@ -107,6 +107,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 		"width":  units.NewValue(2, units.Em),
 		"height": units.NewValue(2, units.Em),
 	})
+	button1.Tooltip = "press this <b>button</b> to pop up a dialog box"
 
 	button1.SetIcon(icnm)
 	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
