@@ -305,8 +305,17 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	sz := len(sr.Text)
 	idx := int(float32(sz) * (trgSize / curSize))
+	if idx >= sz {
+		idx = sz - 1
+	}
+	for idx >= 0 && !unicode.IsSpace(sr.Text[idx]) {
+		idx--
+	}
 	csz := sr.Render[idx].RelPos.X
 	lstgoodi := -1
+	if csz <= trgSize {
+		lstgoodi = idx
+	}
 	for {
 		if csz > trgSize {
 			for idx > 0 {
@@ -336,6 +345,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 				}
 				idx++
 			}
+			return lstgoodi
 		}
 	}
 	return -1
@@ -394,26 +404,27 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 		return nil
 	}
 	nsr := SpanRender{Text: sr.Text[idx:], Render: sr.Render[idx:], Dir: sr.Dir}
-	nsr.LastPos.X = sr.Render[idx].RelPosAfterLR()
 	sr.Text = sr.Text[:idx]
 	sr.Render = sr.Render[:idx]
 	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
 	sr.TrimSpaceLR()
 	nsr.TrimSpaceLR()
+	// go back and find latest face and color -- each sr must start with valid one
+	nrr0 := &(nsr.Render[0])
+	for i := idx - 1; i >= 0; i-- {
+		srr := sr.Render[i]
+		if nrr0.Face == nil && srr.Face != nil {
+			nrr0.Face = srr.Face
+		}
+		if nrr0.Color == nil && srr.Color != nil {
+			nrr0.Color = srr.Color
+		}
+	}
 	return &nsr
 }
 
 // todo: TB, RL cases -- layout is complicated.. with unicode-bidi, direction,
 // writing-mode styles all interacting: https://www.w3.org/TR/SVG11/text.html#TextLayout
-
-// Transform transforms relative coordinates -- todo: need origin
-func (sr *SpanRender) Transform(xform XFormMatrix2D, pos Vec2D) {
-	// if err := tr.IsValid(); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	// sz := len(tr.Text)
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 //  TextRender
@@ -1043,6 +1054,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					}
 					si++
 					sr = &(tr.Spans[si]) // keep going with nsr
+					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 					ssz = sr.SizeHV()
 					if ssz.X <= size.X {
 						if ssz.X > maxw {

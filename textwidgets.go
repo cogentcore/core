@@ -94,7 +94,7 @@ func (g *Label) SetTextAction(txt string) {
 func (g *Label) Style2D() {
 	g.Style2DWidget()
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), Vec2DZero)
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.Size.Max)
 }
 
 func (g *Label) Size2D() {

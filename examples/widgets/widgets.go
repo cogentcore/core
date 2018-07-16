@@ -94,7 +94,9 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	vlay.AddNewChild(gi.KiT_Space, "blspc")
 	blrow := vlay.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
-	blab.Text = "Buttons:"
+	blab.SetProp("word-wrap", true)
+	blab.SetProp("max-width", "20em")
+	blab.Text = "Buttons: everyone loves buttons -- they are so cute and functional and you can hit them and things happen.  Truly amazing what simple button can accomplish.  Every major event starts with a button press."
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutRow
@@ -107,7 +109,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 		"width":  units.NewValue(2, units.Em),
 		"height": units.NewValue(2, units.Em),
 	})
-	button1.Tooltip = "press this <b>button</b> to pop up a dialog box"
+	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
 	button1.SetIcon(icnm)
 	button1.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
