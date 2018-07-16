@@ -113,6 +113,7 @@ func (g *Label) Render2D() {
 		return
 	}
 	if g.PushBounds() {
+		g.WidgetEvents()
 		st := &g.Sty
 		rs := &g.Viewport.Render
 		g.RenderStdBox(st)

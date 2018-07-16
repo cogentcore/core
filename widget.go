@@ -455,11 +455,11 @@ func (g *WidgetBase) ParentLayout() *Layout {
 var TooltipFrameProps = ki.Props{
 	"border-width":        units.NewValue(0, units.Px),
 	"border-color":        "none",
-	"margin":              units.NewValue(4, units.Px),
+	"margin":              units.NewValue(0, units.Px),
 	"padding":             units.NewValue(2, units.Px),
-	"box-shadow.h-offset": units.NewValue(2, units.Px),
-	"box-shadow.v-offset": units.NewValue(2, units.Px),
-	"box-shadow.blur":     units.NewValue(2, units.Px),
+	"box-shadow.h-offset": units.NewValue(0, units.Px),
+	"box-shadow.v-offset": units.NewValue(0, units.Px),
+	"box-shadow.blur":     units.NewValue(0, units.Px),
 	"box-shadow.color":    &Prefs.ShadowColor,
 }
 
@@ -472,10 +472,9 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Win = win
 	updt := pvp.UpdateStart()
 	pvp.SetProp("color", &Prefs.FontColor)
-	pvp.SetProp("background-color", &Prefs.HighlightColor)
-	pvp.Fill = true
+	pvp.Fill = false
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
-	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
+	bitflag.Set(&pvp.Flag, int(VpFlagTooltip))
 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
@@ -484,6 +483,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.SetProps(TooltipFrameProps, false)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetText(tooltip)
+	lbl.SetProp("background-color", &Prefs.HighlightColor)
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes
 	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
@@ -496,7 +496,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 
-	win.NextPopup = pvp.This
+	win.PushPopup(pvp.This)
 	return &pvp
 }
 
@@ -508,8 +508,7 @@ func (g *WidgetBase) WidgetEvents() {
 		ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
 		if ab.Tooltip != "" {
 			pos := ab.WinBBox.Max
-			pos.Y -= 10
-			pos.X -= 10
+			pos.X -= 20
 			PopupTooltip(ab.Tooltip, pos.X, pos.Y, g.Viewport, ab.Nm)
 		}
 	})

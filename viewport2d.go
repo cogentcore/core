@@ -101,6 +101,9 @@ const (
 	// processes clicks
 	VpFlagMenu
 
+	// VpFlagTooltip means viewport is serving as a tooltip
+	VpFlagTooltip
+
 	// VpFlagPopupDestroyAll means that if this is a popup, then destroy all
 	// the children when it is deleted -- otherwise children below the main
 	// layout under the vp will not be destroyed -- it is up to the caller to
@@ -118,6 +121,10 @@ func (vp *Viewport2D) IsPopup() bool {
 
 func (vp *Viewport2D) IsMenu() bool {
 	return bitflag.Has(vp.Flag, int(VpFlagMenu))
+}
+
+func (vp *Viewport2D) IsTooltip() bool {
+	return bitflag.Has(vp.Flag, int(VpFlagTooltip))
 }
 
 func (vp *Viewport2D) IsSVG() bool {

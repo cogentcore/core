@@ -57,9 +57,9 @@ var DNDStartPix = 20
 // hover event
 var HoverStartMSec = 2000
 
-// HoverStartPix is the maximum number of pixels that mouse can move and still
+// HoverMaxPix is the maximum number of pixels that mouse can move and still
 // register a Hover event
-var HoverStartPix = 10
+var HoverMaxPix = 5
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
@@ -551,8 +551,9 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	}
 }
 
-// process mouse.MoveEvent to generate mouse.FocusEvent events
-func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
+// process mouse.MoveEvent to generate mouse.FocusEvent events -- returns true
+// if any such events were sent
+func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) bool {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
 	ftyp := oswin.MouseFocusEvent
@@ -601,11 +602,11 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) {
 	if updated {
 		w.UpdateEnd(updt)
 	}
+	return updated
 }
 
 // SendHoverEvent sends mouse hover event, based on last mouse move event
 func (w *Window) SendHoverEvent(e *mouse.MoveEvent) {
-	fmt.Printf("sending hover event\n")
 	he := mouse.HoverEvent{Event: e.Event}
 	he.Processed = false
 	he.Action = mouse.Hover
@@ -623,6 +624,22 @@ func PopupIsMenu(pop ki.Ki) bool {
 		return false
 	}
 	if vp.IsMenu() {
+		return true
+	}
+	return false
+}
+
+// PopupIsTooltip returns true if the given popup item is a menu
+func PopupIsTooltip(pop ki.Ki) bool {
+	gii, gi := KiToNode2D(pop)
+	if gi == nil {
+		return false
+	}
+	vp := gii.AsViewport2D()
+	if vp == nil {
+		return false
+	}
+	if vp.IsTooltip() {
 		return true
 	}
 	return false
@@ -658,7 +675,7 @@ func (w *Window) EventLoop() {
 	var startDND *mouse.DragEvent
 	dndStarted := false
 
-	var startHover *mouse.MoveEvent
+	var startHover, curHover *mouse.MoveEvent
 	hoverStarted := false
 	var hoverTimer *time.Timer
 
@@ -797,31 +814,34 @@ func (w *Window) EventLoop() {
 		// detect hover event
 		if et == oswin.MouseMoveEvent {
 			if !hoverStarted {
-				if startHover == nil {
-					hoverStarted = true
-					startHover = evi.(*mouse.MoveEvent)
-					fmt.Printf("starting hover timer\n")
-					hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-						w.SendHoverEvent(startHover)
-						hoverStarted = false
-						startHover = nil
-						hoverTimer = nil
-					})
-				} else {
-					dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
-					if dst > HoverStartPix {
-						fmt.Printf("canceled hover timer due to motion %v\n", dst)
-						hoverStarted = false
-						startHover = nil
-						hoverTimer.Stop()
-						hoverTimer = nil
+				hoverStarted = true
+				startHover = evi.(*mouse.MoveEvent)
+				curHover = startHover
+				hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
+					w.SendHoverEvent(curHover)
+					hoverStarted = false
+					startHover = nil
+					curHover = nil
+					hoverTimer = nil
+				})
+			} else {
+				dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
+				if dst > HoverMaxPix {
+					hoverStarted = false
+					startHover = nil
+					hoverTimer.Stop()
+					hoverTimer = nil
+					if w.Popup != nil && PopupIsTooltip(w.Popup) {
+						delPop = true
 					}
+				} else {
+					curHover = evi.(*mouse.MoveEvent)
 				}
 			}
 		} else {
-			fmt.Printf("canceled hover timer due to other event %v\n", et)
 			hoverStarted = false
 			startHover = nil
+			curHover = nil
 			if hoverTimer != nil {
 				hoverTimer.Stop()
 				hoverTimer = nil
@@ -864,14 +884,14 @@ func (w *Window) EventLoop() {
 				e.SetProcessed()
 			case KeyFunAbort:
 				if w.Popup != nil {
-					if PopupIsMenu(w.Popup) {
+					if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
 						delPop = true
 						e.SetProcessed()
 					}
 				}
 			case KeyFunAccept:
 				if w.Popup != nil {
-					if PopupIsMenu(w.Popup) {
+					if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
 						delPop = true
 					}
 				}
@@ -930,12 +950,19 @@ func (w *Window) EventLoop() {
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
 			if !delPop && et == oswin.MouseMoveEvent {
-				w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
+				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
+				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
+					delPop = true
+				}
 			}
 		}
 
-		if w.Popup != nil {
-			if me, ok := evi.(*mouse.Event); ok {
+		if w.Popup != nil && !delPop {
+			if PopupIsTooltip(w.Popup) {
+				if et != oswin.MouseMoveEvent {
+					delPop = true
+				}
+			} else if me, ok := evi.(*mouse.Event); ok {
 				if me.Action == mouse.Release {
 					if w.DeletePopupMenu(w.Popup, me) {
 						delPop = true

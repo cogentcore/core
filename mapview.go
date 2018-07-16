@@ -203,6 +203,7 @@ func (mv *MapView) ConfigMapGrid() {
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*Action)
 		delact.SetIcon("minus")
+		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -420,6 +421,7 @@ func (mv *MapViewInline) ConfigParts() {
 	}
 	edac := mv.Parts.Child(-1).(*Action)
 	edac.SetIcon("edit")
+	edac.Tooltip = "map edit dialog"
 	edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 		dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)
