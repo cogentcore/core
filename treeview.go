@@ -213,6 +213,9 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		}
 		idx++
 	}
+	if !sk.HasChildren() {
+		tv.SetClosed()
+	}
 	tv.UpdateEnd(updt)
 	pr.End()
 }

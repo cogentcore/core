@@ -91,6 +91,8 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
+* window prefs not working occasionally -- not getting DPI properly?
+
 * #icon props not getting used for resizing icons in button.
 
 * CSSAgg needs a tag for no-inline -- don't inline its map ever
