@@ -12,6 +12,7 @@ import (
 	"image/color"
 	"io"
 	"math"
+	"strings"
 
 	"log"
 	"unicode"
@@ -311,7 +312,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	for idx >= 0 && !unicode.IsSpace(sr.Text[idx]) {
 		idx--
 	}
-	csz := sr.Render[idx].RelPos.X
+	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
 	lstgoodi := -1
 	if csz <= trgSize {
 		lstgoodi = idx
@@ -320,7 +321,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 		if csz > trgSize {
 			for idx > 0 {
 				if unicode.IsSpace(sr.Text[idx]) {
-					csz = sr.Render[idx].RelPos.X
+					csz = sr.RelPos.X + sr.Render[idx].RelPos.X
 					if csz <= trgSize {
 						return idx
 					}
@@ -331,7 +332,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 		} else { // too small, go up
 			for idx < sz {
 				if unicode.IsSpace(sr.Text[idx]) {
-					csz = sr.Render[idx].RelPos.X
+					csz = sr.RelPos.X + sr.Render[idx].RelPos.X
 					if csz <= trgSize {
 						if csz == trgSize {
 							return idx
@@ -367,18 +368,30 @@ func (sr *SpanRender) ZeroPosLR() {
 	sr.LastPos.X -= sx
 }
 
-// TrimSpace trims leading and trailing space elements from span, and updates
-// the relative positions accordingly, for LR direction
-func (sr *SpanRender) TrimSpaceLR() {
+// TrimSpaceLeft trims leading space elements from span, and updates the
+// relative positions accordingly, for LR direction
+func (sr *SpanRender) TrimSpaceLeftLR() {
+	srr0 := sr.Render[0]
 	for range sr.Text {
 		if unicode.IsSpace(sr.Text[0]) {
 			sr.Text = sr.Text[1:]
 			sr.Render = sr.Render[1:]
+			if sr.Render[0].Face == nil {
+				sr.Render[0].Face = srr0.Face
+			}
+			if sr.Render[0].Color == nil {
+				sr.Render[0].Color = srr0.Color
+			}
 		} else {
 			break
 		}
 	}
 	sr.ZeroPosLR()
+}
+
+// TrimSpaceRight trims trailing space elements from span, and updates the
+// relative positions accordingly, for LR direction
+func (sr *SpanRender) TrimSpaceRightLR() {
 	for range sr.Text {
 		lidx := len(sr.Text) - 1
 		if unicode.IsSpace(sr.Text[lidx]) {
@@ -396,6 +409,13 @@ func (sr *SpanRender) TrimSpaceLR() {
 	}
 }
 
+// TrimSpace trims leading and trailing space elements from span, and updates
+// the relative positions accordingly, for LR direction
+func (sr *SpanRender) TrimSpaceLR() {
+	sr.TrimSpaceLeftLR()
+	sr.TrimSpaceRightLR()
+}
+
 // SplitAt splits current span at given index, returning a new span with
 // remainder after index -- space is trimmed from both spans and relative
 // positions updated, for LR direction
@@ -407,20 +427,38 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 	sr.Text = sr.Text[:idx]
 	sr.Render = sr.Render[:idx]
 	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
-	sr.TrimSpaceLR()
+	// sr.TrimSpaceLR()
 	nsr.TrimSpaceLR()
 	// go back and find latest face and color -- each sr must start with valid one
 	nrr0 := &(nsr.Render[0])
-	for i := len(sr.Render) - 1; i >= 0; i-- {
-		srr := sr.Render[i]
-		if nrr0.Face == nil && srr.Face != nil {
-			nrr0.Face = srr.Face
-		}
-		if nrr0.Color == nil && srr.Color != nil {
-			nrr0.Color = srr.Color
-		}
+	face, color := sr.LastFont()
+	if nrr0.Face == nil {
+		nrr0.Face = face
+	}
+	if nrr0.Color == nil {
+		nrr0.Color = color
 	}
 	return &nsr
+}
+
+// LastFont finds the last font and color from given span
+func (sr *SpanRender) LastFont() (face font.Face, color color.Color) {
+	for i := len(sr.Render) - 1; i >= 0; i-- {
+		srr := sr.Render[i]
+		if face == nil && srr.Face != nil {
+			face = srr.Face
+			if face != nil && color != nil {
+				break
+			}
+		}
+		if color == nil && srr.Color != nil {
+			color = srr.Color
+			if face != nil && color != nil {
+				break
+			}
+		}
+	}
+	return
 }
 
 // todo: TB, RL cases -- layout is complicated.. with unicode-bidi, direction,
@@ -711,9 +749,9 @@ func (sr *SpanRender) RenderLine(rs *RenderState, tpos Vec2D, deco TextDecoratio
 	}
 }
 
-// Render at given top position -- uses first font info to compute baseline
-// offset and calls overall Render -- convenience for simple widget rendering
-// without layouts
+// RenderTopPos renders at given top position -- uses first font info to
+// compute baseline offset and calls overall Render -- convenience for simple
+// widget rendering without layouts
 func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 	if len(tr.Spans) == 0 {
 		return
@@ -815,7 +853,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 		case xml.StartElement:
 			curf := fstack[len(fstack)-1]
 			fs := *curf
-			nm := se.Name.Local
+			nm := strings.ToLower(se.Name.Local)
 			// https://www.w3schools.com/cssref/css_default_values.asp
 			switch nm {
 			case "b", "strong":
@@ -889,6 +927,9 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			case "bdo":
 				// bidirectional override..
 			case "p":
+				tr.Spans = append(tr.Spans, SpanRender{})
+				curSp = &(tr.Spans[len(tr.Spans)-1])
+				nextIsParaStart = true
 			case "br":
 			default:
 				log.Printf("gi.TextRender SetHTML tag not recognized: %v\n", nm)
@@ -1042,7 +1083,13 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
 			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 		}
+		if bitflag.Has32(int32(sr.Render[0].Deco), int(DecoParaStart)) {
+			sr.RelPos.X = txtSty.Indent.Dots
+		} else {
+			sr.RelPos.X = 0
+		}
 		ssz := sr.SizeHV()
+		ssz.X += sr.RelPos.X
 		if size.X > 0 && ssz.X > size.X && txtSty.WordWrap {
 			for {
 				wp := sr.FindWrapPosLR(size.X, ssz.X)
@@ -1050,6 +1097,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					nsr := sr.SplitAtLR(wp)
 					tr.InsertSpan(si+1, nsr)
 					ssz = sr.SizeHV()
+					ssz.X += sr.RelPos.X
 					if ssz.X > maxw {
 						maxw = ssz.X
 					}
@@ -1108,16 +1156,15 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	for si := range tr.Spans {
 		sr := &(tr.Spans[si])
 		sr.RelPos.Y = vpos
-		sr.RelPos.X = 0
-		// todo: handle indent here look at para start -- sets +X -- also need in size above
 		ssz := sr.SizeHV()
+		ssz.X += sr.RelPos.X
 		hextra := size.X - ssz.X
 		if hextra > 0 {
 			switch {
 			case IsAlignMiddle(txtSty.Align):
-				sr.RelPos.X = hextra / 2
+				sr.RelPos.X += hextra / 2
 			case IsAlignEnd(txtSty.Align):
-				sr.RelPos.X = hextra
+				sr.RelPos.X += hextra
 			}
 		}
 		vpos += lspc

@@ -567,6 +567,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
 // SliceValueView presents a button to edit slices
 type SliceValueView struct {
 	ValueViewBase
+	IsStruct bool
 }
 
 var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
@@ -590,6 +591,9 @@ func (vv *SliceValueView) UpdateWidget() {
 
 func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	vv.Widget = widg
+	slci := vv.Value.Interface()
+	eltyp := kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
+	vv.IsStruct = (eltyp.Kind() == reflect.Struct)
 	vv.UpdateWidget()
 	mb := vv.Widget.(*MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
@@ -598,13 +602,23 @@ func (vv *SliceValueView) ConfigWidget(widg Node2D) {
 	mb.Menu.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*MenuButton)
-		dlg := SliceViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Slice Value View", "", nil, nil)
-		sv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
-		sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
-			vvvv.UpdateWidget()
-			vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-		})
+		if vvv.IsStruct {
+			dlg := StructTableViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice of Struct Value View", "", nil, nil, nil)
+			sv := dlg.Frame().ChildByType(KiT_StructTableView, true, 2).(*StructTableView)
+			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+				vvvv.UpdateWidget()
+				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+			})
+		} else {
+			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, "Slice Value View", "", nil, nil)
+			sv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
+			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+				vvvv.UpdateWidget()
+				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+			})
+		}
 	})
 }
 

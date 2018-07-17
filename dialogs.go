@@ -573,7 +573,7 @@ func SliceViewDialog(avp *Viewport2D, mp interface{}, tmpSave ValueView, title, 
 // signal receiving object and function for signals (nil to ignore) --
 // selectOnly turns it into a selector with no editing of fields, and signal
 // connection is to the selection signal, not the overall dialog signal
-func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun StructTableViewStyleFunc) *Dialog {
+func StructTableViewDialog(avp *Viewport2D, slcOfStru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun StructTableViewStyleFunc) *Dialog {
 	dlg := NewStdDialog("struct-table-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
@@ -587,7 +587,7 @@ func StructTableViewDialog(avp *Viewport2D, stru interface{}, selectOnly bool, t
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(selectOnly)
 	sv.StyleFunc = stylefun
-	sv.SetSlice(stru, tmpSave)
+	sv.SetSlice(slcOfStru, tmpSave)
 
 	if recv != nil && fun != nil {
 		if selectOnly {
