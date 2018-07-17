@@ -59,7 +59,7 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "This is a test of the Slice and Map Views reflect-ive GUI"
+	lab1.Text = "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>"
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
@@ -73,9 +73,13 @@ func mainrun() {
 
 	mv := mvfr.AddNewChild(gi.KiT_MapView, "mv").(*gi.MapView)
 	mv.SetMap(&tstmap, nil)
+	mv.SetStretchMaxWidth()
+	mv.SetStretchMaxHeight()
 
 	sv := svfr.AddNewChild(gi.KiT_SliceView, "sv").(*gi.SliceView)
 	sv.SetSlice(&tstslice, nil)
+	sv.SetStretchMaxWidth()
+	sv.SetStretchMaxHeight()
 
 	vp.UpdateEndNoSig(updt)
 

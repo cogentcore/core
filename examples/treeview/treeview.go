@@ -93,7 +93,7 @@ func mainrun() {
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
 	lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
-	lab1.SetProp("max-width", -1)
+	lab1.SetStretchMaxWidth()
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 

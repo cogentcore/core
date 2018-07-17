@@ -82,7 +82,11 @@ var LabelProps = ki.Props{
 func (g *Label) SetText(txt string) {
 	g.Text = txt
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
+	sz := g.LayData.AllocSize
+	if sz.IsZero() {
+		sz = g.LayData.SizePrefOrMax()
+	}
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
 
 // SetTextAction sets the text and triggers an update action
@@ -94,7 +98,7 @@ func (g *Label) SetTextAction(txt string) {
 func (g *Label) Style2D() {
 	g.Style2DWidget()
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.Size.Max)
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.SizePrefOrMax())
 }
 
 func (g *Label) Size2D() {

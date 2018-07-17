@@ -243,7 +243,13 @@ func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 	// not setting size, so we can keep that as a separate constraint
 }
 
-// called at start of layout process -- resets all values back to 0
+// SizePrefOrMax returns the pref size if non-zero, else the max-size -- use
+// for style-based constraints during initial sizing (e.g., word wrapping)
+func (ld *LayoutData) SizePrefOrMax() Vec2D {
+	return ld.Size.Pref.MinPos(ld.Size.Max)
+}
+
+// Reset is called at start of layout process -- resets all values back to 0
 func (ld *LayoutData) Reset() {
 	ld.AllocSize = Vec2DZero
 	ld.AllocPos = Vec2DZero
@@ -251,7 +257,7 @@ func (ld *LayoutData) Reset() {
 	ld.AllocPosOrig = Vec2DZero
 }
 
-// update our sizes based on AllocSize and Max constraints, etc
+// UpdateSizes updates our sizes based on AllocSize and Max constraints, etc
 func (ld *LayoutData) UpdateSizes() {
 	ld.Size.Need.SetMax(ld.AllocSize)   // min cannot be < alloc -- bare min
 	ld.Size.Pref.SetMax(ld.Size.Need)   // pref cannot be < min
