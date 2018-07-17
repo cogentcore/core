@@ -208,22 +208,22 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 // The RenderState holds all the current rendering state information used
 // while painting -- a viewport just has one of these
 type RenderState struct {
-	Paint       Paint             `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm       XFormMatrix2D     `desc:"current transform"`
-	Path        rasterx.Path      `desc:"current path"`
-	Raster      *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
-	Scanner     *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
-	Start       Vec2D             `desc:"starting point, for close path"`
-	Current     Vec2D             `desc:"current point"`
-	HasCurrent  bool              `desc:"is current point current?"`
-	Image       *image.RGBA       `desc:"pointer to image to render into"`
-	Mask        *image.Alpha      `desc:"current mask"`
-	Bounds      image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
-	ObjBounds   image.Rectangle   `desc:"object boundaries -- for gradient sizing"`
-	XFormStack  []XFormMatrix2D   `desc:"stack of transforms"`
-	BoundsStack []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
-	ClipStack   []*image.Alpha    `desc:"stack of clips, if needed"`
-	PaintBack   Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
+	Paint          Paint             `desc:"communal painter -- for widgets -- SVG have their own"`
+	XForm          XFormMatrix2D     `desc:"current transform"`
+	Path           rasterx.Path      `desc:"current path"`
+	Raster         *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
+	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
+	Start          Vec2D             `desc:"starting point, for close path"`
+	Current        Vec2D             `desc:"current point"`
+	HasCurrent     bool              `desc:"is current point current?"`
+	Image          *image.RGBA       `desc:"pointer to image to render into"`
+	Mask           *image.Alpha      `desc:"current mask"`
+	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
+	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
+	XFormStack     []XFormMatrix2D   `desc:"stack of transforms"`
+	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
+	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
+	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
 }
 
 // Init initializes RenderState -- must be called whenever image size changes
@@ -260,7 +260,7 @@ func (rs *RenderState) PopXForm() {
 }
 
 // PushBounds pushes current bounds onto stack and set new bounds
-func (rs *RenderState) PushBounds(b, objb image.Rectangle) {
+func (rs *RenderState) PushBounds(b image.Rectangle) {
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
 	}
@@ -269,7 +269,6 @@ func (rs *RenderState) PushBounds(b, objb image.Rectangle) {
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
 	rs.Bounds = b
-	rs.ObjBounds = objb // todo: don't need stack?
 }
 
 // PopBounds pops bounds off the stack and set to current bounds
@@ -501,9 +500,13 @@ func (pc *Paint) stroke(rs *RenderState) {
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		dash, 0,
 	)
-	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.ObjBounds))
 	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rs.Raster)
+	fbox := rs.Raster.Scanner.GetPathExtent()
+	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
+	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 
@@ -515,18 +518,17 @@ func (pc *Paint) fill(rs *RenderState) {
 
 	rf := &rs.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
-	if pc.FillStyle.Color.Source == RadialGradient {
-		// todo: none of this is working..
-		// orgm := pc.FillStyle.Color.Gradient.Matrix
-		// pc.FillStyle.Color.Gradient.Matrix = rs.XForm.ToRasterx().Mult(pc.FillStyle.Color.Gradient.Matrix)
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
-		// pc.FillStyle.Color.Gradient.Matrix = orgm
-	} else {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.ObjBounds))
-	}
 	rs.Scanner.SetClip(rs.Bounds)
-
 	rs.Path.AddTo(rf)
+	fbox := rs.Scanner.GetPathExtent()
+	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
+	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	if pc.FillStyle.Color.Source == RadialGradient {
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
+	} else {
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
+	}
 	rf.Draw()
 	rf.Clear()
 

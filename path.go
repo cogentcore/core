@@ -58,8 +58,8 @@ func (g *Path) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
-	g.ComputeBBoxSVG()
 	PathDataRender(g.Data, pc, rs)
+	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
 	g.Render2DChildren()
 	rs.PopXForm()

@@ -119,21 +119,23 @@ func CopyGradient(dst, src *rasterx.Gradient) {
 }
 
 // RenderColor gets the color for rendering, applying opacity and bounds for gradients
-func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle) interface{} {
-	switch cs.Source {
-	case SolidColor:
+func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform XFormMatrix2D, unCtxt *units.Context) interface{} {
+	if cs.Source == SolidColor || cs.Gradient == nil {
 		return rasterx.ApplyOpacity(cs.Color, float64(opacity))
-	default:
-		if cs.Gradient == nil {
-			return nil
-		}
+	} else {
 		if cs.Source == RadialGradient {
 			cs.Gradient.IsRadial = true
 		} else {
 			cs.Gradient.IsRadial = false
 		}
 		SetGradientBounds(cs.Gradient, bounds)
-		return cs.Gradient.GetColorFunction(float64(opacity))
+		// fmt.Printf("g bounds: %v from: %v\n", cs.Gradient.Bounds, bounds)
+
+		if cs.Gradient.Units == rasterx.UserSpaceOnUse {
+			dpiscale := unCtxt.ToDotsFactor(units.Px)
+			xform = xform.Scale(dpiscale, dpiscale)
+		}
+		return cs.Gradient.GetColorFunction(float64(opacity), xform.ToRasterx())
 	}
 }
 

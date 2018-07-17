@@ -163,10 +163,7 @@ func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
 
 func (g *SVGNodeBase) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	fbox := rs.Raster.Scanner.GetPathExtent()
-	bb := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	return bb
+	return rs.LastRenderBBox
 }
 
 func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
@@ -184,8 +181,6 @@ func (g *SVGNodeBase) ComputeBBoxSVG() {
 	g.ObjBBox = g.BBox // no diff
 	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
-	rs := &g.Viewport.Render
-	rs.ObjBounds = g.ObjBBox
 }
 
 func (g *SVGNodeBase) Render2D() {
@@ -266,8 +261,8 @@ func (g *Rect) Render2D() {
 		// todo: only supports 1 radius right now -- easy to add another
 		pc.DrawRoundedRectangle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Size.X), pu.PxToDots(g.Size.Y), pu.PxToDots(g.Radius.X))
 	}
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -290,8 +285,8 @@ func (g *Circle) Render2D() {
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
 	pc.DrawCircle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radius))
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -314,8 +309,8 @@ func (g *Ellipse) Render2D() {
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
 	pc.DrawEllipse(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radii.X), pu.PxToDots(g.Radii.Y))
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -338,8 +333,8 @@ func (g *Line) Render2D() {
 	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
 	pc.DrawLine(rs, pu.PxToDots(g.Start.X), pu.PxToDots(g.Start.Y), pu.PxToDots(g.End.X), pu.PxToDots(g.End.Y))
-	g.ComputeBBoxSVG()
 	pc.Stroke(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -363,8 +358,8 @@ func (g *Polyline) Render2D() {
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolylinePxToDots(rs, g.Points)
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -388,8 +383,8 @@ func (g *Polygon) Render2D() {
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolygonPxToDots(rs, g.Points)
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXForm()
 }

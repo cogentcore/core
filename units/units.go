@@ -306,7 +306,9 @@ func (v *Value) SetString(str string) {
 	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
 	sz := len(trstr)
 	if sz < 2 {
-		v.Set(0, Px)
+		vc, _ := kit.ToFloat(str)
+		v.Val = float32(vc)
+		v.Un = Px
 		return
 	}
 	var ends [4]string

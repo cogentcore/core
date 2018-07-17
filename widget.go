@@ -354,7 +354,7 @@ func (g *WidgetBase) PushBounds() bool {
 		g.ClearFullReRender()
 		if g.Viewport != nil {
 			g.ConnectToViewport()
-			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds(), g.ObjBBox)
+			g.Viewport.Render.PushBounds(g.Viewport.Pixels.Bounds())
 		}
 		return true
 	}
@@ -363,7 +363,7 @@ func (g *WidgetBase) PushBounds() bool {
 		return false
 	}
 	rs := &g.Viewport.Render
-	rs.PushBounds(g.VpBBox, g.ObjBBox)
+	rs.PushBounds(g.VpBBox)
 	g.ConnectToViewport()
 	if Render2DTrace {
 		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
