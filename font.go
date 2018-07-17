@@ -89,9 +89,6 @@ func (fs *FontStyle) ClearDeco(deco TextDecorations) {
 
 // FaceNm returns the full FaceName to use for the current FontStyle spec
 func (fs *FontStyle) FaceNm() string {
-	if fs.Family == "" {
-		return "Arial" // built-in default
-	}
 	fnm := "Arial"
 	nms := strings.Split(fs.Family, ",")
 	for _, fn := range nms {
@@ -145,10 +142,12 @@ func (fs *FontStyle) FaceNm() string {
 		mods = "Bold"
 	}
 	if mods != "" {
-		if FontLibrary.FontAvail(fnm + " " + mods) {
-			fnm += " " + mods
+		fmod := fnm + " " + mods
+		if FontLibrary.FontAvail(fmod) {
+			fnm = fmod
+		} else {
+			log.Printf("could not find modified font name: %v\n", fmod)
 		}
-		// todo: use similar style font fallback to get mods
 	}
 	return fnm
 }
@@ -158,7 +157,7 @@ func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	intDots := math.Round(float64(fs.Size.Dots))
 	face, err := FontLibrary.Font(fs.FaceName, intDots)
 	if err != nil {
-		// log.Printf("%v\n", err)
+		log.Printf("%v\n", err)
 		if fs.Face == nil {
 			if fallback != "" {
 				fs.FaceName = fallback

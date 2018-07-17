@@ -403,7 +403,7 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 	if idx <= 0 || idx >= len(sr.Text)-1 { // shouldn't happen
 		return nil
 	}
-	nsr := SpanRender{Text: sr.Text[idx:], Render: sr.Render[idx:], Dir: sr.Dir}
+	nsr := SpanRender{Text: sr.Text[idx:], Render: sr.Render[idx:], Dir: sr.Dir, HasDeco: sr.HasDeco}
 	sr.Text = sr.Text[:idx]
 	sr.Render = sr.Render[:idx]
 	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
@@ -411,7 +411,7 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 	nsr.TrimSpaceLR()
 	// go back and find latest face and color -- each sr must start with valid one
 	nrr0 := &(nsr.Render[0])
-	for i := idx - 1; i >= 0; i-- {
+	for i := len(sr.Render) - 1; i >= 0; i-- {
 		srr := sr.Render[i]
 		if nrr0.Face == nil && srr.Face != nil {
 			nrr0.Face = srr.Face
@@ -464,6 +464,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 	defer rs.RestorePaint()
 
 	rs.PushXForm(Identity2D()) // needed for SVG
+	defer rs.PopXForm()
 	rs.XForm = Identity2D()
 
 	for _, sr := range tr.Spans {
@@ -539,7 +540,6 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			sr.RenderLine(rs, tpos, DecoLineThrough, 0.25)
 		}
 	}
-	rs.PopXForm()
 }
 
 // RenderBg renders the background behind chars
@@ -1036,6 +1036,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	for si < len(tr.Spans) {
 		sr := &(tr.Spans[si])
 		if sr.IsValid() != nil {
+			si++
 			continue
 		}
 		if sr.LastPos.X == 0 { // don't re-do unless necessary

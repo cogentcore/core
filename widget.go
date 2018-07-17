@@ -581,10 +581,16 @@ func (g *WidgetBase) Size2DFromWH(w, h float32) {
 	g.LayData.AllocSize = Vec2D{w, h}
 }
 
-// add space to existing AllocSize
+// Size2DAddSpace adds space to existing AllocSize
 func (g *WidgetBase) Size2DAddSpace() {
 	spc := g.Sty.BoxSpace()
-	g.LayData.AllocSize.SetAddVal(2.0 * spc)
+	g.LayData.AllocSize.SetAddVal(2 * spc)
+}
+
+// Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
+func (g *WidgetBase) Size2DSubSpace() Vec2D {
+	spc := g.Sty.BoxSpace()
+	return g.LayData.AllocSize.SubVal(2 * spc)
 }
 
 // set minimum and preferred width -- will get at least this amount -- max unspecified

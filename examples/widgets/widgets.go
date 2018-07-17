@@ -43,7 +43,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 	vp.Fill = true
 
-	// style sheet!
+	// style sheet
 	var css = ki.Props{
 		"button": ki.Props{
 			"background-color": gi.Color{255, 240, 240, 255},
@@ -76,11 +76,8 @@ func mainrun() {
 	title.Text = `This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <i>GoGi</i> Widgets<br>
 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
-<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
-Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
-<q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
-and Sub<sub>script</sub> and Super<sup>script</sup>`
-	title.SetProp("text-align", gi.AlignCenter) // todo: center, right not working
+<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
+	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
@@ -94,9 +91,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	vlay.AddNewChild(gi.KiT_Space, "blspc")
 	blrow := vlay.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
-	blab.SetProp("word-wrap", true)
-	blab.SetProp("max-width", "20em")
-	blab.Text = "Buttons: everyone loves buttons -- they are so cute and functional and you can hit them and things happen.  Truly amazing what simple button can accomplish.  Every major event starts with a button press."
+	blab.Text = "Buttons:"
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutRow
@@ -232,7 +227,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	txrow.Lay = gi.LayoutRow
 	// txrow.SetProp("align-horiz", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
-	txrow.SetStretchMaxHeight()
+	// txrow.SetStretchMaxHeight()
 
 	edit1 := txrow.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 	edit1.SetText("Edit this text")
@@ -262,5 +257,6 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 
 	win.StartEventLoop()
 
+	// note: never gets here..
 	fmt.Printf("ending\n")
 }

@@ -82,9 +82,13 @@ var LabelProps = ki.Props{
 func (g *Label) SetText(txt string) {
 	g.Text = txt
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
+	spc := g.Sty.BoxSpace()
 	sz := g.LayData.AllocSize
 	if sz.IsZero() {
 		sz = g.LayData.SizePrefOrMax()
+	}
+	if !sz.IsZero() {
+		sz.SetSubVal(2 * spc)
 	}
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
@@ -98,7 +102,12 @@ func (g *Label) SetTextAction(txt string) {
 func (g *Label) Style2D() {
 	g.Style2DWidget()
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.SizePrefOrMax())
+	spc := g.Sty.BoxSpace()
+	sz := g.LayData.SizePrefOrMax()
+	if !sz.IsZero() {
+		sz.SetSubVal(2 * spc)
+	}
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
 
 func (g *Label) Size2D() {
@@ -109,7 +118,8 @@ func (g *Label) Size2D() {
 func (g *Label) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true)
 	g.Layout2DChildren()
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), g.LayData.AllocSize)
+	sz := g.Size2DSubSpace()
+	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
 
 func (g *Label) Render2D() {
