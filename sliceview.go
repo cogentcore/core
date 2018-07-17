@@ -19,14 +19,18 @@ import (
 // SliceView represents a slice, creating a property editor of the values --
 // constructs Children widgets to show the index / value pairs, within an
 // overall frame with a button box at the bottom where methods can be invoked
+// -- set to Inactive for select-only mode, which emits SelectSig signals when
+// selection is updated
 type SliceView struct {
 	Frame
-	Slice      interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	builtSlice interface{}
-	builtSize  int
+	Slice       interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	Values      []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig     ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	SelectedIdx int         `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SelectSig   ki.Signal   `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
+	builtSlice  interface{}
+	builtSize   int
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -164,6 +168,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 		vv.ConfigWidget(widg)
 		addact := sg.Child(i*4 + 2).(*Action)
 		addact.SetIcon("plus")
+		addact.Tooltip = "insert a new element at this index"
 		addact.Data = i
 		addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -172,6 +177,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 		})
 		delact := sg.Child(i*4 + 3).(*Action)
 		delact.SetIcon("minus")
+		delact.Tooltip = "delete this element"
 		delact.Data = i
 		delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*Action)
@@ -341,6 +347,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	}
 	edac := sv.Parts.Child(-1).(*Action)
 	edac.SetIcon("edit")
+	edac.Tooltip = "edit slice in a dialog window"
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
 		dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil)

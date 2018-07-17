@@ -28,9 +28,26 @@ import (
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
 
-// todo: Animation
+// Style has all the CSS-based style elements -- used for widget-type objects
+type Style struct {
+	Display       bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool          `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
+	Layout        LayoutStyle   `desc:"layout styles -- do not prefix with any xml"`
+	Border        BorderStyle   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	BoxShadow     ShadowStyle   `xml:"box-shadow" desc:"type of shadow to render around box"`
+	Font          FontStyle     `desc:"font parameters -- no xml prefix -- also has color, background-color"`
+	Text          TextStyle     `desc:"text parameters -- no xml prefix"`
+	Outline       BorderStyle   `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
+	PointerEvents bool          `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	UnContext     units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	IsSet         bool          `desc:"has this style been set from object values yet?"`
+	PropsNil      bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
+	dotsSet       bool
+	lastUnCtxt    units.Context
+}
 
-// Bottom = alignment too
+// todo: Animation
 
 // Clear -- no floating elements
 
@@ -182,25 +199,6 @@ func (s *ShadowStyle) HasShadow() bool {
 // CurrentColor is automatically updated from the Color setting of a Style and
 // accessible as a color name in any other style as currentColor
 var CurrentColor Color
-
-// Style has all the CSS-based style elements -- used for widget-type objects
-type Style struct {
-	Display       bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool          `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
-	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
-	Layout        LayoutStyle   `desc:"layout styles -- do not prefix with any xml"`
-	Border        BorderStyle   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
-	BoxShadow     ShadowStyle   `xml:"box-shadow" desc:"type of shadow to render around box"`
-	Font          FontStyle     `desc:"font parameters -- no xml prefix -- also has color, background-color"`
-	Text          TextStyle     `desc:"text parameters -- no xml prefix"`
-	Outline       BorderStyle   `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
-	PointerEvents bool          `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
-	UnContext     units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
-	IsSet         bool          `desc:"has this style been set from object values yet?"`
-	PropsNil      bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
-	dotsSet       bool
-	lastUnCtxt    units.Context
-}
 
 func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..

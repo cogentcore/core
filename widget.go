@@ -484,7 +484,11 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetProp("background-color", &Prefs.HighlightColor)
 	lbl.SetProp("word-wrap", true)
-	lbl.SetProp("max-width", units.NewValue(40, units.Em))
+
+	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
+	mwdots = Min32(mwdots, float32(mainVp.Geom.Size.X-20))
+
+	lbl.SetProp("max-width", units.NewValue(mwdots, units.Dot))
 	lbl.Text = tooltip
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes

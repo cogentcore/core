@@ -1421,8 +1421,6 @@ func (wg *WindowGeomPrefs) Load() error {
 	err = json.Unmarshal(b, wg)
 	if err != nil {
 		log.Println(err)
-		// } else {
-		// 	fmt.Printf("loaded win geom prefs:\n%+v\n", *wg)
 	}
 	return err
 }
@@ -1455,6 +1453,9 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	wgr := WindowGeom{WinName: win.Nm, Screen: sc.Name, LogicalDPI: win.LogicalDPI()}
 	wgr.Pos = win.OSWin.Position()
 	wgr.Size = win.OSWin.Size()
+	if wgr.Size.X == 0 && wgr.Size.Y == 0 {
+		fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
+	}
 	if (*wg)[win.Nm] == nil {
 		(*wg)[win.Nm] = make(map[string]WindowGeom, 10)
 	}
@@ -1476,6 +1477,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 
 	if scrn == nil {
 		scrn = oswin.TheApp.Screen(0)
+		// fmt.Printf("Pref: using scrn 0: %v\n", scrn.Name)
 	}
 
 	wp, ok := wps[scrn.Name]
@@ -1488,17 +1490,18 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	}
 
 	trgdpi := scrn.LogicalDPI
+	fmt.Printf("Pref: falling back on dpi conversion: %v\n", trgdpi)
 
 	// try to find one with same logical dpi, else closest
 	var closest *WindowGeom
-	mindpid := float32(100000.0)
+	minDPId := float32(100000.0)
 	for _, wp = range wps {
 		if wp.LogicalDPI == trgdpi {
 			return &wp
 		}
 		dpid := math32.Abs(wp.LogicalDPI - trgdpi)
-		if dpid < mindpid {
-			mindpid = dpid
+		if dpid < minDPId {
+			minDPId = dpid
 			closest = &wp
 		}
 	}
@@ -1509,5 +1512,6 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	wp.Pos.Y = int(float32(wp.Pos.Y) * rescale)
 	wp.Size.X = int(float32(wp.Size.X) * rescale)
 	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
+	fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
 	return &wp
 }

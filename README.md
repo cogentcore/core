@@ -139,7 +139,9 @@ Currently at an **alpha** level release:
 
 ## layout
 
-* really want an additional spacing parameter on layout -- needs to be separate from margin / padding which just apply to the frame-like property -- easy
+* really want an additional spacing parameter on layout -- needs to be
+  separate from margin / padding which just apply to the frame-like property
+  -- easy
 
 * add new TableGrid widget that combines a Frame Grid Layout with a top row of
   header action labels that just grab the sizes from the grid, and also supports clicking to
@@ -155,15 +157,13 @@ Currently at an **alpha** level release:
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering -- unclear if any gradients are rendering properly
 
-* dashes not scaling with transform
-
 * default join not looking right for some test cases..
 
 * clip-path and ClipPath element..
 
 * impl ViewBox options
 
-* also re-render data string after parsing to be more human friendly.
+* path: re-render data string after parsing to be more human friendly.
 
 ## Missing Widgets
 
@@ -171,16 +171,14 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 + ProgressBar -- very simple
-+ ToolTip
 + TextArea -- go full editor..
 
 ## Remaining features for widgets
 
 + FileView view and dialog -- various, see todo in fileview.go
 + TextField -- undo, constraints
-+ TreeView -- needs clip copy / paste, -- see about LI, UL lists..
++ TreeView -- see about LI, UL lists..
 + TabWidget -- needs updating
-+ Label -- done -- could make lots of H1, etc alts
 
 ## Performance issues
 
