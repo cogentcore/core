@@ -91,11 +91,9 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* valueview sliceview detect struct element type and use structtableview instead (and never use inline for such cases)
+* add margin for para in text
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away?
-
-* window prefs not working occasionally -- not getting DPI properly?
 
 * #icon props not getting used for resizing icons in button.
 

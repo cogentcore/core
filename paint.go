@@ -95,6 +95,7 @@ func (pc *Paint) Defaults() {
 	pc.StrokeStyle.Defaults()
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
+	pc.TextStyle.Defaults()
 	pc.XForm = Identity2D()
 }
 
@@ -111,6 +112,7 @@ func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.StrokeStyle = cp.StrokeStyle
 	pc.FillStyle = cp.FillStyle
 	pc.FontStyle = cp.FontStyle
+	pc.TextStyle = cp.TextStyle
 	pc.VecEff = cp.VecEff
 }
 
@@ -125,6 +127,7 @@ func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
 	pc.StrokeStyle.SetStylePost(props)
 	pc.FillStyle.SetStylePost(props)
 	pc.FontStyle.SetStylePost(props)
+	pc.TextStyle.SetStylePost(props)
 	pc.PropsNil = (len(props) == 0)
 	pc.StyleSet = true
 }

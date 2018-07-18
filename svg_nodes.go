@@ -439,6 +439,12 @@ func (g *SVGText) Render2D() {
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
 		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)
+		g.Render.Size = g.Render.Size.Mul(Vec2D{scx, scy})
+		if IsAlignMiddle(pc.TextStyle.Align) {
+			pos.X -= g.Render.Size.X * .5
+		} else if IsAlignEnd(pc.TextStyle.Align) {
+			pos.X -= g.Render.Size.X
+		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 		sr := &(g.Render.Spans[0])
