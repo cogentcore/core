@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 )
 
@@ -146,10 +145,10 @@ func (pc PathCmds) EncCmd(n int) PathData {
 
 // PathDataNext gets the next path data point, incrementing the index -- ++
 // not an expression so its clunky
-func PathDataNext(pu *units.Context, data []PathData, i *int) float32 {
+func PathDataNext(data []PathData, i *int) float32 {
 	pd := data[*i]
 	(*i)++
-	return pu.PxToDots(float32(pd))
+	return float32(pd)
 }
 
 // PathDataNextCmd gets the next path data command, incrementing the index -- ++
@@ -167,7 +166,6 @@ func reflectPt(px, py, rx, ry float32) (x, y float32) {
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
 func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
-	pu := &pc.UnContext
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -179,75 +177,75 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 		rel := false
 		switch cmd {
 		case PcM:
-			cx = PathDataNext(pu, data, &i)
-			cy = PathDataNext(pu, data, &i)
+			cx = PathDataNext(data, &i)
+			cy = PathDataNext(data, &i)
 			pc.MoveTo(rs, cx, cy)
 			stx, sty = cx, cy
 			for np := 1; np < n/2; np++ {
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case Pcm:
-			cx += PathDataNext(pu, data, &i)
-			cy += PathDataNext(pu, data, &i)
+			cx += PathDataNext(data, &i)
+			cy += PathDataNext(data, &i)
 			pc.MoveTo(rs, cx, cy)
 			stx, sty = cx, cy
 			for np := 1; np < n/2; np++ {
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
-				cx = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
-				cx += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
-				cy = PathDataNext(pu, data, &i)
+				cy = PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
-				cy += PathDataNext(pu, data, &i)
+				cy += PathDataNext(data, &i)
 				pc.LineTo(rs, cx, cy)
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
-				x1 = PathDataNext(pu, data, &i)
-				y1 = PathDataNext(pu, data, &i)
-				ctrlx = PathDataNext(pu, data, &i)
-				ctrly = PathDataNext(pu, data, &i)
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				x1 = PathDataNext(data, &i)
+				y1 = PathDataNext(data, &i)
+				ctrlx = PathDataNext(data, &i)
+				ctrly = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.CubicTo(rs, x1, y1, ctrlx, ctrly, cx, cy)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
-				x1 = cx + PathDataNext(pu, data, &i)
-				y1 = cy + PathDataNext(pu, data, &i)
-				ctrlx = cx + PathDataNext(pu, data, &i)
-				ctrly = cy + PathDataNext(pu, data, &i)
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				x1 = cx + PathDataNext(data, &i)
+				y1 = cy + PathDataNext(data, &i)
+				ctrlx = cx + PathDataNext(data, &i)
+				ctrly = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.CubicTo(rs, x1, y1, ctrlx, ctrly, cx, cy)
 			}
 		case Pcs:
@@ -262,15 +260,15 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 					ctrlx, ctrly = cx, cy
 				}
 				if rel {
-					x1 = cx + PathDataNext(pu, data, &i)
-					y1 = cy + PathDataNext(pu, data, &i)
-					cx += PathDataNext(pu, data, &i)
-					cy += PathDataNext(pu, data, &i)
+					x1 = cx + PathDataNext(data, &i)
+					y1 = cy + PathDataNext(data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
 				} else {
-					x1 = PathDataNext(pu, data, &i)
-					y1 = PathDataNext(pu, data, &i)
-					cx = PathDataNext(pu, data, &i)
-					cy = PathDataNext(pu, data, &i)
+					x1 = PathDataNext(data, &i)
+					y1 = PathDataNext(data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
 				}
 				pc.CubicTo(rs, ctrlx, ctrly, x1, y1, cx, cy)
 				lastCmd = cmd
@@ -279,18 +277,18 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				ctrlx = PathDataNext(pu, data, &i)
-				ctrly = PathDataNext(pu, data, &i)
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				ctrlx = PathDataNext(data, &i)
+				ctrly = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				ctrlx = cx + PathDataNext(pu, data, &i)
-				ctrly = cy + PathDataNext(pu, data, &i)
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				ctrlx = cx + PathDataNext(data, &i)
+				ctrly = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
 			}
 		case Pct:
@@ -305,11 +303,11 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 					ctrlx, ctrly = cx, cy
 				}
 				if rel {
-					cx += PathDataNext(pu, data, &i)
-					cy += PathDataNext(pu, data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
 				} else {
-					cx = PathDataNext(pu, data, &i)
-					cy = PathDataNext(pu, data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
 				}
 				pc.QuadraticTo(rs, ctrlx, ctrly, cx, cy)
 				lastCmd = cmd
@@ -319,19 +317,19 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rx := PathDataNext(pu, data, &i)
-				ry := PathDataNext(pu, data, &i)
-				ang := PathDataNext(pu, data, &i)
-				largeArc := (PathDataNext(pu, data, &i) != 0)
-				sweep := (PathDataNext(pu, data, &i) != 0)
+				rx := PathDataNext(data, &i)
+				ry := PathDataNext(data, &i)
+				ang := PathDataNext(data, &i)
+				largeArc := (PathDataNext(data, &i) != 0)
+				sweep := (PathDataNext(data, &i) != 0)
 				pcx := cx
 				pcy := cy
 				if rel {
-					cx += PathDataNext(pu, data, &i)
-					cy += PathDataNext(pu, data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
 				} else {
-					cx = PathDataNext(pu, data, &i)
-					cy = PathDataNext(pu, data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
 				}
 				ncx, ncy := FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
 				cx, cy = pc.DrawEllipticalArcPath(rs, ncx, ncy, cx, cy, pcx, pcy, rx, ry, ang, largeArc, sweep)
@@ -360,7 +358,6 @@ func minMaxUpdate(cx, cy float32, min, max *Vec2D) {
 
 // PathDataMinMax traverses the path data and extracts the min and max point coords
 func PathDataMinMax(pc *Paint, data []PathData) (min, max Vec2D) {
-	pu := &pc.UnContext
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -371,53 +368,53 @@ func PathDataMinMax(pc *Paint, data []PathData) (min, max Vec2D) {
 		rel := false
 		switch cmd {
 		case PcM:
-			cx = PathDataNext(pu, data, &i)
-			cy = PathDataNext(pu, data, &i)
+			cx = PathDataNext(data, &i)
+			cy = PathDataNext(data, &i)
 			minMaxUpdate(cx, cy, &min, &max)
 			for np := 1; np < n/2; np++ {
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcm:
-			cx += PathDataNext(pu, data, &i)
-			cy += PathDataNext(pu, data, &i)
+			cx += PathDataNext(data, &i)
+			cy += PathDataNext(data, &i)
 			minMaxUpdate(cx, cy, &min, &max)
 			for np := 1; np < n/2; np++ {
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
-				cx = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
-				cx += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
-				cy = PathDataNext(pu, data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
-				cy += PathDataNext(pu, data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcc:
@@ -426,68 +423,68 @@ func PathDataMinMax(pc *Paint, data []PathData) (min, max Vec2D) {
 		case PcC:
 			for np := 0; np < n/6; np++ {
 				if rel {
-					x1 = PathDataNext(pu, data, &i)
-					y1 = PathDataNext(pu, data, &i)
+					x1 = PathDataNext(data, &i)
+					y1 = PathDataNext(data, &i)
 				} else {
-					x1 = cx + PathDataNext(pu, data, &i)
-					y1 = cy + PathDataNext(pu, data, &i)
+					x1 = cx + PathDataNext(data, &i)
+					y1 = cy + PathDataNext(data, &i)
 				}
-				PathDataNext(pu, data, &i)
-				PathDataNext(pu, data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
 				if rel {
-					cx += PathDataNext(pu, data, &i)
-					cy += PathDataNext(pu, data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
 				} else {
-					cx = PathDataNext(pu, data, &i)
-					cy = PathDataNext(pu, data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
 				}
 				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
-				x1 = PathDataNext(pu, data, &i)
-				y1 = PathDataNext(pu, data, &i)
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				x1 = PathDataNext(data, &i)
+				y1 = PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
-				x1 = cx + PathDataNext(pu, data, &i)
-				y1 = cy + PathDataNext(pu, data, &i)
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				x1 = cx + PathDataNext(data, &i)
+				y1 = cy + PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(x1, y1, &min, &max)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				PathDataNext(pu, data, &i)
-				PathDataNext(pu, data, &i)
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				PathDataNext(pu, data, &i)
-				PathDataNext(pu, data, &i)
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				PathDataNext(data, &i)
+				PathDataNext(data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
-				cx = PathDataNext(pu, data, &i)
-				cy = PathDataNext(pu, data, &i)
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
-				cx += PathDataNext(pu, data, &i)
-				cy += PathDataNext(pu, data, &i)
+				cx += PathDataNext(data, &i)
+				cy += PathDataNext(data, &i)
 				minMaxUpdate(cx, cy, &min, &max)
 			}
 		case Pca:
@@ -495,17 +492,17 @@ func PathDataMinMax(pc *Paint, data []PathData) (min, max Vec2D) {
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				PathDataNext(pu, data, &i) // rx
-				PathDataNext(pu, data, &i) // ry
-				PathDataNext(pu, data, &i) // ang
-				PathDataNext(pu, data, &i) // large-arc-flag
-				PathDataNext(pu, data, &i) // sweep-flag
+				PathDataNext(data, &i) // rx
+				PathDataNext(data, &i) // ry
+				PathDataNext(data, &i) // ang
+				PathDataNext(data, &i) // large-arc-flag
+				PathDataNext(data, &i) // sweep-flag
 				if rel {
-					cx += PathDataNext(pu, data, &i)
-					cy += PathDataNext(pu, data, &i)
+					cx += PathDataNext(data, &i)
+					cy += PathDataNext(data, &i)
 				} else {
-					cx = PathDataNext(pu, data, &i)
-					cy = PathDataNext(pu, data, &i)
+					cx = PathDataNext(data, &i)
+					cy = PathDataNext(data, &i)
 				}
 				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
 			}
@@ -542,7 +539,6 @@ var PathCmdNMap = map[PathCmds]int{
 
 // PathDataValidate validates the path data and emits error messages on log
 func PathDataValidate(pc *Paint, data *[]PathData, errstr string) error {
-	pu := &pc.UnContext
 	sz := len(*data)
 	if sz == 0 {
 		return nil
@@ -573,7 +569,7 @@ func PathDataValidate(pc *Paint, data *[]PathData, errstr string) error {
 			return err
 		}
 		for np := 0; np < n; np++ {
-			PathDataNext(pu, *data, &i)
+			PathDataNext(*data, &i)
 		}
 	}
 	return nil

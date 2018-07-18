@@ -23,6 +23,14 @@ func main() {
 
 var CurFilename = ""
 var ZoomFactor = float32(1.0)
+var TheSVG *gi.SVG
+var TheZoom *gi.SpinBox
+
+func SetZoom(zf float32) {
+	ZoomFactor = zf
+	TheZoom.SetValue(ZoomFactor)
+	TheSVG.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
+}
 
 func mainrun() {
 	width := 1600
@@ -57,6 +65,7 @@ func mainrun() {
 	svgrow.SetStretchMaxHeight()
 
 	svg := svgrow.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
+	TheSVG = svg
 	svg.Fill = true
 	svg.SetProp("background-color", "white")
 	svg.SetProp("width", units.NewValue(float32(width-20), units.Px))
@@ -76,6 +85,7 @@ func mainrun() {
 	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	zoom.SetValue(ZoomFactor)
+	TheZoom = zoom
 
 	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
 	zoomin.SetProp("margin", 0)
@@ -97,7 +107,7 @@ func mainrun() {
 					updt := svg.UpdateStart()
 					fmt.Printf("Loading: %v\n", CurFilename)
 					svg.LoadXML(CurFilename)
-					svg.SetNormXForm()
+					SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
 					svg.UpdateEnd(updt)
 				}
 			})
@@ -111,36 +121,28 @@ func mainrun() {
 			updt := svg.UpdateStart()
 			fmt.Printf("Loading: %v\n", CurFilename)
 			svg.LoadXML(CurFilename)
-			svg.SetNormXForm()
+			SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
 			svg.UpdateEnd(updt)
 		}
 	})
 
 	zoomin.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			ZoomFactor *= 1.1
-			zoom.SetValue(ZoomFactor)
-			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
-			// svg.ViewBox.Size.SetMulVal(ZoomFactor)
+			SetZoom(ZoomFactor * 1.1)
 			win.FullReRender()
 		}
 	})
 
 	zoomout.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			ZoomFactor *= 0.9
-			zoom.SetValue(ZoomFactor)
-			svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
-			// svg.ViewBox.Size.SetMulVal(ZoomFactor) // todo: svg should do this
+			SetZoom(ZoomFactor * 0.9)
 			win.FullReRender()
 		}
 	})
 
 	zoom.SpinBoxSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		sp := send.(*gi.SpinBox)
-		ZoomFactor = sp.Value
-		svg.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, ZoomFactor))
-		// svg.ViewBox.Size.SetMulVal(ZoomFactor)
+		SetZoom(sp.Value)
 		win.FullReRender()
 	})
 

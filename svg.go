@@ -62,17 +62,24 @@ func (svg *SVG) DeleteAll() {
 	svg.UpdateEnd(updt)
 }
 
-// SetNormXForm scaling transform
+// SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
 func (svg *SVG) SetNormXForm() {
 	pc := &svg.Pnt
 	pc.XForm = Identity2D()
 	if svg.ViewBox.Size != Vec2DZero {
-		pu := &pc.UnContext
 		// todo: deal with all the other options!
-		vpsX := float32(svg.Geom.Size.X) / pu.PxToDots(svg.ViewBox.Size.X)
-		vpsY := float32(svg.Geom.Size.Y) / pu.PxToDots(svg.ViewBox.Size.Y)
+		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
+		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
 		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY)
 	}
+}
+
+// SetDPIXForm sets a scaling transform to compensate for the dpi -- svg
+// rendering is done within a 96 DPI context
+func (svg *SVG) SetDPIXForm() {
+	pc := &svg.Pnt
+	dpisc := svg.Viewport.Win.LogicalDPI() / 96.0
+	pc.XForm = Scale2D(dpisc, dpisc)
 }
 
 func (svg *SVG) Init2D() {

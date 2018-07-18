@@ -138,9 +138,10 @@ func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
 func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.UnContext.Defaults()
 	if vp != nil {
-		if vp.Win != nil {
-			pc.UnContext.DPI = vp.Win.LogicalDPI()
-		}
+		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
+		// if vp.Win != nil {
+		// 	pc.UnContext.DPI = vp.Win.LogicalDPI()
+		// }
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
 			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
@@ -509,7 +510,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
+	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 
@@ -528,9 +529,9 @@ func (pc *Paint) fill(rs *RenderState) {
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if pc.FillStyle.Color.Source == RadialGradient {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	} else {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm, &pc.UnContext))
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	}
 	rf.Draw()
 	rf.Clear()

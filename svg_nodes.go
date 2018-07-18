@@ -253,13 +253,12 @@ var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 func (g *Rect) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		pc.DrawRectangle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Size.X), pu.PxToDots(g.Size.Y))
+		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		pc.DrawRoundedRectangle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Size.X), pu.PxToDots(g.Size.Y), pu.PxToDots(g.Radius.X))
+		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
 	}
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
@@ -282,9 +281,8 @@ var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 func (g *Circle) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	pc.DrawCircle(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radius))
+	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
@@ -306,9 +304,8 @@ var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 func (g *Ellipse) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	pc.DrawEllipse(rs, pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y), pu.PxToDots(g.Radii.X), pu.PxToDots(g.Radii.Y))
+	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
@@ -330,9 +327,8 @@ var KiT_Line = kit.Types.AddType(&Line{}, nil)
 func (g *Line) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
-	pc.DrawLine(rs, pu.PxToDots(g.Start.X), pu.PxToDots(g.Start.Y), pu.PxToDots(g.End.X), pu.PxToDots(g.End.Y))
+	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
@@ -357,7 +353,7 @@ func (g *Polyline) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
-	pc.DrawPolylinePxToDots(rs, g.Points)
+	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
@@ -382,7 +378,7 @@ func (g *Polygon) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
-	pc.DrawPolygonPxToDots(rs, g.Points)
+	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
@@ -424,11 +420,10 @@ func (g *SVGText) BBox2D() image.Rectangle {
 func (g *SVGText) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	pu := &pc.UnContext
 	rs.PushXForm(pc.XForm)
 	if len(g.Text) > 0 {
 		orgsz := pc.FontStyle.Size
-		pos := rs.XForm.TransformPointVec2D(Vec2D{pu.PxToDots(g.Pos.X), pu.PxToDots(g.Pos.Y)})
+		pos := rs.XForm.TransformPointVec2D(Vec2D{g.Pos.X, g.Pos.Y})
 		rot := math32.Atan2(-rs.XForm.XY, rs.XForm.XX)
 		tx := rs.XForm.Rotate(-rot)
 		scx, _ := tx.TransformVector(1, 0)
