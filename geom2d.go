@@ -646,6 +646,21 @@ func (a XFormMatrix2D) ToRasterx() rasterx.Matrix2D {
 	return rasterx.Matrix2D{float64(a.XX), float64(a.YX), float64(a.XY), float64(a.YY), float64(a.X0), float64(a.Y0)}
 }
 
+// ExtractRot extracts the rotation component from a given matrix
+func (a XFormMatrix2D) ExtractRot() float32 {
+	return math32.Atan2(-a.XY, a.XX)
+}
+
+// ExtractXYScale extracts the X and Y scale factors after undoing any
+// rotation present -- i.e., in the original X, Y coordinates
+func (a XFormMatrix2D) ExtractScale() (scx, scy float32) {
+	rot := a.ExtractRot()
+	tx := a.Rotate(-rot)
+	scx, _ = tx.TransformVector(1, 0)
+	_, scy = tx.TransformVector(0, 1)
+	return
+}
+
 // SetString processes the standard SVG-style transform strings
 func (a *XFormMatrix2D) SetString(str string) error {
 	errmsg := "gi.XFormMatrix2D SetString"

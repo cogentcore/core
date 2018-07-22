@@ -89,6 +89,19 @@ func (cs *ColorSpec) SetColor(cl color.Color) {
 	cs.Gradient = nil
 }
 
+// Copy copies a gradient, making new copies of the stops instead of
+// re-using pointers
+func (cs *ColorSpec) CopyFrom(cp *ColorSpec) {
+	*cs = *cp
+	if cp.Gradient != nil {
+		cs.Gradient = &rasterx.Gradient{}
+		*cs.Gradient = *cp.Gradient
+		sn := len(cp.Gradient.Stops)
+		cs.Gradient.Stops = make([]rasterx.GradStop, sn)
+		copy(cs.Gradient.Stops, cp.Gradient.Stops)
+	}
+}
+
 // SetShadowGradient sets a linear gradient starting at given color and going
 // down to transparent based on given color and direction spec (defaults to
 // "to down")
@@ -110,7 +123,8 @@ func SetGradientBounds(grad *rasterx.Gradient, bounds image.Rectangle) {
 	grad.Bounds.H = float64(sz.Y)
 }
 
-// CopyGradient copies a gradient, making new copies of the stops instead of re-using pointers
+// CopyGradient copies a gradient, making new copies of the stops instead of
+// re-using pointers
 func CopyGradient(dst, src *rasterx.Gradient) {
 	*dst = *src
 	sn := len(src.Stops)
@@ -118,7 +132,8 @@ func CopyGradient(dst, src *rasterx.Gradient) {
 	copy(dst.Stops, src.Stops)
 }
 
-// RenderColor gets the color for rendering, applying opacity and bounds for gradients
+// RenderColor gets the color for rendering, applying opacity and bounds for
+// gradients
 func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform XFormMatrix2D) interface{} {
 	if cs.Source == SolidColor || cs.Gradient == nil {
 		return rasterx.ApplyOpacity(cs.Color, float64(opacity))

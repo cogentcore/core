@@ -8,7 +8,6 @@ import (
 	"image"
 	"strings"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -424,10 +423,8 @@ func (g *SVGText) Render2D() {
 	if len(g.Text) > 0 {
 		orgsz := pc.FontStyle.Size
 		pos := rs.XForm.TransformPointVec2D(Vec2D{g.Pos.X, g.Pos.Y})
-		rot := math32.Atan2(-rs.XForm.XY, rs.XForm.XX)
-		tx := rs.XForm.Rotate(-rot)
-		scx, _ := tx.TransformVector(1, 0)
-		_, scy := tx.TransformVector(0, 1)
+		rot := rs.XForm.ExtractRot()
+		scx, scy := rs.XForm.ExtractScale()
 		scalex := scx / scy
 		if scalex == 1 {
 			scalex = 0

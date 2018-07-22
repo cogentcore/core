@@ -906,7 +906,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 					sprop := make(ki.Props, len(se.Attr))
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "style" {
-							SetStylePropsXML(attr.Value, sprop)
+							SetStylePropsXML(attr.Value, &sprop)
 						} else {
 							sprop[attr.Name.Local] = attr.Value
 						}

@@ -94,17 +94,17 @@ type Styler interface {
 
 // SetStylePropsXML sets style props from XML style string, which contains ';'
 // separated name: value pairs
-func SetStylePropsXML(style string, props ki.Props) {
+func SetStylePropsXML(style string, props *ki.Props) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
 		if len(kv) >= 2 {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
-			if props == nil {
-				props = make(ki.Props)
+			if *props == nil {
+				*props = make(ki.Props)
 			}
-			props[k] = v
+			(*props)[k] = v
 		}
 	}
 }

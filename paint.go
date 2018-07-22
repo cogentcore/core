@@ -6,6 +6,7 @@ package gi
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -483,8 +484,9 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 	if pc.VecEff == VecEffNonScalingStroke {
 		return dw
 	}
-	scf := 0.5 * (rs.XForm.XX + rs.XForm.YY)
-	lw := Max32(scf*dw, pc.StrokeStyle.MinWidth.Dots)
+	scx, scy := rs.XForm.ExtractScale()
+	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+	lw := Max32(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
 }
 
@@ -493,9 +495,14 @@ func (pc *Paint) stroke(rs *RenderState) {
 
 	dash := pc.StrokeStyle.Dashes
 	if dash != nil {
-		sc := float64(0.5 * (rs.XForm.XX + rs.XForm.YY))
-		for i := range dash {
-			dash[i] *= sc
+		scx, scy := rs.XForm.ExtractScale()
+		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
+		if sc != 0 {
+			for i := range dash {
+				dash[i] *= sc
+			}
+		} else {
+			fmt.Printf("scale is zero\n")
 		}
 	}
 	rs.Raster.SetStroke(

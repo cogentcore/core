@@ -239,7 +239,7 @@ func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
 		g.Class = val
 		return true
 	case "style":
-		SetStylePropsXML(val, g.Props)
+		SetStylePropsXML(val, &g.Props)
 		return true
 	}
 	return false

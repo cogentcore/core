@@ -629,7 +629,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
-								grad.Grad = hrg.Grad
+								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}
@@ -654,7 +654,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
-								grad.Grad = hrg.Grad
+								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}
