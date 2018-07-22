@@ -16,8 +16,8 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
-	"github.com/srwiley/rasterx"
-	"github.com/srwiley/scanFT"
+	"github.com/rcoreilly/rasterx"
+	"github.com/rcoreilly/scanFT"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

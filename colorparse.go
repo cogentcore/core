@@ -20,8 +20,7 @@ import (
 	"strings"
 
 	"github.com/goki/ki/kit"
-	"github.com/srwiley/rasterx"
-	// "github.com/rcoreilly/rasterx"
+	"github.com/rcoreilly/rasterx"
 	"golang.org/x/net/html/charset"
 )
 

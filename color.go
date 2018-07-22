@@ -17,8 +17,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/srwiley/rasterx"
-	// "github.com/rcoreilly/rasterx"
+	"github.com/rcoreilly/rasterx"
 	"golang.org/x/image/colornames"
 )
 

@@ -502,20 +502,6 @@ func MakeDefaultIcons() *IconSet {
 			iset[ic.Nm] = &ic
 		}
 	}
-	if false {
-		ic := Icon{}
-		ic.InitName(&ic, "astronaut")
-		ic.Filename = "/Users/oreilly/go/src/github.com/srwiley/oksvg/testdata/testIcons/astronaut.svg"
-		iset[ic.Nm] = &ic
-	}
-	if false {
-		ic := Icon{}
-		ic.InitName(&ic, "test")
-		//		ic.Filename = "/Users/oreilly/go/src/github.com/goki/gi/icons/actions/adjusthsl.svg"
-		ic.Filename = "/Users/oreilly/github/svg-icon/dist/svg/awesome/adn.svg"
-		iset[ic.Nm] = &ic
-	}
-
 	iset.LoadDefaultIcons()
 
 	return &iset
