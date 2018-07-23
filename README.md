@@ -156,8 +156,11 @@ Currently at an **alpha** level release:
 
 ## Rendering / SVG
 
+* use, marker -- fig_mnt2out.svg -- also has big boxes
+* flowRoot in fig_vm_as_tug_of_war creates big black box
+
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
-  rendering -- unclear if any gradients are rendering properly
+  rendering
 
 * default join not looking right for some test cases..
 

@@ -232,6 +232,16 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 
 // LoadXML Loads XML-formatted SVG input from given file
 func (svg *SVG) LoadXML(filename string) error {
+	fi, err := os.Stat(filename)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	if fi.IsDir() {
+		err := fmt.Errorf("svg.LoadXML: file is a directory: %v\n", filename)
+		log.Println(err)
+		return err
+	}
 	fp, err := os.Open(filename)
 	defer fp.Close()
 	if err != nil {
@@ -554,6 +564,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				} else {
 					if inTxt && curTxt != nil {
 						txt = curTxt.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
+						txt.Pos = curTxt.Pos
 					} else {
 						txt = curPar.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
 					}
@@ -569,16 +580,14 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						pts := SVGReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosX = pts
-						}
-						if len(pts) > 0 {
+						} else if len(pts) == 1 {
 							txt.Pos.X = pts[0]
 						}
 					case "y":
 						pts := SVGReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosY = pts
-						}
-						if len(pts) > 0 {
+						} else if len(pts) == 1 {
 							txt.Pos.Y = pts[0]
 						}
 					case "dx":
@@ -824,19 +833,20 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 		case xml.CharData:
 			// (ok, md := curPar.(*MetaData2D); ok)
+			trspc := strings.TrimSpace(string(se))
 			switch {
 			// case :
 			// 	md.MetaData = string(se)
 			case inTitle:
-				curSvg.Title += string(se)
+				curSvg.Title += trspc
 			case inDesc:
-				curSvg.Desc += string(se)
+				curSvg.Desc += trspc
 			case inTspn && curTspn != nil:
-				curTspn.Text = string(se)
+				curTspn.Text = trspc
 			case inTxt && curTxt != nil:
-				curTxt.Text = string(se)
+				curTxt.Text = trspc
 			case inCSS && curCSS != nil:
-				curCSS.ParseString(string(se))
+				curCSS.ParseString(trspc)
 				cp := curCSS.CSSProps()
 				if cp != nil {
 					if inDef && defPrevPar != nil {

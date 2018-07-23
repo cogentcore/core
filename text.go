@@ -998,6 +998,63 @@ type TextStyle struct {
 	// word-break  inherit:"true"
 }
 
+// https://godoc.org/golang.org/x/text/unicode/bidi
+// UnicodeBidi determines how
+type UnicodeBidi int32
+
+const (
+	BidiNormal UnicodeBidi = iota
+	BidiEmbed
+	BidiBidiOverride
+	UnicodeBidiN
+)
+
+//go:generate stringer -type=UnicodeBidi
+
+var KiT_UnicodeBidi = kit.Enums.AddEnumAltLower(UnicodeBidiN, false, StylePropProps, "Bidi")
+
+func (ev UnicodeBidi) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *UnicodeBidi) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// TextDirections are for direction of text writing, used in direction and writing-mode styles
+type TextDirections int32
+
+const (
+	LRTB TextDirections = iota
+	RLTB
+	TBRL
+	LR
+	RL
+	TB
+	LTR
+	RTL
+	TextDirectionsN
+)
+
+//go:generate stringer -type=TextDirections
+
+var KiT_TextDirections = kit.Enums.AddEnumAltLower(TextDirectionsN, false, StylePropProps, "")
+
+func (ev TextDirections) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *TextDirections) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// TextAnchors are for direction of text writing, used in direction and writing-mode styles
+type TextAnchors int32
+
+const (
+	AnchorStart TextAnchors = iota
+	AnchorMiddle
+	AnchorEnd
+	TextAnchorsN
+)
+
+//go:generate stringer -type=TextAnchors
+
+var KiT_TextAnchors = kit.Enums.AddEnumAltLower(TextAnchorsN, false, StylePropProps, "Anchor")
+
+func (ev TextAnchors) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *TextAnchors) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 func (ts *TextStyle) Defaults() {
 	ts.WordWrap = false
 	ts.Align = AlignLeft

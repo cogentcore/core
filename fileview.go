@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"log"
 	"mime"
 	"os"
 	"path/filepath"
@@ -318,7 +319,11 @@ func (fv *FileView) UpdateFiles() {
 	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", fv.DirPath, err)
-			PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
+			if fv.Viewport != nil {
+				PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
+			} else {
+				log.Printf("gi.FileView error: %v\n", emsg)
+			}
 			return err
 		}
 		if path == fv.DirPath { // proceed..

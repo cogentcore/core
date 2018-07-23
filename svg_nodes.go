@@ -412,7 +412,7 @@ var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
 
 func (g *SVGText) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
-	// todo: fix
+	// todo: could be much more accurate..
 	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Render.Size.X, g.Pos.Y+g.Render.Size.Y)
 }
 
@@ -430,23 +430,62 @@ func (g *SVGText) Render2D() {
 			scalex = 0
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
+		if !pc.FillStyle.Color.IsNil() {
+			pc.FontStyle.Color = pc.FillStyle.Color.Color
+		}
 		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)
 		g.Render.Size = g.Render.Size.Mul(Vec2D{scx, scy})
-		if IsAlignMiddle(pc.TextStyle.Align) {
+		if IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == AnchorMiddle {
 			pos.X -= g.Render.Size.X * .5
-		} else if IsAlignEnd(pc.TextStyle.Align) {
+		} else if IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == AnchorEnd {
 			pos.X -= g.Render.Size.X
 		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.LoadFont(&pc.UnContext, "")
 		sr := &(g.Render.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face // upscale
-		for i := range sr.Text {
+		for i := range sr.Render {
 			sr.Render[i].RelPos = rs.XForm.TransformVectorVec2D(sr.Render[i].RelPos)
 			sr.Render[i].Size.Y *= scy
 			sr.Render[i].Size.X *= scx
 		}
 		pc.FontStyle.Size = orgsz
+		if len(g.CharPosX) > 0 {
+			mx := kit.MinInt(len(g.CharPosX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				// todo: this may not be fully correct, given relativity constraints
+				sr.Render[i].RelPos.X, _ = rs.XForm.TransformVector(g.CharPosX[i], 0)
+			}
+		}
+		if len(g.CharPosY) > 0 {
+			mx := kit.MinInt(len(g.CharPosY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				_, sr.Render[i].RelPos.Y = rs.XForm.TransformPoint(g.CharPosY[i], 0)
+			}
+		}
+		if len(g.CharPosDX) > 0 {
+			mx := kit.MinInt(len(g.CharPosDX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				dx, _ := rs.XForm.TransformVector(g.CharPosDX[i], 0)
+				if i > 0 {
+					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx
+				} else {
+					sr.Render[i].RelPos.X = dx // todo: not sure this is right
+				}
+			}
+		}
+		if len(g.CharPosDY) > 0 {
+			mx := kit.MinInt(len(g.CharPosDY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				dy, _ := rs.XForm.TransformVector(g.CharPosDY[i], 0)
+				if i > 0 {
+					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy
+				} else {
+					sr.Render[i].RelPos.Y = dy // todo: not sure this is right
+				}
+			}
+		}
+		// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 		g.Render.Render(rs, pos)
 		g.ComputeBBoxSVG()
 	}

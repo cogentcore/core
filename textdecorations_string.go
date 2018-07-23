@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubTextDecorationsN"
+const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubDecoBgColorTextDecorationsN"
 
-var _TextDecorations_index = [...]uint8{0, 8, 21, 33, 48, 57, 76, 89, 98, 105, 121}
+var _TextDecorations_index = [...]uint8{0, 8, 21, 33, 48, 57, 76, 89, 98, 105, 116, 132}
 
 func (i TextDecorations) String() string {
 	if i < 0 || i >= TextDecorations(len(_TextDecorations_index)-1) {

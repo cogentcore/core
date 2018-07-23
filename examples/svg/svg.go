@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/oswin/driver"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/mitchellh/go-homedir"
 )
 
 func main() {
@@ -99,10 +100,11 @@ func mainrun() {
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			path, fn := filepath.Split(CurFilename)
+			path, _ = homedir.Expand(path)
 			gi.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
-					CurFilename := gi.FileViewDialogValue(dlg)
+					CurFilename = gi.FileViewDialogValue(dlg)
 					fnm.SetText(CurFilename)
 					updt := svg.UpdateStart()
 					fmt.Printf("Loading: %v\n", CurFilename)
@@ -117,7 +119,7 @@ func mainrun() {
 	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
-			CurFilename = tf.Text()
+			CurFilename, _ = homedir.Expand(tf.Text())
 			updt := svg.UpdateStart()
 			fmt.Printf("Loading: %v\n", CurFilename)
 			svg.LoadXML(CurFilename)

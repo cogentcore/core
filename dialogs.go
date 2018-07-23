@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 	"reflect"
 
 	"github.com/goki/gi/oswin"
@@ -376,6 +377,10 @@ func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 // buttons -- any empty text will not be added -- optionally connects to given
 // signal receiving object and function for dialog signals (nil to ignore)
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
+	if avp == nil {
+		log.Printf("gi.PromptDialog has nil avg for: %v %v\n", title, prompt)
+		return
+	}
 	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
