@@ -887,10 +887,13 @@ func (svg *SVGEdit) SVGEditEvents() {
 			ssvg.Trans.X += float32(del.X)
 			ssvg.Trans.Y += float32(del.Y)
 			ssvg.SetTransform()
+			ssvg.SetFullReRender()
+			ssvg.UpdateSig()
 		}
 	})
 	svg.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
+		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
 		ssvg.InitScale()
 		ssvg.Scale += float32(me.NonZeroDelta(false)) / 20
@@ -899,27 +902,25 @@ func (svg *SVGEdit) SVGEditEvents() {
 		}
 		fmt.Printf("zoom: %v\n", ssvg.Scale)
 		ssvg.SetTransform()
-		me.SetProcessed()
+		ssvg.SetFullReRender()
+		ssvg.UpdateSig()
 	})
 	svg.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
-		obj := ssvg.FirstContainingPoint(me.Where)
+		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if me.Action == mouse.Press {
 			if obj != nil {
 				StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
 			}
-		} else {
-			ssvg.SetFullReRender()
-			ssvg.UpdateSig()
 		}
 	})
 	svg.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
-		obj := ssvg.FirstContainingPoint(me.Where)
+		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if obj != nil {
 			pos := me.Where
 			PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, obj.Name())

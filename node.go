@@ -246,11 +246,15 @@ func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
 }
 
 // FirstContainingPoint finds the first node whose WinBBox contains the given
-// point -- nil if none
-func (g *NodeBase) FirstContainingPoint(pt image.Point) ki.Ki {
+// point -- nil if none.  If leavesOnly is set then only nodes that have no
+// nodes (leaves, terminal nodes) will be considered
+func (g *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
 		if k == g.This {
+			return true
+		}
+		if leavesOnly && k.HasChildren() {
 			return true
 		}
 		_, gi := KiToNode2D(k)

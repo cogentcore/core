@@ -25,11 +25,33 @@ func main() {
 var CurFilename = ""
 var TheSVG *gi.SVGEdit
 var TheZoom *gi.SpinBox
+var TheTransX *gi.SpinBox
+var TheTransY *gi.SpinBox
+var TheFile *gi.TextField
 
 func SetZoom(zf float32) {
 	TheSVG.Scale = zf
 	TheZoom.SetValue(zf)
 	TheSVG.SetTransform()
+}
+
+func SetTrans(xt, yt float32) {
+	TheSVG.Trans.Set(xt, yt)
+	TheTransX.SetValue(xt)
+	TheTransY.SetValue(yt)
+	TheSVG.SetTransform()
+}
+
+func LoadSVG(fnm string) {
+	CurFilename = fnm
+	TheFile.SetText(CurFilename)
+	updt := TheSVG.UpdateStart()
+	TheSVG.SetFullReRender()
+	fmt.Printf("Loading: %v\n", CurFilename)
+	TheSVG.LoadXML(CurFilename)
+	SetZoom(TheSVG.Viewport.Win.LogicalDPI() / 96.0)
+	SetTrans(0, 0)
+	TheSVG.UpdateEnd(updt)
 }
 
 func mainrun() {
@@ -78,8 +100,12 @@ func mainrun() {
 	loads.SetText("Load SVG")
 
 	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
-	fnm.SetMinPrefWidth(units.NewValue(20, units.Em))
+	TheFile = fnm
+	fnm.SetMinPrefWidth(units.NewValue(40, units.Em))
 
+	zmlb := brow.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
+	zmlb.Text = "Zoom: "
+	zmlb.SetProp("align-vert", gi.AlignMiddle)
 	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
 	zoomout.SetIcon("zoom-out")
 
@@ -97,6 +123,21 @@ func mainrun() {
 		"height": units.NewValue(2, units.Em),
 	})
 
+	brow.AddNewChild(gi.KiT_Space, "spctr")
+	trlb := brow.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
+	trlb.Text = "Translate: "
+	trlb.SetProp("align-vert", gi.AlignMiddle)
+
+	trx := brow.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
+	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	trx.SetValue(svg.Trans.X)
+	TheTransX = trx
+
+	try := brow.AddNewChild(gi.KiT_SpinBox, "try").(*gi.SpinBox)
+	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	try.SetValue(svg.Trans.Y)
+	TheTransY = try
+
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			path, fn := filepath.Split(CurFilename)
@@ -104,14 +145,7 @@ func mainrun() {
 			gi.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
-					CurFilename = gi.FileViewDialogValue(dlg)
-					fnm.SetText(CurFilename)
-					updt := svg.UpdateStart()
-					fmt.Printf("Loading: %v\n", CurFilename)
-					svg.LoadXML(CurFilename)
-					svg.SetFullReRender()
-					SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
-					svg.UpdateEnd(updt)
+					LoadSVG(gi.FileViewDialogValue(dlg))
 				}
 			})
 		}
@@ -120,13 +154,8 @@ func mainrun() {
 	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
-			CurFilename, _ = homedir.Expand(tf.Text())
-			updt := svg.UpdateStart()
-			fmt.Printf("Loading: %v\n", CurFilename)
-			svg.LoadXML(CurFilename)
-			svg.SetFullReRender()
-			SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
-			svg.UpdateEnd(updt)
+			fn, _ := homedir.Expand(tf.Text())
+			LoadSVG(fn)
 		}
 	})
 
@@ -148,6 +177,12 @@ func mainrun() {
 		sp := send.(*gi.SpinBox)
 		SetZoom(sp.Value)
 		win.FullReRender()
+	})
+
+	svg.NodeSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ssvg := send.EmbeddedStruct(gi.KiT_SVGEdit).(*gi.SVGEdit)
+		SetZoom(ssvg.Scale)
+		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
 	})
 
 	vp.UpdateEndNoSig(updt)

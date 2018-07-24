@@ -265,6 +265,9 @@ func (km *KeyMap) Update() {
 
 	mi := 0
 	for _, dki := range dkms {
+		if mi >= len(kms) {
+			break
+		}
 		mmi := kms[mi]
 		if dki.Fun < mmi.Fun {
 			addkm = append(addkm, dki)
