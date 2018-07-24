@@ -245,6 +245,28 @@ func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
 	return false
 }
 
+// FirstContainingPoint finds the first node whose WinBBox contains the given
+// point -- nil if none
+func (g *NodeBase) FirstContainingPoint(pt image.Point) ki.Ki {
+	var rval ki.Ki
+	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+		if k == g.This {
+			return true
+		}
+		_, gi := KiToNode2D(k)
+		if gi == nil {
+			// todo: 3D
+			return false
+		}
+		if pt.In(gi.WinBBox) {
+			rval = gi.This
+			return false
+		}
+		return true
+	})
+	return rval
+}
+
 // standard css properties on nodes apply, including visible, etc.
 
 // see node2d.go for 2d node

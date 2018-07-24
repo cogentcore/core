@@ -1454,7 +1454,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	wgr.Pos = win.OSWin.Position()
 	wgr.Size = win.OSWin.Size()
 	if wgr.Size == image.ZP {
-		fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
+		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
 		return
 	}
 	if (*wg)[win.Nm] == nil {

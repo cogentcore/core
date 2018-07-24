@@ -682,7 +682,7 @@ func (a *XFormMatrix2D) SetString(str string) error {
 		nxt := ""
 		eidx := strings.IndexByte(vals, ')')
 		if eidx > 0 {
-			nxt = strings.TrimSpace(str[eidx+1:])
+			nxt = strings.TrimSpace(vals[eidx+1:])
 			if strings.HasPrefix(nxt, ";") {
 				nxt = strings.TrimSpace(strings.TrimPrefix(nxt, ";"))
 			}
@@ -696,36 +696,46 @@ func (a *XFormMatrix2D) SetString(str string) error {
 		switch cmd {
 		case "matrix":
 			if err := SVGPointsCheckN(pts, 6, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
 			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Translate(pts[0], pts[1])
 		case "translatex":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Translate(pts[0], 0)
 		case "translatey":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Translate(0, pts[0])
 		case "scale":
-			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
-				return err
+			if len(pts) == 1 {
+				*a = a.Scale(pts[0], pts[0])
+			} else if len(pts) == 2 {
+				*a = a.Scale(pts[0], pts[1])
+			} else {
+				err := fmt.Errorf("%v incorrect number of points: 2 != %v\n", errmsg, len(pts))
+				log.Println(err)
 			}
-			*a = a.Scale(pts[0], pts[1])
 		case "scalex":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Scale(pts[0], 1)
 		case "scaley":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Scale(1, pts[0])
@@ -744,16 +754,19 @@ func (a *XFormMatrix2D) SetString(str string) error {
 			// todo: rotate-origin?
 		case "skew":
 			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Skew(pts[0], pts[1])
 		case "skewx":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Skew(pts[0], 0)
 		case "skewy":
 			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+				log.Println(err)
 				return err
 			}
 			*a = a.Skew(0, pts[0])

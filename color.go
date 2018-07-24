@@ -174,9 +174,26 @@ func (c Color) RGBA() (r, g, b, a uint32) {
 
 var NilColor Color
 
-// check if color is the nil initial default color -- a = 0 means fully transparent black
+// IsNil checks if color is the nil initial default color -- a = 0 means fully
+// transparent black
 func (c *Color) IsNil() bool {
 	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0 {
+		return true
+	}
+	return false
+}
+
+// IsWhite checks if color is a full opaque white color
+func (c *Color) IsWhite() bool {
+	if c.R == 255 && c.G == 255 && c.B == 255 && c.A == 255 {
+		return true
+	}
+	return false
+}
+
+// IsBlack checks if color is a full opaque black color
+func (c *Color) IsBlack() bool {
+	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 255 {
 		return true
 	}
 	return false

@@ -74,7 +74,7 @@ type StrokeStyle struct {
 func (ps *StrokeStyle) Defaults() {
 	ps.On = false // svg says default is off
 	ps.SetColor(color.Black)
-	ps.Width.Set(1.0, units.Pct)
+	ps.Width.Set(1.0, units.Px)
 	ps.MinWidth.Set(.5, units.Dot)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel

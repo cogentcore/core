@@ -430,7 +430,7 @@ func (g *SVGText) Render2D() {
 			scalex = 0
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
-		if !pc.FillStyle.Color.IsNil() {
+		if !pc.FillStyle.Color.IsNil() && !pc.FillStyle.Color.Color.IsWhite() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
 		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)

@@ -23,14 +23,13 @@ func main() {
 }
 
 var CurFilename = ""
-var ZoomFactor = float32(1.0)
-var TheSVG *gi.SVG
+var TheSVG *gi.SVGEdit
 var TheZoom *gi.SpinBox
 
 func SetZoom(zf float32) {
-	ZoomFactor = zf
-	TheZoom.SetValue(ZoomFactor)
-	TheSVG.SetProp("transform", fmt.Sprintf("scale(%v,%v)", ZoomFactor, 1.0*ZoomFactor))
+	TheSVG.Scale = zf
+	TheZoom.SetValue(zf)
+	TheSVG.SetTransform()
 }
 
 func mainrun() {
@@ -65,8 +64,9 @@ func mainrun() {
 	svgrow.SetStretchMaxWidth()
 	svgrow.SetStretchMaxHeight()
 
-	svg := svgrow.AddNewChild(gi.KiT_SVG, "svg").(*gi.SVG)
+	svg := svgrow.AddNewChild(gi.KiT_SVGEdit, "svg").(*gi.SVGEdit)
 	TheSVG = svg
+	svg.InitScale()
 	svg.Fill = true
 	svg.SetProp("background-color", "white")
 	svg.SetProp("width", units.NewValue(float32(width-20), units.Px))
@@ -85,7 +85,7 @@ func mainrun() {
 
 	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	zoom.SetValue(ZoomFactor)
+	zoom.SetValue(svg.Scale)
 	TheZoom = zoom
 
 	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
@@ -109,6 +109,7 @@ func mainrun() {
 					updt := svg.UpdateStart()
 					fmt.Printf("Loading: %v\n", CurFilename)
 					svg.LoadXML(CurFilename)
+					svg.SetFullReRender()
 					SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
 					svg.UpdateEnd(updt)
 				}
@@ -123,6 +124,7 @@ func mainrun() {
 			updt := svg.UpdateStart()
 			fmt.Printf("Loading: %v\n", CurFilename)
 			svg.LoadXML(CurFilename)
+			svg.SetFullReRender()
 			SetZoom(svg.Viewport.Win.LogicalDPI() / 96.0)
 			svg.UpdateEnd(updt)
 		}
@@ -130,14 +132,14 @@ func mainrun() {
 
 	zoomin.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			SetZoom(ZoomFactor * 1.1)
+			SetZoom(svg.Scale * 1.1)
 			win.FullReRender()
 		}
 	})
 
 	zoomout.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			SetZoom(ZoomFactor * 0.9)
+			SetZoom(svg.Scale * 0.9)
 			win.FullReRender()
 		}
 	})

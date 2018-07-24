@@ -158,11 +158,15 @@ Currently at an **alpha** level release:
 
 * use, marker -- fig_mnt2out.svg -- also has big boxes
 * flowRoot in fig_vm_as_tug_of_war creates big black box
+* default join not looking right for some test cases -- getting white holes
+
+* add edit flag to SVG node -- then it gets mouse move, zoom and changes
+  transform accordingly -- setting as prop -- and does select of elements..
+	+ actually, probably want to make an SVGEdit sub-class for this purpose --
+      base SVG is used by Icon and just displays.
 
 * icons/actions/adjusthsl.svg has a rectangle with an opacity gradient -- not
   rendering
-
-* default join not looking right for some test cases..
 
 * clip-path and ClipPath element..
 

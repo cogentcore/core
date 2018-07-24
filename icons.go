@@ -396,6 +396,7 @@ func MakeDefaultIcons() *IconSet {
 			ic.InitName(&ic, "widget-wedge-down")
 			ic.ViewBox.Size = Vec2D{1, 1}
 			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
 			p.SetData("M 0.05 0.05 .95 0.05 .5 .95 Z")
 			iset[ic.Nm] = &ic
 		}
@@ -404,6 +405,7 @@ func MakeDefaultIcons() *IconSet {
 			ic.InitName(&ic, "widget-wedge-up")
 			ic.ViewBox.Size = Vec2D{1, 1}
 			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
 			p.SetData("M 0.05 0.95 .95 0.95 .5 .05 Z")
 			iset[ic.Nm] = &ic
 		}
@@ -412,6 +414,7 @@ func MakeDefaultIcons() *IconSet {
 			ic.InitName(&ic, "widget-wedge-left")
 			ic.ViewBox.Size = Vec2D{1, 1}
 			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
 			p.SetData("M 0.95 0.05 .95 0.95 .05 .5 Z")
 			iset[ic.Nm] = &ic
 		}
@@ -420,6 +423,7 @@ func MakeDefaultIcons() *IconSet {
 			ic.InitName(&ic, "widget-wedge-right")
 			ic.ViewBox.Size = Vec2D{1, 1}
 			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
 			p.SetData("M 0.05 0.05 .05 0.95 .95 .5 Z")
 			iset[ic.Nm] = &ic
 		}

@@ -23,7 +23,10 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"golang.org/x/net/html/charset"
@@ -859,4 +862,99 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 		}
 	}
 	return nil
+}
+
+/////////////////////////////////////////////////////////////
+// SVGEdit
+
+// SVGEdit supports editing of SVG elements
+type SVGEdit struct {
+	SVG
+	Trans Vec2D   `desc:"view translation offset (from dragging)"`
+	Scale float32 `desc:"view scaling (from zooming)"`
+}
+
+var KiT_SVGEdit = kit.Types.AddType(&SVGEdit{}, nil)
+
+// SVGEditEvents handles svg editing events
+func (svg *SVGEdit) SVGEditEvents() {
+	svg.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
+		if ssvg.IsDragging() {
+			del := me.Where.Sub(me.From)
+			ssvg.Trans.X += float32(del.X)
+			ssvg.Trans.Y += float32(del.Y)
+			ssvg.SetTransform()
+		}
+	})
+	svg.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
+		ssvg.InitScale()
+		ssvg.Scale += float32(me.NonZeroDelta(false)) / 20
+		if ssvg.Scale <= 0 {
+			ssvg.Scale = 0.01
+		}
+		fmt.Printf("zoom: %v\n", ssvg.Scale)
+		ssvg.SetTransform()
+		me.SetProcessed()
+	})
+	svg.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
+		obj := ssvg.FirstContainingPoint(me.Where)
+		if me.Action == mouse.Press {
+			if obj != nil {
+				StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
+			}
+		} else {
+			ssvg.SetFullReRender()
+			ssvg.UpdateSig()
+		}
+	})
+	svg.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_SVGEdit).(*SVGEdit)
+		obj := ssvg.FirstContainingPoint(me.Where)
+		if obj != nil {
+			pos := me.Where
+			PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, obj.Name())
+		}
+	})
+}
+
+// InitScale ensures that Scale is initialized and non-zero
+func (svg *SVGEdit) InitScale() {
+	if svg.Scale == 0 {
+		if svg.Viewport != nil {
+			svg.Scale = svg.Viewport.Win.LogicalDPI() / 96.0
+		} else {
+			svg.Scale = 1
+		}
+	}
+}
+
+// SetTransform sets the transform based on Trans and Scale values
+func (svg *SVGEdit) SetTransform() {
+	svg.InitScale()
+	svg.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", svg.Trans.X, svg.Trans.Y, svg.Scale, svg.Scale))
+}
+
+func (svg *SVGEdit) Render2D() {
+	if svg.PushBounds() {
+		svg.SVGEditEvents()
+		rs := &svg.Render
+		if svg.Fill {
+			svg.FillViewport()
+		}
+		rs.PushXForm(svg.Pnt.XForm)
+		svg.Render2DChildren() // we must do children first, then us!
+		svg.PopBounds()
+		rs.PopXForm()
+		svg.RenderViewport2D() // update our parent image
+	}
 }
