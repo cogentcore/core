@@ -56,6 +56,7 @@ const (
 	KeyFunZoomIn
 	KeyFunPrefs
 	KeyFunRefresh
+	KeyFunComplete
 	KeyFunctionsN
 )
 
@@ -151,6 +152,7 @@ var EmacsMacKeyMap = KeyMap{
 	"Shift+Control+_":     KeyFunZoomOut,
 	"Control+Alt+P":       KeyFunPrefs,
 	"F5":                  KeyFunRefresh,
+	"Control+.":           KeyFunComplete,
 }
 
 // ChromeKeyMap is a standard key map for google / chrome style bindings
@@ -183,7 +185,7 @@ var ChromeKeyMap = KeyMap{
 	"KeypadEnter":     KeyFunSelectItem,
 	"Control+A":       KeyFunSelectAll,
 	"Shift+Control+A": KeyFunCancelSelect,
-	// "Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+	//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
 	"Control+ReturnEnter": KeyFunAccept,
 	"Escape":              KeyFunAbort,
 	"DeleteBackspace":     KeyFunBackspace,

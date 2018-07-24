@@ -101,6 +101,10 @@ const (
 	// processes clicks
 	VpFlagMenu
 
+	// VpFlagCompleter means viewport is serving as a popup menu for code completion --
+	// only applies if the VpFlagMenu is also set
+	VpFlagCompleter
+
 	// VpFlagTooltip means viewport is serving as a tooltip
 	VpFlagTooltip
 
@@ -121,6 +125,10 @@ func (vp *Viewport2D) IsPopup() bool {
 
 func (vp *Viewport2D) IsMenu() bool {
 	return bitflag.Has(vp.Flag, int(VpFlagMenu))
+}
+
+func (vp *Viewport2D) IsCompleter() bool {
+	return bitflag.Has(vp.Flag, int(VpFlagCompleter))
 }
 
 func (vp *Viewport2D) IsTooltip() bool {

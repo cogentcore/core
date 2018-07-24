@@ -645,6 +645,25 @@ func PopupIsTooltip(pop ki.Ki) bool {
 	return false
 }
 
+// PopupIsCompleter returns true if the given popup item is a menu and a completer
+func PopupIsCompleter(pop ki.Ki) bool {
+	if !PopupIsMenu(pop) {
+		return false
+	}
+	gii, gi := KiToNode2D(pop)
+	if gi == nil {
+		return false
+	}
+	vp := gii.AsViewport2D()
+	if vp == nil {
+		return false
+	}
+	if vp.IsCompleter() {
+		return true
+	}
+	return false
+}
+
 // DeletePopupMenu returns true if the given popup item should be deleted
 func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if !PopupIsMenu(pop) {
@@ -875,43 +894,60 @@ func (w *Window) EventLoop() {
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
-			switch kf {
-			case KeyFunFocusNext:
-				w.SetNextFocusItem()
-				e.SetProcessed()
-			case KeyFunFocusPrev:
-				w.SetPrevFocusItem()
-				e.SetProcessed()
-			case KeyFunAbort:
-				if w.Popup != nil {
-					if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-						delPop = true
+
+			if !e.IsProcessed() {
+				if w.Popup != nil && PopupIsMenu(w.Popup) {
+					switch kf {
+					case KeyFunMoveUp:
+						w.SetPrevFocusItem()
+						e.SetProcessed()
+					case KeyFunMoveDown:
+						w.SetNextFocusItem()
 						e.SetProcessed()
 					}
 				}
-			case KeyFunAccept:
-				if w.Popup != nil {
-					if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-						delPop = true
-					}
-				}
-			case KeyFunGoGiEditor:
-				GoGiEditorOf(w.Viewport.This)
-				e.SetProcessed()
-			case KeyFunZoomIn:
-				w.ZoomDPI(1)
-				e.SetProcessed()
-			case KeyFunZoomOut:
-				w.ZoomDPI(-1)
-				e.SetProcessed()
-			case KeyFunPrefs:
-				Prefs.Edit()
-				e.SetProcessed()
-			case KeyFunRefresh:
-				w.FullReRender()
-				// w.UploadAllViewports()
-				e.SetProcessed()
 			}
+
+			if !e.IsProcessed() {
+				switch kf {
+				case KeyFunFocusNext:
+					w.SetNextFocusItem()
+					e.SetProcessed()
+				case KeyFunFocusPrev:
+					w.SetPrevFocusItem()
+					e.SetProcessed()
+				case KeyFunAbort:
+					if w.Popup != nil {
+						if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+							delPop = true
+							e.SetProcessed()
+						}
+					}
+				case KeyFunAccept:
+					if w.Popup != nil {
+						if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+							delPop = true
+						}
+					}
+				case KeyFunGoGiEditor:
+					GoGiEditorOf(w.Viewport.This)
+					e.SetProcessed()
+				case KeyFunZoomIn:
+					w.ZoomDPI(1)
+					e.SetProcessed()
+				case KeyFunZoomOut:
+					w.ZoomDPI(-1)
+					e.SetProcessed()
+				case KeyFunPrefs:
+					Prefs.Edit()
+					e.SetProcessed()
+				case KeyFunRefresh:
+					w.FullReRender()
+					// w.UploadAllViewports()
+					e.SetProcessed()
+				}
+			}
+
 			if !e.IsProcessed() {
 				cs := e.ChordString()
 				switch cs { // some other random special codes, during dev..
@@ -967,6 +1003,14 @@ func (w *Window) EventLoop() {
 					if w.DeletePopupMenu(w.Popup, me) {
 						delPop = true
 					}
+				}
+			}
+		}
+
+		if w.Popup != nil && !delPop {
+			if PopupIsCompleter(w.Popup) {
+				if et == oswin.KeyChordEvent {
+					w.EventSigs[et].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
 				}
 			}
 		}

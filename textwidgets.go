@@ -24,6 +24,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
+	"strings"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -185,22 +186,24 @@ var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
-	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
-	CursorPos    int                     `xml:"-" desc:"current cursor position"`
-	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
-	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	Txt           string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Edited        bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditTxt       []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	MaxWidthReq   int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	StartPos      int                     `xml:"-" desc:"starting display position in the string"`
+	EndPos        int                     `xml:"-" desc:"ending display position in the string"`
+	CursorPos     int                     `xml:"-" desc:"current cursor position"`
+	CharWidth     int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart   int                     `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd     int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode    bool                    `xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal                `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    TextRender               `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender               `json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]Style  `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                  `json:"-" xml:"-" desc:"font height, cached during styling"`
+	Cmpltr       SampleCompleter          `json:"-" xml:"-" desc:"current text completer"`
+	UseCmpltr    bool                     `json:"-" xml:"-" desc:"offer completion, or not"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -349,6 +352,7 @@ func (tf *TextField) CursorEnd() {
 func (tf *TextField) CursorBackspace(steps int) {
 	if tf.HasSelection() {
 		tf.DeleteSelection()
+		return
 	}
 	if tf.CursorPos < steps {
 		steps = tf.CursorPos
@@ -630,8 +634,71 @@ func (tf *TextField) MakeActionMenu(m *Menu) {
 	}
 }
 
+// OfferCompletions pops up a menu of possible completions
+func (tf *TextField) OfferCompletions() {
+	if !tf.UseCmpltr {
+		return
+	}
+	if PopupIsCompleter(tf.ParentWindow().Popup) {
+		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+	}
+	tf.Cmpltr.GenCompletions(tf.Text()) // send the current text and get back a list
+	if tf.Cmpltr.Count() > 0 {
+		var m Menu
+		m = tf.MakeCompletionMenu(m, tf.Cmpltr)
+		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
+		// todo: figure popup placement using font and line height
+		vp := PopupMenu(m, cpos.X + 15, cpos.Y + 50, tf.Viewport, "tfCompletionMenu")
+		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
+	}
+}
+
+// MakeCompletionMenu makes the menu of possible completions for the preceding code/text -
+// the Action is Complete() for every item
+func (tf *TextField) MakeCompletionMenu(m Menu, completer SampleCompleter) Menu {
+	for i := range completer.matches {
+		s := completer.matches[i]
+		m.AddMenuText(s, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+			tff.Complete(s)
+		})
+	}
+	return m
+}
+
+// Complete edits the text field using the string chosen from the completion menu
+func (tf *TextField) Complete(str string) {
+	txt := tf.Txt
+	//txt = strings.Replace(txt, tf.Cmpltr.seed, str, 1)
+	txt = strings.TrimSuffix(txt, tf.Cmpltr.Seed())
+	txt = txt + str
+	tf.SetText(txt)
+	tf.CursorEnd()
+}
+
+// KeyInput handles keyboard input into the text field and from the completion menu
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
+
+	if PopupIsCompleter(tf.ParentWindow().Popup) {
+		switch kf {
+		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
+		// todo: extend needs to be implemented in the Completer
+			if tf.Cmpltr.Count() == 1 {
+				tf.Complete(tf.Cmpltr.matches[0])
+				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+			}
+			//fmt.Printf("tab\n")
+			kt.SetProcessed()
+		default:
+			//fmt.Printf("some char\n")
+		}
+	}
+
+	if tf.IsInactive() || kt.IsProcessed() {
+		return
+	}
+
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case KeyFunMoveRight:
@@ -662,6 +729,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if tf.IsInactive() || kt.IsProcessed() {
 		return
 	}
+
 	switch kf {
 	case KeyFunSelectItem:
 		tf.EditDone() // not processed, others could consume
@@ -671,6 +739,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.RevertEdit() // not processed, others could consume
 	case KeyFunBackspace:
 		tf.CursorBackspace(1)
+		tf.OfferCompletions()
 		kt.SetProcessed()
 	case KeyFunKill:
 		tf.CursorKill()
@@ -684,9 +753,13 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunPaste:
 		tf.Paste()
 		kt.SetProcessed()
+	case KeyFunComplete:
+		tf.OfferCompletions()
+		kt.SetProcessed()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			tf.InsertAtCursor(string(kt.Rune))
+			tf.OfferCompletions()
 		}
 	}
 }
@@ -1075,7 +1148,7 @@ func (tf *TextField) Render2D() {
 }
 
 func (tf *TextField) FocusChanged2D(gotFocus bool) {
-	if !gotFocus && !tf.IsInactive() {
+ 	if !gotFocus && !tf.IsInactive() {
 		tf.EditDone() // lose focus
 	}
 	tf.UpdateSig()
