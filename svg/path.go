@@ -60,13 +60,12 @@ func (g *Path) Render2D() {
 	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
 
-	// todo: angles
 	if ms, ok := g.Props["marker-start"]; ok {
 		stv, ang := PathDataStart(g.Data)
 		mrkn := g.FindSVGURL(ms.(string))
 		if mrkn != nil {
 			if mrk, ok := mrkn.(*Marker); ok {
-				mrk.RenderMarker(stv, ang, g.Pnt.StrokeWidth(rs))
+				mrk.RenderMarker(stv, ang, g.Pnt.StrokeStyle.Width.Dots)
 			}
 		}
 	}
@@ -75,7 +74,7 @@ func (g *Path) Render2D() {
 		mrkn := g.FindSVGURL(me.(string))
 		if mrkn != nil {
 			if mrk, ok := mrkn.(*Marker); ok {
-				mrk.RenderMarker(env, ang, g.Pnt.StrokeWidth(rs))
+				mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
 			}
 		}
 	}
@@ -595,8 +594,10 @@ func PathDataEnd(data []PathData) (vec gi.Vec2D, ang float32) {
 		c := gi.Vec2D{cx, cy}
 		if gotSome {
 			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
+			fmt.Printf("c: %v vec: %v ang: %v\n", c, vec, ang)
 		}
 		vec = c
+		gotSome = true
 		return true
 	})
 	return

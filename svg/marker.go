@@ -58,9 +58,12 @@ func (mrk *Marker) RenderMarker(vertexPos gi.Vec2D, vertexAng, strokeWidth float
 	if mrk.Orient != "auto" {
 		ang, _ = gi.ParseAngle32(mrk.Orient)
 	}
-
+	if mrk.ViewBox.Size.IsZero() {
+		mrk.ViewBox.Size = gi.Vec2D{3, 3}
+	}
 	sc := gi.Scale2D(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y)
 	mrk.XForm = sc.Multiply(gi.Rotate2D(ang))
+	//	mrk.XForm = sc.Rotate(ang)
 	roff := sc.TransformPointVec2D(mrk.RefPos)
 	mrk.XForm.X0 = vertexPos.X - roff.X
 	mrk.XForm.Y0 = vertexPos.Y - roff.Y
