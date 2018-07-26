@@ -12,14 +12,12 @@ import (
 	"strconv"
 	"unicode"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/ki/kit"
 )
 
-// path.go contains everything associated with the SVG path element -- see
-// nodes.go and svg.go for relevant base and others
-
-// 2D Path, using SVG-style data that can render just about anything
+// Path renders SVG data sequences that can render just about anything
 type Path struct {
 	SVGNodeBase
 	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
@@ -46,7 +44,7 @@ func (g *Path) SetData(data string) error {
 func (g *Path) BBox2D() image.Rectangle {
 	// todo: cache values, only update when path is updated..
 	rs := &g.Viewport.Render
-	g.MinCoord, g.MaxCoord = PathDataMinMax(&g.Pnt, g.Data)
+	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
 	bb := g.Pnt.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
 	return bb
 }
@@ -61,6 +59,27 @@ func (g *Path) Render2D() {
 	PathDataRender(g.Data, pc, rs)
 	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+
+	// todo: angles
+	if ms, ok := g.Props["marker-start"]; ok {
+		stv, ang := PathDataStart(g.Data)
+		mrkn := g.FindSVGURL(ms.(string))
+		if mrkn != nil {
+			if mrk, ok := mrkn.(*Marker); ok {
+				mrk.RenderMarker(stv, ang, g.Pnt.StrokeWidth(rs))
+			}
+		}
+	}
+	if me, ok := g.Props["marker-end"]; ok {
+		env, ang := PathDataEnd(g.Data)
+		mrkn := g.FindSVGURL(me.(string))
+		if mrkn != nil {
+			if mrk, ok := mrkn.(*Marker); ok {
+				mrk.RenderMarker(env, ang, g.Pnt.StrokeWidth(rs))
+			}
+		}
+	}
+
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -121,24 +140,22 @@ func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(e
 func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // PathData encodes the svg path data, using 32-bit floats which are converted
-// into uint32 for path commands, which contain the command as the first 5
+// into uint32 for path commands, and contain the command as the first 5
 // bits, and the remaining 27 bits are the number of data points following the
 // path command to interpret as numbers.
 type PathData float32
 
-// decode path data as a command and a number of subsequent values for that command
+// Cmd decodes path data as a command and a number of subsequent values for that command
 func (pd PathData) Cmd() (PathCmds, int) {
 	iv := uint32(pd)
-	// cmd := PathCmds(iv & 0x20)       // only the lowest 5 bits (31 values) for command
-	// n := int((iv & 0xFFFFFFD0) >> 5) // extract the n from remainder of bits
-	cmd := PathCmds(iv & 0xFF)       // only the lowest 5 bits (31 values) for command
-	n := int((iv & 0xFFFFFF00) >> 8) // extract the n from remainder of bits
+	cmd := PathCmds(iv & 0x1F)       // only the lowest 5 bits (31 values) for command
+	n := int((iv & 0xFFFFFFE0) >> 5) // extract the n from remainder of bits
 	return cmd, n
 }
 
-// encode command and n into PathData
+// EncCmd encodes command and n into PathData
 func (pc PathCmds) EncCmd(n int) PathData {
-	nb := int32(n << 8) // n up-shifted
+	nb := int32(n << 5) // n up-shifted
 	pd := PathData(int32(pc) | nb)
 	return pd
 }
@@ -344,20 +361,12 @@ func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.RenderState) {
 	}
 }
 
-// update min max for given coord index and coords
-func minMaxUpdate(cx, cy float32, min, max *gi.Vec2D) {
-	c := gi.Vec2D{cx, cy}
-	if *min == gi.Vec2DZero && *max == gi.Vec2DZero {
-		*min = c
-		*max = c
-	} else {
-		min.SetMin(c)
-		max.SetMax(c)
-	}
-}
-
-// PathDataMinMax traverses the path data and extracts the min and max point coords
-func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
+// PathDataIterFunc traverses the path data and calls given function on each
+// coordinate point, passing overall starting index of coords in data stream,
+// command, index of the points within that command, and coord values
+// (absolute, not relative, regardless of the command type) -- if function
+// returns false, then traversal is aborted
+func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -370,52 +379,72 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 		case PcM:
 			cx = PathDataNext(data, &i)
 			cy = PathDataNext(data, &i)
-			minMaxUpdate(cx, cy, &min, &max)
+			if !fun(i-2, cmd, 0, cx, cy) {
+				return
+			}
 			for np := 1; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcm:
 			cx += PathDataNext(data, &i)
 			cy += PathDataNext(data, &i)
-			minMaxUpdate(cx, cy, &min, &max)
+			if !fun(i, cmd, 0, cx, cy) {
+				return
+			}
 			for np := 1; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cx = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-1, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cx += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-1, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-1, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-1, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcc:
 			rel = true
@@ -438,8 +467,10 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 					cx = PathDataNext(data, &i)
 					cy = PathDataNext(data, &i)
 				}
-				minMaxUpdate(x1, y1, &min, &max)
-				minMaxUpdate(cx, cy, &min, &max)
+				x1 = y1 // just to use them -- not sure if should pass to fun
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcS:
 			for np := 0; np < n/4; np++ {
@@ -447,8 +478,10 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 				y1 = PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(x1, y1, &min, &max)
-				minMaxUpdate(cx, cy, &min, &max)
+				y1 = x1 // just to use them -- not sure if should pass to fun
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
@@ -456,8 +489,9 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 				y1 = cy + PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(x1, y1, &min, &max)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
@@ -465,7 +499,9 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 				PathDataNext(data, &i)
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
@@ -473,19 +509,25 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 				PathDataNext(data, &i)
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcT:
 			for np := 0; np < n/2; np++ {
 				cx = PathDataNext(data, &i)
 				cy = PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
 				cx += PathDataNext(data, &i)
 				cy += PathDataNext(data, &i)
-				minMaxUpdate(cx, cy, &min, &max)
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case Pca:
 			rel = true
@@ -504,12 +546,59 @@ func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 					cx = PathDataNext(data, &i)
 					cy = PathDataNext(data, &i)
 				}
-				minMaxUpdate(cx, cy, &min, &max) // todo: not accurate
+				if !fun(i-2, cmd, np, cx, cy) {
+					return
+				}
 			}
 		case PcZ:
 		case Pcz:
 		}
 	}
+	return
+}
+
+// PathDataMinMax traverses the path data and extracts the min and max point coords
+func PathDataMinMax(data []PathData) (min, max gi.Vec2D) {
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
+		c := gi.Vec2D{cx, cy}
+		if min == gi.Vec2DZero && max == gi.Vec2DZero {
+			min = c
+			max = c
+		} else {
+			min.SetMin(c)
+			max.SetMax(c)
+		}
+		return true
+	})
+	return
+}
+
+// PathDataStart gets the starting coords and angle from the path
+func PathDataStart(data []PathData) (vec gi.Vec2D, ang float32) {
+	gotSt := false
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
+		c := gi.Vec2D{cx, cy}
+		if gotSt {
+			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
+			return false // stop
+		}
+		vec = c
+		return true
+	})
+	return
+}
+
+// PathDataEnd gets the ending coords and angle from the path
+func PathDataEnd(data []PathData) (vec gi.Vec2D, ang float32) {
+	gotSome := false
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
+		c := gi.Vec2D{cx, cy}
+		if gotSome {
+			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
+		}
+		vec = c
+		return true
+	})
 	return
 }
 

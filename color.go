@@ -22,6 +22,18 @@ import (
 // Color defines a standard color object for GUI use, with RGBA values, and
 // all the usual necessary conversion functions to / from names, strings, etc
 
+// ColorSpec fully specifies the color for rendering -- used in FillStyle and
+// StrokeStyle
+type ColorSpec struct {
+	Source   ColorSources      `desc:"source of color (solid, gradient)"`
+	Color    Color             `desc:"color for solid color source"`
+	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
+}
+
+var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
+
+// see colorparse.go for ColorSpec.SetString() method
+
 // ColorSources determine how the color is generated -- used in FillStyle and StrokeStyle
 type ColorSources int32
 
@@ -49,18 +61,6 @@ const (
 	GpY2
 	GradientPointsN
 )
-
-// ColorSpec fully specifies the color for rendering -- used in FillStyle and
-// StrokeStyle
-type ColorSpec struct {
-	Source   ColorSources      `desc:"source of color (solid, gradient)"`
-	Color    Color             `desc:"color for solid color source"`
-	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
-}
-
-var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
-
-// see colorparse.go for ColorSpec.SetString() method
 
 // IsNil tests for nil solid or gradient colors
 func (cs *ColorSpec) IsNil() bool {
@@ -131,7 +131,7 @@ func CopyGradient(dst, src *rasterx.Gradient) {
 
 // RenderColor gets the color for rendering, applying opacity and bounds for
 // gradients
-func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform XFormMatrix2D) interface{} {
+func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform Matrix2D) interface{} {
 	if cs.Source == SolidColor || cs.Gradient == nil {
 		return rasterx.ApplyOpacity(cs.Color, float64(opacity))
 	} else {

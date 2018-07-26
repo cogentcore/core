@@ -542,8 +542,8 @@ func (sf *StyledField) FieldIface(obj interface{}) interface{} {
 		return (*Color)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npt == KiT_ColorSpec:
 		return (*ColorSpec)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
-	case npt == KiT_XFormMatrix2D:
-		return (*XFormMatrix2D)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+	case npt == KiT_Matrix2D:
+		return (*Matrix2D)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npt.Name() == "Value":
 		return (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
 	case npk >= reflect.Int && npk <= reflect.Uint64:
@@ -656,11 +656,11 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", fld.Field.Name, val, val)
 			}
 		}
-	case *XFormMatrix2D:
+	case *Matrix2D:
 		switch valv := val.(type) {
 		case string:
 			fiv.SetString(valv)
-		case *XFormMatrix2D:
+		case *Matrix2D:
 			*fiv = *valv
 		}
 	case *[]float64:
@@ -702,10 +702,10 @@ type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag st
 
 // StyleValueTypes is a map of types that are used as value types in style structures
 var StyleValueTypes = map[reflect.Type]bool{
-	units.KiT_Value:   true,
-	KiT_Color:         true,
-	KiT_ColorSpec:     true,
-	KiT_XFormMatrix2D: true,
+	units.KiT_Value: true,
+	KiT_Color:       true,
+	KiT_ColorSpec:   true,
+	KiT_Matrix2D:    true,
 }
 
 // WalkStyleStruct walks through a struct, calling a function on fields with

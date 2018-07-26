@@ -516,74 +516,74 @@ func (a Vec2D) String() string {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// XFormMatrix2D
+// Matrix2D
 
 // todo: in theory a high-quality SVG implementation should use a 64bit xform
 // matrix, but that is rather inconvenient and unlikely to be relevant here..
 // revisit later
 
-type XFormMatrix2D struct {
+type Matrix2D struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
 
-var KiT_XFormMatrix2D = kit.Types.AddType(&XFormMatrix2D{}, XFormMatrix2DProps)
+var KiT_Matrix2D = kit.Types.AddType(&Matrix2D{}, Matrix2DProps)
 
-var XFormMatrix2DProps = ki.Props{
+var Matrix2DProps = ki.Props{
 	"style-prop": true,
 }
 
-func Identity2D() XFormMatrix2D {
-	return XFormMatrix2D{
+func Identity2D() Matrix2D {
+	return Matrix2D{
 		1, 0,
 		0, 1,
 		0, 0,
 	}
 }
 
-func Translate2D(x, y float32) XFormMatrix2D {
-	return XFormMatrix2D{
+func Translate2D(x, y float32) Matrix2D {
+	return Matrix2D{
 		1, 0,
 		0, 1,
 		x, y,
 	}
 }
 
-func Scale2D(x, y float32) XFormMatrix2D {
-	return XFormMatrix2D{
+func Scale2D(x, y float32) Matrix2D {
+	return Matrix2D{
 		x, 0,
 		0, y,
 		0, 0,
 	}
 }
 
-func Rotate2D(angle float32) XFormMatrix2D {
+func Rotate2D(angle float32) Matrix2D {
 	c := float32(math32.Cos(angle))
 	s := float32(math32.Sin(angle))
-	return XFormMatrix2D{
+	return Matrix2D{
 		c, s,
 		-s, c,
 		0, 0,
 	}
 }
 
-func Shear2D(x, y float32) XFormMatrix2D {
-	return XFormMatrix2D{
+func Shear2D(x, y float32) Matrix2D {
+	return Matrix2D{
 		1, y,
 		x, 1,
 		0, 0,
 	}
 }
 
-func Skew2D(x, y float32) XFormMatrix2D {
-	return XFormMatrix2D{
+func Skew2D(x, y float32) Matrix2D {
+	return Matrix2D{
 		1, math32.Tan(y),
 		math32.Tan(x), 1,
 		0, 0,
 	}
 }
 
-func (a XFormMatrix2D) Multiply(b XFormMatrix2D) XFormMatrix2D {
-	return XFormMatrix2D{
+func (a Matrix2D) Multiply(b Matrix2D) Matrix2D {
+	return Matrix2D{
 		a.XX*b.XX + a.YX*b.XY,
 		a.XX*b.YX + a.YX*b.YY,
 		a.XY*b.XX + a.YY*b.XY,
@@ -593,68 +593,68 @@ func (a XFormMatrix2D) Multiply(b XFormMatrix2D) XFormMatrix2D {
 	}
 }
 
-func (a XFormMatrix2D) TransformVector(x, y float32) (tx, ty float32) {
+func (a Matrix2D) TransformVector(x, y float32) (tx, ty float32) {
 	tx = a.XX*x + a.XY*y
 	ty = a.YX*x + a.YY*y
 	return
 }
 
-func (a XFormMatrix2D) TransformVectorVec2D(v Vec2D) Vec2D {
+func (a Matrix2D) TransformVectorVec2D(v Vec2D) Vec2D {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
 	return Vec2D{tx, ty}
 }
 
-func (a XFormMatrix2D) TransformPoint(x, y float32) (tx, ty float32) {
+func (a Matrix2D) TransformPoint(x, y float32) (tx, ty float32) {
 	tx = a.XX*x + a.XY*y + a.X0
 	ty = a.YX*x + a.YY*y + a.Y0
 	return
 }
 
-func (a XFormMatrix2D) TransformPointVec2D(v Vec2D) Vec2D {
+func (a Matrix2D) TransformPointVec2D(v Vec2D) Vec2D {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return Vec2D{tx, ty}
 }
 
-func (a XFormMatrix2D) TransformPointToInt(x, y float32) (tx, ty int) {
+func (a Matrix2D) TransformPointToInt(x, y float32) (tx, ty int) {
 	tx = int(a.XX*x + a.XY*y + a.X0)
 	ty = int(a.YX*x + a.YY*y + a.Y0)
 	return
 }
 
-func (a XFormMatrix2D) Translate(x, y float32) XFormMatrix2D {
+func (a Matrix2D) Translate(x, y float32) Matrix2D {
 	return Translate2D(x, y).Multiply(a)
 }
 
-func (a XFormMatrix2D) Scale(x, y float32) XFormMatrix2D {
+func (a Matrix2D) Scale(x, y float32) Matrix2D {
 	return Scale2D(x, y).Multiply(a)
 }
 
-func (a XFormMatrix2D) Rotate(angle float32) XFormMatrix2D {
+func (a Matrix2D) Rotate(angle float32) Matrix2D {
 	return Rotate2D(angle).Multiply(a)
 }
 
-func (a XFormMatrix2D) Shear(x, y float32) XFormMatrix2D {
+func (a Matrix2D) Shear(x, y float32) Matrix2D {
 	return Shear2D(x, y).Multiply(a)
 }
 
-func (a XFormMatrix2D) Skew(x, y float32) XFormMatrix2D {
+func (a Matrix2D) Skew(x, y float32) Matrix2D {
 	return Skew2D(x, y).Multiply(a)
 }
 
-func (a XFormMatrix2D) ToRasterx() rasterx.Matrix2D {
+func (a Matrix2D) ToRasterx() rasterx.Matrix2D {
 	return rasterx.Matrix2D{float64(a.XX), float64(a.YX), float64(a.XY), float64(a.YY), float64(a.X0), float64(a.Y0)}
 }
 
 // ExtractRot extracts the rotation component from a given matrix
-func (a XFormMatrix2D) ExtractRot() float32 {
+func (a Matrix2D) ExtractRot() float32 {
 	return math32.Atan2(-a.XY, a.XX)
 }
 
 // ExtractXYScale extracts the X and Y scale factors after undoing any
 // rotation present -- i.e., in the original X, Y coordinates
-func (a XFormMatrix2D) ExtractScale() (scx, scy float32) {
+func (a Matrix2D) ExtractScale() (scx, scy float32) {
 	rot := a.ExtractRot()
 	tx := a.Rotate(-rot)
 	scx, _ = tx.TransformVector(1, 0)
@@ -666,8 +666,39 @@ func (a XFormMatrix2D) ExtractScale() (scx, scy float32) {
 func ParseFloat32(pstr string) (float32, error) {
 	r, err := strconv.ParseFloat(pstr, 32)
 	if err != nil {
-		log.Printf("gi.svg.ParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
+		log.Printf("gi.ParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
 		return float32(0.0), err
+	}
+	return float32(r), nil
+}
+
+// ParseAngle32 returns radians angle from string that can specify units (deg,
+// grad, rad) -- deg is assumed if not specified
+func ParseAngle32(pstr string) (float32, error) {
+	units := "deg"
+	lstr := strings.ToLower(pstr)
+	if strings.Contains(lstr, "deg") {
+		units = "deg"
+		lstr = strings.TrimSuffix(lstr, "deg")
+	} else if strings.Contains(lstr, "grad") {
+		units = "grad"
+		lstr = strings.TrimSuffix(lstr, "grad")
+	} else if strings.Contains(lstr, "rad") {
+		units = "rad"
+		lstr = strings.TrimSuffix(lstr, "rad")
+	}
+	r, err := strconv.ParseFloat(lstr, 32)
+	if err != nil {
+		log.Printf("gi.ParseAngle32: error parsing float32 number from: %v, %v\n", lstr, err)
+		return float32(0.0), err
+	}
+	switch units {
+	case "deg":
+		return float32(r) / 180, nil
+	case "grad":
+		return float32(r) / 200, nil
+	case "rad":
+		return float32(r), nil
 	}
 	return float32(r), nil
 }
@@ -718,8 +749,8 @@ func PointsCheckN(pts []float32, n int, errmsg string) error {
 }
 
 // SetString processes the standard SVG-style transform strings
-func (a *XFormMatrix2D) SetString(str string) error {
-	errmsg := "gi.XFormMatrix2D SetString"
+func (a *Matrix2D) SetString(str string) error {
+	errmsg := "gi.Matrix2D SetString"
 	str = strings.ToLower(strings.TrimSpace(str))
 	*a = Identity2D()
 	if str == "none" {
@@ -729,7 +760,7 @@ func (a *XFormMatrix2D) SetString(str string) error {
 	for {
 		pidx := strings.IndexByte(str, '(')
 		if pidx < 0 {
-			err := fmt.Errorf("gi.XFormMatrix2D SetString: no params for xform: %v\n", str)
+			err := fmt.Errorf("gi.Matrix2D SetString: no params for xform: %v\n", str)
 			log.Println(err)
 			return err
 		}
@@ -755,7 +786,7 @@ func (a *XFormMatrix2D) SetString(str string) error {
 				log.Println(err)
 				return err
 			}
-			*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
+			*a = Matrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
 				log.Println(err)

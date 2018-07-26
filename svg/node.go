@@ -6,6 +6,7 @@ package svg
 
 import (
 	"image"
+	"log"
 	"strings"
 
 	"github.com/goki/gi"
@@ -190,4 +191,23 @@ func (g *SVGNodeBase) Render2D() {
 }
 
 func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+}
+
+// FindSVGURL finds a url element in the parent SVG -- returns nil if not
+// found -- can pass full 'url(#Name)' string
+func (g *SVGNodeBase) FindSVGURL(url string) gi.Node2D {
+	if url == "none" {
+		return nil
+	}
+	psvg := g.ParentSVG()
+	if psvg == nil {
+		return nil
+	}
+	url = strings.TrimPrefix(url, "url(")
+	url = strings.TrimSuffix(url, ")")
+	rv := psvg.FindNamedElement(url)
+	if rv == nil {
+		log.Printf("gi.svg FindSVGURL could not find element named: %v in svg: %v\n", url, psvg.PathUnique())
+	}
+	return rv
 }

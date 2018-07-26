@@ -62,10 +62,10 @@ type Paint struct {
 	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	StrokeStyle StrokeStyle
 	FillStyle   FillStyle
-	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	TextStyle   TextStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	VecEff      VectorEffect  `xml:"vector-effect" desc:"various rendering special effects settings"`
-	XForm       XFormMatrix2D `xml:"transform" desc:"our additions to transform -- pushed to render state"`
+	FontStyle   FontStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	TextStyle   TextStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	VecEff      VectorEffect `xml:"vector-effect" desc:"various rendering special effects settings"`
+	XForm       Matrix2D     `xml:"transform" desc:"our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
 }
@@ -214,7 +214,7 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 // while painting -- a viewport just has one of these
 type RenderState struct {
 	Paint          Paint             `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm          XFormMatrix2D     `desc:"current transform"`
+	XForm          Matrix2D          `desc:"current transform"`
 	Path           rasterx.Path      `desc:"current path"`
 	Raster         *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
 	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
@@ -225,7 +225,7 @@ type RenderState struct {
 	Mask           *image.Alpha      `desc:"current mask"`
 	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
 	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
-	XFormStack     []XFormMatrix2D   `desc:"stack of transforms"`
+	XFormStack     []Matrix2D        `desc:"stack of transforms"`
 	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
 	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
@@ -245,9 +245,9 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 }
 
 // PushXForm pushes current xform onto stack and apply new xform on top of it
-func (rs *RenderState) PushXForm(xf XFormMatrix2D) {
+func (rs *RenderState) PushXForm(xf Matrix2D) {
 	if rs.XFormStack == nil {
-		rs.XFormStack = make([]XFormMatrix2D, 0, 100)
+		rs.XFormStack = make([]Matrix2D, 0, 100)
 	}
 	rs.XFormStack = append(rs.XFormStack, rs.XForm)
 	rs.XForm = xf.Multiply(rs.XForm)

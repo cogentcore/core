@@ -147,8 +147,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						csvg.ViewBox.Min.Y = pts[1]
 						csvg.ViewBox.Size.X = pts[2]
 						csvg.ViewBox.Size.Y = pts[3]
-						// csvg.SetProp("width", units.NewValue(float32(csvg.ViewBox.Size.X), units.Dot))
-						// csvg.SetProp("height", units.NewValue(float32(csvg.ViewBox.Size.Y), units.Dot))
 					case "width":
 						wd := units.Value{}
 						wd.SetString(attr.Value)
@@ -505,6 +503,8 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curPar = curPar.AddNewChild(KiT_Marker, "marker").(gi.Node2D)
 				mrk := curPar.(*Marker)
 				var rx, ry float32
+				szx := float32(3)
+				szy := float32(3)
 				for _, attr := range se.Attr {
 					if mrk.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -514,6 +514,27 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						rx, err = gi.ParseFloat32(attr.Value)
 					case "refY":
 						ry, err = gi.ParseFloat32(attr.Value)
+					case "markerWidth":
+						szx, err = gi.ParseFloat32(attr.Value)
+					case "markerHeight":
+						szy, err = gi.ParseFloat32(attr.Value)
+					case "matrixUnits":
+						if attr.Value == "strokeWidth" {
+							mrk.Units = StrokeWidth
+						} else {
+							mrk.Units = UserSpaceOnUse
+						}
+					case "viewBox":
+						pts := gi.ReadPoints(attr.Value)
+						if len(pts) != 4 {
+							return paramMismatchError
+						}
+						mrk.ViewBox.Min.X = pts[0]
+						mrk.ViewBox.Min.Y = pts[1]
+						mrk.ViewBox.Size.X = pts[2]
+						mrk.ViewBox.Size.Y = pts[3]
+					case "orient":
+						mrk.Orient = attr.Value
 					default:
 						mrk.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -522,6 +543,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 				mrk.RefPos.Set(rx, ry)
+				mrk.Size.Set(szx, szy)
 			case nm == "use":
 				link := gi.XMLAttr("href", se.Attr)
 				itm := curPar.FindNamedElement(link)
