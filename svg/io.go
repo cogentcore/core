@@ -102,9 +102,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	inCSS := false
 	var curCSS *gi.StyleSheet
 	inTxt := false
-	var curTxt *SVGText
+	var curTxt *Text
 	inTspn := false
-	var curTspn *SVGText
+	var curTspn *Text
 	var defPrevPar gi.Node2D // previous parent before a def encountered
 
 	for {
@@ -172,7 +172,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
 			case nm == "g":
-				curPar = curPar.AddNewChild(KiT_SVGGroup, "g").(gi.Node2D)
+				curPar = curPar.AddNewChild(KiT_Group, "g").(gi.Node2D)
 				for _, attr := range se.Attr {
 					if curPar.AsNode2D().SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -362,17 +362,17 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "tspan":
 				fallthrough
 			case nm == "text":
-				var txt *SVGText
+				var txt *Text
 				if se.Name.Local == "text" {
-					txt = curPar.AddNewChild(KiT_SVGText, "txt").(*SVGText)
+					txt = curPar.AddNewChild(KiT_Text, "txt").(*Text)
 					inTxt = true
 					curTxt = txt
 				} else {
 					if inTxt && curTxt != nil {
-						txt = curTxt.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
+						txt = curTxt.AddNewChild(KiT_Text, "tspan").(*Text)
 						txt.Pos = curTxt.Pos
 					} else {
-						txt = curPar.AddNewChild(KiT_SVGText, "tspan").(*SVGText)
+						txt = curPar.AddNewChild(KiT_Text, "tspan").(*Text)
 					}
 					inTspn = true
 					curTspn = txt
@@ -430,7 +430,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "linearGradient":
-				grad := curPar.AddNewChild(KiT_Gradient, "lin-grad").(*Gradient)
+				grad := curPar.AddNewChild(gi.KiT_Gradient, "lin-grad").(*gi.Gradient)
 				for _, attr := range se.Attr {
 					if grad.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -443,7 +443,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
-							if hrg, ok := hr.(*Gradient); ok {
+							if hrg, ok := hr.(*gi.Gradient); ok {
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
@@ -455,7 +455,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "radialGradient":
-				grad := curPar.AddNewChild(KiT_Gradient, "rad-grad").(*Gradient)
+				grad := curPar.AddNewChild(gi.KiT_Gradient, "rad-grad").(*gi.Gradient)
 				for _, attr := range se.Attr {
 					if grad.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -468,7 +468,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
-							if hrg, ok := hr.(*Gradient); ok {
+							if hrg, ok := hr.(*gi.Gradient); ok {
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
@@ -570,8 +570,8 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
-				curPar = curPar.AddNewChild(KiT_SVGFlow, nm).(gi.Node2D)
-				md := curPar.(*SVGFlow)
+				curPar = curPar.AddNewChild(KiT_Flow, nm).(gi.Node2D)
+				md := curPar.(*Flow)
 				md.Class = nm
 				md.FlowType = nm
 				for _, attr := range se.Attr {
@@ -585,8 +585,8 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 			case strings.HasPrefix(nm, "fe"):
 			case strings.HasPrefix(nm, "filter"):
-				curPar = curPar.AddNewChild(KiT_SVGFilter, nm).(gi.Node2D)
-				md := curPar.(*SVGFilter)
+				curPar = curPar.AddNewChild(KiT_Filter, nm).(gi.Node2D)
+				md := curPar.(*Filter)
 				md.Class = nm
 				md.FilterType = nm
 				for _, attr := range se.Attr {

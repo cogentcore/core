@@ -176,8 +176,7 @@ type Node2D interface {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Node2D impl for Node2DBase
-// only need to redefine (override) these methods as necessary
+// Node2D impl for Node2DBase (nil)
 
 func (g *Node2DBase) AsNode2D() *Node2DBase {
 	return g
@@ -193,6 +192,36 @@ func (g *Node2DBase) AsLayout2D() *Layout {
 
 func (g *Node2DBase) AsWidget() *WidgetBase {
 	return nil
+}
+
+func (g *Node2DBase) Init2D() {
+	g.Viewport = g.ParentViewport()
+}
+
+func (g *Node2DBase) Style2D() {
+}
+
+func (g *Node2DBase) Size2D() {
+}
+
+func (g *Node2DBase) Layout2D(parBBox image.Rectangle) {
+}
+
+func (g *Node2DBase) BBox2D() image.Rectangle {
+	return image.ZR
+}
+
+func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+}
+
+func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
+	return image.ZR
+}
+
+func (g *Node2DBase) Render2D() {
+}
+
+func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
@@ -516,33 +545,3 @@ type MetaData2D struct {
 }
 
 var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
-
-func (g *MetaData2D) Init2D() {
-	g.Viewport = g.ParentViewport()
-}
-
-func (g *MetaData2D) Style2D() {
-}
-
-func (g *MetaData2D) Size2D() {
-}
-
-func (g *MetaData2D) Layout2D(parBBox image.Rectangle) {
-}
-
-func (g *MetaData2D) BBox2D() image.Rectangle {
-	return image.ZR
-}
-
-func (g *MetaData2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-}
-
-func (g *MetaData2D) ChildrenBBox2D() image.Rectangle {
-	return image.ZR
-}
-
-func (g *MetaData2D) Render2D() {
-}
-
-func (g *MetaData2D) Move2D(delta image.Point, parBBox image.Rectangle) {
-}

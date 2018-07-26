@@ -39,25 +39,24 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 // XML-based version
 func (cs *ColorSpec) SetString(clrstr string) bool {
 	clrstr = strings.TrimSpace(clrstr)
-	// todo:
-	// if strings.HasPrefix(clrstr, "url(") {
-	// 	val := clrstr[4:]
-	// 	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-	// 	if CurStyleNode2D != nil {
-	// 		ne := CurStyleNode2D.FindNamedElement(val)
-	// 		if ne != nil {
-	// 			if grad, ok := ne.(*Gradient); ok {
-	// 				*cs = grad.Grad
-	// 				return true
-	// 			}
-	// 		}
-	// 	}
-	// 	fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)
-	// 	cs.Gradient = nil
-	// 	cs.Source = SolidColor
-	// 	cs.Color.SetColor(color.Black)
-	// 	return false
-	// }
+	if strings.HasPrefix(clrstr, "url(") {
+		val := clrstr[4:]
+		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
+		if CurStyleNode2D != nil {
+			ne := CurStyleNode2D.FindNamedElement(val)
+			if ne != nil {
+				if grad, ok := ne.(*Gradient); ok {
+					*cs = grad.Grad
+					return true
+				}
+			}
+		}
+		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)
+		cs.Gradient = nil
+		cs.Source = SolidColor
+		cs.Color.SetColor(color.Black)
+		return false
+	}
 	clrstr = strings.ToLower(clrstr)
 	grad := "-gradient"
 	if gidx := strings.Index(clrstr, grad); gidx > 0 {

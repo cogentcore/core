@@ -23,7 +23,7 @@ type SVG struct {
 	gi.Viewport2D
 	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`
 	Pnt     gi.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
-	Defs    SVGGroup `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Defs    Group    `desc:"all defs defined elements go here (gradients, symbols, etc)"`
 	Title   string   `xml:"title" desc:"the title of the svg"`
 	Desc    string   `xml:"desc" desc:"the description of the svg"`
 }
