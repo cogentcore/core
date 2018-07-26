@@ -216,25 +216,26 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 	pdst := g.DefaultStyle2DWidget(stynm, pg)
 	pg.DefStyle = pdst // will use this as starting point for all styles now..
 
-	if vp := pk.AsViewport2D(); vp != nil {
+	if ics := pk.EmbeddedStruct(KiT_Icon); ics != nil {
+		ic := ics.(*Icon)
 		// this is typically an icon -- copy fill and stroke params to it
 		styprops := kit.Types.Properties(g.Type(), true)
 		sp := ki.SubProps(styprops, stynm)
 		if sp != nil {
 			if fill, ok := sp["fill"]; ok {
-				pg.SetProp("fill", fill)
+				ic.SetProp("fill", fill)
 			}
 			if stroke, ok := sp["stroke"]; ok {
-				pg.SetProp("stroke", stroke)
+				ic.SetProp("stroke", stroke)
 			}
 		}
 		sp = ki.SubProps(g.Properties(), stynm)
 		if sp != nil {
 			if fill, ok := sp["fill"]; ok {
-				pg.SetProp("fill", fill)
+				ic.SetProp("fill", fill)
 			}
 			if stroke, ok := sp["stroke"]; ok {
-				pg.SetProp("stroke", stroke)
+				ic.SetProp("stroke", stroke)
 			}
 		}
 	}
@@ -421,8 +422,7 @@ func (g *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 // control -- this starts with parent VpBBox and current delta -- can be
 // called de novo
 func (g *WidgetBase) Move2DTree() {
-	svg := g.This.(Node2D).AsSVGNode()
-	if svg != nil { // no layout for svg
+	if g.HasNoLayout() {
 		return
 	}
 	parBBox := image.ZR
@@ -710,7 +710,7 @@ func (g *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config 
 	config = kit.TypeAndNameList{}
 	icIdx = -1
 	lbIdx = -1
-	if IconNameValid(icnm) {
+	if IconName(icnm).IsValid() {
 		config.Add(KiT_Icon, "icon")
 		icIdx = 0
 		if txt != "" {
@@ -729,9 +729,7 @@ func (g *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config 
 func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := g.Parts.Child(icIdx).(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icnm { // can't use nm b/c config does
-			ic.InitFromName(icnm)
-			ic.UniqueNm = icnm
+		if set, _ := ic.SetIcon(icnm); set { // can't use nm b/c config does
 			g.StylePart(Node2D(ic))
 		}
 	}
@@ -749,7 +747,7 @@ func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
 func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
-	if IconNameValid(icnm) {
+	if IconName(icnm).IsValid() {
 		ick := g.Parts.ChildByName("icon", 0)
 		if ick == nil {
 			return true

@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package svg
 
 import (
 	"image"
 	"strings"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
-// svg_nodes.go contains the SVG specific rendering nodes, except Path which is in path.go
+// nodes.go contains the SVG specific rendering nodes, except Path which is in path.go
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SVGNodeBase
@@ -21,8 +23,8 @@ import (
 // SVGNodeBase is an element within the SVG sub-scenegraph -- does not use
 // layout logic -- just renders into parent SVG viewport
 type SVGNodeBase struct {
-	Node2DBase
-	Pnt Paint `json:"-" xml:"-" desc:"full paint information for this node"`
+	gi.Node2DBase
+	Pnt gi.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
 }
 
 var KiT_SVGNodeBase = kit.Types.AddType(&SVGNodeBase{}, SVGNodeBaseProps)
@@ -36,7 +38,7 @@ func (g *SVGNodeBase) AsSVGNode() *SVGNodeBase {
 }
 
 // Paint satisfies the painter interface
-func (g *SVGNodeBase) Paint() *Paint {
+func (g *SVGNodeBase) Paint() *gi.Paint {
 	return &g.Pnt
 }
 
@@ -49,32 +51,33 @@ func (g *SVGNodeBase) Init2DBase() {
 
 func (g *SVGNodeBase) Init2D() {
 	g.Init2DBase()
+	bitflag.Set(&g.Flag, int(gi.NoLayout))
 }
 
-// Style2DSVG styles the Paint values directly from node properties -- for
-// SVG-style nodes -- no relevant default styling here -- parents can just set
-// props directly as needed
-func Style2DSVG(gii Node2D) {
+// StyleSVG styles the Paint values directly from node properties -- no
+// relevant default styling here -- parents can just set props directly as
+// needed
+func StyleSVG(gii gi.Node2D) {
 	g := gii.AsNode2D()
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
 
-	pntr, ok := gii.(Painter)
+	pntr, ok := gii.(gi.Painter)
 	if !ok {
 		return
 	}
 	pc := pntr.Paint()
 
-	SetCurStyleNode2D(gii)
-	defer SetCurStyleNode2D(nil)
+	gi.SetCurStyleNode2D(gii)
+	defer gi.SetCurStyleNode2D(nil)
 
 	pc.StyleSet = false // this is always first call, restart
 	var pagg *ki.Props
-	pgi, pg := KiToNode2D(gii.Parent())
+	pgi, pg := gi.KiToNode2D(gii.Parent())
 	if pgi != nil {
 		pagg = &pg.CSSAgg
-		if pp, ok := pgi.(Painter); ok {
+		if pp, ok := pgi.(gi.Painter); ok {
 			pc.CopyStyleFrom(pp.Paint())
 			pc.SetStyleProps(pp.Paint(), gii.Properties())
 		} else {
@@ -83,13 +86,13 @@ func Style2DSVG(gii Node2D) {
 	} else {
 		pc.SetStyleProps(nil, gii.Properties())
 	}
-	// pc.SetUnitContext(g.Viewport, Vec2DZero)
+	// pc.SetUnitContext(g.Viewport, gi.Vec2DZero)
 	pc.ToDots() // we always inherit parent's unit context -- SVG sets it once-and-for-all
 	if pagg != nil {
-		AggCSS(&g.CSSAgg, *pagg)
+		gi.AggCSS(&g.CSSAgg, *pagg)
 	}
-	AggCSS(&g.CSSAgg, g.CSS)
-	StyleCSSSVG(gii, g.CSSAgg)
+	gi.AggCSS(&g.CSSAgg, g.CSS)
+	StyleCSS(gii, g.CSSAgg)
 	if pc.HasNoStrokeOrFill() {
 		pc.Off = true
 	} else {
@@ -99,8 +102,8 @@ func Style2DSVG(gii Node2D) {
 
 // ApplyCSSSVG applies css styles to given node, using key to select sub-props
 // from overall properties list
-func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
-	pntr, ok := node.(Painter)
+func ApplyCSSSVG(node gi.Node2D, key string, css ki.Props) bool {
+	pntr, ok := node.(gi.Painter)
 	if !ok {
 		return false
 	}
@@ -115,8 +118,8 @@ func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
 
 	pc := pntr.Paint()
 
-	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
-		if pp, ok := pgi.(Painter); ok {
+	if pgi, _ := gi.KiToNode2D(node.Parent()); pgi != nil {
+		if pp, ok := pgi.(gi.Painter); ok {
 			pc.SetStyleProps(pp.Paint(), pmap)
 		} else {
 			pc.SetStyleProps(nil, pmap)
@@ -127,9 +130,9 @@ func ApplyCSSSVG(node Node2D, key string, css ki.Props) bool {
 	return true
 }
 
-// StyleCSSSVG applies css style properties to given SVG node, parsing
+// StyleCSS applies css style properties to given SVG node, parsing
 // out type, .class, and #name selectors
-func StyleCSSSVG(node Node2D, css ki.Props) {
+func StyleCSS(node gi.Node2D, css ki.Props) {
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
 	ApplyCSSSVG(node, tyn, css)
 	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
@@ -139,7 +142,7 @@ func StyleCSSSVG(node Node2D, css ki.Props) {
 }
 
 func (g *SVGNodeBase) Style2D() {
-	Style2DSVG(g.This.(Node2D))
+	StyleSVG(g.This.(gi.Node2D))
 }
 
 // ParentSVG returns the parent SVG viewport
@@ -176,7 +179,7 @@ func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
 func (g *SVGNodeBase) ComputeBBoxSVG() {
-	g.BBox = g.This.(Node2D).BBox2D()
+	g.BBox = g.This.(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
 	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
@@ -210,7 +213,7 @@ var KiT_SVGGroup = kit.Types.AddType(&SVGGroup{}, nil)
 func (g *SVGGroup) BBoxFromChildren() image.Rectangle {
 	bb := image.ZR
 	for i, kid := range g.Kids {
-		_, gi := KiToNode2D(kid)
+		_, gi := gi.KiToNode2D(kid)
 		if gi != nil {
 			if i == 0 {
 				bb = gi.BBox
@@ -242,9 +245,9 @@ func (g *SVGGroup) Render2D() {
 // 2D rectangle, optionally with rounded corners
 type Rect struct {
 	SVGNodeBase
-	Pos    Vec2D `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
-	Size   Vec2D `xml:"{width,height}" desc:"size of the rectangle"`
-	Radius Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
+	Pos    gi.Vec2D `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
+	Size   gi.Vec2D `xml:"{width,height}" desc:"size of the rectangle"`
+	Radius gi.Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
 
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
@@ -271,8 +274,8 @@ func (g *Rect) Render2D() {
 // 2D circle
 type Circle struct {
 	SVGNodeBase
-	Pos    Vec2D   `xml:"{cx,cy}" desc:"position of the center of the circle"`
-	Radius float32 `xml:"r" desc:"radius of the circle"`
+	Pos    gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the circle"`
+	Radius float32  `xml:"r" desc:"radius of the circle"`
 }
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
@@ -294,8 +297,8 @@ func (g *Circle) Render2D() {
 // 2D ellipse
 type Ellipse struct {
 	SVGNodeBase
-	Pos   Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
-	Radii Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Pos   gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
+	Radii gi.Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
@@ -317,8 +320,8 @@ func (g *Ellipse) Render2D() {
 // a 2D line
 type Line struct {
 	SVGNodeBase
-	Start Vec2D `xml:"{x1,y1}" desc:"position of the start of the line"`
-	End   Vec2D `xml:"{x2,y2}" desc:"position of the end of the line"`
+	Start gi.Vec2D `xml:"{x1,y1}" desc:"position of the start of the line"`
+	End   gi.Vec2D `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
@@ -340,7 +343,7 @@ func (g *Line) Render2D() {
 // 2D Polyline
 type Polyline struct {
 	SVGNodeBase
-	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
+	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
@@ -365,7 +368,7 @@ func (g *Polyline) Render2D() {
 // 2D Polygon
 type Polygon struct {
 	SVGNodeBase
-	Points []Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
+	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
@@ -395,17 +398,17 @@ func (g *Polygon) Render2D() {
 // elements (a tspan is just nested under a parent text)
 type SVGText struct {
 	SVGNodeBase
-	Pos          Vec2D      `xml:"{x,y}" desc:"position of the left, baseline of the text"`
-	Width        float32    `xml:"width" desc:"width of text to render if using word-wrapping"`
-	Text         string     `xml:"text" desc:"text string to render"`
-	Render       TextRender `xml:"-" json:"-" desc:"render version of text"`
-	CharPosX     []float32  `desc:"character positions along X axis, if specified"`
-	CharPosY     []float32  `desc:"character positions along Y axis, if specified"`
-	CharPosDX    []float32  `desc:"character delta-positions along X axis, if specified"`
-	CharPosDY    []float32  `desc:"character delta-positions along Y axis, if specified"`
-	CharRots     []float32  `desc:"character rotations, if specified"`
-	TextLength   float32    `desc:"author's computed text length, if specified -- we attempt to match"`
-	AdjustGlyphs bool       `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+	Pos          gi.Vec2D      `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width        float32       `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text         string        `xml:"text" desc:"text string to render"`
+	Render       gi.TextRender `xml:"-" json:"-" desc:"render version of text"`
+	CharPosX     []float32     `desc:"character positions along X axis, if specified"`
+	CharPosY     []float32     `desc:"character positions along Y axis, if specified"`
+	CharPosDX    []float32     `desc:"character delta-positions along X axis, if specified"`
+	CharPosDY    []float32     `desc:"character delta-positions along Y axis, if specified"`
+	CharRots     []float32     `desc:"character rotations, if specified"`
+	TextLength   float32       `desc:"author's computed text length, if specified -- we attempt to match"`
+	AdjustGlyphs bool          `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
 }
 
 var KiT_SVGText = kit.Types.AddType(&SVGText{}, nil)
@@ -422,7 +425,7 @@ func (g *SVGText) Render2D() {
 	rs.PushXForm(pc.XForm)
 	if len(g.Text) > 0 {
 		orgsz := pc.FontStyle.Size
-		pos := rs.XForm.TransformPointVec2D(Vec2D{g.Pos.X, g.Pos.Y})
+		pos := rs.XForm.TransformPointVec2D(gi.Vec2D{g.Pos.X, g.Pos.Y})
 		rot := rs.XForm.ExtractRot()
 		scx, scy := rs.XForm.ExtractScale()
 		scalex := scx / scy
@@ -430,14 +433,14 @@ func (g *SVGText) Render2D() {
 			scalex = 0
 		}
 		pc.FontStyle.LoadFont(&pc.UnContext, "") // use original size font
-		if !pc.FillStyle.Color.IsNil() && !pc.FillStyle.Color.Color.IsWhite() {
+		if !pc.FillStyle.Color.IsNil() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
 		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)
-		g.Render.Size = g.Render.Size.Mul(Vec2D{scx, scy})
-		if IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == AnchorMiddle {
+		g.Render.Size = g.Render.Size.Mul(gi.Vec2D{scx, scy})
+		if gi.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorMiddle {
 			pos.X -= g.Render.Size.X * .5
-		} else if IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == AnchorEnd {
+		} else if gi.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorEnd {
 			pos.X -= g.Render.Size.X
 		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
@@ -500,7 +503,7 @@ func (g *SVGText) Render2D() {
 // lookup in url
 type Gradient struct {
 	SVGNodeBase
-	Grad ColorSpec `desc:"the color gradient"`
+	Grad gi.ColorSpec `desc:"the color gradient"`
 }
 
 var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
@@ -515,9 +518,27 @@ var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
 type Marker struct {
 	SVGNodeBase
+	RefPos    gi.Vec2D `xml:"{refX,refY}" desc:"reference position"`
+	VertexPos gi.Vec2D `desc:"current vertex position -- this must be set by element that is using this marker prior to calling its render method"`
 }
 
 var KiT_Marker = kit.Types.AddType(&Marker{}, nil)
+
+// MarkerUnits specifies units to use for svg marker elements
+type MarkerUnits int32
+
+const (
+	StrokeWidth MarkerUnits = iota
+	UserSpaceOnUse
+	MarkerUnitsN
+)
+
+//go:generate stringer -type=MarkerUnits
+
+var KiT_MarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, false, gi.StylePropProps, "")
+
+func (ev MarkerUnits) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *MarkerUnits) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // SVGFlow represents SVG flow* elements
 type SVGFlow struct {

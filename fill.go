@@ -36,8 +36,8 @@ type FillStyle struct {
 
 // Defaults initializes default values for paint fill
 func (pf *FillStyle) Defaults() {
-	pf.On = false // svg says fill is off by default
-	pf.SetColor(color.White)
+	pf.On = true // svg says fill is ON by default
+	pf.SetColor(color.Black)
 	pf.Rule = FillRuleNonZero
 	pf.Opacity = 1.0
 }

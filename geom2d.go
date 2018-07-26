@@ -11,6 +11,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/ki"
@@ -661,6 +662,61 @@ func (a XFormMatrix2D) ExtractScale() (scx, scy float32) {
 	return
 }
 
+// ParseFloat32 logs any strconv.ParseFloat errors
+func ParseFloat32(pstr string) (float32, error) {
+	r, err := strconv.ParseFloat(pstr, 32)
+	if err != nil {
+		log.Printf("gi.svg.ParseFloat32: error parsing float32 number from: %v, %v\n", pstr, err)
+		return float32(0.0), err
+	}
+	return float32(r), nil
+}
+
+// ReadPoints reads a set of floating point values from a SVG format number
+// string -- returns a slice or nil if there was an error
+func ReadPoints(pstr string) []float32 {
+	lastIdx := -1
+	var pts []float32
+	lr := ' '
+	for i, r := range pstr {
+		if unicode.IsNumber(r) == false && r != '.' && !(r == '-' && lr == 'e') && r != 'e' {
+			if lastIdx != -1 {
+				s := pstr[lastIdx:i]
+				p, err := ParseFloat32(s)
+				if err != nil {
+					return nil
+				}
+				pts = append(pts, p)
+			}
+			if r == '-' {
+				lastIdx = i
+			} else {
+				lastIdx = -1
+			}
+		} else if lastIdx == -1 {
+			lastIdx = i
+		}
+		lr = r
+	}
+	if lastIdx != -1 && lastIdx != len(pstr) {
+		s := pstr[lastIdx:len(pstr)]
+		p, err := ParseFloat32(s)
+		if err != nil {
+			return nil
+		}
+		pts = append(pts, p)
+	}
+	return pts
+}
+
+// PointsCheckN checks the number of points read and emits an error if not equal to n
+func PointsCheckN(pts []float32, n int, errmsg string) error {
+	if len(pts) != n {
+		return fmt.Errorf("%v incorrect number of points: %v != %v\n", errmsg, len(pts), n)
+	}
+	return nil
+}
+
 // SetString processes the standard SVG-style transform strings
 func (a *XFormMatrix2D) SetString(str string) error {
 	errmsg := "gi.XFormMatrix2D SetString"
@@ -692,28 +748,28 @@ func (a *XFormMatrix2D) SetString(str string) error {
 		if strings.Contains(vals, "deg") {
 			hasDeg = true
 		}
-		pts := SVGReadPoints(vals)
+		pts := ReadPoints(vals)
 		switch cmd {
 		case "matrix":
-			if err := SVGPointsCheckN(pts, 6, errmsg); err != nil {
+			if err := PointsCheckN(pts, 6, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = XFormMatrix2D{pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]}
 		case "translate":
-			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+			if err := PointsCheckN(pts, 2, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = a.Translate(pts[0], pts[1])
 		case "translatex":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = a.Translate(pts[0], 0)
 		case "translatey":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
@@ -728,13 +784,13 @@ func (a *XFormMatrix2D) SetString(str string) error {
 				log.Println(err)
 			}
 		case "scalex":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = a.Scale(pts[0], 1)
 		case "scaley":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
@@ -749,23 +805,23 @@ func (a *XFormMatrix2D) SetString(str string) error {
 			} else if len(pts) == 1 {
 				*a = a.Rotate(ang)
 			} else {
-				return SVGPointsCheckN(pts, 1, errmsg)
+				return PointsCheckN(pts, 1, errmsg)
 			}
 			// todo: rotate-origin?
 		case "skew":
-			if err := SVGPointsCheckN(pts, 2, errmsg); err != nil {
+			if err := PointsCheckN(pts, 2, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = a.Skew(pts[0], pts[1])
 		case "skewx":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
 			*a = a.Skew(pts[0], 0)
 		case "skewy":
-			if err := SVGPointsCheckN(pts, 1, errmsg); err != nil {
+			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				log.Println(err)
 				return err
 			}
@@ -807,63 +863,6 @@ func (gm *Geom2DInt) SizeRect() image.Rectangle {
 func (gm *Geom2DInt) SetRect(r image.Rectangle) {
 	gm.Pos = r.Min
 	gm.Size = r.Size()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// ViewBox defines the SVG viewbox
-
-// ViewBox is used in SVG to define the coordinate system
-type ViewBox struct {
-	Min                 Vec2D                      `desc:"offset or starting point in parent Viewport2D"`
-	Size                Vec2D                      `desc:"size of viewbox within parent Viewport2D"`
-	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"`
-}
-
-// todo: need to implement the viewbox preserve aspect ratio logic!
-
-// Defaults returns viewbox to defaults
-func (vb *ViewBox) Defaults() {
-	vb.Min = Vec2DZero
-	vb.Size = Vec2DZero
-	vb.PreserveAspectRatio.Align = None
-	vb.PreserveAspectRatio.MeetOrSlice = Meet
-}
-
-// ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
-type ViewBoxAlign int32
-
-const (
-	None  ViewBoxAlign = 1 << iota          // do not preserve uniform scaling
-	XMin                                    // align ViewBox.Min with smallest values of Viewport
-	XMid                                    // align ViewBox.Min with midpoint values of Viewport
-	XMax                                    // align ViewBox.Min+Size with maximum values of Viewport
-	XMask ViewBoxAlign = XMin + XMid + XMax // mask for X values -- clear all X before setting new one
-	YMin  ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
-	YMid                                    // align ViewBox.Min with midpoint values of Viewport
-	YMax                                    // align ViewBox.Min+Size with maximum values of Viewport
-	YMask ViewBoxAlign = YMin + YMid + YMax // mask for Y values -- clear all Y before setting new one
-)
-
-// ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
-type ViewBoxMeetOrSlice int32
-
-const (
-	// Mett means the entire ViewBox is visible within Viewport, and it is
-	// scaled up as much as possible to meet the align constraints
-	Meet ViewBoxMeetOrSlice = iota
-
-	// Slice means the entire ViewBox is covered by the ViewBox, and the
-	// ViewBox is scaled down as much as possible, while still meeting the
-	// align constraints
-	Slice
-)
-
-//go:generate stringer -type=ViewBoxMeetOrSlice
-
-// ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
-type ViewBoxPreserveAspectRatio struct {
-	Align       ViewBoxAlign       `svg:"align" desc:"how to align x,y coordinates within viewbox"`
-	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice" desc:"how to scale the view box relative to the viewport"`
 }
 
 ///////////////////////////////////////////////////////////

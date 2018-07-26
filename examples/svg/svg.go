@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"
+	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/mitchellh/go-homedir"
@@ -23,7 +24,7 @@ func main() {
 }
 
 var CurFilename = ""
-var TheSVG *gi.SVGEdit
+var TheSVG *svg.Editor
 var TheZoom *gi.SpinBox
 var TheTransX *gi.SpinBox
 var TheTransY *gi.SpinBox
@@ -86,15 +87,15 @@ func mainrun() {
 	svgrow.SetStretchMaxWidth()
 	svgrow.SetStretchMaxHeight()
 
-	svg := svgrow.AddNewChild(gi.KiT_SVGEdit, "svg").(*gi.SVGEdit)
-	TheSVG = svg
-	svg.InitScale()
-	svg.Fill = true
-	svg.SetProp("background-color", "white")
-	svg.SetProp("width", units.NewValue(float32(width-20), units.Px))
-	svg.SetProp("height", units.NewValue(float32(height-100), units.Px))
-	svg.SetStretchMaxWidth()
-	svg.SetStretchMaxHeight()
+	svge := svgrow.AddNewChild(svg.KiT_Editor, "svg").(*svg.Editor)
+	TheSVG = svge
+	svge.InitScale()
+	svge.Fill = true
+	svge.SetProp("background-color", "white")
+	svge.SetProp("width", units.NewValue(float32(width-20), units.Px))
+	svge.SetProp("height", units.NewValue(float32(height-100), units.Px))
+	svge.SetStretchMaxWidth()
+	svge.SetStretchMaxHeight()
 
 	loads := brow.AddNewChild(gi.KiT_Button, "loadsvg").(*gi.Button)
 	loads.SetText("Load SVG")
@@ -106,15 +107,19 @@ func mainrun() {
 	zmlb := brow.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
 	zmlb.Text = "Zoom: "
 	zmlb.SetProp("align-vert", gi.AlignMiddle)
+	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
 	zoomout.SetIcon("zoom-out")
+	zoomout.Tooltip = "zoom out"
 
 	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	zoom.SetValue(svg.Scale)
+	zoom.SetValue(svge.Scale)
+	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
 
 	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
+	zoomin.Tooltip = "zoom in"
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
 	zoomin.SetIcon("zoom-in")
@@ -126,16 +131,17 @@ func mainrun() {
 	brow.AddNewChild(gi.KiT_Space, "spctr")
 	trlb := brow.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
 	trlb.Text = "Translate: "
+	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("align-vert", gi.AlignMiddle)
 
 	trx := brow.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	trx.SetValue(svg.Trans.X)
+	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
 
 	try := brow.AddNewChild(gi.KiT_SpinBox, "try").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
-	try.SetValue(svg.Trans.Y)
+	try.SetValue(svge.Trans.Y)
 	TheTransY = try
 
 	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -161,14 +167,14 @@ func mainrun() {
 
 	zoomin.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			SetZoom(svg.Scale * 1.1)
+			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()
 		}
 	})
 
 	zoomout.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			SetZoom(svg.Scale * 0.9)
+			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
 		}
 	})
@@ -179,8 +185,8 @@ func mainrun() {
 		win.FullReRender()
 	})
 
-	svg.NodeSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ssvg := send.EmbeddedStruct(gi.KiT_SVGEdit).(*gi.SVGEdit)
+	svge.NodeSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ssvg := send.EmbeddedStruct(svg.KiT_Editor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
 	})

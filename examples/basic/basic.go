@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"
+	_ "github.com/goki/gi/svg"
 )
 
 func main() {

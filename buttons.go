@@ -280,12 +280,10 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	}
 	ic := g.Parts.Child(indIdx).(*Icon)
 	icnm := string(g.Indicator)
-	if IconNameNil(icnm) {
+	if IconName(icnm).IsNil() {
 		icnm = "widget-wedge-down"
 	}
-	if !ic.HasChildren() || ic.UniqueNm != icnm {
-		ic.InitFromName(icnm)
-		ic.UniqueNm = icnm
+	if set, _ := IconName(icnm).SetIcon(ic); set {
 		g.StylePart(Node2D(ic))
 	}
 }
@@ -678,17 +676,11 @@ func (g *CheckBox) ConfigParts() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		onnm := string(g.Icon)
-		if !icon.HasChildren() || icon.UniqueNm != onnm {
-			icon.InitFromName(onnm)
-			icon.UniqueNm = onnm
+		if set, _ := g.Icon.SetIcon(icon); set {
 			g.StylePart(Node2D(icon))
 		}
 		icoff := ist.Child(1).(*Icon)
-		offnm := string(g.IconOff)
-		if !icoff.HasChildren() || icoff.UniqueNm != offnm {
-			icoff.InitFromName(offnm)
-			icoff.UniqueNm = offnm
+		if set, _ := g.IconOff.SetIcon(icoff); set {
 			g.StylePart(Node2D(icoff))
 		}
 	}

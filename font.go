@@ -43,7 +43,7 @@ type FontStyle struct {
 	Variant  FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
 	Deco     TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
 	Shift    BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
-	Face     font.Face       `desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
+	Face     font.Face       `view:"-" desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
 	Height   float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font"`
 	FaceName string          `desc:"name corresponding to Face"`
 	// todo: kerning

@@ -40,6 +40,10 @@ type NodeFlags int32
 const (
 	NodeFlagsNil NodeFlags = NodeFlags(ki.FlagsN) + iota
 
+	// NoLayout means that this node does not participate in the layout
+	// process (Size, Layout, Move) -- set by e.g., SVG nodes
+	NoLayout
+
 	// EventsConnected: this node has been connected to receive events from
 	// the window -- to optimize event processing, connections are typically
 	// only established for visible nodes during render, and disconnected when
@@ -100,6 +104,11 @@ const (
 //go:generate stringer -type=NodeFlags
 
 var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
+
+// HasNoLayout checks if the current node is flagged as not needing layout
+func (g *NodeBase) HasNoLayout() bool {
+	return bitflag.Has(g.Flag, int(NoLayout))
+}
 
 // CanFocus checks if this node can recieve keyboard focus
 func (g *NodeBase) CanFocus() bool {

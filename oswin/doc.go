@@ -30,9 +30,9 @@
 //	package main
 //
 //	import (
-//		"github.com/goki/gi"
 //		"github.com/goki/gi/oswin/driver"
 //		"github.com/goki/gi/oswin"
+//		...
 //	)
 //
 //	func main() {
@@ -41,18 +41,6 @@
 // 	})
 // }
 //
-// func mainrun() {
-// 	width := 1024
-// 	height := 768
-//
-// 	// turn these on to see a traces of various stages of processing..
-// 	// gi.Update2DTrace = true
-// 	// gi.Render2DTrace = true
-// 	// gi.Layout2DTrace = true
-// 	// ki.SignalTrace = true
-//
-// 	win := gi.NewWindow2D("GoGi Widgets Window", width, height, true) // pixel sizes
-//  ...
 //
 // Complete examples can be found in the gi/examples directory.
 //

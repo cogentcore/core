@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"
+	_ "github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
@@ -65,7 +66,7 @@ func mainrun() {
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()
 
-	il := gi.IconListSorted(*gi.CurIconSet)
+	il := gi.TheIconMgr.IconList(true)
 
 	for _, icnm := range il {
 		if icnm == "none" {
@@ -75,7 +76,7 @@ func mainrun() {
 		vb.Lay = gi.LayoutCol
 
 		smico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
-		smico.InitFromName(icnm)
+		smico.SetIcon(icnm)
 		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
 		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
 		smico.SetProp("background-color", color.Transparent)
@@ -84,7 +85,7 @@ func mainrun() {
 		smico.SetProp("align-horiz", gi.AlignCenter)
 
 		ico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
-		ico.InitFromName(icnm)
+		ico.SetIcon(icnm)
 		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
 		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
 		ico.SetProp("background-color", color.Transparent)

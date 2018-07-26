@@ -13,9 +13,8 @@ Within 2D scenegraph, the following are supported
 	* Widget nodes for GUI actions (Buttons, Views etc) -- render directly via Paint
 	* Layouts for placing widgets
 	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
-	* optionally: HTML elements -- the 2D scenegraph can render html documents
-	* SVG container for SVG elements: shapes, paths, etc
-    * Icons are SVG elements
+	* SVG container for SVG elements: shapes, paths, etc (in svg package)
+    * Icons wrappers around an SVG container
 
 Layout Logic
 

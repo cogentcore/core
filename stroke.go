@@ -78,7 +78,7 @@ func (ps *StrokeStyle) Defaults() {
 	ps.MinWidth.Set(.5, units.Dot)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
-	ps.MiterLimit = 4.0
+	ps.MiterLimit = 10.0
 	ps.Opacity = 1.0
 }
 

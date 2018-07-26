@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package svg
 
 import (
 	"fmt"
@@ -12,19 +12,20 @@ import (
 	"strconv"
 	"unicode"
 
+	"github.com/goki/gi"
 	"github.com/goki/ki/kit"
 )
 
 // path.go contains everything associated with the SVG path element -- see
-// svg_nodes.go and svg.go for relevant base and others
+// nodes.go and svg.go for relevant base and others
 
 // 2D Path, using SVG-style data that can render just about anything
 type Path struct {
 	SVGNodeBase
 	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
 	DataStr  string     `xml:"d" desc:"string version of the path data"`
-	MinCoord Vec2D      `desc:"minimum coord in path -- computed in BBox2D"`
-	MaxCoord Vec2D      `desc:"maximum coord in path -- computed in BBox2D"`
+	MinCoord gi.Vec2D   `desc:"minimum coord in path -- computed in BBox2D"`
+	MaxCoord gi.Vec2D   `desc:"maximum coord in path -- computed in BBox2D"`
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, nil)
@@ -120,19 +121,18 @@ func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(e
 func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // PathData encodes the svg path data, using 32-bit floats which are converted
-// into uint32 for path commands, which contain the command as the first 8
-// bits, and the remaining 24 bits are the number of data points following the
-// path command to interpret as numbers.  We don't need that many bits, but
-// keeping 32-bit alignment is probably good and really these things don't
-// need to be crazy compact as it is unlikely to make a relevant diff in size
-// or perf to pack down further
+// into uint32 for path commands, which contain the command as the first 5
+// bits, and the remaining 27 bits are the number of data points following the
+// path command to interpret as numbers.
 type PathData float32
 
 // decode path data as a command and a number of subsequent values for that command
 func (pd PathData) Cmd() (PathCmds, int) {
 	iv := uint32(pd)
-	cmd := PathCmds(iv & 0xFF)       // only the lowest byte for cmd
-	n := int((iv & 0xFFFFFF00) >> 8) // extract the n from next highest byte
+	// cmd := PathCmds(iv & 0x20)       // only the lowest 5 bits (31 values) for command
+	// n := int((iv & 0xFFFFFFD0) >> 5) // extract the n from remainder of bits
+	cmd := PathCmds(iv & 0xFF)       // only the lowest 5 bits (31 values) for command
+	n := int((iv & 0xFFFFFF00) >> 8) // extract the n from remainder of bits
 	return cmd, n
 }
 
@@ -165,7 +165,7 @@ func reflectPt(px, py, rx, ry float32) (x, y float32) {
 
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
+func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.RenderState) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -331,7 +331,7 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 					cx = PathDataNext(data, &i)
 					cy = PathDataNext(data, &i)
 				}
-				ncx, ncy := FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
+				ncx, ncy := gi.FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
 				cx, cy = pc.DrawEllipticalArcPath(rs, ncx, ncy, cx, cy, pcx, pcy, rx, ry, ang, largeArc, sweep)
 			}
 		case PcZ:
@@ -345,9 +345,9 @@ func PathDataRender(data []PathData, pc *Paint, rs *RenderState) {
 }
 
 // update min max for given coord index and coords
-func minMaxUpdate(cx, cy float32, min, max *Vec2D) {
-	c := Vec2D{cx, cy}
-	if *min == Vec2DZero && *max == Vec2DZero {
+func minMaxUpdate(cx, cy float32, min, max *gi.Vec2D) {
+	c := gi.Vec2D{cx, cy}
+	if *min == gi.Vec2DZero && *max == gi.Vec2DZero {
 		*min = c
 		*max = c
 	} else {
@@ -357,7 +357,7 @@ func minMaxUpdate(cx, cy float32, min, max *Vec2D) {
 }
 
 // PathDataMinMax traverses the path data and extracts the min and max point coords
-func PathDataMinMax(pc *Paint, data []PathData) (min, max Vec2D) {
+func PathDataMinMax(pc *gi.Paint, data []PathData) (min, max gi.Vec2D) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -538,7 +538,7 @@ var PathCmdNMap = map[PathCmds]int{
 }
 
 // PathDataValidate validates the path data and emits error messages on log
-func PathDataValidate(pc *Paint, data *[]PathData, errstr string) error {
+func PathDataValidate(pc *gi.Paint, data *[]PathData, errstr string) error {
 	sz := len(*data)
 	if sz == 0 {
 		return nil

@@ -1,0 +1,108 @@
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package svg
+
+import (
+	"fmt"
+
+	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
+)
+
+// Editor supports editing of SVG elements
+type Editor struct {
+	SVG
+	Trans gi.Vec2D `desc:"view translation offset (from dragging)"`
+	Scale float32  `desc:"view scaling (from zooming)"`
+}
+
+var KiT_Editor = kit.Types.AddType(&Editor{}, nil)
+
+// EditorEvents handles svg editing events
+func (svg *Editor) EditorEvents() {
+	svg.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		if ssvg.IsDragging() {
+			del := me.Where.Sub(me.From)
+			ssvg.Trans.X += float32(del.X)
+			ssvg.Trans.Y += float32(del.Y)
+			ssvg.SetTransform()
+			ssvg.SetFullReRender()
+			ssvg.UpdateSig()
+		}
+	})
+	svg.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		ssvg.InitScale()
+		ssvg.Scale += float32(me.NonZeroDelta(false)) / 20
+		if ssvg.Scale <= 0 {
+			ssvg.Scale = 0.01
+		}
+		fmt.Printf("zoom: %v\n", ssvg.Scale)
+		ssvg.SetTransform()
+		ssvg.SetFullReRender()
+		ssvg.UpdateSig()
+	})
+	svg.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		obj := ssvg.FirstContainingPoint(me.Where, true)
+		if me.Action == mouse.Press {
+			if obj != nil {
+				gi.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
+			}
+		}
+	})
+	svg.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		me.SetProcessed()
+		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		obj := ssvg.FirstContainingPoint(me.Where, true)
+		if obj != nil {
+			pos := me.Where
+			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, obj.Name())
+		}
+	})
+}
+
+// InitScale ensures that Scale is initialized and non-zero
+func (svg *Editor) InitScale() {
+	if svg.Scale == 0 {
+		if svg.Viewport != nil {
+			svg.Scale = svg.Viewport.Win.LogicalDPI() / 96.0
+		} else {
+			svg.Scale = 1
+		}
+	}
+}
+
+// SetTransform sets the transform based on Trans and Scale values
+func (svg *Editor) SetTransform() {
+	svg.InitScale()
+	svg.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", svg.Trans.X, svg.Trans.Y, svg.Scale, svg.Scale))
+}
+
+func (svg *Editor) Render2D() {
+	if svg.PushBounds() {
+		svg.EditorEvents()
+		rs := &svg.Render
+		if svg.Fill {
+			svg.FillViewport()
+		}
+		rs.PushXForm(svg.Pnt.XForm)
+		svg.Render2DChildren() // we must do children first, then us!
+		svg.PopBounds()
+		rs.PopXForm()
+		svg.RenderViewport2D() // update our parent image
+	}
+}

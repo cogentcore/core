@@ -24,29 +24,40 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
+// XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
+func XMLAttr(name string, attrs []xml.Attr) string {
+	for _, attr := range attrs {
+		if attr.Name.Local == name {
+			return attr.Value
+		}
+	}
+	return ""
+}
+
 // SetString sets the color spec from a standard CSS-formatted string -- see
 // https://www.w3schools.com/css/css3_gradients.asp -- see UnmarshalXML for
 // XML-based version
 func (cs *ColorSpec) SetString(clrstr string) bool {
 	clrstr = strings.TrimSpace(clrstr)
-	if strings.HasPrefix(clrstr, "url(") {
-		val := clrstr[4:]
-		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-		if CurStyleNode2D != nil {
-			ne := CurStyleNode2D.FindNamedElement(val)
-			if ne != nil {
-				if grad, ok := ne.(*Gradient); ok {
-					*cs = grad.Grad
-					return true
-				}
-			}
-		}
-		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)
-		cs.Gradient = nil
-		cs.Source = SolidColor
-		cs.Color.SetColor(color.Black)
-		return false
-	}
+	// todo:
+	// if strings.HasPrefix(clrstr, "url(") {
+	// 	val := clrstr[4:]
+	// 	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
+	// 	if CurStyleNode2D != nil {
+	// 		ne := CurStyleNode2D.FindNamedElement(val)
+	// 		if ne != nil {
+	// 			if grad, ok := ne.(*Gradient); ok {
+	// 				*cs = grad.Grad
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)
+	// 	cs.Gradient = nil
+	// 	cs.Source = SolidColor
+	// 	cs.Color.SetColor(color.Black)
+	// 	return false
+	// }
 	clrstr = strings.ToLower(clrstr)
 	grad := "-gradient"
 	if gidx := strings.Index(clrstr, grad); gidx > 0 {
@@ -424,7 +435,6 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 			default:
 				errStr := "gi.GolorSpec Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
-				IconAutoLoad = false
 			}
 		case xml.EndElement:
 			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {

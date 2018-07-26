@@ -100,9 +100,6 @@ type Node2D interface {
 	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil
 	AsWidget() *WidgetBase
 
-	// AsSVGNode returns SVGNodeBase if this is a SVGNodeBase-derived node, else nil
-	AsSVGNode() *SVGNodeBase
-
 	// Init2D initializes a node -- sets up event receiving connections etc --
 	// must call InitNodeBase as first step set basic inits including setting
 	// Viewport and connecting node signal to parent vp -- all code here must
@@ -195,10 +192,6 @@ func (g *Node2DBase) AsLayout2D() *Layout {
 }
 
 func (g *Node2DBase) AsWidget() *WidgetBase {
-	return nil
-}
-
-func (g *Node2DBase) AsSVGNode() *SVGNodeBase {
 	return nil
 }
 
@@ -370,13 +363,12 @@ func (g *Node2DBase) Size2DTree() {
 	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
-			gii, _ := KiToNode2D(k)
+			gii, gi := KiToNode2D(k)
 			if gii == nil {
 				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", gii, gii.PathUnique())
 				return false
 			}
-			svg := gii.AsSVGNode() // no size for svg's
-			if svg != nil {
+			if gi.HasNoLayout() {
 				return false
 			}
 			return true
@@ -395,8 +387,7 @@ func (g *Node2DBase) Size2DTree() {
 // Layout2DTree does layout pass -- each node iterates over children for
 // maximum control -- this starts with parent VpBBox -- can be called de novo
 func (g *Node2DBase) Layout2DTree() {
-	svg := g.This.(Node2D).AsSVGNode()
-	if svg != nil { // no layout for svg
+	if g.HasNoLayout() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree")
