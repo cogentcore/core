@@ -12,7 +12,7 @@ import (
 
 // ClipPath is used for holding a path that renders as a clip path
 type ClipPath struct {
-	SVGNodeBase
+	NodeBase
 }
 
 var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)

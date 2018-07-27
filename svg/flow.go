@@ -10,7 +10,7 @@ import (
 
 // Flow represents SVG flow* elements
 type Flow struct {
-	SVGNodeBase
+	NodeBase
 	FlowType string
 }
 

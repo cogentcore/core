@@ -5,20 +5,22 @@
 package svg
 
 import (
+	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/ki/kit"
 )
 
 // Polyline is a SVG multi-line shape
 type Polyline struct {
-	SVGNodeBase
+	NodeBase
 	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) Render2D() {
-	if len(g.Points) < 2 {
+	sz := len(g.Points)
+	if sz < 2 {
 		return
 	}
 	pc := &g.Pnt
@@ -27,6 +29,29 @@ func (g *Polyline) Render2D() {
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
+
+	if mrk := g.Marker("marker-start"); mrk != nil {
+		pt := g.Points[0]
+		ptn := g.Points[1]
+		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
+		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+	}
+	if mrk := g.Marker("marker-end"); mrk != nil {
+		pt := g.Points[sz-1]
+		ptp := g.Points[sz-2]
+		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
+		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+	}
+	if mrk := g.Marker("marker-mid"); mrk != nil {
+		for i := 1; i < sz-1; i++ {
+			pt := g.Points[i]
+			ptp := g.Points[i-1]
+			ptn := g.Points[i+1]
+			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
+			mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+		}
+	}
+
 	g.Render2DChildren()
 	rs.PopXForm()
 }

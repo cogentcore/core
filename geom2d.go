@@ -694,9 +694,9 @@ func ParseAngle32(pstr string) (float32, error) {
 	}
 	switch units {
 	case "deg":
-		return float32(r) / 180, nil
+		return float32(r) * math32.Pi / 180, nil
 	case "grad":
-		return float32(r) / 200, nil
+		return float32(r) * math32.Pi / 200, nil
 	case "rad":
 		return float32(r), nil
 	}
@@ -775,10 +775,6 @@ func (a *Matrix2D) SetString(str string) error {
 			}
 			vals = vals[:eidx]
 		}
-		hasDeg := false
-		if strings.Contains(vals, "deg") {
-			hasDeg = true
-		}
 		pts := ReadPoints(vals)
 		switch cmd {
 		case "matrix":
@@ -827,10 +823,7 @@ func (a *Matrix2D) SetString(str string) error {
 			}
 			*a = a.Scale(1, pts[0])
 		case "rotate":
-			ang := pts[0]
-			if hasDeg {
-				ang *= math.Pi / 180
-			}
+			ang := pts[0] * math32.Pi / 180 // always in degrees in this form
 			if len(pts) == 3 {
 				*a = a.Translate(pts[1], pts[2]).Rotate(ang).Translate(-pts[1], -pts[2])
 			} else if len(pts) == 1 {
@@ -838,7 +831,6 @@ func (a *Matrix2D) SetString(str string) error {
 			} else {
 				return PointsCheckN(pts, 1, errmsg)
 			}
-			// todo: rotate-origin?
 		case "skew":
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
 				log.Println(err)

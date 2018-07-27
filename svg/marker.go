@@ -11,7 +11,7 @@ import (
 
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
 type Marker struct {
-	SVGNodeBase
+	NodeBase
 	RefPos      gi.Vec2D    `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"`
 	Size        gi.Vec2D    `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`
 	Units       MarkerUnits `xml:"markerUnits" desc:"units to use"`
@@ -61,12 +61,9 @@ func (mrk *Marker) RenderMarker(vertexPos gi.Vec2D, vertexAng, strokeWidth float
 	if mrk.ViewBox.Size.IsZero() {
 		mrk.ViewBox.Size = gi.Vec2D{3, 3}
 	}
-	sc := gi.Scale2D(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y)
-	mrk.XForm = sc.Multiply(gi.Rotate2D(ang))
-	//	mrk.XForm = sc.Rotate(ang)
-	roff := sc.TransformPointVec2D(mrk.RefPos)
-	mrk.XForm.X0 = vertexPos.X - roff.X
-	mrk.XForm.Y0 = vertexPos.Y - roff.Y
+	mrk.XForm = gi.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
+	mrk.XForm.X0 += vertexPos.X
+	mrk.XForm.Y0 += vertexPos.Y
 
 	mrk.Pnt.XForm = mrk.XForm
 

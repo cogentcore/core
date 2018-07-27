@@ -11,7 +11,7 @@ import (
 
 // Rect is a SVG rectangle, optionally with rounded corners
 type Rect struct {
-	SVGNodeBase
+	NodeBase
 	Pos    gi.Vec2D `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
 	Size   gi.Vec2D `xml:"{width,height}" desc:"size of the rectangle"`
 	Radius gi.Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`

@@ -15,36 +15,36 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// SVGNodeBase is an element within the SVG sub-scenegraph -- does not use
+// svg.NodeBase is an element within the SVG sub-scenegraph -- does not use
 // layout logic -- just renders into parent SVG viewport
-type SVGNodeBase struct {
+type NodeBase struct {
 	gi.Node2DBase
 	Pnt gi.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
 }
 
-var KiT_SVGNodeBase = kit.Types.AddType(&SVGNodeBase{}, SVGNodeBaseProps)
+var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
-var SVGNodeBaseProps = ki.Props{
+var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
-func (g *SVGNodeBase) AsSVGNode() *SVGNodeBase {
+func (g *NodeBase) AsSVGNode() *NodeBase {
 	return g
 }
 
 // Paint satisfies the painter interface
-func (g *SVGNodeBase) Paint() *gi.Paint {
+func (g *NodeBase) Paint() *gi.Paint {
 	return &g.Pnt
 }
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things
-func (g *SVGNodeBase) Init2DBase() {
+func (g *NodeBase) Init2DBase() {
 	g.Viewport = g.ParentViewport()
 	g.Pnt.Defaults()
 	g.ConnectToViewport()
 }
 
-func (g *SVGNodeBase) Init2D() {
+func (g *NodeBase) Init2D() {
 	g.Init2DBase()
 	bitflag.Set(&g.Flag, int(gi.NoLayout))
 }
@@ -136,12 +136,12 @@ func StyleCSS(node gi.Node2D, css ki.Props) {
 	ApplyCSSSVG(node, idnm, css)
 }
 
-func (g *SVGNodeBase) Style2D() {
+func (g *NodeBase) Style2D() {
 	StyleSVG(g.This.(gi.Node2D))
 }
 
 // ParentSVG returns the parent SVG viewport
-func (g *SVGNodeBase) ParentSVG() *SVG {
+func (g *NodeBase) ParentSVG() *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
@@ -152,35 +152,35 @@ func (g *SVGNodeBase) ParentSVG() *SVG {
 	return nil
 }
 
-func (g *SVGNodeBase) Size2D() {
+func (g *NodeBase) Size2D() {
 }
 
-func (g *SVGNodeBase) Layout2D(parBBox image.Rectangle) {
+func (g *NodeBase) Layout2D(parBBox image.Rectangle) {
 }
 
-func (g *SVGNodeBase) BBox2D() image.Rectangle {
+func (g *NodeBase) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	return rs.LastRenderBBox
 }
 
-func (g *SVGNodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+func (g *NodeBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
-func (g *SVGNodeBase) ChildrenBBox2D() image.Rectangle {
+func (g *NodeBase) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
 }
 
 // ComputeBBoxSVG is called by default in render to compute bounding boxes for
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
-func (g *SVGNodeBase) ComputeBBoxSVG() {
+func (g *NodeBase) ComputeBBoxSVG() {
 	g.BBox = g.This.(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
 	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
 }
 
-func (g *SVGNodeBase) Render2D() {
+func (g *NodeBase) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
@@ -190,24 +190,51 @@ func (g *SVGNodeBase) Render2D() {
 	rs.PopXForm()
 }
 
-func (g *SVGNodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (g *NodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 // FindSVGURL finds a url element in the parent SVG -- returns nil if not
 // found -- can pass full 'url(#Name)' string
-func (g *SVGNodeBase) FindSVGURL(url string) gi.Node2D {
+func (g *NodeBase) FindSVGURL(url string) gi.Node2D {
 	if url == "none" {
-		return nil
-	}
-	psvg := g.ParentSVG()
-	if psvg == nil {
 		return nil
 	}
 	url = strings.TrimPrefix(url, "url(")
 	url = strings.TrimSuffix(url, ")")
-	rv := psvg.FindNamedElement(url)
+	rv := g.FindNamedElement(url)
 	if rv == nil {
-		log.Printf("gi.svg FindSVGURL could not find element named: %v in svg: %v\n", url, psvg.PathUnique())
+		log.Printf("gi.svg FindSVGURL could not find element named: %v in parents of svg el: %v\n", url, g.PathUnique())
 	}
 	return rv
+}
+
+// Marker checks for a marker property of given name, or generic "marker"
+// type, and if set, attempts to find that marker and return it
+func (g *NodeBase) Marker(marker string) *Marker {
+	ms, ok := g.Props[marker]
+	if !ok {
+		ms, ok = g.Props["marker"]
+		if !ok {
+			return nil
+		}
+	}
+	mnm, ok := ms.(string)
+	if !ok {
+		mrk, ok := ms.(*Marker)
+		if !ok {
+			log.Printf("gi.svg Marker property should be a string url or pointer to Marker element, instead is: %T\n", ms)
+			return nil
+		}
+		return mrk
+	}
+	mrkn := g.FindSVGURL(mnm)
+	if mrkn != nil {
+		mrk, ok := mrkn.(*Marker)
+		if !ok {
+			log.Printf("gi.svg Found element named: %v but isn't a Marker type, instead is: %T", mnm, mrkn)
+			return nil
+		}
+		return mrk
+	}
+	return nil
 }

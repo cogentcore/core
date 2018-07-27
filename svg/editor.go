@@ -47,7 +47,6 @@ func (svg *Editor) EditorEvents() {
 		if ssvg.Scale <= 0 {
 			ssvg.Scale = 0.01
 		}
-		fmt.Printf("zoom: %v\n", ssvg.Scale)
 		ssvg.SetTransform()
 		ssvg.SetFullReRender()
 		ssvg.UpdateSig()
@@ -57,7 +56,7 @@ func (svg *Editor) EditorEvents() {
 		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
 		obj := ssvg.FirstContainingPoint(me.Where, true)
-		if me.Action == mouse.Press {
+		if me.Action == mouse.Release && me.Button == mouse.Right {
 			if obj != nil {
 				gi.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
 			}
@@ -70,7 +69,8 @@ func (svg *Editor) EditorEvents() {
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if obj != nil {
 			pos := me.Where
-			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, obj.Name())
+			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
+			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, ttxt)
 		}
 	})
 }

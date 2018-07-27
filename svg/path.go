@@ -6,7 +6,6 @@ package svg
 
 import (
 	"fmt"
-	"image"
 	"log"
 	"math"
 	"strconv"
@@ -19,7 +18,7 @@ import (
 
 // Path renders SVG data sequences that can render just about anything
 type Path struct {
-	SVGNodeBase
+	NodeBase
 	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
 	DataStr  string     `xml:"d" desc:"string version of the path data"`
 	MinCoord gi.Vec2D   `desc:"minimum coord in path -- computed in BBox2D"`
@@ -41,44 +40,47 @@ func (g *Path) SetData(data string) error {
 	return err
 }
 
-func (g *Path) BBox2D() image.Rectangle {
-	// todo: cache values, only update when path is updated..
-	rs := &g.Viewport.Render
-	g.MinCoord, g.MaxCoord = PathDataMinMax(g.Data)
-	bb := g.Pnt.BoundingBox(rs, g.MinCoord.X, g.MinCoord.Y, g.MaxCoord.X, g.MaxCoord.Y)
-	return bb
-}
-
 func (g *Path) Render2D() {
-	if len(g.Data) < 2 {
+	sz := len(g.Data)
+	if sz < 2 {
 		return
 	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)
 	PathDataRender(g.Data, pc, rs)
-	g.ComputeBBoxSVG()
 	pc.FillStrokeClear(rs)
+	g.ComputeBBoxSVG()
 
-	if ms, ok := g.Props["marker-start"]; ok {
+	if mrk := g.Marker("marker-start"); mrk != nil {
+		// todo: could look for close-path at end and find angle from there..
 		stv, ang := PathDataStart(g.Data)
-		mrkn := g.FindSVGURL(ms.(string))
-		if mrkn != nil {
-			if mrk, ok := mrkn.(*Marker); ok {
-				mrk.RenderMarker(stv, ang, g.Pnt.StrokeStyle.Width.Dots)
-			}
-		}
+		mrk.RenderMarker(stv, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if me, ok := g.Props["marker-end"]; ok {
+	if mrk := g.Marker("marker-end"); mrk != nil {
 		env, ang := PathDataEnd(g.Data)
-		mrkn := g.FindSVGURL(me.(string))
-		if mrkn != nil {
-			if mrk, ok := mrkn.(*Marker); ok {
-				mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
-			}
-		}
+		mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-
+	if mrk := g.Marker("marker-mid"); mrk != nil {
+		var ptm2, ptm1, pt gi.Vec2D
+		gotidx := 0
+		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
+			ptm2 = ptm1
+			ptm1 = pt
+			pt = gi.Vec2D{cx, cy}
+			if gotidx < 2 {
+				gotidx++
+				return true
+			}
+			if idx >= sz-3 { // todo: this is approximate...
+				return false
+			}
+			ang := 0.5 * (math32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + math32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
+			mrk.RenderMarker(ptm1, ang, g.Pnt.StrokeStyle.Width.Dots)
+			gotidx++
+			return true
+		})
+	}
 	g.Render2DChildren()
 	rs.PopXForm()
 }
@@ -582,6 +584,7 @@ func PathDataStart(data []PathData) (vec gi.Vec2D, ang float32) {
 			return false // stop
 		}
 		vec = c
+		gotSt = true
 		return true
 	})
 	return
@@ -594,7 +597,6 @@ func PathDataEnd(data []PathData) (vec gi.Vec2D, ang float32) {
 		c := gi.Vec2D{cx, cy}
 		if gotSome {
 			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
-			fmt.Printf("c: %v vec: %v ang: %v\n", c, vec, ang)
 		}
 		vec = c
 		gotSome = true

@@ -606,6 +606,9 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case strings.HasPrefix(nm, "fe"):
+				fallthrough
+			case strings.HasPrefix(nm, "path-effect"):
+				fallthrough
 			case strings.HasPrefix(nm, "filter"):
 				curPar = curPar.AddNewChild(KiT_Filter, nm).(gi.Node2D)
 				md := curPar.(*Filter)

@@ -11,7 +11,7 @@ import (
 
 // Circle is a SVG circle
 type Circle struct {
-	SVGNodeBase
+	NodeBase
 	Pos    gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the circle"`
 	Radius float32  `xml:"r" desc:"radius of the circle"`
 }

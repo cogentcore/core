@@ -15,7 +15,7 @@ import (
 // Text renders SVG text-- it handles both text and tspan elements (a tspan is
 // just nested under a parent text)
 type Text struct {
-	SVGNodeBase
+	NodeBase
 	Pos          gi.Vec2D      `xml:"{x,y}" desc:"position of the left, baseline of the text"`
 	Width        float32       `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text         string        `xml:"text" desc:"text string to render"`

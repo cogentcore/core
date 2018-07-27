@@ -10,7 +10,7 @@ import (
 
 // Filter represents SVG filter* elements
 type Filter struct {
-	SVGNodeBase
+	NodeBase
 	FilterType string
 }
 

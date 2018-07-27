@@ -5,13 +5,14 @@
 package svg
 
 import (
+	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/ki/kit"
 )
 
 // Polygon is a SVG polygon
 type Polygon struct {
-	SVGNodeBase
+	NodeBase
 	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
@@ -27,6 +28,29 @@ func (g *Polygon) Render2D() {
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
+
+	if mrk := g.Marker("marker-start"); mrk != nil {
+		pt := g.Points[0]
+		ptn := g.Points[1]
+		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
+		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+	}
+	if mrk := g.Marker("marker-end"); mrk != nil {
+		pt := g.Points[sz-1]
+		ptp := g.Points[sz-2]
+		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
+		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+	}
+	if mrk := g.Marker("marker-mid"); mrk != nil {
+		for i := 1; i < sz-1; i++ {
+			pt := g.Points[i]
+			ptp := g.Points[i-1]
+			ptn := g.Points[i+1]
+			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
+			mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
+		}
+	}
+
 	g.Render2DChildren()
 	rs.PopXForm()
 }

@@ -14,7 +14,7 @@ import (
 // Group groups together SVG elements -- doesn't do much but provide a
 // locus for properties etc
 type Group struct {
-	SVGNodeBase
+	NodeBase
 }
 
 var KiT_Group = kit.Types.AddType(&Group{}, nil)

@@ -11,7 +11,7 @@ import (
 
 // Ellipse is a SVG ellipse
 type Ellipse struct {
-	SVGNodeBase
+	NodeBase
 	Pos   gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
 	Radii gi.Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }

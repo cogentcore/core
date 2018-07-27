@@ -517,7 +517,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm))
+	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 
@@ -536,9 +536,9 @@ func (pc *Paint) fill(rs *RenderState) {
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if pc.FillStyle.Color.Source == RadialGradient {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	} else {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
+		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	}
 	rf.Draw()
 	rf.Clear()
