@@ -100,10 +100,9 @@ type Node2D interface {
 	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil
 	AsWidget() *WidgetBase
 
-	// Init2D initializes a node -- sets up event receiving connections etc --
-	// must call InitNodeBase as first step set basic inits including setting
-	// Viewport and connecting node signal to parent vp -- all code here must
-	// be robust to being called repeatedly
+	// Init2D initializes a node -- grabs active Viewport etc -- must call
+	// InitNodeBase as first step set basic inits including setting Viewport
+	// -- all code here must be robust to being called repeatedly
 	Init2D()
 
 	// Style2D: In a MeFirst downward pass, all properties are cached out in

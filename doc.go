@@ -14,7 +14,7 @@ The 2D scenegraph supports:
 	* Layouts for placing widgets, which are also container nodes
 	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
 	* svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG suport
-    * Icon is a wrapper around an SVG -- any SVG icon can be used
+	* Icon is a wrapper around an SVG -- any SVG icon can be used
 
 Layout Logic
 
@@ -92,12 +92,7 @@ See giv sub-package for all the View elements
 SVG for Icons, Displays, etc
 
 SVG (Structured Vector Graphics) is used icons, and for rendering any kind of
-graphical output (drawing a graph, dial, etc).
-
-SVGNodeBase is the base type for all SVG elements -- unlike Widget nodes, SVG
-nodes do not use layout logic, and just draw directly into a parent SVG
-viewport, with cumulative transforms determining drawing position, etc.  The
-BBox values are only valid after rendering for these nodes.
+graphical output (drawing a graph, dial, etc).  See svg sub-package.
 
 Overlay
 
