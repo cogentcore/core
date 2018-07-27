@@ -12,15 +12,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// todo: manual
-// ValueView returns the ValueView representation for the icon name --
-// presents a chooser
-// func (inm IconName) ValueView() ValueView {
-// 	vv := IconValueView{}
-// 	vv.Init(&vv)
-// 	return &vv
-// }
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  IconValueView
 

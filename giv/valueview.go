@@ -81,6 +81,13 @@ func ToValueView(it interface{}) ValueView {
 	nptyp := kit.NonPtrType(typ)
 	typrops := kit.Types.Properties(typ, false) // don't make
 	vk := typ.Kind()
+
+	if nptyp == reflect.TypeOf(gi.IconName("")) {
+		vv := IconValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
+
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
 		if kit.Enums.TypeRegistered(nptyp) { // todo: bitfield
@@ -153,6 +160,12 @@ func ToValueView(it interface{}) ValueView {
 			return &vv
 		}
 	case vk == reflect.Struct:
+		// note: we need to handle these here b/c cannot define new methods for gi types
+		if nptyp == gi.KiT_Color {
+			vv := ColorValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 		inline := false
 		if typrops != nil {
 			inprop, ok := typrops["inline"]

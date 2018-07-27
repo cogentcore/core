@@ -425,11 +425,3 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
 }
-
-// todo: need to handle manually
-// // This registers the color value view as the view for Color types
-// func (cl gi.Color) ValueView() ValueView {
-// 	vv := ColorValueView{}
-// 	vv.Init(&vv)
-// 	return &vv
-// }
