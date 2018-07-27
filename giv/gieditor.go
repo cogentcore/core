@@ -38,7 +38,7 @@ func GoGiEditor(obj ki.Ki) {
 	title.SetStretchMaxWidth()
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(KiT_SplitView, "split").(*SplitView)
+	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 	split.Dim = gi.X
 
 	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)

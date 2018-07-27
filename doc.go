@@ -5,16 +5,16 @@
 /*
 Package Gi (GoGi) provides a Graphical Interface based on GoKi Tree Node structs
 
-2D and 3D scenegraphs supported, each rendering to respective Viewport2D or 3D
+2D and 3D (TBD) scenegraphs supported, each rendering to respective Viewport
 which in turn can be integrated within the other type of scenegraph.
 
-Within 2D scenegraph, the following are supported
+The 2D scenegraph supports:
 
-	* Widget nodes for GUI actions (Buttons, Views etc) -- render directly via Paint
-	* Layouts for placing widgets
+	* Widget nodes for GUI actions (Buttons, Menus etc) -- render directly via Paint
+	* Layouts for placing widgets, which are also container nodes
 	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
-	* SVG container for SVG elements: shapes, paths, etc (in svg package)
-    * Icons wrappers around an SVG container
+	* svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG suport
+    * Icon is a wrapper around an SVG -- any SVG icon can be used
 
 Layout Logic
 

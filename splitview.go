@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package gi
 
 import (
 	"image"
 
-	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -28,10 +27,10 @@ import (
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
 type SplitView struct {
-	gi.PartsWidgetBase
+	PartsWidgetBase
 	Splits      []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
 	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
-	Dim         gi.Dims2D `desc:"dimension along which to split the space"`
+	Dim         Dims2D    `desc:"dimension along which to split the space"`
 }
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
@@ -133,7 +132,7 @@ func (g *SplitView) SetSplitsAction(idx int, nwval float32) {
 }
 
 func (g *SplitView) Init2D() {
-	g.Parts.Lay = gi.LayoutNil
+	g.Parts.Lay = LayoutNil
 	g.Init2DWidget()
 	g.UpdateSplits()
 	g.ConfigSplitters()
@@ -142,12 +141,12 @@ func (g *SplitView) Init2D() {
 func (g *SplitView) ConfigSplitters() {
 	sz := len(g.Kids)
 	mods, updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
-	odim := gi.OtherDim(g.Dim)
+	odim := OtherDim(g.Dim)
 	spc := g.Sty.BoxSpace()
 	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
 	osz := float32(50.0)
 	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
-	spicon := gi.IconName("widget-handle-circles")
+	spicon := IconName("widget-handle-circles")
 	for i, spk := range g.Parts.Children() {
 		sp := spk.(*Splitter)
 		sp.Defaults()
@@ -162,7 +161,7 @@ func (g *SplitView) ConfigSplitters() {
 		sp.Snap = false
 		if mods {
 			sp.SliderSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.SliderValueChanged) {
+				if sig == int64(SliderValueChanged) {
 					spr, _ := recv.EmbeddedStruct(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
 					spr.SetSplitsAction(i, spl.Value)
@@ -190,7 +189,7 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	handsz := float32(10.0)
 
 	sz := len(g.Kids)
-	odim := gi.OtherDim(g.Dim)
+	odim := OtherDim(g.Dim)
 	size := g.LayData.AllocSize.Dim(g.Dim)
 	avail := size - handsz*float32(sz-1)
 	osz := g.LayData.AllocSize.Dim(odim)
@@ -198,11 +197,11 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 	handval := 0.6 * handsz / size
 
 	for i, sp := range g.Splits {
-		gis := g.Kids[i].(gi.Node2D).AsWidget()
+		gis := g.Kids[i].(Node2D).AsWidget()
 		if gis == nil {
 			continue
 		}
-		if gis.TypeEmbeds(gi.KiT_Frame) {
+		if gis.TypeEmbeds(KiT_Frame) {
 			gis.SetReRenderAnchor()
 		}
 		size := sp * avail
@@ -228,7 +227,7 @@ func (g *SplitView) Render2D() {
 	}
 	if g.PushBounds() {
 		for i, kid := range g.Kids {
-			gii, _ := gi.KiToNode2D(kid)
+			gii, _ := KiToNode2D(kid)
 			if gii != nil {
 				sp := g.Splits[i]
 				if sp <= 0 {
@@ -249,7 +248,7 @@ func (g *SplitView) Render2D() {
 // SplitView, with draggable resizing of the splitter -- parent is Parts
 // layout of the SplitView -- based on SliderBase
 type Splitter struct {
-	gi.SliderBase
+	SliderBase
 }
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
@@ -257,8 +256,8 @@ var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 var SplitterProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(0, units.Px),
-	"background-color": &gi.Prefs.BackgroundColor,
-	"color":            &gi.Prefs.FontColor,
+	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.FontColor,
 	"#icon": ki.Props{
 		"max-width":  units.NewValue(1, units.Em),
 		"max-height": units.NewValue(5, units.Em),
@@ -266,30 +265,30 @@ var SplitterProps = ki.Props{
 		"min-height": units.NewValue(5, units.Em),
 		"margin":     units.NewValue(0, units.Px),
 		"padding":    units.NewValue(0, units.Px),
-		"vert-align": gi.AlignMiddle,
-		"fill":       &gi.Prefs.IconColor,
-		"stroke":     &gi.Prefs.FontColor,
+		"vert-align": AlignMiddle,
+		"fill":       &Prefs.IconColor,
+		"stroke":     &Prefs.FontColor,
 	},
-	gi.SliderSelectors[gi.SliderActive]: ki.Props{},
-	gi.SliderSelectors[gi.SliderInactive]: ki.Props{
+	SliderSelectors[SliderActive]: ki.Props{},
+	SliderSelectors[SliderInactive]: ki.Props{
 		"border-color": "highlight-50",
 		"color":        "highlight-50",
 	},
-	gi.SliderSelectors[gi.SliderHover]: ki.Props{
+	SliderSelectors[SliderHover]: ki.Props{
 		"background-color": "highlight-10",
 	},
-	gi.SliderSelectors[gi.SliderFocus]: ki.Props{
+	SliderSelectors[SliderFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
 		"background-color": "samelight-50",
 	},
-	gi.SliderSelectors[gi.SliderDown]: ki.Props{},
-	gi.SliderSelectors[gi.SliderValue]: ki.Props{
-		"border-color":     &gi.Prefs.IconColor,
-		"background-color": &gi.Prefs.IconColor,
+	SliderSelectors[SliderDown]: ki.Props{},
+	SliderSelectors[SliderValue]: ki.Props{
+		"border-color":     &Prefs.IconColor,
+		"background-color": &Prefs.IconColor,
 	},
-	gi.SliderSelectors[gi.SliderBox]: ki.Props{
-		"border-color":     &gi.Prefs.BackgroundColor,
-		"background-color": &gi.Prefs.BackgroundColor,
+	SliderSelectors[SliderBox]: ki.Props{
+		"border-color":     &Prefs.BackgroundColor,
+		"background-color": &Prefs.BackgroundColor,
 	},
 }
 
@@ -314,12 +313,12 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 		g.ConfigParts()
 	}
 	if g.Icon.IsValid() && g.Parts.HasChildren() {
-		ic := g.Parts.ChildByType(gi.KiT_Icon, true, 0).(*gi.Icon)
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic != nil {
 			mrg := g.Sty.Layout.Margin.Dots
 			pad := g.Sty.Layout.Padding.Dots
 			spc := mrg + pad
-			odim := gi.OtherDim(g.Dim)
+			odim := OtherDim(g.Dim)
 			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.45*g.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
 			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThSize)
@@ -332,16 +331,16 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 }
 
 func (g *Splitter) Style2D() {
-	bitflag.Clear(&g.Flag, int(gi.CanFocus))
+	bitflag.Clear(&g.Flag, int(CanFocus))
 	g.Style2DWidget()
-	pst := &(g.Par.(gi.Node2D).AsWidget().Sty)
-	for i := 0; i < int(gi.SliderStatesN); i++ {
+	pst := &(g.Par.(Node2D).AsWidget().Sty)
+	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Sty)
-		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(gi.SliderSelectors[i]))
+		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
 		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
-	gi.SliderFields.Style(g, nil, g.Props)
-	gi.SliderFields.ToDots(g, &g.Sty.UnContext)
+	SliderFields.Style(g, nil, g.Props)
+	SliderFields.ToDots(g, &g.Sty.UnContext)
 	g.ThSize = g.ThumbSize.Dots
 	g.ConfigParts()
 }
@@ -364,7 +363,7 @@ func (g *Splitter) Layout2D(parBBox image.Rectangle) {
 
 func (g *Splitter) UpdateSplitterPos() {
 	pos := int(g.Pos)
-	if g.Dim == gi.X {
+	if g.Dim == X {
 		g.VpBBox = image.Rect(pos, g.VpBBox.Min.Y, pos+10, g.VpBBox.Max.Y)
 		g.WinBBox = image.Rect(pos, g.WinBBox.Min.Y, pos+10, g.WinBBox.Max.Y)
 	} else {
@@ -378,19 +377,19 @@ func (g *Splitter) Render2D() {
 	win := vp.Win
 	g.SliderEvents()
 	if g.IsDragging() {
-		ic := g.Parts.ChildByType(gi.KiT_Icon, true, 0).(*gi.Icon)
+		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
 		if ic == nil {
 			return
 		}
 		ovk := win.OverlayVp.ChildByName(g.UniqueName(), 0)
-		var ovb *gi.Bitmap
+		var ovb *Bitmap
 		if ovk == nil {
-			ovb = &gi.Bitmap{}
+			ovb = &Bitmap{}
 			ovb.SetName(g.UniqueName())
 			win.OverlayVp.AddChild(ovb)
 			ovk = ovb.This
 		}
-		ovb = ovk.(*gi.Bitmap)
+		ovb = ovk.(*Bitmap)
 		ovb.GrabRenderFrom(ic)
 		ovb.LayData = ic.LayData // copy
 		g.UpdateSplitterPos()
@@ -426,9 +425,9 @@ func (g *Splitter) Render2DDefaultStyle() {
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
-		pos := gi.NewVec2DFmPoint(g.VpBBox.Min)
-		pos.SetSubDim(gi.OtherDim(g.Dim), 10.0)
-		sz := gi.NewVec2DFmPoint(g.VpBBox.Size())
+		pos := NewVec2DFmPoint(g.VpBBox.Min)
+		pos.SetSubDim(OtherDim(g.Dim), 10.0)
+		sz := NewVec2DFmPoint(g.VpBBox.Size())
 		g.RenderBoxImpl(pos, sz, 0)
 	}
 }
@@ -436,9 +435,9 @@ func (g *Splitter) Render2DDefaultStyle() {
 func (g *Splitter) FocusChanged2D(gotFocus bool) {
 	// fmt.Printf("focus changed %v\n", gotFocus)
 	if gotFocus {
-		g.SetSliderState(gi.SliderFocus)
+		g.SetSliderState(SliderFocus)
 	} else {
-		g.SetSliderState(gi.SliderActive) // lose any hover state but whatever..
+		g.SetSliderState(SliderActive) // lose any hover state but whatever..
 	}
 	g.UpdateSig()
 }

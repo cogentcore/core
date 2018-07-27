@@ -91,14 +91,19 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
+* add select to sliceview
+* use in IconView to select icons, and in fileview for favorites -- stateful fileview
+* and selector for different standard keyfun maps in prefs
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
+* search for structtableview, treeview
+* DND and copy/paste for structtableview
+
 * add margin for para in text
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away?
 
 * CSSAgg needs a tag for no-inline -- don't inline its map ever
 * also, inline choice could be smarter if we knew what was in the map, but...
-
-* selector for different standard keyfun maps..
 
 * bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
   general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
@@ -108,16 +113,14 @@ Currently at an **alpha** level release:
   field to be int64..  for 32bit case, not that big a deal, and for most
   user-facing cases, int32 is sufficient, so focus on that case??
 
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
-
-* search for structtableview, treeview
-* DND and copy/paste for structtableview
-
-* scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
+* scroll should go to the sub-widget first before going to the layout: add a
+  First and Last event signal in addition to the regular one, plus registering
+  for each.
+* drag should be statefull -- only drag current item -- logic is in there but not working properly
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?
 
-* add MenuBar / Toolbar -- just a layout really, with some styling?
+* add MenuBar / Toolbar -- just a layout really, with some styling..
 
 * main menu (mac, other platforms?)
 
@@ -140,10 +143,6 @@ Currently at an **alpha** level release:
 * really want an additional spacing parameter on layout -- needs to be
   separate from margin / padding which just apply to the frame-like property
   -- easy
-
-* add new TableGrid widget that combines a Frame Grid Layout with a top row of
-  header action labels that just grab the sizes from the grid, and also supports clicking to
-  select sort order
 
 * grid not using spans
 

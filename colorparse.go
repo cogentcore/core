@@ -160,7 +160,7 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 			if len(cs.Gradient.Stops) > stopIdx {
 				stop = &(cs.Gradient.Stops[stopIdx])
 			} else {
-				stop = &rasterx.GradStop{Opacity: 1.0}
+				stop = &rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
 			}
 			if stopIdx == 0 {
 				prevColor = cs.Color // base color
@@ -221,7 +221,7 @@ func (cs *ColorSpec) parseRadialGrad(pars string) bool {
 			if len(cs.Gradient.Stops) > stopIdx {
 				stop = &(cs.Gradient.Stops[stopIdx])
 			} else {
-				stop = &rasterx.GradStop{Opacity: 1.0}
+				stop = &rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
 			}
 			if stopIdx == 0 {
 				prevColor = cs.Color // base color
@@ -389,7 +389,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					cs.Gradient.Points[3] = cs.Gradient.Points[1]
 				}
 			case "stop":
-				stop := rasterx.GradStop{Opacity: 1.0}
+				stop := rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
