@@ -930,7 +930,7 @@ func (w *Window) EventLoop() {
 						}
 					}
 				case KeyFunGoGiEditor:
-					GoGiEditorOf(w.Viewport.This)
+					TheViewIFace.GoGiEditor(w.Viewport.This)
 					e.SetProcessed()
 				case KeyFunZoomIn:
 					w.ZoomDPI(1)
@@ -939,7 +939,7 @@ func (w *Window) EventLoop() {
 					w.ZoomDPI(-1)
 					e.SetProcessed()
 				case KeyFunPrefs:
-					Prefs.Edit()
+					TheViewIFace.PrefsEditor(&Prefs)
 					e.SetProcessed()
 				case KeyFunRefresh:
 					w.FullReRender()
@@ -1560,3 +1560,19 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
 	return &wp
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//  ViewIFace
+
+// ViewIFace is an interface into the View GUI types in giv subpackage
+type ViewIFace interface {
+
+	// GoGiEditor opens an interactive editor of given Ki tree, at its root
+	GoGiEditor(obj ki.Ki)
+
+	// PrefsEditor opens an interactive editor of given preferences object
+	PrefsEditor(prefs *Preferences)
+}
+
+// TheViewIFace is the implemenation of the interface, defined in giv package
+var TheViewIFace ViewIFace

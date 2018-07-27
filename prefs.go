@@ -15,7 +15,6 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
 
@@ -151,89 +150,6 @@ func (p *Preferences) DefaultKeyMap() {
 	for key, val := range DefaultKeyMap {
 		p.CustomKeyMap[key] = val
 	}
-}
-
-// Edit Preferences in a separate window
-func (p *Preferences) Edit() {
-	width := 800
-	height := 600
-	win := NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
-
-	vp := win.WinViewport2D()
-	updt := vp.UpdateStart()
-	vp.Fill = true
-
-	vlay := vp.AddNewChild(KiT_Frame, "vlay").(*Frame)
-	vlay.Lay = LayoutCol
-
-	trow := vlay.AddNewChild(KiT_Layout, "trow").(*Layout)
-	trow.Lay = LayoutRow
-	trow.SetStretchMaxWidth()
-
-	spc := vlay.AddNewChild(KiT_Space, "spc1").(*Space)
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
-
-	trow.AddNewChild(KiT_Stretch, "str1")
-	title := trow.AddNewChild(KiT_Label, "title").(*Label)
-	title.Text = "GoGi Preferences"
-	title.SetStretchMaxWidth()
-	trow.AddNewChild(KiT_Stretch, "str2")
-
-	sv := vlay.AddNewChild(KiT_StructView, "sv").(*StructView)
-	sv.SetStruct(p, nil)
-	sv.SetStretchMaxWidth()
-	sv.SetStretchMaxHeight()
-
-	bspc := vlay.AddNewChild(KiT_Space, "ButSpc").(*Space)
-	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
-
-	brow := vlay.AddNewChild(KiT_Layout, "brow").(*Layout)
-	brow.Lay = LayoutRow
-	brow.SetProp("align-horiz", "center")
-	brow.SetStretchMaxWidth()
-
-	up := brow.AddNewChild(KiT_Button, "update").(*Button)
-	up.SetText("Update")
-	up.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
-			p.Update()
-		}
-	})
-
-	savej := brow.AddNewChild(KiT_Button, "savejson").(*Button)
-	savej.SetText("Save")
-	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
-			p.Save()
-		}
-	})
-
-	loadj := brow.AddNewChild(KiT_Button, "loadjson").(*Button)
-	loadj.SetText("Load")
-	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
-			p.Load()
-		}
-	})
-
-	defmap := brow.AddNewChild(KiT_Button, "defkemap").(*Button)
-	defmap.SetText("Default KeyMap")
-	defmap.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
-			p.DefaultKeyMap()
-		}
-	})
-
-	scrinfo := brow.AddNewChild(KiT_Button, "scrinfo").(*Button)
-	scrinfo.SetText("Screen Info")
-	scrinfo.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
-			p.ScreenInfo()
-		}
-	})
-
-	vp.UpdateEndNoSig(updt)
-	win.GoStartEventLoop()
 }
 
 // ScreenInfo displays screen info for all screens on the console

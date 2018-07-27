@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
 	"reflect"
 	"sort"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -21,7 +22,7 @@ import (
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame with a button box at the bottom where methods can be invoked
 type MapView struct {
-	Frame
+	gi.Frame
 	Map     interface{} `desc:"the map that we are a view onto"`
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
@@ -45,21 +46,21 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 }
 
 var MapViewProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
+	"background-color": &gi.Prefs.BackgroundColor,
 }
 
 // SetFrame configures view as a frame
 func (mv *MapView) SetFrame() {
-	mv.Lay = LayoutCol
+	mv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (mv *MapView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Frame, "map-grid")
-	config.Add(KiT_Space, "grid-space")
-	config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Frame, "map-grid")
+	config.Add(gi.KiT_Space, "grid-space")
+	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -73,21 +74,21 @@ func (mv *MapView) StdConfig() (mods, updt bool) {
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) MapGrid() (*Frame, int) {
+func (mv *MapView) MapGrid() (*gi.Frame, int) {
 	idx := mv.ChildIndexByName("map-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return mv.Child(idx).(*Frame), idx
+	return mv.Child(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) ButtonBox() (*Layout, int) {
+func (mv *MapView) ButtonBox() (*gi.Layout, int) {
 	idx := mv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return mv.Child(idx).(*Layout), idx
+	return mv.Child(idx).(*gi.Layout), idx
 }
 
 // ConfigMapGrid configures the MapGrid for the current map
@@ -99,7 +100,7 @@ func (mv *MapView) ConfigMapGrid() {
 	if sg == nil {
 		return
 	}
-	sg.Lay = LayoutGrid
+	sg.Lay = gi.LayoutGrid
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
@@ -161,9 +162,9 @@ func (mv *MapView) ConfigMapGrid() {
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
 			typnm := fmt.Sprintf("type-%v", keytxt)
-			config.Add(KiT_ComboBox, typnm)
+			config.Add(gi.KiT_ComboBox, typnm)
 		}
-		config.Add(KiT_Action, delnm)
+		config.Add(gi.KiT_Action, delnm)
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
@@ -179,13 +180,13 @@ func (mv *MapView) ConfigMapGrid() {
 			mvv, _ := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
-		keyw := sg.Child(i * ncol).(Node2D)
-		widg := sg.Child(i*ncol + 1).(Node2D)
+		keyw := sg.Child(i * ncol).(gi.Node2D)
+		widg := sg.Child(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if ifaceType {
-			typw := sg.Child(i*ncol + 2).(*ComboBox)
+			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
 			vtyp := kit.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
@@ -194,19 +195,19 @@ func (mv *MapView) ConfigMapGrid() {
 			typw.SetCurVal(vtyp)
 			typw.SetProp("mapview-index", i)
 			typw.ComboSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				cb := send.(*ComboBox)
+				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
 				idx := cb.Prop("mapview-index", false, false).(int)
 				mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
-		delact := sg.Child(i*ncol + ncol - 1).(*Action)
+		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			act := send.(*Action)
+			act := send.(*gi.Action)
 			mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
 		})
@@ -296,12 +297,12 @@ func (mv *MapView) ConfigMapButtons() {
 	}
 	bb, _ := mv.ButtonBox()
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Button, "Add")
+	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
+		if sig == int64(gi.ButtonClicked) {
 			mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 			mvv.MapAdd()
 		}
@@ -336,7 +337,7 @@ func (mv *MapView) Style2D() {
 
 // MapViewInline represents a map as a single line widget, for smaller maps and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type MapViewInline struct {
-	PartsWidgetBase
+	gi.PartsWidgetBase
 	Map     interface{} `desc:"the map that we are a view onto"`
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
@@ -366,7 +367,7 @@ func (mv *MapViewInline) ConfigParts() {
 	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
-	mv.Parts.Lay = LayoutRow
+	mv.Parts.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
@@ -402,7 +403,7 @@ func (mv *MapViewInline) ConfigParts() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(KiT_Action, "edit-action")
+	config.Add(gi.KiT_Action, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = mv.Parts.UpdateStart()
@@ -413,13 +414,13 @@ func (mv *MapViewInline) ConfigParts() {
 			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
-		keyw := mv.Parts.Child(i * 2).(Node2D)
-		widg := mv.Parts.Child((i * 2) + 1).(Node2D)
+		keyw := mv.Parts.Child(i * 2).(gi.Node2D)
+		widg := mv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 	}
-	edac := mv.Parts.Child(-1).(*Action)
+	edac := mv.Parts.Child(-1).(*gi.Action)
 	edac.SetIcon("edit")
 	edac.Tooltip = "map edit dialog"
 	edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

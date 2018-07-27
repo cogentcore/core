@@ -8,9 +8,8 @@ import (
 	"image"
 
 	"github.com/goki/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
-	_ "github.com/goki/gi/svg"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -46,7 +45,7 @@ type TestNodeB struct {
 var KiT_TestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
 
 func main() {
-	driver.Main(func(app oswin.App) {
+	gimain.Main(func() {
 		mainrun()
 	})
 }
@@ -98,17 +97,17 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := vlay.AddNewChild(giv.KiT_SplitView, "split").(*giv.SplitView)
 	split.Dim = gi.X
 
 	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
 	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
 	split.SetSplits(.3, .7)
 
-	tv := tvfr.AddNewChild(gi.KiT_TreeView, "tv").(*gi.TreeView)
+	tv := tvfr.AddNewChild(giv.KiT_TreeView, "tv").(*giv.TreeView)
 	tv.SetRootNode(&srctree)
 
-	sv := svfr.AddNewChild(gi.KiT_StructView, "sv").(*gi.StructView)
+	sv := svfr.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 	sv.SetStruct(&srctree, nil)
@@ -117,10 +116,10 @@ func mainrun() {
 		if data == nil {
 			return
 		}
-		// tvr, _ := send.EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView) // root is sender
-		tvn, _ := data.(ki.Ki).EmbeddedStruct(gi.KiT_TreeView).(*gi.TreeView)
-		svr, _ := recv.EmbeddedStruct(gi.KiT_StructView).(*gi.StructView)
-		if sig == int64(gi.TreeViewSelected) {
+		// tvr, _ := send.EmbeddedStruct(giv.KiT_TreeView).(*gi.TreeView) // root is sender
+		tvn, _ := data.(ki.Ki).EmbeddedStruct(giv.KiT_TreeView).(*giv.TreeView)
+		svr, _ := recv.EmbeddedStruct(giv.KiT_StructView).(*giv.StructView)
+		if sig == int64(giv.TreeViewSelected) {
 			svr.SetStruct(tvn.SrcNode.Ptr, nil)
 		}
 	})

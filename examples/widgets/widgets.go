@@ -9,16 +9,15 @@ import (
 	"reflect"
 
 	"github.com/goki/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
-	_ "github.com/goki/gi/svg"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
 func main() {
-	driver.Main(func(app oswin.App) {
+	gimain.Main(func() {
 		mainrun()
 	})
 }
@@ -122,7 +121,7 @@ func mainrun() {
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {
-			gi.GoGiEditorOf(vp)
+			giv.GoGiEditor(vp)
 		}
 	})
 

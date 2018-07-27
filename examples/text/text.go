@@ -6,14 +6,12 @@ package main
 
 import (
 	"github.com/goki/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
-	_ "github.com/goki/gi/svg"
+	"github.com/goki/gi/gimain"
 	"github.com/goki/ki"
 )
 
 func main() {
-	driver.Main(func(app oswin.App) {
+	gimain.Main(func() {
 		mainrun()
 	})
 }

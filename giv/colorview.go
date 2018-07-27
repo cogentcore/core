@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"reflect"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -17,8 +18,8 @@ import (
 
 // ColorView represents a color, using sliders to set values
 type ColorView struct {
-	Frame
-	Color   *Color    `desc:"the color that we view"`
+	gi.Frame
+	Color   *gi.Color `desc:"the color that we view"`
 	Title   string    `desc:"title / prompt to show above the editor fields"`
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
@@ -27,17 +28,17 @@ type ColorView struct {
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
 
 var ColorViewProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &gi.Prefs.BackgroundColor,
+	"color":            &gi.Prefs.FontColor,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignCenter,
-		"vertical-align": AlignTop,
+		"text-align":     gi.AlignCenter,
+		"vertical-align": gi.AlignTop,
 	},
 }
 
 // SetColor sets the source color
-func (sv *ColorView) SetColor(color *Color, tmpSave ValueView) {
+func (sv *ColorView) SetColor(color *gi.Color, tmpSave ValueView) {
 	if sv.Color != color {
 		sv.Color = color
 		sv.Config()
@@ -48,7 +49,7 @@ func (sv *ColorView) SetColor(color *Color, tmpSave ValueView) {
 
 // SetFrame configures view as a frame
 func (sv *ColorView) SetFrame() {
-	sv.Lay = LayoutCol
+	sv.Lay = gi.LayoutCol
 }
 
 // Config configures a standard setup of entire view
@@ -86,18 +87,18 @@ func (sv *ColorView) ValueLayConfig() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *ColorView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Label, "title")
-	config.Add(KiT_Space, "title-space")
-	config.Add(KiT_Layout, "value-lay")
-	config.Add(KiT_Space, "slider-space")
-	// config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Label, "title")
+	config.Add(gi.KiT_Space, "title-space")
+	config.Add(gi.KiT_Layout, "value-lay")
+	config.Add(gi.KiT_Space, "slider-space")
+	// config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
 func (sv *ColorView) StdValueLayConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Frame, "value")
-	config.Add(KiT_Layout, "slider-grid")
+	config.Add(gi.KiT_Frame, "value")
+	config.Add(gi.KiT_Layout, "slider-grid")
 	return config
 }
 
@@ -111,23 +112,23 @@ func (sv *ColorView) SetTitle(title string) {
 }
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
-func (sv *ColorView) TitleWidget() (*Label, int) {
+func (sv *ColorView) TitleWidget() (*gi.Label, int) {
 	idx := sv.ChildIndexByName("title", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Label), idx
+	return sv.Child(idx).(*gi.Label), idx
 }
 
-func (sv *ColorView) ValueLay() (*Layout, int) {
+func (sv *ColorView) ValueLay() (*gi.Layout, int) {
 	idx := sv.ChildIndexByName("value-lay", 3)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*gi.Layout), idx
 }
 
-func (sv *ColorView) Value() (*Frame, int) {
+func (sv *ColorView) Value() (*gi.Frame, int) {
 	vl, _ := sv.ValueLay()
 	if vl == nil {
 		return nil, -1
@@ -136,10 +137,10 @@ func (sv *ColorView) Value() (*Frame, int) {
 	if idx < 0 {
 		return nil, -1
 	}
-	return vl.Child(idx).(*Frame), idx
+	return vl.Child(idx).(*gi.Frame), idx
 }
 
-func (sv *ColorView) SliderGrid() (*Layout, int) {
+func (sv *ColorView) SliderGrid() (*gi.Layout, int) {
 	vl, _ := sv.ValueLay()
 	if vl == nil {
 		return nil, -1
@@ -148,33 +149,33 @@ func (sv *ColorView) SliderGrid() (*Layout, int) {
 	if idx < 0 {
 		return nil, -1
 	}
-	return vl.Child(idx).(*Layout), idx
+	return vl.Child(idx).(*gi.Layout), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (sv *ColorView) ButtonBox() (*Layout, int) {
+func (sv *ColorView) ButtonBox() (*gi.Layout, int) {
 	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*gi.Layout), idx
 }
 
 // StdSliderConfig returns a TypeAndNameList for configuring a standard sliders
 func (sv *ColorView) StdSliderConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Label, "rlab")
-	config.Add(KiT_Slider, "red")
-	config.Add(KiT_Label, "hlab")
-	config.Add(KiT_Slider, "hue")
-	config.Add(KiT_Label, "glab")
-	config.Add(KiT_Slider, "green")
-	config.Add(KiT_Label, "slab")
-	config.Add(KiT_Slider, "sat")
-	config.Add(KiT_Label, "blab")
-	config.Add(KiT_Slider, "blue")
-	config.Add(KiT_Label, "llab")
-	config.Add(KiT_Slider, "light")
+	config.Add(gi.KiT_Label, "rlab")
+	config.Add(gi.KiT_Slider, "red")
+	config.Add(gi.KiT_Label, "hlab")
+	config.Add(gi.KiT_Slider, "hue")
+	config.Add(gi.KiT_Label, "glab")
+	config.Add(gi.KiT_Slider, "green")
+	config.Add(gi.KiT_Label, "slab")
+	config.Add(gi.KiT_Slider, "sat")
+	config.Add(gi.KiT_Label, "blab")
+	config.Add(gi.KiT_Slider, "blue")
+	config.Add(gi.KiT_Label, "llab")
+	config.Add(gi.KiT_Slider, "light")
 	return config
 }
 
@@ -195,21 +196,21 @@ func (sv *ColorView) SetRGBValue(val float32, rgb int) {
 	}
 }
 
-func (sv *ColorView) ConfigRGBSlider(sl *Slider, rgb int) {
+func (sv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Defaults()
 	sl.Max = 255
 	sl.Step = 1
 	sl.PageStep = 16
 	sl.Prec = 3
-	sl.Dim = X
+	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewValue(20, units.Ex))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(SliderValueChanged) {
+		if sig == int64(gi.SliderValueChanged) {
 			svv, _ := recv.EmbeddedStruct(KiT_ColorView).(*ColorView)
-			slv := send.EmbeddedStruct(KiT_Slider).(*Slider)
+			slv := send.EmbeddedStruct(gi.KiT_Slider).(*gi.Slider)
 			updt := svv.UpdateStart()
 			svv.SetRGBValue(slv.Value, rgb)
 			svv.ViewSig.Emit(svv.This, 0, nil)
@@ -218,7 +219,7 @@ func (sv *ColorView) ConfigRGBSlider(sl *Slider, rgb int) {
 	})
 }
 
-func (sv *ColorView) UpdateRGBSlider(sl *Slider, rgb int) {
+func (sv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
 	if sv.Color == nil {
 		return
 	}
@@ -251,21 +252,21 @@ func (sv *ColorView) SetHSLValue(val float32, hsl int) {
 	}
 }
 
-func (sv *ColorView) ConfigHSLSlider(sl *Slider, hsl int) {
+func (sv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Defaults()
 	sl.Max = 360
 	sl.Step = 1
 	sl.PageStep = 15
 	sl.Prec = 3
-	sl.Dim = X
+	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewValue(20, units.Ex))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(SliderValueChanged) {
+		if sig == int64(gi.SliderValueChanged) {
 			svv, _ := recv.EmbeddedStruct(KiT_ColorView).(*ColorView)
-			slv := send.EmbeddedStruct(KiT_Slider).(*Slider)
+			slv := send.EmbeddedStruct(gi.KiT_Slider).(*gi.Slider)
 			updt := svv.UpdateStart()
 			svv.SetHSLValue(slv.Value, hsl)
 			svv.ViewSig.Emit(svv.This, 0, nil)
@@ -274,7 +275,7 @@ func (sv *ColorView) ConfigHSLSlider(sl *Slider, hsl int) {
 	})
 }
 
-func (sv *ColorView) UpdateHSLSlider(sl *Slider, hsl int) {
+func (sv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
 	if sv.Color == nil {
 		return
 	}
@@ -289,7 +290,7 @@ func (sv *ColorView) UpdateHSLSlider(sl *Slider, hsl int) {
 	}
 }
 
-func (sv *ColorView) ConfigLabel(lab *Label, txt string) {
+func (sv *ColorView) ConfigLabel(lab *gi.Label, txt string) {
 	lab.Text = txt
 
 }
@@ -300,24 +301,24 @@ func (sv *ColorView) ConfigSliderGrid() {
 	if sg == nil {
 		return
 	}
-	sg.Lay = LayoutGrid
+	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", 4)
 	config := sv.StdSliderConfig()
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
-		sv.ConfigLabel(sg.ChildByName("rlab", 0).EmbeddedStruct(KiT_Label).(*Label), "Red:")
-		sv.ConfigLabel(sg.ChildByName("blab", 0).EmbeddedStruct(KiT_Label).(*Label), "Blue")
-		sv.ConfigLabel(sg.ChildByName("glab", 0).EmbeddedStruct(KiT_Label).(*Label), "Green:")
-		sv.ConfigLabel(sg.ChildByName("hlab", 0).EmbeddedStruct(KiT_Label).(*Label), "Hue:")
-		sv.ConfigLabel(sg.ChildByName("slab", 0).EmbeddedStruct(KiT_Label).(*Label), "Sat:")
-		sv.ConfigLabel(sg.ChildByName("llab", 0).EmbeddedStruct(KiT_Label).(*Label), "Light:")
+		sv.ConfigLabel(sg.ChildByName("rlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Red:")
+		sv.ConfigLabel(sg.ChildByName("blab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Blue")
+		sv.ConfigLabel(sg.ChildByName("glab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Green:")
+		sv.ConfigLabel(sg.ChildByName("hlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Hue:")
+		sv.ConfigLabel(sg.ChildByName("slab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Sat:")
+		sv.ConfigLabel(sg.ChildByName("llab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Light:")
 
-		sv.ConfigRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(KiT_Slider).(*Slider), 0)
-		sv.ConfigRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(KiT_Slider).(*Slider), 1)
-		sv.ConfigRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(KiT_Slider).(*Slider), 2)
-		sv.ConfigHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(KiT_Slider).(*Slider), 0)
-		sv.ConfigHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(KiT_Slider).(*Slider), 1)
-		sv.ConfigHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(KiT_Slider).(*Slider), 2)
+		sv.ConfigRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+		sv.ConfigHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
 	} else {
 		updt = sg.UpdateStart()
 	}
@@ -330,12 +331,12 @@ func (sv *ColorView) UpdateSliderGrid() {
 		return
 	}
 	updt := sg.UpdateStart()
-	sv.UpdateRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(KiT_Slider).(*Slider), 0)
-	sv.UpdateRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(KiT_Slider).(*Slider), 1)
-	sv.UpdateRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(KiT_Slider).(*Slider), 2)
-	sv.UpdateHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(KiT_Slider).(*Slider), 0)
-	sv.UpdateHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(KiT_Slider).(*Slider), 1)
-	sv.UpdateHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(KiT_Slider).(*Slider), 2)
+	sv.UpdateRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+	sv.UpdateHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
 	sg.UpdateEnd(updt)
 }
 
@@ -387,7 +388,7 @@ func (vv *ColorValueView) UpdateWidget() {
 	sv.UpdateFields()
 }
 
-func (vv *ColorValueView) ConfigWidget(widg Node2D) {
+func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 
 	sv := vv.Widget.(*StructViewInline)
@@ -395,14 +396,14 @@ func (vv *ColorValueView) ConfigWidget(widg Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 
-	edac := sv.Parts.Child(-1).(*Action) // action at end, from AddAction above
+	edac := sv.Parts.Child(-1).(*gi.Action) // action at end, from AddAction above
 	edac.SetIcon("color")
 	edac.Tooltip = "color selection dialog"
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
-		clr, ok := svv.Struct.(*Color)
+		clr, ok := svv.Struct.(*gi.Color)
 		if !ok {
-			clrp, ok := svv.Struct.(**Color)
+			clrp, ok := svv.Struct.(**gi.Color)
 			if !ok {
 				return
 			}
@@ -425,9 +426,10 @@ func (vv *ColorValueView) ConfigWidget(widg Node2D) {
 	})
 }
 
-// This registers the color value view as the view for Color types
-func (cl Color) ValueView() ValueView {
-	vv := ColorValueView{}
-	vv.Init(&vv)
-	return &vv
-}
+// todo: need to handle manually
+// // This registers the color value view as the view for Color types
+// func (cl gi.Color) ValueView() ValueView {
+// 	vv := ColorValueView{}
+// 	vv.Init(&vv)
+// 	return &vv
+// }

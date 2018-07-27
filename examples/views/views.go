@@ -8,14 +8,13 @@ import (
 	"fmt"
 
 	"github.com/goki/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
-	_ "github.com/goki/gi/svg"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 )
 
 func main() {
-	driver.Main(func(app oswin.App) {
+	gimain.Main(func() {
 		mainrun()
 	})
 }
@@ -65,19 +64,19 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := vlay.AddNewChild(giv.KiT_SplitView, "split").(*giv.SplitView)
 	split.Dim = gi.X
 
 	mvfr := split.AddNewChild(gi.KiT_Frame, "mvfr").(*gi.Frame)
 	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
 	split.SetSplits(.5, .5)
 
-	mv := mvfr.AddNewChild(gi.KiT_MapView, "mv").(*gi.MapView)
+	mv := mvfr.AddNewChild(giv.KiT_MapView, "mv").(*giv.MapView)
 	mv.SetMap(&tstmap, nil)
 	mv.SetStretchMaxWidth()
 	mv.SetStretchMaxHeight()
 
-	sv := svfr.AddNewChild(gi.KiT_SliceView, "sv").(*gi.SliceView)
+	sv := svfr.AddNewChild(giv.KiT_SliceView, "sv").(*giv.SliceView)
 	sv.SetSlice(&tstslice, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()

@@ -64,7 +64,7 @@ type SliderBase struct {
 	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	SliderSig   ki.Signal            `json:"-" xml:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
-	origWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
+	OrigWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
@@ -314,7 +314,7 @@ func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
 
 // translate a point in global pixel coords into relative position within node
 func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
-	return pt.Sub(g.origWinBBox.Min)
+	return pt.Sub(g.OrigWinBBox.Min)
 }
 
 func (g *SliderBase) SliderEvents() {
@@ -529,7 +529,7 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
-	g.origWinBBox = g.WinBBox
+	g.OrigWinBBox = g.WinBBox
 }
 
 func (g *Slider) Render2D() {
@@ -694,7 +694,7 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
-	g.origWinBBox = g.WinBBox
+	g.OrigWinBBox = g.WinBBox
 }
 
 func (g *ScrollBar) Render2D() {

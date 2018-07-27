@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"log"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -45,7 +46,7 @@ const (
 // LayoutCol with a LayoutRow of tab buttons and then the LayoutStacked of
 // Frames
 type TabView struct {
-	WidgetBase
+	gi.WidgetBase
 	SrcNode    ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
 	TabViewSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 }
@@ -73,7 +74,7 @@ func (g *TabView) SelectTabIndex(idx int) error {
 		return err
 	}
 	tbk := tabrow.Child(idx)
-	tb, ok := tbk.(*Button)
+	tb, ok := tbk.(*gi.Button)
 	if !ok {
 		return nil
 	}
@@ -87,7 +88,7 @@ func (g *TabView) SelectTabIndex(idx int) error {
 }
 
 // get tab frame for given index
-func (g *TabView) TabFrameAtIndex(idx int) *Frame {
+func (g *TabView) TabFrameAtIndex(idx int) *gi.Frame {
 	tabstack := g.TabStackLayout()
 	idx, err := tabstack.Children().ValidIndex(idx)
 	if err != nil {
@@ -95,7 +96,7 @@ func (g *TabView) TabFrameAtIndex(idx int) *Frame {
 		return nil
 	}
 	tfk := tabstack.Child(idx)
-	tf, ok := tfk.(*Frame)
+	tf, ok := tfk.(*gi.Frame)
 	if !ok {
 		return nil
 	}
@@ -103,28 +104,28 @@ func (g *TabView) TabFrameAtIndex(idx int) *Frame {
 }
 
 // get the overal column layout for the tab widget
-func (g *TabView) TabColLayout() *Layout {
+func (g *TabView) TabColLayout() *gi.Layout {
 	g.InitTabView()
-	return g.Child(0).(*Layout)
+	return g.Child(0).(*gi.Layout)
 }
 
 // get the row layout of tabs across the top of the tab widget
-func (g *TabView) TabRowLayout() *Layout {
+func (g *TabView) TabRowLayout() *gi.Layout {
 	tabcol := g.TabColLayout()
-	return tabcol.Child(0).(*Layout)
+	return tabcol.Child(0).(*gi.Layout)
 }
 
 // get the stacked layout of tab frames
-func (g *TabView) TabStackLayout() *Layout {
+func (g *TabView) TabStackLayout() *gi.Layout {
 	tabcol := g.TabColLayout()
-	return tabcol.Child(1).(*Layout)
+	return tabcol.Child(1).(*gi.Layout)
 }
 
 // unselect all tabs
 func (g *TabView) UnselectAllTabButtons() {
 	tabrow := g.TabRowLayout()
 	for _, tbk := range tabrow.Kids {
-		tb, ok := tbk.(*Button)
+		tb, ok := tbk.(*gi.Button)
 		if !ok {
 			continue
 		}
@@ -141,8 +142,8 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 	if !ok {
 		return
 	}
-	if sig == int64(ButtonClicked) {
-		tb, ok := send.(*Button)
+	if sig == int64(gi.ButtonClicked) {
+		tb, ok := send.(*gi.Button)
 		if !ok {
 			return
 		}
@@ -160,16 +161,16 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 var TabButtonProps = ki.Props{
 	"border-width":        units.NewValue(1, units.Px),
 	"border-radius":       units.NewValue(0, units.Px),
-	"border-color":        &Prefs.BorderColor,
-	"border-style":        BorderSolid,
+	"border-color":        &gi.Prefs.BorderColor,
+	"border-style":        gi.BorderSolid,
 	"padding":             units.NewValue(4, units.Px),
 	"margin":              units.NewValue(0, units.Px),
-	"background-color":    &Prefs.ControlColor,
+	"background-color":    &gi.Prefs.ControlColor,
 	"box-shadow.h-offset": units.NewValue(0, units.Px),
 	"box-shadow.v-offset": units.NewValue(0, units.Px),
 	"box-shadow.blur":     units.NewValue(0, units.Px),
-	"box-shadow.color":    &Prefs.ShadowColor,
-	"text-align":          AlignCenter,
+	"box-shadow.color":    &gi.Prefs.ShadowColor,
+	"text-align":          gi.AlignCenter,
 }
 
 // make the initial tab frames for src node
@@ -182,12 +183,12 @@ func (g *TabView) InitTabs() {
 	skids := g.SrcNode.Ptr.Children()
 	for _, sk := range skids {
 		nm := "TabFrameOf_" + sk.UniqueName()
-		tf := tabstack.AddNewChild(KiT_Frame, nm).(*Frame)
-		tf.Lay = LayoutCol
+		tf := tabstack.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
+		tf.Lay = gi.LayoutCol
 		tf.SetProp("max-width", -1.0) // stretch flex
 		tf.SetProp("max-height", -1.0)
 		nm = "TabOf_" + sk.UniqueName()
-		tb := tabrow.AddNewChild(KiT_Button, nm).(*Button) // todo make tab button
+		tb := tabrow.AddNewChild(gi.KiT_Button, nm).(*gi.Button) // todo make tab button
 		tb.Text = sk.Name()
 		for key, val := range TabButtonProps {
 			tb.SetProp(key, val)
@@ -206,12 +207,12 @@ func (g *TabView) InitTabView() {
 		return
 	}
 	updt := g.UpdateStart()
-	tabcol := g.AddNewChild(KiT_Layout, "TabCol").(*Layout)
-	tabcol.Lay = LayoutCol
-	tabrow := tabcol.AddNewChild(KiT_Layout, "TabRow").(*Layout)
-	tabrow.Lay = LayoutRow
-	tabstack := tabcol.AddNewChild(KiT_Layout, "TabStack").(*Layout)
-	tabstack.Lay = LayoutStacked
+	tabcol := g.AddNewChild(gi.KiT_Layout, "TabCol").(*gi.Layout)
+	tabcol.Lay = gi.LayoutCol
+	tabrow := tabcol.AddNewChild(gi.KiT_Layout, "TabRow").(*gi.Layout)
+	tabrow.Lay = gi.LayoutRow
+	tabstack := tabcol.AddNewChild(gi.KiT_Layout, "TabStack").(*gi.Layout)
+	tabstack.Lay = gi.LayoutStacked
 	tabstack.SetProp("max-width", -1.0) // stretch flex
 	tabstack.SetProp("max-height", -1.0)
 	g.InitTabs()

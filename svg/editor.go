@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki"
@@ -58,7 +59,7 @@ func (svg *Editor) EditorEvents() {
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			if obj != nil {
-				gi.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
+				giv.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil)
 			}
 		}
 	})

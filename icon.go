@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"image/color"
-	"reflect"
 
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -36,14 +35,6 @@ func (inm IconName) IsNil() bool {
 // available in the current or default icon set
 func (inm IconName) IsValid() bool {
 	return TheIconMgr.IsValid(string(inm))
-}
-
-// ValueView returns the ValueView representation for the icon name --
-// presents a chooser
-func (inm IconName) ValueView() ValueView {
-	vv := IconValueView{}
-	vv.Init(&vv)
-	return &vv
 }
 
 // Icon is a wrapper around a child svg.Icon SVG element.  SVG should contain no
@@ -156,43 +147,3 @@ type IconMgr interface {
 // TheIconMgr is set by loading the gi/svg package -- all final users must
 // import github/goki/gi/svg to get its init function
 var TheIconMgr IconMgr
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  IconValueView
-
-// IconValueView presents a StructViewInline for a struct plus a IconView button..
-type IconValueView struct {
-	ValueViewBase
-}
-
-var KiT_IconValueView = kit.Types.AddType(&IconValueView{}, nil)
-
-func (vv *IconValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_Action
-	return vv.WidgetTyp
-}
-
-func (vv *IconValueView) UpdateWidget() {
-	cb := vv.Widget.(*Action)
-	txt := kit.ToString(vv.Value.Interface())
-
-	cb.SetIcon(txt)
-}
-
-func (vv *IconValueView) ConfigWidget(widg Node2D) {
-	vv.Widget = widg
-
-	cb := vv.Widget.(*Action)
-	vv.UpdateWidget()
-
-	cb.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_IconValueView).(*IconValueView)
-		if !vvv.IsInactive() {
-			// cbb := vvv.Widget.(*Action)
-			// eval := cbb.CurVal.(string)
-			// if vvv.SetIcon(eval) {
-			// vvv.UpdateWidget()
-			// }
-		}
-	})
-}

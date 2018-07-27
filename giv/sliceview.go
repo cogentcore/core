@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
 	"reflect"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -22,7 +23,7 @@ import (
 // -- set to Inactive for select-only mode, which emits SelectSig signals when
 // selection is updated
 type SliceView struct {
-	Frame
+	gi.Frame
 	Slice       interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	Values      []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -52,21 +53,21 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var SliceViewProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
+	"background-color": &gi.Prefs.BackgroundColor,
 }
 
 // SetFrame configures view as a frame
 func (sv *SliceView) SetFrame() {
-	sv.Lay = LayoutCol
+	sv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Frame, "slice-grid")
-	config.Add(KiT_Space, "grid-space")
-	config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Frame, "slice-grid")
+	config.Add(gi.KiT_Space, "grid-space")
+	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -81,21 +82,21 @@ func (sv *SliceView) StdConfig() (mods, updt bool) {
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) SliceGrid() (*Frame, int) {
+func (sv *SliceView) SliceGrid() (*gi.Frame, int) {
 	idx := sv.ChildIndexByName("slice-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Frame), idx
+	return sv.Child(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) ButtonBox() (*Layout, int) {
+func (sv *SliceView) ButtonBox() (*gi.Layout, int) {
 	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*gi.Layout), idx
 }
 
 // ConfigSliceGrid configures the SliceGrid for the current slice
@@ -117,7 +118,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	if sg == nil {
 		return
 	}
-	sg.Lay = LayoutGrid
+	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", 4)
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
@@ -142,10 +143,10 @@ func (sv *SliceView) ConfigSliceGrid() {
 		valnm := fmt.Sprintf("value-%v", idxtxt)
 		addnm := fmt.Sprintf("add-%v", idxtxt)
 		delnm := fmt.Sprintf("del-%v", idxtxt)
-		config.Add(KiT_Label, labnm)
+		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm)
-		config.Add(KiT_Action, addnm)
-		config.Add(KiT_Action, delnm)
+		config.Add(gi.KiT_Action, addnm)
+		config.Add(gi.KiT_Action, delnm)
 		sv.Values[i] = vv
 	}
 	mods, updt := sg.ConfigChildren(config, false)
@@ -161,26 +162,26 @@ func (sv *SliceView) ConfigSliceGrid() {
 			svv.UpdateSig()
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
-		lbl := sg.Child(i * 4).(*Label)
+		lbl := sg.Child(i * 4).(*gi.Label)
 		idxtxt := fmt.Sprintf("%05d", i)
 		lbl.Text = idxtxt
-		widg := sg.Child((i * 4) + 1).(Node2D)
+		widg := sg.Child((i * 4) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
-		addact := sg.Child(i*4 + 2).(*Action)
+		addact := sg.Child(i*4 + 2).(*gi.Action)
 		addact.SetIcon("plus")
 		addact.Tooltip = "insert a new element at this index"
 		addact.Data = i
 		addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			act := send.(*Action)
+			act := send.(*gi.Action)
 			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
 			svv.SliceNewAt(act.Data.(int) + 1)
 		})
-		delact := sg.Child(i*4 + 3).(*Action)
+		delact := sg.Child(i*4 + 3).(*gi.Action)
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete this element"
 		delact.Data = i
 		delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			act := send.(*Action)
+			act := send.(*gi.Action)
 			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
 			svv.SliceDelete(act.Data.(int))
 		})
@@ -236,12 +237,12 @@ func (sv *SliceView) ConfigSliceButtons() {
 	}
 	bb, _ := sv.ButtonBox()
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Button, "Add")
+	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
+		if sig == int64(gi.ButtonClicked) {
 			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
 			svv.SliceNewAt(-1)
 		}
@@ -273,7 +274,7 @@ func (sv *SliceView) UpdateValues() {
 
 // SliceViewInline represents a slice as a single line widget, for smaller slices and those explicitly marked inline -- constructs widgets in Parts to show the key names and editor vals for each value
 type SliceViewInline struct {
-	PartsWidgetBase
+	gi.PartsWidgetBase
 	Slice   interface{} `desc:"the slice that we are a view onto"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -303,7 +304,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
-	sv.Parts.Lay = LayoutRow
+	sv.Parts.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
@@ -323,11 +324,11 @@ func (sv *SliceViewInline) ConfigParts() {
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
 		valnm := fmt.Sprintf("value-%v", idxtxt)
-		config.Add(KiT_Label, labnm)
+		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm)
 		sv.Values = append(sv.Values, vv)
 	}
-	config.Add(KiT_Action, "EditAction")
+	config.Add(gi.KiT_Action, "EditAction")
 	mods, updt := sv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
@@ -339,13 +340,13 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv.UpdateSig()
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
-		lbl := sv.Parts.Child(i * 2).(*Label)
+		lbl := sv.Parts.Child(i * 2).(*gi.Label)
 		idxtxt := fmt.Sprintf("%05d", i)
 		lbl.Text = idxtxt
-		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
+		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
-	edac := sv.Parts.Child(-1).(*Action)
+	edac := sv.Parts.Child(-1).(*gi.Action)
 	edac.SetIcon("edit")
 	edac.Tooltip = "edit slice in a dialog window"
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

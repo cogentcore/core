@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -25,7 +26,7 @@ import (
 // where methods can be invoked -- set to Inactive for select-only mode, which
 // emits SelectSig signals when selection is updated
 type StructTableView struct {
-	Frame
+	gi.Frame
 	Slice       interface{}              `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	StyleFunc   StructTableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
 	Values      [][]ValueView            `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
@@ -46,7 +47,7 @@ var KiT_StructTableView = kit.Types.AddType(&StructTableView{}, StructTableViewP
 
 // StructTableViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view
-type StructTableViewStyleFunc func(slice interface{}, widg Node2D, row, col int, vv ValueView)
+type StructTableViewStyleFunc func(slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
@@ -80,8 +81,8 @@ func (sv *StructTableView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var StructTableViewProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &gi.Prefs.BackgroundColor,
+	"color":            &gi.Prefs.FontColor,
 }
 
 // StructType returns the type of the struct within the slice
@@ -91,16 +92,16 @@ func (sv *StructTableView) StructType() reflect.Type {
 
 // SetFrame configures view as a frame
 func (sv *StructTableView) SetFrame() {
-	sv.Lay = LayoutCol
+	sv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructTableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Frame, "struct-grid")
-	config.Add(KiT_Space, "grid-space")
-	config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Frame, "struct-grid")
+	config.Add(gi.KiT_Space, "grid-space")
+	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -115,29 +116,29 @@ func (sv *StructTableView) StdConfig() (mods, updt bool) {
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *StructTableView) SliceGrid() (*Frame, int) {
+func (sv *StructTableView) SliceGrid() (*gi.Frame, int) {
 	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Frame), idx
+	return sv.Child(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (sv *StructTableView) ButtonBox() (*Layout, int) {
+func (sv *StructTableView) ButtonBox() (*gi.Layout, int) {
 	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*gi.Layout), idx
 }
 
 // StdGridConfig returns a TypeAndNameList for configuring the struct-grid
 func (sv *StructTableView) StdGridConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Layout, "header")
-	config.Add(KiT_Separator, "head-sepe")
-	config.Add(KiT_Frame, "grid")
+	config.Add(gi.KiT_Layout, "header")
+	config.Add(gi.KiT_Separator, "head-sepe")
+	config.Add(gi.KiT_Frame, "grid")
 	return config
 }
 
@@ -177,7 +178,7 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	if sg == nil {
 		return
 	}
-	sg.Lay = LayoutCol
+	sg.Lay = gi.LayoutCol
 	// sg.SetMinPrefHeight(units.NewValue(10, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
@@ -191,17 +192,17 @@ func (sv *StructTableView) ConfigSliceGrid() {
 		updtg = sg.UpdateStart()
 	}
 
-	sgh := sg.Child(0).(*Layout)
-	sgh.Lay = LayoutRow
+	sgh := sg.Child(0).(*gi.Layout)
+	sgh.Lay = gi.LayoutRow
 	sgh.SetStretchMaxWidth()
 
-	sep := sg.Child(1).(*Separator)
+	sep := sg.Child(1).(*gi.Separator)
 	sep.Horiz = true
 	sep.SetStretchMaxWidth()
 
-	sgf := sg.Child(2).(*Frame)
-	sgf.Lay = LayoutGrid
-	sgf.Stripes = RowStripes
+	sgf := sg.Child(2).(*gi.Frame)
+	sgf.Lay = gi.LayoutGrid
+	sgf.Stripes = gi.RowStripes
 
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sgf.SetMinPrefHeight(units.NewValue(10, units.Em))
@@ -215,15 +216,15 @@ func (sv *StructTableView) ConfigSliceGrid() {
 
 	// Configure Header
 	hcfg := kit.TypeAndNameList{}
-	hcfg.Add(KiT_Label, "head-idx")
+	hcfg.Add(gi.KiT_Label, "head-idx")
 	for fli := 0; fli < nfld; fli++ {
 		fld := struTyp.Field(fli)
 		labnm := fmt.Sprintf("head-%v", fld.Name)
-		hcfg.Add(KiT_Action, labnm)
+		hcfg.Add(gi.KiT_Action, labnm)
 	}
 	if !sv.IsInactive() {
-		hcfg.Add(KiT_Label, "head-add")
-		hcfg.Add(KiT_Label, "head-del")
+		hcfg.Add(gi.KiT_Label, "head-add")
+		hcfg.Add(gi.KiT_Label, "head-del")
 	}
 
 	modsh, updth := sgh.ConfigChildren(hcfg, false)
@@ -232,24 +233,24 @@ func (sv *StructTableView) ConfigSliceGrid() {
 	} else {
 		updth = sgh.UpdateStart()
 	}
-	lbl := sgh.Child(0).(*Label)
+	lbl := sgh.Child(0).(*gi.Label)
 	lbl.Text = "Index"
 	for fli := 0; fli < nfld; fli++ {
 		fld := struTyp.Field(fli)
-		hdr := sgh.Child(1 + fli).(*Action)
+		hdr := sgh.Child(1 + fli).(*gi.Action)
 		hdr.SetText(fld.Name)
 		hdr.Data = fli
 		hdr.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
-			act := send.(*Action)
+			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
 			svv.SortSliceAction(fldIdx)
 		})
 	}
 	if !sv.IsInactive() {
-		lbl := sgh.Child(nfld + 1).(*Label)
+		lbl := sgh.Child(nfld + 1).(*gi.Label)
 		lbl.Text = "Add"
-		lbl = sgh.Child(nfld + 2).(*Label)
+		lbl = sgh.Child(nfld + 2).(*gi.Label)
 		lbl.Text = "Del"
 	}
 
@@ -280,7 +281,7 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 		nWidgPerRow += 2
 	}
 	sg, _ := sv.SliceGrid()
-	sgf := sg.Child(2).(*Frame)
+	sgf := sg.Child(2).(*gi.Frame)
 
 	updt := sgf.UpdateStart()
 	defer sgf.UpdateEnd(updt)
@@ -291,11 +292,11 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 		stru := val.Interface()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
-		var idxlab *Label
+		var idxlab *gi.Label
 		if sgf.Kids[ridx] != nil {
-			idxlab = sgf.Kids[ridx].(*Label)
+			idxlab = sgf.Kids[ridx].(*gi.Label)
 		} else {
-			idxlab = &Label{}
+			idxlab = &gi.Label{}
 			sgf.SetChild(idxlab, ridx, labnm)
 		}
 		idxlab.Text = idxtxt
@@ -311,12 +312,12 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, idxtxt)
 			cidx := ridx + 1 + fli
-			var widg Node2D
+			var widg gi.Node2D
 			if sgf.Kids[cidx] != nil {
-				widg = sgf.Kids[cidx].(Node2D)
+				widg = sgf.Kids[cidx].(gi.Node2D)
 			} else {
 				sv.Values[fli][i] = vv
-				widg = ki.NewOfType(vtyp).(Node2D)
+				widg = ki.NewOfType(vtyp).(gi.Node2D)
 				sgf.SetChild(widg, cidx, valnm)
 			}
 			vv.ConfigWidget(widg)
@@ -334,33 +335,33 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 
 				addnm := fmt.Sprintf("add-%v", idxtxt)
 				delnm := fmt.Sprintf("del-%v", idxtxt)
-				addact := Action{}
-				delact := Action{}
+				addact := gi.Action{}
+				delact := gi.Action{}
 				sgf.SetChild(&addact, ridx+1+nfld, addnm)
 				sgf.SetChild(&delact, ridx+1+nfld+1, delnm)
 
 				addact.SetIcon("plus")
 				addact.Data = i
 				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*Action)
+					act := send.(*gi.Action)
 					svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 					svv.SliceNewAt(act.Data.(int) + 1)
 				})
 				delact.SetIcon("minus")
 				delact.Data = i
 				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*Action)
+					act := send.(*gi.Action)
 					svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 					svv.SliceDelete(act.Data.(int))
 				})
 			} else { // inactive
-				if widg.TypeEmbeds(KiT_TextField) {
-					tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
+				if widg.TypeEmbeds(gi.KiT_TextField) {
+					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
 					tf.SetProp("stv-index", i)
 					tf.ClearSelected()
 					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(TextFieldSelected) {
-							tff := send.(*TextField)
+						if sig == int64(gi.TextFieldSelected) {
+							tff := send.(*gi.TextField)
 							idx := tff.Prop("stv-index", false, false).(int)
 							svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 							svv.UpdateSelect(idx, tff.IsSelected())
@@ -380,7 +381,7 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 	struTyp := sv.StructType()
 	nfld := struTyp.NumField()
 	sg, _ := sv.SliceGrid()
-	sgf := sg.Child(2).(*Frame)
+	sgf := sg.Child(2).(*gi.Frame)
 
 	nWidgPerRow := nfld + 1 // !interact
 
@@ -388,9 +389,9 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 		for fli := 0; fli < nfld; fli++ {
 			seldx := sv.SelectedIdx*nWidgPerRow + 1 + fli
 			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(sv.SelectedIdx*nWidgPerRow + 1 + fli).(Node2D)
-				if widg.TypeEmbeds(KiT_TextField) {
-					tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
+				widg := sgf.Child(sv.SelectedIdx*nWidgPerRow + 1 + fli).(gi.Node2D)
+				if widg.TypeEmbeds(gi.KiT_TextField) {
+					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
 					tf.ClearSelected()
 					tf.UpdateSig()
 				}
@@ -402,9 +403,9 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 		for fli := 0; fli < nfld; fli++ {
 			seldx := idx*nWidgPerRow + 1 + fli
 			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(seldx).(Node2D)
-				if widg.TypeEmbeds(KiT_TextField) {
-					tf := widg.EmbeddedStruct(KiT_TextField).(*TextField)
+				widg := sgf.Child(seldx).(gi.Node2D)
+				if widg.TypeEmbeds(gi.KiT_TextField) {
+					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
 					tf.SetSelected()
 					tf.UpdateSig()
 				}
@@ -464,13 +465,13 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 	nfld := struTyp.NumField()
 
 	sg, _ := sv.SliceGrid()
-	sgh := sg.Child(0).(*Layout)
+	sgh := sg.Child(0).(*gi.Layout)
 	sgh.SetFullReRender()
 
 	ascending := true
 
 	for fli := 0; fli < nfld; fli++ {
-		hdr := sgh.Child(1 + fli).(*Action)
+		hdr := sgh.Child(1 + fli).(*gi.Action)
 		if fli == fldIdx {
 			if sv.SortIdx == fli {
 				sv.SortDesc = !sv.SortDesc
@@ -488,7 +489,7 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 
 	sv.SortIdx = fldIdx
 
-	sgf := sg.Child(2).(*Frame)
+	sgf := sg.Child(2).(*gi.Frame)
 	sgf.SetFullReRender()
 
 	SortStructSlice(sv.Slice, sv.SortIdx, !sv.SortDesc)
@@ -602,12 +603,12 @@ func (sv *StructTableView) ConfigSliceButtons() {
 	}
 	bb, _ := sv.ButtonBox()
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Button, "Add")
+	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonClicked) {
+		if sig == int64(gi.ButtonClicked) {
 			svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 			svv.SliceNewAt(-1)
 		}
@@ -645,12 +646,12 @@ func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
 	}
 	struTyp := sv.StructType()
 	nfld := struTyp.NumField()
-	sgh := sg.Child(0).(*Layout)
-	sgf := sg.Child(2).(*Frame)
+	sgh := sg.Child(0).(*gi.Layout)
+	sgf := sg.Child(2).(*gi.Frame)
 	if len(sgf.Kids) >= 1+nfld {
 		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(1 + fli).(*Action)
-			widg := sgf.Child(1 + fli).(Node2D).AsWidget()
+			lbl := sgh.Child(1 + fli).(*gi.Action)
+			widg := sgf.Child(1 + fli).(gi.Node2D).AsWidget()
 			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
 		}
 		sgh.Layout2D(parBBox)

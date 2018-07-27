@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -59,7 +60,7 @@ const (
 // these extend NodeBase NodeFlags to hold TreeView state
 const (
 	// node is closed
-	TreeViewFlagClosed NodeFlags = NodeFlagsN + iota
+	TreeViewFlagClosed gi.NodeFlags = gi.NodeFlagsN + iota
 )
 
 // TreeViewStates are mutually-exclusive tree view states -- determines appearance
@@ -108,15 +109,15 @@ const (
 // of that source tree (move, cut, add, etc) through drag-n-drop and
 // cut/copy/paste and menu actions.
 type TreeView struct {
-	PartsWidgetBase
-	SrcNode     ki.Ptr                 `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	ViewIdx     int                    `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
-	Indent      units.Value            `xml:"indent" desc:"styled amount to indent children relative to this node"`
-	TreeViewSig ki.Signal              `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
-	StateStyles [TreeViewStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize  Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon        *Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
-	RootView    *TreeView              `json:"-" xml:"-" desc:"cached root of the view"`
+	gi.PartsWidgetBase
+	SrcNode     ki.Ptr                    `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	ViewIdx     int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
+	Indent      units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
+	TreeViewSig ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
+	StateStyles [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	WidgetSize  gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	Icon        *gi.Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
+	RootView    *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
@@ -225,7 +226,7 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.EmbeddedStruct(KiT_TreeView).(*TreeView)
 	if data != nil {
 		dflags := data.(int64)
-		if Update2DTrace {
+		if gi.Update2DTrace {
 			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(*send.Flags(), ki.FlagsN))
 		}
 		if bitflag.HasMask(dflags, int64(ki.StruUpdateFlagsMask)) {
@@ -257,7 +258,7 @@ func (tv *TreeView) SetClosedState(closed bool) {
 func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
 	tv.FuncUpParent(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, pg := KiToNode2D(k)
+		_, pg := gi.KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
@@ -659,16 +660,16 @@ func (tv *TreeView) MenuPosition() (pos image.Point) {
 // ActionMenu pops up a menu of various actions to perform on a node (todo:
 // extend from src object methods)
 func (tv *TreeView) ActionMenu() {
-	var men Menu
+	var men gi.Menu
 	tv.MakeActionMenu(&men)
 	pos := tv.MenuPosition()
-	PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvActionMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvActionMenu")
 }
 
 // MakeActionMenu makes the menu of actions that can be performed on each
 // node.  TODO: check methods on src object for additional actions to
 // insert.. need comment directives for that..
-func (tv *TreeView) MakeActionMenu(m *Menu) {
+func (tv *TreeView) MakeActionMenu(m *gi.Menu) {
 	if len(*m) > 0 {
 		return
 	}
@@ -718,23 +719,23 @@ func (tv *TreeView) MakeActionMenu(m *Menu) {
 func (tv *TreeView) SrcInsertAfter() {
 	ttl := "TreeView Insert After"
 	if tv.IsField() {
-		PromptDialog(tv.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
-	NewKiDialog(tv.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(DialogAccepted) {
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
 			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
 			par := sk.Parent()
-			dlg, _ := send.(*Dialog)
-			n, typ := NewKiDialogValues(dlg)
+			dlg, _ := send.(*gi.Dialog)
+			n, typ := gi.NewKiDialogValues(dlg)
 			updt := par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
@@ -750,24 +751,24 @@ func (tv *TreeView) SrcInsertAfter() {
 func (tv *TreeView) SrcInsertBefore() {
 	ttl := "TreeView Insert Before"
 	if tv.IsField() {
-		PromptDialog(tv.Viewport, ttl, "Cannot insert before fields", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before fields", true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
 
-	NewKiDialog(tv.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(DialogAccepted) {
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
 			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
 			par := sk.Parent()
-			dlg, _ := send.(*Dialog)
-			n, typ := NewKiDialogValues(dlg)
+			dlg, _ := send.(*gi.Dialog)
+			n, typ := gi.NewKiDialogValues(dlg)
 			updt := par.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
@@ -782,12 +783,12 @@ func (tv *TreeView) SrcInsertBefore() {
 // propmpting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
 	ttl := "TreeView Add Child"
-	NewKiDialog(tv.Viewport, reflect.TypeOf((*Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Add:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(DialogAccepted) {
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Add:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
 			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			sk := tv.SrcNode.Ptr
-			dlg, _ := send.(*Dialog)
-			n, typ := NewKiDialogValues(dlg)
+			dlg, _ := send.(*gi.Dialog)
+			n, typ := gi.NewKiDialogValues(dlg)
 			updt := sk.UpdateStart()
 			for i := 0; i < n; i++ {
 				nm := fmt.Sprintf("New%v%v", typ.Name(), i)
@@ -801,11 +802,11 @@ func (tv *TreeView) SrcAddChild() {
 // SrcDelete deletes the source node corresponding to this view node in the source tree
 func (tv *TreeView) SrcDelete() {
 	if tv.IsField() {
-		PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete fields", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete fields", true, false, nil, nil)
 		return
 	}
 	if tv.RootView.This == tv.This {
-		PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil)
 		return
 	}
 	tv.MoveDown(mouse.NoSelectMode)
@@ -818,13 +819,13 @@ func (tv *TreeView) SrcDelete() {
 // sibling)
 func (tv *TreeView) SrcDuplicate() {
 	if tv.IsField() {
-		PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot delete fields", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot delete fields", true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot duplicate the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot duplicate the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
@@ -905,7 +906,7 @@ func (tv *TreeView) Paste() {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}) {
+func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 	if len(*m) > 0 {
 		return
 	}
@@ -936,10 +937,10 @@ func (tv *TreeView) MakePasteMenu(m *Menu, data interface{}) {
 // a menu to determine what specifically to do
 func (tv *TreeView) PasteAction(md mimedata.Mimes) {
 	tv.UnselectAll()
-	var men Menu
+	var men gi.Menu
 	tv.MakePasteMenu(&men, md)
 	pos := tv.MenuPosition()
-	PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -961,7 +962,7 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
@@ -984,7 +985,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		PromptDialog(tv.Viewport, ttl, "Cannot after before the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot after before the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx := sk.Index()
@@ -1032,10 +1033,10 @@ func (tv *TreeView) DragNDropStart() {
 			}
 		}
 	}
-	bi := &Bitmap{}
+	bi := &gi.Bitmap{}
 	bi.InitName(bi, tv.UniqueName())
 	bi.GrabRenderFrom(tv) // todo: show number of items?
-	ImageClearer(bi.Pixels, 50.0)
+	gi.ImageClearer(bi.Pixels, 50.0)
 	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
 }
 
@@ -1077,7 +1078,7 @@ func (tv *TreeView) DragNDropSource(de *dnd.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *Menu, data interface{}, mod dnd.DropMods) {
+func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1116,10 +1117,10 @@ func (tv *TreeView) MakeDropMenu(m *Menu, data interface{}, mod dnd.DropMods) {
 
 // DropAction pops up a menu to determine what specifically to do with dropped items
 func (tv *TreeView) DropAction(md mimedata.Mimes, mod dnd.DropMods) {
-	var men Menu
+	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod)
 	pos := tv.MenuPosition()
-	PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -1171,7 +1172,7 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 func (tv *TreeView) RootTreeView() *TreeView {
 	rn := tv
 	tv.FuncUp(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, pg := KiToNode2D(k)
+		_, pg := gi.KiToNode2D(k)
 		if pg == nil {
 			return false
 		}
@@ -1186,52 +1187,52 @@ func (tv *TreeView) RootTreeView() *TreeView {
 }
 
 func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
-	kf := KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.ChordString())
 	selMode := mouse.SelectModeMod(kt.Modifiers)
 	switch kf {
-	case KeyFunSelectItem:
+	case gi.KeyFunSelectItem:
 		tf.SelectAction(selMode)
 		kt.SetProcessed()
-	case KeyFunCancelSelect:
+	case gi.KeyFunCancelSelect:
 		tf.UnselectAll()
 		kt.SetProcessed()
-	case KeyFunMoveRight:
+	case gi.KeyFunMoveRight:
 		tf.Open()
 		kt.SetProcessed()
-	case KeyFunMoveLeft:
+	case gi.KeyFunMoveLeft:
 		tf.Close()
 		kt.SetProcessed()
-	case KeyFunMoveDown:
+	case gi.KeyFunMoveDown:
 		tf.MoveDownAction(selMode)
 		kt.SetProcessed()
-	case KeyFunMoveUp:
+	case gi.KeyFunMoveUp:
 		tf.MoveUpAction(selMode)
 		kt.SetProcessed()
-	case KeyFunSelectMode:
+	case gi.KeyFunSelectMode:
 		tf.SelectModeToggle()
 		kt.SetProcessed()
-	case KeyFunSelectAll:
+	case gi.KeyFunSelectAll:
 		tf.SelectAll()
 		kt.SetProcessed()
-	case KeyFunDelete:
+	case gi.KeyFunDelete:
 		tf.SrcDelete()
 		kt.SetProcessed()
-	case KeyFunDuplicate:
+	case gi.KeyFunDuplicate:
 		tf.SrcDuplicate()
 		kt.SetProcessed()
-	case KeyFunInsert:
+	case gi.KeyFunInsert:
 		tf.SrcInsertBefore()
 		kt.SetProcessed()
-	case KeyFunInsertAfter:
+	case gi.KeyFunInsertAfter:
 		tf.SrcInsertAfter()
 		kt.SetProcessed()
-	case KeyFunCopy:
+	case gi.KeyFunCopy:
 		tf.Copy(true)
 		kt.SetProcessed()
-	case KeyFunCut:
+	case gi.KeyFunCut:
 		tf.Cut()
 		kt.SetProcessed()
-	case KeyFunPaste:
+	case gi.KeyFunPaste:
 		tf.Paste()
 		kt.SetProcessed()
 	}
@@ -1255,16 +1256,16 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.DragNDropSource(de)
 		}
 	})
-	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
+	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
 	wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(ButtonToggled) {
+		if sig == int64(gi.ButtonToggled) {
 			tvv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tvv.ToggleClose()
 		}
 	})
-	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
+	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
 	lbl.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		lb, _ := recv.(*Label)
+		lb, _ := recv.(*gi.Label)
 		tvv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
 		me := d.(*mouse.Event)
 		me.SetProcessed()
@@ -1291,31 +1292,31 @@ func (tv *TreeView) TreeViewEvents() {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
 var TVBranchProps = ki.Props{
-	"fill":   &Prefs.IconColor,
-	"stroke": &Prefs.FontColor,
+	"fill":   &gi.Prefs.IconColor,
+	"stroke": &gi.Prefs.FontColor,
 }
 
 func (tv *TreeView) ConfigParts() {
-	tv.Parts.Lay = LayoutRow
+	tv.Parts.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_CheckBox, "branch")
-	config.Add(KiT_Space, "space")
-	config.Add(KiT_Label, "label")
+	config.Add(gi.KiT_CheckBox, "branch")
+	config.Add(gi.KiT_Space, "space")
+	config.Add(gi.KiT_Label, "label")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
-	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
-	wb.Icon = IconName("widget-wedge-down") // todo: style
-	wb.IconOff = IconName("widget-wedge-right")
+	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
+	wb.Icon = gi.IconName("widget-wedge-down") // todo: style
+	wb.IconOff = gi.IconName("widget-wedge-right")
 	if mods {
 		wb.SetProp("#icon0", TVBranchProps)
 		wb.SetProp("#icon1", TVBranchProps)
-		tv.StylePart(Node2D(wb))
+		tv.StylePart(gi.Node2D(wb))
 	}
 
-	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
+	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
 	lbl.SetText(tv.Label())
 	if mods {
-		tv.StylePart(Node2D(lbl))
+		tv.StylePart(gi.Node2D(lbl))
 	}
 	tv.Parts.UpdateEnd(updt)
 }
@@ -1324,10 +1325,10 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	if !tv.Parts.HasChildren() {
 		tv.ConfigParts()
 	}
-	lbl := tv.Parts.Child(tvLabelIdx).(*Label)
+	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
 	lbl.SetText(tv.Label())
 	lbl.Sty.Font.Color = tv.Sty.Font.Color
-	wb := tv.Parts.Child(tvBranchIdx).(*CheckBox)
+	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
 	wb.SetChecked(!tv.IsClosed())
 }
 
@@ -1350,9 +1351,9 @@ var TreeViewProps = ki.Props{
 	"border-radius":    units.NewValue(0, units.Px),
 	"padding":          units.NewValue(1, units.Px),
 	"margin":           units.NewValue(1, units.Px),
-	"text-align":       AlignLeft,
-	"vertical-align":   AlignTop,
-	"color":            &Prefs.FontColor,
+	"text-align":       gi.AlignLeft,
+	"vertical-align":   gi.AlignTop,
+	"color":            &gi.Prefs.FontColor,
 	"background-color": "inherit",
 	"#branch": ki.Props{
 		"margin":           units.NewValue(0, units.Px),
@@ -1374,22 +1375,22 @@ var TreeViewProps = ki.Props{
 	},
 	TreeViewSelectors[TreeViewActive]: ki.Props{},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": &gi.Prefs.SelectColor,
 	},
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
-		"background-color": &Prefs.ControlColor,
+		"background-color": &gi.Prefs.ControlColor,
 	},
 }
 
 func (tv *TreeView) Style2D() {
 	if tv.HasClosedParent() {
-		bitflag.Clear(&tv.Flag, int(CanFocus))
+		bitflag.Clear(&tv.Flag, int(gi.CanFocus))
 		return
 	}
 	tv.SetCanFocusIfActive()
 	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
 
-	pst := &(tv.Par.(Node2D).AsWidget().Sty)
+	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
@@ -1417,15 +1418,15 @@ func (tv *TreeView) Size2D() {
 	if !tv.IsClosed() {
 		// we layout children under us
 		for _, kid := range tv.Kids {
-			gi := kid.(Node2D).AsWidget()
-			if gi == nil {
+			gis := kid.(gi.Node2D).AsWidget()
+			if gis == nil {
 				continue
 			}
-			h += gi.LayData.AllocSize.Y
-			w = Max32(w, tv.Indent.Dots+gi.LayData.AllocSize.X)
+			h += gis.LayData.AllocSize.Y
+			w = gi.Max32(w, tv.Indent.Dots+gis.LayData.AllocSize.X)
 		}
 	}
-	tv.LayData.AllocSize = Vec2D{w, h}
+	tv.LayData.AllocSize = gi.Vec2D{w, h}
 	tv.WidgetSize.X = w // stretch
 }
 
@@ -1451,10 +1452,10 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 
 	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
 	tv.Sty.SetUnitContext(tv.Viewport, psize) // update units with final layout
-	tv.BBox = tv.This.(Node2D).BBox2D()       // only compute once, at this point
-	tv.This.(Node2D).ComputeBBox2D(parBBox, image.ZP)
+	tv.BBox = tv.This.(gi.Node2D).BBox2D()    // only compute once, at this point
+	tv.This.(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
 
-	if Layout2DTrace {
+	if gi.Layout2DTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.PathUnique(), tv.WidgetSize.X, rn.LayData.AllocSize.X, tv.LayData.AllocPos.X, rn.LayData.AllocPos.X)
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.PathUnique(), tv.LayData.AllocPos, tv.LayData.AllocSize, tv.VpBBox, tv.WinBBox)
 	}
@@ -1463,7 +1464,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	h := tv.WidgetSize.Y
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
-			gi := kid.(Node2D).AsWidget()
+			gi := kid.(gi.Node2D).AsWidget()
 			if gi == nil {
 				continue
 			}
@@ -1485,7 +1486,7 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
-		pgi, _ := KiToNode2D(tv.Par)
+		pgi, _ := gi.KiToNode2D(tv.Par)
 		ar = ar.Intersect(pgi.ChildrenBBox2D())
 	}
 	return ar
@@ -1541,10 +1542,10 @@ var TreeViewDefault TreeView
 // TreeViewFields contain the StyledFields for TreeView type
 var TreeViewFields = initTreeView()
 
-func initTreeView() *StyledFields {
+func initTreeView() *gi.StyledFields {
 	TreeViewDefault = TreeView{}
 	TreeViewDefault.Indent = units.NewValue(2, units.Ch)
-	sf := &StyledFields{}
+	sf := &gi.StyledFields{}
 	sf.Default = &TreeViewDefault
 	sf.AddField(&TreeViewDefault, "Indent")
 	return sf

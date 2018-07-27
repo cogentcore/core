@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
@@ -10,11 +10,16 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
+
+func init() {
+	gi.TheViewIFace = &ViewIFace{}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ValueView -- an interface for representing values (e.g., fields) in Views
@@ -247,7 +252,7 @@ type ValueView interface {
 	// value, including setting up the signal connections to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated)
-	ConfigWidget(widg Node2D)
+	ConfigWidget(widg gi.Node2D)
 
 	// Val returns the reflect.Value representation for this item
 	Val() reflect.Value
@@ -294,7 +299,7 @@ type ValueViewBase struct {
 	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`
 	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
-	Widget    Node2D               `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
+	Widget    gi.Node2D            `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
 	Label     string               `desc:"label for displaying this item -- based on Field.Name and optional label Tag value"`
 	TmpSave   ValueView            `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
@@ -358,19 +363,19 @@ func (vv *ValueViewBase) IsInactive() bool {
 }
 
 func (vv *ValueViewBase) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_TextField
+	vv.WidgetTyp = gi.KiT_TextField
 	return vv.WidgetTyp
 }
 
 func (vv *ValueViewBase) UpdateWidget() {
-	tf := vv.Widget.(*TextField)
+	tf := vv.Widget.(*gi.TextField)
 	txt := kit.ToString(vv.Value.Interface())
 	tf.SetText(txt)
 }
 
-func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
+func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	tf := vv.Widget.(*TextField)
+	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip = vv.ViewFieldTag("desc")
 	widthtag := vv.ViewFieldTag("width")
@@ -381,12 +386,12 @@ func (vv *ValueViewBase) ConfigWidget(widg Node2D) {
 			tf.MaxWidthReq = int(width)
 		}
 	}
-	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(Inactive))
+	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(gi.Inactive))
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) {
 			vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
-			tf := send.(*TextField)
+			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
 			}
@@ -500,29 +505,29 @@ type StructValueView struct {
 var KiT_StructValueView = kit.Types.AddType(&StructValueView{}, nil)
 
 func (vv *StructValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_MenuButton
 	return vv.WidgetTyp
 }
 
 func (vv *StructValueView) UpdateWidget() {
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := fmt.Sprintf("%T", npv.Interface())
 	mb.SetText(txt)
 }
 
-func (vv *StructValueView) ConfigWidget(widg Node2D) {
+func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
-		mb := vvv.Widget.(*MenuButton)
+		mb := vvv.Widget.(*gi.MenuButton)
 		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Struct Value View", "", nil, nil)
 	})
 }
@@ -547,7 +552,7 @@ func (vv *StructInlineValueView) UpdateWidget() {
 	sv.UpdateFields()
 }
 
-func (vv *StructInlineValueView) ConfigWidget(widg Node2D) {
+func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sv := vv.Widget.(*StructViewInline)
@@ -573,12 +578,12 @@ type SliceValueView struct {
 var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
 
 func (vv *SliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_MenuButton
 	return vv.WidgetTyp
 }
 
 func (vv *SliceValueView) UpdateWidget() {
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
@@ -589,19 +594,19 @@ func (vv *SliceValueView) UpdateWidget() {
 	mb.SetText(txt)
 }
 
-func (vv *SliceValueView) ConfigWidget(widg Node2D) {
+func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	slci := vv.Value.Interface()
 	eltyp := kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
 	vv.IsStruct = (eltyp.Kind() == reflect.Struct)
 	vv.UpdateWidget()
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
-		mb := vvv.Widget.(*MenuButton)
+		mb := vvv.Widget.(*gi.MenuButton)
 		if vvv.IsStruct {
 			dlg := StructTableViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice of Struct Value View", "", nil, nil, nil)
 			sv := dlg.Frame().ChildByType(KiT_StructTableView, true, 2).(*StructTableView)
@@ -633,12 +638,12 @@ type MapValueView struct {
 var KiT_MapValueView = kit.Types.AddType(&MapValueView{}, nil)
 
 func (vv *MapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_MenuButton
 	return vv.WidgetTyp
 }
 
 func (vv *MapValueView) UpdateWidget() {
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
@@ -649,17 +654,17 @@ func (vv *MapValueView) UpdateWidget() {
 	mb.SetText(txt)
 }
 
-func (vv *MapValueView) ConfigWidget(widg Node2D) {
+func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
-		mb := vvv.Widget.(*MenuButton)
+		mb := vvv.Widget.(*gi.MenuButton)
 		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil)
 		mv := dlg.Frame().ChildByType(KiT_MapView, true, 2).(*MapView)
 		mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -690,7 +695,7 @@ func (vv *MapInlineValueView) UpdateWidget() {
 	sv.UpdateValues()
 }
 
-func (vv *MapInlineValueView) ConfigWidget(widg Node2D) {
+func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	sv := vv.Widget.(*MapViewInline)
@@ -715,7 +720,7 @@ type KiPtrValueView struct {
 var KiT_KiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_MenuButton
 	return vv.WidgetTyp
 }
 
@@ -744,7 +749,7 @@ func (vv *KiPtrValueView) KiStruct() ki.Ki {
 }
 
 func (vv *KiPtrValueView) UpdateWidget() {
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
@@ -753,10 +758,10 @@ func (vv *KiPtrValueView) UpdateWidget() {
 	mb.SetText(path)
 }
 
-func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
+func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	mb := vv.Widget.(*MenuButton)
+	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip = vv.ViewFieldTag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
@@ -765,20 +770,20 @@ func (vv *KiPtrValueView) ConfigWidget(widg Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
-			mb := vvv.Widget.(*MenuButton)
+			mb := vvv.Widget.(*gi.MenuButton)
 			StructViewDialog(mb.Viewport, k, vv.TmpSave, "Struct Value View", "", nil, nil)
 		}
 	})
 	mb.Menu.AddMenuText("Select", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
-		mb := vvv.Widget.(*MenuButton)
-		PromptDialog(mb.Viewport, "KiPtr Value View", "Sorry, Ki object chooser  not implemented yet -- would show up here", true, false, nil, nil)
+		mb := vvv.Widget.(*gi.MenuButton)
+		gi.PromptDialog(mb.Viewport, "KiPtr Value View", "Sorry, Ki object chooser  not implemented yet -- would show up here", true, false, nil, nil)
 	})
 	mb.Menu.AddMenuText("GoGiEditor", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
-			GoGiEditorOf(k)
+			GoGiEditor(k)
 		}
 	})
 }
@@ -794,26 +799,26 @@ type BoolValueView struct {
 var KiT_BoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
 
 func (vv *BoolValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_CheckBox
+	vv.WidgetTyp = gi.KiT_CheckBox
 	return vv.WidgetTyp
 }
 
 func (vv *BoolValueView) UpdateWidget() {
-	cb := vv.Widget.(*CheckBox)
+	cb := vv.Widget.(*gi.CheckBox)
 	npv := kit.NonPtrValue(vv.Value)
 	bv, _ := kit.ToBool(npv.Interface())
 	cb.SetChecked(bv)
 }
 
-func (vv *BoolValueView) ConfigWidget(widg Node2D) {
+func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	cb := vv.Widget.(*CheckBox)
+	cb := vv.Widget.(*gi.CheckBox)
 	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
-		cbb := vvv.Widget.(*CheckBox)
+		cbb := vvv.Widget.(*gi.CheckBox)
 		if vvv.SetValue(cbb.IsChecked()) {
 			vvv.UpdateWidget() // always update after setting value..
 		}
@@ -831,12 +836,12 @@ type IntValueView struct {
 var KiT_IntValueView = kit.Types.AddType(&IntValueView{}, nil)
 
 func (vv *IntValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_SpinBox
+	vv.WidgetTyp = gi.KiT_SpinBox
 	return vv.WidgetTyp
 }
 
 func (vv *IntValueView) UpdateWidget() {
-	sb := vv.Widget.(*SpinBox)
+	sb := vv.Widget.(*gi.SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat32(npv.Interface())
 	if ok {
@@ -844,10 +849,10 @@ func (vv *IntValueView) UpdateWidget() {
 	}
 }
 
-func (vv *IntValueView) ConfigWidget(widg Node2D) {
+func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	sb := vv.Widget.(*SpinBox)
+	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip = vv.ViewFieldTag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
@@ -884,7 +889,7 @@ func (vv *IntValueView) ConfigWidget(widg Node2D) {
 	}
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_IntValueView).(*IntValueView)
-		sbb := vvv.Widget.(*SpinBox)
+		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
 		}
@@ -902,12 +907,12 @@ type FloatValueView struct {
 var KiT_FloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
 
 func (vv *FloatValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_SpinBox
+	vv.WidgetTyp = gi.KiT_SpinBox
 	return vv.WidgetTyp
 }
 
 func (vv *FloatValueView) UpdateWidget() {
-	sb := vv.Widget.(*SpinBox)
+	sb := vv.Widget.(*gi.SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat32(npv.Interface())
 	if ok {
@@ -915,10 +920,10 @@ func (vv *FloatValueView) UpdateWidget() {
 	}
 }
 
-func (vv *FloatValueView) ConfigWidget(widg Node2D) {
+func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	sb := vv.Widget.(*SpinBox)
+	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip = vv.ViewFieldTag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
@@ -951,7 +956,7 @@ func (vv *FloatValueView) ConfigWidget(widg Node2D) {
 
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
-		sbb := vvv.Widget.(*SpinBox)
+		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
 		}
@@ -969,7 +974,7 @@ type EnumValueView struct {
 var KiT_EnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
 
 func (vv *EnumValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_ComboBox
+	vv.WidgetTyp = gi.KiT_ComboBox
 	return vv.WidgetTyp
 }
 
@@ -987,7 +992,7 @@ func (vv *EnumValueView) SetEnumValueFromInt(ival int64) bool {
 }
 
 func (vv *EnumValueView) UpdateWidget() {
-	sb := vv.Widget.(*ComboBox)
+	sb := vv.Widget.(*gi.ComboBox)
 	npv := kit.NonPtrValue(vv.Value)
 	iv, ok := kit.ToInt(npv.Interface())
 	if ok {
@@ -995,9 +1000,9 @@ func (vv *EnumValueView) UpdateWidget() {
 	}
 }
 
-func (vv *EnumValueView) ConfigWidget(widg Node2D) {
+func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	cb := vv.Widget.(*ComboBox)
+	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.SetProp("padding", units.NewValue(2, units.Px))
@@ -1010,7 +1015,7 @@ func (vv *EnumValueView) ConfigWidget(widg Node2D) {
 
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_EnumValueView).(*EnumValueView)
-		cbb := vvv.Widget.(*ComboBox)
+		cbb := vvv.Widget.(*gi.ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
 			vvv.UpdateWidget()
@@ -1029,12 +1034,12 @@ type TypeValueView struct {
 var KiT_TypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
 
 func (vv *TypeValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_ComboBox
+	vv.WidgetTyp = gi.KiT_ComboBox
 	return vv.WidgetTyp
 }
 
 func (vv *TypeValueView) UpdateWidget() {
-	sb := vv.Widget.(*ComboBox)
+	sb := vv.Widget.(*gi.ComboBox)
 	npv := kit.NonPtrValue(vv.Value)
 	typ, ok := npv.Interface().(reflect.Type)
 	if ok {
@@ -1042,9 +1047,9 @@ func (vv *TypeValueView) UpdateWidget() {
 	}
 }
 
-func (vv *TypeValueView) ConfigWidget(widg Node2D) {
+func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	cb := vv.Widget.(*ComboBox)
+	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 
@@ -1073,10 +1078,25 @@ func (vv *TypeValueView) ConfigWidget(widg Node2D) {
 
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_TypeValueView).(*TypeValueView)
-		cbb := vvv.Widget.(*ComboBox)
+		cbb := vvv.Widget.(*gi.ComboBox)
 		tval := cbb.CurVal.(reflect.Type)
 		if vvv.SetValue(tval) {
 			vvv.UpdateWidget()
 		}
 	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ViewIFace
+
+// giv.ViewIFace is THE implementation of the gi.ViewIFace interface
+type ViewIFace struct {
+}
+
+func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
+	GoGiEditor(obj)
+}
+
+func (vi *ViewIFace) PrefsEditor(prefs *gi.Preferences) {
+	PrefsEditor(prefs)
 }

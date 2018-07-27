@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/goki/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	driver.Main(func(app oswin.App) {
+	gimain.Main(func() {
 		mainrun()
 	})
 }
@@ -154,10 +154,10 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			path, fn := filepath.Split(CurFilename)
 			path, _ = homedir.Expand(path)
-			gi.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			giv.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
-					LoadSVG(gi.FileViewDialogValue(dlg))
+					LoadSVG(giv.FileViewDialogValue(dlg))
 				}
 			})
 		}

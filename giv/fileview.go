@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/c2h5oh/datasize"
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -36,7 +37,7 @@ func (ft FileTime) String() string {
 
 // FileInfo represents the information about a given file / directory
 type FileInfo struct {
-	Icon    IconName    `desc:"icon for file"`
+	Icon    gi.IconName `desc:"icon for file"`
 	Name    string      `width:"30" desc:"name of the file"`
 	Size    FileSize    `desc:"size of the file in bytes"`
 	Kind    string      `width:"20" desc:"type of file / directory -- including MIME type"`
@@ -50,9 +51,9 @@ var MimeToIconMap = map[string]string{
 }
 
 // FileKindToIcon maps kinds to icon names, using extension directly from file as a last resort
-func FileKindToIcon(kind, name string) IconName {
+func FileKindToIcon(kind, name string) gi.IconName {
 	kind = strings.ToLower(kind)
-	icn := IconName(kind)
+	icn := gi.IconName(kind)
 	if icn.IsValid() {
 		return icn
 	}
@@ -60,37 +61,37 @@ func FileKindToIcon(kind, name string) IconName {
 		si := strings.IndexByte(kind, '/')
 		typ := kind[:si]
 		subtyp := kind[si+1:]
-		if icn = "file-" + IconName(subtyp); icn.IsValid() {
+		if icn = "file-" + gi.IconName(subtyp); icn.IsValid() {
 			return icn
 		}
-		if icn = IconName(subtyp); icn.IsValid() {
+		if icn = gi.IconName(subtyp); icn.IsValid() {
 			return icn
 		}
 		if ms, ok := MimeToIconMap[string(subtyp)]; ok {
-			if icn = IconName(ms); icn.IsValid() {
+			if icn = gi.IconName(ms); icn.IsValid() {
 				return icn
 			}
 		}
-		if icn = "file-" + IconName(typ); icn.IsValid() {
+		if icn = "file-" + gi.IconName(typ); icn.IsValid() {
 			return icn
 		}
-		if icn = IconName(typ); icn.IsValid() {
+		if icn = gi.IconName(typ); icn.IsValid() {
 			return icn
 		}
 		if ms, ok := MimeToIconMap[string(typ)]; ok {
-			if icn = IconName(ms); icn.IsValid() {
+			if icn = gi.IconName(ms); icn.IsValid() {
 				return icn
 			}
 		}
 	}
 	ext := filepath.Ext(name)
 	if ext != "" {
-		if icn = IconName(ext[1:]); icn.IsValid() {
+		if icn = gi.IconName(ext[1:]); icn.IsValid() {
 			return icn
 		}
 	}
 
-	icn = IconName("none")
+	icn = gi.IconName("none")
 	return icn
 }
 
@@ -104,7 +105,7 @@ func FileKindToIcon(kind, name string) IconName {
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
-	Frame
+	gi.Frame
 	DirPath string      `desc:"path to directory of files to display"`
 	SelFile string      `desc:"selected file"`
 	Files   []*FileInfo `desc:"files for current directory"`
@@ -137,8 +138,8 @@ func (fv *FileView) UpdateFromPath() {
 }
 
 var FileViewProps = ki.Props{
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.BackgroundColor,
+	"color":            &gi.Prefs.FontColor,
+	"background-color": &gi.Prefs.BackgroundColor,
 }
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
@@ -147,7 +148,7 @@ var FileViewKindColorMap = map[string]string{
 	"application/json": "purple",
 }
 
-func FileViewStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueView) {
+func FileViewStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
 	finf, ok := slice.([]*FileInfo)
 	if ok {
 		gi := widg.AsNode2D()
@@ -161,20 +162,20 @@ func FileViewStyleFunc(slice interface{}, widg Node2D, row, col int, vv ValueVie
 
 // SetFrame configures view as a frame
 func (fv *FileView) SetFrame() {
-	fv.Lay = LayoutCol
+	fv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Layout, "path-row")
-	config.Add(KiT_Space, "path-space")
-	config.Add(KiT_Layout, "files-row")
-	config.Add(KiT_Space, "files-space")
-	config.Add(KiT_Layout, "sel-row")
-	config.Add(KiT_Space, "sel-space")
-	config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Layout, "path-row")
+	config.Add(gi.KiT_Space, "path-space")
+	config.Add(gi.KiT_Layout, "files-row")
+	config.Add(gi.KiT_Space, "files-space")
+	config.Add(gi.KiT_Layout, "sel-row")
+	config.Add(gi.KiT_Space, "sel-space")
+	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -194,31 +195,31 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 }
 
 func (fv *FileView) ConfigPathRow() {
-	pr := fv.ChildByName("path-row", 0).(*Layout)
-	pr.Lay = LayoutRow
+	pr := fv.ChildByName("path-row", 0).(*gi.Layout)
+	pr.Lay = gi.LayoutRow
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Label, "path-lbl")
-	config.Add(KiT_TextField, "path")
-	config.Add(KiT_Action, "path-up")
+	config.Add(gi.KiT_Label, "path-lbl")
+	config.Add(gi.KiT_TextField, "path")
+	config.Add(gi.KiT_Action, "path-up")
 	pr.ConfigChildren(config, false) // already covered by parent update
-	pl := pr.ChildByName("path-lbl", 0).(*Label)
+	pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
 	pl.Text = "Path:"
 	pf := fv.PathField()
 	pf.SetMinPrefWidth(units.NewValue(30.0, units.Em))
 	pf.SetStretchMaxWidth()
 	pf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-			pff, _ := send.(*TextField)
+			pff, _ := send.(*gi.TextField)
 			fvv.DirPath = pff.Text()
 			fvv.SetFullReRender()
 			fvv.UpdateFiles()
 		}
 	})
 
-	pu := pr.ChildByName("path-up", 0).(*Action)
-	pu.Icon = IconName("widget-wedge-up")
+	pu := pr.ChildByName("path-up", 0).(*gi.Action)
+	pu.Icon = gi.IconName("widget-wedge-up")
 	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
@@ -226,10 +227,10 @@ func (fv *FileView) ConfigPathRow() {
 }
 
 func (fv *FileView) ConfigFilesRow() {
-	fr := fv.ChildByName("files-row", 2).(*Layout)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
-	fr.Lay = LayoutRow
+	fr.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
 	// todo: add favorites, dir tree
 	config.Add(KiT_StructTableView, "files-view")
@@ -248,53 +249,53 @@ func (fv *FileView) ConfigFilesRow() {
 }
 
 func (fv *FileView) ConfigSelRow() {
-	sr := fv.ChildByName("sel-row", 4).(*Layout)
-	sr.Lay = LayoutRow
+	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	sr.Lay = gi.LayoutRow
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Label, "sel-lbl")
-	config.Add(KiT_TextField, "sel")
+	config.Add(gi.KiT_Label, "sel-lbl")
+	config.Add(gi.KiT_TextField, "sel")
 	sr.ConfigChildren(config, false) // already covered by parent update
-	sl := sr.ChildByName("sel-lbl", 0).(*Label)
+	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
 	sf := fv.SelField()
 	sf.SetMinPrefWidth(units.NewValue(30.0, units.Em))
 	sf.SetStretchMaxWidth()
 	sf.GrabFocus()
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-			pff, _ := send.(*TextField)
+			pff, _ := send.(*gi.TextField)
 			fvv.SelFile = pff.Text()
 		}
 	})
 }
 
 // PathField returns the TextField of the path
-func (fv *FileView) PathField() *TextField {
-	pr := fv.ChildByName("path-row", 0).(*Layout)
-	return pr.ChildByName("path", 1).(*TextField)
+func (fv *FileView) PathField() *gi.TextField {
+	pr := fv.ChildByName("path-row", 0).(*gi.Layout)
+	return pr.ChildByName("path", 1).(*gi.TextField)
 }
 
 // FilesView returns the StructTableView of the files
 func (fv *FileView) FilesView() *StructTableView {
-	fr := fv.ChildByName("files-row", 2).(*Layout)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	return fr.ChildByName("files-view", 0).(*StructTableView)
 }
 
 // SelField returns the TextField of the selected file
-func (fv *FileView) SelField() *TextField {
-	sr := fv.ChildByName("sel-row", 4).(*Layout)
-	return sr.ChildByName("sel", 1).(*TextField)
+func (fv *FileView) SelField() *gi.TextField {
+	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	return sr.ChildByName("sel", 1).(*gi.TextField)
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (fv *FileView) ButtonBox() (*Layout, int) {
+func (fv *FileView) ButtonBox() (*gi.Layout, int) {
 	idx := fv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return fv.Child(idx).(*Layout), idx
+	return fv.Child(idx).(*gi.Layout), idx
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -320,7 +321,7 @@ func (fv *FileView) UpdateFiles() {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", fv.DirPath, err)
 			if fv.Viewport != nil {
-				PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
+				gi.PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
 			} else {
 				log.Printf("gi.FileView error: %v\n", emsg)
 			}
@@ -384,9 +385,9 @@ func (fv *FileView) FileSelect(idx int) {
 func (fv *FileView) ConfigButtons() {
 	// bb, _ := fv.ButtonBox()
 	// config := kit.TypeAndNameList{}
-	// config.Add(KiT_Button, "Add")
+	// config.Add(gi.KiT_Button, "Add")
 	// mods, updt := bb.ConfigChildren(config, false)
-	// addb := bb.ChildByName("Add", 0).EmbeddedStruct(KiT_Button).(*Button)
+	// addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*Button)
 	// addb.SetText("Add")
 	// addb.ButtonSig.ConnectOnly(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	if sig == int64(ButtonClicked) {

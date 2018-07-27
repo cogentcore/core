@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
 	"reflect"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -23,7 +24,7 @@ import (
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
 type StructView struct {
-	Frame
+	gi.Frame
 	Struct     interface{} `desc:"the struct that we are a view onto"`
 	Title      string      `desc:"title / prompt to show above the editor fields"`
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
@@ -34,12 +35,12 @@ type StructView struct {
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
 var StructViewProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &gi.Prefs.BackgroundColor,
+	"color":            &gi.Prefs.FontColor,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     AlignCenter,
-		"vertical-align": AlignTop,
+		"text-align":     gi.AlignCenter,
+		"vertical-align": gi.AlignTop,
 	},
 }
 
@@ -67,18 +68,18 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 
 // SetFrame configures view as a frame
 func (sv *StructView) SetFrame() {
-	sv.Lay = LayoutCol
+	sv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Label, "title")
-	config.Add(KiT_Space, "title-space")
-	config.Add(KiT_Frame, "struct-grid")
-	config.Add(KiT_Space, "grid-space")
-	config.Add(KiT_Layout, "buttons")
+	config.Add(gi.KiT_Label, "title")
+	config.Add(gi.KiT_Space, "title-space")
+	config.Add(gi.KiT_Frame, "struct-grid")
+	config.Add(gi.KiT_Space, "grid-space")
+	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -102,32 +103,32 @@ func (sv *StructView) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil,
 // -1 if not found
-func (sv *StructView) TitleWidget() (*Label, int) {
+func (sv *StructView) TitleWidget() (*gi.Label, int) {
 	idx := sv.ChildIndexByName("title", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Label), idx
+	return sv.Child(idx).(*gi.Label), idx
 }
 
 // StructGrid returns the grid layout widget, which contains all the fields
 // and values, and its index, within frame -- nil, -1 if not found
-func (sv *StructView) StructGrid() (*Frame, int) {
+func (sv *StructView) StructGrid() (*gi.Frame, int) {
 	idx := sv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Frame), idx
+	return sv.Child(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame
 // -- nil, -1 if not found
-func (sv *StructView) ButtonBox() (*Layout, int) {
+func (sv *StructView) ButtonBox() (*gi.Layout, int) {
 	idx := sv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*Layout), idx
+	return sv.Child(idx).(*gi.Layout), idx
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -139,8 +140,8 @@ func (sv *StructView) ConfigStructGrid() {
 	if sg == nil {
 		return
 	}
-	sg.Lay = LayoutGrid
-	sg.Stripes = RowStripes
+	sg.Lay = gi.LayoutGrid
+	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
@@ -166,7 +167,7 @@ func (sv *StructView) ConfigStructGrid() {
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
 		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(KiT_Label, labnm)
+		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
@@ -178,7 +179,7 @@ func (sv *StructView) ConfigStructGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sg.Child(i * 2).(*Label)
+		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
@@ -192,7 +193,7 @@ func (sv *StructView) ConfigStructGrid() {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
-		widg := sg.Child((i * 2) + 1).(Node2D)
+		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
@@ -224,7 +225,7 @@ func (sv *StructView) UpdateFields() {
 // properties -- constructs widgets in Parts to show the field names and
 // editor fields for each field
 type StructViewInline struct {
-	PartsWidgetBase
+	gi.PartsWidgetBase
 	Struct     interface{} `desc:"the struct that we are a view onto"`
 	AddAction  bool        `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
@@ -263,7 +264,7 @@ func (sv *StructViewInline) ConfigParts() {
 	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
-	sv.Parts.Lay = LayoutRow
+	sv.Parts.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
@@ -283,20 +284,20 @@ func (sv *StructViewInline) ConfigParts() {
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
 		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(KiT_Label, labnm)
+		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
 	if sv.AddAction {
-		config.Add(KiT_Action, "edit-action")
+		config.Add(gi.KiT_Action, "edit-action")
 	}
 	mods, updt := sv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sv.Parts.Child(i * 2).(*Label)
+		lbl := sv.Parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
@@ -310,7 +311,7 @@ func (sv *StructViewInline) ConfigParts() {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
-		widg := sv.Parts.Child((i * 2) + 1).(Node2D)
+		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
 	sv.Parts.UpdateEnd(updt)
