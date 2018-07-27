@@ -109,6 +109,12 @@ func mainrun() {
 	zmlb.SetProp("align-vert", gi.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
+	zoomout.SetProp("margin", 0)
+	zoomout.SetProp("padding", 0)
+	zoomout.SetProp("#icon", ki.Props{
+		"width":  units.NewValue(1.5, units.Em),
+		"height": units.NewValue(1.5, units.Em),
+	})
 	zoomout.SetIcon("zoom-out")
 	zoomout.Tooltip = "zoom out"
 
@@ -122,11 +128,11 @@ func mainrun() {
 	zoomin.Tooltip = "zoom in"
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
-	zoomin.SetIcon("zoom-in")
-	zoomin.SetProp("#icon", ki.Props{ // todo: not working
-		"width":  units.NewValue(2, units.Em),
-		"height": units.NewValue(2, units.Em),
+	zoomin.SetProp("#icon", ki.Props{
+		"width":  units.NewValue(1.5, units.Em),
+		"height": units.NewValue(1.5, units.Em),
 	})
+	zoomin.SetIcon("zoom-in")
 
 	brow.AddNewChild(gi.KiT_Space, "spctr")
 	trlb := brow.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)

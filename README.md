@@ -95,8 +95,6 @@ Currently at an **alpha** level release:
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away?
 
-* #icon props not getting used for resizing icons in button.
-
 * CSSAgg needs a tag for no-inline -- don't inline its map ever
 * also, inline choice could be smarter if we knew what was in the map, but...
 
@@ -118,8 +116,6 @@ Currently at an **alpha** level release:
 * scroll should go to the sub-widget first before going to the layout: add a First and Last event signal in addition to the regular one, plus registering for each.
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?
-
-* menu separator not rendering..
 
 * add MenuBar / Toolbar -- just a layout really, with some styling?
 

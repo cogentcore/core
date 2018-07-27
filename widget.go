@@ -231,11 +231,8 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 		}
 		sp = ki.SubProps(g.Properties(), stynm)
 		if sp != nil {
-			if fill, ok := sp["fill"]; ok {
-				ic.SetProp("fill", fill)
-			}
-			if stroke, ok := sp["stroke"]; ok {
-				ic.SetProp("stroke", stroke)
+			for k, v := range sp {
+				ic.SetProp(k, v)
 			}
 		}
 	}

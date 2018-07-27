@@ -101,9 +101,9 @@ func mainrun() {
 	brow.SetStretchMaxWidth()
 
 	button1 := brow.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
-	button1.SetProp("#icon", ki.Props{ // todo: not working
-		"width":  units.NewValue(2, units.Em),
-		"height": units.NewValue(2, units.Em),
+	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
+		"width":  units.NewValue(1.5, units.Em),
+		"height": units.NewValue(1.5, units.Em),
 	})
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
