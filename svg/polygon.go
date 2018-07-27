@@ -19,7 +19,8 @@ type Polygon struct {
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
 
 func (g *Polygon) Render2D() {
-	if len(g.Points) < 2 {
+	sz := len(g.Points)
+	if sz < 2 {
 		return
 	}
 	pc := &g.Pnt
