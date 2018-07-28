@@ -40,8 +40,8 @@ func mainrun() {
 
 	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
-	row1.SetProp("align-vert", gi.AlignMiddle)
-	row1.SetProp("align-horiz", "center")
+	row1.SetProp("vertical-align", gi.AlignMiddle)
+	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
@@ -58,8 +58,8 @@ func mainrun() {
 	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
 	grid.SetProp("columns", 11)
-	grid.SetProp("align-vert", "center")
-	grid.SetProp("align-horiz", "center")
+	grid.SetProp("vertical-align", "center")
+	grid.SetProp("horizontal-align", "center")
 	grid.SetProp("margin", 2.0)
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()

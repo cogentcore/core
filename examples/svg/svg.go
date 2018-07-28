@@ -82,7 +82,7 @@ func mainrun() {
 
 	svgrow := vlay.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
 	svgrow.Lay = gi.LayoutRow
-	svgrow.SetProp("align-horiz", "center")
+	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()
 	svgrow.SetStretchMaxHeight()
@@ -106,7 +106,7 @@ func mainrun() {
 
 	zmlb := brow.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
 	zmlb.Text = "Zoom: "
-	zmlb.SetProp("align-vert", gi.AlignMiddle)
+	zmlb.SetProp("vertical-align", gi.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
 	zoomout.SetProp("margin", 0)
@@ -138,7 +138,7 @@ func mainrun() {
 	trlb := brow.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
 	trlb.Text = "Translate: "
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
-	trlb.SetProp("align-vert", gi.AlignMiddle)
+	trlb.SetProp("vertical-align", gi.AlignMiddle)
 
 	trx := brow.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))

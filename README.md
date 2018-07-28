@@ -91,6 +91,8 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
+* inline map showing up centered instead of left aligned?
+
 * fileview for favorites -- stateful fileview
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 * search for structtableview, treeview

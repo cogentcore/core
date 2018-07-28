@@ -59,7 +59,7 @@ func mainrun() {
 	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
 	grid.SetProp("columns", nColumns)
-	grid.SetProp("align-horiz", "center")
+	grid.SetProp("horizontal-align", "center")
 	grid.SetProp("margin", 2.0)
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()
@@ -80,7 +80,7 @@ func mainrun() {
 		smico.SetProp("background-color", color.Transparent)
 		smico.SetProp("fill", "#88F")
 		smico.SetProp("stroke", "black")
-		smico.SetProp("align-horiz", gi.AlignCenter)
+		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
 		ico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
 		ico.SetIcon(icnm)
@@ -89,7 +89,7 @@ func mainrun() {
 		ico.SetProp("background-color", color.Transparent)
 		ico.SetProp("fill", "#88F")
 		ico.SetProp("stroke", "black")
-		ico.SetProp("align-horiz", gi.AlignCenter)
+		// ico.SetProp("horizontal-align", gi.AlignLeft)
 		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
 		nmlbl.Text = icnm
 	}

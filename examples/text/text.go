@@ -54,7 +54,7 @@ Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>
 <q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 and Sub<sub>script</sub> and Super<sup>script</sup>`
 	title.SetProp("text-align", gi.AlignRight)
-	title.SetProp("align-vert", gi.AlignTop)
+	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("letter-spacing", 2)

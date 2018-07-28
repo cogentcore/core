@@ -78,7 +78,7 @@ func mainrun() {
 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
 <kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
 	title.SetProp("text-align", gi.AlignCenter)
-	title.SetProp("align-vert", gi.AlignTop)
+	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("letter-spacing", 2)
@@ -95,8 +95,8 @@ func mainrun() {
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutRow
-	brow.SetProp("align-horiz", gi.AlignLeft)
-	// brow.SetProp("align-horiz", gi.AlignJustify)
+	brow.SetProp("horizontal-align", gi.AlignLeft)
+	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
 
 	button1 := brow.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
@@ -161,7 +161,7 @@ func mainrun() {
 
 	srow := vlay.AddNewChild(gi.KiT_Layout, "srow").(*gi.Layout)
 	srow.Lay = gi.LayoutRow
-	srow.SetProp("align-horiz", "left")
+	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
 	slider1 := srow.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
@@ -226,7 +226,7 @@ func mainrun() {
 	txlab.Text = "Text Widgets:"
 	txrow := vlay.AddNewChild(gi.KiT_Layout, "txrow").(*gi.Layout)
 	txrow.Lay = gi.LayoutRow
-	// txrow.SetProp("align-horiz", gi.AlignJustify)
+	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 	// txrow.SetStretchMaxHeight()
 

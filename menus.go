@@ -232,13 +232,13 @@ type Separator struct {
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
 var SeparatorProps = ki.Props{
-	"padding":      units.NewValue(2, units.Px),
-	"margin":       units.NewValue(2, units.Px),
-	"align-vert":   AlignCenter,
-	"align-horiz":  AlignCenter,
-	"stroke-width": units.NewValue(2, units.Px),
-	"color":        &Prefs.FontColor,
-	"stroke":       &Prefs.FontColor,
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"vertical-align":   AlignCenter,
+	"horizontal-align": AlignCenter,
+	"stroke-width":     units.NewValue(2, units.Px),
+	"color":            &Prefs.FontColor,
+	"stroke":           &Prefs.FontColor,
 	// todo: dotted
 }
 

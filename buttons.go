@@ -17,8 +17,28 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Buttons
+// todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
+
+// ButtonBase has common button functionality for all buttons, including
+// Button, Action, MenuButton, CheckBox, etc
+type ButtonBase struct {
+	PartsWidgetBase
+	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
+	Icon         IconName             `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    IconName             `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+}
+
+var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
+
+var ButtonBaseProps = ki.Props{
+	"base-type": true, // excludes type from user selections
+}
 
 // these extend NodeBase NodeFlags to hold button state
 const (
@@ -95,29 +115,6 @@ func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
 var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
-
-// todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
-
-// ButtonBase has common button functionality for all buttons, including
-// Button, Action, MenuButton, CheckBox, etc
-type ButtonBase struct {
-	PartsWidgetBase
-	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         IconName             `xml:"icon" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Indicator    IconName             `xml:"indicator" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
-	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
-	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
-	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
-	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
-}
-
-var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
-
-var ButtonBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
-}
 
 // see menus.go for MakeMenuFunc, etc
 

@@ -132,6 +132,7 @@ func (mv *MapView) ConfigMapGrid() {
 
 	valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
+	valtypes = append(valtypes, reflect.TypeOf((*reflect.Type)(nil)).Elem())
 
 	sg.SetProp("columns", ncol)
 

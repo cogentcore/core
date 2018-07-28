@@ -83,7 +83,7 @@ func mainrun() {
 
 	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutRow
-	trow.SetProp("align-horiz", "center")
+	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 

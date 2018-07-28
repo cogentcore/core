@@ -19,21 +19,6 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 // SliderBase -- basis for sliders
 
-// signals that sliders can send
-type SliderSignals int64
-
-const (
-	// value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end
-	SliderValueChanged SliderSignals = iota
-	// slider pushed down but not yet up
-	SliderPressed
-	SliderReleased
-	SliderMoved
-	SliderSignalsN
-)
-
-//go:generate stringer -type=SliderSignals
-
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size
@@ -50,7 +35,7 @@ type SliderBase struct {
 	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
 	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
 	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Icon        IconName             `json:"-" xml:"-" desc:"optional icon for the dragging knob"`
+	Icon        IconName             `view:"show-name" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
@@ -72,6 +57,21 @@ var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
+
+// signals that sliders can send
+type SliderSignals int64
+
+const (
+	// value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end
+	SliderValueChanged SliderSignals = iota
+	// slider pushed down but not yet up
+	SliderPressed
+	SliderReleased
+	SliderMoved
+	SliderSignalsN
+)
+
+//go:generate stringer -type=SliderSignals
 
 // mutually-exclusive slider states -- determines appearance
 type SliderStates int32
@@ -429,7 +429,8 @@ func initSlider() *StyledFields {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Slider
 
-// Slider is a standard value slider with a fixed-sized thumb knob -- if an Icon is set, it is used for the knob of the slider
+// Slider is a standard value slider with a fixed-sized thumb knob -- if an
+// Icon is set, it is used for the knob of the slider
 type Slider struct {
 	SliderBase
 }

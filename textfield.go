@@ -5,15 +5,10 @@
 package gi
 
 import (
-	"fmt"
 	"image"
-	"image/color"
-	"log"
-	"reflect"
-	"sort"
-	"strconv"
 	"unicode"
-	"unicode/utf8"
+
+	"strings"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
@@ -24,125 +19,59 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"strings"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Labeler Interface and ToLabel method
-
-// the labeler interface provides a GUI-appropriate label (todo: rich text
-// html tags!?) for an item -- use ToLabel converter to attempt to use this
-// interface and then fall back on Stringer via kit.ToString conversion
-// function
-type Labeler interface {
-	Label() string
-}
-
-// ToLabel returns the gui-appropriate label for an item, using the Labeler
-// interface if it is defined, and falling back on kit.ToString converter
-// otherwise -- also contains label impls for basic interface types for which
-// we cannot easily define the Labeler interface
-func ToLabel(it interface{}) string {
-	lbler, ok := it.(Labeler)
-	if !ok {
-		// typ := reflect.TypeOf(it)
-		// if kit.EmbeddedTypeImplements(typ, reflect.TypeOf((*reflect.Type)(nil)).Elem()) {
-		// 	to, ok :=
-		// }
-		switch v := it.(type) {
-		case reflect.Type:
-			return v.Name()
-		}
-		return kit.ToString(it)
-	}
-	return lbler.Label()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Label
-
-// Label is a widget for rendering text labels -- supports full widget model
-// including box rendering
-type Label struct {
-	WidgetBase
-	Text   string     `xml:"text" desc:"label to display"`
-	Render TextRender `xml:"-" json:"-" desc:"render data for text label"`
-}
-
-var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
-
-var LabelProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
-	"vertical-align":   AlignTop,
-	"color":            &Prefs.FontColor,
-	"background-color": color.Transparent,
-}
-
-// SetText sets the text and updates the rendered version
-func (g *Label) SetText(txt string) {
-	g.Text = txt
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	spc := g.Sty.BoxSpace()
-	sz := g.LayData.AllocSize
-	if sz.IsZero() {
-		sz = g.LayData.SizePrefOrMax()
-	}
-	if !sz.IsZero() {
-		sz.SetSubVal(2 * spc)
-	}
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
-}
-
-// SetTextAction sets the text and triggers an update action
-func (g *Label) SetTextAction(txt string) {
-	g.SetText(txt)
-	g.UpdateSig()
-}
-
-func (g *Label) Style2D() {
-	g.Style2DWidget()
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	spc := g.Sty.BoxSpace()
-	sz := g.LayData.SizePrefOrMax()
-	if !sz.IsZero() {
-		sz.SetSubVal(2 * spc)
-	}
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
-}
-
-func (g *Label) Size2D() {
-	g.InitLayout2D()
-	g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
-}
-
-func (g *Label) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true)
-	g.Layout2DChildren()
-	sz := g.Size2DSubSpace()
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
-}
-
-func (g *Label) Render2D() {
-	if g.FullReRenderIfNeeded() {
-		return
-	}
-	if g.PushBounds() {
-		g.WidgetEvents()
-		st := &g.Sty
-		rs := &g.Viewport.Render
-		g.RenderStdBox(st)
-		pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
-		g.Render.Render(rs, pos)
-		g.Render2DChildren()
-		g.PopBounds()
-	} else {
-		g.DisconnectAllEvents()
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
 // TextField
+
+// TextField is a widget for editing a line of text
+type TextField struct {
+	WidgetBase
+	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
+	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
+	CursorPos    int                     `xml:"-" desc:"current cursor position"`
+	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	Cmpltr       SampleCompleter         `json:"-" xml:"-" desc:"current text completer"`
+	UseCmpltr    bool                    `json:"-" xml:"-" desc:"offer completion, or not"`
+}
+
+var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
+
+var TextFieldProps = ki.Props{
+	"border-width":     units.NewValue(1, units.Px),
+	"border-color":     &Prefs.BorderColor,
+	"border-style":     BorderSolid,
+	"padding":          units.NewValue(4, units.Px),
+	"margin":           units.NewValue(1, units.Px),
+	"text-align":       AlignLeft,
+	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.ControlColor,
+	TextFieldSelectors[TextFieldActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
+	TextFieldSelectors[TextFieldFocus]: ki.Props{
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "samelight-80",
+	},
+	TextFieldSelectors[TextFieldInactive]: ki.Props{
+		"background-color": "highlight-20",
+	},
+	TextFieldSelectors[TextFieldSel]: ki.Props{
+		"background-color": &Prefs.SelectColor,
+	},
+}
 
 // signals that buttons can send
 type TextFieldSignals int64
@@ -182,55 +111,6 @@ const (
 
 // Style selector names for the different states
 var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
-
-// TextField is a widget for editing a line of text
-type TextField struct {
-	WidgetBase
-	Txt           string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Edited        bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	EditTxt       []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	MaxWidthReq   int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	StartPos      int                     `xml:"-" desc:"starting display position in the string"`
-	EndPos        int                     `xml:"-" desc:"ending display position in the string"`
-	CursorPos     int                     `xml:"-" desc:"current cursor position"`
-	CharWidth     int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart   int                     `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd     int                     `xml:"-" desc:"ending position of selection in the string"`
-	SelectMode    bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal                `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    TextRender               `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender               `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles  [TextFieldStatesN]Style  `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight   float32                  `json:"-" xml:"-" desc:"font height, cached during styling"`
-	Cmpltr       SampleCompleter          `json:"-" xml:"-" desc:"current text completer"`
-	UseCmpltr    bool                     `json:"-" xml:"-" desc:"offer completion, or not"`
-}
-
-var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
-
-var TextFieldProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"border-color":     &Prefs.BorderColor,
-	"border-style":     BorderSolid,
-	"padding":          units.NewValue(4, units.Px),
-	"margin":           units.NewValue(1, units.Px),
-	"text-align":       AlignLeft,
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.ControlColor,
-	TextFieldSelectors[TextFieldActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	TextFieldSelectors[TextFieldFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "samelight-80",
-	},
-	TextFieldSelectors[TextFieldInactive]: ki.Props{
-		"background-color": "highlight-20",
-	},
-	TextFieldSelectors[TextFieldSel]: ki.Props{
-		"background-color": &Prefs.SelectColor,
-	},
-}
 
 // Text returns the current text -- applies any unapplied changes first
 func (tf *TextField) Text() string {
@@ -648,7 +528,7 @@ func (tf *TextField) OfferCompletions() {
 		m = tf.MakeCompletionMenu(m, tf.Cmpltr)
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
-		vp := PopupMenu(m, cpos.X + 15, cpos.Y + 50, tf.Viewport, "tfCompletionMenu")
+		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tfCompletionMenu")
 		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
 	}
 }
@@ -683,7 +563,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if PopupIsCompleter(tf.ParentWindow().Popup) {
 		switch kf {
 		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
-		// todo: extend needs to be implemented in the Completer
+			// todo: extend needs to be implemented in the Completer
 			if tf.Cmpltr.Count() == 1 {
 				tf.Complete(tf.Cmpltr.matches[0])
 				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
@@ -1148,557 +1028,8 @@ func (tf *TextField) Render2D() {
 }
 
 func (tf *TextField) FocusChanged2D(gotFocus bool) {
- 	if !gotFocus && !tf.IsInactive() {
+	if !gotFocus && !tf.IsInactive() {
 		tf.EditDone() // lose focus
 	}
 	tf.UpdateSig()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// SpinBox
-
-//go:generate stringer -type=TextFieldSignals
-
-// SpinBox combines a TextField with up / down buttons for incrementing /
-// decrementing values -- all configured within the Parts of the widget
-type SpinBox struct {
-	PartsWidgetBase
-	Value      float32   `xml:"value" desc:"current value"`
-	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
-	Min        float32   `xml:"min" desc:"minimum value in range"`
-	HasMax     bool      `xml:"has-max" desc:"is there a maximumvalue to enforce"`
-	Max        float32   `xml:"max" desc:"maximum value in range"`
-	Step       float32   `xml:"step" desc:"smallest step size to increment"`
-	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	UpIcon     IconName  `json:"-" xml:"-" desc:"icon to use for up button -- defaults to widget-wedge-up"`
-	DownIcon   IconName  `json:"-" xml:"-" desc:"icon to use for down button -- defaults to widget-wedge-down"`
-	SpinBoxSig ki.Signal `json:"-" xml:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
-}
-
-var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
-
-var SpinBoxProps = ki.Props{
-	"#buttons": ki.Props{
-		"vert-align": AlignMiddle,
-	},
-	"#up": ki.Props{
-		"max-width":  units.NewValue(1.5, units.Ex),
-		"max-height": units.NewValue(1.5, units.Ex),
-		"margin":     units.NewValue(1, units.Px),
-		"padding":    units.NewValue(0, units.Px),
-		"fill":       &Prefs.IconColor,
-		"stroke":     &Prefs.FontColor,
-	},
-	"#down": ki.Props{
-		"max-width":  units.NewValue(1.5, units.Ex),
-		"max-height": units.NewValue(1.5, units.Ex),
-		"margin":     units.NewValue(1, units.Px),
-		"padding":    units.NewValue(0, units.Px),
-		"fill":       &Prefs.IconColor,
-		"stroke":     &Prefs.FontColor,
-	},
-	"#space": ki.Props{
-		"width": units.NewValue(.1, units.Ex),
-	},
-	"#text-field": ki.Props{
-		"min-width": units.NewValue(4, units.Ex),
-		"width":     units.NewValue(8, units.Ex),
-		"margin":    units.NewValue(2, units.Px),
-		"padding":   units.NewValue(2, units.Px),
-	},
-}
-
-func (g *SpinBox) Defaults() { // todo: should just get these from props
-	g.Step = 0.1
-	g.PageStep = 0.2
-	g.Max = 1.0
-	g.Prec = 6
-}
-
-// SetMin sets the min limits on the value
-func (g *SpinBox) SetMin(min float32) {
-	g.HasMin = true
-	g.Min = min
-}
-
-// SetMax sets the max limits on the value
-func (g *SpinBox) SetMax(max float32) {
-	g.HasMax = true
-	g.Max = max
-}
-
-// SetMinMax sets the min and max limits on the value
-func (g *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) {
-	g.HasMin = hasMin
-	g.Min = min
-	g.HasMax = hasMax
-	g.Max = max
-	if g.Max < g.Min {
-		log.Printf("gi.SpinBox SetMinMax: max was less than min -- disabling limits\n")
-		g.HasMax = false
-		g.HasMin = false
-	}
-}
-
-// SetValue sets the value, enforcing any limits, and updates the display
-func (g *SpinBox) SetValue(val float32) {
-	updt := g.UpdateStart()
-	defer g.UpdateEnd(updt)
-	if g.Prec == 0 {
-		g.Defaults()
-	}
-	g.Value = val
-	if g.HasMax {
-		g.Value = Min32(g.Value, g.Max)
-	}
-	if g.HasMin {
-		g.Value = Max32(g.Value, g.Min)
-	}
-	g.Value = Truncate32(g.Value, g.Prec)
-}
-
-// SetValueAction calls SetValue and also emits the signal
-func (g *SpinBox) SetValueAction(val float32) {
-	g.SetValue(val)
-	g.SpinBoxSig.Emit(g.This, 0, g.Value)
-}
-
-// IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
-func (g *SpinBox) IncrValue(steps float32) {
-	val := g.Value + steps*g.Step
-	val = FloatMod32(val, g.Step)
-	g.SetValueAction(val)
-}
-
-// internal indexes for accessing elements of the widget
-const (
-	sbTextFieldIdx = iota
-	sbSpaceIdx
-	sbButtonsIdx
-)
-
-func (g *SpinBox) ConfigParts() {
-	if g.UpIcon.IsNil() {
-		g.UpIcon = IconName("widget-wedge-up")
-	}
-	if g.DownIcon.IsNil() {
-		g.DownIcon = IconName("widget-wedge-down")
-	}
-	g.Parts.Lay = LayoutRow
-	g.Parts.SetProp("vert-align", AlignMiddle) // todo: style..
-	config := kit.TypeAndNameList{}
-	config.Add(KiT_TextField, "text-field")
-	config.Add(KiT_Space, "space")
-	config.Add(KiT_Layout, "buttons")
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	if mods {
-		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
-		buts.Lay = LayoutCol
-		g.StylePart(Node2D(buts))
-		buts.SetNChildren(2, KiT_Action, "but")
-		// up
-		up := buts.Child(0).(*Action)
-		up.SetName("up")
-		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
-		up.Icon = g.UpIcon
-		g.StylePart(Node2D(up))
-		if !g.IsInactive() {
-			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-				sb.IncrValue(1.0)
-			})
-		}
-		// dn
-		dn := buts.Child(1).(*Action)
-		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
-		dn.SetName("down")
-		dn.Icon = g.DownIcon
-		g.StylePart(Node2D(dn))
-		if !g.IsInactive() {
-			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-				sb.IncrValue(-1.0)
-			})
-		}
-		// space
-		g.StylePart(g.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
-		// text-field
-		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
-		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
-		g.StylePart(Node2D(tf))
-		tf.Txt = fmt.Sprintf("%g", g.Value)
-		if !g.IsInactive() {
-			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(TextFieldDone) {
-					sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-					tf := send.(*TextField)
-					vl, err := strconv.ParseFloat(tf.Text(), 32)
-					if err == nil {
-						sb.SetValueAction(float32(vl))
-					}
-				}
-			})
-		}
-		g.UpdateEnd(updt)
-	}
-}
-
-func (g *SpinBox) ConfigPartsIfNeeded() {
-	if !g.Parts.HasChildren() {
-		g.ConfigParts()
-	}
-	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
-	txt := fmt.Sprintf("%g", g.Value)
-	if tf.Txt != txt {
-		tf.SetText(txt)
-	}
-}
-
-func (g *SpinBox) SpinBoxEvents() {
-	g.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
-		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-		sb.IncrValue(float32(me.NonZeroDelta(false)))
-		me.SetProcessed()
-	})
-}
-
-func (g *SpinBox) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
-}
-
-func (g *SpinBox) Style2D() {
-	if g.Step == 0 {
-		g.Defaults()
-	}
-	g.Style2DWidget()
-	g.ConfigParts()
-}
-
-func (g *SpinBox) Size2D() {
-	g.Size2DParts()
-	g.ConfigParts()
-}
-
-func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
-	g.ConfigPartsIfNeeded()
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
-	g.Layout2DChildren()
-}
-
-func (g *SpinBox) Render2D() {
-	if g.FullReRenderIfNeeded() {
-		return
-	}
-	if g.PushBounds() {
-		g.SpinBoxEvents()
-		// g.Sty = g.StateStyles[g.State] // get current styles
-		g.ConfigPartsIfNeeded()
-		g.Render2DChildren()
-		g.Render2DParts()
-		g.PopBounds()
-	} else {
-		g.DisconnectAllEvents()
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// ComboBox for selecting items from a list
-
-type ComboBox struct {
-	ButtonBase
-	Editable  bool          `desc:"provide a text field for editing the value, or just a button for selecting items?"`
-	CurVal    interface{}   `json:"-" xml:"-" desc:"current selected value"`
-	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
-	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
-	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	ComboSig  ki.Signal     `json:"-" xml:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
-	MaxLength int           `desc:"maximum label length (in runes)"`
-}
-
-var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
-
-var ComboBoxProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"border-radius":    units.NewValue(4, units.Px),
-	"border-color":     &Prefs.BorderColor,
-	"border-style":     BorderSolid,
-	"padding":          units.NewValue(4, units.Px),
-	"margin":           units.NewValue(4, units.Px),
-	"text-align":       AlignCenter,
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
-	"#icon": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.IconColor,
-		"stroke":  &Prefs.FontColor,
-	},
-	"#label": ki.Props{
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
-	},
-	"#indicator": ki.Props{
-		"width":          units.NewValue(1.5, units.Ex),
-		"height":         units.NewValue(1.5, units.Ex),
-		"margin":         units.NewValue(0, units.Px),
-		"padding":        units.NewValue(0, units.Px),
-		"vertical-align": AlignBottom,
-		"fill":           &Prefs.IconColor,
-		"stroke":         &Prefs.FontColor,
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
-		"color":            "highlight-90",
-	},
-}
-
-// ButtonWidget interface
-
-func (g *ComboBox) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
-}
-
-func (g *ComboBox) ButtonRelease() {
-	wasPressed := (g.State == ButtonDown)
-	updt := g.UpdateStart()
-	g.MakeItemsMenu()
-	g.SetButtonState(ButtonActive)
-	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
-	if wasPressed {
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
-	}
-	g.UpdateEnd(updt)
-	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
-	} else {
-		pos.Y -= 10
-		pos.X -= 10
-	}
-	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
-}
-
-func (g *ComboBox) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
-	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
-	g.ConfigPartsIndicator(indIdx)
-	if g.MaxLength > 0 && lbIdx >= 0 {
-		lbl := g.Parts.Child(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
-	}
-	if mods {
-		g.UpdateEnd(updt)
-	}
-}
-
-// MakeItems makes sure the Items list is made, and if not, or reset is true,
-// creates one with the given capacity
-func (g *ComboBox) MakeItems(reset bool, capacity int) {
-	if g.Items == nil || reset {
-		g.Items = make([]interface{}, 0, capacity)
-	}
-}
-
-// SortItems sorts the items according to their labels
-func (g *ComboBox) SortItems(ascending bool) {
-	sort.Slice(g.Items, func(i, j int) bool {
-		if ascending {
-			return ToLabel(g.Items[i]) < ToLabel(g.Items[j])
-		} else {
-			return ToLabel(g.Items[i]) > ToLabel(g.Items[j])
-		}
-	})
-}
-
-// SetToMaxLength gets the maximum label length so that the width of the
-// button label is automatically set according to the max length of all items
-// in the list -- if maxLen > 0 then it is used as an upper do-not-exceed
-// length
-func (g *ComboBox) SetToMaxLength(maxLen int) {
-	ml := 0
-	for _, it := range g.Items {
-		ml = kit.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
-	}
-	if maxLen > 0 {
-		ml = kit.MinInt(ml, maxLen)
-	}
-	g.MaxLength = ml
-}
-
-// ItemsFromTypes sets the Items list from a list of types -- see e.g.,
-// AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then
-// set current item to the first item in the list, sort sorts the list in
-// ascending order, and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit
-func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
-	sz := len(tl)
-	g.Items = make([]interface{}, sz)
-	for i, typ := range tl {
-		g.Items[i] = typ
-	}
-	if sort {
-		g.SortItems(true)
-	}
-	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
-	}
-	if setFirst {
-		g.SetCurIndex(0)
-	}
-}
-
-// ItemsFromStringList sets the Items list from a list of string values -- if
-// setFirst then set current item to the first item in the list, and maxLen if
-// > 0 auto-sets the width of the button to the contents, with the given upper
-// limit
-func (g *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
-	sz := len(el)
-	g.Items = make([]interface{}, sz)
-	for i, str := range el {
-		g.Items[i] = str
-	}
-	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
-	}
-	if setFirst {
-		g.SetCurIndex(0)
-	}
-}
-
-// ItemsFromEnumList sets the Items list from a list of enum values (see
-// kit.EnumRegistry) -- if setFirst then set current item to the first item in
-// the list, and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit
-func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
-	sz := len(el)
-	g.Items = make([]interface{}, sz)
-	for i, enum := range el {
-		g.Items[i] = enum
-	}
-	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
-	}
-	if setFirst {
-		g.SetCurIndex(0)
-	}
-}
-
-// ItemsFromEnum sets the Items list from an enum type, which must be
-// registered on kit.EnumRegistry -- if setFirst then set current item to the
-// first item in the list, and maxLen if > 0 auto-sets the width of the button
-// to the contents, with the given upper limit -- see kit.EnumRegistry, and
-// maxLen if > 0 auto-sets the width of the button to the contents, with the
-// given upper limit
-func (g *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
-	g.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
-}
-
-// FindItem finds an item on list of items and returns its index
-func (g *ComboBox) FindItem(it interface{}) int {
-	if g.Items == nil {
-		return -1
-	}
-	for i, v := range g.Items {
-		if v == it {
-			return i
-		}
-	}
-	return -1
-}
-
-// SetCurVal sets the current value (CurVal) and the corresponding CurIndex
-// for that item on the current Items list (adds to items list if not found)
-// -- returns that index -- and sets the text to the string value of that
-// value (using standard Stringer string conversion)
-func (g *ComboBox) SetCurVal(it interface{}) int {
-	g.CurVal = it
-	g.CurIndex = g.FindItem(it)
-	if g.CurIndex < 0 { // add to list if not found..
-		g.CurIndex = len(g.Items)
-		g.Items = append(g.Items, it)
-	}
-	g.SetText(ToLabel(it))
-	return g.CurIndex
-}
-
-// SetCurIndex sets the current index (CurIndex) and the corresponding CurVal
-// for that item on the current Items list (-1 if not found) -- returns value
-// -- and sets the text to the string value of that value (using standard
-// Stringer string conversion)
-func (g *ComboBox) SetCurIndex(idx int) interface{} {
-	g.CurIndex = idx
-	if idx < 0 || idx >= len(g.Items) {
-		g.CurVal = nil
-		g.SetText(fmt.Sprintf("idx %v > len", idx))
-	} else {
-		g.CurVal = g.Items[idx]
-		g.SetText(ToLabel(g.CurVal))
-	}
-	return g.CurVal
-}
-
-// SelectItem selects a given item and emits the index as the ComboSig signal
-// and the selected item as the data
-func (g *ComboBox) SelectItem(idx int) {
-	updt := g.UpdateStart()
-	g.SetCurIndex(idx)
-	g.ComboSig.Emit(g.This, int64(g.CurIndex), g.CurVal)
-	g.UpdateEnd(updt)
-}
-
-// MakeItemsMenu makes menu of all the items
-func (g *ComboBox) MakeItemsMenu() {
-	if g.ItemsMenu == nil {
-		g.ItemsMenu = make(Menu, 0, len(g.Items))
-	}
-	sz := len(g.ItemsMenu)
-	for i, it := range g.Items {
-		var ac *Action
-		if sz > i {
-			ac = g.ItemsMenu[i].(*Action)
-		} else {
-			ac = &Action{}
-			ac.Init(ac)
-			g.ItemsMenu = append(g.ItemsMenu, ac.This.(Node2D))
-		}
-		txt := ToLabel(it)
-		nm := fmt.Sprintf("Item_%v", i)
-		ac.SetName(nm)
-		ac.Text = txt
-		ac.Data = i // index is the data
-		ac.SetSelectedState(i == g.CurIndex)
-		ac.SetAsMenu()
-		ac.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			idx := data.(int)
-			cb := recv.(*ComboBox)
-			cb.SelectItem(idx)
-		})
-	}
 }

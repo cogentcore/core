@@ -194,6 +194,7 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
+		widg.SetProp("horizontal-align", gi.AlignLeft)
 		vv.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
@@ -235,7 +236,8 @@ type StructViewInline struct {
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
 
-// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
+// SetStruct sets the source struct that we are viewing -- rebuilds the
+// children to represent this struct
 func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 	updt := false
 	if sv.Struct != st {
@@ -256,7 +258,7 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 }
 
 var StructViewInlineProps = ki.Props{
-	"min-width": units.NewValue(20, units.Ex),
+	"min-width": units.NewValue(60, units.Ex),
 }
 
 // ConfigParts configures Parts for the current struct

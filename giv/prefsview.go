@@ -50,7 +50,7 @@ func PrefsEditor(p *gi.Preferences) {
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutRow
-	brow.SetProp("align-horiz", "center")
+	brow.SetProp("horizontal-align", "center")
 	brow.SetStretchMaxWidth()
 
 	up := brow.AddNewChild(gi.KiT_Button, "update").(*gi.Button)

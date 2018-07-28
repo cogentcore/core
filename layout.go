@@ -17,6 +17,89 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// todo: for style
+// Align = layouts
+// Flex -- flexbox -- https://www.w3schools.com/css/css3_flexbox.asp -- key to look at further for layout ideas
+// as is Position -- absolute, sticky, etc
+// Resize: user-resizability
+// z-index
+
+// CSS vs. Layout alignment
+//
+// CSS has align-self, align-items (for a container, provides a default for
+// items) and align-content which only applies to lines in a flex layout (akin
+// to a flow layout) -- there is a presumed horizontal aspect to these, except
+// align-content, so they are subsumed in the AlignH parameter in this style.
+// Vertical-align works as expected, and Text.Align uses left/center/right
+//
+// LayoutRow, Col both allow explicit Top/Left Center/Middle, Right/Bottom alignment
+// along with Justify and SpaceAround -- they use IsAlign functions
+
+// style preferences on the layout of the element
+type LayoutStyle struct {
+	ZIndex    int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH    Align       `xml:"horizontal-align" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV    Align       `xml:"vertical-align" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX      units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY      units.Value `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
+	Width     units.Value `xml:"width" desc:"specified size of element -- 0 if not specified"`
+	Height    units.Value `xml:"height" desc:"specified size of element -- 0 if not specified"`
+	MaxWidth  units.Value `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight units.Value `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth  units.Value `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight units.Value `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
+	Margin    units.Value `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding   units.Value `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	Overflow  Overflow    `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	Columns   int         `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
+	Row       int         `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
+	Col       int         `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
+	RowSpan   int         `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
+	ColSpan   int         `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
+
+	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
+}
+
+func (ls *LayoutStyle) Defaults() {
+	ls.AlignV = AlignMiddle
+	ls.MinWidth.Set(2.0, units.Px)
+	ls.MinHeight.Set(2.0, units.Px)
+	ls.ScrollBarWidth.Set(16.0, units.Px)
+}
+
+func (ls *LayoutStyle) SetStylePost(props ki.Props) {
+}
+
+// return the alignment for given dimension
+func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
+	switch d {
+	case X:
+		return ls.AlignH
+	default:
+		return ls.AlignV
+	}
+}
+
+// position settings, in dots
+func (ls *LayoutStyle) PosDots() Vec2D {
+	return NewVec2D(ls.PosX.Dots, ls.PosY.Dots)
+}
+
+// size settings, in dots
+func (ls *LayoutStyle) SizeDots() Vec2D {
+	return NewVec2D(ls.Width.Dots, ls.Height.Dots)
+}
+
+// size max settings, in dots
+func (ls *LayoutStyle) MaxSizeDots() Vec2D {
+	return NewVec2D(ls.MaxWidth.Dots, ls.MaxHeight.Dots)
+}
+
+// size min settings, in dots
+func (ls *LayoutStyle) MinSizeDots() Vec2D {
+	return NewVec2D(ls.MinWidth.Dots, ls.MinHeight.Dots)
+}
+
 // Align has all different types of alignment -- only some are applicable to
 // different contexts, but there is also so much overlap that it makes sense
 // to have them all in one list -- some are not standard CSS and used by
@@ -89,89 +172,6 @@ func (ev Overflow) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(e
 func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 //go:generate stringer -type=Overflow
-
-// todo: for style
-// Align = layouts
-// Flex -- flexbox -- https://www.w3schools.com/css/css3_flexbox.asp -- key to look at further for layout ideas
-// as is Position -- absolute, sticky, etc
-// Resize: user-resizability
-// z-index
-
-// CSS vs. Layout alignment
-//
-// CSS has align-self, align-items (for a container, provides a default for
-// items) and align-content which only applies to lines in a flex layout (akin
-// to a flow layout) -- there is a presumed horizontal aspect to these, except
-// align-content, so they are subsumed in the AlignH parameter in this style.
-// Vertical-align works as expected, and Text.Align uses left/center/right
-//
-// LayoutRow, Col both allow explicit Top/Left Center/Middle, Right/Bottom alignment
-// along with Justify and SpaceAround -- they use IsAlign functions
-
-// style preferences on the layout of the element
-type LayoutStyle struct {
-	ZIndex    int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH    Align       `xml:"align-self" alt:"horiz-align,align-horiz" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV    Align       `xml:"vertical-align" alt:"vert-align,align-vert" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX      units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY      units.Value `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width     units.Value `xml:"width" desc:"specified size of element -- 0 if not specified"`
-	Height    units.Value `xml:"height" desc:"specified size of element -- 0 if not specified"`
-	MaxWidth  units.Value `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight units.Value `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth  units.Value `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight units.Value `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
-	Margin    units.Value `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Padding   units.Value `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
-	Overflow  Overflow    `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
-	Columns   int         `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
-	Row       int         `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
-	Col       int         `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
-	RowSpan   int         `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
-	ColSpan   int         `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
-
-	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
-}
-
-func (ls *LayoutStyle) Defaults() {
-	ls.AlignV = AlignMiddle
-	ls.MinWidth.Set(2.0, units.Px)
-	ls.MinHeight.Set(2.0, units.Px)
-	ls.ScrollBarWidth.Set(16.0, units.Px)
-}
-
-func (ls *LayoutStyle) SetStylePost(props ki.Props) {
-}
-
-// return the alignment for given dimension
-func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
-	switch d {
-	case X:
-		return ls.AlignH
-	default:
-		return ls.AlignV
-	}
-}
-
-// position settings, in dots
-func (ls *LayoutStyle) PosDots() Vec2D {
-	return NewVec2D(ls.PosX.Dots, ls.PosY.Dots)
-}
-
-// size settings, in dots
-func (ls *LayoutStyle) SizeDots() Vec2D {
-	return NewVec2D(ls.Width.Dots, ls.Height.Dots)
-}
-
-// size max settings, in dots
-func (ls *LayoutStyle) MaxSizeDots() Vec2D {
-	return NewVec2D(ls.MaxWidth.Dots, ls.MaxHeight.Dots)
-}
-
-// size min settings, in dots
-func (ls *LayoutStyle) MinSizeDots() Vec2D {
-	return NewVec2D(ls.MinWidth.Dots, ls.MinHeight.Dots)
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Layout Data for actually computing the layout

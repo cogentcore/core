@@ -50,9 +50,9 @@ func mainrun() {
 	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
 	row1.Lay = gi.LayoutRow
 
-	row1.SetProp("align-vert", "top")
-	// row1.SetProp("align-horiz", "justify")
-	row1.SetProp("align-horiz", "left")
+	row1.SetProp("vertical-align", "top")
+	// row1.SetProp("horizontal-align", "justify")
+	row1.SetProp("horizontal-align", "left")
 	row1.SetProp("margin", 4.0)
 	row1.SetProp("max-width", -1) // always stretch width
 
@@ -61,8 +61,8 @@ func mainrun() {
 		fr := row1.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
-		fr.SetProp("align-vert", "inherit")
-		// fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("vertical-align", "inherit")
+		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		if i == 2 {
 			fr.SetFixedWidth(units.NewValue(20, units.Em))
@@ -78,9 +78,9 @@ func mainrun() {
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
 
-	row2.SetProp("align-vert", "center")
-	// row2.SetProp("align-horiz", "justify")
-	row2.SetProp("align-horiz", "left")
+	row2.SetProp("vertical-align", "center")
+	// row2.SetProp("horizontal-align", "justify")
+	row2.SetProp("horizontal-align", "left")
 	row2.SetProp("margin", 4.0)
 
 	for i, sz := range frsz {
@@ -88,8 +88,8 @@ func mainrun() {
 		fr := row2.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
-		fr.SetProp("align-vert", "inherit")
-		// fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("vertical-align", "inherit")
+		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		// if i == 2 {
 		// 	row2.AddNewChild(gi.KiT_Stretch, "str")
@@ -101,9 +101,9 @@ func mainrun() {
 	row3.SetProp("text-align", "center")
 	// row3.SetProp("max-width", -1) // always stretch width
 
-	row3.SetProp("align-vert", "bottom")
-	row3.SetProp("align-horiz", "justify")
-	// row3.SetProp("align-horiz", "left")
+	row3.SetProp("vertical-align", "bottom")
+	row3.SetProp("horizontal-align", "justify")
+	// row3.SetProp("horizontal-align", "left")
 	row3.SetProp("margin", 4.0)
 
 	for i, sz := range frsz {
@@ -112,8 +112,8 @@ func mainrun() {
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("min-height", sz.Y)
-		fr.SetProp("align-vert", "inherit")
-		// fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("vertical-align", "inherit")
+		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		// fr.SetProp("max-width", -1) // spacer
 	}
@@ -123,9 +123,9 @@ func mainrun() {
 	row4.SetProp("columns", 2)
 	// row4.SetProp("max-width", -1)
 
-	row4.SetProp("align-vert", "top")
-	// row4.SetProp("align-horiz", "justify")
-	row4.SetProp("align-horiz", "left")
+	row4.SetProp("vertical-align", "top")
+	// row4.SetProp("horizontal-align", "justify")
+	row4.SetProp("horizontal-align", "left")
 	row4.SetProp("margin", 6.0)
 
 	for i, sz := range frsz {
@@ -134,8 +134,8 @@ func mainrun() {
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		// fr.SetProp("min-height", sz.Y)
-		fr.SetProp("align-vert", "inherit")
-		fr.SetProp("align-horiz", "inherit")
+		fr.SetProp("vertical-align", "inherit")
+		fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", 2.0)
 		// fr.SetProp("max-width", -1) // spacer
 	}

@@ -6,6 +6,7 @@ package giv
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/goki/gi"
 	"github.com/goki/ki"
@@ -30,8 +31,17 @@ func (vv *IconValueView) WidgetType() reflect.Type {
 func (vv *IconValueView) UpdateWidget() {
 	cb := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "none"
+	}
+
+	inm := gi.IconName(txt)
 
 	cb.SetIcon(txt)
+	sntag := vv.ViewFieldTag("view")
+	if strings.Contains(sntag, "show-name") || (!inm.IsValid() || inm.IsNil()) {
+		cb.SetText(txt)
+	}
 }
 
 func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
