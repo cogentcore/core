@@ -141,9 +141,12 @@ type IconMgr interface {
 
 	// IconList returns the list of available icon names, optionally sorted
 	// alphabetically (otherwise in map-random order)
-	IconList(alphaSort bool) []string
+	IconList(alphaSort bool) []IconName
 }
 
 // TheIconMgr is set by loading the gi/svg package -- all final users must
 // import github/goki/gi/svg to get its init function
 var TheIconMgr IconMgr
+
+// CurIconList holds the current icon list, alpha sorted -- set at startup
+var CurIconList []IconName

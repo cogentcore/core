@@ -629,7 +629,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
 			})
 		} else {
-			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, "Slice Value View", "", nil, nil)
+			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice Value View", "", nil, nil)
 			sv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
 			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)

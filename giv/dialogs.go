@@ -66,8 +66,10 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 
 // SliceViewDialog for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore)
-func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+// dialog signals (nil to ignore). selectOnly turns it into a selector with no
+// editing of fields, and signal connection is to the selection signal, not
+// the overall dialog signal
+func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("slice-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
@@ -79,10 +81,15 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
+	sv.SetInactiveState(selectOnly)
 	sv.SetSlice(mp, tmpSave)
 
 	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+		if selectOnly {
+			sv.SelectSig.Connect(recv, fun)
+		} else {
+			dlg.DialogSig.Connect(recv, fun)
+		}
 	}
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
@@ -93,7 +100,7 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 
 // StructTableViewDialog is for editing / selecting fields of a
 // slice-of-struct using a StructTableView -- optionally connects to given
-// signal receiving object and function for signals (nil to ignore) --
+// signal receiving object and function for signals (nil to ignore).
 // selectOnly turns it into a selector with no editing of fields, and signal
 // connection is to the selection signal, not the overall dialog signal
 func StructTableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun StructTableViewStyleFunc) *gi.Dialog {
@@ -144,6 +151,13 @@ func FontInfoStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv Value
 			gi.SetProp("font-weight", (finf)[row].Weight)
 		}
 	}
+}
+
+// IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
+// if non-nil are connected to the selection signal for the slice view
+func IconChooserDialog(avp *gi.Viewport2D, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+	dlg := SliceViewDialog(avp, &gi.CurIconList, true, nil, title, prompt, recv, fun)
+	return dlg
 }
 
 // ColorViewDialog for editing a color using a ColorView -- optionally

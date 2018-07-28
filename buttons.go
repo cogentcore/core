@@ -103,7 +103,7 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 type ButtonBase struct {
 	PartsWidgetBase
 	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         IconName             `json:"-" xml:"-" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Icon         IconName             `xml:"icon" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName             `xml:"indicator" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
@@ -333,6 +333,9 @@ func SetButtonText(bw ButtonWidget, txt string) {
 func SetButtonIcon(bw ButtonWidget, iconName string) {
 	g := bw.ButtonAsBase()
 	updt := g.UpdateStart()
+	if g.Icon != IconName(iconName) {
+		g.SetFullReRender()
+	}
 	g.Icon = IconName(iconName)
 	g.This.(ButtonWidget).ConfigParts()
 	g.UpdateEnd(updt)

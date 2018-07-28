@@ -29,7 +29,6 @@ type SliceView struct {
 	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig     ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	SelectedIdx int         `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SelectSig   ki.Signal   `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
 	builtSlice  interface{}
 	builtSize   int
 }
@@ -118,80 +117,130 @@ func (sv *SliceView) ConfigSliceGrid() {
 	if sg == nil {
 		return
 	}
+	updt := sg.UpdateStart()
+	sg.SetFullReRender()
+	defer sg.UpdateEnd(updt)
+
+	nWidgPerRow := 2
+	if !sv.IsInactive() {
+		nWidgPerRow += 2
+	}
+
 	sg.Lay = gi.LayoutGrid
-	sg.SetProp("columns", 4)
+	sg.SetProp("columns", nWidgPerRow)
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
-	config := kit.TypeAndNameList{}
-	// always start fresh!
 
 	sv.Values = make([]ValueView, sz)
 
+	sg.DeleteChildren(true)
+	sg.Kids = make(ki.Slice, nWidgPerRow*sz)
+
+	sv.ConfigSliceGridRows()
+}
+
+// ConfigSliceGridRows configures the SliceGrid rows for the current slice --
+// assumes .Kids is created at the right size -- only call this for a direct
+// re-render e.g., after sorting
+func (sv *SliceView) ConfigSliceGridRows() {
+	mv := reflect.ValueOf(sv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+	sg, _ := sv.SliceGrid()
+
+	nWidgPerRow := 2
+	if !sv.IsInactive() {
+		nWidgPerRow += 2
+	}
+	updt := sg.UpdateStart()
+	defer sg.UpdateEnd(updt)
+
 	for i := 0; i < sz; i++ {
+		ridx := i * nWidgPerRow
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())
 		if vv == nil { // shouldn't happen
 			continue
 		}
 		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
+		sv.Values[i] = vv
 		vtyp := vv.WidgetType()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
 		valnm := fmt.Sprintf("value-%v", idxtxt)
-		addnm := fmt.Sprintf("add-%v", idxtxt)
-		delnm := fmt.Sprintf("del-%v", idxtxt)
-		config.Add(gi.KiT_Label, labnm)
-		config.Add(vtyp, valnm)
-		config.Add(gi.KiT_Action, addnm)
-		config.Add(gi.KiT_Action, delnm)
-		sv.Values[i] = vv
-	}
-	mods, updt := sg.ConfigChildren(config, false)
-	if mods {
-		sv.SetFullReRender()
-	} else {
-		updt = sg.UpdateStart()
-	}
-	for i, vv := range sv.Values {
-		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv, _ := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-			svv.UpdateSig()
-			svv.ViewSig.Emit(svv.This, 0, nil)
-		})
-		lbl := sg.Child(i * 4).(*gi.Label)
-		idxtxt := fmt.Sprintf("%05d", i)
-		lbl.Text = idxtxt
-		widg := sg.Child((i * 4) + 1).(gi.Node2D)
+
+		var idxlab *gi.Label
+		if sg.Kids[ridx] != nil {
+			idxlab = sg.Kids[ridx].(*gi.Label)
+		} else {
+			idxlab = &gi.Label{}
+			sg.SetChild(idxlab, ridx, labnm)
+		}
+		idxlab.Text = idxtxt
+
+		var widg gi.Node2D
+		if sg.Kids[ridx+1] != nil {
+			widg = sg.Kids[ridx+1].(gi.Node2D)
+		} else {
+			widg = ki.NewOfType(vtyp).(gi.Node2D)
+			sg.SetChild(widg, ridx+1, valnm)
+		}
 		vv.ConfigWidget(widg)
-		addact := sg.Child(i*4 + 2).(*gi.Action)
-		addact.SetIcon("plus")
-		addact.Tooltip = "insert a new element at this index"
-		addact.Data = i
-		addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			act := send.(*gi.Action)
-			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-			svv.SliceNewAt(act.Data.(int) + 1)
-		})
-		delact := sg.Child(i*4 + 3).(*gi.Action)
-		delact.SetIcon("minus")
-		delact.Tooltip = "delete this element"
-		delact.Data = i
-		delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			act := send.(*gi.Action)
-			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-			svv.SliceDelete(act.Data.(int))
-		})
+
+		if sv.IsInactive() {
+			widg.AsNode2D().SetInactive()
+			wb := widg.AsWidget()
+			if wb != nil {
+				wb.SetProp("slv-index", i)
+				wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					wbb := send.(gi.Node2D).AsWidget()
+					idx := wbb.Prop("slv-index", false, false).(int)
+					svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+					svv.UpdateSelect(idx, wbb.IsSelected())
+				})
+			}
+		} else {
+			vvb := vv.AsValueViewBase()
+			vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv.UpdateSig()
+				svv.ViewSig.Emit(svv.This, 0, nil)
+			})
+			addnm := fmt.Sprintf("add-%v", idxtxt)
+			delnm := fmt.Sprintf("del-%v", idxtxt)
+			addact := gi.Action{}
+			delact := gi.Action{}
+			sg.SetChild(&addact, ridx+2, addnm)
+			sg.SetChild(&delact, ridx+3, delnm)
+
+			addact.SetIcon("plus")
+			addact.Tooltip = "insert a new element at this index"
+			addact.Data = i
+			addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				act := send.(*gi.Action)
+				svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv.SliceNewAt(act.Data.(int) + 1)
+			})
+			delact.SetIcon("minus")
+			delact.Tooltip = "delete this element"
+			delact.Data = i
+			delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				act := send.(*gi.Action)
+				svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv.SliceDelete(act.Data.(int))
+			})
+		}
 	}
-	sg.UpdateEnd(updt)
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
 func (sv *SliceView) SliceNewAt(idx int) {
 	updt := sv.UpdateStart()
+	defer sv.UpdateEnd(updt)
+
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 	svtyp := svnp.Type()
@@ -206,14 +255,15 @@ func (sv *SliceView) SliceNewAt(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.SetFullReRender()
-	sv.UpdateEnd(updt)
+	sv.ConfigSliceGrid()
 	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
 // SliceDelete deletes element at given index from slice
 func (sv *SliceView) SliceDelete(idx int) {
 	updt := sv.UpdateStart()
+	defer sv.UpdateEnd(updt)
+
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 	svtyp := svnp.Type()
@@ -225,9 +275,36 @@ func (sv *SliceView) SliceDelete(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.SetFullReRender()
-	sv.UpdateEnd(updt)
+	sv.ConfigSliceGrid()
 	sv.ViewSig.Emit(sv.This, 0, nil)
+}
+
+// UpdateSelect updates the selection for the given index
+func (sv *SliceView) UpdateSelect(idx int, sel bool) {
+	sg, _ := sv.SliceGrid()
+
+	nWidgPerRow := 2 // !interact
+
+	if sv.SelectedIdx >= 0 { // unselect current
+		seldx := sv.SelectedIdx * nWidgPerRow
+		if sg.Kids.IsValidIndex(seldx) {
+			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg.ClearSelected()
+			widg.UpdateSig()
+		}
+	}
+	if sel {
+		sv.SelectedIdx = idx
+		seldx := idx*nWidgPerRow + nWidgPerRow
+		if sg.Kids.IsValidIndex(seldx) {
+			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg.SetSelected()
+			widg.UpdateSig()
+		}
+	} else {
+		sv.SelectedIdx = -1
+	}
+	sv.SelectSig.Emit(sv.This, 0, sv.SelectedIdx)
 }
 
 // ConfigSliceButtons configures the buttons for map functions
@@ -257,6 +334,7 @@ func (sv *SliceView) UpdateFromSlice() {
 	sv.ConfigSliceGrid()
 	sv.ConfigSliceButtons()
 	if mods {
+		sv.SetFullReRender()
 		sv.UpdateEnd(updt)
 	}
 }
@@ -351,7 +429,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	edac.Tooltip = "edit slice in a dialog window"
 	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-		dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil)
+		dlg := SliceViewDialog(svv.Viewport, svv.Slice, false, svv.TmpSave, "Slice Value View", "", nil, nil)
 		svvv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
 		svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svvvv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)

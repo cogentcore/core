@@ -222,6 +222,8 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 		return
 	}
 	updt := mv.UpdateStart()
+	defer mv.UpdateEnd(updt)
+
 	keyv := mv.Keys[idx]
 	ck := keyv.Val() // current key value
 	valv := mv.Values[idx]
@@ -240,8 +242,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
-	mv.SetFullReRender()
-	mv.UpdateEnd(updt)
+	mv.ConfigMapGrid()
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
@@ -250,6 +251,8 @@ func (mv *MapView) MapAdd() {
 		return
 	}
 	updt := mv.UpdateStart()
+	defer mv.UpdateEnd(updt)
+
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := kit.NonPtrValue(mpv)
 	mvtyp := mpvnp.Type()
@@ -269,8 +272,7 @@ func (mv *MapView) MapAdd() {
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
-	mv.SetFullReRender()
-	mv.UpdateEnd(updt)
+	mv.ConfigMapGrid()
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
@@ -279,14 +281,15 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 		return
 	}
 	updt := mv.UpdateStart()
+	defer mv.UpdateEnd(updt)
+
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := kit.NonPtrValue(mpv)
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
-	mv.SetFullReRender()
-	mv.UpdateEnd(updt)
+	mv.ConfigMapGrid()
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
@@ -324,12 +327,6 @@ func (mv *MapView) UpdateFromMap() {
 func (mv *MapView) UpdateValues() {
 	// maps have to re-read their values -- can't get pointers
 	mv.ConfigMapGrid()
-}
-
-// needs full rebuild and this is where we do it:
-func (mv *MapView) Style2D() {
-	mv.ConfigMapGrid()
-	mv.Frame.Style2D()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

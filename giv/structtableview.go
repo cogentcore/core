@@ -35,7 +35,6 @@ type StructTableView struct {
 	SelectedIdx int                      `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SortIdx     int                      `desc:"current sort index"`
 	SortDesc    bool                     `desc:"whether current sort order is descending"`
-	SelectSig   ki.Signal                `json:"-" xml:"-" desc:"signal for selection changes, in Inactive mode only"`
 	builtSlice  interface{}
 	builtSize   int
 }
@@ -323,8 +322,21 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 			vv.ConfigWidget(widg)
 			if sv.IsInactive() {
 				widg.AsNode2D().SetInactive()
-			}
-			if !sv.IsInactive() {
+				// todo: setup a more generic select mechanism..
+				if widg.TypeEmbeds(gi.KiT_TextField) {
+					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
+					tf.SetProp("stv-index", i)
+					tf.ClearSelected()
+					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						if sig == int64(gi.TextFieldSelected) {
+							tff := send.(*gi.TextField)
+							idx := tff.Prop("stv-index", false, false).(int)
+							svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
+							svv.UpdateSelect(idx, tff.IsSelected())
+						}
+					})
+				}
+			} else {
 				vvb := vv.AsValueViewBase()
 				vvb.ViewSig.ConnectOnly(sv.This, // todo: do we need this?
 					func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -341,6 +353,7 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 				sgf.SetChild(&delact, ridx+1+nfld+1, delnm)
 
 				addact.SetIcon("plus")
+				addact.Tooltip = "insert a new element at this index"
 				addact.Data = i
 				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
@@ -348,26 +361,13 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 					svv.SliceNewAt(act.Data.(int) + 1)
 				})
 				delact.SetIcon("minus")
+				delact.Tooltip = "delete this element"
 				delact.Data = i
 				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
 					svv.SliceDelete(act.Data.(int))
 				})
-			} else { // inactive
-				if widg.TypeEmbeds(gi.KiT_TextField) {
-					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-					tf.SetProp("stv-index", i)
-					tf.ClearSelected()
-					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(gi.TextFieldSelected) {
-							tff := send.(*gi.TextField)
-							idx := tff.Prop("stv-index", false, false).(int)
-							svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
-							svv.UpdateSelect(idx, tff.IsSelected())
-						}
-					})
-				}
 			}
 			if sv.StyleFunc != nil {
 				sv.StyleFunc(mvnp.Interface(), widg, i, fli, vv)
@@ -389,12 +389,9 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 		for fli := 0; fli < nfld; fli++ {
 			seldx := sv.SelectedIdx*nWidgPerRow + 1 + fli
 			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(sv.SelectedIdx*nWidgPerRow + 1 + fli).(gi.Node2D)
-				if widg.TypeEmbeds(gi.KiT_TextField) {
-					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-					tf.ClearSelected()
-					tf.UpdateSig()
-				}
+				widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
+				widg.ClearSelected()
+				widg.UpdateSig()
 			}
 		}
 	}
@@ -403,12 +400,9 @@ func (sv *StructTableView) UpdateSelect(idx int, sel bool) {
 		for fli := 0; fli < nfld; fli++ {
 			seldx := idx*nWidgPerRow + 1 + fli
 			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(seldx).(gi.Node2D)
-				if widg.TypeEmbeds(gi.KiT_TextField) {
-					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-					tf.SetSelected()
-					tf.UpdateSig()
-				}
+				widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
+				widg.SetSelected()
+				widg.UpdateSig()
 			}
 		}
 	} else {

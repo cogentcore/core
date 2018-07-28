@@ -22,10 +22,11 @@ import (
 // managed by a containing Layout, and use all 5 rendering passes
 type WidgetBase struct {
 	Node2DBase
-	Tooltip  string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	Sty      Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	LayData  LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
+	Tooltip   string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	Sty       Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	DefStyle  *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	LayData   LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
+	SelectSig ki.Signal  `json:"-" xml:"-" desc:"signal for selection event when inactive"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)

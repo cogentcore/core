@@ -350,11 +350,6 @@ func (sv *ColorView) Update() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *ColorView) Style2D() {
-	sv.Frame.Style2D()
-	sv.Config()
-}
-
 func (sv *ColorView) Render2D() {
 	if sv.FullReRenderIfNeeded() {
 		return

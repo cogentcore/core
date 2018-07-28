@@ -26,6 +26,7 @@ func init() {
 	DefaultIconSet = MakeDefaultIcons()
 	DefaultIconSet.LoadDefaultIcons()
 	CurIconSet = DefaultIconSet
+	gi.CurIconList = gi.TheIconMgr.IconList(true)
 }
 
 // svg.Icon is the actual SVG for a gi.Icon -- it should contain no color
@@ -170,7 +171,7 @@ func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
 	return nil
 }
 
-func (im *IconMgr) IconList(alphaSort bool) []string {
+func (im *IconMgr) IconList(alphaSort bool) []gi.IconName {
 	return CurIconSet.IconList(alphaSort)
 }
 
@@ -235,12 +236,12 @@ func (iset *IconSet) LoadIconsFromPath(path string) error {
 }
 
 // IconList returns a list of names of icons in the icon set
-func (iset *IconSet) IconList(alphaSort bool) []string {
-	il := make([]string, len(*iset)+1)
-	il[0] = "none"
+func (iset *IconSet) IconList(alphaSort bool) []gi.IconName {
+	il := make([]gi.IconName, len(*iset)+1)
+	il[0] = gi.IconName("none")
 	idx := 1
 	for _, ic := range *iset {
-		il[idx] = ic.Nm
+		il[idx] = gi.IconName(ic.Nm)
 		idx++
 	}
 	if alphaSort {
