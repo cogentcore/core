@@ -228,7 +228,6 @@ func mainrun() {
 	txrow.Lay = gi.LayoutRow
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
-	// txrow.SetStretchMaxHeight()
 
 	edit1 := txrow.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 	edit1.SetText("Edit this text")

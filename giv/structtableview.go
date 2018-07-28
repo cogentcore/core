@@ -479,6 +479,8 @@ func (sv *StructTableView) SortSliceAction(fldIdx int) {
 			if sv.SortIdx == fli {
 				sv.SortDesc = !sv.SortDesc
 				ascending = !sv.SortDesc
+			} else {
+				sv.SortDesc = false
 			}
 			if ascending {
 				hdr.SetIcon("widget-wedge-up")
@@ -564,7 +566,7 @@ func SortStructSlice(struSlice interface{}, fldIdx int, ascending bool) error {
 				return iv > jv
 			}
 		})
-	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "gi.FileTime":
+	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "giv.FileTime":
 		sort.Slice(mvnp.Interface(), func(i, j int) bool {
 			ival := kit.OnePtrValue(mvnp.Index(i))
 			iv := (time.Time)(ival.Elem().Field(fldIdx).Interface().(FileTime))
@@ -648,13 +650,14 @@ func (sv *StructTableView) Layout2D(parBBox image.Rectangle) {
 		return
 	}
 	struTyp := sv.StructType()
-	nfld := struTyp.NumField()
+	nfld := struTyp.NumField() + 1
 	sgh := sg.Child(0).(*gi.Layout)
 	sgf := sg.Child(2).(*gi.Frame)
-	if len(sgf.Kids) >= 1+nfld {
+	if len(sgf.Kids) >= nfld {
+		sgh.SetProp("width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
 		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(1 + fli).(*gi.Action)
-			widg := sgf.Child(1 + fli).(gi.Node2D).AsWidget()
+			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+			widg := sgf.Child(fli).(gi.Node2D).AsWidget()
 			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
 		}
 		sgh.Layout2D(parBBox)

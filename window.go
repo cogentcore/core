@@ -71,19 +71,19 @@ var HoverMaxPix = 5
 type Window struct {
 	NodeBase
 	Title         string                      `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window                `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	OSWin         oswin.Window                `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	HasGeomPrefs  bool                        `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D                 `json:"-" xml:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	Viewport      *Viewport2D                 `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
 	OverlayVp     Viewport2D                  `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture               `json:"-" xml:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	WinTex        oswin.Texture               `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
 	OverTexActive bool                        `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture               `json:"-" xml:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" desc:"signals for communicating each type of event"`
+	OverTex       oswin.Texture               `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event"`
 	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	DNDData       mimedata.Mimes              `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource     ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event                  `json:"-" xml:"-" desc:"final event for DND which is sent if a finalize is received"`
+	DNDFinalEvent *dnd.Event                  `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
 	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
 	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`

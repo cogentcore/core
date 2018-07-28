@@ -396,7 +396,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	if widthtag != "" {
 		width, err := strconv.ParseFloat(widthtag, 32)
 		if err == nil {
-			tf.MaxWidthReq = int(width)
+			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ex))
 		}
 	}
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(gi.Inactive))
@@ -786,11 +786,6 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			mb := vvv.Widget.(*gi.MenuButton)
 			StructViewDialog(mb.Viewport, k, vv.TmpSave, "Struct Value View", "", nil, nil)
 		}
-	})
-	mb.Menu.AddMenuText("Select", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
-		mb := vvv.Widget.(*gi.MenuButton)
-		gi.PromptDialog(mb.Viewport, "KiPtr Value View", "Sorry, Ki object chooser  not implemented yet -- would show up here", true, false, nil, nil)
 	})
 	mb.Menu.AddMenuText("GoGiEditor", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)

@@ -223,12 +223,6 @@ type LayoutData struct {
 // GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
 
 func (ld *LayoutData) Defaults() {
-	// if ld.GridSpan.X < 1 {
-	// 	ld.GridSpan.X = 1
-	// }
-	// if ld.GridSpan.Y < 1 {
-	// 	ld.GridSpan.Y = 1
-	// }
 }
 
 func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
@@ -275,9 +269,31 @@ type GridData struct {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//    Layout handles all major types of layout
+// Layout
 
-// different types of layouts
+// Layout is the primary node type responsible for organizing the sizes and
+// positions of child widgets -- all arbitrary collections of widgets should
+// generally be contained within a layout -- otherwise the parent widget must
+// take over responsibility for positioning.  The alignment is NOT inherited
+// by default so must be specified per child, except that the parent alignment
+// is used within the relevant dimension (e.g., align-horiz for a LayoutRow
+// layout, to determine left, right, center, justified).  Layouts
+// can automatically add scrollbars depending on the Overflow layout style
+type Layout struct {
+	WidgetBase
+	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
+	StackTop  ki.Ptr              `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	ChildSize Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	Scrolls   [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	GridSize  image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridData  [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+}
+
+var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
+
+// Layouts are the different types of layouts
 type Layouts int32
 
 const (
@@ -336,31 +352,7 @@ func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(e
 
 //go:generate stringer -type=RowCol
 
-// note: Layout cannot be a Widget type because Controls in Widget is a Layout..
-
-// Layout is the primary node type responsible for organizing the sizes and
-// positions of child widgets -- all arbitrary collections of widgets should
-// generally be contained within a layout -- otherwise the parent widget must
-// take over responsibility for positioning.  The alignment is NOT inherited
-// by default so must be specified per child, except that the parent alignment
-// is used within the relevant dimension (e.g., align-horiz for a LayoutRow
-// layout, to determine left, right, center, justified).  Layouts
-// can automatically add scrollbars depending on the Overflow layout style
-type Layout struct {
-	WidgetBase
-	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
-	StackTop  ki.Ptr              `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
-	ChildSize Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasScroll [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
-	Scrolls   [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
-	GridSize  image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
-	GridData  [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
-}
-
-var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
-
-// do we sum up elements along given dimension?  else max
+// SumDim returns whether we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
 	if (d == X && ly.Lay == LayoutRow) || (d == Y && ly.Lay == LayoutCol) {
 		return true

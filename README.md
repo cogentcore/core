@@ -91,12 +91,17 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* inline map showing up centered instead of left aligned?
+* window cursors: busy, etc
 
-* fileview for favorites -- stateful fileview
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
+* combobox getting text cutoff -- descenders and []
+
+* no index option for struct table view
+* fileview for favorites -- stateful fileview (splitter) -- crash in select
 * search for structtableview, treeview
 * DND and copy/paste for structtableview
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
+
+* iconview -- increase icon size -- need a generic row height option for layout?
 
 * add margin for para in text
 

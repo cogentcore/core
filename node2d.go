@@ -59,7 +59,7 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 */
 type Node2DBase struct {
 	NodeBase
-	Viewport *Viewport2D `json:"-" xml:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
+	Viewport *Viewport2D `json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)

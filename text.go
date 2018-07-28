@@ -38,6 +38,11 @@ import (
 // in this way, and makes the final render pass maximally efficient and
 // high-performance, at the potential cost of some memory redundancy.
 
+// FontExtraHeight adds this amount to the declared font height (in raw dots)
+// for allocating space for text rendering -- the antialiasing uses a little
+// bit of extra room
+var FontExtraHeight = float32(2)
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // RuneRender
 
@@ -782,7 +787,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, txtSty *TextStyl
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
-	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht) + FontExtraHeight}
 
 }
 
@@ -802,7 +807,7 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, txtSty *TextStyle
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
-	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht) + FontExtraHeight}
 }
 
 // SetHTML sets text by decoding all standard inline HTML text style

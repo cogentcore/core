@@ -64,7 +64,7 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(giv.KiT_SplitView, "split").(*giv.SplitView)
+	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 	split.Dim = gi.X
 
 	mvfr := split.AddNewChild(gi.KiT_Frame, "mvfr").(*gi.Frame)

@@ -591,13 +591,15 @@ func (g *WidgetBase) Size2DSubSpace() Vec2D {
 	return g.LayData.AllocSize.SubVal(2 * spc)
 }
 
-// set minimum and preferred width -- will get at least this amount -- max unspecified
+// SetMinPrefWidth sets minimum and preferred width -- will get at least this
+// amount -- max unspecified
 func (g *WidgetBase) SetMinPrefWidth(val units.Value) {
 	g.SetProp("width", val)
 	g.SetProp("min-width", val)
 }
 
-// set minimum and preferred height-- will get at least this amount -- max unspecified
+// SetMinPrefHeight sets minimum and preferred height -- will get at least this
+// amount -- max unspecified
 func (g *WidgetBase) SetMinPrefHeight(val units.Value) {
 	g.SetProp("height", val)
 	g.SetProp("min-height", val)

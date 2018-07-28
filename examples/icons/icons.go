@@ -56,8 +56,9 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	row1.AddNewChild(gi.KiT_Stretch, "str2")
 
-	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
+	grid := vlay.AddNewChild(gi.KiT_Frame, "grid").(*gi.Frame)
 	grid.Lay = gi.LayoutGrid
+	grid.Stripes = gi.RowStripes
 	grid.SetProp("columns", nColumns)
 	grid.SetProp("horizontal-align", "center")
 	grid.SetProp("margin", 2.0)
@@ -67,14 +68,18 @@ func mainrun() {
 	il := gi.TheIconMgr.IconList(true)
 
 	for _, icnm := range il {
-		if icnm == "none" {
+		icnms := string(icnm)
+		if icnms == "none" {
 			continue
 		}
 		vb := grid.AddNewChild(gi.KiT_Layout, "vb").(*gi.Layout)
 		vb.Lay = gi.LayoutCol
 
-		smico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
-		smico.SetIcon(icnm)
+		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
+		nmlbl.Text = icnms
+
+		smico := vb.AddNewChild(gi.KiT_Icon, icnms).(*gi.Icon)
+		smico.SetIcon(icnms)
 		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
 		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
 		smico.SetProp("background-color", color.Transparent)
@@ -82,16 +87,14 @@ func mainrun() {
 		smico.SetProp("stroke", "black")
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
-		ico := vb.AddNewChild(gi.KiT_Icon, icnm).(*gi.Icon)
-		ico.SetIcon(icnm)
+		ico := vb.AddNewChild(gi.KiT_Icon, icnms).(*gi.Icon)
+		ico.SetIcon(icnms)
 		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
 		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
 		ico.SetProp("background-color", color.Transparent)
 		ico.SetProp("fill", "#88F")
 		ico.SetProp("stroke", "black")
 		// ico.SetProp("horizontal-align", gi.AlignLeft)
-		nmlbl := vb.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-		nmlbl.Text = icnm
 	}
 
 	vp.UpdateEndNoSig(updt)

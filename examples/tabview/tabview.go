@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/ki"
 )
 
@@ -40,7 +41,7 @@ func mainrun() {
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
 	vlay.Lay = gi.LayoutCol
 
-	tv1 := vlay.AddNewChild(gi.KiT_TabView, "tv1").(*gi.TabView)
+	tv1 := vlay.AddNewChild(giv.KiT_TabView, "tv1").(*giv.TabView)
 	tv1.SetSrcNode(&srctree)
 
 	for i, sk := range srctree.Kids {

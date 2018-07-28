@@ -48,6 +48,7 @@ type Preferences struct {
 	PrefsOverride    bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles     ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	FontPaths        []string               `desc:"extra font paths, beyond system defaults -- searched first"`
+	FavPaths         FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 }
 
 // Prefs are the overall preferences
@@ -66,15 +67,19 @@ func (p *Preferences) Defaults() {
 	p.IconColor.SetString("highlight-30", p.ControlColor)
 	p.SelectColor.SetString("#CFC", nil)
 	p.HighlightColor.SetString("#FFA", nil)
+	p.FavPaths.SetToDefaults()
 }
+
+// PrefsFileName is the name of the preferences file in GoGi prefs directory
+var PrefsFileName = "prefs.json"
 
 // Load preferences from GoGi standard prefs directory
 func (p *Preferences) Load() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, "prefs.json")
+	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err)
+		// log.Println(err) // ok to be non-existant
 		return err
 	}
 	return json.Unmarshal(b, p)
@@ -83,7 +88,7 @@ func (p *Preferences) Load() error {
 // Save Preferences to GoGi standard prefs directory
 func (p *Preferences) Save() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, "prefs.json")
+	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -192,4 +197,34 @@ func (p *Preferences) PrefColor(clrName string) *Color {
 	}
 	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  FavoritePaths
+
+// FavPathItem represents one item in a favorite path list, for display of
+// favorites.  Is an ordered list instead of a map because user can organize
+// in order
+type FavPathItem struct {
+	Ic   IconName `desc:"icon for item"`
+	Name string   `width:"20" desc:"name of the favorite item"`
+	Path string   `view:"-"`
+}
+
+// FavPaths is a list (slice) of favorite path items
+type FavPaths []FavPathItem
+
+// SetToDefaults sets the paths to default values
+func (p *FavPaths) SetToDefaults() {
+	*p = make(FavPaths, len(DefaultPaths))
+	copy(*p, DefaultPaths)
+}
+
+// DefaultPaths are default favorite paths
+var DefaultPaths = FavPaths{
+	{"home", "home", "~"},
+	{"desktop", "Desktop", "~/Desktop"},
+	{"documents", "Documents", "~/Documents"},
+	{"folder-download", "Downloads", "~/Downloads"},
+	{"computer", "root", "/"},
 }
