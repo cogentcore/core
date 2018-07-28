@@ -73,6 +73,7 @@ func GoGiEditor(obj ki.Ki) {
 
 	updtobj := brow.AddNewChild(gi.KiT_Button, "updtobj").(*gi.Button)
 	updtobj.SetText("Update")
+	updtobj.Tooltip = "Updates the source window based on changes made in the editor"
 	updtobj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			obj.UpdateSig()
@@ -81,6 +82,7 @@ func GoGiEditor(obj ki.Ki) {
 
 	savej := brow.AddNewChild(gi.KiT_Button, "savejson").(*gi.Button)
 	savej.SetText("Save JSON")
+	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
 	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -95,6 +97,7 @@ func GoGiEditor(obj ki.Ki) {
 
 	loadj := brow.AddNewChild(gi.KiT_Button, "loadjson").(*gi.Button)
 	loadj.SetText("Load JSON")
+	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
 	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -110,8 +113,10 @@ func GoGiEditor(obj ki.Ki) {
 	fontsel := brow.AddNewChild(gi.KiT_Button, "fontsel").(*gi.Button)
 	fontnm := brow.AddNewChild(gi.KiT_TextField, "selfont").(*gi.TextField)
 	fontnm.SetMinPrefWidth(units.NewValue(20, units.Em))
+	fontnm.Tooltip = "shows the font name selected via Select Font"
 
 	fontsel.SetText("Select Font")
+	fontsel.Tooltip = "pulls up a font selection dialog -- font name will be copied to clipboard so you can paste it into any relevant fields"
 	fontsel.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FontChooserDialog(vp, "Select a Font", "", win.This, func(recv, send ki.Ki, sig int64, data interface{}) {

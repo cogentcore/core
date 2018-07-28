@@ -110,7 +110,7 @@ type ButtonBase struct {
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
-	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -573,7 +573,7 @@ func (g *Button) ButtonAsBase() *ButtonBase {
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff IconName `json:"-" xml:"-" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
+	IconOff IconName `desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)

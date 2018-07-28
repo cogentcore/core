@@ -322,19 +322,28 @@ func (sv *StructTableView) ConfigSliceGridRows() {
 			vv.ConfigWidget(widg)
 			if sv.IsInactive() {
 				widg.AsNode2D().SetInactive()
-				// todo: setup a more generic select mechanism..
-				if widg.TypeEmbeds(gi.KiT_TextField) {
-					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-					tf.SetProp("stv-index", i)
-					tf.ClearSelected()
-					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(gi.TextFieldSelected) {
-							tff := send.(*gi.TextField)
-							idx := tff.Prop("stv-index", false, false).(int)
+				wb := widg.AsWidget()
+				if wb != nil {
+					wb.SetProp("stv-index", i)
+					wb.ClearSelected()
+					if wb.TypeEmbeds(gi.KiT_TextField) {
+						tf := wb.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
+						tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+							if sig == int64(gi.TextFieldSelected) {
+								tff := send.(*gi.TextField)
+								idx := tff.Prop("stv-index", false, false).(int)
+								svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
+								svv.UpdateSelect(idx, tff.IsSelected())
+							}
+						})
+					} else {
+						wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+							wbb := send.(gi.Node2D).AsWidget()
+							idx := wbb.Prop("stv-index", false, false).(int)
 							svv := recv.EmbeddedStruct(KiT_StructTableView).(*StructTableView)
-							svv.UpdateSelect(idx, tff.IsSelected())
-						}
-					})
+							svv.UpdateSelect(idx, wbb.IsSelected())
+						})
+					}
 				}
 			} else {
 				vvb := vv.AsValueViewBase()

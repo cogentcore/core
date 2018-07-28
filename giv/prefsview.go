@@ -16,6 +16,10 @@ func PrefsEditor(p *gi.Preferences) {
 	height := 600
 	win := gi.NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
 
+	if p.StdKeyMapName == "" {
+		p.StdKeyMapName = gi.StdKeyMapName(gi.DefaultKeyMap)
+	}
+
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 	vp.Fill = true
@@ -73,11 +77,22 @@ func PrefsEditor(p *gi.Preferences) {
 		}
 	})
 
-	defmap := brow.AddNewChild(gi.KiT_Button, "defkemap").(*gi.Button)
-	defmap.SetText("Default KeyMap")
-	defmap.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	stdmap := brow.AddNewChild(gi.KiT_Button, "stdmap").(*gi.Button)
+	stdmap.SetText("Std KeyMap")
+	stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"
+	stdmap.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			p.DefaultKeyMap()
+			SliceViewDialog(vp, &gi.StdKeyMapNames, true, nil, "Select a Standard KeyMap", "Can then customize from there", stdmap.This,
+				func(recv, send ki.Ki, sig int64, data interface{}) {
+					svv, _ := send.(*SliceView)
+					si := svv.SelectedIdx
+					if si >= 0 {
+						km := gi.StdKeyMaps[si]
+						p.StdKeyMapName = gi.StdKeyMapNames[si]
+						p.SetKeyMap(km)
+						sv.UpdateFields()
+					}
+				})
 		}
 	})
 

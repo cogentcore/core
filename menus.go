@@ -121,7 +121,9 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.SetProps(MenuFrameProps, false)
 	for _, ac := range menu {
 		acn, _ := KiToNode2D(ac)
-		frame.AddChild(acn)
+		if acn != nil {
+			frame.AddChild(acn)
+		}
 	}
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes

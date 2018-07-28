@@ -43,6 +43,7 @@ type Preferences struct {
 	IconColor        Color                  `desc:"color for icons or other solidly-colored, small elements"`
 	SelectColor      Color                  `desc:"color for selected elements"`
 	HighlightColor   Color                  `desc:"color for highlight background"`
+	StdKeyMapName    string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
 	CustomKeyMap     KeyMap                 `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride    bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles     ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
@@ -64,7 +65,7 @@ func (p *Preferences) Defaults() {
 	p.ControlColor.SetString("#EEF", nil)
 	p.IconColor.SetString("highlight-30", p.ControlColor)
 	p.SelectColor.SetString("#CFC", nil)
-	p.HighlightColor.SetString("#FF0", nil)
+	p.HighlightColor.SetString("#FFA", nil)
 }
 
 // Load preferences from GoGi standard prefs directory
@@ -101,8 +102,14 @@ func (p *Preferences) Apply() {
 	mouse.DoubleClickMSec = p.DoubleClickMSec
 	mouse.ScrollWheelRate = p.ScrollWheelRate
 	DialogsSepWindow = p.DialogsSepWindow
+	if p.StdKeyMapName != "" {
+		defmap := StdKeyMapByName(p.StdKeyMapName)
+		if defmap != nil {
+			DefaultKeyMap = defmap
+		}
+	}
 	if p.CustomKeyMap != nil {
-		SetActiveKeyMap(Prefs.CustomKeyMap) // fills in missing pieces
+		SetActiveKeyMap(&Prefs.CustomKeyMap) // fills in missing pieces
 	}
 	if p.FontPaths != nil {
 		paths := append(p.FontPaths, oswin.TheApp.FontPaths()...)
@@ -144,10 +151,11 @@ func (p *Preferences) Update() {
 	}
 }
 
-// DefaultKeyMap installs the current default key map, prior to editing
-func (p *Preferences) DefaultKeyMap() {
-	p.CustomKeyMap = make(KeyMap, len(DefaultKeyMap))
-	for key, val := range DefaultKeyMap {
+// SetKeyMap installs the given keymap as the current CustomKeyMap, which can
+// then be customized
+func (p *Preferences) SetKeyMap(kmap *KeyMap) {
+	p.CustomKeyMap = make(KeyMap, len(*kmap))
+	for key, val := range *kmap {
 		p.CustomKeyMap[key] = val
 	}
 }

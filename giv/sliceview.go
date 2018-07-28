@@ -195,12 +195,26 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			wb := widg.AsWidget()
 			if wb != nil {
 				wb.SetProp("slv-index", i)
-				wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					wbb := send.(gi.Node2D).AsWidget()
-					idx := wbb.Prop("slv-index", false, false).(int)
-					svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-					svv.UpdateSelect(idx, wbb.IsSelected())
-				})
+				wb.ClearSelected()
+				if wb.TypeEmbeds(gi.KiT_TextField) {
+					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
+					tf.SetProp("stv-index", i)
+					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						if sig == int64(gi.TextFieldSelected) {
+							tff := send.(*gi.TextField)
+							idx := tff.Prop("slv-index", false, false).(int)
+							svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+							svv.UpdateSelect(idx, tff.IsSelected())
+						}
+					})
+				} else {
+					wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						wbb := send.(gi.Node2D).AsWidget()
+						idx := wbb.Prop("slv-index", false, false).(int)
+						svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+						svv.UpdateSelect(idx, wbb.IsSelected())
+					})
+				}
 			}
 		} else {
 			vvb := vv.AsValueViewBase()
@@ -286,7 +300,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 	nWidgPerRow := 2 // !interact
 
 	if sv.SelectedIdx >= 0 { // unselect current
-		seldx := sv.SelectedIdx * nWidgPerRow
+		seldx := sv.SelectedIdx*nWidgPerRow + 1
 		if sg.Kids.IsValidIndex(seldx) {
 			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
 			widg.ClearSelected()
@@ -295,7 +309,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 	}
 	if sel {
 		sv.SelectedIdx = idx
-		seldx := idx*nWidgPerRow + nWidgPerRow
+		seldx := idx*nWidgPerRow + 1
 		if sg.Kids.IsValidIndex(seldx) {
 			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
 			widg.SetSelected()

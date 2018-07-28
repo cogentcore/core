@@ -380,6 +380,18 @@ func (vv *ColorValueView) WidgetType() reflect.Type {
 
 func (vv *ColorValueView) UpdateWidget() {
 	sv := vv.Widget.(*StructViewInline)
+	clr, ok := vv.Value.Interface().(*gi.Color)
+	if !ok {
+		clr, ok = vv.Value.Elem().Interface().(*gi.Color)
+		// fmt.Printf("clr is ** in vv: %v\n", vv.PathUnique())
+	}
+	if clr != nil {
+		edac := sv.Parts.Child(-1).(*gi.Action) // action at end, from AddAction above
+		if edac != nil {
+			edac.SetProp("background-color", *clr)
+			edac.SetFullReRender()
+		}
+	}
 	sv.UpdateFields()
 }
 

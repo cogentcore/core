@@ -197,6 +197,13 @@ func (c *Color) IsBlack() bool {
 	return false
 }
 
+func (c *Color) String() string {
+	if c == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("R: %v G: %v B: %v A: %v", c.R, c.G, c.B, c.A)
+}
+
 func (c *Color) SetToNil() {
 	c.R = 0
 	c.G = 0

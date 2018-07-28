@@ -118,6 +118,7 @@ func mainrun() {
 	button2 := brow.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
 	button2.SetText("Open GoGiEditor")
 	// button2.SetProp("background-color", "#EDF")
+	button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
 	button2.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {

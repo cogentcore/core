@@ -91,9 +91,7 @@ Currently at an **alpha** level release:
 
 ## General / Widgets
 
-* add select to sliceview
-* use in IconView to select icons, and in fileview for favorites -- stateful fileview
-* and selector for different standard keyfun maps in prefs
+* fileview for favorites -- stateful fileview
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 * search for structtableview, treeview
 * DND and copy/paste for structtableview
