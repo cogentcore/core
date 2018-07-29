@@ -13,6 +13,7 @@ import (
 	"io"
 	"math"
 	"strings"
+	"sync"
 
 	"log"
 	"unicode"
@@ -252,6 +253,11 @@ func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, noBG bool, rot, scale
 	sr.SetRenders(sty, noBG, rot, scalex)
 }
 
+// this mutex is required because multiple different goroutines associated
+// with different windows can (and often will be) call curFace.GyphAdvance at
+// the same time, on the same font face -- and that turns out not to work!
+var glyphAdvanceMu sync.Mutex
+
 // SetRunePosLR sets relative positions of each rune using a flat
 // left-to-right text layout, based on font size info and additional extra
 // letter and word spacing parameters (which can be negative)
@@ -284,7 +290,10 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 			rr.RelPos.Y = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
 		}
 
+		glyphAdvanceMu.Lock()
 		a, ok := curFace.GlyphAdvance(r)
+		glyphAdvanceMu.Unlock()
+
 		if !ok {
 			// TODO: is falling back on the U+FFFD glyph the responsibility of
 			// the Drawer or the Face?

@@ -31,7 +31,11 @@ func (vv *IconValueView) WidgetType() reflect.Type {
 func (vv *IconValueView) UpdateWidget() {
 	cb := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
-	cb.SetIcon(txt)
+	if gi.IconName(txt).IsNil() {
+		cb.SetIcon("blank")
+	} else {
+		cb.SetIcon(txt)
+	}
 	sntag := vv.ViewFieldTag("view")
 	if strings.Contains(sntag, "show-name") {
 		if txt == "" {

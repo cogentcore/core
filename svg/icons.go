@@ -54,23 +54,8 @@ func (ic *Icon) CopyFromIcon(cp *Icon) {
 	if cp == nil {
 		return
 	}
-	// oldIc := *ic
 	ic.CopyFrom(cp)
 	ic.Rendered = false
-	// ic.Viewport = oldIc.Viewport
-	// ic.LayData = oldIc.LayData
-	// ic.VpBBox = oldIc.VpBBox
-	// ic.WinBBox = oldIc.WinBBox
-	// ic.Geom = oldIc.Geom
-	// ic.Sty = oldIc.Sty
-	// ic.Fill = oldIc.Fill
-	// ic.Pixels = nil
-	// ic.Resize(ic.Geom.Size)
-	// ic.FullRender2DTree()
-	// ic.LayData = oldIc.LayData
-	// ic.VpBBox = oldIc.VpBBox
-	// ic.WinBBox = oldIc.WinBBox
-	// ic.Rendered = false // not yet..
 }
 
 // IconAutoLoad controls auto-loading of icons -- can turn this off for debugging etc

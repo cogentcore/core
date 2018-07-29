@@ -95,10 +95,11 @@ Currently at an **alpha** level release:
 
 * combobox getting text cutoff -- descenders and []
 
-* no index option for struct table view
-* fileview for favorites -- stateful fileview (splitter) -- crash in select
-* search for structtableview, treeview
-* DND and copy/paste for structtableview
+* update empty icon -> folder
+
+* stateful fileview (splitter)
+* search for tableview, treeview
+* DND and copy/paste for tableview
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * iconview -- increase icon size -- need a generic row height option for layout?

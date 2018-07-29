@@ -30,25 +30,24 @@ type ScreenPrefs struct {
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info
 type Preferences struct {
-	LogicalDPIScale  float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
-	ScreenPrefs      map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	DialogsSepWindow bool                   `desc:"do dialog windows open in a separate OS-level window, or do they open within the same parent window"`
-	DoubleClickMSec  int                    `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelRate  int                    `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
-	FontColor        Color                  `desc:"default font / pen color"`
-	BackgroundColor  Color                  `desc:"default background color"`
-	ShadowColor      Color                  `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	BorderColor      Color                  `desc:"default border color, for button, frame borders, etc"`
-	ControlColor     Color                  `desc:"default main color for controls: buttons, etc"`
-	IconColor        Color                  `desc:"color for icons or other solidly-colored, small elements"`
-	SelectColor      Color                  `desc:"color for selected elements"`
-	HighlightColor   Color                  `desc:"color for highlight background"`
-	StdKeyMapName    string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
-	CustomKeyMap     KeyMap                 `desc:"customized mapping from keys to interface functions"`
-	PrefsOverride    bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
-	CustomStyles     ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	FontPaths        []string               `desc:"extra font paths, beyond system defaults -- searched first"`
-	FavPaths         FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
+	LogicalDPIScale float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
+	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
+	DoubleClickMSec int                    `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelRate int                    `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
+	FontColor       Color                  `desc:"default font / pen color"`
+	BackgroundColor Color                  `desc:"default background color"`
+	ShadowColor     Color                  `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	BorderColor     Color                  `desc:"default border color, for button, frame borders, etc"`
+	ControlColor    Color                  `desc:"default main color for controls: buttons, etc"`
+	IconColor       Color                  `desc:"color for icons or other solidly-colored, small elements"`
+	SelectColor     Color                  `desc:"color for selected elements"`
+	HighlightColor  Color                  `desc:"color for highlight background"`
+	StdKeyMapName   string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
+	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
+	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
+	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
+	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
+	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 }
 
 // Prefs are the overall preferences
@@ -56,7 +55,6 @@ var Prefs = Preferences{}
 
 func (p *Preferences) Defaults() {
 	p.LogicalDPIScale = oswin.LogicalDPIScale
-	p.DialogsSepWindow = true
 	p.DoubleClickMSec = 500
 	p.ScrollWheelRate = 20
 	p.FontColor.SetColor(color.Black)
@@ -103,10 +101,16 @@ func (p *Preferences) Save() error {
 
 // Apply preferences to all the relevant settings
 func (p *Preferences) Apply() {
+	np := len(p.FavPaths)
+	for i := 0; i < np; i++ {
+		if p.FavPaths[i].Ic == "" {
+			p.FavPaths[i].Ic = "folder"
+		}
+	}
+
 	oswin.LogicalDPIScale = p.LogicalDPIScale
 	mouse.DoubleClickMSec = p.DoubleClickMSec
 	mouse.ScrollWheelRate = p.ScrollWheelRate
-	DialogsSepWindow = p.DialogsSepWindow
 	if p.StdKeyMapName != "" {
 		defmap := StdKeyMapByName(p.StdKeyMapName)
 		if defmap != nil {
@@ -208,7 +212,7 @@ func (p *Preferences) PrefColor(clrName string) *Color {
 type FavPathItem struct {
 	Ic   IconName `desc:"icon for item"`
 	Name string   `width:"20" desc:"name of the favorite item"`
-	Path string   `view:"-"`
+	Path string   `tableview:"-select"`
 }
 
 // FavPaths is a list (slice) of favorite path items

@@ -98,12 +98,12 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, selectOnly bool, tmpSav
 	return dlg
 }
 
-// StructTableViewDialog is for editing / selecting fields of a
-// slice-of-struct using a StructTableView -- optionally connects to given
-// signal receiving object and function for signals (nil to ignore).
-// selectOnly turns it into a selector with no editing of fields, and signal
-// connection is to the selection signal, not the overall dialog signal
-func StructTableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun StructTableViewStyleFunc) *gi.Dialog {
+// TableViewDialog is for editing / selecting fields of a slice-of-struct
+// using a TableView -- optionally connects to given signal receiving object
+// and function for signals (nil to ignore).  selectOnly turns it into a
+// selector with no editing of fields, and signal connection is to the
+// selection signal, not the overall dialog signal
+func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun TableViewStyleFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("struct-table-view", title, prompt, true, true)
 
 	frame := dlg.Frame()
@@ -112,7 +112,7 @@ func StructTableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly
 	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
 	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_StructTableView, prIdx+2, "struct-view").(*StructTableView)
+	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "struct-view").(*TableView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(selectOnly)
@@ -137,7 +137,7 @@ func StructTableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
-	dlg := StructTableViewDialog(avp, &gi.FontLibrary.FontInfo, true, nil, title, prompt, recv, fun, FontInfoStyleFunc)
+	dlg := TableViewDialog(avp, &gi.FontLibrary.FontInfo, true, nil, title, prompt, recv, fun, FontInfoStyleFunc)
 	return dlg
 }
 

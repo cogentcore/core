@@ -399,6 +399,14 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ex))
 		}
 	}
+	maxwidthtag := vv.ViewFieldTag("max-width")
+	if maxwidthtag != "" {
+		width, err := strconv.ParseFloat(widthtag, 32)
+		if err == nil {
+			tf.SetProp("max-width", units.NewValue(float32(width), units.Ex))
+		}
+	}
+
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(gi.Inactive))
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -621,8 +629,8 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		if vvv.IsStruct {
-			dlg := StructTableViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice of Struct Value View", "", nil, nil, nil)
-			sv := dlg.Frame().ChildByType(KiT_StructTableView, true, 2).(*StructTableView)
+			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice of Struct Value View", "", nil, nil, nil)
+			sv := dlg.Frame().ChildByType(KiT_TableView, true, 2).(*TableView)
 			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 				vvvv.UpdateWidget()

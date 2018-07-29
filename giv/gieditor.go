@@ -120,7 +120,7 @@ func GoGiEditor(obj ki.Ki) {
 	fontsel.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FontChooserDialog(vp, "Select a Font", "", win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sv, _ := send.(*StructTableView)
+				sv, _ := send.(*TableView)
 				si := sv.SelectedIdx
 				if si >= 0 {
 					fi := gi.FontLibrary.FontInfo[si]

@@ -18,6 +18,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/mitchellh/go-homedir"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,8 +164,8 @@ func (fv *FileView) ConfigFilesRow() {
 	fr.SetStretchMaxWidth()
 	fr.Dim = gi.X
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_StructTableView, "favs-view")
-	config.Add(KiT_StructTableView, "files-view")
+	config.Add(KiT_TableView, "favs-view")
+	config.Add(KiT_TableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
 	sv := fv.FilesView()
 	sv.SetStretchMaxHeight()
@@ -174,18 +175,19 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetSlice(&fv.Files, nil)
 	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-		svv, _ := send.(*StructTableView)
+		svv, _ := send.(*TableView)
 		fvv.FileSelect(svv.SelectedIdx)
 	})
 
 	sv = fv.FavsView()
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
-	sv.SetInactive() // select only
+	sv.SetProp("index", false) // no index
+	sv.SetInactive()           // select only
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
 	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-		svv, _ := send.(*StructTableView)
+		svv, _ := send.(*TableView)
 		fvv.FavSelect(svv.SelectedIdx)
 	})
 	fr.SetSplits(0.2, 0.8) // todo: save / load
@@ -220,16 +222,16 @@ func (fv *FileView) PathField() *gi.TextField {
 	return pr.ChildByName("path", 1).(*gi.TextField)
 }
 
-// FavsView returns the StructTableView of the favorites
-func (fv *FileView) FavsView() *StructTableView {
+// FavsView returns the TableView of the favorites
+func (fv *FileView) FavsView() *TableView {
 	fr := fv.ChildByName("files-row", 2).(*gi.SplitView)
-	return fr.ChildByName("favs-view", 1).(*StructTableView)
+	return fr.ChildByName("favs-view", 1).(*TableView)
 }
 
-// FilesView returns the StructTableView of the files
-func (fv *FileView) FilesView() *StructTableView {
+// FilesView returns the TableView of the files
+func (fv *FileView) FilesView() *TableView {
 	fr := fv.ChildByName("files-row", 2).(*gi.SplitView)
-	return fr.ChildByName("files-view", 1).(*StructTableView)
+	return fr.ChildByName("files-view", 1).(*TableView)
 }
 
 // SelField returns the TextField of the selected file
@@ -342,7 +344,7 @@ func (fv *FileView) FileSelect(idx int) {
 // FavSelect selects a favorite path and goes there
 func (fv *FileView) FavSelect(idx int) {
 	fi := gi.Prefs.FavPaths[idx]
-	fv.DirPath = fi.Path
+	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.SetFullReRender()
 	fv.UpdateFiles()
 }
@@ -389,7 +391,7 @@ type FileInfo struct {
 	Ic      gi.IconName `desc:"icon for file"`
 	Name    string      `width:"40" desc:"name of the file"`
 	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" desc:"type of file / directory -- including MIME type"`
+	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- including MIME type"`
 	Mode    os.FileMode `desc:"file mode bits"`
 	ModTime FileTime    `desc:"time that contents (only) were last modified"`
 }

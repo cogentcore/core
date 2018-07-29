@@ -66,7 +66,7 @@ var TextFieldProps = ki.Props{
 		"background-color": "samelight-80",
 	},
 	TextFieldSelectors[TextFieldInactive]: ki.Props{
-		"background-color": "highlight-20",
+		"background-color": "highlight-10",
 	},
 	TextFieldSelectors[TextFieldSel]: ki.Props{
 		"background-color": &Prefs.SelectColor,
