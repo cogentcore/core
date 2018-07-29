@@ -728,7 +728,7 @@ func (tf *TextField) TextFieldEvents() {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		if tff.IsInactive() {
-			if me.Action == mouse.Press {
+			if me.Action == mouse.Press && me.Button == mouse.Left {
 				tff.SetSelectedState(!tff.IsSelected())
 				if tff.IsSelected() {
 					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Txt)

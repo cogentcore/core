@@ -497,7 +497,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 			if gi.IsInactive() && !bitflag.Has(gi.Flag, int(InactiveEvents)) {
 				if et == oswin.MouseEvent && w.IsInScope(gii, gi) {
 					me := evi.(*mouse.Event)
-					if me.Action == mouse.Press && me.Where.In(gi.WinBBox) {
+					if me.Action == mouse.Press && me.Button == mouse.Left && me.Where.In(gi.WinBBox) {
 						wb := gii.AsWidget()
 						if wb != nil {
 							wb.SetSelectedState(!wb.IsSelected())

@@ -95,14 +95,10 @@ Currently at an **alpha** level release:
 
 * combobox getting text cutoff -- descenders and []
 
-* update empty icon -> folder
-
-* stateful fileview (splitter)
 * search for tableview, treeview
 * DND and copy/paste for tableview
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
-* iconview -- increase icon size -- need a generic row height option for layout?
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * add margin for para in text
 
@@ -138,7 +134,7 @@ Currently at an **alpha** level release:
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
-* text translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
+* text language translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
 
 * DND needs enter / exit events so nodes can signal their ability to accept drop..  later..
 
@@ -156,6 +152,9 @@ Currently at an **alpha** level release:
 
 
 ## Rendering / SVG
+
+* still a gradient issue: see TestShapes6.svg -- inkscape and boxysvg disagree
+  but clearly something wrong in current..
 
 * flowRoot in fig_vm_as_tug_of_war creates big black box
 * default join not looking right for some test cases -- getting white holes
