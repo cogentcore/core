@@ -1460,13 +1460,16 @@ type WindowGeom struct {
 // looks up the info automatically for new windows and saves persistently
 type WindowGeomPrefs map[string]map[string]WindowGeom
 
+// WinGeomPrefsFileName is the name of the preferences file in GoGi prefs directory
+var WinGeomPrefsFileName = "win_geom_prefs.json"
+
 // Load Window Geom preferences from GoGi standard prefs directory
 func (wg *WindowGeomPrefs) Load() error {
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, "win_geom_prefs.json")
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
 		log.Println(err)
@@ -1485,7 +1488,7 @@ func (wg *WindowGeomPrefs) Save() error {
 		return nil
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, "win_geom_prefs.json")
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
 	b, err := json.MarshalIndent(wg, "", "  ")
 	if err != nil {
 		log.Println(err)

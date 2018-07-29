@@ -28,12 +28,10 @@ import (
 
 // * search: use highlighting, not filtering -- < > arrows etc -- ext *.svg is
 // just search pre-load -- add arg
+// * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
 // * busy cursor when loading
-// * NewFolder -- does everyone call it folder now?  Folder is the gui version of the name..
-// * tree view of directory on left of files view
-// * prior paths, saved to prefs dir
-// * favorites, with DND, saved to prefs dir
+// * prior paths, saved to prefs dir (maybe not -- favs is pretty good?)
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
@@ -103,7 +101,7 @@ func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Layout, "path-row")
 	config.Add(gi.KiT_Space, "path-space")
-	config.Add(gi.KiT_SplitView, "files-row")
+	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Space, "files-space")
 	config.Add(gi.KiT_Layout, "sel-row")
 	config.Add(gi.KiT_Space, "sel-space")
@@ -134,6 +132,8 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Label, "path-lbl")
 	config.Add(gi.KiT_TextField, "path")
 	config.Add(gi.KiT_Action, "path-up")
+	config.Add(gi.KiT_Action, "path-fav")
+	config.Add(gi.KiT_Action, "new-folder")
 	pr.ConfigChildren(config, false) // already covered by parent update
 	pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
 	pl.Text = "Path:"
@@ -152,27 +152,48 @@ func (fv *FileView) ConfigPathRow() {
 
 	pu := pr.ChildByName("path-up", 0).(*gi.Action)
 	pu.Icon = gi.IconName("widget-wedge-up")
+	pu.Tooltip = "go up one level into the parent folder"
 	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
 	})
+
+	pfv := pr.ChildByName("path-fav", 0).(*gi.Action)
+	pfv.Icon = gi.IconName("heart")
+	pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
+	pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+		fvv.AddPathToFavs()
+	})
+
+	nf := pr.ChildByName("new-folder", 0).(*gi.Action)
+	nf.Icon = gi.IconName("folder-plus")
+	nf.Tooltip = "Create a new folder in this folder"
+	nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+		fvv.NewFolder()
+	})
 }
 
 func (fv *FileView) ConfigFilesRow() {
-	fr := fv.ChildByName("files-row", 2).(*gi.SplitView)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
-	fr.Dim = gi.X
+	fr.Lay = gi.LayoutRow
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
 	sv := fv.FilesView()
+	sv.SetProp("index", false) // no index
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactive() // select only
 	sv.StyleFunc = FileViewStyleFunc
 	sv.SetSlice(&fv.Files, nil)
+	if gi.Prefs.FileViewSort != "" {
+		sv.SetSortFieldName(gi.Prefs.FileViewSort)
+	}
 	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 		svv, _ := send.(*TableView)
@@ -181,7 +202,6 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv = fv.FavsView()
 	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetProp("index", false) // no index
 	sv.SetInactive()           // select only
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
@@ -190,7 +210,6 @@ func (fv *FileView) ConfigFilesRow() {
 		svv, _ := send.(*TableView)
 		fvv.FavSelect(svv.SelectedIdx)
 	})
-	fr.SetSplits(0.2, 0.8) // todo: save / load
 }
 
 func (fv *FileView) ConfigSelRow() {
@@ -224,13 +243,13 @@ func (fv *FileView) PathField() *gi.TextField {
 
 // FavsView returns the TableView of the favorites
 func (fv *FileView) FavsView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.SplitView)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	return fr.ChildByName("favs-view", 1).(*TableView)
 }
 
 // FilesView returns the TableView of the files
 func (fv *FileView) FilesView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.SplitView)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	return fr.ChildByName("files-view", 1).(*TableView)
 }
 
@@ -271,12 +290,12 @@ func (fv *FileView) UpdateFiles() {
 	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", fv.DirPath, err)
-			if fv.Viewport != nil {
-				gi.PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
-			} else {
-				log.Printf("gi.FileView error: %v\n", emsg)
-			}
-			return err
+			// if fv.Viewport != nil {
+			// 	gi.PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
+			// } else {
+			log.Printf("gi.FileView error: %v\n", emsg)
+			// }
+			return nil // ignore
 		}
 		if path == fv.DirPath { // proceed..
 			return nil
@@ -309,11 +328,29 @@ func (fv *FileView) UpdateFiles() {
 
 // UpdateFavs updates list of files and other views for current path
 func (fv *FileView) UpdateFavs() {
-	updt := fv.UpdateStart()
-	fv.SetFullReRender()
 	sv := fv.FavsView()
 	sv.UpdateFromSlice()
-	fv.UpdateEnd(updt)
+}
+
+// AddPathToFavs adds the current path to favorites
+func (fv *FileView) AddPathToFavs() {
+	dp := fv.DirPath
+	if dp == "" {
+		return
+	}
+	_, fnm := filepath.Split(dp)
+	hd, _ := homedir.Dir()
+	hd += string(filepath.Separator)
+	if strings.HasPrefix(dp, hd) {
+		dp = filepath.Join("~", strings.TrimPrefix(dp, hd))
+	}
+	if fnm == "" {
+		fnm = dp
+	}
+	fi := gi.FavPathItem{"folder", fnm, dp}
+	gi.Prefs.FavPaths = append(gi.Prefs.FavPaths, fi)
+	gi.Prefs.Save()
+	fv.UpdateFavs()
 }
 
 // DirPathUp moves up one directory in the path
@@ -327,8 +364,31 @@ func (fv *FileView) DirPathUp() {
 	fv.UpdateFiles()
 }
 
+// NewFolder creates a new folder in current directory
+func (fv *FileView) NewFolder() {
+	dp := fv.DirPath
+	if dp == "" {
+		return
+	}
+	np := filepath.Join(dp, "NewFolder")
+	err := os.MkdirAll(np, 0775)
+	if err != nil {
+		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
+		if fv.Viewport != nil {
+			gi.PromptDialog(fv.Viewport, "FileView Error", emsg, true, false, nil, nil)
+		} else {
+			log.Printf("gi.FileView NewFolder error: %v\n", emsg)
+		}
+	} else {
+		fmt.Printf("gi.FileView made new folder: %v\n", np)
+	}
+	fv.SetFullReRender()
+	fv.UpdateFiles()
+}
+
 // FileSelect updates selection with given selected file
 func (fv *FileView) FileSelect(idx int) {
+	fv.SaveSortPrefs()
 	fi := fv.Files[idx]
 	if fi.Kind == "Folder" {
 		fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
@@ -347,6 +407,16 @@ func (fv *FileView) FavSelect(idx int) {
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.SetFullReRender()
 	fv.UpdateFiles()
+}
+
+// SaveSortPrefs saves current sorting preferences
+func (fv *FileView) SaveSortPrefs() {
+	sv := fv.FilesView()
+	if sv == nil {
+		return
+	}
+	gi.Prefs.FileViewSort = sv.SortFieldName()
+	gi.Prefs.Save()
 }
 
 // ConfigButtons configures the buttons

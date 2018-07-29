@@ -48,6 +48,7 @@ type Preferences struct {
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
+	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 }
 
 // Prefs are the overall preferences

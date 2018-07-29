@@ -79,11 +79,11 @@
               "Nm": "title",
               "UniqueNm": "title",
               "Props": {
-                "text-align": "__enum:(gi.Align)AlignCenter",
-                "align-vert": "__enum:(gi.Align)AlignTop",
-                "font-family": "Times New Roman, serif",
                 "font-size": "x-large",
-                "line-height": 1.5
+                "line-height": 1.5,
+                "text-align": "__enum:(gi.Align)AlignCenter",
+                "vertical-align": "__enum:(gi.Align)AlignTop",
+                "font-family": "Times New Roman, serif"
               },
               "Kids": null,
               "Class": "",
@@ -147,7 +147,7 @@
           "Nm": "brow",
           "UniqueNm": "brow",
           "Props": {
-            "align-horiz": "__enum:(gi.Align)AlignLeft",
+            "horizontal-align": "__enum:(gi.Align)AlignLeft",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
@@ -171,12 +171,6 @@
               "Nm": "button1",
               "UniqueNm": "button1",
               "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
                 "#icon": {
                   "__type:width": "units.Value",
                   "width": {
@@ -190,6 +184,12 @@
                     "Un": "Em",
                     "Dots": 0
                   }
+                },
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
                 }
               },
               "Kids": null,
@@ -216,7 +216,7 @@
               "Kids": null,
               "Class": "",
               "CSS": null,
-              "Tooltip": "",
+              "Tooltip": "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things",
               "Text": "Open GoGiEditor",
               "Icon": "",
               "Indicator": "",
@@ -405,13 +405,13 @@
           "Nm": "srow",
           "UniqueNm": "srow",
           "Props": {
+            "horizontal-align": "left",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
               "Un": "Px",
               "Dots": 0
-            },
-            "align-horiz": "left"
+            }
           },
           "Kids": [
             {
@@ -429,12 +429,6 @@
               "Nm": "slider1",
               "UniqueNm": "slider1",
               "Props": {
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 2,
-                  "Un": "Em",
-                  "Dots": 0
-                },
                 "__type:width": "units.Value",
                 "width": {
                   "Val": 20,
@@ -449,6 +443,12 @@
                 },
                 "__type:height": "units.Value",
                 "height": {
+                  "Val": 2,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-height": "units.Value",
+                "min-height": {
                   "Val": 2,
                   "Un": "Em",
                   "Dots": 0
@@ -472,6 +472,7 @@
                 "Dots": 24
               },
               "Prec": 9,
+              "Icon": "widget-circlebutton-on",
               "ValThumb": false,
               "ThumbVal": 0,
               "Pos": 137,
@@ -545,6 +546,7 @@
                 "Dots": 24
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": false,
               "ThumbVal": 0,
               "Pos": 57,
@@ -569,6 +571,12 @@
               "Nm": "scrollbar1",
               "UniqueNm": "scrollbar1",
               "Props": {
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
                 "__type:min-width": "units.Value",
                 "min-width": {
                   "Val": 20,
@@ -584,12 +592,6 @@
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 20,
                   "Un": "Em",
                   "Dots": 0
                 }
@@ -612,6 +614,7 @@
                 "Dots": 8
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": true,
               "ThumbVal": 0.25,
               "Pos": 78.5,
@@ -636,6 +639,18 @@
               "Nm": "scrollbar2",
               "UniqueNm": "scrollbar2",
               "Props": {
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:max-height": "units.Value",
+                "max-height": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
                 "__type:height": "units.Value",
                 "height": {
                   "Val": 10,
@@ -652,18 +667,6 @@
                 "width": {
                   "Val": 1,
                   "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:max-height": "units.Value",
-                "max-height": {
-                  "Val": -1,
-                  "Un": "Px",
                   "Dots": 0
                 }
               },
@@ -685,6 +688,7 @@
                 "Dots": 8
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": true,
               "ThumbVal": 0.1,
               "Pos": 77,
@@ -803,7 +807,9 @@
               "Max": 1,
               "Step": 0.1,
               "PageStep": 0.2,
-              "Prec": 6
+              "Prec": 6,
+              "UpIcon": "widget-wedge-up",
+              "DownIcon": "widget-wedge-down"
             },
             {
               "Nm": "combo",
@@ -839,9 +845,6 @@
   ],
   "Class": "",
   "CSS": {
-    "kbd": {
-      "color": "blue"
-    },
     "button": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -868,6 +871,9 @@
         "B": 255,
         "A": 255
       }
+    },
+    "kbd": {
+      "color": "blue"
     }
   },
   "Tooltip": "",

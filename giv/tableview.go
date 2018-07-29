@@ -10,6 +10,7 @@ import (
 	"log"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/goki/gi"
@@ -17,6 +18,11 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
+
+// todo:
+// * search option, both as a search field and as simple type-to-search
+// * popup menu option -- when user does right-mouse on item, a provided func is called
+//   -- use in fileview
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TableView
@@ -275,6 +281,13 @@ func (sv *TableView) ConfigSliceGrid() {
 		fld := sv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		hdr.SetText(fld.Name)
+		if fli == sv.SortIdx {
+			if sv.SortDesc {
+				hdr.SetIcon("widget-wedge-down")
+			} else {
+				hdr.SetIcon("widget-wedge-up")
+			}
+		}
 		hdr.Data = fli
 		hdr.Tooltip = "click to sort by this column -- toggles direction of sort too"
 		hdr.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -518,11 +531,15 @@ func (sv *TableView) SortSliceAction(fldIdx int) {
 	sg, _ := sv.SliceGrid()
 	sgh := sg.Child(0).(*gi.Layout)
 	sgh.SetFullReRender()
+	idxOff := 1
+	if !sv.ShowIndex {
+		idxOff = 0
+	}
 
 	ascending := true
 
 	for fli := 0; fli < sv.NVisFields; fli++ {
-		hdr := sgh.Child(1 + fli).(*gi.Action)
+		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		if fli == fldIdx {
 			if sv.SortIdx == fli {
 				sv.SortDesc = !sv.SortDesc
@@ -669,6 +686,43 @@ func (sv *TableView) ConfigSliceButtons() {
 	})
 	if mods {
 		bb.UpdateEnd(updt)
+	}
+}
+
+// SortFieldName returns the name of the field being sorted, along with :up or
+// :down depending on descending
+func (sv *TableView) SortFieldName() string {
+	if sv.SortIdx >= 0 && sv.SortIdx < sv.NVisFields {
+		nm := sv.VisFields[sv.SortIdx].Name
+		if sv.SortDesc {
+			nm += ":down"
+		} else {
+			nm += ":up"
+		}
+		return nm
+	}
+	return ""
+}
+
+// SetSortField sets sorting to happen on given field and direction -- see
+// SortFieldName for details
+func (sv *TableView) SetSortFieldName(nm string) {
+	if nm == "" {
+		return
+	}
+	spnm := strings.Split(nm, ":")
+	for fli := 0; fli < sv.NVisFields; fli++ {
+		fld := sv.VisFields[fli]
+		if fld.Name == spnm[0] {
+			sv.SortIdx = fli
+		}
+	}
+	if len(spnm) == 2 {
+		if spnm[1] == "down" {
+			sv.SortDesc = true
+		} else {
+			sv.SortDesc = false
+		}
 	}
 }
 
