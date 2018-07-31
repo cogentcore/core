@@ -404,9 +404,6 @@ func (vp *Viewport2D) Render2D() {
 	}
 }
 
-func (g *Viewport2D) FocusChanged2D(gotFocus bool) {
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 

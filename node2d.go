@@ -82,7 +82,8 @@ var Layout2DTrace bool = false
 // Node2D is the interface for all 2D nodes -- defines the stages of building
 // and rendering the 2D scenegraph
 type Node2D interface {
-	// nodes are Ki elements -- this comes for free by embedding ki.Node in all Node2D elements
+	// nodes are Ki elements -- this comes for free by embedding ki.Node in
+	// all Node2D elements
 	ki.Ki
 
 	// AsNode2D returns a generic Node2DBase for our node -- gives generic
@@ -170,8 +171,27 @@ type Node2D interface {
 	// all keyboard activity for certain key keys..
 	HasFocus2D() bool
 
-	// FindNamedElement searches for given named element in this node or in parent nodes
+	// FindNamedElement searches for given named element in this node or in
+	// parent nodes.  Used for url(#name) references
 	FindNamedElement(name string) Node2D
+
+	// MakeContextMenu creates the context menu items (typically Action
+	// elements, but it can be anything) for a given widget, typically
+	// activated by the right mouse button or equivalent.  Widget has a
+	// function parameter that can be set to add context items (e.g., by Views
+	// or other complex widgets) to extend functionality.
+	MakeContextMenu(menu *Menu)
+
+	// ContextMenuPos returns the default position for popup menus --
+	// by default in the middle of the WinBBox, but can be adapted as
+	// appropriate for different widgets
+	ContextMenuPos() image.Point
+
+	// ContextMenu displays the context menu of various actions to perform on
+	// a node -- returns immediately, and actions are all executed directly
+	// (later) via the action signals.  Calls MakeContextMenu and
+	// ContextMenuPos
+	ContextMenu()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -244,11 +264,33 @@ func (g *Node2DBase) FindNamedElement(name string) Node2D {
 	if g.Par == nil {
 		return nil
 	}
+	if ce := g.Par.ChildByName(name, -1); ce != nil {
+		return ce.(Node2D)
+	}
 	pgi, _ := KiToNode2D(g.Par)
 	if pgi != nil {
 		return pgi.FindNamedElement(name)
 	}
 	return nil
+}
+
+func (g *Node2DBase) MakeContextMenu(m *Menu) {
+}
+
+func (g *Node2DBase) ContextMenuPos() (pos image.Point) {
+	pos.X = (g.WinBBox.Min.X + g.WinBBox.Max.X) / 2
+	pos.Y = (g.WinBBox.Min.Y + g.WinBBox.Max.Y) / 2
+	return
+}
+
+func (g *Node2DBase) ContextMenu() {
+	var men Menu
+	g.MakeContextMenu(&men)
+	if len(men) == 0 {
+		return
+	}
+	pos := g.ContextMenuPos()
+	PopupMenu(men, pos.X, pos.Y, g.Viewport, g.Nm+"-menu")
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

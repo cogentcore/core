@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"log"
@@ -14,6 +15,11 @@ import (
 	"time"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -27,21 +33,28 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TableView
 
-// TableView represents a slice of a struct as a table, where the fields
-// are the columns, within an overall frame and a button box at the bottom
-// where methods can be invoked -- set to Inactive for select-only mode, which
-// emits SelectSig signals when selection is updated
+// TableView represents a slice-of-structs as a table, where the fields are
+// the columns, within an overall frame and a button box at the bottom where
+// methods can be invoked.  It has two modes, determined by Inactive flag: if
+// Inactive, it functions as a mutually-exclusive item selector, highlighting
+// the selected row and emitting a WidgetSig WidgetSelected signal.  If
+// !Inactive, it is a full-featured editor with multiple-selection,
+// cut-and-paste, and drag-and-drop, reporting each action taken using the
+// TableViewSig signals
 type TableView struct {
 	gi.Frame
-	Slice       interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	StyleFunc   TableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
-	Values      [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	TmpSave     ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig     ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ShowIndex   bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
-	SelectedIdx int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SortIdx     int                `desc:"current sort index"`
-	SortDesc    bool               `desc:"whether current sort order is descending"`
+	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	StyleFunc    TableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
+	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
+	TmpSave      ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index is required for copy / paste and DND of rows"`
+	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item -- see SelectedRows for full set of selected rows in active editing mode"`
+	SortIdx      int                `desc:"current sort index"`
+	SortDesc     bool               `desc:"whether current sort order is descending"`
+	SelectMode   bool               `desc:"editing-mode select rows mode"`
+	SelectedRows map[int]bool       `desc:"list of currently-selected rows"`
+	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
+	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
 	BuiltSlice interface{}
 	BuiltSize  int
@@ -61,11 +74,11 @@ type TableViewStyleFunc func(slice interface{}, widg gi.Node2D, row, col int, vv
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
-func (sv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
+func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false
-	if sv.Slice != sl {
-		sv.SortIdx = -1
-		sv.SortDesc = false
+	if tv.Slice != sl {
+		tv.SortIdx = -1
+		tv.SortDesc = false
 		slpTyp := reflect.TypeOf(sl)
 		if slpTyp.Kind() != reflect.Ptr {
 			log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
@@ -75,23 +88,25 @@ func (sv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 			log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- ptr doesn't point to a slice: %v\n", slpTyp.Elem().String())
 			return
 		}
-		sv.Slice = sl
-		struTyp := sv.StructType()
+		tv.Slice = sl
+		struTyp := tv.StructType()
 		if struTyp.Kind() != reflect.Struct {
 			log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
 			return
 		}
-		updt = sv.UpdateStart()
-		sv.SelectedIdx = -1
-		sv.SetFullReRender()
+		updt = tv.UpdateStart()
+		tv.SelectedIdx = -1
+		tv.SelectedRows = make(map[int]bool, 10)
+		tv.SelectMode = false
+		tv.SetFullReRender()
 	}
-	sv.ShowIndex = true
-	if sidxp := sv.Prop("index", false, false); sidxp != nil {
-		sv.ShowIndex, _ = kit.ToBool(sidxp)
+	tv.ShowIndex = true
+	if sidxp := tv.Prop("index", false, false); sidxp != nil {
+		tv.ShowIndex, _ = kit.ToBool(sidxp)
 	}
-	sv.TmpSave = tmpSave
-	sv.UpdateFromSlice()
-	sv.UpdateEnd(updt)
+	tv.TmpSave = tmpSave
+	tv.UpdateFromSlice()
+	tv.UpdateEnd(updt)
 }
 
 var TableViewProps = ki.Props{
@@ -101,42 +116,42 @@ var TableViewProps = ki.Props{
 
 // StructType returns the type of the struct within the slice, and the number
 // of visible fields
-func (sv *TableView) StructType() reflect.Type {
-	sv.StruType = kit.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
-	return sv.StruType
+func (tv *TableView) StructType() reflect.Type {
+	tv.StruType = kit.NonPtrType(reflect.TypeOf(tv.Slice).Elem().Elem())
+	return tv.StruType
 }
 
 // CacheVisFields computes the number of visible fields in nVisFields and
 // caches those to skip in fieldSkip
-func (sv *TableView) CacheVisFields() {
-	sv.StructType()
-	nfld := sv.StruType.NumField()
-	sv.VisFields = make([]reflect.StructField, 0, nfld)
+func (tv *TableView) CacheVisFields() {
+	tv.StructType()
+	nfld := tv.StruType.NumField()
+	tv.VisFields = make([]reflect.StructField, 0, nfld)
 	for fli := 0; fli < nfld; fli++ {
-		fld := sv.StruType.Field(fli)
+		fld := tv.StruType.Field(fli)
 		tvtag := fld.Tag.Get("tableview")
 		if tvtag != "" {
 			if tvtag == "-" {
 				continue
-			} else if tvtag == "-select" && sv.IsInactive() {
+			} else if tvtag == "-select" && tv.IsInactive() {
 				continue
-			} else if tvtag == "-edit" && !sv.IsInactive() {
+			} else if tvtag == "-edit" && !tv.IsInactive() {
 				continue
 			}
 		}
-		sv.VisFields = append(sv.VisFields, fld)
+		tv.VisFields = append(tv.VisFields, fld)
 	}
-	sv.NVisFields = len(sv.VisFields)
+	tv.NVisFields = len(tv.VisFields)
 }
 
 // SetFrame configures view as a frame
-func (sv *TableView) SetFrame() {
-	sv.Lay = gi.LayoutCol
+func (tv *TableView) SetFrame() {
+	tv.Lay = gi.LayoutCol
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (sv *TableView) StdFrameConfig() kit.TypeAndNameList {
+func (tv *TableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Frame, "struct-grid")
 	config.Add(gi.KiT_Space, "grid-space")
@@ -146,34 +161,34 @@ func (sv *TableView) StdFrameConfig() kit.TypeAndNameList {
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
-func (sv *TableView) StdConfig() (mods, updt bool) {
-	sv.SetFrame()
-	config := sv.StdFrameConfig()
-	mods, updt = sv.ConfigChildren(config, false)
+func (tv *TableView) StdConfig() (mods, updt bool) {
+	tv.SetFrame()
+	config := tv.StdFrameConfig()
+	mods, updt = tv.ConfigChildren(config, false)
 	return
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *TableView) SliceGrid() (*gi.Frame, int) {
-	idx := sv.ChildIndexByName("struct-grid", 0)
+func (tv *TableView) SliceGrid() (*gi.Frame, int) {
+	idx := tv.ChildIndexByName("struct-grid", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Frame), idx
+	return tv.Child(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (sv *TableView) ButtonBox() (*gi.Layout, int) {
-	idx := sv.ChildIndexByName("buttons", 0)
+func (tv *TableView) ButtonBox() (*gi.Layout, int) {
+	idx := tv.ChildIndexByName("buttons", 0)
 	if idx < 0 {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Layout), idx
+	return tv.Child(idx).(*gi.Layout), idx
 }
 
 // StdGridConfig returns a TypeAndNameList for configuring the struct-grid
-func (sv *TableView) StdGridConfig() kit.TypeAndNameList {
+func (tv *TableView) StdGridConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Layout, "header")
 	config.Add(gi.KiT_Separator, "head-sepe")
@@ -181,42 +196,48 @@ func (sv *TableView) StdGridConfig() kit.TypeAndNameList {
 	return config
 }
 
-// ConfigSliceGrid configures the SliceGrid for the current slice
-func (sv *TableView) ConfigSliceGrid() {
-	if kit.IfaceIsNil(sv.Slice) {
-		return
-	}
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
-
-	if sv.BuiltSlice == sv.Slice && sv.BuiltSize == sz {
-		return
-	}
-	sv.BuiltSlice = sv.Slice
-	sv.BuiltSize = sz
-
-	sv.SelectedIdx = -1
-
-	sv.CacheVisFields()
-
-	nWidgPerRow := 1 + sv.NVisFields
-	if !sv.IsInactive() {
+// RowWidgetNs returns number of widgets per row and offset for index label
+func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
+	nWidgPerRow = 1 + tv.NVisFields
+	if !tv.IsInactive() {
 		nWidgPerRow += 2
 	}
-	idxOff := 1
-	if !sv.ShowIndex {
+	idxOff = 1
+	if !tv.ShowIndex {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
+	return
+}
+
+// ConfigSliceGrid configures the SliceGrid for the current slice
+func (tv *TableView) ConfigSliceGrid() {
+	if kit.IfaceIsNil(tv.Slice) {
+		return
+	}
+	mv := reflect.ValueOf(tv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+
+	if tv.BuiltSlice == tv.Slice && tv.BuiltSize == sz {
+		return
+	}
+	tv.BuiltSlice = tv.Slice
+	tv.BuiltSize = sz
+
+	tv.SelectedIdx = -1
+
+	tv.CacheVisFields()
+
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	// always start fresh!
-	sv.Values = make([][]ValueView, sv.NVisFields)
-	for fli := 0; fli < sv.NVisFields; fli++ {
-		sv.Values[fli] = make([]ValueView, sz)
+	tv.Values = make([][]ValueView, tv.NVisFields)
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		tv.Values[fli] = make([]ValueView, sz)
 	}
 
-	sg, _ := sv.SliceGrid()
+	sg, _ := tv.SliceGrid()
 	if sg == nil {
 		return
 	}
@@ -226,10 +247,10 @@ func (sv *TableView) ConfigSliceGrid() {
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
-	sgcfg := sv.StdGridConfig()
+	sgcfg := tv.StdGridConfig()
 	modsg, updtg := sg.ConfigChildren(sgcfg, false)
 	if modsg {
-		sv.SetFullReRender()
+		tv.SetFullReRender()
 	} else {
 		updtg = sg.UpdateStart()
 	}
@@ -254,35 +275,35 @@ func (sv *TableView) ConfigSliceGrid() {
 
 	// Configure Header
 	hcfg := kit.TypeAndNameList{}
-	if sv.ShowIndex {
+	if tv.ShowIndex {
 		hcfg.Add(gi.KiT_Label, "head-idx")
 	}
-	for fli := 0; fli < sv.NVisFields; fli++ {
-		fld := sv.VisFields[fli]
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		fld := tv.VisFields[fli]
 		labnm := fmt.Sprintf("head-%v", fld.Name)
 		hcfg.Add(gi.KiT_Action, labnm)
 	}
-	if !sv.IsInactive() {
+	if !tv.IsInactive() {
 		hcfg.Add(gi.KiT_Label, "head-add")
 		hcfg.Add(gi.KiT_Label, "head-del")
 	}
 
 	modsh, updth := sgh.ConfigChildren(hcfg, false)
 	if modsh {
-		sv.SetFullReRender()
+		tv.SetFullReRender()
 	} else {
 		updth = sgh.UpdateStart()
 	}
-	if sv.ShowIndex {
+	if tv.ShowIndex {
 		lbl := sgh.Child(0).(*gi.Label)
 		lbl.Text = "Index"
 	}
-	for fli := 0; fli < sv.NVisFields; fli++ {
-		fld := sv.VisFields[fli]
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		fld := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		hdr.SetText(fld.Name)
-		if fli == sv.SortIdx {
-			if sv.SortDesc {
+		if fli == tv.SortIdx {
+			if tv.SortDesc {
 				hdr.SetIcon("widget-wedge-down")
 			} else {
 				hdr.SetIcon("widget-wedge-up")
@@ -290,18 +311,18 @@ func (sv *TableView) ConfigSliceGrid() {
 		}
 		hdr.Data = fli
 		hdr.Tooltip = "click to sort by this column -- toggles direction of sort too"
-		hdr.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		hdr.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
-			svv.SortSliceAction(fldIdx)
+			tvv.SortSliceAction(fldIdx)
 		})
 	}
-	if !sv.IsInactive() {
-		lbl := sgh.Child(sv.NVisFields + idxOff).(*gi.Label)
+	if !tv.IsInactive() {
+		lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
 		lbl.Text = "+"
 		lbl.Tooltip = "insert row"
-		lbl = sgh.Child(sv.NVisFields + idxOff + 1).(*gi.Label)
+		lbl = sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
 		lbl.Text = "-"
 		lbl.Tooltip = "delete row"
 	}
@@ -309,10 +330,10 @@ func (sv *TableView) ConfigSliceGrid() {
 	sgf.DeleteChildren(true)
 	sgf.Kids = make(ki.Slice, nWidgPerRow*sz)
 
-	if sv.SortIdx >= 0 {
-		SortStructSlice(sv.Slice, sv.SortIdx, !sv.SortDesc)
+	if tv.SortIdx >= 0 {
+		SortStructSlice(tv.Slice, tv.SortIdx, !tv.SortDesc)
 	}
-	sv.ConfigSliceGridRows()
+	tv.ConfigSliceGridRows()
 
 	sg.SetFullReRender()
 	sgh.UpdateEnd(updth)
@@ -322,21 +343,13 @@ func (sv *TableView) ConfigSliceGrid() {
 // ConfigSliceGridRows configures the SliceGrid rows for the current slice --
 // assumes .Kids is created at the right size -- only call this for a direct
 // re-render e.g., after sorting
-func (sv *TableView) ConfigSliceGridRows() {
-	mv := reflect.ValueOf(sv.Slice)
+func (tv *TableView) ConfigSliceGridRows() {
+	mv := reflect.ValueOf(tv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 
-	nWidgPerRow := 1 + sv.NVisFields
-	if !sv.IsInactive() {
-		nWidgPerRow += 2
-	}
-	idxOff := 1
-	if !sv.ShowIndex {
-		nWidgPerRow -= 1
-		idxOff = 0
-	}
-	sg, _ := sv.SliceGrid()
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	sg, _ := tv.SliceGrid()
 	sgf := sg.Child(2).(*gi.Frame)
 
 	updt := sgf.UpdateStart()
@@ -348,7 +361,7 @@ func (sv *TableView) ConfigSliceGridRows() {
 		stru := val.Interface()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
-		if sv.ShowIndex {
+		if tv.ShowIndex {
 			var idxlab *gi.Label
 			if sgf.Kids[ridx] != nil {
 				idxlab = sgf.Kids[ridx].(*gi.Label)
@@ -357,16 +370,28 @@ func (sv *TableView) ConfigSliceGridRows() {
 				sgf.SetChild(idxlab, ridx, labnm)
 			}
 			idxlab.Text = idxtxt
+			idxlab.SetProp("tv-index", i)
+			if !tv.IsInactive() {
+				idxlab.Selectable = true
+				idxlab.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.WidgetSelected) {
+						wbb := send.(gi.Node2D).AsWidget()
+						idx := wbb.Prop("tv-index", false, false).(int)
+						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+						tvv.UpdateSelect(idx, wbb.IsSelected())
+					}
+				})
+			}
 		}
 
-		for fli := 0; fli < sv.NVisFields; fli++ {
-			field := sv.VisFields[fli]
+		for fli := 0; fli < tv.NVisFields; fli++ {
+			field := tv.VisFields[fli]
 			fval := val.Elem().Field(field.Index[0])
 			vv := ToValueView(fval.Interface())
 			if vv == nil { // shouldn't happen
 				continue
 			}
-			vv.SetStructValue(fval.Addr(), stru, &field, sv.TmpSave)
+			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave)
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, idxtxt)
 			cidx := ridx + idxOff + fli
@@ -374,178 +399,185 @@ func (sv *TableView) ConfigSliceGridRows() {
 			if sgf.Kids[cidx] != nil {
 				widg = sgf.Kids[cidx].(gi.Node2D)
 			} else {
-				sv.Values[fli][i] = vv
+				tv.Values[fli][i] = vv
 				widg = ki.NewOfType(vtyp).(gi.Node2D)
 				sgf.SetChild(widg, cidx, valnm)
 			}
 			vv.ConfigWidget(widg)
-			if sv.IsInactive() {
-				widg.AsNode2D().SetInactive()
-				wb := widg.AsWidget()
-				if wb != nil {
-					wb.SetProp("stv-index", i)
-					wb.ClearSelected()
-					if wb.TypeEmbeds(gi.KiT_TextField) {
-						tf := wb.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-						tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-							if sig == int64(gi.TextFieldSelected) {
-								tff := send.(*gi.TextField)
-								idx := tff.Prop("stv-index", false, false).(int)
-								svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-								svv.UpdateSelect(idx, tff.IsSelected())
-							}
-						})
-					} else {
-						wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-							wbb := send.(gi.Node2D).AsWidget()
-							idx := wbb.Prop("stv-index", false, false).(int)
-							svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-							svv.UpdateSelect(idx, wbb.IsSelected())
-						})
+			wb := widg.AsWidget()
+			if wb != nil {
+				wb.SetProp("tv-index", i)
+				wb.ClearSelected()
+				wb.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.WidgetSelected) {
+						wbb := send.(gi.Node2D).AsWidget()
+						idx := wbb.Prop("tv-index", false, false).(int)
+						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+						tvv.UpdateSelect(idx, wbb.IsSelected())
 					}
-				}
+				})
+			}
+			if tv.IsInactive() {
+				widg.AsNode2D().SetInactive()
 			} else {
 				vvb := vv.AsValueViewBase()
-				vvb.ViewSig.ConnectOnly(sv.This, // todo: do we need this?
+				vvb.ViewSig.ConnectOnly(tv.This, // todo: do we need this?
 					func(recv, send ki.Ki, sig int64, data interface{}) {
-						svv, _ := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-						svv.UpdateSig()
-						svv.ViewSig.Emit(svv.This, 0, nil)
+						tvv, _ := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+						tvv.UpdateSig()
+						tvv.ViewSig.Emit(tvv.This, 0, nil)
 					})
 
 				addnm := fmt.Sprintf("add-%v", idxtxt)
 				delnm := fmt.Sprintf("del-%v", idxtxt)
 				addact := gi.Action{}
 				delact := gi.Action{}
-				sgf.SetChild(&addact, ridx+1+sv.NVisFields, addnm)
-				sgf.SetChild(&delact, ridx+1+sv.NVisFields+1, delnm)
+				sgf.SetChild(&addact, ridx+1+tv.NVisFields, addnm)
+				sgf.SetChild(&delact, ridx+1+tv.NVisFields+1, delnm)
 
 				addact.SetIcon("plus")
 				addact.Tooltip = "insert a new element at this index"
 				addact.Data = i
-				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				addact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
-					svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-					svv.SliceNewAt(act.Data.(int) + 1)
+					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv.SliceNewAt(act.Data.(int)+1, true)
 				})
 				delact.SetIcon("minus")
 				delact.Tooltip = "delete this element"
 				delact.Data = i
-				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				delact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
-					svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-					svv.SliceDelete(act.Data.(int))
+					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv.SliceDelete(act.Data.(int), true)
 				})
 			}
-			if sv.StyleFunc != nil {
-				sv.StyleFunc(mvnp.Interface(), widg, i, fli, vv)
+			if tv.StyleFunc != nil {
+				tv.StyleFunc(mvnp.Interface(), widg, i, fli, vv)
 			}
 		}
+	}
+}
+
+// SelectRowWidgets sets the selection state of given row of widgets
+func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	sg, _ := tv.SliceGrid()
+	sgf := sg.Child(2).(*gi.Frame)
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	ridx := idx * nWidgPerRow
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		seldx := ridx + idxOff + fli
+		if sgf.Kids.IsValidIndex(seldx) {
+			widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
+			widg.UpdateSig()
+		}
+	}
+	if idxOff == 1 {
+		widg := sgf.Child(ridx).(gi.Node2D).AsNode2D()
+		widg.SetSelectedState(sel)
+		widg.UpdateSig()
+	}
+
+	if win != nil {
+		win.UpdateEnd(updt)
 	}
 }
 
 // UpdateSelect updates the selection for the given index
-func (sv *TableView) UpdateSelect(idx int, sel bool) {
-	sg, _ := sv.SliceGrid()
-	sgf := sg.Child(2).(*gi.Frame)
-
-	nWidgPerRow := sv.NVisFields + 1 // !interact
-	idxOff := 1
-	if !sv.ShowIndex {
-		nWidgPerRow -= 1
-		idxOff = 0
-	}
-
-	if sv.SelectedIdx >= 0 { // unselect current
-		for fli := 0; fli < sv.NVisFields; fli++ {
-			seldx := sv.SelectedIdx*nWidgPerRow + idxOff + fli
-			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
-				widg.ClearSelected()
-				widg.UpdateSig()
-			}
+func (tv *TableView) UpdateSelect(idx int, sel bool) {
+	if tv.IsInactive() {
+		if tv.SelectedIdx >= 0 { // unselect current
+			tv.SelectRowWidgets(tv.SelectedIdx, false)
 		}
-	}
-	if sel {
-		sv.SelectedIdx = idx
-		for fli := 0; fli < sv.NVisFields; fli++ {
-			seldx := idx*nWidgPerRow + idxOff + fli
-			if sgf.Kids.IsValidIndex(seldx) {
-				widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
-				widg.SetSelected()
-				widg.UpdateSig()
-			}
+		if sel {
+			tv.SelectedIdx = idx
+			tv.SelectRowWidgets(tv.SelectedIdx, true)
+		} else {
+			tv.SelectedIdx = -1
 		}
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 	} else {
-		sv.SelectedIdx = -1
+		tv.SelectedIdx = idx
+		tv.SelectRowAction(idx, mouse.ExtendOne) // todo: need to get selmode!
 	}
-	sv.SelectSig.Emit(sv.This, 0, sv.SelectedIdx)
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
-func (sv *TableView) SliceNewAt(idx int) {
-	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
+// SliceNewAt inserts a new blank element at given index in the slice -- -1
+// means the end -- reconfig means call ConfigSliceGrid to update display
+func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 
-	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
-	svtyp := svnp.Type()
-	nval := reflect.New(svtyp.Elem())
-	sz := svnp.Len()
-	svnp = reflect.Append(svnp, nval.Elem())
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+	tvtyp := tvnp.Type()
+	nval := reflect.New(tvtyp.Elem())
+	sz := tvnp.Len()
+	tvnp = reflect.Append(tvnp, nval.Elem())
 	if idx >= 0 && idx < sz-1 {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval.Elem())
+		reflect.Copy(tvnp.Slice(idx+1, sz+1), tvnp.Slice(idx, sz))
+		tvnp.Index(idx).Set(nval.Elem())
 	}
-	svl.Elem().Set(svnp)
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
+	tvl.Elem().Set(tvnp)
+	if tv.TmpSave != nil {
+		tv.TmpSave.SaveTmp()
 	}
-	sv.ConfigSliceGrid()
-	sv.ViewSig.Emit(sv.This, 0, nil)
+	if reconfig {
+		tv.ConfigSliceGrid()
+	}
+	tv.ViewSig.Emit(tv.This, 0, nil)
 }
 
-// SliceDelete deletes element at given index from slice
-func (sv *TableView) SliceDelete(idx int) {
-	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
+// SliceDelete deletes element at given index from slice -- reconfig means
+// call ConfigSliceGrid to update display
+func (tv *TableView) SliceDelete(idx int, reconfig bool) {
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 
-	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
-	svtyp := svnp.Type()
-	nval := reflect.New(svtyp.Elem())
-	sz := svnp.Len()
-	reflect.Copy(svnp.Slice(idx, sz-1), svnp.Slice(idx+1, sz))
-	svnp.Index(sz - 1).Set(nval.Elem())
-	svl.Elem().Set(svnp.Slice(0, sz-1))
-	if sv.TmpSave != nil {
-		sv.TmpSave.SaveTmp()
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+	tvtyp := tvnp.Type()
+	nval := reflect.New(tvtyp.Elem())
+	sz := tvnp.Len()
+	reflect.Copy(tvnp.Slice(idx, sz-1), tvnp.Slice(idx+1, sz))
+	tvnp.Index(sz - 1).Set(nval.Elem())
+	tvl.Elem().Set(tvnp.Slice(0, sz-1))
+	if tv.TmpSave != nil {
+		tv.TmpSave.SaveTmp()
 	}
-	sv.ConfigSliceGrid()
-	sv.ViewSig.Emit(sv.This, 0, nil)
+	if reconfig {
+		tv.ConfigSliceGrid()
+	}
+	tv.ViewSig.Emit(tv.This, 0, nil)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
-func (sv *TableView) SortSliceAction(fldIdx int) {
-	sg, _ := sv.SliceGrid()
+func (tv *TableView) SortSliceAction(fldIdx int) {
+	sg, _ := tv.SliceGrid()
 	sgh := sg.Child(0).(*gi.Layout)
 	sgh.SetFullReRender()
 	idxOff := 1
-	if !sv.ShowIndex {
+	if !tv.ShowIndex {
 		idxOff = 0
 	}
 
 	ascending := true
 
-	for fli := 0; fli < sv.NVisFields; fli++ {
+	for fli := 0; fli < tv.NVisFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		if fli == fldIdx {
-			if sv.SortIdx == fli {
-				sv.SortDesc = !sv.SortDesc
-				ascending = !sv.SortDesc
+			if tv.SortIdx == fli {
+				tv.SortDesc = !tv.SortDesc
+				ascending = !tv.SortDesc
 			} else {
-				sv.SortDesc = false
+				tv.SortDesc = false
 			}
 			if ascending {
 				hdr.SetIcon("widget-wedge-up")
@@ -557,14 +589,14 @@ func (sv *TableView) SortSliceAction(fldIdx int) {
 		}
 	}
 
-	sv.SortIdx = fldIdx
-	rawIdx := sv.VisFields[fldIdx].Index[0]
+	tv.SortIdx = fldIdx
+	rawIdx := tv.VisFields[fldIdx].Index[0]
 
 	sgf := sg.Child(2).(*gi.Frame)
 	sgf.SetFullReRender()
 
-	SortStructSlice(sv.Slice, rawIdx, !sv.SortDesc)
-	sv.ConfigSliceGridRows()
+	SortStructSlice(tv.Slice, rawIdx, !tv.SortDesc)
+	tv.ConfigSliceGridRows()
 }
 
 // SortStructSlice sorts a slice of a struct according to the given field
@@ -665,23 +697,23 @@ func SortStructSlice(struSlice interface{}, fldIdx int, ascending bool) error {
 }
 
 // ConfigSliceButtons configures the buttons for map functions
-func (sv *TableView) ConfigSliceButtons() {
-	if kit.IfaceIsNil(sv.Slice) {
+func (tv *TableView) ConfigSliceButtons() {
+	if kit.IfaceIsNil(tv.Slice) {
 		return
 	}
-	if sv.IsInactive() {
+	if tv.IsInactive() {
 		return
 	}
-	bb, _ := sv.ButtonBox()
+	bb, _ := tv.ButtonBox()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
 	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
-	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	addb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			svv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-			svv.SliceNewAt(-1)
+			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv.SliceNewAt(-1, true)
 		}
 	})
 	if mods {
@@ -691,10 +723,10 @@ func (sv *TableView) ConfigSliceButtons() {
 
 // SortFieldName returns the name of the field being sorted, along with :up or
 // :down depending on descending
-func (sv *TableView) SortFieldName() string {
-	if sv.SortIdx >= 0 && sv.SortIdx < sv.NVisFields {
-		nm := sv.VisFields[sv.SortIdx].Name
-		if sv.SortDesc {
+func (tv *TableView) SortFieldName() string {
+	if tv.SortIdx >= 0 && tv.SortIdx < tv.NVisFields {
+		nm := tv.VisFields[tv.SortIdx].Name
+		if tv.SortDesc {
 			nm += ":down"
 		} else {
 			nm += ":up"
@@ -706,58 +738,58 @@ func (sv *TableView) SortFieldName() string {
 
 // SetSortField sets sorting to happen on given field and direction -- see
 // SortFieldName for details
-func (sv *TableView) SetSortFieldName(nm string) {
+func (tv *TableView) SetSortFieldName(nm string) {
 	if nm == "" {
 		return
 	}
 	spnm := strings.Split(nm, ":")
-	for fli := 0; fli < sv.NVisFields; fli++ {
-		fld := sv.VisFields[fli]
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		fld := tv.VisFields[fli]
 		if fld.Name == spnm[0] {
-			sv.SortIdx = fli
+			tv.SortIdx = fli
 		}
 	}
 	if len(spnm) == 2 {
 		if spnm[1] == "down" {
-			sv.SortDesc = true
+			tv.SortDesc = true
 		} else {
-			sv.SortDesc = false
+			tv.SortDesc = false
 		}
 	}
 }
 
-func (sv *TableView) UpdateFromSlice() {
-	mods, updt := sv.StdConfig()
-	sv.ConfigSliceGrid()
-	sv.ConfigSliceButtons()
+func (tv *TableView) UpdateFromSlice() {
+	mods, updt := tv.StdConfig()
+	tv.ConfigSliceGrid()
+	tv.ConfigSliceButtons()
 	if mods {
-		sv.SetFullReRender()
-		sv.UpdateEnd(updt)
+		tv.SetFullReRender()
+		tv.UpdateEnd(updt)
 	}
 }
 
-func (sv *TableView) UpdateValues() {
-	updt := sv.UpdateStart()
-	for _, vv := range sv.Values {
+func (tv *TableView) UpdateValues() {
+	updt := tv.UpdateStart()
+	for _, vv := range tv.Values {
 		for _, vvf := range vv {
 			vvf.UpdateWidget()
 		}
 	}
-	sv.UpdateEnd(updt)
+	tv.UpdateEnd(updt)
 }
 
-func (sv *TableView) Layout2D(parBBox image.Rectangle) {
-	sv.Frame.Layout2D(parBBox)
-	sg, _ := sv.SliceGrid()
+func (tv *TableView) Layout2D(parBBox image.Rectangle) {
+	tv.Frame.Layout2D(parBBox)
+	sg, _ := tv.SliceGrid()
 	if sg == nil {
 		return
 	}
 	idxOff := 1
-	if !sv.ShowIndex {
+	if !tv.ShowIndex {
 		idxOff = 0
 	}
 
-	nfld := sv.NVisFields + idxOff
+	nfld := tv.NVisFields + idxOff
 	sgh := sg.Child(0).(*gi.Layout)
 	sgf := sg.Child(2).(*gi.Frame)
 	if len(sgf.Kids) >= nfld {
@@ -769,4 +801,681 @@ func (sv *TableView) Layout2D(parBBox image.Rectangle) {
 		}
 		sgh.Layout2D(parBBox)
 	}
+}
+
+func (tv *TableView) Render2D() {
+	if tv.FullReRenderIfNeeded() {
+		return
+	}
+	if tv.PushBounds() {
+		tv.FrameStdRender()
+		tv.TableViewEvents()
+		tv.RenderScrolls()
+		tv.Render2DChildren()
+		tv.PopBounds()
+	} else {
+		tv.DisconnectAllEvents()
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//  Row access methods
+
+// RowStruct returns struct interface at given row
+func (tv *TableView) RowStruct(row int) interface{} {
+	mv := reflect.ValueOf(tv.Slice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+	if row < 0 || row >= sz {
+		fmt.Printf("giv.TableView: row index out of range: %v\n", row)
+		return nil
+	}
+	val := kit.OnePtrValue(mvnp.Index(row)) // deal with pointer lists
+	stru := val.Interface()
+	return stru
+}
+
+// RowIndexLabel returns the index label for given row -- nil if no indexes or out of range
+func (tv *TableView) RowIndexLabel(row int) *gi.Label {
+	if !tv.ShowIndex {
+		return nil
+	}
+	if tv.RowStruct(row) == nil { // range check
+		return nil
+	}
+	nWidgPerRow, _ := tv.RowWidgetNs()
+	sg, _ := tv.SliceGrid()
+	if sg == nil {
+		return nil
+	}
+	sgf := sg.Child(2).(*gi.Frame)
+	idxlab := sgf.Kids[row*nWidgPerRow].(*gi.Label)
+	return idxlab
+}
+
+// RowGrabFocus grabs the focus for the first focusable widget in given row
+// -- returns that element or nil if not successful
+func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
+	if tv.RowStruct(row) == nil { // range check
+		return nil
+	}
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	sg, _ := tv.SliceGrid()
+	if sg == nil {
+		return nil
+	}
+	ridx := nWidgPerRow * row
+	sgf := sg.Child(2).(*gi.Frame)
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		widg := sgf.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		if widg.CanFocus() {
+			widg.GrabFocus()
+			return widg
+		}
+	}
+	return nil
+}
+
+// RowPos returns center of window position of index label for row (ContextMenuPos)
+func (tv *TableView) RowPos(row int) (pos image.Point) {
+	idxlab := tv.RowIndexLabel(row)
+	if idxlab != nil {
+		pos = idxlab.ContextMenuPos()
+	}
+	return
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//    Moving
+
+// MoveDown moves the selection down to next row, using given select mode
+// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+func (tv *TableView) MoveDown(selMode mouse.SelectModes) int {
+	if selMode == mouse.NoSelectMode {
+		if tv.SelectMode {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+	if tv.SelectedIdx >= tv.BuiltSize-1 {
+		tv.SelectedIdx = tv.BuiltSize - 1
+		return -1
+	}
+	tv.SelectedIdx++
+	tv.SelectRowAction(tv.SelectedIdx, selMode)
+	return tv.SelectedIdx
+}
+
+// MoveDownAction moves the selection down to next row, using given select
+// mode (from keyboard modifiers) -- and emits select event for newly selected
+// row
+func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
+	nrow := tv.MoveDown(selMode)
+	if nrow >= 0 {
+		tv.RowGrabFocus(nrow)
+		// fw := tv.RowGrabFocus(nrow)
+		// if fw != nil {
+		// 	tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), nrow)
+		// }
+	}
+	return nrow
+}
+
+// MoveUp moves the selection up to previous row, using given select mode
+// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
+	if selMode == mouse.NoSelectMode {
+		if tv.SelectMode {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+	if tv.SelectedIdx <= 0 {
+		tv.SelectedIdx = 0
+		return -1
+	}
+	tv.SelectedIdx--
+	tv.SelectRowAction(tv.SelectedIdx, selMode)
+	return tv.SelectedIdx
+}
+
+// MoveUpAction moves the selection up to previous row, using given select
+// mode (from keyboard modifiers) -- and emits select event for newly selected
+// row
+func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
+	nrow := tv.MoveUp(selMode)
+	if nrow >= 0 {
+		tv.RowGrabFocus(nrow)
+		// fw := tv.RowGrabFocus(nrow)
+		// if fw != nil {
+		// 	tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), nrow)
+		// }
+	}
+	return nrow
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//    Selection: user operates on the index labels
+
+// RowIsSelected returns the selected status of given row index
+func (tv *TableView) RowIsSelected(row int) bool {
+	if _, ok := tv.SelectedRows[row]; ok {
+		return true
+	}
+	return false
+}
+
+// SelectedRowsList returns list of selected rows, sorted either ascending or descending
+func (tv *TableView) SelectedRowsList(descendingSort bool) []int {
+	rws := make([]int, len(tv.SelectedRows))
+	i := 0
+	for r, _ := range tv.SelectedRows {
+		rws[i] = r
+		i++
+	}
+	if descendingSort {
+		sort.Slice(rws, func(i, j int) bool {
+			return rws[i] > rws[j]
+		})
+	} else {
+		sort.Slice(rws, func(i, j int) bool {
+			return rws[i] < rws[j]
+		})
+	}
+	return rws
+}
+
+// todo: selection signals!?
+
+// SelectRow selects given row (if not already selected) -- updates select
+// status of index label
+func (tv *TableView) SelectRow(row int) {
+	idxlab := tv.RowIndexLabel(row)
+	if idxlab == nil {
+		return
+	}
+	if !tv.RowIsSelected(row) {
+		tv.SelectedRows[row] = true
+		idxlab.SetSelected()
+		idxlab.UpdateSig()
+	}
+}
+
+// UnselectRow unselects given row (if selected)
+func (tv *TableView) UnselectRow(row int) {
+	idxlab := tv.RowIndexLabel(row)
+	if idxlab == nil {
+		return
+	}
+	if tv.RowIsSelected(row) {
+		delete(tv.SelectedRows, row)
+		idxlab.ClearSelected()
+		idxlab.UpdateSig()
+	}
+}
+
+// UnselectAllRows unselects all selected rows
+func (tv *TableView) UnselectAllRows() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	for r, _ := range tv.SelectedRows {
+		idxlab := tv.RowIndexLabel(r)
+		idxlab.ClearSelected()
+		idxlab.UpdateSig()
+	}
+	tv.SelectedRows = make(map[int]bool, 10)
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+	// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewAllUnselected), tv.This)
+}
+
+// SelectAllRows selects all rows
+func (tv *TableView) SelectAllRows() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	tv.UnselectAllRows()
+	tv.SelectedRows = make(map[int]bool, tv.BuiltSize)
+	for row := 0; row < tv.BuiltSize; row++ {
+		idxlab := tv.RowIndexLabel(row)
+		idxlab.SetSelected()
+		tv.SelectedRows[row] = true
+	}
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+	// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewAllSelected), tv.This)
+}
+
+// SelectRowAction is called when a select action has been received (e.g., a
+// mouse click) -- translates into selection updates -- gets selection mode
+// from mouse event (ExtendContinuous, ExtendOne)
+func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	switch mode {
+	case mouse.ExtendContinuous:
+		if len(tv.SelectedRows) == 0 {
+			tv.SelectRow(row)
+			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+		} else {
+			minIdx := -1
+			maxIdx := 0
+			for r, _ := range tv.SelectedRows {
+				if minIdx < 0 {
+					minIdx = r
+				} else {
+					minIdx = kit.MinInt(minIdx, r)
+				}
+				maxIdx = kit.MaxInt(maxIdx, r)
+			}
+			cidx := row
+			tv.SelectRow(row)
+			if row < minIdx {
+				for cidx < minIdx {
+					r := tv.MoveDown(mouse.SelectModesN) // just select
+					cidx = r
+				}
+			} else if row > maxIdx {
+				for cidx > maxIdx {
+					r := tv.MoveUp(mouse.SelectModesN) // just select
+					cidx = r
+				}
+			}
+		}
+	case mouse.ExtendOne:
+		if tv.RowIsSelected(row) {
+			tv.UnselectRowAction(row)
+		} else {
+			tv.SelectRow(row)
+			tv.RowGrabFocus(row)
+			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+		}
+	case mouse.NoSelectMode:
+		if tv.RowIsSelected(row) {
+			if len(tv.SelectedRows) > 1 {
+				tv.UnselectAllRows()
+				tv.SelectRow(row)
+				tv.RowGrabFocus(row)
+				// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+			}
+		} else {
+			tv.UnselectAllRows()
+			tv.SelectRow(row)
+			tv.RowGrabFocus(row)
+			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+		}
+	default: // anything else
+		tv.SelectRow(row)
+	}
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+}
+
+// UnselectRowAction unselects this row (if selected) -- and emits a signal
+func (tv *TableView) UnselectRowAction(row int) {
+	if tv.RowIsSelected(row) {
+		tv.UnselectRow(row)
+		// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewUnselected), tv.This)
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//    Copy / Cut / Paste
+
+// MimeDataRow adds mimedata for given row: an application/json of the struct
+func (tv *TableView) MimeDataRow(md *mimedata.Mimes, row int) {
+	stru := tv.RowStruct(row)
+	b, err := json.MarshalIndent(stru, "", "  ")
+	if err == nil {
+		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: b})
+	} else {
+		log.Printf("gi.TableView MimeData JSON Marshall error: %v\n", err)
+	}
+}
+
+// RowsFromMimeData creates a slice of structs from mime data
+func (tv *TableView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+	tvtyp := tvnp.Type()
+	sl := make([]interface{}, 0, len(md))
+	for _, d := range md {
+		if d.Type == mimedata.AppJSON {
+			nval := reflect.New(tvtyp.Elem()).Interface()
+			err := json.Unmarshal(d.Data, nval)
+			if err == nil {
+				sl = append(sl, nval)
+			} else {
+				log.Printf("gi.TableView NodesFromMimeData: JSON load error: %v\n", err)
+			}
+		}
+	}
+	return sl
+}
+
+// CopyRows copies selected rows to clip.Board, optionally resetting the selection
+func (tv *TableView) CopyRows(reset bool) {
+	nitms := len(tv.SelectedRows)
+	if nitms == 0 {
+		return
+	}
+	md := make(mimedata.Mimes, 0, nitms)
+	for r, _ := range tv.SelectedRows {
+		tv.MimeDataRow(&md, r)
+	}
+	oswin.TheApp.ClipBoard().Write(md)
+	if reset {
+		tv.UnselectAllRows()
+	}
+}
+
+// DeleteRows deletes all selected rows
+func (tv *TableView) DeleteRows() {
+	updt := tv.UpdateStart()
+	rws := tv.SelectedRowsList(true) // descending sort
+	for _, r := range rws {
+		tv.SliceDelete(r, false)
+	}
+	tv.ConfigSliceGrid()
+	tv.UpdateEnd(updt)
+}
+
+// CutRows copies selected rows to clip.Board and deletes selected rows
+func (tv *TableView) CutRows() {
+	updt := tv.UpdateStart()
+	tv.CopyRows(false)
+	rws := tv.SelectedRowsList(true) // descending sort
+	tv.UnselectAllRows()
+	for _, r := range rws {
+		tv.SliceDelete(r, false)
+	}
+	tv.ConfigSliceGrid()
+	tv.UpdateEnd(updt)
+}
+
+// Paste pastes clipboard at given row
+func (tv *TableView) Paste(row int) {
+	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	if md != nil {
+		tv.PasteAction(md, row)
+	}
+}
+
+// MakePasteMenu makes the menu of options for paste events
+func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
+	if len(*m) > 0 {
+		return
+	}
+	m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.PasteAssign(data.(mimedata.Mimes), row)
+	})
+	m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.PasteBefore(data.(mimedata.Mimes), row)
+	})
+	m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.PasteAfter(data.(mimedata.Mimes), row)
+	})
+	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	})
+}
+
+// PasteAction performs a paste from the clipboard using given data -- pops up
+// a menu to determine what specifically to do
+func (tv *TableView) PasteAction(md mimedata.Mimes, row int) {
+	tv.UnselectAllRows()
+	var men gi.Menu
+	tv.MakePasteMenu(&men, md, row)
+	pos := tv.RowPos(row)
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
+}
+
+// PasteAssign assigns mime data (only the first one!) to this row
+func (tv *TableView) PasteAssign(md mimedata.Mimes, row int) {
+	// todo: use json directly to load into row element
+	// sl := tv.RowsFromMimeData(md)
+	// if len(sl) == 0 {
+	// 	return
+	// }
+	// sk := tv.SrcNode.Ptr
+	// sk.CopyFrom(sl[0])
+}
+
+// PasteBefore inserts object(s) from mime data before given row
+func (tv *TableView) PasteBefore(md mimedata.Mimes, row int) {
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+
+	sl := tv.RowsFromMimeData(md)
+	updt := tv.UpdateStart()
+	for _, ns := range sl {
+		sz := tvnp.Len()
+		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns))
+		if row >= 0 && row < sz-1 {
+			reflect.Copy(tvnp.Slice(row+1, sz+1), tvnp.Slice(row, sz))
+			tvnp.Index(row).Set(reflect.ValueOf(ns))
+			tvl.Elem().Set(tvnp)
+		}
+	}
+	if tv.TmpSave != nil {
+		tv.TmpSave.SaveTmp()
+	}
+	tv.UpdateEnd(updt)
+}
+
+// PasteAfter inserts object(s) from mime data after this row
+func (tv *TableView) PasteAfter(md mimedata.Mimes, row int) {
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+
+	sl := tv.RowsFromMimeData(md)
+	updt := tv.UpdateStart()
+	for _, ns := range sl {
+		sz := tvnp.Len()
+		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns))
+		if row >= 0 && row < sz-1 {
+			reflect.Copy(tvnp.Slice(row+1, sz+1), tvnp.Slice(row, sz))
+			tvnp.Index(row).Set(reflect.ValueOf(ns))
+			tvl.Elem().Set(tvnp)
+		}
+	}
+	if tv.TmpSave != nil {
+		tv.TmpSave.SaveTmp()
+	}
+	tv.UpdateEnd(updt)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//    Drag-n-Drop
+
+// DragNDropStart starts a drag-n-drop
+func (tv *TableView) DragNDropStart() {
+	nitms := len(tv.SelectedRows)
+	if nitms == 0 {
+		return
+	}
+	md := make(mimedata.Mimes, 0, nitms)
+	for r, _ := range tv.SelectedRows {
+		tv.MimeDataRow(&md, r)
+	}
+	bi := &gi.Bitmap{}
+	rws := tv.SelectedRowsList(true) // descending sort
+	idxlab := tv.RowIndexLabel(rws[0])
+	bi.InitName(bi, tv.UniqueName())
+	bi.GrabRenderFrom(idxlab)
+	gi.ImageClearer(bi.Pixels, 50.0)
+	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+}
+
+// DragNDropTarget handles a drag-n-drop drop
+func (tv *TableView) DragNDropTarget(de *dnd.Event) {
+	// de.Target = tv.This
+	// if de.Mod == dnd.DropLink {
+	// 	de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	// }
+	// de.SetProcessed()
+	// tv.DropAction(de.Data, de.Mod)
+}
+
+// DragNDropFinalize is called to finalize actions on the Source node prior to
+// performing target actions -- mod must indicate actual action taken by the
+// target, including ignore
+func (tv *TableView) DragNDropFinalize(mod dnd.DropMods) {
+	tv.UnselectAllRows()
+	tv.Viewport.Win.FinalizeDragNDrop(mod)
+}
+
+// DragNDropSource is called after target accepts the drop -- we just remove
+// elements that were moved
+func (tv *TableView) DragNDropSource(de *dnd.Event) {
+	if de.Mod != dnd.DropMove {
+		return
+	}
+	tv.DeleteRows()
+}
+
+// MakeDropMenu makes the menu of options for dropping on a target
+func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods, row int) {
+	if len(*m) > 0 {
+		return
+	}
+	switch mod {
+	case dnd.DropCopy:
+		m.AddLabel("Copy (Shift=Move):")
+	case dnd.DropMove:
+		m.AddLabel("Move:")
+	}
+	if mod == dnd.DropCopy {
+		m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv.DropAssign(data.(mimedata.Mimes), row)
+		})
+	}
+	m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
+	})
+	m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
+	})
+	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv.DropCancel()
+	})
+}
+
+// DropAction pops up a menu to determine what specifically to do with dropped items
+func (tv *TableView) DropAction(md mimedata.Mimes, mod dnd.DropMods, row int) {
+	var men gi.Menu
+	tv.MakeDropMenu(&men, md, mod, row)
+	pos := tv.RowPos(row) // todo: which row?
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
+}
+
+// DropAssign assigns mime data (only the first one!) to this node
+func (tv *TableView) DropAssign(md mimedata.Mimes, row int) {
+	tv.DragNDropFinalize(dnd.DropCopy)
+	tv.PasteAssign(md, row)
+}
+
+// DropBefore inserts object(s) from mime data before this node
+func (tv *TableView) DropBefore(md mimedata.Mimes, mod dnd.DropMods, row int) {
+	tv.DragNDropFinalize(mod)
+	tv.PasteBefore(md, row)
+}
+
+// DropAfter inserts object(s) from mime data after this node
+func (tv *TableView) DropAfter(md mimedata.Mimes, mod dnd.DropMods, row int) {
+	tv.DragNDropFinalize(mod)
+	tv.PasteAfter(md, row)
+}
+
+// DropCancel cancels the drop action e.g., preventing deleting of source
+// items in a Move case
+func (tv *TableView) DropCancel() {
+	tv.DragNDropFinalize(dnd.DropIgnore)
+}
+
+func (tv *TableView) KeyInput(kt *key.ChordEvent) {
+	kf := gi.KeyFun(kt.ChordString())
+	selMode := mouse.SelectModeMod(kt.Modifiers)
+	switch kf {
+	case gi.KeyFunSelectItem:
+		tv.SelectRowAction(tv.SelectedIdx, selMode)
+		kt.SetProcessed()
+	case gi.KeyFunCancelSelect:
+		tv.UnselectAllRows()
+		kt.SetProcessed()
+	// case gi.KeyFunMoveRight:
+	// 	tv.Open()
+	// 	kt.SetProcessed()
+	// case gi.KeyFunMoveLeft:
+	// 	tv.Close()
+	// 	kt.SetProcessed()
+	case gi.KeyFunMoveDown:
+		tv.MoveDownAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunMoveUp:
+		tv.MoveUpAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunSelectMode:
+		tv.SelectMode = !tv.SelectMode
+		kt.SetProcessed()
+	case gi.KeyFunSelectAll:
+		tv.SelectAllRows()
+		kt.SetProcessed()
+	case gi.KeyFunDelete:
+		tv.SliceDelete(tv.SelectedIdx, true)
+		kt.SetProcessed()
+	// case gi.KeyFunDuplicate:
+	// 	tv.SrcDuplicate() // todo: dupe
+	// 	kt.SetProcessed()
+	case gi.KeyFunInsert:
+		tv.SliceNewAt(tv.SelectedIdx, true)
+		kt.SetProcessed()
+	case gi.KeyFunInsertAfter:
+		tv.SliceNewAt(tv.SelectedIdx+1, true)
+		kt.SetProcessed()
+	case gi.KeyFunCopy:
+		tv.CopyRows(true)
+		kt.SetProcessed()
+	case gi.KeyFunCut:
+		tv.CutRows()
+		kt.SetProcessed()
+	case gi.KeyFunPaste:
+		tv.Paste(tv.SelectedIdx)
+		kt.SetProcessed()
+	}
+}
+
+func (tv *TableView) TableViewEvents() {
+	tv.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		kt := d.(*key.ChordEvent)
+		tvv.KeyInput(kt)
+	})
+	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.Event)
+		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		switch de.Action {
+		case dnd.Start:
+			tvv.DragNDropStart()
+		case dnd.DropOnTarget:
+			tvv.DragNDropTarget(de)
+		case dnd.DropFmSource:
+			tvv.DragNDropSource(de)
+		}
+	})
 }

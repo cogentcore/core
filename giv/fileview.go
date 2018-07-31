@@ -194,10 +194,12 @@ func (fv *FileView) ConfigFilesRow() {
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
-	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-		svv, _ := send.(*TableView)
-		fvv.FileSelect(svv.SelectedIdx)
+	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.WidgetSelected) {
+			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			svv, _ := send.(*TableView)
+			fvv.FileSelect(svv.SelectedIdx)
+		}
 	})
 
 	sv = fv.FavsView()
@@ -205,10 +207,12 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetProp("index", false) // no index
 	sv.SetInactive()           // select only
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
-	sv.SelectSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-		svv, _ := send.(*TableView)
-		fvv.FavSelect(svv.SelectedIdx)
+	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.WidgetSelected) {
+			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			svv, _ := send.(*TableView)
+			fvv.FavSelect(svv.SelectedIdx)
+		}
 	})
 }
 

@@ -22,11 +22,12 @@ import (
 // managed by a containing Layout, and use all 5 rendering passes
 type WidgetBase struct {
 	Node2DBase
-	Tooltip   string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	Sty       Style      `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle  *Style     `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	LayData   LayoutData `json:"-" xml:"-" desc:"all the layout information for this item"`
-	SelectSig ki.Signal  `json:"-" xml:"-" desc:"signal for selection event when inactive"`
+	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	Sty          Style        `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	DefStyle     *Style       `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	LayData      LayoutData   `json:"-" xml:"-" desc:"all the layout information for this item"`
+	WidgetSig    ki.Signal    `json:"-" xml:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+	CtxtMenuFunc CtxtMenuFunc `json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -450,6 +451,16 @@ func (g *WidgetBase) ParentLayout() *Layout {
 	return parLy
 }
 
+// CtxtMenuFunc is a function for creating a context menu for given node
+type CtxtMenuFunc func(g Node2D, m *Menu)
+
+func (g *WidgetBase) MakeContextMenu(m *Menu) {
+	// derived types put native menu code here
+	if g.CtxtMenuFunc != nil {
+		g.CtxtMenuFunc(g.This.(Node2D), m)
+	}
+}
+
 var TooltipFrameProps = ki.Props{
 	"border-width":        units.NewValue(0, units.Px),
 	"border-color":        "none",
@@ -504,8 +515,49 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	return &pvp
 }
 
-// WidgetEvents handles base widget events
-func (g *WidgetBase) WidgetEvents() {
+// WidgetSignals are general signals that all widgets can send, via WidgetSig
+// signal
+type WidgetSignals int64
+
+const (
+	// WidgetSelected is triggered when a widget is selected, typically via
+	// left mouse button click (see EmitSelectedSignal) -- is NOT contingent
+	// on actual IsSelected status -- just reports the click event
+	WidgetSelected WidgetSignals = iota
+
+	// WidgetFocused is triggered when a widget receives keyboard focus (see
+	// EmitFocusedSignal -- call in FocusChanged2D for gotFocus
+	WidgetFocused
+
+	// WidgetContextMenu is triggered when a widget receives a
+	// right-mouse-button press, BEFORE generating and displaying the context
+	// menu, so that relevant state can be updated etc (see
+	// EmitContextMenuSignal)
+	WidgetContextMenu
+
+	WidgetSignalsN
+)
+
+//go:generate stringer -type=WidgetSignals
+
+// EmitSelectedSignal emits the WidgetSelected signal for this widget
+func (g *WidgetBase) EmitSelectedSignal() {
+	g.WidgetSig.Emit(g.This, int64(WidgetSelected), nil)
+}
+
+// EmitFocusedSignal emits the WidgetFocused signal for this widget
+func (g *WidgetBase) EmitFocusedSignal() {
+	g.WidgetSig.Emit(g.This, int64(WidgetFocused), nil)
+}
+
+// EmitContextMenuSignal emits the WidgetContextMenu signal for this widget
+func (g *WidgetBase) EmitContextMenuSignal() {
+	g.WidgetSig.Emit(g.This, int64(WidgetContextMenu), nil)
+}
+
+// HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
+// widgets should call this as part of their event connection method
+func (g *WidgetBase) HoverTooltipEvent() {
 	g.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
@@ -514,6 +566,39 @@ func (g *WidgetBase) WidgetEvents() {
 			pos := ab.WinBBox.Max
 			pos.X -= 20
 			PopupTooltip(ab.Tooltip, pos.X, pos.Y, g.Viewport, ab.Nm)
+		}
+	})
+}
+
+// LeftClickSelectEvent connects to Left button mouse.Press event, toggles the
+// selected state, and emits a SelectedEvent
+func (g *WidgetBase) LeftClickSelectEvent() {
+	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		fmt.Printf("select ev: %v\n", recv.PathUnique())
+		if me.Action == mouse.Press && me.Button == mouse.Left {
+			me.SetProcessed()
+			ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+			ab.SetSelectedState(!ab.IsSelected())
+			ab.EmitSelectedSignal()
+			ab.UpdateSig()
+		}
+	})
+}
+
+// RightClickContextMenuEvent connects to Right button mouse.Press event, and
+// sends a WidgetSig WidgetContextMenu signal, followed by calling ContextMenu
+// method -- signal can be used to change state prior to generating context
+// menu, including setting a CtxtMenuFunc that removes all items and thus
+// negates the presentation of any menu
+func (g *WidgetBase) RightClickContextMenuEvent() {
+	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		if me.Action == mouse.Press && me.Button == mouse.Right {
+			me.SetProcessed()
+			ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+			ab.EmitContextMenuSignal()
+			ab.ContextMenu()
 		}
 	})
 }

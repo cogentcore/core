@@ -494,19 +494,6 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 		}
 		gii, gi := KiToNode2D(k)
 		if gi != nil {
-			if gi.IsInactive() && !bitflag.Has(gi.Flag, int(InactiveEvents)) {
-				if et == oswin.MouseEvent && w.IsInScope(gii, gi) {
-					me := evi.(*mouse.Event)
-					if me.Action == mouse.Press && me.Button == mouse.Left && me.Where.In(gi.WinBBox) {
-						wb := gii.AsWidget()
-						if wb != nil {
-							wb.SetSelectedState(!wb.IsSelected())
-							wb.SelectSig.Emit(wb.This, 0, nil)
-						}
-					}
-				}
-				return false
-			}
 			if gi.This == w.Popup || gi.This == w.Viewport.This { // do this last
 				popup = gi.This
 				return false

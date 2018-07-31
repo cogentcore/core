@@ -67,8 +67,8 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 // SliceViewDialog for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore). selectOnly turns it into a selector with no
-// editing of fields, and signal connection is to the selection signal, not
-// the overall dialog signal
+// editing of fields, and signal connection is to the widget signal reporting
+// selection events, not the overall dialog signal
 func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("slice-view", title, prompt, true, true)
 
@@ -86,7 +86,7 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, selectOnly bool, tmpSav
 
 	if recv != nil && fun != nil {
 		if selectOnly {
-			sv.SelectSig.Connect(recv, fun)
+			sv.WidgetSig.Connect(recv, fun)
 		} else {
 			dlg.DialogSig.Connect(recv, fun)
 		}
@@ -101,8 +101,8 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, selectOnly bool, tmpSav
 // TableViewDialog is for editing / selecting fields of a slice-of-struct
 // using a TableView -- optionally connects to given signal receiving object
 // and function for signals (nil to ignore).  selectOnly turns it into a
-// selector with no editing of fields, and signal connection is to the
-// selection signal, not the overall dialog signal
+// selector with no editing of fields, and signal connection is to the widget
+// signal reporting selection events, not the overall dialog signals
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly bool, tmpSave ValueView, title, prompt string, recv ki.Ki, fun ki.RecvFunc, stylefun TableViewStyleFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("struct-table-view", title, prompt, true, true)
 
@@ -121,7 +121,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, selectOnly bool,
 
 	if recv != nil && fun != nil {
 		if selectOnly {
-			sv.SelectSig.Connect(recv, fun)
+			sv.WidgetSig.Connect(recv, fun)
 		} else {
 			dlg.DialogSig.Connect(recv, fun)
 		}

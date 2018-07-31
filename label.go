@@ -52,8 +52,10 @@ func ToLabel(it interface{}) string {
 // including box rendering
 type Label struct {
 	WidgetBase
-	Text   string     `xml:"text" desc:"label to display"`
-	Render TextRender `xml:"-" json:"-" desc:"render data for text label"`
+	Text        string              `xml:"text" desc:"label to display"`
+	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
+	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -64,7 +66,43 @@ var LabelProps = ki.Props{
 	"vertical-align":   AlignTop,
 	"color":            &Prefs.FontColor,
 	"background-color": color.Transparent,
+	LabelSelectors[LabelActive]: ki.Props{
+		"background-color": color.Transparent,
+	},
+	LabelSelectors[LabelInactive]: ki.Props{
+		"color": "lighter-50",
+	},
+	LabelSelectors[LabelSelected]: ki.Props{
+		"background-color": &Prefs.SelectColor,
+	},
 }
+
+// mutually-exclusive button states -- determines appearance
+type LabelStates int32
+
+const (
+	// normal active state
+	LabelActive LabelStates = iota
+
+	// inactive -- font is dimmed
+	LabelInactive
+
+	// selected -- background is selected color
+	LabelSelected
+
+	// total number of button states
+	LabelStatesN
+)
+
+//go:generate stringer -type=LabelStates
+
+var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, false, StylePropProps, "Label")
+
+func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// Style selector names for the different states:
+var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version
 func (g *Label) SetText(txt string) {
@@ -87,8 +125,25 @@ func (g *Label) SetTextAction(txt string) {
 	g.UpdateSig()
 }
 
+// SetStateStyle sets the style based on the inactive, selected flags
+func (g *Label) SetStateStyle() {
+	if g.IsInactive() {
+		g.Sty = g.StateStyles[LabelInactive]
+	} else if g.IsSelected() {
+		g.Sty = g.StateStyles[LabelSelected]
+	} else {
+		g.Sty = g.StateStyles[LabelActive]
+	}
+}
+
 func (g *Label) Style2D() {
 	g.Style2DWidget()
+	pst := g.Par.(Styler).Style()
+	for i := 0; i < int(LabelStatesN); i++ {
+		g.StateStyles[i].CopyFrom(&g.Sty)
+		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(LabelSelectors[i]))
+		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+	}
 	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
 	spc := g.Sty.BoxSpace()
 	sz := g.LayData.SizePrefOrMax()
@@ -110,12 +165,21 @@ func (g *Label) Layout2D(parBBox image.Rectangle) {
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
 
+func (g *Label) LabelEvents() {
+	g.HoverTooltipEvent()
+	if g.Selectable {
+		g.LeftClickSelectEvent()
+	}
+	g.RightClickContextMenuEvent()
+}
+
 func (g *Label) Render2D() {
 	if g.FullReRenderIfNeeded() {
 		return
 	}
 	if g.PushBounds() {
-		g.WidgetEvents()
+		g.LabelEvents()
+		g.SetStateStyle()
 		st := &g.Sty
 		rs := &g.Viewport.Render
 		g.RenderStdBox(st)

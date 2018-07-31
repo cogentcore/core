@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _NodeFlags_name = "NodeFlagsNilNoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInactiveInactiveEventsSelectedMouseHasEnteredNodeDraggingOverlayButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagPopupDestroyAllVpFlagSVG"
+const _NodeFlags_name = "NodeFlagsNilNoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInactiveSelectedMouseHasEnteredNodeDraggingOverlayButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagPopupDestroyAllVpFlagSVG"
 
-var _NodeFlags_index = [...]uint8{0, 12, 20, 35, 43, 51, 63, 77, 85, 99, 107, 122, 134, 141, 160, 177, 191, 203, 224, 233}
+var _NodeFlags_index = [...]uint8{0, 12, 20, 35, 43, 51, 63, 77, 85, 93, 108, 120, 127, 146, 163, 177, 189, 210, 219}
 
 func (i NodeFlags) String() string {
 	i -= 14

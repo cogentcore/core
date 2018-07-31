@@ -58,7 +58,7 @@ var SliderBaseProps = ki.Props{
 	"base-type": true,
 }
 
-// signals that sliders can send
+// SliderSignals are signals that sliders can send
 type SliderSignals int64
 
 const (
@@ -73,7 +73,7 @@ const (
 
 //go:generate stringer -type=SliderSignals
 
-// mutually-exclusive slider states -- determines appearance
+// SliderStates are mutually-exclusive slider states -- determines appearance
 type SliderStates int32
 
 const (
@@ -104,7 +104,7 @@ const (
 
 //go:generate stringer -type=SliderStates
 
-// Style selector names for the different states
+// SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
 
 func (g *SliderBase) Defaults() { // todo: should just get these from props
@@ -115,7 +115,7 @@ func (g *SliderBase) Defaults() { // todo: should just get these from props
 	g.Prec = 9
 }
 
-// if snap is set, then snap the value to step sizes
+// SnapValue snaps the value to step sizes if snap option is set
 func (g *SliderBase) SnapValue() {
 	if g.Snap {
 		g.Value = FloatMod32(g.Value, g.Step)
@@ -123,7 +123,7 @@ func (g *SliderBase) SnapValue() {
 	}
 }
 
-// set the slider state to target
+// SetSliderState sets the slider state to given state, updates style
 func (g *SliderBase) SetSliderState(state SliderStates) {
 	if state == SliderActive && g.HasFocus() {
 		state = SliderFocus
@@ -132,8 +132,8 @@ func (g *SliderBase) SetSliderState(state SliderStates) {
 	g.Sty = g.StateStyles[state] // get relevant styles
 }
 
-// set the slider in the down state -- mouse clicked down but not yet up --
-// emits SliderPressed signal
+// SliderPressed sets the slider in the down state -- mouse clicked down but
+// not yet up -- emits SliderPressed signal
 func (g *SliderBase) SliderPressed(pos float32) {
 	g.EmitValue = g.Min - 1.0 // invalid value
 	updt := g.UpdateStart()
@@ -144,8 +144,9 @@ func (g *SliderBase) SliderPressed(pos float32) {
 	g.UpdateEnd(updt)
 }
 
-// the slider has just been released -- sends a released signal and returns
-// state to normal, and emits clicked signal if if it was previously in pressed state
+// SliderReleased called when the slider has just been released -- sends a
+// released signal and returns state to normal, and emits clicked signal if if
+// it was previously in pressed state
 func (g *SliderBase) SliderReleased() {
 	wasPressed := (g.State == SliderDown)
 	updt := g.UpdateStart()
@@ -158,7 +159,7 @@ func (g *SliderBase) SliderReleased() {
 	g.UpdateEnd(updt)
 }
 
-// slider starting hover-- todo: keep track of time and popup a tooltip -- signal?
+// SliderEnterHover slider starting hover
 func (g *SliderBase) SliderEnterHover() {
 	if g.State != SliderHover {
 		updt := g.UpdateStart()
@@ -167,7 +168,7 @@ func (g *SliderBase) SliderEnterHover() {
 	}
 }
 
-// slider exiting hover
+// SliderExitHover called when slider exiting hover
 func (g *SliderBase) SliderExitHover() {
 	if g.State == SliderHover {
 		updt := g.UpdateStart()
@@ -176,7 +177,7 @@ func (g *SliderBase) SliderExitHover() {
 	}
 }
 
-// get size from allocation
+// SizeFromAlloc gets size from allocation
 func (g *SliderBase) SizeFromAlloc() {
 	if g.LayData.AllocSize.IsZero() {
 		return
@@ -216,12 +217,13 @@ func (g *SliderBase) SetSliderPos(pos float32) {
 	g.UpdateEnd(updt)
 }
 
-// slider moved along relevant axis
+// SliderMoved called when slider moved along relevant axis
 func (g *SliderBase) SliderMoved(start, end float32) {
 	del := end - start
 	g.SetSliderPos(g.DragPos + del)
 }
 
+// UpdatePosFromValue updates the slider position based on the current Value
 func (g *SliderBase) UpdatePosFromValue() {
 	if g.Size == 0.0 {
 		return
@@ -233,7 +235,7 @@ func (g *SliderBase) UpdatePosFromValue() {
 }
 
 // SetValue sets the value and updates the slider position, but does not
-// emit an updated signal
+// emit an updated signal (see SetValueAction)
 func (g *SliderBase) SetValue(val float32) {
 	updt := g.UpdateStart()
 	val = Min32(val, g.Max)
@@ -259,6 +261,8 @@ func (g *SliderBase) SetValueAction(val float32) {
 	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
 }
 
+// SetThumValue sets the thumb value to given value and updates the thumb size
+// -- for scrollbar-style sliders where the thumb size represents visible range
 func (g *SliderBase) SetThumbValue(val float32) {
 	updt := g.UpdateStart()
 	g.ThumbVal = Min32(val, g.Max)
@@ -267,8 +271,8 @@ func (g *SliderBase) SetThumbValue(val float32) {
 	g.UpdateEnd(updt)
 }
 
-// set thumb size as proportion of min / max (e.g., amount visible in
-// scrollbar) -- max's out to full size
+// UpdateThumbValSize sets thumb size as proportion of min / max (e.g., amount
+// visible in scrollbar) -- max's out to full size
 func (g *SliderBase) UpdateThumbValSize() {
 	g.ThSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
 	g.ThSize = Min32(g.ThSize, 1.0)
@@ -312,7 +316,8 @@ func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-// translate a point in global pixel coords into relative position within node
+// PointToRelPos translates a point in global pixel coords into relative
+// position within node
 func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(g.OrigWinBBox.Min)
 }
@@ -604,6 +609,7 @@ func (g *Slider) Render2DDefaultStyle() {
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		g.EmitFocusedSignal()
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..
@@ -739,6 +745,7 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 
 func (g *ScrollBar) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		g.EmitFocusedSignal()
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..

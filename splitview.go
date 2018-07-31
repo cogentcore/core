@@ -433,8 +433,8 @@ func (g *Splitter) Render2DDefaultStyle() {
 }
 
 func (g *Splitter) FocusChanged2D(gotFocus bool) {
-	// fmt.Printf("focus changed %v\n", gotFocus)
 	if gotFocus {
+		g.EmitFocusedSignal()
 		g.SetSliderState(SliderFocus)
 	} else {
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..

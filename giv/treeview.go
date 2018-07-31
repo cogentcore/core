@@ -650,29 +650,13 @@ func (tv *TreeView) ToggleClose() {
 //////////////////////////////////////////////////////////////////////////////
 //    Modifying Source Tree
 
-// MenuPosition returns the position for popup menus
-func (tv *TreeView) MenuPosition() (pos image.Point) {
+func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 	pos.X = tv.WinBBox.Min.X + int(tv.Indent.Dots)
 	pos.Y = (tv.WinBBox.Min.Y + tv.WinBBox.Max.Y) / 2
 	return
 }
 
-// ActionMenu pops up a menu of various actions to perform on a node (todo:
-// extend from src object methods)
-func (tv *TreeView) ActionMenu() {
-	var men gi.Menu
-	tv.MakeActionMenu(&men)
-	pos := tv.MenuPosition()
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvActionMenu")
-}
-
-// MakeActionMenu makes the menu of actions that can be performed on each
-// node.  TODO: check methods on src object for additional actions to
-// insert.. need comment directives for that..
-func (tv *TreeView) MakeActionMenu(m *gi.Menu) {
-	if len(*m) > 0 {
-		return
-	}
+func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	// todo: shortcuts!
 	m.AddMenuText("Add Child", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -712,6 +696,9 @@ func (tv *TreeView) MakeActionMenu(m *gi.Menu) {
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		tvv.Paste()
 	})
+	if tv.CtxtMenuFunc != nil {
+		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)
+	}
 }
 
 // SrcInsertAfter inserts a new node in the source tree after this node, at
@@ -939,7 +926,7 @@ func (tv *TreeView) PasteAction(md mimedata.Mimes) {
 	tv.UnselectAll()
 	var men gi.Menu
 	tv.MakePasteMenu(&men, md)
-	pos := tv.MenuPosition()
+	pos := tv.ContextMenuPos()
 	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
 }
 
@@ -1119,7 +1106,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 func (tv *TreeView) DropAction(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod)
-	pos := tv.MenuPosition()
+	pos := tv.ContextMenuPos()
 	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
 }
 
@@ -1278,8 +1265,8 @@ func (tv *TreeView) TreeViewEvents() {
 				tvv.SelectAction(me.SelectMode())
 			}
 		case mouse.Right:
-			if me.Action == mouse.Press {
-				tvv.ActionMenu()
+			if me.Action == mouse.Release {
+				tvv.ContextMenu()
 			}
 		}
 	})

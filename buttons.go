@@ -99,7 +99,8 @@ const (
 	// button is currently being pressed down
 	ButtonDown
 
-	// button has been selected -- maintains selected state
+	// button has been selected -- selection is a general widget property used
+	// by views and other complex widgets -- checked state is independent of this
 	ButtonSelected
 
 	// total number of button states
@@ -118,33 +119,39 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 
 // see menus.go for MakeMenuFunc, etc
 
-// is this button checkable
+// IsCheckable returns if is this button checkable -- the Checked state is
+// independent of the generic widget selection state
 func (g *ButtonBase) IsCheckable() bool {
 	return bitflag.Has(g.Flag, int(ButtonFlagCheckable))
 }
 
-// SetCheckable sets whether this button is checkable -- emits ButtonToggled signals if so
+// SetCheckable sets whether this button is checkable -- emits ButtonToggled
+// signals if so -- the Checked state is independent of the generic widget
+// selection state
 func (g *ButtonBase) SetCheckable(checkable bool) {
 	bitflag.SetState(&g.Flag, checkable, int(ButtonFlagCheckable))
 }
 
-// is this button checked
+// IsChecked checks if button is checked
 func (g *ButtonBase) IsChecked() bool {
 	return bitflag.Has(g.Flag, int(ButtonFlagChecked))
 }
 
-// set the selected state of this button -- does not emit signal or update
+// SetSelectedState sets the selected state of this button -- does not emit
+// signal or update
 func (g *ButtonBase) SetSelectedState(sel bool) {
 	g.PartsWidgetBase.SetSelectedState(sel)
 	g.SetButtonState(ButtonActive) // update style -- will sort through all state
 }
 
-// set the checked state of this button -- does not emit signal or update
+// SetChecked sets the checked state of this button -- does not emit signal or
+// update
 func (g *ButtonBase) SetChecked(chk bool) {
 	bitflag.SetState(&g.Flag, chk, int(ButtonFlagChecked))
 }
 
-// ToggleChecked toggles the checked state of this button -- does not emit signal or update
+// ToggleChecked toggles the checked state of this button -- does not emit
+// signal or update
 func (g *ButtonBase) ToggleChecked() {
 	g.SetChecked(!g.IsChecked())
 }
@@ -171,7 +178,7 @@ func (g *ButtonBase) SetIcon(iconName string) {
 	SetButtonIcon(g, iconName)
 }
 
-// set the button state to target
+// SetButtonState sets the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	if g.IsInactive() {
 		state = ButtonInactive
@@ -186,8 +193,8 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	g.Sty = g.StateStyles[state] // get relevant styles
 }
 
-// set the button in the down state -- mouse clicked down but not yet up --
-// emits ButtonPressed signal -- ButtonClicked is down and up
+// ButtonPressed sets the button in the down state -- mouse clicked down but
+// not yet up -- emits ButtonPressed signal -- ButtonClicked is down and up
 func (g *ButtonBase) ButtonPressed() {
 	updt := g.UpdateStart()
 	g.SetButtonState(ButtonDown)
@@ -195,8 +202,9 @@ func (g *ButtonBase) ButtonPressed() {
 	g.UpdateEnd(updt)
 }
 
-// the button has just been released -- sends a released signal and returns
-// state to normal, and emits clicked signal if if it was previously in pressed state
+// ButtonReleased action: the button has just been released -- sends a released
+// signal and returns state to normal, and emits clicked signal if if it was
+// previously in pressed state
 func (g *ButtonBase) ButtonReleased() {
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
@@ -285,7 +293,7 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	}
 }
 
-// button starting hover-- todo: keep track of time and popup a tooltip -- signal?
+// ButtonEnterHover called when button starting hover
 func (g *ButtonBase) ButtonEnterHover() {
 	if g.State != ButtonHover {
 		updt := g.UpdateStart()
@@ -294,7 +302,7 @@ func (g *ButtonBase) ButtonEnterHover() {
 	}
 }
 
-// button exiting hover
+// ButtonExitHover called when button exiting hover
 func (g *ButtonBase) ButtonExitHover() {
 	if g.State == ButtonHover {
 		updt := g.UpdateStart()
@@ -341,7 +349,7 @@ func SetButtonIcon(bw ButtonWidget, iconName string) {
 // ButtonEvents handles all the basic button events
 func ButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
-	g.WidgetEvents()
+	g.HoverTooltipEvent()
 	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
@@ -482,6 +490,7 @@ func (g *ButtonBase) Render2D() {
 func (g *ButtonBase) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
 		g.SetButtonState(ButtonFocus)
+		g.EmitFocusedSignal()
 	} else {
 		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
 	}

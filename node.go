@@ -72,15 +72,12 @@ const (
 	// SplitView
 	ReRenderAnchor
 
-	// Inactive disables interaction with widgets or other nodes -- they
-	// should indicate this inactive state in an appropriate way, and not
-	// process input events
+	// Inactive disables interaction with widgets or other nodes (i.e., they
+	// are read-only) -- they should indicate this inactive state in an
+	// appropriate way, and each node should interpret events appropriately
+	// based on this state (select and context menu events should still be
+	// generated)
 	Inactive
-
-	// InactiveEvents overrides the default behavior where inactive nodes are
-	// not sent events from the Window -- for e.g., the TextField which can
-	// still be selected and copied when inactive
-	InactiveEvents
 
 	// Selected indicates that this node has been selected by the user --
 	// widely supported across different nodes
@@ -127,7 +124,7 @@ func (g *NodeBase) IsDragging() bool {
 }
 
 // IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,
-// ignore events) and style appropriately
+// ignore events except select, context menu) and style appropriately
 func (g *NodeBase) IsInactive() bool {
 	return bitflag.Has(g.Flag, int(Inactive))
 }

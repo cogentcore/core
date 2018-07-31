@@ -80,7 +80,7 @@ const (
 	// main signal -- return was pressed and an edit was completed -- data is the text
 	TextFieldDone TextFieldSignals = iota
 
-	// some text was selected or for Inactive state, entire field was selected
+	// some text was selected (for Inactive state, selection is via WidgetSig)
 	TextFieldSelected
 
 	TextFieldSignalsN
@@ -710,7 +710,10 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 }
 
 func (tf *TextField) TextFieldEvents() {
-	tf.WidgetEvents()
+	tf.HoverTooltipEvent()
+	if tf.IsInactive() {
+		tf.RightClickContextMenuEvent()
+	}
 	tf.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
@@ -730,9 +733,7 @@ func (tf *TextField) TextFieldEvents() {
 		if tff.IsInactive() {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				tff.SetSelectedState(!tff.IsSelected())
-				if tff.IsSelected() {
-					tff.TextFieldSig.Emit(tff.This, int64(TextFieldSelected), tff.Txt)
-				}
+				tff.EmitSelectedSignal()
 				tff.UpdateSig()
 			}
 			return
@@ -757,11 +758,15 @@ func (tf *TextField) TextFieldEvents() {
 				}
 			}
 		case mouse.Middle:
-			pt := tff.PointToRelPos(me.Pos())
-			tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
-			tff.Paste()
+			if me.Action == mouse.Press {
+				pt := tff.PointToRelPos(me.Pos())
+				tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
+				tff.Paste()
+			}
 		case mouse.Right:
-			tff.ActionMenu()
+			if me.Action == mouse.Press {
+				tff.ActionMenu()
+			}
 		}
 	})
 	tf.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -789,7 +794,6 @@ func (tf *TextField) Init2D() {
 	tf.Init2DWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
-	bitflag.Set(&tf.Flag, int(InactiveEvents))
 }
 
 func (tf *TextField) Style2D() {
@@ -1028,7 +1032,9 @@ func (tf *TextField) Render2D() {
 }
 
 func (tf *TextField) FocusChanged2D(gotFocus bool) {
-	if !gotFocus && !tf.IsInactive() {
+	if gotFocus {
+		tf.EmitFocusedSignal()
+	} else if !tf.IsInactive() {
 		tf.EditDone() // lose focus
 	}
 	tf.UpdateSig()

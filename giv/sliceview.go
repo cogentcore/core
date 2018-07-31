@@ -20,8 +20,8 @@ import (
 // SliceView represents a slice, creating a property editor of the values --
 // constructs Children widgets to show the index / value pairs, within an
 // overall frame with a button box at the bottom where methods can be invoked
-// -- set to Inactive for select-only mode, which emits SelectSig signals when
-// selection is updated
+// -- set to Inactive for select-only mode, which emits WidgetSig
+// WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
 	Slice       interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
@@ -196,25 +196,14 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			if wb != nil {
 				wb.SetProp("slv-index", i)
 				wb.ClearSelected()
-				if wb.TypeEmbeds(gi.KiT_TextField) {
-					tf := widg.EmbeddedStruct(gi.KiT_TextField).(*gi.TextField)
-					tf.SetProp("stv-index", i)
-					tf.TextFieldSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(gi.TextFieldSelected) {
-							tff := send.(*gi.TextField)
-							idx := tff.Prop("slv-index", false, false).(int)
-							svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-							svv.UpdateSelect(idx, tff.IsSelected())
-						}
-					})
-				} else {
-					wb.SelectSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				wb.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.Prop("slv-index", false, false).(int)
 						svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
 						svv.UpdateSelect(idx, wbb.IsSelected())
-					})
-				}
+					}
+				})
 			}
 		} else {
 			vvb := vv.AsValueViewBase()
@@ -318,7 +307,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 	} else {
 		sv.SelectedIdx = -1
 	}
-	sv.SelectSig.Emit(sv.This, 0, sv.SelectedIdx)
+	sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
 }
 
 // ConfigSliceButtons configures the buttons for map functions
