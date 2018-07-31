@@ -334,7 +334,7 @@ type Ki interface {
 	// ChildIndexByFunc returns index of child based on match function (true
 	// for match, false for not) -- startIdx arg allows for optimized
 	// bidirectional search if you have an idea where it might be -- can be
-	// key speedup for large lists
+	// key speedup for large lists -- pass -1 to start in the middle (good default)
 	ChildIndexByFunc(startIdx int, match func(ki Ki) bool) int
 
 	// ChildIndex returns index of child -- startIdx arg allows for optimized
@@ -344,31 +344,34 @@ type Ki interface {
 
 	// ChildIndexByName returns index of child from name -- startIdx arg
 	// allows for optimized bidirectional search if you have an idea where it
-	// might be -- can be key speedup for large lists
+	// might be -- can be key speedup for large lists -- pass -1 to start in
+	// the middle (good default)
 	ChildIndexByName(name string, startIdx int) int
 
 	// ChildIndexByUniqueName returns index of child from unique name --
 	// startIdx arg allows for optimized bidirectional search if you have an
-	// idea where it might be -- can be key speedup for large lists
+	// idea where it might be -- can be key speedup for large lists -- pass -1
+	// to start in the middle (good default)
 	ChildIndexByUniqueName(name string, startIdx int) int
 
 	// ChildIndexByType returns index of child by type -- if embeds is true,
 	// then it looks for any type that embeds the given type at any level of
 	// anonymous embedding -- startIdx arg allows for optimized bidirectional
 	// search if you have an idea where it might be -- can be key speedup for
-	// large lists
+	// large lists -- pass -1 to start in the middle (good default)
 	ChildIndexByType(t reflect.Type, embeds bool, startIdx int) int
 
 	// ChildByName returns child from name -- startIdx arg allows for
 	// optimized search if you have an idea where it might be -- can be key
-	// speedup for large lists
+	// speedup for large lists -- pass -1 to start in the middle (good default)
 	ChildByName(name string, startIdx int) Ki
 
 	// ChildByType returns child from type (any of types given) -- returns nil
 	// if not found -- if embeds is true, then it looks for any type that
 	// embeds the given type at any level of anonymous embedding -- startIdx
 	// arg allows for optimized bidirectional search if you have an idea where
-	// it might be -- can be key speedup for large lists
+	// it might be -- can be key speedup for large lists -- pass -1 to start
+	// in the middle (good default)
 	ChildByType(t reflect.Type, embeds bool, startIdx int) Ki
 
 	// ParentByName returns parent by name -- returns nil if not found

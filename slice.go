@@ -118,13 +118,16 @@ func (k *Slice) Move(from, to int) error {
 
 // IndexByFunc finds index of item based on match function (true for find,
 // false for not) -- startIdx arg allows for optimized bidirectional find if
-// you have an idea where it might be -- can be key speedup for large lists
+// you have an idea where it might be -- can be key speedup for large lists --
+// pass -1 to start in the middle (good default)
 func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) int {
 	sz := len(*k)
 	if sz == 0 {
 		return -1
 	}
-	// todo: benchmark setting startIdx = sz / 2 here..
+	if startIdx < 0 {
+		startIdx = sz / 2
+	}
 	if startIdx == 0 {
 		for idx, child := range *k {
 			if match(child) {
@@ -160,28 +163,32 @@ func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) int {
 	return -1
 }
 
-// Index returns index of element in list or -1 if not there
+// Index returns index of element in list or -1 if not there -- pass -1 to
+// start in the middle (good default)
 func (k *Slice) Index(kid Ki, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
 }
 
 // IndexByName returns index of first element that has given name -- startIdx
 // arg allows for optimized bidirectional search if you have an idea where it
-// might be -- can be key speedup for large lists
+// might be -- can be key speedup for large lists -- pass -1 to start in the
+// middle (good default)
 func (k *Slice) IndexByName(name string, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
 // IndexByUniqueName returns index of first element that has given unique name
 // -- startIdx arg allows for optimized bidirectional search if you have an
-// idea where it might be -- can be key speedup for large lists
+// idea where it might be -- can be key speedup for large lists -- pass -1 to
+// start in the middle (good default)
 func (k *Slice) IndexByUniqueName(name string, startIdx int) int {
 	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
 }
 
 // IndexByType returns index of element that either is that type or embeds
 // that type -- startIdx arg allows for optimized bidirectional search if you
-// have an idea where it might be -- can be key speedup for large lists
+// have an idea where it might be -- can be key speedup for large lists --
+// pass -1 to start in the middle (good default)
 func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) int {
 	if embeds {
 		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
