@@ -107,6 +107,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ do similar font name updating as done on Windows now
 
 * mac:
+	+ touchpad double-click -> right mouse button -- not obviously working?
 	+ impl setPos
 	+ win pos getting incremented by title.. so annoying
 	+ positioning not working for laptop display -- use non-dpi coords?
@@ -114,6 +115,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
+
+* Change Ki.ChildBy* to return val, bool for "ok" return check
+
+* transparent label getting unselected doesn't clear background..  but don't want to set background..  need to turn on background drawing for selectable
+
+* dialog popup in widgets demo fails 2nd time
+
+* treeview label events getting replaced by label events..
+
+* keyboard events only go to focus -- need an "always focus" option for things like tableview?
 
 * window cursors: busy, etc
 

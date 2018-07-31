@@ -323,7 +323,7 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (g *SliderBase) SliderEvents() {
-	g.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -337,7 +337,7 @@ func (g *SliderBase) SliderEvents() {
 			}
 		}
 	})
-	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -354,7 +354,7 @@ func (g *SliderBase) SliderEvents() {
 			sl.SliderReleased()
 		}
 	})
-	g.ConnectEventType(oswin.MouseFocusEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
@@ -364,7 +364,7 @@ func (g *SliderBase) SliderEvents() {
 			sl.SliderExitHover()
 		}
 	})
-	g.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		cur := float32(sl.Pos)
@@ -375,7 +375,7 @@ func (g *SliderBase) SliderEvents() {
 		}
 		me.SetProcessed()
 	})
-	g.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		sl.KeyInput(d.(*key.ChordEvent))
 	})
@@ -548,7 +548,7 @@ func (g *Slider) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
-		g.DisconnectAllEvents()
+		g.DisconnectAllEvents(RegPri)
 	}
 }
 
@@ -714,7 +714,7 @@ func (g *ScrollBar) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
-		g.DisconnectAllEvents()
+		g.DisconnectAllEvents(RegPri)
 	}
 }
 

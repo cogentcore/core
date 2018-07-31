@@ -388,7 +388,7 @@ func (g *WidgetBase) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
-		g.DisconnectAllEvents()
+		g.DisconnectAllEvents(RegPri)
 	}
 }
 
@@ -558,7 +558,7 @@ func (g *WidgetBase) EmitContextMenuSignal() {
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
 func (g *WidgetBase) HoverTooltipEvent() {
-	g.ConnectEventType(oswin.MouseHoverEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
@@ -570,35 +570,38 @@ func (g *WidgetBase) HoverTooltipEvent() {
 	})
 }
 
-// LeftClickSelectEvent connects to Left button mouse.Press event, toggles the
-// selected state, and emits a SelectedEvent
-func (g *WidgetBase) LeftClickSelectEvent() {
-	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+// WidgetMouseEvents connects to eiher or both mouse events -- IMPORTANT: if
+// you need to also connect to other mouse events, you must copy this code --
+// all processing of a mouse event must happen within one function b/c there
+// can only be one registered per receiver and event type.  sel = Left button
+// mouse.Press event, toggles the selected state, and emits a SelectedEvent.
+// ctxtMenu = connects to Right button mouse.Press event, and sends a
+// WidgetSig WidgetContextMenu signal, followed by calling ContextMenu method
+// -- signal can be used to change state prior to generating context menu,
+// including setting a CtxtMenuFunc that removes all items and thus negates
+// the presentation of any menu
+func (g *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
+	if !sel && !ctxtMenu {
+		return
+	}
+	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		fmt.Printf("select ev: %v\n", recv.PathUnique())
-		if me.Action == mouse.Press && me.Button == mouse.Left {
-			me.SetProcessed()
-			ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
-			ab.SetSelectedState(!ab.IsSelected())
-			ab.EmitSelectedSignal()
-			ab.UpdateSig()
+		if sel {
+			if me.Action == mouse.Press && me.Button == mouse.Left {
+				me.SetProcessed()
+				ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+				ab.SetSelectedState(!ab.IsSelected())
+				ab.EmitSelectedSignal()
+				ab.UpdateSig()
+			}
 		}
-	})
-}
-
-// RightClickContextMenuEvent connects to Right button mouse.Press event, and
-// sends a WidgetSig WidgetContextMenu signal, followed by calling ContextMenu
-// method -- signal can be used to change state prior to generating context
-// menu, including setting a CtxtMenuFunc that removes all items and thus
-// negates the presentation of any menu
-func (g *WidgetBase) RightClickContextMenuEvent() {
-	g.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.Event)
-		if me.Action == mouse.Press && me.Button == mouse.Right {
-			me.SetProcessed()
-			ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
-			ab.EmitContextMenuSignal()
-			ab.ContextMenu()
+		if ctxtMenu {
+			if me.Action == mouse.Release && me.Button == mouse.Right {
+				me.SetProcessed()
+				ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+				ab.EmitContextMenuSignal()
+				ab.ContextMenu()
+			}
 		}
 	})
 }

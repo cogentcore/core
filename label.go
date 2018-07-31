@@ -77,7 +77,7 @@ var LabelProps = ki.Props{
 	},
 }
 
-// mutually-exclusive button states -- determines appearance
+// LabelStates are mutually-exclusive label states -- determines appearance
 type LabelStates int32
 
 const (
@@ -101,7 +101,7 @@ var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, false, StylePropPr
 func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// Style selector names for the different states:
+// LabelSelectors are Style selector names for the different states:
 var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version
@@ -167,10 +167,7 @@ func (g *Label) Layout2D(parBBox image.Rectangle) {
 
 func (g *Label) LabelEvents() {
 	g.HoverTooltipEvent()
-	if g.Selectable {
-		g.LeftClickSelectEvent()
-	}
-	g.RightClickContextMenuEvent()
+	g.WidgetMouseEvents(g.Selectable, true)
 }
 
 func (g *Label) Render2D() {
@@ -188,6 +185,6 @@ func (g *Label) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {
-		g.DisconnectAllEvents()
+		g.DisconnectAllEvents(RegPri)
 	}
 }

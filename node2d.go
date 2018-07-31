@@ -311,32 +311,30 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 // ConnectEventType connects this node to receive a given type of GUI event
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
-func (g *Node2DBase) ConnectEventType(et oswin.EventType, fun ki.RecvFunc) {
+func (g *Node2DBase) ConnectEventType(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.ConnectEventType(g.This, et, fun)
+		win.ConnectEventType(g.This, et, pri, fun)
 	}
 }
 
 // DisconnectEventType disconnects this receiver from receiving given event
-// type -- see also DisconnectAllEvents
-func (g *Node2DBase) DisconnectEventType(et oswin.EventType) {
+// type -- pri is priority -- pass AllPris for all priorities -- see also
+// DisconnectAllEvents
+func (g *Node2DBase) DisconnectEventType(et oswin.EventType, pri EventPris) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.DisconnectEventType(g.This, et)
+		win.DisconnectEventType(g.This, et, pri)
 	}
 }
 
 // DisconnectAllEvents disconnects node from all window events -- typically
-// disconnect when not visible
-func (g *Node2DBase) DisconnectAllEvents() {
+// disconnect when not visible -- pri is priority -- pass AllPris for all priorities
+func (g *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.DisconnectAllEvents(g.This)
+		win.DisconnectAllEvents(g.This, pri)
 	}
-	// if g.Viewport != nil {
-	// 	g.NodeSig.Disconnect(g.Viewport.This)
-	// }
 }
 
 // DisconnectAllEventsTree disconnect node and all of its children (and so on)
@@ -348,7 +346,7 @@ func (g *Node2DBase) DisconnectAllEventsTree(win *Window) {
 		if gi == nil {
 			return false // going into a different type of thing, bail
 		}
-		win.DisconnectAllEvents(gi.This)
+		win.DisconnectAllEvents(gi.This, AllPris)
 		gi.NodeSig.DisconnectAll()
 		return true
 	})

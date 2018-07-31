@@ -814,7 +814,7 @@ func (tv *TableView) Render2D() {
 		tv.Render2DChildren()
 		tv.PopBounds()
 	} else {
-		tv.DisconnectAllEvents()
+		tv.DisconnectAllEvents(gi.AllPris)
 	}
 }
 
@@ -1461,12 +1461,12 @@ func (tv *TableView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (tv *TableView) TableViewEvents() {
-	tv.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		switch de.Action {

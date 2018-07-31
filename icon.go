@@ -120,8 +120,8 @@ func (g *Icon) Render2D() {
 		// connect to events here
 		g.Render2DChildren()
 		g.PopBounds()
-	} else {
-		g.DisconnectAllEvents()
+		// } else {
+		// 	g.DisconnectAllEvents()
 	}
 }
 

@@ -218,7 +218,7 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 }
 
 func (g *SpinBox) SpinBoxEvents() {
-	g.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
 		sb.IncrValue(float32(me.NonZeroDelta(false)))
@@ -263,6 +263,6 @@ func (g *SpinBox) Render2D() {
 		g.Render2DParts()
 		g.PopBounds()
 	} else {
-		g.DisconnectAllEvents()
+		g.DisconnectAllEvents(RegPri)
 	}
 }

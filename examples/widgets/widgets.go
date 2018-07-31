@@ -92,6 +92,7 @@ func mainrun() {
 	blrow := vlay.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
 	blab.Text = "Buttons:"
+	blab.Selectable = true
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutRow

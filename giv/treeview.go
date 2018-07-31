@@ -1226,12 +1226,12 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (tv *TreeView) TreeViewEvents() {
-	tv.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEventType(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	tv.ConnectEventType(oswin.DNDEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
 		tvv := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 		switch de.Action {
@@ -1251,22 +1251,25 @@ func (tv *TreeView) TreeViewEvents() {
 		}
 	})
 	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
-	lbl.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// HiPri is needed to override label's native processing
+	lbl.ConnectEventType(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		lb, _ := recv.(*gi.Label)
 		tvv := lb.Parent().Parent().EmbeddedStruct(KiT_TreeView).(*TreeView)
 		me := d.(*mouse.Event)
-		me.SetProcessed()
 		switch me.Button {
 		case mouse.Left:
 			switch me.Action {
 			case mouse.DoubleClick:
 				tvv.ToggleClose()
+				me.SetProcessed()
 			case mouse.Release:
 				tvv.SelectAction(me.SelectMode())
+				me.SetProcessed()
 			}
 		case mouse.Right:
 			if me.Action == mouse.Release {
 				tvv.ContextMenu()
+				me.SetProcessed()
 			}
 		}
 	})
@@ -1481,7 +1484,7 @@ func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 
 func (tv *TreeView) Render2D() {
 	if tv.HasClosedParent() {
-		tv.DisconnectAllEvents()
+		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing
 	}
 	// if tv.FullReRenderIfNeeded() { // custom stuff here
@@ -1513,7 +1516,7 @@ func (tv *TreeView) Render2D() {
 		tv.Render2DParts()
 		tv.PopBounds()
 	} else {
-		tv.DisconnectAllEvents()
+		tv.DisconnectAllEvents(gi.AllPris)
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.Render2DChildren()

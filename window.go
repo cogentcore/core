@@ -70,30 +70,53 @@ var HoverMaxPix = 5
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Title         string                      `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window                `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs  bool                        `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D                 `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
-	OverlayVp     Viewport2D                  `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture               `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive bool                        `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture               `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	EventSigs     [oswin.EventTypeN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event"`
-	Focus         ki.Ki                       `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	DNDData       mimedata.Mimes              `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki                       `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event                  `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki                       `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
-	Popup         ki.Ki                       `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki                     `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki                       `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DoFullRender  bool                        `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs  bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
+	Viewport      *Viewport2D                             `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	OverlayVp     Viewport2D                              `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
+	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
+	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
+	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	stopEventLoop bool
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
+
+// EventPris for different queues of event signals, processed in priority order
+type EventPris int32
+
+const (
+	// HiPri = high priority -- event receivers processed first -- can be used
+	// to override default behavior
+	HiPri EventPris = iota
+
+	// RegPri = default regular priority -- most should be here
+	RegPri
+
+	// LowPri = low priority -- processed last -- typically for containers /
+	// dialogs etc
+	LowPri
+
+	EventPrisN
+
+	// AllPris = -1 = all priorities (for delete cases only)
+	AllPris EventPris = -1
+)
+
+//go:generate stringer -type=EventPris
 
 // NewWindow creates a new window with given internal name handle, display name, and options
 func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
@@ -424,28 +447,45 @@ func (w *Window) ZoomDPI(steps int) {
 	w.FullReRender()
 }
 
-// ConnectEventType adds a Signal connection for given event type to given receiver
-func (w *Window) ConnectEventType(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
+// ConnectEventType adds a Signal connection for given event type and
+// prioritiy to given receiver
+func (w *Window) ConnectEventType(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
 	if et >= oswin.EventTypeN {
 		log.Printf("Window ConnectEventType type: %v is not a known event type\n", et)
 		return
 	}
-	w.EventSigs[et].Connect(recv, fun)
+	w.EventSigs[et][pri].Connect(recv, fun)
 }
 
-// DisconnectEventType removes Signal connection for given event type to given receiver
-func (w *Window) DisconnectEventType(recv ki.Ki, et oswin.EventType) {
+// DisconnectEventType removes Signal connection for given event type to given
+// receiver -- pri is priority -- pass AllPris for all priorities
+func (w *Window) DisconnectEventType(recv ki.Ki, et oswin.EventType, pri EventPris) {
 	if et >= oswin.EventTypeN {
 		log.Printf("Window DisconnectEventType type: %v is not a known event type\n", et)
 		return
 	}
-	w.EventSigs[et].Disconnect(recv)
+	if pri == AllPris {
+		for p := HiPri; p < EventPrisN; p++ {
+			w.EventSigs[et][p].Disconnect(recv)
+		}
+	} else {
+		w.EventSigs[et][pri].Disconnect(recv)
+	}
 }
 
-// DisconnectAllEvents disconnect node from all event signals
-func (w *Window) DisconnectAllEvents(recv ki.Ki) {
-	for _, es := range w.EventSigs {
-		es.Disconnect(recv)
+// DisconnectAllEvents disconnect node from all event signals -- pri is
+// priority -- pass AllPris for all priorities
+func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
+	if pri == AllPris {
+		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+			for p := HiPri; p < EventPrisN; p++ {
+				w.EventSigs[et][p].Disconnect(recv)
+			}
+		}
+	} else {
+		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+			w.EventSigs[et][pri].Disconnect(recv)
+		}
 	}
 }
 
@@ -472,79 +512,67 @@ func (w *Window) IsInScope(gii Node2D, gi *Node2DBase) bool {
 // the further filtering is just to ensure that they are in the right position
 // to receive the event (focus, popup filtering, etc)
 func (w *Window) SendEventSignal(evi oswin.Event) {
-	if evi.IsProcessed() { // someone took care of it
-		return
-	}
 	et := evi.Type()
 	if et > oswin.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
-	// always process the popup last as a second pass -- this is index if found
-	var popup ki.Ki
-
 	// fmt.Printf("got event type: %v\n", et)
-	// first just process all the events straight-up
-	w.EventSigs[et].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
-		if k.IsDeleted() { // destroyed is filtered upstream
-			return false
-		}
+	for pri := HiPri; pri < EventPrisN; pri++ {
 		if evi.IsProcessed() { // someone took care of it
-			return false
+			return
 		}
-		gii, gi := KiToNode2D(k)
-		if gi != nil {
-			if gi.This == w.Popup || gi.This == w.Viewport.This { // do this last
-				popup = gi.This
+		w.EventSigs[et][pri].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
+			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
-			if !w.IsInScope(gii, gi) { // no
+			if evi.IsProcessed() { // someone took care of it
 				return false
 			}
-			if evi.OnFocus() && !gii.HasFocus2D() {
-				return false
-			} else if evi.HasPos() {
-				pos := evi.Pos()
-				// drag events start with node but can go beyond it..
-				_, ok := evi.(*mouse.DragEvent)
-				if ok {
-					if w.Dragging == gi.This {
-						return true
-					} else if w.Dragging != nil {
-						return false
+			gii, gi := KiToNode2D(k)
+			if gi != nil {
+				if !w.IsInScope(gii, gi) {
+					return false
+				}
+				if evi.OnFocus() && !gii.HasFocus2D() {
+					return false
+				} else if evi.HasPos() {
+					pos := evi.Pos()
+					// drag events start with node but can go beyond it..
+					_, ok := evi.(*mouse.DragEvent)
+					if ok {
+						if w.Dragging == gi.This {
+							return true
+						} else if w.Dragging != nil {
+							return false
+						} else {
+							if pos.In(gi.WinBBox) {
+								w.Dragging = gi.This
+								bitflag.Set(&gi.Flag, int(NodeDragging))
+								return true
+							}
+							return false
+						}
 					} else {
-						if pos.In(gi.WinBBox) {
-							w.Dragging = gi.This
-							bitflag.Set(&gi.Flag, int(NodeDragging))
+						if w.Dragging == gi.This {
+							_, dg := KiToNode2D(w.Dragging)
+							if dg != nil {
+								bitflag.Clear(&dg.Flag, int(NodeDragging))
+							}
+							w.Dragging = nil
 							return true
 						}
-						return false
-					}
-				} else {
-					if w.Dragging == gi.This {
-						_, dg := KiToNode2D(w.Dragging)
-						if dg != nil {
-							bitflag.Clear(&dg.Flag, int(NodeDragging))
+						if !pos.In(gi.WinBBox) {
+							return false
 						}
-						w.Dragging = nil
-						return true
-					}
-					if !pos.In(gi.WinBBox) {
-						return false
 					}
 				}
+			} else {
+				// todo: get a 3D
+				return false
 			}
-		} else {
-			// todo: get a 3D
-			return false
-		}
-		return true
-	})
-
-	// send events to the popup last so e.g., dialog can do Accept / Cancel
-	// after other events have been processed
-	if popup != nil {
-		w.EventSigs[et].SendSig(popup, w.Popup, int64(et), evi)
+			return true
+		})
 	}
 }
 
@@ -556,46 +584,48 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) bool {
 	ftyp := oswin.MouseFocusEvent
 	updated := false
 	updt := false
-	w.EventSigs[ftyp].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
-		if k.IsDeleted() { // destroyed is filtered upstream
-			return false
-		}
-		gii, gi := KiToNode2D(k)
-		if gi != nil {
-			if !w.IsInScope(gii, gi) { // no
+	for pri := HiPri; pri < EventPrisN; pri++ {
+		w.EventSigs[ftyp][pri].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
+			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
-			in := pos.In(gi.WinBBox)
-			if in {
-				if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
-					fe.Action = mouse.Enter
-					bitflag.Set(&gi.Flag, int(MouseHasEntered))
-					if !updated {
-						updt = w.UpdateStart()
-						updated = true
-					}
-					return true // send event
-				} else {
-					return false // already in
+			gii, gi := KiToNode2D(k)
+			if gi != nil {
+				if !w.IsInScope(gii, gi) { // no
+					return false
 				}
-			} else { // mouse not in object
-				if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
-					fe.Action = mouse.Exit
-					bitflag.Clear(&gi.Flag, int(MouseHasEntered))
-					if !updated {
-						updt = w.UpdateStart()
-						updated = true
+				in := pos.In(gi.WinBBox)
+				if in {
+					if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+						fe.Action = mouse.Enter
+						bitflag.Set(&gi.Flag, int(MouseHasEntered))
+						if !updated {
+							updt = w.UpdateStart()
+							updated = true
+						}
+						return true // send event
+					} else {
+						return false // already in
 					}
-					return true // send event
-				} else {
-					return false // already out
+				} else { // mouse not in object
+					if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+						fe.Action = mouse.Exit
+						bitflag.Clear(&gi.Flag, int(MouseHasEntered))
+						if !updated {
+							updt = w.UpdateStart()
+							updated = true
+						}
+						return true // send event
+					} else {
+						return false // already out
+					}
 				}
+			} else {
+				// todo: 3D
+				return false
 			}
-		} else {
-			// todo: 3D
-			return false
-		}
-	})
+		})
+	}
 	if updated {
 		w.UpdateEnd(updt)
 	}
@@ -1007,7 +1037,9 @@ func (w *Window) EventLoop() {
 		if w.Popup != nil && !delPop {
 			if PopupIsCompleter(w.Popup) {
 				if et == oswin.KeyChordEvent {
-					w.EventSigs[et].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
+					for pri := HiPri; pri < EventPrisN; pri++ {
+						w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
+					}
 				}
 			}
 		}
@@ -1194,7 +1226,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 
 // disconnect given popup -- typically the current one
 func (w *Window) DisconnectPopup(pop ki.Ki) {
-	w.DisconnectAllEvents(pop)
+	w.DisconnectAllEvents(pop, AllPris)
 	pop.SetParent(nil) // don't redraw the popup anymore
 	w.Viewport.UploadToWin()
 }
@@ -1296,7 +1328,9 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	if de.Source != nil {
 		et := de.Type()
 		de.Action = dnd.DropFmSource
-		w.EventSigs[et].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
+		for pri := HiPri; pri < EventPrisN; pri++ {
+			w.EventSigs[et][pri].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
+		}
 	}
 	w.DNDFinalEvent = nil
 }

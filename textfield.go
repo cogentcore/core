@@ -483,20 +483,9 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.CursorForward(rsl)
 }
 
-// ActionMenu pops up a menu of various actions to perform
-func (tf *TextField) ActionMenu() {
-	var men Menu
-	tf.MakeActionMenu(&men)
-	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-	PopupMenu(men, cpos.X, cpos.Y, tf.Viewport, "tfActionMenu")
-}
+// cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 
-// MakeActionMenu makes the menu of actions that can be performed on each
-// node.
-func (tf *TextField) MakeActionMenu(m *Menu) {
-	if len(*m) > 0 {
-		return
-	}
+func (tf *TextField) MakeContextMenu(m *Menu) {
 	// todo: add shortcuts
 	m.AddMenuText("Copy", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
@@ -554,6 +543,71 @@ func (tf *TextField) Complete(str string) {
 	txt = txt + str
 	tf.SetText(txt)
 	tf.CursorEnd()
+}
+
+// PixelToCursor finds the cursor position that corresponds to the given pixel location
+func (tf *TextField) PixelToCursor(pixOff float32) int {
+	st := &tf.Sty
+
+	spc := st.BoxSpace()
+	px := pixOff - spc
+
+	if px <= 0 {
+		return tf.StartPos
+	}
+
+	// for selection to work correctly, we need this to be deterministic
+
+	sz := len(tf.EditTxt)
+	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.Ch)))
+	c = kit.MinInt(c, sz)
+
+	w := tf.TextWidth(tf.StartPos, c)
+	if w > px {
+		for w > px {
+			c--
+			if c <= tf.StartPos {
+				c = tf.StartPos
+				break
+			}
+			w = tf.TextWidth(tf.StartPos, c)
+		}
+	} else if w < px {
+		for c < tf.EndPos {
+			wn := tf.TextWidth(tf.StartPos, c+1)
+			if wn > px {
+				break
+			} else if wn == px {
+				c++
+				break
+			}
+			c++
+		}
+	}
+	return c
+}
+
+func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
+	oldPos := tf.CursorPos
+	tf.CursorPos = tf.PixelToCursor(pixOff)
+	if tf.SelectMode || selMode != mouse.NoSelectMode {
+		if !tf.SelectMode && selMode != mouse.NoSelectMode {
+			tf.SelectStart = oldPos
+			tf.SelectMode = true
+		}
+		if !tf.IsDragging() && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+			tf.SelectReset()
+		} else if tf.CursorPos > tf.SelectStart {
+			tf.SelectEnd = tf.CursorPos
+		} else {
+			tf.SelectStart = tf.CursorPos
+		}
+		tf.SelectUpdate()
+	} else if tf.HasSelection() {
+		tf.SelectReset()
+	}
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
@@ -644,77 +698,54 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-// PixelToCursor finds the cursor position that corresponds to the given pixel location
-func (tf *TextField) PixelToCursor(pixOff float32) int {
-	st := &tf.Sty
-
-	spc := st.BoxSpace()
-	px := pixOff - spc
-
-	if px <= 0 {
-		return tf.StartPos
+// MouseEvent handles the mouse.Event
+func (tf *TextField) MouseEvent(me *mouse.Event) {
+	if !tf.IsInactive() && !tf.HasFocus() {
+		tf.GrabFocus()
 	}
-
-	// for selection to work correctly, we need this to be deterministic
-
-	sz := len(tf.EditTxt)
-	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.Ch)))
-	c = kit.MinInt(c, sz)
-
-	w := tf.TextWidth(tf.StartPos, c)
-	if w > px {
-		for w > px {
-			c--
-			if c <= tf.StartPos {
-				c = tf.StartPos
-				break
+	switch me.Button {
+	case mouse.Left:
+		if me.Action == mouse.Press {
+			if tf.IsInactive() {
+				tf.SetSelectedState(!tf.IsSelected())
+				tf.EmitSelectedSignal()
+				tf.UpdateSig()
+			} else {
+				pt := tf.PointToRelPos(me.Pos())
+				tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			}
-			w = tf.TextWidth(tf.StartPos, c)
-		}
-	} else if w < px {
-		for c < tf.EndPos {
-			wn := tf.TextWidth(tf.StartPos, c+1)
-			if wn > px {
-				break
-			} else if wn == px {
-				c++
-				break
+			me.SetProcessed()
+		} else if me.Action == mouse.DoubleClick {
+			if tf.HasSelection() {
+				if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
+					tf.SelectReset()
+				} else {
+					tf.SelectAll()
+				}
+			} else {
+				tf.SelectWord()
 			}
-			c++
+			me.SetProcessed()
 		}
-	}
-	return c
-}
-
-func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
-	updt := tf.UpdateStart()
-	defer tf.UpdateEnd(updt)
-	oldPos := tf.CursorPos
-	tf.CursorPos = tf.PixelToCursor(pixOff)
-	if tf.SelectMode || selMode != mouse.NoSelectMode {
-		if !tf.SelectMode && selMode != mouse.NoSelectMode {
-			tf.SelectStart = oldPos
-			tf.SelectMode = true
+	case mouse.Middle:
+		if !tf.IsInactive() && me.Action == mouse.Press {
+			pt := tf.PointToRelPos(me.Pos())
+			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
+			tf.Paste()
+			me.SetProcessed()
 		}
-		if !tf.IsDragging() && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
-			tf.SelectReset()
-		} else if tf.CursorPos > tf.SelectStart {
-			tf.SelectEnd = tf.CursorPos
-		} else {
-			tf.SelectStart = tf.CursorPos
+	case mouse.Right:
+		if me.Action == mouse.Press {
+			tf.EmitContextMenuSignal()
+			tf.ContextMenu()
+			me.SetProcessed()
 		}
-		tf.SelectUpdate()
-	} else if tf.HasSelection() {
-		tf.SelectReset()
 	}
 }
 
 func (tf *TextField) TextFieldEvents() {
 	tf.HoverTooltipEvent()
-	if tf.IsInactive() {
-		tf.RightClickContextMenuEvent()
-	}
-	tf.ConnectEventType(oswin.MouseDragEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tf := recv.EmbeddedStruct(KiT_TextField).(*TextField)
@@ -726,50 +757,12 @@ func (tf *TextField) TextFieldEvents() {
 			tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 		}
 	})
-	tf.ConnectEventType(oswin.MouseEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
-		me.SetProcessed()
-		if tff.IsInactive() {
-			if me.Action == mouse.Press && me.Button == mouse.Left {
-				tff.SetSelectedState(!tff.IsSelected())
-				tff.EmitSelectedSignal()
-				tff.UpdateSig()
-			}
-			return
-		}
-		if !tff.HasFocus() {
-			tff.GrabFocus()
-		}
-		switch me.Button {
-		case mouse.Left:
-			if me.Action == mouse.Press {
-				pt := tff.PointToRelPos(me.Pos())
-				tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
-			} else if me.Action == mouse.DoubleClick {
-				if tff.HasSelection() {
-					if tff.SelectStart == 0 && tff.SelectEnd == len(tff.EditTxt) {
-						tff.SelectReset()
-					} else {
-						tff.SelectAll()
-					}
-				} else {
-					tff.SelectWord()
-				}
-			}
-		case mouse.Middle:
-			if me.Action == mouse.Press {
-				pt := tff.PointToRelPos(me.Pos())
-				tff.SetCursorFromPixel(float32(pt.X), me.SelectMode())
-				tff.Paste()
-			}
-		case mouse.Right:
-			if me.Action == mouse.Press {
-				tff.ActionMenu()
-			}
-		}
+		tff.MouseEvent(me)
 	})
-	tf.ConnectEventType(oswin.KeyChordEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		if tff.IsInactive() {
 			return
@@ -1027,7 +1020,7 @@ func (tf *TextField) Render2D() {
 		tf.Render2DChildren()
 		tf.PopBounds()
 	} else {
-		tf.DisconnectAllEvents()
+		tf.DisconnectAllEvents(RegPri)
 	}
 }
 

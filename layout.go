@@ -1040,13 +1040,13 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	})
 }
 
-// todo: we are leaking the scrollbars..
+// todo: we are leaking the scrollbars -- move into a container Field
 func (ly *Layout) DeleteScroll(d Dims2D) {
 	if ly.Scrolls[d] == nil {
 		return
 	}
 	sc := ly.Scrolls[d]
-	sc.DisconnectAllEvents()
+	sc.DisconnectAllEvents(AllPris)
 	sc.Destroy()
 	ly.Scrolls[d] = nil
 }
@@ -1185,19 +1185,21 @@ func (ly *Layout) AutoScroll(pos image.Point) {
 }
 
 func (ly *Layout) LayoutEvents() {
-	ly.ConnectEventType(oswin.MouseScrollEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// LowPri to allow other focal widgets to capture
+	ly.ConnectEventType(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
 		if li.ScrollDelta(me.Delta) {
 			me.SetProcessed()
 		}
 	})
-	ly.ConnectEventType(oswin.DNDMoveEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// HiPri to do it first so others can be in view etc -- does NOT consume event!
+	ly.ConnectEventType(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*dnd.MoveEvent)
 		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
-	ly.ConnectEventType(oswin.MouseMoveEvent, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEventType(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.EmbeddedStruct(KiT_Layout).(*Layout)
 		if li.Viewport.IsMenu() {
@@ -1302,7 +1304,7 @@ func (ly *Layout) Render2D() {
 		ly.Render2DChildren()
 		ly.PopBounds()
 	} else {
-		ly.DisconnectAllEvents()
+		ly.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
 

@@ -257,9 +257,7 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd(updt)
 }
 
-var StructViewInlineProps = ki.Props{
-	"min-width": units.NewValue(60, units.Ex),
-}
+var StructViewInlineProps = ki.Props{}
 
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts() {
@@ -313,6 +311,7 @@ func (sv *StructViewInline) ConfigParts() {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
+		lbl.SetProp("horizontal-align", gi.AlignLeft)
 		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
