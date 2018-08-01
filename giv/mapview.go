@@ -198,7 +198,7 @@ func (mv *MapView) ConfigMapGrid() {
 			typw.ComboSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
-				idx := cb.Prop("mapview-index", false, false).(int)
+				idx := cb.KnownProp("mapview-index").(int)
 				mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 				mvv.MapChangeValueType(idx, typ)
 			})

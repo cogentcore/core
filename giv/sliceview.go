@@ -199,7 +199,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				wb.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.Prop("slv-index", false, false).(int)
+						idx := wbb.KnownProp("slv-index").(int)
 						svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
 						svv.UpdateSelect(idx, wbb.IsSelected())
 					}

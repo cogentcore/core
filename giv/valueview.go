@@ -1080,8 +1080,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 
 	typEmbeds := ki.KiT_Node
 	if kiv, ok := vv.Owner.(ki.Ki); ok {
-		tep := kiv.Prop("type-embeds", true, true) // inherit, typ
-		if tep != nil {
+		if tep, ok := kiv.PropInherit("type-embeds", true, true); ok {
 			if te, ok := tep.(reflect.Type); ok {
 				typEmbeds = te
 			}

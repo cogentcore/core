@@ -116,16 +116,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* transparent label getting unselected doesn't clear background..  but don't want to set background..  need to turn on background drawing for selectable
+* search for tableview, treeview
+* DND and copy/paste for tableview
 
 * dialog popup in widgets demo fails 2nd time
 
 * window cursors: busy, etc
 
 * combobox getting text cutoff -- descenders and []
-
-* search for tableview, treeview
-* DND and copy/paste for tableview
 
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
@@ -177,8 +175,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Rendering / SVG
 
-* still a gradient issue: see TestShapes6.svg -- inkscape and boxysvg disagree
-  but clearly something wrong in current..
+* TestShapes5.svg and all the new icons added to svg have issues -- possibly clip-path?
+* radial gradient is off still, at least in userspace units
 
 * flowRoot in fig_vm_as_tug_of_war creates big black box
 * default join not looking right for some test cases -- getting white holes

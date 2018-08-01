@@ -101,7 +101,7 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 		tv.SetFullReRender()
 	}
 	tv.ShowIndex = true
-	if sidxp := tv.Prop("index", false, false); sidxp != nil {
+	if sidxp, ok := tv.Prop("index"); ok {
 		tv.ShowIndex, _ = kit.ToBool(sidxp)
 	}
 	tv.TmpSave = tmpSave
@@ -376,7 +376,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				idxlab.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.Prop("tv-index", false, false).(int)
+						idx := wbb.KnownProp("tv-index").(int)
 						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 						tvv.UpdateSelect(idx, wbb.IsSelected())
 					}
@@ -411,7 +411,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				wb.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.Prop("tv-index", false, false).(int)
+						idx := wbb.KnownProp("tv-index").(int)
 						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 						tvv.UpdateSelect(idx, wbb.IsSelected())
 					}

@@ -130,13 +130,13 @@ func (g *WidgetBase) Style2DWidget() {
 	if pgi, pg := KiToNode2D(g.Par); pgi != nil {
 		pagg = &pg.CSSAgg
 		if ps, ok := pgi.(Styler); ok {
-			g.Sty.SetStyleProps(ps.Style(), g.Properties())
+			g.Sty.SetStyleProps(ps.Style(), *g.Properties())
 		} else {
-			g.Sty.SetStyleProps(nil, g.Properties())
+			g.Sty.SetStyleProps(nil, *g.Properties())
 		}
 	} else {
 		g.CSSAgg = nil // restart
-		g.Sty.SetStyleProps(nil, g.Properties())
+		g.Sty.SetStyleProps(nil, *g.Properties())
 	}
 
 	if pagg != nil {
@@ -231,7 +231,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 				ic.SetProp("stroke", stroke)
 			}
 		}
-		sp = ki.SubProps(g.Properties(), stynm)
+		sp = ki.SubProps(*g.Properties(), stynm)
 		if sp != nil {
 			for k, v := range sp {
 				ic.SetProp(k, v)

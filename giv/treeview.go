@@ -180,8 +180,10 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		if vc, ok := kit.ToBool(ft); ok && vc {
 			cls = true
 		} else {
-			if vc, ok := kit.ToBool(k.Prop(vcprop, false, true)); vc && ok {
-				cls = true
+			if vcp, ok := k.PropInherit(vcprop, false, true); ok {
+				if vc, ok := kit.ToBool(vcp); vc && ok {
+					cls = true
+				}
 			}
 		}
 		fldClosed = append(fldClosed, cls)
@@ -208,8 +210,10 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
 		vk.SetSrcNode(skid, tvIdx)
 		if mods {
-			if vc, ok := kit.ToBool(skid.Prop(vcprop, false, true)); vc && ok {
-				vk.SetClosed()
+			if vcp, ok := skid.PropInherit(vcprop, false, true); ok {
+				if vc, ok := kit.ToBool(vcp); vc && ok {
+					vk.SetClosed()
+				}
 			}
 		}
 		idx++
@@ -284,8 +288,8 @@ func (tv *TreeView) Label() string {
 
 // SelectMode returns true if keyboard movements should automatically select nodes
 func (tv *TreeView) SelectMode() bool {
-	smp := tv.RootView.Prop(TreeViewSelModeProp, false, false)
-	if smp == nil {
+	smp, ok := tv.RootView.Prop(TreeViewSelModeProp)
+	if !ok {
 		tv.SetSelectMode(false)
 		return false
 	} else {
@@ -314,8 +318,8 @@ func (tv *TreeView) SelectedViews() []*TreeView {
 		return nil
 	}
 	var sl []*TreeView
-	slp := tv.RootView.Prop(TreeViewSelProp, false, false)
-	if slp == nil {
+	slp, ok := tv.RootView.Prop(TreeViewSelProp)
+	if !ok {
 		sl = make([]*TreeView, 0)
 		tv.SetSelectedViews(sl)
 	} else {

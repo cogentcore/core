@@ -212,8 +212,8 @@ func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.
 func (g *NodeBase) StyleProps(selector string) ki.Props {
-	sp := g.Prop(selector, false, true) // yeah, use types
-	if sp == nil {
+	sp, ok := g.PropInherit(selector, false, true) // yeah, use types
+	if !ok {
 		return nil
 	}
 	spm, ok := sp.(ki.Props)
