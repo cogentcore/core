@@ -171,20 +171,20 @@ func (tv *TableView) StdConfig() (mods, updt bool) {
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
 func (tv *TableView) SliceGrid() (*gi.Frame, int) {
-	idx := tv.ChildIndexByName("struct-grid", 0)
-	if idx < 0 {
+	idx, ok := tv.Children().IndexByName("struct-grid", 0)
+	if !ok {
 		return nil, -1
 	}
-	return tv.Child(idx).(*gi.Frame), idx
+	return tv.KnownChild(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (tv *TableView) ButtonBox() (*gi.Layout, int) {
-	idx := tv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := tv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return tv.Child(idx).(*gi.Layout), idx
+	return tv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // StdGridConfig returns a TypeAndNameList for configuring the struct-grid
@@ -255,15 +255,15 @@ func (tv *TableView) ConfigSliceGrid() {
 		updtg = sg.UpdateStart()
 	}
 
-	sgh := sg.Child(0).(*gi.Layout)
+	sgh := sg.KnownChild(0).(*gi.Layout)
 	sgh.Lay = gi.LayoutRow
 	sgh.SetStretchMaxWidth()
 
-	sep := sg.Child(1).(*gi.Separator)
+	sep := sg.KnownChild(1).(*gi.Separator)
 	sep.Horiz = true
 	sep.SetStretchMaxWidth()
 
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
 
@@ -295,12 +295,12 @@ func (tv *TableView) ConfigSliceGrid() {
 		updth = sgh.UpdateStart()
 	}
 	if tv.ShowIndex {
-		lbl := sgh.Child(0).(*gi.Label)
+		lbl := sgh.KnownChild(0).(*gi.Label)
 		lbl.Text = "Index"
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
-		hdr := sgh.Child(idxOff + fli).(*gi.Action)
+		hdr := sgh.KnownChild(idxOff + fli).(*gi.Action)
 		hdr.SetText(fld.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
@@ -319,10 +319,10 @@ func (tv *TableView) ConfigSliceGrid() {
 		})
 	}
 	if !tv.IsInactive() {
-		lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
+		lbl := sgh.KnownChild(tv.NVisFields + idxOff).(*gi.Label)
 		lbl.Text = "+"
 		lbl.Tooltip = "insert row"
-		lbl = sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
+		lbl = sgh.KnownChild(tv.NVisFields + idxOff + 1).(*gi.Label)
 		lbl.Text = "-"
 		lbl.Tooltip = "delete row"
 	}
@@ -350,7 +350,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg, _ := tv.SliceGrid()
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 
 	updt := sgf.UpdateStart()
 	defer sgf.UpdateEnd(updt)
@@ -467,19 +467,19 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 		updt = win.UpdateStart()
 	}
 	sg, _ := tv.SliceGrid()
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	ridx := idx * nWidgPerRow
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		seldx := ridx + idxOff + fli
 		if sgf.Kids.IsValidIndex(seldx) {
-			widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
+			widg := sgf.KnownChild(seldx).(gi.Node2D).AsNode2D()
 			widg.SetSelectedState(sel)
 			widg.UpdateSig()
 		}
 	}
 	if idxOff == 1 {
-		widg := sgf.Child(ridx).(gi.Node2D).AsNode2D()
+		widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
 		widg.SetSelectedState(sel)
 		widg.UpdateSig()
 	}
@@ -561,7 +561,7 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
 	sg, _ := tv.SliceGrid()
-	sgh := sg.Child(0).(*gi.Layout)
+	sgh := sg.KnownChild(0).(*gi.Layout)
 	sgh.SetFullReRender()
 	idxOff := 1
 	if !tv.ShowIndex {
@@ -571,7 +571,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	ascending := true
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		hdr := sgh.Child(idxOff + fli).(*gi.Action)
+		hdr := sgh.KnownChild(idxOff + fli).(*gi.Action)
 		if fli == fldIdx {
 			if tv.SortIdx == fli {
 				tv.SortDesc = !tv.SortDesc
@@ -592,7 +592,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortIdx = fldIdx
 	rawIdx := tv.VisFields[fldIdx].Index[0]
 
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	sgf.SetFullReRender()
 
 	SortStructSlice(tv.Slice, rawIdx, !tv.SortDesc)
@@ -708,7 +708,7 @@ func (tv *TableView) ConfigSliceButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -790,13 +790,13 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle) {
 	}
 
 	nfld := tv.NVisFields + idxOff
-	sgh := sg.Child(0).(*gi.Layout)
-	sgf := sg.Child(2).(*gi.Frame)
+	sgh := sg.KnownChild(0).(*gi.Layout)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	if len(sgf.Kids) >= nfld {
 		sgh.SetProp("width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
 		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-			widg := sgf.Child(fli).(gi.Node2D).AsWidget()
+			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
+			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()
 			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
 		}
 		sgh.Layout2D(parBBox)
@@ -816,6 +816,10 @@ func (tv *TableView) Render2D() {
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (tv *TableView) HasFocus2D() bool {
+	return tv.ContainsFocus() // anyone within us gives us focus..
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -848,7 +852,7 @@ func (tv *TableView) RowIndexLabel(row int) *gi.Label {
 	if sg == nil {
 		return nil
 	}
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	idxlab := sgf.Kids[row*nWidgPerRow].(*gi.Label)
 	return idxlab
 }
@@ -865,9 +869,9 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 		return nil
 	}
 	ridx := nWidgPerRow * row
-	sgf := sg.Child(2).(*gi.Frame)
+	sgf := sg.KnownChild(2).(*gi.Frame)
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sgf.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
 		if widg.CanFocus() {
 			widg.GrabFocus()
 			return widg

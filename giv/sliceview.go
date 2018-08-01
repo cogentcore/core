@@ -82,20 +82,20 @@ func (sv *SliceView) StdConfig() (mods, updt bool) {
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, and its index, within frame -- nil, -1 if not found
 func (sv *SliceView) SliceGrid() (*gi.Frame, int) {
-	idx := sv.ChildIndexByName("slice-grid", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("slice-grid", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Frame), idx
+	return sv.KnownChild(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (sv *SliceView) ButtonBox() (*gi.Layout, int) {
-	idx := sv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Layout), idx
+	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // ConfigSliceGrid configures the SliceGrid for the current slice
@@ -291,7 +291,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 	if sv.SelectedIdx >= 0 { // unselect current
 		seldx := sv.SelectedIdx*nWidgPerRow + 1
 		if sg.Kids.IsValidIndex(seldx) {
-			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg := sg.KnownChild(seldx).(gi.Node2D).AsNode2D()
 			widg.ClearSelected()
 			widg.UpdateSig()
 		}
@@ -300,7 +300,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 		sv.SelectedIdx = idx
 		seldx := idx*nWidgPerRow + 1
 		if sg.Kids.IsValidIndex(seldx) {
-			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg := sg.KnownChild(seldx).(gi.Node2D).AsNode2D()
 			widg.SetSelected()
 			widg.UpdateSig()
 		}
@@ -319,7 +319,7 @@ func (sv *SliceView) ConfigSliceButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -421,24 +421,30 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv.UpdateSig()
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
-		lbl := sv.Parts.Child(i * 2).(*gi.Label)
+		lbl := sv.Parts.KnownChild(i * 2).(*gi.Label)
 		idxtxt := fmt.Sprintf("%05d", i)
 		lbl.Text = idxtxt
-		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
+		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
-	edac := sv.Parts.Child(-1).(*gi.Action)
-	edac.SetIcon("edit")
-	edac.Tooltip = "edit slice in a dialog window"
-	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-		dlg := SliceViewDialog(svv.Viewport, svv.Slice, false, svv.TmpSave, "Slice Value View", "", nil, nil)
-		svvv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
-		svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svvvv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-			svvvv.ViewSig.Emit(svvvv.This, 0, nil)
+	edack, ok := sv.Parts.Children().ElemFromEnd(0)
+	if ok {
+		edac := edack.(*gi.Action)
+		edac.SetIcon("edit")
+		edac.Tooltip = "edit slice in a dialog window"
+		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+			dlg := SliceViewDialog(svv.Viewport, svv.Slice, false, svv.TmpSave, "Slice Value View", "", nil, nil)
+			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
+			if ok {
+				svvv := svvvk.(*SliceView)
+				svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					svvvv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+					svvvv.ViewSig.Emit(svvvv.This, 0, nil)
+				})
+			}
 		})
-	})
+	}
 	sv.Parts.UpdateEnd(updt)
 }
 

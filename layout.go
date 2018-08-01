@@ -282,7 +282,7 @@ type GridData struct {
 type Layout struct {
 	WidgetBase
 	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
-	StackTop  ki.Ptr              `desc:"pointer to node to use as the top of the stack -- only node matching this pointer is rendered, even if this is nil"`
+	StackTop  int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
 	ChildSize Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
 	HasScroll [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
@@ -1117,10 +1117,11 @@ func (ly *Layout) ScrollDelta(del image.Point) bool {
 // render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {
-		if ly.StackTop.Ptr == nil {
+		sn, ok := ly.Child(ly.StackTop)
+		if !ok {
 			return
 		}
-		gii, _ := KiToNode2D(ly.StackTop.Ptr)
+		gii, _ := KiToNode2D(sn)
 		gii.Render2D()
 		return
 	}
@@ -1130,16 +1131,6 @@ func (ly *Layout) Render2DChildren() {
 			gii.Render2D()
 		}
 	}
-}
-
-// ShowChildAtIndex is a convenience for LayoutStacked to show child node at a given index
-func (ly *Layout) ShowChildAtIndex(idx int) error {
-	idx, err := ly.Kids.ValidIndex(idx)
-	if err != nil {
-		return err
-	}
-	ly.StackTop.Ptr = ly.Child(idx)
-	return nil
 }
 
 // AutoScrollRate determines the rate of auto-scrolling of layouts

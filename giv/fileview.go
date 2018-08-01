@@ -125,7 +125,7 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 }
 
 func (fv *FileView) ConfigPathRow() {
-	pr := fv.ChildByName("path-row", 0).(*gi.Layout)
+	pr := fv.KnownChildByName("path-row", 0).(*gi.Layout)
 	pr.Lay = gi.LayoutRow
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
@@ -135,7 +135,7 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
 	pr.ConfigChildren(config, false) // already covered by parent update
-	pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
+	pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
 	pl.Text = "Path:"
 	pf := fv.PathField()
 	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ex))
@@ -150,7 +150,7 @@ func (fv *FileView) ConfigPathRow() {
 		}
 	})
 
-	pu := pr.ChildByName("path-up", 0).(*gi.Action)
+	pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
 	pu.Icon = gi.IconName("widget-wedge-up")
 	pu.Tooltip = "go up one level into the parent folder"
 	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -158,7 +158,7 @@ func (fv *FileView) ConfigPathRow() {
 		fvv.DirPathUp()
 	})
 
-	pfv := pr.ChildByName("path-fav", 0).(*gi.Action)
+	pfv := pr.KnownChildByName("path-fav", 0).(*gi.Action)
 	pfv.Icon = gi.IconName("heart")
 	pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
 	pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -166,7 +166,7 @@ func (fv *FileView) ConfigPathRow() {
 		fvv.AddPathToFavs()
 	})
 
-	nf := pr.ChildByName("new-folder", 0).(*gi.Action)
+	nf := pr.KnownChildByName("new-folder", 0).(*gi.Action)
 	nf.Icon = gi.IconName("folder-plus")
 	nf.Tooltip = "Create a new folder in this folder"
 	nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -176,7 +176,7 @@ func (fv *FileView) ConfigPathRow() {
 }
 
 func (fv *FileView) ConfigFilesRow() {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
+	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
 	fr.Lay = gi.LayoutRow
@@ -217,14 +217,14 @@ func (fv *FileView) ConfigFilesRow() {
 }
 
 func (fv *FileView) ConfigSelRow() {
-	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
 	sr.Lay = gi.LayoutRow
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "sel-lbl")
 	config.Add(gi.KiT_TextField, "sel")
 	sr.ConfigChildren(config, false) // already covered by parent update
-	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
+	sl := sr.KnownChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
 	sf := fv.SelField()
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ex))
@@ -241,35 +241,35 @@ func (fv *FileView) ConfigSelRow() {
 
 // PathField returns the TextField of the path
 func (fv *FileView) PathField() *gi.TextField {
-	pr := fv.ChildByName("path-row", 0).(*gi.Layout)
-	return pr.ChildByName("path", 1).(*gi.TextField)
+	pr := fv.KnownChildByName("path-row", 0).(*gi.Layout)
+	return pr.KnownChildByName("path", 1).(*gi.TextField)
 }
 
 // FavsView returns the TableView of the favorites
 func (fv *FileView) FavsView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
-	return fr.ChildByName("favs-view", 1).(*TableView)
+	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
+	return fr.KnownChildByName("favs-view", 1).(*TableView)
 }
 
 // FilesView returns the TableView of the files
 func (fv *FileView) FilesView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
-	return fr.ChildByName("files-view", 1).(*TableView)
+	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
+	return fr.KnownChildByName("files-view", 1).(*TableView)
 }
 
 // SelField returns the TextField of the selected file
 func (fv *FileView) SelField() *gi.TextField {
-	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
-	return sr.ChildByName("sel", 1).(*gi.TextField)
+	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
+	return sr.KnownChildByName("sel", 1).(*gi.TextField)
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (fv *FileView) ButtonBox() (*gi.Layout, int) {
-	idx := fv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := fv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return fv.Child(idx).(*gi.Layout), idx
+	return fv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -429,7 +429,7 @@ func (fv *FileView) ConfigButtons() {
 	// config := kit.TypeAndNameList{}
 	// config.Add(gi.KiT_Button, "Add")
 	// mods, updt := bb.ConfigChildren(config, false)
-	// addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*Button)
+	// addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*Button)
 	// addb.SetText("Add")
 	// addb.ButtonSig.ConnectOnly(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	if sig == int64(ButtonClicked) {

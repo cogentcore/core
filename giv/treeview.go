@@ -167,7 +167,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		tv.RootView = tvPar.RootView
 	}
 	vcprop := "view-closed"
-	skids := sk.Children()
+	skids := *sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
 	typ := tv.This.Type() // always make our type
 	flds := make([]ki.Ki, 0)
@@ -204,7 +204,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		}
 		idx++
 	}
-	for _, skid := range sk.Children() {
+	for _, skid := range *sk.Children() {
 		vk := tv.Kids[idx].EmbeddedStruct(KiT_TreeView).(*TreeView)
 		vk.SetSrcNode(skid, tvIdx)
 		if mods {
@@ -511,7 +511,7 @@ func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
-			nn := tv.Child(0).EmbeddedStruct(KiT_TreeView).(*TreeView)
+			nn := tv.KnownChild(0).EmbeddedStruct(KiT_TreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectAction(selMode)
 				return nn
@@ -541,9 +541,9 @@ func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 	if tv == tv.RootView {
 		return nil
 	}
-	myidx := tv.Index()
-	if myidx < len(tv.Par.Children())-1 {
-		nn := tv.Par.Child(myidx + 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
+	myidx, ok := tv.IndexInParent()
+	if ok && myidx < len(*tv.Par.Children())-1 {
+		nn := tv.Par.KnownChild(myidx + 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			nn.SelectAction(selMode)
 			return nn
@@ -565,9 +565,9 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 			selMode = mouse.ExtendContinuous
 		}
 	}
-	myidx := tv.Index()
-	if myidx > 0 {
-		nn := tv.Par.Child(myidx - 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
+	myidx, ok := tv.IndexInParent()
+	if ok && myidx > 0 {
+		nn := tv.Par.KnownChild(myidx - 1).EmbeddedStruct(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
@@ -601,8 +601,9 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 		return nil
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
-		nn := tv.Child(-1).EmbeddedStruct(KiT_TreeView).(*TreeView)
-		if nn != nil {
+		nnk, ok := tv.Children().ElemFromEnd(0)
+		if ok {
+			nn := nnk.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
@@ -715,7 +716,10 @@ func (tv *TreeView) SrcInsertAfter() {
 		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil)
 		return
 	}
-	myidx := sk.Index()
+	myidx, ok := sk.IndexInParent()
+	if !ok {
+		return
+	}
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -747,8 +751,10 @@ func (tv *TreeView) SrcInsertBefore() {
 		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
 		return
 	}
-	myidx := sk.Index()
-
+	myidx, ok := sk.IndexInParent()
+	if !ok {
+		return
+	}
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			tv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
@@ -815,7 +821,10 @@ func (tv *TreeView) SrcDuplicate() {
 		gi.PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot duplicate the root of the tree", true, false, nil, nil)
 		return
 	}
-	myidx := sk.Index()
+	myidx, ok := sk.IndexInParent()
+	if !ok {
+		return
+	}
 	nm := fmt.Sprintf("%vCopy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
@@ -952,7 +961,10 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil)
 		return
 	}
-	myidx := sk.Index()
+	myidx, ok := sk.IndexInParent()
+	if !ok {
+		return
+	}
 	updt := par.UpdateStart()
 	for i, ns := range sl {
 		if mod == dnd.DropCopy {
@@ -975,7 +987,10 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 		gi.PromptDialog(tv.Viewport, ttl, "Cannot after before the root of the tree", true, false, nil, nil)
 		return
 	}
-	myidx := sk.Index()
+	myidx, ok := sk.IndexInParent()
+	if !ok {
+		return
+	}
 	updt := par.UpdateStart()
 	for i, ns := range sl {
 		if mod == dnd.DropCopy {
@@ -1056,8 +1071,8 @@ func (tv *TreeView) DragNDropSource(de *dnd.Event) {
 	for _, d := range md {
 		if d.Type == mimedata.TextPlain { // link
 			path := string(d.Data)
-			sn := sroot.FindPathUnique(path)
-			if sn != nil {
+			sn, ok := sroot.FindPathUnique(path)
+			if ok {
 				sn.Delete(true)
 			}
 		}
@@ -1243,14 +1258,14 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.DragNDropSource(de)
 		}
 	})
-	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
+	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
 	wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonToggled) {
 			tvv, _ := recv.EmbeddedStruct(KiT_TreeView).(*TreeView)
 			tvv.ToggleClose()
 		}
 	})
-	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
+	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
 	// HiPri is needed to override label's native processing
 	lbl.ConnectEventType(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		lb, _ := recv.(*gi.Label)
@@ -1294,7 +1309,7 @@ func (tv *TreeView) ConfigParts() {
 	config.Add(gi.KiT_Label, "label")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
 
-	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
+	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
 	wb.Icon = gi.IconName("widget-wedge-down") // todo: style
 	wb.IconOff = gi.IconName("widget-wedge-right")
 	if mods {
@@ -1303,7 +1318,7 @@ func (tv *TreeView) ConfigParts() {
 		tv.StylePart(gi.Node2D(wb))
 	}
 
-	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
+	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
 	lbl.SetText(tv.Label())
 	if mods {
 		tv.StylePart(gi.Node2D(lbl))
@@ -1315,10 +1330,10 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	if !tv.Parts.HasChildren() {
 		tv.ConfigParts()
 	}
-	lbl := tv.Parts.Child(tvLabelIdx).(*gi.Label)
+	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
 	lbl.SetText(tv.Label())
 	lbl.Sty.Font.Color = tv.Sty.Font.Color
-	wb := tv.Parts.Child(tvBranchIdx).(*gi.CheckBox)
+	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
 	wb.SetChecked(!tv.IsClosed())
 }
 

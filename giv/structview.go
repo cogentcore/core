@@ -104,31 +104,31 @@ func (sv *StructView) SetTitle(title string) {
 // Title returns the title label widget, and its index, within frame -- nil,
 // -1 if not found
 func (sv *StructView) TitleWidget() (*gi.Label, int) {
-	idx := sv.ChildIndexByName("title", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("title", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Label), idx
+	return sv.KnownChild(idx).(*gi.Label), idx
 }
 
 // StructGrid returns the grid layout widget, which contains all the fields
 // and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) StructGrid() (*gi.Frame, int) {
-	idx := sv.ChildIndexByName("struct-grid", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("struct-grid", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Frame), idx
+	return sv.KnownChild(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame
 // -- nil, -1 if not found
 func (sv *StructView) ButtonBox() (*gi.Layout, int) {
-	idx := sv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Layout), idx
+	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -179,7 +179,7 @@ func (sv *StructView) ConfigStructGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sg.Child(i * 2).(*gi.Label)
+		lbl := sg.KnownChild(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
@@ -193,7 +193,7 @@ func (sv *StructView) ConfigStructGrid() {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
-		widg := sg.Child((i * 2) + 1).(gi.Node2D)
+		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
 		vv.ConfigWidget(widg)
 	}
@@ -297,7 +297,7 @@ func (sv *StructViewInline) ConfigParts() {
 		updt = sv.Parts.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sv.Parts.Child(i * 2).(*gi.Label)
+		lbl := sv.Parts.KnownChild(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
@@ -312,7 +312,7 @@ func (sv *StructViewInline) ConfigParts() {
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
 		lbl.SetProp("horizontal-align", gi.AlignLeft)
-		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
+		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 	}
 	sv.Parts.UpdateEnd(updt)

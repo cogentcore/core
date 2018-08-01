@@ -56,6 +56,7 @@ type Label struct {
 	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
 	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
+	CurBgColor  Color               `xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, to wipe out bg"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -133,6 +134,9 @@ func (g *Label) SetStateStyle() {
 		g.Sty = g.StateStyles[LabelSelected]
 	} else {
 		g.Sty = g.StateStyles[LabelActive]
+		if g.Selectable && !g.CurBgColor.IsNil() {
+			g.Sty.Font.BgColor.SetColor(g.CurBgColor)
+		}
 	}
 }
 
@@ -170,12 +174,22 @@ func (g *Label) LabelEvents() {
 	g.WidgetMouseEvents(g.Selectable, true)
 }
 
+func (g *Label) GrabCurBgColor() {
+	if g.Viewport == nil || g.IsSelected() || !g.CurBgColor.IsNil() {
+		return
+	}
+	pos := g.ContextMenuPos()
+	clr := g.Viewport.Pixels.At(pos.X, pos.Y)
+	g.CurBgColor.SetColor(clr)
+}
+
 func (g *Label) Render2D() {
 	if g.FullReRenderIfNeeded() {
 		return
 	}
 	if g.PushBounds() {
 		g.LabelEvents()
+		g.GrabCurBgColor()
 		g.SetStateStyle()
 		st := &g.Sty
 		rs := &g.Viewport.Render

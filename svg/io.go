@@ -439,8 +439,8 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if strings.HasPrefix(nm, "#") {
 							nm = strings.TrimPrefix(nm, "#")
 						}
-						hr := curPar.ChildByName(nm, 0)
-						if hr != nil {
+						hr, ok := curPar.ChildByName(nm, 0)
+						if ok {
 							if hrg, ok := hr.(*gi.Gradient); ok {
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
@@ -464,8 +464,8 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if strings.HasPrefix(nm, "#") {
 							nm = strings.TrimPrefix(nm, "#")
 						}
-						hr := curPar.ChildByName(nm, 0)
-						if hr != nil {
+						hr, ok := curPar.ChildByName(nm, 0)
+						if ok {
 							if hrg, ok := hr.(*gi.Gradient); ok {
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
@@ -669,7 +669,10 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == svg.This {
 					break
 				}
-				curSvg = curPar.ParentByType(KiT_SVG, true).EmbeddedStruct(KiT_SVG).(*SVG)
+				curSvgk, ok := curPar.ParentByType(KiT_SVG, true)
+				if ok {
+					curSvg = curSvgk.EmbeddedStruct(KiT_SVG).(*SVG)
+				}
 			}
 		case xml.CharData:
 			// (ok, md := curPar.(*MetaData2D); ok)

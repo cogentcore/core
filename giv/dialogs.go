@@ -214,6 +214,10 @@ func FileViewDialog(avp *gi.Viewport2D, path, file string, title, prompt string,
 // FileViewDialogValue gets the full path of selected file
 func FileViewDialogValue(dlg *gi.Dialog) string {
 	frame := dlg.Frame()
-	fv := frame.ChildByName("file-view", 0).(*FileView)
-	return fv.SelectedFile()
+	fvk, ok := frame.ChildByName("file-view", 0)
+	if ok {
+		fv := fvk.(*FileView)
+		return fv.SelectedFile()
+	}
+	return ""
 }

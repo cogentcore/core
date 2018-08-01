@@ -243,9 +243,9 @@ func (g *ButtonBase) OpenMenu() bool {
 		g.MakeMenuFunc(&g.Menu)
 	}
 	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
+	indic, ok := g.Parts.ChildByName("indicator", 3)
+	if ok {
+		pos = KiToNode2DBase(indic).WinBBox.Min
 	} else {
 		pos.Y -= 10
 		pos.X -= 10
@@ -283,7 +283,7 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	if indIdx < 0 {
 		return
 	}
-	ic := g.Parts.Child(indIdx).(*Icon)
+	ic := g.Parts.KnownChild(indIdx).(*Icon)
 	icnm := string(g.Indicator)
 	if IconName(icnm).IsNil() {
 		icnm = "widget-wedge-down"
@@ -680,28 +680,28 @@ func (g *CheckBox) ConfigParts() {
 		config.Add(KiT_Label, "label")
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	ist := g.Parts.Child(icIdx).(*Layout)
+	ist := g.Parts.KnownChild(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
-		icon := ist.Child(0).(*Icon)
+		icon := ist.KnownChild(0).(*Icon)
 		if set, _ := g.Icon.SetIcon(icon); set {
 			g.StylePart(Node2D(icon))
 		}
-		icoff := ist.Child(1).(*Icon)
+		icoff := ist.KnownChild(1).(*Icon)
 		if set, _ := g.IconOff.SetIcon(icoff); set {
 			g.StylePart(Node2D(icoff))
 		}
 	}
 	if g.IsChecked() {
-		ist.ShowChildAtIndex(0)
+		ist.StackTop = 0
 	} else {
-		ist.ShowChildAtIndex(1)
+		ist.StackTop = 1
 	}
 	if lbIdx >= 0 {
-		lbl := g.Parts.Child(lbIdx).(*Label)
+		lbl := g.Parts.KnownChild(lbIdx).(*Label)
 		if lbl.Text != g.Text {
-			g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
+			g.StylePart(g.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
 			g.StylePart(Node2D(lbl))
 			lbl.SetText(g.Text)
 		}
@@ -716,10 +716,10 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 		g.This.(ButtonWidget).ConfigParts()
 	}
 	icIdx := 0 // always there
-	ist := g.Parts.Child(icIdx).(*Layout)
+	ist := g.Parts.KnownChild(icIdx).(*Layout)
 	if g.IsChecked() {
-		ist.ShowChildAtIndex(0)
+		ist.StackTop = 0
 	} else {
-		ist.ShowChildAtIndex(1)
+		ist.StackTop = 1
 	}
 }

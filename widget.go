@@ -816,17 +816,17 @@ func (g *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config 
 // part style props, using given props if not set in object props
 func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
-		ic := g.Parts.Child(icIdx).(*Icon)
+		ic := g.Parts.KnownChild(icIdx).(*Icon)
 		if set, _ := ic.SetIcon(icnm); set { // can't use nm b/c config does
 			g.StylePart(Node2D(ic))
 		}
 	}
 	if lbIdx >= 0 {
-		lbl := g.Parts.Child(lbIdx).(*Label)
+		lbl := g.Parts.KnownChild(lbIdx).(*Label)
 		if lbl.Text != txt {
 			g.StylePart(Node2D(lbl))
 			if icIdx >= 0 {
-				g.StylePart(g.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
+				g.StylePart(g.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
 			}
 			lbl.SetText(txt)
 		}
@@ -836,8 +836,8 @@ func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
 func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
 	if IconName(icnm).IsValid() {
-		ick := g.Parts.ChildByName("icon", 0)
-		if ick == nil {
+		ick, ok := g.Parts.ChildByName("icon", 0)
+		if !ok {
 			return true
 		}
 		ic := ick.(*Icon)
@@ -845,14 +845,14 @@ func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool
 			return true
 		}
 	} else {
-		ic := g.Parts.ChildByName("icon", 0)
-		if ic != nil {
+		_, ok := g.Parts.ChildByName("icon", 0)
+		if ok { // need to remove it
 			return true
 		}
 	}
 	if txt != "" {
-		lbl := g.Parts.ChildByName("label", 2)
-		if lbl == nil {
+		lbl, ok := g.Parts.ChildByName("label", 2)
+		if !ok {
 			return true
 		}
 		lbl.(*Label).Sty.Font.Color = g.Sty.Font.Color
@@ -860,8 +860,8 @@ func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool
 			return true
 		}
 	} else {
-		lbl := g.Parts.ChildByName("label", 2)
-		if lbl != nil {
+		_, ok := g.Parts.ChildByName("label", 2)
+		if ok {
 			return true
 		}
 	}

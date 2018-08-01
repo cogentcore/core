@@ -70,26 +70,27 @@ var HoverMaxPix = 5
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs  bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D                             `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
-	OverlayVp     Viewport2D                              `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	Title         string         `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin         oswin.Window   `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs  bool           `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
+	Viewport      *Viewport2D    `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	OverlayVp     Viewport2D     `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	WinTex        oswin.Texture  `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive bool           `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
+	OverTex       oswin.Texture  `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	Focus         ki.Ki          `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	DNDData       mimedata.Mimes `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki          `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki          `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event     `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging      ki.Ki          `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
+	Popup         ki.Ki          `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki        `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki        `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup     ki.Ki          `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DoFullRender  bool           `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
-	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
-	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	stopEventLoop bool
 }
 
@@ -254,7 +255,10 @@ func (w *Window) LogicalDPI() float32 {
 // WinViewport2D returns the viewport directly under this window that serves
 // as the master viewport for the entire window
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.ChildByType(KiT_Viewport2D, true, 0)
+	vpi, ok := w.Children().ElemByType(KiT_Viewport2D, true, 0)
+	if !ok { // shouldn't happen
+		return nil
+	}
 	vp, _ := vpi.EmbeddedStruct(KiT_Viewport2D).(*Viewport2D)
 	return vp
 }
@@ -510,7 +514,7 @@ func (w *Window) IsInScope(gii Node2D, gi *Node2DBase) bool {
 // note that because there is a different EventSig for each event type, we are
 // ONLY looking at nodes that have registered to receive that type of event --
 // the further filtering is just to ensure that they are in the right position
-// to receive the event (focus, popup filtering, etc)
+// to receive the event (focus, popup filtering, etc).
 func (w *Window) SendEventSignal(evi oswin.Event) {
 	et := evi.Type()
 	if et > oswin.EventTypeN || et < 0 {
@@ -1032,13 +1036,13 @@ func (w *Window) EventLoop() {
 					}
 				}
 			}
-		}
 
-		if w.Popup != nil && !delPop {
 			if PopupIsCompleter(w.Popup) {
 				if et == oswin.KeyChordEvent {
 					for pri := HiPri; pri < EventPrisN; pri++ {
-						w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
+						if len(w.FocusStack) > 0 {
+							w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
+						}
 					}
 				}
 			}

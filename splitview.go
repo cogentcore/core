@@ -147,7 +147,7 @@ func (g *SplitView) ConfigSplitters() {
 	osz := float32(50.0)
 	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
 	spicon := IconName("widget-handle-circles")
-	for i, spk := range g.Parts.Children() {
+	for i, spk := range *g.Parts.Children() {
 		sp := spk.(*Splitter)
 		sp.Defaults()
 		sp.Icon = spicon
@@ -212,7 +212,7 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 		pos += size + handsz
 
 		if i < sz-1 {
-			spl := g.Parts.Child(i).(*Splitter)
+			spl := g.Parts.KnownChild(i).(*Splitter)
 			spl.Value = sp + handval
 			spl.UpdatePosFromValue()
 		}
@@ -313,8 +313,9 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 		g.ConfigParts()
 	}
 	if g.Icon.IsValid() && g.Parts.HasChildren() {
-		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
-		if ic != nil {
+		ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
+		if ok {
+			ic := ick.(*Icon)
 			mrg := g.Sty.Layout.Margin.Dots
 			pad := g.Sty.Layout.Padding.Dots
 			spc := mrg + pad
@@ -377,13 +378,14 @@ func (g *Splitter) Render2D() {
 	win := vp.Win
 	g.SliderEvents()
 	if g.IsDragging() {
-		ic := g.Parts.ChildByType(KiT_Icon, true, 0).(*Icon)
-		if ic == nil {
+		ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
+		if !ok {
 			return
 		}
-		ovk := win.OverlayVp.ChildByName(g.UniqueName(), 0)
+		ic := ick.(*Icon)
+		ovk, ok := win.OverlayVp.ChildByName(g.UniqueName(), 0)
 		var ovb *Bitmap
-		if ovk == nil {
+		if !ok {
 			ovb = &Bitmap{}
 			ovb.SetName(g.UniqueName())
 			win.OverlayVp.AddChild(ovb)
@@ -396,9 +398,9 @@ func (g *Splitter) Render2D() {
 		ovb.LayData.AllocPos.SetPoint(g.VpBBox.Min)
 		win.RenderOverlays()
 	} else {
-		ovk := win.OverlayVp.ChildIndexByName(g.UniqueName(), 0)
-		if ovk >= 0 {
-			win.OverlayVp.DeleteChildAtIndex(ovk, true)
+		ovidx, ok := win.OverlayVp.Children().IndexByName(g.UniqueName(), 0)
+		if ok {
+			win.OverlayVp.DeleteChildAtIndex(ovidx, true)
 			win.RenderOverlays()
 		} else {
 			if g.PushBounds() {

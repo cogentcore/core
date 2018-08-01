@@ -630,20 +630,26 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 		mb := vvv.Widget.(*gi.MenuButton)
 		if vvv.IsStruct {
 			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice of Struct Value View", "", nil, nil, nil)
-			sv := dlg.Frame().ChildByType(KiT_TableView, true, 2).(*TableView)
-			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
-				vvvv.UpdateWidget()
-				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-			})
+			svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
+			if ok {
+				sv := svk.(*TableView)
+				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+					vvvv.UpdateWidget()
+					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+				})
+			}
 		} else {
 			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), false, vvv.TmpSave, "Slice Value View", "", nil, nil)
-			sv := dlg.Frame().ChildByType(KiT_SliceView, true, 2).(*SliceView)
-			sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
-				vvvv.UpdateWidget()
-				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-			})
+			svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
+			if ok {
+				sv := svk.(*SliceView)
+				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+					vvvv.UpdateWidget()
+					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+				})
+			}
 		}
 	})
 }
@@ -687,12 +693,15 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil)
-		mv := dlg.Frame().ChildByType(KiT_MapView, true, 2).(*MapView)
-		mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			vvvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
-			vvvv.UpdateWidget()
-			vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-		})
+		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
+		if ok {
+			mv := mvk.(*MapView)
+			mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				vvvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
+				vvvv.UpdateWidget()
+				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
+			})
+		}
 	})
 }
 

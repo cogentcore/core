@@ -120,8 +120,8 @@ func (svg *SVG) FindNamedElement(name string) gi.Node2D {
 		return svg.This.(gi.Node2D)
 	}
 
-	def := svg.Defs.ChildByName(name, 0)
-	if def != nil {
+	def, ok := svg.Defs.ChildByName(name, 0)
+	if ok {
 		return def.(gi.Node2D)
 	}
 

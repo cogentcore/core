@@ -116,15 +116,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* Change Ki.ChildBy* to return val, bool for "ok" return check
-
 * transparent label getting unselected doesn't clear background..  but don't want to set background..  need to turn on background drawing for selectable
 
 * dialog popup in widgets demo fails 2nd time
-
-* treeview label events getting replaced by label events..
-
-* keyboard events only go to focus -- need an "always focus" option for things like tableview?
 
 * window cursors: busy, etc
 
@@ -150,9 +144,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   field to be int64..  for 32bit case, not that big a deal, and for most
   user-facing cases, int32 is sufficient, so focus on that case??
 
-* scroll should go to the sub-widget first before going to the layout: add a
-  First and Last event signal in addition to the regular one, plus registering
-  for each.
 * drag should be statefull -- only drag current item -- logic is in there but not working properly
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?

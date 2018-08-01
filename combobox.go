@@ -103,9 +103,9 @@ func (g *ComboBox) ButtonRelease() {
 	}
 	g.UpdateEnd(updt)
 	pos := g.WinBBox.Max
-	_, indic := KiToNode2D(g.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
+	indic, ok := g.Parts.ChildByName("indicator", 3)
+	if ok {
+		pos = KiToNode2DBase(indic).WinBBox.Min
 	} else {
 		pos.Y -= 10
 		pos.X -= 10
@@ -120,7 +120,7 @@ func (g *ComboBox) ConfigParts() {
 	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
 	if g.MaxLength > 0 && lbIdx >= 0 {
-		lbl := g.Parts.Child(lbIdx).(*Label)
+		lbl := g.Parts.KnownChild(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
 	}
 	if mods {

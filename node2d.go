@@ -257,6 +257,23 @@ func (g *Node2DBase) GrabFocus() {
 	}
 }
 
+// ContainsFocus returns true if this widget contains the current focus widget
+// as maintained in the Window
+func (g *Node2DBase) ContainsFocus() bool {
+	win := g.ParentWindow()
+	if win == nil {
+		return false
+	}
+	if win.Focus == nil {
+		return false
+	}
+	plev := win.Focus.ParentLevel(g.This)
+	if plev < 0 {
+		return false
+	}
+	return true
+}
+
 func (g *Node2DBase) FindNamedElement(name string) Node2D {
 	if g.Nm == name {
 		return g.This.(Node2D)
@@ -264,7 +281,7 @@ func (g *Node2DBase) FindNamedElement(name string) Node2D {
 	if g.Par == nil {
 		return nil
 	}
-	if ce := g.Par.ChildByName(name, -1); ce != nil {
+	if ce, ok := g.Par.ChildByName(name, -1); ok {
 		return ce.(Node2D)
 	}
 	pgi, _ := KiToNode2D(g.Par)
@@ -296,7 +313,7 @@ func (g *Node2DBase) ContextMenu() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
-// convert Ki to a Node2D interface and a Node2DBase obj -- nil if not
+// KiToNode2D converts Ki to a Node2D interface and a Node2DBase obj -- nil if not.
 func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 	if k == nil {
 		return nil, nil
@@ -306,6 +323,12 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 		return gii, gii.AsNode2D()
 	}
 	return nil, nil
+}
+
+// KiToNode2DBase converts Ki to a *Node2DBase -- use when known to be at
+// least of this type, not-nil, etc
+func KiToNode2DBase(k ki.Ki) *Node2DBase {
+	return k.(Node2D).AsNode2D()
 }
 
 // ConnectEventType connects this node to receive a given type of GUI event
@@ -530,8 +553,8 @@ func (g *Node2DBase) ParentWindow() *Window {
 	if g.Viewport != nil && g.Viewport.Win != nil {
 		return g.Viewport.Win
 	}
-	wini := g.ParentByType(KiT_Window, true)
-	if wini == nil {
+	wini, ok := g.ParentByType(KiT_Window, true)
+	if !ok {
 		return nil
 	}
 	return wini.EmbeddedStruct(KiT_Window).(*Window)

@@ -150,7 +150,7 @@ func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
 		return err
 	}
 	ic.SetNChildren(1, KiT_Icon, "icon")
-	nic := ic.Child(0).(*Icon)
+	nic := ic.KnownChild(0).(*Icon)
 	nic.CopyFromIcon(sic)
 	ic.Filename = sic.Filename
 	return nil

@@ -155,12 +155,12 @@ func (g *SpinBox) ConfigParts() {
 	config.Add(KiT_Layout, "buttons")
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
-		buts := g.Parts.Child(sbButtonsIdx).(*Layout)
+		buts := g.Parts.KnownChild(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutCol
 		g.StylePart(Node2D(buts))
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
-		up := buts.Child(0).(*Action)
+		up := buts.KnownChild(0).(*Action)
 		up.SetName("up")
 		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
 		up.Icon = g.UpIcon
@@ -172,7 +172,7 @@ func (g *SpinBox) ConfigParts() {
 			})
 		}
 		// dn
-		dn := buts.Child(1).(*Action)
+		dn := buts.KnownChild(1).(*Action)
 		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.Icon = g.DownIcon
@@ -184,9 +184,9 @@ func (g *SpinBox) ConfigParts() {
 			})
 		}
 		// space
-		g.StylePart(g.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
+		g.StylePart(g.Parts.KnownChild(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
-		tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
+		tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
 		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
 		g.StylePart(Node2D(tf))
 		tf.Txt = fmt.Sprintf("%g", g.Value)
@@ -210,7 +210,7 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 	if !g.Parts.HasChildren() {
 		g.ConfigParts()
 	}
-	tf := g.Parts.Child(sbTextFieldIdx).(*TextField)
+	tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
 	txt := fmt.Sprintf("%g", g.Value)
 	if tf.Txt != txt {
 		tf.SetText(txt)

@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"log"
-
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -66,36 +64,33 @@ func (g *TabView) SetSrcNode(k ki.Ki) {
 
 // todo: various other ways of selecting tabs..
 
-// select tab at given index
-func (g *TabView) SelectTabIndex(idx int) error {
+// SelectTabIndex selects tab at given index, returning false if index is invalid
+func (g *TabView) SelectTabIndex(idx int) bool {
 	tabrow := g.TabRowLayout()
-	idx, err := tabrow.Children().ValidIndex(idx)
-	if err != nil {
-		return err
+	tbk, ok := tabrow.Child(idx)
+	if !ok {
+		return false
 	}
-	tbk := tabrow.Child(idx)
 	tb, ok := tbk.(*gi.Button)
 	if !ok {
-		return nil
+		return false
 	}
 	updt := g.UpdateStart()
 	g.UnselectAllTabButtons()
 	tb.SetSelectedState(true)
 	tabstack := g.TabStackLayout()
-	tabstack.ShowChildAtIndex(idx)
+	tabstack.StackTop = idx
 	g.UpdateEnd(updt)
-	return nil
+	return true
 }
 
-// get tab frame for given index
+// TabFrameAtIndex returns tab frame for given index
 func (g *TabView) TabFrameAtIndex(idx int) *gi.Frame {
 	tabstack := g.TabStackLayout()
-	idx, err := tabstack.Children().ValidIndex(idx)
-	if err != nil {
-		log.Printf("%v", err)
+	tfk, ok := tabstack.Child(idx)
+	if !ok {
 		return nil
 	}
-	tfk := tabstack.Child(idx)
 	tf, ok := tfk.(*gi.Frame)
 	if !ok {
 		return nil
@@ -106,19 +101,19 @@ func (g *TabView) TabFrameAtIndex(idx int) *gi.Frame {
 // get the overal column layout for the tab widget
 func (g *TabView) TabColLayout() *gi.Layout {
 	g.InitTabView()
-	return g.Child(0).(*gi.Layout)
+	return g.KnownChild(0).(*gi.Layout)
 }
 
 // get the row layout of tabs across the top of the tab widget
 func (g *TabView) TabRowLayout() *gi.Layout {
 	tabcol := g.TabColLayout()
-	return tabcol.Child(0).(*gi.Layout)
+	return tabcol.KnownChild(0).(*gi.Layout)
 }
 
 // get the stacked layout of tab frames
 func (g *TabView) TabStackLayout() *gi.Layout {
 	tabcol := g.TabColLayout()
-	return tabcol.Child(1).(*gi.Layout)
+	return tabcol.KnownChild(1).(*gi.Layout)
 }
 
 // unselect all tabs
@@ -149,9 +144,9 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 		}
 		if !tb.IsSelected() {
 			tabrow := g.TabRowLayout()
-			butidx := tabrow.ChildIndex(send, 0)
+			butidx, ok := tabrow.Children().IndexOf(send, 0)
 			// fmt.Printf("selected tab: %v\n", butidx)
-			if butidx >= 0 {
+			if ok {
 				g.SelectTabIndex(butidx)
 			}
 		}
@@ -180,7 +175,7 @@ func (g *TabView) InitTabs() {
 	if g.SrcNode.Ptr == nil {
 		return
 	}
-	skids := g.SrcNode.Ptr.Children()
+	skids := *g.SrcNode.Ptr.Children()
 	for _, sk := range skids {
 		nm := "TabFrameOf_" + sk.UniqueName()
 		tf := tabstack.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)

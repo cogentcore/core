@@ -113,19 +113,19 @@ func (sv *ColorView) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
 func (sv *ColorView) TitleWidget() (*gi.Label, int) {
-	idx := sv.ChildIndexByName("title", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("title", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Label), idx
+	return sv.KnownChild(idx).(*gi.Label), idx
 }
 
 func (sv *ColorView) ValueLay() (*gi.Layout, int) {
-	idx := sv.ChildIndexByName("value-lay", 3)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("value-lay", 3)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Layout), idx
+	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
 func (sv *ColorView) Value() (*gi.Frame, int) {
@@ -133,11 +133,11 @@ func (sv *ColorView) Value() (*gi.Frame, int) {
 	if vl == nil {
 		return nil, -1
 	}
-	idx := vl.ChildIndexByName("value", 3)
-	if idx < 0 {
+	idx, ok := vl.Children().IndexByName("value", 3)
+	if !ok {
 		return nil, -1
 	}
-	return vl.Child(idx).(*gi.Frame), idx
+	return vl.KnownChild(idx).(*gi.Frame), idx
 }
 
 func (sv *ColorView) SliderGrid() (*gi.Layout, int) {
@@ -145,20 +145,20 @@ func (sv *ColorView) SliderGrid() (*gi.Layout, int) {
 	if vl == nil {
 		return nil, -1
 	}
-	idx := vl.ChildIndexByName("slider-grid", 0)
-	if idx < 0 {
+	idx, ok := vl.Children().IndexByName("slider-grid", 0)
+	if !ok {
 		return nil, -1
 	}
-	return vl.Child(idx).(*gi.Layout), idx
+	return vl.KnownChild(idx).(*gi.Layout), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (sv *ColorView) ButtonBox() (*gi.Layout, int) {
-	idx := sv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := sv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return sv.Child(idx).(*gi.Layout), idx
+	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // StdSliderConfig returns a TypeAndNameList for configuring a standard sliders
@@ -306,19 +306,19 @@ func (sv *ColorView) ConfigSliderGrid() {
 	config := sv.StdSliderConfig()
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
-		sv.ConfigLabel(sg.ChildByName("rlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Red:")
-		sv.ConfigLabel(sg.ChildByName("blab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Blue")
-		sv.ConfigLabel(sg.ChildByName("glab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Green:")
-		sv.ConfigLabel(sg.ChildByName("hlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Hue:")
-		sv.ConfigLabel(sg.ChildByName("slab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Sat:")
-		sv.ConfigLabel(sg.ChildByName("llab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Light:")
+		sv.ConfigLabel(sg.KnownChildByName("rlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Red:")
+		sv.ConfigLabel(sg.KnownChildByName("blab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Blue")
+		sv.ConfigLabel(sg.KnownChildByName("glab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Green:")
+		sv.ConfigLabel(sg.KnownChildByName("hlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Hue:")
+		sv.ConfigLabel(sg.KnownChildByName("slab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Sat:")
+		sv.ConfigLabel(sg.KnownChildByName("llab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Light:")
 
-		sv.ConfigRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-		sv.ConfigRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-		sv.ConfigRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
-		sv.ConfigHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-		sv.ConfigHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-		sv.ConfigHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+		sv.ConfigRGBSlider(sg.KnownChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigRGBSlider(sg.KnownChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigRGBSlider(sg.KnownChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+		sv.ConfigHSLSlider(sg.KnownChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigHSLSlider(sg.KnownChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigHSLSlider(sg.KnownChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
 	} else {
 		updt = sg.UpdateStart()
 	}
@@ -331,12 +331,12 @@ func (sv *ColorView) UpdateSliderGrid() {
 		return
 	}
 	updt := sg.UpdateStart()
-	sv.UpdateRGBSlider(sg.ChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-	sv.UpdateRGBSlider(sg.ChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-	sv.UpdateRGBSlider(sg.ChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
-	sv.UpdateHSLSlider(sg.ChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-	sv.UpdateHSLSlider(sg.ChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-	sv.UpdateHSLSlider(sg.ChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+	sv.UpdateRGBSlider(sg.KnownChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateRGBSlider(sg.KnownChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateRGBSlider(sg.KnownChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+	sv.UpdateHSLSlider(sg.KnownChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateHSLSlider(sg.KnownChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateHSLSlider(sg.KnownChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
 	sg.UpdateEnd(updt)
 }
 
@@ -386,8 +386,9 @@ func (vv *ColorValueView) UpdateWidget() {
 		// fmt.Printf("clr is ** in vv: %v\n", vv.PathUnique())
 	}
 	if clr != nil {
-		edac := sv.Parts.Child(-1).(*gi.Action) // action at end, from AddAction above
-		if edac != nil {
+		edack, ok := sv.Parts.Children().ElemFromEnd(0) // action at end, from AddAction above
+		if ok {
+			edac := edack.(*gi.Action)
 			edac.SetProp("background-color", *clr)
 			edac.SetFullReRender()
 		}
@@ -403,26 +404,32 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 
-	edac := sv.Parts.Child(-1).(*gi.Action) // action at end, from AddAction above
-	edac.SetIcon("color")
-	edac.Tooltip = "color selection dialog"
-	edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
-		clr, ok := svv.Struct.(*gi.Color)
-		if !ok {
-			clrp, ok := svv.Struct.(**gi.Color)
+	edack, ok := sv.Parts.Children().ElemFromEnd(0) // action at end, from AddAction above
+	if ok {
+		edac := edack.(*gi.Action)
+		edac.SetIcon("color")
+		edac.Tooltip = "color selection dialog"
+		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+			clr, ok := svv.Struct.(*gi.Color)
 			if !ok {
-				return
+				clrp, ok := svv.Struct.(**gi.Color)
+				if !ok {
+					return
+				}
+				clr = *clrp
 			}
-			clr = *clrp
-		}
-		dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil)
-		cvvv := dlg.Frame().ChildByType(KiT_ColorView, true, 2).(*ColorView)
-		cvvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			cvvvv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
-			cvvvv.ViewSig.Emit(cvvvv.This, 0, nil)
+			dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil)
+			cvvvk, ok := dlg.Frame().Children().ElemByType(KiT_ColorView, true, 2)
+			if ok {
+				cvvv := cvvvk.(*ColorView)
+				cvvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					cvvvv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+					cvvvv.ViewSig.Emit(cvvvv.This, 0, nil)
+				})
+			}
 		})
-	})
+	}
 
 	vv.UpdateWidget()
 

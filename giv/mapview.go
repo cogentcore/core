@@ -75,20 +75,20 @@ func (mv *MapView) StdConfig() (mods, updt bool) {
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
 func (mv *MapView) MapGrid() (*gi.Frame, int) {
-	idx := mv.ChildIndexByName("map-grid", 0)
-	if idx < 0 {
+	idx, ok := mv.Children().IndexByName("map-grid", 0)
+	if !ok {
 		return nil, -1
 	}
-	return mv.Child(idx).(*gi.Frame), idx
+	return mv.KnownChild(idx).(*gi.Frame), idx
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
 func (mv *MapView) ButtonBox() (*gi.Layout, int) {
-	idx := mv.ChildIndexByName("buttons", 0)
-	if idx < 0 {
+	idx, ok := mv.Children().IndexByName("buttons", 0)
+	if !ok {
 		return nil, -1
 	}
-	return mv.Child(idx).(*gi.Layout), idx
+	return mv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // ConfigMapGrid configures the MapGrid for the current map
@@ -181,13 +181,13 @@ func (mv *MapView) ConfigMapGrid() {
 			mvv, _ := recv.EmbeddedStruct(KiT_MapView).(*MapView)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
-		keyw := sg.Child(i * ncol).(gi.Node2D)
-		widg := sg.Child(i*ncol + 1).(gi.Node2D)
+		keyw := sg.KnownChild(i * ncol).(gi.Node2D)
+		widg := sg.KnownChild(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if ifaceType {
-			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
+			typw := sg.KnownChild(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
 			vtyp := kit.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
@@ -203,7 +203,7 @@ func (mv *MapView) ConfigMapGrid() {
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
-		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
+		delact := sg.KnownChild(i*ncol + ncol - 1).(*gi.Action)
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv
@@ -303,7 +303,7 @@ func (mv *MapView) ConfigMapButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.ChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -412,24 +412,30 @@ func (mv *MapViewInline) ConfigParts() {
 			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
-		keyw := mv.Parts.Child(i * 2).(gi.Node2D)
-		widg := mv.Parts.Child((i * 2) + 1).(gi.Node2D)
+		keyw := mv.Parts.KnownChild(i * 2).(gi.Node2D)
+		widg := mv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 	}
-	edac := mv.Parts.Child(-1).(*gi.Action)
-	edac.SetIcon("edit")
-	edac.Tooltip = "map edit dialog"
-	edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-		dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)
-		mvvv := dlg.Frame().ChildByType(KiT_MapView, true, 2).(*MapView)
-		mvvv.ViewSig.ConnectOnly(mvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			mvvvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-			mvvvv.ViewSig.Emit(mvvvv.This, 0, nil)
+	edack, ok := mv.Parts.Children().ElemFromEnd(0)
+	if ok {
+		edac := edack.(*gi.Action)
+		edac.SetIcon("edit")
+		edac.Tooltip = "map edit dialog"
+		edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)
+			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
+			if ok {
+				mvvv := mvvvk.(*MapView)
+				mvvv.ViewSig.ConnectOnly(mvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					mvvvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+					mvvvv.ViewSig.Emit(mvvvv.This, 0, nil)
+				})
+			}
 		})
-	})
+	}
 	mv.Parts.UpdateEnd(updt)
 }
 
