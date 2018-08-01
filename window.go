@@ -70,25 +70,26 @@ var HoverMaxPix = 5
 // Window provides an OS-specific window and all the associated event handling
 type Window struct {
 	NodeBase
-	Title         string         `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window   `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs  bool           `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D    `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
-	OverlayVp     Viewport2D     `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture  `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive bool           `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture  `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	Focus         ki.Ki          `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	DNDData       mimedata.Mimes `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki          `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki          `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event     `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki          `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
-	Popup         ki.Ki          `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki        `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki        `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki          `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DoFullRender  bool           `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	Title         string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin         oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs  bool              `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
+	Viewport      *Viewport2D       `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	OverlayVp     Viewport2D        `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	WinTex        oswin.Texture     `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive bool              `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
+	OverTex       oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	LastSelMode   mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
+	Focus         ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	DNDData       mimedata.Mimes    `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event        `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging      ki.Ki             `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
+	Popup         ki.Ki             `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup     ki.Ki             `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DoFullRender  bool              `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	stopEventLoop bool
@@ -925,7 +926,7 @@ func (w *Window) EventLoop() {
 			continue
 		case *key.ChordEvent:
 			kf := KeyFun(e.ChordString())
-
+			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
 			if !e.IsProcessed() {
 				if w.Popup != nil && PopupIsMenu(w.Popup) {
 					switch kf {
@@ -1001,6 +1002,7 @@ func (w *Window) EventLoop() {
 			}
 			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
 		case *mouse.DragEvent:
+			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
 			} else {
@@ -1009,6 +1011,7 @@ func (w *Window) EventLoop() {
 				}
 			}
 		case *mouse.Event:
+			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
 			if w.DNDData != nil && e.Action == mouse.Release {
 				w.DNDDropEvent(e)
 			}

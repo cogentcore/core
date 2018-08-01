@@ -459,55 +459,6 @@ func (tv *TableView) ConfigSliceGridRows() {
 	}
 }
 
-// SelectRowWidgets sets the selection state of given row of widgets
-func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	sg, _ := tv.SliceGrid()
-	sgf := sg.KnownChild(2).(*gi.Frame)
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	ridx := idx * nWidgPerRow
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		seldx := ridx + idxOff + fli
-		if sgf.Kids.IsValidIndex(seldx) {
-			widg := sgf.KnownChild(seldx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
-			widg.UpdateSig()
-		}
-	}
-	if idxOff == 1 {
-		widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
-		widg.SetSelectedState(sel)
-		widg.UpdateSig()
-	}
-
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// UpdateSelect updates the selection for the given index
-func (tv *TableView) UpdateSelect(idx int, sel bool) {
-	if tv.IsInactive() {
-		if tv.SelectedIdx >= 0 { // unselect current
-			tv.SelectRowWidgets(tv.SelectedIdx, false)
-		}
-		if sel {
-			tv.SelectedIdx = idx
-			tv.SelectRowWidgets(tv.SelectedIdx, true)
-		} else {
-			tv.SelectedIdx = -1
-		}
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
-	} else {
-		tv.SelectedIdx = idx
-		tv.SelectRowAction(idx, mouse.ExtendOne) // todo: need to get selmode!
-	}
-}
-
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end -- reconfig means call ConfigSliceGrid to update display
 func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
@@ -959,6 +910,59 @@ func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 //////////////////////////////////////////////////////////////////////////////
 //    Selection: user operates on the index labels
 
+// SelectRowWidgets sets the selection state of given row of widgets
+func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
+	sg, _ := tv.SliceGrid()
+	sgf := sg.KnownChild(2).(*gi.Frame)
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	ridx := idx * nWidgPerRow
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		seldx := ridx + idxOff + fli
+		if sgf.Kids.IsValidIndex(seldx) {
+			widg := sgf.KnownChild(seldx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
+			widg.UpdateSig()
+		}
+	}
+	if idxOff == 1 {
+		widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
+		widg.SetSelectedState(sel)
+		widg.UpdateSig()
+	}
+
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
+}
+
+// UpdateSelect updates the selection for the given index
+func (tv *TableView) UpdateSelect(idx int, sel bool) {
+	if tv.IsInactive() {
+		if tv.SelectedIdx >= 0 { // unselect current
+			tv.SelectRowWidgets(tv.SelectedIdx, false)
+		}
+		if sel {
+			tv.SelectedIdx = idx
+			tv.SelectRowWidgets(tv.SelectedIdx, true)
+		} else {
+			tv.SelectedIdx = -1
+		}
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+	} else {
+		selMode := mouse.NoSelectMode
+		win := tv.Viewport.Win
+		if win != nil {
+			selMode = win.LastSelMode
+		}
+		tv.SelectRowAction(idx, selMode)
+	}
+}
+
 // RowIsSelected returns the selected status of given row index
 func (tv *TableView) RowIsSelected(row int) bool {
 	if _, ok := tv.SelectedRows[row]; ok {
@@ -987,32 +991,20 @@ func (tv *TableView) SelectedRowsList(descendingSort bool) []int {
 	return rws
 }
 
-// todo: selection signals!?
-
 // SelectRow selects given row (if not already selected) -- updates select
 // status of index label
 func (tv *TableView) SelectRow(row int) {
-	idxlab := tv.RowIndexLabel(row)
-	if idxlab == nil {
-		return
-	}
 	if !tv.RowIsSelected(row) {
 		tv.SelectedRows[row] = true
-		idxlab.SetSelected()
-		idxlab.UpdateSig()
+		tv.SelectRowWidgets(row, true)
 	}
 }
 
 // UnselectRow unselects given row (if selected)
 func (tv *TableView) UnselectRow(row int) {
-	idxlab := tv.RowIndexLabel(row)
-	if idxlab == nil {
-		return
-	}
 	if tv.RowIsSelected(row) {
 		delete(tv.SelectedRows, row)
-		idxlab.ClearSelected()
-		idxlab.UpdateSig()
+		tv.SelectRowWidgets(row, false)
 	}
 }
 
@@ -1024,15 +1016,12 @@ func (tv *TableView) UnselectAllRows() {
 		updt = win.UpdateStart()
 	}
 	for r, _ := range tv.SelectedRows {
-		idxlab := tv.RowIndexLabel(r)
-		idxlab.ClearSelected()
-		idxlab.UpdateSig()
+		tv.SelectRowWidgets(r, false)
 	}
 	tv.SelectedRows = make(map[int]bool, 10)
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
-	// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewAllUnselected), tv.This)
 }
 
 // SelectAllRows selects all rows
@@ -1045,14 +1034,12 @@ func (tv *TableView) SelectAllRows() {
 	tv.UnselectAllRows()
 	tv.SelectedRows = make(map[int]bool, tv.BuiltSize)
 	for row := 0; row < tv.BuiltSize; row++ {
-		idxlab := tv.RowIndexLabel(row)
-		idxlab.SetSelected()
 		tv.SelectedRows[row] = true
+		tv.SelectRowWidgets(row, true)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
-	// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewAllSelected), tv.This)
 }
 
 // SelectRowAction is called when a select action has been received (e.g., a
@@ -1067,8 +1054,10 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 	switch mode {
 	case mouse.ExtendContinuous:
 		if len(tv.SelectedRows) == 0 {
+			tv.SelectedIdx = row
 			tv.SelectRow(row)
-			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+			tv.RowGrabFocus(row)
+			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -1081,6 +1070,7 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 				maxIdx = kit.MaxInt(maxIdx, r)
 			}
 			cidx := row
+			tv.SelectedIdx = row
 			tv.SelectRow(row)
 			if row < minIdx {
 				for cidx < minIdx {
@@ -1093,31 +1083,38 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 					cidx = r
 				}
 			}
+			tv.RowGrabFocus(row)
+			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 		}
 	case mouse.ExtendOne:
 		if tv.RowIsSelected(row) {
 			tv.UnselectRowAction(row)
 		} else {
+			tv.SelectedIdx = row
 			tv.SelectRow(row)
 			tv.RowGrabFocus(row)
-			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
+			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 		}
 	case mouse.NoSelectMode:
 		if tv.RowIsSelected(row) {
 			if len(tv.SelectedRows) > 1 {
 				tv.UnselectAllRows()
+				tv.SelectedIdx = row
 				tv.SelectRow(row)
 				tv.RowGrabFocus(row)
-				// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
 			}
 		} else {
 			tv.UnselectAllRows()
+			tv.SelectedIdx = row
 			tv.SelectRow(row)
 			tv.RowGrabFocus(row)
-			// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), tv.This)
 		}
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 	default: // anything else
+		tv.SelectedIdx = row
 		tv.SelectRow(row)
+		tv.RowGrabFocus(row)
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -1128,7 +1125,6 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 func (tv *TableView) UnselectRowAction(row int) {
 	if tv.RowIsSelected(row) {
 		tv.UnselectRow(row)
-		// tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewUnselected), tv.This)
 	}
 }
 
@@ -1247,13 +1243,21 @@ func (tv *TableView) PasteAction(md mimedata.Mimes, row int) {
 
 // PasteAssign assigns mime data (only the first one!) to this row
 func (tv *TableView) PasteAssign(md mimedata.Mimes, row int) {
-	// todo: use json directly to load into row element
-	// sl := tv.RowsFromMimeData(md)
-	// if len(sl) == 0 {
-	// 	return
-	// }
-	// sk := tv.SrcNode.Ptr
-	// sk.CopyFrom(sl[0])
+	tvl := reflect.ValueOf(tv.Slice)
+	tvnp := kit.NonPtrValue(tvl)
+
+	sl := tv.RowsFromMimeData(md)
+	updt := tv.UpdateStart()
+	if len(sl) == 0 {
+		return
+	}
+	ns := sl[0]
+	tvnp.Index(row).Set(reflect.ValueOf(ns).Elem())
+	if tv.TmpSave != nil {
+		tv.TmpSave.SaveTmp()
+	}
+	tv.ConfigSliceGrid()
+	tv.UpdateEnd(updt)
 }
 
 // PasteBefore inserts object(s) from mime data before given row
@@ -1265,16 +1269,17 @@ func (tv *TableView) PasteBefore(md mimedata.Mimes, row int) {
 	updt := tv.UpdateStart()
 	for _, ns := range sl {
 		sz := tvnp.Len()
-		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns))
+		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns).Elem())
 		if row >= 0 && row < sz-1 {
 			reflect.Copy(tvnp.Slice(row+1, sz+1), tvnp.Slice(row, sz))
-			tvnp.Index(row).Set(reflect.ValueOf(ns))
+			tvnp.Index(row).Set(reflect.ValueOf(ns).Elem())
 			tvl.Elem().Set(tvnp)
 		}
 	}
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.ConfigSliceGrid()
 	tv.UpdateEnd(updt)
 }
 
@@ -1287,16 +1292,17 @@ func (tv *TableView) PasteAfter(md mimedata.Mimes, row int) {
 	updt := tv.UpdateStart()
 	for _, ns := range sl {
 		sz := tvnp.Len()
-		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns))
+		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns).Elem())
 		if row >= 0 && row < sz-1 {
 			reflect.Copy(tvnp.Slice(row+1, sz+1), tvnp.Slice(row, sz))
-			tvnp.Index(row).Set(reflect.ValueOf(ns))
+			tvnp.Index(row).Set(reflect.ValueOf(ns).Elem())
 			tvl.Elem().Set(tvnp)
 		}
 	}
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.ConfigSliceGrid()
 	tv.UpdateEnd(updt)
 }
 

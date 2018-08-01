@@ -1002,6 +1002,8 @@ func (tf *TextField) Render2D() {
 			}
 		} else if tf.HasFocus() {
 			tf.Sty = tf.StateStyles[TextFieldFocus]
+		} else if tf.IsSelected() {
+			tf.Sty = tf.StateStyles[TextFieldSel]
 		} else {
 			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
