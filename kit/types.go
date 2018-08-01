@@ -153,23 +153,21 @@ func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) map[string]in
 	return tr.PropsByName(typeName, makeNew)
 }
 
-// PropByName safely finds a type property from type name and property key -- nil if not found
-func (tr *TypeRegistry) PropByName(typeName, propKey string) interface{} {
+// PropByName safely finds a type property from type name and property key --
+// returns false if not found
+func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool) {
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		// fmt.Printf("no props for type: %v\n", typeName)
-		return nil
+		return nil, false
 	}
 	p, ok := tp[propKey]
-	if !ok {
-		// fmt.Printf("no props for key: %v\n", propKey)
-		return nil
-	}
-	return p
+	return p, ok
 }
 
-// Prop safely finds a type property from type and property key -- nil if not found
-func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) interface{} {
+// Prop safely finds a type property from type and property key -- returns
+// false if not found.
+func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (interface{}, bool) {
 	typeName := FullTypeName(typ)
 	return tr.PropByName(typeName, propKey)
 }
@@ -187,10 +185,10 @@ func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type, includeBases bool)
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
 		if !includeBases {
-			btp := tr.Prop(typ, "base-type")
-			btpb, _ := ToBool(btp)
-			if btp != nil && btpb {
-				continue
+			if btp, ok := tr.Prop(typ, "base-type"); ok {
+				if bt, ok := ToBool(btp); ok && bt {
+					continue
+				}
 			}
 		}
 		nptyp := NonPtrType(typ)
@@ -216,10 +214,10 @@ func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive, includeBases 
 			continue
 		}
 		if !includeBases {
-			btp := tr.Prop(typ, "base-type")
-			btpb, _ := ToBool(btp)
-			if btp != nil && btpb {
-				continue
+			if btp, ok := tr.Prop(typ, "base-type"); ok {
+				if bt, ok := ToBool(btp); ok && bt {
+					continue
+				}
 			}
 		}
 		if TypeEmbeds(typ, embed) {
@@ -235,8 +233,8 @@ func (tr *TypeRegistry) AllEmbedsOf(embed reflect.Type, inclusive, includeBases 
 func (tr *TypeRegistry) AllTagged(key string) []reflect.Type {
 	tl := make([]reflect.Type, 0)
 	for _, typ := range tr.Types {
-		tp := tr.Prop(typ, key)
-		if tp == nil {
+		_, ok := tr.Prop(typ, key)
+		if !ok {
 			continue
 		}
 		tl = append(tl, typ)

@@ -528,8 +528,8 @@ func (n *Node) NewOfType(typ reflect.Type) Ki {
 		return nil
 	}
 	if typ == nil {
-		ct := n.Prop("ChildType", false, true) // no inherit but yes from type
-		if ct != nil {
+		ct, ok := n.PropInherit("ChildType", false, true) // no inherit but yes from type
+		if ok {
 			if ctt, ok := ct.(reflect.Type); ok {
 				typ = ctt
 			}
@@ -783,8 +783,8 @@ func (n *Node) IsDestroyed() bool {
 //////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
-func (n *Node) Properties() Props {
-	return n.Props
+func (n *Node) Properties() *Props {
+	return &n.Props
 }
 
 func (n *Node) SetProp(key string, val interface{}) {
@@ -819,23 +819,30 @@ func (n *Node) SetPropChildren(key string, val interface{}) {
 	}
 }
 
-func (n *Node) Prop(key string, inherit, typ bool) interface{} {
-	if n.Props != nil {
-		v, ok := n.Props[key]
-		if ok {
-			return v
-		}
+func (n *Node) Prop(key string) (interface{}, bool) {
+	v, ok := n.Props[key]
+	return v, ok
+}
+
+func (n *Node) KnownProp(key string) interface{} {
+	return n.Props[key]
+}
+
+func (n *Node) PropInherit(key string, inherit, typ bool) (interface{}, bool) {
+	v, ok := n.Props[key]
+	if ok {
+		return v, ok
 	}
 	if inherit && n.Par != nil {
-		pv := n.Par.Prop(key, inherit, typ)
-		if pv != nil {
-			return pv
+		v, ok = n.Par.PropInherit(key, inherit, typ)
+		if ok {
+			return v, ok
 		}
 	}
 	if typ {
 		return kit.Types.Prop(n.Type(), key)
 	}
-	return nil
+	return nil, false
 }
 
 func (n *Node) DeleteProp(key string) {
@@ -847,7 +854,11 @@ func (n *Node) DeleteProp(key string) {
 
 func (n *Node) DeleteAllProps(cap int) {
 	if n.Props != nil {
-		n.Props = make(Props, cap)
+		if cap == 0 {
+			n.Props = nil
+		} else {
+			n.Props = make(Props, cap)
+		}
 	}
 }
 
@@ -856,13 +867,13 @@ func init() {
 }
 
 func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
-	if from.Properties() == nil {
+	if *(from.Properties()) == nil {
 		return nil
 	}
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
-	fmP := from.Properties()
+	fmP := *(from.Properties())
 	if deep {
 		// code from https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
 		var buf bytes.Buffer
@@ -1339,8 +1350,8 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 
 func (n *Node) CopyFromRaw(from Ki) error {
 	n.CopyMakeChildrenFrom(from)
-	n.DeleteAllProps(len(from.Properties())) // start off fresh, allocated to size of from
-	n.CopyPropsFrom(from, false)             // use shallow props copy by default
+	n.DeleteAllProps(len(*from.Properties())) // start off fresh, allocated to size of from
+	n.CopyPropsFrom(from, false)              // use shallow props copy by default
 	n.CopyFieldsFrom(n.This, from)
 	for i, kid := range n.Kids {
 		fmk := (*(from.Children()))[i]

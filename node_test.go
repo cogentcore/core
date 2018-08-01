@@ -554,43 +554,58 @@ func TestProps(t *testing.T) {
 	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
-	pprop, ok := kit.ToInt(parent.Prop("intprop", false, false))
+	pprop, ok := kit.ToInt(parent.KnownProp("intprop"))
 	if !ok || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}
-	sprop, ok := kit.ToInt(schild2.Prop("intprop", true, false))
-	if !ok || sprop != 42 {
-		t.Errorf("TestProps error -- sprop inherited %v != %v\n", sprop, 42)
+	sprop, ok := schild2.PropInherit("intprop", true, false)
+	if !ok {
+		t.Errorf("TestProps error -- intprop inherited not found\n")
 	}
-	sprop, ok = kit.ToInt(schild2.Prop("intprop", false, false))
-	if ok || sprop != 0 {
-		t.Errorf("TestProps error -- sprop not inherited %v != %v\n", sprop, 0)
+	sint, ok := kit.ToInt(sprop)
+	if !ok || sprop != 42 {
+		t.Errorf("TestProps error -- intprop inherited %v != %v\n", sint, 42)
+	}
+	sprop, ok = schild2.PropInherit("intprop", false, false)
+	if ok {
+		t.Errorf("TestProps error -- intprop should not be found!  was: %v\n", sprop)
 	}
 
 	parent.SetProp("floatprop", 42.0)
-	spropf, ok := kit.ToFloat(schild2.Prop("floatprop", true, false))
+	sprop, ok = schild2.PropInherit("floatprop", true, false)
+	if !ok {
+		t.Errorf("TestProps error -- floatprop inherited not found\n")
+	}
+	spropf, ok := kit.ToFloat(sprop)
 	if !ok || spropf != 42.0 {
-		t.Errorf("TestProps error -- spropf inherited %v != %v\n", spropf, 42.0)
+		t.Errorf("TestProps error -- floatprop inherited %v != %v\n", spropf, 42.0)
 	}
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprops := kit.ToString(schild2.Prop("stringprop", true, false))
+	sprop, ok = schild2.PropInherit("stringprop", true, false)
+	if !ok {
+		t.Errorf("TestProps error -- stringprop not found\n")
+	}
+	sprops := kit.ToString(sprop)
 	if sprops != tstr {
 		t.Errorf("TestProps error -- sprops inherited %v != %v\n", sprops, tstr)
 	}
 
 	parent.DeleteProp("floatprop")
-	spropf, ok = kit.ToFloat(schild2.Prop("floatprop", true, false))
-	if ok || spropf != 0 {
-		t.Errorf("TestProps error -- spropf inherited %v != %v\n", spropf, 0)
+	sprop, ok = schild2.PropInherit("floatprop", true, false)
+	if ok {
+		t.Errorf("TestProps error -- floatprop should be gone\n")
 	}
 
-	spropf, ok = kit.ToFloat(parent.Prop("floatprop", true, true))
+	sprop, ok = parent.PropInherit("floatprop", true, true)
+	if !ok {
+		t.Errorf("TestProps error -- floatprop on type not found\n")
+	}
+	spropf, ok = kit.ToFloat(sprop)
 	if !ok || spropf != 3.1415 {
-		t.Errorf("TestProps error -- spropf from type %v != %v\n", spropf, 3.1415)
+		t.Errorf("TestProps error -- floatprop from type %v != %v\n", spropf, 3.1415)
 	}
-
 }
 
 func TestTreeMod(t *testing.T) {

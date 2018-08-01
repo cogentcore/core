@@ -390,7 +390,7 @@ type Ki interface {
 	// on Trees about special features of each node -- functions below support
 	// inheritance up Tree -- see kit convert.go for robust convenience
 	// methods for converting interface{} values to standard types.
-	Properties() Props
+	Properties() *Props
 
 	// SetProp sets given property key to value val -- initializes property
 	// map if nil.
@@ -409,17 +409,26 @@ type Ki interface {
 	// SetPropChildren sets given property key to value val for all Children.
 	SetPropChildren(key string, val interface{})
 
-	// Prop gets property value from key -- if inherit, then checks all
-	// parents too -- if typ then checks property on type as well (and on
-	// embedded types if inherit is true) -- returns nil if not set.
-	Prop(key string, inherit, typ bool) interface{}
+	// Prop gets property value from key
+	Prop(key string) (interface{}, bool)
 
-	// DeleteProp deletes property key, safely.
+	// KnownProp gets property value from key that is known to exist --
+	// returns nil if it actually doesn't -- less cumbersome for conversions
+	KnownProp(key string) interface{}
+
+	// PropInherit gets property value from key with options for inheriting
+	// property from parents and / or type-level properties.  If inherit, then
+	// checks all parents.  If typ then checks property on type as well
+	// (registered via KiT type registry).  Returns false if not set anywhere.
+	PropInherit(key string, inherit, typ bool) (interface{}, bool)
+
+	// DeleteProp deletes property key on this node.
 	DeleteProp(key string)
 
 	// DeleteAllProps deletes all properties on this node -- just makes a new
-	// Props map -- can specify the capacity of the new map (0 is ok -- always
-	// grows automatically anyway).
+	// Props map -- can specify the capacity of the new map (0 means set to
+	// nil instead of making a new one -- most efficient if potentially no
+	// properties will be set).
 	DeleteAllProps(cap int)
 
 	// CopyPropsFrom copies our properties from another node -- if deep then
