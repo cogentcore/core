@@ -161,8 +161,8 @@ func TestNodeFindName(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.ChildIndexByName(nm, st)
-			if idx != i {
+			idx, ok := parent.Children().IndexByName(nm, st)
+			if !ok || idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
 		}
@@ -181,8 +181,8 @@ func TestNodeFindNameUnique(t *testing.T) {
 	}
 	for i, nm := range names {
 		for st, _ := range names { // test all starting indexes
-			idx := parent.ChildIndexByUniqueName(nm, st)
-			if idx != i {
+			idx, ok := parent.Children().IndexByUniqueName(nm, st)
+			if !ok || idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
 			}
 		}
@@ -194,15 +194,15 @@ func TestNodeFindType(t *testing.T) {
 	parent.InitName(&parent, "par")
 	parent.AddNewChild(KiT_NodeEmbed, "child1")
 	parent.AddNewChild(KiT_Node, "child2")
-	idx := parent.ChildIndexByType(KiT_NodeEmbed, false, 0)
-	if idx != 0 {
+	idx, ok := parent.Children().IndexByType(KiT_NodeEmbed, false, 0)
+	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx = parent.ChildIndexByType(KiT_Node, false, 0)
-	if idx != 1 {
+	idx, ok = parent.Children().IndexByType(KiT_Node, false, 0)
+	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	cn := parent.ChildByType(KiT_Node, false, 0)
+	cn, ok := parent.Children().ElemByType(KiT_Node, false, 0)
 	if cn == nil {
 		t.Error("find child by type was nil")
 	}

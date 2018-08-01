@@ -126,34 +126,6 @@ func (n *Node) EmbeddedStruct(t reflect.Type) Ki {
 	return nil
 }
 
-func (n *Node) Parent() Ki {
-	return n.Par
-}
-
-func (n *Node) HasParent(par Ki) bool {
-	gotPar := false
-	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
-		if k == par {
-			gotPar = true
-			return false
-		}
-		return true
-	})
-	return gotPar
-}
-
-func (n *Node) Child(idx int) Ki {
-	return n.Kids.Elem(idx)
-}
-
-func (n *Node) Children() Slice {
-	return n.Kids
-}
-
-func (n *Node) IsValidIndex(idx int) bool {
-	return n.Kids.IsValidIndex(idx)
-}
-
 func (n *Node) Name() string {
 	return n.Nm
 }
@@ -232,162 +204,12 @@ func (n *Node) UniquifyNames() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Flags
+//  Parents
 
-func (n *Node) Flags() *int64 {
-	return &n.Flag
+func (n *Node) Parent() Ki {
+	return n.Par
 }
 
-func (n *Node) SetFlagAtomic(flag ...int) {
-	bitflag.SetAtomic(&n.Flag, flag...)
-}
-
-func (n *Node) SetFlagStateAtomic(on bool, flag ...int) {
-	bitflag.SetStateAtomic(&n.Flag, on, flag...)
-}
-
-func (n *Node) ClearFlagAtomic(flag ...int) {
-	bitflag.ClearAtomic(&n.Flag, flag...)
-}
-
-func (n *Node) IsUpdatingAtomic() bool {
-	rval := bitflag.HasAtomic(&n.Flag, int(Updating))
-	return rval
-}
-
-func (n *Node) IsUpdating() bool {
-	return bitflag.Has(n.Flag, int(Updating))
-}
-
-func (n *Node) IsField() bool {
-	return bitflag.Has(n.Flag, int(IsField))
-}
-
-func (n *Node) OnlySelfUpdate() bool {
-	return bitflag.Has(n.Flag, int(OnlySelfUpdate))
-}
-
-func (n *Node) SetOnlySelfUpdate() {
-	bitflag.Set(&n.Flag, int(OnlySelfUpdate))
-}
-
-func (n *Node) IsDeleted() bool {
-	return bitflag.Has(n.Flag, int(NodeDeleted))
-}
-
-func (n *Node) IsDestroyed() bool {
-	return bitflag.Has(n.Flag, int(NodeDestroyed))
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  Property interface with inheritance -- nodes can inherit props from parents
-
-func (n *Node) Properties() Props {
-	return n.Props
-}
-
-func (n *Node) SetProp(key string, val interface{}) {
-	if n.Props == nil {
-		n.Props = make(Props)
-	}
-	n.Props[key] = val
-}
-
-func (n *Node) SetProps(props Props, update bool) {
-	if n.Props == nil {
-		n.Props = make(Props)
-	}
-	for key, val := range props {
-		n.Props[key] = val
-	}
-	if update {
-		bitflag.Set(n.Flags(), int(PropUpdated))
-		n.UpdateSig()
-	}
-}
-
-func (n *Node) SetPropUpdate(key string, val interface{}) {
-	bitflag.Set(n.Flags(), int(PropUpdated))
-	n.SetProp(key, val)
-	n.UpdateSig()
-}
-
-func (n *Node) SetPropChildren(key string, val interface{}) {
-	for _, k := range n.Kids {
-		k.SetProp(key, val)
-	}
-}
-
-func (n *Node) Prop(key string, inherit, typ bool) interface{} {
-	if n.Props != nil {
-		v, ok := n.Props[key]
-		if ok {
-			return v
-		}
-	}
-	if inherit && n.Par != nil {
-		pv := n.Par.Prop(key, inherit, typ)
-		if pv != nil {
-			return pv
-		}
-	}
-	if typ {
-		return kit.Types.Prop(n.Type(), key)
-	}
-	return nil
-}
-
-func (n *Node) DeleteProp(key string) {
-	if n.Props == nil {
-		return
-	}
-	delete(n.Props, key)
-}
-
-func (n *Node) DeleteAllProps(cap int) {
-	if n.Props != nil {
-		n.Props = make(Props, cap)
-	}
-}
-
-func init() {
-	gob.Register(Props{})
-}
-
-func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
-	if from.Properties() == nil {
-		return nil
-	}
-	if n.Props == nil {
-		n.Props = make(Props)
-	}
-	fmP := from.Properties()
-	if deep {
-		// code from https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
-		var buf bytes.Buffer
-		enc := gob.NewEncoder(&buf)
-		dec := gob.NewDecoder(&buf)
-		err := enc.Encode(fmP)
-		if err != nil {
-			return err
-		}
-		err = dec.Decode(&n.Props)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else {
-		for k, v := range fmP {
-			n.Props[k] = v
-		}
-	}
-	return nil
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  Parent / Child Functionality
-
-// set parent of node -- does not remove from existing parent -- use Add / Insert / Delete
 func (n *Node) SetParent(parent Ki) {
 	n.Par = parent
 	if parent != nil && !parent.OnlySelfUpdate() {
@@ -430,17 +252,186 @@ func (n *Node) FieldRoot() Ki {
 	return root
 }
 
+func (n *Node) IndexInParent() (int, bool) {
+	if n.Par == nil {
+		return -1, false
+	}
+	var ok bool
+	n.index, ok = n.Par.Children().IndexOf(n.This, n.index) // very fast if index is close..
+	return n.index, ok
+}
+
+func (n *Node) ParentLevel(par Ki) int {
+	parLev := -1
+	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
+		if k == par {
+			parLev = level
+			return false
+		}
+		return true
+	})
+	return parLev
+}
+
+func (n *Node) ParentByName(name string) (Ki, bool) {
+	if n.IsRoot() {
+		return nil, false
+	}
+	if n.Par.Name() == name {
+		return n.Par, true
+	}
+	return n.Par.ParentByName(name)
+}
+
+func (n *Node) ParentByType(t reflect.Type, embeds bool) (Ki, bool) {
+	if n.IsRoot() {
+		return nil, false
+	}
+	if embeds {
+		if n.Par.TypeEmbeds(t) {
+			return n.Par, true
+		}
+	} else {
+		if n.Par.Type() == t {
+			return n.Par, true
+		}
+	}
+	return n.Par.ParentByType(t, embeds)
+}
+
+func (n *Node) KiFieldByName(name string) (Ki, bool) {
+	v := reflect.ValueOf(n.This).Elem()
+	f := v.FieldByName(name)
+	if !f.IsValid() {
+		return nil, false
+	}
+	if !kit.EmbeddedTypeImplements(f.Type(), KiType()) {
+		return nil, false
+	}
+	return kit.PtrValue(f).Interface().(Ki), true
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Children
+
 func (n *Node) HasChildren() bool {
 	return len(n.Kids) > 0
 }
 
-func (n *Node) Index() int {
-	if n.Par == nil {
-		return -1
-	}
-	n.index = n.Par.ChildIndex(n.This, n.index) // very fast if index is close..
-	return n.index
+func (n *Node) Children() *Slice {
+	return &n.Kids
 }
+
+func (n *Node) IsValidIndex(idx int) bool {
+	return n.Kids.IsValidIndex(idx)
+}
+
+func (n *Node) Child(idx int) (Ki, bool) {
+	return n.Kids.Elem(idx)
+}
+
+func (n *Node) KnownChild(idx int) Ki {
+	return n.Kids[idx]
+}
+
+func (n *Node) ChildByName(name string, startIdx int) (Ki, bool) {
+	return n.Kids.ElemByName(name, startIdx)
+}
+
+func (n *Node) KnownChildByName(name string, startIdx int) Ki {
+	return n.Kids.KnownElemByName(name, startIdx)
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Paths
+
+func (n *Node) Path() string {
+	if n.Par != nil {
+		if n.IsField() {
+			return n.Par.Path() + "." + n.Nm
+		} else {
+			return n.Par.Path() + "/" + n.Nm
+		}
+	}
+	return "/" + n.Nm
+}
+
+func (n *Node) PathUnique() string {
+	if n.Par != nil {
+		if n.IsField() {
+			return n.Par.PathUnique() + "." + n.UniqueNm
+		} else {
+			return n.Par.PathUnique() + "/" + n.UniqueNm
+		}
+	}
+	return "/" + n.UniqueNm
+}
+
+func (n *Node) PathFrom(par Ki) string {
+	if n.Par != nil && n.Par != par {
+		if n.IsField() {
+			return n.Par.PathFrom(par) + "." + n.Nm
+		} else {
+			return n.Par.PathFrom(par) + "/" + n.Nm
+		}
+	}
+	return "/" + n.Nm
+}
+
+func (n *Node) PathFromUnique(par Ki) string {
+	if n.Par != nil && n.Par != par {
+		if n.IsField() {
+			return n.Par.PathFromUnique(par) + "." + n.Nm
+		} else {
+			return n.Par.PathFromUnique(par) + "/" + n.Nm
+		}
+	}
+	return "/" + n.Nm
+}
+
+func (n *Node) FindPathUnique(path string) (Ki, bool) {
+	if n.Par != nil { // we are not root..
+		myp := n.PathUnique()
+		path = strings.TrimLeft(path, myp)
+	}
+	curn := Ki(n)
+	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
+	for i, pe := range pels {
+		if len(pe) == 0 {
+			continue
+		}
+		if i <= 1 && curn.UniqueName() == pe {
+			continue
+		}
+		if strings.Contains(pe, ".") { // has fields
+			fels := strings.Split(pe, ".")
+			// find the child first, then the fields
+			idx, ok := curn.Children().IndexByUniqueName(fels[0], 0)
+			if !ok {
+				return nil, false
+			}
+			curn = (*(curn.Children()))[idx]
+			for i := 1; i < len(fels); i++ {
+				fe := fels[i]
+				fk, ok := curn.KiFieldByName(fe)
+				if !ok {
+					return nil, false
+				}
+				curn = fk
+			}
+		} else {
+			idx, ok := curn.Children().IndexByUniqueName(pe, 0)
+			if !ok {
+				return nil, false
+			}
+			curn = (*(curn.Children()))[idx]
+		}
+	}
+	return curn, true
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Adding, Inserting Children
 
 func (n *Node) SetChildType(t reflect.Type) error {
 	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
@@ -603,14 +594,14 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 	return nil
 }
 
-func (n *Node) MoveChild(from, to int) error {
+func (n *Node) MoveChild(from, to int) bool {
 	updt := n.UpdateStart()
-	err := n.Kids.Move(from, to)
-	if err == nil {
+	ok := n.Kids.Move(from, to)
+	if ok {
 		bitflag.Set(&n.Flag, int(ChildMoved))
 	}
 	n.UpdateEnd(updt)
-	return err
+	return ok
 }
 
 func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, updt bool) {
@@ -644,92 +635,13 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, up
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  Find child / parent by..
+//  Deleting Children
 
-func (n *Node) ChildIndexByFunc(startIdx int, match func(ki Ki) bool) int {
-	return n.Kids.IndexByFunc(startIdx, match)
-}
-
-func (n *Node) ChildIndex(kid Ki, startIdx int) int {
-	return n.Kids.Index(kid, startIdx)
-}
-
-func (n *Node) ChildIndexByName(name string, startIdx int) int {
-	return n.Kids.IndexByName(name, startIdx)
-}
-
-func (n *Node) ChildIndexByUniqueName(name string, startIdx int) int {
-	return n.Kids.IndexByUniqueName(name, startIdx)
-}
-
-func (n *Node) ChildIndexByType(t reflect.Type, embeds bool, startIdx int) int {
-	return n.Kids.IndexByType(t, embeds, startIdx)
-}
-
-func (n *Node) ChildByName(name string, startIdx int) Ki {
-	idx := n.Kids.IndexByName(name, startIdx)
-	if idx < 0 {
-		return nil
+func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
+	child, ok := n.Child(idx)
+	if !ok {
+		return false
 	}
-	return n.Kids[idx]
-}
-
-func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
-	idx := n.Kids.IndexByType(t, embeds, startIdx)
-	if idx < 0 {
-		return nil
-	}
-	return n.Kids[idx]
-}
-
-func (n *Node) ParentByName(name string) Ki {
-	if n.IsRoot() {
-		return nil
-	}
-	if n.Par.Name() == name {
-		return n.Par
-	}
-	return n.Par.ParentByName(name)
-}
-
-func (n *Node) ParentByType(t reflect.Type, embeds bool) Ki {
-	if n.IsRoot() {
-		return nil
-	}
-	if embeds {
-		if n.Par.TypeEmbeds(t) {
-			return n.Par
-		}
-	} else {
-		if n.Par.Type() == t {
-			return n.Par
-		}
-	}
-	return n.Par.ParentByType(t, embeds)
-}
-
-func (n *Node) KiFieldByName(name string) Ki {
-	v := reflect.ValueOf(n.This).Elem()
-	f := v.FieldByName(name)
-	if !f.IsValid() {
-		return nil
-	}
-	if !kit.EmbeddedTypeImplements(f.Type(), KiType()) {
-		return nil
-	}
-	return kit.PtrValue(f).Interface().(Ki)
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  Deleting
-
-func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
-	idx, err := n.Kids.ValidIndex(idx)
-	if err != nil {
-		log.Print("Ki Node DeleteChildAtIndex -- attempt to delete item in empty children slice")
-		return
-	}
-	child := n.Kids[idx]
 	updt := n.UpdateStart()
 	bitflag.Set(&n.Flag, int(ChildDeleted))
 	if child.Parent() == n.This {
@@ -742,30 +654,31 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) {
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 	}
-	_ = n.Kids.DeleteAtIndex(idx)
+	n.Kids.DeleteAtIndex(idx)
 	if destroy {
 		DelMgr.Add(child)
 	}
 	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	n.UpdateEnd(updt)
+	return true
 }
 
-func (n *Node) DeleteChild(child Ki, destroy bool) {
-	idx := n.ChildIndex(child, 0)
-	if idx < 0 {
-		return
+func (n *Node) DeleteChild(child Ki, destroy bool) bool {
+	idx, ok := n.Kids.IndexOf(child, 0)
+	if !ok {
+		return false
 	}
-	n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx, destroy)
 }
 
-func (n *Node) DeleteChildByName(name string, destroy bool) Ki {
-	idx := n.ChildIndexByName(name, 0)
-	if idx < 0 {
-		return nil
+func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, bool) {
+	idx, ok := n.Kids.IndexByName(name, 0)
+	if !ok {
+		return nil, false
 	}
 	child := n.Kids[idx]
 	n.DeleteChildAtIndex(idx, destroy)
-	return child
+	return child, true
 }
 
 func (n *Node) DeleteChildren(destroy bool) {
@@ -817,6 +730,159 @@ func (n *Node) Destroy() {
 		return true
 	})
 	n.This = nil // last gasp: lose our own sense of self..
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Flags
+
+func (n *Node) Flags() *int64 {
+	return &n.Flag
+}
+
+func (n *Node) SetFlagAtomic(flag ...int) {
+	bitflag.SetAtomic(&n.Flag, flag...)
+}
+
+func (n *Node) SetFlagStateAtomic(on bool, flag ...int) {
+	bitflag.SetStateAtomic(&n.Flag, on, flag...)
+}
+
+func (n *Node) ClearFlagAtomic(flag ...int) {
+	bitflag.ClearAtomic(&n.Flag, flag...)
+}
+
+func (n *Node) IsUpdatingAtomic() bool {
+	rval := bitflag.HasAtomic(&n.Flag, int(Updating))
+	return rval
+}
+
+func (n *Node) IsUpdating() bool {
+	return bitflag.Has(n.Flag, int(Updating))
+}
+
+func (n *Node) IsField() bool {
+	return bitflag.Has(n.Flag, int(IsField))
+}
+
+func (n *Node) OnlySelfUpdate() bool {
+	return bitflag.Has(n.Flag, int(OnlySelfUpdate))
+}
+
+func (n *Node) SetOnlySelfUpdate() {
+	bitflag.Set(&n.Flag, int(OnlySelfUpdate))
+}
+
+func (n *Node) IsDeleted() bool {
+	return bitflag.Has(n.Flag, int(NodeDeleted))
+}
+
+func (n *Node) IsDestroyed() bool {
+	return bitflag.Has(n.Flag, int(NodeDestroyed))
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Property interface with inheritance -- nodes can inherit props from parents
+
+func (n *Node) Properties() Props {
+	return n.Props
+}
+
+func (n *Node) SetProp(key string, val interface{}) {
+	if n.Props == nil {
+		n.Props = make(Props)
+	}
+	n.Props[key] = val
+}
+
+func (n *Node) SetProps(props Props, update bool) {
+	if n.Props == nil {
+		n.Props = make(Props)
+	}
+	for key, val := range props {
+		n.Props[key] = val
+	}
+	if update {
+		bitflag.Set(n.Flags(), int(PropUpdated))
+		n.UpdateSig()
+	}
+}
+
+func (n *Node) SetPropUpdate(key string, val interface{}) {
+	bitflag.Set(n.Flags(), int(PropUpdated))
+	n.SetProp(key, val)
+	n.UpdateSig()
+}
+
+func (n *Node) SetPropChildren(key string, val interface{}) {
+	for _, k := range n.Kids {
+		k.SetProp(key, val)
+	}
+}
+
+func (n *Node) Prop(key string, inherit, typ bool) interface{} {
+	if n.Props != nil {
+		v, ok := n.Props[key]
+		if ok {
+			return v
+		}
+	}
+	if inherit && n.Par != nil {
+		pv := n.Par.Prop(key, inherit, typ)
+		if pv != nil {
+			return pv
+		}
+	}
+	if typ {
+		return kit.Types.Prop(n.Type(), key)
+	}
+	return nil
+}
+
+func (n *Node) DeleteProp(key string) {
+	if n.Props == nil {
+		return
+	}
+	delete(n.Props, key)
+}
+
+func (n *Node) DeleteAllProps(cap int) {
+	if n.Props != nil {
+		n.Props = make(Props, cap)
+	}
+}
+
+func init() {
+	gob.Register(Props{})
+}
+
+func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
+	if from.Properties() == nil {
+		return nil
+	}
+	if n.Props == nil {
+		n.Props = make(Props)
+	}
+	fmP := from.Properties()
+	if deep {
+		// code from https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
+		var buf bytes.Buffer
+		enc := gob.NewEncoder(&buf)
+		dec := gob.NewDecoder(&buf)
+		err := enc.Encode(fmP)
+		if err != nil {
+			return err
+		}
+		err = dec.Decode(&n.Props)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		for k, v := range fmP {
+			n.Props[k] = v
+		}
+	}
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -923,7 +989,7 @@ func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
 		k.FuncDownMeFirst(level, data, fun)
 		return true
 	})
-	for _, child := range n.Children() {
+	for _, child := range *n.Children() {
 		child.FuncDownMeFirst(level, data, fun) // don't care about their return values
 	}
 	return true
@@ -931,7 +997,7 @@ func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
 
 func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func) {
 	level++
-	for _, child := range n.Children() {
+	for _, child := range *n.Children() {
 		if doChildTestFunc(n.This, level, data) { // test if we should run on this child
 			child.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
 		}
@@ -950,7 +1016,7 @@ func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc F
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 	dontMap := make(map[int]bool) // map of who NOT to process further -- default is false for map so reverse
 	level++
-	for i, child := range n.Children() {
+	for i, child := range *n.Children() {
 		if !fun(child, level, data) { // false return means stop
 			dontMap[i] = true
 		} else {
@@ -961,7 +1027,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 			})
 		}
 	}
-	for i, child := range n.Children() {
+	for i, child := range *n.Children() {
 		if dontMap[i] {
 			continue
 		}
@@ -973,7 +1039,7 @@ func (n *Node) GoFuncDown(level int, data interface{}, fun Func) {
 	go fun(n.This, level, data)
 	level++
 	n.GoFuncFields(level, data, fun)
-	for _, child := range n.Children() {
+	for _, child := range *n.Children() {
 		child.GoFuncDown(level, data, fun)
 	}
 }
@@ -983,94 +1049,9 @@ func (n *Node) GoFuncDownWait(level int, data interface{}, fun Func) {
 	go fun(n.This, level, data)
 	level++
 	n.GoFuncFields(level, data, fun)
-	for _, child := range n.Children() {
+	for _, child := range *n.Children() {
 		child.GoFuncDown(level, data, fun)
 	}
-}
-
-func (n *Node) Path() string {
-	if n.Par != nil {
-		if n.IsField() {
-			return n.Par.Path() + "." + n.Nm
-		} else {
-			return n.Par.Path() + "/" + n.Nm
-		}
-	}
-	return "/" + n.Nm
-}
-
-func (n *Node) PathUnique() string {
-	if n.Par != nil {
-		if n.IsField() {
-			return n.Par.PathUnique() + "." + n.UniqueNm
-		} else {
-			return n.Par.PathUnique() + "/" + n.UniqueNm
-		}
-	}
-	return "/" + n.UniqueNm
-}
-
-func (n *Node) PathFrom(par Ki) string {
-	if n.Par != nil && n.Par != par {
-		if n.IsField() {
-			return n.Par.PathFrom(par) + "." + n.Nm
-		} else {
-			return n.Par.PathFrom(par) + "/" + n.Nm
-		}
-	}
-	return "/" + n.Nm
-}
-
-func (n *Node) PathFromUnique(par Ki) string {
-	if n.Par != nil && n.Par != par {
-		if n.IsField() {
-			return n.Par.PathFromUnique(par) + "." + n.Nm
-		} else {
-			return n.Par.PathFromUnique(par) + "/" + n.Nm
-		}
-	}
-	return "/" + n.Nm
-}
-
-func (n *Node) FindPathUnique(path string) Ki {
-	if n.Par != nil { // we are not root..
-		myp := n.PathUnique()
-		path = strings.TrimLeft(path, myp)
-	}
-	curn := Ki(n)
-	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
-	for i, pe := range pels {
-		if len(pe) == 0 {
-			continue
-		}
-		if i <= 1 && curn.UniqueName() == pe {
-			continue
-		}
-		if strings.Contains(pe, ".") { // has fields
-			fels := strings.Split(pe, ".")
-			// find the child first, then the fields
-			idx := curn.ChildIndexByUniqueName(fels[0], 0)
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.Children()[idx]
-			for i := 1; i < len(fels); i++ {
-				fe := fels[i]
-				fk := curn.KiFieldByName(fe)
-				if fk == nil {
-					return nil
-				}
-				curn = fk
-			}
-		} else {
-			idx := curn.ChildIndexByUniqueName(pe, 0)
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.Children()[idx]
-		}
-	}
-	return curn
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1294,15 +1275,15 @@ func (n *Node) Clone() Ki {
 
 // use ConfigChildren to recreate source children
 func (n *Node) CopyMakeChildrenFrom(from Ki) {
-	sz := len(from.Children())
+	sz := len(*from.Children())
 	if sz > 0 {
 		cfg := make(kit.TypeAndNameList, sz)
-		for i, kid := range from.Children() {
+		for i, kid := range *from.Children() {
 			cfg[i].Type = kid.Type()
 			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
 		}
 		mods, updt := n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
-		for i, kid := range from.Children() {
+		for i, kid := range *from.Children() {
 			mkid := n.Kids[i]
 			mkid.SetNameRaw(kid.Name()) // restore orig user-names
 		}
@@ -1362,7 +1343,7 @@ func (n *Node) CopyFromRaw(from Ki) error {
 	n.CopyPropsFrom(from, false)             // use shallow props copy by default
 	n.CopyFieldsFrom(n.This, from)
 	for i, kid := range n.Kids {
-		fmk := from.Children()[i]
+		fmk := (*(from.Children()))[i]
 		kid.CopyFromRaw(fmk)
 	}
 	return nil
@@ -1608,7 +1589,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 
 func (n *Node) ParentAllChildren() {
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		for _, child := range k.Children() {
+		for _, child := range *k.Children() {
 			if child != nil {
 				child.SetParent(k)
 			} else {

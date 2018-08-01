@@ -19,49 +19,158 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Slice provides JSON marshal / unmarshal with encoding of underlying types
+// Slice is just a slice of ki elements: []Ki, providing methods for accessing
+// elements in the slice, and JSON marshal / unmarshal with encoding of
+// underlying types
 type Slice []Ki
 
-// ValidIndex returns a valid index given length of slice -- also supports
-// access from the back of the slice using negative numbers -- -1 = last item,
-// -2 = second to last, etc
-func (k Slice) ValidIndex(idx int) (int, error) {
-	kl := len(k)
-	if kl == 0 {
-		return 0, errors.New("ki.Slice is empty -- no valid index")
-	}
-	if idx < 0 {
-		idx = kl + idx
-	}
-	if idx < 0 { // still?
-		return 0, fmt.Errorf("ki.Slice negative index: %v from back of list of children went past start of list, length: %v\n", idx, kl)
-	}
-	if idx >= kl {
-		return 0, fmt.Errorf("ki.Slice index: %v exceeds length of list: %v\n", idx, kl)
-	}
-	return idx, nil
-}
-
 // IsValidIndex checks whether the given index is a valid index into slice,
-// within range of 0..len-1 -- see ValidIndex for version that transforms
-// negative numbers into indicies from end of slice, and has explicit error
-// messages
+// within range of 0..len-1.
 func (k Slice) IsValidIndex(idx int) bool {
 	return idx >= 0 && idx < len(k)
 }
 
-// Elem returns element at index, using ValidIndex supporting negative
-// indexing from back of list -- returns nil if index is invalid -- use
-// ValidIndex or IsValidIndex directly to test if unsure
-func (k *Slice) Elem(idx int) Ki {
-	idx, err := k.ValidIndex(idx)
-	if err != nil {
+// Elem returns element at index, returning false if invalid index
+func (k *Slice) Elem(idx int) (Ki, bool) {
+	if !k.IsValidIndex(idx) {
+		return nil, false
+	}
+	return (*k)[idx], true
+}
+
+// ElemFromEnd returns element at index from end of slice (0 = last element,
+// 1 = 2nd to last, etc), returning false if invalid index
+func (k *Slice) ElemFromEnd(idx int) (Ki, bool) {
+	idx = len(*k) - 1 - idx
+	if !k.IsValidIndex(idx) {
+		return nil, false
+	}
+	return (*k)[idx], true
+}
+
+// IndexByFunc finds index of item based on match function (which must return
+// true for a find match, false for not).  Returns false if not found.
+// startIdx arg allows for optimized bidirectional find if you have an idea
+// where it might be -- can be key speedup for large lists -- pass -1 to start
+// in the middle (good default)
+func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) (int, bool) {
+	sz := len(*k)
+	if sz == 0 {
+		return -1, false
+	}
+	if startIdx < 0 {
+		startIdx = sz / 2
+	}
+	if startIdx == 0 {
+		for idx, child := range *k {
+			if match(child) {
+				return idx, true
+			}
+		}
+	} else {
+		if startIdx >= sz {
+			startIdx = sz - 1
+		}
+		upi := startIdx + 1
+		dni := startIdx
+		upo := false
+		for {
+			if !upo && upi < sz {
+				if match((*k)[upi]) {
+					return upi, true
+				}
+				upi++
+			} else {
+				upo = true
+			}
+			if dni >= 0 {
+				if match((*k)[dni]) {
+					return dni, true
+				}
+				dni--
+			} else if upo {
+				break
+			}
+		}
+	}
+	return -1, false
+}
+
+// IndexOf returns index of element in list, false if not there.  startIdx arg
+// allows for optimized bidirectional find if you have an idea where it might
+// be -- can be key speedup for large lists -- pass -1 to start in the middle
+// (good default).
+func (k *Slice) IndexOf(kid Ki, startIdx int) (int, bool) {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
+}
+
+// IndexByName returns index of first element that has given name, false if
+// not found. See IndexOf for info on startIdx
+func (k *Slice) IndexByName(name string, startIdx int) (int, bool) {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
+}
+
+// IndexByUniqueName returns index of first element that has given unique
+// name, false if not found. See IndexOf for info on startIdx.
+func (k *Slice) IndexByUniqueName(name string, startIdx int) (int, bool) {
+	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
+}
+
+// IndexByType returns index of element that either is that type or embeds
+// that type, false if not found. See IndexOf for info on startIdx.
+func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) (int, bool) {
+	if embeds {
+		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+	} else {
+		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
+	}
+}
+
+// ElemByName returns first element that has given name, false if
+// not found. See IndexOf for info on startIdx.
+func (k *Slice) ElemByName(name string, startIdx int) (Ki, bool) {
+	idx, ok := k.IndexByName(name, startIdx)
+	if !ok {
+		return nil, false
+	}
+	return (*k)[idx], true
+}
+
+// KnownElemByName returns first element that has given name, without
+// returning the bool check value -- when named element is known to exist, and
+// will be directly converted to another type, so the multiple return values
+// are cumbersome.  nil is returned if it actually does not exist. See IndexOf
+// for info on startIdx.
+func (k *Slice) KnownElemByName(name string, startIdx int) Ki {
+	idx, ok := k.IndexByName(name, startIdx)
+	if !ok {
 		return nil
 	}
 	return (*k)[idx]
 }
 
-// Insert item at index
+// ElemByUniqueName returns index of first element that has given unique
+// name, false if not found. See IndexOf for info on startIdx.
+func (k *Slice) ElemByUniqueName(name string, startIdx int) (Ki, bool) {
+	idx, ok := k.IndexByUniqueName(name, startIdx)
+	if !ok {
+		return nil, false
+	}
+	return (*k)[idx], true
+}
+
+// ElemByType returns index of element that either is that type or embeds
+// that type, false if not found. See IndexOf for info on startIdx.
+func (k *Slice) ElemByType(t reflect.Type, embeds bool, startIdx int) (Ki, bool) {
+	idx, ok := k.IndexByType(t, embeds, startIdx)
+	if !ok {
+		return nil, false
+	}
+	return (*k)[idx], true
+}
+
+// Insert item at index -- does not do any parent updating etc -- use Ki/Node
+// method unless you know what you are doing.
 func (k *Slice) Insert(ki Ki, idx int) {
 	kl := len(*k)
 	if idx < 0 {
@@ -82,123 +191,37 @@ func (k *Slice) Insert(ki Ki, idx int) {
 }
 
 // DeleteAtIndex deletes item at index -- does not do any further management
-// deleted item -- optimized version for avoiding memory leaks
-func (k *Slice) DeleteAtIndex(idx int) error {
-	idx, err := k.ValidIndex(idx)
-	if err != nil {
-		return err
+// deleted item -- optimized version for avoiding memory leaks.  returns false
+// if index is invalid.
+func (k *Slice) DeleteAtIndex(idx int) bool {
+	if !k.IsValidIndex(idx) {
+		return false
 	}
 	// this copy makes sure there are no memory leaks
 	sz := len(*k)
 	copy((*k)[idx:], (*k)[idx+1:])
 	(*k)[sz-1] = nil
 	(*k) = (*k)[:sz-1]
-	return nil
+	return true
 }
 
-// Move element from one position to another
-func (k *Slice) Move(from, to int) error {
-	var err error
-	from, err = k.ValidIndex(from)
-	if err != nil {
-		return err
-	}
-	to, err = k.ValidIndex(to)
-	if err != nil {
-		return err
+// Move element from one position to another.  Returns false if either index
+// is invalid.
+func (k *Slice) Move(from, to int) bool {
+	if !k.IsValidIndex(from) || !k.IsValidIndex(to) {
+		return false
 	}
 	if from == to {
-		return nil
+		return false
 	}
 	ki := (*k)[from]
 	k.DeleteAtIndex(from)
 	k.Insert(ki, to)
-	return nil
-}
-
-// IndexByFunc finds index of item based on match function (true for find,
-// false for not) -- startIdx arg allows for optimized bidirectional find if
-// you have an idea where it might be -- can be key speedup for large lists --
-// pass -1 to start in the middle (good default)
-func (k *Slice) IndexByFunc(startIdx int, match func(ki Ki) bool) int {
-	sz := len(*k)
-	if sz == 0 {
-		return -1
-	}
-	if startIdx < 0 {
-		startIdx = sz / 2
-	}
-	if startIdx == 0 {
-		for idx, child := range *k {
-			if match(child) {
-				return idx
-			}
-		}
-	} else {
-		if startIdx >= sz {
-			startIdx = sz - 1
-		}
-		upi := startIdx + 1
-		dni := startIdx
-		upo := false
-		for {
-			if !upo && upi < sz {
-				if match((*k)[upi]) {
-					return upi
-				}
-				upi++
-			} else {
-				upo = true
-			}
-			if dni >= 0 {
-				if match((*k)[dni]) {
-					return dni
-				}
-				dni--
-			} else if upo {
-				break
-			}
-		}
-	}
-	return -1
-}
-
-// Index returns index of element in list or -1 if not there -- pass -1 to
-// start in the middle (good default)
-func (k *Slice) Index(kid Ki, startIdx int) int {
-	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
-}
-
-// IndexByName returns index of first element that has given name -- startIdx
-// arg allows for optimized bidirectional search if you have an idea where it
-// might be -- can be key speedup for large lists -- pass -1 to start in the
-// middle (good default)
-func (k *Slice) IndexByName(name string, startIdx int) int {
-	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
-}
-
-// IndexByUniqueName returns index of first element that has given unique name
-// -- startIdx arg allows for optimized bidirectional search if you have an
-// idea where it might be -- can be key speedup for large lists -- pass -1 to
-// start in the middle (good default)
-func (k *Slice) IndexByUniqueName(name string, startIdx int) int {
-	return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
-}
-
-// IndexByType returns index of element that either is that type or embeds
-// that type -- startIdx arg allows for optimized bidirectional search if you
-// have an idea where it might be -- can be key speedup for large lists --
-// pass -1 to start in the middle (good default)
-func (k *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) int {
-	if embeds {
-		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
-	} else {
-		return k.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
-	}
+	return false
 }
 
 // TypeAndNames returns a kit.TypeAndNameList of elements in the slice --
-// useful for Ki ConfigChildren
+// useful for Ki ConfigChildren.
 func (k *Slice) TypeAndNames() kit.TypeAndNameList {
 	if len(*k) == 0 {
 		return nil
@@ -211,7 +234,7 @@ func (k *Slice) TypeAndNames() kit.TypeAndNameList {
 }
 
 // TypeAndUniqueNames returns a kit.TypeAndNameList of elements in the slice
-// using UniqueNames -- useful for Ki ConfigChildren
+// using UniqueNames -- useful for Ki ConfigChildren.
 func (k *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
 	if len(*k) == 0 {
 		return nil
@@ -224,7 +247,7 @@ func (k *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
 }
 
 // NameToINdexMap returns a Name to Index map for faster lookup when needing to
-// do a lot of name lookups on same fixed slice
+// do a lot of name lookups on same fixed slice.
 func (k *Slice) NameToIndexMap() map[string]int {
 	if len(*k) == 0 {
 		return nil
@@ -237,7 +260,7 @@ func (k *Slice) NameToIndexMap() map[string]int {
 }
 
 // UniqueNameToIndexMap returns a UniqueName to Index map for faster lookup
-// when needing to do a lot of name lookups on same fixed slice
+// when needing to do a lot of name lookups on same fixed slice.
 func (k *Slice) UniqueNameToIndexMap() map[string]int {
 	if len(*k) == 0 {
 		return nil
@@ -256,7 +279,7 @@ func (k *Slice) UniqueNameToIndexMap() map[string]int {
 // a tree structure to fit a target configuration, specified in terms of a
 // type-and-name list.  If the node is != nil, then it has UpdateStart / End
 // logic applied to it, only if necessary, as indicated by mods, updt return
-// values
+// values.
 func (k *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
 	mods, updt = false, false
 	// first make a map for looking up the indexes of the names
@@ -284,12 +307,13 @@ func (k *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, upd
 	// next add and move items as needed -- in order so guaranteed
 	for i, tn := range config {
 		var kidx int
+		var ok bool
 		if uniqNm {
-			kidx = k.IndexByUniqueName(tn.Name, i)
+			kidx, ok = k.IndexByUniqueName(tn.Name, i)
 		} else {
-			kidx = k.IndexByName(tn.Name, i)
+			kidx, ok = k.IndexByName(tn.Name, i)
 		}
-		if kidx < 0 {
+		if !ok {
 			if !mods {
 				mods = true
 				if n != nil {

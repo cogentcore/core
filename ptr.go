@@ -45,9 +45,9 @@ func (k *Ptr) PtrFmPath(root Ki) bool {
 		k.Ptr = nil
 		return true
 	}
-	k.Ptr = root.FindPathUnique(k.Path)
-	// fmt.Printf("found: %v\n", k.Ptr)
-	return k.Ptr != nil
+	var ok bool
+	k.Ptr, ok = root.FindPathUnique(k.Path)
+	return ok
 }
 
 // UpdatePath replaces any occurrence of oldPath with newPath, optionally only at the start of the path (typically true)
