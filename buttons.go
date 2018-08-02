@@ -198,9 +198,13 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 // ButtonClicked is down and up
 func (g *ButtonBase) ButtonPressed() {
 	updt := g.UpdateStart()
-	g.SetButtonState(ButtonDown)
-	g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
-	g.EmitSelectedSignal()
+	if g.IsInactive() {
+		g.SetSelectedState(!g.IsSelected())
+		g.EmitSelectedSignal()
+	} else {
+		g.SetButtonState(ButtonDown)
+		g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
+	}
 	g.UpdateEnd(updt)
 }
 
@@ -208,6 +212,9 @@ func (g *ButtonBase) ButtonPressed() {
 // signal and returns state to normal, and emits clicked signal if if it was
 // previously in pressed state
 func (g *ButtonBase) ButtonReleased() {
+	if g.IsInactive() {
+		return
+	}
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)
@@ -364,7 +371,7 @@ func ButtonEvents(bw ButtonWidget) {
 			case mouse.Press:
 				bb.ButtonPressed()
 			case mouse.Release:
-				ab.ButtonRelease() // special one
+				ab.ButtonRelease()
 			}
 		}
 	})
@@ -387,8 +394,7 @@ func ButtonEvents(bw ButtonWidget) {
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
 			kt.SetProcessed()
 			bb.ButtonPressed()
-			// todo: brief delay??
-			ab.ButtonRelease() // special one
+			ab.ButtonRelease()
 		}
 	})
 }

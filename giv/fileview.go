@@ -407,6 +407,9 @@ func (fv *FileView) FileSelect(idx int) {
 
 // FavSelect selects a favorite path and goes there
 func (fv *FileView) FavSelect(idx int) {
+	if idx < 0 || idx >= len(gi.Prefs.FavPaths) {
+		return
+	}
 	fi := gi.Prefs.FavPaths[idx]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.SetFullReRender()
