@@ -53,6 +53,7 @@ type TableView struct {
 	SortDesc     bool               `desc:"whether current sort order is descending"`
 	SelectMode   bool               `desc:"editing-mode select rows mode"`
 	SelectedRows map[int]bool       `desc:"list of currently-selected rows"`
+	DraggedRows  map[int]bool       `desc:"list of currently-dragged rows"`
 	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
 	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
@@ -371,17 +372,15 @@ func (tv *TableView) ConfigSliceGridRows() {
 			}
 			idxlab.Text = idxtxt
 			idxlab.SetProp("tv-index", i)
-			if !tv.IsInactive() {
-				idxlab.Selectable = true
-				idxlab.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.WidgetSelected) {
-						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.KnownProp("tv-index").(int)
-						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-						tvv.UpdateSelect(idx, wbb.IsSelected())
-					}
-				})
-			}
+			idxlab.Selectable = true
+			idxlab.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.WidgetSelected) {
+					wbb := send.(gi.Node2D).AsWidget()
+					idx := wbb.KnownProp("tv-index").(int)
+					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv.UpdateSelect(idx, wbb.IsSelected())
+				}
+			})
 		}
 
 		for fli := 0; fli < tv.NVisFields; fli++ {
@@ -791,21 +790,21 @@ func (tv *TableView) RowStruct(row int) interface{} {
 }
 
 // RowIndexLabel returns the index label for given row -- nil if no indexes or out of range
-func (tv *TableView) RowIndexLabel(row int) *gi.Label {
+func (tv *TableView) RowIndexLabel(row int) (*gi.Label, bool) {
 	if !tv.ShowIndex {
-		return nil
+		return nil, false
 	}
 	if tv.RowStruct(row) == nil { // range check
-		return nil
+		return nil, false
 	}
 	nWidgPerRow, _ := tv.RowWidgetNs()
 	sg, _ := tv.SliceGrid()
 	if sg == nil {
-		return nil
+		return nil, false
 	}
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	idxlab := sgf.Kids[row*nWidgPerRow].(*gi.Label)
-	return idxlab
+	return idxlab, true
 }
 
 // RowGrabFocus grabs the focus for the first focusable widget in given row
@@ -832,12 +831,26 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 }
 
 // RowPos returns center of window position of index label for row (ContextMenuPos)
-func (tv *TableView) RowPos(row int) (pos image.Point) {
-	idxlab := tv.RowIndexLabel(row)
-	if idxlab != nil {
+func (tv *TableView) RowPos(row int) image.Point {
+	var pos image.Point
+	idxlab, ok := tv.RowIndexLabel(row)
+	if ok {
 		pos = idxlab.ContextMenuPos()
 	}
-	return
+	return pos
+}
+
+// RowFromPos returns the row that contains given vertical position, false if not found
+func (tv *TableView) RowFromPos(posY int) (int, bool) {
+	for rw := 0; rw < tv.BuiltSize; rw++ {
+		idxlab, ok := tv.RowIndexLabel(rw)
+		if ok {
+			if idxlab.WinBBox.Min.Y < posY && posY < idxlab.WinBBox.Max.Y {
+				return rw, true
+			}
+		}
+	}
+	return -1, false
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1180,13 +1193,13 @@ func (tv *TableView) CopyRows(reset bool) {
 
 // DeleteRows deletes all selected rows
 func (tv *TableView) DeleteRows() {
-	updt := tv.UpdateStart()
+	// updt := tv.UpdateStart()
 	rws := tv.SelectedRowsList(true) // descending sort
 	for _, r := range rws {
 		tv.SliceDelete(r, false)
 	}
-	tv.ConfigSliceGrid()
-	tv.UpdateEnd(updt)
+	// tv.ConfigSliceGrid()
+	// tv.UpdateEnd(updt)
 }
 
 // CutRows copies selected rows to clip.Board and deletes selected rows
@@ -1221,11 +1234,11 @@ func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 	})
 	m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-		tvv.PasteBefore(data.(mimedata.Mimes), row)
+		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
 	m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-		tvv.PasteAfter(data.(mimedata.Mimes), row)
+		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
 	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
@@ -1260,31 +1273,8 @@ func (tv *TableView) PasteAssign(md mimedata.Mimes, row int) {
 	tv.UpdateEnd(updt)
 }
 
-// PasteBefore inserts object(s) from mime data before given row
-func (tv *TableView) PasteBefore(md mimedata.Mimes, row int) {
-	tvl := reflect.ValueOf(tv.Slice)
-	tvnp := kit.NonPtrValue(tvl)
-
-	sl := tv.RowsFromMimeData(md)
-	updt := tv.UpdateStart()
-	for _, ns := range sl {
-		sz := tvnp.Len()
-		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns).Elem())
-		if row >= 0 && row < sz-1 {
-			reflect.Copy(tvnp.Slice(row+1, sz+1), tvnp.Slice(row, sz))
-			tvnp.Index(row).Set(reflect.ValueOf(ns).Elem())
-			tvl.Elem().Set(tvnp)
-		}
-	}
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
-	}
-	tv.ConfigSliceGrid()
-	tv.UpdateEnd(updt)
-}
-
-// PasteAfter inserts object(s) from mime data after this row
-func (tv *TableView) PasteAfter(md mimedata.Mimes, row int) {
+// PasteAtRow inserts object(s) from mime data at (before) given row
+func (tv *TableView) PasteAtRow(md mimedata.Mimes, row int) {
 	tvl := reflect.ValueOf(tv.Slice)
 	tvnp := kit.NonPtrValue(tvl)
 
@@ -1319,29 +1309,35 @@ func (tv *TableView) DragNDropStart() {
 	for r, _ := range tv.SelectedRows {
 		tv.MimeDataRow(&md, r)
 	}
-	bi := &gi.Bitmap{}
 	rws := tv.SelectedRowsList(true) // descending sort
-	idxlab := tv.RowIndexLabel(rws[0])
-	bi.InitName(bi, tv.UniqueName())
-	bi.GrabRenderFrom(idxlab)
-	gi.ImageClearer(bi.Pixels, 50.0)
-	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+	idxlab, ok := tv.RowIndexLabel(rws[0])
+	if ok {
+		bi := &gi.Bitmap{}
+		bi.InitName(bi, tv.UniqueName())
+		bi.GrabRenderFrom(idxlab)
+		gi.ImageClearer(bi.Pixels, 50.0)
+		tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+	}
 }
 
 // DragNDropTarget handles a drag-n-drop drop
 func (tv *TableView) DragNDropTarget(de *dnd.Event) {
-	// de.Target = tv.This
-	// if de.Mod == dnd.DropLink {
-	// 	de.Mod = dnd.DropCopy // link not supported -- revert to copy
-	// }
-	// de.SetProcessed()
-	// tv.DropAction(de.Data, de.Mod)
+	de.Target = tv.This
+	if de.Mod == dnd.DropLink {
+		de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	}
+	row, ok := tv.RowFromPos(de.Where.Y)
+	if ok {
+		de.SetProcessed()
+		tv.DropAction(de.Data, de.Mod, row)
+	}
 }
 
 // DragNDropFinalize is called to finalize actions on the Source node prior to
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore
 func (tv *TableView) DragNDropFinalize(mod dnd.DropMods) {
+	tv.DraggedRows = tv.SelectedRows
 	tv.UnselectAllRows()
 	tv.Viewport.Win.FinalizeDragNDrop(mod)
 }
@@ -1352,7 +1348,11 @@ func (tv *TableView) DragNDropSource(de *dnd.Event) {
 	if de.Mod != dnd.DropMove {
 		return
 	}
+	curSel := tv.SelectedRows
+	tv.SelectedRows = tv.DraggedRows
 	tv.DeleteRows()
+	tv.SelectedRows = curSel
+	tv.DraggedRows = nil
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
@@ -1390,7 +1390,7 @@ func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 func (tv *TableView) DropAction(md mimedata.Mimes, mod dnd.DropMods, row int) {
 	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod, row)
-	pos := tv.RowPos(row) // todo: which row?
+	pos := tv.RowPos(row)
 	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
 }
 
@@ -1403,13 +1403,13 @@ func (tv *TableView) DropAssign(md mimedata.Mimes, row int) {
 // DropBefore inserts object(s) from mime data before this node
 func (tv *TableView) DropBefore(md mimedata.Mimes, mod dnd.DropMods, row int) {
 	tv.DragNDropFinalize(mod)
-	tv.PasteBefore(md, row)
+	tv.PasteAtRow(md, row)
 }
 
 // DropAfter inserts object(s) from mime data after this node
 func (tv *TableView) DropAfter(md mimedata.Mimes, mod dnd.DropMods, row int) {
 	tv.DragNDropFinalize(mod)
-	tv.PasteAfter(md, row)
+	tv.PasteAtRow(md, row+1)
 }
 
 // DropCancel cancels the drop action e.g., preventing deleting of source
@@ -1421,6 +1421,7 @@ func (tv *TableView) DropCancel() {
 func (tv *TableView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
 	selMode := mouse.SelectModeMod(kt.Modifiers)
+	row := tv.SelectedIdx
 	switch kf {
 	case gi.KeyFunSelectItem:
 		tv.SelectRowAction(tv.SelectedIdx, selMode)
@@ -1448,24 +1449,30 @@ func (tv *TableView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case gi.KeyFunDelete:
 		tv.SliceDelete(tv.SelectedIdx, true)
+		tv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
 	// case gi.KeyFunDuplicate:
 	// 	tv.SrcDuplicate() // todo: dupe
 	// 	kt.SetProcessed()
 	case gi.KeyFunInsert:
-		tv.SliceNewAt(tv.SelectedIdx, true)
+		tv.SliceNewAt(row, true)
+		tv.SelectRowAction(row+1, mouse.NoSelectMode) // todo: somehow nrow not working
 		kt.SetProcessed()
 	case gi.KeyFunInsertAfter:
-		tv.SliceNewAt(tv.SelectedIdx+1, true)
+		tv.SliceNewAt(row+1, true)
+		tv.SelectRowAction(row+1, mouse.NoSelectMode)
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
 		tv.CopyRows(true)
+		tv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
 	case gi.KeyFunCut:
 		tv.CutRows()
+		tv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
 	case gi.KeyFunPaste:
 		tv.Paste(tv.SelectedIdx)
+		tv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
 	}
 }

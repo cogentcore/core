@@ -988,7 +988,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot after before the root of the tree", true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()

@@ -194,11 +194,13 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 }
 
 // ButtonPressed sets the button in the down state -- mouse clicked down but
-// not yet up -- emits ButtonPressed signal -- ButtonClicked is down and up
+// not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
+// ButtonClicked is down and up
 func (g *ButtonBase) ButtonPressed() {
 	updt := g.UpdateStart()
 	g.SetButtonState(ButtonDown)
 	g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
+	g.EmitSelectedSignal()
 	g.UpdateEnd(updt)
 }
 
