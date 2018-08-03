@@ -183,7 +183,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 
 	if ics := pk.EmbeddedStruct(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
-		// this is typically an icon -- copy fill and stroke params to it
+		ic.SetFullReRender()
 		styprops := kit.Types.Properties(g.Type(), true)
 		sp := ki.SubProps(styprops, stynm)
 		if sp != nil {
@@ -780,7 +780,10 @@ func (g *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config 
 func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := g.Parts.KnownChild(icIdx).(*Icon)
-		if set, _ := ic.SetIcon(icnm); set { // can't use nm b/c config does
+		if set, _ := ic.SetIcon(icnm); set || g.NeedsFullReRender() {
+			if g.NeedsFullReRender() {
+				fmt.Printf("ic needs full re: %v\n", g.Nm)
+			}
 			g.StylePart(Node2D(ic))
 		}
 	}
@@ -804,7 +807,7 @@ func (g *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool
 			return true
 		}
 		ic := ick.(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icnm {
+		if !ic.HasChildren() || ic.UniqueNm != icnm || g.NeedsFullReRender() {
 			return true
 		}
 	} else {

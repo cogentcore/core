@@ -250,10 +250,19 @@ func (g *Node2DBase) HasFocus2D() bool {
 	return g.HasFocus()
 }
 
+// GrabFocus grabs the keyboard input focus on this item
 func (g *Node2DBase) GrabFocus() {
 	win := g.ParentWindow()
 	if win != nil {
 		win.SetFocusItem(g.This)
+	}
+}
+
+// FocusNext moves the focus onto the next item
+func (g *Node2DBase) FocusNext() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.SetNextFocusItem()
 	}
 }
 

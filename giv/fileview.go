@@ -185,7 +185,28 @@ func (fv *FileView) ConfigFilesRow() {
 	config.Add(KiT_TableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
 
-	sv := fv.FilesView()
+	sv := fv.FavsView()
+	sv.CSS = ki.Props{
+		"textfield": ki.Props{
+			":inactive": ki.Props{
+				"background-color": &gi.Prefs.ControlColor,
+			},
+		},
+	}
+	sv.SetStretchMaxHeight()
+	sv.SetProp("index", false) // no index
+	sv.SetInactive()           // select only
+	sv.SelectedIdx = -1
+	sv.SetSlice(&gi.Prefs.FavPaths, nil)
+	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.WidgetSelected) {
+			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			svv, _ := send.(*TableView)
+			fvv.FavSelect(svv.SelectedIdx)
+		}
+	})
+
+	sv = fv.FilesView()
 	sv.CSS = ki.Props{
 		"textfield": ki.Props{
 			":inactive": ki.Props{
@@ -207,26 +228,6 @@ func (fv *FileView) ConfigFilesRow() {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelect(svv.SelectedIdx)
-		}
-	})
-
-	sv = fv.FavsView()
-	sv.CSS = ki.Props{
-		"textfield": ki.Props{
-			":inactive": ki.Props{
-				"background-color": &gi.Prefs.ControlColor,
-			},
-		},
-	}
-	sv.SetStretchMaxHeight()
-	sv.SetProp("index", false) // no index
-	sv.SetInactive()           // select only
-	sv.SetSlice(&gi.Prefs.FavPaths, nil)
-	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-			svv, _ := send.(*TableView)
-			fvv.FavSelect(svv.SelectedIdx)
 		}
 	})
 }
@@ -341,6 +342,8 @@ func (fv *FileView) UpdateFiles() {
 	})
 
 	sv := fv.FilesView()
+	sv.CurSelField = "Name"
+	sv.CurSelVal = fv.SelFile
 	sv.UpdateFromSlice()
 	fv.UpdateEnd(updt)
 }

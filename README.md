@@ -117,13 +117,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 ## General / Widgets
 
 * ctrl+enter is adding rows on std key map dialog
-* fileview: initial selected rows
 * textfield: still have issues with not applying when dialog closed
 
-* TableView:
-	+ can't select same row for insert 
-	+ DND move from early to late does not deal with early indexes being deleted -- do at end?  either way someone has to modify
-* unselect not updating background.
+* TableView: button unselect not setting background -- overall need a way to
+allow individual widgets to have a deep update triggered when relevant state changes
 
 * search for tableview, treeview
 * DND and copy/paste for tableview
