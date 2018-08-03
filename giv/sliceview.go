@@ -258,6 +258,9 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			})
 		}
 	}
+	if sv.SelectedIdx >= 0 {
+		sv.SelectRowWidgets(sv.SelectedIdx, true)
+	}
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
@@ -306,7 +309,7 @@ func (sv *SliceView) SliceDelete(idx int) {
 // SelectRowWidgets sets the selection state of given row of widgets
 func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 	sg, _ := sv.SliceGrid()
-	nWidgPerRow, _ := sv.RowWidgetNs()
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	rowidx := idx * nWidgPerRow
 	if sv.ShowIndex {
 		if sg.Kids.IsValidIndex(rowidx) {
@@ -315,8 +318,8 @@ func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 			widg.UpdateSig()
 		}
 	}
-	if sg.Kids.IsValidIndex(rowidx + 1) {
-		widg := sg.KnownChild(rowidx + 1).(gi.Node2D).AsNode2D()
+	if sg.Kids.IsValidIndex(rowidx + idxOff) {
+		widg := sg.KnownChild(rowidx + idxOff).(gi.Node2D).AsNode2D()
 		widg.SetSelectedState(sel)
 		widg.UpdateSig()
 	}
@@ -460,7 +463,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
-			dlg := SliceViewDialog(svv.Viewport, svv.Slice, false, svv.TmpSave, "Slice Value View", "", nil, nil)
+			dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil, nil)
 			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				svvv := svvvk.(*SliceView)

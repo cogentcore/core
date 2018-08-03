@@ -85,7 +85,7 @@ func GoGiEditor(obj ki.Ki) {
 	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
 	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
 					fnm := FileViewDialogValue(dlg)
@@ -100,7 +100,7 @@ func GoGiEditor(obj ki.Ki) {
 	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
 	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
 					fnm := FileViewDialogValue(dlg)
@@ -119,7 +119,7 @@ func GoGiEditor(obj ki.Ki) {
 	fontsel.Tooltip = "pulls up a font selection dialog -- font name will be copied to clipboard so you can paste it into any relevant fields"
 	fontsel.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			FontChooserDialog(vp, "Select a Font", "", win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FontChooserDialog(vp, "Select a Font", "", nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sv, _ := send.(*TableView)
 				si := sv.SelectedIdx
 				if si >= 0 {
@@ -128,7 +128,7 @@ func GoGiEditor(obj ki.Ki) {
 					fontnm.SelectAll()
 					fontnm.Copy(false) // don't reset
 				}
-			})
+			}, nil)
 		}
 	})
 

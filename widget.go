@@ -31,7 +31,7 @@ type WidgetBase struct {
 	DefStyle     *Style       `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayData      LayoutData   `json:"-" xml:"-" desc:"all the layout information for this item"`
 	WidgetSig    ki.Signal    `json:"-" xml:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
-	CtxtMenuFunc CtxtMenuFunc `json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+	CtxtMenuFunc CtxtMenuFunc `view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -71,7 +71,7 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 	if selector != "" {
 		sp, ok := tprops[selector]
 		if !ok {
-			log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, g.Type().Name())
+			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, g.Type().Name())
 		} else {
 			spm, ok := sp.(ki.Props)
 			if !ok {
@@ -147,7 +147,7 @@ func (g *WidgetBase) Style2DWidget() {
 		AggCSS(&g.CSSAgg, *pagg)
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
-	StyleCSSWidget(gii, g.CSSAgg)
+	g.Sty.StyleCSS(gii, g.CSSAgg, "")
 
 	g.Sty.SetUnitContext(g.Viewport, Vec2DZero) // todo: test for use of el-relative
 	g.LayData.SetFromStyle(&g.Sty.Layout)       // also does reset
@@ -155,47 +155,6 @@ func (g *WidgetBase) Style2DWidget() {
 		g.SetInactive()
 	}
 	g.Sty.Use() // activates currentColor etc
-}
-
-// ApplyCSSWidget applies css styles to given node, using key to select sub-props
-// from overall properties list
-func ApplyCSSWidget(node Node2D, key string, css ki.Props) bool {
-	stlr, ok := node.(Styler)
-	if !ok {
-		return false
-	}
-	pp, got := css[key]
-	if !got {
-		return false
-	}
-	pmap, ok := pp.(ki.Props) // must be a props map
-	if !ok {
-		return false
-	}
-
-	st := stlr.Style()
-
-	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
-		if ps, ok := pgi.(Styler); ok {
-			st.SetStyleProps(ps.Style(), pmap)
-		} else {
-			st.SetStyleProps(nil, pmap)
-		}
-	} else {
-		st.SetStyleProps(nil, pmap)
-	}
-	return true
-}
-
-// StyleCSSWidget applies css style properties to given Widget node, parsing
-// out type, .class, and #name selectors
-func StyleCSSWidget(node Node2D, css ki.Props) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	ApplyCSSWidget(node, tyn, css)
-	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	ApplyCSSWidget(node, cln, css)
-	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSSWidget(node, idnm, css)
 }
 
 // StylePart sets the style properties for a child in parts (or any other

@@ -522,15 +522,15 @@ var DefaultKeyMap = &MacEmacsKeyMap
 // alternative map in Prefs
 var ActiveKeyMap = DefaultKeyMap
 
-// StdKeyMapByName returns a standard keymap by name
-func StdKeyMapByName(name string) *KeyMap {
+// StdKeyMapByName returns a standard keymap and index within StdKeyMaps* tables by name.
+func StdKeyMapByName(name string) (*KeyMap, int) {
 	for i, nm := range StdKeyMapNames {
 		if nm == name {
-			return StdKeyMaps[i]
+			return StdKeyMaps[i], i
 		}
 	}
 	fmt.Printf("gi.StdKeyMapByName key map named: %v not found\n", name)
-	return nil
+	return nil, -1
 }
 
 // StdKeyMapName returns name of a standard key map

@@ -82,15 +82,24 @@ func PrefsEditor(p *gi.Preferences) {
 	stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"
 	stdmap.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			SliceViewDialog(vp, &gi.StdKeyMapNames, true, nil, "Select a Standard KeyMap", "Can then customize from there", stdmap.This,
+			mapName := p.StdKeyMapName
+			_, initRow := gi.StdKeyMapByName(mapName)
+			SliceViewSelectDialog(vp, &gi.StdKeyMapNames, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
 				func(recv, send ki.Ki, sig int64, data interface{}) {
 					svv, _ := send.(*SliceView)
 					si := svv.SelectedIdx
 					if si >= 0 {
-						km := gi.StdKeyMaps[si]
-						p.StdKeyMapName = gi.StdKeyMapNames[si]
-						p.SetKeyMap(km)
-						sv.UpdateFields()
+						mapName = gi.StdKeyMapNames[si]
+					}
+				},
+				func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.DialogAccepted) {
+						p.StdKeyMapName = mapName
+						km, _ := gi.StdKeyMapByName(mapName)
+						if km != nil {
+							p.SetKeyMap(km)
+							sv.UpdateFields()
+						}
 					}
 				})
 		}

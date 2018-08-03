@@ -419,7 +419,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 				}
 				clr = *clrp
 			}
-			dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil)
+			dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil, nil)
 			cvvvk, ok := dlg.Frame().Children().ElemByType(KiT_ColorView, true, 2)
 			if ok {
 				cvvv := cvvvk.(*ColorView)

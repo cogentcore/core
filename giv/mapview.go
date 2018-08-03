@@ -425,7 +425,7 @@ func (mv *MapViewInline) ConfigParts() {
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
-			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil)
+			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil, nil)
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {
 				mvvv := mvvvk.(*MapView)

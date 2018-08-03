@@ -20,23 +20,29 @@ import (
 // DialogsSepWindow determines if dialog windows open in a separate OS-level
 // window, or do they open within the same parent window.  If only within
 // parent window, then they are always effectively modal. This is also in
-// gi.Prefs and updated from there
+// gi.Prefs and updated from there.
 var DialogsSepWindow = true
 
-// state of the dialog
+// DialogState indicates the state of the dialog.
 type DialogState int64
 
 const (
-	// existential state -- struct exists and is likely being constructed
+	// DialogExists is the existential state -- struct exists and is likely
+	// being constructed.
 	DialogExists DialogState = iota
-	// dialog is open in a modal state, blocking all other input
+
+	// DialogOpenModal means dialog is open in a modal state, blocking all other input.
 	DialogOpenModal
-	// dialog is open in a modeless state, allowing other input
+
+	// DialogOpenModeless means dialog is open in a modeless state, allowing other input.
 	DialogOpenModeless
-	// Ok was pressed -- dialog accepted
+
+	// DialogAccepted means Ok was pressed -- dialog accepted.
 	DialogAccepted
-	// Cancel was pressed -- button canceled
+
+	// DialogCanceled means Cancel was pressed -- button canceled.
 	DialogCanceled
+
 	DialogStateN
 )
 
@@ -47,7 +53,7 @@ var StdDialogVSpace = float32(1.0)
 var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Em, Dots: 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either
-// be rendered in a separate window or on top of an existing one
+// be rendered in a separate window or on top of an existing one.
 type Dialog struct {
 	Viewport2D
 	Title     string      `desc:"title text displayed at the top row of the dialog"`
@@ -378,12 +384,13 @@ func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 // PromptDialog opens a basic standard dialog with a title, prompt, and ok / cancel
 // buttons -- any empty text will not be added -- optionally connects to given
 // signal receiving object and function for dialog signals (nil to ignore)
-func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
+func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
 	if avp == nil {
 		log.Printf("gi.PromptDialog has nil avg for: %v %v\n", title, prompt)
 		return
 	}
 	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
+	dlg.CSS = css
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
@@ -409,8 +416,9 @@ func (dlg *Dialog) HasFocus2D() bool {
 // -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get
 // the interface type -- optionally connects to given signal receiving object
 // and function for dialog signals (nil to ignore)
-func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("new-ki", title, prompt, true, true)
+	dlg.CSS = css
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -465,8 +473,9 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 // StringPromptDialog prompts the user for a string value -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("string-prompt", title, prompt, true, true)
+	dlg.CSS = css
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

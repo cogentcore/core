@@ -113,7 +113,7 @@ func (p *Preferences) Apply() {
 	mouse.DoubleClickMSec = p.DoubleClickMSec
 	mouse.ScrollWheelRate = p.ScrollWheelRate
 	if p.StdKeyMapName != "" {
-		defmap := StdKeyMapByName(p.StdKeyMapName)
+		defmap, _ := StdKeyMapByName(p.StdKeyMapName)
 		if defmap != nil {
 			DefaultKeyMap = defmap
 		}

@@ -314,6 +314,64 @@ func (s *Style) BoxSpace() float32 {
 	return s.Layout.Margin.Dots + s.Border.Width.Dots + s.Layout.Padding.Dots
 }
 
+// ApplyCSS applies css styles for given node, using key to select sub-props
+// from overall properties list, and optional selector to select a further
+// :name selector within that key
+func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+	if selector != "" {
+		pmap, ok = SubProps(pmap, selector)
+		if !ok {
+			return false
+		}
+	}
+	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
+		if ps, ok := pgi.(Styler); ok {
+			s.SetStyleProps(ps.Style(), pmap)
+		} else {
+			s.SetStyleProps(nil, pmap)
+		}
+	} else {
+		s.SetStyleProps(nil, pmap)
+	}
+	return true
+}
+
+// StyleCSS applies css style properties to given Widget node, parsing out
+// type, .class, and #name selectors, along with optional sub-selector
+// (:hover, :active etc)
+func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	s.ApplyCSS(node, css, tyn, selector)
+	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
+	s.ApplyCSS(node, css, cln, selector)
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	s.ApplyCSS(node, css, idnm, selector)
+}
+
+// SubProps returns a sub-property map from given prop map for a given styling
+// selector (property name) -- e.g., :normal :active :hover etc -- returns
+// false if not found
+func SubProps(prp ki.Props, selector string) (ki.Props, bool) {
+	sp, ok := prp[selector]
+	if !ok {
+		return nil, false
+	}
+	spm, ok := sp.(ki.Props)
+	if ok {
+		return spm, true
+	}
+	log.Printf("gi.SubProps: looking for a ki.Props for style selector: %v, instead got type: %T\n", selector, spm)
+	return nil, false
+}
+
 // StyleDefault is default style can be used when property specifies "default"
 var StyleDefault Style
 

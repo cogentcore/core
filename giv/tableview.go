@@ -43,8 +43,8 @@ import (
 // TableViewSig signals
 type TableView struct {
 	gi.Frame
-	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	StyleFunc    TableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
+	Slice        interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	StyleFunc    TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
 	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index is required for copy / paste and DND of rows"`
 	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item -- see SelectedRows for full set of selected rows in active editing mode"`
@@ -56,12 +56,12 @@ type TableView struct {
 	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
 	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
-	TmpSave    ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice interface{}
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	BuiltSlice interface{} `view:"-" json:"-" xml:"-" desc:"the built slice"`
 	BuiltSize  int
 	StruType   reflect.Type
 	NVisFields int
-	VisFields  []reflect.StructField
+	VisFields  []reflect.StructField `view:"-" json:"-" xml:"-" desc:"the visible fields"`
 }
 
 var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
@@ -96,7 +96,6 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 			return
 		}
 		updt = tv.UpdateStart()
-		tv.SelectedIdx = -1
 		tv.SelectedRows = make(map[int]bool, 10)
 		tv.SelectMode = false
 		tv.SetFullReRender()
@@ -225,8 +224,6 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 	tv.BuiltSlice = tv.Slice
 	tv.BuiltSize = sz
-
-	tv.SelectedIdx = -1
 
 	tv.CacheVisFields()
 
@@ -456,6 +453,9 @@ func (tv *TableView) ConfigSliceGridRows() {
 			}
 		}
 	}
+	if tv.SelectedIdx >= 0 {
+		tv.SelectRow(tv.SelectedIdx)
+	}
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
@@ -609,9 +609,9 @@ func SortStructSlice(struSlice interface{}, fldIdx int, ascending bool) error {
 			jval := kit.OnePtrValue(mvnp.Index(j))
 			jv := jval.Elem().Field(fldIdx).String()
 			if ascending {
-				return iv < jv
+				return strings.ToLower(iv) < strings.ToLower(jv)
 			} else {
-				return iv > jv
+				return strings.ToLower(iv) > strings.ToLower(jv)
 			}
 		})
 	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "giv.FileTime":
@@ -925,7 +925,10 @@ func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 
 // SelectRowWidgets sets the selection state of given row of widgets
 func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
-	win := tv.Viewport.Win
+	var win *gi.Window
+	if tv.Viewport != nil {
+		win = tv.Viewport.Win
+	}
 	updt := false
 	if win != nil {
 		updt = win.UpdateStart()
@@ -943,9 +946,11 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 		}
 	}
 	if idxOff == 1 {
-		widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
-		widg.SetSelectedState(sel)
-		widg.UpdateSig()
+		if sgf.Kids.IsValidIndex(ridx) {
+			widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
+			widg.UpdateSig()
+		}
 	}
 
 	if win != nil {

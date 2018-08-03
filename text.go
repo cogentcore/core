@@ -273,6 +273,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 	wspc := wordSpace
 	var fpos float32
 	curFace := sr.Render[0].Face
+	glyphAdvanceMu.Lock()
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
@@ -290,9 +291,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 			rr.RelPos.Y = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
 		}
 
-		glyphAdvanceMu.Lock()
 		a, ok := curFace.GlyphAdvance(r)
-		glyphAdvanceMu.Unlock()
 
 		if !ok {
 			// TODO: is falling back on the U+FFFD glyph the responsibility of
@@ -311,6 +310,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 		}
 		prevR = r
 	}
+	glyphAdvanceMu.Unlock()
 	sr.LastPos.X = fpos
 	sr.LastPos.Y = 0
 }

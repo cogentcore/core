@@ -184,7 +184,15 @@ func (fv *FileView) ConfigFilesRow() {
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
+
 	sv := fv.FilesView()
+	sv.CSS = ki.Props{
+		"textfield": ki.Props{
+			":inactive": ki.Props{
+				"background-color": &gi.Prefs.ControlColor,
+			},
+		},
+	}
 	sv.SetProp("index", false) // no index
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
@@ -203,6 +211,13 @@ func (fv *FileView) ConfigFilesRow() {
 	})
 
 	sv = fv.FavsView()
+	sv.CSS = ki.Props{
+		"textfield": ki.Props{
+			":inactive": ki.Props{
+				"background-color": &gi.Prefs.ControlColor,
+			},
+		},
+	}
 	sv.SetStretchMaxHeight()
 	sv.SetProp("index", false) // no index
 	sv.SetInactive()           // select only
@@ -379,7 +394,7 @@ func (fv *FileView) NewFolder() {
 	if err != nil {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
 		if fv.Viewport != nil {
-			gi.PromptDialog(fv.Viewport, "FileView Error", emsg, true, false, nil, nil)
+			gi.PromptDialog(fv.Viewport, "FileView Error", emsg, true, false, nil, nil, nil)
 		} else {
 			log.Printf("gi.FileView NewFolder error: %v\n", emsg)
 		}
@@ -392,6 +407,9 @@ func (fv *FileView) NewFolder() {
 
 // FileSelect updates selection with given selected file
 func (fv *FileView) FileSelect(idx int) {
+	if idx < 0 {
+		return
+	}
 	fv.SaveSortPrefs()
 	fi := fv.Files[idx]
 	if fi.Kind == "Folder" {
