@@ -1,7 +1,16 @@
+{"ki.RootType": "gi.Viewport2D"}
 {
   "Nm": "WinVp",
   "UniqueNm": "WinVp",
-  "Props": null,
+  "Props": {
+    "__type:color": "gi.Color",
+    "color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    }
+  },
   "Kids": [
     {
       "n": 1,
@@ -14,11 +23,9 @@
       "Props": null,
       "Kids": [
         {
-          "n": 11,
+          "n": 10,
           "type": "gi.Layout",
           "name": "trow",
-          "type": "gi.Layout",
-          "name": "irow",
           "type": "gi.Space",
           "name": "blspc",
           "type": "gi.Layout",
@@ -64,98 +71,51 @@
               "UniqueNm": "str1",
               "Props": null,
               "Kids": null,
-              "Class": ""
+              "Class": "",
+              "CSS": null,
+              "Tooltip": ""
             },
             {
               "Nm": "title",
               "UniqueNm": "title",
               "Props": {
-                "__type:font-size": "units.Value",
-                "font-size": {
-                  "Val": 24,
-                  "Un": "Pt",
-                  "Dots": 0
-                },
-                "text-align": "__enum:(gi.Align)AlignTop",
-                "align-vert": "__enum:(gi.Align)AlignTop"
+                "font-size": "x-large",
+                "line-height": 1.5,
+                "text-align": "__enum:(gi.Align)AlignCenter",
+                "vertical-align": "__enum:(gi.Align)AlignTop",
+                "font-family": "Times New Roman, serif"
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
-              "Text": "This is a demonstration of the various GoGi Widgets"
+              "Tooltip": "",
+              "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ci\u003eGoGi\u003c/i\u003e Widgets\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eCtrl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eCtrl+Alt+E\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e",
+              "Selectable": false
             },
             {
               "Nm": "str2",
               "UniqueNm": "str2",
               "Props": null,
               "Kids": null,
-              "Class": ""
-            }
-          ],
-          "Class": "",
-          "Lay": "LayoutRow",
-          "CSS": null,
-          "StackTop": null
-        },
-        {
-          "Nm": "irow",
-          "UniqueNm": "irow",
-          "Props": {
-            "__type:max-width": "units.Value",
-            "max-width": {
-              "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            }
-          },
-          "Kids": [
-            {
-              "n": 3,
-              "type": "gi.Stretch",
-              "name": "str1",
-              "type": "gi.Label",
-              "name": "instr",
-              "type": "gi.Stretch",
-              "name": "str2"
-            },
-            {
-              "Nm": "str1",
-              "UniqueNm": "str1",
-              "Props": null,
-              "Kids": null,
-              "Class": ""
-            },
-            {
-              "Nm": "instr",
-              "UniqueNm": "instr",
-              "Props": {
-                "text-align": "__enum:(gi.Align)AlignTop",
-                "align-vert": "__enum:(gi.Align)AlignTop"
-              },
-              "Kids": null,
               "Class": "",
               "CSS": null,
-              "Text": "Shortcuts: Control+Alt+P = Preferences, Control+Alt+E = Editor, Command +/- = zoom"
-            },
-            {
-              "Nm": "str2",
-              "UniqueNm": "str2",
-              "Props": null,
-              "Kids": null,
-              "Class": ""
+              "Tooltip": ""
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "blspc",
           "UniqueNm": "blspc",
           "Props": null,
           "Kids": null,
-          "Class": ""
+          "Class": "",
+          "CSS": null,
+          "Tooltip": ""
         },
         {
           "Nm": "blrow",
@@ -174,25 +134,28 @@
               "Kids": null,
               "Class": "",
               "CSS": null,
-              "Text": "Buttons:"
+              "Tooltip": "",
+              "Text": "Buttons:",
+              "Selectable": true
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "brow",
           "UniqueNm": "brow",
           "Props": {
+            "horizontal-align": "__enum:(gi.Align)AlignLeft",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
               "Un": "Px",
               "Dots": 0
-            },
-            "align-horiz": "__enum:(gi.Align)AlignLeft"
+            }
           },
           "Kids": [
             {
@@ -210,18 +173,33 @@
               "Nm": "button1",
               "UniqueNm": "button1",
               "Props": {
+                "#icon": {
+                  "__type:height": "units.Value",
+                  "height": {
+                    "Val": 1.5,
+                    "Un": "Em",
+                    "Dots": 0
+                  },
+                  "__type:width": "units.Value",
+                  "width": {
+                    "Val": 1.5,
+                    "Un": "Em",
+                    "Dots": 0
+                  }
+                },
                 "__type:margin": "units.Value",
                 "margin": {
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
-                },
-                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+                }
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "press this \u003ci\u003ebutton\u003c/i\u003e to pop up a dialog box",
               "Text": "",
+              "Icon": "widget-wedge-down",
               "Indicator": "",
               "Shortcut": "",
               "Menu": null
@@ -235,13 +213,14 @@
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
-                },
-                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+                }
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things",
               "Text": "Open GoGiEditor",
+              "Icon": "",
               "Indicator": "",
               "Shortcut": "",
               "Menu": null
@@ -255,16 +234,18 @@
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
-                },
-                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+                }
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Text": "Toggle",
+              "Icon": "widget-checked-box",
               "Indicator": "",
               "Shortcut": "",
-              "Menu": null
+              "Menu": null,
+              "IconOff": "widget-unchecked-box"
             },
             {
               "Nm": "menubutton1",
@@ -275,13 +256,14 @@
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
-                },
-                "vertical-align": "__enum:(gi.Align)AlignMiddle"
+                }
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Text": "Menu Button",
+              "Icon": "",
               "Indicator": "",
               "Shortcut": "",
               "Menu": [
@@ -303,7 +285,9 @@
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
+                  "Tooltip": "",
                   "Text": "Menu Item 1",
+                  "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
                   "Menu": null
@@ -315,7 +299,9 @@
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
+                  "Tooltip": "",
                   "Text": "Menu Item 2",
+                  "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
                   "Menu": [
@@ -331,7 +317,9 @@
                       "Kids": null,
                       "Class": "",
                       "CSS": null,
+                      "Tooltip": "",
                       "Text": "Sub Menu Item 2",
+                      "Icon": "",
                       "Indicator": "",
                       "Shortcut": "",
                       "Menu": null
@@ -353,6 +341,7 @@
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
+                  "Tooltip": "",
                   "Horiz": true
                 },
                 {
@@ -362,7 +351,9 @@
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
+                  "Tooltip": "",
                   "Text": "Menu Item 3",
+                  "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
                   "Menu": null
@@ -371,16 +362,19 @@
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "slspc",
           "UniqueNm": "slspc",
           "Props": null,
           "Kids": null,
-          "Class": ""
+          "Class": "",
+          "CSS": null,
+          "Tooltip": ""
         },
         {
           "Nm": "slrow",
@@ -388,11 +382,9 @@
           "Props": null,
           "Kids": [
             {
-              "n": 2,
+              "n": 1,
               "type": "gi.Label",
-              "name": "slab",
-              "type": "gi.SVG",
-              "name": "NewSVG0"
+              "name": "slab"
             },
             {
               "Nm": "slab",
@@ -401,87 +393,28 @@
               "Kids": null,
               "Class": "",
               "CSS": null,
-              "Text": "Sliders:"
-            },
-            {
-              "Nm": "NewSVG0",
-              "UniqueNm": "NewSVG0",
-              "Props": {
-                "min-width": "20em",
-                "min-height": "20em"
-              },
-              "Kids": [
-                {
-                  "n": 2,
-                  "type": "gi.Circle",
-                  "name": "NewCircle0",
-                  "type": "gi.Circle",
-                  "name": "NewCircle0Copy"
-                },
-                {
-                  "Nm": "NewCircle0",
-                  "UniqueNm": "NewCircle0",
-                  "Props": {
-                    "fill": "blue"
-                  },
-                  "Kids": null,
-                  "Class": "",
-                  "Pos": {
-                    "X": 50,
-                    "Y": 50
-                  },
-                  "Radius": 20
-                },
-                {
-                  "Nm": "NewCircle0Copy",
-                  "UniqueNm": "NewCircle0Copy",
-                  "Props": {
-                    "fill": "red"
-                  },
-                  "Kids": null,
-                  "Class": "",
-                  "Pos": {
-                    "X": 100,
-                    "Y": 100
-                  },
-                  "Radius": 20
-                }
-              ],
-              "Class": "",
-              "CSS": null,
-              "Fill": true,
-              "ViewBox": {
-                "Min": {
-                  "X": 72,
-                  "Y": 184
-                },
-                "Size": {
-                  "X": 320,
-                  "Y": 320
-                },
-                "PreserveAspectRatio": {
-                  "Align": 0,
-                  "MeetOrSlice": 0
-                }
-              }
+              "Tooltip": "",
+              "Text": "Sliders:",
+              "Selectable": false
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "srow",
           "UniqueNm": "srow",
           "Props": {
+            "horizontal-align": "left",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
               "Un": "Px",
               "Dots": 0
-            },
-            "align-horiz": "left"
+            }
           },
           "Kids": [
             {
@@ -527,6 +460,7 @@
               "Kids": null,
               "Class": "hslides",
               "CSS": null,
+              "Tooltip": "",
               "Value": 0.5,
               "EmitValue": 0,
               "Min": 0,
@@ -541,6 +475,7 @@
                 "Dots": 24
               },
               "Prec": 9,
+              "Icon": "widget-circlebutton-on",
               "ValThumb": false,
               "ThumbVal": 0,
               "Pos": 137,
@@ -549,12 +484,34 @@
               "Dim": "X",
               "Tracking": true,
               "TrackThr": 0,
-              "Snap": true
+              "Snap": true,
+              "OrigWinBBox": {
+                "Min": {
+                  "X": 6,
+                  "Y": 297
+                },
+                "Max": {
+                  "X": 326,
+                  "Y": 331
+                }
+              }
             },
             {
               "Nm": "slider2",
               "UniqueNm": "slider2",
               "Props": {
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:max-height": "units.Value",
+                "max-height": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
                 "__type:height": "units.Value",
                 "height": {
                   "Val": 10,
@@ -567,20 +524,8 @@
                   "Un": "Em",
                   "Dots": 0
                 },
-                "__type:max-height": "units.Value",
-                "max-height": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                },
                 "__type:width": "units.Value",
                 "width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
                   "Val": 1,
                   "Un": "Em",
                   "Dots": 0
@@ -589,6 +534,7 @@
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Value": 0.5,
               "EmitValue": 0,
               "Min": 0,
@@ -603,6 +549,7 @@
                 "Dots": 24
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": false,
               "ThumbVal": 0,
               "Pos": 57,
@@ -611,7 +558,17 @@
               "Dim": "Y",
               "Tracking": false,
               "TrackThr": 0,
-              "Snap": false
+              "Snap": false,
+              "OrigWinBBox": {
+                "Min": {
+                  "X": 326,
+                  "Y": 234
+                },
+                "Max": {
+                  "X": 360,
+                  "Y": 394
+                }
+              }
             },
             {
               "Nm": "scrollbar1",
@@ -645,6 +602,7 @@
               "Kids": null,
               "Class": "hslides",
               "CSS": null,
+              "Tooltip": "",
               "Value": 0.25,
               "EmitValue": 0,
               "Min": 0,
@@ -659,6 +617,7 @@
                 "Dots": 8
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": true,
               "ThumbVal": 0.25,
               "Pos": 78.5,
@@ -667,7 +626,17 @@
               "Dim": "X",
               "Tracking": true,
               "TrackThr": 0,
-              "Snap": false
+              "Snap": false,
+              "OrigWinBBox": {
+                "Min": {
+                  "X": 360,
+                  "Y": 306
+                },
+                "Max": {
+                  "X": 680,
+                  "Y": 322
+                }
+              }
             },
             {
               "Nm": "scrollbar2",
@@ -685,6 +654,12 @@
                   "Un": "Em",
                   "Dots": 0
                 },
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
                 "__type:min-width": "units.Value",
                 "min-width": {
                   "Val": 1,
@@ -696,17 +671,12 @@
                   "Val": -1,
                   "Un": "Px",
                   "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
                 }
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Value": 0.5,
               "EmitValue": 0,
               "Min": 0,
@@ -721,6 +691,7 @@
                 "Dots": 8
               },
               "Prec": 9,
+              "Icon": "",
               "ValThumb": true,
               "ThumbVal": 0.1,
               "Pos": 77,
@@ -729,20 +700,33 @@
               "Dim": "Y",
               "Tracking": false,
               "TrackThr": 0,
-              "Snap": false
+              "Snap": false,
+              "OrigWinBBox": {
+                "Min": {
+                  "X": 680,
+                  "Y": 234
+                },
+                "Max": {
+                  "X": 696,
+                  "Y": 394
+                }
+              }
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "tlspc",
           "UniqueNm": "tlspc",
           "Props": null,
           "Kids": null,
-          "Class": ""
+          "Class": "",
+          "CSS": null,
+          "Tooltip": ""
         },
         {
           "Nm": "txlrow",
@@ -761,13 +745,16 @@
               "Kids": null,
               "Class": "",
               "CSS": null,
-              "Text": "Text Widgets:"
+              "Tooltip": "",
+              "Text": "Text Widgets:",
+              "Selectable": false
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         },
         {
           "Nm": "txrow",
@@ -794,39 +781,29 @@
               "Nm": "edit1",
               "UniqueNm": "edit1",
               "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
-                "min-width": "20em",
-                "align-vert": "__enum:(gi.Align)AlignMiddle"
+                "min-width": "20em"
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
+              "MaxWidthReq": 0,
               "StartPos": 0,
-              "EndPos": 0,
+              "EndPos": 14,
               "CursorPos": 0,
-              "CharWidth": 34,
+              "CharWidth": 14,
+              "SelectStart": 0,
+              "SelectEnd": 0,
               "SelectMode": false
             },
             {
               "Nm": "spin",
               "UniqueNm": "spin",
-              "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
-                "align-vert": "__enum:(gi.Align)AlignMiddle"
-              },
+              "Props": null,
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Value": 0,
               "HasMin": true,
               "Min": 0,
@@ -834,24 +811,20 @@
               "Max": 1,
               "Step": 0.1,
               "PageStep": 0.2,
-              "Prec": 6
+              "Prec": 6,
+              "UpIcon": "widget-wedge-up",
+              "DownIcon": "widget-wedge-down"
             },
             {
               "Nm": "combo",
               "UniqueNm": "combo",
-              "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
-                "align-vert": "__enum:(gi.Align)AlignMiddle"
-              },
+              "Props": null,
               "Kids": null,
               "Class": "",
               "CSS": null,
+              "Tooltip": "",
               "Text": "Action",
+              "Icon": "",
               "Indicator": "",
               "Shortcut": "",
               "Menu": null,
@@ -860,15 +833,18 @@
             }
           ],
           "Class": "",
-          "Lay": "LayoutRow",
           "CSS": null,
-          "StackTop": null
+          "Tooltip": "",
+          "Lay": "LayoutRow",
+          "StackTop": 0
         }
       ],
       "Class": "",
-      "Lay": "LayoutCol",
       "CSS": null,
-      "StackTop": null
+      "Tooltip": "",
+      "Lay": "LayoutCol",
+      "StackTop": 0,
+      "Stripes": "NoStripes"
     }
   ],
   "Class": "",
@@ -889,7 +865,13 @@
         "G": 225,
         "B": 255,
         "A": 255
+      },
+      ":active": {
+        "background-color": "yellow"
       }
+    },
+    "kbd": {
+      "color": "blue"
     },
     "button": {
       "__type:background-color": "gi.Color",
@@ -901,19 +883,16 @@
       }
     }
   },
+  "Tooltip": "",
   "Fill": true,
-  "ViewBox": {
-    "Min": {
+  "Geom": {
+    "Pos": {
       "X": 0,
       "Y": 0
     },
     "Size": {
-      "X": 1024,
-      "Y": 768
-    },
-    "PreserveAspectRatio": {
-      "Align": 0,
-      "MeetOrSlice": 0
+      "X": 1001,
+      "Y": 653
     }
   }
 }

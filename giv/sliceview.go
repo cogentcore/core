@@ -258,7 +258,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			})
 		}
 	}
-	if sv.SelectedIdx >= 0 {
+	if sv.IsInactive() && sv.SelectedIdx >= 0 {
 		sv.SelectRowWidgets(sv.SelectedIdx, true)
 	}
 }

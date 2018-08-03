@@ -116,7 +116,9 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunAbort:
-			ddlg.Cancel()
+			if dlg.Modal {
+				ddlg.Cancel()
+			}
 		case KeyFunAccept:
 			ddlg.Accept()
 		}
@@ -383,7 +385,7 @@ func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
 
 // PromptDialog opens a basic standard dialog with a title, prompt, and ok / cancel
 // buttons -- any empty text will not be added -- optionally connects to given
-// signal receiving object and function for dialog signals (nil to ignore)
+// signal receiving object and function for dialog signals (nil to ignore).
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
 	if avp == nil {
 		log.Printf("gi.PromptDialog has nil avg for: %v %v\n", title, prompt)
@@ -391,6 +393,7 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki
 	}
 	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
 	dlg.CSS = css
+	dlg.Modal = true
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
@@ -419,6 +422,7 @@ func (dlg *Dialog) HasFocus2D() bool {
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("new-ki", title, prompt, true, true)
 	dlg.CSS = css
+	dlg.Modal = true
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -476,6 +480,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog("string-prompt", title, prompt, true, true)
 	dlg.CSS = css
+	dlg.Modal = true
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

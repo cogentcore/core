@@ -453,7 +453,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			}
 		}
 	}
-	if tv.SelectedIdx >= 0 {
+	if tv.IsInactive() && tv.SelectedIdx >= 0 {
 		tv.SelectRow(tv.SelectedIdx)
 	}
 }
