@@ -19,7 +19,11 @@ import (
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
-// managed by a containing Layout, and use all 5 rendering passes
+// managed by a containing Layout, and use all 5 rendering passes.  All
+// elemental widgets must support the Node Inactive and Selected states in a
+// reasonable way (Selected only essential when also Inactive), so they can
+// function appropriately in a chooser (e.g., SliceView or TableView) -- this
+// includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
@@ -600,7 +604,7 @@ func (g *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 				me.SetProcessed()
 				ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
 				ab.EmitContextMenuSignal()
-				ab.ContextMenu()
+				ab.This.(Node2D).ContextMenu()
 			}
 		}
 	})

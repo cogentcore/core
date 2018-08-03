@@ -636,29 +636,29 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case KeyFunMoveRight:
+		kt.SetProcessed()
 		tf.CursorForward(1)
-		kt.SetProcessed()
 	case KeyFunMoveLeft:
+		kt.SetProcessed()
 		tf.CursorBackward(1)
-		kt.SetProcessed()
 	case KeyFunHome:
+		kt.SetProcessed()
 		tf.CursorStart()
-		kt.SetProcessed()
 	case KeyFunEnd:
+		kt.SetProcessed()
 		tf.CursorEnd()
-		kt.SetProcessed()
 	case KeyFunSelectMode:
+		kt.SetProcessed()
 		tf.SelectModeToggle()
-		kt.SetProcessed()
 	case KeyFunCancelSelect:
+		kt.SetProcessed()
 		tf.SelectReset()
-		kt.SetProcessed()
 	case KeyFunSelectAll:
+		kt.SetProcessed()
 		tf.SelectAll()
-		kt.SetProcessed()
 	case KeyFunCopy:
-		tf.Copy(true) // reset
 		kt.SetProcessed()
+		tf.Copy(true) // reset
 	}
 	if tf.IsInactive() || kt.IsProcessed() {
 		return
@@ -672,24 +672,24 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunAbort:
 		tf.RevertEdit() // not processed, others could consume
 	case KeyFunBackspace:
+		kt.SetProcessed()
 		tf.CursorBackspace(1)
 		tf.OfferCompletions()
-		kt.SetProcessed()
 	case KeyFunKill:
+		kt.SetProcessed()
 		tf.CursorKill()
-		kt.SetProcessed()
 	case KeyFunDelete:
+		kt.SetProcessed()
 		tf.CursorDelete(1)
-		kt.SetProcessed()
 	case KeyFunCut:
+		kt.SetProcessed()
 		tf.Cut()
-		kt.SetProcessed()
 	case KeyFunPaste:
+		kt.SetProcessed()
 		tf.Paste()
-		kt.SetProcessed()
 	case KeyFunComplete:
-		tf.OfferCompletions()
 		kt.SetProcessed()
+		tf.OfferCompletions()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			tf.InsertAtCursor(string(kt.Rune))
@@ -706,6 +706,7 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
+			me.SetProcessed()
 			if tf.IsInactive() {
 				tf.SetSelectedState(!tf.IsSelected())
 				tf.EmitSelectedSignal()
@@ -714,8 +715,8 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 				pt := tf.PointToRelPos(me.Pos())
 				tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			}
-			me.SetProcessed()
 		} else if me.Action == mouse.DoubleClick {
+			me.SetProcessed()
 			if tf.HasSelection() {
 				if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
 					tf.SelectReset()
@@ -725,20 +726,19 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 			} else {
 				tf.SelectWord()
 			}
-			me.SetProcessed()
 		}
 	case mouse.Middle:
 		if !tf.IsInactive() && me.Action == mouse.Press {
+			me.SetProcessed()
 			pt := tf.PointToRelPos(me.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			tf.Paste()
-			me.SetProcessed()
 		}
 	case mouse.Right:
 		if me.Action == mouse.Press {
-			tf.EmitContextMenuSignal()
-			tf.ContextMenu()
 			me.SetProcessed()
+			tf.EmitContextMenuSignal()
+			tf.This.(Node2D).ContextMenu()
 		}
 	}
 }

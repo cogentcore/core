@@ -119,7 +119,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * TableView:
 	+ can't select same row for insert 
 	+ DND move from early to late does not deal with early indexes being deleted -- do at end?  either way someone has to modify
-* context menu not working on textfield, treeview
 * action not triggering widget select signal on pressed
 * unselect no updating background.
 

@@ -26,11 +26,12 @@ type SliceView struct {
 	gi.Frame
 	Slice       interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	Values      []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig     ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ShowIndex   bool        `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index is required for copy / paste and DND of rows"`
 	SelectedIdx int         `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	builtSlice  interface{}
-	builtSize   int
+	BuiltSlice  interface{}
+	BuiltSize   int
+	ViewSig     ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	TmpSave     ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -98,6 +99,20 @@ func (sv *SliceView) ButtonBox() (*gi.Layout, int) {
 	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
+// RowWidgetNs returns number of widgets per row and offset for index label
+func (sv *SliceView) RowWidgetNs() (nWidgPerRow, idxOff int) {
+	nWidgPerRow = 2
+	if !sv.IsInactive() {
+		nWidgPerRow += 2
+	}
+	idxOff = 1
+	if !sv.ShowIndex {
+		nWidgPerRow -= 1
+		idxOff = 0
+	}
+	return
+}
+
 // ConfigSliceGrid configures the SliceGrid for the current slice
 func (sv *SliceView) ConfigSliceGrid() {
 	if kit.IfaceIsNil(sv.Slice) {
@@ -107,11 +122,11 @@ func (sv *SliceView) ConfigSliceGrid() {
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 
-	if sv.builtSlice == sv.Slice && sv.builtSize == sz {
+	if sv.BuiltSlice == sv.Slice && sv.BuiltSize == sz {
 		return
 	}
-	sv.builtSlice = sv.Slice
-	sv.builtSize = sz
+	sv.BuiltSlice = sv.Slice
+	sv.BuiltSize = sz
 
 	sg, _ := sv.SliceGrid()
 	if sg == nil {
@@ -121,10 +136,7 @@ func (sv *SliceView) ConfigSliceGrid() {
 	sg.SetFullReRender()
 	defer sg.UpdateEnd(updt)
 
-	nWidgPerRow := 2
-	if !sv.IsInactive() {
-		nWidgPerRow += 2
-	}
+	nWidgPerRow, _ := sv.RowWidgetNs()
 
 	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", nWidgPerRow)
@@ -151,10 +163,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 	sz := mvnp.Len()
 	sg, _ := sv.SliceGrid()
 
-	nWidgPerRow := 2
-	if !sv.IsInactive() {
-		nWidgPerRow += 2
-	}
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
@@ -172,31 +181,33 @@ func (sv *SliceView) ConfigSliceGridRows() {
 		labnm := fmt.Sprintf("index-%v", idxtxt)
 		valnm := fmt.Sprintf("value-%v", idxtxt)
 
-		var idxlab *gi.Label
-		if sg.Kids[ridx] != nil {
-			idxlab = sg.Kids[ridx].(*gi.Label)
-		} else {
-			idxlab = &gi.Label{}
-			sg.SetChild(idxlab, ridx, labnm)
-		}
-		idxlab.Text = idxtxt
-		idxlab.SetProp("slv-index", i)
-		idxlab.Selectable = true
-		idxlab.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.WidgetSelected) {
-				wbb := send.(gi.Node2D).AsWidget()
-				idx := wbb.KnownProp("slv-index").(int)
-				svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
-				svv.UpdateSelect(idx, wbb.IsSelected())
+		if sv.ShowIndex {
+			var idxlab *gi.Label
+			if sg.Kids[ridx] != nil {
+				idxlab = sg.Kids[ridx].(*gi.Label)
+			} else {
+				idxlab = &gi.Label{}
+				sg.SetChild(idxlab, ridx, labnm)
 			}
-		})
+			idxlab.Text = idxtxt
+			idxlab.SetProp("slv-index", i)
+			idxlab.Selectable = true
+			idxlab.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.WidgetSelected) {
+					wbb := send.(gi.Node2D).AsWidget()
+					idx := wbb.KnownProp("slv-index").(int)
+					svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+					svv.UpdateSelect(idx, wbb.IsSelected())
+				}
+			})
+		}
 
 		var widg gi.Node2D
-		if sg.Kids[ridx+1] != nil {
-			widg = sg.Kids[ridx+1].(gi.Node2D)
+		if sg.Kids[ridx+idxOff] != nil {
+			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
 		} else {
 			widg = ki.NewOfType(vtyp).(gi.Node2D)
-			sg.SetChild(widg, ridx+1, valnm)
+			sg.SetChild(widg, ridx+idxOff, valnm)
 		}
 		vv.ConfigWidget(widg)
 
@@ -226,8 +237,8 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			delnm := fmt.Sprintf("del-%v", idxtxt)
 			addact := gi.Action{}
 			delact := gi.Action{}
-			sg.SetChild(&addact, ridx+2, addnm)
-			sg.SetChild(&delact, ridx+3, delnm)
+			sg.SetChild(&addact, ridx+idxOff+1, addnm)
+			sg.SetChild(&delact, ridx+idxOff+2, delnm)
 
 			addact.SetIcon("plus")
 			addact.Tooltip = "insert a new element at this index"
@@ -292,28 +303,33 @@ func (sv *SliceView) SliceDelete(idx int) {
 	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
-// UpdateSelect updates the selection for the given index
-func (sv *SliceView) UpdateSelect(idx int, sel bool) {
+// SelectRowWidgets sets the selection state of given row of widgets
+func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 	sg, _ := sv.SliceGrid()
-
-	nWidgPerRow := 2 // !interact
-
-	if sv.SelectedIdx >= 0 { // unselect current
-		seldx := sv.SelectedIdx*nWidgPerRow + 1
-		if sg.Kids.IsValidIndex(seldx) {
-			widg := sg.KnownChild(seldx).(gi.Node2D).AsNode2D()
-			widg.ClearSelected()
+	nWidgPerRow, _ := sv.RowWidgetNs()
+	rowidx := idx * nWidgPerRow
+	if sv.ShowIndex {
+		if sg.Kids.IsValidIndex(rowidx) {
+			widg := sg.KnownChild(rowidx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
 			widg.UpdateSig()
 		}
 	}
+	if sg.Kids.IsValidIndex(rowidx + 1) {
+		widg := sg.KnownChild(rowidx + 1).(gi.Node2D).AsNode2D()
+		widg.SetSelectedState(sel)
+		widg.UpdateSig()
+	}
+}
+
+// UpdateSelect updates the selection for the given index
+func (sv *SliceView) UpdateSelect(idx int, sel bool) {
+	if sv.SelectedIdx >= 0 { // unselect current
+		sv.SelectRowWidgets(sv.SelectedIdx, false)
+	}
 	if sel {
 		sv.SelectedIdx = idx
-		seldx := idx*nWidgPerRow + 1
-		if sg.Kids.IsValidIndex(seldx) {
-			widg := sg.KnownChild(seldx).(gi.Node2D).AsNode2D()
-			widg.SetSelected()
-			widg.UpdateSig()
-		}
+		sv.SelectRowWidgets(sv.SelectedIdx, true)
 	} else {
 		sv.SelectedIdx = -1
 	}

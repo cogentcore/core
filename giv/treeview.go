@@ -1287,8 +1287,8 @@ func (tv *TreeView) TreeViewEvents() {
 			}
 		case mouse.Right:
 			if me.Action == mouse.Release {
-				tvv.ContextMenu()
 				me.SetProcessed()
+				tvv.This.(gi.Node2D).ContextMenu()
 			}
 		}
 	})

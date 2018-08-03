@@ -325,9 +325,12 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 func (g *SliderBase) SliderEvents() {
 	g.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsInactive() {
+			return
+		}
 		if sl.IsDragging() {
+			me.SetProcessed()
 			st := sl.PointToRelPos(me.From)
 			ed := sl.PointToRelPos(me.Where)
 			if sl.Dim == X {
@@ -339,25 +342,37 @@ func (g *SliderBase) SliderEvents() {
 	})
 	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		me.SetProcessed()
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
-		if me.Action == mouse.Press {
-			ed := sl.PointToRelPos(me.Where)
-			st := &sl.Sty
-			spc := st.Layout.Margin.Dots + 0.5*g.ThSize
-			if sl.Dim == X {
-				sl.SliderPressed(float32(ed.X) - spc)
-			} else {
-				sl.SliderPressed(float32(ed.Y) - spc)
-			}
+		if sl.IsInactive() {
+			me.SetProcessed()
+			sl.SetSelectedState(!sl.IsSelected())
+			sl.EmitSelectedSignal()
+			sl.UpdateSig()
 		} else {
-			sl.SliderReleased()
+			if me.Button == mouse.Left {
+				me.SetProcessed()
+				if me.Action == mouse.Press {
+					ed := sl.PointToRelPos(me.Where)
+					st := &sl.Sty
+					spc := st.Layout.Margin.Dots + 0.5*g.ThSize
+					if sl.Dim == X {
+						sl.SliderPressed(float32(ed.X) - spc)
+					} else {
+						sl.SliderPressed(float32(ed.Y) - spc)
+					}
+				} else {
+					sl.SliderReleased()
+				}
+			}
 		}
 	})
 	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsInactive() {
+			return
+		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
 		if me.Action == mouse.Enter {
 			sl.SliderEnterHover()
 		} else {
@@ -365,18 +380,24 @@ func (g *SliderBase) SliderEvents() {
 		}
 	})
 	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsInactive() {
+			return
+		}
+		me := d.(*mouse.ScrollEvent)
+		me.SetProcessed()
 		cur := float32(sl.Pos)
 		if sl.Dim == X {
 			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
 		} else {
 			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 		}
-		me.SetProcessed()
 	})
 	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		if sl.IsInactive() {
+			return
+		}
 		sl.KeyInput(d.(*key.ChordEvent))
 	})
 }

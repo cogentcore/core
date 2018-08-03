@@ -219,10 +219,13 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 
 func (g *SpinBox) SpinBoxEvents() {
 	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
 		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
-		sb.IncrValue(float32(me.NonZeroDelta(false)))
+		if sb.IsInactive() {
+			return
+		}
+		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
+		sb.IncrValue(float32(me.NonZeroDelta(false)))
 	})
 }
 

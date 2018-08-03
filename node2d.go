@@ -302,11 +302,11 @@ func (g *Node2DBase) ContextMenuPos() (pos image.Point) {
 
 func (g *Node2DBase) ContextMenu() {
 	var men Menu
-	g.MakeContextMenu(&men)
+	g.This.(Node2D).MakeContextMenu(&men)
 	if len(men) == 0 {
 		return
 	}
-	pos := g.ContextMenuPos()
+	pos := g.This.(Node2D).ContextMenuPos()
 	PopupMenu(men, pos.X, pos.Y, g.Viewport, g.Nm+"-menu")
 }
 

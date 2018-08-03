@@ -181,7 +181,11 @@ func (g *ButtonBase) SetIcon(iconName string) {
 // SetButtonState sets the button state to target
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	if g.IsInactive() {
-		state = ButtonInactive
+		if g.IsSelected() {
+			state = ButtonSelected
+		} else {
+			state = ButtonInactive
+		}
 	} else {
 		if state == ButtonActive && g.IsSelected() {
 			state = ButtonSelected
@@ -201,6 +205,7 @@ func (g *ButtonBase) ButtonPressed() {
 	if g.IsInactive() {
 		g.SetSelectedState(!g.IsSelected())
 		g.EmitSelectedSignal()
+		g.UpdateSig()
 	} else {
 		g.SetButtonState(ButtonDown)
 		g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
@@ -361,7 +366,6 @@ func ButtonEvents(bw ButtonWidget) {
 	g.HoverTooltipEvent()
 	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
 		if me.Button == mouse.Left {
@@ -369,17 +373,22 @@ func ButtonEvents(bw ButtonWidget) {
 			case mouse.DoubleClick: // we just count as a regular click
 				fallthrough
 			case mouse.Press:
+				me.SetProcessed()
 				bb.ButtonPressed()
 			case mouse.Release:
+				me.SetProcessed()
 				ab.ButtonRelease()
 			}
 		}
 	})
 	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.FocusEvent)
-		me.SetProcessed()
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
+		if bb.IsInactive() {
+			return
+		}
+		me := d.(*mouse.FocusEvent)
+		me.SetProcessed()
 		if me.Action == mouse.Enter {
 			bb.ButtonEnterHover()
 		} else {
@@ -387,9 +396,12 @@ func ButtonEvents(bw ButtonWidget) {
 		}
 	})
 	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		kt := d.(*key.ChordEvent)
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
+		if bb.IsInactive() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
 		kf := KeyFun(kt.ChordString())
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
 			kt.SetProcessed()

@@ -46,7 +46,6 @@ type TableView struct {
 	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	StyleFunc    TableViewStyleFunc `json:"-" xml:"-" desc:"optional styling function"`
 	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	TmpSave      ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index is required for copy / paste and DND of rows"`
 	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item -- see SelectedRows for full set of selected rows in active editing mode"`
 	SortIdx      int                `desc:"current sort index"`
@@ -57,6 +56,7 @@ type TableView struct {
 	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
 	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
+	TmpSave    ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	BuiltSlice interface{}
 	BuiltSize  int
 	StruType   reflect.Type
