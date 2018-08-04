@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -101,7 +100,6 @@ func (ic *Icon) Style2D() {
 		sic.Sty = ic.Sty
 		sic.DefStyle = ic.DefStyle
 		if ic.NeedsFullReRender() {
-			fmt.Printf("style sic full %v\n", ic.Nm)
 			sic.SetFullReRender()
 		}
 	}

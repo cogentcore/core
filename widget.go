@@ -781,9 +781,6 @@ func (g *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx
 	if icIdx >= 0 {
 		ic := g.Parts.KnownChild(icIdx).(*Icon)
 		if set, _ := ic.SetIcon(icnm); set || g.NeedsFullReRender() {
-			if g.NeedsFullReRender() {
-				fmt.Printf("ic needs full re: %v\n", g.Nm)
-			}
 			g.StylePart(Node2D(ic))
 		}
 	}

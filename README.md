@@ -119,8 +119,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * ctrl+enter is adding rows on std key map dialog
 * textfield: still have issues with not applying when dialog closed
 
-* TableView: button unselect not setting background -- overall need a way to
-allow individual widgets to have a deep update triggered when relevant state changes
+* TableView: 
+* context menu
+* inactive: key nav and single-select -- low-pri key event with always-focus.
 
 * search for tableview, treeview
 * DND and copy/paste for tableview

@@ -36,9 +36,11 @@ func init() {
 // original source icon and then can be customized from there.
 type Icon struct {
 	SVG
-	Filename     string      `desc:"file name with full path for icon if loaded from file"`
-	Rendered     bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
-	RenderedSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
+	Filename        string      `desc:"file name with full path for icon if loaded from file"`
+	Rendered        bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+	RendSize        image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
+	RendFillColor   color.Color
+	RendStrokeColor color.Color
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
@@ -77,7 +79,13 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	return ic.FullReRenderIfNeeded() || !ic.Rendered || ic.RenderedSize != ic.Geom.Size
+	if ic.FullReRenderIfNeeded() || !ic.Rendered || ic.RendSize != ic.Geom.Size {
+		return true
+	}
+	if ic.RendFillColor != ic.Pnt.FillStyle.Color.Color || ic.RendStrokeColor != ic.Pnt.StrokeStyle.Color.Color {
+		return true
+	}
+	return false
 }
 
 func (ic *Icon) Render2D() {
@@ -92,7 +100,9 @@ func (ic *Icon) Render2D() {
 			ic.Render2DChildren() // we must do children first, then us!
 			rs.PopXForm()
 			ic.Rendered = true
-			ic.RenderedSize = ic.Geom.Size
+			ic.RendSize = ic.Geom.Size
+			ic.RendFillColor = ic.Pnt.FillStyle.Color.Color
+			ic.RendStrokeColor = ic.Pnt.StrokeStyle.Color.Color
 		}
 		ic.RenderViewport2D() // update our parent image
 		ic.PopBounds()
