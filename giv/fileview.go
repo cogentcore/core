@@ -31,7 +31,8 @@ import (
 // * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
 // * busy cursor when loading
-// * prior paths, saved to prefs dir (maybe not -- favs is pretty good?)
+// * prior paths, saved to prefs dir -- easy -- add combobox with no label that displays them -- ideally would be an editable combobox..
+// * in inactive select mode, it would be better to NOT immediately traverse into subdirs. and even in regular gui mode -- that should be more of a double-click.. although that would cause dialog to close now.. grr.
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {

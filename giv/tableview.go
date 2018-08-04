@@ -29,6 +29,7 @@ import (
 // * search option, both as a search field and as simple type-to-search
 // * popup menu option -- when user does right-mouse on item, a provided func is called
 //   -- use in fileview
+// * could have a native context menu for add / delete etc.
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TableView

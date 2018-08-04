@@ -116,14 +116,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* use screenprefs
+* drag should be stateful -- only drag current item -- logic is in there but not working properly
 
-* TableView: context menu
+* equivalent of AllFieldsN for AllMapElsN -- number of elemental map elements -- use for determining inline display.
+
+* use screenprefs
 
 * search for tableview, treeview
 * DND and copy/paste for tableview
-
-* dialog popup in widgets demo fails 2nd time
 
 * window cursors: busy, etc
 
@@ -135,9 +135,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away?
 
-* CSSAgg needs a tag for no-inline -- don't inline its map ever
-* also, inline choice could be smarter if we knew what was in the map, but...
-
 * bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
   general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
   but key problem is how to associate the enum with the field then?  bit-set
@@ -146,9 +143,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   field to be int64..  for 32bit case, not that big a deal, and for most
   user-facing cases, int32 is sufficient, so focus on that case??
 
-* drag should be stateful -- only drag current item -- logic is in there but not working properly
-
-* tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?
+* tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab? ultimately want multi-row super-tabs -- flow layout..  with dnd..
 
 * add MenuBar / Toolbar -- just a layout really, with some styling..
 
