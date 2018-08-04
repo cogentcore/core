@@ -617,10 +617,18 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if PopupIsCompleter(tf.ParentWindow().Popup) {
 		switch kf {
 		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
-			// todo: extend needs to be implemented in the Completer
 			if tf.Cmpltr.Count() == 1 {
 				tf.Complete(tf.Cmpltr.matches[0])
 				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+				return
+			}
+			// try to extend the seed
+			s := tf.Cmpltr.Extend()
+			if s != "" {
+				// todo: get currently selected menu item and set selected when new menu is offered
+				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+				tf.InsertAtCursor(s)
+				tf.OfferCompletions()
 			}
 			//fmt.Printf("tab\n")
 			kt.SetProcessed()

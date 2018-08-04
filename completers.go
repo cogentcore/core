@@ -25,6 +25,11 @@ type Completer interface {
 
 	// Seed returns the current seed
 	Seed()
+
+	// Extend tries to extend the current seed checking possible completions for a longer common seed
+	// e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
+	// but if the possible completions are "abcde" and "abz" then Extend returns ""
+	Extend() string
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -88,9 +93,29 @@ func (sc *SampleCompleter) Seed() string {
 	return sc.seed
 }
 
-// todo: implement
 func (sc *SampleCompleter) Extend() string {
-	return ""
+	keep_looking := true
+	new_seed := sc.seed
+	potential_seed := new_seed
+	first_match := sc.matches[0]
+	for keep_looking {
+		if len(first_match) <= len(new_seed) {
+			keep_looking = false // ran out of chars
+			break
+		}
+
+		potential_seed = first_match[0:len(new_seed) + 1]
+		for _, s := range sc.matches {
+			if !strings.HasPrefix(s, potential_seed) {
+				keep_looking = false;
+				break;
+			}
+		}
+		if keep_looking {
+			new_seed = potential_seed
+		}
+	}
+	return strings.Replace(new_seed, sc.seed, "", 1) // only return the seed extension
 }
 
 // Init being used to load words for this sample completer
