@@ -417,9 +417,11 @@ func ButtonEvents(bw ButtonWidget) {
 		kt := d.(*key.ChordEvent)
 		kf := KeyFun(kt.ChordString())
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
-			kt.SetProcessed()
-			bb.ButtonPressed()
-			ab.ButtonRelease()
+			if !(kt.Rune == ' ' && bb.Viewport.IsCompleter()) {
+				kt.SetProcessed()
+				bb.ButtonPressed()
+				ab.ButtonRelease()
+			}
 		}
 	})
 }

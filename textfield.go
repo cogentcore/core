@@ -511,7 +511,13 @@ func (tf *TextField) OfferCompletions() {
 	if PopupIsCompleter(tf.ParentWindow().Popup) {
 		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
 	}
-	tf.Cmpltr.GenCompletions(tf.Text()) // send the current text and get back a list
+
+	tf.Cmpltr.GenCompletions(tf.Text()) // send the current text to create a list of possible completions
+	if len(tf.Cmpltr.matches) == 1 {  // don't show if only one and it matches current text
+		if tf.Cmpltr.matches[0] == tf.Cmpltr.Seed() {
+			return
+		}
+	}
 	if tf.Cmpltr.Count() > 0 {
 		var m Menu
 		m = tf.MakeCompletionMenu(m, tf.Cmpltr)
@@ -671,7 +677,6 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if tf.IsInactive() || kt.IsProcessed() {
 		return
 	}
-
 	switch kf {
 	case KeyFunSelectItem: // enter
 		fallthrough
