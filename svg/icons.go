@@ -99,10 +99,7 @@ func (ic *Icon) Render2D() {
 		}
 		ic.RenderViewport2D() // update our parent image
 		ic.PopBounds()
-		// } else {
-		// 	fmt.Printf("svg ic %v out of bounds: vp: %v  obj: %v\n", ic.PathUnique(), ic.VpBBox, ic.ObjBBox)
 	}
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

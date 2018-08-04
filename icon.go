@@ -120,24 +120,10 @@ func (ic *Icon) Render2D() {
 		return
 	}
 	if ic.PushBounds() {
-		// connect to events here
 		ic.Render2DChildren()
 		ic.PopBounds()
-		// } else {
-		// 	g.DisconnectAllEvents()
-		// } else {
-		// 	fmt.Printf("top ic %v out of bounds: vp: %v  obj: %v\n", ic.PathUnique(), ic.VpBBox, ic.ObjBBox)
 	}
 }
-
-// func (ic *Icon) Move2D(delta image.Point, parBBox image.Rectangle) {
-// 	ic.WidgetBase.Move2D(delta, parBBox)
-// 	sic := ic.SVGIcon()
-// 	if sic != nil {
-// 		sic.LayData = ic.LayData
-// 		sic.LayData.AllocPosRel = Vec2DZero
-// 	}
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  IconMgr

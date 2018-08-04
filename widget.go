@@ -183,7 +183,6 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 
 	if ics := pk.EmbeddedStruct(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
-		ic.SetFullReRender()
 		styprops := kit.Types.Properties(g.Type(), true)
 		sp := ki.SubProps(styprops, stynm)
 		if sp != nil {
