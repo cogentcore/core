@@ -11,6 +11,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -116,11 +117,26 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunAbort:
-			if dlg.Modal {
-				ddlg.Cancel()
-			}
+			ddlg.Cancel()
+			kt.SetProcessed()
+		}
+	})
+	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		kt := d.(*key.ChordEvent)
+		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		kf := KeyFun(kt.ChordString())
+		switch kf {
 		case KeyFunAccept:
 			ddlg.Accept()
+			kt.SetProcessed()
+		}
+	})
+	win.ConnectEventType(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+			ddlg.Accept()
+			me.SetProcessed()
 		}
 	})
 

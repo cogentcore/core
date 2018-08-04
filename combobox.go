@@ -93,6 +93,9 @@ func (g *ComboBox) ButtonAsBase() *ButtonBase {
 }
 
 func (g *ComboBox) ButtonRelease() {
+	if g.IsInactive() {
+		return
+	}
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
 	g.MakeItemsMenu()

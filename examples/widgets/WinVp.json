@@ -79,11 +79,11 @@
               "Nm": "title",
               "UniqueNm": "title",
               "Props": {
-                "font-size": "x-large",
-                "line-height": 1.5,
                 "text-align": "__enum:(gi.Align)AlignCenter",
                 "vertical-align": "__enum:(gi.Align)AlignTop",
-                "font-family": "Times New Roman, serif"
+                "font-family": "Times New Roman, serif",
+                "font-size": "x-large",
+                "line-height": 1.5
               },
               "Kids": null,
               "Class": "",
@@ -174,14 +174,14 @@
               "UniqueNm": "button1",
               "Props": {
                 "#icon": {
-                  "__type:height": "units.Value",
-                  "height": {
+                  "__type:width": "units.Value",
+                  "width": {
                     "Val": 1.5,
                     "Un": "Em",
                     "Dots": 0
                   },
-                  "__type:width": "units.Value",
-                  "width": {
+                  "__type:height": "units.Value",
+                  "height": {
                     "Val": 1.5,
                     "Un": "Em",
                     "Dots": 0
@@ -432,18 +432,6 @@
               "Nm": "slider1",
               "UniqueNm": "slider1",
               "Props": {
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
                 "__type:height": "units.Value",
                 "height": {
                   "Val": 2,
@@ -453,6 +441,18 @@
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 2,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 20,
+                  "Un": "Em",
+                  "Dots": 0
+                },
+                "__type:min-width": "units.Value",
+                "min-width": {
+                  "Val": 20,
                   "Un": "Em",
                   "Dots": 0
                 }
@@ -500,6 +500,12 @@
               "Nm": "slider2",
               "UniqueNm": "slider2",
               "Props": {
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
                 "__type:min-width": "units.Value",
                 "min-width": {
                   "Val": 1,
@@ -521,12 +527,6 @@
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 1,
                   "Un": "Em",
                   "Dots": 0
                 }
@@ -849,6 +849,15 @@
   ],
   "Class": "",
   "CSS": {
+    "button": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 255,
+        "G": 240,
+        "B": 240,
+        "A": 255
+      }
+    },
     "#combo": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -865,22 +874,10 @@
         "G": 225,
         "B": 255,
         "A": 255
-      },
-      ":active": {
-        "background-color": "yellow"
       }
     },
     "kbd": {
       "color": "blue"
-    },
-    "button": {
-      "__type:background-color": "gi.Color",
-      "background-color": {
-        "R": 255,
-        "G": 240,
-        "B": 240,
-        "A": 255
-      }
     }
   },
   "Tooltip": "",

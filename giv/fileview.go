@@ -31,7 +31,8 @@ import (
 // * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
 // * busy cursor when loading
-// * prior paths, saved to prefs dir (maybe not -- favs is pretty good?)
+// * prior paths, saved to prefs dir -- easy -- add combobox with no label that displays them -- ideally would be an editable combobox..
+// * in inactive select mode, it would be better to NOT immediately traverse into subdirs. and even in regular gui mode -- that should be more of a double-click.. although that would cause dialog to close now.. grr.
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
@@ -185,7 +186,29 @@ func (fv *FileView) ConfigFilesRow() {
 	config.Add(KiT_TableView, "files-view")
 	fr.ConfigChildren(config, false) // already covered by parent update
 
-	sv := fv.FilesView()
+	sv := fv.FavsView()
+	sv.CSS = ki.Props{
+		"textfield": ki.Props{
+			":inactive": ki.Props{
+				"background-color": &gi.Prefs.ControlColor,
+			},
+		},
+	}
+	sv.SetStretchMaxHeight()
+	sv.SetProp("index", false)
+	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
+	sv.SetInactive()                   // select only
+	sv.SelectedIdx = -1
+	sv.SetSlice(&gi.Prefs.FavPaths, nil)
+	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.WidgetSelected) {
+			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			svv, _ := send.(*TableView)
+			fvv.FavSelect(svv.SelectedIdx)
+		}
+	})
+
+	sv = fv.FilesView()
 	sv.CSS = ki.Props{
 		"textfield": ki.Props{
 			":inactive": ki.Props{
@@ -207,26 +230,6 @@ func (fv *FileView) ConfigFilesRow() {
 			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelect(svv.SelectedIdx)
-		}
-	})
-
-	sv = fv.FavsView()
-	sv.CSS = ki.Props{
-		"textfield": ki.Props{
-			":inactive": ki.Props{
-				"background-color": &gi.Prefs.ControlColor,
-			},
-		},
-	}
-	sv.SetStretchMaxHeight()
-	sv.SetProp("index", false) // no index
-	sv.SetInactive()           // select only
-	sv.SetSlice(&gi.Prefs.FavPaths, nil)
-	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
-			svv, _ := send.(*TableView)
-			fvv.FavSelect(svv.SelectedIdx)
 		}
 	})
 }
@@ -341,6 +344,8 @@ func (fv *FileView) UpdateFiles() {
 	})
 
 	sv := fv.FilesView()
+	sv.CurSelField = "Name"
+	sv.CurSelVal = fv.SelFile
 	sv.UpdateFromSlice()
 	fv.UpdateEnd(updt)
 }
@@ -480,6 +485,8 @@ type FileTime time.Time
 func (ft FileTime) String() string {
 	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
 }
+
+// note: rendering icons taking a fair amount of extra time
 
 // FileInfo represents the information about a given file / directory
 type FileInfo struct {

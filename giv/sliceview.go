@@ -26,7 +26,7 @@ type SliceView struct {
 	gi.Frame
 	Slice       interface{} `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	Values      []ValueView `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	ShowIndex   bool        `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index is required for copy / paste and DND of rows"`
+	ShowIndex   bool        `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index may be neeeded for copy / paste and DND of rows"`
 	SelectedIdx int         `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	BuiltSlice  interface{}
 	BuiltSize   int
@@ -46,6 +46,13 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
+		if !sv.IsInactive() {
+			sv.SelectedIdx = -1
+		}
+	}
+	sv.ShowIndex = true
+	if sidxp, ok := sv.Prop("index"); ok {
+		sv.ShowIndex, _ = kit.ToBool(sidxp)
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
@@ -218,7 +225,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				wb.SetProp("slv-index", i)
 				wb.ClearSelected()
 				wb.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.WidgetSelected) {
+					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.KnownProp("slv-index").(int)
 						svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)

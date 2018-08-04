@@ -21,6 +21,15 @@ func init() {
 	gi.TheViewIFace = &ViewIFace{}
 }
 
+// MapInlineLen is the number of map entries at or below which an inline
+// representation of the map will be presented -- more convenient for small
+// #'s of props
+var MapInlineLen = 4
+
+// StructInlineLen is the number of elemental struct fields at or below which an inline
+// representation of the struct will be presented -- more convenient for small structs
+var StructInlineLen = 6
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ValueView -- an interface for representing values (e.g., fields) in Views
 
@@ -150,7 +159,7 @@ func ToValueView(it interface{}) ValueView {
 	case vk == reflect.Map:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
-		if sz > 0 && sz <= 4 { // todo: param somewhere
+		if sz > 0 && sz <= MapInlineLen {
 			vv := MapInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -173,7 +182,8 @@ func ToValueView(it interface{}) ValueView {
 				inline, ok = kit.ToBool(inprop)
 			}
 		}
-		if inline || typ.NumField() <= 5 {
+		nfld := kit.AllFieldsN(typ)
+		if inline || nfld <= StructInlineLen {
 			vv := StructInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -217,6 +227,23 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 			return vvo
 		}
 	}
+
+	if kig, ok := it.(ki.Ki); ok {
+		typ := reflect.TypeOf(fval)
+		nptyp := kit.NonPtrType(typ)
+		vk := nptyp.Kind()
+
+		ft := kig.FieldTag(field, "view")
+		switch ft {
+		case "no-inline":
+			if vk == reflect.Map {
+				vv := MapValueView{}
+				vv.Init(&vv)
+				return &vv
+			}
+		}
+	}
+
 	// fallback
 	return ToValueView(fval)
 }
@@ -890,7 +917,6 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
 		sb.SetMin(0)
 	}
-	// todo: make a utility for this kind of thing..
 	mintag := vv.ViewFieldTag("min")
 	if mintag != "" {
 		min, err := strconv.ParseFloat(mintag, 32)

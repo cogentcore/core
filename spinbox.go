@@ -227,6 +227,14 @@ func (g *SpinBox) SpinBoxEvents() {
 		me.SetProcessed()
 		sb.IncrValue(float32(me.NonZeroDelta(false)))
 	})
+	tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+	tf.WidgetSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+		if sig == int64(WidgetSelected) {
+			sb.SetSelectedState(!sb.IsSelected())
+		}
+		sb.WidgetSig.Emit(sb.This, sig, data) // passthrough
+	})
 }
 
 func (g *SpinBox) Init2D() {
@@ -261,6 +269,8 @@ func (g *SpinBox) Render2D() {
 	if g.PushBounds() {
 		g.SpinBoxEvents()
 		// g.Sty = g.StateStyles[g.State] // get current styles
+		tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+		tf.SetSelectedState(g.IsSelected())
 		g.ConfigPartsIfNeeded()
 		g.Render2DChildren()
 		g.Render2DParts()

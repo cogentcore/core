@@ -137,13 +137,6 @@ func (g *ButtonBase) IsChecked() bool {
 	return bitflag.Has(g.Flag, int(ButtonFlagChecked))
 }
 
-// SetSelectedState sets the selected state of this button -- does not emit
-// signal or update
-func (g *ButtonBase) SetSelectedState(sel bool) {
-	g.PartsWidgetBase.SetSelectedState(sel)
-	g.SetButtonState(ButtonActive) // update style -- will sort through all state
-}
-
 // SetChecked sets the checked state of this button -- does not emit signal or
 // update
 func (g *ButtonBase) SetChecked(chk bool) {
@@ -178,7 +171,7 @@ func (g *ButtonBase) SetIcon(iconName string) {
 	SetButtonIcon(g, iconName)
 }
 
-// SetButtonState sets the button state to target
+// SetButtonState sets the button state
 func (g *ButtonBase) SetButtonState(state ButtonStates) {
 	if g.IsInactive() {
 		if g.IsSelected() {
@@ -194,7 +187,27 @@ func (g *ButtonBase) SetButtonState(state ButtonStates) {
 		}
 	}
 	g.State = state
-	g.Sty = g.StateStyles[state] // get relevant styles
+	g.Sty = g.StateStyles[state]
+}
+
+// UpdateButtonStyle sets the button style based on current state info
+func (g *ButtonBase) UpdateButtonStyle() {
+	if g.IsInactive() {
+		if g.IsSelected() {
+			g.State = ButtonSelected
+		} else {
+			g.State = ButtonInactive
+		}
+	} else {
+		if g.State == ButtonSelected && !g.IsSelected() {
+			g.State = ButtonActive
+		} else if g.State == ButtonActive && g.IsSelected() {
+			g.State = ButtonSelected
+		} else if g.State == ButtonActive && g.HasFocus() {
+			g.State = ButtonFocus
+		}
+	}
+	g.Sty = g.StateStyles[g.State]
 }
 
 // ButtonPressed sets the button in the down state -- mouse clicked down but
@@ -495,7 +508,7 @@ func (g *ButtonBase) Render2D() {
 	}
 	if g.PushBounds() {
 		ButtonEvents(g)
-		g.Sty = g.StateStyles[g.State] // get current styles
+		g.UpdateButtonStyle()
 		g.This.(ButtonWidget).ConfigPartsIfNeeded()
 		st := &g.Sty
 		g.RenderStdBox(st)

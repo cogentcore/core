@@ -673,12 +673,16 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	}
 
 	switch kf {
-	case KeyFunSelectItem:
-		tf.EditDone() // not processed, others could consume
-	case KeyFunAccept:
-		tf.EditDone() // not processed, others could consume
-	case KeyFunAbort:
-		tf.RevertEdit() // not processed, others could consume
+	case KeyFunSelectItem: // enter
+		fallthrough
+	case KeyFunAccept: // ctrl+enter
+		tf.EditDone()
+		kt.SetProcessed()
+		tf.FocusNext()
+	case KeyFunAbort: // esc
+		tf.RevertEdit()
+		kt.SetProcessed()
+		tf.FocusNext()
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)

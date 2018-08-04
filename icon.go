@@ -99,6 +99,9 @@ func (ic *Icon) Style2D() {
 		sic.CSS = ic.CSS
 		sic.Sty = ic.Sty
 		sic.DefStyle = ic.DefStyle
+		if ic.NeedsFullReRender() {
+			sic.SetFullReRender()
+		}
 	}
 }
 
@@ -112,16 +115,13 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle) {
 	ic.Layout2DChildren()
 }
 
-func (g *Icon) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (ic *Icon) Render2D() {
+	if ic.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		// connect to events here
-		g.Render2DChildren()
-		g.PopBounds()
-		// } else {
-		// 	g.DisconnectAllEvents()
+	if ic.PushBounds() {
+		ic.Render2DChildren()
+		ic.PopBounds()
 	}
 }
 
