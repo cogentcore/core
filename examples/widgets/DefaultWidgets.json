@@ -79,17 +79,18 @@
               "Nm": "title",
               "UniqueNm": "title",
               "Props": {
+                "vertical-align": "__enum:(gi.Align)AlignTop",
+                "font-family": "Times New Roman, serif",
                 "font-size": "x-large",
                 "line-height": 1.5,
-                "text-align": "__enum:(gi.Align)AlignCenter",
-                "vertical-align": "__enum:(gi.Align)AlignTop",
-                "font-family": "Times New Roman, serif"
+                "text-align": "__enum:(gi.Align)AlignCenter"
               },
               "Kids": null,
               "Class": "",
               "CSS": null,
               "Tooltip": "",
-              "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ci\u003eGoGi\u003c/i\u003e Widgets\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eCtrl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eCtrl+Alt+E\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e"
+              "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ci\u003eGoGi\u003c/i\u003e Widgets\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eCtrl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eCtrl+Alt+E\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e",
+              "Selectable": false
             },
             {
               "Nm": "str2",
@@ -105,7 +106,7 @@
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "blspc",
@@ -134,14 +135,15 @@
               "Class": "",
               "CSS": null,
               "Tooltip": "",
-              "Text": "Buttons:"
+              "Text": "Buttons:",
+              "Selectable": true
             }
           ],
           "Class": "",
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "brow",
@@ -171,6 +173,12 @@
               "Nm": "button1",
               "UniqueNm": "button1",
               "Props": {
+                "__type:margin": "units.Value",
+                "margin": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
                 "#icon": {
                   "__type:width": "units.Value",
                   "width": {
@@ -184,12 +192,6 @@
                     "Un": "Em",
                     "Dots": 0
                   }
-                },
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
                 }
               },
               "Kids": null,
@@ -328,13 +330,13 @@
                   "Nm": "sep1",
                   "UniqueNm": "sep1",
                   "Props": {
+                    "max-width": -1,
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 0.5,
                       "Un": "Em",
                       "Dots": 0
-                    },
-                    "max-width": -1
+                    }
                   },
                   "Kids": null,
                   "Class": "",
@@ -363,7 +365,7 @@
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "slspc",
@@ -392,26 +394,27 @@
               "Class": "",
               "CSS": null,
               "Tooltip": "",
-              "Text": "Sliders:"
+              "Text": "Sliders:",
+              "Selectable": false
             }
           ],
           "Class": "",
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "srow",
           "UniqueNm": "srow",
           "Props": {
-            "horizontal-align": "left",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
               "Un": "Px",
               "Dots": 0
-            }
+            },
+            "horizontal-align": "left"
           },
           "Kids": [
             {
@@ -497,6 +500,12 @@
               "Nm": "slider2",
               "UniqueNm": "slider2",
               "Props": {
+                "__type:max-height": "units.Value",
+                "max-height": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
                 "__type:height": "units.Value",
                 "height": {
                   "Val": 10,
@@ -519,12 +528,6 @@
                 "min-width": {
                   "Val": 1,
                   "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:max-height": "units.Value",
-                "max-height": {
-                  "Val": -1,
-                  "Un": "Px",
                   "Dots": 0
                 }
               },
@@ -639,6 +642,12 @@
               "Nm": "scrollbar2",
               "UniqueNm": "scrollbar2",
               "Props": {
+                "__type:width": "units.Value",
+                "width": {
+                  "Val": 1,
+                  "Un": "Em",
+                  "Dots": 0
+                },
                 "__type:min-width": "units.Value",
                 "min-width": {
                   "Val": 1,
@@ -660,12 +669,6 @@
                 "__type:min-height": "units.Value",
                 "min-height": {
                   "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 1,
                   "Un": "Em",
                   "Dots": 0
                 }
@@ -714,7 +717,7 @@
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "tlspc",
@@ -743,14 +746,15 @@
               "Class": "",
               "CSS": null,
               "Tooltip": "",
-              "Text": "Text Widgets:"
+              "Text": "Text Widgets:",
+              "Selectable": false
             }
           ],
           "Class": "",
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         },
         {
           "Nm": "txrow",
@@ -832,19 +836,22 @@
           "CSS": null,
           "Tooltip": "",
           "Lay": "LayoutRow",
-          "StackTop": null
+          "StackTop": 0
         }
       ],
       "Class": "",
       "CSS": null,
       "Tooltip": "",
       "Lay": "LayoutCol",
-      "StackTop": null,
+      "StackTop": 0,
       "Stripes": "NoStripes"
     }
   ],
   "Class": "",
   "CSS": {
+    "kbd": {
+      "color": "blue"
+    },
     "button": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -871,9 +878,6 @@
         "B": 255,
         "A": 255
       }
-    },
-    "kbd": {
-      "color": "blue"
     }
   },
   "Tooltip": "",

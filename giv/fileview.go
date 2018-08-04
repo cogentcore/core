@@ -194,8 +194,9 @@ func (fv *FileView) ConfigFilesRow() {
 		},
 	}
 	sv.SetStretchMaxHeight()
-	sv.SetProp("index", false) // no index
-	sv.SetInactive()           // select only
+	sv.SetProp("index", false)
+	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
+	sv.SetInactive()                   // select only
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
 	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -483,6 +484,8 @@ type FileTime time.Time
 func (ft FileTime) String() string {
 	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
 }
+
+// note: rendering icons taking a fair amount of extra time
 
 // FileInfo represents the information about a given file / directory
 type FileInfo struct {

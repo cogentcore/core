@@ -86,6 +86,9 @@ func (g *Action) ButtonAsBase() *ButtonBase {
 
 // trigger action signal
 func (g *Action) ButtonRelease() {
+	if g.IsInactive() {
+		return
+	}
 	wasPressed := (g.State == ButtonDown)
 	updt := g.UpdateStart()
 	g.SetButtonState(ButtonActive)

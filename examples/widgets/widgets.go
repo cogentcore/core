@@ -53,9 +53,6 @@ func mainrun() {
 		},
 		".hslides": ki.Props{
 			"background-color": gi.Color{240, 225, 255, 255},
-			":active": ki.Props{
-				"background-color": "yellow",
-			},
 		},
 		"kbd": ki.Props{
 			"color": "blue",

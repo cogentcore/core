@@ -112,6 +112,10 @@ const (
 	// dialogs etc
 	LowPri
 
+	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
+	// was already processed -- e.g., DoubleClick, Accept in dialog
+	LowRawPri
+
 	EventPrisN
 
 	// AllPris = -1 = all priorities (for delete cases only)
@@ -524,14 +528,14 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 
 	// fmt.Printf("got event type: %v\n", et)
 	for pri := HiPri; pri < EventPrisN; pri++ {
-		if evi.IsProcessed() { // someone took care of it
-			return
+		if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
+			continue
 		}
 		w.EventSigs[et][pri].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
-			if evi.IsProcessed() { // someone took care of it
+			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 				return false
 			}
 			gii, gi := KiToNode2D(k)

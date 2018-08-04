@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _EventPris_name = "AllPrisHiPriRegPriLowPriEventPrisN"
+const _EventPris_name = "AllPrisHiPriRegPriLowPriLowRawPriEventPrisN"
 
-var _EventPris_index = [...]uint8{0, 7, 12, 18, 24, 34}
+var _EventPris_index = [...]uint8{0, 7, 12, 18, 24, 33, 43}
 
 func (i EventPris) String() string {
 	i -= -1

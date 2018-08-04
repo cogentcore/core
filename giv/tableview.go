@@ -46,7 +46,8 @@ type TableView struct {
 	Slice        interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	StyleFunc    TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool) -- index may be needed for copy / paste and DND of rows"`
+	ShowIndex    bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool) -- index may be needed for copy / paste and DND of rows"`
+	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 	CurSelField  string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
 	CurSelVal    interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in CurSelField"`
 	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item -- see SelectedRows for full set of selected rows in active editing mode"`
@@ -109,6 +110,10 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	tv.ShowIndex = true
 	if sidxp, ok := tv.Prop("index"); ok {
 		tv.ShowIndex, _ = kit.ToBool(sidxp)
+	}
+	tv.InactKeyNav = true
+	if siknp, ok := tv.Prop("inact-key-nav"); ok {
+		tv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
 	tv.TmpSave = tmpSave
 	tv.UpdateFromSlice()
@@ -785,6 +790,9 @@ func (tv *TableView) Render2D() {
 }
 
 func (tv *TableView) HasFocus2D() bool {
+	if tv.IsInactive() {
+		return tv.InactKeyNav
+	}
 	return tv.ContainsFocus() // anyone within us gives us focus..
 }
 
@@ -1008,7 +1016,7 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 	}
 }
 
-// UpdateSelect updates the selection for the given index
+// UpdateSelect updates the selection for the given index -- callback from widgetsig select
 func (tv *TableView) UpdateSelect(idx int, sel bool) {
 	if tv.IsInactive() {
 		if tv.SelectedIdx >= 0 { // unselect current
@@ -1516,24 +1524,15 @@ func (tv *TableView) DropCancel() {
 	tv.DragNDropFinalize(dnd.DropIgnore)
 }
 
-func (tv *TableView) KeyInput(kt *key.ChordEvent) {
+func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
 	selMode := mouse.SelectModeMod(kt.Modifiers)
 	row := tv.SelectedIdx
 	switch kf {
-	case gi.KeyFunSelectItem:
-		tv.SelectRowAction(tv.SelectedIdx, selMode)
-		kt.SetProcessed()
 	case gi.KeyFunCancelSelect:
 		tv.UnselectAllRows()
 		tv.SelectMode = false
 		kt.SetProcessed()
-	// case gi.KeyFunMoveRight:
-	// 	tv.Open()
-	// 	kt.SetProcessed()
-	// case gi.KeyFunMoveLeft:
-	// 	tv.Close()
-	// 	kt.SetProcessed()
 	case gi.KeyFunMoveDown:
 		tv.MoveDownAction(selMode)
 		kt.SetProcessed()
@@ -1581,22 +1580,51 @@ func (tv *TableView) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-func (tv *TableView) TableViewEvents() {
-	tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-		kt := d.(*key.ChordEvent)
-		tvv.KeyInput(kt)
-	})
-	tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		de := d.(*dnd.Event)
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
-		switch de.Action {
-		case dnd.Start:
-			tvv.DragNDropStart()
-		case dnd.DropOnTarget:
-			tvv.DragNDropTarget(de)
-		case dnd.DropFmSource:
-			tvv.DragNDropSource(de)
+func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
+	kf := gi.KeyFun(kt.ChordString())
+	row := tv.SelectedIdx
+	switch kf {
+	case gi.KeyFunMoveDown:
+		nr := row + 1
+		if nr < tv.BuiltSize {
+			tv.UpdateSelect(nr, true)
+			kt.SetProcessed()
 		}
-	})
+	case gi.KeyFunMoveUp:
+		nr := row - 1
+		if nr >= 0 {
+			tv.UpdateSelect(nr, true)
+			kt.SetProcessed()
+		}
+	}
+}
+
+func (tv *TableView) TableViewEvents() {
+	if tv.IsInactive() {
+		if tv.InactKeyNav {
+			tv.ConnectEventType(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+				tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+				kt := d.(*key.ChordEvent)
+				tvv.KeyInputInactive(kt)
+			})
+		}
+	} else {
+		tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			kt := d.(*key.ChordEvent)
+			tvv.KeyInputActive(kt)
+		})
+		tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			de := d.(*dnd.Event)
+			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			switch de.Action {
+			case dnd.Start:
+				tvv.DragNDropStart()
+			case dnd.DropOnTarget:
+				tvv.DragNDropTarget(de)
+			case dnd.DropFmSource:
+				tvv.DragNDropSource(de)
+			}
+		})
+	}
 }

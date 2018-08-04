@@ -116,12 +116,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* ctrl+enter is adding rows on std key map dialog
-* textfield: still have issues with not applying when dialog closed
+* use screenprefs
 
-* TableView: 
-* context menu
-* inactive: key nav and single-select -- low-pri key event with always-focus.
+* TableView: context menu
 
 * search for tableview, treeview
 * DND and copy/paste for tableview
@@ -149,7 +146,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   field to be int64..  for 32bit case, not that big a deal, and for most
   user-facing cases, int32 is sufficient, so focus on that case??
 
-* drag should be statefull -- only drag current item -- logic is in there but not working properly
+* drag should be stateful -- only drag current item -- logic is in there but not working properly
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab?
 
