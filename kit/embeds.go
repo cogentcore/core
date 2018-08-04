@@ -12,7 +12,7 @@ import (
 // This file contains helpful functions for dealing with embedded structs, in
 // the reflect system
 
-// FlatFieldsTypeFun calls a function on all the the primary fields of a given
+// FlatFieldsTypeFun calls a function on all the primary fields of a given
 // struct type, including those on anonymous embedded structs that this struct
 // has, passing the current (embedded) type and StructField -- effectively
 // flattens the reflect field list -- if fun returns false then iteration
@@ -42,7 +42,35 @@ func FlatFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflec
 	return rval
 }
 
-// FlatFieldsValueFun calls a function on all the the primary fields of a
+// AllFieldsTypeFun calls a function on all the fields of a given struct type,
+// including those on *any* embedded structs that this struct has -- if fun
+// returns false then iteration stops -- overall rval is false if iteration
+// was stopped or there was an error (logged), true otherwise.
+func AllFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+	typ = NonPtrType(typ)
+	if typ.Kind() != reflect.Struct {
+		log.Printf("kit.AllFieldsTypeFun: Must call on a struct type, not: %v\n", typ)
+		return false
+	}
+	rval := true
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		if f.Type.Kind() == reflect.Struct {
+			rval = AllFieldsTypeFun(f.Type, fun) // no err here
+			if !rval {
+				break
+			}
+		} else {
+			rval = fun(typ, f)
+			if !rval {
+				break
+			}
+		}
+	}
+	return rval
+}
+
+// FlatFieldsValueFun calls a function on all the primary fields of a
 // given struct value (must pass a pointer to the struct) including those on
 // anonymous embedded structs that this struct has, passing the current
 // (embedded) type and StructField -- effectively flattens the reflect field
@@ -102,6 +130,34 @@ func FlatFields(typ reflect.Type) []reflect.StructField {
 		return nil
 	}
 	return ff
+}
+
+// AllFields returns a slice list of all the StructField type information for
+// all elemental fields of given type and all embedded types -- returns nil on
+// error (logged)
+func AllFields(typ reflect.Type) []reflect.StructField {
+	ff := make([]reflect.StructField, 0)
+	falseErr := AllFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+		ff = append(ff, field)
+		return true
+	})
+	if falseErr == false {
+		return nil
+	}
+	return ff
+}
+
+// AllFieldsN returns number of elemental fields in given type
+func AllFieldsN(typ reflect.Type) int {
+	n := 0
+	falseErr := AllFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+		n++
+		return true
+	})
+	if falseErr == false {
+		return 0
+	}
+	return n
 }
 
 // FlatFieldsVals returns a slice list of all the field reflect.Value's for
