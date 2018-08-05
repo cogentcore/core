@@ -47,7 +47,7 @@ type TableView struct {
 	Slice        interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	StyleFunc    TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	ShowIndex    bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool) -- index may be needed for copy / paste and DND of rows"`
+	ShowIndex    bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
 	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 	CurSelField  string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
 	CurSelVal    interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in CurSelField"`
@@ -814,8 +814,9 @@ func (tv *TableView) RowStruct(row int) interface{} {
 	return stru
 }
 
-// RowIndexLabel returns the index label for given row -- nil if no indexes or out of range
-func (tv *TableView) RowIndexLabel(row int) (*gi.Label, bool) {
+// RowFirstWidget returns the first widget for given row (could be index or
+// not) -- false if out of range
+func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	if !tv.ShowIndex {
 		return nil, false
 	}
@@ -828,8 +829,8 @@ func (tv *TableView) RowIndexLabel(row int) (*gi.Label, bool) {
 		return nil, false
 	}
 	sgf := sg.KnownChild(2).(*gi.Frame)
-	idxlab := sgf.Kids[row*nWidgPerRow].(*gi.Label)
-	return idxlab, true
+	widg := sgf.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
+	return widg, true
 }
 
 // RowGrabFocus grabs the focus for the first focusable widget in given row --
@@ -868,19 +869,20 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 // RowPos returns center of window position of index label for row (ContextMenuPos)
 func (tv *TableView) RowPos(row int) image.Point {
 	var pos image.Point
-	idxlab, ok := tv.RowIndexLabel(row)
+	widg, ok := tv.RowFirstWidget(row)
 	if ok {
-		pos = idxlab.ContextMenuPos()
+		pos = widg.ContextMenuPos()
 	}
 	return pos
 }
 
 // RowFromPos returns the row that contains given vertical position, false if not found
 func (tv *TableView) RowFromPos(posY int) (int, bool) {
+	// todo: could optimize search to approx loc, and search up / down from there
 	for rw := 0; rw < tv.BuiltSize; rw++ {
-		idxlab, ok := tv.RowIndexLabel(rw)
+		widg, ok := tv.RowFirstWidget(rw)
 		if ok {
-			if idxlab.WinBBox.Min.Y < posY && posY < idxlab.WinBBox.Max.Y {
+			if widg.WinBBox.Min.Y < posY && posY < widg.WinBBox.Max.Y {
 				return rw, true
 			}
 		}
@@ -937,13 +939,9 @@ func (tv *TableView) MoveDown(selMode mouse.SelectModes) int {
 // row
 func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveDown(selMode)
-	// if nrow >= 0 {
-	// 	tv.RowGrabFocus(nrow)
-	// 	// fw := tv.RowGrabFocus(nrow)
-	// 	// if fw != nil {
-	// 	// 	tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), nrow)
-	// 	// }
-	// }
+	if nrow >= 0 {
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+	}
 	return nrow
 }
 
@@ -969,13 +967,9 @@ func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
 // row
 func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveUp(selMode)
-	// if nrow >= 0 {
-	// 	tv.RowGrabFocus(nrow)
-	// 	// fw := tv.RowGrabFocus(nrow)
-	// 	// if fw != nil {
-	// 	// 	tv.RootView.TableViewSig.Emit(tv.RootView.This, int64(TableViewSelected), nrow)
-	// 	// }
-	// }
+	if nrow >= 0 {
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+	}
 	return nrow
 }
 
@@ -1236,7 +1230,7 @@ func (tv *TableView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
 			if err == nil {
 				sl = append(sl, nval)
 			} else {
-				log.Printf("gi.TableView NodesFromMimeData: JSON load error: %v\n", err)
+				log.Printf("gi.TableView RowsFromMimeData: JSON load error: %v\n", err)
 			}
 		}
 	}
@@ -1389,11 +1383,11 @@ func (tv *TableView) DragNDropStart() {
 		tv.MimeDataRow(&md, r)
 	}
 	rws := tv.SelectedRowsList(true) // descending sort
-	idxlab, ok := tv.RowIndexLabel(rws[0])
+	widg, ok := tv.RowFirstWidget(rws[0])
 	if ok {
 		bi := &gi.Bitmap{}
 		bi.InitName(bi, tv.UniqueName())
-		bi.GrabRenderFrom(idxlab)
+		bi.GrabRenderFrom(widg)
 		gi.ImageClearer(bi.Pixels, 50.0)
 		tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
 	}

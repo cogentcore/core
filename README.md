@@ -19,11 +19,11 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI frame
 
 * All standard widgets: `Button`, `Menu`, `Slider`, `TextField`, `SpinBox`, `ComboBox` etc, with tooltips, hover, focus, copy / paste (full native clipboard support), drag-n-drop -- the full set of standard GUI functionality.  See `gi/examples/widgets` for a demo.
 
-* Powerful `Layout` logic auto-sizes everything -- very easy to configure interfaces that just work across different scales, resolutions, platforms.  Automatically remembers and reinstates window positions and sizes.
+* Powerful `Layout` logic auto-sizes everything -- very easy to configure interfaces that just work across different scales, resolutions, platforms.  Automatically remembers and reinstates window positions and sizes across sessions.
 
 * CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc).
 
-* Compiles in second(s), compared to hour(s) for Qt, and is fully native with no cgo dependency on Linux and Windows, and minimal cgo (necessary) on MacOS
+* Compiles in second(s), compared to hour(s) for Qt, and is fully native with no cgo dependency on Linux and Windows, and minimal cgo (necessary) on MacOS.
 
 * Fully self-contained -- does *not* use OS-specific native widgets -- results in simple, elegant, consistent code across platforms, and is fully `HiDPI` capable and scalable using standard `Shift+Ctrl/Cmd+Plus or Minus` key, and in `Preferences` (press `Ctrl+Alt+P` in any window to get Prefs editor).
 
@@ -116,6 +116,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* copy all the tableview DND copy / paste etc code to sliceview
+
 * drag should be stateful -- only drag current item -- logic is in there but not working properly
 
 * equivalent of AllFieldsN for AllMapElsN -- number of elemental map elements -- use for determining inline display.
@@ -157,6 +159,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * text language translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
 
+* undo -- sub-package, use diff package (prob this: https://github.com/sergi/go-diff) on top of json outputs, as in emergent diffmgr
+	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
+	+ records themselves are sequential slices of diff records and commands, with same logic as emergent
+	+ diffing happens in separate routine..
+
 * DND needs enter / exit events so nodes can signal their ability to accept drop..  later..
 
 * Reminder: grep all todo: in code -- lots!
@@ -192,13 +199,6 @@ see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
 + RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
 + ProgressBar -- very simple
 + TextArea -- go full editor..
-
-## Remaining features for widgets
-
-+ FileView view and dialog -- various, see todo in fileview.go
-+ TextField -- undo, constraints
-+ TreeView -- see about LI, UL lists..
-+ TabWidget -- needs updating
 
 ## Performance issues
 
