@@ -107,20 +107,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ do similar font name updating as done on Windows now
 
 * mac:
-	+ touchpad double-click -> right mouse button -- not obviously working?
 	+ impl setPos
-	+ win pos getting incremented by title.. so annoying
-	+ positioning not working for laptop display -- use non-dpi coords?
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
 
-* copy all the tableview DND copy / paste etc code to sliceview
-
 * drag should be stateful -- only drag current item -- logic is in there but not working properly
-
-* equivalent of AllFieldsN for AllMapElsN -- number of elemental map elements -- use for determining inline display.
 
 * use screenprefs
 

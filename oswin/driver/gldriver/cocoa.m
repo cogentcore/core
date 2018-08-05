@@ -111,8 +111,10 @@ uint64 threadID() {
 
     // origin in mac for position is lower-left
     NSRect p = [self.window frame];
+    NSRect crect = [self.window contentRectForFrameRect: p ];
     int l = p.origin.x * pixratio;
-    int t = (screenH - (p.origin.y + p.size.height)) * pixratio;
+    int t = (screenH - (p.origin.y + crect.size.height)) * pixratio;
+    // printf("res: pixratio: %g  frame origin: %g, %g, l,t: %d, %d\n", pixratio, p.origin.x, p.origin.y, l, t);
 
     setGeom((GoUintptr)self, scrno, dpi, w, h, l, t);
 }
@@ -272,7 +274,8 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
     double h = (double)height / pixratio;
 
     double l = (double)left / pixratio;
-    double b = (screenH - ((double)(top + height))) / pixratio;
+    double b = (screenH - ((double)(top/pixratio + h)));
+    // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
 
     __block ScreenGLView* view = NULL;
 

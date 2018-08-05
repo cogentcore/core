@@ -21,10 +21,10 @@ func init() {
 	gi.TheViewIFace = &ViewIFace{}
 }
 
-// MapInlineLen is the number of map entries at or below which an inline
+// MapInlineLen is the number of map elements at or below which an inline
 // representation of the map will be presented -- more convenient for small
 // #'s of props
-var MapInlineLen = 4
+var MapInlineLen = 6
 
 // StructInlineLen is the number of elemental struct fields at or below which an inline
 // representation of the struct will be presented -- more convenient for small structs
@@ -159,6 +159,7 @@ func ToValueView(it interface{}) ValueView {
 	case vk == reflect.Map:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
+		sz = kit.MapStructElsN(it)
 		if sz > 0 && sz <= MapInlineLen {
 			vv := MapInlineValueView{}
 			vv.Init(&vv)
