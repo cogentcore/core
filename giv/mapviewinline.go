@@ -49,7 +49,7 @@ func (mv *MapViewInline) ConfigParts() {
 	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
-	mv.Parts.Lay = gi.LayoutRow
+	mv.Parts.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)

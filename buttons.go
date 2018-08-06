@@ -457,7 +457,7 @@ func (g *ButtonBase) ButtonRelease() {
 }
 
 func (g *ButtonBase) ConfigParts() {
-	g.Parts.Lay = LayoutRow
+	g.Parts.Lay = LayoutHoriz
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names

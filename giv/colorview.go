@@ -49,7 +49,7 @@ func (sv *ColorView) SetColor(color *gi.Color, tmpSave ValueView) {
 
 // SetFrame configures view as a frame
 func (sv *ColorView) SetFrame() {
-	sv.Lay = gi.LayoutCol
+	sv.Lay = gi.LayoutVert
 }
 
 // Config configures a standard setup of entire view

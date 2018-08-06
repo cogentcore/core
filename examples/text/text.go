@@ -20,14 +20,10 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
 	win := gi.NewWindow2D("gogi-text-test", "GoGi Text Test", width, height, true) // true = pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
 	// style sheet
 	var css = ki.Props{
@@ -37,11 +33,10 @@ func mainrun() {
 	}
 	vp.CSS = css
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
+	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
@@ -63,9 +58,9 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	rtxt := trow.AddNewChild(gi.KiT_Label, "rtxt").(*gi.Label)
 	rtxt.Text = "this is to test right margin"
 
-	vlay.AddNewChild(gi.KiT_Space, "spc")
+	mfr.AddNewChild(gi.KiT_Space, "spc")
 
-	wrlab := vlay.AddNewChild(gi.KiT_Label, "wrlab").(*gi.Label)
+	wrlab := mfr.AddNewChild(gi.KiT_Label, "wrlab").(*gi.Label)
 	wrlab.SetProp("word-wrap", true)
 	wrlab.SetProp("max-width", "20em")
 	wrlab.SetProp("line-height", 1.2)
@@ -75,7 +70,7 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `
 
-	vlay.AddNewChild(gi.KiT_Stretch, "str")
+	mfr.AddNewChild(gi.KiT_Stretch, "str")
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()

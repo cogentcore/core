@@ -25,10 +25,10 @@ func PrefsEditor(p *gi.Preferences) {
 	vp.Fill = true
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	vlay.Lay = gi.LayoutVert
 
 	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
+	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
 	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
@@ -49,7 +49,7 @@ func PrefsEditor(p *gi.Preferences) {
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
 	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutRow
+	brow.Lay = gi.LayoutHoriz
 	brow.SetProp("horizontal-align", "center")
 	brow.SetStretchMaxWidth()
 

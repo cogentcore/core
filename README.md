@@ -113,6 +113,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* update gi/doc.go with final readme notes etc!
+
+* add MenuBar / Toolbar -- just a layout really, with some styling..
+
+* event injection -- Edit/Cut/Copy/Paste convenience method, and these just inject the corresponding key press
+
+* main menu (mac, other platforms?)
+
+* Label renders links, uses HandPointing for links, delivers link clicked signal
+
 * drag should be stateful -- only drag current item -- logic is in there but not working properly
 
 * use screenprefs
@@ -137,10 +147,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   user-facing cases, int32 is sufficient, so focus on that case??
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab? ultimately want multi-row super-tabs -- flow layout..  with dnd..
-
-* add MenuBar / Toolbar -- just a layout really, with some styling..
-
-* main menu (mac, other platforms?)
 
 * arg view / dialog and button tags
 

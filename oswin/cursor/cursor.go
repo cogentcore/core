@@ -7,8 +7,13 @@
 package cursor
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/goki/ki/kit"
 )
+
+// todo: apps can add new named shapes starting at ShapesN
 
 // Shapes are the standard cursor shapes available on all platforms
 type Shapes int32
@@ -81,6 +86,9 @@ var KiT_Shapes = kit.Enums.AddEnum(ShapesN, false, nil)
 // possible to set the cursor from an image / svg.
 type Cursor interface {
 
+	// Current returns the current shape of the cursor.
+	Current() Shapes
+
 	// Push pushes a new active cursor.
 	Push(sh Shapes)
 
@@ -93,9 +101,61 @@ type Cursor interface {
 	// generally not recommended for direct use -- prefer Push / Pop.
 	Set(sh Shapes)
 
+	// IsVisible returns whether cursor is currently visible (according to Hide / show actions)
+	IsVisible() bool
+
 	// Hide hides the cursor
 	Hide()
 
 	// Show shows the cursor after a hide -- must always be balanced with Hide
 	Show()
+}
+
+// CursorBase provides the common infrastructure for Cursor interface.
+type CursorBase struct {
+
+	// Stack is the stack of shapes from push / pop actions.
+	Stack []Shapes
+
+	// Cur is current shape -- maintained by std methods.
+	Cur Shapes
+
+	// Vis is visibility: be sure to initialize to true!
+	Vis bool
+}
+
+func (c *CursorBase) Current() Shapes {
+	return c.Cur
+}
+
+func (c *CursorBase) IsVisible() bool {
+	return c.Vis
+}
+
+// PushStack pushes item on the stack
+func (c *CursorBase) PushStack(sh Shapes) {
+	c.Cur = sh
+	c.Stack = append(c.Stack, sh)
+}
+
+// PopStack pops item off the stack, returning 2nd-to-last item on stack
+func (c *CursorBase) PopStack() (Shapes, error) {
+	sz := len(c.Stack)
+	if len(c.Stack) == 0 {
+		err := fmt.Errorf("gi.oswin.cursor PopStack: stack is empty -- programmer error\n")
+		log.Print(err)
+		return Arrow, err
+	}
+	c.Stack = c.Stack[:sz-1]
+	c.Cur = c.PeekStack()
+	return c.Cur, nil
+}
+
+// PeekStack returns top item on the stack (default Arrow if nothing on stack)
+func (c *CursorBase) PeekStack() Shapes {
+	sz := len(c.Stack)
+	if len(c.Stack) == 0 {
+		return Arrow
+	}
+	return c.Stack[sz-1]
 }

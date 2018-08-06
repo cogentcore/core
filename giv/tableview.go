@@ -160,7 +160,7 @@ func (tv *TableView) CacheVisFields() {
 
 // SetFrame configures view as a frame
 func (tv *TableView) SetFrame() {
-	tv.Lay = gi.LayoutCol
+	tv.Lay = gi.LayoutVert
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -253,7 +253,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	if sg == nil {
 		return
 	}
-	sg.Lay = gi.LayoutCol
+	sg.Lay = gi.LayoutVert
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
@@ -272,7 +272,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	}
 
 	sgh := sg.KnownChild(0).(*gi.Layout)
-	sgh.Lay = gi.LayoutRow
+	sgh.Lay = gi.LayoutHoriz
 	sgh.SetStretchMaxWidth()
 
 	sep := sg.KnownChild(1).(*gi.Separator)

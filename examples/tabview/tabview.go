@@ -36,12 +36,10 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	tv1 := vlay.AddNewChild(giv.KiT_TabView, "tv1").(*giv.TabView)
+	tv1 := mfr.AddNewChild(giv.KiT_TabView, "tv1").(*giv.TabView)
 	tv1.SetSrcNode(&srctree)
 
 	for i, sk := range srctree.Kids {

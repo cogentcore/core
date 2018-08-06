@@ -48,7 +48,7 @@ var MapViewProps = ki.Props{
 
 // SetFrame configures view as a frame
 func (mv *MapView) SetFrame() {
-	mv.Lay = gi.LayoutCol
+	mv.Lay = gi.LayoutVert
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame

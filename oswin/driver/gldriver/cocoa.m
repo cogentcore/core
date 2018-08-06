@@ -55,10 +55,72 @@ uint64 threadID() {
     return id;
 }
 
+///////////////////////////////////////////////////////////////////////
+//   MainMenu
+
+// qtbase/src/plugins/platforms/cocoa/qcocoamenu.mm
+
+@interface MenuDelegate : NSObject <NSMenuDelegate> {
+}
+
+@end
+
 @interface ScreenGLView : NSOpenGLView<NSWindowDelegate>
 {
 }
 @end
+
+@implementation MenuDelegate
+
+- (void) itemFired:(NSMenuItem*) item
+{
+    NSString* title = [item title];
+    const char* utf8_title = [title UTF8String];
+    long tag = (long)[item tag];
+
+    printf("got menu item: %s tag: %ld\n", utf8_title, tag);
+}
+
+// Cocoa will query the menu item's target for the worksWhenModal selector.
+// So we need to implement this to allow the items to be handled correctly
+// when a modal dialog is visible.
+- (BOOL)worksWhenModal
+{
+    return YES;
+}
+
+@end
+
+MenuDelegate* menu_delegate = NULL;
+
+void menuInitDelegate() {
+    if (menu_delegate == NULL) {
+        menu_delegate = [[MenuDelegate alloc] init];
+    }
+}
+
+void menuAddItem(ScreenGLView* view) {
+    menuInitDelegate();
+    NSMenu* mmen = [NSApp mainMenu];
+
+    [mmen setAutoenablesItems:YES];
+
+    NSMenuItem* edit = [mmen addItemWithTitle:@"Edit" action:nil keyEquivalent: @""];
+    edit.target = menu_delegate;
+    edit.action = @selector(itemFired:);
+
+    NSMenu* editm = [[NSMenu alloc] initWithTitle:@"Edit"];
+    edit.submenu = editm;
+    
+    NSMenuItem* mi = [editm addItemWithTitle:@"NewAction" action:@selector(itemFired:) keyEquivalent: @""];
+    mi.target = menu_delegate;
+    mi.tag = 42;
+
+    printf("attempted to make menu\n");
+}
+
+////////////////////////////////////////////////////////////
+//  ScreenGLView
 
 @implementation ScreenGLView
 - (void)prepareOpenGL {
@@ -117,6 +179,10 @@ uint64 threadID() {
     // printf("res: pixratio: %g  frame origin: %g, %g, l,t: %d, %d\n", pixratio, p.origin.x, p.origin.y, l, t);
 
     setGeom((GoUintptr)self, scrno, dpi, w, h, l, t);
+
+    if (menu_delegate == NULL) {
+        menuAddItem(self);
+    }
 }
 
 - (void)reshape {
@@ -146,7 +212,7 @@ uint64 threadID() {
         dx = theEvent.scrollingDeltaX;
         dy = theEvent.scrollingDeltaY;
     }
-
+    
     mouseEvent((GoUintptr)self, x, y, dx, dy, theEvent.type, theEvent.buttonNumber, theEvent.modifierFlags);
 }
 
@@ -353,7 +419,7 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
             fr.origin.x = l;
             fr.origin.y = b;
             [window setFrame:fr display:YES animate:NO];
-		
+
         });
 
     return (uintptr_t)view;
@@ -704,3 +770,5 @@ void hideCursor() {
 void showCursor() {
     [NSCursor unhide];
 }
+
+

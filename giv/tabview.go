@@ -41,7 +41,7 @@ const (
 
 // TabView represents children of a source node as tabs with a stacked
 // layout of Frame widgets for each child in the source -- we create a
-// LayoutCol with a LayoutRow of tab buttons and then the LayoutStacked of
+// LayoutVert with a LayoutHoriz of tab buttons and then the LayoutStacked of
 // Frames
 type TabView struct {
 	gi.WidgetBase
@@ -179,7 +179,7 @@ func (g *TabView) InitTabs() {
 	for _, sk := range skids {
 		nm := "TabFrameOf_" + sk.UniqueName()
 		tf := tabstack.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
-		tf.Lay = gi.LayoutCol
+		tf.Lay = gi.LayoutVert
 		tf.SetProp("max-width", -1.0) // stretch flex
 		tf.SetProp("max-height", -1.0)
 		nm = "TabOf_" + sk.UniqueName()
@@ -203,9 +203,9 @@ func (g *TabView) InitTabView() {
 	}
 	updt := g.UpdateStart()
 	tabcol := g.AddNewChild(gi.KiT_Layout, "TabCol").(*gi.Layout)
-	tabcol.Lay = gi.LayoutCol
+	tabcol.Lay = gi.LayoutVert
 	tabrow := tabcol.AddNewChild(gi.KiT_Layout, "TabRow").(*gi.Layout)
-	tabrow.Lay = gi.LayoutRow
+	tabrow.Lay = gi.LayoutHoriz
 	tabstack := tabcol.AddNewChild(gi.KiT_Layout, "TabStack").(*gi.Layout)
 	tabstack.Lay = gi.LayoutStacked
 	tabstack.SetProp("max-width", -1.0) // stretch flex

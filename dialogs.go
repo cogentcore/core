@@ -232,7 +232,7 @@ var DialogProps = ki.Props{
 func (dlg *Dialog) SetFrame() *Frame {
 	dlg.SetProp("color", &Prefs.FontColor)
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
-	frame.Lay = LayoutCol
+	frame.Lay = LayoutVert
 	// dlg.StylePart(frame.This)
 	return frame
 }
@@ -304,7 +304,7 @@ func (dlg *Dialog) AddButtonBox(spaceBefore float32, stretchBefore bool, frame *
 		frame.AddNewChild(KiT_Stretch, "button-stretch")
 	}
 	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
-	bb.Lay = LayoutRow
+	bb.Lay = LayoutHoriz
 	bb.SetProp("max-width", -1)
 	return bb
 }
@@ -447,7 +447,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css 
 	nspc.SetFixedHeight(StdDialogVSpaceUnits)
 
 	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "n-row").(*Layout)
-	nrow.Lay = LayoutRow
+	nrow.Lay = LayoutHoriz
 
 	nlbl := nrow.AddNewChild(KiT_Label, "n-label").(*Label)
 	nlbl.Text = "Number:  "
@@ -462,7 +462,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css 
 	tspc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
 	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
-	trow.Lay = LayoutRow
+	trow.Lay = LayoutHoriz
 
 	tlbl := trow.AddNewChild(KiT_Label, "t-label").(*Label)
 	tlbl.Text = "Type:    "

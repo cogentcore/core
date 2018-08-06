@@ -20,16 +20,15 @@ func GoGiEditor(obj ki.Ki) {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
+	mfr.Lay = gi.LayoutVert
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
+	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
@@ -38,7 +37,7 @@ func GoGiEditor(obj ki.Ki) {
 	title.SetStretchMaxWidth()
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 	split.Dim = gi.X
 
 	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
@@ -64,11 +63,11 @@ func GoGiEditor(obj ki.Ki) {
 		}
 	})
 
-	bspc := vlay.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
+	bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
-	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutRow
+	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutHoriz
 	brow.SetStretchMaxWidth()
 
 	updtobj := brow.AddNewChild(gi.KiT_Button, "updtobj").(*gi.Button)

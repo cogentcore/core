@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"runtime/pprof"
 
@@ -66,15 +67,22 @@ var HoverMaxPix = 5
 // buffer/image to the window -- can also render directly onto window using
 // textures using the drawer interface, but..
 
-// todo: could have two subtypes of windows, one a native 3D with OpenGl etc.
-
-// Window provides an OS-specific window and all the associated event handling
+// Window provides an OS-specific window and all the associated event
+// handling.  Widgets connect to event signals to receive relevant GUI events.
+// There is a master Viewport that contains the full bitmap image of the
+// window, onto which most widgets render.  For main windows (not dialogs or
+// other popups), there is a master vertical layout under the Viewport
+// (MasterVLay), whose first element is the MainMenu for the window (which can
+// be empty, in which case it is not displayed).  On MacOS, this main menu is
+// typically not directly visible, and instead updates the overall menubar.
 type Window struct {
 	NodeBase
 	Title         string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 	OSWin         oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	HasGeomPrefs  bool              `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D       `json:"-" xml:"-" view:"-" desc:"convenience pointer to our viewport child that handles all of our rendering"`
+	Viewport      *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay    *Layout           `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu      *MenuBar          `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 	OverlayVp     Viewport2D        `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
 	WinTex        oswin.Texture     `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
 	OverTexActive bool              `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
@@ -126,7 +134,8 @@ const (
 
 //go:generate stringer -type=EventPris
 
-// NewWindow creates a new window with given internal name handle, display name, and options
+// NewWindow creates a new window with given internal name handle, display
+// name, and options.
 func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization
 	win := &Window{}
@@ -154,7 +163,7 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 // name, display name, and sizing, with default positioning, and initializes a
 // 2D viewport within it -- stdPixels means use standardized "pixel" units for
 // the display size (96 per inch), not the actual underlying raw display dot
-// pixels
+// pixels.
 func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window {
 	Init() // overall gogi system initialization
 	opts := &oswin.NewWindowOptions{
@@ -180,13 +189,14 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 
 	win.AddChild(vp)
 	win.Viewport = vp
+	win.ConfigVLay()
 	return win
 }
 
 // NewDialogWin creates a new dialog window with given internal handle name,
 // display name, and sizing (assumed to be in raw dots), without setting its
 // main viewport -- user should do win.AddChild(vp); win.Viewport = vp to set
-// their own viewport
+// their own viewport.
 func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	opts := &oswin.NewWindowOptions{
 		Title: title, Size: image.Point{width, height}, StdPixels: false,
@@ -209,6 +219,82 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 		win.HasGeomPrefs = true
 	}
 	return win
+}
+
+// ConfigVLay creates and configures the vertical layout as first child of
+// Viewport, and installs MainMenu as first element of layout.
+func (w *Window) ConfigVLay() {
+	vp := w.Viewport
+	updt := vp.UpdateStart()
+	defer vp.UpdateEnd(updt)
+	if !vp.HasChildren() {
+		vp.AddNewChild(KiT_Layout, "main-vlay")
+	}
+	w.MasterVLay = vp.KnownChild(0).(*Layout)
+	if !w.MasterVLay.HasChildren() {
+		w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu")
+	}
+	w.MasterVLay.Lay = LayoutVert
+	w.MainMenu = w.MasterVLay.KnownChild(0).(*MenuBar)
+	w.MainMenu.SetStretchMaxWidth()
+}
+
+// SetMainWidget sets given widget as the main widget for the window -- adds
+// into MasterVLay after main menu -- if a main widget has already been set then
+// it is deleted and this one replaces it.  Use this method to ensure future
+// compatibility.
+func (w *Window) SetMainWidget(mw ki.Ki) {
+	if len(w.MasterVLay.Kids) == 1 {
+		w.MasterVLay.AddChild(mw)
+		return
+	}
+	cmw := w.MasterVLay.KnownChild(1)
+	if cmw != mw {
+		w.MasterVLay.DeleteChildAtIndex(1, true)
+		w.MasterVLay.InsertChild(mw, 1)
+	}
+}
+
+// SetMainWidgetType sets the main widget of this window to given type
+// (typically a Layout or Frame), and returns it.  Adds into MasterVLay after
+// main menu -- if a main widget has already been set then it is deleted and
+// this one replaces it.  Use this method to ensure future compatibility.
+func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
+	if len(w.MasterVLay.Kids) == 1 {
+		return w.MasterVLay.AddNewChild(typ, name)
+	}
+	cmw := w.MasterVLay.KnownChild(1)
+	if cmw.Type() != typ {
+		w.MasterVLay.DeleteChildAtIndex(1, true)
+		return w.MasterVLay.InsertNewChild(typ, 1, name)
+	}
+	return cmw
+}
+
+// SetMainFrame sets the main widget of this window as a Frame, with a default
+// column-wise vertical layout and max stretch sizing, and returns that frame.
+func (w *Window) SetMainFrame() *Frame {
+	fr := w.SetMainWidgetType(KiT_Frame, "main-frame").(*Frame)
+	fr.Lay = LayoutVert
+	fr.SetStretchMaxWidth()
+	fr.SetStretchMaxHeight()
+	return fr
+}
+
+// SetMainLayout sets the main widget of this window as a Layout, with a default
+// column-wise vertical layout and max stretch sizing, and returns it.
+func (w *Window) SetMainLayout() *Layout {
+	fr := w.SetMainWidgetType(KiT_Layout, "main-lay").(*Layout)
+	fr.Lay = LayoutVert
+	fr.SetStretchMaxWidth()
+	fr.SetStretchMaxHeight()
+	return fr
+}
+
+// MainWidget returns the main widget for this window -- 2nd element in
+// MasterVLay -- returns false if not yet set
+func (w *Window) MainWidget() (ki.Ki, bool) {
+	return w.MasterVLay.Child(1)
 }
 
 // StartEventLoop is the main startup method to call after the initial window
@@ -587,8 +673,8 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 	}
 }
 
-// process mouse.MoveEvent to generate mouse.FocusEvent events -- returns true
-// if any such events were sent
+// GenMouseFocusEvents processes mouse.MoveEvent to generate mouse.FocusEvent
+// events -- returns true if any such events were sent.
 func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) bool {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
@@ -649,6 +735,21 @@ func (w *Window) SendHoverEvent(e *mouse.MoveEvent) {
 	he.Processed = false
 	he.Action = mouse.Hover
 	w.SendEventSignal(&he)
+}
+
+// SendKeyChordEvent sends a KeyChord event with given values
+func (w *Window) SendKeyChordEvent(r rune, mods ...key.Modifiers) {
+	ke := key.ChordEvent{}
+	ke.SetTime()
+	ke.SetModifiers(mods...)
+	ke.Rune = r
+	ke.Action = key.Press
+	w.SendEventSignal(&ke)
+}
+
+// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun
+func (w *Window) SendKeyFunEvent(kf KeyFunctions) {
+	// todo: do it
 }
 
 // PopupIsMenu returns true if the given popup item is a menu

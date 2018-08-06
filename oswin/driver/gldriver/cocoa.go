@@ -954,26 +954,32 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 // cursor impl
 
 type cursorImpl struct {
+	cursor.CursorBase
 }
 
-var theCursor = cursorImpl{}
+var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
+	c.PushStack(sh)
 	C.pushCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
+	c.Cur = sh
 	C.setCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Pop() {
+	c.PopStack()
 	C.popCursor()
 }
 
 func (c *cursorImpl) Hide() {
+	c.Vis = false
 	C.hideCursor()
 }
 
 func (c *cursorImpl) Show() {
+	c.Vis = true
 	C.showCursor()
 }

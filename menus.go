@@ -82,6 +82,31 @@ func (m *Menu) AddLabel(lbl string) *Label {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Standard menu elements
+
+// AddCopy adds a Copy, Cut, Paste actions that just emit the corresponding
+// keyboard shortcut -- cutPasteActive determines whether Cut and Paste are
+// active, reflecting the modifiability of relevant element (i.e., IsActive)
+func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
+	m.AddMenuText("Copy", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww.SendKeyFunEvent(KeyFunCopy)
+	})
+	cut := m.AddMenuText("Cut", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww.SendKeyFunEvent(KeyFunCut)
+	})
+	paste := m.AddMenuText("Paste", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww.SendKeyFunEvent(KeyFunPaste)
+	})
+	if !cutPasteActive {
+		cut.SetInactive()
+		paste.SetInactive()
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 
 var MenuFrameProps = ki.Props{
@@ -117,7 +142,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
-	frame.Lay = LayoutCol
+	frame.Lay = LayoutVert
 	frame.SetProps(MenuFrameProps, false)
 	for _, ac := range menu {
 		acn, _ := KiToNode2D(ac)
@@ -266,4 +291,75 @@ func (g *Separator) Render2D() {
 		g.Render2DChildren()
 		g.PopBounds()
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// MenuBar
+
+// MenuBar is a Layout (typically LayoutHoriz) that renders a gradient
+// background and has convenience methods for adding menus
+type MenuBar struct {
+	Layout
+	MainMenu bool `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
+}
+
+var KiT_MenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
+
+var MenuBarProps = ki.Props{
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"color":            &Prefs.FontColor,
+	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
+}
+
+// MenuBarStdRender does the standard rendering of the bar
+func (mb *MenuBar) MenuBarStdRender() {
+	st := &mb.Sty
+	rs := &mb.Viewport.Render
+	pc := &rs.Paint
+
+	pos := mb.LayData.AllocPos
+	sz := mb.LayData.AllocSize
+	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+}
+
+func (mb *MenuBar) Render2D() {
+	if len(mb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
+		return
+	}
+	if mb.FullReRenderIfNeeded() {
+		return
+	}
+	if mb.PushBounds() {
+		mb.MenuBarStdRender()
+		mb.LayoutEvents()
+		mb.RenderScrolls()
+		mb.Render2DChildren()
+		mb.PopBounds()
+	} else {
+		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
+	}
+}
+
+// ConfigMenus configures Action items as children of MenuBar with the given
+// names, which function as the main menu panels for the menu bar (File, Edit,
+// etc).  Access the resulting menus as .KnownChildByName("name").(*Action),
+// and
+func (mb *MenuBar) ConfigMenus(menus []string) {
+	sz := len(menus)
+	tnl := make(kit.TypeAndNameList, sz+1)
+	typ := KiT_Action
+	for i, m := range menus {
+		tnl[i].Type = typ
+		tnl[i].Name = m
+	}
+	tnl[sz].Type = KiT_Stretch
+	tnl[sz].Name = "menstr"
+	_, updt := mb.ConfigChildren(tnl, false)
+	for i, m := range menus {
+		ma := mb.Kids[i].(*Action)
+		ma.SetText(m)
+		ma.SetAsMenu()
+	}
+	mb.UpdateEnd(updt)
 }

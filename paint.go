@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 	"math"
 
 	"github.com/chewxy/math32"
@@ -255,11 +256,12 @@ func (rs *RenderState) PushXForm(xf Matrix2D) {
 
 // PopXForm pops xform off the stack and set to current xform
 func (rs *RenderState) PopXForm() {
-	if rs.XFormStack == nil || len(rs.XFormStack) == 0 {
+	sz := len(rs.XFormStack)
+	if sz == 0 {
+		log.Printf("gi.RenderState PopXForm: stack is empty -- programmer error\n")
 		rs.XForm = Identity2D()
 		return
 	}
-	sz := len(rs.XFormStack)
 	rs.XForm = rs.XFormStack[sz-1]
 	rs.XFormStack = rs.XFormStack[:sz-1]
 }
@@ -278,11 +280,12 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 
 // PopBounds pops bounds off the stack and set to current bounds
 func (rs *RenderState) PopBounds() {
-	if rs.BoundsStack == nil || len(rs.BoundsStack) == 0 {
+	sz := len(rs.BoundsStack)
+	if sz == 0 {
+		log.Printf("gi.RenderState PopBounds: stack is empty -- programmer error\n")
 		rs.Bounds = rs.Image.Bounds()
 		return
 	}
-	sz := len(rs.BoundsStack)
 	rs.Bounds = rs.BoundsStack[sz-1]
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
 }
@@ -300,11 +303,12 @@ func (rs *RenderState) PushClip() {
 
 // PopClip pops Mask off the clip stack and set to current mask
 func (rs *RenderState) PopClip() {
-	if rs.ClipStack == nil || len(rs.ClipStack) == 0 {
+	sz := len(rs.ClipStack)
+	if sz == 0 {
+		log.Printf("gi.RenderState PopClip: stack is empty -- programmer error\n")
 		rs.Mask = nil // implied
 		return
 	}
-	sz := len(rs.ClipStack)
 	rs.Mask = rs.ClipStack[sz-1]
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]

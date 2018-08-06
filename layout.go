@@ -32,10 +32,10 @@ import (
 // align-content, so they are subsumed in the AlignH parameter in this style.
 // Vertical-align works as expected, and Text.Align uses left/center/right
 //
-// LayoutRow, Col both allow explicit Top/Left Center/Middle, Right/Bottom alignment
-// along with Justify and SpaceAround -- they use IsAlign functions
+// LayoutHoriz, Vert both allow explicit Top/Left Center/Middle, Right/Bottom
+// alignment along with Justify and SpaceAround -- they use IsAlign functions
 
-// style preferences on the layout of the element
+// LayoutStyle contains style preferences on the layout of the element.
 type LayoutStyle struct {
 	ZIndex    int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	AlignH    Align       `xml:"horizontal-align" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
@@ -276,7 +276,7 @@ type GridData struct {
 // generally be contained within a layout -- otherwise the parent widget must
 // take over responsibility for positioning.  The alignment is NOT inherited
 // by default so must be specified per child, except that the parent alignment
-// is used within the relevant dimension (e.g., align-horiz for a LayoutRow
+// is used within the relevant dimension (e.g., align-horiz for a LayoutHoriz
 // layout, to determine left, right, center, justified).  Layouts
 // can automatically add scrollbars depending on the Overflow layout style
 type Layout struct {
@@ -297,11 +297,11 @@ var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
 type Layouts int32
 
 const (
-	// LayoutRow arranges items horizontally across a row
-	LayoutRow Layouts = iota
+	// LayoutHoriz arranges items horizontally across a row
+	LayoutHoriz Layouts = iota
 
-	// LayoutCol arranges items vertically in a column
-	LayoutCol
+	// LayoutVert arranges items vertically in a column
+	LayoutVert
 
 	// LayoutGrid arranges items according to a regular grid
 	LayoutGrid
@@ -309,13 +309,13 @@ const (
 	// todo: add LayoutGridIrreg that deals with irregular grids with spans etc -- keep
 	// the basic grid for fully regular cases -- need high performance for large grids
 
-	// LayoutRowFlow arranges items horizontally across a row, overflowing
+	// LayoutHorizFlow arranges items horizontally across a row, overflowing
 	// vertically as needed
-	LayoutRowFlow
+	LayoutHorizFlow
 
-	// LayoutColFlow arranges items vertically within a column, overflowing
+	// LayoutVertFlow arranges items vertically within a column, overflowing
 	// horizontally as needed
-	LayoutColFlow
+	LayoutVertFlow
 
 	// LayoutStacked arranges items stacked on top of each other -- Top index
 	// indicates which to show -- overall size accommodates largest in each
@@ -354,7 +354,7 @@ func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(e
 
 // SumDim returns whether we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
-	if (d == X && ly.Lay == LayoutRow) || (d == Y && ly.Lay == LayoutCol) {
+	if (d == X && ly.Lay == LayoutHoriz) || (d == Y && ly.Lay == LayoutVert) {
 		return true
 	}
 	return false
@@ -638,7 +638,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align
 	return
 }
 
-// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutRow / Col
+// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutHoriz / Col
 func (ly *Layout) LayoutSingle(dim Dims2D) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
@@ -1242,10 +1242,10 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	ly.AllocFromParent()           // in case we didn't get anything
 	ly.Layout2DBase(parBBox, true) // init style
 	switch ly.Lay {
-	case LayoutRow:
+	case LayoutHoriz:
 		ly.LayoutAll(X)
 		ly.LayoutSingle(Y)
-	case LayoutCol:
+	case LayoutVert:
 		ly.LayoutAll(Y)
 		ly.LayoutSingle(X)
 	case LayoutGrid:

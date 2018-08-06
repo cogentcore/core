@@ -41,7 +41,6 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
 	// style sheet
 	var css = ki.Props{
@@ -60,15 +59,14 @@ func mainrun() {
 	}
 	vp.CSS = css
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
-	// vlay.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
-	// vlay.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
-	// vlay.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
-	// vlay.SetProp("background-color", "radial-gradient(red, lighter-80)")
+	mfr := win.SetMainFrame()
+	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
+	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
+	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
+	// mfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
+	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
@@ -88,14 +86,14 @@ func mainrun() {
 	//////////////////////////////////////////
 	//      Buttons
 
-	vlay.AddNewChild(gi.KiT_Space, "blspc")
-	blrow := vlay.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
+	mfr.AddNewChild(gi.KiT_Space, "blspc")
+	blrow := mfr.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
 	blab.Text = "Buttons:"
 	blab.Selectable = true
 
-	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutRow
+	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutHoriz
 	brow.SetProp("horizontal-align", gi.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
@@ -162,13 +160,13 @@ func mainrun() {
 	//////////////////////////////////////////
 	//      Sliders
 
-	vlay.AddNewChild(gi.KiT_Space, "slspc")
-	slrow := vlay.AddNewChild(gi.KiT_Layout, "slrow").(*gi.Layout)
+	mfr.AddNewChild(gi.KiT_Space, "slspc")
+	slrow := mfr.AddNewChild(gi.KiT_Layout, "slrow").(*gi.Layout)
 	slab := slrow.AddNewChild(gi.KiT_Label, "slab").(*gi.Label)
 	slab.Text = "Sliders:"
 
-	srow := vlay.AddNewChild(gi.KiT_Layout, "srow").(*gi.Layout)
-	srow.Lay = gi.LayoutRow
+	srow := mfr.AddNewChild(gi.KiT_Layout, "srow").(*gi.Layout)
+	srow.Lay = gi.LayoutHoriz
 	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
@@ -228,12 +226,12 @@ func mainrun() {
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	vlay.AddNewChild(gi.KiT_Space, "tlspc")
-	txlrow := vlay.AddNewChild(gi.KiT_Layout, "txlrow").(*gi.Layout)
+	mfr.AddNewChild(gi.KiT_Space, "tlspc")
+	txlrow := mfr.AddNewChild(gi.KiT_Layout, "txlrow").(*gi.Layout)
 	txlab := txlrow.AddNewChild(gi.KiT_Label, "txlab").(*gi.Label)
 	txlab.Text = "Text Widgets:"
-	txrow := vlay.AddNewChild(gi.KiT_Layout, "txrow").(*gi.Layout)
-	txrow.Lay = gi.LayoutRow
+	txrow := mfr.AddNewChild(gi.KiT_Layout, "txrow").(*gi.Layout)
+	txrow.Lay = gi.LayoutHoriz
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 
@@ -261,6 +259,15 @@ func mainrun() {
 	})
 
 	// txrow.SetPropChildren("margin", units.NewValue(2, units.Ex))
+
+	// main menu
+
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{"File", "Edit", "Window"})
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, false)
 
 	vp.UpdateEndNoSig(updt)
 

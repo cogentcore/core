@@ -8,7 +8,6 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
 )
 
 func main() {
@@ -21,31 +20,21 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	// turn this on to see a trace of the rendering
-	// gi.Update2DTrace = true
-	// gi.Render2DTrace = true
-	// gi.Layout2DTrace = true
-
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
 	win := gi.NewWindow2D("gogi-colors-test", "GoGi Colors Test", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
+	row1 := mfr.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1.Lay = gi.LayoutHoriz
 	row1.SetProp("vertical-align", gi.AlignMiddle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	row1.AddNewChild(gi.KiT_Stretch, "str1")
@@ -55,7 +44,7 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	row1.AddNewChild(gi.KiT_Stretch, "str2")
 
-	grid := vlay.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
+	grid := mfr.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
 	grid.SetProp("columns", 11)
 	grid.SetProp("vertical-align", "center")

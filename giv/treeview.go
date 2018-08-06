@@ -1303,7 +1303,7 @@ var TVBranchProps = ki.Props{
 }
 
 func (tv *TreeView) ConfigParts() {
-	tv.Parts.Lay = gi.LayoutRow
+	tv.Parts.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_CheckBox, "branch")
 	config.Add(gi.KiT_Space, "space")

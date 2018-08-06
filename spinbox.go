@@ -147,7 +147,7 @@ func (g *SpinBox) ConfigParts() {
 	if g.DownIcon.IsNil() {
 		g.DownIcon = IconName("widget-wedge-down")
 	}
-	g.Parts.Lay = LayoutRow
+	g.Parts.Lay = LayoutHoriz
 	g.Parts.SetProp("vertical-align", AlignMiddle)
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
@@ -156,7 +156,7 @@ func (g *SpinBox) ConfigParts() {
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
 		buts := g.Parts.KnownChild(sbButtonsIdx).(*Layout)
-		buts.Lay = LayoutCol
+		buts.Lay = LayoutVert
 		g.StylePart(Node2D(buts))
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up

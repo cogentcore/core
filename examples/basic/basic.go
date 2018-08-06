@@ -23,13 +23,11 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	rlay := vlay.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)
-	rlay.Lay = gi.LayoutRow
+	rlay := mfr.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)
+	rlay.Lay = gi.LayoutHoriz
 	rlay.SetProp("text-align", "center")
 	edit1 := rlay.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 	button1 := rlay.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)

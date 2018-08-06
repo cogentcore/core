@@ -42,13 +42,11 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
+	row1 := mfr.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1.Lay = gi.LayoutHoriz
 
 	row1.SetProp("vertical-align", "top")
 	// row1.SetProp("horizontal-align", "justify")
@@ -73,8 +71,8 @@ func mainrun() {
 		}
 	}
 
-	row2 := vlay.AddNewChild(gi.KiT_Layout, "row2").(*gi.Layout)
-	row2.Lay = gi.LayoutRow
+	row2 := mfr.AddNewChild(gi.KiT_Layout, "row2").(*gi.Layout)
+	row2.Lay = gi.LayoutHoriz
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
 
@@ -96,8 +94,8 @@ func mainrun() {
 		// }
 	}
 
-	row3 := vlay.AddNewChild(gi.KiT_Layout, "row3").(*gi.Layout)
-	row3.Lay = gi.LayoutRow
+	row3 := mfr.AddNewChild(gi.KiT_Layout, "row3").(*gi.Layout)
+	row3.Lay = gi.LayoutHoriz
 	row3.SetProp("text-align", "center")
 	// row3.SetProp("max-width", -1) // always stretch width
 
@@ -118,7 +116,7 @@ func mainrun() {
 		// fr.SetProp("max-width", -1) // spacer
 	}
 
-	row4 := vlay.AddNewChild(gi.KiT_Layout, "row4").(*gi.Layout)
+	row4 := mfr.AddNewChild(gi.KiT_Layout, "row4").(*gi.Layout)
 	row4.Lay = gi.LayoutGrid
 	row4.SetProp("columns", 2)
 	// row4.SetProp("max-width", -1)

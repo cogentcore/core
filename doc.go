@@ -20,18 +20,17 @@ Layout Logic
 
 All 2D scenegraphs are controlled by the Layout, which provides the logic for
 organizing widgets / elements within the constraints of the display.
-Typically start with a vertical LayoutCol in a viewport, with LayoutCol's
+Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
 	win := gi.NewWindow2D("test window", width, height)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
-	vlay := vpfill.AddNewChildNamed(gi.KiT_Layout, "vlay").(*gi.Layout)
-	vlay.Lay = gi.LayoutCol
+	vlay := win.SetMainVLay() // or SetMainFrame
 
-	row1 := vlay.AddNewChildNamed(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutRow
+	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
+	row1.Lay = gi.LayoutHoriz
 
 	...
 
@@ -56,9 +55,9 @@ Controlling the layout involves the following style properties:
       the Stretch is just the minumum 1em in preferred size.
 
 	* align-horiz / align-vert: for the other dimension in a Layout (e.g., for
-      LayoutRow, the vertical dimension) this specifies how the items are
+      LayoutHoriz, the vertical dimension) this specifies how the items are
       aligned within the available space (e.g., tops, bottoms, centers).  In
-      the dimension of the Layout (horiz for LayoutRow) it determines how
+      the dimension of the Layout (horiz for LayoutHoriz) it determines how
       extra space is allocated (only if there aren't any infinitely stretchy
       elements), e.g., right / left / center or justified.
 

@@ -95,7 +95,7 @@ func FileViewStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv Value
 
 // SetFrame configures view as a frame
 func (fv *FileView) SetFrame() {
-	fv.Lay = gi.LayoutCol
+	fv.Lay = gi.LayoutVert
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -129,7 +129,7 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 
 func (fv *FileView) ConfigPathRow() {
 	pr := fv.KnownChildByName("path-row", 0).(*gi.Layout)
-	pr.Lay = gi.LayoutRow
+	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "path-lbl")
@@ -182,7 +182,7 @@ func (fv *FileView) ConfigFilesRow() {
 	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
-	fr.Lay = gi.LayoutRow
+	fr.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
@@ -238,7 +238,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
-	sr.Lay = gi.LayoutRow
+	sr.Lay = gi.LayoutHoriz
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "sel-lbl")

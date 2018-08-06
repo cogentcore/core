@@ -76,18 +76,16 @@ func mainrun() {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutRow
+	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow.Lay = gi.LayoutHoriz
 	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
@@ -97,7 +95,7 @@ func mainrun() {
 	lab1.SetProp("text-align", "center")
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	split := vlay.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 	split.Dim = gi.X
 
 	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)

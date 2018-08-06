@@ -68,7 +68,7 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 
 // SetFrame configures view as a frame
 func (sv *StructView) SetFrame() {
-	sv.Lay = gi.LayoutCol
+	sv.Lay = gi.LayoutVert
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -264,7 +264,7 @@ func (sv *StructViewInline) ConfigParts() {
 	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
-	sv.Parts.Lay = gi.LayoutRow
+	sv.Parts.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)

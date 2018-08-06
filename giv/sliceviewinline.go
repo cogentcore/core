@@ -48,7 +48,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
-	sv.Parts.Lay = gi.LayoutRow
+	sv.Parts.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)

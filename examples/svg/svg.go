@@ -59,29 +59,19 @@ func mainrun() {
 	width := 1600
 	height := 1200
 
-	// turn this on to see a trace of the rendering
-	// gi.Update2DTrace = true
-	// gi.Render2DTrace = true
-	// gi.Layout2DTrace = true
-
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
 	win := gi.NewWindow2D("gogi-svg-viewer", "GoGi SVG Viewer", width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	mfr := win.SetMainFrame()
 
-	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutRow
+	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutHoriz
 	brow.SetStretchMaxWidth()
 
-	svgrow := vlay.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
-	svgrow.Lay = gi.LayoutRow
+	svgrow := mfr.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
+	svgrow.Lay = gi.LayoutHoriz
 	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()

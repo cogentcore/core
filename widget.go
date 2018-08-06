@@ -448,9 +448,9 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	bitflag.Set(&pvp.Flag, int(VpFlagTooltip))
 
 	pvp.Geom.Pos = image.Point{x, y}
-	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
+	bitflag.Set(&pvp.Flag, int(VpFlagPopupDestroyAll)) // nuke it all
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
-	frame.Lay = LayoutCol
+	frame.Lay = LayoutVert
 	frame.SetProps(TooltipFrameProps, false)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetProp("background-color", &Prefs.HighlightColor)

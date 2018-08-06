@@ -140,7 +140,15 @@ func (g *Action) ConfigPartsMenu() {
 }
 
 func (g *Action) ConfigParts() {
-	if g.IsMenu() {
+	ismbar := false
+	if g.Par != nil {
+		_, ismbar = g.Par.(*MenuBar)
+		if ismbar {
+			g.Indicator = "none"
+			g.SetProp("background-color", "transparent") // todo: getting weird overwriting thing
+		}
+	}
+	if g.IsMenu() && !ismbar {
 		g.ConfigPartsMenu()
 	} else {
 		g.ConfigPartsButton()
