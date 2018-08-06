@@ -386,7 +386,5 @@ func (w *windowImpl) SetSize(sz image.Point) {
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
-	// todo: need this in cocoa.go, other cases..
-	// posWindow(w, pos)
-	w.Pos = pos
+	posWindow(w, pos)
 }

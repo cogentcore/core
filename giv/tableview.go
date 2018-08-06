@@ -16,6 +16,7 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
@@ -31,8 +32,9 @@ import (
 //   -- use in fileview
 // * could have a native context menu for add / delete etc.
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  TableView
+// TableViewWaitCursorSize is the length of the slice above which a wait
+// cursor will be displayed while updating the table
+var TableViewWaitCursorSize = 5000
 
 // TableView represents a slice-of-structs as a table, where the fields are
 // the columns, within an overall frame and a button box at the bottom where
@@ -256,6 +258,11 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
+	if sz > TableViewWaitCursorSize {
+		oswin.TheApp.Cursor().Push(cursor.Wait)
+		defer oswin.TheApp.Cursor().Pop()
+	}
+
 	sgcfg := tv.StdGridConfig()
 	modsg, updtg := sg.ConfigChildren(sgcfg, false)
 	if modsg {
@@ -356,6 +363,11 @@ func (tv *TableView) ConfigSliceGridRows() {
 	mv := reflect.ValueOf(tv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
+
+	if sz > TableViewWaitCursorSize {
+		oswin.TheApp.Cursor().Push(cursor.Wait)
+		defer oswin.TheApp.Cursor().Pop()
+	}
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg, _ := tv.SliceGrid()
@@ -532,6 +544,9 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
+	oswin.TheApp.Cursor().Push(cursor.Wait)
+	defer oswin.TheApp.Cursor().Pop()
+
 	sg, _ := tv.SliceGrid()
 	sgh := sg.KnownChild(0).(*gi.Layout)
 	sgh.SetFullReRender()

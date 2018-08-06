@@ -30,12 +30,18 @@ void flushContext(uintptr_t ctx);
 uintptr_t doNewWindow(int width, int height, int left, int top, char* title, bool dialog, bool modal, bool tool, bool fullscreen);
 void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
+void doMoveWindow(uintptr_t id, int left, int top);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 void clipClear();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
 void clipWrite();
+void pushCursor(int);
+void popCursor();
+void setCursor(int);
+void hideCursor();
+void showCursor();
 uint64_t threadID();
 */
 import "C"
@@ -54,6 +60,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
@@ -102,7 +109,9 @@ func resizeWindow(w *windowImpl, sz image.Point) {
 	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
-// todo: add posWindow(w, pos)
+func posWindow(w *windowImpl, pos image.Point) {
+	C.doMoveWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y))
+}
 
 func getGeometry(w *windowImpl) {
 
@@ -842,6 +851,10 @@ func (app *appImpl) ClipBoard() clip.Board {
 	return &theClip
 }
 
+func (app *appImpl) Cursor() cursor.Cursor {
+	return &theCursor
+}
+
 /////////////////////////////////////////////////////////////////
 // clip.Board impl
 
@@ -935,4 +948,32 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 	typ := C.GoStringN(ctyp, typlen)
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
 	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
+}
+
+/////////////////////////////////////////////////////////////////
+// cursor impl
+
+type cursorImpl struct {
+}
+
+var theCursor = cursorImpl{}
+
+func (c *cursorImpl) Push(sh cursor.Shapes) {
+	C.pushCursor(C.int(sh))
+}
+
+func (c *cursorImpl) Set(sh cursor.Shapes) {
+	C.setCursor(C.int(sh))
+}
+
+func (c *cursorImpl) Pop() {
+	C.popCursor()
+}
+
+func (c *cursorImpl) Hide() {
+	C.hideCursor()
+}
+
+func (c *cursorImpl) Show() {
+	C.showCursor()
 }

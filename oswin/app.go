@@ -13,6 +13,7 @@ import (
 	"image"
 
 	"github.com/goki/gi/oswin/clip"
+	"github.com/goki/gi/oswin/cursor"
 )
 
 // TheApp is the current oswin App -- only ever one in effect
@@ -65,8 +66,11 @@ type App interface {
 	// Publish on window after drawing)
 	NewTexture(win Window, size image.Point) (Texture, error)
 
-	// ClipBoard returns the clip.Board handler for the system -- see clip.Board interface
+	// ClipBoard returns the clip.Board handler for the system
 	ClipBoard() clip.Board
+
+	// Cursor returns the cursor.Cursor handler for the system
+	Cursor() cursor.Cursor
 
 	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ?

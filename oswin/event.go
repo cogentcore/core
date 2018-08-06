@@ -46,7 +46,7 @@ import (
 // indexing into different event signalers based on event type, and sending
 // event type in signals -- critical to break up different event types into
 // the right categories needed for different types of widgets -- e.g., most do
-// not need move or scroll events, so those are separated
+// not need move or scroll events, so those are separated.
 type EventType int64
 
 const (

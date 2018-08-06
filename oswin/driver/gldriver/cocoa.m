@@ -376,6 +376,23 @@ void doResizeWindow(uintptr_t viewID, int width, int height) {
         });
 }
 
+void doMoveWindow(uintptr_t viewID, int left, int top) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    NSScreen *screen = [view.window screen];
+    double pixratio = [screen backingScaleFactor];
+    double screenH = [screen frame].size.height;
+    NSRect fr = [view.window frame];
+    NSRect crect = [view.window contentRectForFrameRect: fr ];
+    double l = (double)left / pixratio;
+    double b = (screenH - (top + crect.size.height)) * pixratio;
+    // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
+    fr.origin.x = l;
+    fr.origin.y = b;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [view.window setFrame:fr display:YES animate:NO];
+    });
+}
+    
 void doCloseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -594,4 +611,96 @@ void clipClear() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
     [pb clearContents];
     [pasteWriteItems removeAllObjects];
+}
+
+
+///////////////////////////////////////////////////////////////////////
+//   Cursor
+
+// https://developer.apple.com/documentation/appkit/nscursor
+// Qt: qtbase/src/plugins/platforms/cocoa/qcocoacursor.mm
+// http://doc.qt.io/qt-5/qt.html#CursorShape-enum
+
+NSCursor* getCursor(int curs) {
+    NSCursor* cr = NULL;
+    switch (curs) {
+    case 0: // Arrow
+        cr = [NSCursor arrowCursor];
+        break;
+    case 1: // Cross
+        cr = [NSCursor crosshairCursor];
+        break;
+    case 2: // DragCopy
+        cr = [NSCursor dragCopyCursor];
+        break;
+    case 3: // DragMove
+        cr = [NSCursor arrowCursor];
+        break;
+    case 4: // DragLink
+        cr = [NSCursor dragLinkCursor];
+        break;
+    case 5: // HandPointing
+        cr = [NSCursor pointingHandCursor];
+        break;
+    case 6: // HandOpen
+        cr = [NSCursor openHandCursor];
+        break;
+    case 7: // HandClosed
+        cr = [NSCursor closedHandCursor];
+        break;
+    case 8: // Help
+        cr = [NSCursor arrowCursor]; // todo: needs custom
+        break;
+    case 9: // IBeam
+        cr = [NSCursor IBeamCursor];
+        break;
+    case 10: // Not
+        cr = [NSCursor operationNotAllowedCursor];
+        break;
+    case 11: // UpDown
+        cr = [NSCursor resizeUpDownCursor];
+        break;
+    case 12: // LeftRight
+        cr = [NSCursor resizeLeftRightCursor];
+        break;
+    case 13: // UpRight
+        cr = [NSCursor resizeUpDownCursor]; // todo: needs custom
+        break;
+    case 14: // UpLeft
+        cr = [NSCursor resizeLeftRightCursor]; // todo: needs custom
+        break;
+    case 15: // AllArrows
+        cr = [NSCursor arrowCursor]; // todo: needs custom
+        break;
+    case 16: // Wait
+        cr = [NSCursor disappearingItemCursor]; // todo: needs custom
+        break;
+    }
+    return cr;
+}
+
+void pushCursor(int curs) {
+    NSCursor* cr = getCursor(curs);
+    if (cr != NULL) {
+        [cr push];
+    }
+}
+
+void setCursor(int curs) {
+    NSCursor* cr = getCursor(curs);
+    if (cr != NULL) {
+        [cr set];
+    }
+}
+
+void popCursor() {
+    [NSCursor pop];
+}
+
+void hideCursor() {
+    [NSCursor hide];
+}
+
+void showCursor() {
+    [NSCursor unhide];
 }

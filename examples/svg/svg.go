@@ -154,7 +154,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			path, fn := filepath.Split(CurFilename)
 			path, _ = homedir.Expand(path)
-			giv.FileViewDialog(vp, path, fn, "Load SVG", "", win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, win, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.(*gi.Dialog)
 					LoadSVG(giv.FileViewDialogValue(dlg))

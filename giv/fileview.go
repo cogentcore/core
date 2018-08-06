@@ -15,6 +15,8 @@ import (
 
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -307,6 +309,8 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
+	oswin.TheApp.Cursor().Push(cursor.Wait)
+	defer oswin.TheApp.Cursor().Pop()
 
 	fv.Files = make([]*FileInfo, 0, 1000)
 	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {

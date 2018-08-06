@@ -120,8 +120,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * search for tableview, treeview
 * DND and copy/paste for tableview
 
-* window cursors: busy, etc
-
 * combobox getting text cutoff -- descenders and []
 
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
@@ -152,6 +150,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * text language translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
 
+* Reminder: grep all todo: in code -- lots!
+
+### After Beta Release
+
 * undo -- sub-package, use diff package (prob this: https://github.com/sergi/go-diff) on top of json outputs, as in emergent diffmgr
 	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
 	+ records themselves are sequential slices of diff records and commands, with same logic as emergent
@@ -159,7 +161,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * DND needs enter / exit events so nodes can signal their ability to accept drop..  later..
 
-* Reminder: grep all todo: in code -- lots!
+* Cursors for various systems need extra custom ones to fill in standard set,
+  and support general custom cursors as well
 
 ## layout
 

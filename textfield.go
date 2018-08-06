@@ -12,6 +12,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
@@ -513,7 +514,7 @@ func (tf *TextField) OfferCompletions() {
 	}
 
 	tf.Cmpltr.GenCompletions(tf.Text()) // send the current text to create a list of possible completions
-	if len(tf.Cmpltr.matches) == 1 {  // don't show if only one and it matches current text
+	if len(tf.Cmpltr.matches) == 1 {    // don't show if only one and it matches current text
 		if tf.Cmpltr.matches[0] == tf.Cmpltr.Seed() {
 			return
 		}
@@ -778,6 +779,19 @@ func (tf *TextField) TextFieldEvents() {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
 		tff.MouseEvent(me)
+	})
+	tf.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
+		if tff.IsInactive() {
+			return
+		}
+		me := d.(*mouse.FocusEvent)
+		me.SetProcessed()
+		if me.Action == mouse.Enter {
+			oswin.TheApp.Cursor().Push(cursor.IBeam)
+		} else {
+			oswin.TheApp.Cursor().Pop()
+		}
 	})
 	tf.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)

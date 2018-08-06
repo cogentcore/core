@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -18,8 +19,9 @@ import (
 // Editor supports editing of SVG elements
 type Editor struct {
 	SVG
-	Trans gi.Vec2D `desc:"view translation offset (from dragging)"`
-	Scale float32  `desc:"view scaling (from zooming)"`
+	Trans         gi.Vec2D `desc:"view translation offset (from dragging)"`
+	Scale         float32  `desc:"view scaling (from zooming)"`
+	SetDragCursor bool     `desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Editor = kit.Types.AddType(&Editor{}, nil)
@@ -31,18 +33,32 @@ func (svg *Editor) EditorEvents() {
 		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
 		if ssvg.IsDragging() {
+			if !ssvg.SetDragCursor {
+				oswin.TheApp.Cursor().Push(cursor.HandOpen)
+				ssvg.SetDragCursor = true
+			}
 			del := me.Where.Sub(me.From)
 			ssvg.Trans.X += float32(del.X)
 			ssvg.Trans.Y += float32(del.Y)
 			ssvg.SetTransform()
 			ssvg.SetFullReRender()
 			ssvg.UpdateSig()
+		} else {
+			if ssvg.SetDragCursor {
+				oswin.TheApp.Cursor().Pop()
+				ssvg.SetDragCursor = false
+			}
 		}
+
 	})
 	svg.ConnectEventType(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		if ssvg.SetDragCursor {
+			oswin.TheApp.Cursor().Pop()
+			ssvg.SetDragCursor = false
+		}
 		ssvg.InitScale()
 		ssvg.Scale += float32(me.NonZeroDelta(false)) / 20
 		if ssvg.Scale <= 0 {
@@ -54,10 +70,14 @@ func (svg *Editor) EditorEvents() {
 	})
 	svg.ConnectEventType(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		me.SetProcessed()
 		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		if ssvg.SetDragCursor {
+			oswin.TheApp.Cursor().Pop()
+			ssvg.SetDragCursor = false
+		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if me.Action == mouse.Release && me.Button == mouse.Right {
+			me.SetProcessed()
 			if obj != nil {
 				giv.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil, nil)
 			}

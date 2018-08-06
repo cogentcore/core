@@ -17,6 +17,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/lifecycle"
@@ -84,6 +85,7 @@ type Window struct {
 	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
 	DNDFinalEvent *dnd.Event        `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	DNDMod        dnd.DropMods      `json:"-" xml:"-" desc:"current DND modifier (Copy, Move, Link) -- managed by DNDSetCursor for updating cursor"`
 	Dragging      ki.Ki             `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
 	Popup         ki.Ki             `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of popups"`
@@ -1346,11 +1348,41 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	w.DNDFinalEvent = nil
 }
 
+// DNDSetCursor sets the cursor based on the DND event mod
+func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
+	if w.DNDMod == dmod {
+		return
+	}
+	if w.DNDMod != dnd.NoDropMod {
+		oswin.TheApp.Cursor().Pop()
+	}
+	switch dmod {
+	case dnd.DropCopy:
+		oswin.TheApp.Cursor().Push(cursor.DragCopy)
+	case dnd.DropMove:
+		oswin.TheApp.Cursor().Push(cursor.DragMove)
+	case dnd.DropLink:
+		oswin.TheApp.Cursor().Push(cursor.DragLink)
+	}
+	w.DNDMod = dmod
+}
+
+// DNDClearCursor clears any existing DND cursor that might have been set
+func (w *Window) DNDClearCursor() {
+	if w.DNDMod == dnd.NoDropMod {
+		return
+	}
+	oswin.TheApp.Cursor().Pop()
+	w.DNDMod = dnd.NoDropMod
+}
+
 // DNDStartEvent handles drag-n-drop start events
 func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
 	de.Action = dnd.Start
+	de.DefaultMod()
+	w.DNDMod = dnd.NoDropMod
 	w.SendEventSignal(&de)
 	// now up to receiver to call StartDragNDrop if they want to..
 }
@@ -1366,7 +1398,9 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	// todo: send move / enter / exit events to anyone listening
 	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
 	de.Processed = false
+	de.DefaultMod()
 	de.Action = dnd.Move
+	w.DNDSetCursor(de.Mod)
 	w.SendEventSignal(&de)
 	w.RenderOverlays()
 	e.SetProcessed()
@@ -1394,6 +1428,7 @@ func (w *Window) ClearDragNDrop() {
 	w.DNDData = nil
 	w.OverlayVp.DeleteChild(w.DNDImage, true)
 	w.DNDImage = nil
+	w.DNDClearCursor()
 	w.Dragging = nil
 	w.RenderOverlays()
 }
