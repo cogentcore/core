@@ -153,6 +153,15 @@ func DecodeChord(ch string) (r rune, mods int32, err error) {
 	return
 }
 
+// ChordShortcut transforms chord string into short form suitable for display to users
+func ChordShortcut(ch string) string {
+	cs := strings.Replace(ch, "Shift+", "Sh ", 1) // todo: "⇧ " not rendering
+	cs = strings.Replace(cs, "Control+", "^ ", 1)
+	cs = strings.Replace(cs, "Meta+", "Cmd ", 1) // todo mac only "⌘" -- doesn't render
+	cs = strings.Replace(cs, "Alt+", "Alt ", 1)  // todo mac opt key
+	return cs
+}
+
 // CodeIsModifier returns true if given code is a modifier key
 func CodeIsModifier(c Codes) bool {
 	if c >= CodeLeftControl && c <= CodeRightGUI {
@@ -338,7 +347,7 @@ const (
 	// Usage IDs are uint16s, so these non-standard values start at 0x10000.
 
 	// CodeCompose is the Code for a compose key, sometimes called a multi key,
-	// used to input non-ASCII characters such as ñ being composed of n and ~.
+	// used to input non-ASCII characters such as Ã± being composed of n and ~.
 	//
 	// See https://en.wikipedia.org/wiki/Compose_key
 	CodeCompose Codes = 0x10000

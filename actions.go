@@ -6,7 +6,9 @@ package gi
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -59,7 +61,7 @@ var ActionProps = ki.Props{
 		"stroke":         &Prefs.FontColor,
 	},
 	"#shortcut": ki.Props{
-		"text-align": AlignCenter,
+		"vertical-align": AlignCenter,
 	},
 	"#sc-stretch": ki.Props{
 		"min-width": units.NewValue(2, units.Em),
@@ -144,7 +146,7 @@ func (g *Action) ConfigPartsShortcut(scIdx int) {
 		return
 	}
 	sc := g.Parts.KnownChild(scIdx).(*Label)
-	sclbl := g.Shortcut // todo: call key method to shorten shortcuts
+	sclbl := key.ChordShortcut(g.Shortcut)
 	if sc.Text != sclbl {
 		sc.Text = sclbl
 		g.StylePart(Node2D(sc))
@@ -174,6 +176,8 @@ func (g *Action) ConfigPartsMenu() {
 	scIdx := -1
 	if indIdx < 0 && g.Shortcut != "" {
 		scIdx = g.ConfigPartsAddShortcut(&config)
+	} else if g.Shortcut != "" {
+		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", g.Text)
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {

@@ -772,7 +772,7 @@ func (w *Window) AddShortcut(chord string, act *Action) {
 	}
 	sa, exists := w.Shortcuts[chord]
 	if exists && sa != act {
-		log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Nm, act.Nm)
+		log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
 	}
 	w.Shortcuts[chord] = act
 }
@@ -781,7 +781,6 @@ func (w *Window) AddShortcut(chord string, act *Action) {
 // triggered, and false otherwise.  Also elminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
 func (w *Window) TriggerShortcut(chord string) bool {
-	fmt.Printf("attempting to shortcut chord: %v\n", chord)
 	if w.Shortcuts == nil {
 		return false
 	}
@@ -796,7 +795,7 @@ func (w *Window) TriggerShortcut(chord string) bool {
 	if sa.IsInactive() {
 		return false
 	}
-	fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Nm)
+	fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Text)
 	sa.Trigger()
 	return true
 }

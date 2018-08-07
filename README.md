@@ -113,13 +113,19 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* update gi/doc.go with final readme notes etc!
+* shortcut no longer working
 
 * MenuBar has gradient but actions don't -- add gradient to actions that show
-  up in menubar -- can't not have a background..
-  
+  up in menubar -- can't not have a background..  set margin / padding 0 and rely on elements on sizing properly
+
+* test text render with keyboard runes and other unicode runes -- maybe something broken
+
 * key.ChordShortForm transforms chord into short-form suitable for menu
   shortcuts -- not clear if mac command rune will render -- seems to have broken arial.
+
+  need mac-specific shortcut symbols
+
+* kefun to chord use !! to indicate preferred among alternatives
 
 * add Toolbar based on MenuBar
 
@@ -134,6 +140,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * drag should be stateful -- only drag current item -- logic is in there but not working properly
 
 * use screenprefs
+
+* update gi/doc.go with final readme notes etc!
 
 * search for tableview, treeview
 * DND and copy/paste for tableview

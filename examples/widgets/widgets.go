@@ -138,13 +138,11 @@ func mainrun() {
 	// note: receiver for menut items with shortcuts must be a Node2D or Window
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
-	mb1.Menu.AddMenuText("Menu Item 1", "Control+1", win.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 1", "Shift+Control+1", win.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2 := mb1.Menu.AddMenuText("Menu Item 2", "Control+2", win.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-	})
+	mi2 := mb1.Menu.AddMenuText("Menu Item 2", "", nil, 2, nil)
 
 	mi2.Menu.AddMenuText("Sub Menu Item 2", "", win.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
