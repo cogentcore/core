@@ -107,7 +107,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ do similar font name updating as done on Windows now
 
 * mac:
-	+ impl setPos
+	+ native menu
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -126,6 +126,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   need mac-specific shortcut symbols
 
 * kefun to chord use !! to indicate preferred among alternatives
+
+* DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
+  + hover -> spring load auto-open tree..
+  + basic cursor updates: NOT is default, override for others
 
 * add Toolbar based on MenuBar
 
@@ -178,8 +182,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
 	+ records themselves are sequential slices of diff records and commands, with same logic as emergent
 	+ diffing happens in separate routine..
-
-* DND needs enter / exit events so nodes can signal their ability to accept drop..  later..
 
 * Cursors for various systems need extra custom ones to fill in standard set,
   and support general custom cursors as well
