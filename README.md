@@ -117,6 +117,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * MenuBar has gradient but actions don't -- add gradient to actions that show
   up in menubar -- can't not have a background..
+  
+* key.ChordShortForm transforms chord into short-form suitable for menu
+  shortcuts -- not clear if mac command rune will render -- seems to have broken arial.
 
 * add Toolbar based on MenuBar
 

@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -58,6 +57,12 @@ var ActionProps = ki.Props{
 		"vertical-align": AlignBottom,
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
+	},
+	"#shortcut": ki.Props{
+		"text-align": AlignCenter,
+	},
+	"#sc-stretch": ki.Props{
+		"min-width": units.NewValue(2, units.Em),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -126,18 +131,25 @@ func (g *Action) Init2D() {
 	g.ConfigParts()
 }
 
-// MenuLabel shows the keyboard shortcut for menu items
-func (g *Action) MenuLabel() string {
-	if g.Shortcut == "" {
-		return g.Text
-	}
-	sc := g.Shortcut
-	if false { // todo: mac only
-		sc = strings.Replace(sc, "Meta", "⌘", 1)
-	}
-	lab := g.Text + "     (" + sc + ")" // todo: need stretch between to right-align shortcuts
+// ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
+func (g *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
+	config.Add(KiT_Stretch, "sc-stretch")
+	scIdx := len(*config)
+	config.Add(KiT_Label, "shortcut")
+	return scIdx
+}
 
-	return lab
+func (g *Action) ConfigPartsShortcut(scIdx int) {
+	if scIdx < 0 {
+		return
+	}
+	sc := g.Parts.KnownChild(scIdx).(*Label)
+	sclbl := g.Shortcut // todo: call key method to shorten shortcuts
+	if sc.Text != sclbl {
+		sc.Text = sclbl
+		g.StylePart(Node2D(sc))
+		g.StylePart(g.Parts.KnownChild(scIdx - 1).(Node2D)) // also get the stretch
+	}
 }
 
 func (g *Action) ConfigPartsButton() {
@@ -157,17 +169,21 @@ func (g *Action) ConfigPartsButton() {
 }
 
 func (g *Action) ConfigPartsMenu() {
-	lbl := g.MenuLabel()
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), lbl)
+	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
+	scIdx := -1
+	if indIdx < 0 && g.Shortcut != "" {
+		scIdx = g.ConfigPartsAddShortcut(&config)
+	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
 		g.SetProp("max-width", -1) // note: this is needed to get menus to fill out
 		// well, but doesn't work in menubars
 		g.SetProp("indicator", "widget-wedge-right")
 	}
-	g.ConfigPartsSetIconLabel(string(g.Icon), lbl, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
+	g.ConfigPartsShortcut(scIdx)
 	if mods {
 		g.UpdateEnd(updt)
 	}
@@ -179,9 +195,7 @@ func (g *Action) ConfigParts() {
 		_, ismbar = g.Par.(*MenuBar)
 		if ismbar {
 			g.Indicator = "none"
-			// g.SetProp("background-color", "transparent") // todo: getting
-			// weird accumulation from multiple renders -- has to do with
-			// mask?
+			g.SetProp("background-color", "linear-gradient(pref(ControlColor), highlight-10)")
 		}
 	}
 	if g.IsMenu() && !ismbar {

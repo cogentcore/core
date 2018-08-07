@@ -300,7 +300,7 @@ func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn 
 		return -1
 	}
 	indIdx := -1
-	config.Add(KiT_Space, "indic-stretch")
+	config.Add(KiT_Space, "indic-spc")
 	indIdx = len(*config)
 	config.Add(KiT_Icon, "indicator")
 	return indIdx
