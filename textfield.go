@@ -487,17 +487,19 @@ func (tf *TextField) InsertAtCursor(str string) {
 // cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 
 func (tf *TextField) MakeContextMenu(m *Menu) {
-	// todo: add shortcuts
-	m.AddMenuText("Copy", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
+	m.AddMenuText("Copy", cpsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 		tff.Copy(true)
 	})
 	if !tf.IsInactive() {
-		m.AddMenuText("Cut", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
+		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
+		m.AddMenuText("Cut", ctsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 			tff.Cut()
 		})
-		m.AddMenuText("Paste", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Paste", ptsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 			tff.Paste()
 		})
@@ -534,7 +536,7 @@ func (tf *TextField) OfferCompletions() {
 func (tf *TextField) MakeCompletionMenu(m Menu, completer SampleCompleter) Menu {
 	for i := range completer.matches {
 		s := completer.matches[i]
-		m.AddMenuText(s, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
 			tff.Complete(s)
 		})
@@ -711,6 +713,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			tf.InsertAtCursor(string(kt.Rune))
+			kt.SetProcessed()
 			tf.OfferCompletions()
 		}
 	}
@@ -795,9 +798,6 @@ func (tf *TextField) TextFieldEvents() {
 	})
 	tf.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.EmbeddedStruct(KiT_TextField).(*TextField)
-		if tff.IsInactive() {
-			return
-		}
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})

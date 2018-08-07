@@ -89,6 +89,7 @@ type Window struct {
 	OverTex       oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	LastSelMode   mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
 	Focus         ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	Shortcuts     Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData       mimedata.Mimes    `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
@@ -749,7 +750,55 @@ func (w *Window) SendKeyChordEvent(r rune, mods ...key.Modifiers) {
 
 // SendKeyFunEvent sends a KeyChord event with params from the given KeyFun
 func (w *Window) SendKeyFunEvent(kf KeyFunctions) {
-	// todo: do it
+	chord := ActiveKeyMap.ChordForFun(kf)
+	if chord != "" {
+		r, mods, err := key.DecodeChord(chord)
+		if err == nil {
+			ke := key.ChordEvent{}
+			ke.SetTime()
+			ke.Modifiers = mods
+			ke.Rune = r
+			ke.Action = key.Press
+			w.SendEventSignal(&ke)
+		}
+	}
+}
+
+// AddShortcut adds given shortcut -- will issue warning about conflicting
+// shortcuts and use the most recent.
+func (w *Window) AddShortcut(chord string, act *Action) {
+	if w.Shortcuts == nil {
+		w.Shortcuts = make(Shortcuts, 100)
+	}
+	sa, exists := w.Shortcuts[chord]
+	if exists && sa != act {
+		log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Nm, act.Nm)
+	}
+	w.Shortcuts[chord] = act
+}
+
+// TriggerShortcut attempts to trigger a shortcut, returning true if one was
+// triggered, and false otherwise.  Also elminates any shortcuts with deleted
+// actions, and does not trigger for Inactive actions.
+func (w *Window) TriggerShortcut(chord string) bool {
+	fmt.Printf("attempting to shortcut chord: %v\n", chord)
+	if w.Shortcuts == nil {
+		return false
+	}
+	sa, exists := w.Shortcuts[chord]
+	if !exists {
+		return false
+	}
+	if sa.IsDeleted() || sa.IsDestroyed() {
+		delete(w.Shortcuts, chord)
+		return false
+	}
+	if sa.IsInactive() {
+		return false
+	}
+	fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Nm)
+	sa.Trigger()
+	return true
 }
 
 // PopupIsMenu returns true if the given popup item is a menu
@@ -1124,8 +1173,16 @@ func (w *Window) EventLoop() {
 			}
 		}
 
+		// finally this is where the event is sent out to registered widgets
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
+
+			if !evi.IsProcessed() && et == oswin.KeyChordEvent {
+				ke := evi.(*key.ChordEvent)
+				kc := ke.ChordString()
+				w.TriggerShortcut(kc)
+			}
+
 			if !delPop && et == oswin.MouseMoveEvent {
 				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
 				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {

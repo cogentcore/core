@@ -135,23 +135,24 @@ func mainrun() {
 	checkbox := brow.AddNewChild(gi.KiT_CheckBox, "checkbox").(*gi.CheckBox)
 	checkbox.Text = "Toggle"
 
+	// note: receiver for menut items with shortcuts must be a Node2D or Window
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
-	mb1.Menu.AddMenuText("Menu Item 1", rec.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 1", "Control+1", win.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2 := mb1.Menu.AddMenuText("Menu Item 2", rec.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mi2 := mb1.Menu.AddMenuText("Menu Item 2", "Control+2", win.This, 2, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2.Menu.AddMenuText("Sub Menu Item 2", rec.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mi2.Menu.AddMenuText("Sub Menu Item 2", "", win.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
 	mb1.Menu.AddSeparator("sep1")
 
-	mb1.Menu.AddMenuText("Menu Item 3", rec.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 3", "Control+3", win.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
@@ -267,7 +268,7 @@ func mainrun() {
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win, false)
+	emen.Menu.AddCopyCutPaste(win, true)
 
 	vp.UpdateEndNoSig(updt)
 

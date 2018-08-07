@@ -1313,19 +1313,19 @@ func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.PasteAssign(data.(mimedata.Mimes), row)
 	})
-	m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
-	m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
-	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 }
 
@@ -1433,20 +1433,20 @@ func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddMenuText("Assign To", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 			tvv.DropAssign(data.(mimedata.Mimes), row)
 		})
 	}
-	m.AddMenuText("Insert Before", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddMenuText("Insert After", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddMenuText("Cancel", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
 		tvv.DropCancel()
 	})

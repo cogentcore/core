@@ -339,15 +339,21 @@ func (g *ButtonBase) ButtonExitHover() {
 }
 
 // ButtonWidget is an interface for button widgets allowing ButtonBase
-// defaults to handle most cases
+// defaults to handle most cases.
 type ButtonWidget interface {
-	// get the button base for most basic functions -- reduces interface size
+	// ButtonAsBase gets the button base for most basic functions -- reduces
+	// interface size.
 	ButtonAsBase() *ButtonBase
-	// called for release of button -- this is where buttons actually differ in functionality
+
+	// ButtonRelease is called for release of button -- this is where buttons
+	// actually differ in functionality.
 	ButtonRelease()
-	// configure the parts of the button -- called during init and style
+
+	// ConfigParts configures the parts of the button -- called during init and style.
 	ConfigParts()
-	// configure the parts of the button, only if needed -- called during layout and render
+
+	// ConfigPartsIfNeeded configures the parts of the button, only if needed
+	// -- called during layout and render
 	ConfigPartsIfNeeded()
 }
 

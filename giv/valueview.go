@@ -574,7 +574,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Struct", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("Edit Struct", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Struct Value View", "", nil, nil, nil)
@@ -653,7 +653,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Slice", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("Edit Slice", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		if vvv.IsStruct {
@@ -717,7 +717,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Map", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("Edit Map", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil, nil)
@@ -824,7 +824,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("Edit", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
@@ -832,7 +832,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			StructViewDialog(mb.Viewport, k, vv.TmpSave, "Struct Value View", "", nil, nil, nil)
 		}
 	})
-	mb.Menu.AddMenuText("GoGiEditor", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {

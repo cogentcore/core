@@ -12,10 +12,10 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  KeyFun is for mapping Keys to Functions
-
-// functions that keyboard events can perform in the gui
+// KeyFunctions are functions that keyboard events can perform in the GUI --
+// seems possible to keep this flat and consistent across different contexts,
+// as long as the functions can be appropriately reinterpreted for each
+// context.
 type KeyFunctions int64
 
 const (
@@ -46,6 +46,8 @@ const (
 	KeyFunDelete
 	KeyFunKill
 	KeyFunDuplicate
+	KeyFunUndo
+	KeyFunRedo
 	KeyFunInsert
 	KeyFunInsertAfter
 	KeyFunGoGiEditor
@@ -68,9 +70,164 @@ var KiT_KeyFunctions = kit.Enums.AddEnumAltLower(KeyFunctionsN, false, StyleProp
 func (ev KeyFunctions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *KeyFunctions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// todo: need to have multiple functions possible per key, depending on context?
-
+// KeyMap is a map between a key sequence (chord) and a specific KeyFun
+// function.  This mapping must be unique, in that each chord has unique
+// KeyFun, but multiple chords can trigger the same function.
 type KeyMap map[string]KeyFunctions
+
+// SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
+// prior to setting it to ensure that it is a valid, complete map
+func SetActiveKeyMap(km *KeyMap) {
+	km.Update()
+	ActiveKeyMap = km
+}
+
+// KeyFun translates chord into keyboard function -- use oswin key.ChordString
+// to get chord
+func KeyFun(chord string) KeyFunctions {
+	kf := KeyFunNil
+	if chord != "" {
+		kf = (*ActiveKeyMap)[chord]
+		// fmt.Printf("chord: %v = %v\n", chord, kf)
+	}
+	return kf
+}
+
+// StdKeyMaps collects a list of standard keymap options
+var StdKeyMaps = []*KeyMap{
+	&MacKeyMap,
+	&MacEmacsKeyMap,
+	&LinuxKeyMap,
+	&LinuxEmacsKeyMap,
+	&ChromeKeyMap,
+}
+
+// StdKeyMapNames lists names of maps in same order as StdKeyMaps
+var StdKeyMapNames = []string{
+	"MacKeyMap",
+	"MacEmacsKeyMap",
+	"LinuxKeyMap",
+	"LinuxEmacsKeyMap",
+	"ChromeKeyMap",
+}
+
+// DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
+// depending on platform
+var DefaultKeyMap = &MacEmacsKeyMap
+
+// ActiveKeyMap points to the active map -- users can set this to an
+// alternative map in Prefs
+var ActiveKeyMap = DefaultKeyMap
+
+// StdKeyMapByName returns a standard keymap and index within StdKeyMaps* tables by name.
+func StdKeyMapByName(name string) (*KeyMap, int) {
+	for i, nm := range StdKeyMapNames {
+		if nm == name {
+			return StdKeyMaps[i], i
+		}
+	}
+	fmt.Printf("gi.StdKeyMapByName key map named: %v not found\n", name)
+	return nil, -1
+}
+
+// StdKeyMapName returns name of a standard key map
+func StdKeyMapName(km *KeyMap) string {
+	for i, sk := range StdKeyMaps {
+		if sk == km {
+			return StdKeyMapNames[i]
+		}
+	}
+	fmt.Printf("gi.StdKeyMapName key map not found\n")
+	return ""
+}
+
+// KeyMapItem records one element of the key map -- used for organizing the map.
+type KeyMapItem struct {
+	Key string       `desc:"the key chord that activates a function"`
+	Fun KeyFunctions `desc:"the function of that key"`
+}
+
+// ToSlice copies this keymap to a slice of KeyMapItem's
+func (km *KeyMap) ToSlice() []KeyMapItem {
+	kms := make([]KeyMapItem, len(*km))
+	idx := 0
+	for key, fun := range *km {
+		kms[idx] = KeyMapItem{key, fun}
+		idx++
+	}
+	return kms
+}
+
+// ChordForFun returns first key chord trigger for given KeyFun in map
+func (km *KeyMap) ChordForFun(kf KeyFunctions) string {
+	for key, fun := range *km {
+		if fun == kf {
+			return key
+		}
+	}
+	return ""
+}
+
+// Update ensures that the given keymap has at least one entry for every
+// defined KeyFun, grabbing ones from the default map if not, and also
+// eliminates any Nil entries which might reflect out-of-date functions
+func (km *KeyMap) Update() {
+	for key, val := range *km {
+		if val == KeyFunNil {
+			log.Printf("KeyMap: key function is nil -- probably renamed, for key: %v\n", key)
+			delete(*km, key)
+		}
+	}
+
+	dkms := DefaultKeyMap.ToSlice()
+	kms := km.ToSlice()
+
+	sort.Slice(dkms, func(i, j int) bool {
+		return dkms[i].Fun < dkms[j].Fun
+	})
+	sort.Slice(kms, func(i, j int) bool {
+		return kms[i].Fun < kms[j].Fun
+	})
+
+	addkm := make([]KeyMapItem, 0)
+
+	mi := 0
+	for _, dki := range dkms {
+		if mi >= len(kms) {
+			break
+		}
+		mmi := kms[mi]
+		if dki.Fun < mmi.Fun {
+			addkm = append(addkm, dki)
+		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
+			mi++
+		} else {
+			mi++
+		}
+	}
+
+	for _, ai := range addkm {
+		(*km)[ai.Key] = ai.Fun
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+// Shortcuts is a map between a key sequence (chord) and a specific Action
+// that can be triggered.  This mapping must be unique, in that each chord has
+// unique Action, and generally each Action only has a single chord as well,
+// though this is not strictly enforced.  Shortcuts are evaluated *after* the
+// standard KeyMap event processing, so any conflicts are resolved in favor of
+// the local widget's key event processing, with the shortcut only operating
+// when no conflicting widgets are in focus.  Shortcuts are always window-wide
+// and are intended for global window / toolbar actions.  Widget-specific key
+// functions should be be handeled directly within widget key event
+// processing.
+type Shortcuts map[string]*Action
+
+/////////////////////////////////////////////////////////////////////////////////
+// Std Keymaps
 
 // note: shift and meta modifiers for navigation keys do select + move
 
@@ -138,6 +295,11 @@ var MacEmacsKeyMap = KeyMap{
 	"Control+V":           KeyFunPaste,
 	"Meta+V":              KeyFunPaste,
 	"Control+M":           KeyFunDuplicate,
+	"Control+Z":           KeyFunUndo,
+	"Meta+Z":              KeyFunUndo,
+	"Control+/":           KeyFunUndo,
+	"Shift+Control+Z":     KeyFunRedo,
+	"Shift+Meta+Z":        KeyFunRedo,
 	"Control+I":           KeyFunInsert,
 	"Control+O":           KeyFunInsertAfter,
 	"Control+Alt+I":       KeyFunGoGiEditor,
@@ -223,6 +385,10 @@ var MacKeyMap = KeyMap{
 	"Control+V":           KeyFunPaste,
 	"Meta+V":              KeyFunPaste,
 	"Control+M":           KeyFunDuplicate,
+	"Control+Z":           KeyFunUndo,
+	"Meta+Z":              KeyFunUndo,
+	"Shift+Control+Z":     KeyFunRedo,
+	"Shift+Meta+Z":        KeyFunRedo,
 	"Control+I":           KeyFunInsert,
 	"Control+O":           KeyFunInsertAfter,
 	"Control+Alt+I":       KeyFunGoGiEditor,
@@ -282,9 +448,11 @@ var LinuxKeyMap = KeyMap{
 	"Control+K": KeyFunKill,
 	"Control+C": KeyFunCopy,
 	// "Control+W":       KeyFunCut, // Close Current Tab
-	"Control+X": KeyFunCut,
-	"Control+V": KeyFunPaste,
-	"Control+M": KeyFunDuplicate,
+	"Control+X":       KeyFunCut,
+	"Control+V":       KeyFunPaste,
+	"Control+M":       KeyFunDuplicate,
+	"Control+Z":       KeyFunUndo,
+	"Shift+Control+Z": KeyFunRedo,
 	// "Control+I":       KeyFunInsert, // Italic
 	// "Control+O":       KeyFunInsertAfter, // Open
 	"Shift+Control+I": KeyFunGoGiEditor,
@@ -494,130 +662,4 @@ var ChromeKeyMap = KeyMap{
 	"Control+Alt+P":   KeyFunPrefs,
 	"F5":              KeyFunRefresh,
 	"Control+.":       KeyFunComplete,
-}
-
-// StdKeyMaps collects a list of standard keymap options
-var StdKeyMaps = []*KeyMap{
-	&MacKeyMap,
-	&MacEmacsKeyMap,
-	&LinuxKeyMap,
-	&LinuxEmacsKeyMap,
-	&ChromeKeyMap,
-}
-
-// StdKeyMapNames lists names of maps in same order as StdKeyMaps
-var StdKeyMapNames = []string{
-	"MacKeyMap",
-	"MacEmacsKeyMap",
-	"LinuxKeyMap",
-	"LinuxEmacsKeyMap",
-	"ChromeKeyMap",
-}
-
-// DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
-// depending on platform
-var DefaultKeyMap = &MacEmacsKeyMap
-
-// ActiveKeyMap points to the active map -- users can set this to an
-// alternative map in Prefs
-var ActiveKeyMap = DefaultKeyMap
-
-// StdKeyMapByName returns a standard keymap and index within StdKeyMaps* tables by name.
-func StdKeyMapByName(name string) (*KeyMap, int) {
-	for i, nm := range StdKeyMapNames {
-		if nm == name {
-			return StdKeyMaps[i], i
-		}
-	}
-	fmt.Printf("gi.StdKeyMapByName key map named: %v not found\n", name)
-	return nil, -1
-}
-
-// StdKeyMapName returns name of a standard key map
-func StdKeyMapName(km *KeyMap) string {
-	for i, sk := range StdKeyMaps {
-		if sk == km {
-			return StdKeyMapNames[i]
-		}
-	}
-	fmt.Printf("gi.StdKeyMapName key map not found\n")
-	return ""
-}
-
-// KeyMapItem records one element of the key map -- used for organizing the map
-type KeyMapItem struct {
-	Key string       `desc:"the key chord that activates a function"`
-	Fun KeyFunctions `desc:"the function of that key"`
-}
-
-// ToSlice copies this keymap to a slice of KeyMapItem's
-func (km *KeyMap) ToSlice() []KeyMapItem {
-	kms := make([]KeyMapItem, len(*km))
-	idx := 0
-	for key, fun := range *km {
-		kms[idx] = KeyMapItem{key, fun}
-		idx++
-	}
-	return kms
-}
-
-// Update ensures that the given keymap has at least one entry for every
-// defined KeyFun, grabbing ones from the default map if not, and also
-// eliminates any Nil entries which might reflect out-of-date functions
-func (km *KeyMap) Update() {
-	for key, val := range *km {
-		if val == KeyFunNil {
-			log.Printf("KeyMap: key function is nil -- probably renamed, for key: %v\n", key)
-			delete(*km, key)
-		}
-	}
-
-	dkms := DefaultKeyMap.ToSlice()
-	kms := km.ToSlice()
-
-	sort.Slice(dkms, func(i, j int) bool {
-		return dkms[i].Fun < dkms[j].Fun
-	})
-	sort.Slice(kms, func(i, j int) bool {
-		return kms[i].Fun < kms[j].Fun
-	})
-
-	addkm := make([]KeyMapItem, 0)
-
-	mi := 0
-	for _, dki := range dkms {
-		if mi >= len(kms) {
-			break
-		}
-		mmi := kms[mi]
-		if dki.Fun < mmi.Fun {
-			addkm = append(addkm, dki)
-		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
-			mi++
-		} else {
-			mi++
-		}
-	}
-
-	for _, ai := range addkm {
-		(*km)[ai.Key] = ai.Fun
-	}
-}
-
-// SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
-// prior to setting it to ensure that it is a valid, complete map
-func SetActiveKeyMap(km *KeyMap) {
-	km.Update()
-	ActiveKeyMap = km
-}
-
-// KeyFun translates chord into keyboard function -- use oswin key.ChordString
-// to get chord
-func KeyFun(chord string) KeyFunctions {
-	kf := KeyFunNil
-	if chord != "" {
-		kf = (*ActiveKeyMap)[chord]
-		// fmt.Printf("chord: %v = %v\n", chord, kf)
-	}
-	return kf
 }

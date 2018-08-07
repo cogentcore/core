@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -33,19 +34,34 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 // MakeMenuFunc is a callback for making a menu on demand
 type MakeMenuFunc func(m *Menu)
 
-// AddMenuText adds an action to the menu with a text label -- todo: shortcuts
-func (m *Menu) AddMenuText(txt string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
+// AddMenuText adds an action to the menu with a text label
+func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
 	ac := Action{}
 	ac.InitName(&ac, txt)
 	ac.Text = txt
+	ac.Shortcut = shortcut
 	ac.Data = data
 	ac.SetAsMenu()
 	*m = append(*m, ac.This.(Node2D))
 	if sigTo != nil && fun != nil {
 		ac.ActionSig.Connect(sigTo, fun)
+	}
+	if ac.Shortcut != "" {
+		if gin, ok := sigTo.(Node2D); ok {
+			win := gin.AsNode2D().ParentWindow()
+			if win != nil {
+				win.AddShortcut(ac.Shortcut, &ac)
+			} else {
+				fmt.Printf("gi.Menu AddMenuText: NOT adding shortcut: %v to: %v, win is nil\n", ac.Shortcut, ac.Text)
+			}
+		} else if win, ok := sigTo.(*Window); ok {
+			win.AddShortcut(ac.Shortcut, &ac)
+		} else {
+			fmt.Printf("gi.Menu AddMenuText: NOT adding shortcut: %v to: %v, no path to parent Window -- receiver of event must be Node2D with parent window, or window itself\n", ac.Shortcut, ac.Text)
+		}
 	}
 	return &ac
 }
@@ -88,15 +104,18 @@ func (m *Menu) AddLabel(lbl string) *Label {
 // keyboard shortcut -- cutPasteActive determines whether Cut and Paste are
 // active, reflecting the modifiability of relevant element (i.e., IsActive)
 func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
-	m.AddMenuText("Copy", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
+	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
+	ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
+	m.AddMenuText("Copy", cpsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCopy)
 	})
-	cut := m.AddMenuText("Cut", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cut := m.AddMenuText("Cut", ctsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCut)
 	})
-	paste := m.AddMenuText("Paste", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	paste := m.AddMenuText("Paste", ptsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunPaste)
 	})

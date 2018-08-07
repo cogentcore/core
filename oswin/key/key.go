@@ -134,6 +134,25 @@ func (e *Event) ChordString() string {
 	return modstr + codestr
 }
 
+// DecodeChord decodes a chord string into rune and modifiers (set as bit flags)
+func DecodeChord(ch string) (r rune, mods int32, err error) {
+	cs := ch
+	for m := Shift; m < ModifiersN; m++ {
+		mstr := interface{}(m).(fmt.Stringer).String() + "+"
+		if strings.HasPrefix(cs, mstr) {
+			mods |= (1 << uint32(m))
+			cs = strings.TrimPrefix(cs, mstr)
+		}
+	}
+	rs := ([]rune)(cs)
+	if len(rs) == 1 {
+		r = rs[0]
+	} else {
+		err = fmt.Errorf("gi.oswin.key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
+	}
+	return
+}
+
 // CodeIsModifier returns true if given code is a modifier key
 func CodeIsModifier(c Codes) bool {
 	if c >= CodeLeftControl && c <= CodeRightGUI {
