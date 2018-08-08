@@ -587,29 +587,33 @@ func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 	}
 }
 
-// IsInScope returns true if the given object is in scope for receiving events
-func (w *Window) IsInScope(gii Node2D, gi *Node2DBase) bool {
+// IsInScope returns true if the given object is in scope for receiving events.
+// If popup is true, then only items on popup are in scope, otherwise
+// items NOT on popup are in scope (if no popup, everything is in scope).
+func (w *Window) IsInScope(gi *Node2DBase, popup bool) bool {
 	if w.Popup == nil {
 		return true
 	}
 	if gi.This == w.Popup {
-		return true
+		return popup
 	}
 	if gi.Viewport == nil {
 		return false
 	}
 	if gi.Viewport.This == w.Popup {
-		return true
+		return popup
 	}
-	return false
+	return !popup
 }
 
 // SendEventSignal sends given event signal to all receivers that want it --
 // note that because there is a different EventSig for each event type, we are
 // ONLY looking at nodes that have registered to receive that type of event --
 // the further filtering is just to ensure that they are in the right position
-// to receive the event (focus, popup filtering, etc).
-func (w *Window) SendEventSignal(evi oswin.Event) {
+// to receive the event (focus, popup filtering, etc).  If popup is true, then
+// only items on popup are in scope, otherwise items NOT on popup are in scope
+// (if no popup, everything is in scope).
+func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 	et := evi.Type()
 	if et > oswin.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
@@ -629,7 +633,7 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 			}
 			gii, gi := KiToNode2D(k)
 			if gi != nil {
-				if !w.IsInScope(gii, gi) {
+				if !w.IsInScope(gi, popup) {
 					return false
 				}
 				if evi.OnFocus() && !gii.HasFocus2D() {
@@ -675,8 +679,10 @@ func (w *Window) SendEventSignal(evi oswin.Event) {
 }
 
 // GenMouseFocusEvents processes mouse.MoveEvent to generate mouse.FocusEvent
-// events -- returns true if any such events were sent.
-func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) bool {
+// events -- returns true if any such events were sent.  If popup is true,
+// then only items on popup are in scope, otherwise items NOT on popup are in
+// scope (if no popup, everything is in scope).
+func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
 	ftyp := oswin.MouseFocusEvent
@@ -687,9 +693,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
-			gii, gi := KiToNode2D(k)
+			_, gi := KiToNode2D(k)
 			if gi != nil {
-				if !w.IsInScope(gii, gi) { // no
+				if !w.IsInScope(gi, popup) {
 					return false
 				}
 				in := pos.In(gi.WinBBox)
@@ -735,33 +741,39 @@ func (w *Window) SendHoverEvent(e *mouse.MoveEvent) {
 	he := mouse.HoverEvent{Event: e.Event}
 	he.Processed = false
 	he.Action = mouse.Hover
-	w.SendEventSignal(&he)
+	w.SendEventSignal(&he, true) // popup = true by default
 }
 
-// SendKeyChordEvent sends a KeyChord event with given values
-func (w *Window) SendKeyChordEvent(r rune, mods ...key.Modifiers) {
+// SendKeyChordEvent sends a KeyChord event with given values.  If popup is
+// true, then only items on popup are in scope, otherwise items NOT on popup
+// are in scope (if no popup, everything is in scope).
+func (w *Window) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
 	ke := key.ChordEvent{}
 	ke.SetTime()
 	ke.SetModifiers(mods...)
 	ke.Rune = r
 	ke.Action = key.Press
-	w.SendEventSignal(&ke)
+	w.SendEventSignal(&ke, popup)
 }
 
-// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun
-func (w *Window) SendKeyFunEvent(kf KeyFunctions) {
+// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
+// If popup is true, then only items on popup are in scope, otherwise items
+// NOT on popup are in scope (if no popup, everything is in scope).
+func (w *Window) SendKeyFunEvent(kf KeyFunctions, popup bool) {
 	chord := ActiveKeyMap.ChordForFun(kf)
-	if chord != "" {
-		r, mods, err := key.DecodeChord(chord)
-		if err == nil {
-			ke := key.ChordEvent{}
-			ke.SetTime()
-			ke.Modifiers = mods
-			ke.Rune = r
-			ke.Action = key.Press
-			w.SendEventSignal(&ke)
-		}
+	if chord == "" {
+		return
 	}
+	r, mods, err := key.DecodeChord(chord)
+	if err != nil {
+		return
+	}
+	ke := key.ChordEvent{}
+	ke.SetTime()
+	ke.Modifiers = mods
+	ke.Rune = r
+	ke.Action = key.Press
+	w.SendEventSignal(&ke, popup)
 }
 
 // AddShortcut adds given shortcut -- will issue warning about conflicting
@@ -1175,9 +1187,9 @@ func (w *Window) EventLoop() {
 
 		// finally this is where the event is sent out to registered widgets
 		if !evi.IsProcessed() {
-			w.SendEventSignal(evi)
+			w.SendEventSignal(evi, true) // popup = true by default
 			if !delPop && et == oswin.MouseMoveEvent {
-				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
+				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), true) // popup
 				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
 					delPop = true
 				}
@@ -1541,7 +1553,7 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de.Action = dnd.Start
 	de.DefaultMod()
 	w.DNDMod = dnd.NoDropMod
-	w.SendEventSignal(&de)
+	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	// now up to receiver to call StartDragNDrop if they want to..
 }
 
@@ -1559,7 +1571,7 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	de.DefaultMod()
 	de.Action = dnd.Move
 	w.DNDSetCursor(de.Mod)
-	w.SendEventSignal(&de)
+	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	w.RenderOverlays()
 	e.SetProcessed()
 }
@@ -1574,7 +1586,7 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de.Source = w.DNDSource
 	bitflag.Clear(w.DNDSource.Flags(), int(NodeDragging))
 	w.Dragging = nil
-	w.SendEventSignal(&de)
+	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	w.DNDFinalEvent = &de
 	w.ClearDragNDrop()
 	e.SetProcessed()

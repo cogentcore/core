@@ -114,8 +114,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* kefun to chord use !! to indicate preferred among alternatives
-
 * main menu on mac
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
@@ -123,10 +121,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + basic cursor updates: NOT is default, override for others
 
 * add Toolbar based on MenuBar
-
-* event injection -- Edit/Cut/Copy/Paste convenience method, and these just
-  inject the corresponding key press -- problem: they do so when the menu is
-  still there..  would work ok in buttons probably.
 
 * Label renders links, uses HandPointing for links, delivers link clicked signal
 

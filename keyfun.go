@@ -231,7 +231,9 @@ type Shortcuts map[string]*Action
 
 // note: shift and meta modifiers for navigation keys do select + move
 
-// todo: use ! to indicate preferred shortcut for menus
+// note: where multiple shortcuts exist for a given function, any shortcut
+// display of such items in menus will randomly display one of the
+// options. This can be considered a feature, not a bug!
 
 // MacEmacsKeyMap defines emacs-based navigation for mac
 var MacEmacsKeyMap = KeyMap{
