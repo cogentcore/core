@@ -89,7 +89,8 @@ func mainrun() {
 	mfr.AddNewChild(gi.KiT_Space, "blspc")
 	blrow := mfr.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
-	blab.Text = "Buttons:"
+	blab.SetProp("font-family", "Arial Unicode")
+	blab.Text = "Buttons: ⌘ "
 	blab.Selectable = true
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)

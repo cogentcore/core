@@ -102,7 +102,7 @@ func (fv *FileView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Layout, "path-row")
+	config.Add(gi.KiT_ToolBar, "path-tbar")
 	config.Add(gi.KiT_Space, "path-space")
 	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Space, "files-space")
@@ -128,7 +128,7 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 }
 
 func (fv *FileView) ConfigPathRow() {
-	pr := fv.KnownChildByName("path-row", 0).(*gi.Layout)
+	pr := fv.KnownChildByName("path-tbar", 0).(*gi.ToolBar)
 	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
@@ -261,7 +261,7 @@ func (fv *FileView) ConfigSelRow() {
 
 // PathField returns the TextField of the path
 func (fv *FileView) PathField() *gi.TextField {
-	pr := fv.KnownChildByName("path-row", 0).(*gi.Layout)
+	pr := fv.KnownChildByName("path-tbar", 0).(*gi.ToolBar)
 	return pr.KnownChildByName("path", 1).(*gi.TextField)
 }
 

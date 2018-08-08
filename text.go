@@ -190,36 +190,37 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 	if len(str) == 0 {
 		return
 	}
-	// todo: unicode font that supports rendering of symbols
-	// image/font doesn't have a good mechanism for telling you it can't render a given rune
-	// and even Unicode doesn't handle the standard keyboard shortcut codes!
-	// ucfont := FontStyle{}
-	// ucfont.FaceName = "Arial Unicode"
-	// ucfont.Size = sty.Size
-	// ucfont.LoadFont(ctxt, "")
+	ucfont := FontStyle{}
+	ucfont.Family = "Arial Unicode"
+	ucfont.Size = sty.Size
+	ucfont.LoadFont(ctxt, "")
 
 	nwr := []rune(str)
 	sz := len(nwr)
 	sr.Text = append(sr.Text, nwr...)
 	rr := RuneRender{Face: face, Color: clr, BgColor: bg, Deco: deco}
+	r := nwr[0]
+	lastUc := false
+	if r > 0xFF && unicode.IsSymbol(r) {
+		rr.Face = ucfont.Face
+		lastUc = true
+	}
 	sr.HasDecoUpdate(bg, deco)
 	sr.Render = append(sr.Render, rr)
-	// lastUc := false
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := RuneRender{Deco: deco, BgColor: bg}
-		// r := sr.Text[i]
-		// if r > 0xFF && unicode.IsSymbol(r) {
-		// 	if !lastUc {
-		// 		rp.Face = ucfont.Face
-		// 		fmt.Printf("ucfont for: %v\n", string(r))
-		// 		lastUc = true
-		// 	}
-		// } else {
-		// 	if lastUc {
-		// 		rp.Face = face
-		// 		lastUc = false
-		// 	}
-		// }
+		r := nwr[i]
+		if r > 0xFF && unicode.IsSymbol(r) {
+			if !lastUc {
+				rp.Face = ucfont.Face
+				lastUc = true
+			}
+		} else {
+			if lastUc {
+				rp.Face = face
+				lastUc = false
+			}
+		}
 		sr.Render = append(sr.Render, rp)
 	}
 }
@@ -236,13 +237,10 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 		bgc = nil
 	}
 
-	// todo: unicode font that supports rendering of symbols
-	// image/font doesn't have a good mechanism for telling you it can't render a given rune
-	// and even Unicode doesn't handle the standard keyboard shortcut codes!
-	// ucfont := FontStyle{}
-	// ucfont.FaceName = "Arial Unicode"
-	// ucfont.Size = sty.Size
-	// ucfont.LoadFont(ctxt, "")
+	ucfont := FontStyle{}
+	ucfont.Family = "Arial Unicode"
+	ucfont.Size = sty.Size
+	ucfont.LoadFont(ctxt, "")
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
@@ -268,20 +266,20 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 		}
 	}
 	// use unicode font for all non-ascii symbols
-	// lastUc := false
-	// for i, r := range sr.Text {
-	// 	if r > 0xFF && unicode.IsSymbol(r) {
-	// 		if !lastUc {
-	// 			sr.Render[i].Face = ucfont.Face
-	// 			lastUc = true
-	// 		}
-	// 	} else {
-	// 		if lastUc {
-	// 			sr.Render[i].Face = sty.Face
-	// 			lastUc = false
-	// 		}
-	// 	}
-	// }
+	lastUc := false
+	for i, r := range sr.Text {
+		if r > 0xFF && unicode.IsSymbol(r) {
+			if !lastUc {
+				sr.Render[i].Face = ucfont.Face
+				lastUc = true
+			}
+		} else {
+			if lastUc {
+				sr.Render[i].Face = sty.Face
+				lastUc = false
+			}
+		}
+	}
 }
 
 // SetString initializes to given plain text string, with given default style
@@ -616,6 +614,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			d.Dot = rp.Fixed()
 			dr, mask, maskp, _, ok := d.Face.Glyph(d.Dot, r)
 			if !ok {
+				// fmt.Printf("not ok rendering rune: %v\n", string(r))
 				continue
 			}
 			idr := dr.Intersect(rs.Bounds)

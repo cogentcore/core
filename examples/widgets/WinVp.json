@@ -99,7 +99,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Alt+W"
+                  "Shortcut": "Control+C"
                 },
                 {
                   "Nm": "Cut",
@@ -113,7 +113,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+X"
+                  "Shortcut": "Control+W"
                 },
                 {
                   "Nm": "Paste",
@@ -127,7 +127,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+Y"
+                  "Shortcut": "Control+V"
                 }
               ],
               "Shortcut": ""
@@ -294,7 +294,7 @@
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "Buttons:",
+                  "Text": "Buttons: ⌘ ",
                   "Selectable": true
                 }
               ],
@@ -333,14 +333,14 @@
                   "UniqueNm": "button1",
                   "Props": {
                     "#icon": {
-                      "__type:width": "units.Value",
-                      "width": {
+                      "__type:height": "units.Value",
+                      "height": {
                         "Val": 1.5,
                         "Un": "Em",
                         "Dots": 0
                       },
-                      "__type:height": "units.Value",
-                      "height": {
+                      "__type:width": "units.Value",
+                      "width": {
                         "Val": 1.5,
                         "Un": "Em",
                         "Dots": 0
@@ -567,13 +567,13 @@
               "Nm": "srow",
               "UniqueNm": "srow",
               "Props": {
-                "horizontal-align": "left",
                 "__type:max-width": "units.Value",
                 "max-width": {
                   "Val": -1,
                   "Un": "Px",
                   "Dots": 0
-                }
+                },
+                "horizontal-align": "left"
               },
               "Kids": [
                 {
@@ -591,12 +591,6 @@
                   "Nm": "slider1",
                   "UniqueNm": "slider1",
                   "Props": {
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 20,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:min-width": "units.Value",
                     "min-width": {
                       "Val": 20,
@@ -612,6 +606,12 @@
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 20,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -659,6 +659,18 @@
                   "Nm": "slider2",
                   "UniqueNm": "slider2",
                   "Props": {
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
                     "__type:width": "units.Value",
                     "width": {
                       "Val": 1,
@@ -675,18 +687,6 @@
                     "max-height": {
                       "Val": -1,
                       "Un": "Px",
-                      "Dots": 0
-                    },
-                    "__type:height": "units.Value",
-                    "height": {
-                      "Val": 10,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-height": "units.Value",
-                    "min-height": {
-                      "Val": 10,
-                      "Un": "Em",
                       "Dots": 0
                     }
                   },
@@ -733,12 +733,6 @@
                   "Nm": "scrollbar1",
                   "UniqueNm": "scrollbar1",
                   "Props": {
-                    "__type:height": "units.Value",
-                    "height": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 1,
@@ -754,6 +748,12 @@
                     "__type:min-width": "units.Value",
                     "min-width": {
                       "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 1,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -801,18 +801,6 @@
                   "Nm": "scrollbar2",
                   "UniqueNm": "scrollbar2",
                   "Props": {
-                    "__type:min-height": "units.Value",
-                    "min-height": {
-                      "Val": 10,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:min-width": "units.Value",
                     "min-width": {
                       "Val": 1,
@@ -828,6 +816,18 @@
                     "__type:height": "units.Value",
                     "height": {
                       "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -1015,6 +1015,18 @@
   ],
   "Class": "",
   "CSS": {
+    ".hslides": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 240,
+        "G": 225,
+        "B": 255,
+        "A": 255
+      }
+    },
+    "kbd": {
+      "color": "blue"
+    },
     "button": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -1032,18 +1044,6 @@
         "B": 240,
         "A": 255
       }
-    },
-    ".hslides": {
-      "__type:background-color": "gi.Color",
-      "background-color": {
-        "R": 240,
-        "G": 225,
-        "B": 255,
-        "A": 255
-      }
-    },
-    "kbd": {
-      "color": "blue"
     }
   },
   "Tooltip": "",

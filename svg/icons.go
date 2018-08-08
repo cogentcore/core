@@ -182,7 +182,7 @@ func (iset *IconSet) LoadDefaultIcons() error {
 		gopath = build.Default.GOPATH
 	}
 	path := filepath.Join(gopath, "src/github.com/goki/gi/icons")
-	fmt.Printf("loading default icons: %v\n", path)
+	// fmt.Printf("loading default icons: %v\n", path)
 	rval := iset.LoadIconsFromPath(path)
 	// tstpath := filepath.Join(gopath, "src/github.com/goki/gi/icons_svg_test")
 	// rval = iset.LoadIconsFromPath(tstpath)
