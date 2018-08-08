@@ -60,6 +60,7 @@ func mainrun() {
 	vp.CSS = css
 
 	mfr := win.SetMainFrame()
+	mfr.SetProp("spacing", units.NewValue(1, units.Px))
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
@@ -95,6 +96,8 @@ func mainrun() {
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutHoriz
+	brow.SetProp("spacing", units.NewValue(2, units.Ex))
+
 	brow.SetProp("horizontal-align", gi.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
@@ -155,8 +158,6 @@ func mainrun() {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	brow.SetPropChildren("margin", units.NewValue(2, units.Ex))
-
 	//////////////////////////////////////////
 	//      Sliders
 
@@ -167,6 +168,7 @@ func mainrun() {
 
 	srow := mfr.AddNewChild(gi.KiT_Layout, "srow").(*gi.Layout)
 	srow.Lay = gi.LayoutHoriz
+	srow.SetProp("spacing", units.NewValue(2, units.Ex))
 	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
@@ -232,6 +234,7 @@ func mainrun() {
 	txlab.Text = "Text Widgets:"
 	txrow := mfr.AddNewChild(gi.KiT_Layout, "txrow").(*gi.Layout)
 	txrow.Lay = gi.LayoutHoriz
+	txrow.SetProp("spacing", units.NewValue(2, units.Ex))
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 
@@ -257,8 +260,6 @@ func mainrun() {
 	cb.ComboSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
-
-	// txrow.SetPropChildren("margin", units.NewValue(2, units.Ex))
 
 	// main menu
 

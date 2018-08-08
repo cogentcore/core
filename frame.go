@@ -49,10 +49,6 @@ var KiT_Stripes = kit.Enums.AddEnumAltLower(StripesN, false, StylePropProps, "St
 func (ev Stripes) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-func (fr *Frame) Style2D() {
-	fr.Style2DWidget()
-}
-
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {
 	st := &fr.Sty

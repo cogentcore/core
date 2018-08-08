@@ -282,6 +282,7 @@ type GridData struct {
 type Layout struct {
 	WidgetBase
 	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
+	Spacing   units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
 	StackTop  int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
 	ChildSize Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
@@ -352,6 +353,21 @@ func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(e
 
 //go:generate stringer -type=RowCol
 
+// LayoutDefault is default obj that can be used when property specifies "default"
+var LayoutDefault Layout
+
+// LayoutFields contain the StyledFields for Layout type
+var LayoutFields = initLayout()
+
+func initLayout() *StyledFields {
+	LayoutDefault = Layout{}
+	sf := &StyledFields{}
+	sf.Default = &LayoutDefault
+	sf.AddField(&LayoutDefault, "Lay")
+	sf.AddField(&LayoutDefault, "Spacing")
+	return sf
+}
+
 // SumDim returns whether we sum up elements along given dimension?  else max
 func (ly *Layout) SumDim(d Dims2D) bool {
 	if (d == X && ly.Lay == LayoutHoriz) || (d == Y && ly.Lay == LayoutVert) {
@@ -369,7 +385,8 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 
 // GatherSizes is size first pass: gather the size information from the children
 func (ly *Layout) GatherSizes() {
-	if len(ly.Kids) == 0 {
+	sz := len(ly.Kids)
+	if sz == 0 {
 		return
 	}
 
@@ -403,6 +420,19 @@ func (ly *Layout) GatherSizes() {
 	spc := ly.Sty.BoxSpace()
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
+
+	elspc := float32(0.0)
+	if sz >= 2 {
+		elspc = float32(sz-1) * ly.Spacing.Dots
+	}
+	if ly.SumDim(X) {
+		ly.LayData.Size.Need.X += elspc
+		ly.LayData.Size.Pref.X += elspc
+	}
+	if ly.SumDim(Y) {
+		ly.LayData.Size.Need.Y += elspc
+		ly.LayData.Size.Pref.Y += elspc
+	}
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
@@ -638,7 +668,7 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align
 	return
 }
 
-// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutHoriz / Col
+// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutHoriz / Vert
 func (ly *Layout) LayoutSingle(dim Dims2D) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
@@ -665,11 +695,16 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		return
 	}
 
+	elspc := float32(0.0)
+	if sz >= 2 {
+		elspc = float32(sz-1) * ly.Spacing.Dots
+	}
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
-	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
-	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
+	exspc := 2.0*spc + elspc
+	avail := ly.LayData.AllocSize.Dim(dim) - exspc
+	pref := ly.LayData.Size.Pref.Dim(dim) - exspc
+	need := ly.LayData.Size.Need.Dim(dim) - exspc
 
 	targ := pref
 	usePref := true
@@ -763,7 +798,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		if Layout2DTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), gi.UniqueNm, pos, size)
 		}
-		pos += size
+		pos += size + elspc
 	}
 }
 
@@ -778,9 +813,10 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 	}
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
-	pref := ly.LayData.Size.Pref.Dim(dim) - 2.0*spc
-	need := ly.LayData.Size.Need.Dim(dim) - 2.0*spc
+	exspc := 2.0 * spc
+	avail := ly.LayData.AllocSize.Dim(dim) - exspc
+	pref := ly.LayData.Size.Pref.Dim(dim) - exspc
+	need := ly.LayData.Size.Need.Dim(dim) - exspc
 
 	targ := pref
 	usePref := true
@@ -952,7 +988,7 @@ func (ly *Layout) FinalizeLayout() {
 // avail
 func (ly *Layout) AvailSize() Vec2D {
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.SubVal(spc)
+	avail := ly.LayData.AllocSize.SubVal(spc) // spc is for right size space
 	pargi, _ := KiToNode2D(ly.Par)
 	if pargi != nil {
 		vp := pargi.AsViewport2D()
@@ -1009,7 +1045,17 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Min = 0.0
 	}
 	spc := ly.Sty.BoxSpace()
+	sz := len(ly.Kids)
+	elspc := float32(0.0)
+	if sz >= 2 {
+		elspc = float32(sz-1) * ly.Spacing.Dots
+	}
 	avail := ly.AvailSize().SubVal(spc * 2.0)
+	if ly.SumDim(X) {
+		avail.X += elspc
+	} else {
+		avail.Y += elspc
+	}
 	sc := ly.Scrolls[d]
 	if d == X {
 		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
@@ -1227,6 +1273,10 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
+	tprops := kit.Types.Properties(ly.Type(), true) // true = makeNew
+	LayoutFields.Style(ly, nil, tprops)
+	LayoutFields.Style(ly, nil, ly.Props)
+	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
 }
 
 func (ly *Layout) Size2D() {

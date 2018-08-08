@@ -109,7 +109,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * mac:
 	+ native menu
-	+ doesn't render special shortcut characters (shift arrow, command symbol)
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
