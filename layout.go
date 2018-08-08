@@ -368,7 +368,8 @@ func initLayout() *StyledFields {
 	return sf
 }
 
-// SumDim returns whether we sum up elements along given dimension?  else max
+// SumDim returns whether we sum up elements along given dimension?  else use
+// max for shared dimension.
 func (ly *Layout) SumDim(d Dims2D) bool {
 	if (d == X && ly.Lay == LayoutHoriz) || (d == Y && ly.Lay == LayoutVert) {
 		return true
@@ -436,7 +437,7 @@ func (ly *Layout) GatherSizes() {
 
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref, elspc)
 	}
 }
 
@@ -621,8 +622,9 @@ func (ly *Layout) AllocFromParent() {
 	}
 }
 
-// calculations to layout a single-element dimension, returns pos and size
-func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align) (pos, size float32) {
+// LayoutSharedDim implements calculations to layout for the shared dimension
+// (i.e., Vertical for Horizontal layout). Returns pos and size.
+func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Align) (pos, size float32) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -668,8 +670,9 @@ func (ly *Layout) LayoutSingleImpl(avail, need, pref, max, spc float32, al Align
 	return
 }
 
-// layout item in single-dimensional case -- e.g., orthogonal dimension from LayoutHoriz / Vert
-func (ly *Layout) LayoutSingle(dim Dims2D) {
+// LayoutSharedDim lays out items along a shared dimension, where all elements
+// share the same space, e.g., Horiz for a Vert layout, and vice-versa.
+func (ly *Layout) LayoutSharedDim(dim Dims2D) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
@@ -681,15 +684,15 @@ func (ly *Layout) LayoutSingle(dim Dims2D) {
 		pref := gi.LayData.Size.Pref.Dim(dim)
 		need := gi.LayData.Size.Need.Dim(dim)
 		max := gi.LayData.Size.Max.Dim(dim)
-		pos, size := ly.LayoutSingleImpl(avail, need, pref, max, spc, al)
+		pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, spc, al)
 		gi.LayData.AllocSize.SetDim(dim, size)
 		gi.LayData.AllocPosRel.SetDim(dim, pos)
 	}
 }
 
-// layout all children along given dim -- only affects that dim -- e.g., use
-// LayoutSingle for other dim
-func (ly *Layout) LayoutAll(dim Dims2D) {
+// LayoutAlongDim lays out all children along given dim -- only affects that dim --
+// e.g., use LayoutSharedDim for other dim.
+func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	sz := len(ly.Kids)
 	if sz == 0 {
 		return
@@ -767,7 +770,7 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 	}
 
 	if Layout2DTrace {
-		fmt.Printf("Layout: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+		fmt.Printf("Layout: %v Along dim %v, avail: %v elspc: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, elspc, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 	}
 
 	for i, c := range ly.Kids {
@@ -798,11 +801,11 @@ func (ly *Layout) LayoutAll(dim Dims2D) {
 		if Layout2DTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), gi.UniqueNm, pos, size)
 		}
-		pos += size + elspc
+		pos += size + ly.Spacing.Dots
 	}
 }
 
-// layout grid data along each dimension (row, Y; col, X), same as LayoutAll.
+// layout grid data along each dimension (row, Y; col, X), same as LayoutAlongDim.
 // For cols, X has width prefs of each -- turn that into an actual allocated
 // width for each column, and likewise for rows.
 func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
@@ -938,7 +941,7 @@ func (ly *Layout) LayoutGrid() {
 			pref := gi.LayData.Size.Pref.Dim(dim)
 			need := gi.LayData.Size.Need.Dim(dim)
 			max := gi.LayData.Size.Max.Dim(dim)
-			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
+			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
 			gi.LayData.AllocSize.SetDim(dim, size)
 			gi.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
 
@@ -951,7 +954,7 @@ func (ly *Layout) LayoutGrid() {
 			pref := gi.LayData.Size.Pref.Dim(dim)
 			need := gi.LayData.Size.Need.Dim(dim)
 			max := gi.LayData.Size.Max.Dim(dim)
-			pos, size := ly.LayoutSingleImpl(avail, need, pref, max, 0, al)
+			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
 			gi.LayData.AllocSize.SetDim(dim, size)
 			gi.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}
@@ -1045,17 +1048,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Min = 0.0
 	}
 	spc := ly.Sty.BoxSpace()
-	sz := len(ly.Kids)
-	elspc := float32(0.0)
-	if sz >= 2 {
-		elspc = float32(sz-1) * ly.Spacing.Dots
-	}
 	avail := ly.AvailSize().SubVal(spc * 2.0)
-	if ly.SumDim(X) {
-		avail.X += elspc
-	} else {
-		avail.Y += elspc
-	}
 	sc := ly.Scrolls[d]
 	if d == X {
 		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
@@ -1293,16 +1286,16 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	ly.Layout2DBase(parBBox, true) // init style
 	switch ly.Lay {
 	case LayoutHoriz:
-		ly.LayoutAll(X)
-		ly.LayoutSingle(Y)
+		ly.LayoutAlongDim(X)
+		ly.LayoutSharedDim(Y)
 	case LayoutVert:
-		ly.LayoutAll(Y)
-		ly.LayoutSingle(X)
+		ly.LayoutAlongDim(Y)
+		ly.LayoutSharedDim(X)
 	case LayoutGrid:
 		ly.LayoutGrid()
 	case LayoutStacked:
-		ly.LayoutSingle(X)
-		ly.LayoutSingle(Y)
+		ly.LayoutSharedDim(X)
+		ly.LayoutSharedDim(Y)
 	case LayoutNil:
 		// nothing
 	}

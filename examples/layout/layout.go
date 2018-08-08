@@ -53,6 +53,7 @@ func mainrun() {
 	row1.SetProp("horizontal-align", "left")
 	row1.SetProp("margin", 4.0)
 	row1.SetProp("max-width", -1) // always stretch width
+	row1.SetProp("spacing", 6.0)
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
@@ -80,6 +81,7 @@ func mainrun() {
 	// row2.SetProp("horizontal-align", "justify")
 	row2.SetProp("horizontal-align", "left")
 	row2.SetProp("margin", 4.0)
+	row2.SetProp("spacing", 6.0)
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
@@ -103,6 +105,7 @@ func mainrun() {
 	row3.SetProp("horizontal-align", "justify")
 	// row3.SetProp("horizontal-align", "left")
 	row3.SetProp("margin", 4.0)
+	row3.SetProp("spacing", 6.0)
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)

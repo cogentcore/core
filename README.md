@@ -114,15 +114,15 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* DND in treeview: 2018/08/08 12:13:26 gi.RenderState PopBounds: stack is empty -- programmer error
+
 * main menu on mac
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..
   + basic cursor updates: NOT is default, override for others
 
-* Layout: really want an additional spacing parameter on layout -- needs to be
-  separate from margin / padding which just apply to the frame-like property
-  -- easy -- add to menubar
+* Layout: add spacing for grid
 
 * Layout flow types
 
@@ -154,13 +154,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * Label renders links, uses HandPointing for links, delivers link clicked signal
 
-
-
 * Reminder: grep all todo: in code -- lots!
 
 ### After Beta Release
 
-* search for tableview, treeview
+* search textfield, arrows, highlighting in tableview, treeview
 
 * undo -- sub-package, use diff package (prob this: https://github.com/sergi/go-diff) on top of json outputs, as in emergent diffmgr
 	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
