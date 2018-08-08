@@ -523,17 +523,18 @@ func (tf *TextField) OfferCompletions() {
 	}
 	if tf.Cmpltr.Count() > 0 {
 		var m Menu
-		m = tf.MakeCompletionMenu(m, tf.Cmpltr)
+		m = tf.MakeCompletionMenu(tf.Cmpltr)
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
-		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tfCompletionMenu")
+		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
 		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
 	}
 }
 
 // MakeCompletionMenu makes the menu of possible completions for the preceding code/text -
 // the Action is Complete() for every item
-func (tf *TextField) MakeCompletionMenu(m Menu, completer SampleCompleter) Menu {
+func (tf *TextField) MakeCompletionMenu(completer SampleCompleter) Menu {
+	var m Menu
 	for i := range completer.matches {
 		s := completer.matches[i]
 		m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
