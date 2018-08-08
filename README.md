@@ -51,6 +51,7 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI frame
 * `widget.go` -- `WidgetBase` for all widgets.
 * `buttons.go` -- `ButtonBase`, `Button` and other basic button types.
 * `action.go` -- `Action` is a Button-type used in menus and toolbars, with a simplified `ActionSig` signal.
+* `bars.go` -- `MenuBar` and `ToolBar`
 * `sliders.go` -- `SliderBase`, `Slider`, `ScrollBar`.
 * `textfield.go` for `TextField`, `label.go` for `Label`, etc -- also defines the `gi.Labeler` interface and `ToLabel` converter method (which falls back on kit.ToString using Stringer), which is used for generating a gui-appropriate label for an object -- e.g., for reflect.Type it just presents the raw type name without prefix.
 * `icon.go` for `Icon` wrapper around svg icons (in `svg` sub-package)
@@ -120,10 +121,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + hover -> spring load auto-open tree..
   + basic cursor updates: NOT is default, override for others
 
-* add Toolbar based on MenuBar
-
-* Label renders links, uses HandPointing for links, delivers link clicked signal
-
 * Layout: really want an additional spacing parameter on layout -- needs to be
   separate from margin / padding which just apply to the frame-like property
   -- easy -- add to menubar
@@ -140,7 +137,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * add margin for para in text
 
-* tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away?
+* tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
   general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
@@ -155,6 +152,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * arg view / dialog and button tags
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
+
+* Label renders links, uses HandPointing for links, delivers link clicked signal
+
+
 
 * Reminder: grep all todo: in code -- lots!
 

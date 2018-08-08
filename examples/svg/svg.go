@@ -66,9 +66,9 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutHoriz
-	brow.SetStretchMaxWidth()
+	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
+	tbar.Lay = gi.LayoutHoriz
+	tbar.SetStretchMaxWidth()
 
 	svgrow := mfr.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
 	svgrow.Lay = gi.LayoutHoriz
@@ -87,18 +87,18 @@ func mainrun() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := brow.AddNewChild(gi.KiT_Button, "loadsvg").(*gi.Button)
+	loads := tbar.AddNewChild(gi.KiT_Action, "loadsvg").(*gi.Action)
 	loads.SetText("Load SVG")
 
-	fnm := brow.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
+	fnm := tbar.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	TheFile = fnm
 	fnm.SetMinPrefWidth(units.NewValue(40, units.Em))
 
-	zmlb := brow.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
+	zmlb := tbar.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
 	zmlb.Text = "Zoom: "
 	zmlb.SetProp("vertical-align", gi.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
-	zoomout := brow.AddNewChild(gi.KiT_Button, "zoomout").(*gi.Button)
+	zoomout := tbar.AddNewChild(gi.KiT_Action, "zoomout").(*gi.Action)
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
 	zoomout.SetProp("#icon", ki.Props{
@@ -108,13 +108,13 @@ func mainrun() {
 	zoomout.SetIcon("zoom-out")
 	zoomout.Tooltip = "zoom out"
 
-	zoom := brow.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
+	zoom := tbar.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
 
-	zoomin := brow.AddNewChild(gi.KiT_Button, "zoomin").(*gi.Button)
+	zoomin := tbar.AddNewChild(gi.KiT_Action, "zoomin").(*gi.Action)
 	zoomin.Tooltip = "zoom in"
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
@@ -124,33 +124,31 @@ func mainrun() {
 	})
 	zoomin.SetIcon("zoom-in")
 
-	brow.AddNewChild(gi.KiT_Space, "spctr")
-	trlb := brow.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
+	tbar.AddNewChild(gi.KiT_Space, "spctr")
+	trlb := tbar.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
 	trlb.Text = "Translate: "
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("vertical-align", gi.AlignMiddle)
 
-	trx := brow.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
+	trx := tbar.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
 
-	try := brow.AddNewChild(gi.KiT_SpinBox, "try").(*gi.SpinBox)
+	try := tbar.AddNewChild(gi.KiT_SpinBox, "try").(*gi.SpinBox)
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
 
-	loads.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			path, fn := filepath.Split(CurFilename)
-			path, _ = homedir.Expand(path)
-			giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, win, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.DialogAccepted) {
-					dlg, _ := send.(*gi.Dialog)
-					LoadSVG(giv.FileViewDialogValue(dlg))
-				}
-			})
-		}
+	loads.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		path, fn := filepath.Split(CurFilename)
+		path, _ = homedir.Expand(path)
+		giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				LoadSVG(giv.FileViewDialogValue(dlg))
+			}
+		})
 	})
 
 	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -161,18 +159,14 @@ func mainrun() {
 		}
 	})
 
-	zoomin.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			SetZoom(svge.Scale * 1.1)
-			win.FullReRender()
-		}
+	zoomin.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		SetZoom(svge.Scale * 1.1)
+		win.FullReRender()
 	})
 
-	zoomout.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			SetZoom(svge.Scale * 0.9)
-			win.FullReRender()
-		}
+	zoomout.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		SetZoom(svge.Scale * 0.9)
+		win.FullReRender()
 	})
 
 	zoom.SpinBoxSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {

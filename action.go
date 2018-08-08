@@ -190,27 +190,7 @@ func (g *Action) ButtonRelease() {
 
 func (g *Action) Init2D() {
 	g.Init2DWidget()
-	g.SetClassFromPar()
 	g.ConfigParts()
-}
-
-// SetDefaultClass sets Class field based on parent, etc, which in turn
-// determines styling parameters
-func (g *Action) SetClassFromPar() {
-	ismbar := false
-	if g.Par != nil {
-		_, ismbar = g.Par.(*MenuBar)
-	}
-	if ismbar {
-		if g.Class == "" {
-			g.Class = "bar-action"
-			g.Indicator = "none" // menu-bar specifically
-		}
-	} else if g.IsMenu() {
-		if g.Class == "" {
-			g.Class = "menu-action"
-		}
-	}
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -271,20 +251,30 @@ func (g *Action) ConfigPartsMenuItem() {
 }
 
 func (g *Action) ConfigParts() {
-	g.SetClassFromPar()
 	ismbar := false
+	istbar := false
 	if g.Par != nil {
 		_, ismbar = g.Par.(*MenuBar)
+		_, istbar = g.Par.(*ToolBar)
 	}
-	if ismbar {
+	switch {
+	case ismbar:
 		g.Indicator = "none" // menu-bar specifically
+		fallthrough
+	case istbar:
+		if g.Class == "" {
+			g.Class = "bar-action"
+		}
 		g.ConfigPartsButton()
-	} else if g.IsMenu() {
+	case g.IsMenu():
+		if g.Class == "" {
+			g.Class = "menu-action"
+		}
 		if g.Indicator == "" {
 			g.Indicator = "widget-wedge-right"
 		}
 		g.ConfigPartsMenuItem()
-	} else {
+	default:
 		g.ConfigPartsButton()
 	}
 }
