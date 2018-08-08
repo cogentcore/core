@@ -108,6 +108,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * mac:
 	+ native menu
+	+ doesn't render special shortcut characters (shift arrow, command symbol)
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -116,14 +117,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * MenuBar has gradient but actions don't -- add gradient to actions that show
   up in menubar -- can't not have a background..  set margin / padding 0 and rely on elements on sizing properly
 
-* test text render with keyboard runes and other unicode runes -- maybe something broken
-
-* key.ChordShortForm transforms chord into short-form suitable for menu
-  shortcuts -- not clear if mac command rune will render -- seems to have broken arial.
-
-  need mac-specific shortcut symbols
-
 * kefun to chord use !! to indicate preferred among alternatives
+
+* main menu on mac
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..
@@ -135,9 +131,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   inject the corresponding key press -- problem: they do so when the menu is
   still there..  would work ok in buttons probably.
 
-* main menu (mac, other platforms?)
-
 * Label renders links, uses HandPointing for links, delivers link clicked signal
+
+* Layout: really want an additional spacing parameter on layout -- needs to be
+  separate from margin / padding which just apply to the frame-like property
+  -- easy -- add to menubar
+
+* Layout flow types
 
 * drag should be stateful -- only drag current item -- logic is in there but not working properly
 
@@ -145,12 +145,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * update gi/doc.go with final readme notes etc!
 
-* search for tableview, treeview
-* DND and copy/paste for tableview
-
 * combobox getting text cutoff -- descenders and []
-
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * add margin for para in text
 
@@ -170,11 +165,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
-* text language translation functionality -- just do it automatically for everything, or require user to specifically request it for each string??  prefer a Stringer kind of method?  or a big map of translations?  send it to google??
-
 * Reminder: grep all todo: in code -- lots!
 
 ### After Beta Release
+
+* search for tableview, treeview
 
 * undo -- sub-package, use diff package (prob this: https://github.com/sergi/go-diff) on top of json outputs, as in emergent diffmgr
 	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
@@ -183,16 +178,15 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * Cursors for various systems need extra custom ones to fill in standard set,
   and support general custom cursors as well
+  
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
-## layout
+* text language translation functionality -- just do it automatically for
+  everything, or require user to specifically request it for each string??
+  prefer a Stringer kind of method?  or a big map of translations?  send it to
+  google??
 
-* really want an additional spacing parameter on layout -- needs to be
-  separate from margin / padding which just apply to the frame-like property
-  -- easy
-
-* grid not using spans
-
-* Layout flow types
+* grid layout support for spans
 
 
 ## Rendering / SVG

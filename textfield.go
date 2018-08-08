@@ -547,11 +547,9 @@ func (tf *TextField) MakeCompletionMenu(completer SampleCompleter) Menu {
 
 // Complete edits the text field using the string chosen from the completion menu
 func (tf *TextField) Complete(str string) {
-	txt := tf.Txt
-	//txt = strings.Replace(txt, tf.Cmpltr.seed, str, 1)
-	txt = strings.TrimSuffix(txt, tf.Cmpltr.Seed())
-	txt = txt + str
-	tf.SetText(txt)
+	txt := strings.TrimSuffix(string(tf.EditTxt), tf.Cmpltr.Seed())
+	txt += str
+	tf.EditTxt = []rune(txt)
 	tf.CursorEnd()
 }
 
