@@ -68,23 +68,22 @@ func StyleSVG(gii gi.Node2D) {
 	defer gi.SetCurStyleNode2D(nil)
 
 	pc.StyleSet = false // this is always first call, restart
-	var pagg *ki.Props
-	pgi, pg := gi.KiToNode2D(gii.Parent())
-	if pgi != nil {
-		pagg = &pg.CSSAgg
-		if pp, ok := pgi.(gi.Painter); ok {
-			pc.CopyStyleFrom(pp.Paint())
-			pc.SetStyleProps(pp.Paint(), *gii.Properties())
-		} else {
-			pc.SetStyleProps(nil, *gii.Properties())
-		}
+
+	pp := g.ParentPaint()
+	if pp != nil {
+		pc.CopyStyleFrom(pp)
+		pc.SetStyleProps(pp, *gii.Properties())
 	} else {
 		pc.SetStyleProps(nil, *gii.Properties())
 	}
 	// pc.SetUnitContext(g.Viewport, gi.Vec2DZero)
 	pc.ToDots() // we always inherit parent's unit context -- SVG sets it once-and-for-all
+
+	pagg := g.ParentCSSAgg()
 	if pagg != nil {
 		gi.AggCSS(&g.CSSAgg, *pagg)
+	} else {
+		g.CSSAgg = nil
 	}
 	gi.AggCSS(&g.CSSAgg, g.CSS)
 	StyleCSS(gii, g.CSSAgg)

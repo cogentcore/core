@@ -332,15 +332,8 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string) bool {
 			return false
 		}
 	}
-	if pgi, _ := KiToNode2D(node.Parent()); pgi != nil {
-		if ps, ok := pgi.(Styler); ok {
-			s.SetStyleProps(ps.Style(), pmap)
-		} else {
-			s.SetStyleProps(nil, pmap)
-		}
-	} else {
-		s.SetStyleProps(nil, pmap)
-	}
+	parSty := node.AsNode2D().ParentStyle()
+	s.SetStyleProps(parSty, pmap)
 	return true
 }
 

@@ -588,6 +588,28 @@ func (g *Node2DBase) ParentViewport() *Viewport2D {
 	return parVp
 }
 
+// ParentStyle returns parent's style or nil if not avail
+func (g *Node2DBase) ParentStyle() *Style {
+	if g.Par == nil {
+		return nil
+	}
+	if ps, ok := g.Par.(Styler); ok {
+		return ps.Style()
+	}
+	return nil
+}
+
+// ParentPaint returns the Paint from parent, if available
+func (g *Node2DBase) ParentPaint() *Paint {
+	if g.Par == nil {
+		return nil
+	}
+	if pp, ok := g.Par.(Painter); ok {
+		return pp.Paint()
+	}
+	return nil
+}
+
 // ParentReRenderAnchor returns parent that is a ReRenderAnchor -- for
 // optimized re-rendering
 func (g *Node2DBase) ParentReRenderAnchor() Node2D {

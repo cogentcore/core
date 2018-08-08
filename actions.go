@@ -14,16 +14,17 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Action -- for menu items and tool bars
-
 // Action is a button widget that can display a text label and / or an icon
-// and / or a keyboard shortcut -- this is what is put in menus and toolbars.
+// and / or a keyboard shortcut -- this is what is put in menus, menubars, and
+// toolbars, and also for any standalone simple action.  The default styling
+// differs depending on whether it is in a Menu versus a MenuBar or ToolBar --
+// this is controlled by the Class which is automatically set to menu-action
+// or bar-action.
 type Action struct {
 	ButtonBase
-	Data      interface{} `json:"-" xml:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
-	ActionSig ki.Signal   `json:"-" xml:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
-	Shortcut  string      `desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input."`
+	Shortcut  string      `view:"-" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input."`
+	Data      interface{} `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
+	ActionSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 }
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
@@ -33,12 +34,12 @@ var ActionProps = ki.Props{
 	"border-radius":    units.NewValue(0, units.Px),
 	"border-color":     &Prefs.BorderColor,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(0, units.Px),
 	"box-shadow.color": &Prefs.ShadowColor,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.ControlColor,
 	"color":            &Prefs.FontColor,
+	"padding":          units.NewValue(4, units.Px),
+	"margin":           units.NewValue(4, units.Px),
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -60,6 +61,9 @@ var ActionProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
+	"#ind-stretch": ki.Props{
+		"width": units.NewValue(1, units.Em),
+	},
 	"#shortcut": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
@@ -67,26 +71,81 @@ var ActionProps = ki.Props{
 	"#sc-stretch": ki.Props{
 		"min-width": units.NewValue(2, units.Em),
 	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "lighter-0",
+	".menu-action": ki.Props{ // class of actions as menu items
+		"padding":   units.NewValue(2, units.Px),
+		"margin":    units.NewValue(0, units.Px),
+		"max-width": -1,
+		"indicator": "widget-wedge-right",
+		ButtonSelectors[ButtonActive]: ki.Props{
+			"background-color": "lighter-0",
+		},
+		ButtonSelectors[ButtonInactive]: ki.Props{
+			"border-color": "highlight-50",
+			"color":        "highlight-50",
+		},
+		ButtonSelectors[ButtonHover]: ki.Props{
+			"background-color": "highlight-10",
+		},
+		ButtonSelectors[ButtonFocus]: ki.Props{
+			"border-width":     units.NewValue(2, units.Px),
+			"background-color": "samelight-50",
+		},
+		ButtonSelectors[ButtonDown]: ki.Props{
+			"color":            "highlight-90",
+			"background-color": "highlight-30",
+		},
+		ButtonSelectors[ButtonSelected]: ki.Props{
+			"background-color": &Prefs.SelectColor,
+		},
 	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
+	".bar-action": ki.Props{ // class of actions as bar items (MenuBar, ToolBar)
+		"padding":   units.NewValue(4, units.Px), // we go to edge of bar
+		"margin":    units.NewValue(0, units.Px),
+		"indicator": "none",
+		ButtonSelectors[ButtonActive]: ki.Props{
+			"background-color": "linear-gradient(lighter-0, highlight-10)",
+		},
+		ButtonSelectors[ButtonInactive]: ki.Props{
+			"border-color": "lighter-50",
+			"color":        "lighter-50",
+		},
+		ButtonSelectors[ButtonHover]: ki.Props{
+			"background-color": "linear-gradient(highlight-10, highlight-10)",
+		},
+		ButtonSelectors[ButtonFocus]: ki.Props{
+			"border-width":     units.NewValue(2, units.Px),
+			"background-color": "linear-gradient(samelight-50, highlight-10)",
+		},
+		ButtonSelectors[ButtonDown]: ki.Props{
+			"color":            "lighter-90",
+			"background-color": "linear-gradient(highlight-30, highlight-10)",
+		},
+		ButtonSelectors[ButtonSelected]: ki.Props{
+			"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+		},
 	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
-		"background-color": "samelight-50",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "highlight-30",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+	".": ki.Props{ // default class -- stand-alone buttons presumably
+		ButtonSelectors[ButtonActive]: ki.Props{
+			"background-color": "linear-gradient(lighter-0, highlight-10)",
+		},
+		ButtonSelectors[ButtonInactive]: ki.Props{
+			"border-color": "lighter-50",
+			"color":        "lighter-50",
+		},
+		ButtonSelectors[ButtonHover]: ki.Props{
+			"background-color": "linear-gradient(highlight-10, highlight-10)",
+		},
+		ButtonSelectors[ButtonFocus]: ki.Props{
+			"border-width":     units.NewValue(2, units.Px),
+			"background-color": "linear-gradient(samelight-50, highlight-10)",
+		},
+		ButtonSelectors[ButtonDown]: ki.Props{
+			"color":            "lighter-90",
+			"background-color": "linear-gradient(highlight-30, highlight-10)",
+		},
+		ButtonSelectors[ButtonSelected]: ki.Props{
+			"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+		},
 	},
 }
 
@@ -131,7 +190,27 @@ func (g *Action) ButtonRelease() {
 
 func (g *Action) Init2D() {
 	g.Init2DWidget()
+	g.SetClassFromPar()
 	g.ConfigParts()
+}
+
+// SetDefaultClass sets Class field based on parent, etc, which in turn
+// determines styling parameters
+func (g *Action) SetClassFromPar() {
+	ismbar := false
+	if g.Par != nil {
+		_, ismbar = g.Par.(*MenuBar)
+	}
+	if ismbar {
+		if g.Class == "" {
+			g.Class = "bar-action"
+			g.Indicator = "none" // menu-bar specifically
+		}
+	} else if g.IsMenu() {
+		if g.Class == "" {
+			g.Class = "menu-action"
+		}
+	}
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -171,7 +250,7 @@ func (g *Action) ConfigPartsButton() {
 	}
 }
 
-func (g *Action) ConfigPartsMenu() {
+func (g *Action) ConfigPartsMenuItem() {
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
 	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
@@ -182,9 +261,6 @@ func (g *Action) ConfigPartsMenu() {
 	}
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
-		g.SetProp("max-width", -1) // note: this is needed to get menus to fill out
-		// well, but doesn't work in menubars
-		g.SetProp("indicator", "widget-wedge-right")
 	}
 	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	g.ConfigPartsIndicator(indIdx)
@@ -195,16 +271,19 @@ func (g *Action) ConfigPartsMenu() {
 }
 
 func (g *Action) ConfigParts() {
+	g.SetClassFromPar()
 	ismbar := false
 	if g.Par != nil {
 		_, ismbar = g.Par.(*MenuBar)
-		if ismbar {
-			g.Indicator = "none"
-			g.SetProp("background-color", "linear-gradient(pref(ControlColor), highlight-10)")
-		}
 	}
-	if g.IsMenu() && !ismbar {
-		g.ConfigPartsMenu()
+	if ismbar {
+		g.Indicator = "none" // menu-bar specifically
+		g.ConfigPartsButton()
+	} else if g.IsMenu() {
+		if g.Indicator == "" {
+			g.Indicator = "widget-wedge-right"
+		}
+		g.ConfigPartsMenuItem()
 	} else {
 		g.ConfigPartsButton()
 	}

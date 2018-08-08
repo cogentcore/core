@@ -226,6 +226,9 @@ var MenuButtonProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
+	"#ind-stretch": ki.Props{
+		"width": units.NewValue(1, units.Em),
+	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
 	},
@@ -325,8 +328,8 @@ type MenuBar struct {
 var KiT_MenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
 
 var MenuBarProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewValue(0, units.Px),
+	"margin":           units.NewValue(0, units.Px),
 	"color":            &Prefs.FontColor,
 	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
 }

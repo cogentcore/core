@@ -114,9 +114,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* MenuBar has gradient but actions don't -- add gradient to actions that show
-  up in menubar -- can't not have a background..  set margin / padding 0 and rely on elements on sizing properly
-
 * kefun to chord use !! to indicate preferred among alternatives
 
 * main menu on mac

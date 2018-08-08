@@ -293,14 +293,14 @@ func (g *ButtonBase) ResetMenu() {
 // and the Indicator field is not "none" -- defOn = true means default to
 // adding the indicator even if no menu is yet present -- returns the index in
 // Parts of the indicator object, which is named "indicator" -- an
-// "indic-stretch" is added as well to put on the right by default
+// "ind-stretch" is added as well to put on the right by default.
 func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
 	needInd := (g.HasMenu() || defOn) && g.Indicator != "none"
 	if !needInd {
 		return -1
 	}
 	indIdx := -1
-	config.Add(KiT_Space, "indic-spc")
+	config.Add(KiT_Stretch, "ind-stretch")
 	indIdx = len(*config)
 	config.Add(KiT_Icon, "indicator")
 	return indIdx
@@ -316,6 +316,7 @@ func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
 		icnm = "widget-wedge-down"
 	}
 	if set, _ := IconName(icnm).SetIcon(ic); set {
+		g.StylePart(g.Parts.KnownChild(indIdx - 1).(Node2D)) // also get the stretch
 		g.StylePart(Node2D(ic))
 	}
 }
@@ -490,10 +491,20 @@ func (g *ButtonBase) Style2DWidget() {
 func (g *ButtonBase) Style2D() {
 	g.SetCanFocusIfActive()
 	g.Style2DWidget()
-	pst := g.Par.(Styler).Style()
+	pst := g.ParentStyle()
+	clsty := "." + g.Class
+	var clsp ki.Props
+	if clspi, ok := g.PropInherit(clsty, false, true); ok {
+		clsp, ok = clspi.(ki.Props)
+	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
+		if clsp != nil {
+			if stclsp := ki.SubProps(clsp, ButtonSelectors[i]); stclsp != nil {
+				g.StateStyles[i].SetStyleProps(pst, stclsp)
+			}
+		}
 		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.This.(ButtonWidget).ConfigParts()
@@ -584,6 +595,9 @@ var ButtonProps = ki.Props{
 		"vertical-align": AlignBottom,
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
+	},
+	"#ind-stretch": ki.Props{
+		"width": units.NewValue(1, units.Em),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",

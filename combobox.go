@@ -62,6 +62,9 @@ var ComboBoxProps = ki.Props{
 		"fill":           &Prefs.IconColor,
 		"stroke":         &Prefs.FontColor,
 	},
+	"#ind-stretch": ki.Props{
+		"width": units.NewValue(1, units.Em),
+	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
 	},

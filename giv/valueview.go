@@ -231,16 +231,18 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 
 	if kig, ok := it.(ki.Ki); ok {
 		typ := reflect.TypeOf(fval)
-		nptyp := kit.NonPtrType(typ)
-		vk := nptyp.Kind()
+		if typ != nil {
+			nptyp := kit.NonPtrType(typ)
+			vk := nptyp.Kind()
 
-		ft := kig.FieldTag(field, "view")
-		switch ft {
-		case "no-inline":
-			if vk == reflect.Map {
-				vv := MapValueView{}
-				vv.Init(&vv)
-				return &vv
+			ft := kig.FieldTag(field, "view")
+			switch ft {
+			case "no-inline":
+				if vk == reflect.Map {
+					vv := MapValueView{}
+					vv.Init(&vv)
+					return &vv
+				}
 			}
 		}
 	}

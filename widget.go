@@ -81,6 +81,9 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 			}
 		}
 	}
+
+	parSty := g.ParentStyle()
+
 	var dsty *Style
 	pnm := "__DefStyle" + selector
 	dstyi, ok := tprops[pnm]
@@ -96,16 +99,7 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 			}
 			*dsty = *baseStyle
 		}
-
-		if pgi, _ := KiToNode2D(g.Par); pgi != nil {
-			if ps, ok := pgi.(Styler); ok {
-				dsty.SetStyleProps(ps.Style(), styprops)
-			} else {
-				dsty.SetStyleProps(nil, styprops)
-			}
-		} else {
-			dsty.SetStyleProps(nil, styprops)
-		}
+		dsty.SetStyleProps(parSty, styprops)
 		dsty.IsSet = false // keep as non-set
 		tprops[pnm] = dsty
 	} else {
@@ -130,21 +124,24 @@ func (g *WidgetBase) Style2DWidget() {
 	if g.Viewport == nil { // robust
 		gii.Init2D()
 	}
-	var pagg *ki.Props
-	if pgi, pg := KiToNode2D(g.Par); pgi != nil {
-		pagg = &pg.CSSAgg
-		if ps, ok := pgi.(Styler); ok {
-			g.Sty.SetStyleProps(ps.Style(), *g.Properties())
-		} else {
-			g.Sty.SetStyleProps(nil, *g.Properties())
-		}
-	} else {
-		g.CSSAgg = nil // restart
-		g.Sty.SetStyleProps(nil, *g.Properties())
+
+	styprops := *g.Properties()
+	parSty := g.ParentStyle()
+	g.Sty.SetStyleProps(parSty, styprops)
+
+	// look for class-specific style sheets among defaults -- have to do these
+	// dynamically now -- cannot compile into default which is type-general
+	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
+	clsty := "." + g.Class
+	if sp := ki.SubProps(tprops, clsty); sp != nil {
+		g.Sty.SetStyleProps(parSty, sp)
 	}
 
+	pagg := g.ParentCSSAgg()
 	if pagg != nil {
 		AggCSS(&g.CSSAgg, *pagg)
+	} else {
+		g.CSSAgg = nil // restart
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.Sty.StyleCSS(gii, g.CSSAgg, "")

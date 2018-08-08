@@ -142,7 +142,7 @@ func (g *Label) SetStateStyle() {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
-	pst := g.Par.(Styler).Style()
+	pst := g.ParentStyle()
 	for i := 0; i < int(LabelStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(LabelSelectors[i]))

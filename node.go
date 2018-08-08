@@ -212,7 +212,7 @@ func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.
 func (g *NodeBase) StyleProps(selector string) ki.Props {
-	sp, ok := g.PropInherit(selector, false, true) // yeah, use types
+	sp, ok := g.PropInherit(selector, false, true) // yeah, use type's
 	if !ok {
 		return nil
 	}
@@ -232,6 +232,15 @@ func AggCSS(agg *ki.Props, css ki.Props) {
 	for key, val := range css {
 		(*agg)[key] = val
 	}
+}
+
+// ParentCSSAgg returns parent's CSSAgg styles or nil if not avail
+func (g *NodeBase) ParentCSSAgg() *ki.Props {
+	if g.Par == nil {
+		return nil
+	}
+	pn := g.Par.EmbeddedStruct(KiT_NodeBase).(*NodeBase)
+	return &pn.CSSAgg
 }
 
 // SetStdXMLAttr sets standard attributes of node given XML-style name /
