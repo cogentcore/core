@@ -24,6 +24,10 @@ func GoGiEditor(obj ki.Ki) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
+	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
+	tbar.Lay = gi.LayoutHoriz
+	tbar.SetStretchMaxWidth()
+
 	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
@@ -66,69 +70,57 @@ func GoGiEditor(obj ki.Ki) {
 	bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
-	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutHoriz
-	brow.SetStretchMaxWidth()
-
-	updtobj := brow.AddNewChild(gi.KiT_Button, "updtobj").(*gi.Button)
+	updtobj := tbar.AddNewChild(gi.KiT_Action, "updtobj").(*gi.Action)
 	updtobj.SetText("Update")
 	updtobj.Tooltip = "Updates the source window based on changes made in the editor"
-	updtobj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			obj.UpdateSig()
-		}
+	updtobj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		obj.UpdateSig()
 	})
 
-	savej := brow.AddNewChild(gi.KiT_Button, "savejson").(*gi.Button)
+	savej := tbar.AddNewChild(gi.KiT_Action, "savejson").(*gi.Action)
 	savej.SetText("Save JSON")
 	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
-	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.DialogAccepted) {
-					dlg, _ := send.(*gi.Dialog)
-					fnm := FileViewDialogValue(dlg)
-					recv.SaveJSON(fnm)
-				}
-			})
-		}
+	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				fnm := FileViewDialogValue(dlg)
+				recv.SaveJSON(fnm)
+			}
+		})
 	})
 
-	loadj := brow.AddNewChild(gi.KiT_Button, "loadjson").(*gi.Button)
+	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
 	loadj.SetText("Load JSON")
 	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
-	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.DialogAccepted) {
-					dlg, _ := send.(*gi.Dialog)
-					fnm := FileViewDialogValue(dlg)
-					recv.LoadJSON(fnm)
-				}
-			})
-		}
+	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				fnm := FileViewDialogValue(dlg)
+				recv.LoadJSON(fnm)
+			}
+		})
 	})
 
-	fontsel := brow.AddNewChild(gi.KiT_Button, "fontsel").(*gi.Button)
-	fontnm := brow.AddNewChild(gi.KiT_TextField, "selfont").(*gi.TextField)
+	fontsel := tbar.AddNewChild(gi.KiT_Action, "fontsel").(*gi.Action)
+	fontnm := tbar.AddNewChild(gi.KiT_TextField, "selfont").(*gi.TextField)
 	fontnm.SetMinPrefWidth(units.NewValue(20, units.Em))
 	fontnm.Tooltip = "shows the font name selected via Select Font"
 
 	fontsel.SetText("Select Font")
 	fontsel.Tooltip = "pulls up a font selection dialog -- font name will be copied to clipboard so you can paste it into any relevant fields"
-	fontsel.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			FontChooserDialog(vp, "Select a Font", "", nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sv, _ := send.(*TableView)
-				si := sv.SelectedIdx
-				if si >= 0 {
-					fi := gi.FontLibrary.FontInfo[si]
-					fontnm.SetText(fi.Name)
-					fontnm.SelectAll()
-					fontnm.Copy(false) // don't reset
-				}
-			}, nil)
-		}
+	fontsel.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FontChooserDialog(vp, "Select a Font", "", nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv, _ := send.(*TableView)
+			si := sv.SelectedIdx
+			if si >= 0 {
+				fi := gi.FontLibrary.FontInfo[si]
+				fontnm.SetText(fi.Name)
+				fontnm.SelectAll()
+				fontnm.Copy(false) // don't reset
+			}
+		}, nil)
 	})
 
 	vp.UpdateEndNoSig(updt)

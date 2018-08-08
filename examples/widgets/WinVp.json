@@ -14,142 +14,25 @@
   "Kids": [
     {
       "n": 1,
-      "type": "gi.Frame",
-      "name": "vlay"
+      "type": "gi.Layout",
+      "name": "main-vlay"
     },
     {
-      "Nm": "vlay",
-      "UniqueNm": "vlay",
+      "Nm": "main-vlay",
+      "UniqueNm": "main-vlay",
       "Props": null,
       "Kids": [
         {
-          "n": 10,
-          "type": "gi.Layout",
-          "name": "trow",
-          "type": "gi.Space",
-          "name": "blspc",
-          "type": "gi.Layout",
-          "name": "blrow",
-          "type": "gi.Layout",
-          "name": "brow",
-          "type": "gi.Space",
-          "name": "slspc",
-          "type": "gi.Layout",
-          "name": "slrow",
-          "type": "gi.Layout",
-          "name": "srow",
-          "type": "gi.Space",
-          "name": "tlspc",
-          "type": "gi.Layout",
-          "name": "txlrow",
-          "type": "gi.Layout",
-          "name": "txrow"
+          "n": 2,
+          "type": "gi.MenuBar",
+          "name": "main-menu",
+          "type": "gi.Frame",
+          "name": "main-frame"
         },
         {
-          "Nm": "trow",
-          "UniqueNm": "trow",
+          "Nm": "main-menu",
+          "UniqueNm": "main-menu",
           "Props": {
-            "__type:max-width": "units.Value",
-            "max-width": {
-              "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            }
-          },
-          "Kids": [
-            {
-              "n": 3,
-              "type": "gi.Stretch",
-              "name": "str1",
-              "type": "gi.Label",
-              "name": "title",
-              "type": "gi.Stretch",
-              "name": "str2"
-            },
-            {
-              "Nm": "str1",
-              "UniqueNm": "str1",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": ""
-            },
-            {
-              "Nm": "title",
-              "UniqueNm": "title",
-              "Props": {
-                "text-align": "__enum:(gi.Align)AlignCenter",
-                "vertical-align": "__enum:(gi.Align)AlignTop",
-                "font-family": "Times New Roman, serif",
-                "font-size": "x-large",
-                "line-height": 1.5
-              },
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ci\u003eGoGi\u003c/i\u003e Widgets\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eCtrl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eCtrl+Alt+E\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e",
-              "Selectable": false
-            },
-            {
-              "Nm": "str2",
-              "UniqueNm": "str2",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": ""
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "blspc",
-          "UniqueNm": "blspc",
-          "Props": null,
-          "Kids": null,
-          "Class": "",
-          "CSS": null,
-          "Tooltip": ""
-        },
-        {
-          "Nm": "blrow",
-          "UniqueNm": "blrow",
-          "Props": null,
-          "Kids": [
-            {
-              "n": 1,
-              "type": "gi.Label",
-              "name": "blab"
-            },
-            {
-              "Nm": "blab",
-              "UniqueNm": "blab",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Text": "Buttons:",
-              "Selectable": true
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "brow",
-          "UniqueNm": "brow",
-          "Props": {
-            "horizontal-align": "__enum:(gi.Align)AlignLeft",
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
@@ -160,691 +43,974 @@
           "Kids": [
             {
               "n": 4,
-              "type": "gi.Button",
-              "name": "button1",
-              "type": "gi.Button",
-              "name": "button2",
-              "type": "gi.CheckBox",
-              "name": "checkbox",
-              "type": "gi.MenuButton",
-              "name": "menubutton1"
+              "type": "gi.Action",
+              "name": "File",
+              "type": "gi.Action",
+              "name": "Edit",
+              "type": "gi.Action",
+              "name": "Window",
+              "type": "gi.Stretch",
+              "name": "menstr"
             },
             {
-              "Nm": "button1",
-              "UniqueNm": "button1",
-              "Props": {
-                "#icon": {
-                  "__type:width": "units.Value",
-                  "width": {
-                    "Val": 1.5,
-                    "Un": "Em",
-                    "Dots": 0
-                  },
-                  "__type:height": "units.Value",
-                  "height": {
-                    "Val": 1.5,
-                    "Un": "Em",
-                    "Dots": 0
-                  }
-                },
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                }
-              },
+              "Nm": "File",
+              "UniqueNm": "File",
+              "Props": null,
               "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "press this \u003ci\u003ebutton\u003c/i\u003e to pop up a dialog box",
-              "Text": "",
-              "Icon": "widget-wedge-down",
-              "Indicator": "",
-              "Shortcut": "",
-              "Menu": null
-            },
-            {
-              "Nm": "button2",
-              "UniqueNm": "button2",
-              "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things",
-              "Text": "Open GoGiEditor",
-              "Icon": "",
-              "Indicator": "",
-              "Shortcut": "",
-              "Menu": null
-            },
-            {
-              "Nm": "checkbox",
-              "UniqueNm": "checkbox",
-              "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "",
+              "Class": "bar-action",
               "CSS": null,
               "Tooltip": "",
-              "Text": "Toggle",
-              "Icon": "widget-checked-box",
-              "Indicator": "",
-              "Shortcut": "",
+              "Text": "File",
+              "Icon": "",
+              "Indicator": "none",
               "Menu": null,
-              "IconOff": "widget-unchecked-box"
+              "Shortcut": ""
             },
             {
-              "Nm": "menubutton1",
-              "UniqueNm": "menubutton1",
-              "Props": {
-                "__type:margin": "units.Value",
-                "margin": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                }
-              },
+              "Nm": "Edit",
+              "UniqueNm": "Edit",
+              "Props": null,
               "Kids": null,
-              "Class": "",
+              "Class": "bar-action",
               "CSS": null,
               "Tooltip": "",
-              "Text": "Menu Button",
+              "Text": "Edit",
               "Icon": "",
-              "Indicator": "",
-              "Shortcut": "",
+              "Indicator": "none",
               "Menu": [
                 {
-                  "n": 4,
+                  "n": 3,
                   "type": "gi.Action",
-                  "name": "Menu Item 1",
+                  "name": "Copy",
                   "type": "gi.Action",
-                  "name": "Menu Item 2",
-                  "type": "gi.Separator",
-                  "name": "sep1",
+                  "name": "Cut",
                   "type": "gi.Action",
-                  "name": "Menu Item 3"
+                  "name": "Paste"
                 },
                 {
-                  "Nm": "Menu Item 1",
-                  "UniqueNm": "Menu Item 1",
+                  "Nm": "Copy",
+                  "UniqueNm": "Copy",
                   "Props": null,
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "Menu Item 1",
+                  "Text": "Copy",
+                  "Icon": "",
+                  "Indicator": "",
+                  "Menu": null,
+                  "Shortcut": "Alt+W"
+                },
+                {
+                  "Nm": "Cut",
+                  "UniqueNm": "Cut",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Cut",
+                  "Icon": "",
+                  "Indicator": "",
+                  "Menu": null,
+                  "Shortcut": "Control+X"
+                },
+                {
+                  "Nm": "Paste",
+                  "UniqueNm": "Paste",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Paste",
+                  "Icon": "",
+                  "Indicator": "",
+                  "Menu": null,
+                  "Shortcut": "Control+Y"
+                }
+              ],
+              "Shortcut": ""
+            },
+            {
+              "Nm": "Window",
+              "UniqueNm": "Window",
+              "Props": null,
+              "Kids": null,
+              "Class": "bar-action",
+              "CSS": null,
+              "Tooltip": "",
+              "Text": "Window",
+              "Icon": "",
+              "Indicator": "none",
+              "Menu": null,
+              "Shortcut": ""
+            },
+            {
+              "Nm": "menstr",
+              "UniqueNm": "menstr",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Tooltip": ""
+            }
+          ],
+          "Class": "",
+          "CSS": null,
+          "Tooltip": "",
+          "Lay": "LayoutHoriz",
+          "StackTop": 0,
+          "MainMenu": false
+        },
+        {
+          "Nm": "main-frame",
+          "UniqueNm": "main-frame",
+          "Props": {
+            "__type:max-width": "units.Value",
+            "max-width": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            },
+            "__type:max-height": "units.Value",
+            "max-height": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            }
+          },
+          "Kids": [
+            {
+              "n": 10,
+              "type": "gi.Layout",
+              "name": "trow",
+              "type": "gi.Space",
+              "name": "blspc",
+              "type": "gi.Layout",
+              "name": "blrow",
+              "type": "gi.Layout",
+              "name": "brow",
+              "type": "gi.Space",
+              "name": "slspc",
+              "type": "gi.Layout",
+              "name": "slrow",
+              "type": "gi.Layout",
+              "name": "srow",
+              "type": "gi.Space",
+              "name": "tlspc",
+              "type": "gi.Layout",
+              "name": "txlrow",
+              "type": "gi.Layout",
+              "name": "txrow"
+            },
+            {
+              "Nm": "trow",
+              "UniqueNm": "trow",
+              "Props": {
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
+              },
+              "Kids": [
+                {
+                  "n": 3,
+                  "type": "gi.Stretch",
+                  "name": "str1",
+                  "type": "gi.Label",
+                  "name": "title",
+                  "type": "gi.Stretch",
+                  "name": "str2"
+                },
+                {
+                  "Nm": "str1",
+                  "UniqueNm": "str1",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": ""
+                },
+                {
+                  "Nm": "title",
+                  "UniqueNm": "title",
+                  "Props": {
+                    "text-align": "__enum:(gi.Align)AlignCenter",
+                    "vertical-align": "__enum:(gi.Align)AlignTop",
+                    "font-family": "Times New Roman, serif",
+                    "font-size": "x-large",
+                    "line-height": 1.5
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ci\u003eGoGi\u003c/i\u003e Widgets\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eCtrl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eCtrl+Alt+E\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e",
+                  "Selectable": false
+                },
+                {
+                  "Nm": "str2",
+                  "UniqueNm": "str2",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": ""
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "blspc",
+              "UniqueNm": "blspc",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Tooltip": ""
+            },
+            {
+              "Nm": "blrow",
+              "UniqueNm": "blrow",
+              "Props": null,
+              "Kids": [
+                {
+                  "n": 1,
+                  "type": "gi.Label",
+                  "name": "blab"
+                },
+                {
+                  "Nm": "blab",
+                  "UniqueNm": "blab",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Buttons:",
+                  "Selectable": true
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "brow",
+              "UniqueNm": "brow",
+              "Props": {
+                "horizontal-align": "__enum:(gi.Align)AlignLeft",
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
+              },
+              "Kids": [
+                {
+                  "n": 4,
+                  "type": "gi.Button",
+                  "name": "button1",
+                  "type": "gi.Button",
+                  "name": "button2",
+                  "type": "gi.CheckBox",
+                  "name": "checkbox",
+                  "type": "gi.MenuButton",
+                  "name": "menubutton1"
+                },
+                {
+                  "Nm": "button1",
+                  "UniqueNm": "button1",
+                  "Props": {
+                    "#icon": {
+                      "__type:width": "units.Value",
+                      "width": {
+                        "Val": 1.5,
+                        "Un": "Em",
+                        "Dots": 0
+                      },
+                      "__type:height": "units.Value",
+                      "height": {
+                        "Val": 1.5,
+                        "Un": "Em",
+                        "Dots": 0
+                      }
+                    },
+                    "__type:margin": "units.Value",
+                    "margin": {
+                      "Val": 2,
+                      "Un": "Ex",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "press this \u003ci\u003ebutton\u003c/i\u003e to pop up a dialog box",
+                  "Text": "",
+                  "Icon": "widget-wedge-down",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": null
+                },
+                {
+                  "Nm": "button2",
+                  "UniqueNm": "button2",
+                  "Props": {
+                    "__type:margin": "units.Value",
+                    "margin": {
+                      "Val": 2,
+                      "Un": "Ex",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things",
+                  "Text": "Open GoGiEditor",
                   "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
                   "Menu": null
                 },
                 {
-                  "Nm": "Menu Item 2",
-                  "UniqueNm": "Menu Item 2",
-                  "Props": null,
+                  "Nm": "checkbox",
+                  "UniqueNm": "checkbox",
+                  "Props": {
+                    "__type:margin": "units.Value",
+                    "margin": {
+                      "Val": 2,
+                      "Un": "Ex",
+                      "Dots": 0
+                    }
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "Menu Item 2",
+                  "Text": "Toggle",
+                  "Icon": "widget-checked-box",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": null,
+                  "IconOff": "widget-unchecked-box"
+                },
+                {
+                  "Nm": "menubutton1",
+                  "UniqueNm": "menubutton1",
+                  "Props": {
+                    "__type:margin": "units.Value",
+                    "margin": {
+                      "Val": 2,
+                      "Un": "Ex",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Menu Button",
                   "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
                   "Menu": [
                     {
-                      "n": 1,
+                      "n": 4,
                       "type": "gi.Action",
-                      "name": "Sub Menu Item 2"
+                      "name": "Menu Item 1",
+                      "type": "gi.Action",
+                      "name": "Menu Item 2",
+                      "type": "gi.Separator",
+                      "name": "sep1",
+                      "type": "gi.Action",
+                      "name": "Menu Item 3"
                     },
                     {
-                      "Nm": "Sub Menu Item 2",
-                      "UniqueNm": "Sub Menu Item 2",
+                      "Nm": "Menu Item 1",
+                      "UniqueNm": "Menu Item 1",
                       "Props": null,
                       "Kids": null,
                       "Class": "",
                       "CSS": null,
                       "Tooltip": "",
-                      "Text": "Sub Menu Item 2",
+                      "Text": "Menu Item 1",
                       "Icon": "",
                       "Indicator": "",
-                      "Shortcut": "",
-                      "Menu": null
+                      "Menu": null,
+                      "Shortcut": "Shift+Control+1"
+                    },
+                    {
+                      "Nm": "Menu Item 2",
+                      "UniqueNm": "Menu Item 2",
+                      "Props": null,
+                      "Kids": null,
+                      "Class": "",
+                      "CSS": null,
+                      "Tooltip": "",
+                      "Text": "Menu Item 2",
+                      "Icon": "",
+                      "Indicator": "",
+                      "Menu": [
+                        {
+                          "n": 1,
+                          "type": "gi.Action",
+                          "name": "Sub Menu Item 2"
+                        },
+                        {
+                          "Nm": "Sub Menu Item 2",
+                          "UniqueNm": "Sub Menu Item 2",
+                          "Props": null,
+                          "Kids": null,
+                          "Class": "",
+                          "CSS": null,
+                          "Tooltip": "",
+                          "Text": "Sub Menu Item 2",
+                          "Icon": "",
+                          "Indicator": "",
+                          "Menu": null,
+                          "Shortcut": ""
+                        }
+                      ],
+                      "Shortcut": ""
+                    },
+                    {
+                      "Nm": "sep1",
+                      "UniqueNm": "sep1",
+                      "Props": {
+                        "__type:min-height": "units.Value",
+                        "min-height": {
+                          "Val": 0.5,
+                          "Un": "Em",
+                          "Dots": 0
+                        },
+                        "max-width": -1
+                      },
+                      "Kids": null,
+                      "Class": "",
+                      "CSS": null,
+                      "Tooltip": "",
+                      "Horiz": true
+                    },
+                    {
+                      "Nm": "Menu Item 3",
+                      "UniqueNm": "Menu Item 3",
+                      "Props": null,
+                      "Kids": null,
+                      "Class": "",
+                      "CSS": null,
+                      "Tooltip": "",
+                      "Text": "Menu Item 3",
+                      "Icon": "",
+                      "Indicator": "",
+                      "Menu": null,
+                      "Shortcut": "Control+3"
                     }
                   ]
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "slspc",
+              "UniqueNm": "slspc",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Tooltip": ""
+            },
+            {
+              "Nm": "slrow",
+              "UniqueNm": "slrow",
+              "Props": null,
+              "Kids": [
+                {
+                  "n": 1,
+                  "type": "gi.Label",
+                  "name": "slab"
                 },
                 {
-                  "Nm": "sep1",
-                  "UniqueNm": "sep1",
-                  "Props": {
-                    "__type:min-height": "units.Value",
-                    "min-height": {
-                      "Val": 0.5,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "max-width": -1
-                  },
-                  "Kids": null,
-                  "Class": "",
-                  "CSS": null,
-                  "Tooltip": "",
-                  "Horiz": true
-                },
-                {
-                  "Nm": "Menu Item 3",
-                  "UniqueNm": "Menu Item 3",
+                  "Nm": "slab",
+                  "UniqueNm": "slab",
                   "Props": null,
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "Menu Item 3",
+                  "Text": "Sliders:",
+                  "Selectable": false
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "srow",
+              "UniqueNm": "srow",
+              "Props": {
+                "horizontal-align": "left",
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
+              },
+              "Kids": [
+                {
+                  "n": 4,
+                  "type": "gi.Slider",
+                  "name": "slider1",
+                  "type": "gi.Slider",
+                  "name": "slider2",
+                  "type": "gi.ScrollBar",
+                  "name": "scrollbar1",
+                  "type": "gi.ScrollBar",
+                  "name": "scrollbar2"
+                },
+                {
+                  "Nm": "slider1",
+                  "UniqueNm": "slider1",
+                  "Props": {
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "hslides",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Value": 0.5,
+                  "EmitValue": 0,
+                  "Min": 0,
+                  "Max": 1,
+                  "Step": 0.1,
+                  "PageStep": 0.2,
+                  "Size": 274,
+                  "ThSize": 24,
+                  "ThumbSize": {
+                    "Val": 1.5,
+                    "Un": "Em",
+                    "Dots": 24
+                  },
+                  "Prec": 9,
+                  "Icon": "widget-circlebutton-on",
+                  "ValThumb": false,
+                  "ThumbVal": 0,
+                  "Pos": 137,
+                  "DragPos": 137,
+                  "VisPos": 0,
+                  "Dim": "X",
+                  "Tracking": true,
+                  "TrackThr": 0,
+                  "Snap": true,
+                  "OrigWinBBox": {
+                    "Min": {
+                      "X": 6,
+                      "Y": 323
+                    },
+                    "Max": {
+                      "X": 326,
+                      "Y": 357
+                    }
+                  }
+                },
+                {
+                  "Nm": "slider2",
+                  "UniqueNm": "slider2",
+                  "Props": {
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:max-height": "units.Value",
+                    "max-height": {
+                      "Val": -1,
+                      "Un": "Px",
+                      "Dots": 0
+                    },
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Value": 0.5,
+                  "EmitValue": 0,
+                  "Min": 0,
+                  "Max": 1,
+                  "Step": 0.1,
+                  "PageStep": 0.2,
+                  "Size": 114,
+                  "ThSize": 24,
+                  "ThumbSize": {
+                    "Val": 1.5,
+                    "Un": "Em",
+                    "Dots": 24
+                  },
+                  "Prec": 9,
+                  "Icon": "",
+                  "ValThumb": false,
+                  "ThumbVal": 0,
+                  "Pos": 57,
+                  "DragPos": 57,
+                  "VisPos": 0,
+                  "Dim": "Y",
+                  "Tracking": false,
+                  "TrackThr": 0,
+                  "Snap": false,
+                  "OrigWinBBox": {
+                    "Min": {
+                      "X": 326,
+                      "Y": 260
+                    },
+                    "Max": {
+                      "X": 360,
+                      "Y": 420
+                    }
+                  }
+                },
+                {
+                  "Nm": "scrollbar1",
+                  "UniqueNm": "scrollbar1",
+                  "Props": {
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "hslides",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Value": 0.25,
+                  "EmitValue": 0,
+                  "Min": 0,
+                  "Max": 1,
+                  "Step": 0.1,
+                  "PageStep": 0.2,
+                  "Size": 314,
+                  "ThSize": 78.5,
+                  "ThumbSize": {
+                    "Val": 1,
+                    "Un": "Ex",
+                    "Dots": 8
+                  },
+                  "Prec": 9,
+                  "Icon": "",
+                  "ValThumb": true,
+                  "ThumbVal": 0.25,
+                  "Pos": 78.5,
+                  "DragPos": 78.5,
+                  "VisPos": 0,
+                  "Dim": "X",
+                  "Tracking": true,
+                  "TrackThr": 0,
+                  "Snap": false,
+                  "OrigWinBBox": {
+                    "Min": {
+                      "X": 360,
+                      "Y": 332
+                    },
+                    "Max": {
+                      "X": 680,
+                      "Y": 348
+                    }
+                  }
+                },
+                {
+                  "Nm": "scrollbar2",
+                  "UniqueNm": "scrollbar2",
+                  "Props": {
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:max-height": "units.Value",
+                    "max-height": {
+                      "Val": -1,
+                      "Un": "Px",
+                      "Dots": 0
+                    },
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    }
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Value": 0.5,
+                  "EmitValue": 0,
+                  "Min": 0,
+                  "Max": 1,
+                  "Step": 0.1,
+                  "PageStep": 0.2,
+                  "Size": 154,
+                  "ThSize": 15.400001,
+                  "ThumbSize": {
+                    "Val": 1,
+                    "Un": "Ex",
+                    "Dots": 8
+                  },
+                  "Prec": 9,
+                  "Icon": "",
+                  "ValThumb": true,
+                  "ThumbVal": 0.1,
+                  "Pos": 77,
+                  "DragPos": 77,
+                  "VisPos": 0,
+                  "Dim": "Y",
+                  "Tracking": false,
+                  "TrackThr": 0,
+                  "Snap": false,
+                  "OrigWinBBox": {
+                    "Min": {
+                      "X": 680,
+                      "Y": 260
+                    },
+                    "Max": {
+                      "X": 696,
+                      "Y": 420
+                    }
+                  }
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "tlspc",
+              "UniqueNm": "tlspc",
+              "Props": null,
+              "Kids": null,
+              "Class": "",
+              "CSS": null,
+              "Tooltip": ""
+            },
+            {
+              "Nm": "txlrow",
+              "UniqueNm": "txlrow",
+              "Props": null,
+              "Kids": [
+                {
+                  "n": 1,
+                  "type": "gi.Label",
+                  "name": "txlab"
+                },
+                {
+                  "Nm": "txlab",
+                  "UniqueNm": "txlab",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Text Widgets:",
+                  "Selectable": false
+                }
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
+            },
+            {
+              "Nm": "txrow",
+              "UniqueNm": "txrow",
+              "Props": {
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
+              },
+              "Kids": [
+                {
+                  "n": 3,
+                  "type": "gi.TextField",
+                  "name": "edit1",
+                  "type": "gi.SpinBox",
+                  "name": "spin",
+                  "type": "gi.ComboBox",
+                  "name": "combo"
+                },
+                {
+                  "Nm": "edit1",
+                  "UniqueNm": "edit1",
+                  "Props": {
+                    "min-width": "20em"
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "MaxWidthReq": 0,
+                  "StartPos": 0,
+                  "EndPos": 14,
+                  "CursorPos": 0,
+                  "CharWidth": 14,
+                  "SelectStart": 0,
+                  "SelectEnd": 0,
+                  "SelectMode": false
+                },
+                {
+                  "Nm": "spin",
+                  "UniqueNm": "spin",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Value": 0,
+                  "HasMin": true,
+                  "Min": 0,
+                  "HasMax": false,
+                  "Max": 1,
+                  "Step": 0.1,
+                  "PageStep": 0.2,
+                  "Prec": 6,
+                  "UpIcon": "widget-wedge-up",
+                  "DownIcon": "widget-wedge-down"
+                },
+                {
+                  "Nm": "combo",
+                  "UniqueNm": "combo",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Action",
                   "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
-                  "Menu": null
+                  "Menu": null,
+                  "Editable": false,
+                  "MaxLength": 16
                 }
-              ]
+              ],
+              "Class": "",
+              "CSS": null,
+              "Tooltip": "",
+              "Lay": "LayoutHoriz",
+              "StackTop": 0
             }
           ],
           "Class": "",
           "CSS": null,
           "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "slspc",
-          "UniqueNm": "slspc",
-          "Props": null,
-          "Kids": null,
-          "Class": "",
-          "CSS": null,
-          "Tooltip": ""
-        },
-        {
-          "Nm": "slrow",
-          "UniqueNm": "slrow",
-          "Props": null,
-          "Kids": [
-            {
-              "n": 1,
-              "type": "gi.Label",
-              "name": "slab"
-            },
-            {
-              "Nm": "slab",
-              "UniqueNm": "slab",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Text": "Sliders:",
-              "Selectable": false
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "srow",
-          "UniqueNm": "srow",
-          "Props": {
-            "horizontal-align": "left",
-            "__type:max-width": "units.Value",
-            "max-width": {
-              "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            }
-          },
-          "Kids": [
-            {
-              "n": 4,
-              "type": "gi.Slider",
-              "name": "slider1",
-              "type": "gi.Slider",
-              "name": "slider2",
-              "type": "gi.ScrollBar",
-              "name": "scrollbar1",
-              "type": "gi.ScrollBar",
-              "name": "scrollbar2"
-            },
-            {
-              "Nm": "slider1",
-              "UniqueNm": "slider1",
-              "Props": {
-                "__type:height": "units.Value",
-                "height": {
-                  "Val": 2,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 2,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "hslides",
-              "CSS": null,
-              "Tooltip": "",
-              "Value": 0.5,
-              "EmitValue": 0,
-              "Min": 0,
-              "Max": 1,
-              "Step": 0.1,
-              "PageStep": 0.2,
-              "Size": 274,
-              "ThSize": 24,
-              "ThumbSize": {
-                "Val": 1.5,
-                "Un": "Em",
-                "Dots": 24
-              },
-              "Prec": 9,
-              "Icon": "widget-circlebutton-on",
-              "ValThumb": false,
-              "ThumbVal": 0,
-              "Pos": 137,
-              "DragPos": 137,
-              "VisPos": 0,
-              "Dim": "X",
-              "Tracking": true,
-              "TrackThr": 0,
-              "Snap": true,
-              "OrigWinBBox": {
-                "Min": {
-                  "X": 6,
-                  "Y": 297
-                },
-                "Max": {
-                  "X": 326,
-                  "Y": 331
-                }
-              }
-            },
-            {
-              "Nm": "slider2",
-              "UniqueNm": "slider2",
-              "Props": {
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:max-height": "units.Value",
-                "max-height": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                },
-                "__type:height": "units.Value",
-                "height": {
-                  "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Value": 0.5,
-              "EmitValue": 0,
-              "Min": 0,
-              "Max": 1,
-              "Step": 0.1,
-              "PageStep": 0.2,
-              "Size": 114,
-              "ThSize": 24,
-              "ThumbSize": {
-                "Val": 1.5,
-                "Un": "Em",
-                "Dots": 24
-              },
-              "Prec": 9,
-              "Icon": "",
-              "ValThumb": false,
-              "ThumbVal": 0,
-              "Pos": 57,
-              "DragPos": 57,
-              "VisPos": 0,
-              "Dim": "Y",
-              "Tracking": false,
-              "TrackThr": 0,
-              "Snap": false,
-              "OrigWinBBox": {
-                "Min": {
-                  "X": 326,
-                  "Y": 234
-                },
-                "Max": {
-                  "X": 360,
-                  "Y": 394
-                }
-              }
-            },
-            {
-              "Nm": "scrollbar1",
-              "UniqueNm": "scrollbar1",
-              "Props": {
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 20,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:height": "units.Value",
-                "height": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "hslides",
-              "CSS": null,
-              "Tooltip": "",
-              "Value": 0.25,
-              "EmitValue": 0,
-              "Min": 0,
-              "Max": 1,
-              "Step": 0.1,
-              "PageStep": 0.2,
-              "Size": 314,
-              "ThSize": 78.5,
-              "ThumbSize": {
-                "Val": 1,
-                "Un": "Ex",
-                "Dots": 8
-              },
-              "Prec": 9,
-              "Icon": "",
-              "ValThumb": true,
-              "ThumbVal": 0.25,
-              "Pos": 78.5,
-              "DragPos": 78.5,
-              "VisPos": 0,
-              "Dim": "X",
-              "Tracking": true,
-              "TrackThr": 0,
-              "Snap": false,
-              "OrigWinBBox": {
-                "Min": {
-                  "X": 360,
-                  "Y": 306
-                },
-                "Max": {
-                  "X": 680,
-                  "Y": 322
-                }
-              }
-            },
-            {
-              "Nm": "scrollbar2",
-              "UniqueNm": "scrollbar2",
-              "Props": {
-                "__type:height": "units.Value",
-                "height": {
-                  "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-height": "units.Value",
-                "min-height": {
-                  "Val": 10,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:width": "units.Value",
-                "width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:min-width": "units.Value",
-                "min-width": {
-                  "Val": 1,
-                  "Un": "Em",
-                  "Dots": 0
-                },
-                "__type:max-height": "units.Value",
-                "max-height": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                }
-              },
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Value": 0.5,
-              "EmitValue": 0,
-              "Min": 0,
-              "Max": 1,
-              "Step": 0.1,
-              "PageStep": 0.2,
-              "Size": 154,
-              "ThSize": 15.400001,
-              "ThumbSize": {
-                "Val": 1,
-                "Un": "Ex",
-                "Dots": 8
-              },
-              "Prec": 9,
-              "Icon": "",
-              "ValThumb": true,
-              "ThumbVal": 0.1,
-              "Pos": 77,
-              "DragPos": 77,
-              "VisPos": 0,
-              "Dim": "Y",
-              "Tracking": false,
-              "TrackThr": 0,
-              "Snap": false,
-              "OrigWinBBox": {
-                "Min": {
-                  "X": 680,
-                  "Y": 234
-                },
-                "Max": {
-                  "X": 696,
-                  "Y": 394
-                }
-              }
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "tlspc",
-          "UniqueNm": "tlspc",
-          "Props": null,
-          "Kids": null,
-          "Class": "",
-          "CSS": null,
-          "Tooltip": ""
-        },
-        {
-          "Nm": "txlrow",
-          "UniqueNm": "txlrow",
-          "Props": null,
-          "Kids": [
-            {
-              "n": 1,
-              "type": "gi.Label",
-              "name": "txlab"
-            },
-            {
-              "Nm": "txlab",
-              "UniqueNm": "txlab",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Text": "Text Widgets:",
-              "Selectable": false
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
-        },
-        {
-          "Nm": "txrow",
-          "UniqueNm": "txrow",
-          "Props": {
-            "__type:max-width": "units.Value",
-            "max-width": {
-              "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            }
-          },
-          "Kids": [
-            {
-              "n": 3,
-              "type": "gi.TextField",
-              "name": "edit1",
-              "type": "gi.SpinBox",
-              "name": "spin",
-              "type": "gi.ComboBox",
-              "name": "combo"
-            },
-            {
-              "Nm": "edit1",
-              "UniqueNm": "edit1",
-              "Props": {
-                "min-width": "20em"
-              },
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "MaxWidthReq": 0,
-              "StartPos": 0,
-              "EndPos": 14,
-              "CursorPos": 0,
-              "CharWidth": 14,
-              "SelectStart": 0,
-              "SelectEnd": 0,
-              "SelectMode": false
-            },
-            {
-              "Nm": "spin",
-              "UniqueNm": "spin",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Value": 0,
-              "HasMin": true,
-              "Min": 0,
-              "HasMax": false,
-              "Max": 1,
-              "Step": 0.1,
-              "PageStep": 0.2,
-              "Prec": 6,
-              "UpIcon": "widget-wedge-up",
-              "DownIcon": "widget-wedge-down"
-            },
-            {
-              "Nm": "combo",
-              "UniqueNm": "combo",
-              "Props": null,
-              "Kids": null,
-              "Class": "",
-              "CSS": null,
-              "Tooltip": "",
-              "Text": "Action",
-              "Icon": "",
-              "Indicator": "",
-              "Shortcut": "",
-              "Menu": null,
-              "Editable": false,
-              "MaxLength": 16
-            }
-          ],
-          "Class": "",
-          "CSS": null,
-          "Tooltip": "",
-          "Lay": "LayoutRow",
-          "StackTop": 0
+          "Lay": "LayoutVert",
+          "StackTop": 0,
+          "Stripes": "NoStripes"
         }
       ],
       "Class": "",
       "CSS": null,
       "Tooltip": "",
-      "Lay": "LayoutCol",
-      "StackTop": 0,
-      "Stripes": "NoStripes"
+      "Lay": "LayoutVert",
+      "StackTop": 0
     }
   ],
   "Class": "",
@@ -881,15 +1047,15 @@
     }
   },
   "Tooltip": "",
-  "Fill": true,
+  "Fill": false,
   "Geom": {
     "Pos": {
       "X": 0,
       "Y": 0
     },
     "Size": {
-      "X": 1001,
-      "Y": 653
+      "X": 945,
+      "Y": 648
     }
   }
 }
