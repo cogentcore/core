@@ -54,7 +54,7 @@ func (g *Text) Render2D() {
 		if !pc.FillStyle.Color.IsNil() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
-		g.Render.SetString(g.Text, &pc.FontStyle, &pc.TextStyle, true, rot, scalex)
+		g.Render.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 		g.Render.Size = g.Render.Size.Mul(gi.Vec2D{scx, scy})
 		if gi.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorMiddle {
 			pos.X -= g.Render.Size.X * .5

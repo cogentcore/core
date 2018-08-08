@@ -781,6 +781,7 @@ func (w *Window) AddShortcut(chord string, act *Action) {
 // triggered, and false otherwise.  Also elminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
 func (w *Window) TriggerShortcut(chord string) bool {
+	fmt.Printf("attempting shortcut chord: %v\n", chord)
 	if w.Shortcuts == nil {
 		return false
 	}
@@ -788,7 +789,7 @@ func (w *Window) TriggerShortcut(chord string) bool {
 	if !exists {
 		return false
 	}
-	if sa.IsDeleted() || sa.IsDestroyed() {
+	if sa.IsDestroyed() {
 		delete(w.Shortcuts, chord)
 		return false
 	}
@@ -1175,13 +1176,6 @@ func (w *Window) EventLoop() {
 		// finally this is where the event is sent out to registered widgets
 		if !evi.IsProcessed() {
 			w.SendEventSignal(evi)
-
-			if !evi.IsProcessed() && et == oswin.KeyChordEvent {
-				ke := evi.(*key.ChordEvent)
-				kc := ke.ChordString()
-				w.TriggerShortcut(kc)
-			}
-
 			if !delPop && et == oswin.MouseMoveEvent {
 				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent))
 				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
@@ -1212,6 +1206,13 @@ func (w *Window) EventLoop() {
 					}
 				}
 			}
+		}
+
+		// shortcut is very last thing
+		if !evi.IsProcessed() && et == oswin.KeyChordEvent {
+			ke := evi.(*key.ChordEvent)
+			kc := ke.ChordString()
+			w.TriggerShortcut(kc)
 		}
 
 		if delPop {

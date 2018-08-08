@@ -61,7 +61,8 @@ var ActionProps = ki.Props{
 		"stroke":         &Prefs.FontColor,
 	},
 	"#shortcut": ki.Props{
-		"vertical-align": AlignCenter,
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
 	},
 	"#sc-stretch": ki.Props{
 		"min-width": units.NewValue(2, units.Em),

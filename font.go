@@ -610,4 +610,4 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 }
 
 // FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
-var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国"
+var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"

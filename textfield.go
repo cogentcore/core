@@ -515,8 +515,8 @@ func (tf *TextField) OfferCompletions() {
 		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
 	}
 
-	tf.Cmpltr.GenCompletions(tf.Text()) // send the current text to create a list of possible completions
-	if len(tf.Cmpltr.matches) == 1 {    // don't show if only one and it matches current text
+	tf.Cmpltr.GenCompletions(string(tf.EditTxt)) // send the current text to create a list of possible completions
+	if len(tf.Cmpltr.matches) == 1 {             // don't show if only one and it matches current text
 		if tf.Cmpltr.matches[0] == tf.Cmpltr.Seed() {
 			return
 		}
@@ -712,8 +712,8 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.OfferCompletions()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
-			tf.InsertAtCursor(string(kt.Rune))
 			kt.SetProcessed()
+			tf.InsertAtCursor(string(kt.Rune))
 			tf.OfferCompletions()
 		}
 	}
@@ -835,7 +835,7 @@ func (tf *TextField) Style2D() {
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
 	st.Font.LoadFont(&st.UnContext, "")
-	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.Text, true, 0, 0)
+	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
 
@@ -1046,7 +1046,7 @@ func (tf *TextField) Render2D() {
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
 		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
-		tf.RenderVis.SetRunes(cur, &st.Font, &st.Text, true, 0, 0)
+		tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 		if tf.HasFocus() {
 			tf.RenderCursor()

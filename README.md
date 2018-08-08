@@ -113,8 +113,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* shortcut no longer working
-
 * MenuBar has gradient but actions don't -- add gradient to actions that show
   up in menubar -- can't not have a background..  set margin / padding 0 and rely on elements on sizing properly
 

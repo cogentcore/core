@@ -29,18 +29,20 @@ func mainrun() {
 	rlay := mfr.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)
 	rlay.Lay = gi.LayoutHoriz
 	rlay.SetProp("text-align", "center")
-	edit1 := rlay.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
-	button1 := rlay.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
-	button2 := rlay.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
-	slider1 := rlay.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
+	label1 := rlay.AddNewChild(gi.KiT_Label, "label1").(*gi.Label)
+	// edit1 := rlay.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
+	// button1 := rlay.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
+	// button2 := rlay.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
+	// slider1 := rlay.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
 
-	edit1.SetText("Edit this text")
-	edit1.SetProp("min-width", "20em")
-	button1.Text = "Button 1"
-	button2.Text = "Button 2"
-	slider1.Dim = gi.X
-	slider1.SetProp("width", "20em")
-	slider1.SetValue(0.5)
+	label1.Text = "B ⇧ "
+	// edit1.SetText("Edit this text")
+	// edit1.SetProp("min-width", "20em")
+	// button1.Text = "Button 1"
+	// button2.Text = "Button 2"
+	// slider1.Dim = gi.X
+	// slider1.SetProp("width", "20em")
+	// slider1.SetValue(0.5)
 
 	vp.UpdateEndNoSig(updt)
 

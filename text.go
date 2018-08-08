@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"io"
@@ -145,7 +146,7 @@ func (sr *SpanRender) IsValid() error {
 		return errors.New("gi.TextRender: Text is empty")
 	}
 	if len(sr.Text) != len(sr.Render) {
-		return errors.New("gi.TextRender: Render length != Text length")
+		return fmt.Errorf("gi.TextRender: Render length %v != Text length %v for text: %v", len(sr.Render), len(sr.Text), string(sr.Text))
 	}
 	return sr.Render[0].HasNil()
 }
@@ -185,23 +186,46 @@ func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, de
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Color, deco TextDecorations) {
-	sz := len(str)
-	if sz == 0 {
+func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Color, deco TextDecorations, sty *FontStyle, ctxt *units.Context) {
+	if len(str) == 0 {
 		return
 	}
-	sr.Text = append(sr.Text, []rune(str)...)
+	// todo: unicode font that supports rendering of symbols
+	// image/font doesn't have a good mechanism for telling you it can't render a given rune
+	// and even Unicode doesn't handle the standard keyboard shortcut codes!
+	// ucfont := FontStyle{}
+	// ucfont.FaceName = "Arial Unicode"
+	// ucfont.Size = sty.Size
+	// ucfont.LoadFont(ctxt, "")
+
+	nwr := []rune(str)
+	sz := len(nwr)
+	sr.Text = append(sr.Text, nwr...)
 	rr := RuneRender{Face: face, Color: clr, BgColor: bg, Deco: deco}
 	sr.HasDecoUpdate(bg, deco)
 	sr.Render = append(sr.Render, rr)
+	// lastUc := false
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := RuneRender{Deco: deco, BgColor: bg}
+		// r := sr.Text[i]
+		// if r > 0xFF && unicode.IsSymbol(r) {
+		// 	if !lastUc {
+		// 		rp.Face = ucfont.Face
+		// 		fmt.Printf("ucfont for: %v\n", string(r))
+		// 		lastUc = true
+		// 	}
+		// } else {
+		// 	if lastUc {
+		// 		rp.Face = face
+		// 		lastUc = false
+		// 	}
+		// }
 		sr.Render = append(sr.Render, rp)
 	}
 }
 
 // SetRenders sets rendering parameters based on style
-func (sr *SpanRender) SetRenders(sty *FontStyle, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
@@ -211,6 +235,14 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, noBG bool, rot, scalex float32)
 	if noBG {
 		bgc = nil
 	}
+
+	// todo: unicode font that supports rendering of symbols
+	// image/font doesn't have a good mechanism for telling you it can't render a given rune
+	// and even Unicode doesn't handle the standard keyboard shortcut codes!
+	// ucfont := FontStyle{}
+	// ucfont.FaceName = "Arial Unicode"
+	// ucfont.Size = sty.Size
+	// ucfont.LoadFont(ctxt, "")
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
@@ -235,22 +267,37 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, noBG bool, rot, scalex float32)
 			sr.Render[i].Deco = sty.Deco
 		}
 	}
+	// use unicode font for all non-ascii symbols
+	// lastUc := false
+	// for i, r := range sr.Text {
+	// 	if r > 0xFF && unicode.IsSymbol(r) {
+	// 		if !lastUc {
+	// 			sr.Render[i].Face = ucfont.Face
+	// 			lastUc = true
+	// 		}
+	// 	} else {
+	// 		if lastUc {
+	// 			sr.Render[i].Face = sty.Face
+	// 			lastUc = false
+	// 		}
+	// 	}
+	// }
 }
 
 // SetString initializes to given plain text string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *SpanRender) SetString(str string, sty *FontStyle, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetString(str string, sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = []rune(str)
-	sr.SetRenders(sty, noBG, rot, scalex)
+	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
 
 // SetRunes initializes to given plain rune string, with given default style
 // arameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = str
-	sr.SetRenders(sty, noBG, rot, scalex)
+	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
 
 // this mutex is required because multiple different goroutines associated
@@ -277,6 +324,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
+
 		fht := curFace.Metrics().Ascent + curFace.Metrics().Descent
 		if prevR >= 0 {
 			fpos += FixedToFloat32(curFace.Kern(prevR, r))
@@ -787,12 +835,12 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 // apply these per character after.  Be sure that LoadFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetString(str string, fontSty *FontStyle, txtSty *TextStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetString(str, fontSty, noBG, rot, scalex)
+	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
@@ -807,12 +855,12 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, txtSty *TextStyl
 // apply these per character after Be sure that LoadFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, txtSty *TextStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
 	sr := &(tr.Spans[0])
-	sr.SetRunes(str, fontSty, noBG, rot, scalex)
+	sr.SetRunes(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
@@ -971,7 +1019,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 		case xml.CharData:
 			curf := fstack[len(fstack)-1]
 			atStart := len(curSp.Text) == 0
-			curSp.AppendString(string(se), curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+			curSp.AppendString(string(se), curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
 			if nextIsParaStart && atStart {
 				bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
 			}
@@ -1147,7 +1195,8 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	si := 0
 	for si < len(tr.Spans) {
 		sr := &(tr.Spans[si])
-		if sr.IsValid() != nil {
+		if err := sr.IsValid(); err != nil {
+			log.Print(err)
 			si++
 			continue
 		}
