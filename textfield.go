@@ -515,15 +515,14 @@ func (tf *TextField) OfferCompletions() {
 		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
 	}
 
-	tf.Cmpltr.GenCompletions(string(tf.EditTxt)) // send the current text to create a list of possible completions
-	if len(tf.Cmpltr.matches) == 1 {             // don't show if only one and it matches current text
+	tf.Cmpltr.GenCompletions(string(tf.EditTxt[0:tf.CursorPos])) // send current text to create list of possible completions
+	if len(tf.Cmpltr.matches) == 1 { // don't show if only one and it matches current text
 		if tf.Cmpltr.matches[0] == tf.Cmpltr.Seed() {
 			return
 		}
 	}
 	if tf.Cmpltr.Count() > 0 {
-		var m Menu
-		m = tf.MakeCompletionMenu(tf.Cmpltr)
+		m := tf.MakeCompletionMenu(tf.Cmpltr)
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
 		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
@@ -547,8 +546,11 @@ func (tf *TextField) MakeCompletionMenu(completer SampleCompleter) Menu {
 
 // Complete edits the text field using the string chosen from the completion menu
 func (tf *TextField) Complete(str string) {
-	txt := strings.TrimSuffix(string(tf.EditTxt), tf.Cmpltr.Seed())
-	txt += str
+	s1 := string(tf.EditTxt[0:tf.CursorPos])
+	s2 := string(tf.EditTxt[tf.CursorPos:len(tf.EditTxt)])
+	s1 = strings.TrimSuffix(s1, tf.Cmpltr.Seed())
+	s1 += str
+	txt := s1 + s2
 	tf.EditTxt = []rune(txt)
 	tf.CursorEnd()
 }
