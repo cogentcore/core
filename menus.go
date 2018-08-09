@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -42,26 +41,12 @@ func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, 
 	ac := Action{}
 	ac.InitName(&ac, txt)
 	ac.Text = txt
-	ac.Shortcut = shortcut
+	ac.Shortcut = OSShortcut(shortcut)
 	ac.Data = data
 	ac.SetAsMenu()
 	*m = append(*m, ac.This.(Node2D))
 	if sigTo != nil && fun != nil {
 		ac.ActionSig.Connect(sigTo, fun)
-	}
-	if ac.Shortcut != "" {
-		if gin, ok := sigTo.(Node2D); ok {
-			win := gin.AsNode2D().ParentWindow()
-			if win != nil {
-				win.AddShortcut(ac.Shortcut, &ac)
-			} else {
-				fmt.Printf("gi.Menu AddMenuText: NOT adding shortcut: %v to: %v, win is nil\n", ac.Shortcut, ac.Text)
-			}
-		} else if win, ok := sigTo.(*Window); ok {
-			win.AddShortcut(ac.Shortcut, &ac)
-		} else {
-			fmt.Printf("gi.Menu AddMenuText: NOT adding shortcut: %v to: %v, no path to parent Window -- receiver of event must be Node2D with parent window, or window itself\n", ac.Shortcut, ac.Text)
-		}
 	}
 	return &ac
 }
@@ -95,6 +80,19 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb.SetProp("background-color", &Prefs.ControlColor)
 	*m = append(*m, lb.This.(Node2D))
 	return &lb
+}
+
+// SetShortcuts sets the shortcuts to given window -- call when the menu has
+// been attached to a window
+func (m *Menu) SetShortcuts(win *Window) {
+	if win == nil {
+		return
+	}
+	for _, mi := range *m {
+		if ac, ok := mi.(*Action); ok {
+			win.AddShortcut(ac.Shortcut, ac)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

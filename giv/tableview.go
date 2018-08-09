@@ -204,7 +204,7 @@ func (tv *TableView) ButtonBox() (*gi.Layout, int) {
 // StdGridConfig returns a TypeAndNameList for configuring the struct-grid
 func (tv *TableView) StdGridConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Layout, "header")
+	config.Add(gi.KiT_ToolBar, "header")
 	config.Add(gi.KiT_Separator, "head-sepe")
 	config.Add(gi.KiT_Frame, "grid")
 	return config
@@ -271,7 +271,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		updtg = sg.UpdateStart()
 	}
 
-	sgh := sg.KnownChild(0).(*gi.Layout)
+	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgh.Lay = gi.LayoutHoriz
 	sgh.SetStretchMaxWidth()
 
@@ -548,7 +548,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	defer oswin.TheApp.Cursor().Pop()
 
 	sg, _ := tv.SliceGrid()
-	sgh := sg.KnownChild(0).(*gi.Layout)
+	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgh.SetFullReRender()
 	idxOff := 1
 	if !tv.ShowIndex {
@@ -777,7 +777,7 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle) {
 	}
 
 	nfld := tv.NVisFields + idxOff
-	sgh := sg.KnownChild(0).(*gi.Layout)
+	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	if len(sgf.Kids) >= nfld {
 		sgh.SetProp("width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))

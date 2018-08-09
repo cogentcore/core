@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/kit"
 )
 
@@ -225,6 +227,16 @@ func (km *KeyMap) Update() {
 // functions should be be handeled directly within widget key event
 // processing.
 type Shortcuts map[string]*Action
+
+// OSShortcut translates Command into either Control or Meta depending on platform
+func OSShortcut(sc string) string {
+	if oswin.TheApp.Platform() == oswin.MacOS {
+		sc = strings.Replace(sc, "Command+", "Meta+", -1)
+	} else {
+		sc = strings.Replace(sc, "Command+", "Control+", -1)
+	}
+	return sc
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 // Std Keymaps

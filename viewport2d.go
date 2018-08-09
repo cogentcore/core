@@ -376,6 +376,12 @@ func (vp *Viewport2D) PushBounds() bool {
 }
 
 func (vp *Viewport2D) PopBounds() {
+	if vp.IsOverlay() {
+		if vp.Viewport != nil {
+			vp.Viewport.Render.PopBounds()
+		}
+		return
+	}
 	rs := &vp.Render
 	rs.PopBounds()
 }

@@ -822,6 +822,10 @@ func surfaceCreate() error {
 	return errors.New("gldriver: surface creation not implemented on darwin")
 }
 
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.MacOS
+}
+
 func (app *appImpl) PrefsDir() string {
 	usr, err := user.Current()
 	if err != nil {

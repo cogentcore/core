@@ -509,6 +509,9 @@ func (g *ButtonBase) Style2D() {
 	}
 	g.This.(ButtonWidget).ConfigParts()
 	g.SetButtonState(ButtonActive) // initial default
+	if g.Menu != nil {
+		g.Menu.SetShortcuts(g.ParentWindow())
+	}
 }
 
 func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {

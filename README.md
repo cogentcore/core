@@ -114,15 +114,17 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* DND in treeview: 2018/08/08 12:13:26 gi.RenderState PopBounds: stack is empty -- programmer error
-
 * main menu on mac
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..
   + basic cursor updates: NOT is default, override for others
+  + shift updates from copy to move anytime including with popup menu
+  + right now, shift while dragging is causing extra render in overlay that persists..
 
-* Layout: add spacing for grid
+* add margin for para in text
+
+* tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * Layout flow types
 
@@ -133,10 +135,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * update gi/doc.go with final readme notes etc!
 
 * combobox getting text cutoff -- descenders and []
-
-* add margin for para in text
-
-* tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
   general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,

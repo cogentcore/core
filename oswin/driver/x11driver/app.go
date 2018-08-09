@@ -27,6 +27,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -772,6 +773,10 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.LinuxX11
+}
+
 func (app *appImpl) Name() string {
 	return app.name
 }
@@ -807,4 +812,8 @@ func (app *appImpl) FontPaths() []string {
 
 func (app *appImpl) ClipBoard() clip.Board {
 	return &theClip
+}
+
+func (app *appImpl) Cursor() cursor.Cursor {
+	return &theCursor
 }

@@ -262,9 +262,25 @@ func mainrun() {
 	})
 
 	// main menu
-
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{"File", "Edit", "Window"})
+
+	// note: Command in shortcuts is automatically translated into Control for
+	// Linux, Windows or Meta for MacOS
+	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
+	fmen.Menu = make(gi.Menu, 0, 10)
+	fmen.Menu.AddMenuText("New", "Command+N", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("File:New menu action triggered\n")
+	})
+	fmen.Menu.AddMenuText("Open", "Command+O", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("File:Open menu action triggered\n")
+	})
+	fmen.Menu.AddMenuText("Save", "Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("File:Save menu action triggered\n")
+	})
+	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("File:SaveAs menu action triggered\n")
+	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)

@@ -157,8 +157,15 @@ func DecodeChord(ch string) (r rune, mods int32, err error) {
 func ChordShortcut(ch string) string {
 	cs := strings.Replace(ch, "Shift+", "⇧", 1)
 	cs = strings.Replace(cs, "Control+", "^", 1) // ⌃ doesn't look as good
-	cs = strings.Replace(cs, "Meta+", "⌘", 1)    // todo mac only
-	cs = strings.Replace(cs, "Alt+", "⌥", 1)     // todo mac only
+	switch oswin.TheApp.Platform() {
+	case oswin.MacOS:
+		cs = strings.Replace(cs, "Meta+", "⌘", 1)
+		cs = strings.Replace(cs, "Alt+", "⌥", 1)
+	case oswin.Windows:
+		cs = strings.Replace(cs, "Meta+", "Win+", 1) // todo: actual windows key
+	default:
+		cs = strings.Replace(cs, "Meta+", "", 1)
+	}
 	return cs
 }
 

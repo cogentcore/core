@@ -51,6 +51,7 @@ func mainrun() {
 	grid.SetProp("columns", nColumns)
 	grid.SetProp("horizontal-align", "center")
 	grid.SetProp("margin", 2.0)
+	grid.SetProp("spacing", 6.0)
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()
 

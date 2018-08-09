@@ -19,6 +19,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
@@ -152,7 +153,7 @@ func (app *appImpl) initScreens() {
 	app.screens[0] = sc
 
 	_SetProcessDpiAwareness(_PROCESS_PER_MONITOR_DPI_AWARE)
-	
+
 	// todo: this is not working at all!
 	widthPx, heightPx := win32.ScreenSize()
 
@@ -216,6 +217,10 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.Windows
+}
+
 func (app *appImpl) Name() string {
 	return app.name
 }
@@ -256,4 +261,8 @@ func (app *appImpl) FontPaths() []string {
 
 func (app *appImpl) ClipBoard() clip.Board {
 	return &theClip
+}
+
+func (app *appImpl) Cursor() cursor.Cursor {
+	return &theCursor
 }

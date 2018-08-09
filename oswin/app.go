@@ -14,6 +14,7 @@ import (
 
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/ki/kit"
 )
 
 // TheApp is the current oswin App -- only ever one in effect
@@ -23,6 +24,10 @@ var TheApp App
 // and Windows, appropriate for that hardware / OS, and maintains data about
 // the physical screen(s)
 type App interface {
+	// Platform returns the platform type -- can use this for conditionalizing
+	// behavior in minor, simple ways
+	Platform() Platforms
+
 	// Name is the overall name of the application -- used for specifying an
 	// application-specific preferences directory, etc
 	Name() string
@@ -87,3 +92,23 @@ type App interface {
 	// FontPaths returns the default system font paths
 	FontPaths() []string
 }
+
+// Platforms are all the supported platforms for OSWin
+type Platforms int32
+
+const (
+	// MacOS is a mac desktop machine (aka Darwin)
+	MacOS Platforms = iota
+
+	// LinuxX11 is a Linux OS machine running X11 window server
+	LinuxX11
+
+	// Windows is a Microsoft Windows machine
+	Windows
+
+	PlatformsN
+)
+
+//go:generate stringer -type=Platforms
+
+var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, false, nil)

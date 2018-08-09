@@ -586,6 +586,11 @@ func (ly *Layout) GatherSizesGrid() {
 	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
 	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
 
+	ly.LayData.Size.Need.X += float32(cols-1) * ly.Spacing.Dots
+	ly.LayData.Size.Pref.X += float32(cols-1) * ly.Spacing.Dots
+	ly.LayData.Size.Need.Y += float32(rows-1) * ly.Spacing.Dots
+	ly.LayData.Size.Pref.Y += float32(rows-1) * ly.Spacing.Dots
+
 	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
 		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
@@ -698,10 +703,7 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 		return
 	}
 
-	elspc := float32(0.0)
-	if sz >= 2 {
-		elspc = float32(sz-1) * ly.Spacing.Dots
-	}
+	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
 	exspc := 2.0*spc + elspc
@@ -805,18 +807,19 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	}
 }
 
-// layout grid data along each dimension (row, Y; col, X), same as LayoutAlongDim.
-// For cols, X has width prefs of each -- turn that into an actual allocated
-// width for each column, and likewise for rows.
+// LayoutGridDim lays out grid data along each dimension (row, Y; col, X),
+// same as LayoutAlongDim.  For cols, X has width prefs of each -- turn that
+// into an actual allocated width for each column, and likewise for rows.
 func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 	gds := ly.GridData[rowcol]
 	sz := len(gds)
 	if sz == 0 {
 		return
 	}
+	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
-	exspc := 2.0 * spc
+	exspc := 2.0*spc + elspc
 	avail := ly.LayData.AllocSize.Dim(dim) - exspc
 	pref := ly.LayData.Size.Pref.Dim(dim) - exspc
 	need := ly.LayData.Size.Need.Dim(dim) - exspc
@@ -902,7 +905,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 		if Layout2DTrace {
 			fmt.Printf("Grid %v pos: %v, size: %v\n", rowcol, pos, size)
 		}
-		pos += size
+		pos += size + ly.Spacing.Dots
 	}
 }
 
