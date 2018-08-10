@@ -18,6 +18,11 @@ import (
 	"github.com/goki/ki"
 )
 
+// ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
+// display zooming without changing prefs -- see SaveCurrentZoom to save prefs
+// with this current factor.
+var ZoomFactor = float32(1.0)
+
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences
@@ -55,7 +60,7 @@ type Preferences struct {
 var Prefs = Preferences{}
 
 func (p *Preferences) Defaults() {
-	p.LogicalDPIScale = oswin.LogicalDPIScale
+	p.LogicalDPIScale = 1.0
 	p.DoubleClickMSec = 500
 	p.ScrollWheelRate = 20
 	p.FontColor.SetColor(color.Black)
@@ -100,7 +105,7 @@ func (p *Preferences) Save() error {
 	return err
 }
 
-// Apply preferences to all the relevant settings
+// Apply preferences to all the relevant settings.
 func (p *Preferences) Apply() {
 	np := len(p.FavPaths)
 	for i := 0; i < np; i++ {
@@ -109,7 +114,6 @@ func (p *Preferences) Apply() {
 		}
 	}
 
-	oswin.LogicalDPIScale = p.LogicalDPIScale
 	mouse.DoubleClickMSec = p.DoubleClickMSec
 	mouse.ScrollWheelRate = p.ScrollWheelRate
 	if p.StdKeyMapName != "" {
@@ -127,15 +131,23 @@ func (p *Preferences) Apply() {
 	} else {
 		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
 	}
+	p.ApplyDPI()
+}
+
+// ApplyDPI updates the screen LogicalDPI values according to current
+// preferences and zoom factor, and then updates all open windows as well.
+func (p *Preferences) ApplyDPI() {
 	n := oswin.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := oswin.TheApp.Screen(i)
-		if _, ok := p.ScreenPrefs[sc.Name]; ok {
-			// todo: this is not currently used -- need to update code in window.go
-			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(sc.PhysicalDPI)
+		if scp, ok := p.ScreenPrefs[sc.Name]; ok {
+			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*scp.LogicalDPIScale, sc.PhysicalDPI)
 		} else {
-			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(sc.PhysicalDPI)
+			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*p.LogicalDPIScale, sc.PhysicalDPI)
 		}
+	}
+	for _, w := range AllWindows {
+		w.OSWin.SetLogicalDPI(w.OSWin.Screen().LogicalDPI)
 	}
 }
 
@@ -170,13 +182,15 @@ func (p *Preferences) SetKeyMap(kmap *KeyMap) {
 	}
 }
 
-// ScreenInfo displays screen info for all screens on the console
-func (p *Preferences) ScreenInfo() {
+// ScreenInfo returns screen info for all screens on the console
+func (p *Preferences) ScreenInfo() string {
 	ns := oswin.TheApp.NScreens()
+	scinfo := ""
 	for i := 0; i < ns; i++ {
 		sc := oswin.TheApp.Screen(i)
-		fmt.Printf("Screen number: %v name: %v\n%+v\n", i, sc.Name, sc)
+		scinfo += fmt.Sprintf("Screen number: %v name: %v\n<br>    geom: %v, depth: %v, logical DPI: %v, physical DPI: %v, physical size: %v\n<br>    device pixel ratio: %v, refresh rate: %v\n<br>    orientation: %v, native orientation: %v, primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.Depth, sc.LogicalDPI, sc.PhysicalDPI, sc.PhysicalSize, sc.DevicePixelRatio, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
 	}
+	return scinfo
 }
 
 // PrefColor returns preference color of given name (case insensitive)

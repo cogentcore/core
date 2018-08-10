@@ -18,41 +18,36 @@ import (
 
 // note: fields obtained from QScreen in Qt
 
-// LogicalDPIScale is a scaling factor that can be set by preferences to
-// rescale the logical DPI relative to the actual physical DPI, thereby
-// scaling the overall density of the display (e.g., smaller numbers produce
-// smaller, higher-density displays)
-var LogicalDPIScale = float32(1.0)
-
 // Screen contains data about each physical and / or logical screen
 type Screen struct {
 	// ScreenNumber is the index of this screen in the list of screens
-	// maintained under Screen
+	// maintained under Screen.
 	ScreenNumber int
 
-	// Geometry contains the geometry of the screen in raw pixels -- all physical screens start at 0,0
+	// Geometry contains the geometry of the screen in raw pixels -- all
+	// physical screens start at 0,0.
 	Geometry image.Rectangle
 
-	// Color depth of the screen, in bits
+	// Color depth of the screen, in bits.
 	Depth int
 
-	// LogicalDPI is the logical dots per inch of the window, which is used for all
+	// LogicalDPI is the logical dots per inch of the screen, which is used for all
 	// rendering -- subject to zooming effects etc -- see the gi/units package
-	// for translating into various other units
+	// for translating into various other units.
 	LogicalDPI float32
 
-	// PhysicalDPI is the physical dots per inch of the window, for generating
+	// PhysicalDPI is the physical dots per inch of the screen, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
-	// translating into various other units
+	// translating into various other units.
 	PhysicalDPI float32
 
-	// PhysicalSize is the actual physical size of the screen, in mm
+	// PhysicalSize is the actual physical size of the screen, in mm.
 	PhysicalSize image.Point
 
 	// DevicePixelRatio is a multiplier factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
 	//
-	// On OS-X  it is backingScaleFactor, which is 2.0 on "retina" displays
+	// On OS-X  it is backingScaleFactor, which is 2.0 on "retina" displays.
 	DevicePixelRatio float32
 
 	RefreshRate float32
@@ -109,10 +104,10 @@ const (
 var KiT_ScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, false, nil)
 
 // LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling
-// based on the LogicalDPIScale factor, and also makes it a multiple of 6 to
-// make normal font sizes look best
-func LogicalFmPhysicalDPI(pdpi float32) float32 {
-	idpi := int(math.Round(float64(pdpi * LogicalDPIScale)))
+// based on the given logical DPI scale factor (logScale), and also makes it a
+// multiple of 6 to make normal font sizes look best
+func LogicalFmPhysicalDPI(logScale, pdpi float32) float32 {
+	idpi := int(math.Round(float64(pdpi * logScale)))
 	mdpi := idpi / 6
 	mdpi *= 6
 	return float32(mdpi)

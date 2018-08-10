@@ -281,6 +281,11 @@ func mainrun() {
 	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:SaveAs menu action triggered\n")
 	})
+	fmen.Menu.AddSeparator("sep1")
+	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
+	fmen.Menu.AddMenuText("Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		gi.TheViewIFace.PrefsEditor(&gi.Prefs)
+	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)

@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"fmt"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -13,7 +15,7 @@ import (
 // PrefsEditor opens an editor of user preferences
 func PrefsEditor(p *gi.Preferences) {
 	width := 800
-	height := 600
+	height := 800
 	win := gi.NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
 
 	if p.StdKeyMapName == "" {
@@ -22,16 +24,20 @@ func PrefsEditor(p *gi.Preferences) {
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
 
-	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutVert
+	mfr := win.SetMainFrame()
+	mfr.Lay = gi.LayoutVert
 
-	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
+	tbar.Lay = gi.LayoutHoriz
+	tbar.SetProp("horizontal-align", "center")
+	tbar.SetStretchMaxWidth()
+
+	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
-	spc := vlay.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
@@ -40,77 +46,64 @@ func PrefsEditor(p *gi.Preferences) {
 	title.SetStretchMaxWidth()
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
-	sv := vlay.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStruct(p, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
-	bspc := vlay.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
+	bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
 	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
-	brow := vlay.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutHoriz
-	brow.SetProp("horizontal-align", "center")
-	brow.SetStretchMaxWidth()
-
-	up := brow.AddNewChild(gi.KiT_Button, "update").(*gi.Button)
+	up := tbar.AddNewChild(gi.KiT_Action, "update").(*gi.Action)
 	up.SetText("Update")
-	up.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			p.Update()
-		}
+	up.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Update()
 	})
 
-	savej := brow.AddNewChild(gi.KiT_Button, "savejson").(*gi.Button)
+	savej := tbar.AddNewChild(gi.KiT_Action, "savejson").(*gi.Action)
 	savej.SetText("Save")
-	savej.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			p.Save()
-		}
+	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Save()
 	})
 
-	loadj := brow.AddNewChild(gi.KiT_Button, "loadjson").(*gi.Button)
+	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
 	loadj.SetText("Load")
-	loadj.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			p.Load()
-		}
+	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Load()
 	})
 
-	stdmap := brow.AddNewChild(gi.KiT_Button, "stdmap").(*gi.Button)
+	stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
 	stdmap.SetText("Std KeyMap")
 	stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"
-	stdmap.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			mapName := p.StdKeyMapName
-			_, initRow := gi.StdKeyMapByName(mapName)
-			SliceViewSelectDialog(vp, &gi.StdKeyMapNames, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
-				func(recv, send ki.Ki, sig int64, data interface{}) {
-					svv, _ := send.(*SliceView)
-					si := svv.SelectedIdx
-					if si >= 0 {
-						mapName = gi.StdKeyMapNames[si]
+	stdmap.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mapName := p.StdKeyMapName
+		_, initRow := gi.StdKeyMapByName(mapName)
+		SliceViewSelectDialog(vp, &gi.StdKeyMapNames, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
+			func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := send.(*SliceView)
+				si := svv.SelectedIdx
+				if si >= 0 {
+					mapName = gi.StdKeyMapNames[si]
+				}
+			},
+			func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					p.StdKeyMapName = mapName
+					km, _ := gi.StdKeyMapByName(mapName)
+					if km != nil {
+						p.SetKeyMap(km)
+						sv.UpdateFields()
 					}
-				},
-				func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.DialogAccepted) {
-						p.StdKeyMapName = mapName
-						km, _ := gi.StdKeyMapByName(mapName)
-						if km != nil {
-							p.SetKeyMap(km)
-							sv.UpdateFields()
-						}
-					}
-				})
-		}
+				}
+			})
 	})
 
-	scrinfo := brow.AddNewChild(gi.KiT_Button, "scrinfo").(*gi.Button)
+	scrinfo := tbar.AddNewChild(gi.KiT_Action, "scrinfo").(*gi.Action)
 	scrinfo.SetText("Screen Info")
-	scrinfo.ButtonSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			p.ScreenInfo()
-		}
+	scrinfo.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		scinfo := p.ScreenInfo()
+		fmt.Println(scinfo)
+		gi.PromptDialog(win.Viewport, "Screen Info", scinfo, true, false, nil, nil, nil)
 	})
 
 	vp.UpdateEndNoSig(updt)

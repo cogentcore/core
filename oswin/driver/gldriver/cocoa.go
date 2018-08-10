@@ -227,14 +227,12 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 		return // closing window
 	}
 
-	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
-
 	act := window.ActionsN
 
 	sz := image.Point{widthPx, heightPx}
 	ps := image.Point{leftPx, topPx}
 
-	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
+	if w.Sz != sz || w.PhysDPI != dpi {
 		act = window.Resize
 	} else if w.Pos != ps {
 		act = window.Move
@@ -246,7 +244,6 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	w.Sz = sz
 	w.Pos = ps
 	w.PhysDPI = dpi
-	w.LogDPI = ldpi
 
 	if scrno > 0 && len(theApp.screens) > scrno {
 		w.Scrn = theApp.screens[scrno]
@@ -256,7 +253,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 
 	winEv := window.Event{
 		Size:       sz,
-		LogicalDPI: ldpi,
+		LogicalDPI: dpi, // todo: change to PhysicalDPI
 		Action:     act,
 	}
 	winEv.Init()
@@ -285,7 +282,7 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	sc.ScreenNumber = scrIdx
 	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
 	sc.Depth = depth
-	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
+	sc.LogicalDPI = dpi
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{widthMM, heightMM}

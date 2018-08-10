@@ -184,6 +184,8 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	if wgp != nil {
 		win.HasGeomPrefs = true
 	}
+	AllWindows.Add(win)
+	MainWindows.Add(win)
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
 	vp.SetProp("color", &Prefs.FontColor) // everything inherits this..
@@ -219,6 +221,8 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	if wgp != nil {
 		win.HasGeomPrefs = true
 	}
+	AllWindows.Add(win)
+	DialogWindows.Add(win)
 	return win
 }
 
@@ -326,7 +330,7 @@ func (w *Window) Quit() {
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
 // -- automatically called when new window opened, but can be called before
-// then if pref info needed
+// then if pref info needed.
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
 		Prefs.Defaults()
@@ -382,6 +386,10 @@ func (w *Window) Resized(sz image.Point) {
 
 // Closed frees any resources after the window has been closed
 func (w *Window) Closed() {
+	AllWindows.Delete(w)
+	MainWindows.Delete(w)
+	DialogWindows.Delete(w)
+	// todo: trigger signal to update Windows menu of all open windows!
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
@@ -403,9 +411,6 @@ func (w *Window) FullReRender() {
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
-	pdpi := w.OSWin.PhysicalDPI()
-	dpi := oswin.LogicalFmPhysicalDPI(pdpi)
-	w.OSWin.SetLogicalDPI(dpi)
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		w.SetNextFocusItem()
@@ -534,14 +539,15 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
-// Zoom -- positive steps increase logical DPI, negative steps decrease it
+// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it.
 func (w *Window) ZoomDPI(steps int) {
-	pdpi := w.OSWin.PhysicalDPI()
-	dpi := oswin.LogicalFmPhysicalDPI(pdpi)
-	dpi += float32(6 * steps)
-	oswin.LogicalDPIScale = dpi / pdpi
-	w.OSWin.SetLogicalDPI(dpi) // will also be updated by resize events
-	fmt.Printf("LogicalDPI now: %v  PhysicalDPI: %v  Scale: %v\n", dpi, pdpi, oswin.LogicalDPIScale)
+	sc := oswin.TheApp.Screen(0)
+	pdpi := sc.PhysicalDPI
+	ldpi := sc.LogicalDPI
+	ldpi += float32(6 * steps)
+	ZoomFactor = ldpi / pdpi
+	Prefs.ApplyDPI()
+	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Scale: %v\n", ldpi, pdpi, ZoomFactor)
 	w.FullReRender()
 }
 
@@ -779,6 +785,9 @@ func (w *Window) SendKeyFunEvent(kf KeyFunctions, popup bool) {
 // AddShortcut adds given shortcut -- will issue warning about conflicting
 // shortcuts and use the most recent.
 func (w *Window) AddShortcut(chord string, act *Action) {
+	if chord == "" {
+		return
+	}
 	if w.Shortcuts == nil {
 		w.Shortcuts = make(Shortcuts, 100)
 	}
@@ -1678,6 +1687,42 @@ func (w *Window) BenchmarkReRender() {
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	w.EndTargProfile()
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+//  WindowLists
+
+// WindowList is a list of windows.
+type WindowList []*Window
+
+// Add adds a window to the list.
+func (wl *WindowList) Add(w *Window) {
+	*wl = append(*wl, w)
+}
+
+// Delete removes a window from the list -- returns true if deleted.
+func (wl *WindowList) Delete(w *Window) bool {
+	sz := len(*wl)
+	for i, wi := range *wl {
+		if wi == w {
+			copy((*wl)[i:], (*wl)[i+1:])
+			(*wl)[sz-1] = nil
+			(*wl) = (*wl)[:sz-1]
+			return true
+		}
+	}
+	return false
+}
+
+// AllWindows is the list of all windows that have been created (dialogs, main
+// windows, etc).
+var AllWindows WindowList
+
+// DialogWindows is the list of only dialog windows that have been created.
+var DialogWindows WindowList
+
+// MainWindows is the list of main windows (non-dialogs) that have been
+// created.
+var MainWindows WindowList
 
 //////////////////////////////////////////////////////////////////////////////////
 //  WindowGeom

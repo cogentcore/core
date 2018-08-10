@@ -114,7 +114,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* get rid of paint, lifecycle -- just have simpler window and app events
+
 * main menu on mac
+
+* drag should be stateful -- only drag current item -- logic is in there but
+  not working properly
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..
@@ -123,14 +128,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + right now, shift while dragging is causing extra render in overlay that persists..
 
 * add margin for para in text
+* Text HTML renders links, uses HandPointing for links, delivers link clicked signal
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * Layout flow types
-
-* drag should be stateful -- only drag current item -- logic is in there but not working properly
-
-* use screenprefs
 
 * update gi/doc.go with final readme notes etc!
 
@@ -149,8 +151,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * arg view / dialog and button tags
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
-
-* Label renders links, uses HandPointing for links, delivers link clicked signal
 
 * Reminder: grep all todo: in code -- lots!
 
