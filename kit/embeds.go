@@ -12,23 +12,23 @@ import (
 // This file contains helpful functions for dealing with embedded structs, in
 // the reflect system
 
-// FlatFieldsTypeFun calls a function on all the primary fields of a given
+// FlatFieldsTypeFunc calls a function on all the primary fields of a given
 // struct type, including those on anonymous embedded structs that this struct
 // has, passing the current (embedded) type and StructField -- effectively
 // flattens the reflect field list -- if fun returns false then iteration
 // stops -- overall rval is false if iteration was stopped or there was an
 // error (logged), true otherwise
-func FlatFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.FlatFieldsTypeFun: Must call on a struct type, not: %v\n", typ)
+		log.Printf("kit.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			rval = FlatFieldsTypeFun(f.Type, fun) // no err here
+			rval = FlatFieldsTypeFunc(f.Type, fun) // no err here
 			if !rval {
 				break
 			}
@@ -42,21 +42,21 @@ func FlatFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflec
 	return rval
 }
 
-// AllFieldsTypeFun calls a function on all the fields of a given struct type,
+// AllFieldsTypeFunc calls a function on all the fields of a given struct type,
 // including those on *any* embedded structs that this struct has -- if fun
 // returns false then iteration stops -- overall rval is false if iteration
 // was stopped or there was an error (logged), true otherwise.
-func AllFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.AllFieldsTypeFun: Must call on a struct type, not: %v\n", typ)
+		log.Printf("kit.AllFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct {
-			rval = AllFieldsTypeFun(f.Type, fun) // no err here
+			rval = AllFieldsTypeFunc(f.Type, fun) // no err here
 			if !rval {
 				break
 			}
@@ -70,15 +70,15 @@ func AllFieldsTypeFun(typ reflect.Type, fun func(typ reflect.Type, field reflect
 	return rval
 }
 
-// FlatFieldsValueFun calls a function on all the primary fields of a
+// FlatFieldsValueFunc calls a function on all the primary fields of a
 // given struct value (must pass a pointer to the struct) including those on
 // anonymous embedded structs that this struct has, passing the current
 // (embedded) type and StructField -- effectively flattens the reflect field
 // list
-func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
-		log.Printf("kit.FlatFieldsValueFun: must pass a non-nil pointer to the struct: %v\n", stru)
+		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -87,7 +87,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.FlatFieldsValueFun: non-pointer type is not a struct: %v\n", typ.String())
+		log.Printf("kit.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
 		return false
 	}
 	rval := true
@@ -103,7 +103,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
 			// key to take addr here so next level is addressable
-			rval = FlatFieldsValueFun(PtrValue(vf).Interface(), fun)
+			rval = FlatFieldsValueFunc(PtrValue(vf).Interface(), fun)
 			if !rval {
 				break
 			}
@@ -122,7 +122,7 @@ func FlatFieldsValueFun(stru interface{}, fun func(stru interface{}, typ reflect
 // (logged)
 func FlatFields(typ reflect.Type) []reflect.StructField {
 	ff := make([]reflect.StructField, 0)
-	falseErr := FlatFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+	falseErr := FlatFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
 		ff = append(ff, field)
 		return true
 	})
@@ -137,7 +137,7 @@ func FlatFields(typ reflect.Type) []reflect.StructField {
 // error (logged)
 func AllFields(typ reflect.Type) []reflect.StructField {
 	ff := make([]reflect.StructField, 0)
-	falseErr := AllFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+	falseErr := AllFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
 		ff = append(ff, field)
 		return true
 	})
@@ -150,7 +150,7 @@ func AllFields(typ reflect.Type) []reflect.StructField {
 // AllFieldsN returns number of elemental fields in given type
 func AllFieldsN(typ reflect.Type) int {
 	n := 0
-	falseErr := AllFieldsTypeFun(typ, func(typ reflect.Type, field reflect.StructField) bool {
+	falseErr := AllFieldsTypeFunc(typ, func(typ reflect.Type, field reflect.StructField) bool {
 		n++
 		return true
 	})
@@ -165,7 +165,7 @@ func AllFieldsN(typ reflect.Type) int {
 // embedded structs -- returns nil on error (logged)
 func FlatFieldVals(stru interface{}) []reflect.Value {
 	ff := make([]reflect.Value, 0)
-	falseErr := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	falseErr := FlatFieldsValueFunc(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, fieldVal)
 		return true
 	})
@@ -181,7 +181,7 @@ func FlatFieldVals(stru interface{}) []reflect.Value {
 // any of its embedded structs -- returns nil on error (logged)
 func FlatFieldInterfaces(stru interface{}) []interface{} {
 	ff := make([]interface{}, 0)
-	falseErr := FlatFieldsValueFun(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	falseErr := FlatFieldsValueFunc(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, PtrValue(fieldVal).Interface())
 		return true
 	})
@@ -214,7 +214,7 @@ func FlatFieldTag(typ reflect.Type, nm, tag string) string {
 func FlatFieldValueByName(stru interface{}, nm string) reflect.Value {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
-		log.Printf("kit.FlatFieldsValueFun: must pass a non-nil pointer to the struct: %v\n", stru)
+		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return reflect.Value{}
 	}
 	v := NonPtrValue(vv)
@@ -252,9 +252,8 @@ func TypeEmbeds(typ, embed reflect.Type) bool {
 	return false
 }
 
-// EmbeddedStruct returns the embedded struct of given type within given
-// struct
-func EmbeddedStruct(stru interface{}, embed reflect.Type) interface{} {
+// Embed returns the embedded struct of given type within given struct
+func Embed(stru interface{}, embed reflect.Type) interface{} {
 	if IfaceIsNil(stru) {
 		return nil
 	}
@@ -271,7 +270,7 @@ func EmbeddedStruct(stru interface{}, embed reflect.Type) interface{} {
 			if f.Type == embed {
 				return vfpi
 			}
-			rv := EmbeddedStruct(vfpi, embed)
+			rv := Embed(vfpi, embed)
 			if rv != nil {
 				return rv
 			}

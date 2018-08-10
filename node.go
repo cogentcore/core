@@ -37,7 +37,6 @@ import (
 // info -- add these to all your derived struct's fields.  See relevant docs
 // for other such tags controlling a wide range of GUI and other functionality
 // -- Ki makes extensive use of such tags.
-//
 type Node struct {
 	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
 	UniqueNm string `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
@@ -110,17 +109,17 @@ func (n *Node) TypeEmbeds(t reflect.Type) bool {
 	return kit.TypeEmbeds(n.Type(), t)
 }
 
-func (n *Node) EmbeddedStruct(t reflect.Type) Ki {
+func (n *Node) Embed(t reflect.Type) Ki {
 	if n == nil {
 		return nil
 	}
-	es := kit.EmbeddedStruct(n.This, t)
+	es := kit.Embed(n.This, t)
 	if es != nil {
 		k, ok := es.(Ki)
 		if ok {
 			return k
 		}
-		log.Printf("ki.EmbeddedStruct on: %v embedded struct is not a Ki type -- use kit.EmbeddedStruct for a more general version\n", n.PathUnique())
+		log.Printf("ki.Embed on: %v embedded struct is not a Ki type -- use kit.Embed for a more general version\n", n.PathUnique())
 		return nil
 	}
 	return nil
@@ -271,6 +270,10 @@ func (n *Node) ParentLevel(par Ki) int {
 		return true
 	})
 	return parLev
+}
+
+func (n *Node) HasParent(par Ki) bool {
+	return n.ParentLevel(par) != -1
 }
 
 func (n *Node) ParentByName(name string) (Ki, bool) {

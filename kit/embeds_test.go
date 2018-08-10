@@ -87,17 +87,17 @@ func TestTypeEmbeds(t *testing.T) {
 	}
 }
 
-func TestEmbeddedStruct(t *testing.T) {
+func TestEmbed(t *testing.T) {
 	InitC()
 
-	aa := EmbeddedStruct(&a, reflect.TypeOf(a))
+	aa := Embed(&a, reflect.TypeOf(a))
 	aas := fmt.Sprintf("%+v", aa)
 	aat := "&{Mbr1: Mbr2:0}"
 	if aas != aat {
 		t.Errorf("Didn't get proper embedded members of A from A: %v != %v\n", aas, aat)
 	}
 
-	ca := EmbeddedStruct(&c, reflect.TypeOf(a))
+	ca := Embed(&c, reflect.TypeOf(a))
 	cas := fmt.Sprintf("%+v", ca)
 	cat := "&{Mbr1:mbr1 string Mbr2:2}"
 	if cas != cat {
@@ -108,11 +108,11 @@ func TestEmbeddedStruct(t *testing.T) {
 func TestFlatFields(t *testing.T) {
 	InitC()
 
-	// FlatFieldsTypeFun(reflect.TypeOf(c), func(typ reflect.Type, field reflect.StructField) {
+	// FlatFieldsTypeFunc(reflect.TypeOf(c), func(typ reflect.Type, field reflect.StructField) {
 	// 	fmt.Printf("typ: %v, field: %v\n", typ, field)
 	// })
 
-	// FlatFieldsValueFun(c, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
+	// FlatFieldsValueFunc(c, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) {
 	// 	fmt.Printf("typ: %v, field: %v val: %v\n", typ, field, fieldVal)
 	// })
 

@@ -56,14 +56,14 @@ type Ki interface {
 	Type() reflect.Type
 
 	// TypeEmbeds tests whether this node is of the given type, or it embeds
-	// that type at any level of anonymous embedding -- use EmbeddedStruct to
-	// get the embedded struct of that type from this node.
+	// that type at any level of anonymous embedding -- use Embed to get the
+	// embedded struct of that type from this node.
 	TypeEmbeds(t reflect.Type) bool
 
-	// EmbeddedStruct returns the embedded struct of given type from this node
-	// (or nil if it does not embed that type, or the type is not a Ki type --
-	// see kit.EmbeddedStruct for a generic interface{} version.
-	EmbeddedStruct(t reflect.Type) Ki
+	// Embed returns the embedded struct of given type from this node (or nil
+	// if it does not embed that type, or the type is not a Ki type -- see
+	// kit.Embed for a generic interface{} version.
+	Embed(t reflect.Type) Ki
 
 	// Name returns the user-defined name of the object (Node.Nm), for finding
 	// elements, generating paths, IO, etc -- allows generic GUI / Text / Path
@@ -119,9 +119,9 @@ type Ki interface {
 	Root() Ki
 
 	// FieldRoot returns the field root object for this node -- the node that
-	// owns the branch of the tree rooted in one of its fields -- the first
-	// non-Field parent node after the first Field parent node -- can be nil
-	// if no such thing exists for this node.
+	// owns the branch of the tree rooted in one of its fields -- i.e., the
+	// first non-Field parent node after the first Field parent node -- can be
+	// nil if no such thing exists for this node.
 	FieldRoot() Ki
 
 	// IndexInParent returns our index within our parent object -- caches the
@@ -133,6 +133,10 @@ type Ki interface {
 	// hierarchy, returning level above current node that the parent was
 	// found, and -1 if not found.
 	ParentLevel(par Ki) int
+
+	// HasParent checks if given node is a parent of this one (i.e.,
+	// ParentLevel(par) != -1).
+	HasParent(par Ki) bool
 
 	// ParentByName finds first parent recursively up hierarchy that matches
 	// given name -- returns false if not found.
@@ -334,16 +338,16 @@ type Ki interface {
 	// -- can be extended from FlagsN up to 64 bit capacity.
 	Flags() *int64
 
-	// SetFlagAtomic provides an atomic bit flag update -- use this whenever
-	// there might be concurrent access.
+	// SetFlagAtomic sets the given flags using atomic operation safe for
+	// concurrent access.
 	SetFlagAtomic(flag ...int)
 
-	// SetFlagState provides an atomic bit flag update -- use this
-	// whenever there might be concurrent access.
+	// SetFlagStateAtomic sets the given flags to given state using atomic
+	// operation safe for concurrent access.
 	SetFlagStateAtomic(on bool, flag ...int)
 
-	// ClearFlag provides an atomic bit flag update -- use this whenever
-	// there might be concurrent access.
+	// ClearFlagAtomic clears the given flags using atomic operation safe for
+	// concurrent access.
 	ClearFlagAtomic(flag ...int)
 
 	// IsField checks if this is a field on a parent struct (via IsField
@@ -409,11 +413,11 @@ type Ki interface {
 	// SetPropChildren sets given property key to value val for all Children.
 	SetPropChildren(key string, val interface{})
 
-	// Prop gets property value from key
+	// Prop gets property value from key.
 	Prop(key string) (interface{}, bool)
 
 	// KnownProp gets property value from key that is known to exist --
-	// returns nil if it actually doesn't -- less cumbersome for conversions
+	// returns nil if it actually doesn't -- less cumbersome for conversions.
 	KnownProp(key string) interface{}
 
 	// PropInherit gets property value from key with options for inheriting
@@ -519,7 +523,10 @@ type Ki interface {
 	//   updt := n.UpdateStart()
 	//   ... code
 	//   n.UpdateEnd(updt)
-	//
+	// or
+	//   updt := n.UpdateStart()
+	//   defer n.UpdateEnd(updt)
+	//   ... code
 	UpdateStart() bool
 
 	// UpdateEnd should be called when done updating after an UpdateStart, and
@@ -588,10 +595,10 @@ type Ki interface {
 	// copy from a source to a target that only differ minimally will be
 	// minimally destructive.  Only copies to same types are supported.
 	// Pointers (Ptr) are copied by saving the current UniquePath and then
-	// SetPtrsFmPaths is called -- no other Ki point.  Signal connections are
-	// NOT copied (todo: revisit).  No other Ki pointers are copied, and the
-	// field tag copy:"-" can be added for any other fields that should not be
-	// copied (unexported, lower-case fields are not copyable).
+	// SetPtrsFmPaths is called.  Signal connections are NOT copied.  No other
+	// Ki pointers are copied, and the field tag copy:"-" can be added for any
+	// other fields that should not be copied (unexported, lower-case fields
+	// are not copyable).
 	//
 	// When nodes are copied from one place to another within the same overall
 	// tree, paths are updated so that pointers to items within the copied
