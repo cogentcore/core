@@ -209,8 +209,8 @@ func (sv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
-			svv, _ := recv.EmbeddedStruct(KiT_ColorView).(*ColorView)
-			slv := send.EmbeddedStruct(gi.KiT_Slider).(*gi.Slider)
+			svv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 			updt := svv.UpdateStart()
 			svv.SetRGBValue(slv.Value, rgb)
 			svv.ViewSig.Emit(svv.This, 0, nil)
@@ -265,8 +265,8 @@ func (sv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
-			svv, _ := recv.EmbeddedStruct(KiT_ColorView).(*ColorView)
-			slv := send.EmbeddedStruct(gi.KiT_Slider).(*gi.Slider)
+			svv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 			updt := svv.UpdateStart()
 			svv.SetHSLValue(slv.Value, hsl)
 			svv.ViewSig.Emit(svv.This, 0, nil)
@@ -306,19 +306,19 @@ func (sv *ColorView) ConfigSliderGrid() {
 	config := sv.StdSliderConfig()
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
-		sv.ConfigLabel(sg.KnownChildByName("rlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Red:")
-		sv.ConfigLabel(sg.KnownChildByName("blab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Blue")
-		sv.ConfigLabel(sg.KnownChildByName("glab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Green:")
-		sv.ConfigLabel(sg.KnownChildByName("hlab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Hue:")
-		sv.ConfigLabel(sg.KnownChildByName("slab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Sat:")
-		sv.ConfigLabel(sg.KnownChildByName("llab", 0).EmbeddedStruct(gi.KiT_Label).(*gi.Label), "Light:")
+		sv.ConfigLabel(sg.KnownChildByName("rlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Red:")
+		sv.ConfigLabel(sg.KnownChildByName("blab", 0).Embed(gi.KiT_Label).(*gi.Label), "Blue")
+		sv.ConfigLabel(sg.KnownChildByName("glab", 0).Embed(gi.KiT_Label).(*gi.Label), "Green:")
+		sv.ConfigLabel(sg.KnownChildByName("hlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Hue:")
+		sv.ConfigLabel(sg.KnownChildByName("slab", 0).Embed(gi.KiT_Label).(*gi.Label), "Sat:")
+		sv.ConfigLabel(sg.KnownChildByName("llab", 0).Embed(gi.KiT_Label).(*gi.Label), "Light:")
 
-		sv.ConfigRGBSlider(sg.KnownChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-		sv.ConfigRGBSlider(sg.KnownChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-		sv.ConfigRGBSlider(sg.KnownChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
-		sv.ConfigHSLSlider(sg.KnownChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-		sv.ConfigHSLSlider(sg.KnownChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-		sv.ConfigHSLSlider(sg.KnownChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+		sv.ConfigRGBSlider(sg.KnownChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigRGBSlider(sg.KnownChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigRGBSlider(sg.KnownChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
+		sv.ConfigHSLSlider(sg.KnownChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
+		sv.ConfigHSLSlider(sg.KnownChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
+		sv.ConfigHSLSlider(sg.KnownChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
 	} else {
 		updt = sg.UpdateStart()
 	}
@@ -331,12 +331,12 @@ func (sv *ColorView) UpdateSliderGrid() {
 		return
 	}
 	updt := sg.UpdateStart()
-	sv.UpdateRGBSlider(sg.KnownChildByName("red", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-	sv.UpdateRGBSlider(sg.KnownChildByName("green", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-	sv.UpdateRGBSlider(sg.KnownChildByName("blue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
-	sv.UpdateHSLSlider(sg.KnownChildByName("hue", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 0)
-	sv.UpdateHSLSlider(sg.KnownChildByName("sat", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 1)
-	sv.UpdateHSLSlider(sg.KnownChildByName("light", 0).EmbeddedStruct(gi.KiT_Slider).(*gi.Slider), 2)
+	sv.UpdateRGBSlider(sg.KnownChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateRGBSlider(sg.KnownChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateRGBSlider(sg.KnownChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
+	sv.UpdateHSLSlider(sg.KnownChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
+	sv.UpdateHSLSlider(sg.KnownChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
+	sv.UpdateHSLSlider(sg.KnownChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
 	sg.UpdateEnd(updt)
 }
 
@@ -410,7 +410,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac.SetIcon("color")
 		edac.Tooltip = "color selection dialog"
 		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 			clr, ok := svv.Struct.(*gi.Color)
 			if !ok {
 				clrp, ok := svv.Struct.(**gi.Color)
@@ -424,7 +424,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 			if ok {
 				cvvv := cvvvk.(*ColorView)
 				cvvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					cvvvv, _ := recv.EmbeddedStruct(KiT_StructViewInline).(*StructViewInline)
+					cvvvv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 					cvvvv.ViewSig.Emit(cvvvv.This, 0, nil)
 				})
 			}
@@ -434,7 +434,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.UpdateWidget()
 
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_ColorValueView).(*ColorValueView)
+		vvv, _ := recv.Embed(KiT_ColorValueView).(*ColorValueView)
 		vvv.UpdateWidget() // necessary in this case!
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})

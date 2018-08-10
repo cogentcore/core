@@ -60,8 +60,8 @@ func GoGiEditor(obj ki.Ki) {
 		if data == nil {
 			return
 		}
-		tvn, _ := data.(ki.Ki).EmbeddedStruct(KiT_TreeView).(*TreeView)
-		svr, _ := recv.EmbeddedStruct(KiT_StructView).(*StructView)
+		tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+		svr, _ := recv.Embed(KiT_StructView).(*StructView)
 		if sig == int64(TreeViewSelected) {
 			svr.SetStruct(tvn.SrcNode.Ptr, nil)
 		}

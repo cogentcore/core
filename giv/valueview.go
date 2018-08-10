@@ -441,7 +441,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
-			vvv, _ := recv.EmbeddedStruct(KiT_ValueViewBase).(*ValueViewBase)
+			vvv, _ := recv.Embed(KiT_ValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
@@ -577,7 +577,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Struct", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_StructValueView).(*StructValueView)
+		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Struct Value View", "", nil, nil, nil)
 	})
@@ -611,7 +611,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_StructInlineValueView).(*StructInlineValueView)
+		vvv, _ := recv.Embed(KiT_StructInlineValueView).(*StructInlineValueView)
 		// vvv.UpdateWidget() // prob not necc..
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
@@ -656,7 +656,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Slice", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		if vvv.IsStruct {
 			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, "Slice-of-Struct Value View", "", nil, nil, nil, nil)
@@ -664,7 +664,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 			if ok {
 				sv := svk.(*TableView)
 				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+					vvvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 					vvvv.UpdateWidget()
 					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
 				})
@@ -675,7 +675,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 			if ok {
 				sv := svk.(*SliceView)
 				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					vvvv, _ := recv.EmbeddedStruct(KiT_SliceValueView).(*SliceValueView)
+					vvvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 					vvvv.UpdateWidget()
 					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
 				})
@@ -720,14 +720,14 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit Map", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
+		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
 		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil, nil)
 		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 		if ok {
 			mv := mvk.(*MapView)
 			mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				vvvv, _ := recv.EmbeddedStruct(KiT_MapValueView).(*MapValueView)
+				vvvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 				vvvv.UpdateWidget()
 				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
 			})
@@ -763,7 +763,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	// npv := vv.Value.Elem()
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_MapInlineValueView).(*MapInlineValueView)
+		vvv, _ := recv.Embed(KiT_MapInlineValueView).(*MapInlineValueView)
 		vvv.UpdateWidget()
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
@@ -827,7 +827,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddMenuText("Edit", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
+		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
 			mb := vvv.Widget.(*gi.MenuButton)
@@ -835,7 +835,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	})
 	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_KiPtrValueView).(*KiPtrValueView)
+		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
 			GoGiEditor(k)
@@ -872,7 +872,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	cb.Tooltip = vv.ViewFieldTag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_BoolValueView).(*BoolValueView)
+		vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
 		cbb := vvv.Widget.(*gi.CheckBox)
 		if vvv.SetValue(cbb.IsChecked()) {
 			vvv.UpdateWidget() // always update after setting value..
@@ -942,7 +942,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_IntValueView).(*IntValueView)
+		vvv, _ := recv.Embed(KiT_IntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
@@ -1009,7 +1009,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	}
 
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_FloatValueView).(*FloatValueView)
+		vvv, _ := recv.Embed(KiT_FloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
@@ -1068,7 +1068,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.UpdateWidget()
 
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_EnumValueView).(*EnumValueView)
+		vvv, _ := recv.Embed(KiT_EnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
@@ -1130,7 +1130,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.UpdateWidget()
 
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_TypeValueView).(*TypeValueView)
+		vvv, _ := recv.Embed(KiT_TypeValueView).(*TypeValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		tval := cbb.CurVal.(reflect.Type)
 		if vvv.SetValue(tval) {

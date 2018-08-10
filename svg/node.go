@@ -144,7 +144,7 @@ func (g *NodeBase) ParentSVG() *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
-			return pvp.This.EmbeddedStruct(KiT_SVG).(*SVG)
+			return pvp.This.Embed(KiT_SVG).(*SVG)
 		}
 		pvp = pvp.ParentViewport()
 	}

@@ -167,7 +167,7 @@ func (g *SpinBox) ConfigParts() {
 		g.StylePart(Node2D(up))
 		if !g.IsInactive() {
 			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(1.0)
 			})
 		}
@@ -179,7 +179,7 @@ func (g *SpinBox) ConfigParts() {
 		g.StylePart(Node2D(dn))
 		if !g.IsInactive() {
 			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(-1.0)
 			})
 		}
@@ -193,7 +193,7 @@ func (g *SpinBox) ConfigParts() {
 		if !g.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) {
-					sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+					sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
 					vl, err := strconv.ParseFloat(tf.Text(), 32)
 					if err == nil {
@@ -219,7 +219,7 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 
 func (g *SpinBox) SpinBoxEvents() {
 	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sb.IsInactive() {
 			return
 		}
@@ -229,7 +229,7 @@ func (g *SpinBox) SpinBoxEvents() {
 	})
 	tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
 	tf.WidgetSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		sb := recv.EmbeddedStruct(KiT_SpinBox).(*SpinBox)
+		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
 			sb.SetSelectedState(!sb.IsSelected())
 		}

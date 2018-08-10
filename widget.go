@@ -178,7 +178,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 	pdst := g.DefaultStyle2DWidget(stynm, pg)
 	pg.DefStyle = pdst // will use this as starting point for all styles now..
 
-	if ics := pk.EmbeddedStruct(KiT_Icon); ics != nil {
+	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
 		styprops := kit.Types.Properties(g.Type(), true)
 		sp := ki.SubProps(styprops, stynm)
@@ -520,7 +520,7 @@ func (g *WidgetBase) HoverTooltipEvent() {
 	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
-		ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+		ab := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 		if ab.Tooltip != "" {
 			pos := ab.WinBBox.Max
 			pos.X -= 20
@@ -548,7 +548,7 @@ func (g *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				me.SetProcessed()
-				ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+				ab := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 				ab.SetSelectedState(!ab.IsSelected())
 				ab.EmitSelectedSignal()
 				ab.UpdateSig()
@@ -557,7 +557,7 @@ func (g *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		if ctxtMenu {
 			if me.Action == mouse.Release && me.Button == mouse.Right {
 				me.SetProcessed()
-				ab := recv.EmbeddedStruct(KiT_WidgetBase).(*WidgetBase)
+				ab := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 				ab.EmitContextMenuSignal()
 				ab.This.(Node2D).ContextMenu()
 			}

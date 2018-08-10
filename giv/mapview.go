@@ -175,7 +175,7 @@ func (mv *MapView) ConfigMapGrid() {
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			mvv, _ := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
 		keyw := sg.KnownChild(i * ncol).(gi.Node2D)
@@ -196,7 +196,7 @@ func (mv *MapView) ConfigMapGrid() {
 				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
 				idx := cb.KnownProp("mapview-index").(int)
-				mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
@@ -206,7 +206,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.Data = kv
 		delact.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*gi.Action)
-			mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			mvv := recv.Embed(KiT_MapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
 		})
 	}
@@ -300,11 +300,11 @@ func (mv *MapView) ConfigMapButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			mvv := recv.EmbeddedStruct(KiT_MapView).(*MapView)
+			mvv := recv.Embed(KiT_MapView).(*MapView)
 			mvv.MapAdd()
 		}
 	})

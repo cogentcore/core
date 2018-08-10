@@ -353,7 +353,7 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	if !ok { // shouldn't happen
 		return nil
 	}
-	vp, _ := vpi.EmbeddedStruct(KiT_Viewport2D).(*Viewport2D)
+	vp, _ := vpi.Embed(KiT_Viewport2D).(*Viewport2D)
 	return vp
 }
 
@@ -527,7 +527,7 @@ func (w *Window) Publish() {
 // SignalWindowPublish is the signal receiver function that publishes the
 // window updates when the window update signal (UpdateEnd) occurs
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
-	win := winki.EmbeddedStruct(KiT_Window).(*Window)
+	win := winki.Embed(KiT_Window).(*Window)
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
@@ -793,7 +793,7 @@ func (w *Window) AddShortcut(chord string, act *Action) {
 // triggered, and false otherwise.  Also elminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
 func (w *Window) TriggerShortcut(chord string) bool {
-	fmt.Printf("attempting shortcut chord: %v\n", chord)
+	// fmt.Printf("attempting shortcut chord: %v\n", chord)
 	if w.Shortcuts == nil {
 		return false
 	}
@@ -808,7 +808,7 @@ func (w *Window) TriggerShortcut(chord string) bool {
 	if sa.IsInactive() {
 		return false
 	}
-	fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Text)
+	// fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Text)
 	sa.Trigger()
 	return true
 }

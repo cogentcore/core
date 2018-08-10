@@ -131,7 +131,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar != svg.This {
 					curPar = curPar.AddNewChild(KiT_SVG, "svg").(gi.Node2D)
 				}
-				csvg := curPar.EmbeddedStruct(KiT_SVG).(*SVG)
+				csvg := curPar.Embed(KiT_SVG).(*SVG)
 				curSvg = csvg
 				for _, attr := range se.Attr {
 					if csvg.SetStdXMLAttr(attr.Name.Local, attr.Value) {
@@ -671,7 +671,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 				curSvgk, ok := curPar.ParentByType(KiT_SVG, true)
 				if ok {
-					curSvg = curSvgk.EmbeddedStruct(KiT_SVG).(*SVG)
+					curSvg = curSvgk.Embed(KiT_SVG).(*SVG)
 				}
 			}
 		case xml.CharData:

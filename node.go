@@ -239,7 +239,7 @@ func (g *NodeBase) ParentCSSAgg() *ki.Props {
 	if g.Par == nil {
 		return nil
 	}
-	pn := g.Par.EmbeddedStruct(KiT_NodeBase).(*NodeBase)
+	pn := g.Par.Embed(KiT_NodeBase).(*NodeBase)
 	return &pn.CSSAgg
 }
 

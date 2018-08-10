@@ -176,7 +176,7 @@ func mainrun() {
 	})
 
 	svge.NodeSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ssvg := send.EmbeddedStruct(svg.KiT_Editor).(*svg.Editor)
+		ssvg := send.Embed(svg.KiT_Editor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
 	})

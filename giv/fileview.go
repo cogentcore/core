@@ -145,7 +145,7 @@ func (fv *FileView) ConfigPathRow() {
 	pf.SetStretchMaxWidth()
 	pf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.DirPath = pff.Text()
 			fvv.SetFullReRender()
@@ -157,7 +157,7 @@ func (fv *FileView) ConfigPathRow() {
 	pu.Icon = gi.IconName("widget-wedge-up")
 	pu.Tooltip = "go up one level into the parent folder"
 	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
@@ -165,7 +165,7 @@ func (fv *FileView) ConfigPathRow() {
 	pfv.Icon = gi.IconName("heart")
 	pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
 	pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
@@ -173,7 +173,7 @@ func (fv *FileView) ConfigPathRow() {
 	nf.Icon = gi.IconName("folder-plus")
 	nf.Tooltip = "Create a new folder in this folder"
 	nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.NewFolder()
 	})
 }
@@ -204,7 +204,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
 	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FavSelect(svv.SelectedIdx)
 		}
@@ -229,7 +229,7 @@ func (fv *FileView) ConfigFilesRow() {
 	}
 	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelect(svv.SelectedIdx)
 		}
@@ -252,7 +252,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf.GrabFocus()
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
-			fvv, _ := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.SelFile = pff.Text()
 		}
@@ -459,11 +459,11 @@ func (fv *FileView) ConfigButtons() {
 	// config := kit.TypeAndNameList{}
 	// config.Add(gi.KiT_Button, "Add")
 	// mods, updt := bb.ConfigChildren(config, false)
-	// addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*Button)
+	// addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*Button)
 	// addb.SetText("Add")
 	// addb.ButtonSig.ConnectOnly(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	if sig == int64(ButtonClicked) {
-	// 		fvv := recv.EmbeddedStruct(KiT_FileView).(*FileView)
+	// 		fvv := recv.Embed(KiT_FileView).(*FileView)
 	// 		fvv.SliceNewAt(-1)
 	// 	}
 	// })

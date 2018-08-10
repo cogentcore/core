@@ -566,7 +566,7 @@ func (g *Node2DBase) ParentWindow() *Window {
 	if !ok {
 		return nil
 	}
-	return wini.EmbeddedStruct(KiT_Window).(*Window)
+	return wini.Embed(KiT_Window).(*Window)
 }
 
 // ParentViewport returns the parent viewport -- uses AsViewport2D() method on

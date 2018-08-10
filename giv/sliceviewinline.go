@@ -80,7 +80,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			svv.UpdateSig()
 			svv.ViewSig.Emit(svv.This, 0, nil)
 		})
@@ -96,13 +96,13 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac.SetIcon("edit")
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil, nil)
 			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				svvv := svvvk.(*SliceView)
 				svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					svvvv, _ := recv.EmbeddedStruct(KiT_SliceViewInline).(*SliceViewInline)
+					svvvv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 					svvvv.ViewSig.Emit(svvvv.This, 0, nil)
 				})
 			}

@@ -52,7 +52,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	vv.UpdateWidget()
 
 	cb.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.EmbeddedStruct(KiT_IconValueView).(*IconValueView)
+		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
 		if !vvv.IsInactive() {
 			IconChooserDialog(cb.Viewport, "Select an Icon", "", nil, vv.This,
 				func(recv, send ki.Ki, sig int64, data interface{}) {

@@ -113,7 +113,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	// note: LowPri allows all other events to be processed before dialog
 	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunAbort:
@@ -123,7 +123,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	})
 	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		kf := KeyFun(kt.ChordString())
 		switch kf {
 		case KeyFunAccept:
@@ -133,7 +133,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	})
 	win.ConnectEventType(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		ddlg, _ := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
 			ddlg.Accept()
 			me.SetProcessed()
@@ -344,21 +344,21 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.KnownChildByName("ok", 0).EmbeddedStruct(KiT_Button).(*Button)
+		okb := bb.KnownChildByName("ok", 0).Embed(KiT_Button).(*Button)
 		okb.SetText("Ok")
 		okb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Accept()
 			}
 		})
 	}
 	if cancel {
-		canb := bb.KnownChildByName("cancel", 0).EmbeddedStruct(KiT_Button).(*Button)
+		canb := bb.KnownChildByName("cancel", 0).Embed(KiT_Button).(*Button)
 		canb.SetText("Cancel")
 		canb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.EmbeddedStruct(KiT_Dialog).(*Dialog)
+				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Cancel()
 			}
 		})

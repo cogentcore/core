@@ -31,7 +31,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEventType(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.IsDragging() {
 			if !ssvg.SetDragCursor {
 				oswin.TheApp.Cursor().Push(cursor.HandOpen)
@@ -54,7 +54,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEventType(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
-		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
 			oswin.TheApp.Cursor().Pop()
 			ssvg.SetDragCursor = false
@@ -70,7 +70,7 @@ func (svg *Editor) EditorEvents() {
 	})
 	svg.ConnectEventType(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
 			oswin.TheApp.Cursor().Pop()
 			ssvg.SetDragCursor = false
@@ -86,7 +86,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEventType(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
-		ssvg := recv.EmbeddedStruct(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if obj != nil {
 			pos := me.Where

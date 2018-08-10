@@ -162,7 +162,7 @@ func (g *SplitView) ConfigSplitters() {
 		if mods {
 			sp.SliderSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(SliderValueChanged) {
-					spr, _ := recv.EmbeddedStruct(KiT_SplitView).(*SplitView)
+					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
 					spr.SetSplitsAction(i, spl.Value)
 				}

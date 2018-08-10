@@ -114,9 +114,9 @@ func mainrun() {
 		if data == nil {
 			return
 		}
-		// tvr, _ := send.EmbeddedStruct(giv.KiT_TreeView).(*gi.TreeView) // root is sender
-		tvn, _ := data.(ki.Ki).EmbeddedStruct(giv.KiT_TreeView).(*giv.TreeView)
-		svr, _ := recv.EmbeddedStruct(giv.KiT_StructView).(*giv.StructView)
+		// tvr, _ := send.Embed(giv.KiT_TreeView).(*gi.TreeView) // root is sender
+		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
+		svr, _ := recv.Embed(giv.KiT_StructView).(*giv.StructView)
 		if sig == int64(giv.TreeViewSelected) {
 			svr.SetStruct(tvn.SrcNode.Ptr, nil)
 		}

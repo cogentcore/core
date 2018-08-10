@@ -106,15 +106,15 @@ func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
 	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 	ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 	m.AddMenuText("Copy", cpsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 	})
 	cut := m.AddMenuText("Cut", ctsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 	})
 	paste := m.AddMenuText("Paste", ptsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ww := recv.EmbeddedStruct(KiT_Window).(*Window)
+		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
 	if !cutPasteActive {

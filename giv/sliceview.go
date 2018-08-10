@@ -224,7 +224,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
 					idx := wbb.KnownProp("slv-index").(int)
-					svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+					svv := recv.Embed(KiT_SliceView).(*SliceView)
 					svv.UpdateSelect(idx, wbb.IsSelected())
 				}
 			})
@@ -249,7 +249,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.KnownProp("slv-index").(int)
-						svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+						svv := recv.Embed(KiT_SliceView).(*SliceView)
 						svv.UpdateSelect(idx, wbb.IsSelected())
 					}
 				})
@@ -257,7 +257,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 		} else {
 			vvb := vv.AsValueViewBase()
 			vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				svv, _ := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.UpdateSig()
 				svv.ViewSig.Emit(svv.This, 0, nil)
 			})
@@ -273,7 +273,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			addact.Data = i
 			addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				act := send.(*gi.Action)
-				svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SliceNewAt(act.Data.(int)+1, true)
 			})
 			delact.SetIcon("minus")
@@ -281,7 +281,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			delact.Data = i
 			delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				act := send.(*gi.Action)
-				svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				svv := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SliceDelete(act.Data.(int), true)
 			})
 		}
@@ -347,11 +347,11 @@ func (sv *SliceView) ConfigSliceButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			svv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			svv := recv.Embed(KiT_SliceView).(*SliceView)
 			svv.SliceNewAt(-1, true)
 		}
 	})
@@ -854,15 +854,15 @@ func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 		return
 	}
 	m.AddMenuText("Assign To", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAssign(data.(mimedata.Mimes), row)
 	})
 	m.AddMenuText("Insert Before", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
 	m.AddMenuText("Insert After", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
 	m.AddMenuText("Cancel", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -974,20 +974,20 @@ func (sv *SliceView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 	}
 	if mod == dnd.DropCopy {
 		m.AddMenuText("Assign To", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.DropAssign(data.(mimedata.Mimes), row)
 		})
 	}
 	m.AddMenuText("Insert Before", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
 	})
 	m.AddMenuText("Insert After", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
 	})
 	m.AddMenuText("Cancel", "", sv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropCancel()
 	})
 }
@@ -1153,20 +1153,20 @@ func (sv *SliceView) SliceViewEvents() {
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
 			sv.ConnectEventType(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-				tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+				tvv := recv.Embed(KiT_SliceView).(*SliceView)
 				kt := d.(*key.ChordEvent)
 				tvv.KeyInputInactive(kt)
 			})
 		}
 	} else {
 		sv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)
 		})
 		sv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			de := d.(*dnd.Event)
-			tvv := recv.EmbeddedStruct(KiT_SliceView).(*SliceView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			switch de.Action {
 			case dnd.Start:
 				tvv.DragNDropStart()

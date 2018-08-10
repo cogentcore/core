@@ -328,7 +328,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		hdr.Data = fli
 		hdr.Tooltip = "click to sort by this column -- toggles direction of sort too"
 		hdr.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
 			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
 			tvv.SortSliceAction(fldIdx)
@@ -397,7 +397,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
 					idx := wbb.KnownProp("tv-index").(int)
-					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.UpdateSelect(idx, wbb.IsSelected())
 				}
 			})
@@ -431,7 +431,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.KnownProp("tv-index").(int)
-						tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+						tvv := recv.Embed(KiT_TableView).(*TableView)
 						if sig != int64(gi.WidgetFocused) || !tvv.inFocusGrab {
 							tvv.UpdateSelect(idx, wbb.IsSelected())
 						}
@@ -444,7 +444,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				vvb := vv.AsValueViewBase()
 				vvb.ViewSig.ConnectOnly(tv.This, // todo: do we need this?
 					func(recv, send ki.Ki, sig int64, data interface{}) {
-						tvv, _ := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+						tvv, _ := recv.Embed(KiT_TableView).(*TableView)
 						tvv.UpdateSig()
 						tvv.ViewSig.Emit(tvv.This, 0, nil)
 					})
@@ -461,7 +461,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				addact.Data = i
 				addact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
-					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceNewAt(act.Data.(int)+1, true)
 				})
 				delact.SetIcon("minus")
@@ -469,7 +469,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				delact.Data = i
 				delact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
-					tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceDelete(act.Data.(int), true)
 				})
 			}
@@ -695,11 +695,11 @@ func (tv *TableView) ConfigSliceButtons() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Button, "Add")
 	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).EmbeddedStruct(gi.KiT_Button).(*gi.Button)
+	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
 	addb.SetText("Add")
 	addb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.SliceNewAt(-1, true)
 		}
 	})
@@ -1314,15 +1314,15 @@ func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 		return
 	}
 	m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAssign(data.(mimedata.Mimes), row)
 	})
 	m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
 	m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
 	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1434,20 +1434,20 @@ func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 	}
 	if mod == dnd.DropCopy {
 		m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.DropAssign(data.(mimedata.Mimes), row)
 		})
 	}
 	m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
 	})
 	m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
 	})
 	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropCancel()
 	})
 }
@@ -1613,20 +1613,20 @@ func (tv *TableView) TableViewEvents() {
 	if tv.IsInactive() {
 		if tv.InactKeyNav {
 			tv.ConnectEventType(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-				tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+				tvv := recv.Embed(KiT_TableView).(*TableView)
 				kt := d.(*key.ChordEvent)
 				tvv.KeyInputInactive(kt)
 			})
 		}
 	} else {
 		tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)
 		})
 		tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			de := d.(*dnd.Event)
-			tvv := recv.EmbeddedStruct(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
 			switch de.Action {
 			case dnd.Start:
 				tvv.DragNDropStart()

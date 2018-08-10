@@ -93,7 +93,7 @@ func (mv *MapViewInline) ConfigParts() {
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.ViewSig.Emit(mvv.This, 0, nil)
 		})
 		keyw := mv.Parts.KnownChild(i * 2).(gi.Node2D)
@@ -108,13 +108,13 @@ func (mv *MapViewInline) ConfigParts() {
 		edac.SetIcon("edit")
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			mvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil, nil)
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {
 				mvvv := mvvvk.(*MapView)
 				mvvv.ViewSig.ConnectOnly(mvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					mvvvv, _ := recv.EmbeddedStruct(KiT_MapViewInline).(*MapViewInline)
+					mvvvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 					mvvvv.ViewSig.Emit(mvvvv.This, 0, nil)
 				})
 			}

@@ -325,7 +325,7 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 func (g *SliderBase) SliderEvents() {
 	g.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
 		}
@@ -342,7 +342,7 @@ func (g *SliderBase) SliderEvents() {
 	})
 	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			me.SetProcessed()
 			sl.SetSelectedState(!sl.IsSelected())
@@ -367,7 +367,7 @@ func (g *SliderBase) SliderEvents() {
 		}
 	})
 	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
 		}
@@ -380,7 +380,7 @@ func (g *SliderBase) SliderEvents() {
 		}
 	})
 	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
 		}
@@ -394,7 +394,7 @@ func (g *SliderBase) SliderEvents() {
 		}
 	})
 	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.EmbeddedStruct(KiT_SliderBase).(*SliderBase)
+		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
 		}
