@@ -297,7 +297,7 @@ func (w *Window) SetMainLayout() *Layout {
 }
 
 // MainWidget returns the main widget for this window -- 2nd element in
-// MasterVLay -- returns false if not yet set
+// MasterVLay -- returns false if not yet set.
 func (w *Window) MainWidget() (ki.Ki, bool) {
 	return w.MasterVLay.Child(1)
 }
@@ -306,25 +306,32 @@ func (w *Window) MainWidget() (ki.Ki, bool) {
 // configuration is setup -- does any necessary final initialization and then
 // starts the event loop in this same goroutine, and does not return until the
 // window is closed -- see GoStartEventLoop for a version that starts in a
-// separate goroutine and returns immediately
+// separate goroutine and returns immediately.
 func (w *Window) StartEventLoop() {
 	w.EventLoop()
 }
 
 // GoStartEventLoop starts the event processing loop for this window in a new
-// goroutine, and returns immediately
+// goroutine, and returns immediately.
 func (w *Window) GoStartEventLoop() {
 	go w.EventLoop()
 }
 
-// StopEventLoop tells the event loop to stop running when the next event arrives
+// StopEventLoop tells the event loop to stop running when the next event arrives.
 func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true
 }
 
-// MainMenuUpdated needs to be called whenever the main menu for this window is updated
+// MainMenuUpdated needs to be called whenever the main menu for this window
+// is updated in terms of items added or removed.
 func (w *Window) MainMenuUpdated() {
 	w.MainMenu.SetMainMenu(w)
+}
+
+// MainMenuUpdateActives needs to be called whenever items on the main menu
+// for this window have their IsActive status updated.
+func (w *Window) MainMenuUpdateActives() {
+	w.MainMenu.MainMenuUpdateActives(w)
 }
 
 // Quit exits out of the program, closing the window..

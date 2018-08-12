@@ -39,7 +39,7 @@ type TextField struct {
 	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
 	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `json:"-" xml:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
 	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`

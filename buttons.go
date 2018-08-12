@@ -29,7 +29,7 @@ type ButtonBase struct {
 	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig    ki.Signal            `json:"-" xml:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	ButtonSig    ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
@@ -274,8 +274,7 @@ func (g *ButtonBase) OpenMenu() bool {
 	if ok {
 		pos = KiToNode2DBase(indic).WinBBox.Min
 	} else {
-		pos.Y -= 10
-		pos.X -= 10
+		pos.X = g.WinBBox.Min.X
 	}
 	if g.Viewport != nil {
 		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)

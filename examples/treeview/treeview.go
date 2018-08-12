@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -70,6 +71,10 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
+	oswin.TheApp.SetName("treeview")
+	oswin.TheApp.SetAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
+<p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`)
+
 	width := 1024
 	height := 768
 	win := gi.NewWindow2D("gogi-treeview-test", "TreeView Test", width, height, true)
@@ -121,6 +126,21 @@ func mainrun() {
 			svr.SetStruct(tvn.SrcNode.Ptr, nil)
 		}
 	})
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

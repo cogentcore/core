@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
 
@@ -37,6 +38,9 @@ func mainrun() {
 	// 	{100, 100},
 	// 	{100, 100},
 	// }
+
+	oswin.TheApp.SetName("layout")
+	oswin.TheApp.SetAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-layout-test", "GoGi Layout Test", width, height, true)
 
@@ -140,6 +144,21 @@ func mainrun() {
 		fr.SetProp("margin", 2.0)
 		// fr.SetProp("max-width", -1) // spacer
 	}
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

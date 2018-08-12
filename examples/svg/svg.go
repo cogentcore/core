@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -55,9 +56,24 @@ func LoadSVG(fnm string) {
 	TheSVG.UpdateEnd(updt)
 }
 
+func FileViewLoadSVG(vp *gi.Viewport2D) {
+	path, fn := filepath.Split(CurFilename)
+	path, _ = homedir.Expand(path)
+	giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
+			dlg, _ := send.(*gi.Dialog)
+			LoadSVG(giv.FileViewDialogValue(dlg))
+		}
+	})
+}
+
 func mainrun() {
 	width := 1600
 	height := 1200
+
+	oswin.TheApp.SetName("svg")
+	oswin.TheApp.SetAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
+<p>You can drag the image around and use the scroll wheel to zoom.</p>`)
 
 	win := gi.NewWindow2D("gogi-svg-viewer", "GoGi SVG Viewer", width, height, true)
 
@@ -141,14 +157,7 @@ func mainrun() {
 	TheTransY = try
 
 	loads.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		path, fn := filepath.Split(CurFilename)
-		path, _ = homedir.Expand(path)
-		giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, win, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.(*gi.Dialog)
-				LoadSVG(giv.FileViewDialogValue(dlg))
-			}
-		})
+		FileViewLoadSVG(vp)
 	})
 
 	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -182,6 +191,29 @@ func mainrun() {
 	})
 
 	vp.UpdateEndNoSig(updt)
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	// note: Command in shortcuts is automatically translated into Control for
+	// Linux, Windows or Meta for MacOS
+	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
+	fmen.Menu = make(gi.Menu, 0, 10)
+	fmen.Menu.AddMenuText("Open", "Command+O", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewLoadSVG(vp)
+	})
+
+	win.MainMenuUpdated()
 
 	win.StartEventLoop()
 }

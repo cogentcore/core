@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
 
@@ -36,6 +37,9 @@ func mainrun() {
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
+
+	oswin.TheApp.SetName("views")
+	oswin.TheApp.SetAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	width := 1024
 	height := 768
@@ -78,6 +82,21 @@ func mainrun() {
 	sv.SetSlice(&tstslice, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

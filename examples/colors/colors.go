@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
 
@@ -19,6 +20,9 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
+
+	oswin.TheApp.SetName("colors")
+	oswin.TheApp.SetAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-colors-test", "GoGi Colors Test", width, height, true)
 
@@ -95,6 +99,24 @@ func mainrun() {
 			fr.SetProp("max-height", -1)
 		}
 	}
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	// note: Command in shortcuts is automatically translated into Control for
+	// Linux, Windows or Meta for MacOS
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, false)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

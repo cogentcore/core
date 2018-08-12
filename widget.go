@@ -30,7 +30,7 @@ type WidgetBase struct {
 	Sty          Style        `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	DefStyle     *Style       `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayData      LayoutData   `json:"-" xml:"-" desc:"all the layout information for this item"`
-	WidgetSig    ki.Signal    `json:"-" xml:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+	WidgetSig    ki.Signal    `json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 	CtxtMenuFunc CtxtMenuFunc `view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 }
 

@@ -61,7 +61,7 @@ type Dialog struct {
 	Prompt    string      `desc:"a prompt string displayed below the title"`
 	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
 	State     DialogState `desc:"state of the dialog"`
-	DialogSig ki.Signal   `json:"-" xml:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
+	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
@@ -273,6 +273,8 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *
 		}
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
+		lab.SetProp("max-width", units.NewValue(80, units.Ex))
+		lab.SetProp("word-wrap", true)
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}

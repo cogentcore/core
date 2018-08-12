@@ -7,6 +7,9 @@ package oswin
 // Menu is a pointer to an OS-specific menu structure.
 type Menu uintptr
 
+// MenuItem is a pointer to an OS-specific menu item structure.
+type MenuItem uintptr
+
 // MainMenu supports the OS-specific main menu associated with a window.
 type MainMenu interface {
 	// Window returns the window that this menu is attached to.
@@ -34,8 +37,19 @@ type MainMenu interface {
 	// AddItem adds a menu item of given title / label, shortcut, and tag to
 	// given menu.  Callback function set by SetFunc will be called when menu
 	// item is selected.
-	AddItem(men Menu, title string, shortcut string, tag int)
+	AddItem(men Menu, title string, shortcut string, tag int, active bool) MenuItem
 
 	// AddSeparator adds a separator menu item.
 	AddSeparator(men Menu)
+
+	// ItemByTitle finds menu item by title on given menu -- does not iterate
+	// over sub-menus, so that needs to be done manually.
+	ItemByTitle(men Menu, title string) MenuItem
+
+	// ItemByTag finds menu item by tag on given menu -- does not iterate
+	// over sub-menus, so that needs to be done manually.
+	ItemByTag(men Menu, tag int) MenuItem
+
+	// SetItemActive sets the active status of given item.
+	SetItemActive(mitem MenuItem, active bool)
 }

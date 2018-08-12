@@ -47,6 +47,7 @@ type Preferences struct {
 	IconColor       Color                  `desc:"color for icons or other solidly-colored, small elements"`
 	SelectColor     Color                  `desc:"color for selected elements"`
 	HighlightColor  Color                  `desc:"color for highlight background"`
+	LinkColor       Color                  `desc:"color for links in text etc"`
 	StdKeyMapName   string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
 	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
@@ -71,6 +72,7 @@ func (p *Preferences) Defaults() {
 	p.IconColor.SetString("highlight-30", p.ControlColor)
 	p.SelectColor.SetString("#CFC", nil)
 	p.HighlightColor.SetString("#FFA", nil)
+	p.LinkColor.SetString("#00F", nil)
 	p.FavPaths.SetToDefaults()
 }
 
@@ -209,6 +211,8 @@ func (p *Preferences) PrefColor(clrName string) *Color {
 		return &p.SelectColor
 	case "highlightcolor":
 		return &p.HighlightColor
+	case "linkcolor":
+		return &p.LinkColor
 	}
 	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
 	return nil

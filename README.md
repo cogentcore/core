@@ -96,19 +96,18 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-* clip.Board: windows & mac converted over to mimedata multipart encoding for more complex cases (e.g., treeview) -- update linux to use the same so everything is consistent, and much simpler!
-  
 * enable dnd to use OS DND when moves outside window
 
 * windows:
 	+ support SetPos window method (and probably need to track movement)
 
 * linux:
+	+ multipart clip.Board
 	+ moving window isn't updating pos of new windows (now fixed? test)
 	+ do similar font name updating as done on Windows now
 
 * mac:
-	+ native menu
+	+ scroll direction is not correct??
 
 * lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
@@ -126,7 +125,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + right now, shift while dragging is causing extra render in overlay that persists..
 
 * add margin for para in text
-* Text HTML renders links, uses HandPointing for links, delivers link clicked signal
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 

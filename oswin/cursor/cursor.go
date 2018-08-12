@@ -92,10 +92,17 @@ type Cursor interface {
 	// Push pushes a new active cursor.
 	Push(sh Shapes)
 
+	// PushIfNot pushes a new active cursor if it is not already set to given shape.
+	PushIfNot(sh Shapes) bool
+
 	// Pop pops cursor off the stack and restores the previous cursor -- an
 	// error message is emitted if no more cursors on the stack (programming
 	// error).
 	Pop()
+
+	// PopIf pops cursor off the stack and restores the previous cursor if the
+	// current cursor is the given shape.
+	PopIf(sh Shapes) bool
 
 	// Set sets the active cursor, without reference to the cursor stack --
 	// generally not recommended for direct use -- prefer Push / Pop.

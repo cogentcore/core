@@ -129,6 +129,11 @@ func (g *NodeBase) IsInactive() bool {
 	return bitflag.Has(g.Flag, int(Inactive))
 }
 
+// IsActive tests if this node is NOT flagged as Inactive.
+func (g *NodeBase) IsActive() bool {
+	return !g.IsInactive()
+}
+
 // SetInactive sets the node as inactive
 func (g *NodeBase) SetInactive() {
 	bitflag.Set(&g.Flag, int(Inactive))

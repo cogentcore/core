@@ -314,7 +314,7 @@ void menuSetAsMain(ScreenGLView* view);
         _menuDel = [[MenuDelegate alloc] init];
         [_menuDel setView: self];
         [_menuDel setMainMenu: _mainMenu];
-        [_mainMenu setAutoenablesItems:YES];
+        [_mainMenu setAutoenablesItems:NO];
     }
     return _mainMenu;
 }
@@ -614,12 +614,6 @@ void menuSetAsMain(ScreenGLView* view) {
     [NSApp setMainMenu: men];
 }
 
-NSMenuItem* menuFindMenu(NSMenu* men, char* mnm) {
-    NSString* title = [[NSString alloc] initWithUTF8String:mnm];
-    NSMenuItem* mi = [men itemWithTitle:title];
-    return mi;
-}
-
 uintptr_t doGetMainMenu(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* men = [view mainMenu];
@@ -638,46 +632,69 @@ uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
     NSMenuItem* smen = [men addItemWithTitle:title action:nil keyEquivalent: @""];
     NSMenu* ssmen = [[NSMenu alloc] initWithTitle:title];
     smen.submenu = ssmen;
+    [ssmen setAutoenablesItems:NO];
     return (uintptr_t)ssmen;
 }
 
-uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag) {
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* subm  = (NSMenu*)submID;
     MenuDelegate* md = [view menuDel];
     NSString* title = [[NSString alloc] initWithUTF8String:itmnm];
     NSString* scut = [[NSString alloc] initWithUTF8String:sc];
-    
+
+    // todo: always seems to assume command
     NSMenuItem* mi = [subm addItemWithTitle:title action:@selector(itemFired:) keyEquivalent: scut];
     mi.target = md;
     mi.tag = tag;
+    mi.enabled = active;
     if (scCommand) {
         if (scShift) {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagCommand;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagShift | NSEventModifierFlagCommand;
         } else {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagCommand;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagCommand;
         }
     } else if (scAlt) {
         if (scShift) {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagOption;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagShift | NSEventModifierFlagOption;
         } else {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagOption;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagOption;
         }
     } else if (scControl) {
         if (scShift) {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagControl;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagShift | NSEventModifierFlagControl;
         } else {
-            mi.keyEquivalentModifierMask= NSEventModifierFlagControl;
+            mi.keyEquivalentModifierMask = NSEventModifierFlagControl;
         }
     }
     return (uintptr_t)mi;
 }
 
-void doAddSeparator(uintptr_t submID) {
-    NSMenu* subm  = (NSMenu*)submID;
+void doAddSeparator(uintptr_t menuID) {
+    NSMenu* menu  = (NSMenu*)menuID;
     NSMenuItem* sep = [NSMenuItem separatorItem];
-    [subm addItem: sep];
+    [menu addItem: sep];
 }
+
+uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm) {
+    NSMenu* men  = (NSMenu*)menuID;
+    NSString* title = [[NSString alloc] initWithUTF8String:mnm];
+    NSMenuItem* mi = [men itemWithTitle:title];
+    return (uintptr_t)mi;
+}
+
+uintptr_t doMenuItemByTag(uintptr_t menuID, int tag) {
+    NSMenu* men  = (NSMenu*)menuID;
+    NSMenuItem* mi = [men itemWithTag:tag];
+    return (uintptr_t)mi;
+}
+
+void doSetMenuItemActive(uintptr_t mitmID, bool active) {
+    NSMenuItem* mi  = (NSMenuItem*)mitmID;
+    mi.enabled = active;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////
 //   Clipboard / Pasteboard / drag-n-drop

@@ -36,11 +36,13 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
+	oswin.TheApp.SetName("widgets")
+	oswin.TheApp.SetAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
+<p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
+
 	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
 
 	icnm := "widget-wedge-down"
-
-	oswin.TheApp.SetName("widgets")
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -79,9 +81,10 @@ func mainrun() {
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = `This is a <b>demonstration</b> of the
-<span style="color:red">various</span> <i>GoGi</i> Widgets<br>
+<span style="color:red">various</span> <a href="https://github.com/goki/gi">GoGi</a> <i>Widgets</i><br>
 <large>Shortcuts: <kbd>` + prsc + `</kbd> = Preferences,
-<kbd>` + giedsc + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
+<kbd>` + giedsc + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
@@ -295,7 +298,7 @@ func mainrun() {
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win, true)
+	emen.Menu.AddCopyCutPaste(win, false)
 
 	win.MainMenuUpdated()
 

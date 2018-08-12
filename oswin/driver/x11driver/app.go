@@ -16,6 +16,7 @@ import (
 	"image/draw"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sync"
@@ -83,6 +84,7 @@ type appImpl struct {
 	completionKeys  []uint16
 	selNotifyChan   chan xproto.SelectionNotifyEvent
 	name            string
+	about           string
 }
 
 func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
@@ -816,4 +818,17 @@ func (app *appImpl) ClipBoard() clip.Board {
 
 func (app *appImpl) Cursor() cursor.Cursor {
 	return &theCursor
+}
+
+func (app *appImpl) About() string {
+	return app.about
+}
+
+func (app *appImpl) SetAbout(about string) {
+	app.about = about
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("xdg-open", url)
+	cmd.Run()
 }

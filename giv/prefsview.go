@@ -30,21 +30,10 @@ func PrefsEditor(p *gi.Preferences) {
 
 	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
 	tbar.Lay = gi.LayoutHoriz
-	tbar.SetProp("horizontal-align", "center")
 	tbar.SetStretchMaxWidth()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
-	trow.SetStretchMaxWidth()
-
 	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
-
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = "GoGi Preferences"
-	title.SetStretchMaxWidth()
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
+	spc.SetFixedHeight(units.NewValue(1.0, units.Em))
 
 	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStruct(p, nil)

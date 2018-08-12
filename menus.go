@@ -127,9 +127,10 @@ func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
 
 // AddAppMenu adds a standard menu for application-level control
 func (m *Menu) AddAppMenu(win *Window) {
-	m.AddMenuText("About "+oswin.TheApp.Name(), "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	aboutitle := "About " + oswin.TheApp.Name()
+	m.AddMenuText(aboutitle, "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
-		ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
+		PromptDialog(ww.Viewport, aboutitle, oswin.TheApp.About(), true, false, nil, nil, nil)
 	})
 	prsc := ActiveKeyMap.ChordForFun(KeyFunPrefs)
 	m.AddMenuText("Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {

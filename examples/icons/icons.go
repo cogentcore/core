@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
 
@@ -22,6 +23,9 @@ func mainrun() {
 	width := 1024
 	height := 768
 	nColumns := 5
+
+	oswin.TheApp.SetName("icons")
+	oswin.TheApp.SetAbout(`This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-icons-demo", "GoGi Icons", width, height, true)
 
@@ -86,6 +90,21 @@ func mainrun() {
 		ico.SetProp("stroke", "black")
 		// ico.SetProp("horizontal-align", gi.AlignLeft)
 	}
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

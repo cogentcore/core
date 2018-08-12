@@ -40,19 +40,19 @@ type App interface {
 	NScreens() int
 
 	// Screen returns screen for given screen number, or nil if not a
-	// valid screen number
+	// valid screen number.
 	Screen(scrN int) *Screen
 
-	// NWindows returns the number of windows open for this app
+	// NWindows returns the number of windows open for this app.
 	NWindows() int
 
 	// Window returns given window in list of windows opened under this screen
 	// -- list is not in any guaranteed order, but typically in order of
-	// creation (see also WindowByName) -- returns nil for invalid index
+	// creation (see also WindowByName) -- returns nil for invalid index.
 	Window(win int) Window
 
 	// WindowByName returns given window in list of windows opened under this
-	// screen, by name -- nil if not found
+	// screen, by name -- nil if not found.
 	WindowByName(name string) Window
 
 	// NewWindow returns a new Window for this screen. A nil opts is valid and
@@ -61,20 +61,20 @@ type App interface {
 
 	// NewImage returns a new Image for this screen.  Images can be drawn upon
 	// directly using image and other packages, and have an accessable []byte
-	// slice holding the image data
+	// slice holding the image data.
 	NewImage(size image.Point) (Image, error)
 
 	// NewTexture returns a new Texture for the given window.  Textures are opaque
 	// and could be non-local, but very fast for rendering to windows --
 	// typically create a texture of each window and render to that texture,
 	// then Draw that texture to the window when it is time to update (call
-	// Publish on window after drawing)
+	// Publish on window after drawing).
 	NewTexture(win Window, size image.Point) (Texture, error)
 
-	// ClipBoard returns the clip.Board handler for the system
+	// ClipBoard returns the clip.Board handler for the system.
 	ClipBoard() clip.Board
 
-	// Cursor returns the cursor.Cursor handler for the system
+	// Cursor returns the cursor.Cursor handler for the system.
 	Cursor() cursor.Cursor
 
 	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
@@ -82,15 +82,27 @@ type App interface {
 	PrefsDir() string
 
 	// GoGiPrefsDir returns the GoGi preferences directory: PrefsDir + GoGi --
-	// ensures that the directory exists first
+	// ensures that the directory exists first.
 	GoGiPrefsDir() string
 
 	// AppPrefsDir returns the application-specific preferences directory:
-	// PrefsDir + App.Name --ensures that the directory exists first
+	// PrefsDir + App.Name --ensures that the directory exists first.
 	AppPrefsDir() string
 
-	// FontPaths returns the default system font paths
+	// FontPaths returns the default system font paths.
 	FontPaths() []string
+
+	// About is an informative message about the app.  Can use HTML
+	// formatting, including links.
+	About() string
+
+	// SetAbout sets the about info.
+	SetAbout(about string)
+
+	// OpenURL opens the given URL in the user's default browser.  On Linux
+	// this requires that xdg-utils package has been installed -- uses
+	// xdg-open command.
+	OpenURL(url string)
 }
 
 // Platforms are all the supported platforms for OSWin

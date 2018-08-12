@@ -11,6 +11,7 @@ import (
 	"image"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sync"
@@ -36,6 +37,7 @@ type appImpl struct {
 	winlist []*windowImpl
 	screens []*oswin.Screen
 	name    string
+	about   string
 }
 
 func (*appImpl) NewImage(size image.Point) (oswin.Image, error) {
@@ -265,4 +267,17 @@ func (app *appImpl) ClipBoard() clip.Board {
 
 func (app *appImpl) Cursor() cursor.Cursor {
 	return &theCursor
+}
+
+func (app *appImpl) About() string {
+	return app.about
+}
+
+func (app *appImpl) SetAbout(about string) {
+	app.about = about
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("explorer", url)
+	cmd.Run()
 }

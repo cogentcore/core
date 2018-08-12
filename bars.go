@@ -63,8 +63,7 @@ func (mb *MenuBar) Render2D() {
 
 // ConfigMenus configures Action items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
-// etc).  Access the resulting menus as .KnownChildByName("name").(*Action),
-// and
+// etc).  Access the resulting menus as .KnownChildByName("name").(*Action).
 func (mb *MenuBar) ConfigMenus(menus []string) {
 	sz := len(menus)
 	tnl := make(kit.TypeAndNameList, sz+1)
@@ -84,6 +83,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	mb.UpdateEnd(updt)
 }
 
+// MainMenuFunc is the callback function for OS-generated menu actions.
 func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	win, ok := owin.Parent().(*Window)
 	if !ok {
@@ -104,12 +104,16 @@ func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	ma.Trigger()
 }
 
-// SetMainMenu
+// SetMainMenu sets this menubar as the main menu of given window -- called by Window.MainMenuUpdated.
 func (mb *MenuBar) SetMainMenu(win *Window) {
 	osmm := win.OSWin.MainMenu()
+	if osmm == nil { // no OS main menu
+		return
+	}
 	osmm.SetFunc(MainMenuFunc)
 	mm := osmm.Menu()
 	osmm.Reset(mm)
+	mb.OSMainMenus = make(map[string]*Action, 100)
 	for _, m := range mb.Kids {
 		if ma, ok := m.(*Action); ok {
 			subm := osmm.AddSubMenu(mm, ma.Text)
@@ -118,22 +122,41 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 	}
 }
 
+// SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
 func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
-	if mb.OSMainMenus == nil {
-		mb.OSMainMenus = make(map[string]*Action, 100)
-	}
 	for i, m := range am.Menu {
 		if ma, ok := m.(*Action); ok {
 			if len(ma.Menu) > 0 {
 				ssubm := osmm.AddSubMenu(subm, ma.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ma)
 			} else {
-				osmm.AddItem(subm, ma.Text, ma.Shortcut, i)
+				mid := osmm.AddItem(subm, ma.Text, ma.Shortcut, i, ma.IsActive())
 				mb.OSMainMenus[ma.Text] = ma
+				ma.SetProp("__OSMainMenuItemID", mid)
 			}
 		} else if _, ok := m.(*Separator); ok {
 			osmm.AddSeparator(subm)
 		}
+	}
+}
+
+// MainMenuUpdateActives updates the active state of all menu items, based on
+// active state of corresponding Actions -- can be called by method of same
+// name on Window.
+func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
+	osmm := win.OSWin.MainMenu()
+	if osmm == nil { // no OS main menu
+		return
+	}
+	if mb.OSMainMenus == nil {
+		return
+	}
+	for _, ma := range mb.OSMainMenus {
+		mid, ok := ma.Prop("__OSMainMenuItemID")
+		if !ok {
+			continue
+		}
+		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsActive())
 	}
 }
 

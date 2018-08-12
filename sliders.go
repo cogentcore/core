@@ -47,7 +47,7 @@ type SliderBase struct {
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	SliderSig   ki.Signal            `json:"-" xml:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	SliderSig   ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
 	OrigWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }

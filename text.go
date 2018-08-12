@@ -525,6 +525,39 @@ func (sr *SpanRender) LastFont() (face font.Face, color color.Color) {
 // writing-mode styles all interacting: https://www.w3.org/TR/SVG11/text.html#TextLayout
 
 //////////////////////////////////////////////////////////////////////////////////
+//  TextLink
+
+// TextLink represents a hyperlink within rendered text
+type TextLink struct {
+	Label     string `desc:"text label for the link"`
+	URL       string `desc:"full URL for the link"`
+	StartSpan int    `desc:"span index where link starts"`
+	StartIdx  int    `desc:"index in StartSpan where link starts"`
+	EndSpan   int    `desc:"span index where link ends (can be same as EndSpan)"`
+	EndIdx    int    `desc:"index in EndSpan where link ends (index of last rune in label)"`
+}
+
+// Bounds returns the bounds of the link
+func (tl *TextLink) Bounds(tr *TextRender, pos Vec2D) image.Rectangle {
+	stsp := &tr.Spans[tl.StartSpan]
+	tpos := pos.Add(stsp.RelPos)
+	sr := &(stsp.Render[tl.StartIdx])
+	sp := tpos.Add(sr.RelPos)
+	sp.Y -= sr.Size.Y
+	ep := sp
+	if tl.EndSpan == tl.StartSpan {
+		er := &(stsp.Render[tl.EndIdx])
+		ep = tpos.Add(er.RelPos)
+		ep.X += er.Size.X
+	} else {
+		er := &(stsp.Render[len(stsp.Render)-1])
+		ep = tpos.Add(er.RelPos)
+		ep.X += er.Size.X
+	}
+	return image.Rectangle{Min: sp.ToPointFloor(), Max: ep.ToPointCeil()}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 //  TextRender
 
 // TextRender contains one or more SpanRender elements, typically with each
@@ -533,6 +566,7 @@ type TextRender struct {
 	Spans []SpanRender
 	Size  Vec2D          `desc:"last size of overall rendered text"`
 	Dir   TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Links []TextLink     `desc:"hyperlinks within rendered text"`
 }
 
 // InsertSpan inserts a new span at given index
@@ -838,6 +872,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
+	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
@@ -858,6 +893,7 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
+	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetRunes(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
@@ -881,6 +917,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 		return
 	}
 	tr.Spans = make([]SpanRender, 1)
+	tr.Links = nil
 	curSp := &(tr.Spans[0])
 	initsz := kit.MinInt(sz, 1020)
 	curSp.Init(initsz)
@@ -898,6 +935,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
+	curLinkIdx := -1 // if currently processing an <a> link element
 
 	fstack := make([]*FontStyle, 1, 10)
 	fstack[0] = font
@@ -915,6 +953,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			curf := fstack[len(fstack)-1]
 			fs := *curf
 			nm := strings.ToLower(se.Name.Local)
+			curLinkIdx = -1
 			// https://www.w3schools.com/cssref/css_default_values.asp
 			switch nm {
 			case "b", "strong":
@@ -927,6 +966,16 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				fallthrough
 			case "u":
 				fs.SetDeco(DecoUnderline)
+			case "a":
+				fs.Color.SetColor(Prefs.LinkColor)
+				fs.SetDeco(DecoUnderline)
+				for _, attr := range se.Attr {
+					if attr.Name.Local == "href" {
+						curLinkIdx = len(tr.Links)
+						tl := TextLink{URL: attr.Value, StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
+						tr.Links = append(tr.Links, tl)
+					}
+				}
 			case "s", "del", "strike":
 				fs.SetDeco(DecoLineThrough)
 			case "sup":
@@ -963,18 +1012,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				fs.Family = "monospace"
 				fs.LoadFont(ctxt, "")
 			case "span":
-				if len(se.Attr) > 0 {
-					sprop := make(ki.Props, len(se.Attr))
-					for _, attr := range se.Attr {
-						if attr.Name.Local == "style" {
-							SetStylePropsXML(attr.Value, &sprop)
-						} else {
-							sprop[attr.Name.Local] = attr.Value
-						}
-					}
-					fs.SetStyleProps(nil, sprop)
-					fs.LoadFont(ctxt, "")
-				}
+				// just uses props
 			case "q":
 				curf := fstack[len(fstack)-1]
 				atStart := len(curSp.Text) == 0
@@ -995,6 +1033,18 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			default:
 				log.Printf("gi.TextRender SetHTML tag not recognized: %v\n", nm)
 			}
+			if len(se.Attr) > 0 {
+				sprop := make(ki.Props, len(se.Attr))
+				for _, attr := range se.Attr {
+					if attr.Name.Local == "style" {
+						SetStylePropsXML(attr.Value, &sprop)
+					} else {
+						sprop[attr.Name.Local] = attr.Value
+					}
+				}
+				fs.SetStyleProps(nil, sprop)
+				fs.LoadFont(ctxt, "")
+			}
 			if cssAgg != nil {
 				fs.StyleCSS(nm, cssAgg, ctxt)
 			}
@@ -1011,6 +1061,13 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			case "q":
 				curf := fstack[len(fstack)-1]
 				curSp.AppendRune('”', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+			case "a":
+				if curLinkIdx >= 0 {
+					tl := &tr.Links[curLinkIdx]
+					tl.EndSpan = len(tr.Spans) - 1
+					tl.EndIdx = len(curSp.Text) - 1
+					curLinkIdx = -1
+				}
 			}
 			if len(fstack) > 1 {
 				fstack = fstack[:len(fstack)-1]
@@ -1023,6 +1080,10 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
 			}
 			nextIsParaStart = false
+			if curLinkIdx >= 0 {
+				tl := &tr.Links[curLinkIdx]
+				tl.Label = string(se)
+			}
 		}
 	}
 }
@@ -1224,6 +1285,28 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					sr = &(tr.Spans[si]) // keep going with nsr
 					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 					ssz = sr.SizeHV()
+
+					// fixup links
+					for li := range tr.Links {
+						tl := &tr.Links[li]
+						if tl.StartSpan == si-1 {
+							if tl.StartIdx >= wp {
+								tl.StartIdx -= wp
+								tl.StartSpan++
+							}
+						} else if tl.StartSpan > si-1 {
+							tl.StartSpan++
+						}
+						if tl.EndSpan == si-1 {
+							if tl.EndIdx >= wp {
+								tl.EndIdx -= wp
+								tl.EndSpan++
+							}
+						} else if tl.EndSpan > si-1 {
+							tl.EndSpan++
+						}
+					}
+
 					if ssz.X <= size.X {
 						if ssz.X > maxw {
 							maxw = ssz.X
@@ -1245,6 +1328,19 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		si++
 	}
 	// have maxw, can do alignment cases..
+
+	// make sure links are still in range
+	for li := range tr.Links {
+		tl := &tr.Links[li]
+		stsp := tr.Spans[tl.StartSpan]
+		if tl.StartIdx >= len(stsp.Text) {
+			tl.StartIdx = len(stsp.Text) - 1
+		}
+		edsp := tr.Spans[tl.EndSpan]
+		if tl.EndIdx >= len(edsp.Text) {
+			tl.EndIdx = len(edsp.Text) - 1
+		}
+	}
 
 	if maxw > size.X {
 		size.X = maxw

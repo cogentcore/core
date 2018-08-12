@@ -798,25 +798,3 @@ func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun Walk
 		}
 	}
 }
-
-// todo:
-// * need to be able to process entire chunks at a time: box-shadow: val val val
-
-// manual method for getting a units value directly
-func StyleUnitsValue(tag string, uv *units.Value, props ki.Props) bool {
-	val, got := props[tag]
-	if !got {
-		return false
-	}
-	switch v := val.(type) {
-	case string:
-		uv.SetString(v)
-	case float64:
-		uv.Set(float32(v), units.Px) // assume px
-	case float32:
-		uv.Set(v, units.Px) // assume px
-	case int:
-		uv.Set(float32(v), units.Px) // assume px
-	}
-	return true
-}

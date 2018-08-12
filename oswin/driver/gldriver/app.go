@@ -48,6 +48,7 @@ type appImpl struct {
 	winlist []*windowImpl
 	screens []*oswin.Screen
 	name    string
+	about   string
 }
 
 func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
@@ -204,4 +205,12 @@ func (app *appImpl) Name() string {
 
 func (app *appImpl) SetName(name string) {
 	app.name = name
+}
+
+func (app *appImpl) About() string {
+	return app.about
+}
+
+func (app *appImpl) SetAbout(about string) {
+	app.about = about
 }

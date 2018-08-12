@@ -36,8 +36,11 @@ void getScreens();
 uintptr_t doGetMainMenu(uintptr_t viewID);
 void doMenuReset(uintptr_t menuID);
 uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);
-uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag);
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag, bool active);
 void doAddSeparator(uintptr_t menuID);
+uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm);
+uintptr_t doMenuItemByTag(uintptr_t menuID, int tag);
+void doSetMenuItemActive(uintptr_t mitmID, bool active);
 void clipClear();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
@@ -57,6 +60,7 @@ import (
 	"image"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -428,7 +432,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 				Action:    mouse.Scroll,
 				Modifiers: mods,
 			},
-			Delta: image.Point{int(dx), int(dy)},
+			Delta: image.Point{int(dx), int(-dy)},
 		}
 	default:
 		act := cocoaMouseAct(ty)
@@ -862,6 +866,11 @@ func (app *appImpl) Cursor() cursor.Cursor {
 	return &theCursor
 }
 
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("open", url)
+	cmd.Run()
+}
+
 /////////////////////////////////////////////////////////////////
 // MainMenu
 
@@ -914,7 +923,7 @@ func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
 	return oswin.Menu(subid)
 }
 
-func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int) {
+func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
@@ -932,11 +941,28 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
-	C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag))
+	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
 	C.doAddSeparator(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
+	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
+	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
 }
 
 //export menuFired
@@ -1077,4 +1103,20 @@ func (c *cursorImpl) Hide() {
 func (c *cursorImpl) Show() {
 	c.Vis = true
 	C.showCursor()
+}
+
+func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
+	if c.Cur == sh {
+		return false
+	}
+	c.Push(sh)
+	return true
+}
+
+func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
+	if c.Cur == sh {
+		c.Pop()
+		return true
+	}
+	return false
 }

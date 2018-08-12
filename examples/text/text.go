@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 )
 
@@ -19,6 +20,9 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
+
+	oswin.TheApp.SetName("text")
+	oswin.TheApp.SetAbout(`This is a demo of the text rendering in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-text-test", "GoGi Text Test", width, height, true) // true = pixel sizes
 
@@ -69,8 +73,23 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 <p>One major question is the extent to which word wrapping can be made sensitive to the overall size of the containing element -- this is easy when setting a direct fixed width, but word wrapping should also occur as the user resizes the window.</p>
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `
-
 	mfr.AddNewChild(gi.KiT_Stretch, "str")
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
+
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()

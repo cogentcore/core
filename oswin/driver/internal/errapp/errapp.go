@@ -45,6 +45,9 @@ func (s stub) PrefsDir() string          { return "" }
 func (s stub) GoGiPrefsDir() string      { return "" }
 func (s stub) AppPrefsDir() string       { return "" }
 func (s stub) FontPaths() []string       { return nil }
+func (s stub) About() string             { return "" }
+func (s stub) SetAbout(about string)     {}
+func (s stub) OpenURL(url string)        {}
 
 // check for interface implementation
 var _ oswin.App = &stub{}
