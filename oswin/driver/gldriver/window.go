@@ -69,6 +69,9 @@ type windowImpl struct {
 	// need to hold both glctxMu and sizeMu, the lock ordering is to lock
 	// glctxMu first (and unlock it last).
 	sizeMu sync.Mutex
+
+	// mainMenu is the main menu associated with window, if applicable.
+	mainMenu interface{}
 }
 
 // NextEvent implements the oswin.EventDeque interface.

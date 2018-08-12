@@ -17,7 +17,7 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Window is a double-buffered OS-specific hardware window
+// Window is a double-buffered OS-specific hardware window.
 type Window interface {
 	// Name returns the name of the window -- name is used strictly for
 	// internal tracking and finding of windows -- see Title for the displayed
@@ -82,6 +82,10 @@ type Window interface {
 	// Release closes the window. The behavior of the Window after Release,
 	// whether calling its methods or passing it as an argument, is undefined.
 	Release()
+
+	// MainMenu returns the OS-level main menu for this window -- this is
+	// currently for MacOS only -- noop for others.
+	MainMenu() MainMenu
 
 	EventDeque
 

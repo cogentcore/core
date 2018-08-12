@@ -55,22 +55,43 @@ uint64 threadID() {
     return id;
 }
 
-///////////////////////////////////////////////////////////////////////
-//   MainMenu
-
-// qtbase/src/plugins/platforms/cocoa/qcocoamenu.mm
-
-@interface MenuDelegate : NSObject <NSMenuDelegate> {
-}
-
-@end
+@class MenuDelegate;
 
 @interface ScreenGLView : NSOpenGLView<NSWindowDelegate>
 {
+    MenuDelegate* _menuDel;
+    NSMenu* _mainMenu;
 }
 @end
 
+@interface MenuDelegate : NSObject <NSMenuDelegate> {
+    ScreenGLView* _view;
+    NSMenu* _mainMenu;
+}
+
+@end
+
 @implementation MenuDelegate
+
+- (void) setView:(ScreenGLView*) vw
+{
+    _view = vw;
+}
+
+- (ScreenGLView*) view
+{
+    return _view;
+}
+
+- (void) setMainMenu:(NSMenu*) mn
+{
+    _mainMenu = mn;
+}
+
+- (NSMenu*) mainMenu
+{
+    return _mainMenu;
+}
 
 - (void) itemFired:(NSMenuItem*) item
 {
@@ -78,7 +99,10 @@ uint64 threadID() {
     const char* utf8_title = [title UTF8String];
     long tag = (long)[item tag];
 
-    printf("got menu item: %s tag: %ld\n", utf8_title, tag);
+    ScreenGLView* vw = [self view];
+    
+    int tilen = (int)strlen(utf8_title);
+    menuFired((GoUintptr)vw, (char*)utf8_title, tilen, tag);
 }
 
 // Cocoa will query the menu item's target for the worksWhenModal selector.
@@ -91,33 +115,7 @@ uint64 threadID() {
 
 @end
 
-MenuDelegate* menu_delegate = NULL;
-
-void menuInitDelegate() {
-    if (menu_delegate == NULL) {
-        menu_delegate = [[MenuDelegate alloc] init];
-    }
-}
-
-void menuAddItem(ScreenGLView* view) {
-    menuInitDelegate();
-    NSMenu* mmen = [NSApp mainMenu];
-
-    [mmen setAutoenablesItems:YES];
-
-    NSMenuItem* edit = [mmen addItemWithTitle:@"Edit" action:nil keyEquivalent: @""];
-    edit.target = menu_delegate;
-    edit.action = @selector(itemFired:);
-
-    NSMenu* editm = [[NSMenu alloc] initWithTitle:@"Edit"];
-    edit.submenu = editm;
-    
-    NSMenuItem* mi = [editm addItemWithTitle:@"NewAction" action:@selector(itemFired:) keyEquivalent: @""];
-    mi.target = menu_delegate;
-    mi.tag = 42;
-
-    printf("attempted to make menu\n");
-}
+void menuSetAsMain(ScreenGLView* view);
 
 ////////////////////////////////////////////////////////////
 //  ScreenGLView
@@ -179,10 +177,6 @@ void menuAddItem(ScreenGLView* view) {
     // printf("res: pixratio: %g  frame origin: %g, %g, l,t: %d, %d\n", pixratio, p.origin.x, p.origin.y, l, t);
 
     setGeom((GoUintptr)self, scrno, dpi, w, h, l, t);
-
-    if (menu_delegate == NULL) {
-        menuAddItem(self);
-    }
 }
 
 - (void)reshape {
@@ -282,10 +276,12 @@ void menuAddItem(ScreenGLView* view) {
 // TODO: catch windowDidMiniaturize?
 
 - (void)windowDidExpose:(NSNotification *)notification {
+    menuSetAsMain(self);
     lifecycleVisible((GoUintptr)self, true);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
+    menuSetAsMain(self);
     lifecycleFocused((GoUintptr)self, true);
 }
 
@@ -306,7 +302,35 @@ void menuAddItem(ScreenGLView* view) {
     windowClosing((GoUintptr)self);
     [self.window.nextResponder release];
     self.window.nextResponder = NULL;
+    [self.mainMenu release];
+    self.mainMenu = NULL;
+    [self.menuDel release];
+    self.menuDel = NULL;
 }
+
+- (NSMenu*) mainMenu {
+    if (_mainMenu == NULL) {
+        _mainMenu = [[NSMenu alloc] init];
+        _menuDel = [[MenuDelegate alloc] init];
+        [_menuDel setView: self];
+        [_menuDel setMainMenu: _mainMenu];
+        [_mainMenu setAutoenablesItems:YES];
+    }
+    return _mainMenu;
+}
+
+- (MenuDelegate*) menuDel {
+    return _menuDel;
+}
+
+- (void)setMainMenu: (NSMenu*) men {
+    _mainMenu = men;
+}
+
+ - (void) setMenuDel: (MenuDelegate*) md {
+    _menuDel = md;
+}
+
 @end
 
 @interface AppDelegate : NSObject<NSApplicationDelegate>
@@ -346,22 +370,22 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
     __block ScreenGLView* view = NULL;
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-            id menuBar = [NSMenu new];
-            id menuItem = [NSMenuItem new];
-            [menuBar addItem:menuItem];
-            [NSApp setMainMenu:menuBar];
-
-            id menu = [NSMenu new];
             NSString* name = [[NSString alloc] initWithUTF8String:title];
+            // id menuBar = [NSMenu new];
+            // id menuItem = [NSMenuItem new];
+            // [menuBar addItem:menuItem];
+            // [NSApp setMainMenu:menuBar];
 
-            id hideMenuItem = [[NSMenuItem alloc] initWithTitle:@"Hide"
-                                                         action:@selector(hide:) keyEquivalent:@"h"];
-            [menu addItem:hideMenuItem];
+            // id menu = [NSMenu new];
 
-            id quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit"
-                                                         action:@selector(terminate:) keyEquivalent:@"q"];
-            [menu addItem:quitMenuItem];
-            [menuItem setSubmenu:menu];
+            // id hideMenuItem = [[NSMenuItem alloc] initWithTitle:@"Hide"
+            //                                              action:@selector(hide:) keyEquivalent:@"h"];
+            // [menu addItem:hideMenuItem];
+
+            // id quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit"
+            //                                              action:@selector(terminate:) keyEquivalent:@"q"];
+            // [menu addItem:quitMenuItem];
+            // [menuItem setSubmenu:menu];
 
             NSRect rect = NSMakeRect(0, 0, w, h);
 		
@@ -577,6 +601,82 @@ void getScreens() {
             [deviceInfo release];
         }
     }
+}
+
+///////////////////////////////////////////////////////////////////////
+//   MainMenu
+
+// qtbase/src/plugins/platforms/cocoa/qcocoamenu.mm
+
+// called during expose or focus
+void menuSetAsMain(ScreenGLView* view) {
+    NSMenu* men = [view mainMenu];
+    [NSApp setMainMenu: men];
+}
+
+NSMenuItem* menuFindMenu(NSMenu* men, char* mnm) {
+    NSString* title = [[NSString alloc] initWithUTF8String:mnm];
+    NSMenuItem* mi = [men itemWithTitle:title];
+    return mi;
+}
+
+uintptr_t doGetMainMenu(uintptr_t viewID) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    NSMenu* men = [view mainMenu];
+    return (uintptr_t)men;
+}
+
+void doMenuReset(uintptr_t menuID) {
+    NSMenu* men  = (NSMenu*)menuID;
+    [men removeAllItems];
+}
+
+uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
+    NSMenu* men  = (NSMenu*)menuID;
+    NSString* title = [[NSString alloc] initWithUTF8String:mnm];
+    
+    NSMenuItem* smen = [men addItemWithTitle:title action:nil keyEquivalent: @""];
+    NSMenu* ssmen = [[NSMenu alloc] initWithTitle:title];
+    smen.submenu = ssmen;
+    return (uintptr_t)ssmen;
+}
+
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    NSMenu* subm  = (NSMenu*)submID;
+    MenuDelegate* md = [view menuDel];
+    NSString* title = [[NSString alloc] initWithUTF8String:itmnm];
+    NSString* scut = [[NSString alloc] initWithUTF8String:sc];
+    
+    NSMenuItem* mi = [subm addItemWithTitle:title action:@selector(itemFired:) keyEquivalent: scut];
+    mi.target = md;
+    mi.tag = tag;
+    if (scCommand) {
+        if (scShift) {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagCommand;
+        } else {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagCommand;
+        }
+    } else if (scAlt) {
+        if (scShift) {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagOption;
+        } else {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagOption;
+        }
+    } else if (scControl) {
+        if (scShift) {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagShift | NSEventModifierFlagControl;
+        } else {
+            mi.keyEquivalentModifierMask= NSEventModifierFlagControl;
+        }
+    }
+    return (uintptr_t)mi;
+}
+
+void doAddSeparator(uintptr_t submID) {
+    NSMenu* subm  = (NSMenu*)submID;
+    NSMenuItem* sep = [NSMenuItem separatorItem];
+    [subm addItem: sep];
 }
 
 ///////////////////////////////////////////////////////////////////////

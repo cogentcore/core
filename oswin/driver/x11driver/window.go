@@ -283,3 +283,7 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	w.Pos = pos
 	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
 }
+
+func (w *windowImpl) MainMenu() oswin.MainMenu {
+	return nil
+}

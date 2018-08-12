@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -17,7 +18,8 @@ import (
 // background and has convenience methods for adding menus
 type MenuBar struct {
 	Layout
-	MainMenu bool `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
+	MainMenu    bool               `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
+	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
 }
 
 var KiT_MenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
@@ -80,6 +82,59 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 		ma.SetAsMenu()
 	}
 	mb.UpdateEnd(updt)
+}
+
+func MainMenuFunc(owin oswin.Window, title string, tag int) {
+	win, ok := owin.Parent().(*Window)
+	if !ok {
+		return
+	}
+	mb := win.MainMenu
+	if mb == nil {
+		return
+	}
+	if mb.OSMainMenus == nil {
+		return
+	}
+	ma, ok := mb.OSMainMenus[title]
+	if !ok {
+		return
+	}
+	// fmt.Printf("triggering OS main menu: %v\n", title)
+	ma.Trigger()
+}
+
+// SetMainMenu
+func (mb *MenuBar) SetMainMenu(win *Window) {
+	osmm := win.OSWin.MainMenu()
+	osmm.SetFunc(MainMenuFunc)
+	mm := osmm.Menu()
+	osmm.Reset(mm)
+	for _, m := range mb.Kids {
+		if ma, ok := m.(*Action); ok {
+			subm := osmm.AddSubMenu(mm, ma.Text)
+			mb.SetMainMenuSub(osmm, subm, ma)
+		}
+	}
+}
+
+func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
+	if mb.OSMainMenus == nil {
+		mb.OSMainMenus = make(map[string]*Action, 100)
+	}
+	for i, m := range am.Menu {
+		if ma, ok := m.(*Action); ok {
+			if len(ma.Menu) > 0 {
+				ssubm := osmm.AddSubMenu(subm, ma.Text)
+				mb.SetMainMenuSub(osmm, ssubm, ma)
+			} else {
+				osmm.AddItem(subm, ma.Text, ma.Shortcut, i)
+				mb.OSMainMenus[ma.Text] = ma
+			}
+		} else if _, ok := m.(*Separator); ok {
+			osmm.AddSeparator(subm)
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

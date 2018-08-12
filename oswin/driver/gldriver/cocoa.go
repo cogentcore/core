@@ -33,6 +33,11 @@ void doResizeWindow(uintptr_t id, int width, int height);
 void doMoveWindow(uintptr_t id, int left, int top);
 void doCloseWindow(uintptr_t id);
 void getScreens();
+uintptr_t doGetMainMenu(uintptr_t viewID);
+void doMenuReset(uintptr_t menuID);
+uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag);
+void doAddSeparator(uintptr_t menuID);
 void clipClear();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
@@ -55,6 +60,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -854,6 +860,94 @@ func (app *appImpl) ClipBoard() clip.Board {
 
 func (app *appImpl) Cursor() cursor.Cursor {
 	return &theCursor
+}
+
+/////////////////////////////////////////////////////////////////
+// MainMenu
+
+func (w *windowImpl) MainMenu() oswin.MainMenu {
+	if w.mainMenu == nil {
+		mm := &mainMenuImpl{win: w}
+		w.mainMenu = mm
+	}
+	return w.mainMenu.(*mainMenuImpl)
+}
+
+type mainMenuImpl struct {
+	win      *windowImpl
+	callback func(win oswin.Window, title string, tag int)
+}
+
+func (mm *mainMenuImpl) Window() oswin.Window {
+	return mm.win
+}
+
+func (mm *mainMenuImpl) SetWindow(win oswin.Window) {
+	mm.win = win.(*windowImpl)
+}
+
+func (mm *mainMenuImpl) SetFunc(fun func(win oswin.Window, title string, tag int)) {
+	mm.callback = fun
+}
+
+func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
+	if mm.callback == nil {
+		return
+	}
+	mm.callback(win, title, tag)
+}
+
+func (mm *mainMenuImpl) Menu() oswin.Menu {
+	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
+	return oswin.Menu(mmen)
+}
+
+func (mm *mainMenuImpl) Reset(men oswin.Menu) {
+	C.doMenuReset(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	subid := C.doAddSubMenu(C.uintptr_t(men), title)
+	return oswin.Menu(subid)
+}
+
+func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int) {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	sc := ""
+	r, mods, err := key.DecodeChord(shortcut)
+	if err == nil {
+		sc = strings.ToLower(string(r))
+	}
+
+	scShift := (mods&1<<uint32(key.Shift) != 0)
+	scCommand := (mods&1<<uint32(key.Meta) != 0)
+	scAlt := (mods&1<<uint32(key.Alt) != 0)
+	scControl := (mods&1<<uint32(key.Control) != 0)
+
+	scs := C.CString(sc)
+	defer C.free(unsafe.Pointer(scs))
+
+	C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag))
+}
+
+func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
+	C.doAddSeparator(C.uintptr_t(men))
+}
+
+//export menuFired
+func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
+	w := theApp.windows[id]
+	tit := C.GoStringN(title, tilen)
+	osmm := w.MainMenu()
+	if osmm == nil {
+		return
+	}
+	go osmm.Triggered(w, tit, int(tag))
 }
 
 /////////////////////////////////////////////////////////////////

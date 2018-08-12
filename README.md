@@ -116,8 +116,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * get rid of paint, lifecycle -- just have simpler window and app events
 
-* main menu on mac
-
 * drag should be stateful -- only drag current item -- logic is in there but
   not working properly
 

@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -98,9 +99,10 @@ func (m *Menu) SetShortcuts(win *Window) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Standard menu elements
 
-// AddCopy adds a Copy, Cut, Paste actions that just emit the corresponding
-// keyboard shortcut -- cutPasteActive determines whether Cut and Paste are
-// active, reflecting the modifiability of relevant element (i.e., IsActive)
+// AddCopyCutPaste adds a Copy, Cut, Paste actions that just emit the
+// corresponding keyboard shortcut -- cutPasteActive determines whether Cut
+// and Paste are active, reflecting the modifiability of relevant element
+// (i.e., IsActive)
 func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
@@ -121,6 +123,23 @@ func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
 		cut.SetInactive()
 		paste.SetInactive()
 	}
+}
+
+// AddAppMenu adds a standard menu for application-level control
+func (m *Menu) AddAppMenu(win *Window) {
+	m.AddMenuText("About "+oswin.TheApp.Name(), "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.Embed(KiT_Window).(*Window)
+		ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
+	})
+	prsc := ActiveKeyMap.ChordForFun(KeyFunPrefs)
+	m.AddMenuText("Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		TheViewIFace.PrefsEditor(&Prefs)
+	})
+	m.AddSeparator("sepq")
+	m.AddMenuText("Quit", "Command+Q", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.Embed(KiT_Window).(*Window)
+		ww.Quit()
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

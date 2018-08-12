@@ -105,7 +105,7 @@ var KiT_ScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, false, nil)
 
 // LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling
 // based on the given logical DPI scale factor (logScale), and also makes it a
-// multiple of 6 to make normal font sizes look best
+// multiple of 6 to make normal font sizes look best.
 func LogicalFmPhysicalDPI(logScale, pdpi float32) float32 {
 	idpi := int(math.Round(float64(pdpi * logScale)))
 	mdpi := idpi / 6

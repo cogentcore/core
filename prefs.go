@@ -156,20 +156,13 @@ func (p *Preferences) Update() {
 	p.Apply()
 
 	RebuildDefaultStyles = true
-	n := oswin.TheApp.NWindows()
-	for i := 0; i < n; i++ {
-		owin := oswin.TheApp.Window(i)
-		if win, ok := owin.Parent().(*Window); ok {
-			win.FullReRender()
-		}
+	for _, w := range AllWindows {
+		w.FullReRender()
 	}
 	RebuildDefaultStyles = false
 	// needs another pass through to get it right..
-	for i := 0; i < n; i++ {
-		owin := oswin.TheApp.Window(i)
-		if win, ok := owin.Parent().(*Window); ok {
-			win.FullReRender()
-		}
+	for _, w := range AllWindows {
+		w.FullReRender()
 	}
 }
 
@@ -188,7 +181,10 @@ func (p *Preferences) ScreenInfo() string {
 	scinfo := ""
 	for i := 0; i < ns; i++ {
 		sc := oswin.TheApp.Screen(i)
-		scinfo += fmt.Sprintf("Screen number: %v name: %v\n<br>    geom: %v, depth: %v, logical DPI: %v, physical DPI: %v, physical size: %v\n<br>    device pixel ratio: %v, refresh rate: %v\n<br>    orientation: %v, native orientation: %v, primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.Depth, sc.LogicalDPI, sc.PhysicalDPI, sc.PhysicalSize, sc.DevicePixelRatio, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
+		if i > 0 {
+			scinfo += "<br><br>\n"
+		}
+		scinfo += fmt.Sprintf("Screen number: %v name: %v\n<br>    geom: %v, depth: %v, logical DPI: %v, physical DPI: %v, logical DPI scale: %v, physical size: %v\n<br>    device pixel ratio: %v, refresh rate: %v\n<br>    orientation: %v, native orientation: %v, primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.Depth, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.PhysicalSize, sc.DevicePixelRatio, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
 	}
 	return scinfo
 }

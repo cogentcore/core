@@ -56,18 +56,21 @@ func PrefsEditor(p *gi.Preferences) {
 
 	up := tbar.AddNewChild(gi.KiT_Action, "update").(*gi.Action)
 	up.SetText("Update")
+	up.Tooltip = "Update all windows with current prefs settings"
 	up.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		p.Update()
 	})
 
 	savej := tbar.AddNewChild(gi.KiT_Action, "savejson").(*gi.Action)
 	savej.SetText("Save")
+	savej.Tooltip = "Save current prefs to prefs.json persistent prefs file in standard config prefs location for platform"
 	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		p.Save()
 	})
 
 	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
 	loadj.SetText("Load")
+	loadj.Tooltip = "Load saved prefs from prefs.json persistent prefs -- done automatically at startup"
 	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		p.Load()
 	})
@@ -100,6 +103,7 @@ func PrefsEditor(p *gi.Preferences) {
 
 	scrinfo := tbar.AddNewChild(gi.KiT_Action, "scrinfo").(*gi.Action)
 	scrinfo.SetText("Screen Info")
+	scrinfo.Tooltip = "display information about all the currently-available screens -- can set per-screen preferences using name of screen"
 	scrinfo.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		scinfo := p.ScreenInfo()
 		fmt.Println(scinfo)

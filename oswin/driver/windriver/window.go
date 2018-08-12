@@ -36,6 +36,10 @@ type windowImpl struct {
 	lifecycleStage lifecycle.Stage
 }
 
+func (w *windowImpl) MainMenu() oswin.MainMenu {
+	return nil
+}
+
 func (w *windowImpl) Release() {
 	theApp.DeleteWin(w.hwnd)
 	win32.Release(w.hwnd)

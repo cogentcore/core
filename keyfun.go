@@ -319,7 +319,6 @@ var MacEmacsKeyMap = KeyMap{
 	"Control+I":           KeyFunInsert,
 	"Control+O":           KeyFunInsertAfter,
 	"Control+Alt+I":       KeyFunGoGiEditor,
-	"Control+Alt+E":       KeyFunGoGiEditor,
 	"Shift+Control+I":     KeyFunGoGiEditor,
 	"Shift+Meta+=":        KeyFunZoomIn,
 	"Meta+=":              KeyFunZoomIn,

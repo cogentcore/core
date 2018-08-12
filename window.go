@@ -322,6 +322,11 @@ func (w *Window) StopEventLoop() {
 	w.stopEventLoop = true
 }
 
+// MainMenuUpdated needs to be called whenever the main menu for this window is updated
+func (w *Window) MainMenuUpdated() {
+	w.MainMenu.SetMainMenu(w)
+}
+
 // Quit exits out of the program, closing the window..
 func (w *Window) Quit() {
 	w.OSWin.Release()
@@ -539,15 +544,18 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
-// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it.
+// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
+// in increments of 6 dots to keep fonts rendering clearly.
 func (w *Window) ZoomDPI(steps int) {
 	sc := oswin.TheApp.Screen(0)
 	pdpi := sc.PhysicalDPI
-	ldpi := sc.LogicalDPI
-	ldpi += float32(6 * steps)
-	ZoomFactor = ldpi / pdpi
+	// ldpi = pdpi * zoom * ldpi
+	cldpinet := sc.LogicalDPI
+	cldpi := cldpinet / ZoomFactor
+	nldpinet := cldpinet + float32(6*steps)
+	ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
-	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Scale: %v\n", ldpi, pdpi, ZoomFactor)
+	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)
 	w.FullReRender()
 }
 

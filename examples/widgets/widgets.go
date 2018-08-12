@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -38,6 +39,8 @@ func mainrun() {
 	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
 
 	icnm := "widget-wedge-down"
+
+	oswin.TheApp.SetName("widgets")
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -70,12 +73,15 @@ func mainrun() {
 	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
+	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
+	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
+
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = `This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <i>GoGi</i> Widgets<br>
-<large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
-<kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
+<large>Shortcuts: <kbd>` + prsc + `</kbd> = Preferences,
+<kbd>` + giedsc + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large>`
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
@@ -262,8 +268,13 @@ func mainrun() {
 	})
 
 	// main menu
+	appnm := oswin.TheApp.Name()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{"File", "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
 	// Linux, Windows or Meta for MacOS
@@ -281,15 +292,12 @@ func mainrun() {
 	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:SaveAs menu action triggered\n")
 	})
-	fmen.Menu.AddSeparator("sep1")
-	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
-	fmen.Menu.AddMenuText("Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		gi.TheViewIFace.PrefsEditor(&gi.Prefs)
-	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

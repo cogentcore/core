@@ -1195,7 +1195,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	for si < len(tr.Spans) {
 		sr := &(tr.Spans[si])
 		if err := sr.IsValid(); err != nil {
-			log.Print(err)
+			// log.Print(err)
 			si++
 			continue
 		}
