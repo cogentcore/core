@@ -36,7 +36,7 @@ type windowImpl struct {
 	lifecycleStage lifecycle.Stage
 }
 
-func (w *windowImpl) Release() {
+func (w *windowImpl) Close() {
 	theApp.DeleteWin(w.hwnd)
 	win32.Release(w.hwnd)
 }

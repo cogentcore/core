@@ -8,11 +8,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package window defines an event associated with windows -- including
-// changes in the dimensions, physical resolution and orientation of the app's
-// window, and iconify, open and close events (see also lifecycle events,
-// which pertain to the main app window -- these window events are for all
-// windows including dialogs and popups)
+// Package window defines events associated with windows -- including changes
+// in the dimensions, physical resolution and orientation of the app's window,
+// and iconify, open and close events.
 package window
 
 import (
@@ -22,89 +20,45 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// window.Event holds the dimensions, physical resolution, orientation,
-// visibility status of a given window, and actions taken on the window
+// window.Event reports on actions taken on a window.  The oswin.Window Flags
+// and other state information will always be updated prior to this event
+// being sent, so those should be consulted directly for the new current
+// state.
 type Event struct {
 	oswin.EventBase
-
-	// Size is the window's new dimensions in raw physical pixels.
-	Size image.Point
-
-	// DPI is the window's current logical dots-per-inch -- can change if
-	// moved to different screen
-	LogicalDPI float32
-
-	// ScreenNumber contains index of the current physical or logical screen
-	// on which the window is being displayed -- see App.Screen() for
-	// the accessing the data associated with this screen
-	ScreenNumber int
-
-	// Visibility is the visibility status of the window: Closed, NotVisible,
-	// Visible, Iconified
-	Visibility Visibilities
 
 	// Action taken on the window -- what has changed
 	Action Actions
 }
 
-// Bounds returns the window's bounds in raw display dots (pixels), at the
-// time this size event was sent.
-//
-// The top-left pixel is always (0, 0).
-func (e Event) Bounds() image.Rectangle {
-	return image.Rectangle{Max: e.Size}
-}
-
-// Screen returns the screen associated with the screen on which this
-// window is displayed
-func (e Event) Screen() *oswin.Screen {
-	return oswin.TheApp.Screen(e.ScreenNumber)
-}
-
-// Visibilities is the visibility status of the window
-type Visibilities int32
-
-const (
-	// Closed means the window is closed -- has not been opened yet or is now closed
-	Closed Visibilities = iota
-
-	// NotVisible means the window is not visible for various reasons (occluded by other windows, off the screen), but not specifically Iconfied
-	NotVisible
-
-	// Visible means the window has been opened and is visible
-	Visible
-
-	// Iconified means the window has been iconified
-	Iconified
-
-	VisibilitiesN
-)
-
-//go:generate stringer -type=Visibilities
-
-var KiT_Visibilities = kit.Enums.AddEnum(VisibilitiesN, false, nil)
-
-// Actions is the action taken on the window by the user
+// Actions is the action taken on the window by the user.
 type Actions int32
 
 const (
-	Open Actions = iota
-	Close
+	// Close means that the window is about to close, but has not yet closed.
+	Close Actions = iota
+
+	// Iconify means that the window has been iconified / miniaturized / is no
+	// longer visible.
 	Iconify
 
-	// Resize includes changes in DPI
+	// Resize means that the window was resized, including changes in DPI
+	// associated with moving to a new screen.  Position may have also changed
+	// too.  Requires a redraw.
 	Resize
 
-	Maximize
-	Minimize
-
+	// Move means that the window was moved but NOT resized or changed in any
+	// other way -- does not require a redraw, but anything tracking positions
+	// will want to update.
 	Move
 
-	// Enter indicates that the user focus / mouse has entered the window
-	Enter
+	// Focus indicates that the window has been activated for receiving user
+	// input.
+	Focus
 
-	// Leave indicates that the user focus / mouse has left the window
-	Leave
+	// DeFocus indicates that the window is no longer activated for
+	// receiving input.
+	DeFocus
 
 	ActionsN
 )
@@ -138,5 +92,3 @@ func (ev Event) OnFocus() bool {
 
 // check for interface implementation
 var _ oswin.Event = &Event{}
-
-// todo: above should subsume function of paint event, but can revisit

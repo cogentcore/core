@@ -18,8 +18,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/driver/internal/lifecycler"
-	"github.com/goki/gi/oswin/lifecycle"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )
@@ -41,15 +39,11 @@ type windowImpl struct {
 	//	- Windows: ctxWin32
 	ctx interface{}
 
-	lifecycler lifecycler.State
-	// TODO: Delete the field below (and the useLifecycler constant), and use
-	// the field above for cocoa and win32.
-	lifecycleStage lifecycle.Stage // current stage
-
 	event.Deque
 	publish     chan struct{}
 	publishDone chan oswin.PublishResult
 	drawDone    chan struct{}
+	winClose    chan struct{}
 
 	// glctxMu is a mutex that enforces the atomicity of methods like
 	// Texture.Upload or Window.Draw that are conceptually one operation
@@ -71,7 +65,7 @@ type windowImpl struct {
 	sizeMu sync.Mutex
 
 	// mainMenu is the main menu associated with window, if applicable.
-	mainMenu interface{}
+	mainMenu oswin.MainMenu
 }
 
 // NextEvent implements the oswin.EventDeque interface.
@@ -80,7 +74,7 @@ func (w *windowImpl) NextEvent() oswin.Event {
 	return e
 }
 
-func (w *windowImpl) Release() {
+func (w *windowImpl) Close() {
 	// There are two ways a window can be closed: the Operating System or
 	// Desktop Environment can initiate (e.g. in response to a user clicking a
 	// red button), or the Go app can programatically close the window (by
@@ -90,10 +84,6 @@ func (w *windowImpl) Release() {
 	//	- Cocoa:   Obj-C's windowWillClose calls Go's windowClosing.
 	//	- X11:     the X11 server sends a WM_DELETE_WINDOW message.
 	//	- Windows: TODO: implement and document this.
-	//
-	// This should send a lifecycle event (To: StageDead) to the Go app's event
-	// loop, which should respond by calling Window.Release (this method).
-	// Window.Release is where system resources are actually cleaned up.
 	//
 	// When Window.Release is called, the closeWindow call below:
 	//	- Cocoa:   calls Obj-C's performClose, which emulates the red button
@@ -390,4 +380,12 @@ func (w *windowImpl) SetSize(sz image.Point) {
 
 func (w *windowImpl) SetPos(pos image.Point) {
 	posWindow(w, pos)
+}
+
+func (w *windowImpl) Raise() {
+	raiseWindow(w)
+}
+
+func (w *windowImpl) Iconify() {
+	iconifyWindow(w)
 }

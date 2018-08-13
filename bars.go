@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"image"
+
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -43,11 +45,34 @@ func (mb *MenuBar) MenuBarStdRender() {
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 }
 
-func (mb *MenuBar) Render2D() {
-	if len(mb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
+func (mb *MenuBar) ShowMenuBar() bool {
+	if len(mb.Kids) == 0 {
+		return false
+	}
+	if mb.MainMenu {
+		if oswin.TheApp.Platform() == oswin.MacOS && !MacShowMainMenu {
+			return false
+		}
+	}
+	return true
+}
+
+func (mb *MenuBar) Size2D() {
+	if !mb.ShowMenuBar() {
 		return
 	}
-	if mb.FullReRenderIfNeeded() {
+	mb.Layout.Size2D()
+}
+
+func (mb *MenuBar) Layout2D(parBBox image.Rectangle) {
+	if !mb.ShowMenuBar() {
+		return
+	}
+	mb.Layout.Layout2D(parBBox)
+}
+
+func (mb *MenuBar) Render2D() {
+	if !mb.ShowMenuBar() {
 		return
 	}
 	if mb.PushBounds() {
@@ -104,7 +129,8 @@ func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	ma.Trigger()
 }
 
-// SetMainMenu sets this menubar as the main menu of given window -- called by Window.MainMenuUpdated.
+// SetMainMenu sets this menubar as the main menu of given window -- called by
+// Window.MainMenuUpdated.
 func (mb *MenuBar) SetMainMenu(win *Window) {
 	osmm := win.OSWin.MainMenu()
 	if osmm == nil { // no OS main menu

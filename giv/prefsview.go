@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
@@ -62,6 +63,7 @@ func PrefsEditor(p *gi.Preferences) {
 	loadj.Tooltip = "Load saved prefs from prefs.json persistent prefs -- done automatically at startup"
 	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		p.Load()
+		vp.UpdateSig()
 	})
 
 	stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
@@ -98,6 +100,38 @@ func PrefsEditor(p *gi.Preferences) {
 		fmt.Println(scinfo)
 		gi.PromptDialog(win.Viewport, "Screen Info", scinfo, true, false, nil, nil, nil)
 	})
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
+	fmen.Menu = make(gi.Menu, 0, 10)
+	fmen.Menu.AddMenuText("Update", "Command+U", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Update()
+	})
+	fmen.Menu.AddMenuText("Load", "Command+O", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Load()
+		vp.UpdateSig()
+	})
+	fmen.Menu.AddMenuText("Save", "Command+S", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.Save()
+	})
+	fmen.Menu.AddSeparator("csep")
+	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.OSWin.Close()
+	})
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, false)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()

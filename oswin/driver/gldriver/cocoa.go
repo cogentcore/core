@@ -32,6 +32,8 @@ void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
 void doMoveWindow(uintptr_t id, int left, int top);
 void doCloseWindow(uintptr_t id);
+void doRaiseWindow(uintptr_t id);
+void doIconifyWindow(uintptr_t id);
 void getScreens();
 uintptr_t doGetMainMenu(uintptr_t viewID);
 void doMenuReset(uintptr_t menuID);
@@ -71,12 +73,12 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/driver/internal/lifecycler"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	"golang.org/x/mobile/gl"
 )
 
@@ -121,6 +123,14 @@ func resizeWindow(w *windowImpl, sz image.Point) {
 
 func posWindow(w *windowImpl, pos image.Point) {
 	C.doMoveWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y))
+}
+
+func raiseWindow(w *windowImpl) {
+	C.doRaiseWindow(C.uintptr_t(w.id))
+}
+
+func iconifyWindow(w *windowImpl) {
+	C.doIconifyWindow(C.uintptr_t(w.id))
 }
 
 func getGeometry(w *windowImpl) {
@@ -173,10 +183,7 @@ func drawgl(id uintptr) {
 		return // closing window
 	}
 
-	// TODO: is this necessary?
-	w.lifecycler.SetVisible(true)
-	w.lifecycler.SendEvent(w, w.glctx)
-
+	bitflag.Clear(&w.Flag, int(oswin.Iconified))
 	pe := &paint.Event{External: true}
 	pe.Init()
 	w.Send(pe)
@@ -206,9 +213,12 @@ func drawLoop(w *windowImpl, vba uintptr) {
 
 	workAvailable := w.worker.WorkAvailable()
 
-	// TODO(crawshaw): exit this goroutine on Release.
+	// TODO(crawshaw): exit this goroutine on Close.
+outer:
 	for {
 		select {
+		case <-w.winClose:
+			break outer
 		case <-workAvailable:
 			w.worker.DoWork()
 		case <-w.publish:
@@ -227,6 +237,27 @@ func drawLoop(w *windowImpl, vba uintptr) {
 	}
 }
 
+// for sending any kind of event
+func sendEvent(id uintptr, ev oswin.Event) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	ev.Init()
+	w.Send(ev)
+}
+
+// for sending window.Event's
+func sendWindowEvent(w *windowImpl, act window.Actions) {
+	winEv := window.Event{
+		Action: act,
+	}
+	winEv.Init()
+	w.Send(&winEv)
+}
+
 //export setGeom
 func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topPx int) {
 	theApp.mu.Lock()
@@ -237,7 +268,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 		return // closing window
 	}
 
-	act := window.ActionsN
+	act := window.Resize
 
 	sz := image.Point{widthPx, heightPx}
 	ps := image.Point{leftPx, topPx}
@@ -254,6 +285,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	w.Sz = sz
 	w.Pos = ps
 	w.PhysDPI = dpi
+	bitflag.Clear(&w.Flag, int(oswin.Iconified))
 
 	if scrno > 0 && len(theApp.screens) > scrno {
 		w.Scrn = theApp.screens[scrno]
@@ -261,13 +293,66 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 
 	w.sizeMu.Unlock()
 
-	winEv := window.Event{
-		Size:       sz,
-		LogicalDPI: dpi, // todo: change to PhysicalDPI
-		Action:     act,
+	sendWindowEvent(w, act)
+}
+
+//export windowClosing
+func windowClosing(id uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
 	}
-	winEv.Init()
-	w.Send(&winEv)
+	// w.winClose <- struct{}{} // break out of draw loop
+	sendWindowEvent(w, window.Close)
+}
+
+//export windowIconified
+func windowIconified(id uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	bitflag.Set(&w.Flag, int(oswin.Iconified))
+	sendWindowEvent(w, window.Iconify)
+}
+
+//export windowFocused
+func windowFocused(id uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	bitflag.Clear(&w.Flag, int(oswin.Iconified))
+	bitflag.Set(&w.Flag, int(oswin.Focus))
+	sendWindowEvent(w, window.Focus)
+}
+
+//export windowDeFocused
+func windowDeFocused(id uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	bitflag.Clear(&w.Flag, int(oswin.Focus))
+	sendWindowEvent(w, window.DeFocus)
+}
+
+//export quitReq
+func quitReq() {
+	theApp.QuitReq()
+}
+
+//export appQuitting
+func appQuitting() {
+	theApp.QuitClean()
 }
 
 //export resetScreens
@@ -300,27 +385,6 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 		sc.Name = C.GoStringN(sname, snlen)
 	}
 	// todo: rest of the fields
-}
-
-//export windowClosing
-func windowClosing(id uintptr) {
-	winEv := window.Event{
-		Action: window.Close,
-	}
-	sendWindowEvent(id, &winEv)
-	sendLifecycle(id, (*lifecycler.State).SetDead, true)
-}
-
-func sendWindowEvent(id uintptr, e oswin.Event) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-
-	if w == nil {
-		return // closing window
-	}
-	e.Init()
-	w.Send(e)
 }
 
 // Mac virtual keys (kVK_) defined here:
@@ -462,7 +526,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 	}
 	event.SetTime()
 	lastMouseEvent = event
-	sendWindowEvent(id, event)
+	sendEvent(id, event)
 }
 
 //export keyEvent
@@ -479,14 +543,14 @@ func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
 		Action:    ea,
 	}
 
-	sendWindowEvent(id, event)
+	sendEvent(id, event)
 
 	// do ChordEvent -- only for non-modifier key presses -- call
 	// key.ChordString to convert the event into a parsable string for GUI
 	// events
 	if ea == key.Press && !key.CodeIsModifier(ec) {
 		che := &key.ChordEvent{Event: *event}
-		sendWindowEvent(id, che)
+		sendEvent(id, che)
 	}
 }
 
@@ -504,57 +568,6 @@ func flagEvent(id uintptr, flags uint32) {
 }
 
 var lastFlags uint32
-
-func sendLifecycle(id uintptr, setter func(*lifecycler.State, bool), val bool) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-
-	if w == nil {
-		return
-	}
-	setter(&w.lifecycler, val)
-	w.lifecycler.SendEvent(w, w.glctx)
-}
-
-func sendLifecycleAll(dead bool) {
-	windows := []*windowImpl{}
-
-	theApp.mu.Lock()
-	for _, w := range theApp.windows {
-		windows = append(windows, w)
-	}
-	theApp.mu.Unlock()
-
-	for _, w := range windows {
-		w.lifecycler.SetFocused(false)
-		w.lifecycler.SetVisible(false)
-		if dead {
-			w.lifecycler.SetDead(true)
-		}
-		w.lifecycler.SendEvent(w, w.glctx)
-	}
-}
-
-//export lifecycleDeadAll
-func lifecycleDeadAll() { sendLifecycleAll(true) }
-
-//export lifecycleHideAll
-func lifecycleHideAll() { sendLifecycleAll(false) }
-
-//export lifecycleVisible
-func lifecycleVisible(id uintptr, val bool) {
-	sendLifecycle(id, (*lifecycler.State).SetVisible, val)
-}
-
-//export lifecycleFocused
-func lifecycleFocused(id uintptr, val bool) {
-	// winEv := window.Event{
-	// 	Action: window.Enter,
-	// }
-	// sendWindowEvent(id, &winEv)
-	sendLifecycle(id, (*lifecycler.State).SetFocused, val)
-}
 
 // cocoaRune marks the Carbon/Cocoa private-range unicode rune representing
 // a non-unicode key event to -1, used for Rune in the key package.

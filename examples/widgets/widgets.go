@@ -295,10 +295,26 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:SaveAs menu action triggered\n")
 	})
+	fmen.Menu.AddSeparator("csep")
+	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.OSWin.Close()
+	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, false)
+
+	oswin.TheApp.SetQuitReqFunc(func() {
+		gi.PromptDialog(vp, "Really Quit?", "Are you <i>sure</i> you want to quit?", true, true, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				oswin.TheApp.Quit()
+			}
+		})
+	})
+
+	oswin.TheApp.SetQuitCleanFunc(func() {
+		fmt.Printf("Doing final Quit cleanup here..\n")
+	})
 
 	win.MainMenuUpdated()
 

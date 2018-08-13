@@ -21,7 +21,7 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI frame
 
 * Powerful `Layout` logic auto-sizes everything -- very easy to configure interfaces that just work across different scales, resolutions, platforms.  Automatically remembers and reinstates window positions and sizes across sessions.
 
-* CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc).
+* CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.
 
 * Compiles in second(s), compared to hour(s) for Qt, and is fully native with no cgo dependency on Linux and Windows, and minimal cgo (necessary) on MacOS.
 
@@ -30,7 +30,7 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI frame
 * `SVG` element (in `svg` sub-package) supports full SVG rendering -- used for Icons internally and available for advanced graphics displays -- see `gi/examples/svg` for viewer and start on editor, along with a number of test .svg files.
 
 * Advanced **Model / View** paradigm with `reflect`ion-based view elements that display and manipulate all the standard Go types (in `giv` sub-package), from individual types (e.g., int, float display in a `SpinBox`, "enum" const int types in a `ComboBox` chooser) to composite data structures, including `StructView` editor of `struct` fields, `MapView` and `SliceView` displays of `map` and `slice` elements (including full editing / adding / deleting of elements), and full-featured `TableView` for a `slice`-of-`struct` and `TreeView` for GoKi trees.
-	+ `TreeView` enables a built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+E` (or `I`) in any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
+	+ `TreeView` enables a built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+I` in any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
 
 ![Screenshot of Widgets demo](screenshot.png?raw=true "Screenshot of Widgets demo")
 
@@ -96,7 +96,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-* enable dnd to use OS DND when moves outside window
+* after beta: enable dnd to use OS DND when moves outside window
 
 * windows:
 	+ support SetPos window method (and probably need to track movement)
@@ -107,13 +107,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ do similar font name updating as done on Windows now
 
 * mac:
-	+ scroll direction is not correct??
-
-* lifecycle not really being used, and closing last window doesn't kill app -- need to clarify that logic vis-a-vis main app window, main app menu / toolbar etc.
 
 ## General / Widgets
 
-* get rid of paint, lifecycle -- just have simpler window and app events
+* arrow nav for menubar
 
 * drag should be stateful -- only drag current item -- logic is in there but
   not working properly
@@ -133,14 +130,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * update gi/doc.go with final readme notes etc!
 
 * combobox getting text cutoff -- descenders and []
-
-* bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
-  general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
-  but key problem is how to associate the enum with the field then?  bit-set
-  values don't match the defined ints.. but who cares?  simplest to just use
-  type. but for bitflag never want consts to be int64, but often do want flags
-  field to be int64..  for 32bit case, not that big a deal, and for most
-  user-facing cases, int32 is sufficient, so focus on that case??
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab? ultimately want multi-row super-tabs -- flow layout..  with dnd..
 
@@ -170,6 +159,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   google??
 
 * grid layout support for spans
+
+* bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
+  general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
+  but key problem is how to associate the enum with the field then?  bit-set
+  values don't match the defined ints.. but who cares?  simplest to just use
+  type. but for bitflag never want consts to be int64, but often do want flags
+  field to be int64..  for 32bit case, not that big a deal, and for most
+  user-facing cases, int32 is sufficient, so focus on that case??
 
 
 ## Rendering / SVG

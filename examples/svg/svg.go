@@ -212,6 +212,10 @@ func mainrun() {
 	fmen.Menu.AddMenuText("Open", "Command+O", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		FileViewLoadSVG(vp)
 	})
+	fmen.Menu.AddSeparator("csep")
+	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.OSWin.Close()
+	})
 
 	win.MainMenuUpdated()
 

@@ -103,6 +103,29 @@ type App interface {
 	// this requires that xdg-utils package has been installed -- uses
 	// xdg-open command.
 	OpenURL(url string)
+
+	// SetQuitReqFunc sets the function that is called whenver there is a
+	// request to quit the app (via a OS or a call to QuitReq() method).  That
+	// function can then adjudicate whether and when to actually call Quit.
+	SetQuitReqFunc(fun func())
+
+	// SetQuitCleanFunc sets the function that is called whenver app is
+	// actually about to quit (irrevocably) -- can do any necessary
+	// last-minute cleanup here.
+	SetQuitCleanFunc(fun func())
+
+	// QuitReq is a quit request, triggered either by OS or user call (e.g.,
+	// via Quit menu action) -- calls function previously-registered by
+	// SetQuitReqFunc, which is then solely responsible for actually calling
+	// Quit.
+	QuitReq()
+
+	// QuitClean calls the function setup in SetQuitCleanFunc and does other
+	// app cleanup -- called on way to quitting.
+	QuitClean()
+
+	// Quit closes all windows and exits the program.
+	Quit()
 }
 
 // Platforms are all the supported platforms for OSWin

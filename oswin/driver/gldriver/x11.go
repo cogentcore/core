@@ -53,8 +53,6 @@ import (
 	"golang.org/x/mobile/gl"
 )
 
-const useLifecycler = true
-
 var theKeysyms x11key.KeysymTable
 
 func init() {
@@ -367,8 +365,8 @@ func onFocus(id uintptr, focused bool) {
 		return
 	}
 
-	w.lifecycler.SetFocused(focused)
-	w.lifecycler.SendEvent(w, w.glctx)
+	// w.lifecycler.SetFocused(focused)
+	// w.lifecycler.SendEvent(w, w.glctx)
 }
 
 //export onConfigure
@@ -381,8 +379,8 @@ func onConfigure(id uintptr, scrno, x, y, width, height, displayWidth, displayWi
 		return
 	}
 
-	w.lifecycler.SetVisible(x+width > 0 && y+height > 0)
-	w.lifecycler.SendEvent(w, w.glctx)
+	// w.lifecycler.SetVisible(x+width > 0 && y+height > 0)
+	// w.lifecycler.SendEvent(w, w.glctx)
 
 	dpi := 25.4 * (float32(displayWidth) / float32(displayWidthMM))
 	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
@@ -431,8 +429,8 @@ func onDeleteWindow(id uintptr) {
 		return
 	}
 
-	w.lifecycler.SetDead(true)
-	w.lifecycler.SendEvent(w, w.glctx)
+	// w.lifecycler.SetDead(true)
+	// w.lifecycler.SendEvent(w, w.glctx)
 }
 
 func surfaceCreate() error {

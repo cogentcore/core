@@ -273,31 +273,38 @@ void menuSetAsMain(ScreenGLView* view);
     [self callSetGeom];
 }
 
-// TODO: catch windowDidMiniaturize?
+// - (void)windowDidExpose:(NSNotification *)notification {
+//      menuSetAsMain(self);
+//      lifecycleVisible((GoUintptr)self, true);
+// }
 
-- (void)windowDidExpose:(NSNotification *)notification {
-    menuSetAsMain(self);
-    lifecycleVisible((GoUintptr)self, true);
+- (void)windowDidMiniaturize:(NSNotification *)notification {
+    windowIconified((GoUintptr)self);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
     menuSetAsMain(self);
-    lifecycleFocused((GoUintptr)self, true);
+   windowFocused((GoUintptr)self);
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
-    lifecycleFocused((GoUintptr)self, false);
-    if ([NSApp isHidden]) {
-        lifecycleVisible((GoUintptr)self, false);
-    }
+    windowDeFocused((GoUintptr)self);
+    // if ([NSApp isHidden]) {
+    // }
+}
+
+- (BOOL)windowShouldClose:(NSNotification *)notification {
+    // TODO: return true if OK to close, false if not -- use
+    // same strategy as app
+    return YES;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
     // TODO: is this right? Closing a window via the top-left red button
     // seems to return early without ever calling windowClosing.
-    if (self.window.nextResponder == NULL) {
-        return; // already called close
-    }
+    // if (self.window.nextResponder == NULL) {
+    //     return; // already called close
+    // }
 
     windowClosing((GoUintptr)self);
     [self.window.nextResponder release];
@@ -345,11 +352,16 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    lifecycleDeadAll();
+    appQuitting();
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSNotification *)aNotification {
+    quitReq();
+    return NSTerminateCancel; // we never actually quit
 }
 
 - (void)applicationWillHide:(NSNotification *)aNotification {
-    lifecycleHideAll();
+    // lifecycleHideAll();
 }
 @end
 
@@ -487,6 +499,20 @@ void doCloseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performClose:view];
+        });
+}
+
+void doRaiseWindow(uintptr_t viewID) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+            [view.window makeKeyAndOrderFront:view];
+        });
+}
+
+void doIconifyWindow(uintptr_t viewID) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+            [view.window performMiniaturize:view];
         });
 }
 

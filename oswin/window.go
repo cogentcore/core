@@ -17,75 +17,107 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Window is a double-buffered OS-specific hardware window.
+// Window is a double-buffered OS-specific hardware window.  Windows are
+// generally always visible unless specifically iconified (i.e., there is no
+// explicit mechanism to show the window).
 type Window interface {
+
 	// Name returns the name of the window -- name is used strictly for
 	// internal tracking and finding of windows -- see Title for the displayed
-	// title of the window
+	// title of the window.
 	Name() string
 
-	// SetName sets the name of the window
+	// SetName sets the name of the window.
 	SetName(name string)
 
-	// Title returns the current title of the window, which is displayed in the GUI
+	// Title returns the current title of the window, which is displayed in the GUI.
 	Title() string
 
-	// SetTitle sets the current title of the window, which is displayed in the GUI
+	// SetTitle sets the current title of the window, which is displayed in the GUI.
 	SetTitle(title string)
 
-	// Size returns the current size of the window, in raw underlying dots / pixels
+	// Size returns the current size of the window, in raw underlying dots / pixels.
 	Size() image.Point
 
 	// SetSize attempts to set the size of the window to given size, in raw
-	// underlying dots / pixels
+	// underlying dots / pixels.
 	SetSize(sz image.Point)
 
 	// SetPos attempts to set the position of the window to given size, in raw
-	// underlying dots / pixels
+	// underlying dots / pixels.
 	SetPos(pos image.Point)
 
+	// Raise requests that the window be at the top of the stack of windows,
+	// and receive focus.  If it is iconified, it will be de-iconified.  This
+	// is the only supported mechanism for de-iconifying.
+	Raise()
+
+	// Iconify requests that the window be iconfied, making it no longer
+	// visible or active -- rendering should not occur for iconified windows.
+	Iconify()
+
 	// Position returns the current lef-top position of the window relative to
-	// underlying screen, in raw underlying dots / pixels
+	// underlying screen, in raw underlying dots / pixels.
 	Position() image.Point
 
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
-	// translating into various other units
+	// translating into various other units.
 	PhysicalDPI() float32
 
 	// LogicalDPI returns the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units --
-	// physical DPI can be found in the Screen
+	// physical DPI can be found in the Screen.
 	LogicalDPI() float32
 
 	// SetLogicalDPI sets the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units --
-	// physical DPI can be found in the Screen
+	// physical DPI can be found in the Screen.
 	SetLogicalDPI(dpi float32)
 
 	// Screen returns the screen for this window, with all the relevant
-	// information about its properties
+	// information about its properties.
 	Screen() *Screen
 
 	// Parent returns the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks
+	// gi.Window but could be something else in other frameworks.
 	Parent() interface{}
 
 	// SetParent sets the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks
+	// gi.Window but could be something else in other frameworks.
 	SetParent(par interface{})
 
+	// MainMenu returns the OS-level main menu for this window -- this is
+	// currently for MacOS only -- returns nil for others.
+	MainMenu() MainMenu
+
 	// Flags returns the bit flags for this window's properties set according
-	// to WindowFlags bits (use bitflag package to access)
+	// to WindowFlags bits.
 	Flags() int64
 
-	// Release closes the window. The behavior of the Window after Release,
-	// whether calling its methods or passing it as an argument, is undefined.
-	Release()
+	// IsDialog returns true if this is a dialog window.
+	IsDialog() bool
 
-	// MainMenu returns the OS-level main menu for this window -- this is
-	// currently for MacOS only -- noop for others.
-	MainMenu() MainMenu
+	// IsModal returns true if this is a modal window (blocks input to other windows).
+	IsModal() bool
+
+	// IsTool returns true if this is a tool window.
+	IsTool() bool
+
+	// IsFullscreen returns true if this is a fullscreen window.
+	IsFullscreen() bool
+
+	// IsIconified returns true if this window is iconified.
+	IsIconified() bool
+
+	// IsFocused returns true if this window is focused (will receive keyboard
+	// input etc).
+	IsFocus() bool
+
+	// Close requests that the window be closed. The behavior of the Window
+	// after this, whether calling its methods or passing it as an argument,
+	// is undefined.  See App.Quit() to quit overall app.
+	Close()
 
 	EventDeque
 
@@ -171,29 +203,61 @@ func (w *WindowBase) Flags() int64 {
 	return w.Flag
 }
 
+func (w *WindowBase) IsDialog() bool {
+	return bitflag.Has(w.Flag, int(Dialog))
+}
+
+func (w *WindowBase) IsModal() bool {
+	return bitflag.Has(w.Flag, int(Modal))
+}
+
+func (w *WindowBase) IsTool() bool {
+	return bitflag.Has(w.Flag, int(Tool))
+}
+
+func (w *WindowBase) IsFullscreen() bool {
+	return bitflag.Has(w.Flag, int(Fullscreen))
+}
+
+func (w *WindowBase) IsIconified() bool {
+	return bitflag.Has(w.Flag, int(Iconified))
+}
+
+func (w *WindowBase) IsFocus() bool {
+	return bitflag.Has(w.Flag, int(Focus))
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // WindowOptions
 
 // Qt options: http://doc.qt.io/qt-5/qt.html#WindowType-enum
 
-// WindowFlags contains all the optional properties of a window -- by default
-// with no flags a window is a main top-level window
+// WindowFlags contains all the binary properties of a window -- by default
+// with no other relevant flags a window is a main top-level window.
 type WindowFlags int32
 
 const (
-	// Dialog indicates that this is a temporary, pop-up window
+	// Dialog indicates that this is a temporary, pop-up window.
 	Dialog WindowFlags = iota
 
 	// Modal indicates that this dialog window blocks events going to other
-	// windows until it is closed
+	// windows until it is closed.
 	Modal
 
 	// Tool indicates that this is a floating tool window that has minimized
-	// window decoration
+	// window decoration.
 	Tool
 
-	// FullScreen indicates that this window should be opened full-screen
-	FullScreen
+	// Fullscreen indicates a window that occupies the entire screen.
+	Fullscreen
+
+	// Iconified indicates a window reduced to an icon, or otherwise no longer
+	// visible or active.  Otherwise, the window should be assumed to be
+	// visible.
+	Iconified
+
+	// Focus indicates that the window has the focus.
+	Focus
 
 	WindowFlagsN
 )
@@ -237,15 +301,15 @@ func (o *NewWindowOptions) SetTool() {
 	bitflag.Set(&o.Flags, int(Tool))
 }
 
-func (o *NewWindowOptions) SetFullScreen() {
-	bitflag.Set(&o.Flags, int(FullScreen))
+func (o *NewWindowOptions) SetFullscreen() {
+	bitflag.Set(&o.Flags, int(Fullscreen))
 }
 
 func WindowFlagsToBool(flags int64) (dialog, modal, tool, fullscreen bool) {
 	dialog = bitflag.Has(flags, int(Dialog))
 	modal = bitflag.Has(flags, int(Modal))
 	tool = bitflag.Has(flags, int(Tool))
-	fullscreen = bitflag.Has(flags, int(FullScreen))
+	fullscreen = bitflag.Has(flags, int(Fullscreen))
 	return
 }
 

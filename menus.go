@@ -34,7 +34,9 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 // MakeMenuFunc is a callback for making a menu on demand
 type MakeMenuFunc func(m *Menu)
 
-// AddMenuText adds an action to the menu with a text label
+// AddMenuText adds an action to the menu with a text label, shortcut, and
+// connects the action signal to given receiver object, along with given data
+// which is stored on the action and then passed in the action signal.
 func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
 	if m == nil {
 		*m = make(Menu, 0, 10)
@@ -125,7 +127,7 @@ func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
 	}
 }
 
-// AddAppMenu adds a standard menu for application-level control
+// AddAppMenu adds a standard set of menu items for application-level control.
 func (m *Menu) AddAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()
 	m.AddMenuText(aboutitle, "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -133,14 +135,35 @@ func (m *Menu) AddAppMenu(win *Window) {
 		PromptDialog(ww.Viewport, aboutitle, oswin.TheApp.About(), true, false, nil, nil, nil)
 	})
 	prsc := ActiveKeyMap.ChordForFun(KeyFunPrefs)
-	m.AddMenuText("Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("GoGi Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		TheViewIFace.PrefsEditor(&Prefs)
 	})
 	m.AddSeparator("sepq")
 	m.AddMenuText("Quit", "Command+Q", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ww := recv.Embed(KiT_Window).(*Window)
-		ww.Quit()
+		oswin.TheApp.QuitReq()
 	})
+}
+
+// AddWindowsMenu adds menu items for current main and dialog windows.
+func (m *Menu) AddWindowsMenu(win *Window) {
+	m.AddMenuText("Iconify", "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ww := recv.Embed(KiT_Window).(*Window)
+		ww.OSWin.Iconify()
+	})
+	m.AddSeparator("sepa")
+	for _, w := range MainWindows {
+		m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			ww := recv.Embed(KiT_Window).(*Window)
+			ww.OSWin.Raise()
+		})
+	}
+	m.AddSeparator("sepw")
+	for _, w := range DialogWindows {
+		m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			ww := recv.Embed(KiT_Window).(*Window)
+			ww.OSWin.Raise()
+		})
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

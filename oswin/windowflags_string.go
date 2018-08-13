@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _WindowFlags_name = "DialogModalToolFullScreenWindowFlagsN"
+const _WindowFlags_name = "DialogModalToolFullscreenIconifiedFocusWindowFlagsN"
 
-var _WindowFlags_index = [...]uint8{0, 6, 11, 15, 25, 37}
+var _WindowFlags_index = [...]uint8{0, 6, 11, 15, 25, 34, 39, 51}
 
 func (i WindowFlags) String() string {
 	if i < 0 || i >= WindowFlags(len(_WindowFlags_index)-1) {

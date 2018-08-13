@@ -21,7 +21,6 @@ import (
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/lifecycle"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
@@ -62,6 +61,13 @@ var HoverStartMSec = 2000
 // HoverMaxPix is the maximum number of pixels that mouse can move and still
 // register a Hover event
 var HoverMaxPix = 5
+
+// MacShowMainMenu controls whether the main menu is displayed at top of each
+// window, in addition to at the top of the screen.  Mac native apps do not do
+// this, but OTOH it makes things more consistent with other platforms, and
+// with larger screens, it can be convenient to have access to all the menu
+// items right there.
+var MacShowMainMenu = false
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
@@ -186,6 +192,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
+	MainMenuUpdateWindowsAll()
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
 	vp.SetProp("color", &Prefs.FontColor) // everything inherits this..
@@ -223,6 +230,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	}
 	AllWindows.Add(win)
 	DialogWindows.Add(win)
+	MainMenuUpdateWindowsAll()
 	return win
 }
 
@@ -241,6 +249,7 @@ func (w *Window) ConfigVLay() {
 	}
 	w.MasterVLay.Lay = LayoutVert
 	w.MainMenu = w.MasterVLay.KnownChild(0).(*MenuBar)
+	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 }
 
@@ -334,10 +343,27 @@ func (w *Window) MainMenuUpdateActives() {
 	w.MainMenu.MainMenuUpdateActives(w)
 }
 
-// Quit exits out of the program, closing the window..
-func (w *Window) Quit() {
-	w.OSWin.Release()
-	os.Exit(0) // todo: should use lifecycle
+// MainMenuUpdateWindows updates a Window menu with a list of active menus.
+func (w *Window) MainMenuUpdateWindows() {
+	if w.MainMenu == nil {
+		return
+	}
+	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
+	if !ok {
+		return
+	}
+	wmen := wmeni.(*Action)
+	men := make(Menu, 0, len(AllWindows))
+	men.AddWindowsMenu(w)
+	wmen.Menu = men
+	w.MainMenuUpdated()
+}
+
+// MainMenuUpdateWindowsAll updates Window menu for all main windows
+func MainMenuUpdateWindowsAll() {
+	for _, w := range MainWindows {
+		w.MainMenuUpdateWindows()
+	}
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
@@ -363,7 +389,7 @@ func (w *Window) LogicalDPI() float32 {
 }
 
 // WinViewport2D returns the viewport directly under this window that serves
-// as the master viewport for the entire window
+// as the master viewport for the entire window.
 func (w *Window) WinViewport2D() *Viewport2D {
 	vpi, ok := w.Children().ElemByType(KiT_Viewport2D, true, 0)
 	if !ok { // shouldn't happen
@@ -374,12 +400,12 @@ func (w *Window) WinViewport2D() *Viewport2D {
 }
 
 // SetSize requests that the window be resized to the given size -- it will
-// trigger a resize event and be processed that way when it occurs
+// trigger a resize event and be processed that way when it occurs.
 func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
 }
 
-// Resized updates internal buffers after a window has been resized
+// Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
 	if w.IsInactive() || w.Viewport == nil {
 		return
@@ -396,12 +422,12 @@ func (w *Window) Resized(sz image.Point) {
 	WinGeomPrefs.RecordPref(w)
 }
 
-// Closed frees any resources after the window has been closed
+// Closed frees any resources after the window has been closed.
 func (w *Window) Closed() {
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
-	// todo: trigger signal to update Windows menu of all open windows!
+	MainMenuUpdateWindowsAll()
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
@@ -526,7 +552,8 @@ func (w *Window) RenderOverlays() {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsInactive() {
+	if w.IsInactive() || w.OSWin.IsIconified() {
+		// fmt.Printf("skipping update on inactive / iconified window: %v\n", w.Nm)
 		return
 	}
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
@@ -989,7 +1016,7 @@ func (w *Window) EventLoop() {
 					skippedResize = we
 					continue
 				} else {
-					w.Resized(we.Size)
+					w.Resized(w.OSWin.Size())
 					w.DoFullRender = true
 					lastSkipped = false
 					skippedResize = nil
@@ -1010,7 +1037,7 @@ func (w *Window) EventLoop() {
 		lastEt = et
 
 		if skippedResize != nil {
-			w.Resized(skippedResize.Size)
+			w.Resized(w.OSWin.Size())
 			w.DoFullRender = true
 			skippedResize = nil
 		}
@@ -1093,27 +1120,19 @@ func (w *Window) EventLoop() {
 
 		// Window gets first crack at the events, and handles window-specific ones
 		switch e := evi.(type) {
-		case *lifecycle.Event:
-			if e.To == lifecycle.StageDead {
-				// fmt.Println("close")
-				evi.SetProcessed()
-				w.Closed()
-				break
-			} else {
-				// fmt.Printf("lifecycle from: %v to %v\n", e.From, e.To)
-				// if e.Crosses(lifecycle.StageFocused) == lifecycle.CrossOff {
-				// }
-				evi.SetProcessed()
-			}
 		case *paint.Event:
 			w.FullReRender()
 			// fmt.Println("doing paint")
 			continue
 		case *window.Event:
-			if e.Action == window.Open || e.Action == window.Resize {
+			switch e.Action {
+			case window.Resize:
 				// fmt.Printf("doing resize for action %v \n", e.Action)
-				w.Resized(e.Size)
+				w.Resized(w.OSWin.Size())
+				w.MainMenuUpdateWindows()
 				w.FullReRender()
+			case window.Close:
+				w.Closed()
 			}
 			continue
 		case *key.ChordEvent:

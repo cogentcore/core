@@ -12,6 +12,7 @@ package gldriver
 import (
 	"fmt"
 	"image"
+	"os"
 	"sync"
 
 	"github.com/goki/gi/oswin"
@@ -43,12 +44,14 @@ type appImpl struct {
 		quad    gl.Buffer
 	}
 
-	mu      sync.Mutex
-	windows map[uintptr]*windowImpl
-	winlist []*windowImpl
-	screens []*oswin.Screen
-	name    string
-	about   string
+	mu            sync.Mutex
+	windows       map[uintptr]*windowImpl
+	winlist       []*windowImpl
+	screens       []*oswin.Screen
+	name          string
+	about         string
+	quitReqFunc   func()
+	quitCleanFunc func()
 }
 
 func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
@@ -141,10 +144,6 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	w.Scrn = sc
 	w.Flag = opts.Flags
 
-	if useLifecycler {
-		w.lifecycler.SendEvent(w, nil)
-	}
-
 	showWindow(w)
 
 	return w, nil
@@ -213,4 +212,33 @@ func (app *appImpl) About() string {
 
 func (app *appImpl) SetAbout(about string) {
 	app.about = about
+}
+
+func (app *appImpl) SetQuitReqFunc(fun func()) {
+	app.quitReqFunc = fun
+}
+
+func (app *appImpl) SetQuitCleanFunc(fun func()) {
+	app.quitCleanFunc = fun
+}
+
+func (app *appImpl) QuitReq() {
+	if app.quitReqFunc != nil {
+		app.quitReqFunc()
+	}
+}
+
+func (app *appImpl) QuitClean() {
+	if app.quitCleanFunc != nil {
+		app.quitCleanFunc()
+	}
+}
+
+func (app *appImpl) Quit() {
+	// todo: could try to invoke NSApp terminate method instead
+	app.QuitClean()
+	for _, win := range app.winlist {
+		win.Close()
+	}
+	os.Exit(0)
 }

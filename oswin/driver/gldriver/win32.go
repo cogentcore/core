@@ -21,15 +21,11 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/win32"
 	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/lifecycle"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
 	"golang.org/x/mobile/gl"
 )
-
-// TODO: change this to true, after manual testing on Win32.
-const useLifecycler = false
 
 func main(f func(oswin.App)) error {
 	return win32.Main(func() { f(theApp) })
@@ -130,23 +126,6 @@ func init() {
 	win32.PaintEvent = paintEvent
 	win32.MouseEvent = mouseEvent
 	win32.KeyEvent = keyEvent
-	win32.LifecycleEvent = lifecycleEvent
-}
-
-func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
-	theApp.mu.Lock()
-	w := theApp.windows[uintptr(hwnd)]
-	theApp.mu.Unlock()
-
-	if w.lifecycleStage == to {
-		return
-	}
-	w.Send(lifecycle.Event{
-		From:        w.lifecycleStage,
-		To:          to,
-		DrawContext: w.glctx,
-	})
-	w.lifecycleStage = to
 }
 
 func mouseEvent(hwnd syscall.Handle, e mouse.Event) {

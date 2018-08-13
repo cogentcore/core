@@ -8,9 +8,30 @@ import (
 	"fmt"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
+
+func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
+	FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
+			dlg, _ := send.(*gi.Dialog)
+			fnm := FileViewDialogValue(dlg)
+			recv.SaveJSON(fnm)
+		}
+	})
+}
+
+func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
+	FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
+			dlg, _ := send.(*gi.Dialog)
+			fnm := FileViewDialogValue(dlg)
+			recv.LoadJSON(fnm)
+		}
+	})
+}
 
 // GoGiEditor opens an interactive editor of the given Ki tree, at its root
 func GoGiEditor(obj ki.Ki) {
@@ -81,26 +102,14 @@ func GoGiEditor(obj ki.Ki) {
 	savej.SetText("Save JSON")
 	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
 	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "./", obj.Name()+".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.(*gi.Dialog)
-				fnm := FileViewDialogValue(dlg)
-				recv.SaveJSON(fnm)
-			}
-		})
+		gieditSaveGUI(vp, obj)
 	})
 
 	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
 	loadj.SetText("Load JSON")
 	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
 	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "./", obj.Name()+".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.(*gi.Dialog)
-				fnm := FileViewDialogValue(dlg)
-				recv.LoadJSON(fnm)
-			}
-		})
+		gieditLoadGUI(vp, obj)
 	})
 
 	fontsel := tbar.AddNewChild(gi.KiT_Action, "fontsel").(*gi.Action)
@@ -122,6 +131,37 @@ func GoGiEditor(obj ki.Ki) {
 			}
 		}, nil)
 	})
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
+	fmen.Menu = make(gi.Menu, 0, 10)
+	fmen.Menu.AddMenuText("Update", "Command+U", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		obj.UpdateSig()
+	})
+	fmen.Menu.AddMenuText("Load", "Command+O", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		gieditLoadGUI(vp, obj)
+	})
+	fmen.Menu.AddMenuText("Save", "Command+S", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		gieditSaveGUI(vp, obj)
+	})
+	fmen.Menu.AddSeparator("csep")
+	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.OSWin.Close()
+	})
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, false)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop() // in a separate goroutine
