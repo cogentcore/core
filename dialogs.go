@@ -9,6 +9,8 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -61,14 +63,32 @@ type Dialog struct {
 	Prompt    string      `desc:"a prompt string displayed below the title"`
 	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
 	State     DialogState `desc:"state of the dialog"`
+	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
+// ValidViewport finds a non-nil viewport, either using the provided one, or
+// using the first main window's viewport
+func ValidViewport(avp *Viewport2D) *Viewport2D {
+	if avp != nil {
+		return avp
+	}
+	if len(AllWindows) == 0 {
+		log.Printf("No gi.AllWindows to get viewport from!\n")
+		return nil
+	}
+	return AllWindows[0].Viewport
+}
+
 // Open this dialog, in given location (0 = middle of window), finding window
-// from given viewport -- returns false if it fails for any reason
+// from given viewport -- returns false if it fails for any reason.
 func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
+	avp = ValidViewport(avp)
+	if avp == nil {
+		return false
+	}
 	win := avp.Win
 	if win == nil {
 		return false
@@ -185,7 +205,11 @@ func (dlg *Dialog) Accept() {
 		return
 	}
 	dlg.State = DialogAccepted
-	dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+	if dlg.SigVal >= 0 {
+		dlg.DialogSig.Emit(dlg.This, dlg.SigVal, nil)
+	} else {
+		dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+	}
 	dlg.Close()
 }
 
@@ -195,7 +219,11 @@ func (dlg *Dialog) Cancel() {
 		return
 	}
 	dlg.State = DialogCanceled
-	dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+	if dlg.SigVal >= 0 {
+		dlg.DialogSig.Emit(dlg.This, dlg.SigVal, nil)
+	} else {
+		dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+	}
 	dlg.Close()
 }
 
@@ -370,6 +398,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 // StdDialog configures a basic standard dialog with a title, prompt, and ok /
 // cancel buttons -- any empty text will not be added
 func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
+	dlg.SigVal = -1
 	frame := dlg.SetFrame()
 	pspc := float32(0.0)
 	if title != "" {
@@ -393,28 +422,72 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 // and ok / cancel buttons -- any empty text will not be added -- returns with
 // UpdateStart started but NOT ended -- must call UpdateEnd(true) once done
 // configuring!
-func NewStdDialog(name, title, prompt string, ok, cancel bool) *Dialog {
+func NewStdDialog(name, title, prompt string, ok, cancel bool, css ki.Props) *Dialog {
 	dlg := Dialog{}
 	dlg.InitName(&dlg, name)
 	dlg.UpdateStart() // guaranteed to be true
+	dlg.CSS = css
 	dlg.StdDialog(title, prompt, ok, cancel)
 	return &dlg
 }
 
-// PromptDialog opens a basic standard dialog with a title, prompt, and ok / cancel
-// buttons -- any empty text will not be added -- optionally connects to given
-// signal receiving object and function for dialog signals (nil to ignore).
+// PromptDialog opens a basic standard dialog with a title, prompt, and ok /
+// cancel buttons -- any empty text will not be added -- optionally connects
+// to given signal receiving object and function for dialog signals (nil to
+// ignore).  Viewport is optional to properly contextualize dialog to given
+// master window.
 func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
-	if avp == nil {
-		log.Printf("gi.PromptDialog has nil avg for: %v %v\n", title, prompt)
-		return
-	}
-	dlg := NewStdDialog("prompt", title, prompt, ok, cancel)
-	dlg.CSS = css
+	winm := strcase.ToKebab(title)
+	dlg := NewStdDialog(winm, title, prompt, ok, cancel, css)
 	dlg.Modal = true
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+	dlg.UpdateEndNoSig(true) // going to be shown
+	dlg.Open(0, 0, avp)
+}
+
+// ChoiceDialog opens a basic standard dialog with a title, prompt, and any
+// number of buttons with labels as given, for the user to choose among -- the
+// clicked button number (starting at 0) will be sent to the receiving object
+// and function for dialog signals.  Viewport is optional to properly
+// contextualize dialog to given master window.
+func ChoiceDialog(avp *Viewport2D, title, prompt string, choices []string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
+	winm := strcase.ToKebab(title)
+	dlg := NewStdDialog(winm, title, prompt, false, false, css) // no buttons
+	dlg.Modal = true
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+
+	frame := dlg.Frame()
+	bb, _ := dlg.ButtonBox(frame)
+	for i, ch := range choices {
+		chnm := strcase.ToKebab(ch)
+		b := bb.AddNewChild(KiT_Button, chnm).(*Button)
+		b.SetProp("__cdSigVal", int64(i))
+		b.SetText(ch)
+		if chnm == "cancel" {
+			b.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(ButtonClicked) {
+					tb := send.Embed(KiT_Button).(*Button)
+					dlg := recv.Embed(KiT_Dialog).(*Dialog)
+					dlg.SigVal = tb.KnownProp("__cdSigVal").(int64)
+					dlg.Cancel()
+				}
+			})
+		} else {
+			b.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(ButtonClicked) {
+					tb := send.Embed(KiT_Button).(*Button)
+					dlg := recv.Embed(KiT_Dialog).(*Dialog)
+					dlg.SigVal = tb.KnownProp("__cdSigVal").(int64)
+					dlg.Accept()
+				}
+			})
+		}
+	}
+
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp)
 }
@@ -433,13 +506,13 @@ func (dlg *Dialog) HasFocus2D() bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 // more specialized types of dialogs
 
-// New Ki item(s) of type dialog, showing types that implement given interface
-// -- use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get
-// the interface type -- optionally connects to given signal receiving object
-// and function for dialog signals (nil to ignore)
+// NewKiDialog prompts for creating new item(s) of a given type, showing types
+// that implement given interface -- use construct of form:
+// reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type.
+// Optionally connects to given signal receiving object and function for
+// dialog signals (nil to ignore).
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("new-ki", title, prompt, true, true)
-	dlg.CSS = css
+	dlg := NewStdDialog("new-ki", title, prompt, true, true, css)
 	dlg.Modal = true
 
 	frame := dlg.Frame()
@@ -480,7 +553,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css 
 	return dlg
 }
 
-// get the user-set values from a NewKiDialog
+// NewKiDialogValues gets the user-set values from a NewKiDialog.
 func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	frame := dlg.Frame()
 	nrow := frame.KnownChildByName("n-row", 0).(*Layout)
@@ -494,10 +567,11 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 
 // StringPromptDialog prompts the user for a string value -- optionally
 // connects to given signal receiving object and function for dialog signals
-// (nil to ignore)
+// (nil to ignore).  Viewport is optional to properly contextualize dialog to
+// given master window.
 func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("string-prompt", title, prompt, true, true)
-	dlg.CSS = css
+	winm := strcase.ToKebab(title)
+	dlg := NewStdDialog(winm, title, prompt, true, true, css)
 	dlg.Modal = true
 
 	frame := dlg.Frame()
@@ -519,7 +593,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Pr
 	return dlg
 }
 
-// StringPromptValue gets the string value the user set
+// StringPromptValue gets the string value the user set.
 func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
 	tf := frame.KnownChildByName("str-field", 0).(*TextField)

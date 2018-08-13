@@ -61,7 +61,13 @@ uint64 threadID() {
 {
     MenuDelegate* _menuDel;
     NSMenu* _mainMenu;
+    BOOL _reallyClose;
 }
+
+@property (nonatomic, assign) MenuDelegate* menuDel;
+@property (nonatomic, assign) NSMenu* mainMenu;
+@property (nonatomic, assign) BOOL reallyClose;
+
 @end
 
 @interface MenuDelegate : NSObject <NSMenuDelegate> {
@@ -69,29 +75,15 @@ uint64 threadID() {
     NSMenu* _mainMenu;
 }
 
+@property (nonatomic, assign) ScreenGLView *view;
+@property (nonatomic, assign) NSMenu *mainMenu;
+
 @end
 
 @implementation MenuDelegate
 
-- (void) setView:(ScreenGLView*) vw
-{
-    _view = vw;
-}
-
-- (ScreenGLView*) view
-{
-    return _view;
-}
-
-- (void) setMainMenu:(NSMenu*) mn
-{
-    _mainMenu = mn;
-}
-
-- (NSMenu*) mainMenu
-{
-    return _mainMenu;
-}
+@synthesize view = _view;
+@synthesize mainMenu = _mainMenu;
 
 - (void) itemFired:(NSMenuItem*) item
 {
@@ -121,7 +113,13 @@ void menuSetAsMain(ScreenGLView* view);
 //  ScreenGLView
 
 @implementation ScreenGLView
+
+@synthesize menuDel = _menuDel;
+@synthesize mainMenu = _mainMenu;
+@synthesize reallyClose = _reallyClose;
+
 - (void)prepareOpenGL {
+    self.reallyClose = NO;
     [self setWantsBestResolutionOpenGLSurface:YES];
     GLint swapInt = 1;
     NSOpenGLContext *ctx = [self openGLContext];
@@ -273,11 +271,6 @@ void menuSetAsMain(ScreenGLView* view);
     [self callSetGeom];
 }
 
-// - (void)windowDidExpose:(NSNotification *)notification {
-//      menuSetAsMain(self);
-//      lifecycleVisible((GoUintptr)self, true);
-// }
-
 - (void)windowDidMiniaturize:(NSNotification *)notification {
     windowIconified((GoUintptr)self);
 }
@@ -289,23 +282,18 @@ void menuSetAsMain(ScreenGLView* view);
 
 - (void)windowDidResignKey:(NSNotification *)notification {
     windowDeFocused((GoUintptr)self);
-    // if ([NSApp isHidden]) {
-    // }
 }
 
 - (BOOL)windowShouldClose:(NSNotification *)notification {
-    // TODO: return true if OK to close, false if not -- use
-    // same strategy as app
-    return YES;
+    if (self.reallyClose == YES) {
+        return YES;
+    } else {
+        windowCloseReq((GoUintptr)self);
+        return NO;
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-    // TODO: is this right? Closing a window via the top-left red button
-    // seems to return early without ever calling windowClosing.
-    // if (self.window.nextResponder == NULL) {
-    //     return; // already called close
-    // }
-
     windowClosing((GoUintptr)self);
     [self.window.nextResponder release];
     self.window.nextResponder = NULL;
@@ -326,16 +314,8 @@ void menuSetAsMain(ScreenGLView* view);
     return _mainMenu;
 }
 
-- (MenuDelegate*) menuDel {
-    return _menuDel;
-}
-
 - (void)setMainMenu: (NSMenu*) men {
     _mainMenu = men;
-}
-
- - (void) setMenuDel: (MenuDelegate*) md {
-    _menuDel = md;
 }
 
 @end
@@ -497,6 +477,7 @@ void doMoveWindow(uintptr_t viewID, int left, int top) {
     
 void doCloseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
+    view.reallyClose = YES;
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performClose:view];
         });

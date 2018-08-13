@@ -297,7 +297,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		win.OSWin.Close()
+		win.OSWin.CloseReq()
 	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
@@ -314,6 +314,18 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	oswin.TheApp.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
+	})
+
+	win.OSWin.SetCloseReqFunc(func() {
+		gi.PromptDialog(vp, "Really Close Window?", "Are you <i>sure</i> you want to close the window?", true, true, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				win.OSWin.Close()
+			}
+		})
+	})
+
+	win.OSWin.SetCloseCleanFunc(func() {
+		fmt.Printf("Doing final Close cleanup here..\n")
 	})
 
 	win.MainMenuUpdated()

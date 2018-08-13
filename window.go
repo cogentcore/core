@@ -1132,6 +1132,7 @@ func (w *Window) EventLoop() {
 				w.MainMenuUpdateWindows()
 				w.FullReRender()
 			case window.Close:
+				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
 			}
 			continue

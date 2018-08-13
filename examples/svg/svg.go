@@ -217,6 +217,8 @@ func mainrun() {
 		win.OSWin.Close()
 	})
 
+	// todo: when saving works, add option to save, and change above to CloseReq
+
 	win.MainMenuUpdated()
 
 	win.StartEventLoop()

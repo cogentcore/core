@@ -66,6 +66,9 @@ type windowImpl struct {
 
 	// mainMenu is the main menu associated with window, if applicable.
 	mainMenu oswin.MainMenu
+
+	closeReqFunc   func()
+	closeCleanFunc func()
 }
 
 // NextEvent implements the oswin.EventDeque interface.
@@ -97,8 +100,9 @@ func (w *windowImpl) Close() {
 	// thread). Even if that isn't true, the windowWillClose handler is
 	// idempotent.
 
-	theApp.DeleteWin(w.id)
+	w.CloseClean()
 	closeWindow(w.id)
+	theApp.DeleteWin(w.id)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
@@ -388,4 +392,26 @@ func (w *windowImpl) Raise() {
 
 func (w *windowImpl) Iconify() {
 	iconifyWindow(w)
+}
+
+func (w *windowImpl) SetCloseReqFunc(fun func()) {
+	w.closeReqFunc = fun
+}
+
+func (w *windowImpl) SetCloseCleanFunc(fun func()) {
+	w.closeCleanFunc = fun
+}
+
+func (w *windowImpl) CloseReq() {
+	if w.closeReqFunc != nil {
+		w.closeReqFunc()
+	} else {
+		w.Close()
+	}
+}
+
+func (w *windowImpl) CloseClean() {
+	if w.closeCleanFunc != nil {
+		w.closeCleanFunc()
+	}
 }

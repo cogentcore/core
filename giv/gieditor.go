@@ -154,12 +154,25 @@ func GoGiEditor(obj ki.Ki) {
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		win.OSWin.Close()
+		win.OSWin.CloseReq()
 	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, false)
+
+	win.OSWin.SetCloseReqFunc(func() {
+		gi.ChoiceDialog(vp, "Save JSON Before Closing?", "Do you want to save to JSON before closing?", []string{"Close Without Saving", "Save JSON", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			switch sig {
+			case 0:
+				win.OSWin.Close()
+			case 1:
+				gieditSaveGUI(vp, obj)
+			case 2:
+				// default is to do nothing, i.e., cancel
+			}
+		})
+	})
 
 	win.MainMenuUpdated()
 

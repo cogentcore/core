@@ -225,6 +225,8 @@ func (app *appImpl) SetQuitCleanFunc(fun func()) {
 func (app *appImpl) QuitReq() {
 	if app.quitReqFunc != nil {
 		app.quitReqFunc()
+	} else {
+		app.Quit()
 	}
 }
 

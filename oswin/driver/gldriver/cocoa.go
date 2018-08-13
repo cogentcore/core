@@ -147,10 +147,6 @@ func preparedOpenGL(id, ctx, vba uintptr) {
 	go drawLoop(w, vba)
 }
 
-func closeWindow(id uintptr) {
-	C.doCloseWindow(C.uintptr_t(id))
-}
-
 var mainCallback func(oswin.App)
 
 func main(f func(oswin.App)) error {
@@ -296,6 +292,21 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	sendWindowEvent(w, act)
 }
 
+//export windowCloseReq
+func windowCloseReq(id uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	go w.CloseReq()
+}
+
+func closeWindow(id uintptr) {
+	C.doCloseWindow(C.uintptr_t(id))
+}
+
 //export windowClosing
 func windowClosing(id uintptr) {
 	theApp.mu.Lock()
@@ -347,7 +358,7 @@ func windowDeFocused(id uintptr) {
 
 //export quitReq
 func quitReq() {
-	theApp.QuitReq()
+	go theApp.QuitReq()
 }
 
 //export appQuitting

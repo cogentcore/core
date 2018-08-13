@@ -124,12 +124,27 @@ func PrefsEditor(p *gi.Preferences) {
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		win.OSWin.Close()
+		win.OSWin.CloseReq()
 	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, false)
+
+	win.OSWin.SetCloseReqFunc(func() {
+		gi.ChoiceDialog(vp, "Save Prefs Before Closing?", "Do you want to save any changes to preferences before closing?", []string{"Save and Close", "Discard and Close", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			switch sig {
+			case 0:
+				p.Save()
+				fmt.Println("Preferences Saved to prefs.json")
+				win.OSWin.Close()
+			case 1:
+				win.OSWin.Close()
+			case 2:
+				// default is to do nothing, i.e., cancel
+			}
+		})
+	})
 
 	win.MainMenuUpdated()
 

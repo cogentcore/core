@@ -114,9 +114,29 @@ type Window interface {
 	// input etc).
 	IsFocus() bool
 
+	// SetCloseReqFunc sets the function that is called whenver there is a
+	// request to close the window (via a OS or a call to CloseReq() method).  That
+	// function can then adjudicate whether and when to actually call Close.
+	SetCloseReqFunc(fun func())
+
+	// SetCloseCleanFunc sets the function that is called whenver window is
+	// actually about to close (irrevocably) -- can do any necessary
+	// last-minute cleanup here.
+	SetCloseCleanFunc(fun func())
+
+	// CloseReq is a close request, triggered either by OS or user call (e.g.,
+	// via Close menu action) -- calls function previously-registered by
+	// SetCloseReqFunc, which is then solely responsible for actually calling
+	// Close.
+	CloseReq()
+
+	// CloseClean calls the function setup in SetCloseCleanFunc and does other
+	// window cleanup -- called on way to closing.
+	CloseClean()
+
 	// Close requests that the window be closed. The behavior of the Window
 	// after this, whether calling its methods or passing it as an argument,
-	// is undefined.  See App.Quit() to quit overall app.
+	// is undefined.  See App.Quit methods to quit overall app.
 	Close()
 
 	EventDeque
