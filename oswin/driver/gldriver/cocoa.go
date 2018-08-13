@@ -496,7 +496,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 				Action:    mouse.Scroll,
 				Modifiers: mods,
 			},
-			Delta: image.Point{int(dx), int(-dy)},
+			Delta: image.Point{int(-dx), int(-dy)},
 		}
 	default:
 		act := cocoaMouseAct(ty)
