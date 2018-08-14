@@ -419,7 +419,5 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
-	w.CloseClean()
 	closeWindow(w.id)
-	theApp.DeleteWin(w.id)
 }

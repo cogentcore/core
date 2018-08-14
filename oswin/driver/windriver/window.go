@@ -227,9 +227,7 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
-	w.CloseClean()
 	DeleteWindow(w.hwnd)
-	theApp.DeleteWin(w.hwnd)
 }
 
 // cmd is used to carry parameters between user code
@@ -539,9 +537,13 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	// note: this is the final common path for all window closes
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
-	DeleteWindow(hwnd)
+	theApp.DeleteWin(w.hwnd)
 	return 0
 }
 

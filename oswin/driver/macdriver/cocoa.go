@@ -281,10 +281,12 @@ func windowClosing(id uintptr) {
 	if w == nil {
 		return
 	}
+	// note: this is the common final path of all window closes
 	// todo: following doesn't work even though drawLoop is stuck on the select for w.winClose
 	// w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
+	theApp.DeleteWin(w.id)
 }
 
 //export windowIconified
