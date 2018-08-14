@@ -11,7 +11,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/gi/oswin/driver/internal/win32"
 	"github.com/goki/gi/oswin/mimedata"
 )
 
@@ -39,7 +38,7 @@ func (ci *clipImpl) OpenClipboard() bool {
 	}
 	win := theApp.winlist[0]
 	for retry := 0; retry < ClipRetries; retry++ {
-		got := win32.OpenClipboard(win.hwnd)
+		got := _OpenClipboard(win.hwnd)
 		if got {
 			return true
 		}
@@ -55,22 +54,22 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if !ci.OpenClipboard() {
 		return nil
 	}
-	defer win32.CloseClipboard()
+	defer _CloseClipboard()
 
 	wantText := mimedata.IsText(types[0])
 
 	if wantText {
-		hData := win32.GetClipboardData(win32.CF_UNICODETEXT)
+		hData := _GetClipboardData(_CF_UNICODETEXT)
 		if hData == 0 {
 			log.Printf("clip.Board.Read couldn't get clip data\n")
 			return nil
 		}
-		wd := win32.GlobalLock(hData)
+		wd := _GlobalLock(hData)
 		if wd == nil {
 			log.Printf("clip.Board.Read couldn't lock clip data\n")
 			return nil
 		}
-		defer win32.GlobalUnlock(hData)
+		defer _GlobalUnlock(hData)
 		txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
 		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
 		if isMulti {
@@ -95,18 +94,18 @@ func (ci *clipImpl) WriteText(b []byte) error {
 		return err
 	}
 	sz := uintptr(len(wc) * 2)
-	hData := win32.GlobalAlloc(win32.GMEM_MOVEABLE, sz)
-	wd := win32.GlobalLock(hData)
+	hData := _GlobalAlloc(_GMEM_MOVEABLE, sz)
+	wd := _GlobalLock(hData)
 	if wd == nil {
 		log.Printf("clip.Board.Write couldn't lock clip data\n")
 		return nil
 	}
-	win32.CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(&wc[0])), sz)
-	win32.GlobalUnlock(hData)
+	_CopyMemory(uintptr(unsafe.Pointer(wd)), uintptr(unsafe.Pointer(&wc[0])), sz)
+	_GlobalUnlock(hData)
 
-	hRes := win32.SetClipboardData(win32.CF_UNICODETEXT, hData)
+	hRes := _SetClipboardData(_CF_UNICODETEXT, hData)
 	if hRes == 0 {
-		win32.GlobalFree(hData)
+		_GlobalFree(hData)
 		return fmt.Errorf("clip.Board.Write Could not set clip data\n")
 	}
 	return nil
@@ -120,9 +119,9 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	if !ci.OpenClipboard() {
 		return fmt.Errorf("clip.Board.Write could not open clipboard\n")
 	}
-	defer win32.CloseClipboard()
+	defer _CloseClipboard()
 
-	if !win32.EmptyClipboard() {
+	if !_EmptyClipboard() {
 		return fmt.Errorf("clip.Board.Write could not empty clipboard\n")
 	}
 
@@ -142,6 +141,6 @@ func (ci *clipImpl) Clear() {
 	if !ci.OpenClipboard() {
 		return
 	}
-	win32.EmptyClipboard()
-	win32.CloseClipboard()
+	_EmptyClipboard()
+	_CloseClipboard()
 }

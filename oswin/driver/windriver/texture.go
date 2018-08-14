@@ -16,7 +16,6 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
 type textureImpl struct {
@@ -35,11 +34,11 @@ type handleCreateTextureParams struct {
 	err    error
 }
 
-var msgCreateTexture = win32.AddAppMsg(handleCreateTexture)
+var msgCreateTexture = _AddAppMsg(handleCreateTexture)
 
 func newTexture(size image.Point) (oswin.Texture, error) {
 	p := handleCreateTextureParams{size: size}
-	win32.SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
+	_SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
 	if p.err != nil {
 		return nil, p.err
 	}
@@ -63,12 +62,12 @@ func handleCreateTexture(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintpt
 	// live as long as we want to.
 	p := (*handleCreateTextureParams)(unsafe.Pointer(lParam))
 
-	appDC, err := win32.GetDC(0)
+	appDC, err := _GetDC(0)
 	if err != nil {
 		p.err = err
 		return
 	}
-	defer win32.ReleaseDC(0, appDC)
+	defer _ReleaseDC(0, appDC)
 
 	dc, err := _CreateCompatibleDC(appDC)
 	if err != nil {

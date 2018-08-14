@@ -1140,7 +1140,7 @@ func (w *Window) EventLoop() {
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
 			case window.Paint:
-				fmt.Printf("got paint event for window %v \n", w.Nm)
+				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				w.FullReRender()
 			}
 			continue

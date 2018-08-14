@@ -7,15 +7,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gldriver
+package macdriver
 
 import (
 	"fmt"
 	"image"
+	"log"
 	"os"
+	"os/exec"
+	"os/user"
+	"path/filepath"
 	"sync"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/clip"
+	"github.com/goki/gi/oswin/cursor"
 	"golang.org/x/mobile/gl"
 )
 
@@ -72,7 +78,7 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	defer w.glctxMu.Unlock()
 	glctx := w.glctx
 	if glctx == nil {
-		return nil, fmt.Errorf("gldriver: no GL context available")
+		return nil, fmt.Errorf("macdriver: no GL context available")
 	}
 
 	if !glctx.IsProgram(app.texture.program) {
@@ -212,6 +218,48 @@ func (app *appImpl) About() string {
 
 func (app *appImpl) SetAbout(about string) {
 	app.about = about
+}
+
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.MacOS
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, "Library")
+}
+
+func (app *appImpl) GoGiPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), "GoGi")
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) AppPrefsDir() string {
+	pdir := filepath.Join(app.PrefsDir(), app.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/Library/Fonts"}
+}
+
+func (app *appImpl) ClipBoard() clip.Board {
+	return &theClip
+}
+
+func (app *appImpl) Cursor() cursor.Cursor {
+	return &theCursor
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("open", url)
+	cmd.Run()
 }
 
 func (app *appImpl) SetQuitReqFunc(fun func()) {

@@ -13,9 +13,9 @@ package driver
 
 import (
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/gldriver"
+	"github.com/goki/gi/oswin/driver/macdriver"
 )
 
 func main(f func(oswin.App)) {
-	gldriver.Main(f)
+	macdriver.Main(f)
 }

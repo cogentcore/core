@@ -21,7 +21,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/driver/internal/win32"
 )
 
 var theApp = &appImpl{
@@ -96,7 +95,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	}
 
 	var err error
-	w.hwnd, err = win32.NewWindow(opts)
+	w.hwnd, err = NewWindow(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +105,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	err = win32.ResizeClientRect(w.hwnd, opts.Size)
+	err = ResizeClientRect(w.hwnd, opts.Size)
 	if err != nil {
 		return nil, err
 	}
 
-	win32.Show(w.hwnd)
+	Show(w.hwnd)
 
 	if procGetDpiForWindow.Find() == nil { // has it
 		dpi = float32(_GetDpiForWindow(w.hwnd))
@@ -154,10 +153,11 @@ func (app *appImpl) initScreens() {
 	sc := &oswin.Screen{}
 	app.screens[0] = sc
 
+	// todo: conditionalize on windows version
 	_SetProcessDpiAwareness(_PROCESS_PER_MONITOR_DPI_AWARE)
 
 	// todo: this is not working at all!
-	widthPx, heightPx := win32.ScreenSize()
+	widthPx, heightPx := ScreenSize()
 
 	if widthPx == 0 {
 		widthPx = 1200
@@ -280,4 +280,157 @@ func (app *appImpl) SetAbout(about string) {
 func (app *appImpl) OpenURL(url string) {
 	cmd := exec.Command("explorer", url)
 	cmd.Run()
+}
+
+//////////////////////////////////////////////////////////////////
+//   Windows utilties
+
+////////////////////////////////////////////////////////
+// appWND is the handle to the "AppWindow".  The window encapsulates all
+// oswin.Window operations in an actual Windows window so they all run on the
+// main thread.  Since any messages sent to a window will be executed on the
+// main thread, we can safely use the messages below.
+var appHWND syscall.Handle
+
+const (
+	msgCreateWindow = _WM_USER + iota
+	msgDeleteWindow
+	msgMainCallback
+	msgShow
+	msgQuit
+	msgLast
+)
+
+// userWM is used to generate private (WM_USER and above) window message IDs
+// for use by appWindowWndProc and windowWndProc.
+type userWM struct {
+	sync.Mutex
+	id uint32
+}
+
+func (m *userWM) next() uint32 {
+	m.Lock()
+	if m.id == 0 {
+		m.id = msgLast
+	}
+	r := m.id
+	m.id++
+	m.Unlock()
+	return r
+}
+
+var currentUserWM userWM
+
+var appMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr){}
+
+func AddAppMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr)) uint32 {
+	uMsg := currentUserWM.next()
+	appMsgs[uMsg] = func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) uintptr {
+		fn(hwnd, uMsg, wParam, lParam)
+		return 0
+	}
+	return uMsg
+}
+
+var mainCallback func()
+
+func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+	switch uMsg {
+	case msgCreateWindow:
+		p := (*newWindowParams)(unsafe.Pointer(lParam))
+		p.w, p.err = newWindow(p.opts)
+	case msgDeleteWindow:
+		hwnd := (syscall.Handle)(unsafe.Pointer(lParam))
+		deleteWindow(hwnd)
+	case msgMainCallback:
+		go func() {
+			mainCallback()
+			SendAppMessage(msgQuit, 0, 0)
+		}()
+	case msgQuit:
+		_PostQuitMessage(0)
+	}
+	fn := appMsgs[uMsg]
+	if fn != nil {
+		return fn(hwnd, uMsg, wParam, lParam)
+	}
+	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
+}
+
+//go:uintptrescapes
+
+func SendAppMessage(uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+	return SendMessage(appHWND, uMsg, wParam, lParam)
+}
+
+func initAppWindow() (err error) {
+	const appWindowClass = "GoGi_AppWindow"
+	swc, err := syscall.UTF16PtrFromString(appWindowClass)
+	if err != nil {
+		return err
+	}
+	emptyString, err := syscall.UTF16PtrFromString("")
+	if err != nil {
+		return err
+	}
+	wc := _WNDCLASS{
+		LpszClassName: swc,
+		LpfnWndProc:   syscall.NewCallback(appWindowWndProc),
+		HIcon:         hDefaultIcon,
+		HCursor:       hDefaultCursor,
+		HInstance:     hThisInstance,
+		HbrBackground: syscall.Handle(_COLOR_BTNFACE + 1),
+	}
+	_, err = _RegisterClass(&wc)
+	if err != nil {
+		return err
+	}
+	appHWND, err = _CreateWindowEx(0,
+		swc, emptyString,
+		_WS_OVERLAPPEDWINDOW,
+		_CW_USEDEFAULT, _CW_USEDEFAULT,
+		_CW_USEDEFAULT, _CW_USEDEFAULT,
+		_HWND_MESSAGE, 0, hThisInstance, 0)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ScreenSize() (width, height int) {
+	width = 1024
+	height = 768
+	var wr _RECT
+	err := _GetWindowRect(appHWND, &wr)
+	if err != nil {
+		width = int(wr.Right - wr.Left)
+		height = int(wr.Bottom - wr.Top)
+	}
+	return
+}
+
+var (
+	hDefaultIcon   syscall.Handle
+	hDefaultCursor syscall.Handle
+	hThisInstance  syscall.Handle
+)
+
+func initCommon() (err error) {
+	hDefaultIcon, err = _LoadIcon(0, _IDI_APPLICATION)
+	if err != nil {
+		return err
+	}
+	hDefaultCursor, err = _LoadCursor(0, _IDC_ARROW)
+	if err != nil {
+		return err
+	}
+	// TODO(andlabs) hThisInstance
+	return nil
+}
+
+//go:uintptrescapes
+
+func SendMessage(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+	return sendMessage(hwnd, uMsg, wParam, lParam)
 }

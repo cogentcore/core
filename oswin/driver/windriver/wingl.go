@@ -9,6 +9,10 @@
 
 // +build windows
 
+// this is all windows-specific code from old gldriver -- integrate into windriver
+// package as gl option
+
+/*
 package gldriver
 
 import (
@@ -19,17 +23,12 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/win32"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
 	"golang.org/x/mobile/gl"
 )
-
-func main(f func(oswin.App)) error {
-	return win32.Main(func() { f(theApp) })
-}
 
 var (
 	eglGetPlatformDisplayEXT = gl.LibEGL.NewProc("eglGetPlatformDisplayEXT")
@@ -67,7 +66,7 @@ type ctxWin32 struct {
 }
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
-	w, err := win32.NewWindow(opts)
+	w, err := NewWindow(opts)
 	if err != nil {
 		return 0, err
 	}
@@ -79,9 +78,9 @@ func initWindow(w *windowImpl) {
 }
 
 func showWindow(w *windowImpl) {
-	// Show makes an initial call to sizeEvent (via win32.SizeEvent), where
+	// Show makes an initial call to sizeEvent (via SizeEvent), where
 	// we setup the EGL surface and GL context.
-	win32.Show(syscall.Handle(w.id))
+	Show(syscall.Handle(w.id))
 }
 
 func closeWindow(id uintptr) {} // TODO
@@ -119,13 +118,6 @@ func drawLoop(w *windowImpl) {
 			w.publishDone <- oswin.PublishResult{}
 		}
 	}
-}
-
-func init() {
-	win32.SizeEvent = sizeEvent
-	win32.PaintEvent = paintEvent
-	win32.MouseEvent = mouseEvent
-	win32.KeyEvent = keyEvent
 }
 
 func mouseEvent(hwnd syscall.Handle, e mouse.Event) {
@@ -252,9 +244,9 @@ func createEGLSurface(hwnd syscall.Handle, w *windowImpl) error {
 		},
 	}
 
-	dc, err := win32.GetDC(hwnd)
+	dc, err := GetDC(hwnd)
 	if err != nil {
-		return fmt.Errorf("win32.GetDC failed: %v", err)
+		return fmt.Errorf("GetDC failed: %v", err)
 	}
 
 	var display uintptr = _EGL_NO_DISPLAY
@@ -336,3 +328,4 @@ func createEGLSurface(hwnd syscall.Handle, w *windowImpl) error {
 func surfaceCreate() error {
 	return errors.New("gldriver: surface creation not implemented on windows")
 }
+*/

@@ -20,9 +20,8 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/driver/internal/win32"
-	"github.com/goki/gi/oswin/lifecycle"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
 )
 
@@ -32,13 +31,29 @@ type windowImpl struct {
 
 	event.Deque
 
-	sz             window.Event
-	lifecycleStage lifecycle.Stage
+	closeReqFunc   func(win oswin.Window)
+	closeCleanFunc func(win oswin.Window)
 }
 
-func (w *windowImpl) Close() {
-	theApp.DeleteWin(w.hwnd)
-	win32.Release(w.hwnd)
+// for sending any kind of event
+func sendEvent(hwnd syscall.Handle, ev oswin.Event) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	ev.Init()
+	w.Send(ev)
+}
+
+// for sending window.Event's
+func sendWindowEvent(w *windowImpl, act window.Actions) {
+	winEv := window.Event{
+		Action: act,
+	}
+	winEv.Init()
+	w.Send(&winEv)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
@@ -170,12 +185,7 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-	win32.ResizeClientRect(w.hwnd, sz)
-}
-
-func (w *windowImpl) SetPos(pos image.Point) {
-	// todo: need this in base win32
-	w.Pos = pos
+	ResizeClientRect(w.hwnd, sz)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
@@ -187,80 +197,40 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 	return nil
 }
 
-func init() {
-	send := func(hwnd syscall.Handle, e oswin.Event) {
-		theApp.mu.Lock()
-		w := theApp.windows[hwnd]
-		theApp.mu.Unlock()
-
-		e.Init()
-		w.Send(e)
-	}
-	win32.MouseEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
-	win32.PaintEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
-	win32.KeyEvent = func(hwnd syscall.Handle, e oswin.Event) { send(hwnd, e) }
-	win32.LifecycleEvent = lifecycleEvent
-	win32.WindowEvent = windowEvent
+func (w *windowImpl) Raise() {
+	raiseWindow(w)
 }
 
-func lifecycleEvent(hwnd syscall.Handle, to lifecycle.Stage) {
-	theApp.mu.Lock()
-	w := theApp.windows[hwnd]
-	theApp.mu.Unlock()
-	if w == nil {
-		return
-	}
-
-	if w.lifecycleStage == to {
-		return
-	}
-	le := &lifecycle.Event{
-		From: w.lifecycleStage,
-		To:   to,
-	}
-	le.Init()
-	w.Send(le)
-	w.lifecycleStage = to
+func (w *windowImpl) Iconify() {
+	iconifyWindow(w)
 }
 
-func windowEvent(hwnd syscall.Handle, e oswin.Event) {
-	theApp.mu.Lock()
-	w := theApp.windows[hwnd]
-	theApp.mu.Unlock()
+func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
+	w.closeReqFunc = fun
+}
 
-	we := e.(*window.Event)
-	sz := we.Size
-	ldpi := we.LogicalDPI
+func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
+	w.closeCleanFunc = fun
+}
 
-	// todo: multiple screens
-	sc := oswin.TheApp.Screen(0)
-
-	act := window.ActionsN
-
-	if w.Sz != sz || w.LogDPI != ldpi {
-		act = window.Resize
-		//	} else if w.Pos != ps {
-		//		act = window.Move
-		//	} else {
-		//		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
+func (w *windowImpl) CloseReq() {
+	if w.closeReqFunc != nil {
+		w.closeReqFunc(w)
+	} else {
+		w.Close()
 	}
+}
 
-	w.Sz = we.Size
-	// todo: extend event to include position
-	// 	w.Pos = ps
-	w.PhysDPI = sc.PhysicalDPI
-	w.LogDPI = we.LogicalDPI
-	w.Scrn = sc
+func (w *windowImpl) CloseClean() {
+	if w.closeCleanFunc != nil {
+		w.closeCleanFunc(w)
+	}
+}
 
-	we.Action = act
-	we.Init()
-	w.Send(we)
-
-	// todo: redundant?
-	//	if e != w.sz {
-	//		w.sz = sz
-	//		w.Send(&paint.Event{})
-	//	}
+func (w *windowImpl) Close() {
+	w.CloseClean()
+	DeleteWindow(w.hwnd)
+	theApp.DeleteWin(w.hwnd)
 }
 
 // cmd is used to carry parameters between user code
@@ -286,10 +256,10 @@ const (
 	cmdDrawUniform
 )
 
-var msgCmd = win32.AddWindowMsg(handleCmd)
+var msgCmd = AddWindowMsg(handleCmd)
 
 func (w *windowImpl) execCmd(c *cmd) {
-	win32.SendMessage(w.hwnd, msgCmd, 0, uintptr(unsafe.Pointer(c)))
+	SendMessage(w.hwnd, msgCmd, 0, uintptr(unsafe.Pointer(c)))
 	if c.err != nil {
 		panic(fmt.Sprintf("execCmd faild for cmd.id=%d: %v", c.id, c.err)) // TODO handle errors
 	}
@@ -298,12 +268,12 @@ func (w *windowImpl) execCmd(c *cmd) {
 func handleCmd(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) {
 	c := (*cmd)(unsafe.Pointer(lParam))
 
-	dc, err := win32.GetDC(hwnd)
+	dc, err := _GetDC(hwnd)
 	if err != nil {
 		c.err = err
 		return
 	}
-	defer win32.ReleaseDC(hwnd, dc)
+	defer _ReleaseDC(hwnd, dc)
 
 	switch c.id {
 	case cmdDraw:
@@ -320,4 +290,247 @@ func handleCmd(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) {
 		c.err = fmt.Errorf("unknown command id=%d", c.id)
 	}
 	return
+}
+
+var windowMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr){
+	_WM_SETFOCUS:         sendFocus,
+	_WM_KILLFOCUS:        sendFocus,
+	_WM_PAINT:            sendPaint,
+	msgShow:              sendShow,
+	_WM_WINDOWPOSCHANGED: sendSizeEvent,
+	_WM_CLOSE:            sendCloseReq,
+	_WM_DESTROY:          sendClose,
+	_WM_QUIT:             sendQuit,
+
+	_WM_LBUTTONDOWN: sendMouseEvent,
+	_WM_LBUTTONUP:   sendMouseEvent,
+	_WM_MBUTTONDOWN: sendMouseEvent,
+	_WM_MBUTTONUP:   sendMouseEvent,
+	_WM_RBUTTONDOWN: sendMouseEvent,
+	_WM_RBUTTONUP:   sendMouseEvent,
+	_WM_MOUSEMOVE:   sendMouseEvent,
+	_WM_MOUSEWHEEL:  sendMouseEvent,
+
+	_WM_KEYDOWN: sendKeyEvent,
+	_WM_KEYUP:   sendKeyEvent,
+	// TODO case _WM_SYSKEYDOWN, _WM_SYSKEYUP:
+}
+
+func AddWindowMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr)) uint32 {
+	uMsg := currentUserWM.next()
+	windowMsgs[uMsg] = func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) uintptr {
+		fn(hwnd, uMsg, wParam, lParam)
+		return 0
+	}
+	return uMsg
+}
+
+func windowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
+	fn := windowMsgs[uMsg]
+	if fn != nil {
+		return fn(hwnd, uMsg, wParam, lParam)
+	}
+	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
+}
+
+type newWindowParams struct {
+	opts *oswin.NewWindowOptions
+	w    syscall.Handle
+	err  error
+}
+
+func NewWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
+	var p newWindowParams
+	p.opts = opts
+	SendAppMessage(msgCreateWindow, 0, uintptr(unsafe.Pointer(&p)))
+	return p.w, p.err
+}
+
+func DeleteWindow(hwnd syscall.Handle) {
+	SendAppMessage(msgDeleteWindow, 0, uintptr(unsafe.Pointer(hwnd)))
+}
+
+const windowClass = "GoGi_Window"
+
+func initWindowClass() (err error) {
+	wcname, err := syscall.UTF16PtrFromString(windowClass)
+	if err != nil {
+		return err
+	}
+	_, err = _RegisterClass(&_WNDCLASS{
+		LpszClassName: wcname,
+		LpfnWndProc:   syscall.NewCallback(windowWndProc),
+		HIcon:         hDefaultIcon,
+		HCursor:       hDefaultCursor,
+		HInstance:     hThisInstance,
+		// TODO(andlabs): change this to something else? NULL? the hollow brush?
+		HbrBackground: syscall.Handle(_COLOR_BTNFACE + 1),
+	})
+	return err
+}
+
+func newWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
+	// TODO(brainman): convert windowClass to *uint16 once (in initWindowClass)
+	wcname, err := syscall.UTF16PtrFromString(windowClass)
+	if err != nil {
+		return 0, err
+	}
+	title, err := syscall.UTF16PtrFromString(opts.GetTitle())
+	if err != nil {
+		return 0, err
+	}
+	hwnd, err := _CreateWindowEx(0,
+		wcname, title,
+		_WS_OVERLAPPEDWINDOW,
+		int32(opts.Pos.X), int32(opts.Pos.Y),
+		int32(opts.Size.X), int32(opts.Size.Y),
+		0, 0, hThisInstance, 0)
+	if err != nil {
+		return 0, err
+	}
+	// TODO(andlabs): use proper nCmdShow
+	// TODO(andlabs): call UpdateWindow()
+
+	return hwnd, nil
+}
+
+// ResizeClientRect makes hwnd client rectangle given size
+func ResizeClientRect(hwnd syscall.Handle, size image.Point) error {
+	var cr, wr _RECT
+	err := _GetClientRect(hwnd, &cr)
+	if err != nil {
+		return err
+	}
+	err = _GetWindowRect(hwnd, &wr)
+	if err != nil {
+		return err
+	}
+	w := (wr.Right - wr.Left) - (cr.Right - int32(size.X))
+	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(size.Y))
+	return _MoveWindow(hwnd, wr.Left, wr.Top, w, h, false)
+}
+
+// Show shows a newly created window.  It makes the window appear on the
+// screen, and sends an initial size event.
+//
+// This is a separate step from NewWindow to give the driver a chance
+// to setup its internal state for a window before events start being
+// delivered.
+func Show(hwnd syscall.Handle) {
+	SendMessage(hwnd, msgShow, 0, 0)
+}
+
+// this must be called in original app thread..
+func deleteWindow(hwnd syscall.Handle) {
+	_DestroyWindow(hwnd)
+}
+
+func sendFocus(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	switch uMsg {
+	case _WM_SETFOCUS:
+		bitflag.Clear(&w.Flag, int(oswin.Iconified))
+		bitflag.Set(&w.Flag, int(oswin.Focus))
+		sendWindowEvent(w, window.Focus)
+	case _WM_KILLFOCUS:
+		bitflag.Clear(&w.Flag, int(oswin.Focus))
+		sendWindowEvent(w, window.DeFocus)
+	default:
+		panic(fmt.Sprintf("windriver: unexpected focus message: %d", uMsg))
+	}
+	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
+}
+
+func sendShow(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	_ShowWindow(hwnd, _SW_SHOWDEFAULT)
+	sendSize(hwnd)
+	return 0
+}
+
+func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	wp := (*_WINDOWPOS)(unsafe.Pointer(lParam))
+	if wp.Flags&_SWP_NOSIZE != 0 {
+		return 0
+	}
+	sendSize(hwnd)
+	return 0
+}
+
+func sendSize(hwnd syscall.Handle) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+
+	var r _RECT
+	if err := _GetClientRect(hwnd, &r); err != nil {
+		panic(err) // TODO(andlabs)
+	}
+
+	width := int(r.Right - r.Left)
+	height := int(r.Bottom - r.Top)
+
+	if width < 100 {
+		width = 1000
+	}
+	if height < 100 {
+		height = 1000
+	}
+	sz := image.Point{int(width), int(height)}
+	ps := image.Point{int(r.Left), int(r.Top)}
+	act := window.Resize // also resolved at higher level that has access to prev
+
+	// todo: multiple screens
+	sc := oswin.TheApp.Screen(0)
+	ldpi := sc.LogicalDPI
+	act := window.ActionsN
+
+	if w.Sz != sz || w.LogDPI != ldpi {
+		act = window.Resize
+	} else if w.Pos != ps {
+		act = window.Move
+		// } else {
+		// 	//		act = window.Resize // todo: for now safer to default to resize -- to catch the
+		// filtering
+	}
+
+	w.Sz = sz
+	w.Pos = ps
+	w.PhysDPI = sc.PhysicalDPI
+	w.LogDPI = ldpi
+	w.Scrn = sc
+	sendWindowEvent(w, act)
+}
+
+func sendCloseReq(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	go w.CloseReq()
+	return 0 //
+}
+
+func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	w.CloseClean()
+	sendWindowEvent(w, window.Close)
+	Release(hwnd)
+	return 0
+}
+
+func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.QuitClean()
+	// Release(hwnd)
+	return 0
+}
+
+func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	sendWindowEvent(hwnd, window.Paint)
+	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }

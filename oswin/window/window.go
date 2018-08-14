@@ -27,7 +27,8 @@ import (
 type Event struct {
 	oswin.EventBase
 
-	// Action taken on the window -- what has changed
+	// Action taken on the window -- what has changed.  Window state fields
+	// have current values.
 	Action Actions
 }
 

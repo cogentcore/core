@@ -7,7 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gldriver
+package macdriver
 
 // These constants match the values found in the EGL 1.4 headers,
 // egl.h, eglext.h, and eglplatform.h.

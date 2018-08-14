@@ -112,8 +112,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* paint is a Window event
-
 * double check all the window flags!  also fullscreen.
 
 * add option for no window render at all while iconfied

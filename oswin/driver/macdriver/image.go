@@ -7,7 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gldriver
+package macdriver
 
 import "image"
 
@@ -32,6 +32,6 @@ func (b *imageImpl) preUpload() {
 	// oswin.Image such as:
 	//	*image.RGBA() = anotherImageRGBA
 	if len(b.buf) != 0 && len(b.rgba.Pix) != 0 && &b.buf[0] != &b.rgba.Pix[0] {
-		panic("gldriver: invalid Image.RGBA modification")
+		panic("macdriver: invalid Image.RGBA modification")
 	}
 }

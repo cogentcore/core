@@ -11,7 +11,7 @@
 // +build 386 amd64
 // +build !ios
 
-package gldriver
+package macdriver
 
 /*
 #cgo CFLAGS: -x objective-c
@@ -61,17 +61,12 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"os"
-	"os/exec"
-	"os/user"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
@@ -81,7 +76,7 @@ import (
 	"golang.org/x/mobile/gl"
 )
 
-const useLifecycler = true
+// note: this file contains all the cgo-relevant code for interfacing into cocoa
 
 var initThreadID C.uint64_t
 
@@ -95,6 +90,13 @@ func init() {
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
 	initThreadID = C.threadID()
+}
+
+func startDriver() {
+	if tid := C.threadID(); tid != initThreadID {
+		log.Fatalf("macdriver.Main called on thread %d, but macdriver.init ran on %d", tid, initThreadID)
+	}
+	C.startDriver()
 }
 
 func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
@@ -148,16 +150,6 @@ func preparedOpenGL(id, ctx, vba uintptr) {
 
 var mainCallback func(oswin.App)
 
-func main(f func(oswin.App)) error {
-	if tid := C.threadID(); tid != initThreadID {
-		log.Fatalf("gldriver.Main called on thread %d, but gldriver.init ran on %d", tid, initThreadID)
-	}
-
-	mainCallback = f
-	C.startDriver()
-	return nil
-}
-
 //export driverStarted
 func driverStarted() {
 	oswin.TheApp = theApp
@@ -199,7 +191,7 @@ func drawLoop(w *windowImpl, vba uintptr) {
 	// Avoid this by binding it again.
 	C.glBindVertexArray(C.GLuint(vba))
 	if errno := C.glGetError(); errno != 0 {
-		panic(fmt.Sprintf("gldriver: glBindVertexArray failed: %d", errno))
+		panic(fmt.Sprintf("macdriver: glBindVertexArray failed: %d", errno))
 	}
 
 	workAvailable := w.worker.WorkAvailable()
@@ -226,27 +218,6 @@ outer:
 			w.publishDone <- oswin.PublishResult{}
 		}
 	}
-}
-
-// for sending any kind of event
-func sendEvent(id uintptr, ev oswin.Event) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-	if w == nil {
-		return
-	}
-	ev.Init()
-	w.Send(ev)
-}
-
-// for sending window.Event's
-func sendWindowEvent(w *windowImpl, act window.Actions) {
-	winEv := window.Event{
-		Action: act,
-	}
-	winEv.Init()
-	w.Send(&winEv)
 }
 
 //export setGeom
@@ -312,6 +283,7 @@ func windowClosing(id uintptr) {
 	}
 	// todo: following doesn't work even though drawLoop is stuck on the select for w.winClose
 	// w.winClose <- struct{}{} // break out of draw loop
+	w.CloseClean()
 	sendWindowEvent(w, window.Close)
 }
 
@@ -393,34 +365,6 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 		sc.Name = C.GoStringN(sname, snlen)
 	}
 	// todo: rest of the fields
-}
-
-// Mac virtual keys (kVK_) defined here:
-// /System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/Headers/Events.h
-// and NSEventModifierFlags are here:
-// /System/Library/Frameworks/AppKit.framework/Headers/NSEvent.h
-var mods = [...]struct {
-	flags uint32
-	code  uint16
-	mod   key.Modifiers
-}{
-	{C.NSEventModifierFlagShift, C.kVK_Shift, key.Shift},
-	{C.NSEventModifierFlagShift, C.kVK_RightShift, key.Shift},
-	{C.NSEventModifierFlagControl, C.kVK_Control, key.Control},
-	{C.NSEventModifierFlagControl, C.kVK_RightControl, key.Control},
-	{C.NSEventModifierFlagOption, C.kVK_Option, key.Alt},
-	{C.NSEventModifierFlagOption, C.kVK_RightOption, key.Alt},
-	{C.NSEventModifierFlagCommand, C.kVK_Command, key.Meta},
-	{C.NSEventModifierFlagCommand, C.kVK_RightCommand, key.Meta},
-}
-
-func cocoaMods(flags uint32) (m int32) {
-	for _, mod := range mods {
-		if flags&mod.flags != 0 {
-			m |= 1 << uint32(mod.mod)
-		}
-	}
-	return m
 }
 
 func cocoaMouseAct(ty int32) mouse.Actions {
@@ -577,16 +521,230 @@ func flagEvent(id uintptr, flags uint32) {
 
 var lastFlags uint32
 
-// cocoaRune marks the Carbon/Cocoa private-range unicode rune representing
-// a non-unicode key event to -1, used for Rune in the key package.
-//
-// http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/CORPCHAR.TXT
-func cocoaRune(r rune) rune {
-	if '\uE000' <= r && r <= '\uF8FF' {
-		return -1
-	}
-	return r
+func surfaceCreate() error {
+	return errors.New("macdriver: surface creation not implemented on darwin")
 }
+
+/////////////////////////////////////////////////////////////////
+// MainMenu
+
+func (mm *mainMenuImpl) Menu() oswin.Menu {
+	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
+	return oswin.Menu(mmen)
+}
+
+func (mm *mainMenuImpl) Reset(men oswin.Menu) {
+	C.doMenuReset(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	subid := C.doAddSubMenu(C.uintptr_t(men), title)
+	return oswin.Menu(subid)
+}
+
+func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	sc := ""
+	r, mods, err := key.DecodeChord(shortcut)
+	if err == nil {
+		sc = strings.ToLower(string(r))
+	}
+
+	scShift := (mods&1<<uint32(key.Shift) != 0)
+	scCommand := (mods&1<<uint32(key.Meta) != 0)
+	scAlt := (mods&1<<uint32(key.Alt) != 0)
+	scControl := (mods&1<<uint32(key.Control) != 0)
+
+	scs := C.CString(sc)
+	defer C.free(unsafe.Pointer(scs))
+
+	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
+	C.doAddSeparator(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
+	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
+	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
+}
+
+//export menuFired
+func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
+	w := theApp.windows[id]
+	tit := C.GoStringN(title, tilen)
+	osmm := w.MainMenu()
+	if osmm == nil {
+		return
+	}
+	go osmm.Triggered(w, tit, int(tag))
+}
+
+/////////////////////////////////////////////////////////////////
+// clip.Board impl
+
+type clipImpl struct {
+	data mimedata.Mimes
+}
+
+var theClip = clipImpl{}
+
+// curpMimeData is the current mime data to write to from cocoa side
+var curMimeData *mimedata.Mimes
+
+func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+	if len(types) == 0 {
+		return nil
+	}
+	ci.data = nil
+	curMimeData = &ci.data
+
+	wantText := mimedata.IsText(types[0])
+
+	if wantText {
+		C.clipReadText() // calls addMimeText
+		if len(ci.data) == 0 {
+			return nil
+		}
+		txt := string(ci.data[0].Data)
+		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
+		if isMulti {
+			return mimedata.FromMultipart(body, boundary)
+		} else {
+			if mediaType != "" { // found a mime type encoding
+				return mimedata.NewMime(mediaType, []byte(txt))
+			} else {
+				// we can't really figure out type, so just assume..
+				return mimedata.NewMime(types[0], []byte(txt))
+			}
+		}
+	} else {
+		// todo: deal with image formats etc
+	}
+	return ci.data
+}
+
+func (ci *clipImpl) WriteText(b []byte) {
+	sz := len(b)
+	cdata := C.malloc(C.size_t(sz))
+	copy((*[1 << 30]byte)(cdata)[0:sz], b)
+	C.pasteWriteAddText((*C.char)(cdata), C.int(sz))
+	C.free(unsafe.Pointer(cdata))
+}
+
+func (ci *clipImpl) Write(data mimedata.Mimes) error {
+	ci.Clear()
+	if len(data) > 1 { // multipart
+		mpd := data.ToMultipart()
+		ci.WriteText(mpd)
+	} else {
+		d := data[0]
+		if mimedata.IsText(d.Type) {
+			ci.WriteText(d.Data)
+		}
+	}
+	C.clipWrite()
+	return nil
+}
+
+func (ci *clipImpl) Clear() {
+	C.clipClear()
+}
+
+//export addMimeText
+func addMimeText(cdata *C.char, datalen C.int) {
+	if *curMimeData == nil {
+		*curMimeData = make(mimedata.Mimes, 1)
+		(*curMimeData)[0] = &mimedata.Data{Type: mimedata.TextPlain}
+	}
+	md := (*curMimeData)[0]
+	if len(md.Type) == 0 {
+		md.Type = mimedata.TextPlain
+	}
+	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
+	md.Data = append(md.Data, data...)
+}
+
+//export addMimeData
+func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
+	if *curMimeData == nil {
+		*curMimeData = make(mimedata.Mimes, 0)
+	}
+	typ := C.GoStringN(ctyp, typlen)
+	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
+	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
+}
+
+/////////////////////////////////////////////////////////////////
+// cursor impl
+
+type cursorImpl struct {
+	cursor.CursorBase
+}
+
+var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
+
+func (c *cursorImpl) Push(sh cursor.Shapes) {
+	c.PushStack(sh)
+	C.pushCursor(C.int(sh))
+}
+
+func (c *cursorImpl) Set(sh cursor.Shapes) {
+	c.Cur = sh
+	C.setCursor(C.int(sh))
+}
+
+func (c *cursorImpl) Pop() {
+	c.PopStack()
+	C.popCursor()
+}
+
+func (c *cursorImpl) Hide() {
+	c.Vis = false
+	C.hideCursor()
+}
+
+func (c *cursorImpl) Show() {
+	c.Vis = true
+	C.showCursor()
+}
+
+func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
+	if c.Cur == sh {
+		return false
+	}
+	c.Push(sh)
+	return true
+}
+
+func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
+	if c.Cur == sh {
+		c.Pop()
+		return true
+	}
+	return false
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+//  key mapping
 
 // cocoaKeyCode converts a Carbon/Cocoa virtual key code number
 // into the standard keycodes used by the key package.
@@ -846,298 +1004,41 @@ func cocoaKeyCode(vkcode uint16) key.Codes {
 	}
 }
 
-func surfaceCreate() error {
-	return errors.New("gldriver: surface creation not implemented on darwin")
-}
-
-func (app *appImpl) Platform() oswin.Platforms {
-	return oswin.MacOS
-}
-
-func (app *appImpl) PrefsDir() string {
-	usr, err := user.Current()
-	if err != nil {
-		log.Print(err)
-		return "/tmp"
+// cocoaRune marks the Carbon/Cocoa private-range unicode rune representing
+// a non-unicode key event to -1, used for Rune in the key package.
+//
+// http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/CORPCHAR.TXT
+func cocoaRune(r rune) rune {
+	if '\uE000' <= r && r <= '\uF8FF' {
+		return -1
 	}
-	return filepath.Join(usr.HomeDir, "Library")
+	return r
 }
 
-func (app *appImpl) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
+// Mac virtual keys (kVK_) defined here:
+// /System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/Headers/Events.h
+// and NSEventModifierFlags are here:
+// /System/Library/Frameworks/AppKit.framework/Headers/NSEvent.h
+var mods = [...]struct {
+	flags uint32
+	code  uint16
+	mod   key.Modifiers
+}{
+	{C.NSEventModifierFlagShift, C.kVK_Shift, key.Shift},
+	{C.NSEventModifierFlagShift, C.kVK_RightShift, key.Shift},
+	{C.NSEventModifierFlagControl, C.kVK_Control, key.Control},
+	{C.NSEventModifierFlagControl, C.kVK_RightControl, key.Control},
+	{C.NSEventModifierFlagOption, C.kVK_Option, key.Alt},
+	{C.NSEventModifierFlagOption, C.kVK_RightOption, key.Alt},
+	{C.NSEventModifierFlagCommand, C.kVK_Command, key.Meta},
+	{C.NSEventModifierFlagCommand, C.kVK_RightCommand, key.Meta},
 }
 
-func (app *appImpl) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *appImpl) FontPaths() []string {
-	return []string{"/Library/Fonts"}
-}
-
-func (app *appImpl) ClipBoard() clip.Board {
-	return &theClip
-}
-
-func (app *appImpl) Cursor() cursor.Cursor {
-	return &theCursor
-}
-
-func (app *appImpl) OpenURL(url string) {
-	cmd := exec.Command("open", url)
-	cmd.Run()
-}
-
-/////////////////////////////////////////////////////////////////
-// MainMenu
-
-func (w *windowImpl) MainMenu() oswin.MainMenu {
-	if w.mainMenu == nil {
-		mm := &mainMenuImpl{win: w}
-		w.mainMenu = mm
-	}
-	return w.mainMenu.(*mainMenuImpl)
-}
-
-type mainMenuImpl struct {
-	win      *windowImpl
-	callback func(win oswin.Window, title string, tag int)
-}
-
-func (mm *mainMenuImpl) Window() oswin.Window {
-	return mm.win
-}
-
-func (mm *mainMenuImpl) SetWindow(win oswin.Window) {
-	mm.win = win.(*windowImpl)
-}
-
-func (mm *mainMenuImpl) SetFunc(fun func(win oswin.Window, title string, tag int)) {
-	mm.callback = fun
-}
-
-func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
-	if mm.callback == nil {
-		return
-	}
-	mm.callback(win, title, tag)
-}
-
-func (mm *mainMenuImpl) Menu() oswin.Menu {
-	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
-	return oswin.Menu(mmen)
-}
-
-func (mm *mainMenuImpl) Reset(men oswin.Menu) {
-	C.doMenuReset(C.uintptr_t(men))
-}
-
-func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-
-	subid := C.doAddSubMenu(C.uintptr_t(men), title)
-	return oswin.Menu(subid)
-}
-
-func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-
-	sc := ""
-	r, mods, err := key.DecodeChord(shortcut)
-	if err == nil {
-		sc = strings.ToLower(string(r))
-	}
-
-	scShift := (mods&1<<uint32(key.Shift) != 0)
-	scCommand := (mods&1<<uint32(key.Meta) != 0)
-	scAlt := (mods&1<<uint32(key.Alt) != 0)
-	scControl := (mods&1<<uint32(key.Control) != 0)
-
-	scs := C.CString(sc)
-	defer C.free(unsafe.Pointer(scs))
-
-	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	return oswin.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
-	C.doAddSeparator(C.uintptr_t(men))
-}
-
-func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	return oswin.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
-	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
-	return oswin.MenuItem(mid)
-}
-
-func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
-	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
-}
-
-//export menuFired
-func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
-	w := theApp.windows[id]
-	tit := C.GoStringN(title, tilen)
-	osmm := w.MainMenu()
-	if osmm == nil {
-		return
-	}
-	go osmm.Triggered(w, tit, int(tag))
-}
-
-/////////////////////////////////////////////////////////////////
-// clip.Board impl
-
-type clipImpl struct {
-	data mimedata.Mimes
-}
-
-var theClip = clipImpl{}
-
-// curpMimeData is the current mime data to write to from cocoa side
-var curMimeData *mimedata.Mimes
-
-func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	if len(types) == 0 {
-		return nil
-	}
-	ci.data = nil
-	curMimeData = &ci.data
-
-	wantText := mimedata.IsText(types[0])
-
-	if wantText {
-		C.clipReadText() // calls addMimeText
-		if len(ci.data) == 0 {
-			return nil
-		}
-		txt := string(ci.data[0].Data)
-		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
-		if isMulti {
-			return mimedata.FromMultipart(body, boundary)
-		} else {
-			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, []byte(txt))
-			} else {
-				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], []byte(txt))
-			}
-		}
-	} else {
-		// todo: deal with image formats etc
-	}
-	return ci.data
-}
-
-func (ci *clipImpl) WriteText(b []byte) {
-	sz := len(b)
-	cdata := C.malloc(C.size_t(sz))
-	copy((*[1 << 30]byte)(cdata)[0:sz], b)
-	C.pasteWriteAddText((*C.char)(cdata), C.int(sz))
-	C.free(unsafe.Pointer(cdata))
-}
-
-func (ci *clipImpl) Write(data mimedata.Mimes) error {
-	ci.Clear()
-	if len(data) > 1 { // multipart
-		mpd := data.ToMultipart()
-		ci.WriteText(mpd)
-	} else {
-		d := data[0]
-		if mimedata.IsText(d.Type) {
-			ci.WriteText(d.Data)
+func cocoaMods(flags uint32) (m int32) {
+	for _, mod := range mods {
+		if flags&mod.flags != 0 {
+			m |= 1 << uint32(mod.mod)
 		}
 	}
-	C.clipWrite()
-	return nil
-}
-
-func (ci *clipImpl) Clear() {
-	C.clipClear()
-}
-
-//export addMimeText
-func addMimeText(cdata *C.char, datalen C.int) {
-	if *curMimeData == nil {
-		*curMimeData = make(mimedata.Mimes, 1)
-		(*curMimeData)[0] = &mimedata.Data{Type: mimedata.TextPlain}
-	}
-	md := (*curMimeData)[0]
-	if len(md.Type) == 0 {
-		md.Type = mimedata.TextPlain
-	}
-	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
-	md.Data = append(md.Data, data...)
-}
-
-//export addMimeData
-func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
-	if *curMimeData == nil {
-		*curMimeData = make(mimedata.Mimes, 0)
-	}
-	typ := C.GoStringN(ctyp, typlen)
-	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
-	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
-}
-
-/////////////////////////////////////////////////////////////////
-// cursor impl
-
-type cursorImpl struct {
-	cursor.CursorBase
-}
-
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
-
-func (c *cursorImpl) Push(sh cursor.Shapes) {
-	c.PushStack(sh)
-	C.pushCursor(C.int(sh))
-}
-
-func (c *cursorImpl) Set(sh cursor.Shapes) {
-	c.Cur = sh
-	C.setCursor(C.int(sh))
-}
-
-func (c *cursorImpl) Pop() {
-	c.PopStack()
-	C.popCursor()
-}
-
-func (c *cursorImpl) Hide() {
-	c.Vis = false
-	C.hideCursor()
-}
-
-func (c *cursorImpl) Show() {
-	c.Vis = true
-	C.showCursor()
-}
-
-func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
-	if c.Cur == sh {
-		return false
-	}
-	c.Push(sh)
-	return true
-}
-
-func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
-	if c.Cur == sh {
-		c.Pop()
-		return true
-	}
-	return false
+	return m
 }

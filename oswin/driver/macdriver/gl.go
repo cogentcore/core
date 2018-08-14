@@ -7,32 +7,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package gldriver provides an OpenGL driver for accessing a screen.
-package gldriver
+// Package macdriver provides an OpenGL-based driver for MacOS platform.
+package macdriver
 
 import (
 	"encoding/binary"
 	"fmt"
 	"math"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/errapp"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )
-
-// Main is called by the program's main function to run the graphical
-// application.
-//
-// It calls f on the App, possibly in a separate goroutine, as some OS-
-// specific libraries require being on 'the main thread'. It returns when f
-// returns.
-func Main(f func(oswin.App)) {
-	if err := main(f); err != nil {
-		oswin.TheApp = errapp.Stub(err)
-		f(oswin.TheApp)
-	}
-}
 
 func mul(a, b f64.Aff3) f64.Aff3 {
 	return f64.Aff3{

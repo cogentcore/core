@@ -7,7 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gldriver
+package macdriver
 
 import (
 	"image"
@@ -18,6 +18,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/gi/oswin/window"
 	"golang.org/x/image/math/f64"
 	"golang.org/x/mobile/gl"
 )
@@ -71,38 +72,31 @@ type windowImpl struct {
 	closeCleanFunc func(win oswin.Window)
 }
 
+// for sending any kind of event
+func sendEvent(id uintptr, ev oswin.Event) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+	ev.Init()
+	w.Send(ev)
+}
+
+// for sending window.Event's
+func sendWindowEvent(w *windowImpl, act window.Actions) {
+	winEv := window.Event{
+		Action: act,
+	}
+	winEv.Init()
+	w.Send(&winEv)
+}
+
 // NextEvent implements the oswin.EventDeque interface.
 func (w *windowImpl) NextEvent() oswin.Event {
 	e := w.Deque.NextEvent()
 	return e
-}
-
-func (w *windowImpl) Close() {
-	// There are two ways a window can be closed: the Operating System or
-	// Desktop Environment can initiate (e.g. in response to a user clicking a
-	// red button), or the Go app can programatically close the window (by
-	// calling Window.Release).
-	//
-	// When the OS closes a window:
-	//	- Cocoa:   Obj-C's windowWillClose calls Go's windowClosing.
-	//	- X11:     the X11 server sends a WM_DELETE_WINDOW message.
-	//	- Windows: TODO: implement and document this.
-	//
-	// When Window.Release is called, the closeWindow call below:
-	//	- Cocoa:   calls Obj-C's performClose, which emulates the red button
-	//	           being clicked. (TODO: document how this actually cleans up
-	//	           resources??)
-	//	- X11:     calls C's XDestroyWindow.
-	//	- Windows: TODO: implement and document this.
-	//
-	// On Cocoa, if these two approaches race, experiments suggest that the
-	// race is won by performClose (which is called serially on the main
-	// thread). Even if that isn't true, the windowWillClose handler is
-	// idempotent.
-
-	w.CloseClean()
-	closeWindow(w.id)
-	theApp.DeleteWin(w.id)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
@@ -386,6 +380,14 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	posWindow(w, pos)
 }
 
+func (w *windowImpl) MainMenu() oswin.MainMenu {
+	if w.mainMenu == nil {
+		mm := &mainMenuImpl{win: w}
+		w.mainMenu = mm
+	}
+	return w.mainMenu.(*mainMenuImpl)
+}
+
 func (w *windowImpl) Raise() {
 	raiseWindow(w)
 }
@@ -414,4 +416,10 @@ func (w *windowImpl) CloseClean() {
 	if w.closeCleanFunc != nil {
 		w.closeCleanFunc(w)
 	}
+}
+
+func (w *windowImpl) Close() {
+	w.CloseClean()
+	closeWindow(w.id)
+	theApp.DeleteWin(w.id)
 }

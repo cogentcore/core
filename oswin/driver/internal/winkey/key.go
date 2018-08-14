@@ -9,12 +9,10 @@
 
 // +build windows
 
-package win32
+package winkey
 
 import (
-	"fmt"
 	"syscall"
-	"unicode/utf16"
 
 	"github.com/goki/gi/oswin/key"
 )
@@ -313,31 +311,13 @@ func convVirtualKeyCode(vKey uint32) key.Codes {
 	return key.CodeUnknown
 }
 
-func readRune(vKey uint32, scanCode uint8) rune {
-	var (
-		keystate [256]byte
-		buf      [4]uint16
-	)
-	if err := _GetKeyboardState(&keystate[0]); err != nil {
-		panic(fmt.Sprintf("win32: %v", err))
-	}
-	// TODO: cache GetKeyboardLayout result, update on WM_INPUTLANGCHANGE
-	layout := _GetKeyboardLayout(0)
-	ret := _ToUnicodeEx(vKey, uint32(scanCode), &keystate[0], &buf[0], int32(len(buf)), 0, layout)
-	if ret < 1 {
-		return -1
-	}
-	return utf16.Decode(buf[:ret])[0]
-}
+func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (c key.Codes, mod int32) {
+	c = convVirtualKeyCode(uint32(wParam))
+	mod = int32(keyModifiers())
 
-func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	r := readRune(uint32(wParam), uint8(lParam>>16))
-	c := convVirtualKeyCode(uint32(wParam))
-	mod := int32(keyModifiers())
-
-	// these keys are fooled by presence of some modifiers -- restore 
+	// these keys are fooled by presence of some modifiers -- restore
 	if r == -1 {
-		shft := mod & (1<<uint32(key.Shift)) != 0
+		shft := mod&(1<<uint32(key.Shift)) != 0
 		switch c {
 		case key.CodeEqualSign:
 			if shft {
@@ -377,40 +357,5 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 			}
 		}
 	}
-	
-	var act key.Actions
-	
-	switch uMsg {
-	case _WM_KEYDOWN:
-		const prevMask = 1 << 30
-		if repeat := lParam&prevMask == prevMask; repeat {
-			act = key.None
-		} else {
-			act = key.Press
-		}
-	case _WM_KEYUP:
-		act = key.Release
-	default:
-		panic(fmt.Sprintf("win32: unexpected key message: %d", uMsg))
-	}
-
-	event := &key.Event{
-		Rune:      r,
-		Code:      c,
-		Modifiers: mod,
-		Action:    act,
-	}
-
-	KeyEvent(hwnd, event)
-
-	// do ChordEvent -- only for non-modifier key presses -- call
-	// key.ChordString to convert the event into a parsable string for GUI
-	// events
-	if act == key.Press && !key.CodeIsModifier(c) {
-		che := &key.ChordEvent{Event: *event}
-		KeyEvent(hwnd, che)
-	}
-
-
-	return 0
+	return
 }
