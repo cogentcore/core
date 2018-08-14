@@ -529,12 +529,13 @@ func (sr *SpanRender) LastFont() (face font.Face, color color.Color) {
 
 // TextLink represents a hyperlink within rendered text
 type TextLink struct {
-	Label     string `desc:"text label for the link"`
-	URL       string `desc:"full URL for the link"`
-	StartSpan int    `desc:"span index where link starts"`
-	StartIdx  int    `desc:"index in StartSpan where link starts"`
-	EndSpan   int    `desc:"span index where link ends (can be same as EndSpan)"`
-	EndIdx    int    `desc:"index in EndSpan where link ends (index of last rune in label)"`
+	Label     string   `desc:"text label for the link"`
+	URL       string   `desc:"full URL for the link"`
+	Props     ki.Props `desc:"proerties defined for the link"`
+	StartSpan int      `desc:"span index where link starts"`
+	StartIdx  int      `desc:"index in StartSpan where link starts"`
+	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`
+	EndIdx    int      `desc:"index in EndSpan where link ends (index of last rune in label)"`
 }
 
 // Bounds returns the bounds of the link
@@ -969,13 +970,17 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			case "a":
 				fs.Color.SetColor(Prefs.LinkColor)
 				fs.SetDeco(DecoUnderline)
+				curLinkIdx = len(tr.Links)
+				tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
+				sprop := make(ki.Props, len(se.Attr))
+				tl.Props = sprop
 				for _, attr := range se.Attr {
 					if attr.Name.Local == "href" {
-						curLinkIdx = len(tr.Links)
-						tl := TextLink{URL: attr.Value, StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
-						tr.Links = append(tr.Links, tl)
+						tl.URL = attr.Value
 					}
+					sprop[attr.Name.Local] = attr.Value
 				}
+				tr.Links = append(tr.Links, *tl)
 			case "s", "del", "strike":
 				fs.SetDeco(DecoLineThrough)
 			case "sup":

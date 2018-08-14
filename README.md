@@ -100,15 +100,23 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * windows:
 	+ support SetPos window method (and probably need to track movement)
+	+ remove lifecycle, update to windows event, close/quit req, etc
 
 * linux:
 	+ multipart clip.Board
 	+ moving window isn't updating pos of new windows (now fixed? test)
 	+ do similar font name updating as done on Windows now
+	+ remove lifecycle, update to windows event, close/quit req, etc
 
 * mac:
 
 ## General / Widgets
+
+* paint is a Window event
+
+* double check all the window flags!  also fullscreen.
+
+* add option for no window render at all while iconfied
 
 * arrow nav for menubar
 

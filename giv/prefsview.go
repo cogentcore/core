@@ -131,15 +131,15 @@ func PrefsEditor(p *gi.Preferences) {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, false)
 
-	win.OSWin.SetCloseReqFunc(func() {
+	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		gi.ChoiceDialog(vp, "Save Prefs Before Closing?", "Do you want to save any changes to preferences before closing?", []string{"Save and Close", "Discard and Close", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
 				p.Save()
 				fmt.Println("Preferences Saved to prefs.json")
-				win.OSWin.Close()
+				w.Close()
 			case 1:
-				win.OSWin.Close()
+				w.Close()
 			case 2:
 				// default is to do nothing, i.e., cancel
 			}

@@ -60,6 +60,9 @@ const (
 	// receiving input.
 	DeFocus
 
+	// Paint indicates a request to repaint the window.
+	Paint
+
 	ActionsN
 )
 

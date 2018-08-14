@@ -161,11 +161,11 @@ func GoGiEditor(obj ki.Ki) {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, false)
 
-	win.OSWin.SetCloseReqFunc(func() {
+	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		gi.ChoiceDialog(vp, "Save JSON Before Closing?", "Do you want to save to JSON before closing?", []string{"Close Without Saving", "Save JSON", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
-				win.OSWin.Close()
+				w.Close()
 			case 1:
 				gieditSaveGUI(vp, obj)
 			case 2:

@@ -117,12 +117,12 @@ type Window interface {
 	// SetCloseReqFunc sets the function that is called whenver there is a
 	// request to close the window (via a OS or a call to CloseReq() method).  That
 	// function can then adjudicate whether and when to actually call Close.
-	SetCloseReqFunc(fun func())
+	SetCloseReqFunc(fun func(win Window))
 
 	// SetCloseCleanFunc sets the function that is called whenver window is
 	// actually about to close (irrevocably) -- can do any necessary
 	// last-minute cleanup here.
-	SetCloseCleanFunc(fun func())
+	SetCloseCleanFunc(fun func(win Window))
 
 	// CloseReq is a close request, triggered either by OS or user call (e.g.,
 	// via Close menu action) -- calls function previously-registered by

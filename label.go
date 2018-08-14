@@ -178,12 +178,12 @@ func (g *Label) Layout2D(parBBox image.Rectangle) {
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by opening in user's default browser (see oswin/App.OpenURL()
 // method for more info)
-func (g *Label) OpenLink(label, url string) {
+func (g *Label) OpenLink(tl *TextLink) {
 	if len(g.LinkSig.Cons) == 0 {
-		oswin.TheApp.OpenURL(url)
+		oswin.TheApp.OpenURL(tl.URL)
 		return
 	}
-	g.LinkSig.Emit(g.This, 0, url) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	g.LinkSig.Emit(g.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 func (g *Label) LabelEvents() {
@@ -196,10 +196,11 @@ func (g *Label) LabelEvents() {
 		if lb.Selectable || hasLinks {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				if hasLinks {
-					for _, tl := range lb.Render.Links {
+					for ti, _ := range lb.Render.Links {
+						tl := &lb.Render.Links[ti]
 						tlb := tl.Bounds(&lb.Render, pos)
 						if me.Where.In(tlb) {
-							lb.OpenLink(tl.Label, tl.URL)
+							lb.OpenLink(tl)
 							me.SetProcessed()
 							return
 						}

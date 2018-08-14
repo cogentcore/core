@@ -316,15 +316,15 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 
-	win.OSWin.SetCloseReqFunc(func() {
+	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		gi.PromptDialog(vp, "Really Close Window?", "Are you <i>sure</i> you want to close the window?", true, true, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
-				win.OSWin.Close()
+				w.Close()
 			}
 		})
 	})
 
-	win.OSWin.SetCloseCleanFunc(func() {
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
 		fmt.Printf("Doing final Close cleanup here..\n")
 	})
 

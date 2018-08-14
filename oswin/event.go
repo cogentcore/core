@@ -89,7 +89,7 @@ const (
 	RotateEvent
 
 	// WindowEvent reports any changes in the window size, orientation,
-	// iconify, close, open
+	// iconify, close, open, paint
 	WindowEvent
 
 	// WindowResizeEvent is specifically for window resize events which need
@@ -102,12 +102,6 @@ const (
 	DNDMoveEvent
 	// DNDFocusEvent is for Enter / Exit events of the DND into / out of a given widget
 	DNDFocusEvent
-
-	// LifeCycleEvent for app window activation, focus, and startup / termination
-	LifeCycleEvent
-
-	// PaintEvent for notifications about painting windows
-	PaintEvent
 
 	// number of event types
 	EventTypeN

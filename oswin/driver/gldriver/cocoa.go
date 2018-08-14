@@ -76,7 +76,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"golang.org/x/mobile/gl"
@@ -174,15 +173,11 @@ func drawgl(id uintptr) {
 	theApp.mu.Lock()
 	w := theApp.windows[id]
 	theApp.mu.Unlock()
-
 	if w == nil {
-		return // closing window
+		return
 	}
-
 	bitflag.Clear(&w.Flag, int(oswin.Iconified))
-	pe := &paint.Event{External: true}
-	pe.Init()
-	w.Send(pe)
+	sendWindowEvent(w, window.Paint)
 	<-w.drawDone
 }
 
@@ -315,6 +310,7 @@ func windowClosing(id uintptr) {
 	if w == nil {
 		return
 	}
+	// todo: following doesn't work even though drawLoop is stuck on the select for w.winClose
 	// w.winClose <- struct{}{} // break out of draw loop
 	sendWindowEvent(w, window.Close)
 }
@@ -328,6 +324,7 @@ func windowIconified(id uintptr) {
 		return
 	}
 	bitflag.Set(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Focus))
 	sendWindowEvent(w, window.Iconify)
 }
 

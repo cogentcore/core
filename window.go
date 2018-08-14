@@ -23,7 +23,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -934,6 +933,7 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 // other state etc (popups, etc)
 func (w *Window) EventLoop() {
 	var skippedResize *window.Event
+	var lastResizeTime time.Time
 
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
@@ -973,7 +973,7 @@ func (w *Window) EventLoop() {
 		lagMs := int(lag / time.Millisecond)
 		// fmt.Printf("et %v lag %v\n", et, lag)
 
-		if et == lastEt || lastEt == oswin.WindowResizeEvent && et == oswin.PaintEvent {
+		if et == lastEt || lastEt == oswin.WindowResizeEvent {
 			switch et {
 			case oswin.MouseScrollEvent:
 				me := evi.(*mouse.ScrollEvent)
@@ -1020,6 +1020,7 @@ func (w *Window) EventLoop() {
 					w.DoFullRender = true
 					lastSkipped = false
 					skippedResize = nil
+					lastResizeTime = now
 					continue
 				}
 			case oswin.WindowEvent:
@@ -1028,9 +1029,13 @@ func (w *Window) EventLoop() {
 					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
-			case oswin.PaintEvent:
-				// fmt.Printf("skipped paint\n")
-				continue
+				if we.Action == window.Paint {
+					rslag := int(we.Time().Sub(lastResizeTime) / time.Millisecond)
+					if rslag < EventSkipLagMSec {
+						// fmt.Printf("skipped paint in ongoing resize\n")
+						continue
+					}
+				}
 			}
 		}
 		lastSkipped = false
@@ -1040,6 +1045,7 @@ func (w *Window) EventLoop() {
 			w.Resized(w.OSWin.Size())
 			w.DoFullRender = true
 			skippedResize = nil
+			lastResizeTime = now
 		}
 
 		// detect start of drag and DND -- both require delays in starting due
@@ -1120,10 +1126,9 @@ func (w *Window) EventLoop() {
 
 		// Window gets first crack at the events, and handles window-specific ones
 		switch e := evi.(type) {
-		case *paint.Event:
-			w.FullReRender()
-			// fmt.Println("doing paint")
-			continue
+		// case *paint.Event:
+		// 	// fmt.Println("doing paint")
+		// 	continue
 		case *window.Event:
 			switch e.Action {
 			case window.Resize:
@@ -1134,6 +1139,9 @@ func (w *Window) EventLoop() {
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
+			case window.Paint:
+				fmt.Printf("got paint event for window %v \n", w.Nm)
+				w.FullReRender()
 			}
 			continue
 		case *key.ChordEvent:
