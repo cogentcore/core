@@ -111,10 +111,10 @@ type Cursor interface {
 	// IsVisible returns whether cursor is currently visible (according to Hide / show actions)
 	IsVisible() bool
 
-	// Hide hides the cursor
+	// Hide hides the cursor if it is not already hidden.
 	Hide()
 
-	// Show shows the cursor after a hide -- must always be balanced with Hide
+	// Show shows the cursor after a hide if it is hidden.
 	Show()
 }
 

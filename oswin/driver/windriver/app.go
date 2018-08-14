@@ -31,12 +31,14 @@ var theApp = &appImpl{
 }
 
 type appImpl struct {
-	mu      sync.Mutex
-	windows map[syscall.Handle]*windowImpl
-	winlist []*windowImpl
-	screens []*oswin.Screen
-	name    string
-	about   string
+	mu            sync.Mutex
+	windows       map[syscall.Handle]*windowImpl
+	winlist       []*windowImpl
+	screens       []*oswin.Screen
+	name          string
+	about         string
+	quitReqFunc   func()
+	quitCleanFunc func()
 }
 
 func (*appImpl) NewImage(size image.Point) (oswin.Image, error) {
@@ -280,6 +282,44 @@ func (app *appImpl) SetAbout(about string) {
 func (app *appImpl) OpenURL(url string) {
 	cmd := exec.Command("explorer", url)
 	cmd.Run()
+}
+
+func (app *appImpl) SetQuitReqFunc(fun func()) {
+	app.quitReqFunc = fun
+}
+
+func (app *appImpl) SetQuitCleanFunc(fun func()) {
+	app.quitCleanFunc = fun
+}
+
+func (app *appImpl) QuitReq() {
+	if app.quitReqFunc != nil {
+		app.quitReqFunc()
+	} else {
+		app.Quit()
+	}
+}
+
+func (app *appImpl) QuitClean() {
+	if app.quitCleanFunc != nil {
+		app.quitCleanFunc()
+	}
+	nwin := len(app.winlist)
+	for i := nwin - 1; i >= 0; i-- {
+		win := app.winlist[i]
+		win.Close()
+	}
+}
+
+func (app *appImpl) Quit() {
+	// todo: could try to invoke quit call instead
+	app.QuitClean()
+	os.Exit(0)
+}
+
+func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	theApp.QuitClean()
+	return 0
 }
 
 //////////////////////////////////////////////////////////////////

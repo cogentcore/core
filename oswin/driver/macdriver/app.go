@@ -282,13 +282,15 @@ func (app *appImpl) QuitClean() {
 	if app.quitCleanFunc != nil {
 		app.quitCleanFunc()
 	}
+	nwin := len(app.winlist)
+	for i := nwin - 1; i >= 0; i-- {
+		win := app.winlist[i]
+		win.Close()
+	}
 }
 
 func (app *appImpl) Quit() {
 	// todo: could try to invoke NSApp terminate method instead
 	app.QuitClean()
-	for _, win := range app.winlist {
-		win.Close()
-	}
 	os.Exit(0)
 }

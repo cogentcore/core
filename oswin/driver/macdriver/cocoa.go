@@ -718,11 +718,17 @@ func (c *cursorImpl) Pop() {
 }
 
 func (c *cursorImpl) Hide() {
+	if c.Vis == false {
+		return
+	}
 	c.Vis = false
 	C.hideCursor()
 }
 
 func (c *cursorImpl) Show() {
+	if c.Vis {
+		return
+	}
 	c.Vis = true
 	C.showCursor()
 }

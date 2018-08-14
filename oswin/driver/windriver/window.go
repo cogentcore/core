@@ -189,8 +189,7 @@ func (w *windowImpl) SetSize(sz image.Point) {
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
-	// todo: need this in base win32
-	w.Pos = pos
+	MoveWindowPos(w.hwnd, pos)
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
@@ -198,11 +197,11 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) Raise() {
-	raiseWindow(w)
+	_BringWindowToTop(w.hwnd)
 }
 
 func (w *windowImpl) Iconify() {
-	iconifyWindow(w)
+	_AnimateWindow(w.hwnd, 200, _AW_HIDE)
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -410,6 +409,18 @@ func ResizeClientRect(hwnd syscall.Handle, size image.Point) error {
 	return _MoveWindow(hwnd, wr.Left, wr.Top, w, h, false)
 }
 
+// MoveWindowPos
+func MoveWindowPos(hwnd syscall.Handle, pos image.Point) error {
+	var wr _RECT
+	err = _GetWindowRect(hwnd, &wr)
+	if err != nil {
+		return err
+	}
+	w := (wr.Right - wr.Left)
+	h := (wr.Bottom - wr.Top)
+	return _MoveWindow(hwnd, pos.X, pos.Y, w, h, false)
+}
+
 // Show shows a newly created window.  It makes the window appear on the
 // screen, and sends an initial size event.
 //
@@ -450,12 +461,26 @@ func sendShow(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult
 }
 
 func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	wp := (*_WINDOWPOS)(unsafe.Pointer(lParam))
-	if wp.Flags&_SWP_NOSIZE != 0 {
+	if _IsIconic(hwnd) {
+		sendIconify(hwnd)
+		return 0
+	} else {
+		wp := (*_WINDOWPOS)(unsafe.Pointer(lParam))
+		if wp.Flags&_SWP_NOSIZE != 0 {
+			return 0
+		}
+		sendSize(hwnd)
 		return 0
 	}
-	sendSize(hwnd)
-	return 0
+}
+
+func sendIconify(hwnd syscall.Handle) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+	bitflag.Set(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Focus))
+	sendWindowEvent(w, window.Iconify)
 }
 
 func sendSize(hwnd syscall.Handle) {
@@ -521,16 +546,11 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	return 0
 }
 
-func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	theApp.QuitClean()
-	// Release(hwnd)
-	return 0
-}
-
 func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
+	bitflag.Clear(&w.Flag, int(oswin.Iconified))
 	sendWindowEvent(hwnd, window.Paint)
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }

@@ -9,10 +9,12 @@
 
 // +build windows
 
-package winkey
+package windriver
 
 import (
+	"fmt"
 	"syscall"
+	"unicode/utf16"
 
 	"github.com/goki/gi/oswin/key"
 )
@@ -358,4 +360,81 @@ func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uin
 		}
 	}
 	return
+}
+
+// Precondition: this is called in immediate response to the message that triggered the event (so not after w.Send).
+func keyModifiers() int32 {
+	var m key.Modifiers
+	down := func(x int32) bool {
+		// GetKeyState gets the key state at the time of the message, so this is what we want.
+		return _GetKeyState(x)&0x80 != 0
+	}
+
+	if down(_VK_CONTROL) {
+		m |= 1 << uint32(key.Control)
+	}
+	if down(_VK_MENU) {
+		m |= 1 << uint32(key.Alt)
+	}
+	if down(_VK_SHIFT) {
+		m |= 1 << uint32(key.Shift)
+	}
+	if down(_VK_LWIN) || down(_VK_RWIN) {
+		m |= 1 << uint32(key.Meta)
+	}
+	return int32(m)
+}
+
+func readRune(vKey uint32, scanCode uint8) rune {
+	var (
+		keystate [256]byte
+		buf      [4]uint16
+	)
+	if err := _GetKeyboardState(&keystate[0]); err != nil {
+		panic(fmt.Sprintf("win32: %v", err))
+	}
+	// TODO: cache GetKeyboardLayout result, update on WM_INPUTLANGCHANGE
+	layout := _GetKeyboardLayout(0)
+	ret := _ToUnicodeEx(vKey, uint32(scanCode), &keystate[0], &buf[0], int32(len(buf)), 0, layout)
+	if ret < 1 {
+		return -1
+	}
+	return utf16.Decode(buf[:ret])[0]
+}
+
+func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	r = readRune(uint32(wParam), uint8(lParam>>16))
+	c, mod := winkey.DecodeKeyEvent(r, hwnd, uMsg, wParam, lParam)
+	var act key.Actions
+	switch uMsg {
+	case _WM_KEYDOWN:
+		const prevMask = 1 << 30
+		if repeat := lParam&prevMask == prevMask; repeat {
+			act = key.None
+		} else {
+			act = key.Press
+		}
+	case _WM_KEYUP:
+		act = key.Release
+	default:
+		panic(fmt.Sprintf("windriver: unexpected key message: %d", uMsg))
+	}
+
+	event := &key.Event{
+		Rune:      r,
+		Code:      c,
+		Modifiers: mod,
+		Action:    act,
+	}
+
+	SendEvent(hwnd, event)
+
+	// do ChordEvent -- only for non-modifier key presses -- call
+	// key.ChordString to convert the event into a parsable string for GUI
+	// events
+	if act == key.Press && !key.CodeIsModifier(c) {
+		che := &key.ChordEvent{Event: *event}
+		SendEvent(hwnd, che)
+	}
+	return 0
 }

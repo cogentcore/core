@@ -106,6 +106,8 @@ type _XFORM struct {
 	eDy  float32
 }
 
+type _LPCTSTR *byte
+
 const (
 	_WM_DESTROY          = 2
 	_WM_SETFOCUS         = 7
@@ -160,12 +162,25 @@ const (
 const (
 	_IDI_APPLICATION = 32512
 	_IDC_ARROW       = 32512
+	_IDC_CROSS       = 32515
+	_IDC_HAND        = 32649
+	_IDC_HELP        = 32651
+	_IDC_IBEAM       = 32513
+	_IDC_NO          = 32648
+	_IDC_SIZEALL     = 32646
+	_IDC_SIZENESW    = 32643
+	_IDC_SIZENS      = 32645
+	_IDC_SIZENWSE    = 32642
+	_IDC_SIZEWE      = 32644
+	_IDC_UPARROW     = 32516
+	_IDC_WAIT        = 32514
 )
 
 const (
 	_CW_USEDEFAULT = 0x80000000 - 0x100000000
 
 	_SW_SHOWDEFAULT = 10
+	_AW_HIDE        = 0x00010000
 
 	_HWND_MESSAGE = syscall.Handle(^uintptr(2)) // -3
 
@@ -245,10 +260,13 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle, err error) = user32.LoadCursorW
 //sys	_LoadIcon(hInstance syscall.Handle, iconName uintptr) (icon syscall.Handle, err error) = user32.LoadIconW
 //sys	_MoveWindow(hwnd syscall.Handle, x int32, y int32, w int32, h int32, repaint bool) (err error) = user32.MoveWindow
+//sys	_BringWindowToTop(hwnd syscall.Handle) (err error) = user32.BringWindowToTop
 //sys	_PostMessage(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult bool) = user32.PostMessageW
 //sys   _PostQuitMessage(exitCode int32) = user32.PostQuitMessage
 //sys	_RegisterClass(wc *_WNDCLASS) (atom uint16, err error) = user32.RegisterClassW
 //sys	_ShowWindow(hwnd syscall.Handle, cmdshow int32) (wasvisible bool) = user32.ShowWindow
+//sys	_AnimateWindow(hwnd syscall.Handle, dwtime int32, dwflags int32) (ok bool) = user32.AnimateWindow
+//sys	_IsIconic(hwnd syscall.Handle) (iconic bool) = user32.IsIconic
 //sys	_ScreenToClient(hwnd syscall.Handle, lpPoint *_POINT) (ok bool) = user32.ScreenToClient
 //sys   _ToUnicodeEx(wVirtKey uint32, wScanCode uint32, lpKeyState *byte, pwszBuff *uint16, cchBuff int32, wFlags uint32, dwhkl syscall.Handle) (ret int32) = user32.ToUnicodeEx
 //sys	_TranslateMessage(msg *_MSG) (done bool) = user32.TranslateMessage
@@ -280,3 +298,6 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_GetDeviceCaps(dc syscall.Handle, index int32) (ret int32) = gdi32.GetDeviceCaps
 //sys	_SetProcessDpiAwareness(pdpi uint32) (ret int32) = shcore.SetProcessDpiAwareness
 //sys	_GetDpiForWindow(hwnd syscall.Handle) (ret uint32) = user32.GetDpiForWindow
+//sys	_LoadCursor(hinst syscall.Handle, _LPCTSTR cursnm) (curs syscall.Handle) = user32.LoadCursor
+//sys	_SetCursor(hinst syscall.Handle) (prevcurs syscall.Handle) = user32.SetCursor
+//sys	_ShowCursor(show bool) (dispcnt int) = user32.ShowCursor

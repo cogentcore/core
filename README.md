@@ -99,8 +99,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * after beta: enable dnd to use OS DND when moves outside window
 
 * windows:
-	+ support SetPos window method (and probably need to track movement)
-	+ remove lifecycle, update to windows event, close/quit req, etc
+	+ is not getting / managing multiple screens
 
 * linux:
 	+ multipart clip.Board

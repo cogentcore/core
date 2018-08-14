@@ -155,6 +155,7 @@ func (p *Preferences) ApplyDPI() {
 
 // Update everything with current preferences -- triggers rebuild of default styles
 func (p *Preferences) Update() {
+	ZoomFactor = 1 // reset so saved dpi is used
 	p.Apply()
 
 	RebuildDefaultStyles = true
