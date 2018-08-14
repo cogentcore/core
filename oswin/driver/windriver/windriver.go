@@ -7,7 +7,7 @@
 package windriver
 
 import (
-	"fmt"
+	"log"
 	"runtime"
 
 	"github.com/goki/gi/oswin"
@@ -29,11 +29,11 @@ func Main(f func(oswin.App)) {
 	runtime.LockOSThread()
 
 	if err := initCommon(); err != nil {
-		return err
+		return
 	}
 
 	if err := initAppWindow(); err != nil {
-		return err
+		return
 	}
 	defer func() {
 		// TODO(andlabs): log an error if this fails?
@@ -42,7 +42,7 @@ func Main(f func(oswin.App)) {
 	}()
 
 	if err := initWindowClass(); err != nil {
-		return err
+		return
 	}
 
 	// Prime the pump.
@@ -54,7 +54,8 @@ func Main(f func(oswin.App)) {
 	for {
 		done, err := _GetMessage(&m, 0, 0, 0)
 		if err != nil {
-			return fmt.Errorf("win32 GetMessage failed: %v", err)
+			log.Printf("win32 GetMessage failed: %v", err)
+			return
 		}
 		if done == 0 { // WM_QUIT
 			break

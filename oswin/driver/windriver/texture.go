@@ -34,11 +34,11 @@ type handleCreateTextureParams struct {
 	err    error
 }
 
-var msgCreateTexture = _AddAppMsg(handleCreateTexture)
+var msgCreateTexture = AddAppMsg(handleCreateTexture)
 
 func newTexture(size image.Point) (oswin.Texture, error) {
 	p := handleCreateTextureParams{size: size}
-	_SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
+	SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
 	if p.err != nil {
 		return nil, p.err
 	}

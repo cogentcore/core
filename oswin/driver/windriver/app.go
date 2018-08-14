@@ -86,7 +86,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	// todo: multiple screens..
 	sc := app.Screen(0)
 	dpi := sc.PhysicalDPI
-	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+	ldpi := dpi
 
 	w := &windowImpl{
 		WindowBase: oswin.WindowBase{
@@ -116,7 +116,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	if procGetDpiForWindow.Find() == nil { // has it
 		dpi = float32(_GetDpiForWindow(w.hwnd))
-		ldpi = oswin.LogicalFmPhysicalDPI(dpi)
+		ldpi = dpi
 		w.PhysDPI = dpi
 		w.LogDPI = ldpi
 		if sc.PhysicalDPI == 96 {
@@ -180,7 +180,7 @@ func (app *appImpl) initScreens() {
 	sc.ScreenNumber = 0
 	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
 	sc.Depth = depth
-	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
+	sc.LogicalDPI = dpi // oswin.LogicalFmPhysicalDPI(dpi)
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{int(widthPx), int(heightPx)} // don't know yet..
@@ -372,7 +372,7 @@ func AddAppMsg(fn func(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr)
 	return uMsg
 }
 
-var mainCallback func()
+var mainCallback func(oswin.App)
 
 func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
 	switch uMsg {
@@ -384,7 +384,7 @@ func appWindowWndProc(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam u
 		deleteWindow(hwnd)
 	case msgMainCallback:
 		go func() {
-			mainCallback()
+			mainCallback(theApp)
 			SendAppMessage(msgQuit, 0, 0)
 		}()
 	case msgQuit:
@@ -472,5 +472,5 @@ func initCommon() (err error) {
 //go:uintptrescapes
 
 func SendMessage(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult uintptr) {
-	return sendMessage(hwnd, uMsg, wParam, lParam)
+	return _sendMessage(hwnd, uMsg, wParam, lParam)
 }

@@ -403,8 +403,8 @@ func readRune(vKey uint32, scanCode uint8) rune {
 }
 
 func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	r = readRune(uint32(wParam), uint8(lParam>>16))
-	c, mod := winkey.DecodeKeyEvent(r, hwnd, uMsg, wParam, lParam)
+	r := readRune(uint32(wParam), uint8(lParam>>16))
+	c, mod := DecodeKeyEvent(r, hwnd, uMsg, wParam, lParam)
 	var act key.Actions
 	switch uMsg {
 	case _WM_KEYDOWN:
@@ -427,14 +427,14 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 		Action:    act,
 	}
 
-	SendEvent(hwnd, event)
+	sendEvent(hwnd, event)
 
 	// do ChordEvent -- only for non-modifier key presses -- call
 	// key.ChordString to convert the event into a parsable string for GUI
 	// events
 	if act == key.Press && !key.CodeIsModifier(c) {
 		che := &key.ChordEvent{Event: *event}
-		SendEvent(hwnd, che)
+		sendEvent(hwnd, che)
 	}
 	return 0
 }

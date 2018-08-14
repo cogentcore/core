@@ -12,9 +12,9 @@
 // this is all windows-specific code from old gldriver -- integrate into windriver
 // package as gl option
 
-/*
-package gldriver
+package windriver
 
+/*
 import (
 	"errors"
 	"fmt"

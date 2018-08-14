@@ -122,7 +122,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 
 	event.Init()
 	lastMouseEvent = event
-	SendEvent(hwnd, event)
+	sendEvent(hwnd, event)
 
 	return 0
 }

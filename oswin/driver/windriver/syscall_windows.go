@@ -106,8 +106,6 @@ type _XFORM struct {
 	eDy  float32
 }
 
-type _LPCTSTR *byte
-
 const (
 	_WM_DESTROY          = 2
 	_WM_SETFOCUS         = 7
@@ -161,6 +159,8 @@ const (
 
 const (
 	_IDI_APPLICATION = 32512
+)
+const (
 	_IDC_ARROW       = 32512
 	_IDC_CROSS       = 32515
 	_IDC_HAND        = 32649
@@ -211,11 +211,11 @@ const (
 )
 
 const (
-	CF_UNICODETEXT = 13
+	_CF_UNICODETEXT = 13
 )
 
 const (
-	GMEM_MOVEABLE = 0x0002
+	_GMEM_MOVEABLE = 0x0002
 )
 
 func _GET_X_LPARAM(lp uintptr) int32 {
@@ -259,6 +259,8 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_GetMessage(msg *_MSG, hwnd syscall.Handle, msgfiltermin uint32, msgfiltermax uint32) (ret int32, err error) [failretval==-1] = user32.GetMessageW
 //sys	_LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle, err error) = user32.LoadCursorW
 //sys	_LoadIcon(hInstance syscall.Handle, iconName uintptr) (icon syscall.Handle, err error) = user32.LoadIconW
+//sys	_SetCursor(hinst syscall.Handle) (prevcurs syscall.Handle) = user32.SetCursor
+//sys	_ShowCursor(show bool) (dispcnt int) = user32.ShowCursor
 //sys	_MoveWindow(hwnd syscall.Handle, x int32, y int32, w int32, h int32, repaint bool) (err error) = user32.MoveWindow
 //sys	_BringWindowToTop(hwnd syscall.Handle) (err error) = user32.BringWindowToTop
 //sys	_PostMessage(hwnd syscall.Handle, uMsg uint32, wParam uintptr, lParam uintptr) (lResult bool) = user32.PostMessageW
@@ -298,6 +300,3 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_GetDeviceCaps(dc syscall.Handle, index int32) (ret int32) = gdi32.GetDeviceCaps
 //sys	_SetProcessDpiAwareness(pdpi uint32) (ret int32) = shcore.SetProcessDpiAwareness
 //sys	_GetDpiForWindow(hwnd syscall.Handle) (ret uint32) = user32.GetDpiForWindow
-//sys	_LoadCursor(hinst syscall.Handle, _LPCTSTR cursnm) (curs syscall.Handle) = user32.LoadCursor
-//sys	_SetCursor(hinst syscall.Handle) (prevcurs syscall.Handle) = user32.SetCursor
-//sys	_ShowCursor(show bool) (dispcnt int) = user32.ShowCursor

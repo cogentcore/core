@@ -412,13 +412,13 @@ func ResizeClientRect(hwnd syscall.Handle, size image.Point) error {
 // MoveWindowPos
 func MoveWindowPos(hwnd syscall.Handle, pos image.Point) error {
 	var wr _RECT
-	err = _GetWindowRect(hwnd, &wr)
+	err := _GetWindowRect(hwnd, &wr)
 	if err != nil {
 		return err
 	}
 	w := (wr.Right - wr.Left)
 	h := (wr.Bottom - wr.Top)
-	return _MoveWindow(hwnd, pos.X, pos.Y, w, h, false)
+	return _MoveWindow(hwnd, int32(pos.X), int32(pos.Y), w, h, false)
 }
 
 // Show shows a newly created window.  It makes the window appear on the
@@ -509,7 +509,6 @@ func sendSize(hwnd syscall.Handle) {
 	// todo: multiple screens
 	sc := oswin.TheApp.Screen(0)
 	ldpi := sc.LogicalDPI
-	act := window.ActionsN
 
 	if w.Sz != sz || w.LogDPI != ldpi {
 		act = window.Resize
@@ -542,7 +541,7 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	theApp.mu.Unlock()
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
-	Release(hwnd)
+	DeleteWindow(hwnd)
 	return 0
 }
 
@@ -551,6 +550,6 @@ func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
 	bitflag.Clear(&w.Flag, int(oswin.Iconified))
-	sendWindowEvent(hwnd, window.Paint)
+	sendWindowEvent(w, window.Paint)
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }

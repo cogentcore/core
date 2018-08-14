@@ -12,24 +12,24 @@ import (
 	"github.com/goki/gi/oswin/cursor"
 )
 
-var cursorMap = map[cursor.Shapes]_LPCTSTR{
-	Arrow:        _IDC_ARROW,
-	Cross:        _IDC_CROSS,
-	DragCopy:     _IDC_UPARROW, // todo: needs custom cursor
-	DragMove:     _IDC_ARROW,   //  todo: needs custom cursor
-	DragLink:     _IDC_ARROW,   //  todo: needs custom cursor
-	HandPointing: _IDC_HAND,
-	HandOpen:     _IDC_HAND, // todo: needs custom cursor
-	HandClosed:   _IDC_HAND, // todo: needs custom cursor
-	Help:         _IDC_HELP,
-	IBeam:        _IDC_IBEAM,
-	Not:          _IDC_NO,
-	UpDown:       _IDC_SIZENS,
-	LeftRight:    _IDC_SIZEWE,
-	UpRight:      _IDC_SIZENESW,
-	UpLeft:       _IDC_SIZENWSE,
-	AllArrows:    _IDC_SIZEALL,
-	Wait:         IDC_WAIT,
+var cursorMap = map[cursor.Shapes]int{
+	cursor.Arrow:        _IDC_ARROW,
+	cursor.Cross:        _IDC_CROSS,
+	cursor.DragCopy:     _IDC_UPARROW, // todo: needs custom cursor
+	cursor.DragMove:     _IDC_ARROW,   //  todo: needs custom cursor
+	cursor.DragLink:     _IDC_ARROW,   //  todo: needs custom cursor
+	cursor.HandPointing: _IDC_HAND,
+	cursor.HandOpen:     _IDC_HAND, // todo: needs custom cursor
+	cursor.HandClosed:   _IDC_HAND, // todo: needs custom cursor
+	cursor.Help:         _IDC_HELP,
+	cursor.IBeam:        _IDC_IBEAM,
+	cursor.Not:          _IDC_NO,
+	cursor.UpDown:       _IDC_SIZENS,
+	cursor.LeftRight:    _IDC_SIZEWE,
+	cursor.UpRight:      _IDC_SIZENESW,
+	cursor.UpLeft:       _IDC_SIZENWSE,
+	cursor.AllArrows:    _IDC_SIZEALL,
+	cursor.Wait:         _IDC_WAIT,
 }
 
 type cursorImpl struct {
@@ -45,7 +45,8 @@ func (c *cursorImpl) cursorHandle(sh cursor.Shapes) syscall.Handle {
 	}
 	ch, ok := c.cursors[sh]
 	if !ok {
-		ch = _LoadCursor(nil, cursorMap[sh])
+		idc := cursorMap[sh]
+		ch, _ := _LoadCursor(0, uintptr(idc))
 		// todo: load custom
 		c.cursors[sh] = ch
 	}
@@ -54,7 +55,7 @@ func (c *cursorImpl) cursorHandle(sh cursor.Shapes) syscall.Handle {
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
 	c.Cur = sh
-	_SetCursor(cursorHandle(sh))
+	_SetCursor(c.cursorHandle(sh))
 }
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
