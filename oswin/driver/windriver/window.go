@@ -298,6 +298,7 @@ var windowMsgs = map[uint32]func(hwnd syscall.Handle, uMsg uint32, wParam, lPara
 	_WM_CLOSE:            sendCloseReq,
 	_WM_DESTROY:          sendClose,
 	_WM_QUIT:             sendQuit,
+	_WM_SETCURSOR:        resetCursor,
 
 	_WM_LBUTTONDOWN: sendMouseEvent,
 	_WM_LBUTTONUP:   sendMouseEvent,
@@ -391,6 +392,23 @@ func newWindow(opts *oswin.NewWindowOptions) (syscall.Handle, error) {
 	return hwnd, nil
 }
 
+// ConfigWindowGeom configures size and position of window
+func ConfigWindowGeom(hwnd syscall.Handle, pos image.Point, size image.Point) error {
+	var cr, wr _RECT
+	err := _GetClientRect(hwnd, &cr)
+	if err != nil {
+		return err
+	}
+	err = _GetWindowRect(hwnd, &wr)
+	if err != nil {
+		return err
+	}
+	w := (wr.Right - wr.Left) - (cr.Right - int32(size.X))
+	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(size.Y))
+	fmt.Printf("move, size window to: %v, %v\n", pos, size)
+	return _MoveWindow(hwnd, int32(pos.X), int32(pos.Y), w, h, false)
+}
+
 // ResizeClientRect makes hwnd client rectangle given size
 func ResizeClientRect(hwnd syscall.Handle, size image.Point) error {
 	var cr, wr _RECT
@@ -416,6 +434,7 @@ func MoveWindowPos(hwnd syscall.Handle, pos image.Point) error {
 	}
 	w := (wr.Right - wr.Left)
 	h := (wr.Bottom - wr.Top)
+	fmt.Printf("attempting to move window to: %v (w,h): %v\n", pos, w, h)
 	return _MoveWindow(hwnd, int32(pos.X), int32(pos.Y), w, h, false)
 }
 
@@ -465,6 +484,7 @@ func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lR
 	} else {
 		wp := (*_WINDOWPOS)(unsafe.Pointer(lParam))
 		if wp.Flags&_SWP_NOSIZE != 0 {
+			fmt.Printf("no size -- check move\n")
 			return 0
 		}
 		sendSize(hwnd)
@@ -522,6 +542,7 @@ func sendSize(hwnd syscall.Handle) {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = ldpi
 	w.Scrn = sc
+	fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
 	sendWindowEvent(w, act)
 }
 

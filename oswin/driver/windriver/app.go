@@ -107,7 +107,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	err = ResizeClientRect(w.hwnd, opts.Size)
+	err = ConfigWindowGeom(w.hwnd, opts.Pos, opts.Size)
 	if err != nil {
 		return nil, err
 	}
@@ -461,10 +461,7 @@ func initCommon() (err error) {
 	if err != nil {
 		return err
 	}
-	hDefaultCursor, err = _LoadCursor(0, _IDC_ARROW)
-	if err != nil {
-		return err
-	}
+	hDefaultCursor = _LoadCursor(0, _IDC_ARROW)
 	// TODO(andlabs) hThisInstance
 	return nil
 }

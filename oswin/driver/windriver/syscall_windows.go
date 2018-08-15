@@ -113,6 +113,7 @@ const (
 	_WM_PAINT            = 15
 	_WM_CLOSE            = 16
 	_WM_QUIT             = 18
+	_WM_SETCURSOR        = 32
 	_WM_WINDOWPOSCHANGED = 71
 	_WM_KEYDOWN          = 256
 	_WM_KEYUP            = 257
@@ -160,20 +161,21 @@ const (
 const (
 	_IDI_APPLICATION = 32512
 )
+
 const (
-	_IDC_ARROW       = 32512
-	_IDC_CROSS       = 32515
-	_IDC_HAND        = 32649
-	_IDC_HELP        = 32651
-	_IDC_IBEAM       = 32513
-	_IDC_NO          = 32648
-	_IDC_SIZEALL     = 32646
-	_IDC_SIZENESW    = 32643
-	_IDC_SIZENS      = 32645
-	_IDC_SIZENWSE    = 32642
-	_IDC_SIZEWE      = 32644
-	_IDC_UPARROW     = 32516
-	_IDC_WAIT        = 32514
+	_IDC_ARROW    = 32512
+	_IDC_CROSS    = 32515
+	_IDC_HAND     = 32649
+	_IDC_HELP     = 32651
+	_IDC_IBEAM    = 32513
+	_IDC_NO       = 32648
+	_IDC_SIZEALL  = 32646
+	_IDC_SIZENESW = 32643
+	_IDC_SIZENS   = 32645
+	_IDC_SIZENWSE = 32642
+	_IDC_SIZEWE   = 32644
+	_IDC_UPARROW  = 32516
+	_IDC_WAIT     = 32514
 )
 
 const (
@@ -257,7 +259,7 @@ func _HIWORD(l uintptr) uint16 {
 //sys   _GetKeyboardState(lpKeyState *byte) (err error) = user32.GetKeyboardState
 //sys	_GetKeyState(virtkey int32) (keystatus int16) = user32.GetKeyState
 //sys	_GetMessage(msg *_MSG, hwnd syscall.Handle, msgfiltermin uint32, msgfiltermax uint32) (ret int32, err error) [failretval==-1] = user32.GetMessageW
-//sys	_LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle, err error) = user32.LoadCursorW
+//sys	_LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle) = user32.LoadCursorA
 //sys	_LoadIcon(hInstance syscall.Handle, iconName uintptr) (icon syscall.Handle, err error) = user32.LoadIconW
 //sys	_SetCursor(hinst syscall.Handle) (prevcurs syscall.Handle) = user32.SetCursor
 //sys	_ShowCursor(show bool) (dispcnt int) = user32.ShowCursor

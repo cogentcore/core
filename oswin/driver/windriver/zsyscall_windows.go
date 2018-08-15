@@ -56,7 +56,7 @@ var (
 	procGetKeyboardState       = moduser32.NewProc("GetKeyboardState")
 	procGetKeyState            = moduser32.NewProc("GetKeyState")
 	procGetMessageW            = moduser32.NewProc("GetMessageW")
-	procLoadCursorW            = moduser32.NewProc("LoadCursorW")
+	procLoadCursorA            = moduser32.NewProc("LoadCursorA")
 	procLoadIconW              = moduser32.NewProc("LoadIconW")
 	procSetCursor              = moduser32.NewProc("SetCursor")
 	procShowCursor             = moduser32.NewProc("ShowCursor")
@@ -229,16 +229,9 @@ func _GetMessage(msg *_MSG, hwnd syscall.Handle, msgfiltermin uint32, msgfilterm
 	return
 }
 
-func _LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle, err error) {
-	r0, _, e1 := syscall.Syscall(procLoadCursorW.Addr(), 2, uintptr(hInstance), uintptr(cursorName), 0)
+func _LoadCursor(hInstance syscall.Handle, cursorName uintptr) (cursor syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procLoadCursorA.Addr(), 2, uintptr(hInstance), uintptr(cursorName), 0)
 	cursor = syscall.Handle(r0)
-	if cursor == 0 {
-		if e1 != 0 {
-			err = errnoErr(e1)
-		} else {
-			err = syscall.EINVAL
-		}
-	}
 	return
 }
 

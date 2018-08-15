@@ -111,6 +111,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* double click close dialog is only for tableview select action -- need a separate pathway for that.
+
+* label needs 2nd path with actual size to re-layout (only for wordwrap)
+
+* separate prefs for colors, fonts, OS
+
 * double check all the window flags!  also fullscreen.
 
 * add option for no window render at all while iconfied
