@@ -190,12 +190,20 @@ const (
 const (
 	_CW_USEDEFAULT = 0x80000000 - 0x100000000
 
-	_SW_SHOWDEFAULT = 10
-	_AW_HIDE        = 0x00010000
+	_AW_HIDE = 0x00010000
 
 	_HWND_MESSAGE = syscall.Handle(^uintptr(2)) // -3
 
 	_SWP_NOSIZE = 0x0001
+)
+
+const (
+	_SW_HIDE        = 0
+	_SW_MAXIMIZE    = 3
+	_SW_SHOW        = 5
+	_SW_MINIMIZE    = 6
+	_SW_RESTORE     = 9
+	_SW_SHOWDEFAULT = 10
 )
 
 const (
@@ -289,7 +297,9 @@ func _HIWORD(l uintptr) uint16 {
 //sys   _PostQuitMessage(exitCode int32) = user32.PostQuitMessage
 //sys	_RegisterClass(wc *_WNDCLASS) (atom uint16, err error) = user32.RegisterClassW
 //sys	_ShowWindow(hwnd syscall.Handle, cmdshow int32) (wasvisible bool) = user32.ShowWindow
-//sys	_AnimateWindow(hwnd syscall.Handle, dwtime int32, dwflags int32) (ok bool) = user32.AnimateWindow
+//sys	_SetActiveWindow(hwnd syscall.Handle) (prev syscall.Handle) = user32.SetActiveWindow
+//sys	_SetFocus(hwnd syscall.Handle) (prev syscall.Handle) = user32.SetFocus
+//sys	_SetForegroundWindow(hwnd syscall.Handle) (ok bool) = user32.SetForegroundWindow
 //sys	_IsIconic(hwnd syscall.Handle) (iconic bool) = user32.IsIconic
 //sys	_IsWindowVisible(hwnd syscall.Handle) (vis bool) = user32.IsWindowVisible
 //sys	_ScreenToClient(hwnd syscall.Handle, lpPoint *_POINT) (ok bool) = user32.ScreenToClient

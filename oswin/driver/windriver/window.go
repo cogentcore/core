@@ -198,11 +198,16 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) Raise() {
-	_BringWindowToTop(w.hwnd)
+	// https://stackoverflow.com/questions/916259/win32-bring-a-window-to-top
+	// fmt.Printf("attempting to raise %v\n", w.Name())
+	_ShowWindow(w.hwnd, _SW_RESTORE)
+	_SetForegroundWindow(w.hwnd)
+	_SetFocus(w.hwnd)
+	_SetActiveWindow(w.hwnd)
 }
 
 func (w *windowImpl) Iconify() {
-	_AnimateWindow(w.hwnd, 200, _AW_HIDE)
+	_ShowWindow(w.hwnd, _SW_MINIMIZE)
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -462,9 +467,11 @@ func sendFocus(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	case _WM_SETFOCUS:
 		bitflag.Clear(&w.Flag, int(oswin.Iconified))
 		bitflag.Set(&w.Flag, int(oswin.Focus))
+		// fmt.Printf("focused %v\n", w.Name())
 		sendWindowEvent(w, window.Focus)
 	case _WM_KILLFOCUS:
 		bitflag.Clear(&w.Flag, int(oswin.Focus))
+		// fmt.Printf("defocused %v\n", w.Name())
 		sendWindowEvent(w, window.DeFocus)
 	default:
 		panic(fmt.Sprintf("windriver: unexpected focus message: %d", uMsg))

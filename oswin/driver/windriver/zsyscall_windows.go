@@ -66,7 +66,9 @@ var (
 	procPostQuitMessage        = moduser32.NewProc("PostQuitMessage")
 	procRegisterClassW         = moduser32.NewProc("RegisterClassW")
 	procShowWindow             = moduser32.NewProc("ShowWindow")
-	procAnimateWindow          = moduser32.NewProc("AnimateWindow")
+	procSetActiveWindow        = moduser32.NewProc("SetActiveWindow")
+	procSetFocus               = moduser32.NewProc("SetFocus")
+	procSetForegroundWindow    = moduser32.NewProc("SetForegroundWindow")
 	procIsIconic               = moduser32.NewProc("IsIconic")
 	procIsWindowVisible        = moduser32.NewProc("IsWindowVisible")
 	procScreenToClient         = moduser32.NewProc("ScreenToClient")
@@ -328,8 +330,20 @@ func _ShowWindow(hwnd syscall.Handle, cmdshow int32) (wasvisible bool) {
 	return
 }
 
-func _AnimateWindow(hwnd syscall.Handle, dwtime int32, dwflags int32) (ok bool) {
-	r0, _, _ := syscall.Syscall(procAnimateWindow.Addr(), 3, uintptr(hwnd), uintptr(dwtime), uintptr(dwflags))
+func _SetActiveWindow(hwnd syscall.Handle) (prev syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procSetActiveWindow.Addr(), 1, uintptr(hwnd), 0, 0)
+	prev = syscall.Handle(r0)
+	return
+}
+
+func _SetFocus(hwnd syscall.Handle) (prev syscall.Handle) {
+	r0, _, _ := syscall.Syscall(procSetFocus.Addr(), 1, uintptr(hwnd), 0, 0)
+	prev = syscall.Handle(r0)
+	return
+}
+
+func _SetForegroundWindow(hwnd syscall.Handle) (ok bool) {
+	r0, _, _ := syscall.Syscall(procSetForegroundWindow.Addr(), 1, uintptr(hwnd), 0, 0)
 	ok = r0 != 0
 	return
 }

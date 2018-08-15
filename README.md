@@ -99,7 +99,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * after beta: enable dnd to use OS DND when moves outside window
 
 * windows:
-	+ is not getting / managing multiple screens
+	+ dragging not displaying properly
+	+ confirm new soln to set dpi method per issue #1
+	+ is not getting / managing multiple screens -- very complex..
 
 * linux:
 	+ multipart clip.Board
@@ -110,6 +112,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * mac:
 
 ## General / Widgets
+
+* get rid of "JSON" in gieditor
 
 * not saving file sort order (on windows -- check on mac)
 
