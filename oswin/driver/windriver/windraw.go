@@ -71,7 +71,7 @@ func copyBitmapToDC(dc syscall.Handle, dr image.Rectangle, src syscall.Handle, s
 			fmt.Printf("This display does not support AlphaBlend capability -- any overlay or transparency effects will not work\n")
 			alphaBlendNotified = true
 		}
-		op = draw.Src
+//		op = draw.Src
 	}
 
 	switch op {
