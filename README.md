@@ -96,10 +96,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-* after beta: enable dnd to use OS DND when moves outside window
-
 * windows:
-	+ dragging not displaying properly
+	+ test alphablend support (SHADEBLENDCAPS) on different systems -- not 
+	working on virtualbox on my mac host..
 	+ confirm new soln to set dpi method per issue #1
 	+ is not getting / managing multiple screens -- very complex..
 
@@ -110,6 +109,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ remove lifecycle, update to windows event, close/quit req, etc
 
 * mac:
+
+* not yet tracking fullscreen on any platform
+* after beta: enable dnd to use OS DND when moves outside window
 
 ## General / Widgets
 
