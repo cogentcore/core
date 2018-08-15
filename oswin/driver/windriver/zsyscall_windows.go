@@ -68,6 +68,7 @@ var (
 	procShowWindow             = moduser32.NewProc("ShowWindow")
 	procAnimateWindow          = moduser32.NewProc("AnimateWindow")
 	procIsIconic               = moduser32.NewProc("IsIconic")
+	procIsWindowVisible        = moduser32.NewProc("IsWindowVisible")
 	procScreenToClient         = moduser32.NewProc("ScreenToClient")
 	procToUnicodeEx            = moduser32.NewProc("ToUnicodeEx")
 	procTranslateMessage       = moduser32.NewProc("TranslateMessage")
@@ -98,6 +99,7 @@ var (
 	procGetDeviceCaps          = modgdi32.NewProc("GetDeviceCaps")
 	procSetProcessDpiAwareness = modshcore.NewProc("SetProcessDpiAwareness")
 	procGetDpiForWindow        = moduser32.NewProc("GetDpiForWindow")
+	procEnumDisplayDevicesA    = moduser32.NewProc("EnumDisplayDevicesA")
 )
 
 func _GetDC(hwnd syscall.Handle) (dc syscall.Handle, err error) {
@@ -335,6 +337,12 @@ func _AnimateWindow(hwnd syscall.Handle, dwtime int32, dwflags int32) (ok bool) 
 func _IsIconic(hwnd syscall.Handle) (iconic bool) {
 	r0, _, _ := syscall.Syscall(procIsIconic.Addr(), 1, uintptr(hwnd), 0, 0)
 	iconic = r0 != 0
+	return
+}
+
+func _IsWindowVisible(hwnd syscall.Handle) (vis bool) {
+	r0, _, _ := syscall.Syscall(procIsWindowVisible.Addr(), 1, uintptr(hwnd), 0, 0)
+	vis = r0 != 0
 	return
 }
 
@@ -603,5 +611,11 @@ func _SetProcessDpiAwareness(pdpi uint32) (ret int32) {
 func _GetDpiForWindow(hwnd syscall.Handle) (ret uint32) {
 	r0, _, _ := syscall.Syscall(procGetDpiForWindow.Addr(), 1, uintptr(hwnd), 0, 0)
 	ret = uint32(r0)
+	return
+}
+
+func _EnumDisplayDevices(lpdevice uintptr, idevnum uint32, dispdev *_DISPLAY_DEVICE, dwflags uint32) (ok bool) {
+	r0, _, _ := syscall.Syscall6(procEnumDisplayDevicesA.Addr(), 4, uintptr(lpdevice), uintptr(idevnum), uintptr(unsafe.Pointer(dispdev)), uintptr(dwflags), 0, 0)
+	ok = r0 != 0
 	return
 }

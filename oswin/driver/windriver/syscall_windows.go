@@ -106,6 +106,15 @@ type _XFORM struct {
 	eDy  float32
 }
 
+type _DISPLAY_DEVICE struct {
+	CB           uint32
+	DeviceName   [32]byte
+	DeviceString [128]byte
+	StateFlags   uint32
+	DeviceID     [128]byte
+	DeviceKey    [128]byte
+}
+
 const (
 	_WM_DESTROY          = 2
 	_WM_SETFOCUS         = 7
@@ -190,6 +199,17 @@ const (
 )
 
 const (
+	_DISPLAY_DEVICE_ACTIVE         = 1
+	_DISPLAY_DEVICE_PRIMARY_DEVICE = 4
+	_HORZSIZE                      = 4
+	_VERTSIZE                      = 6
+	_HORZRES                       = 8
+	_VERTRES                       = 10
+	_LOGPIXELSX                    = 88
+	_LOGPIXELSY                    = 90
+)
+
+const (
 	_BI_RGB         = 0
 	_DIB_RGB_COLORS = 0
 
@@ -271,6 +291,7 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_ShowWindow(hwnd syscall.Handle, cmdshow int32) (wasvisible bool) = user32.ShowWindow
 //sys	_AnimateWindow(hwnd syscall.Handle, dwtime int32, dwflags int32) (ok bool) = user32.AnimateWindow
 //sys	_IsIconic(hwnd syscall.Handle) (iconic bool) = user32.IsIconic
+//sys	_IsWindowVisible(hwnd syscall.Handle) (vis bool) = user32.IsWindowVisible
 //sys	_ScreenToClient(hwnd syscall.Handle, lpPoint *_POINT) (ok bool) = user32.ScreenToClient
 //sys   _ToUnicodeEx(wVirtKey uint32, wScanCode uint32, lpKeyState *byte, pwszBuff *uint16, cchBuff int32, wFlags uint32, dwhkl syscall.Handle) (ret int32) = user32.ToUnicodeEx
 //sys	_TranslateMessage(msg *_MSG) (done bool) = user32.TranslateMessage
@@ -302,3 +323,4 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_GetDeviceCaps(dc syscall.Handle, index int32) (ret int32) = gdi32.GetDeviceCaps
 //sys	_SetProcessDpiAwareness(pdpi uint32) (ret int32) = shcore.SetProcessDpiAwareness
 //sys	_GetDpiForWindow(hwnd syscall.Handle) (ret uint32) = user32.GetDpiForWindow
+//sys	_EnumDisplayDevices(lpdevice uintptr, idevnum uint32, dispdev *_DISPLAY_DEVICE, dwflags uint32) (ok bool) = user32.EnumDisplayDevicesA

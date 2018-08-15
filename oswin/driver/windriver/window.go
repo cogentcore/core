@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"math"
 	"syscall"
 	"unsafe"
@@ -405,7 +406,7 @@ func ConfigWindowGeom(hwnd syscall.Handle, pos image.Point, size image.Point) er
 	}
 	w := (wr.Right - wr.Left) - (cr.Right - int32(size.X))
 	h := (wr.Bottom - wr.Top) - (cr.Bottom - int32(size.Y))
-	fmt.Printf("move, size window to: %v, %v\n", pos, size)
+	// fmt.Printf("move, size window to: %v, %v\n", pos, size)
 	return _MoveWindow(hwnd, int32(pos.X), int32(pos.Y), w, h, false)
 }
 
@@ -434,7 +435,7 @@ func MoveWindowPos(hwnd syscall.Handle, pos image.Point) error {
 	}
 	w := (wr.Right - wr.Left)
 	h := (wr.Bottom - wr.Top)
-	fmt.Printf("attempting to move window to: %v (w,h): %v\n", pos, w, h)
+	// fmt.Printf("attempting to move window to: %v (w,h): %v\n", pos, w, h)
 	return _MoveWindow(hwnd, int32(pos.X), int32(pos.Y), w, h, false)
 }
 
@@ -481,13 +482,15 @@ func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lR
 	if _IsIconic(hwnd) {
 		sendIconify(hwnd)
 		return 0
+	} else if !_IsWindowVisible(hwnd) {
+		return 0
 	} else {
 		wp := (*_WINDOWPOS)(unsafe.Pointer(lParam))
 		if wp.Flags&_SWP_NOSIZE != 0 {
-			fmt.Printf("no size -- check move\n")
-			return 0
+			sendMove(hwnd)
+		} else {
+			sendSize(hwnd) // todo: other options?
 		}
-		sendSize(hwnd)
 		return 0
 	}
 }
@@ -508,21 +511,21 @@ func sendSize(hwnd syscall.Handle) {
 
 	var r _RECT
 	if err := _GetClientRect(hwnd, &r); err != nil {
-		panic(err) // TODO(andlabs)
+		log.Println(err)
+		return
+	}
+	var wr _RECT
+	if err := _GetWindowRect(hwnd, &wr); err != nil {
+		log.Println(err)
+		return
 	}
 
 	width := int(r.Right - r.Left)
 	height := int(r.Bottom - r.Top)
 
-	if width < 100 {
-		width = 1000
-	}
-	if height < 100 {
-		height = 1000
-	}
 	sz := image.Point{int(width), int(height)}
-	ps := image.Point{int(r.Left), int(r.Top)}
-	act := window.Resize // also resolved at higher level that has access to prev
+	ps := image.Point{int(wr.Left), int(wr.Top)}
+	act := window.Resize
 
 	// todo: multiple screens
 	sc := oswin.TheApp.Screen(0)
@@ -532,9 +535,6 @@ func sendSize(hwnd syscall.Handle) {
 		act = window.Resize
 	} else if w.Pos != ps {
 		act = window.Move
-		// } else {
-		// 	//		act = window.Resize // todo: for now safer to default to resize -- to catch the
-		// filtering
 	}
 
 	w.Sz = sz
@@ -542,8 +542,25 @@ func sendSize(hwnd syscall.Handle) {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = ldpi
 	w.Scrn = sc
-	fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
+	// fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
 	sendWindowEvent(w, act)
+}
+
+func sendMove(hwnd syscall.Handle) {
+	theApp.mu.Lock()
+	w := theApp.windows[hwnd]
+	theApp.mu.Unlock()
+
+	var wr _RECT
+	if err := _GetWindowRect(hwnd, &wr); err != nil {
+		log.Println(err)
+		return
+	}
+
+	ps := image.Point{int(wr.Left), int(wr.Top)}
+	w.Pos = ps
+	// fmt.Printf("sending window move: %v\n", ps)
+	sendWindowEvent(w, window.Move)
 }
 
 func sendCloseReq(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {

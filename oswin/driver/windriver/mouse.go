@@ -114,7 +114,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 				Action:    mouse.Scroll,
 				Modifiers: mods,
 			},
-			Delta: image.Point{0, int(delta)}, // only vert
+			Delta: image.Point{0, int(-delta)}, // only vert
 		}
 	default:
 		panic("sendMouseEvent() called on non-mouse message")

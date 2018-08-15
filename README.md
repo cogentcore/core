@@ -111,6 +111,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* not saving file sort order (on windows -- check on mac)
+
 * double click close dialog is only for tableview select action -- need a separate pathway for that.
 
 * label needs 2nd path with actual size to re-layout (only for wordwrap)

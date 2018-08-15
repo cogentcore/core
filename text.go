@@ -22,6 +22,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
@@ -191,7 +192,11 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 		return
 	}
 	ucfont := FontStyle{}
-	ucfont.Family = "Arial Unicode"
+	if oswin.TheApp.Platform() == oswin.MacOS {
+		ucfont.Family = "Arial Unicode"
+	} else {
+		ucfont.Family = "Arial"
+	}
 	ucfont.Size = sty.Size
 	ucfont.LoadFont(ctxt, "")
 
@@ -210,15 +215,17 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := RuneRender{Deco: deco, BgColor: bg}
 		r := nwr[i]
-		if r > 0xFF && unicode.IsSymbol(r) {
-			if !lastUc {
-				rp.Face = ucfont.Face
-				lastUc = true
-			}
-		} else {
-			if lastUc {
-				rp.Face = face
-				lastUc = false
+		if oswin.TheApp.Platform() == oswin.MacOS {
+			if r > 0xFF && unicode.IsSymbol(r) {
+				if !lastUc {
+					rp.Face = ucfont.Face
+					lastUc = true
+				}
+			} else {
+				if lastUc {
+					rp.Face = face
+					lastUc = false
+				}
 			}
 		}
 		sr.Render = append(sr.Render, rp)

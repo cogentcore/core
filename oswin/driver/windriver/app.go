@@ -7,6 +7,7 @@
 package windriver
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -83,10 +85,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	opts.Fixup()
 	// can also apply further tuning here..
 
+	// fmt.Printf("new window opts pos: %v  size: %v\n", opts.Pos, opts.Size)
+
 	// todo: multiple screens..
 	sc := app.Screen(0)
 	dpi := sc.PhysicalDPI
-	ldpi := dpi
+	ldpi := sc.LogicalDPI
 
 	w := &windowImpl{
 		WindowBase: oswin.WindowBase{
@@ -116,12 +120,10 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	if procGetDpiForWindow.Find() == nil { // has it
 		dpi = float32(_GetDpiForWindow(w.hwnd))
-		ldpi = dpi
-		w.PhysDPI = dpi
-		w.LogDPI = ldpi
-		if sc.PhysicalDPI == 96 {
+		if dpi != sc.PhysicalDPI {
+			fmt.Printf("Window DPI: %v is different from screen: %v\n", dpi, sc.PhysicalDPI)
 			sc.PhysicalDPI = dpi
-			sc.LogicalDPI = ldpi
+			// todo: need to be able to trigger an update of ldpi from settings
 		}
 	}
 
@@ -144,36 +146,64 @@ func (app *appImpl) DeleteWin(id syscall.Handle) {
 	delete(app.windows, id)
 }
 
+func NullTermToString(b []byte) string {
+	i := bytes.IndexByte(b, 0)
+	if i == -1 {
+		return ""
+	}
+	return string(b[0:i])
+}
+
 func (app *appImpl) initScreens() {
 	// https://blogs.windows.com/buildingapps/2016/10/24/high-dpi-scaling-improvements-for-desktop-applications-and-mixed-mode-dpi-scaling-in-the-windows-10-anniversary-update/
 
 	// https://github.com/Microsoft/Windows-classic-samples/tree/master/Samples/DPIAwarenessPerWindow/cpp
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/hh447398(v=vs.85).aspx
 
-	// for now, just gonna fake it..
-	app.screens = make([]*oswin.Screen, 1)
-	sc := &oswin.Screen{}
+	if procSetProcessDpiAwareness.Find() == nil { // returns err -- has it
+		_SetProcessDpiAwareness(_PROCESS_PER_MONITOR_DPI_AWARE)
+	}
+
+	ddinfo := _DISPLAY_DEVICE{}
+	ddinfo.CB = uint32(unsafe.Sizeof(ddinfo))
+
+	// todo: this gives size info, but requires a callback function for EnumDisplayMonitors  https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-getmonitorinfoa https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-enumdisplaymonitors
+
+	scNms := make([]string, 0, 5)
+	scno := 0
+	mainsc := 0
+	for {
+		ok := _EnumDisplayDevices(0, uint32(scno), &ddinfo, 0)
+		if !ok {
+			break
+		}
+		if ddinfo.StateFlags&_DISPLAY_DEVICE_ACTIVE == 0 {
+			scno++
+			continue
+		}
+		nm := NullTermToString(ddinfo.DeviceName[:])
+		nm = strings.TrimPrefix(nm, `\\.\`)
+		scNms = append(scNms, nm)
+		if ddinfo.StateFlags&_DISPLAY_DEVICE_PRIMARY_DEVICE != 0 {
+			mainsc = len(scNms) - 1
+		}
+		scno++
+	}
+
+	app.screens = make([]*oswin.Screen, 1, len(scNms))
+	sc := &oswin.Screen{Name: scNms[mainsc]}
 	app.screens[0] = sc
 
-	// todo: conditionalize on windows version
-	_SetProcessDpiAwareness(_PROCESS_PER_MONITOR_DPI_AWARE)
+	dc, _ := _GetDC(0) // 0 = for entire virtual screen
+	defer _ReleaseDC(0, dc)
 
-	// todo: this is not working at all!
-	widthPx, heightPx := ScreenSize()
+	widthPx := _GetDeviceCaps(dc, _HORZRES)
+	heightPx := _GetDeviceCaps(dc, _VERTRES)
+	widthMM := _GetDeviceCaps(dc, _HORZSIZE)
+	heightMM := _GetDeviceCaps(dc, _VERTSIZE)
+	dpi := float32(_GetDeviceCaps(dc, _LOGPIXELSX))
 
-	if widthPx == 0 {
-		widthPx = 1200
-	}
-	if heightPx == 0 {
-		heightPx = 800
-	}
-
-	// widthMM := app.xsi.WidthInMillimeters
-	// heightMM := app.xsi.WidthInMillimeters
-	// dpi := 25.4 * (float32(widthPx) / float32(widthMM))
-
-	dpi := float32(96)
-
+	// fmt.Printf("scrn dc logpixelsx: %v\n", dpi)
 	depth := 32
 	pixratio := float32(1.0)
 
@@ -183,9 +213,7 @@ func (app *appImpl) initScreens() {
 	sc.LogicalDPI = dpi // oswin.LogicalFmPhysicalDPI(dpi)
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
-	sc.PhysicalSize = image.Point{int(widthPx), int(heightPx)} // don't know yet..
-	// todo: rest of the fields
-	//	fmt.Printf("screen: %+v\n", sc)
+	sc.PhysicalSize = image.Point{int(widthMM), int(heightMM)}
 }
 
 func (app *appImpl) NScreens() int {

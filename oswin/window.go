@@ -360,8 +360,8 @@ func sanitizeUTF8(s string, n int) string {
 	return s[:i]
 }
 
-// Fixup fills in defaults and updates everything based on current screen and window context
-// Specific hardware can fine-tune this as well, in driver code
+// Fixup fills in defaults and updates everything based on current screen and
+// window context Specific hardware can fine-tune this as well, in driver code
 func (o *NewWindowOptions) Fixup() {
 	sc := TheApp.Screen(0)
 	scsz := sc.Geometry.Size()

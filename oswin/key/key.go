@@ -155,13 +155,14 @@ func DecodeChord(ch string) (r rune, mods int32, err error) {
 
 // ChordShortcut transforms chord string into short form suitable for display to users
 func ChordShortcut(ch string) string {
-	cs := strings.Replace(ch, "Shift+", "⇧", 1)
-	cs = strings.Replace(cs, "Control+", "^", 1) // ⌃ doesn't look as good
+	cs := strings.Replace(cs, "Control+", "^", 1) // ⌃ doesn't look as good
 	switch oswin.TheApp.Platform() {
 	case oswin.MacOS:
+		cs = strings.Replace(ch, "Shift+", "⇧", 1)
 		cs = strings.Replace(cs, "Meta+", "⌘", 1)
 		cs = strings.Replace(cs, "Alt+", "⌥", 1)
 	case oswin.Windows:
+		cs = strings.Replace(ch, "Shift+", "↑", 1)
 		cs = strings.Replace(cs, "Meta+", "Win+", 1) // todo: actual windows key
 	default:
 		cs = strings.Replace(cs, "Meta+", "", 1)
