@@ -217,6 +217,10 @@ func mainrun() {
 		win.OSWin.Close()
 	})
 
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+		go oswin.TheApp.Quit() // once main window is closed, quit
+	})
+
 	// todo: when saving works, add option to save, and change above to CloseReq
 
 	win.MainMenuUpdated()

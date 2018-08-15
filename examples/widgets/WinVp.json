@@ -80,28 +80,32 @@
                 {
                   "Nm": "About widgets",
                   "UniqueNm": "About widgets",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92816800
+                  },
                   "Kids": null,
-                  "Class": "menu-action",
+                  "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "About widgets",
                   "Icon": "",
-                  "Indicator": "widget-wedge-right",
+                  "Indicator": "",
                   "Menu": null,
                   "Shortcut": ""
                 },
                 {
                   "Nm": "GoGi Preferences",
                   "UniqueNm": "GoGi Preferences",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92816416
+                  },
                   "Kids": null,
-                  "Class": "menu-action",
+                  "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "GoGi Preferences",
                   "Icon": "",
-                  "Indicator": "widget-wedge-right",
+                  "Indicator": "",
                   "Menu": null,
                   "Shortcut": "Control+Alt+P"
                 },
@@ -126,16 +130,18 @@
                 {
                   "Nm": "Quit",
                   "UniqueNm": "Quit",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92717696
+                  },
                   "Kids": null,
-                  "Class": "menu-action",
+                  "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "Quit",
                   "Icon": "",
-                  "Indicator": "widget-wedge-right",
+                  "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+Q"
+                  "Shortcut": "Meta+Q"
                 }
               ],
               "Shortcut": ""
@@ -170,7 +176,9 @@
                 {
                   "Nm": "New",
                   "UniqueNm": "New",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92851968
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -179,12 +187,14 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+N"
+                  "Shortcut": "Meta+N"
                 },
                 {
                   "Nm": "Open",
                   "UniqueNm": "Open",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92852432
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -193,12 +203,14 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+O"
+                  "Shortcut": "Meta+O"
                 },
                 {
                   "Nm": "Save",
                   "UniqueNm": "Save",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92852704
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -207,12 +219,14 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+S"
+                  "Shortcut": "Meta+S"
                 },
                 {
                   "Nm": "Save As..",
                   "UniqueNm": "Save As..",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92853008
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -221,7 +235,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Shift+Control+S"
+                  "Shortcut": "Shift+Meta+S"
                 },
                 {
                   "Nm": "csep",
@@ -244,7 +258,9 @@
                 {
                   "Nm": "Close Window",
                   "UniqueNm": "Close Window",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92853728
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -253,7 +269,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+W"
+                  "Shortcut": "Meta+W"
                 }
               ],
               "Shortcut": ""
@@ -282,7 +298,9 @@
                 {
                   "Nm": "Copy",
                   "UniqueNm": "Copy",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92854400
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -296,7 +314,9 @@
                 {
                   "Nm": "Cut",
                   "UniqueNm": "Cut",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92854944
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -305,12 +325,14 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+X"
+                  "Shortcut": "Control+W"
                 },
                 {
                   "Nm": "Paste",
                   "UniqueNm": "Paste",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92855296
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -319,7 +341,7 @@
                   "Icon": "",
                   "Indicator": "",
                   "Menu": null,
-                  "Shortcut": "Control+V"
+                  "Shortcut": "Control+Y"
                 }
               ],
               "Shortcut": ""
@@ -354,7 +376,9 @@
                 {
                   "Nm": "Iconify",
                   "UniqueNm": "Iconify",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92856096
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -386,7 +410,9 @@
                 {
                   "Nm": "GoGi Widgets Demo",
                   "UniqueNm": "GoGi Widgets Demo",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92856960
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -400,7 +426,9 @@
                 {
                   "Nm": "GoGi Editor",
                   "UniqueNm": "GoGi Editor",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92857312
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -415,13 +443,13 @@
                   "Nm": "sepw",
                   "UniqueNm": "sepw",
                   "Props": {
-                    "max-width": -1,
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 0.5,
                       "Un": "Em",
                       "Dots": 0
-                    }
+                    },
+                    "max-width": -1
                   },
                   "Kids": null,
                   "Class": "",
@@ -432,7 +460,9 @@
                 {
                   "Nm": "Save GUI to JSON",
                   "UniqueNm": "Save GUI to JSON",
-                  "Props": null,
+                  "Props": {
+                    "__OSMainMenuItemID": 92857936
+                  },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -463,7 +493,7 @@
           "Spacing": {
             "Val": 4,
             "Un": "Px",
-            "Dots": 4
+            "Dots": 4.25
           },
           "StackTop": 0,
           "MainMenu": true
@@ -472,6 +502,12 @@
           "Nm": "main-frame",
           "UniqueNm": "main-frame",
           "Props": {
+            "__type:spacing": "units.Value",
+            "spacing": {
+              "Val": 1,
+              "Un": "Px",
+              "Dots": 0
+            },
             "__type:max-width": "units.Value",
             "max-width": {
               "Val": -1,
@@ -481,12 +517,6 @@
             "__type:max-height": "units.Value",
             "max-height": {
               "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            },
-            "__type:spacing": "units.Value",
-            "spacing": {
-              "Val": 1,
               "Un": "Px",
               "Dots": 0
             }
@@ -549,17 +579,17 @@
                   "Nm": "title",
                   "UniqueNm": "title",
                   "Props": {
-                    "text-align": "__enum:(gi.Align)AlignCenter",
-                    "vertical-align": "__enum:(gi.Align)AlignTop",
                     "font-family": "Times New Roman, serif",
                     "font-size": "x-large",
-                    "line-height": 1.5
+                    "line-height": 1.5,
+                    "text-align": "__enum:(gi.Align)AlignCenter",
+                    "vertical-align": "__enum:(gi.Align)AlignTop"
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eControl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eShift+Control+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
+                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eControl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eControl+Alt+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
                   "Selectable": false
                 },
                 {
@@ -631,17 +661,17 @@
               "Nm": "brow",
               "UniqueNm": "brow",
               "Props": {
+                "__type:spacing": "units.Value",
+                "spacing": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
                 "horizontal-align": "__enum:(gi.Align)AlignLeft",
                 "__type:max-width": "units.Value",
                 "max-width": {
                   "Val": -1,
                   "Un": "Px",
-                  "Dots": 0
-                },
-                "__type:spacing": "units.Value",
-                "spacing": {
-                  "Val": 2,
-                  "Un": "Ex",
                   "Dots": 0
                 }
               },
@@ -662,14 +692,14 @@
                   "UniqueNm": "button1",
                   "Props": {
                     "#icon": {
-                      "__type:height": "units.Value",
-                      "height": {
+                      "__type:width": "units.Value",
+                      "width": {
                         "Val": 1.5,
                         "Un": "Em",
                         "Dots": 0
                       },
-                      "__type:width": "units.Value",
-                      "width": {
+                      "__type:height": "units.Value",
+                      "height": {
                         "Val": 1.5,
                         "Un": "Em",
                         "Dots": 0
@@ -744,12 +774,12 @@
                       "UniqueNm": "Menu Item 1",
                       "Props": null,
                       "Kids": null,
-                      "Class": "menu-action",
+                      "Class": "",
                       "CSS": null,
                       "Tooltip": "",
                       "Text": "Menu Item 1",
                       "Icon": "",
-                      "Indicator": "widget-wedge-right",
+                      "Indicator": "",
                       "Menu": null,
                       "Shortcut": "Shift+Control+1"
                     },
@@ -758,12 +788,12 @@
                       "UniqueNm": "Menu Item 2",
                       "Props": null,
                       "Kids": null,
-                      "Class": "menu-action",
+                      "Class": "",
                       "CSS": null,
                       "Tooltip": "",
                       "Text": "Menu Item 2",
                       "Icon": "",
-                      "Indicator": "widget-wedge-right",
+                      "Indicator": "",
                       "Menu": [
                         {
                           "n": 1,
@@ -810,12 +840,12 @@
                       "UniqueNm": "Menu Item 3",
                       "Props": null,
                       "Kids": null,
-                      "Class": "menu-action",
+                      "Class": "",
                       "CSS": null,
                       "Tooltip": "",
                       "Text": "Menu Item 3",
                       "Icon": "",
-                      "Indicator": "widget-wedge-right",
+                      "Indicator": "",
                       "Menu": null,
                       "Shortcut": "Control+3"
                     }
@@ -829,7 +859,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 17
               },
               "StackTop": 0
             },
@@ -879,17 +909,17 @@
               "Nm": "srow",
               "UniqueNm": "srow",
               "Props": {
-                "__type:spacing": "units.Value",
-                "spacing": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
                 "horizontal-align": "left",
                 "__type:max-width": "units.Value",
                 "max-width": {
                   "Val": -1,
                   "Un": "Px",
+                  "Dots": 0
+                },
+                "__type:spacing": "units.Value",
+                "spacing": {
+                  "Val": 2,
+                  "Un": "Ex",
                   "Dots": 0
                 }
               },
@@ -909,12 +939,6 @@
                   "Nm": "slider1",
                   "UniqueNm": "slider1",
                   "Props": {
-                    "__type:min-height": "units.Value",
-                    "min-height": {
-                      "Val": 2,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:width": "units.Value",
                     "width": {
                       "Val": 20,
@@ -932,6 +956,12 @@
                       "Val": 2,
                       "Un": "Em",
                       "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
                     }
                   },
                   "Kids": null,
@@ -944,19 +974,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 274,
-                  "ThSize": 24,
+                  "Size": 291.125,
+                  "ThSize": 25.5,
                   "ThumbSize": {
                     "Val": 1.5,
                     "Un": "Em",
-                    "Dots": 24
+                    "Dots": 25.5
                   },
                   "Prec": 9,
                   "Icon": "widget-circlebutton-on",
                   "ValThumb": false,
                   "ThumbVal": 0,
-                  "Pos": 137,
-                  "DragPos": 137,
+                  "Pos": 145.5625,
+                  "DragPos": 145.5625,
                   "VisPos": 0,
                   "Dim": "X",
                   "Tracking": true,
@@ -965,11 +995,11 @@
                   "OrigWinBBox": {
                     "Min": {
                       "X": 6,
-                      "Y": 345
+                      "Y": 339
                     },
                     "Max": {
-                      "X": 326,
-                      "Y": 379
+                      "X": 346,
+                      "Y": 376
                     }
                   }
                 },
@@ -977,18 +1007,6 @@
                   "Nm": "slider2",
                   "UniqueNm": "slider2",
                   "Props": {
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-width": "units.Value",
-                    "min-width": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:max-height": "units.Value",
                     "max-height": {
                       "Val": -1,
@@ -1006,6 +1024,18 @@
                       "Val": 10,
                       "Un": "Em",
                       "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
                     }
                   },
                   "Kids": null,
@@ -1018,19 +1048,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 114,
-                  "ThSize": 24,
+                  "Size": 121.125,
+                  "ThSize": 25.5,
                   "ThumbSize": {
                     "Val": 1.5,
                     "Un": "Em",
-                    "Dots": 24
+                    "Dots": 25.5
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": false,
                   "ThumbVal": 0,
-                  "Pos": 57,
-                  "DragPos": 57,
+                  "Pos": 60.5625,
+                  "DragPos": 60.5625,
                   "VisPos": 0,
                   "Dim": "Y",
                   "Tracking": false,
@@ -1038,11 +1068,11 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 342,
-                      "Y": 282
+                      "X": 363,
+                      "Y": 272
                     },
                     "Max": {
-                      "X": 376,
+                      "X": 400,
                       "Y": 442
                     }
                   }
@@ -1086,19 +1116,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 314,
-                  "ThSize": 78.5,
+                  "Size": 333.625,
+                  "ThSize": 83.40625,
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8
+                    "Dots": 8.5
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": true,
                   "ThumbVal": 0.25,
-                  "Pos": 78.5,
-                  "DragPos": 78.5,
+                  "Pos": 83.40625,
+                  "DragPos": 83.40625,
                   "VisPos": 0,
                   "Dim": "X",
                   "Tracking": true,
@@ -1106,12 +1136,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 392,
-                      "Y": 354
+                      "X": 416,
+                      "Y": 348
                     },
                     "Max": {
-                      "X": 712,
-                      "Y": 370
+                      "X": 756,
+                      "Y": 365
                     }
                   }
                 },
@@ -1119,6 +1149,12 @@
                   "Nm": "scrollbar2",
                   "UniqueNm": "scrollbar2",
                   "Props": {
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 10,
@@ -1142,12 +1178,6 @@
                       "Val": -1,
                       "Un": "Px",
                       "Dots": 0
-                    },
-                    "__type:height": "units.Value",
-                    "height": {
-                      "Val": 10,
-                      "Un": "Em",
-                      "Dots": 0
                     }
                   },
                   "Kids": null,
@@ -1160,19 +1190,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 154,
-                  "ThSize": 15.400001,
+                  "Size": 163.625,
+                  "ThSize": 16.362501,
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8
+                    "Dots": 8.5
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": true,
                   "ThumbVal": 0.1,
-                  "Pos": 77,
-                  "DragPos": 77,
+                  "Pos": 81.8125,
+                  "DragPos": 81.8125,
                   "VisPos": 0,
                   "Dim": "Y",
                   "Tracking": false,
@@ -1180,11 +1210,11 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 728,
-                      "Y": 282
+                      "X": 773,
+                      "Y": 272
                     },
                     "Max": {
-                      "X": 744,
+                      "X": 790,
                       "Y": 442
                     }
                   }
@@ -1197,7 +1227,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 17
               },
               "StackTop": 0
             },
@@ -1284,7 +1314,7 @@
                   "StartPos": 0,
                   "EndPos": 14,
                   "CursorPos": 0,
-                  "CharWidth": 14,
+                  "CharWidth": 11,
                   "SelectStart": 0,
                   "SelectEnd": 0,
                   "SelectMode": false
@@ -1332,7 +1362,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 17
               },
               "StackTop": 0
             }
@@ -1344,7 +1374,7 @@
           "Spacing": {
             "Val": 1,
             "Un": "Px",
-            "Dots": 1
+            "Dots": 1.0625
           },
           "StackTop": 0,
           "Stripes": "NoStripes"
@@ -1364,6 +1394,15 @@
   ],
   "Class": "",
   "CSS": {
+    "button": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 255,
+        "G": 240,
+        "B": 240,
+        "A": 255
+      }
+    },
     "#combo": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -1384,15 +1423,6 @@
     },
     "kbd": {
       "color": "blue"
-    },
-    "button": {
-      "__type:background-color": "gi.Color",
-      "background-color": {
-        "R": 255,
-        "G": 240,
-        "B": 240,
-        "A": 255
-      }
     }
   },
   "Tooltip": "",
@@ -1403,8 +1433,8 @@
       "Y": 0
     },
     "Size": {
-      "X": 899,
-      "Y": 637
+      "X": 973,
+      "Y": 725
     }
   }
 }

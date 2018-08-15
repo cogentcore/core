@@ -15,7 +15,8 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/rcoreilly/rasterx"
+	// "github.com/rcoreilly/rasterx"
+	"github.com/srwiley/rasterx"
 	"golang.org/x/image/colornames"
 )
 
@@ -141,7 +142,7 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 			cs.Gradient.IsRadial = false
 		}
 		SetGradientBounds(cs.Gradient, bounds)
-		return cs.Gradient.GetColorFunction(float64(opacity), xform.ToRasterx())
+		return cs.Gradient.GetColorFunctionUS(float64(opacity), xform.ToRasterx())
 	}
 }
 

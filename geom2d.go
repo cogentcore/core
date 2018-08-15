@@ -16,7 +16,8 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/rcoreilly/rasterx"
+	// "github.com/rcoreilly/rasterx"
+	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"
 )
 

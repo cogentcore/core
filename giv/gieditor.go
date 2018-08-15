@@ -99,14 +99,14 @@ func GoGiEditor(obj ki.Ki) {
 	})
 
 	savej := tbar.AddNewChild(gi.KiT_Action, "savejson").(*gi.Action)
-	savej.SetText("Save JSON")
+	savej.SetText("Save")
 	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
 	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		gieditSaveGUI(vp, obj)
 	})
 
 	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
-	loadj.SetText("Load JSON")
+	loadj.SetText("Load")
 	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
 	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		gieditLoadGUI(vp, obj)
@@ -162,7 +162,7 @@ func GoGiEditor(obj ki.Ki) {
 	emen.Menu.AddCopyCutPaste(win, false)
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		gi.ChoiceDialog(vp, "Save JSON Before Closing?", "Do you want to save to JSON before closing?", []string{"Close Without Saving", "Save JSON", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		gi.ChoiceDialog(vp, "Save Before Closing?", "Do you want to save to before closing?", []string{"Close Without Saving", "Save", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
 				w.Close()

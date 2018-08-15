@@ -115,13 +115,17 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* get rid of "JSON" in gieditor
-
-* not saving file sort order (on windows -- check on mac)
+* weird inconsistency in HasScroll in layout for fileview
 
 * double click close dialog is only for tableview select action -- need a separate pathway for that.
 
-* label needs 2nd path with actual size to re-layout (only for wordwrap)
+* label needs 2nd pass with actual size to re-layout (only for wordwrap) --
+  works but subsequent elements can't move up b/c they are allocated based on
+  original size.. really need 2 passes here.
+
+* crash on prefs screen info when sizing wider
+
+* add hover for label to show url for links.
 
 * separate prefs for colors, fonts, OS
 

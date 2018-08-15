@@ -450,6 +450,7 @@ func (fv *FileView) SaveSortPrefs() {
 		return
 	}
 	gi.Prefs.FileViewSort = sv.SortFieldName()
+	// fmt.Printf("sort: %v\n", gi.Prefs.FileViewSort)
 	gi.Prefs.Save()
 }
 

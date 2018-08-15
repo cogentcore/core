@@ -43,7 +43,7 @@ var blendOverFunc = _BLENDFUNCTION{
 	AlphaFormat:         _AC_SRC_ALPHA, // premultiplied
 }
 
-var alphaBlendNotified = false
+// var alphaBlendNotified = false
 
 func copyBitmapToDC(dc syscall.Handle, dr image.Rectangle, src syscall.Handle, sr image.Rectangle, op draw.Op) (retErr error) {
 	memdc, err := _CreateCompatibleDC(dc)
@@ -63,16 +63,17 @@ func copyBitmapToDC(dc syscall.Handle, dr image.Rectangle, src syscall.Handle, s
 		}
 	}()
 
-	if _GetDeviceCaps(dc, _SHADEBLENDCAPS) == _SB_NONE {
-		// This output device does not support blending capabilities,
-		// so the subsequent output is incorrect, but is the best we
-		// can do on systems that do not support AlphaBlend.
-		if !alphaBlendNotified {
-			fmt.Printf("This display does not support AlphaBlend capability -- any overlay or transparency effects will not work\n")
-			alphaBlendNotified = true
-		}
-//		op = draw.Src
-	}
+	// this seems inaccurate -- works fine!
+	// 	if _GetDeviceCaps(dc, _SHADEBLENDCAPS) == _SB_NONE {
+	// 		// This output device does not support blending capabilities,
+	// 		// so the subsequent output is incorrect, but is the best we
+	// 		// can do on systems that do not support AlphaBlend.
+	// 		if !alphaBlendNotified {
+	// 			fmt.Printf("This display does not support AlphaBlend capability -- any overlay or transparency effects will not work\n")
+	// 			alphaBlendNotified = true
+	// 		}
+	// //		op = draw.Src
+	// 	}
 
 	switch op {
 	case draw.Src:

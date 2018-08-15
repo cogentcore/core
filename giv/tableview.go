@@ -273,7 +273,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 
 	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgh.Lay = gi.LayoutHoriz
-	sgh.SetStretchMaxWidth()
+	// sgh.SetStretchMaxWidth()
 
 	sep := sg.KnownChild(1).(*gi.Separator)
 	sep.Horiz = true
@@ -780,7 +780,7 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle) {
 	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	if len(sgf.Kids) >= nfld {
-		sgh.SetProp("width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
+		sgh.SetProp("max-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
 			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()

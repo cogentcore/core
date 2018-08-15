@@ -45,13 +45,15 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = `This is a <b>test</b> of the
+	hdrText := `This is a <b>test</b> of the
 <span style="color:red">various</span> <i>GoGi</i> Text elements<br>
 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
 <kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
 <q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 and Sub<sub>script</sub> and Super<sup>script</sup>`
+	title.Text = hdrText
+	// title.Text = "header" // use this to test word wrapping
 	title.SetProp("text-align", gi.AlignRight)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
@@ -66,13 +68,20 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 
 	wrlab := mfr.AddNewChild(gi.KiT_Label, "wrlab").(*gi.Label)
 	wrlab.SetProp("word-wrap", true)
-	wrlab.SetProp("max-width", "20em")
+	wrlab.SetProp("width", "20em")
+	wrlab.SetProp("max-width", -1)
 	wrlab.SetProp("line-height", 1.2)
 	wrlab.SetProp("text-indent", "20px")
 	wrlab.Text = `Word <u>wrapping</u> should be <span style="color:red">enabled in this label</span> -- this is a test to see if it is.  Usually people use some kind of obscure latin text here -- not really sure why <u>because nobody reads latin anymore,</u> at least nobody I know.  Anyway, let's see how this works.  Also, it should be interesting to determine how word wrapping works with styling -- <large>the styles should properly wrap across the lines</large>.  In addition, there is the question of <b>how built-in breaks interface</b> with the auto-line breaks, and furthermore the question of paragraph breaks versus simple br line breaks.
-<p>One major question is the extent to which word wrapping can be made sensitive to the overall size of the containing element -- this is easy when setting a direct fixed width, but word wrapping should also occur as the user resizes the window.</p>
+<p>One major question is the extent to which <a href="https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap">word wrapping</a> can be made sensitive to the overall size of the containing element -- this is easy when setting a direct fixed width, but word wrapping should also occur as the user resizes the window.</p>
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `
+
+	// mfr.AddNewChild(gi.KiT_Space, "aspc")
+
+	etxt := mfr.AddNewChild(gi.KiT_Label, "etxt").(*gi.Label)
+	etxt.Text = "this is to test bottom after word wrapped text"
+
 	mfr.AddNewChild(gi.KiT_Stretch, "str")
 
 	// main menu
@@ -87,6 +96,10 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+		go oswin.TheApp.Quit() // once main window is closed, quit
+	})
 
 	win.MainMenuUpdated()
 

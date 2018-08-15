@@ -172,7 +172,10 @@ func (g *Label) Layout2D(parBBox image.Rectangle) {
 	g.Layout2DBase(parBBox, true)
 	g.Layout2DChildren()
 	sz := g.Size2DSubSpace()
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
+	if g.Sty.Text.WordWrap {
+		g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
+		g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
+	}
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
