@@ -9,7 +9,7 @@
 
 // +build linux,!android openbsd
 
-package gldriver
+package x11driver
 
 /*
 #cgo linux      LDFLAGS: -lEGL -lGLESv2 -lX11
@@ -45,7 +45,6 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/paint"
@@ -53,7 +52,7 @@ import (
 	"golang.org/x/mobile/gl"
 )
 
-var theKeysyms x11key.KeysymTable
+var theKeysyms KeysymTable
 
 func init() {
 	// It might not be necessary, but it probably doesn't hurt to try to make
@@ -254,7 +253,7 @@ func onKey(id uintptr, state uint16, detail, act uint8) {
 	event := &key.Event{
 		Rune:      r,
 		Code:      c,
-		Modifiers: x11key.KeyModifiers(state),
+		Modifiers: KeyModifiers(state),
 		Action:    key.Action(act),
 	}
 	event.Init()
@@ -277,8 +276,8 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 	if lastMouseEvent != nil {
 		from = lastMouseEvent.Pos()
 	}
-	mods := x11key.KeyModifiers(state)
-	stb := mouse.Button(x11key.ButtonFromState(state))
+	mods := KeyModifiers(state)
+	stb := mouse.Button(ButtonFromState(state))
 
 	var event oswin.Event
 	switch {

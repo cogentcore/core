@@ -158,6 +158,10 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win, true)
 
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+		go oswin.TheApp.Quit() // once main window is closed, quit
+	})
+
 	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)

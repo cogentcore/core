@@ -55,6 +55,10 @@ type App interface {
 	// screen, by name -- nil if not found.
 	WindowByName(name string) Window
 
+	// WindowInFocus returns the window currently in focus (receiving keyboard
+	// input) -- could be nil if none are.
+	WindowInFocus() Window
+
 	// NewWindow returns a new Window for this screen. A nil opts is valid and
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)

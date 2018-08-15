@@ -39,9 +39,9 @@ const (
 	// Close means that the window is about to close, but has not yet closed.
 	Close Actions = iota
 
-	// Iconify means that the window has been iconified / miniaturized / is no
+	// Minimize means that the window has been iconified / miniaturized / is no
 	// longer visible.
-	Iconify
+	Minimize
 
 	// Resize means that the window was resized, including changes in DPI
 	// associated with moving to a new screen.  Position may have also changed

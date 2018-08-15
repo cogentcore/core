@@ -35,6 +35,7 @@ func (s stub) Screen(scrN int) *oswin.Screen                                    
 func (s stub) NWindows() int                                                        { return 0 }
 func (s stub) Window(win int) oswin.Window                                          { return nil }
 func (s stub) WindowByName(name string) oswin.Window                                { return nil }
+func (s stub) WindowInFocus() oswin.Window                                          { return nil }
 func (s stub) ClipBoard() clip.Board                                                { return nil }
 func (s stub) Cursor() cursor.Cursor                                                { return nil }
 

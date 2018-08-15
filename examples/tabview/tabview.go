@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 )
 
@@ -50,6 +51,25 @@ func mainrun() {
 		// tf.SetProp("max-width", -1.0) // stretch flex
 		// tf.SetProp("max-height", -1.0)
 	}
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win, true)
+
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+		go oswin.TheApp.Quit() // once main window is closed, quit
+	})
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

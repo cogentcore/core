@@ -7,8 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// x11key contains X11 numeric codes for the keyboard and mouse.
-package x11key
+package x11driver
 
 import (
 	"github.com/goki/gi/oswin/key"

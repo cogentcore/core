@@ -551,8 +551,8 @@ func (w *Window) RenderOverlays() {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsInactive() || w.OSWin.IsIconified() {
-		// fmt.Printf("skipping update on inactive / iconified window: %v\n", w.Nm)
+	if w.IsInactive() || w.OSWin.IsMinimized() {
+		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}
 	// fmt.Printf("Win %v doing publish\n", w.Nm)

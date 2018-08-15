@@ -96,6 +96,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
+cursor api needs a window arg!
+
 * windows:
 	+ test alphablend support (SHADEBLENDCAPS) on different systems -- not 
 	working on virtualbox on my mac host..
@@ -106,7 +108,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ multipart clip.Board
 	+ moving window isn't updating pos of new windows (now fixed? test)
 	+ do similar font name updating as done on Windows now
-	+ remove lifecycle, update to windows event, close/quit req, etc
+
 
 * mac:
 
@@ -149,6 +151,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * Layout flow types
+* text word wrap: consider TeX algo
+  * https://github.com/bramstein/typeset/blob/master/src/linebreak.js
 
 * update gi/doc.go with final readme notes etc!
 

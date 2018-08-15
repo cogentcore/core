@@ -20,12 +20,10 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/driver/internal/lifecycler"
-	"github.com/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/oswin/paint"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
 )
 
@@ -45,32 +43,29 @@ type windowImpl struct {
 	// This next group of variables are mutable, but are only modified in the
 	// appImpl.run goroutine.
 
-	lifecycler lifecycler.State
-
-	mu       sync.Mutex
-	released bool
+	mu             sync.Mutex
+	released       bool
+	closeReqFunc   func(win oswin.Window)
+	closeCleanFunc func(win oswin.Window)
 }
 
-func (w *windowImpl) Release() {
-	w.mu.Lock()
-	released := w.released
-	w.released = true
-	w.mu.Unlock()
+// for sending any kind of event
+func sendEvent(w *windowImpl, ev oswin.Event) {
+	ev.Init()
+	w.Send(ev)
+}
 
-	// TODO: call w.lifecycler.SetDead and w.lifecycler.SendEvent, a la
-	// handling atomWMDeleteWindow?
-
-	if !released {
-		render.FreePicture(w.app.xc, w.xp)
-		xproto.FreeGC(w.app.xc, w.xg)
-		xproto.DestroyWindow(w.app.xc, w.xw)
+// for sending window.Event's
+func sendWindowEvent(w *windowImpl, act window.Actions) {
+	winEv := window.Event{
+		Action: act,
 	}
-
-	w.app.DeleteWin(w.xw)
+	winEv.Init()
+	w.Send(&winEv)
 }
 
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
-	src.(*imageImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsi.RootDepth, dp, sr)
+	src.(*imageImpl).upload(xproto.Drawable(w.xw), w.xg, w.app.xsci.RootDepth, dp, sr)
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
@@ -110,11 +105,6 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 }
 
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
-	// TODO: does the order of these lifecycle and window events matter? Should
-	// they really be a single, atomic event?
-	w.lifecycler.SetVisible((int(ev.X)+int(ev.Width)) > 0 && (int(ev.Y)+int(ev.Height)) > 0)
-	w.lifecycler.SendEvent(w, nil)
-
 	// todo: support multple screens
 	sc := oswin.TheApp.Screen(0)
 
@@ -143,17 +133,12 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	w.Scrn = sc
 	// }
 
-	winEv := &window.Event{
-		Size:       sz,
-		LogicalDPI: ldpi,
-		Action:     act,
-	}
-	winEv.Init()
-	w.Send(winEv)
+	sendWindowEvent(w, act)
 }
 
 func (w *windowImpl) handleExpose() {
-	w.Send(&paint.Event{})
+	bitflag.Clear(&w.Flag, int(oswin.Minimized))
+	sendWindowEvent(w, window.Paint)
 }
 
 func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Actions) {
@@ -162,7 +147,7 @@ func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Acti
 	event := &key.Event{
 		Rune:      r,
 		Code:      c,
-		Modifiers: x11key.KeyModifiers(state),
+		Modifiers: KeyModifiers(state),
 		Action:    act,
 	}
 	event.Init()
@@ -187,8 +172,8 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 	if lastMouseEvent != nil {
 		from = lastMouseEvent.Pos()
 	}
-	mods := x11key.KeyModifiers(state)
-	stb := mouse.Buttons(x11key.ButtonFromState(state))
+	mods := KeyModifiers(state)
+	stb := mouse.Buttons(ButtonFromState(state))
 
 	var event oswin.Event
 	switch {
@@ -280,10 +265,75 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	valmask := uint16(xproto.ConfigWindowX + xproto.ConfigWindowY)
 	vallist := []uint32{uint32(pos.X), uint32(pos.Y)}
 
-	w.Pos = pos
 	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
 	return nil
+}
+
+func (w *windowImpl) Raise() {
+	valmask := uint16(xproto.ConfigWindowStackMode)
+	vallist := []uint32{uint32(xproto.StackModeAbove)}
+
+	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
+}
+
+func (w *windowImpl) Minimize() {
+	// https://cgit.freedesktop.org/xorg/lib/libX11/tree/src/Iconify.c
+	minmsg := xproto.ClientMessageEvent{
+		Sequence: 1, // no idea what this is..
+		Format:   32,
+		Window:   w.xw,
+		Type:     w.app.atomWMChangeState,
+		Data:     IconicState,
+	}
+
+	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
+	// send to: x.xw
+	xproto.SendEvent(w.app.xc, false, w.xw, uint32(mask), string(minmsg.Bytes()))
+}
+
+func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
+	w.closeReqFunc = fun
+}
+
+func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
+	w.closeCleanFunc = fun
+}
+
+func (w *windowImpl) CloseReq() {
+	if w.closeReqFunc != nil {
+		w.closeReqFunc(w)
+	} else {
+		w.Close()
+	}
+}
+
+func (w *windowImpl) CloseClean() {
+	if w.closeCleanFunc != nil {
+		w.closeCleanFunc(w)
+	}
+}
+
+func (w *windowImpl) Close() {
+	xproto.DestroyWindow(w.app.xc, w.xw)
+}
+
+func (w *windowImpl) closed() {
+	// note: this is the final common path for all window closes
+	w.CloseClean()
+	sendWindowEvent(w, window.Close)
+
+	w.mu.Lock()
+	released := w.released
+	w.released = true
+	w.mu.Unlock()
+
+	if !released {
+		render.FreePicture(w.app.xc, w.xp)
+		xproto.FreeGC(w.app.xc, w.xg)
+	}
+
+	w.app.DeleteWin(w.xw)
 }

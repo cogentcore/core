@@ -52,9 +52,9 @@ type Window interface {
 	// is the only supported mechanism for de-iconifying.
 	Raise()
 
-	// Iconify requests that the window be iconfied, making it no longer
-	// visible or active -- rendering should not occur for iconified windows.
-	Iconify()
+	// Minimize requests that the window be iconfied, making it no longer
+	// visible or active -- rendering should not occur for minimized windows.
+	Minimize()
 
 	// Position returns the current lef-top position of the window relative to
 	// underlying screen, in raw underlying dots / pixels.
@@ -107,8 +107,8 @@ type Window interface {
 	// IsFullscreen returns true if this is a fullscreen window.
 	IsFullscreen() bool
 
-	// IsIconified returns true if this window is iconified.
-	IsIconified() bool
+	// IsMinimized returns true if this window is minimized.
+	IsMinimized() bool
 
 	// IsFocused returns true if this window is focused (will receive keyboard
 	// input etc).
@@ -239,8 +239,8 @@ func (w *WindowBase) IsFullscreen() bool {
 	return bitflag.Has(w.Flag, int(Fullscreen))
 }
 
-func (w *WindowBase) IsIconified() bool {
-	return bitflag.Has(w.Flag, int(Iconified))
+func (w *WindowBase) IsMinimized() bool {
+	return bitflag.Has(w.Flag, int(Minimized))
 }
 
 func (w *WindowBase) IsFocus() bool {
@@ -271,10 +271,10 @@ const (
 	// Fullscreen indicates a window that occupies the entire screen.
 	Fullscreen
 
-	// Iconified indicates a window reduced to an icon, or otherwise no longer
+	// Minimized indicates a window reduced to an icon, or otherwise no longer
 	// visible or active.  Otherwise, the window should be assumed to be
 	// visible.
-	Iconified
+	Minimized
 
 	// Focus indicates that the window has the focus.
 	Focus

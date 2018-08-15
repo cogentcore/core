@@ -204,6 +204,15 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
+func (app *appImpl) WindowInFocus() oswin.Window {
+	for _, win := range app.winlist {
+		if win.IsFocus() {
+			return win
+		}
+	}
+	return nil
+}
+
 func (app *appImpl) Name() string {
 	return app.name
 }

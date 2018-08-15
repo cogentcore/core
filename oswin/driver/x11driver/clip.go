@@ -23,7 +23,6 @@ import (
 // middle-mouse-button
 
 type clipImpl struct {
-	app       *appImpl
 	lastWrite mimedata.Mimes
 }
 
@@ -43,15 +42,15 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	// check for an owner on either the CLIPBOARD or PRIMARY selections
 	// owner info is not actually used under the XCB/XGB protocol -- just to see
 	// that it exists..
-	useSel := ci.app.atomClipboardSel
-	selown, err := xproto.GetSelectionOwner(ci.app.xc, ci.app.atomClipboardSel).Reply()
+	useSel := theApp.atomClipboardSel
+	selown, err := xproto.GetSelectionOwner(theApp.xc, theApp.atomClipboardSel).Reply()
 	if err != nil {
 		log.Printf("X11 Clipboard Read error: %v\n", err)
 		return nil
 	}
 	if selown.Owner == xproto.AtomNone {
-		useSel = ci.app.atomPrimarySel
-		selown, err = xproto.GetSelectionOwner(ci.app.xc, ci.app.atomPrimarySel).Reply()
+		useSel = theApp.atomPrimarySel
+		selown, err = xproto.GetSelectionOwner(theApp.xc, theApp.atomPrimarySel).Reply()
 		if err != nil {
 			log.Printf("X11 Clipboard Read error: %v\n", err)
 			return nil
@@ -61,47 +60,58 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		return nil
 	}
 
-	if selown.Owner == ci.app.window32 { // we are the owner -- just send our data
+	if selown.Owner == theApp.window32 { // we are the owner -- just send our data
 		return ci.lastWrite
 	}
 
-	// this is the main call requesting the selection -- there are no apparent
-	// docs for the xcb version of this call, in terms of the "Property" arg,
-	// but example from jtanx just uses the name of the selection again, so...
-	xproto.ConvertSelection(ci.app.xc, ci.app.window32, useSel, ci.app.atomUTF8String, useSel, xproto.TimeCurrentTime)
+	wantText := mimedata.IsText(types[0])
 
-	var ptyp xproto.Atom
-	b := make([]byte, 0, 1024)
+	if wantText {
+		// this is the main call requesting the selection -- there are no apparent
+		// docs for the xcb version of this call, in terms of the "Property" arg,
+		// but example from jtanx just uses the name of the selection again, so...
+		xproto.ConvertSelection(theApp.xc, theApp.window32, useSel, theApp.atomUTF8String, useSel, xproto.TimeCurrentTime)
 
-	select {
-	case ev := <-ci.app.selNotifyChan:
-		bytesAfter := uint32(1)
-		bufsz := uint32(0) // current buffer size
-		for bytesAfter > 0 {
-			// last two args are offset and amount to transfer, in 32bit "long" sizes
-			prop, err := xproto.GetProperty(ci.app.xc, true, ci.app.window32, ev.Property, xproto.AtomAny, bufsz/4, ClipTransSize/4).Reply()
-			if err != nil {
-				log.Printf("X11 Clipboard Read Property error: %v\n", err)
-				return nil
+		var ptyp xproto.Atom
+		b := make([]byte, 0, 1024)
+
+		select {
+		case ev := <-theApp.selNotifyChan:
+			bytesAfter := uint32(1)
+			bufsz := uint32(0) // current buffer size
+			for bytesAfter > 0 {
+				// last two args are offset and amount to transfer, in 32bit "long" sizes
+				prop, err := xproto.GetProperty(theApp.xc, true, theApp.window32, ev.Property, xproto.AtomAny, bufsz/4, ClipTransSize/4).Reply()
+				if err != nil {
+					log.Printf("X11 Clipboard Read Property error: %v\n", err)
+					return nil
+				}
+				bytesAfter = prop.BytesAfter
+				sz := len(prop.Value)
+				if sz > 0 {
+					b = append(b, prop.Value...)
+					bufsz += uint32(sz)
+				}
+				ptyp = prop.Type
 			}
-			bytesAfter = prop.BytesAfter
-			sz := len(prop.Value)
-			if sz > 0 {
-				b = append(b, prop.Value...)
-				bufsz += uint32(sz)
-			}
-			ptyp = prop.Type
+		case <-time.After(ClipTimeOut):
+			log.Printf("X11 Clipboard Read: unexpected timeout on receipt of SelectionNotifyEvent\n")
+			return nil
 		}
-	case <-time.After(ClipTimeOut):
-		log.Printf("X11 Clipboard Read: unexpected timeout on receipt of SelectionNotifyEvent\n")
-		return nil
-	}
 
-	// fmt.Printf("ptyp: %v and utf8: %v \n", ptyp, ci.app.atomUTF8String)
-	for _, typ := range types {
-		if typ == mimedata.TextPlain && ptyp == ci.app.atomUTF8String {
-			return mimedata.NewText(string(b))
+		isMulti, mediaType, boundary, body := mimedata.IsMultipart(b)
+		if isMulti {
+			return mimedata.FromMultipart(body, boundary)
+		} else {
+			if mediaType != "" { // found a mime type encoding
+				return mimedata.NewMime(mediaType, b)
+			} else {
+				// we can't really figure out type, so just assume..
+				return mimedata.NewMime(types[0], b)
+			}
 		}
+	} else {
+		// todo: deal with image formats etc
 	}
 	return nil
 }
@@ -110,8 +120,8 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	// we just advertise ourselves as clipboard owners and save the data until
 	// someone requests it..
 	ci.lastWrite = data
-	useSel := ci.app.atomClipboardSel
-	xproto.SetSelectionOwner(ci.app.xc, ci.app.window32, useSel, xproto.TimeCurrentTime)
+	useSel := theApp.atomClipboardSel
+	xproto.SetSelectionOwner(theApp.xc, theApp.window32, useSel, xproto.TimeCurrentTime)
 	return nil
 }
 
@@ -131,38 +141,40 @@ func (ci *clipImpl) SendLastWrite(ev xproto.SelectionRequestEvent) {
 			reply.Property = reply.Target
 		}
 		switch reply.Target {
-		case ci.app.atomTargets: // requesting to know what targets we support
+		case theApp.atomTargets: // requesting to know what targets we support
 			mask = xproto.EventMaskPropertyChange
 			targs := make([]byte, 4*3)
 			bi := 0
-			xgb.Put32(targs[bi:], uint32(ci.app.atomUTF8String))
+			xgb.Put32(targs[bi:], uint32(theApp.atomUTF8String))
 			bi += 4
-			xgb.Put32(targs[bi:], uint32(ci.app.atomTimestamp))
+			xgb.Put32(targs[bi:], uint32(theApp.atomTimestamp))
 			bi += 4
-			xgb.Put32(targs[bi:], uint32(ci.app.atomTargets))
-			xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
+			xgb.Put32(targs[bi:], uint32(theApp.atomTargets))
+			xproto.ChangeProperty(theApp.xc, xproto.PropModeReplace, reply.Requestor,
 				reply.Property, xproto.AtomAtom, 32, 3, targs)
-		case ci.app.atomTimestamp:
+		case theApp.atomTimestamp:
 			mask = xproto.EventMaskPropertyChange
 			targs := make([]byte, 4*1)
 			xgb.Put32(targs, uint32(xproto.TimeCurrentTime))
-			xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
+			xproto.ChangeProperty(theApp.xc, xproto.PropModeReplace, reply.Requestor,
 				reply.Property, xproto.AtomInteger, 32, 1, targs)
-		case ci.app.atomUTF8String:
-			for _, d := range ci.lastWrite {
-				if d.Type == mimedata.TextPlain {
-					mask = xproto.EventMaskPropertyChange
-					xproto.ChangeProperty(ci.app.xc, xproto.PropModeReplace, reply.Requestor,
-						reply.Property, reply.Target, 8, uint32(len(d.Data)), d.Data)
-					break // first one for now -- todo: need to support MULTIPLE
-				}
+		case theApp.atomUTF8String:
+			mask = xproto.EventMaskPropertyChange
+			if len(ci.lastWrite) > 1 {
+				mpd := ci.lastWrite.ToMultipart()
+				xproto.ChangeProperty(theApp.xc, xproto.PropModeReplace, reply.Requestor,
+					reply.Property, reply.Target, 8, uint32(len(mpd)), mpd)
+			} else {
+				d := ci.lastWrite[0]
+				xproto.ChangeProperty(theApp.xc, xproto.PropModeReplace, reply.Requestor,
+					reply.Property, reply.Target, 8, uint32(len(d.Data)), d.Data)
 			}
 		}
 	}
-	xproto.SendEvent(ci.app.xc, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
+	xproto.SendEvent(theApp.xc, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
 }
 
 func (ci *clipImpl) Clear() {
 	ci.lastWrite = nil
-	xproto.SetSelectionOwner(ci.app.xc, xproto.AtomNone, ci.app.atomClipboardSel, xproto.TimeCurrentTime)
+	xproto.SetSelectionOwner(theApp.xc, xproto.AtomNone, theApp.atomClipboardSel, xproto.TimeCurrentTime)
 }

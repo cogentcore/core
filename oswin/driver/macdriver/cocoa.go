@@ -33,7 +33,7 @@ void doResizeWindow(uintptr_t id, int width, int height);
 void doMoveWindow(uintptr_t id, int left, int top);
 void doCloseWindow(uintptr_t id);
 void doRaiseWindow(uintptr_t id);
-void doIconifyWindow(uintptr_t id);
+void doMinimizeWindow(uintptr_t id);
 void getScreens();
 uintptr_t doGetMainMenu(uintptr_t viewID);
 void doMenuReset(uintptr_t menuID);
@@ -130,8 +130,8 @@ func raiseWindow(w *windowImpl) {
 	C.doRaiseWindow(C.uintptr_t(w.id))
 }
 
-func iconifyWindow(w *windowImpl) {
-	C.doIconifyWindow(C.uintptr_t(w.id))
+func minimizeWindow(w *windowImpl) {
+	C.doMinimizeWindow(C.uintptr_t(w.id))
 }
 
 func getGeometry(w *windowImpl) {
@@ -168,7 +168,7 @@ func drawgl(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Clear(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Minimized))
 	sendWindowEvent(w, window.Paint)
 	<-w.drawDone
 }
@@ -247,7 +247,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	w.Sz = sz
 	w.Pos = ps
 	w.PhysDPI = dpi
-	bitflag.Clear(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Minimized))
 
 	if scrno > 0 && len(theApp.screens) > scrno {
 		w.Scrn = theApp.screens[scrno]
@@ -289,17 +289,17 @@ func windowClosing(id uintptr) {
 	theApp.DeleteWin(w.id)
 }
 
-//export windowIconified
-func windowIconified(id uintptr) {
+//export windowMinimized
+func windowMinimized(id uintptr) {
 	theApp.mu.Lock()
 	w := theApp.windows[id]
 	theApp.mu.Unlock()
 	if w == nil {
 		return
 	}
-	bitflag.Set(&w.Flag, int(oswin.Iconified))
+	bitflag.Set(&w.Flag, int(oswin.Minimized))
 	bitflag.Clear(&w.Flag, int(oswin.Focus))
-	sendWindowEvent(w, window.Iconify)
+	sendWindowEvent(w, window.Minimize)
 }
 
 //export windowFocused
@@ -310,7 +310,7 @@ func windowFocused(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Clear(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Minimized))
 	bitflag.Set(&w.Flag, int(oswin.Focus))
 	sendWindowEvent(w, window.Focus)
 }
@@ -626,16 +626,16 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		if len(ci.data) == 0 {
 			return nil
 		}
-		txt := string(ci.data[0].Data)
-		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
+		dat := ci.data[0].Data
+		isMulti, mediaType, boundary, body := mimedata.IsMultipart(dat)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
 		} else {
 			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, []byte(txt))
+				return mimedata.NewMime(mediaType, dat)
 			} else {
 				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], []byte(txt))
+				return mimedata.NewMime(types[0], dat)
 			}
 		}
 	} else {

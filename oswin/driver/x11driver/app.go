@@ -29,9 +29,10 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/driver/internal/x11key"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
 )
 
@@ -41,14 +42,16 @@ import (
 
 type appImpl struct {
 	xc      *xgb.Conn
-	xsi     *xproto.ScreenInfo
-	keysyms x11key.KeysymTable
+	xsi     *xproto.SetupInfo
+	xsci    *xproto.ScreenInfo
+	keysyms KeysymTable
 
 	atomNETWMName      xproto.Atom
 	atomUTF8String     xproto.Atom
 	atomWMDeleteWindow xproto.Atom
 	atomWMProtocols    xproto.Atom
 	atomWMTakeFocus    xproto.Atom
+	atomWMChangeState  xproto.Atom
 	atomClipboardSel   xproto.Atom
 	atomPrimarySel     xproto.Atom
 	atomTargets        xproto.Atom
@@ -85,20 +88,24 @@ type appImpl struct {
 	selNotifyChan   chan xproto.SelectionNotifyEvent
 	name            string
 	about           string
+	quitReqFunc     func()
+	quitCleanFunc   func()
 }
+
+var theApp *appImpl
 
 func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	app := &appImpl{
 		xc:            xc,
-		xsi:           xproto.Setup(xc).DefaultScreen(xc),
+		xsi:           xproto.Setup(xc),
 		images:        map[shm.Seg]*imageImpl{},
 		uploads:       map[uint16]chan struct{}{},
 		windows:       map[xproto.Window]*windowImpl{},
 		winlist:       make([]*windowImpl, 0),
-		screens:       make([]*oswin.Screen, 0),
 		selNotifyChan: make(chan xproto.SelectionNotifyEvent, 100),
 		name:          "GoGi",
 	}
+	app.xsci = app.sci.DefaultScreen(xc)
 	if err := app.initAtoms(); err != nil {
 		return nil, err
 	}
@@ -109,7 +116,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		mmPerInch = 25.4
 		ptPerInch = 72
 	)
-	pixelsPerMM := float32(app.xsi.WidthInPixels) / float32(app.xsi.WidthInMillimeters)
+	pixelsPerMM := float32(app.xsci.WidthInPixels) / float32(app.xsci.WidthInMillimeters)
 	app.pixelsPerPt = pixelsPerMM * mmPerInch / ptPerInch
 	if err := app.initPictformats(); err != nil {
 		return nil, err
@@ -135,14 +142,18 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	})
 	render.CreateSolidFill(app.xc, app.uniformP, render.Color{})
 
-	app.screens = make([]*oswin.Screen, 1)
+	nsc := xproto.ScreenInfoListSize(app.xsi.Roots)
+
+	// note: putting default screen first, but this then makes rest of screens out of order
+	// relative to xwindows's list.
+	app.screens = make([]*oswin.Screen, nsc)
 	sc := &oswin.Screen{}
 	app.screens[0] = sc
 
-	widthPx := app.xsi.WidthInPixels
-	heightPx := app.xsi.HeightInPixels
-	widthMM := app.xsi.WidthInMillimeters
-	heightMM := app.xsi.WidthInMillimeters
+	widthPx := app.xsci.WidthInPixels
+	heightPx := app.xsci.HeightInPixels
+	widthMM := app.xsci.WidthInMillimeters
+	heightMM := app.xsci.WidthInMillimeters
 
 	dpi := 25.4 * (float32(widthPx) / float32(widthMM))
 	depth := 32
@@ -150,15 +161,46 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 
 	sc.ScreenNumber = 0
 	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
-	sc.Depth = depth
-	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
+	sc.Depth = app.xsci.RootDepth
+	sc.LogicalDPI = dpi
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
 	sc.PhysicalSize = image.Point{int(widthMM), int(heightMM)}
-	// todo: rest of the fields
+	sc.Name = app.xsi.Vendor + ":0"
+
+	sidx := 1
+	for si := 0; si < nsc; si++ {
+		if si == app.xc.DefaultScreen {
+			continue
+		}
+		sci := &app.sci.Roots[si]
+
+		sc := &oswin.Screen{}
+		app.screens[sidx] = sc
+
+		widthPx := sci.WidthInPixels
+		heightPx := sci.HeightInPixels
+		widthMM := sci.WidthInMillimeters
+		heightMM := sci.WidthInMillimeters
+
+		dpi := 25.4 * (float32(widthPx) / float32(widthMM))
+		depth := 32
+		pixratio := float32(1.0)
+
+		sc.ScreenNumber = 0
+		sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
+		sc.Depth = sci.RootDepth
+		sc.LogicalDPI = dpi
+		sc.PhysicalDPI = dpi
+		sc.DevicePixelRatio = pixratio
+		sc.PhysicalSize = image.Point{int(widthMM), int(heightMM)}
+		sc.Name = fmt.Sprintf("%v:%v", app.xsi.Vendor, sidx)
+
+		sidx++
+	}
 
 	oswin.TheApp = app
-	theClip.app = app
+	theApp = app
 
 	go app.run()
 	return app, nil
@@ -178,7 +220,7 @@ func (app *appImpl) run() {
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
 			if w := app.findWindow(ev.Window); w != nil {
-				w.Release()
+				w.closed()
 			}
 		case shm.CompletionEvent:
 			app.mu.Lock()
@@ -193,9 +235,7 @@ func (app *appImpl) run() {
 			switch xproto.Atom(ev.Data.Data32[0]) {
 			case app.atomWMDeleteWindow:
 				if w := app.findWindow(ev.Window); w != nil {
-					w.lifecycler.SetDead(true)
-					w.lifecycler.SendEvent(w, nil)
-					w.Release()
+					w.CloseReq()
 				} else {
 					noWindowFound = true
 				}
@@ -227,16 +267,19 @@ func (app *appImpl) run() {
 
 		case xproto.FocusInEvent:
 			if w := app.findWindow(ev.Event); w != nil {
-				w.lifecycler.SetFocused(true)
-				w.lifecycler.SendEvent(w, nil)
+				bitflag.Clear(&w.Flag, int(oswin.Minimized))
+				bitflag.Set(&w.Flag, int(oswin.Focus))
+				// fmt.Printf("focused %v\n", w.Name())
+				sendWindowEvent(w, window.Focus)
 			} else {
 				noWindowFound = true
 			}
 
 		case xproto.FocusOutEvent:
 			if w := app.findWindow(ev.Event); w != nil {
-				w.lifecycler.SetFocused(false)
-				w.lifecycler.SendEvent(w, nil)
+				bitflag.Clear(&w.Flag, int(oswin.Focus))
+				// fmt.Printf("defocused %v\n", w.Name())
+				sendWindowEvent(w, window.DeFocus)
 			} else {
 				noWindowFound = true
 			}
@@ -441,9 +484,9 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		return nil, fmt.Errorf("x11driver: render.NewPictureId failed: %v", err)
 	}
 	pictformat := render.Pictformat(0)
-	switch app.xsi.RootDepth {
+	switch app.xsci.RootDepth {
 	default:
-		return nil, fmt.Errorf("x11driver: unsupported root depth %d", app.xsi.RootDepth)
+		return nil, fmt.Errorf("x11driver: unsupported root depth %d", app.xsci.RootDepth)
 	case 24:
 		pictformat = app.pictformat24
 	case 32:
@@ -473,11 +516,9 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	w.lifecycler.SendEvent(w, nil)
-
-	xproto.CreateWindow(app.xc, app.xsi.RootDepth, xw, app.xsi.Root,
+	xproto.CreateWindow(app.xc, app.xsci.RootDepth, xw, app.xsci.Root,
 		int16(opts.Pos.X), int16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
-		xproto.WindowClassInputOutput, app.xsi.RootVisual,
+		xproto.WindowClassInputOutput, app.xsci.RootVisual,
 		xproto.CwEventMask,
 		[]uint32{0 |
 			xproto.EventMaskKeyPress |
@@ -529,6 +570,10 @@ func (app *appImpl) initAtoms() (err error) {
 		return err
 	}
 	app.atomWMTakeFocus, err = app.internAtom("WM_TAKE_FOCUS")
+	if err != nil {
+		return err
+	}
+	app.atomWMChangeState, err = app.internAtom("WM_CHANGE_STATE")
 	if err != nil {
 		return err
 	}
@@ -632,7 +677,7 @@ func findPictformat(fs []render.Pictforminfo, depth byte) (render.Pictformat, er
 }
 
 func (app *appImpl) initWindow32() error {
-	visualid, err := findVisual(app.xsi, 32)
+	visualid, err := findVisual(app.xsci, 32)
 	if err != nil {
 		return err
 	}
@@ -641,7 +686,7 @@ func (app *appImpl) initWindow32() error {
 		return fmt.Errorf("x11driver: xproto.NewColormapId failed: %v", err)
 	}
 	if err := xproto.CreateColormapChecked(
-		app.xc, xproto.ColormapAllocNone, colormap, app.xsi.Root, visualid).Check(); err != nil {
+		app.xc, xproto.ColormapAllocNone, colormap, app.xsci.Root, visualid).Check(); err != nil {
 		return fmt.Errorf("x11driver: xproto.CreateColormap failed: %v", err)
 	}
 	app.window32, err = xproto.NewWindowId(app.xc)
@@ -653,7 +698,7 @@ func (app *appImpl) initWindow32() error {
 		return fmt.Errorf("x11driver: xproto.NewGcontextId failed: %v", err)
 	}
 	const depth = 32
-	xproto.CreateWindow(app.xc, depth, app.window32, app.xsi.Root,
+	xproto.CreateWindow(app.xc, depth, app.window32, app.xsci.Root,
 		0, 0, 1, 1, 0,
 		xproto.WindowClassInputOutput, visualid,
 		// The CwBorderPixel attribute seems necessary for depth == 32. See
@@ -665,8 +710,8 @@ func (app *appImpl) initWindow32() error {
 	return nil
 }
 
-func findVisual(xsi *xproto.ScreenInfo, depth byte) (xproto.Visualid, error) {
-	for _, d := range xsi.AllowedDepths {
+func findVisual(xsci *xproto.ScreenInfo, depth byte) (xproto.Visualid, error) {
+	for _, d := range xsci.AllowedDepths {
 		if d.Depth != depth {
 			continue
 		}
@@ -775,6 +820,15 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
+func (app *appImpl) WindowInFocus() oswin.Window {
+	for _, win := range app.winlist {
+		if win.IsFocus() {
+			return win
+		}
+	}
+	return nil
+}
+
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.LinuxX11
 }
@@ -831,4 +885,37 @@ func (app *appImpl) SetAbout(about string) {
 func (app *appImpl) OpenURL(url string) {
 	cmd := exec.Command("xdg-open", url)
 	cmd.Run()
+}
+
+func (app *appImpl) SetQuitReqFunc(fun func()) {
+	app.quitReqFunc = fun
+}
+
+func (app *appImpl) SetQuitCleanFunc(fun func()) {
+	app.quitCleanFunc = fun
+}
+
+func (app *appImpl) QuitReq() {
+	if app.quitReqFunc != nil {
+		app.quitReqFunc()
+	} else {
+		app.Quit()
+	}
+}
+
+func (app *appImpl) QuitClean() {
+	if app.quitCleanFunc != nil {
+		app.quitCleanFunc()
+	}
+	nwin := len(app.winlist)
+	for i := nwin - 1; i >= 0; i-- {
+		win := app.winlist[i]
+		win.Close()
+	}
+}
+
+func (app *appImpl) Quit() {
+	// todo: could try to invoke quit call instead
+	app.QuitClean()
+	os.Exit(0)
 }

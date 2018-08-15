@@ -206,7 +206,7 @@ func (w *windowImpl) Raise() {
 	_SetActiveWindow(w.hwnd)
 }
 
-func (w *windowImpl) Iconify() {
+func (w *windowImpl) Minimize() {
 	_ShowWindow(w.hwnd, _SW_MINIMIZE)
 }
 
@@ -465,7 +465,7 @@ func sendFocus(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	theApp.mu.Unlock()
 	switch uMsg {
 	case _WM_SETFOCUS:
-		bitflag.Clear(&w.Flag, int(oswin.Iconified))
+		bitflag.Clear(&w.Flag, int(oswin.Minimized))
 		bitflag.Set(&w.Flag, int(oswin.Focus))
 		// fmt.Printf("focused %v\n", w.Name())
 		sendWindowEvent(w, window.Focus)
@@ -487,7 +487,7 @@ func sendShow(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult
 
 func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
 	if _IsIconic(hwnd) {
-		sendIconify(hwnd)
+		sendMinimize(hwnd)
 		return 0
 	} else if !_IsWindowVisible(hwnd) {
 		return 0
@@ -502,13 +502,13 @@ func sendSizeEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lR
 	}
 }
 
-func sendIconify(hwnd syscall.Handle) {
+func sendMinimize(hwnd syscall.Handle) {
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
-	bitflag.Set(&w.Flag, int(oswin.Iconified))
+	bitflag.Set(&w.Flag, int(oswin.Minimized))
 	bitflag.Clear(&w.Flag, int(oswin.Focus))
-	sendWindowEvent(w, window.Iconify)
+	sendWindowEvent(w, window.Minimize)
 }
 
 func sendSize(hwnd syscall.Handle) {
@@ -596,7 +596,7 @@ func sendPaint(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
-	bitflag.Clear(&w.Flag, int(oswin.Iconified))
+	bitflag.Clear(&w.Flag, int(oswin.Minimized))
 	sendWindowEvent(w, window.Paint)
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }

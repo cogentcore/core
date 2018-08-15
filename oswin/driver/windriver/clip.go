@@ -70,16 +70,16 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 			return nil
 		}
 		defer _GlobalUnlock(hData)
-		txt := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:])
-		isMulti, mediaType, body, boundary := mimedata.IsMultipart(txt)
+		txt := ([]byte)(syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(wd))[:]))
+		isMulti, mediaType, boundary, body := mimedata.IsMultipart(txt)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
 		} else {
 			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, []byte(txt))
+				return mimedata.NewMime(mediaType, txt)
 			} else {
 				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], []byte(txt))
+				return mimedata.NewMime(types[0], txt)
 			}
 		}
 	} else {

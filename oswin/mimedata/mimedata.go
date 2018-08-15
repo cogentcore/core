@@ -28,6 +28,10 @@ const (
 	ContentTransferEncoding = "Content-Transfer-Encoding"
 )
 
+var MIMEVersion1B = ([]byte)(MIMEVersion1)
+var ContentTypeB = ([]byte)(ContentType)
+var ContentTransferEncodingB = ([]byte)(ContentTransferEncoding)
+
 // Data represents one element of MIME data as a type string and byte slice
 type Data struct {
 	// MIME Type string representing the data, e.g., text/plain, text/html, text/xml, text/uri-list, image/jpg, png etc
@@ -198,32 +202,32 @@ func (mi Mimes) ToMultipart() []byte {
 	return b.Bytes()
 }
 
-// IsMultipart examines a string to see if it has a MIME-Version: 1.0
+// IsMultipart examines data bytes to see if it has a MIME-Version: 1.0
 // ContentType: multipart/* header -- returns the actual multipart media type,
 // body of the data string after the header (assumed to be a single \n
 // terminated line at start of string, and the boundary separating multipart
 // elements (all from mime.ParseMediaType) -- mediaType is the mediaType if it
 // is another MIME type -- can check that for non-empty string
-func IsMultipart(str string) (isMulti bool, mediaType, body, boundary string) {
+func IsMultipart(str []byte) (isMulti bool, mediaType, boundary string, body []byte) {
 	isMulti = false
 	mediaType = ""
-	body = ""
 	boundary = ""
+	body = ([]byte)("")
 	var pars map[string]string
 	var err error
-	if strings.HasPrefix(str, MIMEVersion1) {
-		cri := strings.IndexRune(str, '\n')
+	if bytes.HasPrefix(str, MIMEVersion1B) {
+		cri := bytes.IndexByte(str, '\n')
 		if cri < 0 { // shouldn't happen
 			return
 		}
 		ctln := str[cri+1:]
-		if strings.HasPrefix(ctln, ContentType) { // should
-			cri2 := strings.IndexRune(ctln, '\n')
+		if bytes.HasPrefix(ctln, ContentTypeB) { // should
+			cri2 := bytes.IndexByte(ctln, '\n')
 			if cri2 < 0 { // shouldn't happen
 				return
 			}
-			hdr := ctln[len(ContentType)+1 : cri2]
-			mediaType, pars, err = mime.ParseMediaType(hdr)
+			hdr := ctln[len(ContentTypeB)+1 : cri2]
+			mediaType, pars, err = mime.ParseMediaType(string(hdr))
 			if err != nil { // shouldn't happen
 				log.Printf("mimedata.IsMultipart: malformed MIME header: %v\n", err)
 				return
@@ -240,9 +244,9 @@ func IsMultipart(str string) (isMulti bool, mediaType, body, boundary string) {
 
 // FromMultipart parses a MIME multipart representation of multiple data
 // elements into corresponding mime data components
-func FromMultipart(body, boundary string) Mimes {
+func FromMultipart(body []byte, boundary string) Mimes {
 	mi := make(Mimes, 0, 10)
-	sr := strings.NewReader(body)
+	sr := bytes.NewReader(body)
 	mr := multipart.NewReader(sr, boundary)
 	for {
 		p, err := mr.NextPart()

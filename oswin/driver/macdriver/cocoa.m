@@ -272,7 +272,7 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)notification {
-    windowIconified((GoUintptr)self);
+    windowMinimized((GoUintptr)self);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
@@ -490,7 +490,7 @@ void doRaiseWindow(uintptr_t viewID) {
         });
 }
 
-void doIconifyWindow(uintptr_t viewID) {
+void doMinimizeWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performMiniaturize:view];

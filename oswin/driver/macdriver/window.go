@@ -392,8 +392,8 @@ func (w *windowImpl) Raise() {
 	raiseWindow(w)
 }
 
-func (w *windowImpl) Iconify() {
-	iconifyWindow(w)
+func (w *windowImpl) Minimize() {
+	minimizeWindow(w)
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {

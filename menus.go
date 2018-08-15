@@ -146,9 +146,9 @@ func (m *Menu) AddAppMenu(win *Window) {
 
 // AddWindowsMenu adds menu items for current main and dialog windows.
 func (m *Menu) AddWindowsMenu(win *Window) {
-	m.AddMenuText("Iconify", "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Minimize", "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
-		ww.OSWin.Iconify()
+		ww.OSWin.Minimize()
 	})
 	m.AddSeparator("sepa")
 	for _, w := range MainWindows {
