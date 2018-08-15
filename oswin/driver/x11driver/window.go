@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// based on golang.org/x/exp/shiny:
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// +build linux,!android dragonfly openbsd
+
 package x11driver
 
 // TODO: implement a back buffer.
@@ -109,7 +116,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	sc := oswin.TheApp.Screen(0)
 
 	dpi := sc.PhysicalDPI
-	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+	ldpi := dpi
 
 	sz := image.Point{int(ev.Width), int(ev.Height)}
 	ps := image.Point{int(ev.X), int(ev.Y)}
@@ -281,12 +288,15 @@ func (w *windowImpl) Raise() {
 
 func (w *windowImpl) Minimize() {
 	// https://cgit.freedesktop.org/xorg/lib/libX11/tree/src/Iconify.c
+
+	dat := xproto.ClientMessageDataUnionData32New([]uint32{3}) // 3 = IconicState
+
 	minmsg := xproto.ClientMessageEvent{
 		Sequence: 1, // no idea what this is..
 		Format:   32,
 		Window:   w.xw,
 		Type:     w.app.atomWMChangeState,
-		Data:     IconicState,
+		Data:     dat,
 	}
 
 	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify

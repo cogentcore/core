@@ -333,18 +333,24 @@ func (w *Window) StopEventLoop() {
 // MainMenuUpdated needs to be called whenever the main menu for this window
 // is updated in terms of items added or removed.
 func (w *Window) MainMenuUpdated() {
+	if w == nil || w.MainMenu == nil {
+		return
+	}
 	w.MainMenu.SetMainMenu(w)
 }
 
 // MainMenuUpdateActives needs to be called whenever items on the main menu
 // for this window have their IsActive status updated.
 func (w *Window) MainMenuUpdateActives() {
+	if w == nil || w.MainMenu == nil {
+		return
+	}
 	w.MainMenu.MainMenuUpdateActives(w)
 }
 
 // MainMenuUpdateWindows updates a Window menu with a list of active menus.
 func (w *Window) MainMenuUpdateWindows() {
-	if w.MainMenu == nil {
+	if w == nil || w.MainMenu == nil {
 		return
 	}
 	wmeni, ok := w.MainMenu.ChildByName("Window", 3)

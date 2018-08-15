@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package x11driver provides the X11 driver for accessing a app.
+// based on golang.org/x/exp/shiny:
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// +build linux,!android dragonfly openbsd
+
+// Package x11driver provides the X11 driver for oswin
 package x11driver
 
 // TODO: figure out what to say about the responsibility for users of this
@@ -17,8 +24,8 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/shm"
 
-	"github.com/goki/gi/oswin/driver/internal/errapp"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/errapp"
 )
 
 // Main is called by the program's main function to run the graphical

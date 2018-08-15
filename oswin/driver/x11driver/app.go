@@ -7,6 +7,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build linux,!android dragonfly openbsd
+
 package x11driver
 
 import (
@@ -105,7 +107,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		selNotifyChan: make(chan xproto.SelectionNotifyEvent, 100),
 		name:          "GoGi",
 	}
-	app.xsci = app.sci.DefaultScreen(xc)
+	app.xsci = app.xsi.DefaultScreen(xc)
 	if err := app.initAtoms(); err != nil {
 		return nil, err
 	}
@@ -142,7 +144,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	})
 	render.CreateSolidFill(app.xc, app.uniformP, render.Color{})
 
-	nsc := xproto.ScreenInfoListSize(app.xsi.Roots)
+	nsc := len(app.xsi.Roots)
 
 	// note: putting default screen first, but this then makes rest of screens out of order
 	// relative to xwindows's list.
@@ -156,12 +158,11 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	heightMM := app.xsci.WidthInMillimeters
 
 	dpi := 25.4 * (float32(widthPx) / float32(widthMM))
-	depth := 32
 	pixratio := float32(1.0)
 
 	sc.ScreenNumber = 0
 	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
-	sc.Depth = app.xsci.RootDepth
+	sc.Depth = int(app.xsci.RootDepth)
 	sc.LogicalDPI = dpi
 	sc.PhysicalDPI = dpi
 	sc.DevicePixelRatio = pixratio
@@ -173,7 +174,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		if si == app.xc.DefaultScreen {
 			continue
 		}
-		sci := &app.sci.Roots[si]
+		sci := &app.xsi.Roots[si]
 
 		sc := &oswin.Screen{}
 		app.screens[sidx] = sc
@@ -184,12 +185,11 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		heightMM := sci.WidthInMillimeters
 
 		dpi := 25.4 * (float32(widthPx) / float32(widthMM))
-		depth := 32
 		pixratio := float32(1.0)
 
 		sc.ScreenNumber = 0
 		sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
-		sc.Depth = sci.RootDepth
+		sc.Depth = int(sci.RootDepth)
 		sc.LogicalDPI = dpi
 		sc.PhysicalDPI = dpi
 		sc.DevicePixelRatio = pixratio
@@ -496,7 +496,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	// todo: multiple screens..
 	sc := app.Screen(0)
 	dpi := sc.PhysicalDPI
-	ldpi := oswin.LogicalFmPhysicalDPI(dpi)
+	ldpi := dpi
 
 	w := &windowImpl{
 		app:     app,

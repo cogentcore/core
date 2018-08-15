@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build linux,!android dragonfly openbsd
+
 package x11driver
 
 import (
@@ -72,7 +74,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		// but example from jtanx just uses the name of the selection again, so...
 		xproto.ConvertSelection(theApp.xc, theApp.window32, useSel, theApp.atomUTF8String, useSel, xproto.TimeCurrentTime)
 
-		var ptyp xproto.Atom
+		// var ptyp xproto.Atom
 		b := make([]byte, 0, 1024)
 
 		select {
@@ -92,7 +94,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 					b = append(b, prop.Value...)
 					bufsz += uint32(sz)
 				}
-				ptyp = prop.Type
+				// ptyp = prop.Type
 			}
 		case <-time.After(ClipTimeOut):
 			log.Printf("X11 Clipboard Read: unexpected timeout on receipt of SelectionNotifyEvent\n")

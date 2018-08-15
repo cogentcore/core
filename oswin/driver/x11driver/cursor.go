@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build windows
+// +build linux,!android dragonfly openbsd
 
 package x11driver
 
 import (
+	"log"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/goki/gi/oswin/cursor"
 )
@@ -46,30 +48,29 @@ func (c *cursorImpl) openCursorFont() {
 	var err error
 	c.cursFont, err = xproto.NewFontId(theApp.xc)
 	if err != nil {
-		log.Errorf("x11driver: xproto.NewFontId failed: %v", err)
+		log.Printf("x11driver: xproto.NewFontId failed: %v", err)
 		return
 	}
 	fnm := "cursor"
-	err = xproto.OpenFontChecked(theApp.xc, c.cursFont, len(fnm), fnm).Check()
+	err = xproto.OpenFontChecked(theApp.xc, c.cursFont, uint16(len(fnm)), fnm).Check()
 	if err != nil {
-		log.Errorf("x11driver: xproto.OpenFont for cursor font failed: %v", err)
+		log.Printf("x11driver: xproto.OpenFont for cursor font failed: %v", err)
 		return
 	}
 }
 
 func (c *cursorImpl) createCursor(curid int) xproto.Cursor {
-	var err error
-	cur, err = xproto.NewCursorId(theApp.xc)
+	cur, err := xproto.NewCursorId(theApp.xc)
 	if err != nil {
-		log.Errorf("x11driver: xproto.NewCursorId failed: %v", err)
+		log.Printf("x11driver: xproto.NewCursorId failed: %v", err)
 		return 0
 	}
 
 	// 0's are all colors -- black by default
-	err = xproto.CreateGlyphCursorChecked(theApp.xc, cur, c.cursFont, c.cursFont, curid, curid+1, 0, 0, 0, 0, 0, 0).Check()
+	err = xproto.CreateGlyphCursorChecked(theApp.xc, cur, c.cursFont, c.cursFont, uint16(curid), uint16(curid+1), 0, 0, 0, 0, 0, 0).Check()
 
 	if err != nil {
-		log.Errorf("x11driver: xproto.CreateGlyphCursor for cursor id %v failed: %v", curid, err)
+		log.Printf("x11driver: xproto.CreateGlyphCursor for cursor id %v failed: %v", curid, err)
 		return 0
 	}
 
@@ -78,21 +79,21 @@ func (c *cursorImpl) createCursor(curid int) xproto.Cursor {
 
 func (c *cursorImpl) setCursor(cur xproto.Cursor) {
 	focwin := theApp.WindowInFocus()
-	if !focwin {
+	if focwin == nil {
 		return
 	}
 	fw := focwin.(*windowImpl)
 	vallist := []uint32{uint32(cur)}
-	err = xproto.ChangeWindowAttributesChecked(theApp.xc, fw.xw, xproto.CwCursor, vallist).Check()
+	err := xproto.ChangeWindowAttributesChecked(theApp.xc, fw.xw, xproto.CwCursor, vallist).Check()
 	if err != nil {
-		log.Errorf("x11driver: xproto.ChangeWindowAttributes for cursor failed: %v", err)
+		log.Printf("x11driver: xproto.ChangeWindowAttributes for cursor failed: %v", err)
 	}
 }
 
 func (c *cursorImpl) cursorHandle(sh cursor.Shapes) xproto.Cursor {
 	if c.cursors == nil {
 		c.cursors = make(map[cursor.Shapes]xproto.Cursor, cursor.ShapesN)
-		openCursorFont()
+		c.openCursorFont()
 	}
 	ch, ok := c.cursors[sh]
 	if !ok {
@@ -104,7 +105,7 @@ func (c *cursorImpl) cursorHandle(sh cursor.Shapes) xproto.Cursor {
 }
 
 func (c *cursorImpl) setImpl(sh cursor.Shapes) {
-	setCursor(c.cursorHandle(sh))
+	c.setCursor(c.cursorHandle(sh))
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
