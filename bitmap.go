@@ -29,7 +29,7 @@ type Bitmap struct {
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
 
 var BitmapProps = ki.Props{
-	"background-color": &Prefs.BackgroundColor,
+	"background-color": &Prefs.Colors.Background,
 }
 
 // GrabRenderFrom grabs the rendered image from given node -- copies the

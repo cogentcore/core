@@ -100,7 +100,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt str
 		css = ki.Props{
 			"textfield": ki.Props{
 				":inactive": ki.Props{
-					"background-color": &gi.Prefs.ControlColor,
+					"background-color": &gi.Prefs.Colors.Control,
 				},
 			},
 		}
@@ -175,7 +175,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 		css = ki.Props{
 			"textfield": ki.Props{
 				":inactive": ki.Props{
-					"background-color": &gi.Prefs.ControlColor,
+					"background-color": &gi.Prefs.Colors.Control,
 				},
 			},
 		}

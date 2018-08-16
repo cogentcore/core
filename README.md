@@ -96,15 +96,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-advertise Noto fonts: https://www.google.com/get/noto/
+* advertise Noto fonts: https://www.google.com/get/noto/, use this and
+Liberation as fallbacks on linux
 
+* update keymaps for each platform
 
 * windows:
 	+ confirm new soln to set dpi method per issue #1
 	+ is not getting / managing multiple screens -- very complex..
 
 * linux:
-	+ track focus!
 	+ some issues with multiple screens -- getting them but not really using
       them or connecting back with windows properly
 
@@ -114,6 +115,13 @@ advertise Noto fonts: https://www.google.com/get/noto/
 * after beta: enable dnd to use OS DND when moves outside window
 
 ## General / Widgets
+
+* struct, map, etc views should have window title reflecting object type -- so
+  sizing is remembered appropriately
+
+* mac crash on close font sel window.. reliable -- probably need a go
+
+* cursor on windows, x11 getting stuck with close popup..
 
 * linux: copy / paste puts in opposite order?
 
@@ -134,9 +142,7 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 
 * add hover for label to show url for links.
 
-* separate prefs for colors, fonts, OS
-
-* double check all the window flags!  also fullscreen.
+* separate prefs for fonts, OS?
 
 * add option for no window render at all while iconfied
 

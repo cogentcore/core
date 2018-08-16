@@ -30,7 +30,7 @@ var MenuBarProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(0, units.Px),
 	"spacing":          units.NewValue(4, units.Px),
-	"color":            &Prefs.FontColor,
+	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
 }
 
@@ -201,7 +201,7 @@ var ToolBarProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(0, units.Px),
 	"spacing":          units.NewValue(4, units.Px),
-	"color":            &Prefs.FontColor,
+	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
 }
 

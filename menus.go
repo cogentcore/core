@@ -80,7 +80,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb := Label{}
 	lb.InitName(&lb, lbl)
 	lb.SetText(lbl)
-	lb.SetProp("background-color", &Prefs.ControlColor)
+	lb.SetProp("background-color", &Prefs.Colors.Control)
 	*m = append(*m, lb.This.(Node2D))
 	return &lb
 }
@@ -181,7 +181,7 @@ var MenuFrameProps = ki.Props{
 	"box-shadow.h-offset": units.NewValue(2, units.Px),
 	"box-shadow.v-offset": units.NewValue(2, units.Px),
 	"box-shadow.blur":     units.NewValue(2, units.Px),
-	"box-shadow.color":    &Prefs.ShadowColor,
+	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
 // PopupMenu pops up a viewport with a layout that draws the supplied actions
@@ -198,7 +198,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.InitName(&pvp, name+"Menu")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
-	pvp.SetProp("color", &Prefs.FontColor)
+	pvp.SetProp("color", &Prefs.Colors.Font)
 	pvp.Fill = true
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
@@ -244,21 +244,21 @@ var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 var MenuButtonProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(4, units.Px),
 	"margin":           units.NewValue(4, units.Px),
-	"box-shadow.color": &Prefs.ShadowColor,
+	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.IconColor,
-		"stroke":  &Prefs.FontColor,
+		"fill":    &Prefs.Colors.Icon,
+		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
@@ -270,8 +270,8 @@ var MenuButtonProps = ki.Props{
 		"margin":         units.NewValue(0, units.Px),
 		"padding":        units.NewValue(0, units.Px),
 		"vertical-align": AlignBottom,
-		"fill":           &Prefs.IconColor,
-		"stroke":         &Prefs.FontColor,
+		"fill":           &Prefs.Colors.Icon,
+		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
 		"width": units.NewValue(1, units.Em),
@@ -331,8 +331,8 @@ var SeparatorProps = ki.Props{
 	"vertical-align":   AlignCenter,
 	"horizontal-align": AlignCenter,
 	"stroke-width":     units.NewValue(2, units.Px),
-	"color":            &Prefs.FontColor,
-	"stroke":           &Prefs.FontColor,
+	"color":            &Prefs.Colors.Font,
+	"stroke":           &Prefs.Colors.Font,
 	// todo: dotted
 }
 

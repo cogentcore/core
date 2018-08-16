@@ -71,7 +71,7 @@ var LabelProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
 	"vertical-align":   AlignTop,
-	"color":            &Prefs.FontColor,
+	"color":            &Prefs.Colors.Font,
 	"background-color": color.Transparent,
 	LabelSelectors[LabelActive]: ki.Props{
 		"background-color": color.Transparent,
@@ -80,7 +80,7 @@ var LabelProps = ki.Props{
 		"color": "lighter-50",
 	},
 	LabelSelectors[LabelSelected]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": &Prefs.Colors.Select,
 	},
 }
 

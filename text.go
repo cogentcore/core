@@ -21,8 +21,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/units"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
@@ -975,7 +975,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			case "u":
 				fs.SetDeco(DecoUnderline)
 			case "a":
-				fs.Color.SetColor(Prefs.LinkColor)
+				fs.Color.SetColor(Prefs.Colors.Link)
 				fs.SetDeco(DecoUnderline)
 				curLinkIdx = len(tr.Links)
 				tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
@@ -1017,7 +1017,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				fs.Size.ToDots(ctxt)
 				fs.LoadFont(ctxt, "")
 			case "mark":
-				fs.BgColor.SetColor(Prefs.HighlightColor)
+				fs.BgColor.SetColor(Prefs.Colors.Highlight)
 			case "abbr", "acronym":
 				fs.SetDeco(DecoDottedUnderline)
 			case "tt", "kbd", "samp", "code":

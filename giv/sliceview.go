@@ -81,7 +81,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var SliceViewProps = ki.Props{
-	"background-color": &gi.Prefs.BackgroundColor,
+	"background-color": &gi.Prefs.Colors.Background,
 }
 
 // SetFrame configures view as a frame

@@ -231,7 +231,7 @@ func (dlg *Dialog) Cancel() {
 //  Configuration functions construct standard types of dialogs but anything can be done
 
 var DialogProps = ki.Props{
-	"color": &Prefs.FontColor,
+	"color": &Prefs.Colors.Font,
 	"#frame": ki.Props{
 		"border-width":        units.NewValue(2, units.Px),
 		"margin":              units.NewValue(8, units.Px),
@@ -239,7 +239,7 @@ var DialogProps = ki.Props{
 		"box-shadow.h-offset": units.NewValue(4, units.Px),
 		"box-shadow.v-offset": units.NewValue(4, units.Px),
 		"box-shadow.blur":     units.NewValue(4, units.Px),
-		"box-shadow.color":    &Prefs.ShadowColor,
+		"box-shadow.color":    &Prefs.Colors.Shadow,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
@@ -258,7 +258,7 @@ var DialogProps = ki.Props{
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {
-	dlg.SetProp("color", &Prefs.FontColor)
+	dlg.SetProp("color", &Prefs.Colors.Font)
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutVert
 	// dlg.StylePart(frame.This)

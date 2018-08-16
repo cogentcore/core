@@ -25,33 +25,40 @@ var ZoomFactor = float32(1.0)
 
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
 // info on the different screens -- these prefs are indexed by the Screen.Name
-// -- settings here override those in the global preferences
+// -- settings here override those in the global preferences.
 type ScreenPrefs struct {
 	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
+}
+
+// ColorPrefs specify colors for all major categories of GUI elements, and are
+// used in the default styles.
+type ColorPrefs struct {
+	Font       Color `desc:"default font / pen color"`
+	Background Color `desc:"default background color"`
+	Shadow     Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Border     Color `desc:"default border color, for button, frame borders, etc"`
+	Control    Color `desc:"default main color for controls: buttons, etc"`
+	Icon       Color `desc:"color for icons or other solidly-colored, small elements"`
+	Select     Color `desc:"color for selected elements"`
+	Highlight  Color `desc:"color for highlight background"`
+	Link       Color `desc:"color for links in text etc"`
 }
 
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
-// the GoGi user preferences directory -- see oswin/App for further info
+// the GoGi user preferences directory -- see oswin/App for further info.
 type Preferences struct {
 	LogicalDPIScale float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	DoubleClickMSec int                    `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
 	ScrollWheelRate int                    `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
-	FontColor       Color                  `desc:"default font / pen color"`
-	BackgroundColor Color                  `desc:"default background color"`
-	ShadowColor     Color                  `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	BorderColor     Color                  `desc:"default border color, for button, frame borders, etc"`
-	ControlColor    Color                  `desc:"default main color for controls: buttons, etc"`
-	IconColor       Color                  `desc:"color for icons or other solidly-colored, small elements"`
-	SelectColor     Color                  `desc:"color for selected elements"`
-	HighlightColor  Color                  `desc:"color for highlight background"`
-	LinkColor       Color                  `desc:"color for links in text etc"`
+	Colors          ColorPrefs             `desc:"color preferences"`
 	StdKeyMapName   string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
 	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
+	FontFamily      string                 `desc:"default font family when otherwise not specified"`
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
@@ -60,19 +67,52 @@ type Preferences struct {
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
+func (p *ColorPrefs) Defaults() {
+	p.Font.SetColor(color.Black)
+	p.Border.SetString("#666", nil)
+	p.Background.SetColor(color.White)
+	p.Shadow.SetString("darker-10", &p.Background)
+	p.Control.SetString("#EEF", nil)
+	p.Icon.SetString("highlight-30", p.Control)
+	p.Select.SetString("#CFC", nil)
+	p.Highlight.SetString("#FFA", nil)
+	p.Link.SetString("#00F", nil)
+}
+
+// PrefColor returns preference color of given name (case insensitive)
+func (p *ColorPrefs) PrefColor(clrName string) *Color {
+	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
+	switch lc {
+	case "fontcolor":
+		return &p.Font
+	case "backgroundcolor":
+		return &p.Background
+	case "shadowcolor":
+		return &p.Shadow
+	case "bordercolor":
+		return &p.Border
+	case "controlcolor":
+		return &p.Control
+	case "iconcolor":
+		return &p.Icon
+	case "selectcolor":
+		return &p.Select
+	case "highlightcolor":
+		return &p.Highlight
+	case "linkcolor":
+		return &p.Link
+	}
+	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
+	return nil
+}
+
+// todo: Save, Load colors separately!
+
 func (p *Preferences) Defaults() {
 	p.LogicalDPIScale = 1.0
 	p.DoubleClickMSec = 500
 	p.ScrollWheelRate = 20
-	p.FontColor.SetColor(color.Black)
-	p.BorderColor.SetString("#666", nil)
-	p.BackgroundColor.SetColor(color.White)
-	p.ShadowColor.SetString("darker-10", &p.BackgroundColor)
-	p.ControlColor.SetString("#EEF", nil)
-	p.IconColor.SetString("highlight-30", p.ControlColor)
-	p.SelectColor.SetString("#CFC", nil)
-	p.HighlightColor.SetString("#FFA", nil)
-	p.LinkColor.SetString("#00F", nil)
+	p.Colors.Defaults()
 	p.FavPaths.SetToDefaults()
 }
 
@@ -190,33 +230,6 @@ func (p *Preferences) ScreenInfo() string {
 		scinfo += fmt.Sprintf("Screen number: %v name: %v\n<br>    geom: %v, depth: %v, logical DPI: %v, physical DPI: %v, logical DPI scale: %v, physical size: %v\n<br>    device pixel ratio: %v, refresh rate: %v\n<br>    orientation: %v, native orientation: %v, primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.Depth, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.PhysicalSize, sc.DevicePixelRatio, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
 	}
 	return scinfo
-}
-
-// PrefColor returns preference color of given name (case insensitive)
-func (p *Preferences) PrefColor(clrName string) *Color {
-	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
-	switch lc {
-	case "fontcolor":
-		return &p.FontColor
-	case "backgroundcolor":
-		return &p.BackgroundColor
-	case "shadowcolor":
-		return &p.ShadowColor
-	case "bordercolor":
-		return &p.BorderColor
-	case "controlcolor":
-		return &p.ControlColor
-	case "iconcolor":
-		return &p.IconColor
-	case "selectcolor":
-		return &p.SelectColor
-	case "highlightcolor":
-		return &p.HighlightColor
-	case "linkcolor":
-		return &p.LinkColor
-	}
-	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
-	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

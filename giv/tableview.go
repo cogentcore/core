@@ -124,8 +124,8 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var TableViewProps = ki.Props{
-	"background-color": &gi.Prefs.BackgroundColor,
-	"color":            &gi.Prefs.FontColor,
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
 }
 
 // StructType returns the type of the struct within the slice, and the number

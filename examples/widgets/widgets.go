@@ -100,7 +100,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	blrow := mfr.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
 	blab.SetProp("font-family", "Arial Unicode")
-	blab.Text = "Buttons: ⌘ "
+	blab.Text = "Buttons:"
 	blab.Selectable = true
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)

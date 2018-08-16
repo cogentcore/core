@@ -35,8 +35,8 @@ type StructView struct {
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
 var StructViewProps = ki.Props{
-	"background-color": &gi.Prefs.BackgroundColor,
-	"color":            &gi.Prefs.FontColor,
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
 		"text-align":     gi.AlignCenter,

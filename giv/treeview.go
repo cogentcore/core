@@ -1303,8 +1303,8 @@ func (tv *TreeView) TreeViewEvents() {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
 var TVBranchProps = ki.Props{
-	"fill":   &gi.Prefs.IconColor,
-	"stroke": &gi.Prefs.FontColor,
+	"fill":   &gi.Prefs.Colors.Icon,
+	"stroke": &gi.Prefs.Colors.Font,
 }
 
 func (tv *TreeView) ConfigParts() {
@@ -1364,7 +1364,7 @@ var TreeViewProps = ki.Props{
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       gi.AlignLeft,
 	"vertical-align":   gi.AlignTop,
-	"color":            &gi.Prefs.FontColor,
+	"color":            &gi.Prefs.Colors.Font,
 	"background-color": "inherit",
 	"#branch": ki.Props{
 		"margin":           units.NewValue(0, units.Px),
@@ -1386,10 +1386,10 @@ var TreeViewProps = ki.Props{
 	},
 	TreeViewSelectors[TreeViewActive]: ki.Props{},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": &gi.Prefs.SelectColor,
+		"background-color": &gi.Prefs.Colors.Select,
 	},
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
-		"background-color": &gi.Prefs.ControlColor,
+		"background-color": &gi.Prefs.Colors.Control,
 	},
 }
 

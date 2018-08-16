@@ -42,8 +42,8 @@ type Viewport2D struct {
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.Colors.Font,
+	"background-color": &Prefs.Colors.Background,
 }
 
 // NewViewport2D creates a new OSImage with the specified width and height,

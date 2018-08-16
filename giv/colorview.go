@@ -28,8 +28,8 @@ type ColorView struct {
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
 
 var ColorViewProps = ki.Props{
-	"background-color": &gi.Prefs.BackgroundColor,
-	"color":            &gi.Prefs.FontColor,
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
 	"#title": ki.Props{
 		"max-width":      units.NewValue(-1, units.Px),
 		"text-align":     gi.AlignCenter,

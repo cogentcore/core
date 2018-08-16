@@ -156,15 +156,15 @@ func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
 var TabButtonProps = ki.Props{
 	"border-width":        units.NewValue(1, units.Px),
 	"border-radius":       units.NewValue(0, units.Px),
-	"border-color":        &gi.Prefs.BorderColor,
+	"border-color":        &gi.Prefs.Colors.Border,
 	"border-style":        gi.BorderSolid,
 	"padding":             units.NewValue(4, units.Px),
 	"margin":              units.NewValue(0, units.Px),
-	"background-color":    &gi.Prefs.ControlColor,
+	"background-color":    &gi.Prefs.Colors.Control,
 	"box-shadow.h-offset": units.NewValue(0, units.Px),
 	"box-shadow.v-offset": units.NewValue(0, units.Px),
 	"box-shadow.blur":     units.NewValue(0, units.Px),
-	"box-shadow.color":    &gi.Prefs.ShadowColor,
+	"box-shadow.color":    &gi.Prefs.Colors.Shadow,
 	"text-align":          gi.AlignCenter,
 }
 

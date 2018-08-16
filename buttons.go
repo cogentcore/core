@@ -566,24 +566,24 @@ var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 var ButtonProps = ki.Props{
 	"border-width":  units.NewValue(1, units.Px),
 	"border-radius": units.NewValue(4, units.Px),
-	"border-color":  &Prefs.BorderColor,
+	"border-color":  &Prefs.Colors.Border,
 	"border-style":  BorderSolid,
 	"padding":       units.NewValue(4, units.Px),
 	"margin":        units.NewValue(4, units.Px),
 	// "box-shadow.h-offset": units.NewValue(10, units.Px),
 	// "box-shadow.v-offset": units.NewValue(10, units.Px),
 	// "box-shadow.blur":     units.NewValue(4, units.Px),
-	"box-shadow.color": &Prefs.ShadowColor,
+	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.IconColor,
-		"stroke":  &Prefs.FontColor,
+		"fill":    &Prefs.Colors.Icon,
+		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
@@ -595,8 +595,8 @@ var ButtonProps = ki.Props{
 		"margin":         units.NewValue(0, units.Px),
 		"padding":        units.NewValue(0, units.Px),
 		"vertical-align": AlignBottom,
-		"fill":           &Prefs.IconColor,
-		"stroke":         &Prefs.FontColor,
+		"fill":           &Prefs.Colors.Icon,
+		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
 		"width": units.NewValue(1, units.Em),
@@ -643,16 +643,16 @@ var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
 var CheckBoxProps = ki.Props{
 	"text-align":       AlignLeft,
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.Colors.Font,
+	"background-color": &Prefs.Colors.Control,
 	"#icon0": ki.Props{
 		"width":            units.NewValue(1, units.Em),
 		"height":           units.NewValue(1, units.Em),
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,
-		"fill":             &Prefs.ControlColor,
-		"stroke":           &Prefs.FontColor,
+		"fill":             &Prefs.Colors.Control,
+		"stroke":           &Prefs.Colors.Font,
 	},
 	"#icon1": ki.Props{
 		"width":            units.NewValue(1, units.Em),
@@ -660,8 +660,8 @@ var CheckBoxProps = ki.Props{
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,
-		"fill":             &Prefs.ControlColor,
-		"stroke":           &Prefs.FontColor,
+		"fill":             &Prefs.Colors.Control,
+		"stroke":           &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
 		"width": units.NewValue(1, units.Ex),
@@ -689,7 +689,7 @@ var CheckBoxProps = ki.Props{
 		"background-color": "highlight-30",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": &Prefs.Colors.Select,
 	},
 }
 

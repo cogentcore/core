@@ -351,7 +351,7 @@ func (c *Color) SetString(str string, base color.Color) error {
 	case strings.HasPrefix(low, "pref("):
 		val := low[5:]
 		val = strings.TrimRight(val, ")")
-		clr := Prefs.PrefColor(val)
+		clr := Prefs.Colors.PrefColor(val)
 		if clr != nil {
 			*c = *clr
 		}

@@ -71,8 +71,8 @@ func (fv *FileView) UpdateFromPath() {
 }
 
 var FileViewProps = ki.Props{
-	"color":            &gi.Prefs.FontColor,
-	"background-color": &gi.Prefs.BackgroundColor,
+	"color":            &gi.Prefs.Colors.Font,
+	"background-color": &gi.Prefs.Colors.Background,
 }
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
@@ -192,7 +192,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.CSS = ki.Props{
 		"textfield": ki.Props{
 			":inactive": ki.Props{
-				"background-color": &gi.Prefs.ControlColor,
+				"background-color": &gi.Prefs.Colors.Control,
 			},
 		},
 	}
@@ -214,7 +214,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.CSS = ki.Props{
 		"textfield": ki.Props{
 			":inactive": ki.Props{
-				"background-color": &gi.Prefs.ControlColor,
+				"background-color": &gi.Prefs.Colors.Control,
 			},
 		},
 	}

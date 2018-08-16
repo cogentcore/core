@@ -32,12 +32,12 @@ var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
 var ActionProps = ki.Props{
 	"border-width":     units.NewValue(0, units.Px), // todo: should be default
 	"border-radius":    units.NewValue(0, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"box-shadow.color": &Prefs.ShadowColor,
+	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
 	"padding":          units.NewValue(4, units.Px),
 	"margin":           units.NewValue(4, units.Px),
 	"#icon": ki.Props{
@@ -45,8 +45,8 @@ var ActionProps = ki.Props{
 		"height":  units.NewValue(1, units.Em),
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.IconColor,
-		"stroke":  &Prefs.FontColor,
+		"fill":    &Prefs.Colors.Icon,
+		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
@@ -58,8 +58,8 @@ var ActionProps = ki.Props{
 		"margin":         units.NewValue(0, units.Px),
 		"padding":        units.NewValue(0, units.Px),
 		"vertical-align": AlignBottom,
-		"fill":           &Prefs.IconColor,
-		"stroke":         &Prefs.FontColor,
+		"fill":           &Prefs.Colors.Icon,
+		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
 		"width": units.NewValue(1, units.Em),
@@ -95,7 +95,7 @@ var ActionProps = ki.Props{
 			"background-color": "highlight-30",
 		},
 		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": &Prefs.SelectColor,
+			"background-color": &Prefs.Colors.Select,
 		},
 	},
 	".bar-action": ki.Props{ // class of actions as bar items (MenuBar, ToolBar)

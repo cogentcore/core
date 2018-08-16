@@ -24,12 +24,12 @@ var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 var FrameProps = ki.Props{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.BackgroundColor,
+	"color":            &Prefs.Colors.Font,
+	"background-color": &Prefs.Colors.Background,
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds

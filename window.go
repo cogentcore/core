@@ -194,7 +194,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	MainMenuUpdateWindowsAll()
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
-	vp.SetProp("color", &Prefs.FontColor) // everything inherits this..
+	vp.SetProp("color", &Prefs.Colors.Font) // everything inherits this..
 
 	win.AddChild(vp)
 	win.Viewport = vp

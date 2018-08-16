@@ -43,7 +43,7 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 }
 
 var MapViewProps = ki.Props{
-	"background-color": &gi.Prefs.BackgroundColor,
+	"background-color": &gi.Prefs.Colors.Background,
 }
 
 // SetFrame configures view as a frame

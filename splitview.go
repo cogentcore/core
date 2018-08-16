@@ -256,8 +256,8 @@ var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 var SplitterProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(0, units.Px),
-	"background-color": &Prefs.BackgroundColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Background,
+	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
 		"max-width":      units.NewValue(1, units.Em),
 		"max-height":     units.NewValue(5, units.Em),
@@ -266,8 +266,8 @@ var SplitterProps = ki.Props{
 		"margin":         units.NewValue(0, units.Px),
 		"padding":        units.NewValue(0, units.Px),
 		"vertical-align": AlignMiddle,
-		"fill":           &Prefs.IconColor,
-		"stroke":         &Prefs.FontColor,
+		"fill":           &Prefs.Colors.Icon,
+		"stroke":         &Prefs.Colors.Font,
 	},
 	SliderSelectors[SliderActive]: ki.Props{},
 	SliderSelectors[SliderInactive]: ki.Props{
@@ -283,12 +283,12 @@ var SplitterProps = ki.Props{
 	},
 	SliderSelectors[SliderDown]: ki.Props{},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.IconColor,
-		"background-color": &Prefs.IconColor,
+		"border-color":     &Prefs.Colors.Icon,
+		"background-color": &Prefs.Colors.Icon,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.BackgroundColor,
-		"background-color": &Prefs.BackgroundColor,
+		"border-color":     &Prefs.Colors.Background,
+		"background-color": &Prefs.Colors.Background,
 	},
 }
 

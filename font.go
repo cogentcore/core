@@ -17,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/goki/freetype/truetype"
+	// "github.com/golang/freetype/truetype"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -622,7 +623,8 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 	if path := fl.FontsAvail[fontnm]; path != "" {
 		face, err := LoadFontFace(path, points)
 		if err != nil {
-			log.Printf("gi.FontLib: error loading font %v\n", err)
+			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
+			delete(fl.FontsAvail, fontnm)
 			return nil, err
 		}
 		fl.loadMu.Lock()

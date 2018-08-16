@@ -52,13 +52,13 @@ var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
 var TextFieldProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(4, units.Px),
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       AlignLeft,
-	"color":            &Prefs.FontColor,
-	"background-color": &Prefs.ControlColor,
+	"color":            &Prefs.Colors.Font,
+	"background-color": &Prefs.Colors.Control,
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
@@ -70,7 +70,7 @@ var TextFieldProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	TextFieldSelectors[TextFieldSel]: ki.Props{
-		"background-color": &Prefs.SelectColor,
+		"background-color": &Prefs.Colors.Select,
 	},
 }
 

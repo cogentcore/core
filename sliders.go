@@ -467,19 +467,19 @@ var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 var SliderProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(6, units.Px),
 	"margin":           units.NewValue(4, units.Px),
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
-		"fill":    &Prefs.IconColor,
-		"stroke":  &Prefs.FontColor,
+		"fill":    &Prefs.Colors.Icon,
+		"stroke":  &Prefs.Colors.Font,
 	},
 	SliderSelectors[SliderActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -499,12 +499,12 @@ var SliderProps = ki.Props{
 		"background-color": "highlight-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.IconColor,
-		"background-color": &Prefs.IconColor,
+		"border-color":     &Prefs.Colors.Icon,
+		"background-color": &Prefs.Colors.Icon,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.BackgroundColor,
-		"background-color": &Prefs.BackgroundColor,
+		"border-color":     &Prefs.Colors.Background,
+		"background-color": &Prefs.Colors.Background,
 	},
 }
 
@@ -652,12 +652,12 @@ var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 var ScrollBarProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
-	"border-color":     &Prefs.BorderColor,
+	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"background-color": &Prefs.ControlColor,
-	"color":            &Prefs.FontColor,
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
 	SliderSelectors[SliderActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
@@ -676,12 +676,12 @@ var ScrollBarProps = ki.Props{
 		"background-color": "highlight-20",
 	},
 	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.IconColor,
-		"background-color": &Prefs.IconColor,
+		"border-color":     &Prefs.Colors.Icon,
+		"background-color": &Prefs.Colors.Icon,
 	},
 	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.BackgroundColor,
-		"background-color": &Prefs.BackgroundColor,
+		"border-color":     &Prefs.Colors.Background,
+		"background-color": &Prefs.Colors.Background,
 	},
 }
 

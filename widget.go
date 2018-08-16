@@ -428,7 +428,7 @@ var TooltipFrameProps = ki.Props{
 	"box-shadow.h-offset": units.NewValue(0, units.Px),
 	"box-shadow.v-offset": units.NewValue(0, units.Px),
 	"box-shadow.blur":     units.NewValue(0, units.Px),
-	"box-shadow.color":    &Prefs.ShadowColor,
+	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
@@ -439,7 +439,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.InitName(&pvp, name+"Tooltip")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
-	pvp.SetProp("color", &Prefs.FontColor)
+	pvp.SetProp("color", &Prefs.Colors.Font)
 	pvp.Fill = false
 	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
 	bitflag.Set(&pvp.Flag, int(VpFlagTooltip))
@@ -450,7 +450,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.Lay = LayoutVert
 	frame.SetProps(TooltipFrameProps, false)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
-	lbl.SetProp("background-color", &Prefs.HighlightColor)
+	lbl.SetProp("background-color", &Prefs.Colors.Highlight)
 	lbl.SetProp("word-wrap", true)
 
 	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
