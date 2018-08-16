@@ -116,8 +116,12 @@ Liberation as fallbacks on linux
 
 ## General / Widgets
 
+* update widgets README
+
 * struct, map, etc views should have window title reflecting object type -- so
   sizing is remembered appropriately
+
+* add menu in prefs to delete saved window location prefs file
 
 * mac crash on close font sel window.. reliable -- probably need a go
 
@@ -141,8 +145,6 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 * crash on prefs screen info when sizing wider
 
 * add hover for label to show url for links.
-
-* separate prefs for fonts, OS?
 
 * add option for no window render at all while iconfied
 

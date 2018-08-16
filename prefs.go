@@ -44,6 +44,13 @@ type ColorPrefs struct {
 	Link       Color `desc:"color for links in text etc"`
 }
 
+// ParamPrefs contains misc parameters controlling GUI behavior.
+type ParamPrefs struct {
+	DoubleClickMSec int  `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelRate int  `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
+	LocalMainMenu   bool `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+}
+
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
@@ -51,9 +58,8 @@ type ColorPrefs struct {
 type Preferences struct {
 	LogicalDPIScale float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	DoubleClickMSec int                    `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelRate int                    `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
 	Colors          ColorPrefs             `desc:"color preferences"`
+	Params          ParamPrefs             `desc:"parameters controlling GUI behavior"`
 	StdKeyMapName   string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
 	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
@@ -108,11 +114,16 @@ func (p *ColorPrefs) PrefColor(clrName string) *Color {
 
 // todo: Save, Load colors separately!
 
-func (p *Preferences) Defaults() {
-	p.LogicalDPIScale = 1.0
+func (p *ParamPrefs) Defaults() {
 	p.DoubleClickMSec = 500
 	p.ScrollWheelRate = 20
+	p.LocalMainMenu = false
+}
+
+func (p *Preferences) Defaults() {
+	p.LogicalDPIScale = 1.0
 	p.Colors.Defaults()
+	p.Params.Defaults()
 	p.FavPaths.SetToDefaults()
 }
 
@@ -156,8 +167,10 @@ func (p *Preferences) Apply() {
 		}
 	}
 
-	mouse.DoubleClickMSec = p.DoubleClickMSec
-	mouse.ScrollWheelRate = p.ScrollWheelRate
+	mouse.DoubleClickMSec = p.Params.DoubleClickMSec
+	mouse.ScrollWheelRate = p.Params.ScrollWheelRate
+	LocalMainMenu = p.Params.LocalMainMenu
+
 	if p.StdKeyMapName != "" {
 		defmap, _ := StdKeyMapByName(p.StdKeyMapName)
 		if defmap != nil {

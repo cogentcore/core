@@ -61,12 +61,13 @@ var HoverStartMSec = 2000
 // register a Hover event
 var HoverMaxPix = 5
 
-// MacShowMainMenu controls whether the main menu is displayed at top of each
-// window, in addition to at the top of the screen.  Mac native apps do not do
-// this, but OTOH it makes things more consistent with other platforms, and
-// with larger screens, it can be convenient to have access to all the menu
-// items right there.
-var MacShowMainMenu = false
+// LocalMainMenu controls whether the main menu is displayed locally at top of
+// each window, in addition to the global menu at the top of the screen.  Mac
+// native apps do not do this, but OTOH it makes things more consistent with
+// other platforms, and with larger screens, it can be convenient to have
+// access to all the menu items right there.  Controlled by Prefs.Params
+// variable.
+var LocalMainMenu = false
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using

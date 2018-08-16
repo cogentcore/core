@@ -50,7 +50,7 @@ func (mb *MenuBar) ShowMenuBar() bool {
 		return false
 	}
 	if mb.MainMenu {
-		if oswin.TheApp.Platform() == oswin.MacOS && !MacShowMainMenu {
+		if oswin.TheApp.Platform() == oswin.MacOS && !LocalMainMenu {
 			return false
 		}
 	}
