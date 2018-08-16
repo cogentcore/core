@@ -16,11 +16,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/freetype/truetype"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 )
@@ -135,14 +135,23 @@ func (fs *FontStyle) FaceNm() string {
 	}
 	mods := ""
 	if fs.Style == FontItalic && fs.Weight == WeightBold {
-		mods = "Bold Italic"
+		if !strings.Contains(fnm, "Bold") {
+			mods += "Bold "
+		}
+		if !strings.Contains(fnm, "Italic") {
+			mods += "Italic"
+		}
 	} else if fs.Style == FontItalic {
-		mods = "Italic"
+		if !strings.Contains(fnm, "Italic") {
+			mods += "Italic"
+		}
 	} else if fs.Weight == WeightBold {
-		mods = "Bold"
+		if !strings.Contains(fnm, "Bold") {
+			mods += "Bold "
+		}
 	}
 	if mods != "" {
-		fmod := fnm + " " + mods
+		fmod := fnm + " " + strings.TrimSpace(mods)
 		if FontLibrary.FontAvail(fmod) {
 			fnm = fmod
 		} else {
@@ -512,7 +521,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 }
 
 // FontsAvailFromPath scans for all fonts we can use on a given path,
-// gathering info into FontsAvail and FontInfo
+// gathering info into FontsAvail and FontInfo.
 func (fl *FontLib) FontsAvailFromPath(path string) error {
 	ext := ".ttf" // for now -- might need more
 
@@ -547,6 +556,9 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 				fn = strings.Replace(fn, "-", " ", -1)
 				// fn = strings.Title(fn)
 			}
+			fn = strings.Replace(fn, "BoldItalic", "Bold Italic", 1)
+			fn = strings.Replace(fn, "BoldOblique", "Bold Oblique", 1)
+			fn = strings.Replace(fn, "LightOblique", "Light Oblique", 1)
 			basefn := strings.ToLower(fn)
 			if _, ok := fl.FontsAvail[basefn]; !ok {
 				fl.FontsAvail[basefn] = path
