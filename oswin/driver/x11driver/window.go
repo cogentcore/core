@@ -17,6 +17,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"sync"
 	"time"
 
@@ -54,6 +55,9 @@ type windowImpl struct {
 	released       bool
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
+	// frameSizes are sizes of extra stuff from window manager, for converting positions
+	// l,r,t,b
+	frameSizes [4]int
 }
 
 // for sending any kind of event
@@ -111,30 +115,70 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	return oswin.PublishResult{}
 }
 
+func (w *windowImpl) getFrameSizes() [4]int {
+	if w.frameSizes[2] != 0 {
+		return w.frameSizes
+	}
+	prop, err := xproto.GetProperty(w.app.xc, false, w.xw, w.app.atomNetFrameExtents, xproto.AtomAny, 0, 4).Reply()
+	if err != nil {
+		log.Printf("X11 _NET_FRAME_EXTENTS Read Property error: %v\n", err)
+	}
+	if prop.Format == 32 && prop.ValueLen == 4 {
+		for i := 0; i < 4; i++ {
+			w.frameSizes[i] = int(xgb.Get32(prop.Value[i*4:]))
+		}
+	} else {
+		log.Printf("X11 _NET_FRAME_EXTENTS Property values not as expected. fmt: %v, len: %v\n", prop.Format, prop.ValueLen)
+	}
+	return w.frameSizes
+}
+
+// note: this does NOT seem result in accurate results compared to event, but
+// frame sizes are accurate
+func (w *windowImpl) getCurGeom() (pos, size image.Point, err error) {
+	geo, err := xproto.GetGeometry(w.app.xc, xproto.Drawable(w.xw)).Reply()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	trpos, err := xproto.TranslateCoordinates(w.app.xc, w.xw, w.app.xsci.Root, geo.X, geo.Y).Reply()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	frext := w.getFrameSizes() // l,r,t,b
+	pos = image.Point{int(trpos.DstX) - frext[0], int(trpos.DstY) - frext[2]}
+	size = image.Point{int(geo.Width), int(geo.Height)}
+	// fmt.Printf("computed geom, pos: %v size: %v  frext: %v\n", pos, size, frext)
+	return
+}
+
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	// todo: support multple screens
 	sc := oswin.TheApp.Screen(0)
-
 	dpi := sc.PhysicalDPI
-	ldpi := dpi
 
 	sz := image.Point{int(ev.Width), int(ev.Height)}
 	ps := image.Point{int(ev.X), int(ev.Y)}
 
-	act := window.ActionsN
+	frext := w.getFrameSizes() // l,r,t,b
+	ps.Y -= frext[2]
+	ps.X -= frext[0]
 
-	if w.Sz != sz || w.PhysDPI != dpi || w.LogDPI != ldpi {
+	// fmt.Printf("event geom, pos: %v size: %v\n", ps, sz)
+
+	act := window.Resize
+
+	if w.Sz != sz || w.PhysDPI != dpi {
 		act = window.Resize
 	} else if w.Pos != ps {
 		act = window.Move
-	} else {
-		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
+		// fmt.Printf("sent mv from: %v\n", w.Pos)
+		w.Pos = ps
 	}
 
 	w.Sz = sz
-	w.Pos = ps
 	w.PhysDPI = dpi
-	w.LogDPI = ldpi
 
 	// if scrno > 0 && len(theApp.screens) > int(scrno) {
 	w.Scrn = sc
@@ -289,10 +333,11 @@ func (w *windowImpl) Raise() {
 func (w *windowImpl) Minimize() {
 	// https://cgit.freedesktop.org/xorg/lib/libX11/tree/src/Iconify.c
 
-	dat := xproto.ClientMessageDataUnionData32New([]uint32{3}) // 3 = IconicState
+	vdat := []uint32{3, 0, 0, 0, 0} // 3 = IconicState
+	dat := xproto.ClientMessageDataUnionData32New(vdat)
 
 	minmsg := xproto.ClientMessageEvent{
-		Sequence: 1, // no idea what this is..
+		Sequence: 0, // no idea what this is..
 		Format:   32,
 		Window:   w.xw,
 		Type:     w.app.atomWMChangeState,

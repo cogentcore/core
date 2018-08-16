@@ -48,19 +48,20 @@ type appImpl struct {
 	xsci    *xproto.ScreenInfo
 	keysyms KeysymTable
 
-	atomNETWMName      xproto.Atom
-	atomUTF8String     xproto.Atom
-	atomWMDeleteWindow xproto.Atom
-	atomWMProtocols    xproto.Atom
-	atomWMTakeFocus    xproto.Atom
-	atomWMChangeState  xproto.Atom
-	atomClipboardSel   xproto.Atom
-	atomPrimarySel     xproto.Atom
-	atomTargets        xproto.Atom
-	atomMultiple       xproto.Atom
-	atomTimestamp      xproto.Atom
-	atomIncr           xproto.Atom
-	atomText           xproto.Atom
+	atomNETWMName       xproto.Atom
+	atomUTF8String      xproto.Atom
+	atomWMDeleteWindow  xproto.Atom
+	atomWMProtocols     xproto.Atom
+	atomWMTakeFocus     xproto.Atom
+	atomWMChangeState   xproto.Atom
+	atomNetFrameExtents xproto.Atom
+	atomClipboardSel    xproto.Atom
+	atomPrimarySel      xproto.Atom
+	atomTargets         xproto.Atom
+	atomMultiple        xproto.Atom
+	atomTimestamp       xproto.Atom
+	atomIncr            xproto.Atom
+	atomText            xproto.Atom
 
 	pixelsPerPt  float32
 	pictformat24 render.Pictformat
@@ -533,6 +534,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	)
 	app.setProperty(xw, app.atomWMProtocols, app.atomWMDeleteWindow, app.atomWMTakeFocus)
 
+	fmt.Printf("create pos: %v\n", opts.Pos)
 	// todo: opts
 	// dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
@@ -545,8 +547,8 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	xproto.MapWindow(app.xc, xw)
 
 	if opts.Pos != image.ZP {
-		w.SetPos(opts.Pos)
 		w.SetSize(opts.Size)
+		w.SetPos(opts.Pos)
 	}
 
 	return w, nil
@@ -574,6 +576,10 @@ func (app *appImpl) initAtoms() (err error) {
 		return err
 	}
 	app.atomWMChangeState, err = app.internAtom("WM_CHANGE_STATE")
+	if err != nil {
+		return err
+	}
+	app.atomNetFrameExtents, err = app.internAtom("_NET_FRAME_EXTENTS")
 	if err != nil {
 		return err
 	}

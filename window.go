@@ -465,7 +465,7 @@ func (w *Window) FullReRender() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	if w.IsInactive() {
+	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
 	pr := prof.Start("win.UploadVpRegion")
@@ -479,7 +479,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
-	if w.IsInactive() {
+	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
 	pr := prof.Start("win.UploadVp")
@@ -494,7 +494,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	if w.IsInactive() {
+	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
 	pr := prof.Start("win.UploadAllViewports")
@@ -557,7 +557,7 @@ func (w *Window) RenderOverlays() {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsInactive() || w.OSWin.IsMinimized() {
+	if w.IsInactive() || w.WinTex == nil || w.OSWin.IsMinimized() {
 		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}

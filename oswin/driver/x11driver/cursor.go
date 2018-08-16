@@ -67,7 +67,7 @@ func (c *cursorImpl) createCursor(curid int) xproto.Cursor {
 	}
 
 	// 0's are all colors -- black by default
-	err = xproto.CreateGlyphCursorChecked(theApp.xc, cur, c.cursFont, c.cursFont, uint16(curid), uint16(curid+1), 0, 0, 0, 0, 0, 0).Check()
+	err = xproto.CreateGlyphCursorChecked(theApp.xc, cur, c.cursFont, c.cursFont, uint16(curid), uint16(curid+1), 65535, 65535, 65535, 0, 0, 0).Check()
 
 	if err != nil {
 		log.Printf("x11driver: xproto.CreateGlyphCursor for cursor id %v failed: %v", curid, err)
