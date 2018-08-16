@@ -317,13 +317,13 @@ type ValueView interface {
 	SaveTmp()
 }
 
-// TODO: need a more efficient way to represent the different owner type data
-// (Key vs. Field vs. Idx), instead of just having everything for everything?
-// issue is that ValueView itself gets customized for different target value
-// types, but those are orthogonal to the owner type, so need a separate
+// note: could have a more efficient way to represent the different owner type
+// data (Key vs. Field vs. Idx), instead of just having everything for
+// everything.  However, ValueView itself gets customized for different target
+// value types, and those are orthogonal to the owner type, so need a separate
 // ValueViewOwner class that encodes these options more efficiently -- but
 // that introduces another struct alloc and pointer -- not clear if it is
-// worth it?
+// worth it..
 
 // ValueViewBase provides the basis for implementations of the ValueView
 // interface, representing values in the interface -- it implements a generic
@@ -336,14 +336,12 @@ type ValueViewBase struct {
 	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
 	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
 	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
-	OwnerType reflect.Type         `desc:"non-pointer type of the Owner, for convenience"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
 	Key       interface{}          `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
 	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`
 	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
 	Widget    gi.Node2D            `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
-	Label     string               `desc:"label for displaying this item -- based on Field.Name and optional label Tag value"`
 	TmpSave   ValueView            `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
@@ -579,7 +577,8 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Struct", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
-		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Struct Value View", "", nil, nil, nil)
+		tynm := kit.NonPtrType(vv.Value.Type()).Name()
+		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 	})
 }
 
@@ -658,8 +657,9 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Slice", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
+		tynm := kit.NonPtrType(vv.Value.Type()).Name()
 		if vvv.IsStruct {
-			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, "Slice-of-Struct Value View", "", nil, nil, nil, nil)
+			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 			if ok {
 				sv := svk.(*TableView)
@@ -670,7 +670,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 				})
 			}
 		} else {
-			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, "Slice Value View", "", nil, nil, nil)
+			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				sv := svk.(*SliceView)
@@ -722,7 +722,8 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Map", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
-		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, "Map Value View", "", nil, nil, nil)
+		tynm := kit.NonPtrType(vv.Value.Type()).Name()
+		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 		if ok {
 			mv := mvk.(*MapView)
@@ -831,7 +832,8 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		k := vvv.KiStruct()
 		if k != nil {
 			mb := vvv.Widget.(*gi.MenuButton)
-			StructViewDialog(mb.Viewport, k, vv.TmpSave, "Struct Value View", "", nil, nil, nil)
+			tynm := kit.NonPtrType(vvv.Value.Type()).Name()
+			StructViewDialog(mb.Viewport, k, vv.TmpSave, tynm, "", nil, nil, nil)
 		}
 	})
 	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {

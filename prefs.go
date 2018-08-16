@@ -245,6 +245,32 @@ func (p *Preferences) ScreenInfo() string {
 	return scinfo
 }
 
+// Load colors from a JSON-formatted file
+func (p *ColorPrefs) LoadJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, p)
+}
+
+// Save colors to a JSON-formatted file
+func (p *ColorPrefs) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	if err != nil {
+		PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+	}
+	return err
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //  FavoritePaths
 

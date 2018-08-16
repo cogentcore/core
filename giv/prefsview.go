@@ -66,6 +66,30 @@ func PrefsEditor(p *gi.Preferences) {
 		vp.UpdateSig()
 	})
 
+	savec := tbar.AddNewChild(gi.KiT_Action, "savecolor").(*gi.Action)
+	savec.SetText("Save Colors")
+	savec.Tooltip = "Save current colors to a file -- for sharing"
+	savec.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				p.Colors.SaveJSON(FileViewDialogValue(dlg))
+			}
+		})
+	})
+
+	loadc := tbar.AddNewChild(gi.KiT_Action, "loadcolor").(*gi.Action)
+	loadc.SetText("Load Colors")
+	loadc.Tooltip = "Load colors from a file"
+	loadc.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				p.Colors.LoadJSON(FileViewDialogValue(dlg))
+			}
+		})
+	})
+
 	stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
 	stdmap.SetText("Std KeyMap")
 	stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"

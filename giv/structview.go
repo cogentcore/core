@@ -92,12 +92,14 @@ func (sv *StructView) StdConfig() (mods, updt bool) {
 	return
 }
 
-// SetTitle sets the title and updates the Title label
+// SetTitle sets the optional title and updates the Title label
 func (sv *StructView) SetTitle(title string) {
 	sv.Title = title
-	lab, _ := sv.TitleWidget()
-	if lab != nil {
-		lab.Text = title
+	if sv.Title != "" {
+		lab, _ := sv.TitleWidget()
+		if lab != nil {
+			lab.Text = title
+		}
 	}
 }
 
@@ -202,8 +204,6 @@ func (sv *StructView) ConfigStructGrid() {
 
 func (sv *StructView) UpdateFromStruct() {
 	mods, updt := sv.StdConfig()
-	typ := kit.NonPtrType(reflect.TypeOf(sv.Struct))
-	sv.SetTitle(fmt.Sprintf("%v Fields", typ.Name()))
 	sv.ConfigStructGrid()
 	if mods {
 		sv.UpdateEnd(updt)

@@ -8,13 +8,15 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/iancoleman/strcase"
 )
 
 // StructViewDialog is for editing fields of a structure using a StructView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog("struct-view", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -41,7 +43,8 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog("map-view", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -68,7 +71,8 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog("slice-view", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -105,7 +109,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt str
 			},
 		}
 	}
-	dlg := gi.NewStdDialog("slice-view-select", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -140,7 +145,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt str
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun TableViewStyleFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog("table-view", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -180,7 +186,8 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 			},
 		}
 	}
-	dlg := gi.NewStdDialog("table-view-select", title, prompt, true, true, css)
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

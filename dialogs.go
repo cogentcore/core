@@ -52,7 +52,7 @@ const (
 //go:generate stringer -type=DialogState
 
 // standard vertical space between elements in a dialog, in Em units
-var StdDialogVSpace = float32(1.0)
+var StdDialogVSpace = float32(0.5)
 var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Em, Dots: 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either
