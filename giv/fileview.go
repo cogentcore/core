@@ -78,7 +78,7 @@ var FileViewProps = ki.Props{
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
 var FileViewKindColorMap = map[string]string{
 	"Folder":           "blue",
-	"application/json": "purple",
+	"application/json": "pref(link)",
 }
 
 func FileViewStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {

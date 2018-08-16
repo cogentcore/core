@@ -31,7 +31,7 @@ var MenuBarProps = ki.Props{
 	"margin":           units.NewValue(0, units.Px),
 	"spacing":          units.NewValue(4, units.Px),
 	"color":            &Prefs.Colors.Font,
-	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
+	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
 // MenuBarStdRender does the standard rendering of the bar
@@ -202,7 +202,7 @@ var ToolBarProps = ki.Props{
 	"margin":           units.NewValue(0, units.Px),
 	"spacing":          units.NewValue(4, units.Px),
 	"color":            &Prefs.Colors.Font,
-	"background-color": "linear-gradient(pref(ControlColor), highlight-10)",
+	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
 // ToolBarStdRender does the standard rendering of the bar

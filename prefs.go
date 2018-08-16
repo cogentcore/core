@@ -89,23 +89,23 @@ func (p *ColorPrefs) Defaults() {
 func (p *ColorPrefs) PrefColor(clrName string) *Color {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {
-	case "fontcolor":
+	case "font":
 		return &p.Font
-	case "backgroundcolor":
+	case "background":
 		return &p.Background
-	case "shadowcolor":
+	case "shadow":
 		return &p.Shadow
-	case "bordercolor":
+	case "border":
 		return &p.Border
-	case "controlcolor":
+	case "control":
 		return &p.Control
-	case "iconcolor":
+	case "icon":
 		return &p.Icon
-	case "selectcolor":
+	case "select":
 		return &p.Select
-	case "highlightcolor":
+	case "highlight":
 		return &p.Highlight
-	case "linkcolor":
+	case "link":
 		return &p.Link
 	}
 	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)

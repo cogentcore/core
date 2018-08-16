@@ -116,7 +116,9 @@ Liberation as fallbacks on linux
 
 ## General / Widgets
 
-* update widgets README
+* spinbox text fields not updating styles -- change color to see.
+
+* crash in sliceview -- title probably not good
 
 * struct, map, etc views should have window title reflecting object type -- so
   sizing is remembered appropriately
@@ -173,6 +175,8 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 * arg view / dialog and button tags
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
+
+* update widgets README
 
 * Reminder: grep all todo: in code
 

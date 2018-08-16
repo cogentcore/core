@@ -84,7 +84,7 @@ var ComboBoxProps = ki.Props{
 		"background-color": "linear-gradient(highlight-30, highlight-10)",
 	},
 	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+		"background-color": "linear-gradient(pref(Select), highlight-10)",
 		"color":            "highlight-90",
 	},
 }

@@ -121,7 +121,7 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(highlight-30, highlight-10)",
 		},
 		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+			"background-color": "linear-gradient(pref(Select), highlight-10)",
 		},
 	},
 	".": ki.Props{ // default class -- stand-alone buttons presumably
@@ -144,7 +144,7 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(highlight-30, highlight-10)",
 		},
 		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": "linear-gradient(pref(SelectColor), highlight-10)",
+			"background-color": "linear-gradient(pref(Select), highlight-10)",
 		},
 	},
 }
