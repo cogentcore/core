@@ -141,9 +141,20 @@ func (fs *FontStyle) FaceNm() string {
 		if !strings.Contains(fnm, "Italic") {
 			mods += "Italic"
 		}
+	} else if fs.Style == FontOblique && fs.Weight == WeightBold {
+		if !strings.Contains(fnm, "Bold") {
+			mods += "Bold "
+		}
+		if !strings.Contains(fnm, "Oblique") {
+			mods += "Oblique"
+		}
 	} else if fs.Style == FontItalic {
 		if !strings.Contains(fnm, "Italic") {
 			mods += "Italic"
+		}
+	} else if fs.Style == FontOblique {
+		if !strings.Contains(fnm, "Oblique") {
+			mods += "Obqlique"
 		}
 	} else if fs.Weight == WeightBold {
 		if !strings.Contains(fnm, "Bold") {
@@ -520,6 +531,21 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	return len(fl.FontsAvail) > 0
 }
 
+// FontMods are standard font modifiers
+var FontMods = [...]string{"Bold", "Italic", "Oblique"}
+
+// SpaceFontMods ensures that standard font modifiers have a space in front of them
+func SpaceFontMods(fn string) string {
+	for _, mod := range FontMods {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+		}
+	}
+	return fn
+}
+
 // FontsAvailFromPath scans for all fonts we can use on a given path,
 // gathering info into FontsAvail and FontInfo.
 func (fl *FontLib) FontsAvailFromPath(path string) error {
@@ -556,9 +582,8 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 				fn = strings.Replace(fn, "-", " ", -1)
 				// fn = strings.Title(fn)
 			}
-			fn = strings.Replace(fn, "BoldItalic", "Bold Italic", 1)
-			fn = strings.Replace(fn, "BoldOblique", "Bold Oblique", 1)
-			fn = strings.Replace(fn, "LightOblique", "Light Oblique", 1)
+			// all std modifiers should have space before them
+			fn = SpaceFontMods(fn)
 			basefn := strings.ToLower(fn)
 			if _, ok := fl.FontsAvail[basefn]; !ok {
 				fl.FontsAvail[basefn] = path

@@ -152,17 +152,21 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 	})
 	m.AddSeparator("sepa")
 	for _, w := range MainWindows {
-		m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			ww := recv.Embed(KiT_Window).(*Window)
-			ww.OSWin.Raise()
-		})
+		if w != nil {
+			m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+				ww := recv.Embed(KiT_Window).(*Window)
+				ww.OSWin.Raise()
+			})
+		}
 	}
 	m.AddSeparator("sepw")
 	for _, w := range DialogWindows {
-		m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			ww := recv.Embed(KiT_Window).(*Window)
-			ww.OSWin.Raise()
-		})
+		if w != nil {
+			m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+				ww := recv.Embed(KiT_Window).(*Window)
+				ww.OSWin.Raise()
+			})
+		}
 	}
 }
 

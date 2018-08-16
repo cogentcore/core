@@ -55,6 +55,7 @@ type appImpl struct {
 	atomWMTakeFocus     xproto.Atom
 	atomWMChangeState   xproto.Atom
 	atomNetFrameExtents xproto.Atom
+	atomNetActiveWindow xproto.Atom
 	atomClipboardSel    xproto.Atom
 	atomPrimarySel      xproto.Atom
 	atomTargets         xproto.Atom
@@ -534,7 +535,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	)
 	app.setProperty(xw, app.atomWMProtocols, app.atomWMDeleteWindow, app.atomWMTakeFocus)
 
-	fmt.Printf("create pos: %v\n", opts.Pos)
+	// fmt.Printf("create pos: %v\n", opts.Pos)
 	// todo: opts
 	// dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 
@@ -580,6 +581,10 @@ func (app *appImpl) initAtoms() (err error) {
 		return err
 	}
 	app.atomNetFrameExtents, err = app.internAtom("_NET_FRAME_EXTENTS")
+	if err != nil {
+		return err
+	}
+	app.atomNetActiveWindow, err = app.internAtom("_NET_ACTIVE_WINDOW")
 	if err != nil {
 		return err
 	}

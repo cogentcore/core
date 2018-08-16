@@ -324,6 +324,25 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) Raise() {
+	// throwing everything at it:
+	// https://stackoverflow.com/questions/30192347/how-to-restore-a-window-with-xlib
+
+	xproto.MapWindow(w.app.xc, w.xw)
+
+	vdat := []uint32{1, xproto.TimeCurrentTime, 0, 0, 0} // 1 = make it active somehow
+	dat := xproto.ClientMessageDataUnionData32New(vdat)
+
+	minmsg := xproto.ClientMessageEvent{
+		Sequence: 0, // no idea what this is..
+		Format:   32,
+		Window:   w.xw,
+		Type:     w.app.atomNetActiveWindow,
+		Data:     dat,
+	}
+	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
+	// send to: x.xw
+	xproto.SendEvent(w.app.xc, true, w.xw, uint32(mask), string(minmsg.Bytes()))
+
 	valmask := uint16(xproto.ConfigWindowStackMode)
 	vallist := []uint32{uint32(xproto.StackModeAbove)}
 
@@ -346,7 +365,7 @@ func (w *windowImpl) Minimize() {
 
 	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
 	// send to: x.xw
-	xproto.SendEvent(w.app.xc, false, w.xw, uint32(mask), string(minmsg.Bytes()))
+	xproto.SendEvent(w.app.xc, true, w.xw, uint32(mask), string(minmsg.Bytes()))
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -372,6 +391,15 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
+	w.mu.Lock()
+	released := w.released
+	w.released = true
+	w.mu.Unlock()
+
+	if !released {
+		render.FreePicture(w.app.xc, w.xp)
+		xproto.FreeGC(w.app.xc, w.xg)
+	}
 	xproto.DestroyWindow(w.app.xc, w.xw)
 }
 

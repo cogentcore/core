@@ -96,19 +96,17 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-cursor api needs a window arg!
+advertise Noto fonts: https://www.google.com/get/noto/
+
 
 * windows:
-	+ test alphablend support (SHADEBLENDCAPS) on different systems -- not 
-	working on virtualbox on my mac host..
 	+ confirm new soln to set dpi method per issue #1
 	+ is not getting / managing multiple screens -- very complex..
 
 * linux:
-	+ multipart clip.Board
-	+ moving window isn't updating pos of new windows (now fixed? test)
-	+ do similar font name updating as done on Windows now
-
+	+ track focus!
+	+ some issues with multiple screens -- getting them but not really using
+      them or connecting back with windows properly
 
 * mac:
 
@@ -117,7 +115,14 @@ cursor api needs a window arg!
 
 ## General / Widgets
 
-* weird inconsistency in HasScroll in layout for fileview
+* linux: copy / paste puts in opposite order?
+
+* reparse path string button..  need generic methods!
+
+* protect windows menu updating and iteration over windows lists using mutex?  getting
+some crashes on X11 -- gets called during a close, so it seems dangerous.
+
+* weird inconsistency in HasScroll in layout for fileview (on mac only?)
 
 * double click close dialog is only for tableview select action -- need a separate pathway for that.
 
@@ -151,9 +156,6 @@ cursor api needs a window arg!
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 
 * Layout flow types
-* text word wrap: consider TeX algo
-  * https://github.com/bramstein/typeset/blob/master/src/linebreak.js
-
 * update gi/doc.go with final readme notes etc!
 
 * combobox getting text cutoff -- descenders and []
@@ -164,9 +166,12 @@ cursor api needs a window arg!
 
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
-* Reminder: grep all todo: in code -- lots!
+* Reminder: grep all todo: in code
 
 ### After Beta Release
+
+* text word wrap: consider TeX algo
+  * https://github.com/bramstein/typeset/blob/master/src/linebreak.js
 
 * search textfield, arrows, highlighting in tableview, treeview
 
