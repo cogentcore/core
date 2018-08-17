@@ -29,6 +29,7 @@ import (
 type TextField struct {
 	WidgetBase
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
@@ -136,6 +137,7 @@ func (tf *TextField) EditDone() {
 		tf.Txt = string(tf.EditTxt)
 		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Txt)
 	}
+	tf.ClearSelected()
 }
 
 // RevertEdit aborts editing and reverts to last saved text
@@ -841,7 +843,12 @@ func (tf *TextField) UpdateRenderAll() bool {
 }
 
 func (tf *TextField) Size2D() {
-	tf.EditTxt = []rune(tf.Txt)
+	tmptxt := tf.EditTxt
+	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
+		tf.EditTxt = []rune(tf.Placeholder)
+	} else {
+		tf.EditTxt = []rune(tf.Txt)
+	}
 	tf.Edited = false
 	tf.StartPos = 0
 	maxlen := tf.MaxWidthReq
@@ -855,6 +862,7 @@ func (tf *TextField) Size2D() {
 	w += 2.0 // give some extra buffer
 	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
 	tf.Size2DFromWH(w, tf.FontHeight)
+	tf.EditTxt = tmptxt
 }
 
 func (tf *TextField) Layout2D(parBBox image.Rectangle) {
@@ -1047,8 +1055,15 @@ func (tf *TextField) Render2D() {
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
 		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
-		tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
-		tf.RenderVis.RenderTopPos(rs, pos)
+		if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
+			st.Font.Color = st.Font.Color.Highlight(50)
+			tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+			tf.RenderVis.RenderTopPos(rs, pos)
+
+		} else {
+			tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+			tf.RenderVis.RenderTopPos(rs, pos)
+		}
 		if tf.HasFocus() {
 			tf.RenderCursor()
 		}
@@ -1061,6 +1076,7 @@ func (tf *TextField) Render2D() {
 
 func (tf *TextField) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		tf.CursorEnd()
 		tf.EmitFocusedSignal()
 	} else if !tf.IsInactive() {
 		tf.EditDone() // lose focus

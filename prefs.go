@@ -245,7 +245,25 @@ func (p *Preferences) ScreenInfo() string {
 	return scinfo
 }
 
-// Load colors from a JSON-formatted file
+// SaveScreenZoom saves the current LogicalDPI scaling to name of current screen.
+func (p *Preferences) SaveScreenZoom() {
+	sc := oswin.TheApp.Screen(0)
+	sp, ok := p.ScreenPrefs[sc.Name]
+	if !ok {
+		sp = ScreenPrefs{}
+	}
+	sp.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
+	p.ScreenPrefs[sc.Name] = sp
+}
+
+// DeleteSavedWindowGeoms deletes the file that saves the position and size of
+// each window, by screen, and clear current in-memory cache.  You shouldn't
+// need to use this but sometimes useful for testing.
+func (p *Preferences) DeleteSavedWindowGeoms() {
+	WinGeomPrefs.DeleteAll()
+}
+
+// Load colors from a JSON-formatted file.
 func (p *ColorPrefs) LoadJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -256,7 +274,7 @@ func (p *ColorPrefs) LoadJSON(filename string) error {
 	return json.Unmarshal(b, p)
 }
 
-// Save colors to a JSON-formatted file
+// Save colors to a JSON-formatted file.
 func (p *ColorPrefs) SaveJSON(filename string) error {
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {

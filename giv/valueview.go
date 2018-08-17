@@ -577,7 +577,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Struct", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
-		tynm := kit.NonPtrType(vv.Value.Type()).Name()
+		tynm := kit.NonPtrType(vvv.Value.Type()).Name()
 		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 	})
 }
@@ -622,6 +622,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 // SliceValueView presents a button to edit slices
 type SliceValueView struct {
 	ValueViewBase
+	ElType   reflect.Type
 	IsStruct bool
 }
 
@@ -647,8 +648,8 @@ func (vv *SliceValueView) UpdateWidget() {
 func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	slci := vv.Value.Interface()
-	eltyp := kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
-	vv.IsStruct = (eltyp.Kind() == reflect.Struct)
+	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
+	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
 	vv.UpdateWidget()
 	mb := vv.Widget.(*gi.MenuButton)
 	mb.SetProp("padding", units.NewValue(2, units.Px))
@@ -657,7 +658,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Slice", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
-		tynm := kit.NonPtrType(vv.Value.Type()).Name()
+		tynm := "Slice of " + kit.NonPtrType(vvv.ElType).Name()
 		if vvv.IsStruct {
 			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
@@ -722,7 +723,11 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	mb.Menu.AddMenuText("Edit Map", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		mb := vvv.Widget.(*gi.MenuButton)
-		tynm := kit.NonPtrType(vv.Value.Type()).Name()
+		tmptyp := kit.NonPtrType(vvv.Value.Type())
+		tynm := tmptyp.Name()
+		if tynm == "" {
+			tynm = tmptyp.String()
+		}
 		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 		if ok {

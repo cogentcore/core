@@ -29,13 +29,14 @@ func mainrun() {
 	rlay := mfr.AddNewChild(gi.KiT_Layout, "rowlay").(*gi.Layout)
 	rlay.Lay = gi.LayoutHoriz
 	rlay.SetProp("text-align", "center")
-	label1 := rlay.AddNewChild(gi.KiT_Label, "label1").(*gi.Label)
+	// label1 := rlay.AddNewChild(gi.KiT_Label, "label1").(*gi.Label)
 	// edit1 := rlay.AddNewChild(gi.KiT_TextField, "edit1").(*gi.TextField)
 	// button1 := rlay.AddNewChild(gi.KiT_Button, "button1").(*gi.Button)
 	// button2 := rlay.AddNewChild(gi.KiT_Button, "button2").(*gi.Button)
 	// slider1 := rlay.AddNewChild(gi.KiT_Slider, "slider1").(*gi.Slider)
+	spin1 := rlay.AddNewChild(gi.KiT_SpinBox, "spin1").(*gi.SpinBox)
 
-	label1.Text = "B ⇧ "
+	// label1.Text = "B ⇧ "
 	// edit1.SetText("Edit this text")
 	// edit1.SetProp("min-width", "20em")
 	// button1.Text = "Button 1"
@@ -43,6 +44,7 @@ func mainrun() {
 	// slider1.Dim = gi.X
 	// slider1.SetProp("width", "20em")
 	// slider1.SetValue(0.5)
+	spin1.SetValue(0.0)
 
 	// main menu
 	appnm := oswin.TheApp.Name()

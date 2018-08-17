@@ -13,7 +13,6 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -151,14 +150,15 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.ConnectEventType(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.Event)
-		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
-		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-			ddlg.Accept()
-			me.SetProcessed()
-		}
-	})
+	// this is not a good idea
+	// win.ConnectEventType(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// 	me := d.(*mouse.Event)
+	// 	ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
+	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+	// 		ddlg.Accept()
+	// 		me.SetProcessed()
+	// 	}
+	// })
 
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)

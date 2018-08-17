@@ -1798,7 +1798,7 @@ var WinGeomPrefsFileName = "win_geom_prefs.json"
 // Load Window Geom preferences from GoGi standard prefs directory
 func (wg *WindowGeomPrefs) Load() error {
 	if wg == nil {
-		*wg = make(WindowGeomPrefs, 100)
+		*wg = make(WindowGeomPrefs, 1000)
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
@@ -1904,6 +1904,16 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
 	fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
 	return &wp
+}
+
+// DeleteAll deletes the file that saves the position and size of each window,
+// by screen, and clear current in-memory cache.  You shouldn't need to use
+// this but sometimes useful for testing.
+func (wg *WindowGeomPrefs) DeleteAll() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
+	os.Remove(pnm)
+	*wg = make(WindowGeomPrefs, 1000)
 }
 
 //////////////////////////////////////////////////////////////////////////////

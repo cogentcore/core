@@ -109,7 +109,12 @@ func (mv *MapViewInline) ConfigParts() {
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
-			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, "Map Value View", "", nil, nil, nil)
+			tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
+			tynm := tmptyp.Name()
+			if tynm == "" {
+				tynm = tmptyp.String()
+			}
+			dlg := MapViewDialog(mvv.Viewport, mvv.Map, mvv.TmpSave, tynm, "", nil, nil, nil)
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {
 				mvvv := mvvvk.(*MapView)

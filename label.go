@@ -246,7 +246,10 @@ func (g *Label) LabelEvents() {
 }
 
 func (g *Label) GrabCurBgColor() {
-	if g.Viewport == nil || g.IsSelected() || !g.CurBgColor.IsNil() {
+	if g.Viewport == nil || g.IsSelected() {
+		return
+	}
+	if !RebuildDefaultStyles && !g.CurBgColor.IsNil() {
 		return
 	}
 	pos := g.ContextMenuPos()

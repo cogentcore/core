@@ -116,25 +116,33 @@ Liberation as fallbacks on linux
 
 ## General / Widgets
 
-* spinbox text fields not updating styles -- change color to see.
+* hang on window open: stuck in drawgl, cocoa.go:173 -- sent paint event but it got filtered??
+
+* win geom prefs: adapt DPI for size relative to saved!
+
+* fileview: add extension, mode flags -- use extension for search
+* also really need history of paths so you can go back to where you started
 
 * crash in sliceview -- title probably not good
+* menu updating likely culprit -- need to lock this somehow.
+* protect windows menu updating and iteration over windows lists using mutex?  getting
+some crashes on X11 -- gets called during a close, so it seems dangerous.
 
-* struct, map, etc views should have window title reflecting object type -- so
-  sizing is remembered appropriately
+* mac crash on close font sel window.. reliable -- probably need a go?
 
-* add menu in prefs to delete saved window location prefs file
-
-* mac crash on close font sel window.. reliable -- probably need a go
+* crash on quit:
+* cocoa.go:
+   272:	func closeWindow(id uintptr) {
+=> 273:		C.doCloseWindow(C.uintptr_t(id))
+   274:	}
+   
+   need to wait for close windows to go through..  
 
 * cursor on windows, x11 getting stuck with close popup..
 
 * linux: copy / paste puts in opposite order?
 
 * reparse path string button..  need generic methods!
-
-* protect windows menu updating and iteration over windows lists using mutex?  getting
-some crashes on X11 -- gets called during a close, so it seems dangerous.
 
 * weird inconsistency in HasScroll in layout for fileview (on mac only?)
 
@@ -212,6 +220,7 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
   field to be int64..  for 32bit case, not that big a deal, and for most
   user-facing cases, int32 is sufficient, so focus on that case??
 
+* each element can generate SVG version of itself, save whole display as SVG -- nicer for screenshots..
 
 ## Rendering / SVG
 

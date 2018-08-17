@@ -97,7 +97,9 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
-			dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, "Slice Value View", "", nil, nil, nil)
+			elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
+			tynm := "Slice of " + kit.NonPtrType(elType).Name()
+			dlg := SliceViewDialog(svv.Viewport, svv.Slice, svv.TmpSave, tynm, "", nil, nil, nil)
 			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				svvv := svvvk.(*SliceView)

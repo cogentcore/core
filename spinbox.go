@@ -154,7 +154,7 @@ func (g *SpinBox) ConfigParts() {
 	config.Add(KiT_Space, "space")
 	config.Add(KiT_Layout, "buttons")
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	if mods {
+	if mods || RebuildDefaultStyles {
 		buts := g.Parts.KnownChild(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutVert
 		g.StylePart(Node2D(buts))
@@ -162,6 +162,7 @@ func (g *SpinBox) ConfigParts() {
 		// up
 		up := buts.KnownChild(0).(*Action)
 		up.SetName("up")
+		up.SetProp("no-focus", true)
 		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
 		up.Icon = g.UpIcon
 		g.StylePart(Node2D(up))
@@ -175,6 +176,7 @@ func (g *SpinBox) ConfigParts() {
 		dn := buts.KnownChild(1).(*Action)
 		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
 		dn.SetName("down")
+		dn.SetProp("no-focus", true)
 		dn.Icon = g.DownIcon
 		g.StylePart(Node2D(dn))
 		if !g.IsInactive() {

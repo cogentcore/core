@@ -77,7 +77,7 @@ var FileViewProps = ki.Props{
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
 var FileViewKindColorMap = map[string]string{
-	"Folder":           "blue",
+	"Folder":           "pref(highlight)",
 	"application/json": "pref(link)",
 }
 

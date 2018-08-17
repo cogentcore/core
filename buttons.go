@@ -488,7 +488,12 @@ func (g *ButtonBase) Style2DWidget() {
 }
 
 func (g *ButtonBase) Style2D() {
-	g.SetCanFocusIfActive()
+	if nf, ok := g.Prop("no-focus"); ok {
+		bitflag.SetState(&g.Flag, !g.IsInactive() && !nf.(bool), int(CanFocus))
+	} else {
+		bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
+	}
+
 	g.Style2DWidget()
 	pst := g.ParentStyle()
 	clsty := "." + g.Class

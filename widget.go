@@ -167,7 +167,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 	if pg == nil {
 		return
 	}
-	if pg.DefStyle != nil { // already set
+	if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
 		return
 	}
 	stynm := "#" + strings.ToLower(pk.Name())

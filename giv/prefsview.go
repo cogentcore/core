@@ -34,15 +34,15 @@ func PrefsEditor(p *gi.Preferences) {
 	tbar.SetStretchMaxWidth()
 
 	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(1.0, units.Em))
+	spc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
 	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStruct(p, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
-	bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
-	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
+	// bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
+	// bspc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
 	up := tbar.AddNewChild(gi.KiT_Action, "update").(*gi.Action)
 	up.SetText("Update")
@@ -86,6 +86,7 @@ func PrefsEditor(p *gi.Preferences) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.LoadJSON(FileViewDialogValue(dlg))
+				p.Update()
 			}
 		})
 	})
@@ -145,6 +146,31 @@ func PrefsEditor(p *gi.Preferences) {
 	})
 	fmen.Menu.AddMenuText("Save", "Command+S", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		p.Save()
+	})
+	fmen.Menu.AddSeparator("clrsep")
+	fmen.Menu.AddMenuText("Load Colors", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				p.Colors.LoadJSON(FileViewDialogValue(dlg))
+				p.Update()
+			}
+		})
+	})
+	fmen.Menu.AddMenuText("Save Colors", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				p.Colors.SaveJSON(FileViewDialogValue(dlg))
+			}
+		})
+	})
+	fmen.Menu.AddSeparator("msep")
+	fmen.Menu.AddMenuText("Save Screen Zoom", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.SaveScreenZoom()
+	})
+	fmen.Menu.AddMenuText("Delete Saved Window Geoms", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		p.DeleteSavedWindowGeoms()
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {

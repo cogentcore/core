@@ -54,12 +54,11 @@ func GoGiEditor(obj ki.Ki) {
 	trow.SetStretchMaxWidth()
 
 	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+	spc.SetFixedHeight(units.NewValue(0.5, units.Em))
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", obj.Name())
-	title.SetStretchMaxWidth()
 	trow.AddNewChild(gi.KiT_Stretch, "str2")
 
 	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
