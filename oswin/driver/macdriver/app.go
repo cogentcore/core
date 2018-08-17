@@ -255,7 +255,7 @@ func (app *appImpl) AppPrefsDir() string {
 }
 
 func (app *appImpl) FontPaths() []string {
-	return []string{"/Library/Fonts"}
+	return []string{"/System/Library/Fonts", "/Library/Fonts"}
 }
 
 func (app *appImpl) ClipBoard() clip.Board {

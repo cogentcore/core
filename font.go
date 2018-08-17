@@ -25,6 +25,8 @@ import (
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/font/sfnt"
 )
 
 // font.go contains all font and basic SVG-level text rendering styles, and the
@@ -449,24 +451,6 @@ func (ev *BaselineShifts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarsh
 //////////////////////////////////////////////////////////////////////////////////
 // Font library
 
-func LoadFontFace(path string, points float64) (font.Face, error) {
-	fontBytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	f, err := truetype.Parse(fontBytes)
-	if err != nil {
-		return nil, err
-	}
-	face := truetype.NewFace(f, &truetype.Options{
-		Size: points,
-		// Hinting: font.HintingFull,
-		GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
-		// Stroke:            1, // cool stroking from tdewolff -- add to svg options
-	})
-	return face, nil
-}
-
 type FontInfo struct {
 	Name    string      `desc:"name of font"`
 	Style   FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
@@ -583,60 +567,69 @@ func SpaceFontMods(fn string) string {
 	return fn
 }
 
+var FontExts = map[string]bool{
+	".ttf": true,
+	".ttc": true,
+	//	".otf": true,  // not yet supported
+}
+
 // FontsAvailFromPath scans for all fonts we can use on a given path,
 // gathering info into FontsAvail and FontInfo.
 func (fl *FontLib) FontsAvailFromPath(path string) error {
-	ext := ".ttf" // for now -- might need more
 
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("gi.FontLib: error accessing path %q: %v\n", path, err)
 			return err
 		}
-		if filepath.Ext(path) == ext {
-			_, fn := filepath.Split(path)
-			fn = fn[:len(fn)-len(ext)]
-			bfn := fn
-			bfn = strings.TrimSuffix(fn, "bd")
-			bfn = strings.TrimSuffix(bfn, "bi")
-			bfn = strings.TrimSuffix(bfn, "z")
-			bfn = strings.TrimSuffix(bfn, "b")
-			if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
-				bfn = strings.TrimSuffix(bfn, "i")
+		ext := strings.ToLower(filepath.Ext(path))
+		_, ok := FontExts[ext]
+		if !ok {
+			return nil
+		}
+		_, fn := filepath.Split(path)
+		fn = fn[:len(fn)-len(ext)]
+		bfn := fn
+		bfn = strings.TrimSuffix(fn, "bd")
+		bfn = strings.TrimSuffix(bfn, "bi")
+		bfn = strings.TrimSuffix(bfn, "z")
+		bfn = strings.TrimSuffix(bfn, "b")
+		if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
+			bfn = strings.TrimSuffix(bfn, "i")
+		}
+		if afn, ok := AltFontMap[bfn]; ok {
+			sfx := ""
+			if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
+				sfx = " Bold"
+			} else if strings.HasSuffix(fn, "bi") || strings.HasSuffix(fn, "z") {
+				sfx = " Bold Italic"
+			} else if strings.HasSuffix(fn, "i") {
+				sfx = " Italic"
 			}
-			if afn, ok := AltFontMap[bfn]; ok {
-				sfx := ""
-				if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
-					sfx = " Bold"
-				} else if strings.HasSuffix(fn, "bi") || strings.HasSuffix(fn, "z") {
-					sfx = " Bold Italic"
-				} else if strings.HasSuffix(fn, "i") {
-					sfx = " Italic"
-				}
-				fn = afn + sfx
-			} else {
-				fn = strings.Replace(fn, "_", " ", -1)
-				fn = strings.Replace(fn, "-", " ", -1)
-				// fn = strings.Title(fn)
+			fn = afn + sfx
+		} else {
+			fn = strings.Replace(fn, "_", " ", -1)
+			fn = strings.Replace(fn, "-", " ", -1)
+			// fn = strings.Title(fn)
+		}
+		fn = strings.TrimSuffix(fn, " Regular")
+		// all std modifiers should have space before them
+		fn = SpaceFontMods(fn)
+		basefn := strings.ToLower(fn)
+		if _, ok := fl.FontsAvail[basefn]; !ok {
+			fl.FontsAvail[basefn] = path
+			fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
+			if strings.Contains(basefn, "bold") {
+				fi.Weight = WeightBold
 			}
-			// all std modifiers should have space before them
-			fn = SpaceFontMods(fn)
-			basefn := strings.ToLower(fn)
-			if _, ok := fl.FontsAvail[basefn]; !ok {
-				fl.FontsAvail[basefn] = path
-				fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
-				if strings.Contains(basefn, "bold") {
-					fi.Weight = WeightBold
-				}
-				if strings.Contains(basefn, "italic") {
-					fi.Style = FontItalic
-				} else if strings.Contains(basefn, "oblique") {
-					fi.Style = FontOblique
-				}
-				fl.FontInfo = append(fl.FontInfo, fi)
-				// fmt.Printf("added font: %v at path %q\n", basefn, path)
+			if strings.Contains(basefn, "italic") {
+				fi.Style = FontItalic
+			} else if strings.Contains(basefn, "oblique") {
+				fi.Style = FontOblique
+			}
+			fl.FontInfo = append(fl.FontInfo, fi)
+			// fmt.Printf("added font: %v at path %q\n", basefn, path)
 
-			}
 		}
 		return nil
 	})
@@ -677,6 +670,38 @@ func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
 	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
 }
 
+func LoadFontFace(path string, points float64) (font.Face, error) {
+	fontBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".otf" {
+		// note: this compiles but otf fonts are NOT yet supported apparently
+		f, err := sfnt.Parse(fontBytes)
+		if err != nil {
+			return nil, err
+		}
+		face, err := opentype.NewFace(f, &opentype.FaceOptions{
+			Size: points,
+			// Hinting: font.HintingFull,
+		})
+		return face, err
+	} else {
+		f, err := truetype.Parse(fontBytes)
+		if err != nil {
+			return nil, err
+		}
+		face := truetype.NewFace(f, &truetype.Options{
+			Size: points,
+			// Hinting: font.HintingFull,
+			GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
+			// Stroke:            1, // todo: cool stroking from tdewolff -- add to svg options
+		})
+		return face, nil
+	}
+}
+
 // FontAvail determines if a given font name is available (case insensitive)
 func (fl *FontLib) FontAvail(fontnm string) bool {
 	fontnm = strings.ToLower(fontnm)
@@ -686,3 +711,5 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 
 // FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
 var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
+
+// todo: https://blog.golang.org/go-fonts

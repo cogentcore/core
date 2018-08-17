@@ -940,8 +940,6 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 // other state etc (popups, etc)
 func (w *Window) EventLoop() {
 	var skippedResize *window.Event
-	var skippedPaint *window.Event
-	var lastResizeTime time.Time
 
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
@@ -1029,7 +1027,7 @@ func (w *Window) EventLoop() {
 					// w.DoFullRender = true
 					lastSkipped = false
 					skippedResize = nil
-					lastResizeTime = now
+					// lastResizeTime = now
 					continue
 				}
 			case oswin.WindowEvent:
@@ -1038,14 +1036,6 @@ func (w *Window) EventLoop() {
 					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
-				if we.Action == window.Paint {
-					rslag := int(we.Time().Sub(lastResizeTime) / time.Millisecond)
-					if rslag < EventSkipLagMSec {
-						// fmt.Printf("skipped paint in ongoing resize\n")
-						skippedPaint = we
-						continue
-					}
-				}
 			}
 		}
 		lastSkipped = false
@@ -1053,17 +1043,8 @@ func (w *Window) EventLoop() {
 
 		if skippedResize != nil {
 			w.Resized(w.OSWin.Size())
-			// w.DoFullRender = true
 			w.FullReRender()
 			skippedResize = nil
-			skippedPaint = nil
-			lastResizeTime = now
-		}
-
-		if skippedPaint != nil {
-			// fmt.Printf("doing publish on skipped paint\n")
-			w.Publish()
-			skippedPaint = nil
 		}
 
 		// detect start of drag and DND -- both require delays in starting due
@@ -1156,7 +1137,8 @@ func (w *Window) EventLoop() {
 				w.Closed()
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
-				w.FullReRender()
+				w.Publish()
+				// w.FullReRender()
 			}
 			continue
 		case *key.ChordEvent:
@@ -1880,7 +1862,12 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 
 	wp, ok := wps[scrn.Name]
 	if ok {
-		return &wp
+		if scrn.LogicalDPI == wp.LogicalDPI {
+			return &wp
+		} else {
+			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
+			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
+		}
 	}
 
 	if len(wps) == 0 { // shouldn't happen
