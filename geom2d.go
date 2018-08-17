@@ -919,3 +919,15 @@ func FixedToFloat32(x fixed.Int26_6) float32 {
 	}
 	return 0
 }
+
+func FixedToFloat(x fixed.Int26_6) float64 {
+	const shift, mask = 6, 1<<6 - 1
+	if x >= 0 {
+		return float64(x>>shift) + float64(x&mask)/64
+	}
+	x = -x
+	if x >= 0 {
+		return -(float64(x>>shift) + float64(x&mask)/64)
+	}
+	return 0
+}

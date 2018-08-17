@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/freetype/truetype"
 	// "github.com/golang/freetype/truetype"
 	"github.com/goki/gi/units"
@@ -45,8 +46,12 @@ type FontStyle struct {
 	Deco     TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
 	Shift    BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
 	Face     font.Face       `view:"-" desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
-	Height   float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font"`
-	FaceName string          `desc:"name corresponding to Face"`
+	Height   float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing"`
+	Em       float32         `desc:"Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font"`
+	Ex       float32         `desc:"Ex size of font -- this is the actual height of the letter x in the font"`
+	Ch       float32         `desc:"Ch size of font -- this is the actual width of the 0 glyph in the font"`
+	Rem      float32         `desc:"Rem size of font -- 12pt converted to same effective DPI as above measurements"`
+	FaceName string          `desc:"full name of font face as loaded -- computed based on Family, Style, Weight, etc"`
 	// todo: kerning
 	// todo: stretch -- css 3 -- not supported
 }
@@ -90,7 +95,10 @@ func (fs *FontStyle) ClearDeco(deco TextDecorations) {
 
 // FaceNm returns the full FaceName to use for the current FontStyle spec
 func (fs *FontStyle) FaceNm() string {
-	fnm := "Arial"
+	fnm := Prefs.FontFamily
+	if fnm == "" {
+		fnm = "Arial"
+	}
 	nms := strings.Split(fs.Family, ",")
 	for _, fn := range nms {
 		fn = strings.TrimSpace(fn)
@@ -176,6 +184,9 @@ func (fs *FontStyle) FaceNm() string {
 func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	fs.FaceName = fs.FaceNm()
 	intDots := math.Round(float64(fs.Size.Dots))
+	if intDots == 0 {
+		intDots = 12
+	}
 	face, err := FontLibrary.Font(fs.FaceName, intDots)
 	if err != nil {
 		log.Printf("%v\n", err)
@@ -191,17 +202,40 @@ func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	} else {
 		fs.Face = face
 	}
-	fs.Height = FixedToFloat32(fs.Face.Metrics().Height)
+	fs.ComputeMetrics(ctxt)
 	fs.SetUnitContext(ctxt)
 }
 
+func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
+	if fs.Face == nil {
+		return
+	}
+	intDots := float32(math.Round(float64(fs.Size.Dots)))
+	if intDots == 0 {
+		intDots = 12
+	}
+	// apd := fs.Face.Metrics().Ascent + fs.Face.Metrics().Descent
+	fs.Height = math32.Ceil(FixedToFloat32(fs.Face.Metrics().Height))
+	fs.Em = intDots // conventional definition
+	xb, _, ok := fs.Face.GlyphBounds('x')
+	if ok {
+		fs.Ex = FixedToFloat32(xb.Max.Y - xb.Min.Y)
+	} else {
+		fs.Ex = 0.5 * fs.Em
+	}
+	xb, _, ok = fs.Face.GlyphBounds('0')
+	if ok {
+		fs.Ch = FixedToFloat32(xb.Max.X - xb.Min.X)
+	} else {
+		fs.Ch = 0.5 * fs.Em
+	}
+	fs.Rem = ctxt.ToDots(12, units.Pt)
+	// fmt.Printf("fs: %v sz: %v\t\tHt: %v\tEm: %v\tEx: %v\tCh: %v\n", fs.FaceName, intDots, fs.Height, fs.Em, fs.Ex, fs.Ch)
+}
+
 func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
-	// todo: could measure actual chars but just use defaults right now
 	if fs.Face != nil {
-		em := FixedToFloat32(fs.Face.Metrics().Ascent + fs.Face.Metrics().Descent)
-		ctxt.SetFont(em, 0.5*em, .9*em, 12.0) // todo: rem!?  just using 12
-		// fmt.Printf("em %v ex %v ch %v\n", em, 0.5*em, 0.9*em)
-		// order is ex, ch, rem -- using .75 for ch
+		ctxt.SetFont(fs.Em, fs.Ex, fs.Ch, fs.Rem)
 	}
 }
 
@@ -427,6 +461,8 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 	face := truetype.NewFace(f, &truetype.Options{
 		Size: points,
 		// Hinting: font.HintingFull,
+		GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
+		// Stroke:            1, // cool stroking from tdewolff -- add to svg options
 	})
 	return face, nil
 }

@@ -940,6 +940,7 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 // other state etc (popups, etc)
 func (w *Window) EventLoop() {
 	var skippedResize *window.Event
+	var skippedPaint *window.Event
 	var lastResizeTime time.Time
 
 	lastEt := oswin.EventTypeN
@@ -1024,7 +1025,8 @@ func (w *Window) EventLoop() {
 					continue
 				} else {
 					w.Resized(w.OSWin.Size())
-					w.DoFullRender = true
+					w.FullReRender()
+					// w.DoFullRender = true
 					lastSkipped = false
 					skippedResize = nil
 					lastResizeTime = now
@@ -1040,6 +1042,7 @@ func (w *Window) EventLoop() {
 					rslag := int(we.Time().Sub(lastResizeTime) / time.Millisecond)
 					if rslag < EventSkipLagMSec {
 						// fmt.Printf("skipped paint in ongoing resize\n")
+						skippedPaint = we
 						continue
 					}
 				}
@@ -1050,9 +1053,17 @@ func (w *Window) EventLoop() {
 
 		if skippedResize != nil {
 			w.Resized(w.OSWin.Size())
-			w.DoFullRender = true
+			// w.DoFullRender = true
+			w.FullReRender()
 			skippedResize = nil
+			skippedPaint = nil
 			lastResizeTime = now
+		}
+
+		if skippedPaint != nil {
+			// fmt.Printf("doing publish on skipped paint\n")
+			w.Publish()
+			skippedPaint = nil
 		}
 
 		// detect start of drag and DND -- both require delays in starting due
@@ -1133,9 +1144,6 @@ func (w *Window) EventLoop() {
 
 		// Window gets first crack at the events, and handles window-specific ones
 		switch e := evi.(type) {
-		// case *paint.Event:
-		// 	// fmt.Println("doing paint")
-		// 	continue
 		case *window.Event:
 			switch e.Action {
 			case window.Resize:

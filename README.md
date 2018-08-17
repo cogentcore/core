@@ -116,14 +116,11 @@ Liberation as fallbacks on linux
 
 ## General / Widgets
 
-* hang on window open: stuck in drawgl, cocoa.go:173 -- sent paint event but it got filtered??
-
 * win geom prefs: adapt DPI for size relative to saved!
 
 * fileview: add extension, mode flags -- use extension for search
 * also really need history of paths so you can go back to where you started
 
-* crash in sliceview -- title probably not good
 * menu updating likely culprit -- need to lock this somehow.
 * protect windows menu updating and iteration over windows lists using mutex?  getting
 some crashes on X11 -- gets called during a close, so it seems dangerous.
@@ -176,9 +173,9 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 * Layout flow types
 * update gi/doc.go with final readme notes etc!
 
-* combobox getting text cutoff -- descenders and []
-
-* tab widget basic fix, and integrate with tree view editor? Popups show up in a separate tab? ultimately want multi-row super-tabs -- flow layout..  with dnd..
+* tab widget basic fix, and integrate with tree view editor? Popups show up in
+  a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
+  dnd..
 
 * arg view / dialog and button tags
 
@@ -199,6 +196,8 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
 	+ records themselves are sequential slices of diff records and commands, with same logic as emergent
 	+ diffing happens in separate routine..
+
+* Dirty flag from edit events in gieditor
 
 * Cursors for various systems need extra custom ones to fill in standard set,
   and support general custom cursors as well

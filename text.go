@@ -41,11 +41,6 @@ import (
 // in this way, and makes the final render pass maximally efficient and
 // high-performance, at the potential cost of some memory redundancy.
 
-// FontExtraHeight adds this amount to the declared font height (in raw dots)
-// for allocating space for text rendering -- the antialiasing uses a little
-// bit of extra room
-var FontExtraHeight = float32(2)
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // RuneRender
 
@@ -330,7 +325,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
 
-		fht := curFace.Metrics().Ascent + curFace.Metrics().Descent
+		fht := curFace.Metrics().Height
 		if prevR >= 0 {
 			fpos += FixedToFloat32(curFace.Kern(prevR, r))
 		}
@@ -886,7 +881,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
-	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht) + FontExtraHeight}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
 }
 
@@ -907,7 +902,7 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
-	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht) + FontExtraHeight}
+	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 }
 
 // SetHTML sets text by decoding all standard inline HTML text style
@@ -1255,10 +1250,9 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 
 	tr.Dir = LRTB
 	fontSty.LoadFont(ctxt, "")
-	asc := FixedToFloat32(fontSty.Face.Metrics().Ascent)
+	fht := fontSty.Height
 	dsc := FixedToFloat32(fontSty.Face.Metrics().Descent)
-	fht := asc + dsc
-	lspc := fontSty.Height * txtSty.EffLineHeight()
+	lspc := fht * txtSty.EffLineHeight()
 	lpad := (lspc - fht) / 2 // padding above / below text box for centering in line
 
 	maxw := float32(0)

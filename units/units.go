@@ -53,7 +53,7 @@ const (
 	// Pct = percentage of surrounding contextual element
 	Pct
 
-	// Rem = font size of the root element -- fallback to 12pt by default
+	// Rem = font size of the root element -- defaults to 12pt scaled by DPI factor
 	Rem
 
 	// Em = font size of the element -- fallback to 12pt by default
@@ -62,7 +62,7 @@ const (
 	// Ex = x-height of the element's font -- fallback to 0.5em by default
 	Ex
 
-	// Ch = with of the '0' glyph in the element's font -- fallback to 0.5em by default
+	// Ch = width of the '0' glyph in the element's font -- fallback to 0.5em by default
 	Ch
 
 	// Vw = 1% of the viewport's width
