@@ -916,7 +916,7 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 		if bfn != "calibri" && bfn != "gadugui" && bfn != "segoeui" && bfn != "segui" {
 			bfn = strings.TrimSuffix(bfn, "i")
 		}
-		if afn, ok := AltFontMap[bfn]; ok {
+		if afn, ok := altFontMap[bfn]; ok {
 			sfx := ""
 			if strings.HasSuffix(fn, "bd") || strings.HasSuffix(fn, "b") {
 				sfx = " Bold"
@@ -930,6 +930,13 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 			fn = strings.Replace(fn, "_", " ", -1)
 			fn = strings.Replace(fn, "-", " ", -1)
 			// fn = strings.Title(fn)
+			sfx := ""
+			for sc, rp := range shortFontMods {
+				if strings.HasSuffix(fn, sc) {
+					sfx = rp
+				}
+			}
+			fn += sfx
 		}
 		fn = FixFontMods(fn)
 		basefn := strings.ToLower(fn)
@@ -949,11 +956,11 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 	return err
 }
 
-// AltFontMap is an alternative font map that maps file names to more standard
+// altFontMap is an alternative font map that maps file names to more standard
 // full names (e.g., Times -> Times New Roman) -- also looks for b,i suffixes
 // for these cases -- some are added here just to pick up those suffixes.
 // This is needed for Windows only.
-var AltFontMap = map[string]string{
+var altFontMap = map[string]string{
 	"arial":   "Arial",
 	"ariblk":  "Arial Black",
 	"candara": "Candara",
@@ -979,6 +986,22 @@ var AltFontMap = map[string]string{
 	"times":   "Times New Roman",
 	"trebuc":  "Trebuchet",
 	"verdana": "Verdana",
+}
+
+// shortFontMods corrects annoying short font mod names, found in Unity font
+// on linux -- needs space and uppercase to avoid confusion -- checked with
+// HasSuffix
+var shortFontMods = map[string]string{
+	" B":  " Bold",
+	" I":  " Italic",
+	" C":  " Condensed",
+	" L":  " Light",
+	" LI": " Light Italic",
+	" M":  " Medium",
+	" MI": " Medium Italic",
+	" R":  " Regular",
+	" RI": " Italic",
+	" BI": " Bold Italic",
 }
 
 // LoadFontFace loads a font file at given path, with given raw size in
