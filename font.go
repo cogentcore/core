@@ -96,6 +96,17 @@ func (fs *FontStyle) SetStylePost(props ki.Props) {
 	}
 }
 
+// InheritFields from parent: Manual inheriting of values is much faster than
+// automatic version!
+func (fs *FontStyle) InheritFields(par *FontStyle) {
+	fs.Color = par.Color
+	fs.Family = par.Family
+	fs.Style = par.Style
+	fs.Weight = par.Weight
+	fs.Stretch = par.Stretch
+	fs.Variant = par.Variant
+}
+
 // SetDeco sets decoration (underline, etc), which uses bitflag to allow multiple combinations
 func (fs *FontStyle) SetDeco(deco TextDecorations) {
 	bitflag.Set32((*int32)(&fs.Deco), int(deco))

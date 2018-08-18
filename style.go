@@ -231,13 +231,21 @@ func (s *Style) CopyFrom(cp *Style) {
 	s.lastUnCtxt = lu
 }
 
+// InheritFields from parent: Manual inheriting of values is much faster than
+// automatic version!
+func (s *Style) InheritFields(par *Style) {
+	s.Font.InheritFields(&par.Font)
+	s.Text.InheritFields(&par.Text)
+}
+
 // SetStyleProps sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
-func (s *Style) SetStyleProps(parent *Style, props ki.Props) {
-	if !s.IsSet && parent != nil { // first time
-		StyleFields.Inherit(s, parent)
+func (s *Style) SetStyleProps(par *Style, props ki.Props) {
+	if !s.IsSet && par != nil { // first time
+		// StyleFields.Inherit(s, par) // very slow for some mysterious reason
+		s.InheritFields(par)
 	}
-	StyleFields.Style(s, parent, props)
+	StyleFields.Style(s, par, props)
 	s.Text.AlignV = s.Layout.AlignV
 	s.Layout.SetStylePost(props)
 	s.Font.SetStylePost(props)
@@ -500,17 +508,23 @@ func (sf *StyledFields) CompileFields(def interface{}) {
 	return
 }
 
-// Inherit copies all the values from par to obj for fields marked
-// as "inherit" -- inherited by default
+// Inherit copies all the values from par to obj for fields marked as
+// "inherit" -- inherited by default.  NOTE: No longer using this -- doing it
+// manually -- much faster
 func (sf *StyledFields) Inherit(obj, par interface{}) {
-	pr := prof.Start("StyleFields.Inherit")
+	// pr := prof.Start("StyleFields.Inherit")
+	objptr := reflect.ValueOf(obj).Pointer()
 	hasPar := !kit.IfaceIsNil(par)
+	var parptr uintptr
+	if hasPar {
+		parptr = reflect.ValueOf(par).Pointer()
+	}
 	for _, fld := range sf.Inherits {
-		pfi := fld.FieldIface(par)
-		fld.FromProps(sf.Fields, obj, par, pfi, hasPar)
+		pfi := fld.FieldIface(parptr)
+		fld.FromProps(sf.Fields, objptr, parptr, pfi, hasPar)
 		// fmt.Printf("inh: %v\n", fld.Field.Name)
 	}
-	pr.End()
+	// pr.End()
 }
 
 // Style applies styles to the fields from given properties for given object
@@ -519,7 +533,12 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 		return
 	}
 	pr := prof.Start("StyleFields.Style")
+	objptr := reflect.ValueOf(obj).Pointer()
 	hasPar := !kit.IfaceIsNil(par)
+	var parptr uintptr
+	if hasPar {
+		parptr = reflect.ValueOf(par).Pointer()
+	}
 	// fewer props than fields, esp with alts!
 	for key, val := range props {
 		if len(key) == 0 {
@@ -532,9 +551,9 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 			if len(vstr) > 0 && vstr[0] == '$' { // special case to use other value
 				nkey := vstr[1:] // e.g., border-color has "$background-color" value
 				if vfld, nok := sf.Fields[nkey]; nok {
-					nval := vfld.FieldValue(obj).Elem().Interface()
+					nval := vfld.FieldIface(objptr)
 					if fld, fok := sf.Fields[key]; fok {
-						fld.FromProps(sf.Fields, obj, par, nval, hasPar)
+						fld.FromProps(sf.Fields, objptr, parptr, nval, hasPar)
 						continue
 					}
 				}
@@ -548,7 +567,7 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 			// log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
 			continue
 		}
-		fld.FromProps(sf.Fields, obj, par, val, hasPar)
+		fld.FromProps(sf.Fields, objptr, parptr, val, hasPar)
 	}
 	pr.End()
 }
@@ -556,8 +575,9 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (sf *StyledFields) ToDots(obj interface{}, uc *units.Context) {
 	pr := prof.Start("StyleFields.ToDots")
+	objptr := reflect.ValueOf(obj).Pointer()
 	for _, fld := range sf.Units {
-		uv := fld.UnitsValue(obj)
+		uv := fld.UnitsValue(objptr)
 		uv.ToDots(uc)
 	}
 	pr.End()
@@ -575,40 +595,38 @@ type StyledField struct {
 
 // FieldValue returns a reflect.Value for a given object, computed from NetOff
 // -- this is VERY expensive time-wise -- need to figure out a better solution..
-func (sf *StyledField) FieldValue(obj interface{}) reflect.Value {
-	ov := reflect.ValueOf(obj)
-	f := unsafe.Pointer(ov.Pointer() + sf.NetOff)
+func (sf *StyledField) FieldValue(objptr uintptr) reflect.Value {
+	f := unsafe.Pointer(objptr + sf.NetOff)
 	nw := reflect.NewAt(sf.Field.Type, f)
 	return kit.UnhideIfaceValue(nw).Elem()
 }
 
 // FieldIface returns an interface{} for a given object, computed from NetOff
 // -- much faster -- use this
-func (sf *StyledField) FieldIface(obj interface{}) interface{} {
-	ov := reflect.ValueOf(obj)
+func (sf *StyledField) FieldIface(objptr uintptr) interface{} {
 	npt := kit.NonPtrType(sf.Field.Type)
 	npk := npt.Kind()
 	switch {
 	case npt == KiT_Color:
-		return (*Color)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*Color)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt == KiT_ColorSpec:
-		return (*ColorSpec)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*ColorSpec)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt == KiT_Matrix2D:
-		return (*Matrix2D)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*Matrix2D)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt.Name() == "Value":
-		return (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*units.Value)(unsafe.Pointer(objptr + sf.NetOff))
 	case npk >= reflect.Int && npk <= reflect.Uint64:
-		return sf.FieldValue(obj).Interface() // no choice for enums
+		return sf.FieldValue(objptr).Interface() // no choice for enums
 	case npk == reflect.Float32:
-		return (*float32)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*float32)(unsafe.Pointer(objptr + sf.NetOff))
 	case npk == reflect.Float64:
-		return (*float64)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*float64)(unsafe.Pointer(objptr + sf.NetOff))
 	case npk == reflect.Bool:
-		return (*bool)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*bool)(unsafe.Pointer(objptr + sf.NetOff))
 	case npk == reflect.String:
-		return (*string)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*string)(unsafe.Pointer(objptr + sf.NetOff))
 	case sf.Field.Name == "Dashes":
-		return (*[]float64)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+		return (*[]float64)(unsafe.Pointer(objptr + sf.NetOff))
 	default:
 		fmt.Printf("Field: %v type %v not processed in StyledField.FieldIface -- fixme!\n", sf.Field.Name, npt.String())
 		return nil
@@ -616,28 +634,23 @@ func (sf *StyledField) FieldIface(obj interface{}) interface{} {
 }
 
 // UnitsValue returns a units.Value for a field, which must be of that type..
-func (sf *StyledField) UnitsValue(obj interface{}) *units.Value {
-	ov := reflect.ValueOf(obj)
-	uv := (*units.Value)(unsafe.Pointer(ov.Pointer() + sf.NetOff))
+func (sf *StyledField) UnitsValue(objptr uintptr) *units.Value {
+	uv := (*units.Value)(unsafe.Pointer(objptr + sf.NetOff))
 	return uv
 }
 
 // FromProps styles given field from property value val, with optional parent object obj
-func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val interface{}, hasPar bool) {
-	fi := fld.FieldIface(obj)
+func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool) {
+	fi := fld.FieldIface(objptr)
 	if kit.IfaceIsNil(fi) {
 		fmt.Printf("StyleField %v of type %v has nil value\n", fld.Field.Name, fld.Field.Type.String())
 		return
-	}
-	var pfi interface{}
-	if hasPar {
-		pfi = fld.FieldIface(par)
 	}
 	switch valv := val.(type) {
 	case string:
 		if valv == "inherit" {
 			if hasPar {
-				val = pfi
+				val = fld.FieldIface(parptr)
 				// fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, val)
 			} else {
 				// fmt.Printf("StyleField %v tried to inherit but par null: %v\n", fld.Field.Name, val)
@@ -673,7 +686,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 				oclr := valv[idx+1:]
 				valv = valv[:idx]
 				if vfld, nok := fields[oclr]; nok {
-					nclr, nok := vfld.FieldIface(obj).(*Color)
+					nclr, nok := vfld.FieldIface(objptr).(*Color)
 					if nok {
 						fiv.SetColor(nclr) // init from color
 						fmt.Printf("StyleField %v initialized to other color: %v val: %v\n", fld.Field.Name, oclr, fiv)

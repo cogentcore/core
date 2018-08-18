@@ -120,14 +120,22 @@ func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.VecEff = cp.VecEff
 }
 
+// InheritFields from parent: Manual inheriting of values is much faster than
+// automatic version!
+func (pc *Paint) InheritFields(par *Paint) {
+	pc.FontStyle.InheritFields(&par.FontStyle)
+	pc.TextStyle.InheritFields(&par.TextStyle)
+}
+
 // SetStyleProps sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(parent *Paint, props ki.Props) {
-	if !pc.StyleSet && parent != nil { // first time
-		PaintFields.Inherit(pc, parent)
+func (pc *Paint) SetStyleProps(par *Paint, props ki.Props) {
+	if !pc.StyleSet && par != nil { // first time
+		// PaintFields.Inherit(pc, par) // very slow..
+		pc.InheritFields(par)
 	}
-	PaintFields.Style(pc, parent, props)
+	PaintFields.Style(pc, par, props)
 	pc.StrokeStyle.SetStylePost(props)
 	pc.FillStyle.SetStylePost(props)
 	pc.FontStyle.SetStylePost(props)

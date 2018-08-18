@@ -46,6 +46,77 @@ string, other render things.  Main conclusions:
 
 * at start of benchmarking, full render total was 28s, and re-render was 12s -- major factors of improvement
 
+* Significant speedup in full re-render by doing a manual version of Inherits, which makes a lot of
+sense anyway (doesn't require anything fancy -- just copy) and was mysteriously taking a TON of time.
+
+```
+Starting Targeted Profiling, window has 2098 nodes
+Time for 50 Re-Renders:         2.62 s
+     Node2D.Render2DTree:	Tot:	     1324.12	Avg:	       26.48	N:	    50	Pct:	32.54
+              Paint.fill:	Tot:	      877.90	Avg:	        0.19	N:	  4650	Pct:	21.57
+      Node2D.Style2DTree:	Tot:	      662.82	Avg:	       13.26	N:	    50	Pct:	16.29
+     Node2D.Layout2DTree:	Tot:	      287.18	Avg:	        2.87	N:	   100	Pct:	 7.06
+       Node2D.Init2DTree:	Tot:	      192.99	Avg:	        3.86	N:	    50	Pct:	 4.74
+       StyleFields.Style:	Tot:	      154.93	Avg:	        0.00	N:	210650	Pct:	 3.81
+            Paint.stroke:	Tot:	      149.53	Avg:	        0.01	N:	 12550	Pct:	 3.67
+      StyleFields.ToDots:	Tot:	      115.16	Avg:	        0.00	N:	433650	Pct:	 2.83
+        TextRenderLayout:	Tot:	       94.39	Avg:	        0.00	N:	 21950	Pct:	 2.32
+       Node2D.Size2DTree:	Tot:	       79.23	Avg:	        1.58	N:	    50	Pct:	 1.95
+     win.Publish.Publish:	Tot:	       58.19	Avg:	        1.16	N:	    50	Pct:	 1.43
+              RenderText:	Tot:	       34.78	Avg:	        0.01	N:	  5850	Pct:	 0.85
+  win.UploadAllViewports:	Tot:	       30.32	Avg:	        0.61	N:	    50	Pct:	 0.74
+        win.Publish.Copy:	Tot:	        7.08	Avg:	        0.14	N:	    50	Pct:	 0.17
+     Style.FromProps.Int:	Tot:	        1.06	Avg:	        0.00	N:	  3350	Pct:	 0.03
+```
+
+* Also big speedup on FileView of svn_docs/figs, which was at 37.97 s before:
+
+```
+Starting Targeted Profiling, window has 26689 nodes
+Time for 50 Re-Renders:        25.31 s
+      Node2D.Style2DTree:	Tot:	    11570.93	Avg:	      231.42	N:	    50	Pct:	35.28
+       Node2D.Size2DTree:	Tot:	     6565.28	Avg:	      131.31	N:	    50	Pct:	20.02
+       StyleFields.Style:	Tot:	     4341.58	Avg:	        0.00	N:	5994450	Pct:	13.24
+     Node2D.Layout2DTree:	Tot:	     2899.77	Avg:	       58.00	N:	    50	Pct:	 8.84
+      StyleFields.ToDots:	Tot:	     2795.35	Avg:	        0.00	N:	9410950	Pct:	 8.52
+     Node2D.Render2DTree:	Tot:	     1882.18	Avg:	       37.64	N:	    50	Pct:	 5.74
+       Node2D.Init2DTree:	Tot:	     1398.54	Avg:	       27.97	N:	    50	Pct:	 4.26
+              Paint.fill:	Tot:	      871.58	Avg:	        0.83	N:	  1050	Pct:	 2.66
+            Paint.stroke:	Tot:	      222.89	Avg:	        0.02	N:	  9350	Pct:	 0.68
+              RenderText:	Tot:	       99.05	Avg:	        0.02	N:	  6350	Pct:	 0.30
+     win.Publish.Publish:	Tot:	       96.01	Avg:	        1.92	N:	    50	Pct:	 0.29
+  win.UploadAllViewports:	Tot:	       41.05	Avg:	        0.82	N:	    50	Pct:	 0.13
+        win.Publish.Copy:	Tot:	        7.37	Avg:	        0.15	N:	    50	Pct:	 0.02
+        TextRenderLayout:	Tot:	        3.13	Avg:	        0.00	N:	   650	Pct:	 0.01
+     Style.FromProps.Int:	Tot:	        0.10	Avg:	        0.00	N:	   100	Pct:	 0.00
+```
+
+* Before StyleFields.Inherit optimization:
+
+```
+Starting Targeted Profiling, window has 2098 nodes
+Time for 50 Re-Renders:         3.66 s
+      Node2D.Style2DTree:	Tot:	     1702.94	Avg:	       34.06	N:	    50	Pct:	26.64
+     Node2D.Render2DTree:	Tot:	     1254.75	Avg:	       25.09	N:	    50	Pct:	19.63
+     StyleFields.Inherit:	Tot:	     1009.91	Avg:	        0.01	N:	104800	Pct:	15.80
+              Paint.fill:	Tot:	      817.88	Avg:	        0.18	N:	  4650	Pct:	12.79
+     Node2D.Layout2DTree:	Tot:	      363.88	Avg:	        3.64	N:	   100	Pct:	 5.69
+      StyleFields.ToDots:	Tot:	      218.69	Avg:	        0.00	N:	433650	Pct:	 3.42
+       Node2D.Init2DTree:	Tot:	      184.31	Avg:	        3.69	N:	    50	Pct:	 2.88
+       StyleFields.Style:	Tot:	      148.14	Avg:	        0.00	N:	210650	Pct:	 2.32
+     Style.FromProps.Int:	Tot:	      147.04	Avg:	        0.00	N:	946550	Pct:	 2.30
+            Paint.stroke:	Tot:	      145.89	Avg:	        0.01	N:	 12550	Pct:	 2.28
+Style.FromProps.SetRobust:	Tot:	      103.65	Avg:	        0.00	N:	524000	Pct:	 1.62
+        TextRenderLayout:	Tot:	       89.17	Avg:	        0.00	N:	 21950	Pct:	 1.39
+       Node2D.Size2DTree:	Tot:	       74.50	Avg:	        1.49	N:	    50	Pct:	 1.17
+     win.Publish.Publish:	Tot:	       62.95	Avg:	        1.26	N:	    50	Pct:	 0.98
+              RenderText:	Tot:	       33.17	Avg:	        0.01	N:	  5850	Pct:	 0.52
+  win.UploadAllViewports:	Tot:	       29.04	Avg:	        0.58	N:	    50	Pct:	 0.45
+        win.Publish.Copy:	Tot:	        6.77	Avg:	        0.14	N:	    50	Pct:	 0.11
+```
+
+* Earlier..
+
 ```
 Starting BenchmarkFullRender
 Starting Std CPU / Mem Profiling

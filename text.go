@@ -1196,6 +1196,23 @@ func (ts *TextStyle) Defaults() {
 func (ts *TextStyle) SetStylePost(props ki.Props) {
 }
 
+// InheritFields from parent: Manual inheriting of values is much faster than
+// automatic version!
+func (ts *TextStyle) InheritFields(par *TextStyle) {
+	ts.Align = par.Align
+	ts.Anchor = par.Anchor
+	ts.WordSpacing = par.WordSpacing
+	ts.LineHeight = par.LineHeight
+	ts.UnicodeBidi = par.UnicodeBidi
+	ts.Direction = par.Direction
+	ts.WritingMode = par.WritingMode
+	ts.OrientationVert = par.OrientationVert
+	ts.OrientationHoriz = par.OrientationHoriz
+	ts.Indent = par.Indent
+	ts.TabSize = par.TabSize
+	ts.WordWrap = par.WordWrap
+}
+
 // EffLineHeight returns the effective line height (taking into account 0 value)
 func (ts *TextStyle) EffLineHeight() float32 {
 	if ts.LineHeight == 0 {

@@ -111,8 +111,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* style.Inherit is major timesync
-
 * fileview: add extension, mode flags -- use extension for search
 * also really need history of paths so you can go back to where you started
 
@@ -127,8 +125,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * cursor on windows, x11 getting stuck with close popup..
 
 * linux: copy / paste puts in opposite order?
-
-* reparse path string button..  need generic methods!
 
 * double click close dialog is only for tableview select action -- need a separate pathway for that.
 
@@ -161,8 +157,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
 
-* arg view / dialog and button tags
-
 * button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
 
 * update widgets README
@@ -170,6 +164,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * Reminder: grep all todo: in code
 
 ### After Beta Release
+
+* arg view / dialog and button tags
 
 * text word wrap: consider TeX algo
   * https://github.com/bramstein/typeset/blob/master/src/linebreak.js
@@ -204,6 +200,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   user-facing cases, int32 is sufficient, so focus on that case??
 
 * each element can generate SVG version of itself, save whole display as SVG -- nicer for screenshots..
+
+* reparse svg path string button..  need generic methods!
+
+
 
 ## Rendering / SVG
 
