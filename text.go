@@ -321,6 +321,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 	var fpos float32
 	curFace := sr.Render[0].Face
 	glyphAdvanceMu.Lock()
+	defer glyphAdvanceMu.Unlock()
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
@@ -358,7 +359,6 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 		}
 		prevR = r
 	}
-	glyphAdvanceMu.Unlock()
 	sr.LastPos.X = fpos
 	sr.LastPos.Y = 0
 }

@@ -14,13 +14,6 @@ For Go newbies..
 > ./widgets
 ```
 
-**IMPORTANT for Linux users:** You need to install the Arial TTF font to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu. 
-
-``` bash
-> sudo apt-get install ttf-mscorefonts-installer
-> sudo fc-cache
-```
-
 ## GoGi Editor
 
 This editor allows you to interactively build new GUI designs, and save / load them from JSON files.

@@ -930,13 +930,13 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 			fn = strings.Replace(fn, "_", " ", -1)
 			fn = strings.Replace(fn, "-", " ", -1)
 			// fn = strings.Title(fn)
-			sfx := ""
 			for sc, rp := range shortFontMods {
 				if strings.HasSuffix(fn, sc) {
-					sfx = rp
+					fn = strings.TrimSuffix(fn, sc)
+					fn += rp
+					break
 				}
 			}
-			fn += sfx
 		}
 		fn = FixFontMods(fn)
 		basefn := strings.ToLower(fn)

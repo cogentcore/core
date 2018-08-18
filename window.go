@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"runtime"
 	"runtime/pprof"
+	"sync"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
@@ -68,6 +69,19 @@ var HoverMaxPix = 5
 // access to all the menu items right there.  Controlled by Prefs.Params
 // variable.
 var LocalMainMenu = false
+
+// WinNewCloseTime records last time a new window was opened or another
+// closed -- used to trigger updating of Window menus on each window.
+var WinNewCloseTime time.Time
+
+// mutex that protects updates to WinNewCloseTime
+var winNewCloseTimeMu sync.Mutex
+
+func WinNewCloseStamp() {
+	winNewCloseTimeMu.Lock()
+	WinNewCloseTime = time.Now()
+	winNewCloseTimeMu.Unlock()
+}
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
@@ -192,7 +206,6 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
-	MainMenuUpdateWindowsAll()
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
 	vp.SetProp("color", &Prefs.Colors.Font) // everything inherits this..
@@ -200,6 +213,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	win.AddChild(vp)
 	win.Viewport = vp
 	win.ConfigVLay()
+	WinNewCloseStamp()
 	return win
 }
 
@@ -230,7 +244,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	}
 	AllWindows.Add(win)
 	DialogWindows.Add(win)
-	MainMenuUpdateWindowsAll()
+	WinNewCloseStamp()
 	return win
 }
 
@@ -365,13 +379,6 @@ func (w *Window) MainMenuUpdateWindows() {
 	w.MainMenuUpdated()
 }
 
-// MainMenuUpdateWindowsAll updates Window menu for all main windows
-func MainMenuUpdateWindowsAll() {
-	for _, w := range MainWindows {
-		w.MainMenuUpdateWindows()
-	}
-}
-
 // Init performs overall initialization of the gogi system: loading prefs, etc
 // -- automatically called when new window opened, but can be called before
 // then if pref info needed.
@@ -433,7 +440,7 @@ func (w *Window) Closed() {
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
-	MainMenuUpdateWindowsAll()
+	WinNewCloseStamp()
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
@@ -955,12 +962,19 @@ func (w *Window) EventLoop() {
 	hoverStarted := false
 	var hoverTimer *time.Timer
 
+	var lastWinMenuUpdate time.Time
+
 	for {
 		evi := w.OSWin.NextEvent()
 		if w.stopEventLoop {
 			w.stopEventLoop = false
 			fmt.Println("stop event loop")
 			break
+		}
+		if lastWinMenuUpdate != WinNewCloseTime {
+			w.MainMenuUpdateWindows()
+			lastWinMenuUpdate = WinNewCloseTime
+			// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 		}
 		if w.DoFullRender {
 			// fmt.Printf("Doing full render\n")

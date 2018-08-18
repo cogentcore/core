@@ -94,9 +94,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## Platforms / oswin
 
-* advertise Noto fonts: https://www.google.com/get/noto/, use this and
-Liberation as fallbacks on linux -- also https://ss64.com/fonts.html
-
 * update keymaps for each platform
 
 * windows:
