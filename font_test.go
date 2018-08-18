@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -31,7 +32,7 @@ var testFontNames = []testFontSpec{
 	{"NotoSansNormal", "NotoSans", FontStrNormal, WeightNormal, FontNormal},
 }
 
-func TestFixFontMods(t *testing.T) {
+func TestFontMods(t *testing.T) {
 	for _, ft := range testFontNames {
 		fo := FixFontMods(ft.fn)
 		if fo != ft.cor {
@@ -55,6 +56,43 @@ func TestFixFontMods(t *testing.T) {
 		frc := FontNameFromMods(base, str, wt, sty)
 		if frc != fo {
 			t.Errorf("FontNameFromMods reconstructed font name: %v != correct: %v\n", frc, fo)
+		}
+	}
+}
+
+// note: the responses to the following two tests depend on what is installed on the system
+
+func TestFontAlts(t *testing.T) {
+	fa, serif, mono := FontAlts("serif")
+	fmt.Printf("FontAlts: serif: %v  serif: %v, mono: %v\n", fa, serif, mono)
+
+	fa, serif, mono = FontAlts("sans-serif")
+	fmt.Printf("FontAlts: sans-serif: %v  serif: %v, mono: %v\n", fa, serif, mono)
+
+	fa, serif, mono = FontAlts("monospace")
+	fmt.Printf("FontAlts: monospace: %v  serif: %v, mono: %v\n", fa, serif, mono)
+
+	fa, serif, mono = FontAlts("cursive")
+	fmt.Printf("FontAlts: cursive: %v  serif: %v, mono: %v\n", fa, serif, mono)
+
+	fa, serif, mono = FontAlts("fantasy")
+	fmt.Printf("FontAlts: fantasy: %v  serif: %v, mono: %v\n", fa, serif, mono)
+}
+
+var testStrs = []FontStretch{FontStrNormal, FontStrCondensed, FontStrExpanded}
+var testWts = []FontWeights{WeightNormal, WeightLight, WeightBold, WeightBlack}
+var testStys = []FontStyles{FontNormal, FontItalic, FontOblique}
+var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
+
+func TestFontFaceName(t *testing.T) {
+	for _, nm := range testNms {
+		for _, str := range testStrs {
+			for _, wt := range testWts {
+				for _, sty := range testStys {
+					fn := FontFaceName(nm, str, wt, sty)
+					fmt.Printf("FontName: nm:\t%v\t str:\t%v\t wt:\t%v\t sty:\t%v\t res:\t%v\n", nm, str, wt, sty, fn)
+				}
+			}
 		}
 	}
 }

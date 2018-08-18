@@ -220,42 +220,78 @@ func FontAlts(fams string) (fns []string, serif, mono bool) {
 
 // FaceNm returns the full FaceName to use for the current FontStyle spec, robustly
 func (fs *FontStyle) FaceNm() string {
-	// these are the parameters we need to generate to get the font:
-	basenm := fs.Family
-	str := fs.Stretch
-	wt := fs.Weight
-	sty := fs.Style
+	fnm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
+	return fnm
+}
 
-	if basenm == "" {
-		basenm = Prefs.FontFamily
+// FontFaceName returns the best full FaceName to use for the given font
+// family(ies) (comma separated) and modifier parameters
+func FontFaceName(fam string, str FontStretch, wt FontWeights, sty FontStyles) string {
+	if fam == "" {
+		fam = Prefs.FontFamily
 	}
-	if basenm != "" { // start off with any styles implicit in font name
-		basenm, str, wt, sty = FontNameToMods(basenm)
+	nms := strings.Split(fam, ",")
+	basenm := ""
+	if len(nms) > 0 { // start off with any styles implicit in font name
+		_, fstr, fwt, fsty := FontNameToMods(strings.TrimSpace(nms[0]))
+		if fstr != FontStrNormal {
+			str = fstr
+		}
+		if fwt != WeightNormal {
+			wt = fwt
+		}
+		if fsty != FontNormal {
+			sty = fsty
+		}
 	}
 
-	nms, _, _ := FontAlts(fs.Family) // nms are all base names now
+	nms, _, _ = FontAlts(fam) // nms are all base names now
+
 	// we try multiple iterations, going through list of alternatives (which
 	// should be from most specific to least, all of which have an existing
 	// base name) -- first iter we look for an exact match for given
 	// modifiers, then we start relaxing things in terms of most likely
 	// issues..
+	didItalic := false
+	didOblique := false
 iterloop:
-	for iter := 0; iter < 6; iter++ {
-		for _, basenm := range nms {
+	for iter := 0; iter < 10; iter++ {
+		for _, basenm = range nms {
 			fn := FontNameFromMods(basenm, str, wt, sty)
 			if FontLibrary.FontAvail(fn) {
 				break iterloop
 			}
 		}
-		if str != FontStrNormal { // very rare, normalize..
-			str = FontStrNormal
+		if str != FontStrNormal {
+			hasStr := false
+			for _, basenm = range nms {
+				fn := FontNameFromMods(basenm, str, WeightNormal, FontNormal)
+				if FontLibrary.FontAvail(fn) {
+					hasStr = true
+					break
+				}
+			}
+			if !hasStr { // if even basic stretch not avail, move on
+				str = FontStrNormal
+				continue
+			}
 			continue
 		}
 		if sty == FontItalic { // italic is more common, but maybe oblique exists
-			sty = FontOblique
+			didItalic = true
+			if !didOblique {
+				sty = FontOblique
+				continue
+			}
+			sty = FontNormal
 			continue
 		}
 		if sty == FontOblique { // by now we've tried both, try nothing
+			didOblique = true
+			if !didItalic {
+				sty = FontItalic
+				continue
+			}
 			sty = FontNormal
 			continue
 		}
@@ -272,6 +308,10 @@ iterloop:
 				}
 			}
 			wt = WeightNormal
+			continue
+		}
+		if str != FontStrNormal { // time to give up
+			str = FontStrNormal
 			continue
 		}
 		break // tried everything
