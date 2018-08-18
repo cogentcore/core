@@ -420,18 +420,18 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip = vv.ViewFieldTag("desc")
 	widthtag := vv.ViewFieldTag("width")
-	tf.SetProp("min-width", units.NewValue(16, units.Ex))
+	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag != "" {
 		width, err := strconv.ParseFloat(widthtag, 32)
 		if err == nil {
-			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ex))
+			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
 		}
 	}
 	maxwidthtag := vv.ViewFieldTag("max-width")
 	if maxwidthtag != "" {
 		width, err := strconv.ParseFloat(widthtag, 32)
 		if err == nil {
-			tf.SetProp("max-width", units.NewValue(float32(width), units.Ex))
+			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
 		}
 	}
 
@@ -921,7 +921,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	sb.SetProp("#textfield", ki.Props{
-		"width": units.NewValue(5, units.Ex),
+		"width": units.NewValue(5, units.Ch),
 	})
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {

@@ -205,7 +205,7 @@ func (sv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewValue(20, units.Ex))
+	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
@@ -261,7 +261,7 @@ func (sv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewValue(20, units.Ex))
+	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
 	sl.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {

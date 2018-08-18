@@ -64,8 +64,8 @@ var SpinBoxProps = ki.Props{
 		"width": units.NewValue(.1, units.Ex),
 	},
 	"#text-field": ki.Props{
-		"min-width": units.NewValue(4, units.Ex),
-		"width":     units.NewValue(8, units.Ex),
+		"min-width": units.NewValue(4, units.Ch),
+		"width":     units.NewValue(8, units.Ch),
 		"margin":    units.NewValue(2, units.Px),
 		"padding":   units.NewValue(2, units.Px),
 	},

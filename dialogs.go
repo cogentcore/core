@@ -301,7 +301,7 @@ func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *
 		}
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
-		lab.SetProp("width", units.NewValue(40, units.Ex))
+		lab.SetProp("width", units.NewValue(30, units.Ch))
 		lab.SetProp("max-width", -1)
 		lab.SetProp("word-wrap", true)
 		dlg.StylePart(Node2D(lab))

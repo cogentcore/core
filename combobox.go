@@ -20,7 +20,7 @@ import (
 
 type ComboBox struct {
 	ButtonBase
-	Editable  bool          `desc:"provide a text field for editing the value, or just a button for selecting items?"`
+	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
 	CurVal    interface{}   `json:"-" xml:"-" desc:"current selected value"`
 	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
 	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
@@ -52,6 +52,11 @@ var ComboBoxProps = ki.Props{
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
+	},
+	"#text": ki.Props{
+		"margin":    units.NewValue(0, units.Px),
+		"padding":   units.NewValue(0, units.Px),
+		"max-width": -1,
 	},
 	"#indicator": ki.Props{
 		"width":          units.NewValue(1.5, units.Ex),
@@ -119,11 +124,76 @@ func (g *ComboBox) ButtonRelease() {
 	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
 }
 
+// ConfigPartsIconText returns a standard config for creating parts, of icon
+// and text left-to right in a row -- always makes text
+func (g *ComboBox) ConfigPartsIconText(icnm string) (config kit.TypeAndNameList, icIdx, txIdx int) {
+	// todo: add some styles for button layout
+	config = kit.TypeAndNameList{}
+	icIdx = -1
+	txIdx = -1
+	if IconName(icnm).IsValid() {
+		config.Add(KiT_Icon, "icon")
+		icIdx = 0
+		config.Add(KiT_Space, "space")
+	}
+	txIdx = len(config)
+	config.Add(KiT_TextField, "text")
+	return
+}
+
+// ConfigPartsSetText sets part style props, using given props if not set in
+// object props
+func (g *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx int) {
+	if txIdx >= 0 {
+		tx := g.Parts.KnownChild(txIdx).(*TextField)
+		tx.SetText(txt)
+		if _, ok := tx.Prop("__comboInit"); !ok {
+			g.StylePart(Node2D(tx))
+			if icIdx >= 0 {
+				g.StylePart(g.Parts.KnownChild(txIdx - 1).(Node2D)) // also get the space
+			}
+			tx.SetProp("__comboInit", true)
+			if g.MaxLength > 0 {
+				tx.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ch))
+			}
+		}
+	}
+}
+
+func (g *ComboBox) ConfigPartsIfNeeded() {
+	if g.Editable {
+		_, ok := g.Parts.ChildByName("text", 2)
+		if !g.PartsNeedUpdateIconLabel(string(g.Icon), "") && ok {
+			return
+		}
+
+	} else {
+		if !g.PartsNeedUpdateIconLabel(string(g.Icon), g.Text) {
+			return
+		}
+	}
+	g.This.(ButtonWidget).ConfigParts()
+}
+
 func (g *ComboBox) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
+	if eb, ok := g.Prop("editable"); ok {
+		g.Editable = eb.(bool)
+	}
+	var config kit.TypeAndNameList
+	var icIdx, lbIdx, txIdx int
+	if g.Editable {
+		lbIdx = -1
+		config, icIdx, txIdx = g.ConfigPartsIconText(string(g.Icon))
+	} else {
+		txIdx = -1
+		config, icIdx, lbIdx = g.ConfigPartsIconLabel(string(g.Icon), g.Text)
+	}
 	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), "", icIdx, lbIdx)
+	if txIdx >= 0 {
+		g.ConfigPartsSetText(g.Text, txIdx, icIdx)
+	}
 	g.ConfigPartsIndicator(indIdx)
 	if g.MaxLength > 0 && lbIdx >= 0 {
 		lbl := g.Parts.KnownChild(lbIdx).(*Label)
@@ -132,6 +202,15 @@ func (g *ComboBox) ConfigParts() {
 	if mods {
 		g.UpdateEnd(updt)
 	}
+}
+
+// TextField returns the text field of an editable combobox, and false if not made
+func (g *ComboBox) TextField() (*TextField, bool) {
+	tff, ok := g.Parts.ChildByName("text", 2)
+	if !ok {
+		return nil, ok
+	}
+	return tff.(*TextField), ok
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,

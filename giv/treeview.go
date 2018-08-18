@@ -1379,7 +1379,7 @@ var TreeViewProps = ki.Props{
 	"#label": ki.Props{
 		"margin":    units.NewValue(0, units.Px),
 		"padding":   units.NewValue(0, units.Px),
-		"min-width": units.NewValue(16, units.Ex),
+		"min-width": units.NewValue(16, units.Ch),
 	},
 	"#menu": ki.Props{
 		"indicator": "none",

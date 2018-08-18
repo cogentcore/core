@@ -5,7 +5,9 @@
 package giv
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"mime"
 	"os"
@@ -32,8 +34,6 @@ import (
 // just search pre-load -- add arg
 // * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
-// * busy cursor when loading
-// * prior paths, saved to prefs dir -- easy -- add combobox with no label that displays them -- ideally would be an editable combobox..
 // * in inactive select mode, it would be better to NOT immediately traverse into subdirs. and even in regular gui mode -- that should be more of a double-click.. although that would cause dialog to close now.. grr.
 
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -41,6 +41,7 @@ type FileView struct {
 	gi.Frame
 	DirPath string      `desc:"path to directory of files to display"`
 	SelFile string      `desc:"selected file"`
+	Ext     string      `desc:"target extension"`
 	Files   []*FileInfo `desc:"files for current directory"`
 	FileSig ki.Signal   `desc:"signal for file actions"`
 }
@@ -133,7 +134,7 @@ func (fv *FileView) ConfigPathRow() {
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "path-lbl")
-	config.Add(gi.KiT_TextField, "path")
+	config.Add(gi.KiT_ComboBox, "path")
 	config.Add(gi.KiT_Action, "path-up")
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
@@ -141,16 +142,27 @@ func (fv *FileView) ConfigPathRow() {
 	pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
 	pl.Text = "Path:"
 	pf := fv.PathField()
-	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ex))
+	pf.Editable = true
+	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	pf.SetStretchMaxWidth()
-	pf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-			pff, _ := send.(*gi.TextField)
-			fvv.DirPath = pff.Text()
-			fvv.SetFullReRender()
-			fvv.UpdateFiles()
-		}
+	pf.ConfigParts()
+	tf, ok := pf.TextField()
+	if ok {
+		tf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.TextFieldDone) {
+				fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+				pff, _ := send.(*gi.TextField)
+				fvv.DirPath = pff.Text()
+				fvv.SetFullReRender()
+				fvv.UpdateFiles()
+			}
+		})
+	}
+	pf.ComboSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv.DirPath = data.(string)
+		fvv.SetFullReRender()
+		fvv.UpdateFiles()
 	})
 
 	pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
@@ -247,7 +259,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl := sr.KnownChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
 	sf := fv.SelField()
-	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ex))
+	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.GrabFocus()
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -259,10 +271,10 @@ func (fv *FileView) ConfigSelRow() {
 	})
 }
 
-// PathField returns the TextField of the path
-func (fv *FileView) PathField() *gi.TextField {
+// PathField returns the ComboBox of the path
+func (fv *FileView) PathField() *gi.ComboBox {
 	pr := fv.KnownChildByName("path-tbar", 0).(*gi.ToolBar)
-	return pr.KnownChildByName("path", 1).(*gi.TextField)
+	return pr.KnownChildByName("path", 1).(*gi.ComboBox)
 }
 
 // FavsView returns the TableView of the favorites
@@ -306,6 +318,12 @@ func (fv *FileView) UpdateFiles() {
 	fv.SetFullReRender()
 	fv.UpdatePath()
 	pf := fv.PathField()
+	if len(SavedPaths) == 0 {
+		LoadPaths()
+	}
+	SavedPaths.AddPath(fv.DirPath, SavedPathsMax)
+	SavePaths()
+	pf.ItemsFromStringList(([]string)(SavedPaths), false, 0)
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
@@ -551,4 +569,81 @@ func FileKindToIcon(kind, name string) gi.IconName {
 
 	icn = gi.IconName("none")
 	return icn
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  FilePaths
+
+type FilePaths []string
+
+var SavedPaths FilePaths
+
+var SavedPathsMax = 50
+
+// Load file paths from a JSON-formatted file.
+func (p *FilePaths) LoadJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		// gi.PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, p)
+}
+
+// Save file paths to a JSON-formatted file.
+func (p *FilePaths) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	if err != nil {
+		// gi.PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+	}
+	return err
+}
+
+// AddPath inserts a path to the file paths (at the start), subject to max
+// length -- if path is already on the list then it is moved to the start.
+func (p *FilePaths) AddPath(path string, max int) {
+	sz := len(*p)
+
+	for i, s := range *p {
+		if i > 0 && s == path {
+			copy((*p)[1:i+1], (*p)[0:i])
+			(*p)[0] = path
+			return
+		}
+	}
+
+	if sz >= max {
+		copy((*p)[1:max], (*p)[0:max-1])
+		(*p)[0] = path
+	} else {
+		*p = append(*p, "")
+		if sz > 0 {
+			copy((*p)[1:], (*p)[0:sz])
+		}
+		(*p)[0] = path
+	}
+}
+
+// SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
+var SavedPathsFileName = "saved_paths.json"
+
+// SavePaths saves the active SavedPaths to prefs dir
+func SavePaths() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.SaveJSON(pnm)
+}
+
+// LoadPaths loads the active SavedPaths from prefs dir
+func LoadPaths() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.LoadJSON(pnm)
 }

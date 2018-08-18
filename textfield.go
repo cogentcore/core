@@ -727,10 +727,10 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 	if !tf.IsInactive() && !tf.HasFocus() {
 		tf.GrabFocus()
 	}
+	me.SetProcessed()
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
-			me.SetProcessed()
 			if tf.IsInactive() {
 				tf.SetSelectedState(!tf.IsSelected())
 				tf.EmitSelectedSignal()

@@ -574,7 +574,7 @@ var ButtonProps = ki.Props{
 	"border-color":  &Prefs.Colors.Border,
 	"border-style":  BorderSolid,
 	"padding":       units.NewValue(4, units.Px),
-	"margin":        units.NewValue(4, units.Px),
+	"margin":        units.NewValue(2, units.Px),
 	// "box-shadow.h-offset": units.NewValue(10, units.Px),
 	// "box-shadow.v-offset": units.NewValue(10, units.Px),
 	// "box-shadow.blur":     units.NewValue(4, units.Px),
