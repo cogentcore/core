@@ -1266,7 +1266,8 @@
                   "Nm": "edit1",
                   "UniqueNm": "edit1",
                   "Props": {
-                    "min-width": "20em"
+                    "min-width": "20em",
+                    "completer-type": "word-completer"
                   },
                   "Kids": null,
                   "Class": "",

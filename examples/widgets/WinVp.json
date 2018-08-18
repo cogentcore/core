@@ -493,7 +493,7 @@
           "Spacing": {
             "Val": 4,
             "Un": "Px",
-            "Dots": 4.25
+            "Dots": 4.5
           },
           "StackTop": 0,
           "MainMenu": true
@@ -502,6 +502,12 @@
           "Nm": "main-frame",
           "UniqueNm": "main-frame",
           "Props": {
+            "__type:max-height": "units.Value",
+            "max-height": {
+              "Val": -1,
+              "Un": "Px",
+              "Dots": 0
+            },
             "__type:spacing": "units.Value",
             "spacing": {
               "Val": 1,
@@ -510,12 +516,6 @@
             },
             "__type:max-width": "units.Value",
             "max-width": {
-              "Val": -1,
-              "Un": "Px",
-              "Dots": 0
-            },
-            "__type:max-height": "units.Value",
-            "max-height": {
               "Val": -1,
               "Un": "Px",
               "Dots": 0
@@ -579,11 +579,11 @@
                   "Nm": "title",
                   "UniqueNm": "title",
                   "Props": {
-                    "font-family": "Times New Roman, serif",
                     "font-size": "x-large",
                     "line-height": 1.5,
                     "text-align": "__enum:(gi.Align)AlignCenter",
-                    "vertical-align": "__enum:(gi.Align)AlignTop"
+                    "vertical-align": "__enum:(gi.Align)AlignTop",
+                    "font-family": "Times New Roman, serif"
                   },
                   "Kids": null,
                   "Class": "",
@@ -661,19 +661,19 @@
               "Nm": "brow",
               "UniqueNm": "brow",
               "Props": {
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                },
                 "__type:spacing": "units.Value",
                 "spacing": {
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
                 },
-                "horizontal-align": "__enum:(gi.Align)AlignLeft",
-                "__type:max-width": "units.Value",
-                "max-width": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                }
+                "horizontal-align": "__enum:(gi.Align)AlignLeft"
               },
               "Kids": [
                 {
@@ -859,7 +859,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 17
+                "Dots": 18
               },
               "StackTop": 0
             },
@@ -909,19 +909,19 @@
               "Nm": "srow",
               "UniqueNm": "srow",
               "Props": {
-                "horizontal-align": "left",
+                "__type:spacing": "units.Value",
+                "spacing": {
+                  "Val": 2,
+                  "Un": "Ex",
+                  "Dots": 0
+                },
                 "__type:max-width": "units.Value",
                 "max-width": {
                   "Val": -1,
                   "Un": "Px",
                   "Dots": 0
                 },
-                "__type:spacing": "units.Value",
-                "spacing": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                }
+                "horizontal-align": "left"
               },
               "Kids": [
                 {
@@ -939,18 +939,6 @@
                   "Nm": "slider1",
                   "UniqueNm": "slider1",
                   "Props": {
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 20,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-width": "units.Value",
-                    "min-width": {
-                      "Val": 20,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:height": "units.Value",
                     "height": {
                       "Val": 2,
@@ -960,6 +948,18 @@
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 20,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -974,19 +974,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 291.125,
-                  "ThSize": 25.5,
+                  "Size": 308.25,
+                  "ThSize": 27,
                   "ThumbSize": {
                     "Val": 1.5,
                     "Un": "Em",
-                    "Dots": 25.5
+                    "Dots": 27
                   },
                   "Prec": 9,
                   "Icon": "widget-circlebutton-on",
                   "ValThumb": false,
                   "ThumbVal": 0,
-                  "Pos": 145.5625,
-                  "DragPos": 145.5625,
+                  "Pos": 154.125,
+                  "DragPos": 154.125,
                   "VisPos": 0,
                   "Dim": "X",
                   "Tracking": true,
@@ -995,11 +995,11 @@
                   "OrigWinBBox": {
                     "Min": {
                       "X": 6,
-                      "Y": 339
+                      "Y": 382
                     },
                     "Max": {
-                      "X": 346,
-                      "Y": 376
+                      "X": 366,
+                      "Y": 421
                     }
                   }
                 },
@@ -1007,15 +1007,21 @@
                   "Nm": "slider2",
                   "UniqueNm": "slider2",
                   "Props": {
-                    "__type:max-height": "units.Value",
-                    "max-height": {
-                      "Val": -1,
-                      "Un": "Px",
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
+                      "Un": "Em",
                       "Dots": 0
                     },
                     "__type:height": "units.Value",
                     "height": {
                       "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-width": "units.Value",
+                    "min-width": {
+                      "Val": 1,
                       "Un": "Em",
                       "Dots": 0
                     },
@@ -1025,16 +1031,10 @@
                       "Un": "Em",
                       "Dots": 0
                     },
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-width": "units.Value",
-                    "min-width": {
-                      "Val": 1,
-                      "Un": "Em",
+                    "__type:max-height": "units.Value",
+                    "max-height": {
+                      "Val": -1,
+                      "Un": "Px",
                       "Dots": 0
                     }
                   },
@@ -1048,19 +1048,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 121.125,
-                  "ThSize": 25.5,
+                  "Size": 128.25,
+                  "ThSize": 27,
                   "ThumbSize": {
                     "Val": 1.5,
                     "Un": "Em",
-                    "Dots": 25.5
+                    "Dots": 27
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": false,
                   "ThumbVal": 0,
-                  "Pos": 60.5625,
-                  "DragPos": 60.5625,
+                  "Pos": 64.125,
+                  "DragPos": 64.125,
                   "VisPos": 0,
                   "Dim": "Y",
                   "Tracking": false,
@@ -1068,12 +1068,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 363,
-                      "Y": 272
+                      "X": 384,
+                      "Y": 311
                     },
                     "Max": {
-                      "X": 400,
-                      "Y": 442
+                      "X": 423,
+                      "Y": 491
                     }
                   }
                 },
@@ -1081,6 +1081,12 @@
                   "Nm": "scrollbar1",
                   "UniqueNm": "scrollbar1",
                   "Props": {
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
                     "__type:width": "units.Value",
                     "width": {
                       "Val": 20,
@@ -1095,12 +1101,6 @@
                     },
                     "__type:height": "units.Value",
                     "height": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-height": "units.Value",
-                    "min-height": {
                       "Val": 1,
                       "Un": "Em",
                       "Dots": 0
@@ -1116,19 +1116,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 333.625,
-                  "ThSize": 83.40625,
+                  "Size": 353.25,
+                  "ThSize": 88.3125,
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8.5
+                    "Dots": 9
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": true,
                   "ThumbVal": 0.25,
-                  "Pos": 83.40625,
-                  "DragPos": 83.40625,
+                  "Pos": 88.3125,
+                  "DragPos": 88.3125,
                   "VisPos": 0,
                   "Dim": "X",
                   "Tracking": true,
@@ -1136,12 +1136,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 416,
-                      "Y": 348
+                      "X": 441,
+                      "Y": 392
                     },
                     "Max": {
-                      "X": 756,
-                      "Y": 365
+                      "X": 801,
+                      "Y": 410
                     }
                   }
                 },
@@ -1149,21 +1149,15 @@
                   "Nm": "scrollbar2",
                   "UniqueNm": "scrollbar2",
                   "Props": {
-                    "__type:height": "units.Value",
-                    "height": {
-                      "Val": 10,
-                      "Un": "Em",
+                    "__type:max-height": "units.Value",
+                    "max-height": {
+                      "Val": -1,
+                      "Un": "Px",
                       "Dots": 0
                     },
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 10,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 1,
                       "Un": "Em",
                       "Dots": 0
                     },
@@ -1173,10 +1167,16 @@
                       "Un": "Em",
                       "Dots": 0
                     },
-                    "__type:max-height": "units.Value",
-                    "max-height": {
-                      "Val": -1,
-                      "Un": "Px",
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 10,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 1,
+                      "Un": "Em",
                       "Dots": 0
                     }
                   },
@@ -1190,19 +1190,19 @@
                   "Max": 1,
                   "Step": 0.1,
                   "PageStep": 0.2,
-                  "Size": 163.625,
-                  "ThSize": 16.362501,
+                  "Size": 173.25,
+                  "ThSize": 17.325,
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8.5
+                    "Dots": 9
                   },
                   "Prec": 9,
                   "Icon": "",
                   "ValThumb": true,
                   "ThumbVal": 0.1,
-                  "Pos": 81.8125,
-                  "DragPos": 81.8125,
+                  "Pos": 86.625,
+                  "DragPos": 86.625,
                   "VisPos": 0,
                   "Dim": "Y",
                   "Tracking": false,
@@ -1210,12 +1210,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 773,
-                      "Y": 272
+                      "X": 819,
+                      "Y": 311
                     },
                     "Max": {
-                      "X": 790,
-                      "Y": 442
+                      "X": 837,
+                      "Y": 491
                     }
                   }
                 }
@@ -1227,7 +1227,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 17
+                "Dots": 18
               },
               "StackTop": 0
             },
@@ -1304,7 +1304,8 @@
                   "Nm": "edit1",
                   "UniqueNm": "edit1",
                   "Props": {
-                    "min-width": "20em"
+                    "min-width": "20em",
+                    "completer-type": "word-completer"
                   },
                   "Kids": null,
                   "Class": "",
@@ -1312,7 +1313,7 @@
                   "Tooltip": "",
                   "MaxWidthReq": 0,
                   "StartPos": 0,
-                  "EndPos": 14,
+                  "EndPos": 0,
                   "CursorPos": 0,
                   "CharWidth": 11,
                   "SelectStart": 0,
@@ -1362,7 +1363,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 17
+                "Dots": 18
               },
               "StackTop": 0
             }
@@ -1374,7 +1375,7 @@
           "Spacing": {
             "Val": 1,
             "Un": "Px",
-            "Dots": 1.0625
+            "Dots": 1.125
           },
           "StackTop": 0,
           "Stripes": "NoStripes"
@@ -1394,15 +1395,6 @@
   ],
   "Class": "",
   "CSS": {
-    "button": {
-      "__type:background-color": "gi.Color",
-      "background-color": {
-        "R": 255,
-        "G": 240,
-        "B": 240,
-        "A": 255
-      }
-    },
     "#combo": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -1423,6 +1415,15 @@
     },
     "kbd": {
       "color": "blue"
+    },
+    "button": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 255,
+        "G": 240,
+        "B": 240,
+        "A": 255
+      }
     }
   },
   "Tooltip": "",

@@ -5,10 +5,11 @@
 package gi
 
 import (
-	"go/parser"
+	"errors"
 	"fmt"
-	"unicode"
+	"go/parser"
 	"strings"
+	"unicode"
 )
 
 // Completer is an implementation of completion for debugging - there will be a real code completer
@@ -24,7 +25,10 @@ type Completer interface {
 	Count() int
 
 	// Seed returns the current seed
-	Seed()
+	Seed() string
+
+	// Match returns the match at index
+	Match(index int) string
 
 	// Extend tries to extend the current seed checking possible completions for a longer common seed
 	// e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
@@ -33,20 +37,26 @@ type Completer interface {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// SampleCompleter
-type SampleCompleter struct {
-	inited		bool
+// BaseCompleter
+type BaseCompleter struct {
+	inited      bool
 	seed        string // the portion of the text from which completions are generated
 	completions []string
-	matches		[]string
+	matches     []string
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// WordCompleter
+type WordCompleter struct {
+	BaseCompleter
 }
 
 // GenCompletions generates a list of possible completions and returns the number found.
-func (sc *SampleCompleter) GenCompletions(text string) {
-	if sc.inited == false {
-		sc.Init()
+func (wc *WordCompleter) GenCompletions(text string) {
+	if wc.inited == false {
+		wc.Init()
 	}
-	sc.matches = sc.completions[0:0]
+	wc.matches = wc.completions[0:0]
 
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
@@ -56,23 +66,23 @@ func (sc *SampleCompleter) GenCompletions(text string) {
 			break
 		}
 	}
-	sc.seed = text[seedStart:]
+	wc.seed = text[seedStart:]
 
 	match_start := -1
 	match_end := -1
-	if len(sc.seed) > 0 {
-		for i, s := range sc.completions {
+	if len(wc.seed) > 0 {
+		for i, s := range wc.completions {
 			if match_end > -1 {
 				break
 			}
 			if match_start == -1 {
-				if strings.HasPrefix(s, sc.seed) {
+				if strings.HasPrefix(s, wc.seed) {
 					match_start = i // first match in sorted list
 				}
 				continue
 			}
-			if (match_start > -1) {
-				if strings.HasPrefix(s, sc.seed) == false {
+			if match_start > -1 {
+				if strings.HasPrefix(s, wc.seed) == false {
 					match_end = i
 				}
 			}
@@ -80,47 +90,51 @@ func (sc *SampleCompleter) GenCompletions(text string) {
 	}
 
 	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
-	if (match_start > -1 && match_end > -1) {
-		sc.matches = sc.completions[match_start:match_end]
+	if match_start > -1 && match_end > -1 {
+		wc.matches = wc.completions[match_start:match_end]
 	}
 }
 
-func (sc *SampleCompleter) Count() int {
-	return len(sc.matches)
+func (wc *WordCompleter) Count() int {
+	return len(wc.matches)
 }
 
-func (sc *SampleCompleter) Seed() string {
-	return sc.seed
+func (wc *WordCompleter) Seed() string {
+	return wc.seed
 }
 
-func (sc *SampleCompleter) Extend() string {
+func (wc *WordCompleter) Match(index int) string {
+	return wc.matches[index]
+}
+
+func (wc *WordCompleter) Extend() string {
 	keep_looking := true
-	new_seed := sc.seed
+	new_seed := wc.seed
 	potential_seed := new_seed
-	first_match := sc.matches[0]
+	first_match := wc.matches[0]
 	for keep_looking {
 		if len(first_match) <= len(new_seed) {
 			keep_looking = false // ran out of chars
 			break
 		}
 
-		potential_seed = first_match[0:len(new_seed) + 1]
-		for _, s := range sc.matches {
+		potential_seed = first_match[0 : len(new_seed)+1]
+		for _, s := range wc.matches {
 			if !strings.HasPrefix(s, potential_seed) {
-				keep_looking = false;
-				break;
+				keep_looking = false
+				break
 			}
 		}
 		if keep_looking {
 			new_seed = potential_seed
 		}
 	}
-	return strings.Replace(new_seed, sc.seed, "", 1) // only return the seed extension
+	return strings.Replace(new_seed, wc.seed, "", 1) // only return the seed extension
 }
 
 // Init being used to load words for this sample completer
-func (sc *SampleCompleter) Init() {
-	sc.completions = []string{"a", "able", "about", "above", "act", "add", "afraid", "after", "again", "against", "age", "ago", "agree", "air", "all",
+func (wc *WordCompleter) Init() {
+	wc.completions = []string{"a", "able", "about", "above", "act", "add", "afraid", "after", "again", "against", "age", "ago", "agree", "air", "all",
 		"allow", "also", "always", "am", "among", "an", "and", "anger", "animal", "answer", "any", "appear", "apple", "are",
 		"area", "arm", "arrange", "arrive", "art", "as", "ask", "at", "atom", "baby", "back", "bad", "ball", "band", "bank",
 		"bar", "base", "basic", "bat", "be", "bear", "beat", "beauty", "bed", "been", "before", "began", "begin", "behind",
@@ -197,21 +211,74 @@ func (sc *SampleCompleter) Init() {
 		"word", "work", "world", "would", "write", "written", "wrong", "wrote", "yard", "year", "yellow", "yes", "yet", "you",
 		"young", "your"}
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // GoCompleter - the completer functions for parsing and offering completions for go lang expressions
 
 type GoCompleter struct {
-
+	BaseCompleter
 }
 
-func (sc *GoCompleter) GenCompletions(text string) int {
-	return 0
+func (gc *GoCompleter) GenCompletions(text string) {
 }
 
-func (sc *GoCompleter) Parse(code string) {
+func (gc *GoCompleter) Parse(code string) {
 	t, err := parser.ParseExpr(code)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Printf("%s", t)
+}
+
+func (gc *GoCompleter) Count() int {
+	return len(gc.matches)
+}
+
+func (gc *GoCompleter) Seed() string {
+	return gc.seed
+}
+
+func (gc *GoCompleter) Match(index int) string {
+	return gc.matches[index]
+}
+
+func (gc *GoCompleter) Extend() string {
+	keep_looking := true
+	new_seed := gc.seed
+	potential_seed := new_seed
+	first_match := gc.matches[0]
+	for keep_looking {
+		if len(first_match) <= len(new_seed) {
+			keep_looking = false // ran out of chars
+			break
+		}
+
+		potential_seed = first_match[0 : len(new_seed)+1]
+		for _, s := range gc.matches {
+			if !strings.HasPrefix(s, potential_seed) {
+				keep_looking = false
+				break
+			}
+		}
+		if keep_looking {
+			new_seed = potential_seed
+		}
+	}
+	return strings.Replace(new_seed, gc.seed, "", 1) // only return the seed extension
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// GoCompleter - the completer functions for parsing and offering completions for go lang expressions
+
+func CreateCompleter(s string) (Completer, error) {
+	switch s {
+	case "word-completer":
+		return new(WordCompleter), nil
+	case "go-completer":
+		return new(GoCompleter), nil
+	default:
+		//if type is invalid, return an error
+		return nil, errors.New("Invalid Completer Type")
+	}
+
 }

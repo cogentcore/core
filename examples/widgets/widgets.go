@@ -255,7 +255,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
 	// edit1.SetProp("inactive", true)
-	edit1.UseCmpltr = true
+	edit1.Completion = true
 
 	sb := txrow.AddNewChild(gi.KiT_SpinBox, "spin").(*gi.SpinBox)
 	sb.Defaults()

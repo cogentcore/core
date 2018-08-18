@@ -10,6 +10,7 @@ import (
 
 	"strings"
 
+	"fmt"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -45,8 +46,8 @@ type TextField struct {
 	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	Cmpltr       SampleCompleter         `json:"-" xml:"-" desc:"current text completer"`
-	UseCmpltr    bool                    `json:"-" xml:"-" desc:"offer completion, or not"`
+	Cmpltr       Completer               `json:"-" xml:"-" desc:"current text completer"`
+	Completion   bool                    `json:"-" xml:"-" desc:"offer completion, or not"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -510,34 +511,52 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 
 // OfferCompletions pops up a menu of possible completions
 func (tf *TextField) OfferCompletions() {
-	if !tf.UseCmpltr {
-		return
-	}
 	if PopupIsCompleter(tf.ParentWindow().Popup) {
 		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
 	}
 
-	tf.Cmpltr.GenCompletions(string(tf.EditTxt[0:tf.CursorPos])) // send current text to create list of possible completions
-	if len(tf.Cmpltr.matches) == 1 {                             // don't show if only one and it matches current text
-		if tf.Cmpltr.matches[0] == tf.Cmpltr.Seed() {
-			return
-		}
+	tf.Cmpltr = nil // start fresh
+
+	if !tf.Completion {
+		return
 	}
-	if tf.Cmpltr.Count() > 0 {
-		m := tf.MakeCompletionMenu(tf.Cmpltr)
-		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-		// todo: figure popup placement using font and line height
-		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
-		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
+
+	// create completer and populate menu
+	ct, found := tf.Prop("completer-type")
+	if !found {
+		fmt.Println("completer-type unknown property")
+	} else {
+		ctStr := ct.(string)
+		//fmt.Println(ctStr)
+		cmpltr, err := CreateCompleter(ctStr)
+		if err == nil {
+			tf.Cmpltr = cmpltr                                        // KeyInput needs this
+			cmpltr.GenCompletions(string(tf.EditTxt[0:tf.CursorPos])) // send current text to create list of possible completion
+			if cmpltr.Count() == 1 {                                  // don't show if only one and it matches current text
+				if cmpltr.Match(0) == cmpltr.Seed() {
+					return
+				}
+			}
+			if cmpltr.Count() > 0 {
+				m := tf.MakeCompletionMenu(cmpltr)
+				cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
+				// todo: figure popup placement using font and line height
+				vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
+				bitflag.Set(&vp.Flag, int(VpFlagCompleter))
+			}
+		} else {
+			fmt.Println(err)
+		}
 	}
 }
 
 // MakeCompletionMenu makes the menu of possible completions for the preceding code/text -
 // the Action is Complete() for every item
-func (tf *TextField) MakeCompletionMenu(completer SampleCompleter) Menu {
+func (tf *TextField) MakeCompletionMenu(c Completer) Menu {
 	var m Menu
-	for i := range completer.matches {
-		s := completer.matches[i]
+	count := c.Count()
+	for i := 0; i < count; i++ {
+		s := c.Match(i)
 		m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.Complete(s)
@@ -555,6 +574,7 @@ func (tf *TextField) Complete(str string) {
 	txt := s1 + s2
 	tf.EditTxt = []rune(txt)
 	tf.CursorEnd()
+	tf.Cmpltr = nil
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
@@ -630,7 +650,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		switch kf {
 		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
 			if tf.Cmpltr.Count() == 1 {
-				tf.Complete(tf.Cmpltr.matches[0])
+				tf.Complete(tf.Cmpltr.Match(0))
 				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
 				return
 			}
