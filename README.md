@@ -113,16 +113,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * style.Inherit is major timesync
 
-* TEST: win geom prefs: adapt DPI for size relative to saved!
-
 * fileview: add extension, mode flags -- use extension for search
 * also really need history of paths so you can go back to where you started
-
-* menu updating likely culprit -- need to lock this somehow.
-* protect windows menu updating and iteration over windows lists using mutex?  getting
-some crashes on X11 -- gets called during a close, so it seems dangerous.
-
-* mac crash on close font sel window.. reliable -- probably need a go?
 
 * crash on quit:
 * cocoa.go:
@@ -138,8 +130,6 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 
 * reparse path string button..  need generic methods!
 
-* weird inconsistency in HasScroll in layout for fileview (on mac only?)
-
 * double click close dialog is only for tableview select action -- need a separate pathway for that.
 
 * label needs 2nd pass with actual size to re-layout (only for wordwrap) --
@@ -153,9 +143,6 @@ some crashes on X11 -- gets called during a close, so it seems dangerous.
 * add option for no window render at all while iconfied
 
 * arrow nav for menubar
-
-* drag should be stateful -- only drag current item -- logic is in there but
-  not working properly
 
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..

@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"runtime"
 	"runtime/pprof"
+	"sort"
 	"sync"
 
 	"github.com/chewxy/math32"
@@ -667,6 +668,18 @@ func (w *Window) IsInScope(gi *Node2DBase, popup bool) bool {
 	return !popup
 }
 
+type winEventRecv struct {
+	recv  ki.Ki
+	fun   ki.RecvFunc
+	depth int
+}
+
+func addWinEventRecv(lst *[]winEventRecv, recv ki.Ki, fun ki.RecvFunc, w *Window) {
+	depth := recv.ParentLevel(w.This)
+	rr := winEventRecv{recv, fun, depth}
+	*lst = append(*lst, rr)
+}
+
 // SendEventSignal sends given event signal to all receivers that want it --
 // note that because there is a different EventSig for each event type, we are
 // ONLY looking at nodes that have registered to receive that type of event --
@@ -685,36 +698,47 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 		if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 			continue
 		}
-		w.EventSigs[et][pri].EmitFiltered(w.This, int64(et), evi, func(k ki.Ki) bool {
-			if k.IsDeleted() { // destroyed is filtered upstream
-				return false
+
+		// we take control of signal process to sort elements by depth, and
+		// dispatch to inner-most one first
+		evRecvs := make([]winEventRecv, 0, 10)
+
+		esig := w.EventSigs[et][pri]
+
+		for recv, fun := range esig.Cons {
+			if recv.IsDestroyed() {
+				// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
+				delete(esig.Cons, recv)
+				continue
 			}
-			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
-				return false
+			if recv.IsDeleted() {
+				continue
 			}
-			gii, gi := KiToNode2D(k)
+			gii, gi := KiToNode2D(recv)
 			if gi != nil {
 				if !w.IsInScope(gi, popup) {
-					return false
+					continue
 				}
 				if evi.OnFocus() && !gii.HasFocus2D() {
-					return false
+					continue
 				} else if evi.HasPos() {
 					pos := evi.Pos()
 					// drag events start with node but can go beyond it..
 					_, ok := evi.(*mouse.DragEvent)
 					if ok {
 						if w.Dragging == gi.This {
-							return true
+							addWinEventRecv(&evRecvs, recv, fun, w)
+							break // done -- dragger owns it!
 						} else if w.Dragging != nil {
-							return false
+							continue
 						} else {
 							if pos.In(gi.WinBBox) {
 								w.Dragging = gi.This
 								bitflag.Set(&gi.Flag, int(NodeDragging))
-								return true
+								addWinEventRecv(&evRecvs, recv, fun, w)
+								break
 							}
-							return false
+							continue
 						}
 					} else {
 						if w.Dragging == gi.This {
@@ -723,19 +747,35 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 								bitflag.Clear(&dg.Flag, int(NodeDragging))
 							}
 							w.Dragging = nil
-							return true
 						}
 						if !pos.In(gi.WinBBox) {
-							return false
+							continue
 						}
 					}
 				}
+				addWinEventRecv(&evRecvs, recv, fun, w)
+				continue
 			} else {
 				// todo: get a 3D
-				return false
+				continue
 			}
-			return true
+		}
+		if len(evRecvs) == 0 {
+			continue
+		}
+
+		// deepest first
+		sort.Slice(evRecvs, func(i, j int) bool {
+			return evRecvs[i].depth > evRecvs[j].depth
 		})
+
+		for _, rr := range evRecvs {
+			rr.fun(rr.recv, w.This, int64(et), evi)
+			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
+				break
+			}
+		}
+
 	}
 }
 

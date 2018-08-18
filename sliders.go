@@ -390,7 +390,7 @@ func (g *SliderBase) SliderEvents() {
 		if sl.Dim == X {
 			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
 		} else {
-			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(false))) // preferY
+			sl.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
 		}
 	})
 	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

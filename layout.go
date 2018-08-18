@@ -1138,16 +1138,16 @@ func (ly *Layout) RenderScrolls() {
 // scroll was processed
 func (ly *Layout) ScrollDelta(del image.Point) bool {
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		fmt.Printf("both del: %v\n", del)
+		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
 		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
 		return true
 	} else if ly.HasScroll[Y] {
-		fmt.Printf("y del: %v\n", del)
+		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
 		return true
 	} else if ly.HasScroll[X] {
-		fmt.Printf("x del: %v\n", del)
+		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
 		d := del.X
 		if d == 0 { // often don't get X
 			d = del.Y
@@ -1332,6 +1332,7 @@ func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 	ly.Move2DBase(delta, parBBox)
 	delta = ly.Move2DDelta(delta) // add our offset
 	ly.Move2DChildren(delta)
+	ly.RenderScrolls()
 }
 
 func (ly *Layout) Render2D() {
