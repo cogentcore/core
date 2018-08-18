@@ -560,6 +560,11 @@ func (g *Slider) Layout2D(parBBox image.Rectangle) {
 	g.OrigWinBBox = g.WinBBox
 }
 
+func (g *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
+	g.SliderBase.Move2D(delta, parBBox)
+	g.OrigWinBBox = g.WinBBox
+}
+
 func (g *Slider) Render2D() {
 	if g.FullReRenderIfNeeded() {
 		return
@@ -723,6 +728,11 @@ func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
 	}
 	g.SizeFromAlloc()
 	g.Layout2DChildren()
+	g.OrigWinBBox = g.WinBBox
+}
+
+func (g *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
+	g.SliderBase.Move2D(delta, parBBox)
 	g.OrigWinBBox = g.WinBBox
 }
 
