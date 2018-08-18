@@ -33,17 +33,17 @@ import (
 // WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
-	Slice        interface{}  `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	Values       []ValueView  `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	ShowIndex    bool         `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
-	InactKeyNav  bool         `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelectedIdx  int          `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SelectMode   bool         `desc:"editing-mode select rows mode"`
-	SelectedRows map[int]bool `desc:"list of currently-selected rows"`
-	DraggedRows  []int        `desc:"list of currently-dragged rows"`
-	ViewSig      ki.Signal    `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	TmpSave      ValueView    `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice   interface{}  `view:"-" json:"-" xml:"-" desc:"the built slice"`
+	Slice        interface{}      `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	Values       []ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	ShowIndex    bool             `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
+	InactKeyNav  bool             `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	SelectedIdx  int              `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SelectMode   bool             `desc:"editing-mode select rows mode"`
+	SelectedRows map[int]struct{} `desc:"list of currently-selected rows"`
+	DraggedRows  []int            `desc:"list of currently-dragged rows"`
+	ViewSig      ki.Signal        `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	TmpSave      ValueView        `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	BuiltSlice   interface{}      `view:"-" json:"-" xml:"-" desc:"the built slice"`
 	BuiltSize    int
 	inFocusGrab  bool
 }
@@ -63,7 +63,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 		if !sv.IsInactive() {
 			sv.SelectedIdx = -1
 		}
-		sv.SelectedRows = make(map[int]bool, 10)
+		sv.SelectedRows = make(map[int]struct{}, 10)
 		sv.SelectMode = false
 		sv.SetFullReRender()
 	}
@@ -620,7 +620,7 @@ func (sv *SliceView) SelectedRowsList(descendingSort bool) []int {
 // SelectRow selects given row (if not already selected) -- updates select
 // status of index label
 func (sv *SliceView) SelectRow(row int) {
-	sv.SelectedRows[row] = true
+	sv.SelectedRows[row] = struct{}{}
 	sv.SelectRowWidgets(row, true)
 }
 
@@ -642,7 +642,7 @@ func (sv *SliceView) UnselectAllRows() {
 	for r, _ := range sv.SelectedRows {
 		sv.SelectRowWidgets(r, false)
 	}
-	sv.SelectedRows = make(map[int]bool, 10)
+	sv.SelectedRows = make(map[int]struct{}, 10)
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
@@ -656,9 +656,9 @@ func (sv *SliceView) SelectAllRows() {
 		updt = win.UpdateStart()
 	}
 	sv.UnselectAllRows()
-	sv.SelectedRows = make(map[int]bool, sv.BuiltSize)
+	sv.SelectedRows = make(map[int]struct{}, sv.BuiltSize)
 	for row := 0; row < sv.BuiltSize; row++ {
-		sv.SelectedRows[row] = true
+		sv.SelectedRows[row] = struct{}{}
 		sv.SelectRowWidgets(row, true)
 	}
 	if win != nil {

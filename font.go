@@ -18,13 +18,25 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/freetype/truetype"
+	"github.com/iancoleman/strcase"
 	// "github.com/golang/freetype/truetype"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/font/gofont/gobold"
+	"golang.org/x/image/font/gofont/gobolditalic"
+	"golang.org/x/image/font/gofont/goitalic"
+	"golang.org/x/image/font/gofont/gomedium"
+	"golang.org/x/image/font/gofont/gomediumitalic"
+	"golang.org/x/image/font/gofont/gomono"
+	"golang.org/x/image/font/gofont/gomonobold"
+	"golang.org/x/image/font/gofont/gomonobolditalic"
+	"golang.org/x/image/font/gofont/gomonoitalic"
+	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/image/font/gofont/gosmallcaps"
+	"golang.org/x/image/font/gofont/gosmallcapsitalic"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/font/sfnt"
 )
@@ -33,14 +45,14 @@ import (
 // font library.  see text.go for rendering code
 
 // FontStyle contains all font styling information, including everything that
-// is used in SVG text rendering -- used in Paint and in Style -- see style.go
-// -- most of font information is inherited
+// is used in SVG text rendering -- used in Paint and in Style. Most of font
+// information is inherited.
 type FontStyle struct {
 	Color    Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
 	BgColor  ColorSpec       `xml:"background-color" desc:"background color -- not inherited, transparent by default"`
 	Opacity  float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
 	Size     units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
-	Family   string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of names from more general to more specific to use -- use split on , to parse"`
+	Family   string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
 	Style    FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
 	Weight   FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
 	Stretch  FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
@@ -61,7 +73,6 @@ type FontStyle struct {
 func (fs *FontStyle) Defaults() {
 	fs.Color.SetColor(color.Black)
 	fs.Opacity = 1.0
-	fs.FaceName = "Arial"
 	fs.Size = units.NewValue(12, units.Pt)
 }
 
@@ -90,102 +101,195 @@ func (fs *FontStyle) SetDeco(deco TextDecorations) {
 	bitflag.Set32((*int32)(&fs.Deco), int(deco))
 }
 
-// ClearDeco clears decoration (underline, etc), which uses bitflag to allow multiple combinations
+// ClearDeco clears decoration (underline, etc), which uses bitflag to allow
+// multiple combinations
 func (fs *FontStyle) ClearDeco(deco TextDecorations) {
 	bitflag.Clear32((*int32)(&fs.Deco), int(deco))
 }
 
-// FaceNm returns the full FaceName to use for the current FontStyle spec
-func (fs *FontStyle) FaceNm() string {
-	fnm := Prefs.FontFamily
-	if fnm == "" {
-		fnm = "Arial"
+// FontFallbacks are a list of fallback fonts to try, at the basename level.
+// Make sure there are no loops!  Include Noto versions of everything in this
+// because they have the most stretch options, so they should be in the mix if
+// they have been installed, and include "Go" options last.
+var FontFallbacks = map[string]string{
+	"serif":            "Times New Roman",
+	"times":            "Times New Roman",
+	"Times New Roman":  "Liberation Serif",
+	"Liberation Serif": "NotoSerif",
+	"sans-serif":       "NotoSans",
+	"NotoSans":         "Go",
+	"courier":          "Courier",
+	"Courier":          "Courier New",
+	"Courier New":      "NotoSansMono",
+	"NotoSansMono":     "Go Mono",
+	"monospace":        "NotoSansMono",
+	"cursive":          "Comic Sans", // todo: look up more of these
+	"Comic Sans":       "Comic Sans MS",
+	"fantasy":          "Impact",
+	"Impact":           "Impac",
+}
+
+func addUniqueFont(fns *[]string, fn string) bool {
+	sz := len(*fns)
+	for i := 0; i < sz; i++ {
+		if (*fns)[i] == fn {
+			return false
+		}
 	}
-	nms := strings.Split(fs.Family, ",")
+	*fns = append(*fns, fn)
+	return true
+}
+
+func addUniqueFontRobust(fns *[]string, fn string) bool {
+	if FontLibrary.FontAvail(fn) {
+		return addUniqueFont(fns, fn)
+	}
+	camel := strcase.ToCamel(fn)
+	if FontLibrary.FontAvail(camel) {
+		return addUniqueFont(fns, camel)
+	}
+	spc := strcase.ToDelimited(camel, ' ')
+	if FontLibrary.FontAvail(spc) {
+		return addUniqueFont(fns, spc)
+	}
+	return false
+}
+
+// FontSerifMonoGuess looks at a list of alternative font names and tires to
+// guess if the font is a serif (vs sans) or monospaced (vs proportional)
+// font.
+func FontSerifMonoGuess(fns []string) (serif, mono bool) {
+	for _, fn := range fns {
+		lfn := strings.ToLower(fn)
+		if strings.Contains(lfn, "serif") {
+			serif = true
+		}
+		if strings.Contains(lfn, "mono") || lfn == "menlo" || lfn == "courier" || lfn == "courier new" || strings.Contains(lfn, "typewriter") {
+			mono = true
+		}
+	}
+	return
+}
+
+// FontAlts generates a list of all possible alternative fonts that actually
+// exist in font library for a list of font families, and a guess as to
+// whether the font is a serif (vs sans) or monospaced (vs proportional) font.
+// Only deals with base names.
+func FontAlts(fams string) (fns []string, serif, mono bool) {
+	nms := strings.Split(fams, ",")
+	if len(nms) == 0 {
+		fn := Prefs.FontFamily
+		if fn == "" {
+			fns = []string{"Go"}
+			return
+		}
+	}
+	fns = make([]string, 0, 20)
 	for _, fn := range nms {
 		fn = strings.TrimSpace(fn)
-		if FontLibrary.FontAvail(fn) {
-			fnm = fn
-			break
+		basenm, _, _, _ := FontNameToMods(fn)
+		addUniqueFontRobust(&fns, basenm)
+	altsloop:
+		for {
+			altfn, ok := FontFallbacks[basenm]
+			if !ok {
+				break altsloop
+			}
+			addUniqueFontRobust(&fns, altfn)
+			basenm = altfn
 		}
-		switch fn {
-		case "times":
-			fnm = "Times New Roman"
-			break
-		case "serif":
-			fnm = "Times New Roman"
-			break
-		case "sans-serif":
-			fnm = "Arial"
-			break
-		case "courier":
-			fnm = "Courier New" // this is the tt name
-			break
-		case "monospace":
-			if FontLibrary.FontAvail("Andale Mono") {
-				fnm = "Andale Mono"
+	}
+
+	serif, mono = FontSerifMonoGuess(fns)
+
+	// final baseline backups
+	if mono {
+		addUniqueFont(&fns, "NotoSansMono") // has more options
+		addUniqueFont(&fns, "Go Mono")      // just as good as liberation mono..
+	} else if serif {
+		addUniqueFont(&fns, "Liberation Serif")
+		addUniqueFont(&fns, "NotoSerif")
+		addUniqueFont(&fns, "Go") // not serif but drop dead backup
+	} else {
+		addUniqueFont(&fns, "NotoSans")
+		addUniqueFont(&fns, "Go") // good as anything
+	}
+
+	return
+}
+
+// FaceNm returns the full FaceName to use for the current FontStyle spec, robustly
+func (fs *FontStyle) FaceNm() string {
+	// these are the parameters we need to generate to get the font:
+	basenm := fs.Family
+	str := fs.Stretch
+	wt := fs.Weight
+	sty := fs.Style
+
+	if basenm == "" {
+		basenm = Prefs.FontFamily
+	}
+	if basenm != "" { // start off with any styles implicit in font name
+		basenm, str, wt, sty = FontNameToMods(basenm)
+	}
+
+	nms, _, _ := FontAlts(fs.Family) // nms are all base names now
+	// we try multiple iterations, going through list of alternatives (which
+	// should be from most specific to least, all of which have an existing
+	// base name) -- first iter we look for an exact match for given
+	// modifiers, then we start relaxing things in terms of most likely
+	// issues..
+iterloop:
+	for iter := 0; iter < 6; iter++ {
+		for _, basenm := range nms {
+			fn := FontNameFromMods(basenm, str, wt, sty)
+			if FontLibrary.FontAvail(fn) {
+				break iterloop
+			}
+		}
+		if str != FontStrNormal { // very rare, normalize..
+			str = FontStrNormal
+			continue
+		}
+		if sty == FontItalic { // italic is more common, but maybe oblique exists
+			sty = FontOblique
+			continue
+		}
+		if sty == FontOblique { // by now we've tried both, try nothing
+			sty = FontNormal
+			continue
+		}
+		if wt != WeightNormal {
+			if wt < Weight400 {
+				if wt != WeightLight {
+					wt = WeightLight
+					continue
+				}
 			} else {
-				fnm = "Courier New"
+				if wt != WeightBold {
+					wt = WeightBold
+					continue
+				}
 			}
-			break
-		case "cursive":
-			if FontLibrary.FontAvail("Comic Sans") {
-				fnm = "Comic Sans"
-			} else if FontLibrary.FontAvail("Comic Sans MS") {
-				fnm = "Comic Sans MS"
-			}
-			break
-		case "fantasy":
-			if FontLibrary.FontAvail("Impact") {
-				fnm = "Impact"
-			} else if FontLibrary.FontAvail("Impac") {
-				fnm = "Impac"
-			}
-			break
+			wt = WeightNormal
+			continue
 		}
+		break // tried everything
 	}
-	mods := ""
-	if fs.Style == FontItalic && fs.Weight == WeightBold {
-		if !strings.Contains(fnm, "Bold") {
-			mods += "Bold "
-		}
-		if !strings.Contains(fnm, "Italic") {
-			mods += "Italic"
-		}
-	} else if fs.Style == FontOblique && fs.Weight == WeightBold {
-		if !strings.Contains(fnm, "Bold") {
-			mods += "Bold "
-		}
-		if !strings.Contains(fnm, "Oblique") {
-			mods += "Oblique"
-		}
-	} else if fs.Style == FontItalic {
-		if !strings.Contains(fnm, "Italic") {
-			mods += "Italic"
-		}
-	} else if fs.Style == FontOblique {
-		if !strings.Contains(fnm, "Oblique") {
-			mods += "Obqlique"
-		}
-	} else if fs.Weight == WeightBold {
-		if !strings.Contains(fnm, "Bold") {
-			mods += "Bold "
-		}
-	}
-	if mods != "" {
-		fmod := fnm + " " + strings.TrimSpace(mods)
-		if FontLibrary.FontAvail(fmod) {
-			fnm = fmod
-		} else {
-			log.Printf("could not find modified font name: %v\n", fmod)
-		}
-	}
+	fnm := FontNameFromMods(basenm, str, wt, sty)
 	return fnm
 }
 
-func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
+// LoadFont loads the font specified by the font style from the font library.
+// This is the primary method to use for loading fonts, as it uses a robust
+// fallback method to finding an appropriate font, and falls back on the
+// builtin Go font as a last resort.  The Face field will have the resulting
+// font.  The font size is always rounded to nearest integer, to produce
+// better-looking results (presumably).  The current metrics and given
+// unit.Context are updated based on the properties of the font.
+func (fs *FontStyle) LoadFont(ctxt *units.Context) {
 	fs.FaceName = fs.FaceNm()
-	intDots := math.Round(float64(fs.Size.Dots))
+	intDots := int(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
 		intDots = 12
 	}
@@ -193,13 +297,8 @@ func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	if err != nil {
 		log.Printf("%v\n", err)
 		if fs.Face == nil {
-			if fallback != "" {
-				fs.FaceName = fallback
-				fs.LoadFont(ctxt, "") // try again
-			} else {
-				//				log.Printf("FontStyle LoadFont() -- Falling back on basicfont\n")
-				fs.Face = basicfont.Face7x13
-			}
+			face, err = FontLibrary.Font("Go", intDots) // guaranteed to exist
+			fs.Face = face
 		}
 	} else {
 		fs.Face = face
@@ -208,6 +307,8 @@ func (fs *FontStyle) LoadFont(ctxt *units.Context, fallback string) {
 	fs.SetUnitContext(ctxt)
 }
 
+// ComputeMetrics computes the Height, Em, Ex, Ch and Rem metrics associated
+// with current font and overall units context
 func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	if fs.Face == nil {
 		return
@@ -235,6 +336,8 @@ func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	// fmt.Printf("fs: %v sz: %v\t\tHt: %v\tEm: %v\tEx: %v\tCh: %v\n", fs.FaceName, intDots, fs.Height, fs.Em, fs.Ex, fs.Ch)
 }
 
+// SetUnitContext sets the font-specific information in the given
+// units.Context, based on the currently-loaded face.
 func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
 	if fs.Face != nil {
 		ctxt.SetFont(fs.Em, fs.Ex, fs.Ch, fs.Rem)
@@ -256,7 +359,7 @@ func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) 
 		return false
 	}
 	fs.SetStyleProps(nil, pmap)
-	fs.LoadFont(ctxt, "")
+	fs.LoadFont(ctxt)
 	return true
 }
 
@@ -324,23 +427,37 @@ var KiT_FontStyles = kit.Enums.AddEnumAltLower(FontStylesN, false, StylePropProp
 func (ev FontStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FontStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// FontWeights styles of font: normal, italic, etc
+// FontStyleNames contains the uppercase names of all the valid font styles
+// used in the regularized font names.  The first name is the baseline default
+// and will be omitted from font names.
+var FontStyleNames = []string{"Normal", "Italic", "Oblique"}
+
+// FontWeights are the valid names for different weights of font, with both
+// the numeric and standard names given.  The regularized font names in the
+// font library use the names, as those are typically found in the font files.
 type FontWeights int32
 
 const (
 	WeightNormal FontWeights = iota
+	Weight100
+	WeightThin // (Hairline)
+	Weight200
+	WeightExtraLight // (UltraLight)
+	Weight300
+	WeightLight
+	Weight400
+	Weight500
+	WeightMedium
+	Weight600
+	WeightSemiBold // (DemiBold)
+	Weight700
 	WeightBold
+	Weight800
+	WeightExtraBold // (UltraBold)
+	Weight900
+	WeightBlack
 	WeightBolder
 	WeightLighter
-	Weight100
-	Weight200
-	Weight300
-	Weight400 // normal
-	Weight500
-	Weight600
-	Weight700
-	Weight800
-	Weight900 // bold
 	FontWeightsN
 )
 
@@ -351,37 +468,58 @@ var KiT_FontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, false, StylePropPr
 func (ev FontWeights) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FontWeights) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// FontVariants is just normal vs. small caps. todo: not currently supported
-type FontVariants int32
+// FontWeightNames contains the uppercase names of all the valid font weights
+// used in the regularized font names.  The first name is the baseline default
+// and will be omitted from font names. Order must have names that are subsets
+// of other names at the end so they only match if the more specific one
+// hasn't!
+var FontWeightNames = []string{"Normal", "Thin", "ExtraLight", "Light", "Medium", "SemiBold", "ExtraBold", "Bold", "Black"}
 
-const (
-	FontVarNormal FontVariants = iota
-	FontVarSmallCaps
-	FontVariantsN
-)
+// FontWeightNameVals is 1-to-1 index map from FontWeightNames to
+// corresponding weight value (using more semantic term instead of numerical
+// one)
+var FontWeightNameVals = []FontWeights{WeightNormal, WeightThin, WeightExtraLight, WeightLight, WeightMedium, WeightSemiBold, WeightExtraBold, WeightBold, WeightBlack}
 
-//go:generate stringer -type=FontVariants
+// FontWeightToNameMap maps all the style enums to canonical regularized font names
+var FontWeightToNameMap = map[FontWeights]string{
+	Weight100:        "Thin",
+	WeightThin:       "Thin",
+	Weight200:        "ExtraLight",
+	WeightExtraLight: "ExtraLight",
+	Weight300:        "Light",
+	WeightLight:      "Light",
+	Weight400:        "",
+	WeightNormal:     "",
+	Weight500:        "Medium",
+	WeightMedium:     "Medium",
+	Weight600:        "SemiBold",
+	WeightSemiBold:   "SemiBold",
+	Weight700:        "Bold",
+	WeightBold:       "Bold",
+	Weight800:        "ExtraBold",
+	WeightExtraBold:  "ExtraBold",
+	Weight900:        "Black",
+	WeightBlack:      "Black",
+	WeightBolder:     "Medium", // todo: lame but assumes normal and goes one bolder
+	WeightLighter:    "Light",  // todo: lame but assumes normal and goes one lighter
+}
 
-var KiT_FontVariants = kit.Enums.AddEnumAltLower(FontVariantsN, false, StylePropProps, "FontVar")
-
-func (ev FontVariants) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// FontStretch are different stretch levels of font.  todo: not currently supported
+// FontStretch are different stretch levels of font.  These are less typically
+// available on most platforms by default.
 type FontStretch int32
 
 const (
 	FontStrNormal FontStretch = iota
-	FontStrWider
-	FontStrNarrower
 	FontStrUltraCondensed
 	FontStrExtraCondensed
-	FontStrCondensed
 	FontStrSemiCondensed
 	FontStrSemiExpanded
-	FontStrExpanded
 	FontStrExtraExpanded
 	FontStrUltraExpanded
+	FontStrCondensed
+	FontStrExpanded
+	FontStrNarrower
+	FontStrWider
 	FontStretchN
 )
 
@@ -391,6 +529,13 @@ var KiT_FontStretch = kit.Enums.AddEnumAltLower(FontStretchN, false, StylePropPr
 
 func (ev FontStretch) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FontStretch) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// FontStretchNames contains the uppercase names of all the valid font
+// stretches used in the regularized font names.  The first name is the
+// baseline default and will be omitted from font names.  Order must have
+// names that are subsets of other names at the end so they only match if the
+// more specific one hasn't!  And also match the FontStretch enum.
+var FontStretchNames = []string{"Normal", "UltraCondensed", "ExtraCondensed", "SemiCondensed", "SemiExpanded", "ExtraExpanded", "UltraExpanded", "Condensed", "Expanded", "Condensed", "Expanded"}
 
 // TextDecorations are underline, line-through, etc -- operates as bit flags
 // -- also used for additional layout hints for RuneRender
@@ -448,21 +593,46 @@ var KiT_BaselineShifts = kit.Enums.AddEnumAltLower(BaselineShiftsN, false, Style
 func (ev BaselineShifts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BaselineShifts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
+// FontVariants is just normal vs. small caps. todo: not currently supported
+type FontVariants int32
+
+const (
+	FontVarNormal FontVariants = iota
+	FontVarSmallCaps
+	FontVariantsN
+)
+
+//go:generate stringer -type=FontVariants
+
+var KiT_FontVariants = kit.Enums.AddEnumAltLower(FontVariantsN, false, StylePropProps, "FontVar")
+
+func (ev FontVariants) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 //////////////////////////////////////////////////////////////////////////////////
 // Font library
 
+// FontInfo contains basic font information for choosing a given font --
+// displayed in the font chooser dialog.
 type FontInfo struct {
-	Name    string      `desc:"name of font"`
-	Style   FontStyles  `xml:"style" inherit:"true" desc:"style -- normal, italic, etc"`
-	Weight  FontWeights `xml:"weight" inherit:"true" desc:"weight: normal, bold, etc"`
+	Name    string      `desc:"official regularized name of font"`
+	Stretch FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`
+	Weight  FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`
+	Style   FontStyles  `xml:"style" desc:"style -- normal, italic, etc"`
 	Example string      `desc:"example text -- styled according to font params in chooser"`
 }
 
+// FontLib holds the fonts available in a font library.  The font name is
+// regularized so that the base "Regular" font is the root term of a sequence
+// of other font names that describe the stretch, weight, and style, e.g.,
+// "Arial" as the base name, "Arial Bold", "Arial Bold Italic" etc.  Thus,
+// each font name specifies a particular font weight and style.  When fonts
+// are loaded into the library, the names are appropriately regularized.
 type FontLib struct {
-	FontPaths  []string
-	FontsAvail map[string]string `desc:"map of font name to path to file"`
-	FontInfo   []FontInfo        `desc:"information about each font"`
-	Faces      map[string]map[float64]font.Face
+	FontPaths  []string                     `desc:"list of font paths to search for fonts"`
+	FontsAvail map[string]string            `desc:"map of font name to path to file"`
+	FontInfo   []FontInfo                   `desc:"information about each font -- this list should be used for selecting valid regularized font names"`
+	Faces      map[string]map[int]font.Face `desc:"double-map of cached fonts, by font name and then integer font size within that"`
 	initMu     sync.Mutex
 	loadMu     sync.Mutex
 }
@@ -470,36 +640,15 @@ type FontLib struct {
 // FontLibrary is the gi font library, initialized from fonts available on font paths
 var FontLibrary FontLib
 
-// AltFontMap is an alternative font map that maps file names to more standard
-// full names (e.g., Times -> Times New Roman) -- also looks for b,i suffixes
-// for these cases -- some are added here just to pick up those suffixes
-var AltFontMap = map[string]string{
-	"arial":   "Arial",
-	"ariblk":  "Arial Black",
-	"candara": "Candara",
-	"calibri": "Calibri",
-	"cambria": "Cambria",
-	"cour":    "Courier New",
-	"constan": "Constantia",
-	"consola": "Console",
-	"comic":   "Comic Sans MS",
-	"corbel":  "Corbel",
-	"framd":   "Franklin Gothic Medium",
-	"georgia": "Georgia",
-	"gadugi":  "Gadugi",
-	"malgun":  "Malgun Gothic",
-	"mmrtex":  "Myanmar Text",
-	"pala":    "Palatino",
-	"segoepr": "Segoe Print",
-	"segoesc": "Segoe Script",
-	"segoeui": "Segoe UI",
-	"segui":   "Segoe UI Historic",
-	"tahoma":  "Tahoma",
-	"taile":   "Traditional Arabic",
-	"times":   "Times New Roman",
-	"trebuc":  "Trebuchet",
-	"verdana": "Verdana",
+// FontAvail determines if a given font name is available (case insensitive)
+func (fl *FontLib) FontAvail(fontnm string) bool {
+	fontnm = strings.ToLower(fontnm)
+	_, ok := FontLibrary.FontsAvail[fontnm]
+	return ok
 }
+
+// FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
+var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
 
 func (fl *FontLib) Init() {
 	fl.initMu.Lock()
@@ -508,12 +657,67 @@ func (fl *FontLib) Init() {
 		fl.FontPaths = make([]string, 0, 1000)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0, 1000)
-		fl.Faces = make(map[string]map[float64]font.Face)
+		fl.Faces = make(map[string]map[int]font.Face)
 	} else if len(fl.FontsAvail) == 0 {
 		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
 		fl.UpdateFontsAvail()
 	}
 	fl.initMu.Unlock()
+}
+
+// Font gets a particular font, specified by the official regularized font
+// name (see FontsAvail list), at given dots size (integer), using a cache of
+// loaded fonts.
+func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
+	fontnm = strings.ToLower(fontnm)
+	fl.Init()
+	if facemap := fl.Faces[fontnm]; facemap != nil {
+		if face := facemap[size]; face != nil {
+			// fmt.Printf("Got font face from cache: %v %v\n", fontnm, size)
+			return face, nil
+		}
+	}
+	if path := fl.FontsAvail[fontnm]; path != "" {
+		face, err := LoadFontFace(path, size, 0)
+		if err != nil {
+			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
+			fl.DeleteFont(fontnm)
+			return nil, err
+		}
+		fl.loadMu.Lock()
+		facemap := fl.Faces[fontnm]
+		if facemap == nil {
+			facemap = make(map[int]font.Face)
+			fl.Faces[fontnm] = facemap
+		}
+		facemap[size] = face
+		// fmt.Printf("Loaded font face: %v %v\n", fontnm, size)
+		fl.loadMu.Unlock()
+		return face, nil
+	}
+	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
+}
+
+func (fl *FontLib) DeleteFont(fontnm string) {
+	delete(fl.FontsAvail, fontnm)
+	for i, fi := range fl.FontInfo {
+		if strings.ToLower(fi.Name) == fontnm {
+			sz := len(fl.FontInfo)
+			copy(fl.FontInfo[i:], fl.FontInfo[i+1:])
+			fl.FontInfo = fl.FontInfo[:sz-1]
+			break
+		}
+	}
+}
+
+// LoadAllFonts attempts to load all fonts that were found -- call this before
+// displaying the font chooser to eliminate any bad fonts.
+func (fl *FontLib) LoadAllFonts(size int) {
+	sz := len(fl.FontInfo)
+	for i := sz - 1; i > 0; i-- {
+		fi := fl.FontInfo[i]
+		fl.Font(strings.ToLower(fi.Name), size)
+	}
 }
 
 // InitFontPaths initializes font paths to system defaults, only if no paths
@@ -542,6 +746,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontsAvail) > 0 {
 		fl.FontsAvail = make(map[string]string)
 	}
+	fl.GoFontsAvail()
 	for _, p := range fl.FontPaths {
 		fl.FontsAvailFromPath(p)
 	}
@@ -552,31 +757,105 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	return len(fl.FontsAvail) > 0
 }
 
-// FontMods are standard font modifiers
-var FontMods = [...]string{"Bold", "Italic", "Oblique"}
-
-// SpaceFontMods ensures that standard font modifiers have a space in front of them
-func SpaceFontMods(fn string) string {
-	for _, mod := range FontMods {
+// FixFontMods ensures that standard font modifiers have a space in front of
+// them, and that the default is not in the name -- used for regularizing font
+// names.
+func FixFontMods(fn string) string {
+	for mi, mod := range FontStretchNames {
 		if bi := strings.Index(fn, mod); bi > 0 {
 			if fn[bi-1] != ' ' {
 				fn = strings.Replace(fn, mod, " "+mod, 1)
 			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
 		}
+	}
+	for mi, mod := range FontWeightNames {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
+		}
+	}
+	for mi, mod := range FontStyleNames {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
+		}
+	}
+	// also get rid of Regular!
+	fn = strings.TrimSuffix(fn, " Regular")
+	fn = strings.TrimSuffix(fn, "Regular")
+	return fn
+}
+
+// FontNameToMods parses the regularized font name and returns the appropriate
+// base name and associated font mods.
+func FontNameToMods(fn string) (basenm string, str FontStretch, wt FontWeights, sty FontStyles) {
+	basenm = fn
+	for mi, mod := range FontStretchNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			str = FontStretch(mi)
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	for mi, mod := range FontWeightNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			wt = FontWeightNameVals[mi]
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	for mi, mod := range FontStyleNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			sty = FontStyles(mi)
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	return
+}
+
+// FontNameFromMods generates the appropriate regularized file name based on
+// base name and modifiers
+func FontNameFromMods(basenm string, str FontStretch, wt FontWeights, sty FontStyles) string {
+	fn := basenm
+	if str != FontStrNormal {
+		fn += " " + FontStretchNames[str]
+	}
+	if wt != WeightNormal && wt != Weight400 {
+		fn += " " + FontWeightToNameMap[wt]
+	}
+	if sty != FontNormal {
+		fn += " " + FontStyleNames[sty]
 	}
 	return fn
 }
 
-var FontExts = map[string]bool{
-	".ttf": true,
-	".ttc": true,
-	//	".otf": true,  // not yet supported
+var FontExts = map[string]struct{}{
+	".ttf": struct{}{},
+	".ttc": struct{}{}, // note: unpack to raw .ttf to use -- otherwise only getting first font
+	//	".otf": struct{}{},  // not yet supported
 }
 
 // FontsAvailFromPath scans for all fonts we can use on a given path,
 // gathering info into FontsAvail and FontInfo.
 func (fl *FontLib) FontsAvailFromPath(path string) error {
-
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("gi.FontLib: error accessing path %q: %v\n", path, err)
@@ -612,21 +891,12 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 			fn = strings.Replace(fn, "-", " ", -1)
 			// fn = strings.Title(fn)
 		}
-		fn = strings.TrimSuffix(fn, " Regular")
-		// all std modifiers should have space before them
-		fn = SpaceFontMods(fn)
+		fn = FixFontMods(fn)
 		basefn := strings.ToLower(fn)
 		if _, ok := fl.FontsAvail[basefn]; !ok {
 			fl.FontsAvail[basefn] = path
-			fi := FontInfo{Name: fn, Style: FontNormal, Weight: WeightNormal, Example: FontInfoExample}
-			if strings.Contains(basefn, "bold") {
-				fi.Weight = WeightBold
-			}
-			if strings.Contains(basefn, "italic") {
-				fi.Style = FontItalic
-			} else if strings.Contains(basefn, "oblique") {
-				fi.Style = FontOblique
-			}
+			fi := FontInfo{Name: fn, Example: FontInfoExample}
+			_, fi.Stretch, fi.Weight, fi.Style = FontNameToMods(fn)
 			fl.FontInfo = append(fl.FontInfo, fi)
 			// fmt.Printf("added font: %v at path %q\n", basefn, path)
 
@@ -639,38 +909,45 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 	return err
 }
 
-// Font gets a particular font
-func (fl *FontLib) Font(fontnm string, points float64) (font.Face, error) {
-	fontnm = strings.ToLower(fontnm)
-	fl.Init()
-	if facemap := fl.Faces[fontnm]; facemap != nil {
-		if face := facemap[points]; face != nil {
-			// fmt.Printf("Got font face from cache: %v %v\n", fontnm, points)
-			return face, nil
-		}
-	}
-	if path := fl.FontsAvail[fontnm]; path != "" {
-		face, err := LoadFontFace(path, points)
-		if err != nil {
-			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
-			delete(fl.FontsAvail, fontnm)
-			return nil, err
-		}
-		fl.loadMu.Lock()
-		facemap := fl.Faces[fontnm]
-		if facemap == nil {
-			facemap = make(map[float64]font.Face)
-			fl.Faces[fontnm] = facemap
-		}
-		facemap[points] = face
-		// fmt.Printf("Loaded font face: %v %v\n", fontnm, points)
-		fl.loadMu.Unlock()
-		return face, nil
-	}
-	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
+// AltFontMap is an alternative font map that maps file names to more standard
+// full names (e.g., Times -> Times New Roman) -- also looks for b,i suffixes
+// for these cases -- some are added here just to pick up those suffixes.
+// This is needed for Windows only.
+var AltFontMap = map[string]string{
+	"arial":   "Arial",
+	"ariblk":  "Arial Black",
+	"candara": "Candara",
+	"calibri": "Calibri",
+	"cambria": "Cambria",
+	"cour":    "Courier New",
+	"constan": "Constantia",
+	"consola": "Console",
+	"comic":   "Comic Sans MS",
+	"corbel":  "Corbel",
+	"framd":   "Franklin Gothic Medium",
+	"georgia": "Georgia",
+	"gadugi":  "Gadugi",
+	"malgun":  "Malgun Gothic",
+	"mmrtex":  "Myanmar Text",
+	"pala":    "Palatino",
+	"segoepr": "Segoe Print",
+	"segoesc": "Segoe Script",
+	"segoeui": "Segoe UI",
+	"segui":   "Segoe UI Historic",
+	"tahoma":  "Tahoma",
+	"taile":   "Traditional Arabic",
+	"times":   "Times New Roman",
+	"trebuc":  "Trebuchet",
+	"verdana": "Verdana",
 }
 
-func LoadFontFace(path string, points float64) (font.Face, error) {
+// LoadFontFace loads a font file at given path, with given raw size in
+// display dots, and if strokeWidth is > 0, the font is drawn in outline form
+// (stroked) instead of filled (supported in SVG).
+func LoadFontFace(path string, size int, strokeWidth int) (font.Face, error) {
+	if strings.HasPrefix(path, "gofont") {
+		return LoadGoFont(path, size, strokeWidth)
+	}
 	fontBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -683,7 +960,7 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 			return nil, err
 		}
 		face, err := opentype.NewFace(f, &opentype.FaceOptions{
-			Size: points,
+			Size: float64(size),
 			// Hinting: font.HintingFull,
 		})
 		return face, err
@@ -693,23 +970,59 @@ func LoadFontFace(path string, points float64) (font.Face, error) {
 			return nil, err
 		}
 		face := truetype.NewFace(f, &truetype.Options{
-			Size: points,
+			Size:   float64(size),
+			Stroke: strokeWidth,
 			// Hinting: font.HintingFull,
-			GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
-			// Stroke:            1, // todo: cool stroking from tdewolff -- add to svg options
+			// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
 		})
 		return face, nil
 	}
 }
 
-// FontAvail determines if a given font name is available (case insensitive)
-func (fl *FontLib) FontAvail(fontnm string) bool {
-	fontnm = strings.ToLower(fontnm)
-	_, ok := FontLibrary.FontsAvail[fontnm]
-	return ok
+// see: https://blog.golang.org/go-fonts
+
+type goFontInfo struct {
+	name string
+	ttf  []byte
 }
 
-// FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
-var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
+var GoFonts = map[string]goFontInfo{
+	"gofont/goregular":         {"Go", goregular.TTF},
+	"gofont/gobold":            {"Go Bold", gobold.TTF},
+	"gofont/gobolditalic":      {"Go Bold Italic", gobolditalic.TTF},
+	"gofont/goitalic":          {"Go Italic", goitalic.TTF},
+	"gofont/gomedium":          {"Go Medium", gomedium.TTF},
+	"gofont/gomediumitalic":    {"Go Medium Italic", gomediumitalic.TTF},
+	"gofont/gomono":            {"Go Mono", gomono.TTF},
+	"gofont/gomonobold":        {"Go Mono Bold", gomonobold.TTF},
+	"gofont/gomonobolditalic":  {"Go Mono Bold Italic", gomonobolditalic.TTF},
+	"gofont/gomonoitalic":      {"Go Mono Italic", gomonoitalic.TTF},
+	"gofont/gosmallcaps":       {"Go Small Caps", gosmallcaps.TTF},
+	"gofont/gosmallcapsitalic": {"Go Small Caps Italic", gosmallcapsitalic.TTF},
+}
 
-// todo: https://blog.golang.org/go-fonts
+func LoadGoFont(path string, size int, strokeWidth int) (font.Face, error) {
+	gf, ok := GoFonts[path]
+	if !ok {
+		return nil, fmt.Errorf("Go Font Path not found: %v", path)
+	}
+	f, _ := truetype.Parse(gf.ttf)
+	face := truetype.NewFace(f, &truetype.Options{
+		Size:   float64(size),
+		Stroke: strokeWidth,
+		// Hinting: font.HintingFull,
+		// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
+
+	})
+	return face, nil
+}
+
+func (fl *FontLib) GoFontsAvail() {
+	for path, gf := range GoFonts {
+		basefn := strings.ToLower(gf.name)
+		fl.FontsAvail[basefn] = path
+		fi := FontInfo{Name: gf.name, Example: FontInfoExample}
+		_, fi.Stretch, fi.Weight, fi.Style = FontNameToMods(gf.name)
+		fl.FontInfo = append(fl.FontInfo, fi)
+	}
+}

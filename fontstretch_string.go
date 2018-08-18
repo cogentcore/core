@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _FontStretch_name = "FontStrNormalFontStrWiderFontStrNarrowerFontStrUltraCondensedFontStrExtraCondensedFontStrCondensedFontStrSemiCondensedFontStrSemiExpandedFontStrExpandedFontStrExtraExpandedFontStrUltraExpandedFontStretchN"
+const _FontStretch_name = "FontStrNormalFontStrUltraCondensedFontStrExtraCondensedFontStrSemiCondensedFontStrSemiExpandedFontStrExtraExpandedFontStrUltraExpandedFontStrCondensedFontStrExpandedFontStrNarrowerFontStrWiderFontStretchN"
 
-var _FontStretch_index = [...]uint8{0, 13, 25, 40, 61, 82, 98, 118, 137, 152, 172, 192, 204}
+var _FontStretch_index = [...]uint8{0, 13, 34, 55, 75, 94, 114, 134, 150, 165, 180, 192, 204}
 
 func (i FontStretch) String() string {
 	if i < 0 || i >= FontStretch(len(_FontStretch_index)-1) {

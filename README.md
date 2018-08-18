@@ -9,8 +9,6 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 
 NOTE: Requires Go version `1.10+` due to use of `math.Round`.
 
-**IMPORTANT for Linux users:** You need to install the standard Windows TTF fonts (e.g., Arial, etc) to get decent-looking rendering: https://askubuntu.com/questions/651441/how-to-install-arial-font-in-ubuntu
-
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs, discussion, etc.
 
 GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
@@ -116,7 +114,9 @@ Liberation as fallbacks on linux -- also https://ss64.com/fonts.html
 
 ## General / Widgets
 
-* win geom prefs: adapt DPI for size relative to saved!
+* style.Inherit is major timesync
+
+* TEST: win geom prefs: adapt DPI for size relative to saved!
 
 * fileview: add extension, mode flags -- use extension for search
 * also really need history of paths so you can go back to where you started

@@ -125,11 +125,7 @@ func (p *Preferences) Defaults() {
 	p.Colors.Defaults()
 	p.Params.Defaults()
 	p.FavPaths.SetToDefaults()
-	if oswin.TheApp.Platform() == oswin.LinuxX11 {
-		p.FontFamily = "Liberation Sans"
-	} else {
-		p.FontFamily = "Arial"
-	}
+	p.FontFamily = "Go"
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory

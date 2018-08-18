@@ -193,7 +193,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 		ucfont.Family = "Arial"
 	}
 	ucfont.Size = sty.Size
-	ucfont.LoadFont(ctxt, "")
+	ucfont.LoadFont(ctxt)
 
 	nwr := []rune(str)
 	sz := len(nwr)
@@ -242,7 +242,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 	ucfont := FontStyle{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
-	ucfont.LoadFont(ctxt, "")
+	ucfont.LoadFont(ctxt)
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
@@ -934,7 +934,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 
-	font.LoadFont(ctxt, "")
+	font.LoadFont(ctxt)
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
@@ -961,10 +961,10 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			switch nm {
 			case "b", "strong":
 				fs.Weight = WeightBold
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "i", "em", "var", "cite":
 				fs.Style = FontItalic
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "ins":
 				fallthrough
 			case "u":
@@ -991,7 +991,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				curpts -= 2
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "sub":
 				fs.SetDeco(DecoSub)
 				fallthrough
@@ -1000,24 +1000,24 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				curpts -= 2
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "big":
 				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 				curpts += 2
 				fs.Size = units.NewValue(float32(curpts), units.Pt)
 				fs.Size.ToDots(ctxt)
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
 				fs.Size = units.NewValue(FontSizePoints[nm], units.Pt)
 				fs.Size.ToDots(ctxt)
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "mark":
 				fs.BgColor.SetColor(Prefs.Colors.Highlight)
 			case "abbr", "acronym":
 				fs.SetDeco(DecoDottedUnderline)
 			case "tt", "kbd", "samp", "code":
 				fs.Family = "monospace"
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			case "span":
 				// just uses props
 			case "q":
@@ -1050,7 +1050,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 					}
 				}
 				fs.SetStyleProps(nil, sprop)
-				fs.LoadFont(ctxt, "")
+				fs.LoadFont(ctxt)
 			}
 			if cssAgg != nil {
 				fs.StyleCSS(nm, cssAgg, ctxt)
@@ -1249,7 +1249,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	defer pr.End()
 
 	tr.Dir = LRTB
-	fontSty.LoadFont(ctxt, "")
+	fontSty.LoadFont(ctxt)
 	fht := fontSty.Height
 	dsc := FixedToFloat32(fontSty.Face.Metrics().Descent)
 	lspc := fht * txtSty.EffLineHeight()

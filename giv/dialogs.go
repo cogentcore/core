@@ -218,22 +218,29 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	return dlg
 }
 
+// show fonts in a bigger size so you can actually see the differences
+var FontChooserSize = 18
+var FontChooserSizeDots = 18
+
 // FontChooserDialog for choosing a font -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
+	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
+	gi.FontLibrary.LoadAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(avp, &gi.FontLibrary.FontInfo, title, prompt, -1, css, recv, selFun, dlgFun, FontInfoStyleFunc)
 	return dlg
 }
 
 func FontInfoStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
-	if col == 3 {
+	if col == 4 {
 		finf, ok := slice.([]gi.FontInfo)
 		if ok {
-			gi := widg.AsNode2D()
-			gi.SetProp("font-family", (finf)[row].Name)
-			gi.SetProp("font-style", (finf)[row].Style)
-			gi.SetProp("font-weight", (finf)[row].Weight)
+			widg.SetProp("font-family", (finf)[row].Name)
+			widg.SetProp("font-stretch", (finf)[row].Stretch)
+			widg.SetProp("font-weight", (finf)[row].Weight)
+			widg.SetProp("font-style", (finf)[row].Style)
+			widg.SetProp("font-size", units.NewValue(float32(FontChooserSize), units.Pt))
 		}
 	}
 }

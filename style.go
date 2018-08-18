@@ -752,11 +752,11 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, obj, par, val 
 type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
 
 // StyleValueTypes is a map of types that are used as value types in style structures
-var StyleValueTypes = map[reflect.Type]bool{
-	units.KiT_Value: true,
-	KiT_Color:       true,
-	KiT_ColorSpec:   true,
-	KiT_Matrix2D:    true,
+var StyleValueTypes = map[reflect.Type]struct{}{
+	units.KiT_Value: {},
+	KiT_Color:       {},
+	KiT_ColorSpec:   {},
+	KiT_Matrix2D:    {},
 }
 
 // WalkStyleStruct walks through a struct, calling a function on fields with
