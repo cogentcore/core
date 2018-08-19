@@ -69,8 +69,9 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 
 // SliceViewDialog for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore).
-func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+// dialog signals (nil to ignore).    Also has an optional styling
+// function for styling elements of the table.
+func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
 	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
@@ -84,6 +85,7 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
+	sv.StyleFunc = stylefun
 	sv.SetSlice(mp, tmpSave)
 
 	if recv != nil && fun != nil {
@@ -98,8 +100,9 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 
 // SliceViewSelectDialog for selecting one row from given slice -- connections
 // functions available for both the widget signal reporting selection events,
-// and the overall dialog signal.
-func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
+// and the overall dialog signal.  Also has an optional styling function for
+// styling elements of the table.
+func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"textfield": ki.Props{
@@ -123,7 +126,15 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt str
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
 	sv.SelectedIdx = initRow
+	sv.StyleFunc = stylefun
 	sv.SetSlice(mp, nil)
+
+	sv.SliceViewSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(SliceViewDoubleClicked) {
+			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg.Accept()
+		}
+	})
 
 	if recv != nil {
 		if selFun != nil {
@@ -154,7 +165,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueVie
 	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
 	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "struct-view").(*TableView)
+	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "tableview").(*TableView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
@@ -195,13 +206,20 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
 	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
 
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "struct-view").(*TableView)
+	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "tableview").(*TableView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFun
 	sv.SelectedIdx = initRow
 	sv.SetSlice(slcOfStru, nil)
+
+	sv.TableViewSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(TableViewDoubleClicked) {
+			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg.Accept()
+		}
+	})
 
 	if recv != nil {
 		if selFun != nil {
@@ -256,8 +274,16 @@ func IconChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, r
 			},
 		}
 	}
-	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, title, prompt, -1, css, recv, selFun, dlgFun)
+	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, title, prompt, -1, css, recv, selFun, dlgFun, IconChooserStyleFunc)
 	return dlg
+}
+
+func IconChooserStyleFunc(slice interface{}, widg gi.Node2D, row int, vv ValueView) {
+	ic, ok := slice.([]gi.IconName)
+	if ok {
+		widg.(*gi.Action).SetText(string(ic[row]))
+		widg.SetProp("max-width", -1)
+	}
 }
 
 // ColorViewDialog for editing a color using a ColorView -- optionally
@@ -298,6 +324,13 @@ func FileViewDialog(avp *gi.Viewport2D, path, file string, title, prompt string,
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
 	fv.SetPathFile(path, file)
+
+	fv.FileSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(FileViewDoubleClicked) {
+			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg.Accept()
+		}
+	})
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

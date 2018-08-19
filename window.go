@@ -1245,6 +1245,7 @@ func (w *Window) EventLoop() {
 					TheViewIFace.PrefsEditor(&Prefs)
 					e.SetProcessed()
 				case KeyFunRefresh:
+					fmt.Printf("Window: %v display refreshed\n", w.Nm)
 					w.FullReRender()
 					// w.UploadAllViewports()
 					e.SetProcessed()

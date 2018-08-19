@@ -37,11 +37,12 @@ import (
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
 	gi.Frame
-	DirPath string      `desc:"path to directory of files to display"`
-	SelFile string      `desc:"selected file"`
-	Ext     string      `desc:"target extension"`
-	Files   []*FileInfo `desc:"files for current directory"`
-	FileSig ki.Signal   `desc:"signal for file actions"`
+	DirPath     string      `desc:"path to directory of files to display"`
+	SelFile     string      `desc:"selected file"`
+	Ext         string      `desc:"target extension"`
+	Files       []*FileInfo `desc:"files for current directory"`
+	SelectedIdx int         `desc:"index of currently-selected file in Files list (-1 if none)"`
+	FileSig     ki.Signal   `desc:"signal for file actions"`
 }
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
@@ -61,6 +62,16 @@ func (fv *FileView) SelectedFile() string {
 	return filepath.Join(fv.DirPath, fv.SelFile)
 }
 
+// SelectedFileInfo returns the currently-selected fileinfo, returns
+// false if none
+func (fv *FileView) SelectedFileInfo() (*FileInfo, bool) {
+	if fv.SelectedIdx < 0 || fv.SelectedIdx >= len(fv.Files) {
+		return nil, false
+	}
+	return fv.Files[fv.SelectedIdx], true
+}
+
+// UpdateFromPath will update view based on current DirPath
 func (fv *FileView) UpdateFromPath() {
 	mods, updt := fv.StdConfig()
 	fv.UpdateFiles()
@@ -79,6 +90,37 @@ var FileViewKindColorMap = map[string]string{
 	"Folder":           "pref(link)",
 	"application/json": "pref(link)",
 }
+
+// FileViewSignals are signals that fileview sends based on user actions.
+type FileViewSignals int64
+
+const (
+	// FileViewDoubleClicked emitted for double-click on a non-directory file
+	// in table view (data is full selected file name w/ path) -- typically
+	// closes dialog.
+	FileViewDoubleClicked FileViewSignals = iota
+
+	// FileViewWillUpdate emitted when list of files is about to be updated
+	// based on user action (data is current path) -- current DirPath will be
+	// used -- can intervene here if needed.
+	FileViewWillUpdate
+
+	// FileViewUpdated emitted after list of files has been updated (data is
+	// current path).
+	FileViewUpdated
+
+	// FileViewNewFolder emitted when a new folder was created (data is
+	// current path).
+	FileViewNewFolder
+
+	// FileViewFavAdded emitted when a new favorite was added (data is new
+	// favorite path).
+	FileViewFavAdded
+
+	FileViewSignalsN
+)
+
+//go:generate stringer -type=FileViewSignals
 
 func FileViewStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
 	finf, ok := slice.([]*FileInfo)
@@ -152,7 +194,7 @@ func (fv *FileView) ConfigPathRow() {
 				pff, _ := send.(*gi.TextField)
 				fvv.DirPath = pff.Text()
 				fvv.SetFullReRender()
-				fvv.UpdateFiles()
+				fvv.UpdateFilesAction()
 			}
 		})
 	}
@@ -160,7 +202,7 @@ func (fv *FileView) ConfigPathRow() {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.DirPath = data.(string)
 		fvv.SetFullReRender()
-		fvv.UpdateFiles()
+		fvv.UpdateFilesAction()
 	})
 
 	pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
@@ -244,6 +286,20 @@ func (fv *FileView) ConfigFilesRow() {
 			fvv.FileSelect(svv.SelectedIdx)
 		}
 	})
+	sv.TableViewSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(TableViewDoubleClicked) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			if fi, ok := fvv.SelectedFileInfo(); ok {
+				if fi.Kind == "Folder" {
+					fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
+					fv.SetFullReRender()
+					fv.UpdateFilesAction()
+					return
+				}
+				fv.FileSig.Emit(fv.This, int64(FileViewDoubleClicked), fv.SelectedFile())
+			}
+		}
+	})
 }
 
 func (fv *FileView) ConfigSelRow() {
@@ -310,6 +366,14 @@ func (fv *FileView) UpdatePath() {
 	fv.DirPath, _ = filepath.Abs(fv.DirPath)
 }
 
+// UpdateFilesAction updates list of files and other views for current path,
+// emitting FileSig signals around it -- this is for gui-generated actions only.
+func (fv *FileView) UpdateFilesAction() {
+	fv.FileSig.Emit(fv.This, int64(FileViewWillUpdate), fv.DirPath)
+	fv.UpdateFiles()
+	fv.FileSig.Emit(fv.This, int64(FileViewUpdated), fv.DirPath)
+}
+
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
@@ -367,6 +431,7 @@ func (fv *FileView) UpdateFiles() {
 	sv.CurSelField = "Name"
 	sv.CurSelVal = fv.SelFile
 	sv.UpdateFromSlice()
+	fv.SelectedIdx = sv.SelectedIdx
 	fv.UpdateEnd(updt)
 }
 
@@ -394,6 +459,7 @@ func (fv *FileView) AddPathToFavs() {
 	fi := gi.FavPathItem{"folder", fnm, dp}
 	gi.Prefs.FavPaths = append(gi.Prefs.FavPaths, fi)
 	gi.Prefs.Save()
+	fv.FileSig.Emit(fv.This, int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
 
@@ -405,7 +471,7 @@ func (fv *FileView) DirPathUp() {
 	}
 	fv.DirPath = pdr
 	fv.SetFullReRender()
-	fv.UpdateFiles()
+	fv.UpdateFilesAction()
 }
 
 // NewFolder creates a new folder in current directory
@@ -426,8 +492,9 @@ func (fv *FileView) NewFolder() {
 	} else {
 		fmt.Printf("gi.FileView made new folder: %v\n", np)
 	}
+	fv.FileSig.Emit(fv.This, int64(FileViewNewFolder), fv.DirPath)
 	fv.SetFullReRender()
-	fv.UpdateFiles()
+	fv.UpdateFilesAction()
 }
 
 // FileSelect updates selection with given selected file
@@ -437,12 +504,7 @@ func (fv *FileView) FileSelect(idx int) {
 	}
 	fv.SaveSortPrefs()
 	fi := fv.Files[idx]
-	if fi.Kind == "Folder" {
-		fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
-		fv.SetFullReRender()
-		fv.UpdateFiles()
-		return
-	}
+	fv.SelectedIdx = idx
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
@@ -456,7 +518,7 @@ func (fv *FileView) FavSelect(idx int) {
 	fi := gi.Prefs.FavPaths[idx]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.SetFullReRender()
-	fv.UpdateFiles()
+	fv.UpdateFilesAction()
 }
 
 // SaveSortPrefs saves current sorting preferences

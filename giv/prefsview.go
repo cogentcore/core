@@ -114,7 +114,7 @@ func PrefsEditor(p *gi.Preferences) {
 						sv.UpdateFields()
 					}
 				}
-			})
+			}, nil)
 	})
 
 	scrinfo := tbar.AddNewChild(gi.KiT_Action, "scrinfo").(*gi.Action)

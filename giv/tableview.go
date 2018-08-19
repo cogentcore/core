@@ -31,6 +31,7 @@ import (
 // * popup menu option -- when user does right-mouse on item, a provided func is called
 //   -- use in fileview
 // * could have a native context menu for add / delete etc.
+// * emit TableViewSigs
 
 // TableViewWaitCursorSize is the length of the slice above which a wait
 // cursor will be displayed while updating the table
@@ -40,8 +41,9 @@ var TableViewWaitCursorSize = 5000
 // the columns, within an overall frame and a button box at the bottom where
 // methods can be invoked.  It has two modes, determined by Inactive flag: if
 // Inactive, it functions as a mutually-exclusive item selector, highlighting
-// the selected row and emitting a WidgetSig WidgetSelected signal.  If
-// !Inactive, it is a full-featured editor with multiple-selection,
+// the selected row and emitting a WidgetSig WidgetSelected signal, and
+// TableViewDoubleClick for double clicks (can be used for closing dialogs).
+// If !Inactive, it is a full-featured editor with multiple-selection,
 // cut-and-paste, and drag-and-drop, reporting each action taken using the
 // TableViewSig signals
 type TableView struct {
@@ -53,7 +55,7 @@ type TableView struct {
 	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 	CurSelField  string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
 	CurSelVal    interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in CurSelField"`
-	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item -- see SelectedRows for full set of selected rows in active editing mode"`
+	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedRows for full set of selected rows in active editing mode"`
 	SortIdx      int                `desc:"current sort index"`
 	SortDesc     bool               `desc:"whether current sort order is descending"`
 	SelectMode   bool               `desc:"editing-mode select rows mode"`
@@ -127,6 +129,23 @@ var TableViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 }
+
+// TableViewSignals are signals that tableview can send, mostly for editing
+// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
+// both modes.
+type TableViewSignals int64
+
+const (
+	// TableViewDoubleClicked emitted during inactive mode when item
+	// double-clicked -- can be used for accepting dialog.
+	TableViewDoubleClicked TableViewSignals = iota
+
+	// todo: add more signals as needed
+
+	TableViewSignalsN
+)
+
+//go:generate stringer -type=TableViewSignals
 
 // StructType returns the type of the struct within the slice, and the number
 // of visible fields
@@ -1618,6 +1637,14 @@ func (tv *TableView) TableViewEvents() {
 				tvv.KeyInputInactive(kt)
 			})
 		}
+		tv.ConnectEventType(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.Event)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+				tvv.TableViewSig.Emit(tvv.This, int64(TableViewDoubleClicked), tvv.SelectedIdx)
+				me.SetProcessed()
+			}
+		})
 	} else {
 		tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)

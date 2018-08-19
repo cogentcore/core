@@ -28,82 +28,6 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TreeView -- a widget that graphically represents / manipulates a Ki Tree
 
-// TreeViewSignals are signals that treeview can send -- these are all sent
-// from the root tree view widget node, with data being the relevant node
-// widget
-type TreeViewSignals int64
-
-const (
-	// node was selected
-	TreeViewSelected TreeViewSignals = iota
-
-	// TreeView unselected
-	TreeViewUnselected
-
-	// TreeView all items were selected
-	TreeViewAllSelected
-
-	// TreeView all items were unselected
-	TreeViewAllUnselected
-
-	// closed TreeView was opened
-	TreeViewOpened
-
-	// open TreeView was closed -- children not visible
-	TreeViewClosed
-
-	TreeViewSignalsN
-)
-
-//go:generate stringer -type=TreeViewSignals
-
-// these extend NodeBase NodeFlags to hold TreeView state
-const (
-	// node is closed
-	TreeViewFlagClosed gi.NodeFlags = gi.NodeFlagsN + iota
-)
-
-// TreeViewStates are mutually-exclusive tree view states -- determines appearance
-type TreeViewStates int32
-
-const (
-	// normal state -- there but not being interacted with
-	TreeViewActive TreeViewStates = iota
-
-	// selected
-	TreeViewSel
-
-	// in focus -- will respond to keyboard input
-	TreeViewFocus
-
-	TreeViewStatesN
-)
-
-//go:generate stringer -type=TreeViewStates
-
-// TreeViewSelectors are Style selector names for the different states:
-var TreeViewSelectors = []string{":active", ":selected", ":focus"}
-
-// internal indexes for accessing elements of the widget -- todo: icon!
-const (
-	tvBranchIdx = iota
-	tvSpaceIdx
-	tvLabelIdx
-)
-
-// These are special properties established on the RootView for maintaining
-// overall tree state
-const (
-	// TreeViewSelProp is a slice of tree views that are currently selected
-	// -- much more efficient to update the list rather than regenerate it,
-	// especially for a large tree
-	TreeViewSelProp = "__SelectedList"
-
-	// TreeViewSelModeProp is a bool that, if true, automatically selects nodes
-	// when nodes are moved to via keyboard actions
-	TreeViewSelModeProp = "__SelectMode"
-)
-
 // TreeView provides a graphical representation of source tree structure
 // (which can be any type of Ki nodes), providing full manipulation abilities
 // of that source tree (move, cut, add, etc) through drag-n-drop and
@@ -282,6 +206,85 @@ func (tv *TreeView) HasClosedParent() bool {
 func (tv *TreeView) Label() string {
 	return tv.SrcNode.Ptr.Name()
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//    Signals etc
+
+// TreeViewSignals are signals that treeview can send -- these are all sent
+// from the root tree view widget node, with data being the relevant node
+// widget
+type TreeViewSignals int64
+
+const (
+	// node was selected
+	TreeViewSelected TreeViewSignals = iota
+
+	// TreeView unselected
+	TreeViewUnselected
+
+	// TreeView all items were selected
+	TreeViewAllSelected
+
+	// TreeView all items were unselected
+	TreeViewAllUnselected
+
+	// closed TreeView was opened
+	TreeViewOpened
+
+	// open TreeView was closed -- children not visible
+	TreeViewClosed
+
+	TreeViewSignalsN
+)
+
+//go:generate stringer -type=TreeViewSignals
+
+// these extend NodeBase NodeFlags to hold TreeView state
+const (
+	// node is closed
+	TreeViewFlagClosed gi.NodeFlags = gi.NodeFlagsN + iota
+)
+
+// TreeViewStates are mutually-exclusive tree view states -- determines appearance
+type TreeViewStates int32
+
+const (
+	// normal state -- there but not being interacted with
+	TreeViewActive TreeViewStates = iota
+
+	// selected
+	TreeViewSel
+
+	// in focus -- will respond to keyboard input
+	TreeViewFocus
+
+	TreeViewStatesN
+)
+
+//go:generate stringer -type=TreeViewStates
+
+// TreeViewSelectors are Style selector names for the different states:
+var TreeViewSelectors = []string{":active", ":selected", ":focus"}
+
+// internal indexes for accessing elements of the widget -- todo: icon!
+const (
+	tvBranchIdx = iota
+	tvSpaceIdx
+	tvLabelIdx
+)
+
+// These are special properties established on the RootView for maintaining
+// overall tree state
+const (
+	// TreeViewSelProp is a slice of tree views that are currently selected
+	// -- much more efficient to update the list rather than regenerate it,
+	// especially for a large tree
+	TreeViewSelProp = "__SelectedList"
+
+	// TreeViewSelModeProp is a bool that, if true, automatically selects nodes
+	// when nodes are moved to via keyboard actions
+	TreeViewSelModeProp = "__SelectMode"
+)
 
 //////////////////////////////////////////////////////////////////////////////
 //    Selection

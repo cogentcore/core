@@ -33,17 +33,19 @@ import (
 // WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
-	Slice        interface{}      `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	Values       []ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	ShowIndex    bool             `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
-	InactKeyNav  bool             `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelectedIdx  int              `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SelectMode   bool             `desc:"editing-mode select rows mode"`
-	SelectedRows map[int]struct{} `desc:"list of currently-selected rows"`
-	DraggedRows  []int            `desc:"list of currently-dragged rows"`
-	ViewSig      ki.Signal        `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	TmpSave      ValueView        `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice   interface{}      `view:"-" json:"-" xml:"-" desc:"the built slice"`
+	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	StyleFunc    SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	Values       []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
+	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	SelectedIdx  int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SelectMode   bool               `desc:"editing-mode select rows mode"`
+	SelectedRows map[int]struct{}   `desc:"list of currently-selected rows"`
+	DraggedRows  []int              `desc:"list of currently-dragged rows"`
+	SliceViewSig ki.Signal          `json:"-" xml:"-" desc:"slice view interactive editing signals"`
+	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	TmpSave      ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	BuiltSlice   interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
 	BuiltSize    int
 	inFocusGrab  bool
 }
@@ -52,6 +54,10 @@ var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
+
+// SliceViewStyleFunc is a styling function for custom styling /
+// configuration of elements in the view
+type SliceViewStyleFunc func(slice interface{}, widg gi.Node2D, row int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
@@ -83,6 +89,23 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 var SliceViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 }
+
+// SliceViewSignals are signals that sliceview can send, mostly for editing
+// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
+// both modes.
+type SliceViewSignals int64
+
+const (
+	// SliceViewDoubleClicked emitted during inactive mode when item
+	// double-clicked -- can be used for accepting dialog.
+	SliceViewDoubleClicked SliceViewSignals = iota
+
+	// todo: add more signals as needed
+
+	SliceViewSignalsN
+)
+
+//go:generate stringer -type=SliceViewSignals
 
 // SetFrame configures view as a frame
 func (sv *SliceView) SetFrame() {
@@ -285,6 +308,10 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				svv.SliceDelete(act.Data.(int), true)
 			})
 		}
+		if sv.StyleFunc != nil {
+			sv.StyleFunc(mvnp.Interface(), widg, i, vv)
+		}
+
 	}
 	if sv.IsInactive() && sv.SelectedIdx >= 0 {
 		sv.SelectRowWidgets(sv.SelectedIdx, true)
@@ -409,7 +436,7 @@ func (sv *SliceView) RowVal(row int) interface{} {
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 	if row < 0 || row >= sz {
-		fmt.Printf("giv.TableView: row index out of range: %v\n", row)
+		fmt.Printf("giv.SliceView: row index out of range: %v\n", row)
 		return nil
 	}
 	val := kit.OnePtrValue(mvnp.Index(row)) // deal with pointer lists
@@ -1158,6 +1185,14 @@ func (sv *SliceView) SliceViewEvents() {
 				tvv.KeyInputInactive(kt)
 			})
 		}
+		sv.ConnectEventType(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.Event)
+			svv := recv.Embed(KiT_SliceView).(*SliceView)
+			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+				svv.SliceViewSig.Emit(svv.This, int64(SliceViewDoubleClicked), svv.SelectedIdx)
+				me.SetProcessed()
+			}
+		})
 	} else {
 		sv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)

@@ -111,6 +111,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* tableview return / space to select item
+
 * layout scroll to box, item methods, call in tableview -- easy
 
 * fileview: add extension, mode flags -- use extension for search

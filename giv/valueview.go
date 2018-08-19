@@ -671,7 +671,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 				})
 			}
 		} else {
-			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil)
+			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				sv := svk.(*SliceView)
