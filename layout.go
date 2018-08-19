@@ -1076,8 +1076,8 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		if !ls.IsUpdatingAtomic() {
 			ls.Move2DTree()
 			ls.Viewport.ReRender2DNode(li)
-		} else {
-			fmt.Printf("not ready to update\n")
+			// } else {
+			// 	fmt.Printf("not ready to update\n")
 		}
 	})
 }

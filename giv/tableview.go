@@ -854,9 +854,6 @@ func (tv *TableView) RowStruct(row int) interface{} {
 // RowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
 func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
-	if !tv.ShowIndex {
-		return nil, false
-	}
 	if tv.RowStruct(row) == nil { // range check
 		return nil, false
 	}

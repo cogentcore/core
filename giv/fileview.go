@@ -432,6 +432,8 @@ func (fv *FileView) UpdateFilesAction() {
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
+	defer fv.UpdateEnd(updt)
+
 	fv.SetFullReRender()
 	fv.UpdatePath()
 	pf := fv.PathField()
@@ -493,7 +495,9 @@ func (fv *FileView) UpdateFiles() {
 	sv.SelVal = fv.SelFile
 	sv.UpdateFromSlice()
 	fv.SelectedIdx = sv.SelectedIdx
-	fv.UpdateEnd(updt)
+	if sv.SelectedIdx >= 0 {
+		sv.ScrollToRow(sv.SelectedIdx)
+	}
 }
 
 // UpdateFavs updates list of files and other views for current path
