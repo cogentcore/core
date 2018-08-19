@@ -57,7 +57,7 @@ var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
 // SliceViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view
-type SliceViewStyleFunc func(slice interface{}, widg gi.Node2D, row int, vv ValueView)
+type SliceViewStyleFunc func(sv *SliceView, slice interface{}, widg gi.Node2D, row int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
@@ -309,7 +309,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			})
 		}
 		if sv.StyleFunc != nil {
-			sv.StyleFunc(mvnp.Interface(), widg, i, vv)
+			sv.StyleFunc(sv, mvnp.Interface(), widg, i, vv)
 		}
 
 	}

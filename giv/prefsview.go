@@ -70,7 +70,7 @@ func PrefsEditor(p *gi.Preferences) {
 	savec.SetText("Save Colors")
 	savec.Tooltip = "Save current colors to a file -- for sharing"
 	savec.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "", "", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", ".json", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.SaveJSON(FileViewDialogValue(dlg))
@@ -82,7 +82,7 @@ func PrefsEditor(p *gi.Preferences) {
 	loadc.SetText("Load Colors")
 	loadc.Tooltip = "Load colors from a file"
 	loadc.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "", "", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", ".json", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.LoadJSON(FileViewDialogValue(dlg))
@@ -149,7 +149,7 @@ func PrefsEditor(p *gi.Preferences) {
 	})
 	fmen.Menu.AddSeparator("clrsep")
 	fmen.Menu.AddMenuText("Load Colors", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "", "", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", ".json", "Load Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.LoadJSON(FileViewDialogValue(dlg))
@@ -158,7 +158,7 @@ func PrefsEditor(p *gi.Preferences) {
 		})
 	})
 	fmen.Menu.AddMenuText("Save Colors", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewDialog(vp, "", "", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		FileViewDialog(vp, "", "", ".json", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.SaveJSON(FileViewDialogValue(dlg))

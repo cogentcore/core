@@ -250,7 +250,7 @@ func FontChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, r
 	return dlg
 }
 
-func FontInfoStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
+func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
 	if col == 4 {
 		finf, ok := slice.([]gi.FontInfo)
 		if ok {
@@ -278,7 +278,7 @@ func IconChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, r
 	return dlg
 }
 
-func IconChooserStyleFunc(slice interface{}, widg gi.Node2D, row int, vv ValueView) {
+func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row int, vv ValueView) {
 	ic, ok := slice.([]gi.IconName)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))
@@ -311,7 +311,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 
 // FileViewDialog is for selecting / manipulating files -- if recv and fun are
 // non-nil, they connect to the dialog signals
-func FileViewDialog(avp *gi.Viewport2D, path, file string, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("file-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
@@ -323,7 +323,7 @@ func FileViewDialog(avp *gi.Viewport2D, path, file string, title, prompt string,
 	fv := frame.InsertNewChild(KiT_FileView, prIdx+2, "file-view").(*FileView)
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
-	fv.SetPathFile(path, file)
+	fv.SetPathFile(path, file, ext)
 
 	fv.FileSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(FileViewDoubleClicked) {

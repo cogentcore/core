@@ -110,6 +110,7 @@ type Window struct {
 	OverTex       oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	LastSelMode   mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
 	Focus         ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	StartFocus    ki.Ki             `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
 	Shortcuts     Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData       mimedata.Mimes    `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
@@ -465,7 +466,11 @@ func (w *Window) FullReRender() {
 	}
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
-		w.SetNextFocusItem()
+		if w.StartFocus != nil {
+			w.SetFocusItem(w.StartFocus)
+		} else {
+			w.SetNextFocusItem()
+		}
 	}
 }
 
@@ -1021,6 +1026,10 @@ func (w *Window) EventLoop() {
 			w.DoFullRender = false
 			w.FullReRender()
 		}
+		if w.Focus == nil && w.StartFocus != nil {
+			w.SetFocusItem(w.StartFocus)
+		}
+
 		delPop := false // if true, delete this popup after event loop
 
 		et := evi.Type()
@@ -1381,7 +1390,12 @@ func (w *Window) ClearNonFocus() {
 	}
 }
 
-// set focus to given item -- returns true if focus changed
+// SetStartFocus sets the given item to be first focus when window opens
+func (w *Window) SetStartFocus(k ki.Ki) {
+	w.StartFocus = k
+}
+
+// SetFocusItem sets focus to given item -- returns true if focus changed.
 func (w *Window) SetFocusItem(k ki.Ki) bool {
 	if w.Focus == k {
 		return false

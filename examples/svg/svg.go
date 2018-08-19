@@ -59,7 +59,7 @@ func LoadSVG(fnm string) {
 func FileViewLoadSVG(vp *gi.Viewport2D) {
 	path, fn := filepath.Split(CurFilename)
 	path, _ = homedir.Expand(path)
-	giv.FileViewDialog(vp, path, fn, "Load SVG", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+	giv.FileViewDialog(vp, path, fn, ".svg", "Load SVG", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			LoadSVG(giv.FileViewDialogValue(dlg))
@@ -105,6 +105,7 @@ func mainrun() {
 
 	loads := tbar.AddNewChild(gi.KiT_Action, "loadsvg").(*gi.Action)
 	loads.SetText("Load SVG")
+	loads.StartFocus()
 
 	fnm := tbar.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	TheFile = fnm

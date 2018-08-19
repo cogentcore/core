@@ -80,7 +80,7 @@ var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
 
 // TableViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view
-type TableViewStyleFunc func(slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
+type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
@@ -493,7 +493,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				})
 			}
 			if tv.StyleFunc != nil {
-				tv.StyleFunc(mvnp.Interface(), widg, i, fli, vv)
+				tv.StyleFunc(tv, mvnp.Interface(), widg, i, fli, vv)
 			}
 		}
 	}
@@ -874,6 +874,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	if tv.RowStruct(row) == nil || tv.inFocusGrab { // range check
 		return nil
 	}
+	fmt.Printf("grab row focus: %v\n", row)
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg, _ := tv.SliceGrid()
 	if sg == nil {
@@ -922,6 +923,22 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 		}
 	}
 	return -1, false
+}
+
+// SelectFieldVal sets CurSelField and CurSelVal and attempts to find
+// corresponding row, setting SelectedIdx and selecting row if found --
+// returns true if found, false otherwise
+func (tv *TableView) SelectFieldVal(fld, val string) bool {
+	tv.CurSelField = fld
+	tv.CurSelVal = val
+	if tv.CurSelField != "" && tv.CurSelVal != nil {
+		idx, _ := StructSliceRowByValue(tv.Slice, tv.CurSelField, tv.CurSelVal)
+		if idx >= 0 {
+			tv.UpdateSelect(idx, true)
+			return true
+		}
+	}
+	return false
 }
 
 // StructSliceRowByValue searches for first row that contains given value in field of
@@ -1012,6 +1029,9 @@ func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 
 // SelectRowWidgets sets the selection state of given row of widgets
 func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
+	if idx < 0 {
+		return
+	}
 	var win *gi.Window
 	if tv.Viewport != nil {
 		win = tv.Viewport.Win

@@ -28,21 +28,20 @@ import (
 
 // todo:
 
-// * search: use highlighting, not filtering -- < > arrows etc -- ext *.svg is
-// just search pre-load -- add arg
+// * search: use highlighting, not filtering -- < > arrows etc
 // * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
-// * in inactive select mode, it would be better to NOT immediately traverse into subdirs. and even in regular gui mode -- that should be more of a double-click.. although that would cause dialog to close now.. grr.
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
 	gi.Frame
-	DirPath     string      `desc:"path to directory of files to display"`
-	SelFile     string      `desc:"selected file"`
-	Ext         string      `desc:"target extension"`
-	Files       []*FileInfo `desc:"files for current directory"`
-	SelectedIdx int         `desc:"index of currently-selected file in Files list (-1 if none)"`
-	FileSig     ki.Signal   `desc:"signal for file actions"`
+	DirPath     string            `desc:"path to directory of files to display"`
+	SelFile     string            `desc:"selected file"`
+	Ext         string            `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
+	ExtMap      map[string]string `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
+	Files       []*FileInfo       `desc:"files for current directory"`
+	SelectedIdx int               `desc:"index of currently-selected file in Files list (-1 if none)"`
+	FileSig     ki.Signal         `desc:"signal for file actions"`
 }
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
@@ -51,9 +50,10 @@ var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
 // of flexible configuration elements that can be easily extended and modified
 
 // SetPathFile sets the path, initial select file (or "") and intializes the view
-func (fv *FileView) SetPathFile(path, file string) {
+func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file
+	fv.SetExt(ext)
 	fv.UpdateFromPath()
 }
 
@@ -87,8 +87,7 @@ var FileViewProps = ki.Props{
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
 var FileViewKindColorMap = map[string]string{
-	"Folder":           "pref(link)",
-	"application/json": "pref(link)",
+	"Folder": "pref(link)",
 }
 
 // FileViewSignals are signals that fileview sends based on user actions.
@@ -122,15 +121,24 @@ const (
 
 //go:generate stringer -type=FileViewSignals
 
-func FileViewStyleFunc(slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
+func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
 	finf, ok := slice.([]*FileInfo)
 	if ok {
-		gi := widg.AsNode2D()
+		wi := widg.AsNode2D()
 		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
-			gi.SetProp("color", clr)
-		} else {
-			gi.DeleteProp("color")
+			wi.SetProp("color", clr)
+			return
 		}
+		if fvv, pok := tv.ParentByType(KiT_FileView, true); pok {
+			fv := fvv.Embed(KiT_FileView).(*FileView)
+			fn := finf[row].Name
+			ext := strings.ToLower(filepath.Ext(fn))
+			if _, has := fv.ExtMap[ext]; has {
+				wi.SetProp("color", "pref(link)")
+				return
+			}
+		}
+		wi.DeleteProp("color")
 	}
 }
 
@@ -181,6 +189,7 @@ func (fv *FileView) ConfigPathRow() {
 	pr.ConfigChildren(config, false) // already covered by parent update
 	pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
 	pl.Text = "Path:"
+	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
 	pf := fv.PathField()
 	pf.Editable = true
 	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
@@ -283,7 +292,7 @@ func (fv *FileView) ConfigFilesRow() {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
-			fvv.FileSelect(svv.SelectedIdx)
+			fvv.FileSelectAction(svv.SelectedIdx)
 		}
 	})
 	sv.TableViewSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -305,22 +314,41 @@ func (fv *FileView) ConfigFilesRow() {
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
 	sr.Lay = gi.LayoutHoriz
+	sr.SetProp("spacing", units.NewValue(4, units.Px))
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "sel-lbl")
 	config.Add(gi.KiT_TextField, "sel")
+	config.Add(gi.KiT_Label, "ext-lbl")
+	config.Add(gi.KiT_TextField, "ext")
 	sr.ConfigChildren(config, false) // already covered by parent update
+
 	sl := sr.KnownChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
+	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
-	sf.GrabFocus()
+	sf.SetText(fv.SelFile)
 	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
-			fvv.SelFile = pff.Text()
+			fvv.SetSelFileAction(pff.Text())
+		}
+	})
+
+	el := sr.KnownChildByName("ext-lbl", 0).(*gi.Label)
+	el.Text = "Ext(s):"
+	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
+	ef := fv.ExtField()
+	ef.SetText(fv.Ext)
+	ef.SetMinPrefWidth(units.NewValue(10.0, units.Ch))
+	ef.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			pff, _ := send.(*gi.TextField)
+			fvv.SetExtAction(pff.Text())
 		}
 	})
 }
@@ -347,6 +375,12 @@ func (fv *FileView) FilesView() *TableView {
 func (fv *FileView) SelField() *gi.TextField {
 	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
 	return sr.KnownChildByName("sel", 1).(*gi.TextField)
+}
+
+// ExtField returns the TextField of the extension
+func (fv *FileView) ExtField() *gi.TextField {
+	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
+	return sr.KnownChildByName("ext", 2).(*gi.TextField)
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
@@ -497,8 +531,22 @@ func (fv *FileView) NewFolder() {
 	fv.UpdateFilesAction()
 }
 
-// FileSelect updates selection with given selected file
-func (fv *FileView) FileSelect(idx int) {
+// SetSelFileAction sets the currently selected file to given name, and sends
+// selection action with current full file name, and updates selection in
+// table view
+func (fv *FileView) SetSelFileAction(sel string) {
+	fv.SelFile = sel
+	sv := fv.FilesView()
+	sv.SelectFieldVal("Name", fv.SelFile)
+	fv.SelectedIdx = sv.SelectedIdx
+	sf := fv.SelField()
+	sf.SetText(fv.SelFile)
+	fv.WidgetSig.Emit(fv.This, int64(gi.WidgetSelected), fv.SelectedFile())
+}
+
+// FileSelectAction updates selection with given selected file and emits
+// selected signal on WidgetSig with full name of selected item
+func (fv *FileView) FileSelectAction(idx int) {
 	if idx < 0 {
 		return
 	}
@@ -508,6 +556,31 @@ func (fv *FileView) FileSelect(idx int) {
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
+	fv.WidgetSig.Emit(fv.This, int64(gi.WidgetSelected), fv.SelectedFile())
+}
+
+// SetExt updates the ext to given (list of, comma separated) extensions
+func (fv *FileView) SetExt(ext string) {
+	fv.Ext = ext
+	exts := strings.Split(fv.Ext, ",")
+	fv.ExtMap = make(map[string]string, len(exts))
+	for _, ex := range exts {
+		ex = strings.TrimSpace(ex)
+		if len(ex) == 0 {
+			continue
+		}
+		if ex[0] != '.' {
+			ex = "." + ex
+		}
+		fv.ExtMap[strings.ToLower(ex)] = ex
+	}
+}
+
+// SetExtAction sets the current extension to highlight, and redisplays files
+func (fv *FileView) SetExtAction(ext string) {
+	fv.SetExt(ext)
+	fv.SetFullReRender()
+	fv.UpdateFiles()
 }
 
 // FavSelect selects a favorite path and goes there
@@ -549,6 +622,12 @@ func (fv *FileView) ConfigButtons() {
 	// if mods {
 	// 	bb.UpdateEnd(updt)
 	// }
+}
+
+func (fv *FileView) Style2D() {
+	fv.Frame.Style2D()
+	sf := fv.SelField()
+	sf.StartFocus() // need to call this when window is actually active
 }
 
 ////////////////////////////////////////////////////////////////////////////////

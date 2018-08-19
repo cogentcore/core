@@ -111,11 +111,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* rename all gi vars in gi -- bad when copying to something that uses gi package!
+
 * tableview return / space to select item
 
 * layout scroll to box, item methods, call in tableview -- easy
-
-* fileview: add extension, mode flags -- use extension for search
 
 * crash on quit:
 * cocoa.go:
@@ -128,8 +128,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * cursor on windows, x11 getting stuck with close popup..
 
 * linux: copy / paste puts in opposite order?
-
-* double click close dialog is only for tableview select action -- need a separate pathway for that.
 
 * label needs 2nd pass with actual size to re-layout (only for wordwrap) --
   works but subsequent elements can't move up b/c they are allocated based on

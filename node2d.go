@@ -266,6 +266,14 @@ func (g *Node2DBase) FocusNext() {
 	}
 }
 
+// StartFocus specifies this widget to give focus to when the window opens
+func (g *Node2DBase) StartFocus() {
+	win := g.ParentWindow()
+	if win != nil {
+		win.SetStartFocus(g.This)
+	}
+}
+
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the Window
 func (g *Node2DBase) ContainsFocus() bool {
