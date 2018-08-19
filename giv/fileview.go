@@ -5,9 +5,7 @@
 package giv
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"mime"
 	"os"
@@ -318,12 +316,12 @@ func (fv *FileView) UpdateFiles() {
 	fv.SetFullReRender()
 	fv.UpdatePath()
 	pf := fv.PathField()
-	if len(SavedPaths) == 0 {
-		LoadPaths()
+	if len(gi.SavedPaths) == 0 {
+		gi.LoadPaths()
 	}
-	SavedPaths.AddPath(fv.DirPath, SavedPathsMax)
-	SavePaths()
-	pf.ItemsFromStringList(([]string)(SavedPaths), false, 0)
+	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.SavedPathsMax)
+	gi.SavePaths()
+	pf.ItemsFromStringList(([]string)(gi.SavedPaths), false, 0)
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
@@ -569,81 +567,4 @@ func FileKindToIcon(kind, name string) gi.IconName {
 
 	icn = gi.IconName("none")
 	return icn
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//  FilePaths
-
-type FilePaths []string
-
-var SavedPaths FilePaths
-
-var SavedPathsMax = 50
-
-// Load file paths from a JSON-formatted file.
-func (p *FilePaths) LoadJSON(filename string) error {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		// gi.PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
-		log.Println(err)
-		return err
-	}
-	return json.Unmarshal(b, p)
-}
-
-// Save file paths to a JSON-formatted file.
-func (p *FilePaths) SaveJSON(filename string) error {
-	b, err := json.MarshalIndent(p, "", "  ")
-	if err != nil {
-		log.Println(err) // unlikely
-		return err
-	}
-	err = ioutil.WriteFile(filename, b, 0644)
-	if err != nil {
-		// gi.PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
-		log.Println(err)
-	}
-	return err
-}
-
-// AddPath inserts a path to the file paths (at the start), subject to max
-// length -- if path is already on the list then it is moved to the start.
-func (p *FilePaths) AddPath(path string, max int) {
-	sz := len(*p)
-
-	for i, s := range *p {
-		if i > 0 && s == path {
-			copy((*p)[1:i+1], (*p)[0:i])
-			(*p)[0] = path
-			return
-		}
-	}
-
-	if sz >= max {
-		copy((*p)[1:max], (*p)[0:max-1])
-		(*p)[0] = path
-	} else {
-		*p = append(*p, "")
-		if sz > 0 {
-			copy((*p)[1:], (*p)[0:sz])
-		}
-		(*p)[0] = path
-	}
-}
-
-// SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFileName = "saved_paths.json"
-
-// SavePaths saves the active SavedPaths to prefs dir
-func SavePaths() {
-	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.SaveJSON(pnm)
-}
-
-// LoadPaths loads the active SavedPaths from prefs dir
-func LoadPaths() {
-	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.LoadJSON(pnm)
 }

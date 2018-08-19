@@ -190,7 +190,7 @@ func (g *ComboBox) ConfigParts() {
 	}
 	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), "", icIdx, lbIdx)
+	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
 	if txIdx >= 0 {
 		g.ConfigPartsSetText(g.Text, txIdx, icIdx)
 	}

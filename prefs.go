@@ -67,6 +67,7 @@ type Preferences struct {
 	FontFamily      string                 `desc:"default font family when otherwise not specified"`
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
+	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
 	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 }
 
@@ -126,6 +127,7 @@ func (p *Preferences) Defaults() {
 	p.Params.Defaults()
 	p.FavPaths.SetToDefaults()
 	p.FontFamily = "Go"
+	p.SavedPathsMax = 20
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
@@ -318,4 +320,83 @@ var DefaultPaths = FavPaths{
 	{"documents", "Documents", "~/Documents"},
 	{"folder-download", "Downloads", "~/Downloads"},
 	{"computer", "root", "/"},
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  FilePaths
+
+type FilePaths []string
+
+var SavedPaths FilePaths
+
+// Load file paths from a JSON-formatted file.
+func (p *FilePaths) LoadJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, p)
+}
+
+// Save file paths to a JSON-formatted file.
+func (p *FilePaths) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	if err != nil {
+		// PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
+		log.Println(err)
+	}
+	return err
+}
+
+// AddPath inserts a path to the file paths (at the start), subject to max
+// length -- if path is already on the list then it is moved to the start.
+func (p *FilePaths) AddPath(path string, max int) {
+	sz := len(*p)
+
+	if sz > max {
+		*p = (*p)[:max]
+	}
+
+	for i, s := range *p {
+		if i > 0 && s == path {
+			copy((*p)[1:i+1], (*p)[0:i])
+			(*p)[0] = path
+			return
+		}
+	}
+
+	if sz >= max {
+		copy((*p)[1:max], (*p)[0:max-1])
+		(*p)[0] = path
+	} else {
+		*p = append(*p, "")
+		if sz > 0 {
+			copy((*p)[1:], (*p)[0:sz])
+		}
+		(*p)[0] = path
+	}
+}
+
+// SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
+var SavedPathsFileName = "saved_paths.json"
+
+// SavePaths saves the active SavedPaths to prefs dir
+func SavePaths() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.SaveJSON(pnm)
+}
+
+// LoadPaths loads the active SavedPaths from prefs dir
+func LoadPaths() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.LoadJSON(pnm)
 }

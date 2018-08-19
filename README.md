@@ -111,8 +111,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
+* layout scroll to box, item methods, call in tableview -- easy
+
 * fileview: add extension, mode flags -- use extension for search
-* also really need history of paths so you can go back to where you started
 
 * crash on quit:
 * cocoa.go:
