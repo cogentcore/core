@@ -220,8 +220,8 @@ func (g *WidgetBase) Size2D() {
 // finally cached out at this stage also returns the size of the parent for
 // setting units context relative to parent objects
 func (g *WidgetBase) AddParentPos() Vec2D {
-	if pgi, _ := KiToNode2D(g.Par); pgi != nil {
-		if pw := pgi.AsWidget(); pw != nil {
+	if pni, _ := KiToNode2D(g.Par); pni != nil {
+		if pw := pni.AsWidget(); pw != nil {
 			if !g.IsField() {
 				g.LayData.AllocPos = pw.LayData.AllocPos.Add(g.LayData.AllocPosRel)
 			}
@@ -246,11 +246,11 @@ func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 
 // Layout2DBase provides basic Layout2D functions -- good for most cases
 func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
-	gii, _ := g.This.(Node2D)
+	nii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
-		if gii.AsViewport2D() == nil {
-			gii.Init2D()
-			gii.Style2D()
+		if nii.AsViewport2D() == nil {
+			nii.Init2D()
+			nii.Style2D()
 			// fmt.Printf("node not init in Layout2DBase: %v\n", g.PathUnique())
 		}
 	}
@@ -259,9 +259,9 @@ func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 	if initStyle {
 		g.Sty.SetUnitContext(g.Viewport, psize) // update units with final layout
 	}
-	g.BBox = gii.BBox2D() // only compute once, at this point
+	g.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	gii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
+	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
 	// typically Layout2DChildren must be called after this!
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
@@ -396,11 +396,11 @@ func (g *WidgetBase) Move2DTree() {
 func (g *WidgetBase) ParentLayout() *Layout {
 	var parLy *Layout
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
+		nii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
 		}
-		ly := gii.AsLayout2D()
+		ly := nii.AsLayout2D()
 		if ly != nil {
 			parLy = ly
 			return false // done

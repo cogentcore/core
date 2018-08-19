@@ -111,7 +111,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* rename all gi vars in gi -- bad when copying to something that uses gi package!
+* fileview file filter function -- add to all calls..  probably worth it
+
+* recent paths seems like a bug -- test more carefully
 
 * tableview return / space to select item
 

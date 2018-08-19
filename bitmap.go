@@ -35,26 +35,26 @@ var BitmapProps = ki.Props{
 // GrabRenderFrom grabs the rendered image from given node -- copies the
 // vpBBox from parent viewport of node (or from viewport directly if node is a
 // viewport) -- returns success
-func (bm *Bitmap) GrabRenderFrom(gii Node2D) bool {
-	gi := gii.AsNode2D()
-	givp := gii.AsViewport2D()
-	if givp != nil && givp.Pixels != nil {
-		sz := givp.Pixels.Bounds().Size()
+func (bm *Bitmap) GrabRenderFrom(nii Node2D) bool {
+	ni := nii.AsNode2D()
+	nivp := nii.AsViewport2D()
+	if nivp != nil && nivp.Pixels != nil {
+		sz := nivp.Pixels.Bounds().Size()
 		bm.Resize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, image.ZP, draw.Src)
+		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), nivp.Pixels, image.ZP, draw.Src)
 		return true
 	}
-	givp = gi.Viewport
-	if givp == nil || givp.Pixels == nil {
-		log.Printf("Bitmap GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", gi.PathUnique())
+	nivp = ni.Viewport
+	if nivp == nil || nivp.Pixels == nil {
+		log.Printf("Bitmap GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.PathUnique())
 		return false
 	}
-	if gi.VpBBox.Empty() {
+	if ni.VpBBox.Empty() {
 		return false // offscreen -- can happen -- no warning -- just check rval
 	}
-	sz := gi.VpBBox.Size()
+	sz := ni.VpBBox.Size()
 	bm.Resize(sz)
-	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), givp.Pixels, gi.VpBBox.Min, draw.Src)
+	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), nivp.Pixels, ni.VpBBox.Min, draw.Src)
 	// todo: option to make it semi-transparent
 	return true
 }

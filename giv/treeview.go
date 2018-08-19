@@ -1478,13 +1478,13 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 	h := tv.WidgetSize.Y
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
-			gi := kid.(gi.Node2D).AsWidget()
-			if gi == nil {
+			ni := kid.(gi.Node2D).AsWidget()
+			if ni == nil {
 				continue
 			}
-			gi.LayData.AllocPosRel.Y = h
-			gi.LayData.AllocPosRel.X = tv.Indent.Dots
-			h += gi.LayData.AllocSize.Y
+			ni.LayData.AllocPosRel.Y = h
+			ni.LayData.AllocPosRel.X = tv.Indent.Dots
+			h += ni.LayData.AllocSize.Y
 		}
 	}
 	tv.Layout2DChildren()
@@ -1500,8 +1500,8 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
-		pgi, _ := gi.KiToNode2D(tv.Par)
-		ar = ar.Intersect(pgi.ChildrenBBox2D())
+		pni, _ := gi.KiToNode2D(tv.Par)
+		ar = ar.Intersect(pni.ChildrenBBox2D())
 	}
 	return ar
 }

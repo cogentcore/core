@@ -657,17 +657,17 @@ func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 // IsInScope returns true if the given object is in scope for receiving events.
 // If popup is true, then only items on popup are in scope, otherwise
 // items NOT on popup are in scope (if no popup, everything is in scope).
-func (w *Window) IsInScope(gi *Node2DBase, popup bool) bool {
+func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 	if w.Popup == nil {
 		return true
 	}
-	if gi.This == w.Popup {
+	if ni.This == w.Popup {
 		return popup
 	}
-	if gi.Viewport == nil {
+	if ni.Viewport == nil {
 		return false
 	}
-	if gi.Viewport.This == w.Popup {
+	if ni.Viewport.This == w.Popup {
 		return popup
 	}
 	return !popup
@@ -719,41 +719,41 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 			if recv.IsDeleted() {
 				continue
 			}
-			gii, gi := KiToNode2D(recv)
-			if gi != nil {
-				if !w.IsInScope(gi, popup) {
+			nii, ni := KiToNode2D(recv)
+			if ni != nil {
+				if !w.IsInScope(ni, popup) {
 					continue
 				}
-				if evi.OnFocus() && !gii.HasFocus2D() {
+				if evi.OnFocus() && !nii.HasFocus2D() {
 					continue
 				} else if evi.HasPos() {
 					pos := evi.Pos()
 					// drag events start with node but can go beyond it..
 					_, ok := evi.(*mouse.DragEvent)
 					if ok {
-						if w.Dragging == gi.This {
+						if w.Dragging == ni.This {
 							addWinEventRecv(&evRecvs, recv, fun, w)
 							break // done -- dragger owns it!
 						} else if w.Dragging != nil {
 							continue
 						} else {
-							if pos.In(gi.WinBBox) {
-								w.Dragging = gi.This
-								bitflag.Set(&gi.Flag, int(NodeDragging))
+							if pos.In(ni.WinBBox) {
+								w.Dragging = ni.This
+								bitflag.Set(&ni.Flag, int(NodeDragging))
 								addWinEventRecv(&evRecvs, recv, fun, w)
 								break
 							}
 							continue
 						}
 					} else {
-						if w.Dragging == gi.This {
+						if w.Dragging == ni.This {
 							_, dg := KiToNode2D(w.Dragging)
 							if dg != nil {
 								bitflag.Clear(&dg.Flag, int(NodeDragging))
 							}
 							w.Dragging = nil
 						}
-						if !pos.In(gi.WinBBox) {
+						if !pos.In(ni.WinBBox) {
 							continue
 						}
 					}
@@ -799,16 +799,16 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
-			_, gi := KiToNode2D(k)
-			if gi != nil {
-				if !w.IsInScope(gi, popup) {
+			_, ni := KiToNode2D(k)
+			if ni != nil {
+				if !w.IsInScope(ni, popup) {
 					return false
 				}
-				in := pos.In(gi.WinBBox)
+				in := pos.In(ni.WinBBox)
 				if in {
-					if !bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+					if !bitflag.Has(ni.Flag, int(MouseHasEntered)) {
 						fe.Action = mouse.Enter
-						bitflag.Set(&gi.Flag, int(MouseHasEntered))
+						bitflag.Set(&ni.Flag, int(MouseHasEntered))
 						if !updated {
 							updt = w.UpdateStart()
 							updated = true
@@ -818,9 +818,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 						return false // already in
 					}
 				} else { // mouse not in object
-					if bitflag.Has(gi.Flag, int(MouseHasEntered)) {
+					if bitflag.Has(ni.Flag, int(MouseHasEntered)) {
 						fe.Action = mouse.Exit
-						bitflag.Clear(&gi.Flag, int(MouseHasEntered))
+						bitflag.Clear(&ni.Flag, int(MouseHasEntered))
 						if !updated {
 							updt = w.UpdateStart()
 							updated = true
@@ -924,11 +924,11 @@ func (w *Window) TriggerShortcut(chord string) bool {
 
 // PopupIsMenu returns true if the given popup item is a menu
 func PopupIsMenu(pop ki.Ki) bool {
-	gii, gi := KiToNode2D(pop)
-	if gi == nil {
+	nii, ni := KiToNode2D(pop)
+	if ni == nil {
 		return false
 	}
-	vp := gii.AsViewport2D()
+	vp := nii.AsViewport2D()
 	if vp == nil {
 		return false
 	}
@@ -940,11 +940,11 @@ func PopupIsMenu(pop ki.Ki) bool {
 
 // PopupIsTooltip returns true if the given popup item is a menu
 func PopupIsTooltip(pop ki.Ki) bool {
-	gii, gi := KiToNode2D(pop)
-	if gi == nil {
+	nii, ni := KiToNode2D(pop)
+	if ni == nil {
 		return false
 	}
-	vp := gii.AsViewport2D()
+	vp := nii.AsViewport2D()
 	if vp == nil {
 		return false
 	}
@@ -959,11 +959,11 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
-	gii, gi := KiToNode2D(pop)
-	if gi == nil {
+	nii, ni := KiToNode2D(pop)
+	if ni == nil {
 		return false
 	}
-	vp := gii.AsViewport2D()
+	vp := nii.AsViewport2D()
 	if vp == nil {
 		return false
 	}
@@ -1368,20 +1368,20 @@ func (w *Window) ClearNonFocus() {
 			return true
 		}
 		// todo: see about 3D guys
-		gii, gi := KiToNode2D(k)
-		if gi == nil {
+		nii, ni := KiToNode2D(k)
+		if ni == nil {
 			return true
 		}
 		if w.Focus == k {
 			return true
 		}
-		if gi.HasFocus() {
+		if ni.HasFocus() {
 			if !updated {
 				updated = true
 				updt = w.UpdateStart()
 			}
-			bitflag.Clear(&gi.Flag, int(HasFocus))
-			gii.FocusChanged2D(false)
+			bitflag.Clear(&ni.Flag, int(HasFocus))
+			nii.FocusChanged2D(false)
 		}
 		return true
 	})
@@ -1402,10 +1402,10 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 	}
 	updt := w.UpdateStart()
 	if w.Focus != nil {
-		gii, gi := KiToNode2D(w.Focus)
-		if gi != nil {
-			bitflag.Clear(&gi.Flag, int(HasFocus))
-			gii.FocusChanged2D(false)
+		nii, ni := KiToNode2D(w.Focus)
+		if ni != nil {
+			bitflag.Clear(&ni.Flag, int(HasFocus))
+			nii.FocusChanged2D(false)
 		}
 	}
 	w.Focus = k
@@ -1413,10 +1413,10 @@ func (w *Window) SetFocusItem(k ki.Ki) bool {
 		w.UpdateEnd(updt)
 		return true
 	}
-	gii, gi := KiToNode2D(k)
-	if gi != nil {
-		bitflag.Set(&gi.Flag, int(HasFocus))
-		gii.FocusChanged2D(true)
+	nii, ni := KiToNode2D(k)
+	if ni != nil {
+		bitflag.Set(&ni.Flag, int(HasFocus))
+		nii.FocusChanged2D(true)
 	}
 	w.ClearNonFocus()
 	w.UpdateEnd(updt)
@@ -1442,15 +1442,15 @@ func (w *Window) SetNextFocusItem() bool {
 				return false
 			}
 			// todo: see about 3D guys
-			_, gi := KiToNode2D(k)
-			if gi == nil {
+			_, ni := KiToNode2D(k)
+			if ni == nil {
 				return true
 			}
 			if w.Focus == k { // current focus can be a non-can-focus item
 				focusNext = true
 				return true
 			}
-			if !gi.CanFocus() || gi.VpBBox.Empty() {
+			if !ni.CanFocus() || ni.VpBBox.Empty() {
 				return true
 			}
 			if focusNext {
@@ -1488,15 +1488,15 @@ func (w *Window) SetPrevFocusItem() bool {
 			return false
 		}
 		// todo: see about 3D guys
-		_, gi := KiToNode2D(k)
-		if gi == nil {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
 			return true
 		}
 		if w.Focus == k {
 			gotFocus = true
 			return false
 		}
-		if !gi.CanFocus() || gi.VpBBox.Empty() {
+		if !ni.CanFocus() || ni.VpBBox.Empty() {
 			return true
 		}
 		prevItem = k
@@ -1518,9 +1518,9 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
-	_, gi := KiToNode2D(pop)
-	if gi != nil {
-		gi.FullRender2DTree()
+	_, ni := KiToNode2D(pop)
+	if ni != nil {
+		ni.FullRender2DTree()
 	}
 	w.PushFocus(pop)
 }
@@ -1544,9 +1544,9 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 
 // pop current popup off the popup stack and set to current popup
 func (w *Window) PopPopup(pop ki.Ki) {
-	gii, ok := pop.(Node2D)
+	nii, ok := pop.(Node2D)
 	if ok {
-		pvp := gii.AsViewport2D()
+		pvp := nii.AsViewport2D()
 		if pvp != nil {
 			pvp.DeletePopup()
 		}
@@ -1605,8 +1605,8 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	w.DNDSource = src
 	w.DNDData = data
 	wimg := img.AsWidget()
-	if _, sgi := KiToNode2D(src); sgi != nil { // 2d case
-		if sw := sgi.AsWidget(); sw != nil {
+	if _, sni := KiToNode2D(src); sni != nil { // 2d case
+		if sw := sni.AsWidget(); sw != nil {
 			wimg.LayData.AllocPos.SetPoint(sw.LayData.AllocPos.ToPoint())
 		}
 	}
@@ -1677,8 +1677,8 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 
 // DNDMoveEvent handles drag-n-drop move events
 func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
-	if gii, _ := KiToNode2D(w.DNDImage); gii != nil { // 2d case
-		if wg := gii.AsWidget(); wg != nil {
+	if nii, _ := KiToNode2D(w.DNDImage); nii != nil { // 2d case
+		if wg := nii.AsWidget(); wg != nil {
 			wg.LayData.AllocPos.SetPoint(e.Where)
 		}
 	} // else 3d..

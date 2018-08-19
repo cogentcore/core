@@ -188,8 +188,8 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	r := vp.Geom.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
-		pgi, _ := KiToNode2D(vp.Par)
-		nr := r.Intersect(pgi.ChildrenBBox2D())
+		pni, _ := KiToNode2D(vp.Par)
+		nr := r.Intersect(pni.ChildrenBBox2D())
 		sp = nr.Min.Sub(r.Min)
 		r = nr
 	}
@@ -415,23 +415,23 @@ func (vp *Viewport2D) Render2D() {
 
 // each node calls this signal method to notify its parent viewport whenever it changes, causing a re-render
 func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
-	vpgi, ok := vpki.(Node2D)
+	vpni, ok := vpki.(Node2D)
 	if !ok {
 		return
 	}
-	vp := vpgi.AsViewport2D()
+	vp := vpni.AsViewport2D()
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
-	gii, gi := KiToNode2D(send)
-	if gii == nil { // should not happen
+	nii, ni := KiToNode2D(send)
+	if nii == nil { // should not happen
 		return
 	}
-	if gi.IsDeleted() || gi.IsDestroyed() { // skip these for sure
+	if ni.IsDeleted() || ni.IsDestroyed() { // skip these for sure
 		return
 	}
-	if gi.IsUpdatingAtomic() {
-		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", gi.PathUnique())
+	if ni.IsUpdatingAtomic() {
+		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", ni.PathUnique())
 		return
 	}
 
@@ -457,33 +457,33 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 		if Update2DTrace {
 			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes)\n", vp.PathUnique())
 		}
-		anchor := gi.ParentReRenderAnchor()
+		anchor := ni.ParentReRenderAnchor()
 		if anchor != nil {
 			vp.ReRender2DAnchor(anchor)
 		} else {
 			vp.FullRender2DTree()
 		}
 	} else {
-		if gi.NeedsFullReRender() {
-			gi.ClearFullReRender()
-			anchor := gi.ParentReRenderAnchor()
+		if ni.NeedsFullReRender() {
+			ni.ClearFullReRender()
+			anchor := ni.ParentReRenderAnchor()
 			if anchor != nil {
 				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), gi.PathUnique(), anchor.PathUnique())
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), ni.PathUnique(), anchor.PathUnique())
 				}
 				vp.ReRender2DAnchor(anchor)
 			} else {
 				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), gi.PathUnique())
+					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), ni.PathUnique())
 				}
-				gi.Style2DTree()    // restyle only from affected node downward
+				ni.Style2DTree()    // restyle only from affected node downward
 				vp.ReRender2DTree() // need to re-render entirely from us
 			}
 		} else {
 			if Update2DTrace {
-				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), gi.PathUnique())
+				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), ni.PathUnique())
 			}
-			vp.ReRender2DNode(gii)
+			vp.ReRender2DNode(nii)
 		}
 	}
 	// don't do anything on deleting or destroying, and
@@ -502,17 +502,17 @@ func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 
 	// just do top-level objects here
 	for _, k := range vp.Kids {
-		gii, gi := KiToNode2D(k)
-		if gii == nil {
+		nii, ni := KiToNode2D(k)
+		if nii == nil {
 			continue
 		}
-		if !gi.IsOverlay() { // has not been initialized
-			gi.SetAsOverlay()
-			gii.Init2D()
-			gii.Style2D()
+		if !ni.IsOverlay() { // has not been initialized
+			ni.SetAsOverlay()
+			nii.Init2D()
+			nii.Style2D()
 		}
 		// note: skipping sizing, layout -- use simple elements here, esp Bitmap
-		gii.Render2D()
+		nii.Render2D()
 	}
 }
 

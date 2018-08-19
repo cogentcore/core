@@ -277,13 +277,13 @@ func (g *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 		if leavesOnly && k.HasChildren() {
 			return true
 		}
-		_, gi := KiToNode2D(k)
-		if gi == nil {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
 			// todo: 3D
 			return false
 		}
-		if pt.In(gi.WinBBox) {
-			rval = gi.This
+		if pt.In(ni.WinBBox) {
+			rval = ni.This
 			return false
 		}
 		return true

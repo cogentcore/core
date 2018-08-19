@@ -301,9 +301,9 @@ func (g *Node2DBase) FindNamedElement(name string) Node2D {
 	if ce, ok := g.Par.ChildByName(name, -1); ok {
 		return ce.(Node2D)
 	}
-	pgi, _ := KiToNode2D(g.Par)
-	if pgi != nil {
-		return pgi.FindNamedElement(name)
+	pni, _ := KiToNode2D(g.Par)
+	if pni != nil {
+		return pni.FindNamedElement(name)
 	}
 	return nil
 }
@@ -335,9 +335,9 @@ func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 	if k == nil {
 		return nil, nil
 	}
-	gii, ok := k.(Node2D)
+	nii, ok := k.(Node2D)
 	if ok {
-		return gii, gii.AsNode2D()
+		return nii, nii.AsNode2D()
 	}
 	return nil, nil
 }
@@ -382,12 +382,12 @@ func (g *Node2DBase) DisconnectAllEvents(pri EventPris) {
 // destroy anyway, but more efficient here)
 func (g *Node2DBase) DisconnectAllEventsTree(win *Window) {
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		_, gi := KiToNode2D(k)
-		if gi == nil {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
 			return false // going into a different type of thing, bail
 		}
-		win.DisconnectAllEvents(gi.This, AllPris)
-		gi.NodeSig.DisconnectAll()
+		win.DisconnectAllEvents(ni.This, AllPris)
+		ni.NodeSig.DisconnectAll()
 		return true
 	})
 }
@@ -441,11 +441,11 @@ func (g *Node2DBase) FullRender2DTree() {
 func (g *Node2DBase) Init2DTree() {
 	pr := prof.Start("Node2D.Init2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, _ := KiToNode2D(k)
-		if gii == nil {
+		nii, _ := KiToNode2D(k)
+		if nii == nil {
 			return false
 		}
-		gii.Init2D()
+		nii.Init2D()
 		return true
 	})
 	pr.End()
@@ -456,11 +456,11 @@ func (g *Node2DBase) Init2DTree() {
 func (g *Node2DBase) Style2DTree() {
 	pr := prof.Start("Node2D.Style2DTree")
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, _ := KiToNode2D(k)
-		if gii == nil {
+		nii, _ := KiToNode2D(k)
+		if nii == nil {
 			return false
 		}
-		gii.Style2D()
+		nii.Style2D()
 		return true
 	})
 	pr.End()
@@ -471,22 +471,22 @@ func (g *Node2DBase) Size2DTree() {
 	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
-			gii, gi := KiToNode2D(k)
-			if gii == nil {
-				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", gii, gii.PathUnique())
+			nii, ni := KiToNode2D(k)
+			if nii == nil {
+				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", nii, nii.PathUnique())
 				return false
 			}
-			if gi.HasNoLayout() {
+			if ni.HasNoLayout() {
 				return false
 			}
 			return true
 		},
 		func(k ki.Ki, level int, d interface{}) bool { // this one does the work
-			gii, gi := KiToNode2D(k)
-			if gi == nil {
+			nii, ni := KiToNode2D(k)
+			if ni == nil {
 				return false
 			}
-			gii.Size2D()
+			nii.Size2D()
 			return true
 		})
 	pr.End()
@@ -522,9 +522,9 @@ func (g *Node2DBase) Render2DTree() {
 func (g *Node2DBase) Layout2DChildren() {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
-		gii, _ := KiToNode2D(kid)
-		if gii != nil {
-			gii.Layout2D(cbb)
+		nii, _ := KiToNode2D(kid)
+		if nii != nil {
+			nii.Layout2D(cbb)
 		}
 	}
 }
@@ -534,9 +534,9 @@ func (g *Node2DBase) Layout2DChildren() {
 func (g *Node2DBase) Move2DChildren(delta image.Point) {
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
-		gii, _ := KiToNode2D(kid)
-		if gii != nil {
-			gii.Move2D(delta, cbb)
+		nii, _ := KiToNode2D(kid)
+		if nii != nil {
+			nii.Move2D(delta, cbb)
 		}
 	}
 }
@@ -544,9 +544,9 @@ func (g *Node2DBase) Move2DChildren(delta image.Point) {
 // Render2DChildren renders all of node's children -- default call at end of Render2D()
 func (g *Node2DBase) Render2DChildren() {
 	for _, kid := range g.Kids {
-		gii, _ := KiToNode2D(kid)
-		if gii != nil {
-			gii.Render2D()
+		nii, _ := KiToNode2D(kid)
+		if nii != nil {
+			nii.Render2D()
 		}
 	}
 }
@@ -555,11 +555,11 @@ func (g *Node2DBase) Render2DChildren() {
 func (g *Node2DBase) BBoxReport() string {
 	rpt := ""
 	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
-		if gii == nil {
+		nii, ni := KiToNode2D(k)
+		if nii == nil {
 			return false
 		}
-		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", gi.Nm, gi.VpBBox, gi.WinBBox)
+		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.VpBBox, ni.WinBBox)
 		return true
 	})
 	return rpt
@@ -582,11 +582,11 @@ func (g *Node2DBase) ParentWindow() *Window {
 func (g *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, ok := k.(Node2D)
+		nii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
 		}
-		vp := gii.AsViewport2D()
+		vp := nii.AsViewport2D()
 		if vp != nil {
 			parVp = vp
 			return false // done
@@ -623,12 +623,12 @@ func (g *Node2DBase) ParentPaint() *Paint {
 func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
 	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		gii, gi := KiToNode2D(k)
-		if gii == nil {
+		nii, ni := KiToNode2D(k)
+		if nii == nil {
 			return false // don't keep going up
 		}
-		if gi.IsReRenderAnchor() {
-			par = gii
+		if ni.IsReRenderAnchor() {
+			par = nii
 			return false
 		}
 		return true

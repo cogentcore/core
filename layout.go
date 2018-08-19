@@ -393,15 +393,15 @@ func (ly *Layout) GatherSizes() {
 
 	var sumPref, sumNeed, maxPref, maxNeed Vec2D
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		gi.LayData.UpdateSizes()
-		sumNeed = sumNeed.Add(gi.LayData.Size.Need)
-		sumPref = sumPref.Add(gi.LayData.Size.Pref)
-		maxNeed = maxNeed.Max(gi.LayData.Size.Need)
-		maxPref = maxPref.Max(gi.LayData.Size.Pref)
+		ni.LayData.UpdateSizes()
+		sumNeed = sumNeed.Add(ni.LayData.Size.Need)
+		sumPref = sumPref.Add(ni.LayData.Size.Pref)
+		maxNeed = maxNeed.Max(ni.LayData.Size.Need)
+		maxPref = maxPref.Max(ni.LayData.Size.Pref)
 	}
 
 	for d := X; d <= Y; d++ {
@@ -456,11 +456,11 @@ func (ly *Layout) GatherSizesGrid() {
 	sz := len(ly.Kids)
 	// collect overal size
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		lst := gi.Sty.Layout
+		lst := ni.Sty.Layout
 		if lst.Col > 0 {
 			cols = kit.MaxInt(cols, lst.Col+lst.ColSpan)
 		}
@@ -503,12 +503,12 @@ func (ly *Layout) GatherSizesGrid() {
 	col := 0
 	row := 0
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		gi.LayData.UpdateSizes()
-		lst := gi.Sty.Layout
+		ni.LayData.UpdateSizes()
+		lst := ni.Sty.Layout
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -526,24 +526,24 @@ func (ly *Layout) GatherSizesGrid() {
 		cgd := &(ly.GridData[Col][col])
 
 		// todo: need to deal with span in sums..
-		SetMax32(&(rgd.SizeNeed), gi.LayData.Size.Need.Y)
-		SetMax32(&(rgd.SizePref), gi.LayData.Size.Pref.Y)
-		SetMax32(&(cgd.SizeNeed), gi.LayData.Size.Need.X)
-		SetMax32(&(cgd.SizePref), gi.LayData.Size.Pref.X)
+		SetMax32(&(rgd.SizeNeed), ni.LayData.Size.Need.Y)
+		SetMax32(&(rgd.SizePref), ni.LayData.Size.Pref.Y)
+		SetMax32(&(cgd.SizeNeed), ni.LayData.Size.Need.X)
+		SetMax32(&(cgd.SizePref), ni.LayData.Size.Pref.X)
 
 		// for max: any -1 stretch dominates, else accumulate any max
 		if rgd.SizeMax >= 0 {
-			if gi.LayData.Size.Max.Y < 0 { // stretch
+			if ni.LayData.Size.Max.Y < 0 { // stretch
 				rgd.SizeMax = -1
 			} else {
-				SetMax32(&(rgd.SizeMax), gi.LayData.Size.Max.Y)
+				SetMax32(&(rgd.SizeMax), ni.LayData.Size.Max.Y)
 			}
 		}
 		if cgd.SizeMax >= 0 {
-			if gi.LayData.Size.Max.Y < 0 { // stretch
+			if ni.LayData.Size.Max.Y < 0 { // stretch
 				cgd.SizeMax = -1
 			} else {
-				SetMax32(&(cgd.SizeMax), gi.LayData.Size.Max.X)
+				SetMax32(&(cgd.SizeMax), ni.LayData.Size.Max.X)
 			}
 		}
 
@@ -603,15 +603,15 @@ func (ly *Layout) AllocFromParent() {
 	if ly.Par == nil || !ly.LayData.AllocSize.IsZero() {
 		return
 	}
-	pgi, _ := KiToNode2D(ly.Par)
-	lyp := pgi.AsLayout2D()
+	pni, _ := KiToNode2D(ly.Par)
+	lyp := pni.AsLayout2D()
 	if lyp == nil {
 		ly.FuncUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
-			pgi, _ := KiToNode2D(k)
-			if pgi == nil {
+			pni, _ := KiToNode2D(k)
+			if pni == nil {
 				return false
 			}
-			pg := pgi.AsWidget()
+			pg := pni.AsWidget()
 			if pg == nil {
 				return false
 			}
@@ -681,17 +681,17 @@ func (ly *Layout) LayoutSharedDim(dim Dims2D) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		al := gi.Sty.Layout.AlignDim(dim)
-		pref := gi.LayData.Size.Pref.Dim(dim)
-		need := gi.LayData.Size.Need.Dim(dim)
-		max := gi.LayData.Size.Max.Dim(dim)
+		al := ni.Sty.Layout.AlignDim(dim)
+		pref := ni.LayData.Size.Pref.Dim(dim)
+		need := ni.LayData.Size.Need.Dim(dim)
+		max := ni.LayData.Size.Max.Dim(dim)
 		pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, spc, al)
-		gi.LayData.AllocSize.SetDim(dim, size)
-		gi.LayData.AllocPosRel.SetDim(dim, pos)
+		ni.LayData.AllocSize.SetDim(dim, size)
+		ni.LayData.AllocPosRel.SetDim(dim, pos)
 	}
 }
 
@@ -728,13 +728,13 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	addSpace := false           // apply extra toward spacing -- for justify
 	if usePref && extra > 0.0 { // have some stretch extra
 		for _, c := range ly.Kids {
-			gi := c.(Node2D).AsWidget()
-			if gi == nil {
+			ni := c.(Node2D).AsWidget()
+			if ni == nil {
 				continue
 			}
-			if gi.LayData.Size.HasMaxStretch(dim) { // negative = stretch
+			if ni.LayData.Size.HasMaxStretch(dim) { // negative = stretch
 				nstretch++
-				stretchTot += gi.LayData.Size.Pref.Dim(dim)
+				stretchTot += ni.LayData.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
@@ -742,13 +742,13 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 		}
 	} else if extra > 0.0 { // extra relative to Need
 		for _, c := range ly.Kids {
-			gi := c.(Node2D).AsWidget()
-			if gi == nil {
+			ni := c.(Node2D).AsWidget()
+			if ni == nil {
 				continue
 			}
-			if gi.LayData.Size.HasMaxStretch(dim) || gi.LayData.Size.CanStretchNeed(dim) {
+			if ni.LayData.Size.HasMaxStretch(dim) || ni.LayData.Size.CanStretchNeed(dim) {
 				nstretch++
-				stretchTot += gi.LayData.Size.Pref.Dim(dim)
+				stretchTot += ni.LayData.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
@@ -776,21 +776,21 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	}
 
 	for i, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		size := gi.LayData.Size.Need.Dim(dim)
+		size := ni.LayData.Size.Need.Dim(dim)
 		if usePref {
-			size = gi.LayData.Size.Pref.Dim(dim)
+			size = ni.LayData.Size.Pref.Dim(dim)
 		}
 		if stretchMax { // negative = stretch
-			if gi.LayData.Size.HasMaxStretch(dim) { // in proportion to pref
-				size += extra * (gi.LayData.Size.Pref.Dim(dim) / stretchTot)
+			if ni.LayData.Size.HasMaxStretch(dim) { // in proportion to pref
+				size += extra * (ni.LayData.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if stretchNeed {
-			if gi.LayData.Size.HasMaxStretch(dim) || gi.LayData.Size.CanStretchNeed(dim) {
-				size += extra * (gi.LayData.Size.Pref.Dim(dim) / stretchTot)
+			if ni.LayData.Size.HasMaxStretch(dim) || ni.LayData.Size.CanStretchNeed(dim) {
+				size += extra * (ni.LayData.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if addSpace { // implies align justify
 			if i > 0 {
@@ -798,10 +798,10 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 			}
 		}
 
-		gi.LayData.AllocSize.SetDim(dim, size)
-		gi.LayData.AllocPosRel.SetDim(dim, pos)
+		ni.LayData.AllocSize.SetDim(dim, size)
+		ni.LayData.AllocPosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), gi.UniqueNm, pos, size)
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size)
 		}
 		pos += size + ly.Spacing.Dots
 	}
@@ -923,12 +923,12 @@ func (ly *Layout) LayoutGrid() {
 	cols := ly.GridSize.X
 	rows := ly.GridSize.Y
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
 
-		lst := gi.Sty.Layout
+		lst := ni.Sty.Layout
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -941,12 +941,12 @@ func (ly *Layout) LayoutGrid() {
 			gd := ly.GridData[Col][col]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
-			pref := gi.LayData.Size.Pref.Dim(dim)
-			need := gi.LayData.Size.Need.Dim(dim)
-			max := gi.LayData.Size.Max.Dim(dim)
+			pref := ni.LayData.Size.Pref.Dim(dim)
+			need := ni.LayData.Size.Need.Dim(dim)
+			max := ni.LayData.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
-			gi.LayData.AllocSize.SetDim(dim, size)
-			gi.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.LayData.AllocSize.SetDim(dim, size)
+			ni.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
 
 		}
 		{ // row, Y dim
@@ -954,16 +954,16 @@ func (ly *Layout) LayoutGrid() {
 			gd := ly.GridData[Row][row]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
-			pref := gi.LayData.Size.Pref.Dim(dim)
-			need := gi.LayData.Size.Need.Dim(dim)
-			max := gi.LayData.Size.Max.Dim(dim)
+			pref := ni.LayData.Size.Pref.Dim(dim)
+			need := ni.LayData.Size.Need.Dim(dim)
+			max := ni.LayData.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
-			gi.LayData.AllocSize.SetDim(dim, size)
-			gi.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.LayData.AllocSize.SetDim(dim, size)
+			ni.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}
 
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, gi.LayData.AllocPosRel, gi.LayData.AllocSize)
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, ni.LayData.AllocPosRel, ni.LayData.AllocSize)
 		}
 
 		col++
@@ -981,11 +981,11 @@ func (ly *Layout) LayoutGrid() {
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
 	for _, c := range ly.Kids {
-		gi := c.(Node2D).AsWidget()
-		if gi == nil {
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
 			continue
 		}
-		ly.ChildSize.SetMax(gi.LayData.AllocPosRel.Add(gi.LayData.AllocSize))
+		ly.ChildSize.SetMax(ni.LayData.AllocPosRel.Add(ni.LayData.AllocSize))
 	}
 }
 
@@ -995,9 +995,9 @@ func (ly *Layout) FinalizeLayout() {
 func (ly *Layout) AvailSize() Vec2D {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.SubVal(spc) // spc is for right size space
-	pargi, _ := KiToNode2D(ly.Par)
-	if pargi != nil {
-		vp := pargi.AsViewport2D()
+	parni, _ := KiToNode2D(ly.Par)
+	if parni != nil {
+		vp := parni.AsViewport2D()
 		if vp != nil {
 			if vp.Viewport == nil {
 				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
@@ -1166,14 +1166,14 @@ func (ly *Layout) Render2DChildren() {
 		if !ok {
 			return
 		}
-		gii, _ := KiToNode2D(sn)
-		gii.Render2D()
+		nii, _ := KiToNode2D(sn)
+		nii.Render2D()
 		return
 	}
 	for _, kid := range ly.Kids {
-		gii, _ := KiToNode2D(kid)
-		if gii != nil {
-			gii.Render2D()
+		nii, _ := KiToNode2D(kid)
+		if nii != nil {
+			nii.Render2D()
 		}
 	}
 }
