@@ -54,7 +54,8 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	cb.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
 		if !vvv.IsInactive() {
-			IconChooserDialog(cb.Viewport, "Select an Icon", "", nil, vv.This,
+			cur := gi.IconName(kit.ToString(vvv.Value.Interface()))
+			IconChooserDialog(cb.Viewport, cur, "Select an Icon", "", nil, vv.This,
 				func(recv, send ki.Ki, sig int64, data interface{}) {
 					sv, _ := send.(*SliceView)
 					si := sv.SelectedIdx

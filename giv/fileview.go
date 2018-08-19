@@ -35,19 +35,40 @@ import (
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
 	gi.Frame
-	DirPath     string            `desc:"path to directory of files to display"`
-	SelFile     string            `desc:"selected file"`
-	Ext         string            `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
-	ExtMap      map[string]string `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
-	Files       []*FileInfo       `desc:"files for current directory"`
-	SelectedIdx int               `desc:"index of currently-selected file in Files list (-1 if none)"`
-	FileSig     ki.Signal         `desc:"signal for file actions"`
+	DirPath     string             `desc:"path to directory of files to display"`
+	SelFile     string             `desc:"selected file"`
+	Ext         string             `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
+	FilterFunc  FileViewFilterFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	ExtMap      map[string]string  `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
+	Files       []*FileInfo        `desc:"files for current directory"`
+	SelectedIdx int                `desc:"index of currently-selected file in Files list (-1 if none)"`
+	FileSig     ki.Signal          `desc:"signal for file actions"`
 }
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
 
 // Note: the overall strategy here is similar to Dialog, where we provide lots
 // of flexible configuration elements that can be easily extended and modified
+
+// FileViewFilterFunc is a filtering function for files -- returns true if the
+// file should be visible in the view, and false if not
+type FileViewFilterFunc func(fv *FileView, fi *FileInfo) bool
+
+// FileViewDirOnlyFilter is a FileViewFilterFunc that only shows directories (folders).
+func FileViewDirOnlyFilter(fv *FileView, fi *FileInfo) bool {
+	return fi.Kind == "Folder"
+}
+
+// FileViewExtOnlyFilter is a FileViewFilterFunc that only shows files that
+// match the target extensions, and directories.
+func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
+	if fi.Kind == "Folder" {
+		return true
+	}
+	ext := strings.ToLower(filepath.Ext(fi.Name))
+	_, has := fv.ExtMap[ext]
+	return has
+}
 
 // SetPathFile sets the path, initial select file (or "") and intializes the view
 func (fv *FileView) SetPathFile(path, file, ext string) {
@@ -454,7 +475,13 @@ func (fv *FileView) UpdateFiles() {
 			fi.Kind = mime.TypeByExtension(ext)
 		}
 		fi.Ic = FileKindToIcon(fi.Kind, fi.Name)
-		fv.Files = append(fv.Files, &fi)
+		keep := true
+		if fv.FilterFunc != nil {
+			keep = fv.FilterFunc(fv, &fi)
+		}
+		if keep {
+			fv.Files = append(fv.Files, &fi)
+		}
 		if info.IsDir() {
 			return filepath.SkipDir
 		}
@@ -462,8 +489,8 @@ func (fv *FileView) UpdateFiles() {
 	})
 
 	sv := fv.FilesView()
-	sv.CurSelField = "Name"
-	sv.CurSelVal = fv.SelFile
+	sv.SelField = "Name"
+	sv.SelVal = fv.SelFile
 	sv.UpdateFromSlice()
 	fv.SelectedIdx = sv.SelectedIdx
 	fv.UpdateEnd(updt)

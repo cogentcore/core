@@ -421,6 +421,7 @@ func (g *WidgetBase) MakeContextMenu(m *Menu) {
 }
 
 var TooltipFrameProps = ki.Props{
+	"background-color":    &Prefs.Colors.Highlight,
 	"border-width":        units.NewValue(0, units.Px),
 	"border-color":        "none",
 	"margin":              units.NewValue(0, units.Px),
@@ -450,7 +451,6 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.Lay = LayoutVert
 	frame.SetProps(TooltipFrameProps, false)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
-	lbl.SetProp("background-color", &Prefs.Colors.Highlight)
 	lbl.SetProp("word-wrap", true)
 
 	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)

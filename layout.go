@@ -1220,6 +1220,58 @@ func (ly *Layout) AutoScroll(pos image.Point) {
 	}
 }
 
+// ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
+// in view -- returns true if scrolling was needed
+func (ly *Layout) ScrollToBoxDim(dim Dims2D, st, minPos, maxPos int) bool {
+	sc := ly.Scrolls[dim]
+	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+	vissz := sc.ThumbVal            // amount visible
+	ed := st + int(vissz)
+
+	if minPos >= st && maxPos <= ed {
+		return false
+	}
+
+	h := ly.Sty.Font.Size.Dots
+
+	if minPos < st {
+		trg := sc.Value + float32(minPos-st) - h
+		if trg < 0 {
+			trg = 0
+		}
+		sc.SetValueAction(trg)
+		return true
+	} else {
+		trg := sc.Value + float32(maxPos-ed) + h
+		if trg > scrange {
+			trg = scrange
+		}
+		sc.SetValueAction(trg)
+		return true
+	}
+}
+
+// ScrollToBox scrolls the layout to ensure that given rect box is in view --
+// returns true if scrolling was needed
+func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
+	did := false
+	if ly.HasScroll[Y] && ly.HasScroll[X] {
+		did = ly.ScrollToBoxDim(Y, ly.WinBBox.Min.Y, box.Min.Y, box.Max.Y)
+		did = did || ly.ScrollToBoxDim(X, ly.WinBBox.Min.X, box.Min.X, box.Max.X)
+	} else if ly.HasScroll[Y] {
+		did = ly.ScrollToBoxDim(Y, ly.WinBBox.Min.Y, box.Min.Y, box.Max.Y)
+	} else if ly.HasScroll[X] {
+		did = ly.ScrollToBoxDim(X, ly.WinBBox.Min.X, box.Min.X, box.Max.X)
+	}
+	return did
+}
+
+// ScrollToItem scrolls the layout to ensure that given item is in view --
+// returns true if scrolling was needed
+func (ly *Layout) ScrollToItem(ni Node2D) bool {
+	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
+}
+
 func (ly *Layout) LayoutEvents() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEventType(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {

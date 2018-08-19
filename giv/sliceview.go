@@ -38,6 +38,7 @@ type SliceView struct {
 	Values       []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
 	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	SelVal       interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 	SelectedIdx  int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SelectMode   bool               `desc:"editing-mode select rows mode"`
 	SelectedRows map[int]struct{}   `desc:"list of currently-selected rows"`
@@ -313,6 +314,9 @@ func (sv *SliceView) ConfigSliceGridRows() {
 		}
 
 	}
+	if sv.SelVal != nil {
+		sv.SelectedIdx, _ = SliceRowByValue(sv.Slice, sv.SelVal)
+	}
 	if sv.IsInactive() && sv.SelectedIdx >= 0 {
 		sv.SelectRowWidgets(sv.SelectedIdx, true)
 	}
@@ -415,6 +419,9 @@ func (sv *SliceView) Render2D() {
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
+		if sv.SelectedIdx > -1 {
+			sv.ScrollToRow(sv.SelectedIdx)
+		}
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
 	}
@@ -512,6 +519,47 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 	return -1, false
 }
 
+// ScrollToRow ensures that given row is visible by scrolling layout as needed
+// -- returns true if any scrolling was performed
+func (sv *SliceView) ScrollToRow(row int) bool {
+	sg, _ := sv.SliceGrid()
+	if widg, ok := sv.RowFirstWidget(row); ok {
+		return sg.ScrollToItem(widg)
+	}
+	return false
+}
+
+// SelectVal sets SelVal and attempts to find corresponding row, setting
+// SelectedIdx and selecting row if found -- returns true if found, false
+// otherwise.
+func (sv *SliceView) SelectVal(val string) bool {
+	sv.SelVal = val
+	if sv.SelVal != nil {
+		idx, _ := SliceRowByValue(sv.Slice, sv.SelVal)
+		if idx >= 0 {
+			sv.ScrollToRow(idx)
+			sv.UpdateSelect(idx, true)
+			return true
+		}
+	}
+	return false
+}
+
+// SliceRowByValue searches for first row that contains given value in slice
+// -- returns false if not found
+func SliceRowByValue(struSlice interface{}, fldVal interface{}) (int, bool) {
+	mv := reflect.ValueOf(struSlice)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+	for row := 0; row < sz; row++ {
+		rval := kit.NonPtrValue(mvnp.Index(row))
+		if rval.Interface() == fldVal {
+			return row, true
+		}
+	}
+	return -1, false
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //    Moving
 
@@ -538,6 +586,7 @@ func (sv *SliceView) MoveDown(selMode mouse.SelectModes) int {
 func (sv *SliceView) MoveDownAction(selMode mouse.SelectModes) int {
 	nrow := sv.MoveDown(selMode)
 	if nrow >= 0 {
+		sv.ScrollToRow(nrow)
 		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
@@ -566,6 +615,7 @@ func (sv *SliceView) MoveUp(selMode mouse.SelectModes) int {
 func (sv *SliceView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := sv.MoveUp(selMode)
 	if nrow >= 0 {
+		sv.ScrollToRow(nrow)
 		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
@@ -1164,12 +1214,14 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 	case gi.KeyFunMoveDown:
 		nr := row + 1
 		if nr < sv.BuiltSize {
+			sv.ScrollToRow(nr)
 			sv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
 	case gi.KeyFunMoveUp:
 		nr := row - 1
 		if nr >= 0 {
+			sv.ScrollToRow(nr)
 			sv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}

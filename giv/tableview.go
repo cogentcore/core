@@ -53,8 +53,8 @@ type TableView struct {
 	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
 	ShowIndex    bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
 	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	CurSelField  string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
-	CurSelVal    interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in CurSelField"`
+	SelField     string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
+	SelVal       interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`
 	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedRows for full set of selected rows in active editing mode"`
 	SortIdx      int                `desc:"current sort index"`
 	SortDesc     bool               `desc:"whether current sort order is descending"`
@@ -497,8 +497,8 @@ func (tv *TableView) ConfigSliceGridRows() {
 			}
 		}
 	}
-	if tv.CurSelField != "" && tv.CurSelVal != nil {
-		tv.SelectedIdx, _ = StructSliceRowByValue(tv.Slice, tv.CurSelField, tv.CurSelVal)
+	if tv.SelField != "" && tv.SelVal != nil {
+		tv.SelectedIdx, _ = StructSliceRowByValue(tv.Slice, tv.SelField, tv.SelVal)
 	}
 	if tv.IsInactive() && tv.SelectedIdx >= 0 {
 		tv.SelectRow(tv.SelectedIdx)
@@ -819,6 +819,9 @@ func (tv *TableView) Render2D() {
 		tv.RenderScrolls()
 		tv.Render2DChildren()
 		tv.PopBounds()
+		if tv.SelectedIdx > -1 {
+			tv.ScrollToRow(tv.SelectedIdx)
+		}
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)
 	}
@@ -925,15 +928,27 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 	return -1, false
 }
 
-// SelectFieldVal sets CurSelField and CurSelVal and attempts to find
-// corresponding row, setting SelectedIdx and selecting row if found --
-// returns true if found, false otherwise
+// ScrollToRow ensures that given row is visible by scrolling layout as needed
+// -- returns true if any scrolling was performed
+func (tv *TableView) ScrollToRow(row int) bool {
+	sg, _ := tv.SliceGrid()
+	sgf := sg.KnownChild(2).(*gi.Frame)
+	if widg, ok := tv.RowFirstWidget(row); ok {
+		return sgf.ScrollToItem(widg)
+	}
+	return false
+}
+
+// SelectFieldVal sets SelField and SelVal and attempts to find corresponding
+// row, setting SelectedIdx and selecting row if found -- returns true if
+// found, false otherwise
 func (tv *TableView) SelectFieldVal(fld, val string) bool {
-	tv.CurSelField = fld
-	tv.CurSelVal = val
-	if tv.CurSelField != "" && tv.CurSelVal != nil {
-		idx, _ := StructSliceRowByValue(tv.Slice, tv.CurSelField, tv.CurSelVal)
+	tv.SelField = fld
+	tv.SelVal = val
+	if tv.SelField != "" && tv.SelVal != nil {
+		idx, _ := StructSliceRowByValue(tv.Slice, tv.SelField, tv.SelVal)
 		if idx >= 0 {
+			tv.ScrollToRow(idx)
 			tv.UpdateSelect(idx, true)
 			return true
 		}
@@ -991,6 +1006,7 @@ func (tv *TableView) MoveDown(selMode mouse.SelectModes) int {
 func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveDown(selMode)
 	if nrow >= 0 {
+		tv.ScrollToRow(nrow)
 		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
@@ -1019,6 +1035,7 @@ func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
 func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveUp(selMode)
 	if nrow >= 0 {
+		tv.ScrollToRow(nrow)
 		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
@@ -1636,12 +1653,14 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 	case gi.KeyFunMoveDown:
 		nr := row + 1
 		if nr < tv.BuiltSize {
+			tv.ScrollToRow(nr)
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
 	case gi.KeyFunMoveUp:
 		nr := row - 1
 		if nr >= 0 {
+			tv.ScrollToRow(nr)
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}

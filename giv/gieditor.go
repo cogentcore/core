@@ -20,7 +20,7 @@ func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
 			fnm := FileViewDialogValue(dlg)
 			recv.SaveJSON(fnm)
 		}
-	})
+	}, nil)
 }
 
 func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
@@ -30,7 +30,7 @@ func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
 			fnm := FileViewDialogValue(dlg)
 			recv.LoadJSON(fnm)
 		}
-	})
+	}, nil)
 }
 
 // GoGiEditor opens an interactive editor of the given Ki tree, at its root

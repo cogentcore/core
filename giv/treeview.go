@@ -691,7 +691,7 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 			tvv.SrcDelete()
 		})
 	}
-	m.AddSeparator("")
+	m.AddSeparator("esep")
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
 	ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 	ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
@@ -708,6 +708,17 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	m.AddMenuText("Paste", ptsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.Paste()
+	})
+	m.AddSeparator("vwsep")
+	m.AddMenuText("Edit In Window", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tynm := kit.NonPtrType(tvv.SrcNode.Ptr.Type()).Name()
+		StructViewDialog(tv.Viewport, tvv.SrcNode.Ptr, nil, tynm, "", nil, nil, nil)
+		tvv.Paste()
+	})
+	m.AddMenuText("GoGiEditor", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		GoGiEditor(tvv.SrcNode.Ptr)
 	})
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)

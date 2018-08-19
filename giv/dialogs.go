@@ -71,7 +71,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
-func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
+func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
 	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
@@ -86,7 +86,7 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
 	sv.StyleFunc = stylefun
-	sv.SetSlice(mp, tmpSave)
+	sv.SetSlice(slice, tmpSave)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -102,7 +102,7 @@ func SliceViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, titl
 // functions available for both the widget signal reporting selection events,
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
-func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
+func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"textfield": ki.Props{
@@ -127,7 +127,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, mp interface{}, title, prompt str
 	sv.SetInactiveState(true)
 	sv.SelectedIdx = initRow
 	sv.StyleFunc = stylefun
-	sv.SetSlice(mp, nil)
+	sv.SelVal = curVal
+	sv.SetSlice(slice, nil)
 
 	sv.SliceViewSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(SliceViewDoubleClicked) {
@@ -265,7 +266,7 @@ func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view
-func IconChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
+func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"icon": ki.Props{
@@ -274,7 +275,7 @@ func IconChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, r
 			},
 		}
 	}
-	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, title, prompt, -1, css, recv, selFun, dlgFun, IconChooserStyleFunc)
+	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, curIc, title, prompt, -1, css, recv, selFun, dlgFun, IconChooserStyleFunc)
 	return dlg
 }
 
@@ -309,9 +310,14 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 	return dlg
 }
 
-// FileViewDialog is for selecting / manipulating files -- if recv and fun are
-// non-nil, they connect to the dialog signals
-func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+// FileViewDialog is for selecting / manipulating files -- ext is one or more
+// (comma separated) extensions -- files with those will be highighted
+// (include the . at the start of the extension).  recv and fun connect to the
+// dialog signal: if signal value is gi.DialogAccepted use FileViewDialogValue
+// to get the resulting selected file.  The optional filterFunc can filter
+// files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
+// directories) and FileViewExtOnlyFilter (for only showing directories).
+func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, filterFunc FileViewFilterFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("file-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
@@ -323,6 +329,7 @@ func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt st
 	fv := frame.InsertNewChild(KiT_FileView, prIdx+2, "file-view").(*FileView)
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
+	fv.FilterFunc = filterFunc
 	fv.SetPathFile(path, file, ext)
 
 	fv.FileSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {

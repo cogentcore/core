@@ -75,7 +75,7 @@ func PrefsEditor(p *gi.Preferences) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.SaveJSON(FileViewDialogValue(dlg))
 			}
-		})
+		}, nil)
 	})
 
 	loadc := tbar.AddNewChild(gi.KiT_Action, "loadcolor").(*gi.Action)
@@ -88,7 +88,7 @@ func PrefsEditor(p *gi.Preferences) {
 				p.Colors.LoadJSON(FileViewDialogValue(dlg))
 				p.Update()
 			}
-		})
+		}, nil)
 	})
 
 	stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
@@ -97,7 +97,7 @@ func PrefsEditor(p *gi.Preferences) {
 	stdmap.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		mapName := p.StdKeyMapName
 		_, initRow := gi.StdKeyMapByName(mapName)
-		SliceViewSelectDialog(vp, &gi.StdKeyMapNames, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
+		SliceViewSelectDialog(vp, &gi.StdKeyMapNames, mapName, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := send.(*SliceView)
 				si := svv.SelectedIdx
@@ -155,7 +155,7 @@ func PrefsEditor(p *gi.Preferences) {
 				p.Colors.LoadJSON(FileViewDialogValue(dlg))
 				p.Update()
 			}
-		})
+		}, nil)
 	})
 	fmen.Menu.AddMenuText("Save Colors", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		FileViewDialog(vp, "", "", ".json", "Save Colors", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -163,7 +163,7 @@ func PrefsEditor(p *gi.Preferences) {
 				dlg, _ := send.(*gi.Dialog)
 				p.Colors.SaveJSON(FileViewDialogValue(dlg))
 			}
-		})
+		}, nil)
 	})
 	fmen.Menu.AddSeparator("msep")
 	fmen.Menu.AddMenuText("Save Screen Zoom", "", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
