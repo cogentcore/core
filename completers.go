@@ -46,6 +46,23 @@ type BaseCompleter struct {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// CreateCompleter - a factory to create different types of text completers
+
+func CreateCompleter(s string) (Completer, error) {
+	switch s {
+	case "word-completer":
+		return new(WordCompleter), nil
+	case "go-completer":
+		return new(GoCompleter), nil
+	case "path-completer":
+		return new(PathCompleter), nil
+	default:
+		//if type is invalid, return an error
+		return nil, errors.New("Invalid Completer Type")
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // WordCompleter
 type WordCompleter struct {
 	BaseCompleter
@@ -86,6 +103,9 @@ func (wc *WordCompleter) GenCompletions(text string) {
 					match_end = i
 				}
 			}
+		}
+		if match_start > -1 && match_end == -1 { // everything possible was a match!
+			match_end = len(wc.completions)
 		}
 	}
 
@@ -268,17 +288,96 @@ func (gc *GoCompleter) Extend() string {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// GoCompleter - the completer functions for parsing and offering completions for go lang expressions
+// PathCompleter - the completer for file path fields (.e.g. load/save dialog)
 
-func CreateCompleter(s string) (Completer, error) {
-	switch s {
-	case "word-completer":
-		return new(WordCompleter), nil
-	case "go-completer":
-		return new(GoCompleter), nil
-	default:
-		//if type is invalid, return an error
-		return nil, errors.New("Invalid Completer Type")
+type PathCompleter struct {
+	BaseCompleter
+}
+
+func (pc *PathCompleter) GenCompletions(text string) {
+	if pc.inited == false {
+		pc.Init()
+	}
+	pc.matches = pc.completions[0:0]
+
+	seedStart := 0
+	for i := len(text) - 1; i >= 0; i-- {
+		r := rune(text[i])
+		if unicode.IsSpace(r) || unicode.IsPunct(r) {
+			seedStart = i + 1
+			break
+		}
+	}
+	pc.seed = text[seedStart:]
+
+	match_start := -1
+	match_end := -1
+	if len(pc.seed) > 0 {
+		for i, s := range pc.completions {
+			if match_end > -1 {
+				break
+			}
+			if match_start == -1 {
+				if strings.HasPrefix(s, pc.seed) {
+					match_start = i // first match in sorted list
+					fmt.Println(pc.completions[i])
+				}
+				continue
+			}
+			if match_start > -1 {
+				if strings.HasPrefix(s, pc.seed) == false {
+					match_end = i
+				}
+			}
+		}
+		if match_start > -1 && match_end == -1 { // everything possible was a match!
+			match_end = len(pc.completions)
+		}
 	}
 
+	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
+	if match_start > -1 && match_end > -1 {
+		pc.matches = pc.completions[match_start:match_end]
+	}
+}
+
+func (pc *PathCompleter) Count() int {
+	return len(pc.matches)
+}
+
+func (pc *PathCompleter) Seed() string {
+	return pc.seed
+}
+
+func (pc *PathCompleter) Match(index int) string {
+	return pc.matches[index]
+}
+
+func (pc *PathCompleter) Extend() string {
+	keep_looking := true
+	new_seed := pc.seed
+	potential_seed := new_seed
+	first_match := pc.matches[0]
+	for keep_looking {
+		if len(first_match) <= len(new_seed) {
+			keep_looking = false // ran out of chars
+			break
+		}
+
+		potential_seed = first_match[0 : len(new_seed)+1]
+		for _, s := range pc.matches {
+			if !strings.HasPrefix(s, potential_seed) {
+				keep_looking = false
+				break
+			}
+		}
+		if keep_looking {
+			new_seed = potential_seed
+		}
+	}
+	return strings.Replace(new_seed, pc.seed, "", 1) // only return the seed extension
+}
+
+func (pc *PathCompleter) Init() {
+	pc.completions = []string{"file_1", "file_2", "file_3"}
 }
