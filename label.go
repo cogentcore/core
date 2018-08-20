@@ -190,7 +190,29 @@ func (g *Label) OpenLink(tl *TextLink) {
 }
 
 func (g *Label) LabelEvents() {
-	g.HoverTooltipEvent()
+	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		lb := recv.Embed(KiT_Label).(*Label)
+		hasLinks := len(lb.Render.Links) > 0
+		if hasLinks {
+			pos := lb.LayData.AllocPos.AddVal(lb.Sty.BoxSpace())
+			for ti, _ := range lb.Render.Links {
+				tl := &lb.Render.Links[ti]
+				tlb := tl.Bounds(&lb.Render, pos)
+				if me.Where.In(tlb) {
+					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, g.Viewport, lb.Nm)
+					me.SetProcessed()
+					return
+				}
+			}
+		}
+		if lb.Tooltip != "" {
+			me.SetProcessed()
+			pos := lb.WinBBox.Max
+			pos.X -= 20
+			PopupTooltip(lb.Tooltip, pos.X, pos.Y, g.Viewport, lb.Nm)
+		}
+	})
 	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		lb := recv.Embed(KiT_Label).(*Label)

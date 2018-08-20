@@ -519,9 +519,9 @@ func (g *WidgetBase) EmitContextMenuSignal() {
 func (g *WidgetBase) HoverTooltipEvent() {
 	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
-		me.SetProcessed()
 		ab := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 		if ab.Tooltip != "" {
+			me.SetProcessed()
 			pos := ab.WinBBox.Max
 			pos.X -= 20
 			PopupTooltip(ab.Tooltip, pos.X, pos.Y, g.Viewport, ab.Nm)
