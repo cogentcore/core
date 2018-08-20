@@ -116,7 +116,6 @@ type Window struct {
 	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
 	DNDFinalEvent *dnd.Event        `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	DNDMod        dnd.DropMods      `json:"-" xml:"-" desc:"current DND modifier (Copy, Move, Link) -- managed by DNDSetCursor for updating cursor"`
 	Dragging      ki.Ki             `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
 	Popup         ki.Ki             `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of popups"`
@@ -1696,32 +1695,26 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	w.DNDFinalEvent = nil
 }
 
-// DNDSetCursor sets the cursor based on the DND event mod.
+// DNDSetCursor sets the cursor based on the DND event mod -- does a
+// "PushIfNot" so safe for multiple calls.
 func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
-	if w.DNDMod == dmod {
-		return
-	}
-	if w.DNDMod != dnd.NoDropMod {
-		oswin.TheApp.Cursor().Pop()
-	}
+	curs := oswin.TheApp.Cursor()
 	switch dmod {
 	case dnd.DropCopy:
-		oswin.TheApp.Cursor().Push(cursor.DragCopy)
+		curs.PushIfNot(cursor.DragCopy)
 	case dnd.DropMove:
-		oswin.TheApp.Cursor().Push(cursor.DragMove)
+		curs.PushIfNot(cursor.DragMove)
 	case dnd.DropLink:
-		oswin.TheApp.Cursor().Push(cursor.DragLink)
+		curs.PushIfNot(cursor.DragLink)
 	}
-	w.DNDMod = dmod
 }
 
 // DNDClearCursor clears any existing DND cursor that might have been set.
 func (w *Window) DNDClearCursor() {
-	if w.DNDMod == dnd.NoDropMod {
-		return
+	curs := oswin.TheApp.Cursor()
+	for curs.IsDrag() {
+		curs.Pop()
 	}
-	oswin.TheApp.Cursor().Pop()
-	w.DNDMod = dnd.NoDropMod
 }
 
 // DNDStartEvent handles drag-n-drop start events.
@@ -1729,9 +1722,9 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
 	de.Action = dnd.Start
-	de.DefaultMod()
-	w.DNDMod = dnd.NoDropMod
-	w.SendEventSignal(&de, false) // popup = false: ignore any popups
+	de.DefaultMod()                             // based on current key modifiers
+	oswin.TheApp.Cursor().PushIfNot(cursor.Not) // start off with not accepting drop
+	w.SendEventSignal(&de, false)               // popup = false: ignore any popups
 	// now up to receiver to call StartDragNDrop if they want to..
 }
 
@@ -1746,12 +1739,70 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	// todo: send move / enter / exit events to anyone listening
 	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
 	de.Processed = false
-	de.DefaultMod()
+	de.DefaultMod() // based on current key modifiers
 	de.Action = dnd.Move
-	w.DNDSetCursor(de.Mod)
 	w.SendEventSignal(&de, false) // popup = false: ignore any popups
+	w.GenDNDFocusEvents(&de, false)
 	w.RenderOverlays()
 	e.SetProcessed()
+}
+
+// GenDNDFocusEvents processes mouse.MoveEvent to generate dnd.FocusEvent
+// events -- returns true if any such events were sent.  If popup is true,
+// then only items on popup are in scope, otherwise items NOT on popup are in
+// scope (if no popup, everything is in scope).
+func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
+	fe := dnd.FocusEvent{Event: mev.Event}
+	pos := mev.Pos()
+	ftyp := oswin.DNDFocusEvent
+	updated := false
+	updt := false
+	for pri := HiPri; pri < EventPrisN; pri++ {
+		w.EventSigs[ftyp][pri].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
+			if k.IsDeleted() { // destroyed is filtered upstream
+				return false
+			}
+			_, ni := KiToNode2D(k)
+			if ni != nil {
+				if !w.IsInScope(ni, popup) {
+					return false
+				}
+				in := pos.In(ni.WinBBox)
+				if in {
+					if !bitflag.Has(ni.Flag, int(DNDHasEntered)) {
+						fe.Action = dnd.Enter
+						bitflag.Set(&ni.Flag, int(DNDHasEntered))
+						if !updated {
+							updt = w.UpdateStart()
+							updated = true
+						}
+						return true // send event
+					} else {
+						return false // already in
+					}
+				} else { // mouse not in object
+					if bitflag.Has(ni.Flag, int(DNDHasEntered)) {
+						fe.Action = dnd.Exit
+						bitflag.Clear(&ni.Flag, int(DNDHasEntered))
+						if !updated {
+							updt = w.UpdateStart()
+							updated = true
+						}
+						return true // send event
+					} else {
+						return false // already out
+					}
+				}
+			} else {
+				// todo: 3D
+				return false
+			}
+		})
+	}
+	if updated {
+		w.UpdateEnd(updt)
+	}
+	return updated
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).

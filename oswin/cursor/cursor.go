@@ -81,6 +81,14 @@ const (
 
 var KiT_Shapes = kit.Enums.AddEnum(ShapesN, false, nil)
 
+// Drags is a map-set of cursors used for signaling dragging events.
+var Drags = map[Shapes]struct{}{
+	Not:      struct{}{},
+	DragCopy: struct{}{},
+	DragMove: struct{}{},
+	DragLink: struct{}{},
+}
+
 // Cursor manages the mouse cursor / pointer appearance.  Currently only a
 // fixed set of standard cursors are supported, but in the future it will be
 // possible to set the cursor from an image / svg.
@@ -116,6 +124,9 @@ type Cursor interface {
 
 	// Show shows the cursor after a hide if it is hidden.
 	Show()
+
+	// IsDrag returns true if the current cursor is used for signaling dragging events.
+	IsDrag() bool
 }
 
 // CursorBase provides the common infrastructure for Cursor interface.
@@ -137,6 +148,11 @@ func (c *CursorBase) Current() Shapes {
 
 func (c *CursorBase) IsVisible() bool {
 	return c.Vis
+}
+
+func (c *CursorBase) IsDrag() bool {
+	_, has := Drags[c.Cur]
+	return has
 }
 
 // PushStack pushes item on the stack
