@@ -247,6 +247,9 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props) {
 	}
 	StyleFields.Style(s, par, props)
 	s.Text.AlignV = s.Layout.AlignV
+	if s.Layout.Margin.Val > 0 && s.Text.ParaSpacing.Val == 0 {
+		s.Text.ParaSpacing = s.Layout.Margin
+	}
 	s.Layout.SetStylePost(props)
 	s.Font.SetStylePost(props)
 	s.Text.SetStylePost(props)

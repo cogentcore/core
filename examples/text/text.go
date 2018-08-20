@@ -71,8 +71,9 @@ and Sub<sub>script</sub> and Super<sup>script</sup>`
 	wrlab.SetProp("width", "20em")
 	wrlab.SetProp("max-width", -1)
 	wrlab.SetProp("line-height", 1.2)
+	wrlab.SetProp("para-spacing", "1ex")
 	wrlab.SetProp("text-indent", "20px")
-	wrlab.Text = `Word <u>wrapping</u> should be <span style="color:red">enabled in this label</span> -- this is a test to see if it is.  Usually people use some kind of obscure latin text here -- not really sure why <u>because nobody reads latin anymore,</u> at least nobody I know.  Anyway, let's see how this works.  Also, it should be interesting to determine how word wrapping works with styling -- <large>the styles should properly wrap across the lines</large>.  In addition, there is the question of <b>how built-in breaks interface</b> with the auto-line breaks, and furthermore the question of paragraph breaks versus simple br line breaks.
+	wrlab.Text = `<p>Word <u>wrapping</u> should be <span style="color:red">enabled in this label</span> -- this is a test to see if it is.  Usually people use some kind of obscure latin text here -- not really sure why <u>because nobody reads latin anymore,</u> at least nobody I know.  Anyway, let's see how this works.  Also, it should be interesting to determine how word wrapping works with styling -- <large>the styles should properly wrap across the lines</large>.  In addition, there is the question of <b>how built-in breaks interface</b> with the auto-line breaks, and furthermore the question of paragraph breaks versus simple br line breaks.</p>
 <p>One major question is the extent to which <a href="https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap">word wrapping</a> can be made sensitive to the overall size of the containing element -- this is easy when setting a direct fixed width, but word wrapping should also occur as the user resizes the window.</p>
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `

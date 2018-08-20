@@ -172,6 +172,21 @@ func (sr *SpanRender) HasDecoUpdate(bg color.Color, deco TextDecorations) {
 	}
 }
 
+// IsNewPara returns true if this span starts a new paragraph
+func (sr *SpanRender) IsNewPara() bool {
+	if len(sr.Render) == 0 {
+		return false
+	}
+	return bitflag.Has32(int32(sr.Render[0].Deco), int(DecoParaStart))
+}
+
+// SetNewPara sets this as starting a new paragraph
+func (sr *SpanRender) SetNewPara() {
+	if len(sr.Render) > 0 {
+		bitflag.Set32((*int32)(&sr.Render[0].Deco), int(DecoParaStart))
+	}
+}
+
 // AppendRune adds one rune and associated formatting info
 func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, deco TextDecorations) {
 	sr.Text = append(sr.Text, r)
@@ -1025,7 +1040,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 				atStart := len(curSp.Text) == 0
 				curSp.AppendRune('“', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
 				if nextIsParaStart && atStart {
-					bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
+					curSp.SetNewPara()
 				}
 				nextIsParaStart = false
 			case "dfn":
@@ -1033,8 +1048,11 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			case "bdo":
 				// bidirectional override..
 			case "p":
-				tr.Spans = append(tr.Spans, SpanRender{})
-				curSp = &(tr.Spans[len(tr.Spans)-1])
+				if len(curSp.Text) > 0 {
+					// fmt.Printf("para start: '%v'\n", string(curSp.Text))
+					tr.Spans = append(tr.Spans, SpanRender{})
+					curSp = &(tr.Spans[len(tr.Spans)-1])
+				}
 				nextIsParaStart = true
 			case "br":
 			default:
@@ -1082,14 +1100,20 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 		case xml.CharData:
 			curf := fstack[len(fstack)-1]
 			atStart := len(curSp.Text) == 0
-			curSp.AppendString(string(se), curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+			str := string(se)
 			if nextIsParaStart && atStart {
-				bitflag.Set32((*int32)(&(curSp.Render[0].Deco)), int(DecoParaStart))
+				str = strings.TrimLeftFunc(str, func(r rune) bool {
+					return unicode.IsSpace(r)
+				})
+			}
+			curSp.AppendString(str, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+			if nextIsParaStart && atStart {
+				curSp.SetNewPara()
 			}
 			nextIsParaStart = false
 			if curLinkIdx >= 0 {
 				tl := &tr.Links[curLinkIdx]
-				tl.Label = string(se)
+				tl.Label = str
 			}
 		}
 	}
@@ -1114,6 +1138,7 @@ type TextStyle struct {
 	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
 	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
 	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
+	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directy with para-spacing"`
 	TabSize          units.Value    `xml:"tab-size" inherit:"true" desc:"tab size"`
 	WordWrap         bool           `xml:"word-wrap" inherit:"true" desc:"wrap text within a given size"`
 	// todo:
@@ -1209,6 +1234,7 @@ func (ts *TextStyle) InheritFields(par *TextStyle) {
 	ts.OrientationVert = par.OrientationVert
 	ts.OrientationHoriz = par.OrientationHoriz
 	ts.Indent = par.Indent
+	ts.ParaSpacing = par.ParaSpacing
 	ts.TabSize = par.TabSize
 	ts.WordWrap = par.WordWrap
 }
@@ -1286,7 +1312,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
 			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
 		}
-		if bitflag.Has32(int32(sr.Render[0].Deco), int(DecoParaStart)) {
+		if sr.IsNewPara() {
 			sr.RelPos.X = txtSty.Indent.Dots
 		} else {
 			sr.RelPos.X = 0
@@ -1370,7 +1396,16 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	}
 
 	// vertical alignment
-	vht := lspc * float32(len(tr.Spans))
+	nsp := len(tr.Spans)
+	npara := 0
+	for si := 1; si < nsp; si++ {
+		sr := &(tr.Spans[si])
+		if sr.IsNewPara() {
+			npara++
+		}
+	}
+
+	vht := lspc*float32(nsp) + float32(npara)*txtSty.ParaSpacing.Dots
 	if vht > size.Y {
 		size.Y = vht
 	}
@@ -1393,6 +1428,9 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 
 	for si := range tr.Spans {
 		sr := &(tr.Spans[si])
+		if si > 0 && sr.IsNewPara() {
+			vpos += txtSty.ParaSpacing.Dots
+		}
 		sr.RelPos.Y = vpos
 		ssz := sr.SizeHV()
 		ssz.X += sr.RelPos.X

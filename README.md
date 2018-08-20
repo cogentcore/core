@@ -127,8 +127,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   works but subsequent elements can't move up b/c they are allocated based on
   original size.. really need 2 passes here.
 
-* add hover for label to show url for links.
-
 * add option for no window render at all while iconfied
 
 * arrow nav for menubar
