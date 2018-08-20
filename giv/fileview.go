@@ -357,6 +357,9 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
+	sf.SetProp("completer-type", "path-completer")
+	sf.Completion = true
+	sf.CmpltrCB = fv.CompletionList
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
@@ -752,4 +755,13 @@ func FileKindToIcon(kind, name string) gi.IconName {
 
 	icn = gi.IconName("none")
 	return icn
+}
+
+func (fv *FileView) CompletionList() []string {
+	var files = []string{}
+	for _, f := range fv.Files {
+		//fmt.Println(f.Name)
+		files = append(files, f.Name)
+	}
+	return files
 }
