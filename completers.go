@@ -313,7 +313,7 @@ func (pc *PathCompleter) GenCompletions(text string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
-		if unicode.IsSpace(r) || unicode.IsPunct(r) {
+		if unicode.IsSpace(r) || r == '/' {
 			seedStart = i + 1
 			break
 		}
@@ -330,7 +330,6 @@ func (pc *PathCompleter) GenCompletions(text string) {
 			if match_start == -1 {
 				if strings.HasPrefix(s, pc.seed) {
 					match_start = i // first match in sorted list
-					fmt.Println(pc.completions[i])
 				}
 				continue
 			}
