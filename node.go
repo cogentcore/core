@@ -1028,11 +1028,11 @@ func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc F
 }
 
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
-	dontMap := make(map[int]bool) // map of who NOT to process further -- default is false for map so reverse
+	dontMap := make(map[int]struct{}) // map of who NOT to process further -- default is false for map so reverse
 	level++
 	for i, child := range *n.Children() {
 		if !fun(child, level, data) { // false return means stop
-			dontMap[i] = true
+			dontMap[i] = struct{}{}
 		} else {
 			child.FuncFields(level+1, data, func(k Ki, level int, d interface{}) bool {
 				k.FuncDownBreadthFirst(level+1, data, fun)
@@ -1042,7 +1042,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 		}
 	}
 	for i, child := range *n.Children() {
-		if dontMap[i] {
+		if _, has := dontMap[i]; has {
 			continue
 		}
 		child.FuncDownBreadthFirst(level, data, fun)
