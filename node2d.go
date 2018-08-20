@@ -260,7 +260,7 @@ func (g *Node2DBase) HasFocus2D() bool {
 func (g *Node2DBase) GrabFocus() {
 	win := g.ParentWindow()
 	if win != nil {
-		win.SetFocusItem(g.This)
+		win.SetFocus(g.This)
 	}
 }
 
@@ -268,7 +268,7 @@ func (g *Node2DBase) GrabFocus() {
 func (g *Node2DBase) FocusNext() {
 	win := g.ParentWindow()
 	if win != nil {
-		win.SetNextFocusItem()
+		win.FocusNext()
 	}
 }
 
@@ -354,23 +354,23 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 	return k.(Node2D).AsNode2D()
 }
 
-// ConnectEventType connects this node to receive a given type of GUI event
+// ConnectEvent connects this node to receive a given type of GUI event
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
-func (g *Node2DBase) ConnectEventType(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
+func (g *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.ConnectEventType(g.This, et, pri, fun)
+		win.ConnectEvent(g.This, et, pri, fun)
 	}
 }
 
-// DisconnectEventType disconnects this receiver from receiving given event
+// DisconnectEvent disconnects this receiver from receiving given event
 // type -- pri is priority -- pass AllPris for all priorities -- see also
 // DisconnectAllEvents
-func (g *Node2DBase) DisconnectEventType(et oswin.EventType, pri EventPris) {
+func (g *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
 	win := g.ParentWindow()
 	if win != nil {
-		win.DisconnectEventType(g.This, et, pri)
+		win.DisconnectEvent(g.This, et, pri)
 	}
 }
 

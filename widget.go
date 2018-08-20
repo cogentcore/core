@@ -518,7 +518,7 @@ func (g *WidgetBase) EmitContextMenuSignal() {
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
 func (g *WidgetBase) HoverTooltipEvent() {
-	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		ab := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 		if ab.Tooltip != "" {
@@ -544,7 +544,7 @@ func (g *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {

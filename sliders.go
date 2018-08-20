@@ -323,7 +323,7 @@ func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (g *SliderBase) SliderEvents() {
-	g.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
@@ -340,7 +340,7 @@ func (g *SliderBase) SliderEvents() {
 			}
 		}
 	})
-	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
@@ -366,7 +366,7 @@ func (g *SliderBase) SliderEvents() {
 			}
 		}
 	})
-	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
@@ -379,7 +379,7 @@ func (g *SliderBase) SliderEvents() {
 			sl.SliderExitHover()
 		}
 	})
-	g.ConnectEventType(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return
@@ -393,7 +393,7 @@ func (g *SliderBase) SliderEvents() {
 			sl.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
 		}
 	})
-	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sl.IsInactive() {
 			return

@@ -1274,7 +1274,7 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 
 func (ly *Layout) LayoutEvents() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEventType(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		if li.ScrollDelta(me.Delta) {
@@ -1282,12 +1282,12 @@ func (ly *Layout) LayoutEvents() {
 		}
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	ly.ConnectEventType(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*dnd.MoveEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
-	ly.ConnectEventType(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		if li.Viewport.IsMenu() {

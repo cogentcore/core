@@ -1261,12 +1261,12 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (tv *TreeView) TreeViewEvents() {
-	tv.ConnectEventType(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		switch de.Action {
@@ -1287,7 +1287,7 @@ func (tv *TreeView) TreeViewEvents() {
 	})
 	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
 	// HiPri is needed to override label's native processing
-	lbl.ConnectEventType(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		lb, _ := recv.(*gi.Label)
 		tvv := lb.Parent().Parent().Embed(KiT_TreeView).(*TreeView)
 		me := d.(*mouse.Event)

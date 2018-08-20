@@ -92,11 +92,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-## Platforms / oswin
-
-* update keymaps for each platform
-
-## General / Widgets
+* autoscroll menu on tab focus updates (like mouse)
+* up / down arrows in spinbox
 
 * crash on quit:
 * cocoa.go:
@@ -127,6 +124,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 + TextArea -- go full editor..
 
 * Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
+
+* add context menus for delete, rename to fileview -- would be a good test to
+  make sure context menu api is sufficiently flexible.
+
+* update keymaps for each platform
 
 * update widgets README
 

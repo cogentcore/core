@@ -157,6 +157,9 @@ const (
 
 //go:generate stringer -type=EventPris
 
+/////////////////////////////////////////////////////////////////////////////
+//                   New Windows and Init
+
 // NewWindow creates a new window with given internal name handle, display
 // name, and options.
 func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
@@ -188,7 +191,7 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 // the display size (96 per inch), not the actual underlying raw display dot
 // pixels.
 func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window {
-	Init() // overall gogi system initialization
+	Init() // overall gogi system initialization, at latest possible moment
 	opts := &oswin.NewWindowOptions{
 		Title: title, Size: image.Point{width, height}, StdPixels: stdPixels,
 	}
@@ -327,72 +330,6 @@ func (w *Window) MainWidget() (ki.Ki, bool) {
 	return w.MasterVLay.Child(1)
 }
 
-// StartEventLoop is the main startup method to call after the initial window
-// configuration is setup -- does any necessary final initialization and then
-// starts the event loop in this same goroutine, and does not return until the
-// window is closed -- see GoStartEventLoop for a version that starts in a
-// separate goroutine and returns immediately.
-func (w *Window) StartEventLoop() {
-	w.EventLoop()
-}
-
-// GoStartEventLoop starts the event processing loop for this window in a new
-// goroutine, and returns immediately.
-func (w *Window) GoStartEventLoop() {
-	go w.EventLoop()
-}
-
-// StopEventLoop tells the event loop to stop running when the next event arrives.
-func (w *Window) StopEventLoop() {
-	w.stopEventLoop = true
-}
-
-// MainMenuUpdated needs to be called whenever the main menu for this window
-// is updated in terms of items added or removed.
-func (w *Window) MainMenuUpdated() {
-	if w == nil || w.MainMenu == nil {
-		return
-	}
-	w.MainMenu.SetMainMenu(w)
-}
-
-// MainMenuUpdateActives needs to be called whenever items on the main menu
-// for this window have their IsActive status updated.
-func (w *Window) MainMenuUpdateActives() {
-	if w == nil || w.MainMenu == nil {
-		return
-	}
-	w.MainMenu.MainMenuUpdateActives(w)
-}
-
-// MainMenuUpdateWindows updates a Window menu with a list of active menus.
-func (w *Window) MainMenuUpdateWindows() {
-	if w == nil || w.MainMenu == nil {
-		return
-	}
-	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
-	if !ok {
-		return
-	}
-	wmen := wmeni.(*Action)
-	men := make(Menu, 0, len(AllWindows))
-	men.AddWindowsMenu(w)
-	wmen.Menu = men
-	w.MainMenuUpdated()
-}
-
-// Init performs overall initialization of the gogi system: loading prefs, etc
-// -- automatically called when new window opened, but can be called before
-// then if pref info needed.
-func Init() {
-	if Prefs.LogicalDPIScale == 0 {
-		Prefs.Defaults()
-		Prefs.Load()
-		Prefs.Apply()
-		WinGeomPrefs.Load()
-	}
-}
-
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
@@ -401,6 +338,21 @@ func (w *Window) LogicalDPI() float32 {
 		return 96.0 // null default
 	}
 	return w.OSWin.LogicalDPI()
+}
+
+// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
+// in increments of 6 dots to keep fonts rendering clearly.
+func (w *Window) ZoomDPI(steps int) {
+	sc := oswin.TheApp.Screen(0)
+	pdpi := sc.PhysicalDPI
+	// ldpi = pdpi * zoom * ldpi
+	cldpinet := sc.LogicalDPI
+	cldpi := cldpinet / ZoomFactor
+	nldpinet := cldpinet + float32(6*steps)
+	ZoomFactor = nldpinet / cldpi
+	Prefs.ApplyDPI()
+	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)
+	w.FullReRender()
 }
 
 // WinViewport2D returns the viewport directly under this window that serves
@@ -456,6 +408,86 @@ func (w *Window) Closed() {
 	}
 }
 
+// Init performs overall initialization of the gogi system: loading prefs, etc
+// -- automatically called when new window opened, but can be called before
+// then if pref info needed.
+func Init() {
+	if Prefs.LogicalDPIScale == 0 {
+		Prefs.Defaults()
+		Prefs.Load()
+		Prefs.Apply()
+		WinGeomPrefs.Load()
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Event Loop
+
+// StartEventLoop is the main startup method to call after the initial window
+// configuration is setup -- does any necessary final initialization and then
+// starts the event loop in this same goroutine, and does not return until the
+// window is closed -- see GoStartEventLoop for a version that starts in a
+// separate goroutine and returns immediately.
+func (w *Window) StartEventLoop() {
+	w.EventLoop()
+}
+
+// GoStartEventLoop starts the event processing loop for this window in a new
+// goroutine, and returns immediately.
+func (w *Window) GoStartEventLoop() {
+	go w.EventLoop()
+}
+
+// StopEventLoop tells the event loop to stop running when the next event arrives.
+func (w *Window) StopEventLoop() {
+	w.stopEventLoop = true
+}
+
+// ConnectEvent adds a Signal connection for given event type and
+// prioritiy to given receiver
+func (w *Window) ConnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
+	if et >= oswin.EventTypeN {
+		log.Printf("Window ConnectEvent type: %v is not a known event type\n", et)
+		return
+	}
+	w.EventSigs[et][pri].Connect(recv, fun)
+}
+
+// DisconnectEvent removes Signal connection for given event type to given
+// receiver -- pri is priority -- pass AllPris for all priorities
+func (w *Window) DisconnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris) {
+	if et >= oswin.EventTypeN {
+		log.Printf("Window DisconnectEvent type: %v is not a known event type\n", et)
+		return
+	}
+	if pri == AllPris {
+		for p := HiPri; p < EventPrisN; p++ {
+			w.EventSigs[et][p].Disconnect(recv)
+		}
+	} else {
+		w.EventSigs[et][pri].Disconnect(recv)
+	}
+}
+
+// DisconnectAllEvents disconnect node from all event signals -- pri is
+// priority -- pass AllPris for all priorities
+func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
+	if pri == AllPris {
+		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+			for p := HiPri; p < EventPrisN; p++ {
+				w.EventSigs[et][p].Disconnect(recv)
+			}
+		}
+	} else {
+		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+			w.EventSigs[et][pri].Disconnect(recv)
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Rendering
+
 // FullReRender performs a full re-render of the window -- each node renders
 // into its viewport, aggregating into the main window viewport, which will
 // drive an UploadAllViewports call after all the rendering is done, and
@@ -467,9 +499,9 @@ func (w *Window) FullReRender() {
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
-			w.SetFocusItem(w.StartFocus)
+			w.SetFocus(w.StartFocus)
 		} else {
-			w.SetNextFocusItem()
+			w.FocusNext()
 		}
 	}
 }
@@ -597,62 +629,367 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
-// ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
-// in increments of 6 dots to keep fonts rendering clearly.
-func (w *Window) ZoomDPI(steps int) {
-	sc := oswin.TheApp.Screen(0)
-	pdpi := sc.PhysicalDPI
-	// ldpi = pdpi * zoom * ldpi
-	cldpinet := sc.LogicalDPI
-	cldpi := cldpinet / ZoomFactor
-	nldpinet := cldpinet + float32(6*steps)
-	ZoomFactor = nldpinet / cldpi
-	Prefs.ApplyDPI()
-	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)
-	w.FullReRender()
-}
+/////////////////////////////////////////////////////////////////////////////
+//                   MainMenu Updating
 
-// ConnectEventType adds a Signal connection for given event type and
-// prioritiy to given receiver
-func (w *Window) ConnectEventType(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
-	if et >= oswin.EventTypeN {
-		log.Printf("Window ConnectEventType type: %v is not a known event type\n", et)
+// MainMenuUpdated needs to be called whenever the main menu for this window
+// is updated in terms of items added or removed.
+func (w *Window) MainMenuUpdated() {
+	if w == nil || w.MainMenu == nil {
 		return
 	}
-	w.EventSigs[et][pri].Connect(recv, fun)
+	w.MainMenu.SetMainMenu(w)
 }
 
-// DisconnectEventType removes Signal connection for given event type to given
-// receiver -- pri is priority -- pass AllPris for all priorities
-func (w *Window) DisconnectEventType(recv ki.Ki, et oswin.EventType, pri EventPris) {
-	if et >= oswin.EventTypeN {
-		log.Printf("Window DisconnectEventType type: %v is not a known event type\n", et)
+// MainMenuUpdateActives needs to be called whenever items on the main menu
+// for this window have their IsActive status updated.
+func (w *Window) MainMenuUpdateActives() {
+	if w == nil || w.MainMenu == nil {
 		return
 	}
-	if pri == AllPris {
-		for p := HiPri; p < EventPrisN; p++ {
-			w.EventSigs[et][p].Disconnect(recv)
+	w.MainMenu.MainMenuUpdateActives(w)
+}
+
+// MainMenuUpdateWindows updates a Window menu with a list of active menus.
+func (w *Window) MainMenuUpdateWindows() {
+	if w == nil || w.MainMenu == nil {
+		return
+	}
+	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
+	if !ok {
+		return
+	}
+	wmen := wmeni.(*Action)
+	men := make(Menu, 0, len(AllWindows))
+	men.AddWindowsMenu(w)
+	wmen.Menu = men
+	w.MainMenuUpdated()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Main Method: EventLoop
+
+// EventLoop runs the event processing loop for the Window -- grabs oswin
+// events for the window and dispatches them to receiving nodes, and manages
+// other state etc (popups, etc).
+func (w *Window) EventLoop() {
+	var skippedResize *window.Event
+
+	lastEt := oswin.EventTypeN
+	var skipDelta image.Point
+	lastSkipped := false
+
+	var startDrag *mouse.DragEvent
+	dragStarted := false
+
+	var startDND *mouse.DragEvent
+	dndStarted := false
+
+	var startHover, curHover *mouse.MoveEvent
+	hoverStarted := false
+	var hoverTimer *time.Timer
+
+	var lastWinMenuUpdate time.Time
+
+	for {
+		evi := w.OSWin.NextEvent()
+		if w.stopEventLoop {
+			w.stopEventLoop = false
+			fmt.Println("stop event loop")
+			break
 		}
-	} else {
-		w.EventSigs[et][pri].Disconnect(recv)
-	}
-}
+		if lastWinMenuUpdate != WinNewCloseTime {
+			w.MainMenuUpdateWindows()
+			lastWinMenuUpdate = WinNewCloseTime
+			// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+		}
+		if w.DoFullRender {
+			// fmt.Printf("Doing full render\n")
+			w.DoFullRender = false
+			w.FullReRender()
+		}
+		if w.Focus == nil && w.StartFocus != nil {
+			w.SetFocus(w.StartFocus)
+		}
 
-// DisconnectAllEvents disconnect node from all event signals -- pri is
-// priority -- pass AllPris for all priorities
-func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
-	if pri == AllPris {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
-			for p := HiPri; p < EventPrisN; p++ {
-				w.EventSigs[et][p].Disconnect(recv)
+		delPop := false // if true, delete this popup after event loop
+
+		et := evi.Type()
+		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
+			continue
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Filter repeated laggy events -- key for responsive resize, scroll, etc
+
+		now := time.Now()
+		lag := now.Sub(evi.Time())
+		lagMs := int(lag / time.Millisecond)
+		// fmt.Printf("et %v lag %v\n", et, lag)
+
+		if et == lastEt || lastEt == oswin.WindowResizeEvent {
+			switch et {
+			case oswin.MouseScrollEvent:
+				me := evi.(*mouse.ScrollEvent)
+				if lagMs > EventSkipLagMSec {
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
+					if !lastSkipped {
+						skipDelta = me.Delta
+					} else {
+						skipDelta = skipDelta.Add(me.Delta)
+					}
+					lastSkipped = true
+					continue
+				} else {
+					if lastSkipped {
+						me.Delta = skipDelta.Add(me.Delta)
+					}
+					lastSkipped = false
+				}
+			case oswin.MouseDragEvent:
+				me := evi.(*mouse.DragEvent)
+				if lagMs > EventSkipLagMSec {
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
+					if !lastSkipped {
+						skipDelta = me.From
+					}
+					lastSkipped = true
+					continue
+				} else {
+					if lastSkipped {
+						me.From = skipDelta
+					}
+					lastSkipped = false
+				}
+			case oswin.WindowResizeEvent:
+				we := evi.(*window.Event)
+				// fmt.Printf("resize %v\n", we.Size)
+				if lagMs > EventSkipLagMSec {
+					// fmt.Printf("skipped et %v lag %v\n", et, lag)
+					lastSkipped = true
+					skippedResize = we
+					continue
+				} else {
+					w.Resized(w.OSWin.Size())
+					w.FullReRender()
+					// w.DoFullRender = true
+					lastSkipped = false
+					skippedResize = nil
+					// lastResizeTime = now
+					continue
+				}
+			case oswin.WindowEvent:
+				we := evi.(*window.Event)
+				if we.Action == window.Move {
+					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
+					WinGeomPrefs.RecordPref(w)
+				}
 			}
 		}
-	} else {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
-			w.EventSigs[et][pri].Disconnect(recv)
+		lastSkipped = false
+		lastEt = et
+
+		if skippedResize != nil {
+			w.Resized(w.OSWin.Size())
+			w.FullReRender()
+			skippedResize = nil
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Detect start of drag and DND -- both require delays in starting due
+		// to minor wiggles when pressing the mouse button
+
+		if et == oswin.MouseDragEvent {
+			if !dragStarted {
+				if startDrag == nil {
+					startDrag = evi.(*mouse.DragEvent)
+				} else {
+					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
+					if delayMs >= DragStartMSec {
+						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
+						if dst >= DragStartPix {
+							dragStarted = true
+							startDrag = nil
+						}
+					}
+				}
+			}
+			if !dndStarted {
+				if startDND == nil {
+					startDND = evi.(*mouse.DragEvent)
+				} else {
+					delayMs := int(now.Sub(startDND.Time()) / time.Millisecond)
+					if delayMs >= DNDStartMSec {
+						dst := int(math32.Hypot(float32(startDND.Where.X-evi.Pos().X), float32(startDND.Where.Y-evi.Pos().Y)))
+						if dst >= DNDStartPix {
+							dndStarted = true
+							w.DNDStartEvent(startDND)
+							startDND = nil
+						}
+					}
+				}
+			}
+		} else {
+			if et != oswin.KeyEvent { // allow modifier keypress
+				dragStarted = false
+				startDrag = nil
+				dndStarted = false
+				startDND = nil
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Detect hover event -- requires delay timing
+
+		if et == oswin.MouseMoveEvent {
+			if !hoverStarted {
+				hoverStarted = true
+				startHover = evi.(*mouse.MoveEvent)
+				curHover = startHover
+				hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
+					w.SendHoverEvent(curHover)
+					hoverStarted = false
+					startHover = nil
+					curHover = nil
+					hoverTimer = nil
+				})
+			} else {
+				dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
+				if dst > HoverMaxPix {
+					hoverStarted = false
+					startHover = nil
+					hoverTimer.Stop()
+					hoverTimer = nil
+					if w.Popup != nil && PopupIsTooltip(w.Popup) {
+						delPop = true
+					}
+				} else {
+					curHover = evi.(*mouse.MoveEvent)
+				}
+			}
+		} else {
+			hoverStarted = false
+			startHover = nil
+			curHover = nil
+			if hoverTimer != nil {
+				hoverTimer.Stop()
+				hoverTimer = nil
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		//  Process events for Window
+		//  Window gets first crack at the events, and handles window-specific ones
+
+		switch e := evi.(type) {
+		case *window.Event:
+			switch e.Action {
+			case window.Resize:
+				// fmt.Printf("doing resize for action %v \n", e.Action)
+				w.Resized(w.OSWin.Size())
+				w.MainMenuUpdateWindows()
+				w.FullReRender()
+			case window.Close:
+				// fmt.Printf("got close event for window %v \n", w.Nm)
+				w.Closed()
+			case window.Paint:
+				// fmt.Printf("got paint event for window %v \n", w.Nm)
+				w.Publish()
+				// w.FullReRender()
+			}
+			continue
+		case *key.Event:
+			if w.DNDData != nil {
+				// todo: update event type
+			}
+		case *key.ChordEvent:
+			keyDelPop := w.KeyChordEvent(e)
+			if keyDelPop {
+				delPop = true
+			}
+		case *mouse.DragEvent:
+			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+			if w.DNDData != nil {
+				w.DNDMoveEvent(e)
+			} else {
+				if !dragStarted {
+					e.SetProcessed() // ignore
+				}
+			}
+		case *mouse.Event:
+			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+			if w.DNDData != nil && e.Action == mouse.Release {
+				w.DNDDropEvent(e)
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Send Events to Widgets
+
+		if !evi.IsProcessed() {
+			evToPopup := !PopupIsTooltip(w.Popup) // don't send events to tooltips!
+			w.SendEventSignal(evi, evToPopup)
+			if !delPop && et == oswin.MouseMoveEvent {
+				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
+				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
+					delPop = true
+				}
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Delete popup?
+
+		if w.Popup != nil && !delPop {
+			if PopupIsTooltip(w.Popup) {
+				if et != oswin.MouseMoveEvent {
+					delPop = true
+				}
+			} else if me, ok := evi.(*mouse.Event); ok {
+				if me.Action == mouse.Release {
+					if w.DeletePopupMenu(w.Popup, me) {
+						delPop = true
+					}
+				}
+			}
+
+			if PopupIsCompleter(w.Popup) {
+				if et == oswin.KeyChordEvent {
+					for pri := HiPri; pri < EventPrisN; pri++ {
+						if len(w.FocusStack) > 0 {
+							w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
+						}
+					}
+				}
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Shortcuts come last as lowest priority relative to more specific cases
+
+		if !evi.IsProcessed() && et == oswin.KeyChordEvent {
+			ke := evi.(*key.ChordEvent)
+			kc := ke.ChordString()
+			w.TriggerShortcut(kc)
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Actually delete popup and push a new one
+
+		if delPop {
+			w.PopPopup(w.Popup)
+		}
+
+		if w.NextPopup != nil {
+			w.PushPopup(w.NextPopup)
+			w.NextPopup = nil
 		}
 	}
+	fmt.Println("end of events")
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Sending Events
 
 // IsInScope returns true if the given object is in scope for receiving events.
 // If popup is true, then only items on popup are in scope, otherwise
@@ -922,6 +1259,9 @@ func (w *Window) TriggerShortcut(chord string) bool {
 	return true
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//                   Popups
+
 // PopupIsMenu returns true if the given popup item is a menu
 func PopupIsMenu(pop ki.Ki) bool {
 	nii, ni := KiToNode2D(pop)
@@ -987,374 +1327,276 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	return true
 }
 
-// EventLoop runs the event processing loop for the Window -- grabs oswin
-// events for the window and dispatches them to receiving nodes, and manages
-// other state etc (popups, etc)
-func (w *Window) EventLoop() {
-	var skippedResize *window.Event
-
-	lastEt := oswin.EventTypeN
-	var skipDelta image.Point
-	lastSkipped := false
-
-	var startDrag *mouse.DragEvent
-	dragStarted := false
-
-	var startDND *mouse.DragEvent
-	dndStarted := false
-
-	var startHover, curHover *mouse.MoveEvent
-	hoverStarted := false
-	var hoverTimer *time.Timer
-
-	var lastWinMenuUpdate time.Time
-
-	for {
-		evi := w.OSWin.NextEvent()
-		if w.stopEventLoop {
-			w.stopEventLoop = false
-			fmt.Println("stop event loop")
-			break
-		}
-		if lastWinMenuUpdate != WinNewCloseTime {
-			w.MainMenuUpdateWindows()
-			lastWinMenuUpdate = WinNewCloseTime
-			// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-		}
-		if w.DoFullRender {
-			// fmt.Printf("Doing full render\n")
-			w.DoFullRender = false
-			w.FullReRender()
-		}
-		if w.Focus == nil && w.StartFocus != nil {
-			w.SetFocusItem(w.StartFocus)
-		}
-
-		delPop := false // if true, delete this popup after event loop
-
-		et := evi.Type()
-		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
-			continue
-		}
-
-		now := time.Now()
-		lag := now.Sub(evi.Time())
-		lagMs := int(lag / time.Millisecond)
-		// fmt.Printf("et %v lag %v\n", et, lag)
-
-		if et == lastEt || lastEt == oswin.WindowResizeEvent {
-			switch et {
-			case oswin.MouseScrollEvent:
-				me := evi.(*mouse.ScrollEvent)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					if !lastSkipped {
-						skipDelta = me.Delta
-					} else {
-						skipDelta = skipDelta.Add(me.Delta)
-					}
-					lastSkipped = true
-					continue
-				} else {
-					if lastSkipped {
-						me.Delta = skipDelta.Add(me.Delta)
-					}
-					lastSkipped = false
-				}
-			case oswin.MouseDragEvent:
-				me := evi.(*mouse.DragEvent)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					if !lastSkipped {
-						skipDelta = me.From
-					}
-					lastSkipped = true
-					continue
-				} else {
-					if lastSkipped {
-						me.From = skipDelta
-					}
-					lastSkipped = false
-				}
-			case oswin.WindowResizeEvent:
-				we := evi.(*window.Event)
-				// fmt.Printf("resize %v\n", we.Size)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					lastSkipped = true
-					skippedResize = we
-					continue
-				} else {
-					w.Resized(w.OSWin.Size())
-					w.FullReRender()
-					// w.DoFullRender = true
-					lastSkipped = false
-					skippedResize = nil
-					// lastResizeTime = now
-					continue
-				}
-			case oswin.WindowEvent:
-				we := evi.(*window.Event)
-				if we.Action == window.Move {
-					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
-					WinGeomPrefs.RecordPref(w)
-				}
-			}
-		}
-		lastSkipped = false
-		lastEt = et
-
-		if skippedResize != nil {
-			w.Resized(w.OSWin.Size())
-			w.FullReRender()
-			skippedResize = nil
-		}
-
-		// detect start of drag and DND -- both require delays in starting due
-		// to minor wiggles when pressing the mouse button
-		if et == oswin.MouseDragEvent {
-			if !dragStarted {
-				if startDrag == nil {
-					startDrag = evi.(*mouse.DragEvent)
-				} else {
-					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
-					if delayMs >= DragStartMSec {
-						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
-						if dst >= DragStartPix {
-							dragStarted = true
-							startDrag = nil
-						}
-					}
-				}
-			}
-			if !dndStarted {
-				if startDND == nil {
-					startDND = evi.(*mouse.DragEvent)
-				} else {
-					delayMs := int(now.Sub(startDND.Time()) / time.Millisecond)
-					if delayMs >= DNDStartMSec {
-						dst := int(math32.Hypot(float32(startDND.Where.X-evi.Pos().X), float32(startDND.Where.Y-evi.Pos().Y)))
-						if dst >= DNDStartPix {
-							dndStarted = true
-							w.DNDStartEvent(startDND)
-							startDND = nil
-						}
-					}
-				}
-			}
-		} else {
-			dragStarted = false
-			startDrag = nil
-			dndStarted = false
-			startDND = nil
-		}
-
-		// detect hover event
-		if et == oswin.MouseMoveEvent {
-			if !hoverStarted {
-				hoverStarted = true
-				startHover = evi.(*mouse.MoveEvent)
-				curHover = startHover
-				hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-					w.SendHoverEvent(curHover)
-					hoverStarted = false
-					startHover = nil
-					curHover = nil
-					hoverTimer = nil
-				})
-			} else {
-				dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
-				if dst > HoverMaxPix {
-					hoverStarted = false
-					startHover = nil
-					hoverTimer.Stop()
-					hoverTimer = nil
-					if w.Popup != nil && PopupIsTooltip(w.Popup) {
-						delPop = true
-					}
-				} else {
-					curHover = evi.(*mouse.MoveEvent)
-				}
-			}
-		} else {
-			hoverStarted = false
-			startHover = nil
-			curHover = nil
-			if hoverTimer != nil {
-				hoverTimer.Stop()
-				hoverTimer = nil
-			}
-		}
-
-		// Window gets first crack at the events, and handles window-specific ones
-		switch e := evi.(type) {
-		case *window.Event:
-			switch e.Action {
-			case window.Resize:
-				// fmt.Printf("doing resize for action %v \n", e.Action)
-				w.Resized(w.OSWin.Size())
-				w.MainMenuUpdateWindows()
-				w.FullReRender()
-			case window.Close:
-				// fmt.Printf("got close event for window %v \n", w.Nm)
-				w.Closed()
-			case window.Paint:
-				// fmt.Printf("got paint event for window %v \n", w.Nm)
-				w.Publish()
-				// w.FullReRender()
-			}
-			continue
-		case *key.ChordEvent:
-			kf := KeyFun(e.ChordString())
-			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
-			if !e.IsProcessed() {
-				if w.Popup != nil && PopupIsMenu(w.Popup) {
-					switch kf {
-					case KeyFunMoveUp:
-						w.SetPrevFocusItem()
-						e.SetProcessed()
-					case KeyFunMoveDown:
-						w.SetNextFocusItem()
-						e.SetProcessed()
-					}
-				}
-			}
-
-			if !e.IsProcessed() {
-				switch kf {
-				case KeyFunFocusNext:
-					w.SetNextFocusItem()
-					e.SetProcessed()
-				case KeyFunFocusPrev:
-					w.SetPrevFocusItem()
-					e.SetProcessed()
-				case KeyFunAbort:
-					if w.Popup != nil {
-						if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-							delPop = true
-							e.SetProcessed()
-						}
-					}
-				case KeyFunAccept:
-					if w.Popup != nil {
-						if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-							delPop = true
-						}
-					}
-				case KeyFunGoGiEditor:
-					TheViewIFace.GoGiEditor(w.Viewport.This)
-					e.SetProcessed()
-				case KeyFunZoomIn:
-					w.ZoomDPI(1)
-					e.SetProcessed()
-				case KeyFunZoomOut:
-					w.ZoomDPI(-1)
-					e.SetProcessed()
-				case KeyFunPrefs:
-					TheViewIFace.PrefsEditor(&Prefs)
-					e.SetProcessed()
-				case KeyFunRefresh:
-					fmt.Printf("Window: %v display refreshed\n", w.Nm)
-					w.FullReRender()
-					// w.UploadAllViewports()
-					e.SetProcessed()
-				}
-			}
-
-			if !e.IsProcessed() {
-				cs := e.ChordString()
-				switch cs { // some other random special codes, during dev..
-				case "Control+Alt+R":
-					if prof.Profiling {
-						w.EndTargProfile()
-						w.EndCPUMemProfile()
-					} else {
-						w.StartTargProfile()
-						w.StartCPUMemProfile()
-					}
-					e.SetProcessed()
-				case "Control+Alt+F":
-					w.BenchmarkFullRender()
-					e.SetProcessed()
-				case "Control+Alt+G":
-					w.BenchmarkReRender()
-					e.SetProcessed()
-				}
-			}
-			// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
-		case *mouse.DragEvent:
-			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
-			if w.DNDData != nil {
-				w.DNDMoveEvent(e)
-			} else {
-				if !dragStarted {
-					e.SetProcessed() // ignore
-				}
-			}
-		case *mouse.Event:
-			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
-			if w.DNDData != nil && e.Action == mouse.Release {
-				w.DNDDropEvent(e)
-			}
-		}
-
-		// finally this is where the event is sent out to registered widgets
-		if !evi.IsProcessed() {
-			evToPopup := !PopupIsTooltip(w.Popup) // don't send events to tooltips!
-			w.SendEventSignal(evi, evToPopup)
-			if !delPop && et == oswin.MouseMoveEvent {
-				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
-				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
-					delPop = true
-				}
-			}
-		}
-
-		if w.Popup != nil && !delPop {
-			if PopupIsTooltip(w.Popup) {
-				if et != oswin.MouseMoveEvent {
-					delPop = true
-				}
-			} else if me, ok := evi.(*mouse.Event); ok {
-				if me.Action == mouse.Release {
-					if w.DeletePopupMenu(w.Popup, me) {
-						delPop = true
-					}
-				}
-			}
-
-			if PopupIsCompleter(w.Popup) {
-				if et == oswin.KeyChordEvent {
-					for pri := HiPri; pri < EventPrisN; pri++ {
-						if len(w.FocusStack) > 0 {
-							w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
-						}
-					}
-				}
-			}
-		}
-
-		// shortcut is very last thing
-		if !evi.IsProcessed() && et == oswin.KeyChordEvent {
-			ke := evi.(*key.ChordEvent)
-			kc := ke.ChordString()
-			w.TriggerShortcut(kc)
-		}
-
-		if delPop {
-			w.PopPopup(w.Popup)
-		}
-
-		if w.NextPopup != nil {
-			w.PushPopup(w.NextPopup)
-			w.NextPopup = nil
-		}
+// PusPopup pushes current popup onto stack and set new popup.
+func (w *Window) PushPopup(pop ki.Ki) {
+	if w.PopupStack == nil {
+		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
-	fmt.Println("end of events")
+	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
+	w.PopupStack = append(w.PopupStack, w.Popup)
+	w.Popup = pop
+	_, ni := KiToNode2D(pop)
+	if ni != nil {
+		ni.FullRender2DTree()
+	}
+	w.PushFocus(pop)
 }
 
-// ClearNonFocus clears the focus of any non-w.Focus item -- sometimes can get
-// off
+// DisconnectPopup disconnects given popup -- typically the current one.
+func (w *Window) DisconnectPopup(pop ki.Ki) {
+	w.DisconnectAllEvents(pop, AllPris)
+	pop.SetParent(nil) // don't redraw the popup anymore
+	w.Viewport.UploadToWin()
+}
+
+// ClosePopup close given popup -- must be the current one -- returns false if not.
+func (w *Window) ClosePopup(pop ki.Ki) bool {
+	if pop != w.Popup {
+		return false
+	}
+	w.DisconnectPopup(pop)
+	w.PopPopup(pop)
+	return true
+}
+
+// PopPopup pops current popup off the popup stack and set to current popup.
+func (w *Window) PopPopup(pop ki.Ki) {
+	nii, ok := pop.(Node2D)
+	if ok {
+		pvp := nii.AsViewport2D()
+		if pvp != nil {
+			pvp.DeletePopup()
+		}
+	}
+	sz := len(w.PopupStack)
+	if w.Popup == pop {
+		if w.PopupStack == nil || sz == 0 {
+			w.Popup = nil
+		} else {
+			w.Popup = w.PopupStack[sz-1]
+			w.PopupStack = w.PopupStack[:sz-1]
+		}
+		w.PopFocus()
+	} else {
+		for i := sz - 1; i >= 0; i-- {
+			pp := w.PopupStack[i]
+			if pp == pop {
+				w.PopupStack = w.PopupStack[:i+copy(w.PopupStack[i:], w.PopupStack[i+1:])]
+				break
+			}
+		}
+		// do nothing
+	}
+	w.UploadAllViewports()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Key Events Handled by Window
+
+// KeyChordEvent handles all the window-specific key events, returning its
+// input on whether any existing popup should be deleted
+func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
+	delPop := false
+	cs := e.ChordString()
+	kf := KeyFun(cs)
+	w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+	if e.IsProcessed() {
+		return false
+	}
+	if w.Popup != nil && PopupIsMenu(w.Popup) {
+		switch kf {
+		case KeyFunMoveUp:
+			w.FocusPrev()
+			e.SetProcessed()
+		case KeyFunMoveDown:
+			w.FocusNext()
+			e.SetProcessed()
+		}
+	}
+	switch kf {
+	case KeyFunFocusNext:
+		w.FocusNext()
+		e.SetProcessed()
+	case KeyFunFocusPrev:
+		w.FocusPrev()
+		e.SetProcessed()
+	case KeyFunAbort:
+		if w.Popup != nil {
+			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+				delPop = true
+				e.SetProcessed()
+			}
+		}
+	case KeyFunAccept:
+		if w.Popup != nil {
+			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+				delPop = true
+			}
+		}
+	case KeyFunGoGiEditor:
+		TheViewIFace.GoGiEditor(w.Viewport.This)
+		e.SetProcessed()
+	case KeyFunZoomIn:
+		w.ZoomDPI(1)
+		e.SetProcessed()
+	case KeyFunZoomOut:
+		w.ZoomDPI(-1)
+		e.SetProcessed()
+	case KeyFunPrefs:
+		TheViewIFace.PrefsEditor(&Prefs)
+		e.SetProcessed()
+	case KeyFunRefresh:
+		fmt.Printf("Window: %v display refreshed\n", w.Nm)
+		w.FullReRender()
+		// w.UploadAllViewports()
+		e.SetProcessed()
+	}
+	switch cs { // some other random special codes, during dev..
+	case "Control+Alt+R":
+		if prof.Profiling {
+			w.EndTargProfile()
+			w.EndCPUMemProfile()
+		} else {
+			w.StartTargProfile()
+			w.StartCPUMemProfile()
+		}
+		e.SetProcessed()
+	case "Control+Alt+F":
+		w.BenchmarkFullRender()
+		e.SetProcessed()
+	case "Control+Alt+G":
+		w.BenchmarkReRender()
+		e.SetProcessed()
+	}
+	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+	return delPop
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Key Focus
+
+// SetStartFocus sets the given item to be first focus when window opens.
+func (w *Window) SetStartFocus(k ki.Ki) {
+	w.StartFocus = k
+}
+
+// SetFocus sets focus to given item -- returns true if focus changed.
+func (w *Window) SetFocus(k ki.Ki) bool {
+	if w.Focus == k {
+		return false
+	}
+	updt := w.UpdateStart()
+	if w.Focus != nil {
+		nii, ni := KiToNode2D(w.Focus)
+		if ni != nil {
+			bitflag.Clear(&ni.Flag, int(HasFocus))
+			nii.FocusChanged2D(false)
+		}
+	}
+	w.Focus = k
+	if k == nil {
+		w.UpdateEnd(updt)
+		return true
+	}
+	nii, ni := KiToNode2D(k)
+	if ni != nil {
+		bitflag.Set(&ni.Flag, int(HasFocus))
+		nii.FocusChanged2D(true)
+	}
+	w.ClearNonFocus()
+	w.UpdateEnd(updt)
+	return true
+}
+
+// FocusNext sets the focus on the next item that can accept focus -- returns
+// true if a focus item found.
+func (w *Window) FocusNext() bool {
+	gotFocus := false
+	focusNext := false // get the next guy
+	if w.Focus == nil {
+		focusNext = true
+	}
+
+	focRoot := w.Viewport.This
+	if w.Popup != nil {
+		focRoot = w.Popup
+	}
+
+	for i := 0; i < 2; i++ {
+		focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+			if gotFocus {
+				return false
+			}
+			// todo: see about 3D guys
+			_, ni := KiToNode2D(k)
+			if ni == nil {
+				return true
+			}
+			if w.Focus == k { // current focus can be a non-can-focus item
+				focusNext = true
+				return true
+			}
+			if !ni.CanFocus() || ni.VpBBox.Empty() {
+				return true
+			}
+			if focusNext {
+				w.SetFocus(k)
+				gotFocus = true
+				return false // done
+			}
+			return true
+		})
+		if gotFocus {
+			return true
+		}
+		focusNext = true // this time around, just get the first one
+	}
+	return false
+}
+
+// FocusPrev sets the focus on the previous item.
+func (w *Window) FocusPrev() bool {
+	if w.Focus == nil { // must have a current item here
+		w.FocusNext()
+		return false
+	}
+
+	gotFocus := false
+	var prevItem ki.Ki
+
+	focRoot := w.Viewport.This
+	if w.Popup != nil {
+		focRoot = w.Popup
+	}
+
+	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		if gotFocus {
+			return false
+		}
+		// todo: see about 3D guys
+		_, ni := KiToNode2D(k)
+		if ni == nil {
+			return true
+		}
+		if w.Focus == k {
+			gotFocus = true
+			return false
+		}
+		if !ni.CanFocus() || ni.VpBBox.Empty() {
+			return true
+		}
+		prevItem = k
+		return true
+	})
+	if gotFocus && prevItem != nil {
+		w.SetFocus(prevItem)
+	} else {
+		w.FocusNext()
+	}
+	return true
+}
+
+// ClearNonFocus clears the focus of any non-w.Focus item.
 func (w *Window) ClearNonFocus() {
 	focRoot := w.Viewport.This
 	if w.Popup != nil {
@@ -1391,200 +1633,17 @@ func (w *Window) ClearNonFocus() {
 	}
 }
 
-// SetStartFocus sets the given item to be first focus when window opens
-func (w *Window) SetStartFocus(k ki.Ki) {
-	w.StartFocus = k
-}
-
-// SetFocusItem sets focus to given item -- returns true if focus changed.
-func (w *Window) SetFocusItem(k ki.Ki) bool {
-	if w.Focus == k {
-		return false
-	}
-	updt := w.UpdateStart()
-	if w.Focus != nil {
-		nii, ni := KiToNode2D(w.Focus)
-		if ni != nil {
-			bitflag.Clear(&ni.Flag, int(HasFocus))
-			nii.FocusChanged2D(false)
-		}
-	}
-	w.Focus = k
-	if k == nil {
-		w.UpdateEnd(updt)
-		return true
-	}
-	nii, ni := KiToNode2D(k)
-	if ni != nil {
-		bitflag.Set(&ni.Flag, int(HasFocus))
-		nii.FocusChanged2D(true)
-	}
-	w.ClearNonFocus()
-	w.UpdateEnd(updt)
-	return true
-}
-
-// set the focus on the next item that can accept focus -- returns true if a focus item found
-func (w *Window) SetNextFocusItem() bool {
-	gotFocus := false
-	focusNext := false // get the next guy
-	if w.Focus == nil {
-		focusNext = true
-	}
-
-	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
-	}
-
-	for i := 0; i < 2; i++ {
-		focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-			if gotFocus {
-				return false
-			}
-			// todo: see about 3D guys
-			_, ni := KiToNode2D(k)
-			if ni == nil {
-				return true
-			}
-			if w.Focus == k { // current focus can be a non-can-focus item
-				focusNext = true
-				return true
-			}
-			if !ni.CanFocus() || ni.VpBBox.Empty() {
-				return true
-			}
-			if focusNext {
-				w.SetFocusItem(k)
-				gotFocus = true
-				return false // done
-			}
-			return true
-		})
-		if gotFocus {
-			return true
-		}
-		focusNext = true // this time around, just get the first one
-	}
-	return false
-}
-
-// set the focus on the previous item
-func (w *Window) SetPrevFocusItem() bool {
-	if w.Focus == nil { // must have a current item here
-		w.SetNextFocusItem()
-		return false
-	}
-
-	gotFocus := false
-	var prevItem ki.Ki
-
-	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
-	}
-
-	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-		if gotFocus {
-			return false
-		}
-		// todo: see about 3D guys
-		_, ni := KiToNode2D(k)
-		if ni == nil {
-			return true
-		}
-		if w.Focus == k {
-			gotFocus = true
-			return false
-		}
-		if !ni.CanFocus() || ni.VpBBox.Empty() {
-			return true
-		}
-		prevItem = k
-		return true
-	})
-	if gotFocus && prevItem != nil {
-		w.SetFocusItem(prevItem)
-	} else {
-		w.SetNextFocusItem()
-	}
-	return true
-}
-
-// push current popup onto stack and set new popup
-func (w *Window) PushPopup(pop ki.Ki) {
-	if w.PopupStack == nil {
-		w.PopupStack = make([]ki.Ki, 0, 50)
-	}
-	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
-	w.PopupStack = append(w.PopupStack, w.Popup)
-	w.Popup = pop
-	_, ni := KiToNode2D(pop)
-	if ni != nil {
-		ni.FullRender2DTree()
-	}
-	w.PushFocus(pop)
-}
-
-// disconnect given popup -- typically the current one
-func (w *Window) DisconnectPopup(pop ki.Ki) {
-	w.DisconnectAllEvents(pop, AllPris)
-	pop.SetParent(nil) // don't redraw the popup anymore
-	w.Viewport.UploadToWin()
-}
-
-// close given popup -- must be the current one -- returns false if not
-func (w *Window) ClosePopup(pop ki.Ki) bool {
-	if pop != w.Popup {
-		return false
-	}
-	w.DisconnectPopup(pop)
-	w.PopPopup(pop)
-	return true
-}
-
-// pop current popup off the popup stack and set to current popup
-func (w *Window) PopPopup(pop ki.Ki) {
-	nii, ok := pop.(Node2D)
-	if ok {
-		pvp := nii.AsViewport2D()
-		if pvp != nil {
-			pvp.DeletePopup()
-		}
-	}
-	sz := len(w.PopupStack)
-	if w.Popup == pop {
-		if w.PopupStack == nil || sz == 0 {
-			w.Popup = nil
-		} else {
-			w.Popup = w.PopupStack[sz-1]
-			w.PopupStack = w.PopupStack[:sz-1]
-		}
-		w.PopFocus()
-	} else {
-		for i := sz - 1; i >= 0; i-- {
-			pp := w.PopupStack[i]
-			if pp == pop {
-				w.PopupStack = w.PopupStack[:i+copy(w.PopupStack[i:], w.PopupStack[i+1:])]
-				break
-			}
-		}
-		// do nothing
-	}
-	w.UploadAllViewports()
-}
-
-// push current focus onto stack and set new focus
+// PushFocus pushes current focus onto stack and sets new focus.
 func (w *Window) PushFocus(p ki.Ki) {
 	if w.FocusStack == nil {
 		w.FocusStack = make([]ki.Ki, 0, 50)
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
 	w.Focus = p
-	w.SetNextFocusItem()
+	w.FocusNext()
 }
 
-// pop Mask off the focus stack and set to current focus
+// PopFocus pops off the focus stack and sets prev to current focus.
 func (w *Window) PopFocus() {
 	if w.FocusStack == nil || len(w.FocusStack) == 0 {
 		w.Focus = nil
@@ -1595,12 +1654,12 @@ func (w *Window) PopFocus() {
 	w.FocusStack = w.FocusStack[:sz-1]
 }
 
-///////////////////////////////////////////////////////
-// Drag-n-drop
+/////////////////////////////////////////////////////////////////////////////
+//                   DND: Drag-n-Drop
 
 // StartDragNDrop is called by a node to start a drag-n-drop operation on
 // given source node, which is responsible for providing the data and image
-// representation of the node
+// representation of the node.
 func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	// todo: 3d version later..
 	w.DNDSource = src
@@ -1619,7 +1678,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 
 // FinalizeDragNDrop is called by a node to finalize the drag-n-drop
 // operation, after given action has been performed on the target -- allows
-// target to cancel, by sending dnd.DropIgnore
+// target to cancel, by sending dnd.DropIgnore.
 func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	if w.DNDFinalEvent == nil { // shouldn't happen...
 		return
@@ -1637,7 +1696,7 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	w.DNDFinalEvent = nil
 }
 
-// DNDSetCursor sets the cursor based on the DND event mod
+// DNDSetCursor sets the cursor based on the DND event mod.
 func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
 	if w.DNDMod == dmod {
 		return
@@ -1656,7 +1715,7 @@ func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
 	w.DNDMod = dmod
 }
 
-// DNDClearCursor clears any existing DND cursor that might have been set
+// DNDClearCursor clears any existing DND cursor that might have been set.
 func (w *Window) DNDClearCursor() {
 	if w.DNDMod == dnd.NoDropMod {
 		return
@@ -1665,7 +1724,7 @@ func (w *Window) DNDClearCursor() {
 	w.DNDMod = dnd.NoDropMod
 }
 
-// DNDStartEvent handles drag-n-drop start events
+// DNDStartEvent handles drag-n-drop start events.
 func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
@@ -1676,7 +1735,7 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	// now up to receiver to call StartDragNDrop if they want to..
 }
 
-// DNDMoveEvent handles drag-n-drop move events
+// DNDMoveEvent handles drag-n-drop move events.
 func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	if nii, _ := KiToNode2D(w.DNDImage); nii != nil { // 2d case
 		if wg := nii.AsWidget(); wg != nil {
@@ -1695,7 +1754,7 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	e.SetProcessed()
 }
 
-// DNDDropEvent handles drag-n-drop drop event (action = release)
+// DNDDropEvent handles drag-n-drop drop event (action = release).
 func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
@@ -1711,7 +1770,7 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 	e.SetProcessed()
 }
 
-// ClearDragNDrop clears any existing DND values
+// ClearDragNDrop clears any existing DND values.
 func (w *Window) ClearDragNDrop() {
 	w.DNDSource = nil
 	w.DNDData = nil
@@ -1722,9 +1781,10 @@ func (w *Window) ClearDragNDrop() {
 	w.RenderOverlays()
 }
 
-///////////////////////////////////////////////////////
-// Profiling and Benchmarking, controlled by hot-keys
+/////////////////////////////////////////////////////////////////////////////
+//                   Profiling and Benchmarking, controlled by hot-keys
 
+// StartCPUMemProfile starts the standard Go cpu and memory profiling.
 func (w *Window) StartCPUMemProfile() {
 	fmt.Println("Starting Std CPU / Mem Profiling")
 	f, err := os.Create("cpu.prof")
@@ -1736,6 +1796,7 @@ func (w *Window) StartCPUMemProfile() {
 	}
 }
 
+// EndCPUMemProfile ends the standard Go cpu and memory profiling.
 func (w *Window) EndCPUMemProfile() {
 	fmt.Println("Ending Std CPU / Mem Profiling")
 	pprof.StopCPUProfile()
@@ -1750,7 +1811,7 @@ func (w *Window) EndCPUMemProfile() {
 	f.Close()
 }
 
-// start targeted profiling using prof package
+// StartTargProfile starts targeted profiling using goki prof package.
 func (w *Window) StartTargProfile() {
 	nn := 0
 	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
@@ -1762,13 +1823,15 @@ func (w *Window) StartTargProfile() {
 	prof.Profiling = true
 }
 
-// end targeted profiling and print report
+// EndTargProfile ends targeted profiling and prints report.
 func (w *Window) EndTargProfile() {
 	prof.Report(time.Millisecond)
 	prof.Profiling = false
 }
 
-// run benchmark of 50 full re-renders, report targeted profile results
+// BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
+// and everything), reporting targeted profile results and generating standard
+// Go cpu.prof and mem.prof outputs.
 func (w *Window) BenchmarkFullRender() {
 	fmt.Println("Starting BenchmarkFullRender")
 	w.StartCPUMemProfile()
@@ -1784,7 +1847,9 @@ func (w *Window) BenchmarkFullRender() {
 	w.EndCPUMemProfile()
 }
 
-// run benchmark of 50 just-re-renders, not full rebuilds
+// BenchmarkReRender runs benchmark of 50 re-render-only updates of display
+// (just the raw rendering, no styling or layout), reporting targeted profile
+// results and generating standard Go cpu.prof and mem.prof outputs.
 func (w *Window) BenchmarkReRender() {
 	fmt.Println("Starting BenchmarkReRender")
 	w.StartTargProfile()

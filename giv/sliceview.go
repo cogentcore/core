@@ -1231,13 +1231,13 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 func (sv *SliceView) SliceViewEvents() {
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
-			sv.ConnectEventType(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			sv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 				tvv := recv.Embed(KiT_SliceView).(*SliceView)
 				kt := d.(*key.ChordEvent)
 				tvv.KeyInputInactive(kt)
 			})
 		}
-		sv.ConnectEventType(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			me := d.(*mouse.Event)
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
@@ -1246,12 +1246,12 @@ func (sv *SliceView) SliceViewEvents() {
 			}
 		})
 	} else {
-		sv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)
 		})
-		sv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			de := d.(*dnd.Event)
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			switch de.Action {

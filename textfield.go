@@ -790,7 +790,7 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 
 func (tf *TextField) TextFieldEvents() {
 	tf.HoverTooltipEvent()
-	tf.ConnectEventType(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tf := recv.Embed(KiT_TextField).(*TextField)
@@ -802,12 +802,12 @@ func (tf *TextField) TextFieldEvents() {
 			tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 		}
 	})
-	tf.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
 		tff.MouseEvent(me)
 	})
-	tf.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		if tff.IsInactive() {
 			return
@@ -820,7 +820,7 @@ func (tf *TextField) TextFieldEvents() {
 			oswin.TheApp.Cursor().Pop()
 		}
 	})
-	tf.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)

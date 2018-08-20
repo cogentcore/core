@@ -383,7 +383,7 @@ func SetButtonIcon(bw ButtonWidget, iconName string) {
 func ButtonEvents(bw ButtonWidget) {
 	g := bw.ButtonAsBase()
 	g.HoverTooltipEvent()
-	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
@@ -400,7 +400,7 @@ func ButtonEvents(bw ButtonWidget) {
 			}
 		}
 	})
-	g.ConnectEventType(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
 		if bb.IsInactive() {
@@ -414,7 +414,7 @@ func ButtonEvents(bw ButtonWidget) {
 			bb.ButtonExitHover()
 		}
 	})
-	g.ConnectEventType(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ab := recv.(ButtonWidget)
 		bb := ab.ButtonAsBase()
 		if bb.IsInactive() {

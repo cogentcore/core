@@ -28,7 +28,7 @@ var KiT_Editor = kit.Types.AddType(&Editor{}, nil)
 
 // EditorEvents handles svg editing events
 func (svg *Editor) EditorEvents() {
-	svg.ConnectEventType(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
@@ -51,7 +51,7 @@ func (svg *Editor) EditorEvents() {
 		}
 
 	})
-	svg.ConnectEventType(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
@@ -68,7 +68,7 @@ func (svg *Editor) EditorEvents() {
 		ssvg.SetFullReRender()
 		ssvg.UpdateSig()
 	})
-	svg.ConnectEventType(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
@@ -83,7 +83,7 @@ func (svg *Editor) EditorEvents() {
 			}
 		}
 	})
-	svg.ConnectEventType(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)

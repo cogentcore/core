@@ -1671,13 +1671,13 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 func (tv *TableView) TableViewEvents() {
 	if tv.IsInactive() {
 		if tv.InactKeyNav {
-			tv.ConnectEventType(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			tv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				kt := d.(*key.ChordEvent)
 				tvv.KeyInputInactive(kt)
 			})
 		}
-		tv.ConnectEventType(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			me := d.(*mouse.Event)
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
@@ -1686,12 +1686,12 @@ func (tv *TableView) TableViewEvents() {
 			}
 		})
 	} else {
-		tv.ConnectEventType(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)
 		})
-		tv.ConnectEventType(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			de := d.(*dnd.Event)
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			switch de.Action {

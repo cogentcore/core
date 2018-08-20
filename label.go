@@ -197,7 +197,7 @@ func (g *Label) OpenLink(tl *TextLink) {
 }
 
 func (g *Label) LabelEvents() {
-	g.ConnectEventType(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		lb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
@@ -220,7 +220,7 @@ func (g *Label) LabelEvents() {
 			PopupTooltip(lb.Tooltip, pos.X, pos.Y, g.Viewport, lb.Nm)
 		}
 	})
-	g.ConnectEventType(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		lb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
@@ -253,7 +253,7 @@ func (g *Label) LabelEvents() {
 	})
 	hasLinks := len(g.Render.Links) > 0
 	if hasLinks {
-		g.ConnectEventType(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		g.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			me := d.(*mouse.MoveEvent)
 			me.SetProcessed()
 			lb := recv.Embed(KiT_Label).(*Label)

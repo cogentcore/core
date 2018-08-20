@@ -130,7 +130,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		kf := KeyFun(kt.ChordString())
@@ -140,7 +140,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.ConnectEventType(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		kf := KeyFun(kt.ChordString())
@@ -151,7 +151,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 		}
 	})
 	// this is not a good idea
-	// win.ConnectEventType(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// win.ConnectEvent(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
