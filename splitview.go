@@ -180,10 +180,10 @@ func (g *SplitView) Style2D() {
 	g.ConfigSplitters()
 }
 
-func (g *SplitView) Layout2D(parBBox image.Rectangle) {
+func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.ConfigSplitters()
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
 	g.UpdateSplits()
 
 	handsz := float32(10.0)
@@ -218,7 +218,7 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle) {
 		}
 	}
 
-	g.Layout2DChildren()
+	return g.Layout2DChildren(iter)
 }
 
 func (g *SplitView) Render2D() {
@@ -353,13 +353,13 @@ func (g *Splitter) Size2D() {
 	}
 }
 
-func (g *Splitter) Layout2D(parBBox image.Rectangle) {
+func (g *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.ConfigPartsIfNeeded(false)
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
 	g.SizeFromAlloc()
-	g.Layout2DChildren()
 	g.OrigWinBBox = g.WinBBox
+	return g.Layout2DChildren(iter)
 }
 
 func (g *Splitter) UpdateSplitterPos() {

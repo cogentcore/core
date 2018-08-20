@@ -548,16 +548,16 @@ func (g *Slider) Size2D() {
 	g.LayData.AllocSize.SetDim(OtherDim(g.Dim), sz)
 }
 
-func (g *Slider) Layout2D(parBBox image.Rectangle) {
+func (g *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.ConfigPartsIfNeeded(false)
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.SizeFromAlloc()
-	g.Layout2DChildren()
 	g.OrigWinBBox = g.WinBBox
+	return g.Layout2DChildren(iter)
 }
 
 func (g *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
@@ -720,15 +720,15 @@ func (g *ScrollBar) Size2D() {
 	g.InitLayout2D()
 }
 
-func (g *ScrollBar) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
+func (g *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
 	g.SizeFromAlloc()
-	g.Layout2DChildren()
 	g.OrigWinBBox = g.WinBBox
+	return g.Layout2DChildren(iter)
 }
 
 func (g *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {

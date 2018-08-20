@@ -168,14 +168,21 @@ func (g *Label) Size2D() {
 	g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
 }
 
-func (g *Label) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true)
-	g.Layout2DChildren()
+func (g *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter)
+	g.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := g.Size2DSubSpace()
 	if g.Sty.Text.WordWrap {
 		g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
 		g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
+		if g.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
+			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", g.Nm, g.Render.Size.Y, sz.Y)
+			g.LayData.SetFromStyle(&g.Sty.Layout)
+			g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
+			return true // needs a redo!
+		}
 	}
+	return false
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are

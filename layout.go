@@ -37,26 +37,25 @@ import (
 
 // LayoutStyle contains style preferences on the layout of the element.
 type LayoutStyle struct {
-	ZIndex    int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH    Align       `xml:"horizontal-align" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV    Align       `xml:"vertical-align" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX      units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY      units.Value `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width     units.Value `xml:"width" desc:"specified size of element -- 0 if not specified"`
-	Height    units.Value `xml:"height" desc:"specified size of element -- 0 if not specified"`
-	MaxWidth  units.Value `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight units.Value `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth  units.Value `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight units.Value `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
-	Margin    units.Value `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Padding   units.Value `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
-	Overflow  Overflow    `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
-	Columns   int         `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
-	Row       int         `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
-	Col       int         `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
-	RowSpan   int         `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
-	ColSpan   int         `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
-
+	ZIndex         int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH         Align       `xml:"horizontal-align" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV         Align       `xml:"vertical-align" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX           units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
+	PosY           units.Value `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
+	Width          units.Value `xml:"width" desc:"specified size of element -- 0 if not specified"`
+	Height         units.Value `xml:"height" desc:"specified size of element -- 0 if not specified"`
+	MaxWidth       units.Value `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight      units.Value `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth       units.Value `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
+	MinHeight      units.Value `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
+	Margin         units.Value `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding        units.Value `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	Overflow       Overflow    `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	Columns        int         `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
+	Row            int         `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
+	Col            int         `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
+	RowSpan        int         `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
+	ColSpan        int         `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
 	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
 }
 
@@ -278,7 +277,7 @@ type GridData struct {
 // by default so must be specified per child, except that the parent alignment
 // is used within the relevant dimension (e.g., align-horiz for a LayoutHoriz
 // layout, to determine left, right, center, justified).  Layouts
-// can automatically add scrollbars depending on the Overflow layout style
+// can automatically add scrollbars depending on the Overflow layout style.
 type Layout struct {
 	WidgetBase
 	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
@@ -290,6 +289,7 @@ type Layout struct {
 	Scrolls   [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
 	GridSize  image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
 	GridData  [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	NeedsRedo bool                `json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -1117,7 +1117,7 @@ func (ly *Layout) LayoutScrolls() {
 				sc.LayData.AllocSize.SetSubDim(d, sbw)
 			}
 			sc.LayData.AllocSize.SetDim(odim, sbw)
-			sc.Layout2D(ly.VpBBox) // this will add parent position to above rel pos
+			sc.Layout2D(ly.VpBBox, 0) // this will add parent position to above rel pos
 		} else {
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])
@@ -1339,9 +1339,18 @@ func (ly *Layout) Size2D() {
 	}
 }
 
-func (ly *Layout) Layout2D(parBBox image.Rectangle) {
-	ly.AllocFromParent()           // in case we didn't get anything
-	ly.Layout2DBase(parBBox, true) // init style
+func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
+	if iter > 0 {
+		if ly.NeedsRedo {
+			if ly.Lay == LayoutGrid {
+				ly.GatherSizesGrid()
+			} else {
+				ly.GatherSizes()
+			}
+		}
+	}
+	ly.AllocFromParent()                 // in case we didn't get anything
+	ly.Layout2DBase(parBBox, true, iter) // init style
 	switch ly.Lay {
 	case LayoutHoriz:
 		ly.LayoutAlongDim(X)
@@ -1359,12 +1368,15 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle) {
 	}
 	ly.FinalizeLayout()
 	ly.ManageOverflow()
-	ly.Layout2DChildren() // layout done with canonical positions
+	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
 
-	delta := ly.Move2DDelta(image.ZP)
-	if delta != image.ZP {
-		ly.Move2DChildren(delta) // move is a separate step
+	if !ly.NeedsRedo {
+		delta := ly.Move2DDelta(image.ZP)
+		if delta != image.ZP {
+			ly.Move2DChildren(delta) // move is a separate step
+		}
 	}
+	return ly.NeedsRedo
 }
 
 // we add our own offset here
@@ -1422,9 +1434,9 @@ func (g *Stretch) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Stretch) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DChildren()
+func (g *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter) // init style
+	return g.Layout2DChildren(iter)
 }
 
 // Space adds a fixed sized (1 em by default) blank space to a layout -- set width / height property to change
@@ -1443,7 +1455,7 @@ func (g *Space) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *Space) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DChildren()
+func (g *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter) // init style
+	return g.Layout2DChildren(iter)
 }

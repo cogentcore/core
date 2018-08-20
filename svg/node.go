@@ -154,7 +154,8 @@ func (g *NodeBase) ParentSVG() *SVG {
 func (g *NodeBase) Size2D() {
 }
 
-func (g *NodeBase) Layout2D(parBBox image.Rectangle) {
+func (g *NodeBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	return false
 }
 
 func (g *NodeBase) BBox2D() image.Rectangle {

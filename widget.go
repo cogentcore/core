@@ -203,8 +203,9 @@ func (g *WidgetBase) Style2D() {
 	g.Style2DWidget()
 }
 
-func (g *WidgetBase) InitLayout2D() {
+func (g *WidgetBase) InitLayout2D() bool {
 	g.LayData.SetFromStyle(&g.Sty.Layout)
+	return false
 }
 
 func (g *WidgetBase) Size2DBase() {
@@ -245,7 +246,7 @@ func (g *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
 // Layout2DBase provides basic Layout2D functions -- good for most cases
-func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
+func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter int) {
 	nii, _ := g.This.(Node2D)
 	if g.Viewport == nil { // robust
 		if nii.AsViewport2D() == nil {
@@ -262,15 +263,15 @@ func (g *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool) {
 	g.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
-	// typically Layout2DChildren must be called after this!
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", g.PathUnique(), g.LayData.AllocPos, g.LayData.AllocSize, g.VpBBox, g.WinBBox)
 	}
+	// typically Layout2DChildren must be called after this!
 }
 
-func (g *WidgetBase) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true)
-	g.Layout2DChildren()
+func (g *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter)
+	return g.Layout2DChildren(iter)
 }
 
 // ChildrenBBox2DWidget provides a basic widget box-model subtraction of
@@ -724,17 +725,17 @@ func (g *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Poi
 	g.ComputeBBox2DParts(parBBox, delta)
 }
 
-func (g *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle) {
+func (g *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := g.Sty.BoxSpace()
 	g.Parts.LayData.AllocPos = g.LayData.AllocPos.AddVal(spc)
 	g.Parts.LayData.AllocSize = g.LayData.AllocSize.AddVal(-2.0 * spc)
-	g.Parts.Layout2D(parBBox)
+	g.Parts.Layout2D(parBBox, iter)
 }
 
-func (g *PartsWidgetBase) Layout2D(parBBox image.Rectangle) {
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
-	g.Layout2DChildren()
+func (g *PartsWidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
+	return g.Layout2DChildren(iter)
 }
 
 func (g *PartsWidgetBase) Render2DParts() {

@@ -294,9 +294,9 @@ func (vp *Viewport2D) Size2D() {
 	}
 }
 
-func (vp *Viewport2D) Layout2D(parBBox image.Rectangle) {
-	vp.Layout2DBase(parBBox, true)
-	vp.Layout2DChildren()
+func (vp *Viewport2D) Layout2D(parBBox image.Rectangle, iter int) bool {
+	vp.Layout2DBase(parBBox, true, iter)
+	return vp.Layout2DChildren(iter)
 }
 
 func (vp *Viewport2D) BBox2D() image.Rectangle {

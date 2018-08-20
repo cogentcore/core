@@ -39,9 +39,11 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 	appropriate point) with relevant parent BBox that the children are
 	constrained to render within -- they then intersect this BBox with their
 	own BBox (from BBox2D) -- typically just call Layout2DBase for default
-	behavior -- and add parent position to AllocPos -- Layout does all its
+	behavior -- and add parent position to AllocPos. Layout does all its
 	sizing and positioning of children in this pass, based on the Size2D data
 	gathered bottom-up and constraints applied top-down from higher levels.
+	Typically only a single iteration is required but multiple are supported
+	(needed for word-wrapped text or flow layouts).
 
 	4. Render2D: Final rendering pass, each node is fully responsible for
 	rendering its own children, to provide maximum flexibility (see
@@ -123,11 +125,14 @@ type Node2D interface {
 	// appropriate point) with relevant parent BBox that the children are
 	// constrained to render within -- they then intersect this BBox with
 	// their own BBox (from BBox2D) -- typically just call Layout2DBase for
-	// default behavior -- and add parent position to AllocPos -- Layout does
-	// all its sizing and positioning of children in this pass, based on the
-	// Size2D data gathered bottom-up and constraints applied top-down from
-	// higher levels
-	Layout2D(parBBox image.Rectangle)
+	// default behavior -- and add parent position to AllocPos, and then
+	// return call to Layout2DChildren. Layout does all its sizing and
+	// positioning of children in this pass, based on the Size2D data gathered
+	// bottom-up and constraints applied top-down from higher levels.
+	// Typically only a single iteration is required (iter = 0) but multiple
+	// are supported (needed for word-wrapped text or flow layouts) -- return
+	// = true indicates another iteration required (pass this up the chain).
+	Layout2D(parBBox image.Rectangle, iter int) bool
 
 	// Move2D: optional MeFirst downward pass to move all elements by given
 	// delta -- used for scrolling -- the layout pass assigns canonical
@@ -223,7 +228,8 @@ func (g *Node2DBase) Style2D() {
 func (g *Node2DBase) Size2D() {
 }
 
-func (g *Node2DBase) Layout2D(parBBox image.Rectangle) {
+func (g *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	return false
 }
 
 func (g *Node2DBase) BBox2D() image.Rectangle {
@@ -473,7 +479,7 @@ func (g *Node2DBase) Size2DTree() {
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
-				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", nii, nii.PathUnique())
+				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", k, k.PathUnique())
 				return false
 			}
 			if ni.HasNoLayout() {
@@ -493,7 +499,8 @@ func (g *Node2DBase) Size2DTree() {
 }
 
 // Layout2DTree does layout pass -- each node iterates over children for
-// maximum control -- this starts with parent VpBBox -- can be called de novo
+// maximum control -- this starts with parent VpBBox -- can be called de novo.
+// Handles multiple iterations if needed.
 func (g *Node2DBase) Layout2DTree() {
 	if g.HasNoLayout() {
 		return
@@ -504,7 +511,10 @@ func (g *Node2DBase) Layout2DTree() {
 	if pg != nil {
 		parBBox = pg.VpBBox
 	}
-	g.This.(Node2D).Layout2D(parBBox) // important to use interface version to get interface!
+	redo := g.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
+	if redo {
+		g.This.(Node2D).Layout2D(parBBox, 1) // todo: multiple iters?
+	}
 	pr.End()
 }
 
@@ -518,15 +528,21 @@ func (g *Node2DBase) Render2DTree() {
 }
 
 // Layout2DChildren does layout on all of node's children, giving them the
-// ChildrenBBox2D -- default call at end of Layout2D
-func (g *Node2DBase) Layout2DChildren() {
+// ChildrenBBox2D -- default call at end of Layout2D.  Passes along whether
+// any of the children need a re-layout -- typically Layout2D just returns
+// this.
+func (g *Node2DBase) Layout2DChildren(iter int) bool {
+	redo := false
 	cbb := g.This.(Node2D).ChildrenBBox2D()
 	for _, kid := range g.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
-			nii.Layout2D(cbb)
+			if nii.Layout2D(cbb, iter) {
+				redo = true
+			}
 		}
 	}
+	return redo
 }
 
 // Move2dChildren moves all of node's children, giving them the ChildrenBBox2D

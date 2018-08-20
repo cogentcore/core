@@ -257,11 +257,11 @@ func (g *SpinBox) Size2D() {
 	g.ConfigParts()
 }
 
-func (g *SpinBox) Layout2D(parBBox image.Rectangle) {
+func (g *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.ConfigPartsIfNeeded()
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
-	g.Layout2DChildren()
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
+	return g.Layout2DChildren(iter)
 }
 
 func (g *SpinBox) Render2D() {

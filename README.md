@@ -123,10 +123,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * linux: copy / paste puts in opposite order?
 
-* label needs 2nd pass with actual size to re-layout (only for wordwrap) --
-  works but subsequent elements can't move up b/c they are allocated based on
-  original size.. really need 2 passes here.
-
 * add option for no window render at all while iconfied
 
 * arrow nav for menubar
@@ -136,8 +132,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + basic cursor updates: NOT is default, override for others
   + shift updates from copy to move anytime including with popup menu
   + right now, shift while dragging is causing extra render in overlay that persists..
-
-* add margin for para in text
 
 * tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
 

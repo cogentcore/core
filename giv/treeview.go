@@ -1455,14 +1455,14 @@ func (tv *TreeView) Size2D() {
 	tv.WidgetSize.X = w // stretch
 }
 
-func (tv *TreeView) Layout2DParts(parBBox image.Rectangle) {
+func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Sty.BoxSpace()
 	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddVal(spc)
 	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddVal(-2.0 * spc)
-	tv.Parts.Layout2D(parBBox)
+	tv.Parts.Layout2D(parBBox, iter)
 }
 
-func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
+func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayData.AllocPosRel.X = -1000000 // put it very far off screen..
 	}
@@ -1485,7 +1485,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.PathUnique(), tv.LayData.AllocPos, tv.LayData.AllocSize, tv.VpBBox, tv.WinBBox)
 	}
 
-	tv.Layout2DParts(parBBox) // use OUR version
+	tv.Layout2DParts(parBBox, iter) // use OUR version
 	h := tv.WidgetSize.Y
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
@@ -1498,7 +1498,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle) {
 			h += ni.LayData.AllocSize.Y
 		}
 	}
-	tv.Layout2DChildren()
+	return tv.Layout2DChildren(iter)
 }
 
 func (tv *TreeView) BBox2D() image.Rectangle {

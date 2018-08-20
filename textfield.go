@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -885,12 +886,12 @@ func (tf *TextField) Size2D() {
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) Layout2D(parBBox image.Rectangle) {
-	tf.Layout2DBase(parBBox, true) // init style
+func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
+	tf.Layout2DBase(parBBox, true, iter) // init style
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
-	tf.Layout2DChildren()
+	return tf.Layout2DChildren(iter)
 }
 
 // StartCharPos returns the starting position of the given rune

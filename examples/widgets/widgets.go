@@ -272,7 +272,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
 
-	// main menu
+	//////////////////////////////////////////
+	//      Main Menu
+
 	appnm := oswin.TheApp.Name()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})

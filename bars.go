@@ -64,11 +64,11 @@ func (mb *MenuBar) Size2D() {
 	mb.Layout.Size2D()
 }
 
-func (mb *MenuBar) Layout2D(parBBox image.Rectangle) {
+func (mb *MenuBar) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if !mb.ShowMenuBar() {
-		return
+		return false
 	}
-	mb.Layout.Layout2D(parBBox)
+	return mb.Layout.Layout2D(parBBox, iter)
 }
 
 func (mb *MenuBar) Render2D() {

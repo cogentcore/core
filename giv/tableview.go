@@ -784,11 +784,11 @@ func (tv *TableView) UpdateValues() {
 	tv.UpdateEnd(updt)
 }
 
-func (tv *TableView) Layout2D(parBBox image.Rectangle) {
-	tv.Frame.Layout2D(parBBox)
+func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
+	redo := tv.Frame.Layout2D(parBBox, iter)
 	sg, _ := tv.SliceGrid()
 	if sg == nil {
-		return
+		return redo
 	}
 	idxOff := 1
 	if !tv.ShowIndex {
@@ -805,8 +805,9 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle) {
 			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()
 			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
 		}
-		sgh.Layout2D(parBBox)
+		sgh.Layout2D(parBBox, iter)
 	}
+	return redo
 }
 
 func (tv *TableView) Render2D() {

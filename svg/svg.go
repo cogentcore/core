@@ -89,11 +89,12 @@ func (svg *SVG) Style2D() {
 	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
 }
 
-func (svg *SVG) Layout2D(parBBox image.Rectangle) {
-	svg.Layout2DBase(parBBox, true)
+func (svg *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {
+	svg.Layout2DBase(parBBox, true, iter)
 	// do not call layout on children -- they don't do it
 	// this is too late to affect anything
 	// svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size)
+	return false
 }
 
 func (svg *SVG) Render2D() {

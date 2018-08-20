@@ -518,14 +518,14 @@ func (g *ButtonBase) Style2D() {
 	}
 }
 
-func (g *ButtonBase) Layout2D(parBBox image.Rectangle) {
+func (g *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.This.(ButtonWidget).ConfigPartsIfNeeded()
-	g.Layout2DBase(parBBox, true) // init style
-	g.Layout2DParts(parBBox)
+	g.Layout2DBase(parBBox, true, iter) // init style
+	g.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(ButtonStatesN); i++ {
 		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
 	}
-	g.Layout2DChildren()
+	return g.Layout2DChildren(iter)
 }
 
 func (g *ButtonBase) Render2D() {

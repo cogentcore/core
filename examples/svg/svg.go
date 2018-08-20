@@ -64,7 +64,7 @@ func FileViewLoadSVG(vp *gi.Viewport2D) {
 			dlg, _ := send.(*gi.Dialog)
 			LoadSVG(giv.FileViewDialogValue(dlg))
 		}
-	})
+	}, nil)
 }
 
 func mainrun() {

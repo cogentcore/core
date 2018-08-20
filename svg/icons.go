@@ -70,9 +70,10 @@ func (ic *Icon) Size2D() {
 	ic.Viewport.Size2D()
 }
 
-func (ic *Icon) Layout2D(parBBox image.Rectangle) {
-	ic.SVG.Layout2D(parBBox)
+func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
+	redo := ic.SVG.Layout2D(parBBox, iter)
 	ic.SetNormXForm()
+	return redo
 }
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
