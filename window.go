@@ -1300,9 +1300,10 @@ func (w *Window) EventLoop() {
 
 		// finally this is where the event is sent out to registered widgets
 		if !evi.IsProcessed() {
-			w.SendEventSignal(evi, true) // popup = true by default
+			evToPopup := !PopupIsTooltip(w.Popup) // don't send events to tooltips!
+			w.SendEventSignal(evi, evToPopup)
 			if !delPop && et == oswin.MouseMoveEvent {
-				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), true) // popup
+				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
 				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
 					delPop = true
 				}

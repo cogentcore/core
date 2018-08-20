@@ -31,6 +31,7 @@ import (
 // * search: use highlighting, not filtering -- < > arrows etc
 // * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
+// * fileview selector DND is a file:/// url
 
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {

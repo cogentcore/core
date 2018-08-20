@@ -133,8 +133,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   + shift updates from copy to move anytime including with popup menu
   + right now, shift while dragging is causing extra render in overlay that persists..
 
-* tooltip prevents button from opening dialog, causes hang sometimes -- close tooltip right away? 
-
 * Layout flow types
 * update gi/doc.go with final readme notes etc!
 
