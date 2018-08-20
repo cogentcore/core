@@ -111,8 +111,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* tableview return / space to select item
-
 * crash on quit:
 * cocoa.go:
    272:	func closeWindow(id uintptr) {

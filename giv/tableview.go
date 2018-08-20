@@ -1646,21 +1646,24 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
 	row := tv.SelectedIdx
-	switch kf {
-	case gi.KeyFunMoveDown:
+	switch {
+	case kf == gi.KeyFunMoveDown:
 		nr := row + 1
 		if nr < tv.BuiltSize {
 			tv.ScrollToRow(nr)
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
-	case gi.KeyFunMoveUp:
+	case kf == gi.KeyFunMoveUp:
 		nr := row - 1
 		if nr >= 0 {
 			tv.ScrollToRow(nr)
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
+	case kf == gi.KeyFunSelectItem || kf == gi.KeyFunAccept || kt.Rune == ' ':
+		tv.TableViewSig.Emit(tv.This, int64(TableViewDoubleClicked), tv.SelectedIdx)
+		kt.SetProcessed()
 	}
 }
 

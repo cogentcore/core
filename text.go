@@ -1296,7 +1296,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		if size.X > 0 && ssz.X > size.X && txtSty.WordWrap {
 			for {
 				wp := sr.FindWrapPosLR(size.X, ssz.X)
-				if wp > 0 {
+				if wp > 0 && wp < len(sr.Text)-1 {
 					nsr := sr.SplitAtLR(wp)
 					tr.InsertSpan(si+1, nsr)
 					ssz = sr.SizeHV()
