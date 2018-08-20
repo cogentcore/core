@@ -111,8 +111,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 ## General / Widgets
 
-* recent paths seems like a bug -- test more carefully
-
 * tableview return / space to select item
 
 * crash on quit:

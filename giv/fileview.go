@@ -230,9 +230,17 @@ func (fv *FileView) ConfigPathRow() {
 	}
 	pf.ComboSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		fvv.DirPath = data.(string)
-		fvv.SetFullReRender()
-		fvv.UpdateFilesAction()
+		pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
+		sp := data.(string)
+		if sp == fileViewResetPaths {
+			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
+			gi.SavedPaths[0] = fvv.DirPath
+			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+		} else {
+			fvv.DirPath = sp
+			fvv.SetFullReRender()
+			fvv.UpdateFilesAction()
+		}
 	})
 
 	pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
@@ -429,6 +437,8 @@ func (fv *FileView) UpdateFilesAction() {
 	fv.FileSig.Emit(fv.This, int64(FileViewUpdated), fv.DirPath)
 }
 
+var fileViewResetPaths = "<i>Reset Paths</i>"
+
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
@@ -442,7 +452,9 @@ func (fv *FileView) UpdateFiles() {
 	}
 	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.SavedPathsMax)
 	gi.SavePaths()
-	pf.ItemsFromStringList(([]string)(gi.SavedPaths), false, 0)
+	sp := []string(gi.SavedPaths)
+	sp = append(sp, fileViewResetPaths)
+	pf.ItemsFromStringList(sp, true, 0)
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)

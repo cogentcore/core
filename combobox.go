@@ -370,10 +370,14 @@ func (g *ComboBox) SelectItem(idx int) {
 
 // MakeItemsMenu makes menu of all the items
 func (g *ComboBox) MakeItemsMenu() {
+	nitm := len(g.Items)
 	if g.ItemsMenu == nil {
-		g.ItemsMenu = make(Menu, 0, len(g.Items))
+		g.ItemsMenu = make(Menu, 0, nitm)
 	}
 	sz := len(g.ItemsMenu)
+	if nitm < sz {
+		g.ItemsMenu = g.ItemsMenu[0:nitm]
+	}
 	for i, it := range g.Items {
 		var ac *Action
 		if sz > i {

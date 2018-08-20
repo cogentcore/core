@@ -365,7 +365,10 @@ func (p *FilePaths) AddPath(path string, max int) {
 	}
 
 	for i, s := range *p {
-		if i > 0 && s == path {
+		if s == path {
+			if i == 0 {
+				return
+			}
 			copy((*p)[1:i+1], (*p)[0:i])
 			(*p)[0] = path
 			return
