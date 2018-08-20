@@ -11,11 +11,11 @@ NOTE: Requires Go version `1.10+` due to use of `math.Round`.
 
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs, discussion, etc.
 
-GoGi uses the GoKi tree infrastructure to implement a simple, elegant, GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
+GoGi uses the GoKi tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
 
 # Main Features
 
-* All standard widgets: `Button`, `Menu`, `Slider`, `TextField`, `SpinBox`, `ComboBox` etc, with tooltips, hover, focus, copy / paste (full native clipboard support), drag-n-drop -- the full set of standard GUI functionality.  See `gi/examples/widgets` for a demo.
+* Has all the standard widgets: `Button`, `Menu`, `Slider`, `TextField`, `SpinBox`, `ComboBox` etc, with tooltips, hover, focus, copy / paste (full native clipboard support), drag-n-drop -- the full set of standard GUI functionality.  See `gi/examples/widgets` for a demo.
 
 * Powerful `Layout` logic auto-sizes everything -- very easy to configure interfaces that just work across different scales, resolutions, platforms.  Automatically remembers and reinstates window positions and sizes across sessions.
 
@@ -96,19 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * update keymaps for each platform
 
-* windows:
-	+ confirm new soln to set dpi method per issue #1
-	+ is not getting / managing multiple screens -- very complex..
-
-* linux:
-	+ some issues with multiple screens -- getting them but not really using
-      them or connecting back with windows properly
-
-* mac:
-
-* not yet tracking fullscreen on any platform
-* after beta: enable dnd to use OS DND when moves outside window
-
 ## General / Widgets
 
 * crash on quit:
@@ -123,96 +110,26 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * linux: copy / paste puts in opposite order?
 
-* add option for no window render at all while iconfied
-
-* arrow nav for menubar
-
 * DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
   + hover -> spring load auto-open tree..
   + basic cursor updates: NOT is default, override for others
   + shift updates from copy to move anytime including with popup menu
   + right now, shift while dragging is causing extra render in overlay that persists..
+  + enable dnd to use OS DND when moves outside window (maybe do now? or save for later)
 
-* Layout flow types
-* update gi/doc.go with final readme notes etc!
+* update gi/doc.go with final readme notes etc!  add docs to this README about
+  "what can you do with demos?" kind of thing..
 
 * tab widget basic fix, and integrate with tree view editor? Popups show up in
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
 
-* button repeat settings when button is held down -- esp for spinner buttons -- probably off by default
++ TextArea -- go full editor..
+
+* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * update widgets README
 
 * Reminder: grep all todo: in code
 
-### After Beta Release
-
-* arg view / dialog and button tags
-
-* text word wrap: consider TeX algo
-  * https://github.com/bramstein/typeset/blob/master/src/linebreak.js
-
-* search textfield, arrows, highlighting in tableview, treeview
-
-* undo -- sub-package, use diff package (prob this: https://github.com/sergi/go-diff) on top of json outputs, as in emergent diffmgr
-	+ map of diff records for each top-level entity -- can be many of these in parallel (e.g., textfield vs. ki tree etc)
-	+ records themselves are sequential slices of diff records and commands, with same logic as emergent
-	+ diffing happens in separate routine..
-
-* Dirty flag from edit events in gieditor
-
-* Cursors for various systems need extra custom ones to fill in standard set,
-  and support general custom cursors as well
-  
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
-
-* text language translation functionality -- just do it automatically for
-  everything, or require user to specifically request it for each string??
-  prefer a Stringer kind of method?  or a big map of translations?  send it to
-  google??
-
-* grid layout support for spans
-
-* bitflag elements, e.g., TypeDecoration in FontStyle -- field should in
-  general be a uint32 or uint64, but bitflag uses int32, int64 which is fine,
-  but key problem is how to associate the enum with the field then?  bit-set
-  values don't match the defined ints.. but who cares?  simplest to just use
-  type. but for bitflag never want consts to be int64, but often do want flags
-  field to be int64..  for 32bit case, not that big a deal, and for most
-  user-facing cases, int32 is sufficient, so focus on that case??
-
-* each element can generate SVG version of itself, save whole display as SVG -- nicer for screenshots..
-
-* reparse svg path string button..  need generic methods!
-
-
-
-## Rendering / SVG
-
-* TestShapes5.svg and all the new icons added to svg have issues -- possibly clip-path?
-* radial gradient is off still, at least in userspace units
-
-* flowRoot in fig_vm_as_tug_of_war creates big black box
-* default join not looking right for some test cases -- getting white holes
-* clip-path and ClipPath element..
-
-* impl ViewBox options
-
-* path: re-render data string after parsing to be more human friendly.
-
-## Missing Widgets
-
-see http://doc.qt.io/qt-5/qtquickcontrols2-differences.html for ref
-
-+ RadioButton -- checkbox + mutex logic -- everyone within same parent is mutex -- easy
-+ ProgressBar -- very simple
-+ TextArea -- go full editor..
-
-## Performance issues
-
-* Styling and ToDots
-	+ currently compiling default of main style, but derived state / sub styles MUST be styled dynamically otherwise css and props changes don't propagate -- this doesn't add much -- was previously caching those but then they were not responsive to overall changes.
-	+ Lots of redundant ToDots is happening, but it is difficult to figure out exactly when minimal recompute is necessary.  right now only for nil props.  computing prop diffs might be more expensive and complex than just redoing everything.
-	+ switched to map!  old: 4.6sec on FindConnectionIndex when making new Connections -- this is most of the time in Init2D
 	
