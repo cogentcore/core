@@ -285,6 +285,8 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
+	// note: this does not fix the ghost trace from rendering..
+	// bp1 := image.Rectangle{Min: image.Point{X: b.Min.X - 1, Y: b.Min.Y - 1}, Max: image.Point{X: b.Max.X + 1, Y: b.Max.Y + 1}}
 	rs.Bounds = b
 }
 
@@ -592,7 +594,7 @@ func (pc *Paint) Fill(rs *RenderState) {
 // the given color spec is a solid color
 func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
 	if clr.Source == SolidColor {
-		b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
+		b := rs.Bounds.Intersect(RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
 	} else {
 		pc.FillStyle.SetColorSpec(clr)
@@ -603,7 +605,7 @@ func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
 
 // FillBoxColor is an optimized fill of a square region with given uniform color
 func (pc *Paint) FillBoxColor(rs *RenderState, pos, size Vec2D, clr color.Color) {
-	b := rs.Bounds.Intersect(RectFromPosSize(pos, size))
+	b := rs.Bounds.Intersect(RectFromPosSizeMax(pos, size))
 	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
 }
 

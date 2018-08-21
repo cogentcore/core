@@ -59,12 +59,12 @@ func LoadSVG(fnm string) {
 func FileViewLoadSVG(vp *gi.Viewport2D) {
 	path, fn := filepath.Split(CurFilename)
 	path, _ = homedir.Expand(path)
-	giv.FileViewDialog(vp, path, fn, ".svg", "Load SVG", "", nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+	giv.FileViewDialog(vp, path, fn, ".svg", "Load SVG", "", nil, nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			LoadSVG(giv.FileViewDialogValue(dlg))
 		}
-	}, nil)
+	})
 }
 
 func mainrun() {

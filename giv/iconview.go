@@ -16,7 +16,8 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  IconValueView
 
-// IconValueView presents a StructViewInline for a struct plus a IconView button..
+// IconValueView presents an action for displaying an IconName and selecting
+// icons from IconChooserDialog
 type IconValueView struct {
 	ValueViewBase
 }

@@ -186,7 +186,7 @@ func (tv *TableView) SetFrame() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (tv *TableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Frame, "struct-grid")
+	config.Add(gi.KiT_Frame, "slice-frame")
 	config.Add(gi.KiT_Space, "grid-space")
 	config.Add(gi.KiT_Layout, "buttons")
 	return config
@@ -201,14 +201,24 @@ func (tv *TableView) StdConfig() (mods, updt bool) {
 	return
 }
 
-// SliceGrid returns the SliceGrid grid frame widget, which contains all the
+// SliceFrame returns the outer frame widget, which contains all the header,
 // fields and values, and its index, within frame -- nil, -1 if not found
-func (tv *TableView) SliceGrid() (*gi.Frame, int) {
-	idx, ok := tv.Children().IndexByName("struct-grid", 0)
+func (tv *TableView) SliceFrame() (*gi.Frame, int) {
+	idx, ok := tv.Children().IndexByName("slice-frame", 0)
 	if !ok {
 		return nil, -1
 	}
 	return tv.KnownChild(idx).(*gi.Frame), idx
+}
+
+// SliceGrid returns the SliceGrid grid frame widget, which contains all the
+// fields and values, within SliceFrame
+func (tv *TableView) SliceGrid() *gi.Frame {
+	sf, _ := tv.SliceFrame()
+	if sf == nil {
+		return nil
+	}
+	return sf.KnownChild(2).(*gi.Frame)
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
@@ -220,8 +230,8 @@ func (tv *TableView) ButtonBox() (*gi.Layout, int) {
 	return tv.KnownChild(idx).(*gi.Layout), idx
 }
 
-// StdGridConfig returns a TypeAndNameList for configuring the struct-grid
-func (tv *TableView) StdGridConfig() kit.TypeAndNameList {
+// StdSliceFrameConfig returns a TypeAndNameList for configuring the slice-frame
+func (tv *TableView) StdSliceFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "header")
 	config.Add(gi.KiT_Separator, "head-sepe")
@@ -268,7 +278,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		tv.Values[fli] = make([]ValueView, sz)
 	}
 
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	if sg == nil {
 		return
 	}
@@ -282,7 +292,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		defer oswin.TheApp.Cursor().Pop()
 	}
 
-	sgcfg := tv.StdGridConfig()
+	sgcfg := tv.StdSliceFrameConfig()
 	modsg, updtg := sg.ConfigChildren(sgcfg, false)
 	if modsg {
 		tv.SetFullReRender()
@@ -389,7 +399,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 	}
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	sgf := sg.KnownChild(2).(*gi.Frame)
 
 	updt := sgf.UpdateStart()
@@ -566,7 +576,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	oswin.TheApp.Cursor().Push(cursor.Wait)
 	defer oswin.TheApp.Cursor().Pop()
 
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgh.SetFullReRender()
 	idxOff := 1
@@ -786,7 +796,7 @@ func (tv *TableView) UpdateValues() {
 
 func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	redo := tv.Frame.Layout2D(parBBox, iter)
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	if sg == nil {
 		return redo
 	}
@@ -859,7 +869,7 @@ func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, _ := tv.RowWidgetNs()
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	if sg == nil {
 		return nil, false
 	}
@@ -875,9 +885,9 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	if tv.RowStruct(row) == nil || tv.inFocusGrab { // range check
 		return nil
 	}
-	fmt.Printf("grab row focus: %v\n", row)
+	// fmt.Printf("grab row focus: %v\n", row)
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	if sg == nil {
 		return nil
 	}
@@ -929,7 +939,7 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (tv *TableView) ScrollToRow(row int) bool {
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	if widg, ok := tv.RowFirstWidget(row); ok {
 		return sgf.ScrollToItem(widg)
@@ -1055,7 +1065,7 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	sg, _ := tv.SliceGrid()
+	sg, _ := tv.SliceFrame()
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	ridx := idx * nWidgPerRow
@@ -1701,6 +1711,18 @@ func (tv *TableView) TableViewEvents() {
 				tvv.DragNDropTarget(de)
 			case dnd.DropFmSource:
 				tvv.DragNDropSource(de)
+			}
+		})
+		sgf := tv.SliceGrid()
+		sgf.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			de := d.(*dnd.FocusEvent)
+			switch de.Action {
+			case dnd.Enter:
+				gi.DNDSetCursor(de.Mod)
+			case dnd.Exit:
+				gi.DNDNotCursor()
+			case dnd.Hover:
+				// nothing here?
 			}
 		})
 	}

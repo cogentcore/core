@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -237,6 +238,21 @@ func (g *SpinBox) SpinBoxEvents() {
 		}
 		sb.WidgetSig.Emit(sb.This, sig, data) // passthrough
 	})
+	g.ConnectEvent(oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
+		if sb.IsInactive() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
+		kf := KeyFun(kt.ChordString())
+		if kf == KeyFunMoveUp {
+			kt.SetProcessed()
+			sb.IncrValue(1.0)
+		} else if kf == KeyFunMoveDown {
+			kt.SetProcessed()
+			sb.IncrValue(-1.0)
+		}
+	})
 }
 
 func (g *SpinBox) Init2D() {
@@ -280,4 +296,11 @@ func (g *SpinBox) Render2D() {
 	} else {
 		g.DisconnectAllEvents(RegPri)
 	}
+}
+
+func (g *SpinBox) HasFocus2D() bool {
+	if g.IsInactive() {
+		return false
+	}
+	return g.ContainsFocus() // needed for getting key events
 }

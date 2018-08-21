@@ -96,6 +96,11 @@ func ToValueView(it interface{}) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
+	if nptyp == reflect.TypeOf(gi.FontName("")) {
+		vv := FontValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:

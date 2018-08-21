@@ -57,7 +57,7 @@ var DNDStartPix = 20
 
 // HoverStartMSec is the number of milliseconds to wait before initiating a
 // hover event
-var HoverStartMSec = 2000
+var HoverStartMSec = 1500
 
 // HoverMaxPix is the maximum number of pixels that mouse can move and still
 // register a Hover event
@@ -98,32 +98,30 @@ func WinNewCloseStamp() {
 // typically not directly visible, and instead updates the overall menubar.
 type Window struct {
 	NodeBase
-	Title         string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs  bool              `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay    *Layout           `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu      *MenuBar          `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	OverlayVp     Viewport2D        `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture     `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive bool              `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	LastSelMode   mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
-	Focus         ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	StartFocus    ki.Ki             `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
-	Shortcuts     Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	DNDData       mimedata.Mimes    `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki             `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event        `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	DNDMod        dnd.DropMods      `json:"-" xml:"-" desc:"current DND modifier (Copy, Move, Link) -- managed by DNDSetCursor for updating cursor"`
-	Dragging      ki.Ki             `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
-	Popup         ki.Ki             `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki           `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki             `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DoFullRender  bool              `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
-
+	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs  bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
+	Viewport      *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay    *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu      *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	OverlayVp     Viewport2D                              `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
+	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
+	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
+	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
+	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	stopEventLoop bool
 }
@@ -146,7 +144,7 @@ const (
 	LowPri
 
 	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
-	// was already processed -- e.g., DoubleClick, Accept in dialog
+	// was already processed.
 	LowRawPri
 
 	EventPrisN
@@ -689,6 +687,10 @@ func (w *Window) EventLoop() {
 	hoverStarted := false
 	var hoverTimer *time.Timer
 
+	var startDNDHover, curDNDHover *mouse.DragEvent
+	dndHoverStarted := false
+	var dndHoverTimer *time.Timer
+
 	var lastWinMenuUpdate time.Time
 
 	for {
@@ -828,6 +830,29 @@ func (w *Window) EventLoop() {
 						}
 					}
 				}
+			} else { // dndStarted
+				if !dndHoverStarted {
+					dndHoverStarted = true
+					startDNDHover = evi.(*mouse.DragEvent)
+					curDNDHover = startDNDHover
+					dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
+						w.SendDNDHoverEvent(curDNDHover)
+						dndHoverStarted = false
+						startDNDHover = nil
+						curDNDHover = nil
+						dndHoverTimer = nil
+					})
+				} else {
+					dst := int(math32.Hypot(float32(startDNDHover.Where.X-evi.Pos().X), float32(startDNDHover.Where.Y-evi.Pos().Y)))
+					if dst > HoverMaxPix {
+						dndHoverStarted = false
+						startDNDHover = nil
+						dndHoverTimer.Stop()
+						dndHoverTimer = nil
+					} else {
+						curDNDHover = evi.(*mouse.DragEvent)
+					}
+				}
 			}
 		} else {
 			if et != oswin.KeyEvent { // allow modifier keypress
@@ -835,6 +860,14 @@ func (w *Window) EventLoop() {
 				startDrag = nil
 				dndStarted = false
 				startDND = nil
+
+				dndHoverStarted = false
+				startDNDHover = nil
+				curDNDHover = nil
+				if dndHoverTimer != nil {
+					dndHoverTimer.Stop()
+					dndHoverTimer = nil
+				}
 			}
 		}
 
@@ -1010,16 +1043,35 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 	return !popup
 }
 
-type winEventRecv struct {
-	recv  ki.Ki
-	fun   ki.RecvFunc
-	depth int
+// WinEventRecv is used to hold info about widgets receiving event signals to
+// given function, used for sorting and delayed sending.
+type WinEventRecv struct {
+	recv ki.Ki
+	fun  ki.RecvFunc
+	data int
 }
 
-func addWinEventRecv(lst *[]winEventRecv, recv ki.Ki, fun ki.RecvFunc, w *Window) {
-	depth := recv.ParentLevel(w.This)
-	rr := winEventRecv{recv, fun, depth}
-	*lst = append(*lst, rr)
+// Set sets the recv and fun
+func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
+	we.recv = r
+	we.fun = f
+	we.data = data
+}
+
+// Call calls the function on the recv with the args
+func (we *WinEventRecv) Call(send ki.Ki, sig int64, data interface{}) {
+	we.fun(we.recv, send, sig, data)
+}
+
+type WinEventRecvList []WinEventRecv
+
+func (wl *WinEventRecvList) Add(recv ki.Ki, fun ki.RecvFunc, data int) {
+	rr := WinEventRecv{recv, fun, data}
+	*wl = append(*wl, rr)
+}
+
+func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, w *Window) {
+	wl.Add(recv, fun, recv.ParentLevel(w.This))
 }
 
 // SendEventSignal sends given event signal to all receivers that want it --
@@ -1043,7 +1095,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 
 		// we take control of signal process to sort elements by depth, and
 		// dispatch to inner-most one first
-		evRecvs := make([]winEventRecv, 0, 10)
+		rvs := make(WinEventRecvList, 0, 10)
 
 		esig := w.EventSigs[et][pri]
 
@@ -1069,7 +1121,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					_, ok := evi.(*mouse.DragEvent)
 					if ok {
 						if w.Dragging == ni.This {
-							addWinEventRecv(&evRecvs, recv, fun, w)
+							rvs.AddDepth(recv, fun, w)
 							break // done -- dragger owns it!
 						} else if w.Dragging != nil {
 							continue
@@ -1077,7 +1129,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 							if pos.In(ni.WinBBox) {
 								w.Dragging = ni.This
 								bitflag.Set(&ni.Flag, int(NodeDragging))
-								addWinEventRecv(&evRecvs, recv, fun, w)
+								rvs.AddDepth(recv, fun, w)
 								break
 							}
 							continue
@@ -1095,24 +1147,24 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 						}
 					}
 				}
-				addWinEventRecv(&evRecvs, recv, fun, w)
+				rvs.AddDepth(recv, fun, w)
 				continue
 			} else {
 				// todo: get a 3D
 				continue
 			}
 		}
-		if len(evRecvs) == 0 {
+		if len(rvs) == 0 {
 			continue
 		}
 
 		// deepest first
-		sort.Slice(evRecvs, func(i, j int) bool {
-			return evRecvs[i].depth > evRecvs[j].depth
+		sort.Slice(rvs, func(i, j int) bool {
+			return rvs[i].data > rvs[j].data
 		})
 
-		for _, rr := range evRecvs {
-			rr.fun(rr.recv, w.This, int64(et), evi)
+		for _, rr := range rvs {
+			rr.Call(w.This, int64(et), evi)
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 				break
 			}
@@ -1536,7 +1588,7 @@ func (w *Window) FocusNext() bool {
 				focusNext = true
 				return true
 			}
-			if !ni.CanFocus() || ni.VpBBox.Empty() {
+			if !ni.CanFocus() {
 				return true
 			}
 			if focusNext {
@@ -1582,7 +1634,7 @@ func (w *Window) FocusPrev() bool {
 			gotFocus = true
 			return false
 		}
-		if !ni.CanFocus() || ni.VpBBox.Empty() {
+		if !ni.CanFocus() {
 			return true
 		}
 		prevItem = k
@@ -1591,9 +1643,33 @@ func (w *Window) FocusPrev() bool {
 	if gotFocus && prevItem != nil {
 		w.SetFocus(prevItem)
 	} else {
-		w.FocusNext()
+		w.FocusLast()
 	}
 	return true
+}
+
+// FocusLast sets the focus on the last item in the tree
+func (w *Window) FocusLast() {
+	var lastItem ki.Ki
+
+	focRoot := w.Viewport.This
+	if w.Popup != nil {
+		focRoot = w.Popup
+	}
+
+	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
+		// todo: see about 3D guys
+		_, ni := KiToNode2D(k)
+		if ni == nil {
+			return true
+		}
+		if !ni.CanFocus() {
+			return true
+		}
+		lastItem = k
+		return true
+	})
+	w.SetFocus(lastItem)
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
@@ -1696,32 +1772,49 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	w.DNDFinalEvent = nil
 }
 
-// DNDSetCursor sets the cursor based on the DND event mod.
-func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
-	if w.DNDMod == dmod {
-		return
-	}
-	if w.DNDMod != dnd.NoDropMod {
-		oswin.TheApp.Cursor().Pop()
-	}
+// DNDModCursor gets the appropriate cursor based on the DND event mod.
+func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
 	switch dmod {
 	case dnd.DropCopy:
-		oswin.TheApp.Cursor().Push(cursor.DragCopy)
+		return cursor.DragCopy
 	case dnd.DropMove:
-		oswin.TheApp.Cursor().Push(cursor.DragMove)
+		return cursor.DragMove
 	case dnd.DropLink:
-		oswin.TheApp.Cursor().Push(cursor.DragLink)
+		return cursor.DragLink
 	}
-	w.DNDMod = dmod
+	return cursor.Not
+}
+
+// DNDSetCursor sets the cursor based on the DND event mod -- does a
+// "PushIfNot" so safe for multiple calls.
+func DNDSetCursor(dmod dnd.DropMods) {
+	dndc := DNDModCursor(dmod)
+	oswin.TheApp.Cursor().PushIfNot(dndc)
+}
+
+// DNDNotCursor sets the cursor to Not = can't accept a drop
+func DNDNotCursor() {
+	oswin.TheApp.Cursor().PushIfNot(cursor.Not)
+}
+
+// DNDUpdateCursor updates the cursor based on the curent DND event mod if
+// different from current (but no update if Not)
+func DNDUpdateCursor(dmod dnd.DropMods) bool {
+	dndc := DNDModCursor(dmod)
+	curs := oswin.TheApp.Cursor()
+	if !curs.IsDrag() || curs.Current() == dndc {
+		return false
+	}
+	curs.Push(dndc)
+	return true
 }
 
 // DNDClearCursor clears any existing DND cursor that might have been set.
 func (w *Window) DNDClearCursor() {
-	if w.DNDMod == dnd.NoDropMod {
-		return
+	curs := oswin.TheApp.Cursor()
+	for curs.IsDrag() || curs.Current() == cursor.Not {
+		curs.Pop()
 	}
-	oswin.TheApp.Cursor().Pop()
-	w.DNDMod = dnd.NoDropMod
 }
 
 // DNDStartEvent handles drag-n-drop start events.
@@ -1729,8 +1822,8 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
 	de.Action = dnd.Start
-	de.DefaultMod()
-	w.DNDMod = dnd.NoDropMod
+	de.DefaultMod() // based on current key modifiers
+	DNDSetCursor(de.Mod)
 	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	// now up to receiver to call StartDragNDrop if they want to..
 }
@@ -1746,12 +1839,79 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	// todo: send move / enter / exit events to anyone listening
 	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
 	de.Processed = false
-	de.DefaultMod()
+	de.DefaultMod() // based on current key modifiers
 	de.Action = dnd.Move
-	w.DNDSetCursor(de.Mod)
 	w.SendEventSignal(&de, false) // popup = false: ignore any popups
+	w.GenDNDFocusEvents(&de, false)
+	DNDUpdateCursor(de.Mod)
 	w.RenderOverlays()
 	e.SetProcessed()
+}
+
+// GenDNDFocusEvents processes mouse.MoveEvent to generate dnd.FocusEvent
+// events -- returns true if any such events were sent.  If popup is true,
+// then only items on popup are in scope, otherwise items NOT on popup are in
+// scope (if no popup, everything is in scope).  Extra work is done to ensure
+// that Exit from prior widget is always sent before Enter to next one.
+func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
+	fe := dnd.FocusEvent{Event: mev.Event}
+	pos := mev.Pos()
+	ftyp := oswin.DNDFocusEvent
+
+	// first pass is just to get all the ins and outs
+	var ins, outs WinEventRecvList
+
+	for pri := HiPri; pri < EventPrisN; pri++ {
+		esig := w.EventSigs[ftyp][pri]
+		for recv, fun := range esig.Cons {
+			if recv.IsDeleted() { // destroyed is filtered upstream
+				continue
+			}
+			_, ni := KiToNode2D(recv)
+			if ni != nil {
+				if !w.IsInScope(ni, popup) {
+					continue
+				}
+				in := pos.In(ni.WinBBox)
+				if in {
+					if !bitflag.Has(ni.Flag, int(DNDHasEntered)) {
+						bitflag.Set(&ni.Flag, int(DNDHasEntered))
+						ins.Add(recv, fun, 0)
+					}
+				} else { // mouse not in object
+					if bitflag.Has(ni.Flag, int(DNDHasEntered)) {
+						bitflag.Clear(&ni.Flag, int(DNDHasEntered))
+						outs.Add(recv, fun, 0)
+					}
+				}
+			} else {
+				// todo: 3D
+			}
+		}
+	}
+	if len(outs)+len(ins) > 0 {
+		updt := w.UpdateStart()
+		// now send all the exits before the enters..
+		fe.Action = dnd.Exit
+		for i := range outs {
+			outs[i].Call(w.This, int64(ftyp), &fe)
+		}
+		fe.Action = dnd.Enter
+		for i := range ins {
+			ins[i].Call(w.This, int64(ftyp), &fe)
+		}
+		w.UpdateEnd(updt)
+		return true
+	}
+	return false
+}
+
+// SendDNDHoverEvent sends DND hover event, based on last mouse move event
+func (w *Window) SendDNDHoverEvent(e *mouse.DragEvent) {
+	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
+	he.Processed = false
+	he.Action = dnd.Hover
+	w.SendEventSignal(&he, false) // popup = false by default
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).

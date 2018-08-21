@@ -14,23 +14,23 @@ import (
 )
 
 func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Save GUI to JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Save GUI to JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			fnm := FileViewDialogValue(dlg)
 			recv.SaveJSON(fnm)
 		}
-	}, nil)
+	})
 }
 
 func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Load GUI from JSON", "", nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Load GUI from JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			fnm := FileViewDialogValue(dlg)
 			recv.LoadJSON(fnm)
 		}
-	}, nil)
+	})
 }
 
 // GoGiEditor opens an interactive editor of the given Ki tree, at its root

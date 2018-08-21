@@ -548,6 +548,7 @@ func (g *ButtonBase) Render2D() {
 
 func (g *ButtonBase) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		g.ScrollToMe()
 		g.SetButtonState(ButtonFocus)
 		g.EmitFocusedSignal()
 	} else {

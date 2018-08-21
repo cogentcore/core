@@ -652,6 +652,35 @@ func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 	return par
 }
 
+// ParentLayout returns the parent layout
+func (g *Node2DBase) ParentLayout() *Layout {
+	ly, ok := g.ParentByType(KiT_Layout, true)
+	if !ok {
+		return nil
+	}
+	return ly.Embed(KiT_Layout).(*Layout)
+}
+
+// ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
+// this widget in view -- returns true if scrolled
+func (g *Node2DBase) ScrollToMe() bool {
+	ly := g.ParentLayout()
+	if ly == nil {
+		return false
+	}
+	for {
+		if ly.HasScroll[X] || ly.HasScroll[Y] {
+			break
+		}
+		ply := ly.ParentLayout()
+		if ply == nil {
+			break
+		}
+		ly = ply
+	}
+	return ly.ScrollToItem(g.This.(Node2D))
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // MetaData2D
 

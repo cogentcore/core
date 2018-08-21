@@ -83,9 +83,13 @@ const (
 	// widely supported across different nodes
 	Selected
 
-	// MouseHasEntered indicates that the MouseEnteredEvent was previously
+	// MouseHasEntered indicates that the MouseFocusEvent Enter was previously
 	// registered on this node
 	MouseHasEntered
+
+	// DNDHasEntered indicates that the DNDFocusEvent Enter was previously
+	// registered on this node
+	DNDHasEntered
 
 	// NodeDragging indicates this node is currently dragging -- win.Dragging
 	// set to this node

@@ -232,9 +232,9 @@ func (g *WidgetBase) AddParentPos() Vec2D {
 	return Vec2DZero
 }
 
-// get our bbox from Layout allocation
+// BBoxFromAlloc gets our bbox from Layout allocation.
 func (g *WidgetBase) BBoxFromAlloc() image.Rectangle {
-	return RectFromPosSize(g.LayData.AllocPos, g.LayData.AllocSize)
+	return RectFromPosSizeMax(g.LayData.AllocPos, g.LayData.AllocSize)
 }
 
 func (g *WidgetBase) BBox2D() image.Rectangle {
@@ -608,6 +608,8 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
 	// pc.FillStyle.SetColor(&st.Font.BgColor)
+	pos = pos.AddVal(0.5 * st.Border.Width.Dots)
+	sz = sz.SubVal(st.Border.Width.Dots)
 	pc.FillStyle.SetColor(nil)
 	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }

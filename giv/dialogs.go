@@ -317,7 +317,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 // to get the resulting selected file.  The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, filterFunc FileViewFilterFunc) *gi.Dialog {
+func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, filterFunc FileViewFilterFunc, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("file-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
