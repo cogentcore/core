@@ -251,8 +251,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
-	edit1.SetProp("completer-type", "word-completer")
-	edit1.Completion = true
+	edit1.SetCompleter(nil, nil) // gets us word demo completion
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
