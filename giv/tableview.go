@@ -1716,10 +1716,13 @@ func (tv *TableView) TableViewEvents() {
 		sgf := tv.SliceGrid()
 		sgf.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			de := d.(*dnd.FocusEvent)
-			if de.Action == dnd.Enter {
+			switch de.Action {
+			case dnd.Enter:
 				gi.DNDSetCursor(de.Mod)
-			} else {
+			case dnd.Exit:
 				gi.DNDNotCursor()
+			case dnd.Hover:
+				// nothing here?
 			}
 		})
 	}

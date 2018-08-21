@@ -92,11 +92,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* focus = thicker border line leaves trace when it goes back to thin -- need to somehow compensate in settings.
-
-* autoscroll menu on tab focus updates (like mouse)
-* up / down arrows in spinbox
-
 * crash on quit:
 * cocoa.go:
    272:	func closeWindow(id uintptr) {
@@ -107,10 +102,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * cursor on windows, x11 getting stuck with close popup..
 
-* DND needs enter / exit / hover events so nodes can signal their ability to accept drop.
-  + hover -> spring load auto-open tree..
-  + enable dnd to use OS DND when moves outside window (maybe do now? or save for later)
-
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..
 
@@ -119,8 +110,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   dnd..
 
 + TextArea -- go full editor..
-
-* Use same technique as IconName for FontName and that can be used to trigger chooser for font_family.
 
 * add context menus for delete, rename to fileview -- would be a good test to
   make sure context menu api is sufficiently flexible.

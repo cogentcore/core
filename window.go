@@ -57,7 +57,7 @@ var DNDStartPix = 20
 
 // HoverStartMSec is the number of milliseconds to wait before initiating a
 // hover event
-var HoverStartMSec = 2000
+var HoverStartMSec = 1500
 
 // HoverMaxPix is the maximum number of pixels that mouse can move and still
 // register a Hover event
@@ -144,7 +144,7 @@ const (
 	LowPri
 
 	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
-	// was already processed -- e.g., DoubleClick, Accept in dialog
+	// was already processed.
 	LowRawPri
 
 	EventPrisN
@@ -687,6 +687,10 @@ func (w *Window) EventLoop() {
 	hoverStarted := false
 	var hoverTimer *time.Timer
 
+	var startDNDHover, curDNDHover *mouse.DragEvent
+	dndHoverStarted := false
+	var dndHoverTimer *time.Timer
+
 	var lastWinMenuUpdate time.Time
 
 	for {
@@ -826,6 +830,29 @@ func (w *Window) EventLoop() {
 						}
 					}
 				}
+			} else { // dndStarted
+				if !dndHoverStarted {
+					dndHoverStarted = true
+					startDNDHover = evi.(*mouse.DragEvent)
+					curDNDHover = startDNDHover
+					dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
+						w.SendDNDHoverEvent(curDNDHover)
+						dndHoverStarted = false
+						startDNDHover = nil
+						curDNDHover = nil
+						dndHoverTimer = nil
+					})
+				} else {
+					dst := int(math32.Hypot(float32(startDNDHover.Where.X-evi.Pos().X), float32(startDNDHover.Where.Y-evi.Pos().Y)))
+					if dst > HoverMaxPix {
+						dndHoverStarted = false
+						startDNDHover = nil
+						dndHoverTimer.Stop()
+						dndHoverTimer = nil
+					} else {
+						curDNDHover = evi.(*mouse.DragEvent)
+					}
+				}
 			}
 		} else {
 			if et != oswin.KeyEvent { // allow modifier keypress
@@ -833,6 +860,14 @@ func (w *Window) EventLoop() {
 				startDrag = nil
 				dndStarted = false
 				startDND = nil
+
+				dndHoverStarted = false
+				startDNDHover = nil
+				curDNDHover = nil
+				if dndHoverTimer != nil {
+					dndHoverTimer.Stop()
+					dndHoverTimer = nil
+				}
 			}
 		}
 
@@ -1869,6 +1904,14 @@ func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 		return true
 	}
 	return false
+}
+
+// SendDNDHoverEvent sends DND hover event, based on last mouse move event
+func (w *Window) SendDNDHoverEvent(e *mouse.DragEvent) {
+	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
+	he.Processed = false
+	he.Action = dnd.Hover
+	w.SendEventSignal(&he, false) // popup = false by default
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).

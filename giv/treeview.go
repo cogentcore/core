@@ -1283,11 +1283,14 @@ func (tv *TreeView) TreeViewEvents() {
 	})
 	tv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.FocusEvent)
-		// tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		if de.Action == dnd.Enter {
+		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		switch de.Action {
+		case dnd.Enter:
 			gi.DNDSetCursor(de.Mod)
-		} else {
+		case dnd.Exit:
 			gi.DNDNotCursor()
+		case dnd.Hover:
+			tvv.Open()
 		}
 	})
 	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)

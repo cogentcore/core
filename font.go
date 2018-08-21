@@ -239,7 +239,7 @@ func (fs *FontStyle) FaceNm() string {
 // family(ies) (comma separated) and modifier parameters
 func FontFaceName(fam string, str FontStretch, wt FontWeights, sty FontStyles) string {
 	if fam == "" {
-		fam = Prefs.FontFamily
+		fam = string(Prefs.FontFamily)
 	}
 	nms := strings.Split(fam, ",")
 	basenm := ""
@@ -1100,3 +1100,11 @@ func (fl *FontLib) GoFontsAvail() {
 		fl.FontInfo = append(fl.FontInfo, fi)
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  FontName
+
+// FontName is used to specify an font -- just the unique name of the font
+// family -- automtically provides a chooser menu for fonts using ValueView
+// system
+type FontName string

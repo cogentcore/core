@@ -64,7 +64,7 @@ type Preferences struct {
 	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	FontFamily      string                 `desc:"default font family when otherwise not specified"`
+	FontFamily      FontName               `desc:"default font family when otherwise not specified"`
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
