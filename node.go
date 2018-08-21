@@ -395,7 +395,7 @@ func (n *Node) PathFromUnique(par Ki) string {
 func (n *Node) FindPathUnique(path string) (Ki, bool) {
 	if n.Par != nil { // we are not root..
 		myp := n.PathUnique()
-		path = strings.TrimLeft(path, myp)
+		path = strings.TrimPrefix(path, myp)
 	}
 	curn := Ki(n)
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")

@@ -120,7 +120,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 	// the structs made b/c the order is random..
 	for key, val := range tmp {
 		if strings.HasPrefix(key, struTypeKey) {
-			pkey := strings.TrimLeft(key, struTypeKey)
+			pkey := strings.TrimPrefix(key, struTypeKey)
 			rval := tmp[pkey]
 			tn := val.(string)
 			typ := kit.Types.Type(tn)
@@ -174,7 +174,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 		} else { // straight copy
 			if sval, ok := val.(string); ok {
 				if strings.HasPrefix(sval, enumTypeKey) {
-					tn := strings.TrimLeft(sval, enumTypeKey)
+					tn := strings.TrimPrefix(sval, enumTypeKey)
 					rpi := strings.Index(tn, ")")
 					str := tn[rpi+1:]
 					tn = tn[1:rpi]
