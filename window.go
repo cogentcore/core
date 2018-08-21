@@ -2162,6 +2162,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		} else {
 			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
 			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
+			return &wp
 		}
 	}
 
@@ -2170,7 +2171,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	}
 
 	trgdpi := scrn.LogicalDPI
-	fmt.Printf("Pref: falling back on dpi conversion: %v\n", trgdpi)
+	// fmt.Printf("Pref: falling back on dpi conversion: %v\n", trgdpi)
 
 	// try to find one with same logical dpi, else closest
 	var closest *WindowGeom

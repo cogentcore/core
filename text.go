@@ -382,6 +382,9 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 // RelPos positions must have already been set (e.g., SetRunePosLR)
 func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	sz := len(sr.Text)
+	if sz == 0 {
+		return -1
+	}
 	idx := int(float32(sz) * (trgSize / curSize))
 	if idx >= sz {
 		idx = sz - 1
