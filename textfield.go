@@ -814,9 +814,9 @@ func (tf *TextField) TextFieldEvents() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor().Push(cursor.IBeam)
+			oswin.TheApp.Cursor().PushIfNot(cursor.IBeam)
 		} else {
-			oswin.TheApp.Cursor().Pop()
+			oswin.TheApp.Cursor().PopIf(cursor.IBeam)
 		}
 	})
 	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -1096,6 +1096,7 @@ func (tf *TextField) Render2D() {
 
 func (tf *TextField) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		tf.ScrollToMe()
 		tf.CursorEnd()
 		tf.EmitFocusedSignal()
 	} else if !tf.IsInactive() {

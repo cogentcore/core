@@ -12,6 +12,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -534,6 +535,7 @@ func (tv *TreeView) MoveDownAction(selMode mouse.SelectModes) *TreeView {
 	nn := tv.MoveDown(selMode)
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
+		nn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
 	}
 	return nn
@@ -596,6 +598,7 @@ func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
 	nn := tv.MoveUp(selMode)
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
+		nn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
 	}
 	return nn
@@ -1109,7 +1112,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 	}
 	switch mod {
 	case dnd.DropCopy:
-		m.AddLabel("Copy (Shift=Move):")
+		m.AddLabel("Copy (Use Shift to Move):")
 	case dnd.DropMove:
 		m.AddLabel("Move:")
 	}
@@ -1278,6 +1281,15 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.DragNDropSource(de)
 		}
 	})
+	tv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.FocusEvent)
+		// tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		if de.Action == dnd.Enter {
+			gi.DNDSetCursor(de.Mod)
+		} else {
+			gi.DNDNotCursor()
+		}
+	})
 	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
 	wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonToggled) {
@@ -1374,7 +1386,7 @@ var TreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"border-width":     units.NewValue(0, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
-	"padding":          units.NewValue(1, units.Px),
+	"padding":          units.NewValue(0, units.Px),
 	"margin":           units.NewValue(1, units.Px),
 	"text-align":       gi.AlignLeft,
 	"vertical-align":   gi.AlignTop,
@@ -1437,7 +1449,7 @@ func (tv *TreeView) Size2D() {
 	}
 	tv.SizeFromParts() // get our size from parts
 	tv.WidgetSize = tv.LayData.AllocSize
-	h := tv.WidgetSize.Y
+	h := math32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
 
 	if !tv.IsClosed() {
@@ -1447,7 +1459,7 @@ func (tv *TreeView) Size2D() {
 			if gis == nil {
 				continue
 			}
-			h += gis.LayData.AllocSize.Y
+			h += math32.Ceil(gis.LayData.AllocSize.Y)
 			w = gi.Max32(w, tv.Indent.Dots+gis.LayData.AllocSize.X)
 		}
 	}
@@ -1486,7 +1498,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 
 	tv.Layout2DParts(parBBox, iter) // use OUR version
-	h := tv.WidgetSize.Y
+	h := math32.Ceil(tv.WidgetSize.Y)
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
 			ni := kid.(gi.Node2D).AsWidget()
@@ -1495,7 +1507,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 			}
 			ni.LayData.AllocPosRel.Y = h
 			ni.LayData.AllocPosRel.X = tv.Indent.Dots
-			h += ni.LayData.AllocSize.Y
+			h += math32.Ceil(ni.LayData.AllocSize.Y)
 		}
 	}
 	return tv.Layout2DChildren(iter)

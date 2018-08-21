@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Actions_name = "NoActionStartDropOnTargetDropFmSourceMoveEnterExitActionsN"
+const _Actions_name = "NoActionStartDropOnTargetDropFmSourceMoveEnterExitHoverActionsN"
 
-var _Actions_index = [...]uint8{0, 8, 13, 25, 37, 41, 46, 50, 58}
+var _Actions_index = [...]uint8{0, 8, 13, 25, 37, 41, 46, 50, 55, 63}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {

@@ -494,11 +494,19 @@ func (a Vec2D) ToPointRound() image.Point {
 	return image.Point{int(math.Round(float64(a.X))), int(math.Round(float64(a.Y)))}
 }
 
-// RectFromPosSize returns an image.Rectangle from max dims of pos, size
+// RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size
 // (floor on pos, ceil on size)
-func RectFromPosSize(pos, sz Vec2D) image.Rectangle {
+func RectFromPosSizeMax(pos, sz Vec2D) image.Rectangle {
 	tp := pos.ToPointFloor()
 	ts := sz.ToPointCeil()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+}
+
+// RectFromPosSizeMin returns an image.Rectangle from min dims of pos, size
+// (ceil on pos, floor on size)
+func RectFromPosSizeMin(pos, sz Vec2D) image.Rectangle {
+	tp := pos.ToPointCeil()
+	ts := sz.ToPointFloor()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 

@@ -83,7 +83,6 @@ var KiT_Shapes = kit.Enums.AddEnum(ShapesN, false, nil)
 
 // Drags is a map-set of cursors used for signaling dragging events.
 var Drags = map[Shapes]struct{}{
-	Not:      struct{}{},
 	DragCopy: struct{}{},
 	DragMove: struct{}{},
 	DragLink: struct{}{},

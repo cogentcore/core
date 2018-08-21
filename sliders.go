@@ -636,6 +636,7 @@ func (g *Slider) Render2DDefaultStyle() {
 
 func (g *Slider) FocusChanged2D(gotFocus bool) {
 	if gotFocus {
+		g.ScrollToMe()
 		g.EmitFocusedSignal()
 		g.SetSliderState(SliderFocus)
 	} else {

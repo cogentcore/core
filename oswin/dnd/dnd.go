@@ -112,28 +112,39 @@ type FocusEvent struct {
 	Event
 }
 
-// Actions associated with the DND event -- this is the nature of the event
+// Actions associated with the DND event -- this is the nature of the event.
 type Actions int32
 
 const (
 	NoAction Actions = iota
 
 	// Start is triggered when criteria for DND starting have been met -- it
-	// is the chance for potential sources to start a DND event
+	// is the chance for potential sources to start a DND event.
 	Start
 
-	// DropOnTarget is set when event is sent to the target where the item is dropped
+	// DropOnTarget is set when event is sent to the target where the item is dropped.
 	DropOnTarget
 
 	// DropFmSource is set when event is sent back to the source after the
 	// target has been dropped on a valid target that did not ignore the event
 	// -- the source should check if Mod = DropMove, and typically delete
-	// itself in this case
+	// itself in this case.
 	DropFmSource
 
+	// Move is sent whenever mouse is moving while dragging -- usually not needed.
 	Move
+
+	// Enter is sent when drag enters a given widget, in a FocusEvent.
 	Enter
+
+	// Exit is sent when drag exits a given widget, in a FocusEvent.  Exit
+	// from one widget always happens before entering another (so you can
+	// reset cursor to Not).
 	Exit
+
+	// Hover is sent when drag is hovering over a widget without moving -- can
+	// use this for spring-loaded opening of items to drag into, for example.
+	Hover
 
 	ActionsN
 )
