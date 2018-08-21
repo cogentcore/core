@@ -21,6 +21,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/mitchellh/go-homedir"
+	"unicode"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -357,9 +358,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.SetProp("completer-type", "path-completer")
-	sf.Completion = true
-	sf.CmpltrCB = fv.CompletionList
+	sf.SetCompleter(fv, fv.Complete)
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
@@ -757,11 +756,21 @@ func FileKindToIcon(kind, name string) gi.IconName {
 	return icn
 }
 
-func (fv *FileView) CompletionList() []string {
+func (fv *FileView) Complete(text string) (list []string, seed string) {
+	seedStart := 0
+	for i := len(text) - 1; i >= 0; i-- {
+		r := rune(text[i])
+		if unicode.IsSpace(r) || r == '/' {
+			seedStart = i + 1
+			break
+		}
+	}
+	seed = text[seedStart:]
+
 	var files = []string{}
 	for _, f := range fv.Files {
-		//fmt.Println(f.Name)
 		files = append(files, f.Name)
 	}
-	return files
+
+	return files, seed
 }
