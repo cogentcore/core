@@ -573,7 +573,7 @@ func (tf *TextField) Complete(str string) {
 	s1 += str
 	txt := s1 + s2
 	tf.EditTxt = []rune(txt)
-	tf.CursorEnd()
+	tf.CursorForward(len(str) - len(tf.Cmpltr.Seed()))
 	tf.Cmpltr = nil
 }
 
