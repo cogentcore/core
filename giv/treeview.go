@@ -1217,6 +1217,8 @@ func (tv *TreeView) RootTreeView() *TreeView {
 func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
+
+	// first all the keys that work for inactive and active
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		tf.UnselectAll()
@@ -1239,27 +1241,31 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunSelectAll:
 		tf.SelectAll()
 		kt.SetProcessed()
-	case gi.KeyFunDelete:
-		tf.SrcDelete()
-		kt.SetProcessed()
-	case gi.KeyFunDuplicate:
-		tf.SrcDuplicate()
-		kt.SetProcessed()
-	case gi.KeyFunInsert:
-		tf.SrcInsertBefore()
-		kt.SetProcessed()
-	case gi.KeyFunInsertAfter:
-		tf.SrcInsertAfter()
-		kt.SetProcessed()
 	case gi.KeyFunCopy:
 		tf.Copy(true)
 		kt.SetProcessed()
-	case gi.KeyFunCut:
-		tf.Cut()
-		kt.SetProcessed()
-	case gi.KeyFunPaste:
-		tf.Paste()
-		kt.SetProcessed()
+	}
+	if !tf.IsInactive() && !kt.IsProcessed() {
+		switch kf {
+		case gi.KeyFunDelete:
+			tf.SrcDelete()
+			kt.SetProcessed()
+		case gi.KeyFunDuplicate:
+			tf.SrcDuplicate()
+			kt.SetProcessed()
+		case gi.KeyFunInsert:
+			tf.SrcInsertBefore()
+			kt.SetProcessed()
+		case gi.KeyFunInsertAfter:
+			tf.SrcInsertAfter()
+			kt.SetProcessed()
+		case gi.KeyFunCut:
+			tf.Cut()
+			kt.SetProcessed()
+		case gi.KeyFunPaste:
+			tf.Paste()
+			kt.SetProcessed()
+		}
 	}
 }
 
@@ -1350,6 +1356,7 @@ func (tv *TreeView) ConfigParts() {
 	if mods {
 		wb.SetProp("#icon0", TVBranchProps)
 		wb.SetProp("#icon1", TVBranchProps)
+		wb.SetProp("no-focus", true) // note: cannot be in compiled props
 		tv.StylePart(gi.Node2D(wb))
 	}
 
@@ -1573,6 +1580,10 @@ func (tv *TreeView) Render2D() {
 }
 
 func (tv *TreeView) FocusChanged2D(gotFocus bool) {
+	if gotFocus {
+		tv.ScrollToMe()
+		tv.EmitFocusedSignal()
+	}
 	tv.UpdateSig()
 }
 

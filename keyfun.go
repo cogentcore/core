@@ -32,8 +32,8 @@ const (
 	KeyFunPageLeft
 	KeyFunHome
 	KeyFunEnd
-	KeyFunFocusNext
-	KeyFunFocusPrev
+	KeyFunFocusNext  // tab
+	KeyFunFocusPrev  // shift-tab
 	KeyFunSelectItem // enter
 	KeyFunCancelSelect
 	KeyFunSelectMode

@@ -92,9 +92,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* drag cursor getting set somehow -- in gieditor
-
-* pick element in menu based on first letter -- maybe impl at layout level as lowpri and will work everywhere including treeview -- good idea..
+* splitter not dragging
 
 * change 1 option valueview to just directly do that one option instead of
   pulling up menu.
@@ -114,7 +112,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
    
    need to wait for close windows to go through..  
 
-* cursor on windows, x11 getting stuck with close popup..
+* test cursor on windows, x11 getting stuck with close popup..
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..

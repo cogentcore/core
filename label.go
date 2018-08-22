@@ -42,6 +42,8 @@ func ToLabel(it interface{}) string {
 		switch v := it.(type) {
 		case reflect.Type:
 			return v.Name()
+		case ki.Ki:
+			return v.Name()
 		}
 		return kit.ToString(it)
 	}
@@ -124,6 +126,14 @@ func (g *Label) SetText(txt string) {
 		sz.SetSubVal(2 * spc)
 	}
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
+}
+
+// Label returns the display label for this node, satisfying the Labeler interface
+func (g *Label) Label() string {
+	if g.Text != "" {
+		return g.Text
+	}
+	return g.Nm
 }
 
 // SetTextAction sets the text and triggers an update action

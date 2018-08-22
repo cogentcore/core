@@ -165,6 +165,14 @@ func (g *ButtonBase) SetText(txt string) {
 	SetButtonText(g, txt)
 }
 
+// Label returns the display label for this node, satisfying the Labeler interface
+func (g *ButtonBase) Label() string {
+	if g.Text != "" {
+		return g.Text
+	}
+	return g.Nm
+}
+
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button
 func (g *ButtonBase) SetIcon(iconName string) {

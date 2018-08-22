@@ -920,8 +920,8 @@ func (w *Window) EventLoop() {
 		}
 
 		////////////////////////////////////////////////////////////////////////////
-		//  Process events for Window
-		//  Window gets first crack at the events, and handles window-specific ones
+		//  High-priority events for Window
+		//  Window gets first crack at these events, and handles window-specific ones
 
 		switch e := evi.(type) {
 		case *window.Event:
@@ -940,15 +940,6 @@ func (w *Window) EventLoop() {
 				// w.FullReRender()
 			}
 			continue
-		case *key.Event:
-			if w.DNDData != nil {
-				// todo: update event type
-			}
-		case *key.ChordEvent:
-			keyDelPop := w.KeyChordEvent(e)
-			if keyDelPop {
-				delPop = true
-			}
 		case *mouse.DragEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
@@ -979,6 +970,19 @@ func (w *Window) EventLoop() {
 			if !delPop && et == oswin.MouseMoveEvent {
 				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
 				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
+					delPop = true
+				}
+			}
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+		// Low priority windows events
+
+		if !evi.IsProcessed() {
+			switch e := evi.(type) {
+			case *key.ChordEvent:
+				keyDelPop := w.KeyChordEvent(e)
+				if keyDelPop {
 					delPop = true
 				}
 			}

@@ -7,10 +7,14 @@ package gi
 import (
 	"fmt"
 	"image"
+	"strings"
+	"time"
+	"unicode"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -270,6 +274,15 @@ type GridData struct {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Layout
 
+// LayoutFocusNameTimeoutMSec is the number of milliseconds between keypresses
+// to combine characters into name to search for within layout -- starts over
+// after this delay.
+var LayoutFocusNameTimeoutMSec = 500
+
+// LayoutFocusNameTabMSec is the number of milliseconds since last focus name
+// event to allow tab to focus on next element with same name.
+var LayoutFocusNameTabMSec = 2000
+
 // Layout is the primary node type responsible for organizing the sizes and
 // positions of child widgets -- all arbitrary collections of widgets should
 // generally be contained within a layout -- otherwise the parent widget must
@@ -280,16 +293,19 @@ type GridData struct {
 // can automatically add scrollbars depending on the Overflow layout style.
 type Layout struct {
 	WidgetBase
-	Lay       Layouts             `xml:"lay" desc:"type of layout to use"`
-	Spacing   units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
-	StackTop  int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
-	ChildSize Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasScroll [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
-	Scrolls   [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
-	GridSize  image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
-	GridData  [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
-	NeedsRedo bool                `json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
+	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`
+	Spacing       units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
+	StackTop      int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
+	ChildSize     Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize     Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll     [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	Scrolls       [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	GridSize      image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridData      [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	NeedsRedo     bool                `json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
+	FocusName     string              `json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
+	FocusNameTime time.Time           `json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
+	FocusNameLast ki.Ki               `json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -1008,7 +1024,7 @@ func (ly *Layout) AvailSize() Vec2D {
 	return avail
 }
 
-// process any overflow according to overflow settings
+// ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow() {
 	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
 		return
@@ -1036,6 +1052,10 @@ func (ly *Layout) ManageOverflow() {
 		}
 		ly.LayoutScrolls()
 	}
+}
+
+func (ly *Layout) HasAnyScroll() bool {
+	return ly.HasScroll[X] || ly.HasScroll[Y]
 }
 
 func (ly *Layout) SetScroll(d Dims2D) {
@@ -1234,7 +1254,7 @@ func (ly *Layout) ScrollToBoxDim(dim Dims2D, st, minPos, maxPos int) bool {
 
 	h := ly.Sty.Font.Size.Dots
 
-	if minPos < st {
+	if minPos < st { // favors scrolling to start
 		trg := sc.Value + float32(minPos-st) - h
 		if trg < 0 {
 			trg = 0
@@ -1272,27 +1292,110 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
 }
 
+// FocusOnName processes key events to look for an element starting with given name
+func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
+	kf := KeyFun(kt.ChordString())
+	delayMs := int(kt.Time().Sub(ly.FocusNameTime) / time.Millisecond)
+	ly.FocusNameTime = kt.Time()
+	if kf == KeyFunFocusNext { // tab means go to next match -- don't worry about time
+		if ly.FocusName == "" || delayMs > LayoutFocusNameTabMSec {
+			ly.FocusName = ""
+			ly.FocusNameLast = nil
+			return false
+		}
+	} else if kf == KeyFunAbort {
+		kt.SetProcessed()
+		ly.FocusName = ""
+		ly.FocusNameLast = nil
+		return false
+	} else {
+		if delayMs > LayoutFocusNameTimeoutMSec {
+			ly.FocusName = ""
+		}
+		if !unicode.IsPrint(kt.Rune) || kt.Modifiers != 0 {
+			return false
+		}
+		ly.FocusName += string(kt.Rune)
+		ly.FocusNameLast = nil // only use last if tabbing
+	}
+	kt.SetProcessed()
+	// fmt.Printf("searching for: %v\n", ly.FocusName)
+	focel, found := ly.ChildByLabelStartsCanFocus(ly.FocusName, ly.FocusNameLast)
+	if found {
+		ly.ParentWindow().SetFocus(focel) // this will also scroll by default!
+		ly.FocusNameLast = focel
+		return true
+	} else {
+		if ly.FocusNameLast == nil {
+			ly.FocusName = "" // nothing being found
+		}
+		ly.FocusNameLast = nil // start over
+	}
+	return false
+}
+
+// ChildByLabelStartsCanFocus uses breadth-first search to find first element
+// within layout whose Label (from Labeler interface) starts with given string
+// (case insensitive) and can focus.  If after is non-nil, only finds after
+// given element.
+func (ly *Layout) ChildByLabelStartsCanFocus(name string, after ki.Ki) (ki.Ki, bool) {
+	lcnm := strings.ToLower(name)
+	var rki ki.Ki
+	gotAfter := false
+	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data interface{}) bool {
+		_, ni := KiToNode2D(k)
+		if ni != nil && !ni.CanFocus() { // don't go any further
+			return false
+		}
+		if after != nil && !gotAfter {
+			if k == after {
+				gotAfter = true
+			}
+			return true // skip to next
+		}
+		kn := strings.ToLower(ToLabel(k))
+		if rki == nil && strings.HasPrefix(kn, lcnm) {
+			rki = k
+			return false
+		}
+		return rki == nil // only continue if haven't found yet
+	})
+	if rki != nil {
+		return rki, true
+	}
+	return nil, false
+}
+
+// LayoutEvents registers events processed by Layout -- most having to do with scrolling.
 func (ly *Layout) LayoutEvents() {
-	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
-		if li.ScrollDelta(me.Delta) {
-			me.SetProcessed()
-		}
-	})
-	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*dnd.MoveEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
-		li.AutoScroll(me.Pos())
-	})
-	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.MoveEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
-		if li.Viewport.IsMenu() {
+	if ly.HasAnyScroll() { // we are only interested in scrolling!
+		// LowPri to allow other focal widgets to capture
+		ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.ScrollEvent)
+			li := recv.Embed(KiT_Layout).(*Layout)
+			if li.ScrollDelta(me.Delta) {
+				me.SetProcessed()
+			}
+		})
+		// HiPri to do it first so others can be in view etc -- does NOT consume event!
+		ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*dnd.MoveEvent)
+			li := recv.Embed(KiT_Layout).(*Layout)
 			li.AutoScroll(me.Pos())
-		}
+		})
+		ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.MoveEvent)
+			li := recv.Embed(KiT_Layout).(*Layout)
+			if li.Viewport.IsMenu() {
+				li.AutoScroll(me.Pos())
+			}
+		})
+	}
+	// LowPri to allow other focal widgets to capture
+	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		li := recv.Embed(KiT_Layout).(*Layout)
+		kt := d.(*key.ChordEvent)
+		li.FocusOnName(kt)
 	})
 }
 
@@ -1411,6 +1514,13 @@ func (ly *Layout) Render2D() {
 	} else {
 		ly.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
+}
+
+func (g *Layout) HasFocus2D() bool {
+	if g.IsInactive() {
+		return false
+	}
+	return g.ContainsFocus() // needed for getting key events
 }
 
 ///////////////////////////////////////////////////////////

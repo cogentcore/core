@@ -85,27 +85,27 @@ var Layout2DTrace bool = false
 // and rendering the 2D scenegraph
 type Node2D interface {
 	// nodes are Ki elements -- this comes for free by embedding ki.Node in
-	// all Node2D elements
+	// all Node2D elements.
 	ki.Ki
 
 	// AsNode2D returns a generic Node2DBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
-	// interface methods
+	// interface methods.
 	AsNode2D() *Node2DBase
 
 	// AsViewport2D returns Viewport2D if this node is one (has its own
-	// bitmap, used for menus, dialogs, icons, etc), else nil
+	// bitmap, used for menus, dialogs, icons, etc), else nil.
 	AsViewport2D() *Viewport2D
 
 	// AsLayout2D returns Layout if this is a Layout-derived node, else nil
 	AsLayout2D() *Layout
 
-	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil
+	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil.
 	AsWidget() *WidgetBase
 
 	// Init2D initializes a node -- grabs active Viewport etc -- must call
 	// InitNodeBase as first step set basic inits including setting Viewport
-	// -- all code here must be robust to being called repeatedly
+	// -- all code here must be robust to being called repeatedly.
 	Init2D()
 
 	// Style2D: In a MeFirst downward pass, all properties are cached out in
@@ -118,7 +118,7 @@ type Node2D interface {
 	// Size2D: DepthFirst downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
-	// Layout
+	// Layout.
 	Size2D()
 
 	// Layout2D: MeFirst downward pass (each node calls on its children at
@@ -138,23 +138,23 @@ type Node2D interface {
 	// delta -- used for scrolling -- the layout pass assigns canonical
 	// positions, saved in AllocPosOrig and BBox, and this adds the given
 	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
-	// update its bounding box information given the new position
+	// update its bounding box information given the new position.
 	Move2D(delta image.Point, parBBox image.Rectangle)
 
 	// BBox2D: compute the raw bounding box of this node relative to its
 	// parent viewport -- called during Layout2D to set node BBox field, which
-	// is then used in setting WinBBox and VpBBox
+	// is then used in setting WinBBox and VpBBox.
 	BBox2D() image.Rectangle
 
 	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
 	// call ComputeBBox2DBase but viewports require special code -- called
-	// during Layout and Move
+	// during Layout and Move.
 	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
 
 	// ChildrenBBox2D: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
 	// operates on the existing VpBBox for this node -- this is what is passed
-	// down as parBBox do the children's Layout2D
+	// down as parBBox do the children's Layout2D.
 	ChildrenBBox2D() image.Rectangle
 
 	// Render2D: Final rendering pass, each node is fully responsible for
@@ -167,7 +167,7 @@ type Node2D interface {
 	Render2D()
 
 	// FocusChanged2D is called on node when it gets or loses focus -- focus
-	// flag has current state too
+	// flag has current state too.
 	FocusChanged2D(gotFocus bool)
 
 	// HasFocus2D returns true if this node has keyboard focus and should
@@ -177,7 +177,7 @@ type Node2D interface {
 	HasFocus2D() bool
 
 	// FindNamedElement searches for given named element in this node or in
-	// parent nodes.  Used for url(#name) references
+	// parent nodes.  Used for url(#name) references.
 	FindNamedElement(name string) Node2D
 
 	// MakeContextMenu creates the context menu items (typically Action
@@ -189,13 +189,13 @@ type Node2D interface {
 
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle of the WinBBox, but can be adapted as
-	// appropriate for different widgets
+	// appropriate for different widgets.
 	ContextMenuPos() image.Point
 
 	// ContextMenu displays the context menu of various actions to perform on
 	// a node -- returns immediately, and actions are all executed directly
 	// (later) via the action signals.  Calls MakeContextMenu and
-	// ContextMenuPos
+	// ContextMenuPos.
 	ContextMenu()
 }
 

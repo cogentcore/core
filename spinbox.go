@@ -163,7 +163,8 @@ func (g *SpinBox) ConfigParts() {
 		// up
 		up := buts.KnownChild(0).(*Action)
 		up.SetName("up")
-		up.SetProp("no-focus", true)
+		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
+		// not compiled into style prop
 		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
 		up.Icon = g.UpIcon
 		g.StylePart(Node2D(up))
