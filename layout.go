@@ -1292,6 +1292,42 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
 }
 
+// LayoutKeys is key processing for layouts -- focus name and arrow keys
+func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
+	kf := KeyFun(kt.ChordString())
+	win := ly.ParentWindow()
+	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
+		switch kf {
+		case KeyFunMoveRight:
+			kt.SetProcessed()
+			win.FocusNext()
+			return
+		case KeyFunMoveLeft:
+			kt.SetProcessed()
+			win.FocusPrev()
+			return
+		}
+	}
+	if ly.Lay == LayoutVert || ly.Lay == LayoutGrid || ly.Lay == LayoutVertFlow {
+		switch kf {
+		case KeyFunMoveDown:
+			kt.SetProcessed()
+			win.FocusNext()
+			return
+		case KeyFunMoveUp:
+			kt.SetProcessed()
+			win.FocusPrev()
+			return
+		}
+	}
+	if nf, ok := ly.Prop("no-focus-name"); ok {
+		if nf.(bool) {
+			return
+		}
+	}
+	ly.FocusOnName(kt)
+}
+
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 	kf := KeyFun(kt.ChordString())
@@ -1303,11 +1339,6 @@ func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 			ly.FocusNameLast = nil
 			return false
 		}
-	} else if kf == KeyFunAbort {
-		kt.SetProcessed()
-		ly.FocusName = ""
-		ly.FocusNameLast = nil
-		return false
 	} else {
 		if delayMs > LayoutFocusNameTimeoutMSec {
 			ly.FocusName = ""
@@ -1366,36 +1397,42 @@ func (ly *Layout) ChildByLabelStartsCanFocus(name string, after ki.Ki) (ki.Ki, b
 	return nil, false
 }
 
+// LayoutScrollEvents registers scrolling-related mouse events processed by
+// Layout -- most subclasses of Layout will want these..
+func (ly *Layout) LayoutScrollEvents() {
+	// LowPri to allow other focal widgets to capture
+	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		li := recv.Embed(KiT_Layout).(*Layout)
+		if li.ScrollDelta(me.Delta) {
+			me.SetProcessed()
+		}
+	})
+	// HiPri to do it first so others can be in view etc -- does NOT consume event!
+	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*dnd.MoveEvent)
+		li := recv.Embed(KiT_Layout).(*Layout)
+		li.AutoScroll(me.Pos())
+	})
+	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.MoveEvent)
+		li := recv.Embed(KiT_Layout).(*Layout)
+		if li.Viewport.IsMenu() {
+			li.AutoScroll(me.Pos())
+		}
+	})
+}
+
 // LayoutEvents registers events processed by Layout -- most having to do with scrolling.
 func (ly *Layout) LayoutEvents() {
-	if ly.HasAnyScroll() { // we are only interested in scrolling!
-		// LowPri to allow other focal widgets to capture
-		ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.ScrollEvent)
-			li := recv.Embed(KiT_Layout).(*Layout)
-			if li.ScrollDelta(me.Delta) {
-				me.SetProcessed()
-			}
-		})
-		// HiPri to do it first so others can be in view etc -- does NOT consume event!
-		ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*dnd.MoveEvent)
-			li := recv.Embed(KiT_Layout).(*Layout)
-			li.AutoScroll(me.Pos())
-		})
-		ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.MoveEvent)
-			li := recv.Embed(KiT_Layout).(*Layout)
-			if li.Viewport.IsMenu() {
-				li.AutoScroll(me.Pos())
-			}
-		})
+	if ly.HasAnyScroll() {
+		ly.LayoutScrollEvents()
 	}
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		li := recv.Embed(KiT_Layout).(*Layout)
 		kt := d.(*key.ChordEvent)
-		li.FocusOnName(kt)
+		li.LayoutKeys(kt)
 	})
 }
 

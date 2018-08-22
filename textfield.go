@@ -521,8 +521,9 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 
 // OfferCompletions pops up a menu of possible completions
 func (tf *TextField) OfferCompletions() {
-	if PopupIsCompleter(tf.ParentWindow().Popup) {
-		tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+	win := tf.ParentWindow()
+	if PopupIsCompleter(win.Popup) {
+		win.ClosePopup(win.Popup)
 	}
 	if !tf.EnableComplete {
 		return
@@ -545,6 +546,7 @@ func (tf *TextField) OfferCompletions() {
 		// todo: figure popup placement using font and line height
 		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
 		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
+		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	}
 }
 
@@ -640,20 +642,21 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
+	win := tf.ParentWindow()
 
-	if PopupIsCompleter(tf.ParentWindow().Popup) {
+	if PopupIsCompleter(win.Popup) {
 		switch kf {
 		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
 			if len(tf.completions) == 1 {
 				tf.Complete(tf.completions[0])
-				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+				win.ClosePopup(win.Popup)
 				return
 			}
 			// try to extend the seed
 			s := complete.Extend(tf.completions, tf.seed)
 			if s != "" {
 				// todo: get currently selected menu item and set selected when new menu is offered
-				tf.ParentWindow().ClosePopup(tf.ParentWindow().Popup)
+				win.ClosePopup(win.Popup)
 				tf.InsertAtCursor(s)
 				tf.OfferCompletions()
 			}

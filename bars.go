@@ -206,30 +206,30 @@ var ToolBarProps = ki.Props{
 }
 
 // ToolBarStdRender does the standard rendering of the bar
-func (mb *ToolBar) ToolBarStdRender() {
-	st := &mb.Sty
-	rs := &mb.Viewport.Render
+func (tb *ToolBar) ToolBarStdRender() {
+	st := &tb.Sty
+	rs := &tb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := mb.LayData.AllocPos
-	sz := mb.LayData.AllocSize
+	pos := tb.LayData.AllocPos
+	sz := tb.LayData.AllocSize
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 }
 
-func (mb *ToolBar) Render2D() {
-	if len(mb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
+func (tb *ToolBar) Render2D() {
+	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
 		return
 	}
-	if mb.FullReRenderIfNeeded() {
+	if tb.FullReRenderIfNeeded() {
 		return
 	}
-	if mb.PushBounds() {
-		mb.ToolBarStdRender()
-		mb.LayoutEvents()
-		mb.RenderScrolls()
-		mb.Render2DChildren()
-		mb.PopBounds()
+	if tb.PushBounds() {
+		tb.ToolBarStdRender()
+		tb.LayoutEvents()
+		tb.RenderScrolls()
+		tb.Render2DChildren()
+		tb.PopBounds()
 	} else {
-		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
+		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }

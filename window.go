@@ -1490,16 +1490,6 @@ func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
 	if e.IsProcessed() {
 		return false
 	}
-	if w.Popup != nil && PopupIsMenu(w.Popup) {
-		switch kf {
-		case KeyFunMoveUp:
-			w.FocusPrev()
-			e.SetProcessed()
-		case KeyFunMoveDown:
-			w.FocusNext()
-			e.SetProcessed()
-		}
-	}
 	switch kf {
 	case KeyFunFocusNext:
 		w.FocusNext()
