@@ -9,7 +9,6 @@ import (
 	"strings"
 	"unicode"
 
-	"fmt"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
@@ -650,7 +649,6 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 					if frame.Children().IsValidIndex(i) {
 						child, good := frame.Child(i)
 						if good && child.TypeEmbeds(KiT_ButtonBase) {
-							fmt.Println(child.Name())
 							matches = append(matches, child.Name())
 						}
 						i++
