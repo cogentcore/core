@@ -559,31 +559,28 @@ type StructValueView struct {
 var KiT_StructValueView = kit.Types.AddType(&StructValueView{}, nil)
 
 func (vv *StructValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_Action
 	return vv.WidgetTyp
 }
 
 func (vv *StructValueView) UpdateWidget() {
-	mb := vv.Widget.(*gi.MenuButton)
+	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := fmt.Sprintf("%T", npv.Interface())
-	mb.SetText(txt)
+	ac.SetText(txt)
 }
 
 func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	mb := vv.Widget.(*gi.MenuButton)
-	mb.Tooltip = vv.ViewFieldTag("desc")
-	mb.SetProp("padding", units.NewValue(2, units.Px))
-	mb.SetProp("margin", units.NewValue(2, units.Px))
-	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Struct", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac := vv.Widget.(*gi.Action)
+	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
-		mb := vvv.Widget.(*gi.MenuButton)
+		ac := vvv.Widget.(*gi.Action)
 		tynm := kit.NonPtrType(vvv.Value.Type()).Name()
-		StructViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+		StructViewDialog(ac.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 	})
 }
 
@@ -634,12 +631,12 @@ type SliceValueView struct {
 var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
 
 func (vv *SliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_Action
 	return vv.WidgetTyp
 }
 
 func (vv *SliceValueView) UpdateWidget() {
-	mb := vv.Widget.(*gi.MenuButton)
+	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
@@ -647,7 +644,7 @@ func (vv *SliceValueView) UpdateWidget() {
 	} else {
 		txt = fmt.Sprintf("[%v] %T", npv.Len(), npv.Interface())
 	}
-	mb.SetText(txt)
+	ac.SetText(txt)
 }
 
 func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
@@ -656,16 +653,14 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
 	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
 	vv.UpdateWidget()
-	mb := vv.Widget.(*gi.MenuButton)
-	mb.SetProp("padding", units.NewValue(2, units.Px))
-	mb.SetProp("margin", units.NewValue(2, units.Px))
-	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Slice", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac := vv.Widget.(*gi.Action)
+	ac.ResetMenu()
+	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
-		mb := vvv.Widget.(*gi.MenuButton)
+		ac := vvv.Widget.(*gi.Action)
 		tynm := "Slice of " + kit.NonPtrType(vvv.ElType).Name()
 		if vvv.IsStruct {
-			dlg := TableViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
+			dlg := TableViewDialog(ac.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 			if ok {
 				sv := svk.(*TableView)
@@ -676,7 +671,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 				})
 			}
 		} else {
-			dlg := SliceViewDialog(mb.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
+			dlg := SliceViewDialog(ac.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
 			svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				sv := svk.(*SliceView)
@@ -701,12 +696,12 @@ type MapValueView struct {
 var KiT_MapValueView = kit.Types.AddType(&MapValueView{}, nil)
 
 func (vv *MapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_MenuButton
+	vv.WidgetTyp = gi.KiT_Action
 	return vv.WidgetTyp
 }
 
 func (vv *MapValueView) UpdateWidget() {
-	mb := vv.Widget.(*gi.MenuButton)
+	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
@@ -714,26 +709,26 @@ func (vv *MapValueView) UpdateWidget() {
 	} else {
 		txt = fmt.Sprintf("Map: [%v] %T", npv.Len(), npv.Interface())
 	}
-	mb.SetText(txt)
+	ac.SetText(txt)
 }
 
 func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.UpdateWidget()
-	mb := vv.Widget.(*gi.MenuButton)
-	mb.Tooltip = vv.ViewFieldTag("desc")
-	mb.SetProp("padding", units.NewValue(2, units.Px))
-	mb.SetProp("margin", units.NewValue(2, units.Px))
-	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit Map", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac := vv.Widget.(*gi.Action)
+	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.SetProp("padding", units.NewValue(2, units.Px))
+	ac.SetProp("margin", units.NewValue(2, units.Px))
+	ac.ResetMenu()
+	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
-		mb := vvv.Widget.(*gi.MenuButton)
+		ac := vvv.Widget.(*gi.Action)
 		tmptyp := kit.NonPtrType(vvv.Value.Type())
 		tynm := tmptyp.Name()
 		if tynm == "" {
 			tynm = tmptyp.String()
 		}
-		dlg := MapViewDialog(mb.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+		dlg := MapViewDialog(ac.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
 		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 		if ok {
 			mv := mvk.(*MapView)

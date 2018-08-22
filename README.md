@@ -94,9 +94,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * splitter not dragging
 
-* change 1 option valueview to just directly do that one option instead of
-  pulling up menu.
-
 * fix the style-props context -- need an overall prop on objects -- in type presumably.
 
 * need key function for moving between panels, and an API to support that..
