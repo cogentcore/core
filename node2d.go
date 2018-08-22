@@ -268,7 +268,7 @@ func (g *Node2DBase) GrabFocus() {
 func (g *Node2DBase) FocusNext() {
 	win := g.ParentWindow()
 	if win != nil {
-		win.FocusNext()
+		win.FocusNext(win.Focus)
 	}
 }
 
@@ -289,6 +289,9 @@ func (g *Node2DBase) ContainsFocus() bool {
 	}
 	if win.Focus == nil {
 		return false
+	}
+	if win.Focus == g.This {
+		return true
 	}
 	plev := win.Focus.ParentLevel(g.This)
 	if plev < 0 {

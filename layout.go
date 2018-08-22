@@ -1292,31 +1292,112 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
 }
 
+// ChildWithFocus returns a direct child of this layout that either is the
+// current window focus item, or contains that focus item (along with its
+// index) -- nil, -1 if none.
+func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
+	win := ly.ParentWindow()
+	if win == nil {
+		return nil, -1
+	}
+	for i, k := range ly.Kids {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
+			continue
+		}
+		if ni.ContainsFocus() {
+			return k, i
+		}
+	}
+	return nil, -1
+}
+
+// FocusNextChild attempts to move the focus into the next layout child (with
+// wraparound to start) -- returns true if successful
+func (ly *Layout) FocusNextChild(updn bool) bool {
+	sz := len(ly.Kids)
+	if sz <= 1 {
+		return false
+	}
+	foc, idx := ly.ChildWithFocus()
+	if foc == nil {
+		return false
+	}
+	win := ly.ParentWindow()
+	cur := win.Focus
+	nxti := idx + 1
+	if ly.Lay == LayoutGrid && updn {
+		nxti = idx + ly.Sty.Layout.Columns
+	}
+	did := false
+	if nxti < sz {
+		did = win.FocusOnOrNext(ly.KnownChild(nxti))
+	} else {
+		did = win.FocusOnOrNext(ly.KnownChild(0))
+	}
+	if !did || win.Focus == cur {
+		return false
+	}
+	return true
+}
+
+// FocusPrevChild attempts to move the focus into the previous layout child
+// (with wraparound to end) -- returns true if successful
+func (ly *Layout) FocusPrevChild(updn bool) bool {
+	sz := len(ly.Kids)
+	if sz <= 1 {
+		return false
+	}
+	foc, idx := ly.ChildWithFocus()
+	if foc == nil {
+		return false
+	}
+	win := ly.ParentWindow()
+	cur := win.Focus
+	nxti := idx - 1
+	if ly.Lay == LayoutGrid && updn {
+		nxti = idx - ly.Sty.Layout.Columns
+	}
+	did := false
+	if nxti >= 0 {
+		did = win.FocusOnOrNext(ly.KnownChild(nxti))
+	} else {
+		did = win.FocusOnOrNext(ly.KnownChild(sz - 1))
+	}
+	if !did || win.Focus == cur {
+		return false
+	}
+	return true
+}
+
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
-	win := ly.ParentWindow()
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
 		switch kf {
 		case KeyFunMoveRight:
-			kt.SetProcessed()
-			win.FocusNext()
+			if ly.FocusNextChild(false) { // allow higher layers to try..
+				kt.SetProcessed()
+			}
 			return
 		case KeyFunMoveLeft:
-			kt.SetProcessed()
-			win.FocusPrev()
+			if ly.FocusPrevChild(false) {
+				kt.SetProcessed()
+			}
 			return
 		}
 	}
 	if ly.Lay == LayoutVert || ly.Lay == LayoutGrid || ly.Lay == LayoutVertFlow {
 		switch kf {
 		case KeyFunMoveDown:
-			kt.SetProcessed()
-			win.FocusNext()
+			if ly.FocusNextChild(true) {
+				kt.SetProcessed()
+			}
 			return
 		case KeyFunMoveUp:
-			kt.SetProcessed()
-			win.FocusPrev()
+			if ly.FocusPrevChild(true) {
+				kt.SetProcessed()
+			}
 			return
 		}
 	}

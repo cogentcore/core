@@ -501,7 +501,7 @@ func (w *Window) FullReRender() {
 		if w.StartFocus != nil {
 			w.SetFocus(w.StartFocus)
 		} else {
-			w.FocusNext()
+			w.FocusNext(w.Focus)
 		}
 	}
 }
@@ -1496,10 +1496,10 @@ func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
 	}
 	switch kf {
 	case KeyFunFocusNext:
-		w.FocusNext()
+		w.FocusNext(w.Focus)
 		e.SetProcessed()
 	case KeyFunFocusPrev:
-		w.FocusPrev()
+		w.FocusPrev(w.Focus)
 		e.SetProcessed()
 	case KeyFunAbort:
 		if w.Popup != nil {
@@ -1589,12 +1589,12 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	return true
 }
 
-// FocusNext sets the focus on the next item that can accept focus -- returns
-// true if a focus item found.
-func (w *Window) FocusNext() bool {
+// FocusNext sets the focus on the next item that can accept focus after the
+// given item (can be nil) -- returns true if a focus item found.
+func (w *Window) FocusNext(foc ki.Ki) bool {
 	gotFocus := false
 	focusNext := false // get the next guy
-	if w.Focus == nil {
+	if foc == nil {
 		focusNext = true
 	}
 
@@ -1608,12 +1608,11 @@ func (w *Window) FocusNext() bool {
 			if gotFocus {
 				return false
 			}
-			// todo: see about 3D guys
 			_, ni := KiToNode2D(k)
 			if ni == nil {
 				return true
 			}
-			if w.Focus == k { // current focus can be a non-can-focus item
+			if foc == k { // current focus can be a non-can-focus item
 				focusNext = true
 				return true
 			}
@@ -1632,13 +1631,30 @@ func (w *Window) FocusNext() bool {
 		}
 		focusNext = true // this time around, just get the first one
 	}
-	return false
+	return gotFocus
 }
 
-// FocusPrev sets the focus on the previous item.
-func (w *Window) FocusPrev() bool {
-	if w.Focus == nil { // must have a current item here
-		w.FocusNext()
+// FocusOnOrNext sets the focus on the given item, or the next one that can
+// accept focus -- returns true if a new focus item found.
+func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
+	if w.Focus == foc {
+		return true
+	}
+	_, ni := KiToNode2D(foc)
+	if ni == nil {
+		return false
+	}
+	if ni.CanFocus() {
+		w.SetFocus(foc)
+		return true
+	}
+	return w.FocusNext(foc)
+}
+
+// FocusPrev sets the focus on the previous item before the given item (can be nil)
+func (w *Window) FocusPrev(foc ki.Ki) bool {
+	if foc == nil { // must have a current item here
+		w.FocusLast()
 		return false
 	}
 
@@ -1659,7 +1675,7 @@ func (w *Window) FocusPrev() bool {
 		if ni == nil {
 			return true
 		}
-		if w.Focus == k {
+		if foc == k {
 			gotFocus = true
 			return false
 		}
@@ -1671,14 +1687,15 @@ func (w *Window) FocusPrev() bool {
 	})
 	if gotFocus && prevItem != nil {
 		w.SetFocus(prevItem)
+		return true
 	} else {
-		w.FocusLast()
+		return w.FocusLast()
 	}
-	return true
 }
 
-// FocusLast sets the focus on the last item in the tree
-func (w *Window) FocusLast() {
+// FocusLast sets the focus on the last item in the tree -- returns true if a
+// focusable item was found
+func (w *Window) FocusLast() bool {
 	var lastItem ki.Ki
 
 	focRoot := w.Viewport.This
@@ -1699,6 +1716,10 @@ func (w *Window) FocusLast() {
 		return true
 	})
 	w.SetFocus(lastItem)
+	if lastItem == nil {
+		return false
+	}
+	return true
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
@@ -1744,8 +1765,7 @@ func (w *Window) PushFocus(p ki.Ki) {
 		w.FocusStack = make([]ki.Ki, 0, 50)
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
-	w.Focus = p
-	w.FocusNext()
+	w.FocusNext(p)
 }
 
 // PopFocus pops off the focus stack and sets prev to current focus.

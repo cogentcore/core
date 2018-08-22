@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -238,21 +237,6 @@ func (g *SpinBox) SpinBoxEvents() {
 			sb.SetSelectedState(!sb.IsSelected())
 		}
 		sb.WidgetSig.Emit(sb.This, sig, data) // passthrough
-	})
-	g.ConnectEvent(oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
-		if sb.IsInactive() {
-			return
-		}
-		kt := d.(*key.ChordEvent)
-		kf := KeyFun(kt.ChordString())
-		if kf == KeyFunMoveUp {
-			kt.SetProcessed()
-			sb.IncrValue(1.0)
-		} else if kf == KeyFunMoveDown {
-			kt.SetProcessed()
-			sb.IncrValue(-1.0)
-		}
 	})
 }
 

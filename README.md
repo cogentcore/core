@@ -92,10 +92,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* fix the style-props context -- need an overall prop on objects -- in type presumably.
+* fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
 
 * need key function for moving between panels, and an API to support that..
   this is key in emacs for full mouseless functionality.  use in gieditor.  search it.
+  
+	  + emacs is C-x o and I've mapped C-x p to be the "previous" version -- need support for these extended key functions
+
+	  + https://code.visualstudio.com/docs/getstarted/keybindings -- Ctrl+1,2,3 etc -- seems pretty awkward though..
 
 * gieditor remember last filename saved if any, instead of WinVp.json
 
