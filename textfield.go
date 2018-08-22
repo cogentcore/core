@@ -46,7 +46,6 @@ type TextField struct {
 	RenderVis       TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles     [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight      float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	EnableComplete  bool                    `json:"-" xml:"-" desc:"offer completion, or not"`
 	CompleteFunc    complete.Func           `desc:"function to get the list of possible completions"`
 	CompleteContext interface{}             `desc:"the object that implements complete.Func"`
 	Seed            string                  `desc:"current completion seed"`
@@ -525,10 +524,6 @@ func (tf *TextField) OfferCompletions() {
 	if PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
 	}
-	if !tf.EnableComplete {
-		return
-	}
-
 	if tf.CompleteFunc == nil {
 		return
 	}
@@ -1123,7 +1118,6 @@ func (tf *TextField) SetCompleter(data interface{}, fun complete.Func) {
 	if fun == nil {
 		return
 	}
-	tf.EnableComplete = true
 	tf.CompleteContext = data
 	tf.CompleteFunc = fun
 }
