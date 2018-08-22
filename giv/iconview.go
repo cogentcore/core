@@ -64,6 +64,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 						cbb := vvv.Widget.(*gi.Action)
 						ic := gi.CurIconList[si]
 						vvv.SetValue(ic)
+						cbb.SetFullReRender()
 						cbb.SetIcon(string(ic))
 					}
 				}, nil)

@@ -910,15 +910,6 @@ func (w *Window) EventLoop() {
 			}
 		}
 
-		// reset "catch" events (Dragging, Scrolling)
-		if w.Dragging != nil && et != oswin.MouseDragEvent {
-			bitflag.Clear(w.Dragging.Flags(), int(NodeDragging))
-			w.Dragging = nil
-		}
-		if w.Scrolling != nil && et != oswin.MouseScrollEvent {
-			w.Scrolling = nil
-		}
-
 		////////////////////////////////////////////////////////////////////////////
 		//  High-priority events for Window
 		//  Window gets first crack at these events, and handles window-specific ones
@@ -986,6 +977,15 @@ func (w *Window) EventLoop() {
 					delPop = true
 				}
 			}
+		}
+
+		// reset "catch" events (Dragging, Scrolling)
+		if w.Dragging != nil && et != oswin.MouseDragEvent {
+			bitflag.Clear(w.Dragging.Flags(), int(NodeDragging))
+			w.Dragging = nil
+		}
+		if w.Scrolling != nil && et != oswin.MouseScrollEvent {
+			w.Scrolling = nil
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -1139,7 +1139,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					case *mouse.DragEvent:
 						if w.Dragging != nil {
 							if w.Dragging == ni.This {
-								rvs.AddDepth(recv, fun, w)
+								rvs.Add(recv, fun, 10000)
 								break
 							} else {
 								continue
@@ -1154,7 +1154,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					case *mouse.ScrollEvent:
 						if w.Scrolling != nil {
 							if w.Scrolling == ni.This {
-								rvs.AddDepth(recv, fun, w)
+								rvs.Add(recv, fun, 10000)
 							} else {
 								continue
 							}
@@ -1166,6 +1166,10 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 							continue
 						}
 					default:
+						if w.Dragging == ni.This { // dragger always gets it
+							rvs.Add(recv, fun, 10000) // top priority -- can't steal!
+							break
+						}
 						if !pos.In(ni.WinBBox) {
 							continue
 						}

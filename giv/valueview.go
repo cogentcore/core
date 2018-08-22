@@ -576,6 +576,8 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.SetProp("padding", units.NewValue(2, units.Px))
+	ac.SetProp("margin", units.NewValue(2, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -654,7 +656,9 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
 	vv.UpdateWidget()
 	ac := vv.Widget.(*gi.Action)
-	ac.ResetMenu()
+	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.SetProp("padding", units.NewValue(2, units.Px))
+	ac.SetProp("margin", units.NewValue(2, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -719,7 +723,6 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.Tooltip = vv.ViewFieldTag("desc")
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
-	ac.ResetMenu()
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)

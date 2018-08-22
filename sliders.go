@@ -62,12 +62,20 @@ var SliderBaseProps = ki.Props{
 type SliderSignals int64
 
 const (
-	// value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end
+	// SliderValueChanged indicates that the value has changed -- if tracking
+	// is enabled, then this tracks online changes -- otherwise only at the
+	// end.
 	SliderValueChanged SliderSignals = iota
-	// slider pushed down but not yet up
+
+	// SliderPressed means slider was pushed down but not yet up.
 	SliderPressed
+
+	// SliderReleased means the slider has been released after being pressed.
 	SliderReleased
+
+	// SliderMoved means the slider position has moved (low level move event).
 	SliderMoved
+
 	SliderSignalsN
 )
 
