@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode"
 
+	"fmt"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
@@ -46,10 +47,9 @@ type TextField struct {
 	StateStyles     [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight      float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	EnableComplete  bool                    `json:"-" xml:"-" desc:"offer completion, or not"`
-	completeFunc    complete.Complete       `desc:"function to get the list of possible completions"`
-	completeContext interface{}             `desc:"the object that implements completeFunc"`
-	seed            string                  `desc:"current completion seed"`
-	completions     []string                `desc:"current completions"`
+	CompleteFunc    complete.Func           `desc:"function to get the list of possible completions"`
+	CompleteContext interface{}             `desc:"the object that implements complete.Func"`
+	Seed            string                  `desc:"current completion seed"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -529,19 +529,17 @@ func (tf *TextField) OfferCompletions() {
 		return
 	}
 
-	// create completer and populate menu
-	tf.completions = tf.completions[:0]
-	tf.seed = ""
-	if tf.completeFunc != nil {
-		tf.completions, tf.seed = tf.completeFunc(string(tf.EditTxt[0:tf.CursorPos]))
+	if tf.CompleteFunc == nil {
+		return
 	}
 
-	tf.completions = complete.Matches(tf.completions, tf.seed)
-	if len(tf.completions) > 0 {
-		if len(tf.completions) == 1 && tf.completions[0] == tf.seed { // don't show if only one and it completions current text
+	var completions []string
+	completions, tf.Seed = tf.CompleteFunc(string(tf.EditTxt[0:tf.CursorPos]))
+	if len(completions) > 0 {
+		if len(completions) == 1 && completions[0] == tf.Seed { // don't show if only one and it completions current text
 			return
 		}
-		m := tf.MakeCompletionMenu(tf.completions)
+		m := tf.MakeCompletionMenu(completions)
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
 		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
@@ -567,11 +565,11 @@ func (tf *TextField) MakeCompletionMenu(matches []string) Menu {
 func (tf *TextField) Complete(str string) {
 	s1 := string(tf.EditTxt[0:tf.CursorPos])
 	s2 := string(tf.EditTxt[tf.CursorPos:len(tf.EditTxt)])
-	s1 = strings.TrimSuffix(s1, tf.seed)
+	s1 = strings.TrimSuffix(s1, tf.Seed)
 	s1 += str
 	txt := s1 + s2
 	tf.EditTxt = []rune(txt)
-	tf.CursorForward(len(str) - len(tf.seed))
+	tf.CursorForward(len(str) - len(tf.Seed))
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
@@ -647,20 +645,40 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if PopupIsCompleter(win.Popup) {
 		switch kf {
 		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
-			if len(tf.completions) == 1 {
-				tf.Complete(tf.completions[0])
-				win.ClosePopup(win.Popup)
-				return
+			frame, found := win.Popup.Child(0) // should be the frame
+			if found && frame.TypeEmbeds(KiT_Frame) {
+				var matches []string
+				var child ki.Node
+				i := 0
+				valid := true
+				for valid {
+					if frame.Children().IsValidIndex(i) {
+						child, good := frame.Child(i)
+						if good && child.TypeEmbeds(KiT_ButtonBase) {
+							fmt.Println(child.Name())
+							matches = append(matches, child.Name())
+						}
+						i++
+					} else {
+						valid = false
+					}
+				}
+				if len(matches) > 0 {
+					if len(matches) == 1 { // just complete
+						tf.Complete(child.Name())
+						win.ClosePopup(win.Popup)
+						return
+					}
+					// try to extend the seed
+					s := complete.Extend(matches, tf.Seed)
+					if s != "" {
+						// todo: get currently selected menu item and set selected when new menu is offered
+						win.ClosePopup(win.Popup)
+						tf.InsertAtCursor(s)
+						tf.OfferCompletions()
+					}
+				}
 			}
-			// try to extend the seed
-			s := complete.Extend(tf.completions, tf.seed)
-			if s != "" {
-				// todo: get currently selected menu item and set selected when new menu is offered
-				win.ClosePopup(win.Popup)
-				tf.InsertAtCursor(s)
-				tf.OfferCompletions()
-			}
-			//fmt.Printf("tab\n")
 			kt.SetProcessed()
 		default:
 			//fmt.Printf("some char\n")
@@ -1101,8 +1119,11 @@ func (tf *TextField) FocusChanged2D(gotFocus bool) {
 	tf.UpdateSig()
 }
 
-func (tf *TextField) SetCompleter(data interface{}, fun complete.Complete) {
+func (tf *TextField) SetCompleter(data interface{}, fun complete.Func) {
+	if fun == nil {
+		return
+	}
 	tf.EnableComplete = true
-	tf.completeContext = data
-	tf.completeFunc = fun
+	tf.CompleteContext = data
+	tf.CompleteFunc = fun
 }

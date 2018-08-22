@@ -5,7 +5,6 @@
 /*
 	Package Complete provides functions for text completion
 */
-
 package complete
 
 import (
@@ -15,11 +14,11 @@ import (
 
 // CompletionFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type Complete func(text string) (list []string, seed string)
+type Func func(text string) (matches []string, seed string)
 
 // Matches returns a list of matches given a list of possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.
-func Matches(completions []string, seed string) (matches []string) {
+func MatchSeed(completions []string, seed string) (matches []string) {
 	completions = completions
 	seed = seed
 

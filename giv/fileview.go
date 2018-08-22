@@ -15,6 +15,7 @@ import (
 
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi"
+	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
@@ -756,7 +757,7 @@ func FileKindToIcon(kind, name string) gi.IconName {
 	return icn
 }
 
-func (fv *FileView) Complete(text string) (list []string, seed string) {
+func (fv *FileView) Complete(text string) (matches []string, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -772,5 +773,6 @@ func (fv *FileView) Complete(text string) (list []string, seed string) {
 		files = append(files, f.Name)
 	}
 
-	return files, seed
+	matches = complete.MatchSeed(files, seed)
+	return matches, seed
 }
