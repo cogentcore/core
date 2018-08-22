@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -17,9 +18,8 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/ki/bitflag"
-	"github.com/goki/gi/complete"
+	"github.com/goki/ki/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -521,16 +521,15 @@ func (tf *TextField) OfferCompletions() {
 	}
 
 	// create completer and populate menu
-	var list []string
-	var seed string
+	tf.completions = tf.completions[:0]
+	tf.seed = ""
 	if tf.completeFunc != nil {
-		list, seed = tf.completeFunc(string(tf.EditTxt[0:tf.CursorPos]))
-		tf.seed = seed
+		tf.completions, tf.seed = tf.completeFunc(string(tf.EditTxt[0:tf.CursorPos]))
 	}
 
-	tf.completions = complete.Matches(list, seed)
+	tf.completions = complete.Matches(tf.completions, tf.seed)
 	if len(tf.completions) > 0 {
-		if len(tf.completions) == 1 && tf.completions[0] == seed { // don't show if only one and it completions current text
+		if len(tf.completions) == 1 && tf.completions[0] == tf.seed { // don't show if only one and it completions current text
 			return
 		}
 		m := tf.MakeCompletionMenu(tf.completions)
