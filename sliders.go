@@ -329,15 +329,13 @@ func (g *SliderBase) SliderEvents() {
 		if sl.IsInactive() {
 			return
 		}
-		if sl.IsDragging() {
-			me.SetProcessed()
-			st := sl.PointToRelPos(me.From)
-			ed := sl.PointToRelPos(me.Where)
-			if sl.Dim == X {
-				sl.SliderMoved(float32(st.X), float32(ed.X))
-			} else {
-				sl.SliderMoved(float32(st.Y), float32(ed.Y))
-			}
+		me.SetProcessed()
+		st := sl.PointToRelPos(me.From)
+		ed := sl.PointToRelPos(me.Where)
+		if sl.Dim == X {
+			sl.SliderMoved(float32(st.X), float32(ed.X))
+		} else {
+			sl.SliderMoved(float32(st.Y), float32(ed.Y))
 		}
 	})
 	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

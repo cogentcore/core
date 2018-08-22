@@ -1600,7 +1600,7 @@ func (tv *TableView) DropCancel() {
 
 func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
-	selMode := mouse.SelectModeMod(kt.Modifiers)
+	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := tv.SelectedIdx
 	switch kf {
 	case gi.KeyFunCancelSelect:

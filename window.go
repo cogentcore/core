@@ -108,7 +108,8 @@ type Window struct {
 	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
 	OverTexActive bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
 	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from Mouse, Keyboard events"`
+	LastModBits   int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
 	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
 	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
@@ -116,7 +117,8 @@ type Window struct {
 	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
 	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders"`
+	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Scrolling     ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
 	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
@@ -777,13 +779,11 @@ func (w *Window) EventLoop() {
 					// w.DoFullRender = true
 					lastSkipped = false
 					skippedResize = nil
-					// lastResizeTime = now
 					continue
 				}
 			case oswin.WindowEvent:
 				we := evi.(*window.Event)
 				if we.Action == window.Move {
-					// fmt.Printf("window %v moved: pos %v winpos: %v\n", w.Nm, we.Pos(), w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
 			}
@@ -910,6 +910,15 @@ func (w *Window) EventLoop() {
 			}
 		}
 
+		// reset "catch" events (Dragging, Scrolling)
+		if w.Dragging != nil && et != oswin.MouseDragEvent {
+			bitflag.Clear(w.Dragging.Flags(), int(NodeDragging))
+			w.Dragging = nil
+		}
+		if w.Scrolling != nil && et != oswin.MouseScrollEvent {
+			w.Scrolling = nil
+		}
+
 		////////////////////////////////////////////////////////////////////////////
 		//  Process events for Window
 		//  Window gets first crack at the events, and handles window-specific ones
@@ -941,7 +950,8 @@ func (w *Window) EventLoop() {
 				delPop = true
 			}
 		case *mouse.DragEvent:
-			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+			w.LastModBits = e.Modifiers
+			w.LastSelMode = e.SelectMode()
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
 			} else {
@@ -950,10 +960,14 @@ func (w *Window) EventLoop() {
 				}
 			}
 		case *mouse.Event:
-			w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+			w.LastModBits = e.Modifiers
+			w.LastSelMode = e.SelectMode()
 			if w.DNDData != nil && e.Action == mouse.Release {
 				w.DNDDropEvent(e)
 			}
+		case *mouse.MoveEvent:
+			w.LastModBits = e.Modifiers
+			w.LastSelMode = e.SelectMode()
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -1046,21 +1060,21 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 // WinEventRecv is used to hold info about widgets receiving event signals to
 // given function, used for sorting and delayed sending.
 type WinEventRecv struct {
-	recv ki.Ki
-	fun  ki.RecvFunc
-	data int
+	Recv ki.Ki
+	Func ki.RecvFunc
+	Data int
 }
 
 // Set sets the recv and fun
 func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
-	we.recv = r
-	we.fun = f
-	we.data = data
+	we.Recv = r
+	we.Func = f
+	we.Data = data
 }
 
 // Call calls the function on the recv with the args
 func (we *WinEventRecv) Call(send ki.Ki, sig int64, data interface{}) {
-	we.fun(we.recv, send, sig, data)
+	we.Func(we.Recv, send, sig, data)
 }
 
 type WinEventRecvList []WinEventRecv
@@ -1117,31 +1131,37 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					continue
 				} else if evi.HasPos() {
 					pos := evi.Pos()
-					// drag events start with node but can go beyond it..
-					_, ok := evi.(*mouse.DragEvent)
-					if ok {
-						if w.Dragging == ni.This {
-							rvs.AddDepth(recv, fun, w)
-							break // done -- dragger owns it!
-						} else if w.Dragging != nil {
-							continue
+					switch evi.(type) {
+					case *mouse.DragEvent:
+						if w.Dragging != nil {
+							if w.Dragging == ni.This {
+								rvs.AddDepth(recv, fun, w)
+								break
+							} else {
+								continue
+							}
 						} else {
 							if pos.In(ni.WinBBox) {
-								w.Dragging = ni.This
-								bitflag.Set(&ni.Flag, int(NodeDragging))
 								rvs.AddDepth(recv, fun, w)
 								break
 							}
 							continue
 						}
-					} else {
-						if w.Dragging == ni.This {
-							_, dg := KiToNode2D(w.Dragging)
-							if dg != nil {
-								bitflag.Clear(&dg.Flag, int(NodeDragging))
+					case *mouse.ScrollEvent:
+						if w.Scrolling != nil {
+							if w.Scrolling == ni.This {
+								rvs.AddDepth(recv, fun, w)
+							} else {
+								continue
 							}
-							w.Dragging = nil
+						} else {
+							if pos.In(ni.WinBBox) {
+								rvs.AddDepth(recv, fun, w)
+								break
+							}
+							continue
 						}
+					default:
 						if !pos.In(ni.WinBBox) {
 							continue
 						}
@@ -1160,16 +1180,26 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 
 		// deepest first
 		sort.Slice(rvs, func(i, j int) bool {
-			return rvs[i].data > rvs[j].data
+			return rvs[i].Data > rvs[j].Data
 		})
 
 		for _, rr := range rvs {
 			rr.Call(w.This, int64(et), evi)
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
+				switch evi.(type) { // only grab events if processed
+				case *mouse.DragEvent:
+					if w.Dragging == nil {
+						w.Dragging = rr.Recv
+						bitflag.Set(rr.Recv.Flags(), int(NodeDragging))
+					}
+				case *mouse.ScrollEvent:
+					if w.Scrolling == nil {
+						w.Scrolling = rr.Recv
+					}
+				}
 				break
 			}
 		}
-
 	}
 }
 
@@ -1451,7 +1481,8 @@ func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
 	delPop := false
 	cs := e.ChordString()
 	kf := KeyFun(cs)
-	w.LastSelMode = mouse.SelectModeMod(e.Modifiers)
+	w.LastModBits = e.Modifiers
+	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
 	if e.IsProcessed() {
 		return false
 	}
@@ -1733,6 +1764,16 @@ func (w *Window) PopFocus() {
 /////////////////////////////////////////////////////////////////////////////
 //                   DND: Drag-n-Drop
 
+// DNDStartEvent handles drag-n-drop start events.
+func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
+	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
+	de.Processed = false
+	de.Action = dnd.Start
+	de.DefaultMod()               // based on current key modifiers
+	w.SendEventSignal(&de, false) // popup = false: ignore any popups
+	// now up to receiver to call StartDragNDrop if they want to..
+}
+
 // StartDragNDrop is called by a node to start a drag-n-drop operation on
 // given source node, which is responsible for providing the data and image
 // representation of the node.
@@ -1749,83 +1790,8 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	wimg.This.SetName(src.UniqueName())
 	w.OverlayVp.AddChild(wimg.This)
 	w.DNDImage = wimg.This
+	DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
 	// fmt.Printf("starting dnd: %v\n", src.Name())
-}
-
-// FinalizeDragNDrop is called by a node to finalize the drag-n-drop
-// operation, after given action has been performed on the target -- allows
-// target to cancel, by sending dnd.DropIgnore.
-func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
-	if w.DNDFinalEvent == nil { // shouldn't happen...
-		return
-	}
-	de := w.DNDFinalEvent
-	de.Processed = false
-	de.Mod = action
-	if de.Source != nil {
-		et := de.Type()
-		de.Action = dnd.DropFmSource
-		for pri := HiPri; pri < EventPrisN; pri++ {
-			w.EventSigs[et][pri].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
-		}
-	}
-	w.DNDFinalEvent = nil
-}
-
-// DNDModCursor gets the appropriate cursor based on the DND event mod.
-func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
-	switch dmod {
-	case dnd.DropCopy:
-		return cursor.DragCopy
-	case dnd.DropMove:
-		return cursor.DragMove
-	case dnd.DropLink:
-		return cursor.DragLink
-	}
-	return cursor.Not
-}
-
-// DNDSetCursor sets the cursor based on the DND event mod -- does a
-// "PushIfNot" so safe for multiple calls.
-func DNDSetCursor(dmod dnd.DropMods) {
-	dndc := DNDModCursor(dmod)
-	oswin.TheApp.Cursor().PushIfNot(dndc)
-}
-
-// DNDNotCursor sets the cursor to Not = can't accept a drop
-func DNDNotCursor() {
-	oswin.TheApp.Cursor().PushIfNot(cursor.Not)
-}
-
-// DNDUpdateCursor updates the cursor based on the curent DND event mod if
-// different from current (but no update if Not)
-func DNDUpdateCursor(dmod dnd.DropMods) bool {
-	dndc := DNDModCursor(dmod)
-	curs := oswin.TheApp.Cursor()
-	if !curs.IsDrag() || curs.Current() == dndc {
-		return false
-	}
-	curs.Push(dndc)
-	return true
-}
-
-// DNDClearCursor clears any existing DND cursor that might have been set.
-func (w *Window) DNDClearCursor() {
-	curs := oswin.TheApp.Cursor()
-	for curs.IsDrag() || curs.Current() == cursor.Not {
-		curs.Pop()
-	}
-}
-
-// DNDStartEvent handles drag-n-drop start events.
-func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
-	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	de.Processed = false
-	de.Action = dnd.Start
-	de.DefaultMod() // based on current key modifiers
-	DNDSetCursor(de.Mod)
-	w.SendEventSignal(&de, false) // popup = false: ignore any popups
-	// now up to receiver to call StartDragNDrop if they want to..
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
@@ -1930,6 +1896,26 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 	e.SetProcessed()
 }
 
+// FinalizeDragNDrop is called by a node to finalize the drag-n-drop
+// operation, after given action has been performed on the target -- allows
+// target to cancel, by sending dnd.DropIgnore.
+func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
+	if w.DNDFinalEvent == nil { // shouldn't happen...
+		return
+	}
+	de := w.DNDFinalEvent
+	de.Processed = false
+	de.Mod = action
+	if de.Source != nil {
+		et := de.Type()
+		de.Action = dnd.DropFmSource
+		for pri := HiPri; pri < EventPrisN; pri++ {
+			w.EventSigs[et][pri].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
+		}
+	}
+	w.DNDFinalEvent = nil
+}
+
 // ClearDragNDrop clears any existing DND values.
 func (w *Window) ClearDragNDrop() {
 	w.DNDSource = nil
@@ -1939,6 +1925,51 @@ func (w *Window) ClearDragNDrop() {
 	w.DNDClearCursor()
 	w.Dragging = nil
 	w.RenderOverlays()
+}
+
+// DNDModCursor gets the appropriate cursor based on the DND event mod.
+func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
+	switch dmod {
+	case dnd.DropCopy:
+		return cursor.DragCopy
+	case dnd.DropMove:
+		return cursor.DragMove
+	case dnd.DropLink:
+		return cursor.DragLink
+	}
+	return cursor.Not
+}
+
+// DNDSetCursor sets the cursor based on the DND event mod -- does a
+// "PushIfNot" so safe for multiple calls.
+func DNDSetCursor(dmod dnd.DropMods) {
+	dndc := DNDModCursor(dmod)
+	oswin.TheApp.Cursor().PushIfNot(dndc)
+}
+
+// DNDNotCursor sets the cursor to Not = can't accept a drop
+func DNDNotCursor() {
+	oswin.TheApp.Cursor().PushIfNot(cursor.Not)
+}
+
+// DNDUpdateCursor updates the cursor based on the curent DND event mod if
+// different from current (but no update if Not)
+func DNDUpdateCursor(dmod dnd.DropMods) bool {
+	dndc := DNDModCursor(dmod)
+	curs := oswin.TheApp.Cursor()
+	if !curs.IsDrag() || curs.Current() == dndc {
+		return false
+	}
+	curs.Push(dndc)
+	return true
+}
+
+// DNDClearCursor clears any existing DND cursor that might have been set.
+func (w *Window) DNDClearCursor() {
+	curs := oswin.TheApp.Cursor()
+	for curs.IsDrag() || curs.Current() == cursor.Not {
+		curs.Pop()
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

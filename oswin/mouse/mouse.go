@@ -20,7 +20,6 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -70,51 +69,33 @@ type Event struct {
 
 // SetModifiers sets the bitflags based on a list of key.Modifiers
 func (e *Event) SetModifiers(mods ...key.Modifiers) {
-	for _, m := range mods {
-		e.Modifiers |= 1 << uint32(m)
-	}
+	key.SetModifierBits(&e.Modifiers, mods...)
 }
 
 // HasAnyModifier tests whether any of given modifier(s) were set
 func (e *Event) HasAnyModifier(mods ...key.Modifiers) bool {
-	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) != 0 {
-			return true
-		}
-	}
-	return false
+	return key.HasAnyModifierBits(e.Modifiers, mods...)
 }
 
 // HasAllModifiers tests whether all of given modifier(s) were set
 func (e *Event) HasAllModifier(mods ...key.Modifiers) bool {
-	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) == 0 {
-			return false
-		}
+	return key.HasAllModifierBits(e.Modifiers, mods...)
+}
+
+// SelectModeBits returns the selection mode based on given modifiers bitflags
+func SelectModeBits(modBits int32) SelectModes {
+	if key.HasAnyModifierBits(modBits, key.Shift) {
+		return ExtendContinuous
 	}
-	return true
+	if key.HasAnyModifierBits(modBits, key.Meta) {
+		return ExtendOne
+	}
+	return NoSelectMode
 }
 
 // SelectMode returns the selection mode based on given modifiers on event
 func (e *Event) SelectMode() SelectModes {
-	if e.HasAnyModifier(key.Shift) {
-		return ExtendContinuous
-	}
-	if e.HasAnyModifier(key.Meta) {
-		return ExtendOne
-	}
-	return NoSelectMode
-}
-
-// SelectModeMod returns the selection mode based on given modifiers bitflags
-func SelectModeMod(mods int32) SelectModes {
-	if bitflag.Has32(mods, int(key.Shift)) {
-		return ExtendContinuous
-	}
-	if bitflag.Has32(mods, int(key.Meta)) {
-		return ExtendOne
-	}
-	return NoSelectMode
+	return SelectModeBits(e.Modifiers)
 }
 
 /////////////////////////////////////////////////////////////////

@@ -223,7 +223,7 @@ func (g *SpinBox) ConfigPartsIfNeeded() {
 func (g *SpinBox) SpinBoxEvents() {
 	g.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
-		if sb.IsInactive() {
+		if sb.IsInactive() || !sb.HasFocus2D() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)

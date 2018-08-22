@@ -81,31 +81,46 @@ func (e Event) String() string {
 	return fmt.Sprintf("key.Event{(%v), %v, %v}", e.Code, e.Modifiers, e.Action)
 }
 
-// SetModifiers sets the bitflags based on a list of key.Modifiers
-func (e *Event) SetModifiers(mods ...Modifiers) {
+// SetModifierBits sets the bitflags based on a list of key.Modifiers
+func SetModifierBits(modBits *int32, mods ...Modifiers) {
 	for _, m := range mods {
-		e.Modifiers |= (1 << uint32(m))
+		*modBits |= (1 << uint32(m))
 	}
 }
 
-// HasAnyModifier tests whether any of given modifier(s) were set
-func (e *Event) HasAnyModifier(mods ...Modifiers) bool {
+// HasAnyModifierBits tests whether any of given modifier(s) bits were set
+func HasAnyModifierBits(modBits int32, mods ...Modifiers) bool {
 	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) != 0 {
+		if modBits&(1<<uint32(m)) != 0 {
 			return true
 		}
 	}
 	return false
 }
 
-// HasAllModifiers tests whether all of given modifier(s) were set
-func (e *Event) HasAllModifier(mods ...Modifiers) bool {
+// HasAllModifiersBits tests whether all of given modifier(s) bits were set
+func HasAllModifierBits(modBits int32, mods ...Modifiers) bool {
 	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) == 0 {
+		if modBits&(1<<uint32(m)) == 0 {
 			return false
 		}
 	}
 	return true
+}
+
+// SetModifiers sets the bitflags based on a list of key.Modifiers
+func (e *Event) SetModifiers(mods ...Modifiers) {
+	SetModifierBits(&e.Modifiers, mods...)
+}
+
+// HasAnyModifier tests whether any of given modifier(s) were set
+func (e *Event) HasAnyModifier(mods ...Modifiers) bool {
+	return HasAnyModifierBits(e.Modifiers, mods...)
+}
+
+// HasAllModifiers tests whether all of given modifier(s) were set
+func (e *Event) HasAllModifier(mods ...Modifiers) bool {
+	return HasAllModifierBits(e.Modifiers, mods...)
 }
 
 // ChordString returns a string representation of the keyboard event suitable

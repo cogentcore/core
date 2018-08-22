@@ -786,13 +786,11 @@ func (tf *TextField) TextFieldEvents() {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tf := recv.Embed(KiT_TextField).(*TextField)
-		if tf.IsDragging() {
-			if !tf.SelectMode {
-				tf.SelectModeToggle()
-			}
-			pt := tf.PointToRelPos(me.Pos())
-			tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
+		if !tf.SelectMode {
+			tf.SelectModeToggle()
 		}
+		pt := tf.PointToRelPos(me.Pos())
+		tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 	})
 	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)

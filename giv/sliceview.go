@@ -1153,7 +1153,7 @@ func (sv *SliceView) DropCancel() {
 
 func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
-	selMode := mouse.SelectModeMod(kt.Modifiers)
+	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := sv.SelectedIdx
 	switch kf {
 	case gi.KeyFunCancelSelect:

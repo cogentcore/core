@@ -92,15 +92,17 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* pick element in menu based on first letter -- maybe impl at layout level as lowpri and will work everywhere including treeview -- good idea..
+* drag cursor getting set somehow -- in gieditor
 
-* scrollwheel needs to "catch" -- stick with initial scroll wheel element
-* only scroll if clicked into a widget (focus -- only for spinbox)
+* pick element in menu based on first letter -- maybe impl at layout level as lowpri and will work everywhere including treeview -- good idea..
 
 * change 1 option valueview to just directly do that one option instead of
   pulling up menu.
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.
+
+* need key function for moving between panels, and an API to support that..
+  this is key in emacs for full mouseless functionality.  use in gieditor.  search it.
 
 * gieditor remember last filename saved if any, instead of WinVp.json
 

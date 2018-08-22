@@ -1216,7 +1216,7 @@ func (tv *TreeView) RootTreeView() *TreeView {
 
 func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
-	selMode := mouse.SelectModeMod(kt.Modifiers)
+	selMode := mouse.SelectModeBits(kt.Modifiers)
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		tf.UnselectAll()

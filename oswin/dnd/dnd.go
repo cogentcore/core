@@ -59,35 +59,31 @@ type Event struct {
 
 // HasAnyModifier tests whether any of given modifier(s) were set
 func (e *Event) HasAnyModifier(mods ...key.Modifiers) bool {
-	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) != 0 {
-			return true
-		}
-	}
-	return false
+	return key.HasAnyModifierBits(e.Modifiers, mods...)
 }
 
 // HasAllModifiers tests whether all of given modifier(s) were set
-func (e *Event) HasAllModifier(mods ...key.Modifiers) bool {
-	for _, m := range mods {
-		if e.Modifiers&(1<<uint32(m)) == 0 {
-			return false
-		}
+func (e *Event) HasAllModifiers(mods ...key.Modifiers) bool {
+	return key.HasAllModifierBits(e.Modifiers, mods...)
+}
+
+// DefaultModBits returns the default DropMod modifier action based on modifier keys
+func DefaultModBits(modBits int32) DropMods {
+	switch {
+	case key.HasAnyModifierBits(modBits, key.Control):
+		return DropCopy
+	case key.HasAnyModifierBits(modBits, key.Shift, key.Meta):
+		return DropMove
+	case key.HasAnyModifierBits(modBits, key.Alt):
+		return DropLink
+	default:
+		return DropCopy
 	}
-	return true
 }
 
 // DefaultMod sets the default DropMod modifier action based on modifier keys
 func (e *Event) DefaultMod() {
-	if e.HasAnyModifier(key.Control) {
-		e.Mod = DropCopy
-	} else if e.HasAnyModifier(key.Shift, key.Meta) {
-		e.Mod = DropMove
-	} else if e.HasAnyModifier(key.Alt) {
-		e.Mod = DropLink
-	} else {
-		e.Mod = DropCopy
-	}
+	e.Mod = DefaultModBits(e.Modifiers)
 }
 
 /////////////////////////////////////////////////////////////////
