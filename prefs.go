@@ -256,6 +256,9 @@ func (p *Preferences) SaveScreenZoom() {
 		sp = ScreenPrefs{}
 	}
 	sp.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
+	if p.ScreenPrefs == nil {
+		p.ScreenPrefs = make(map[string]ScreenPrefs)
+	}
 	p.ScreenPrefs[sc.Name] = sp
 }
 
