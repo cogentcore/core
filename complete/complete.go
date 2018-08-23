@@ -12,11 +12,11 @@ import (
 	"unicode"
 )
 
-// CompletionFunc is the function called to get the list of possible completions
+// Func is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
 type Func func(text string) (matches []string, seed string)
 
-// Matches returns a list of matches given a list of possibilities and a seed.
+// MatchSeed returns a list of matches given a list of possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.
 func MatchSeed(completions []string, seed string) (matches []string) {
 	completions = completions
@@ -54,10 +54,10 @@ func MatchSeed(completions []string, seed string) (matches []string) {
 	return matches
 }
 
-// Extend tries to extend the current seed checking possible completions for a longer common seed
+// ExtendSeed tries to extend the current seed checking possible completions for a longer common seed
 // e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
 // but if the possible completions are "abcde" and "abz" then Extend returns ""
-func Extend(matches []string, seed string) (extension string) {
+func ExtendSeed(matches []string, seed string) (extension string) {
 	keep_looking := true
 	new_seed := seed
 	potential_seed := new_seed

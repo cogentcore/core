@@ -529,30 +529,25 @@ func (tf *TextField) OfferCompletions() {
 
 	var completions []string
 	completions, tf.Seed = tf.CompleteFunc(string(tf.EditTxt[0:tf.CursorPos]))
-	if len(completions) > 0 {
-		if len(completions) == 1 && completions[0] == tf.Seed { // don't show if only one and it completions current text
+	count := len(completions)
+	if count > 0 {
+		if count == 1 && completions[0] == tf.Seed { // don't show if only one and it completions current text
 			return
 		}
-		m := tf.MakeCompletionMenu(completions)
+		var m Menu
+		for i := 0; i < count; i++ {
+			s := completions[i]
+			m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tff := recv.Embed(KiT_TextField).(*TextField)
+				tff.Complete(s)
+			})
+		}
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
 		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
 		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
 		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	}
-}
-
-func (tf *TextField) MakeCompletionMenu(matches []string) Menu {
-	var m Menu
-	count := len(matches)
-	for i := 0; i < count; i++ {
-		s := matches[i]
-		m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tff := recv.Embed(KiT_TextField).(*TextField)
-			tff.Complete(s)
-		})
-	}
-	return m
 }
 
 // Complete edits the text field using the string chosen from the completion menu
@@ -663,7 +658,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 						return
 					}
 					// try to extend the seed
-					s := complete.Extend(matches, tf.Seed)
+					s := complete.ExtendSeed(matches, tf.Seed)
 					if s != "" {
 						// todo: get currently selected menu item and set selected when new menu is offered
 						win.ClosePopup(win.Popup)
@@ -687,9 +682,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunMoveRight:
 		kt.SetProcessed()
 		tf.CursorForward(1)
+		tf.OfferCompletions()
 	case KeyFunMoveLeft:
 		kt.SetProcessed()
 		tf.CursorBackward(1)
+		tf.OfferCompletions()
 	case KeyFunHome:
 		kt.SetProcessed()
 		tf.CursorStart()
