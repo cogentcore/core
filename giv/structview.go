@@ -20,11 +20,12 @@ import (
 // box at the bottom where methods can be invoked
 type StructView struct {
 	gi.Frame
-	Struct     interface{} `desc:"the struct that we are a view onto"`
-	Title      string      `desc:"title / prompt to show above the editor fields"`
-	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Struct      interface{} `desc:"the struct that we are a view onto"`
+	Title       string      `desc:"title / prompt to show above the editor fields"`
+	FieldViews  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig     ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ToolbarStru interface{} `desc:"the struct that we successfully set a toolbar for"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -74,7 +75,6 @@ func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config.Add(gi.KiT_Space, "title-space")
 	config.Add(gi.KiT_Frame, "struct-grid")
 	config.Add(gi.KiT_Space, "grid-space")
-	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -116,16 +116,6 @@ func (sv *StructView) StructGrid() (*gi.Frame, int) {
 		return nil, -1
 	}
 	return sv.KnownChild(idx).(*gi.Frame), idx
-}
-
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame
-// -- nil, -1 if not found
-func (sv *StructView) ButtonBox() (*gi.Layout, int) {
-	idx, ok := sv.Children().IndexByName("buttons", 0)
-	if !ok {
-		return nil, -1
-	}
-	return sv.KnownChild(idx).(*gi.Layout), idx
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -197,18 +187,55 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.UpdateEnd(updt)
 }
 
+// UpdateFromStruct updates full widget layout from structure
 func (sv *StructView) UpdateFromStruct() {
 	mods, updt := sv.StdConfig()
 	sv.ConfigStructGrid()
+	sv.ConfigToolbar()
 	if mods {
 		sv.UpdateEnd(updt)
 	}
 }
 
+// UpdateFields updates each of the value-view widgets for the fields --
+// called by the ViewSig update
 func (sv *StructView) UpdateFields() {
 	updt := sv.UpdateStart()
 	for _, vv := range sv.FieldViews {
 		vv.UpdateWidget()
 	}
 	sv.UpdateEnd(updt)
+}
+
+// ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
+// one has been defined for this struct type through its registered type
+// properties.
+func (sv *StructView) ConfigToolbar() {
+	if kit.IfaceIsNil(sv.Struct) {
+		return
+	}
+	win := sv.ParentWindow()
+	if win == nil {
+		return // not ready yet
+	}
+	if sv.ToolbarStru == sv.Struct {
+		return
+	}
+	tb, ok := ToolBarView(sv.Struct, win)
+	if !ok {
+		sv.DeleteToolbar() // delete any old one
+		return
+	}
+	_, idx := sv.StructGrid()
+	sv.InsertChild(tb, idx)
+	sv.ToolbarStru = sv.Struct
+}
+
+// DeleteToolbar deletes any existing toolbar
+func (sv *StructView) DeleteToolbar() {
+	_, idx := sv.StructGrid()
+	if _, ok := sv.KnownChild(idx - 1).(*gi.ToolBar); ok {
+		sv.DeleteChildAtIndex(idx-1, true)
+	}
+	sv.ToolbarStru = nil
 }

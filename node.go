@@ -38,11 +38,9 @@ var NodeBaseProps = ki.Props{
 type NodeFlags int32
 
 const (
-	NodeFlagsNil NodeFlags = NodeFlags(ki.FlagsN) + iota
-
 	// NoLayout means that this node does not participate in the layout
 	// process (Size, Layout, Move) -- set by e.g., SVG nodes
-	NoLayout
+	NoLayout NodeFlags = NodeFlags(ki.FlagsN) + iota
 
 	// EventsConnected: this node has been connected to receive events from
 	// the window -- to optimize event processing, connections are typically

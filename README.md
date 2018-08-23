@@ -92,6 +92,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* use spacing instead of explicit space elements in all dialogs views etc -- much
+  simpler and easier to adjust.  need for new toolbar.
+
+* map, slice have automatic toolbar element plus custom -- not sure about how to do that yet.
+
+* TextField has an ActiveFocus bool -- window notifies if someone else clicks somewhere
+
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
 
 * need key function for moving between panels, and an API to support that..
@@ -102,6 +109,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	  + https://code.visualstudio.com/docs/getstarted/keybindings -- Ctrl+1,2,3 etc -- seems pretty awkward though..
 
 * gieditor remember last filename saved if any, instead of WinVp.json
+   + it should just be a Frame object itself, with Filename field.
 
 * crash on quit:
 * cocoa.go:

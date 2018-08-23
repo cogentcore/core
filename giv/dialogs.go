@@ -29,13 +29,19 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 	sv.SetStretchMaxWidth()
 	sv.SetStruct(stru, tmpSave)
 
+	// todo: need to access main menu of window but not here yet..
+	// need a callback I guess..
+
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, func() {
+		MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
+		sv.ConfigToolbar()
+	})
 	return dlg
 }
 
@@ -63,7 +69,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -94,7 +100,7 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, t
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -148,7 +154,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -179,7 +185,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueVie
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -233,7 +239,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -306,7 +312,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 		dlg.DialogSig.Connect(recv, fun)
 	}
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -317,7 +323,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 // to get the resulting selected file.  The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt string, css ki.Props, filterFunc FileViewFilterFunc, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt string, css ki.Props, filterFunc FileViewFilterFunc, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("file-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
@@ -330,7 +336,7 @@ func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt st
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
 	fv.FilterFunc = filterFunc
-	fv.SetPathFile(path, file, ext)
+	fv.SetFilename(filename, ext)
 
 	fv.FileSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(FileViewDoubleClicked) {
@@ -347,7 +353,7 @@ func FileViewDialog(avp *gi.Viewport2D, path, file, ext string, title, prompt st
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(35, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 

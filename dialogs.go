@@ -82,8 +82,10 @@ func ValidViewport(avp *Viewport2D) *Viewport2D {
 }
 
 // Open this dialog, in given location (0 = middle of window), finding window
-// from given viewport -- returns false if it fails for any reason.
-func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
+// from given viewport -- returns false if it fails for any reason.  optional
+// cvgFunc can perform additional configuration after the dialog window has
+// been created and dialog added to it -- some configs require the window.
+func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	avp = ValidViewport(avp)
 	if avp == nil {
 		return false
@@ -108,6 +110,11 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D) bool {
 	}
 
 	dlg.Win = win
+
+	if cfgFunc != nil {
+		cfgFunc()
+	}
+
 	dlg.Init2DTree()
 	dlg.Style2DTree()                                      // sufficient to get sizes
 	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
@@ -445,7 +452,7 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki
 		dlg.DialogSig.Connect(recv, fun)
 	}
 	dlg.UpdateEndNoSig(true) // going to be shown
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 }
 
 // ChoiceDialog opens a basic standard dialog with a title, prompt, and any
@@ -490,7 +497,7 @@ func ChoiceDialog(avp *Viewport2D, title, prompt string, choices []string, css k
 	}
 
 	dlg.UpdateEndNoSig(true) // going to be shown
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +557,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css 
 		dlg.DialogSig.Connect(recv, fun)
 	}
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
@@ -590,7 +597,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Pr
 		dlg.DialogSig.Connect(recv, fun)
 	}
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp)
+	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 

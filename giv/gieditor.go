@@ -14,7 +14,7 @@ import (
 )
 
 func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Save GUI to JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+	FileViewDialog(vp, "./"+obj.Name()+".json", ".json", "Save GUI to JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			fnm := FileViewDialogValue(dlg)
@@ -24,7 +24,7 @@ func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
 }
 
 func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./", obj.Name()+".json", ".json", "Load GUI from JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
+	FileViewDialog(vp, "./"+obj.Name()+".json", ".json", "Load GUI from JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			fnm := FileViewDialogValue(dlg)

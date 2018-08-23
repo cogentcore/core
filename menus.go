@@ -65,8 +65,6 @@ func (m *Menu) AddSeparator(name string) *Separator {
 		name = "sep"
 	}
 	sp.InitName(&sp, name)
-	sp.SetProp("min-height", units.NewValue(0.5, units.Em))
-	sp.SetProp("max-width", -1)
 	sp.Horiz = true
 	*m = append(*m, sp.This.(Node2D))
 	return &sp
@@ -328,14 +326,25 @@ type Separator struct {
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
 var SeparatorProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewValue(0, units.Px),
+	"margin":           units.NewValue(0, units.Px),
 	"vertical-align":   AlignCenter,
 	"horizontal-align": AlignCenter,
-	"stroke-width":     units.NewValue(2, units.Px),
-	"color":            &Prefs.Colors.Font,
-	"stroke":           &Prefs.Colors.Font,
+	"border-color":     &Prefs.Colors.Border,
+	"border-width":     units.NewValue(2, units.Px),
+	"background-color": &Prefs.Colors.Control,
 	// todo: dotted
+}
+
+func (g *Separator) Style2D() {
+	if g.Horiz {
+		g.SetProp("max-width", -1)
+		g.SetProp("min-height", units.NewValue(0.5, units.Ex))
+	} else {
+		g.SetProp("max-height", -1)
+		g.SetProp("min-width", units.NewValue(0.5, units.Ch))
+	}
+	g.WidgetBase.Style2D()
 }
 
 func (g *Separator) Render2D() {
@@ -343,16 +352,16 @@ func (g *Separator) Render2D() {
 		rs := &g.Viewport.Render
 		pc := &rs.Paint
 		st := &g.Sty
-		pc.FontStyle = st.Font
-		g.RenderStdBox(st)
-		pc.StrokeStyle.SetColor(&st.Font.Color) // ink color
+
+		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
+		sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+
+		if !st.Font.BgColor.IsNil() {
+			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+		}
+
 		pc.StrokeStyle.Width = st.Border.Width
-		pc.FillStyle.SetColor(nil)
-
-		spc := st.BoxSpace()
-		pos := g.LayData.AllocPos.AddVal(spc)
-		sz := g.LayData.AllocSize.AddVal(-2.0 * spc)
-
+		pc.StrokeStyle.SetColor(&st.Border.Color)
 		if g.Horiz {
 			pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
 		} else {
