@@ -389,7 +389,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	if idx >= sz {
 		idx = sz - 1
 	}
-	for idx >= 0 && !unicode.IsSpace(sr.Text[idx]) {
+	for idx > 0 && !unicode.IsSpace(sr.Text[idx]) {
 		idx--
 	}
 	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
