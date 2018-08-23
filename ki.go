@@ -487,7 +487,7 @@ type Ki interface {
 	// FuncDownBreadthFirst calls function on all children, then calls
 	// FuncDownBreadthFirst on all the children -- does NOT call on first node
 	// where this method is first called, due to nature of recursive logic --
-	// level var is incremented before calling chlidren -- if fun returns
+	// level var is incremented before calling children -- if fun returns
 	// false then any further traversal of that branch of the tree is aborted,
 	// but other branches can continue.
 	FuncDownBreadthFirst(level int, data interface{}, fun Func)

@@ -25,19 +25,18 @@ var PropsProps = Props{
 	"basic-type": true, // registers props as a basic type avail for type selection in creating property values -- many cases call for nested properties
 }
 
-// SubProps returns a value that contains another props, or nil if it doesn't
-// exist or isn't a Props
-func SubProps(pr map[string]interface{}, key string) Props {
+// SubProps returns a value that contains another props, or nil and false if
+// it doesn't exist or isn't a Props
+func SubProps(pr map[string]interface{}, key string) (Props, bool) {
 	sp, ok := pr[key]
 	if !ok {
-		return nil
+		return nil, false
 	}
 	spp, ok := sp.(Props)
 	if ok {
-		return spp
+		return spp, true
 	}
-	return nil
-
+	return nil, false
 }
 
 // special key prefix indicating type info
@@ -46,7 +45,34 @@ var struTypeKey = "__type:"
 // special key prefix for enums
 var enumTypeKey = "__enum:"
 
-// todo: wrap enum types in __enum:TypeName( )
+// BlankProp is an empty property, for when there isn't any need for the value
+type BlankProp struct{}
+
+// PropStruct is a struct of Name and Value, for use in a PropSlice to hold
+// properties that require order information (maps do not retain any order)
+type PropStruct struct {
+	Name  string
+	Value interface{}
+}
+
+// PropSlice is a slice of PropStruct, for when order is important within a
+// subset of properties (maps do not retain order) -- can set the value of a
+// property to a PropSlice to create an ordered list of property values.
+type PropSlice []PropStruct
+
+// SliceProps returns a value that contains a PropSlice, or nil and false if it doesn't
+// exist or isn't a PropSlice
+func SliceProps(pr map[string]interface{}, key string) (PropSlice, bool) {
+	sp, ok := pr[key]
+	if !ok {
+		return nil, false
+	}
+	spp, ok := sp.(PropSlice)
+	if ok {
+		return spp, true
+	}
+	return nil, false
+}
 
 // MarshalJSON saves the type information for each struct used in props, as a
 // separate key with the __type: prefix -- this allows the Unmarshal to
