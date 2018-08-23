@@ -687,9 +687,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunMoveRight:
 		kt.SetProcessed()
 		tf.CursorForward(1)
+		tf.OfferCompletions()
 	case KeyFunMoveLeft:
 		kt.SetProcessed()
 		tf.CursorBackward(1)
+		tf.OfferCompletions()
 	case KeyFunHome:
 		kt.SetProcessed()
 		tf.CursorStart()
