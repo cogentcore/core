@@ -100,7 +100,8 @@ github.com/srwiley/rasterx.(*Gradient).GetColorFunctionUS.func6(0x16e, 0x2, 0xff
 
 * double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
 
-* map, slice have automatic toolbar element plus custom -- not sure about how to do that yet.
+* impl single-arg logic and props from args setting tags in valueview -- need to create the valueviews outside of argview so we can intercept the single-arg HasAction case -- set tags then.
+
 
 * TextField has an ActiveFocus bool -- window notifies if someone else clicks somewhere
 
