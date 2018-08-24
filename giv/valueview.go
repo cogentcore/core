@@ -256,11 +256,12 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 	return ToValueView(fval)
 }
 
-// ValueView is an interface for representing values (e.g., fields, map
-// values, slice values) in Views (StructView, MapView, etc) -- the different
-// types of ValueView are for different Kinds of values (bool, float, etc) --
-// which can have different Kinds of owners -- the ValueVuewBase class
-// supports all the basic fields for managing the owner kinds
+// ValueView is an interface for managing the GUI representation of values
+// (e.g., fields, map values, slice values) in Views (StructView, MapView,
+// etc).  The different types of ValueView are for different Kinds of values
+// (bool, float, etc) -- which can have different Kinds of owners.  The
+// ValueVuewBase class supports all the basic fields for managing the owner
+// kinds.
 type ValueView interface {
 	ki.Ki
 

@@ -17,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/chewxy/math32"
+	"github.com/fatih/camelcase"
 	"github.com/goki/freetype/truetype"
 	"github.com/iancoleman/strcase"
 	// "github.com/golang/freetype/truetype"
@@ -159,7 +160,7 @@ func addUniqueFontRobust(fns *[]string, fn string) bool {
 	if FontLibrary.FontAvail(camel) {
 		return addUniqueFont(fns, camel)
 	}
-	spc := strcase.ToDelimited(camel, ' ')
+	spc := strings.Join(camelcase.Split(camel), " ")
 	if FontLibrary.FontAvail(spc) {
 		return addUniqueFont(fns, spc)
 	}

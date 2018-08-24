@@ -513,7 +513,7 @@ func (g *ButtonBase) Style2D() {
 		g.StateStyles[i].CopyFrom(&g.Sty)
 		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
 		if clsp != nil {
-			if stclsp := ki.SubProps(clsp, ButtonSelectors[i]); stclsp != nil {
+			if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
 				g.StateStyles[i].SetStyleProps(pst, stclsp)
 			}
 		}

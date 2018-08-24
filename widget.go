@@ -133,7 +133,7 @@ func (g *WidgetBase) Style2DWidget() {
 	// dynamically now -- cannot compile into default which is type-general
 	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
 	clsty := "." + g.Class
-	if sp := ki.SubProps(tprops, clsty); sp != nil {
+	if sp, ok := ki.SubProps(tprops, clsty); ok {
 		g.Sty.SetStyleProps(parSty, sp)
 	}
 
@@ -181,8 +181,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
 		styprops := kit.Types.Properties(g.Type(), true)
-		sp := ki.SubProps(styprops, stynm)
-		if sp != nil {
+		if sp, ok := ki.SubProps(styprops, stynm); ok {
 			if fill, ok := sp["fill"]; ok {
 				ic.SetProp("fill", fill)
 			}
@@ -190,8 +189,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 				ic.SetProp("stroke", stroke)
 			}
 		}
-		sp = ki.SubProps(*g.Properties(), stynm)
-		if sp != nil {
+		if sp, ok := ki.SubProps(*g.Properties(), stynm); ok {
 			for k, v := range sp {
 				ic.SetProp(k, v)
 			}

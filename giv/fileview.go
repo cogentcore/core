@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"unicode"
+
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
@@ -22,7 +24,6 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/mitchellh/go-homedir"
-	"unicode"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +72,14 @@ func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
 	ext := strings.ToLower(filepath.Ext(fi.Name))
 	_, has := fv.ExtMap[ext]
 	return has
+}
+
+// SetFilename sets the initial filename (splitting out path and filename) and
+// initializes the view
+func (fv *FileView) SetFilename(filename, ext string) {
+	fv.DirPath, fv.SelFile = filepath.Split(filename)
+	fv.SetExt(ext)
+	fv.UpdateFromPath()
 }
 
 // SetPathFile sets the path, initial select file (or "") and intializes the view
@@ -430,6 +439,7 @@ func (fv *FileView) UpdatePath() {
 	if fv.DirPath == "" {
 		fv.DirPath, _ = os.Getwd()
 	}
+	fv.DirPath, _ = homedir.Expand(fv.DirPath)
 	fv.DirPath, _ = filepath.Abs(fv.DirPath)
 }
 

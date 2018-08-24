@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
@@ -69,7 +70,10 @@ type Preferences struct {
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
 	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
+	ColorFilename   string                 `view:"-" desc:"filename for saving / loading colors"`
 }
+
+var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 
 // Prefs are the overall preferences
 var Prefs = Preferences{}
@@ -161,6 +165,21 @@ func (p *Preferences) Save() error {
 	return err
 }
 
+// LoadColors colors from a JSON-formatted file.
+func (p *Preferences) LoadColors(filename string) error {
+	err := p.Colors.LoadJSON(filename)
+	if err == nil {
+		p.Update()
+	}
+	return err
+}
+
+// Save colors to a JSON-formatted file, for easy sharing of your favorite
+// palettes.
+func (p *Preferences) SaveColors(filename string) error {
+	return p.Colors.SaveJSON(filename)
+}
+
 // Apply preferences to all the relevant settings.
 func (p *Preferences) Apply() {
 	np := len(p.FavPaths)
@@ -209,7 +228,7 @@ func (p *Preferences) ApplyDPI() {
 	}
 }
 
-// Update everything with current preferences -- triggers rebuild of default styles
+// Update everything with current preferences -- triggers rebuild of default styles.
 func (p *Preferences) Update() {
 	ZoomFactor = 1 // reset so saved dpi is used
 	p.Apply()
@@ -226,7 +245,7 @@ func (p *Preferences) Update() {
 }
 
 // SetKeyMap installs the given keymap as the current CustomKeyMap, which can
-// then be customized
+// then be customized.
 func (p *Preferences) SetKeyMap(kmap *KeyMap) {
 	p.CustomKeyMap = make(KeyMap, len(*kmap))
 	for key, val := range *kmap {
@@ -234,7 +253,16 @@ func (p *Preferences) SetKeyMap(kmap *KeyMap) {
 	}
 }
 
-// ScreenInfo returns screen info for all screens on the console
+// StdKeyMap sets StdKeyMapName and installs it as the current keymap
+func (p *Preferences) StdKeyMap(mapName string) {
+	p.StdKeyMapName = mapName
+	km, _ := StdKeyMapByName(mapName)
+	if km != nil {
+		p.SetKeyMap(km)
+	}
+}
+
+// ScreenInfo returns screen info for all screens on the console.
 func (p *Preferences) ScreenInfo() string {
 	ns := oswin.TheApp.NScreens()
 	scinfo := ""
@@ -293,6 +321,82 @@ func (p *ColorPrefs) SaveJSON(filename string) error {
 		log.Println(err)
 	}
 	return err
+}
+
+// PreferencesProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
+var PreferencesProps = ki.Props{
+	"MainMenu": ki.PropSlice{
+		{"AppMenu", ki.BlankProp{}},
+		{"File", ki.PropSlice{
+			{"Update", ki.Props{
+				"shortcut": "Command+U",
+			}},
+			{"Files", ki.PropSlice{
+				{"Load", ki.Props{
+					"shortcut":     "Command+O",
+					"update-after": true,
+				}},
+				{"Save", ki.Props{
+					"shortcut": "Command+S",
+				}},
+			}},
+			{"sep-color", ki.BlankProp{}},
+			{"LoadColors", ki.Props{
+				"FileView": ki.Props{
+					"field": "ColorFilename",
+					"ext":   ".json",
+				},
+			}},
+			{"SaveColors", ki.Props{
+				"FileView": ki.Props{
+					"field": "ColorFilename",
+					"ext":   ".json",
+				},
+			}},
+			{"sep-misc", ki.BlankProp{}},
+			{"SaveScreenZoom", ki.BlankProp{}},
+			{"DeleteSavedWindowGeoms", ki.Props{
+				"confirm": true,
+				"desc":    "Are you <i>sure</i>?  This deletes the file that saves the position and size of each window, by screen, and clear current in-memory cache.  You shouldn't generally need to do this but sometimes it is useful for testing or windows are showing up in bad places that you can't recover from.",
+			}},
+			{"sep-close", ki.BlankProp{}},
+			{"Close Window", ki.BlankProp{}},
+		}},
+		{"Edit", "Copy Cut Paste"},
+	},
+	"ToolBar": ki.PropSlice{
+		{"Update", ki.Props{
+			"shortcut": "Command+U",
+		}},
+		{"sep-file", ki.BlankProp{}},
+		{"Save", ki.Props{
+			"shortcut": "Command+O",
+		}},
+		{"sep-color", ki.BlankProp{}},
+		{"LoadColors", ki.Props{
+			"FileView": ki.Props{
+				"field": "ColorFilename",
+				"ext":   ".json",
+			},
+		}},
+		{"SaveColors", ki.Props{
+			"shortcut": "Command+S",
+			"FileView": ki.Props{
+				"field": "ColorFilename",
+				"ext":   ".json",
+			},
+		}},
+		{"sep-key", ki.BlankProp{}},
+		{"StdKeyMap", ki.Props{
+			"SliceViewSelect": ki.Props{
+				"slice": &StdKeyMapNames,
+				"field": "StdKeyMapName",
+			},
+		}},
+		{"ScreenInfo", ki.Props{
+			"show-return": true,
+		}},
+	},
 }
 
 ////////////////////////////////////////////////////////////////////////////////
