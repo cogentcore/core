@@ -337,6 +337,10 @@ iterloop:
 	return fnm
 }
 
+// fontMetricsMu protects the font GlyphBounds calls, which are not
+// concurent-safe
+var metricsFontMu sync.Mutex
+
 // LoadFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
 // fallback method to finding an appropriate font, and falls back on the
@@ -370,6 +374,8 @@ func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	if fs.Face == nil {
 		return
 	}
+	metricsFontMu.Lock()
+	defer metricsFontMu.Unlock()
 	intDots := float32(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
 		intDots = 12
@@ -669,6 +675,9 @@ func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 //////////////////////////////////////////////////////////////////////////////////
 // Font library
 
+// loadFontMu protects the font loading calls, which are not concurent-safe
+var loadFontMu sync.Mutex
+
 // FontInfo contains basic font information for choosing a given font --
 // displayed in the font chooser dialog.
 type FontInfo struct {
@@ -690,8 +699,6 @@ type FontLib struct {
 	FontsAvail map[string]string            `desc:"map of font name to path to file"`
 	FontInfo   []FontInfo                   `desc:"information about each font -- this list should be used for selecting valid regularized font names"`
 	Faces      map[string]map[int]font.Face `desc:"double-map of cached fonts, by font name and then integer font size within that"`
-	initMu     sync.Mutex
-	loadMu     sync.Mutex
 }
 
 // FontLibrary is the gi font library, initialized from fonts available on font paths
@@ -708,18 +715,18 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
 
 func (fl *FontLib) Init() {
-	fl.initMu.Lock()
 	if fl.FontPaths == nil {
+		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
 		fl.FontPaths = make([]string, 0, 1000)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0, 1000)
 		fl.Faces = make(map[string]map[int]font.Face)
+		loadFontMu.Unlock()
 	} else if len(fl.FontsAvail) == 0 {
-		fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
+		// fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
 		fl.UpdateFontsAvail()
 	}
-	fl.initMu.Unlock()
 }
 
 // Font gets a particular font, specified by the official regularized font
@@ -735,13 +742,14 @@ func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 		}
 	}
 	if path := fl.FontsAvail[fontnm]; path != "" {
+		loadFontMu.Lock()
+		defer loadFontMu.Unlock()
 		face, err := LoadFontFace(path, size, 0)
 		if err != nil {
 			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
 			fl.DeleteFont(fontnm)
 			return nil, err
 		}
-		fl.loadMu.Lock()
 		facemap := fl.Faces[fontnm]
 		if facemap == nil {
 			facemap = make(map[int]font.Face)
@@ -749,7 +757,6 @@ func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 		}
 		facemap[size] = face
 		// fmt.Printf("Loaded font face: %v %v\n", fontnm, size)
-		fl.loadMu.Unlock()
 		return face, nil
 	}
 	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
@@ -800,6 +807,8 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 		log.Print("gi.FontLib: no font paths -- need to add some\n")
 		return false
 	}
+	loadFontMu.Lock()
+	defer loadFontMu.Unlock()
 	if len(fl.FontsAvail) > 0 {
 		fl.FontsAvail = make(map[string]string)
 	}

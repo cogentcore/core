@@ -315,9 +315,10 @@ func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, 
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
 
-// this mutex is required because multiple different goroutines associated
-// with different windows can (and often will be) call curFace.GyphAdvance at
-// the same time, on the same font face -- and that turns out not to work!
+// glyphAdvanceMu mutex is required because multiple different goroutines
+// associated with different windows can (and often will be) call
+// curFace.GyphAdvance at the same time, on the same font face -- and that
+// turns out not to work!
 var glyphAdvanceMu sync.Mutex
 
 // SetRunePosLR sets relative positions of each rune using a flat

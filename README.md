@@ -92,15 +92,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
+
 * color dialog should always operate on a temp color value and then you get that when user presses ok.  and show the rgb values directly in it.
 
 * activate / inactivate menus should just be a simple callback fun attached to the menu item!  it can be called immediately before menu is rendered, every time.  not sure about when a toolbar would be updated.
-
-* getting irregular crash opening prefsview -- maybe due to conflicting update timing or something -- 
-
-github.com/srwiley/rasterx.(*Gradient).GetColorFunctionUS.func6(0x16e, 0x2, 0xffff0000dddd, 0xc42878c20c)
-	/Users/oreilly/go/src/github.com/srwiley/rasterx/gradient.go:278 +0x12d
-
 
 * double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
 
