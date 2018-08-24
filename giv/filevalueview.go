@@ -61,7 +61,8 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	}
 	cur := kit.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	FileViewDialog(vp, cur, ext, vv.Name(), "", nil, nil, vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	desc, _ := vv.Tag("desc")
+	FileViewDialog(vp, cur, ext, vv.Name(), desc, nil, nil, vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			fn := FileViewDialogValue(dlg)

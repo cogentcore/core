@@ -106,6 +106,11 @@ func ToValueView(it interface{}) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
+	if nptyp == reflect.TypeOf(gi.KeyMapName("")) {
+		vv := KeyMapValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:

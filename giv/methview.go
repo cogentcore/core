@@ -327,6 +327,13 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	// check for single arg with action -- do action directly
 	if len(ads) == 1 {
 		ad := &ads[0]
+		if ad.Desc == "" {
+			ad.Desc = md.Desc
+
+		}
+		if ad.Desc != "" {
+			ad.View.SetTag("desc", ad.Desc)
+		}
 		if ad.View.HasAction() {
 			ad.View.Activate(md.Vp, ad.View, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
@@ -390,6 +397,7 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 				switch pk {
 				case "desc":
 					ad.Desc = kit.ToString(pv)
+					ad.View.SetTag("desc", ad.Desc)
 				case "default":
 					ad.Default = pv
 				case "default-field":
@@ -403,6 +411,9 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 					}
 				}
 			}
+		}
+		if !kit.IfaceIsNil(ad.Default) {
+			ad.View.SetValue(ad.Default)
 		}
 	}
 	return ads, args, true

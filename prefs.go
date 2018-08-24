@@ -67,8 +67,8 @@ type Preferences struct {
 	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	Colors          ColorPrefs             `desc:"color preferences"`
 	Params          ParamPrefs             `desc:"parameters controlling GUI behavior"`
-	StdKeyMapName   string                 `desc:"name of standard key map -- select via Std KeyMap button in editor"`
-	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface functions"`
+	StdKeyMapName   KeyMapName             `desc:"name of standard key map to use if no CustomKeyMap has been defined -- use StdKeyMap button to set your CustomKeyMap to a standard keymap as a starting point for customization"`
+	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface function -- use StdKeyMap button to set your CustomKeyMap to a standard keymap as a starting point for customizations"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	FontFamily      FontName               `desc:"default font family when otherwise not specified"`
@@ -200,7 +200,7 @@ func (p *Preferences) Apply() {
 	LocalMainMenu = p.Params.LocalMainMenu
 
 	if p.StdKeyMapName != "" {
-		defmap, _ := StdKeyMapByName(p.StdKeyMapName)
+		defmap, _ := StdKeyMapByName(string(p.StdKeyMapName))
 		if defmap != nil {
 			DefaultKeyMap = defmap
 		}
@@ -259,10 +259,11 @@ func (p *Preferences) SetKeyMap(kmap *KeyMap) {
 	}
 }
 
-// StdKeyMap sets StdKeyMapName and installs it as the current keymap
-func (p *Preferences) StdKeyMap(mapName string) {
+// StdKeyMap sets StdKeyMapName to given standard keymap and installs it as
+// the current custom keymap, as a starting point for further customization.
+func (p *Preferences) StdKeyMap(mapName KeyMapName) {
 	p.StdKeyMapName = mapName
-	km, _ := StdKeyMapByName(mapName)
+	km, _ := StdKeyMapByName(string(mapName))
 	if km != nil {
 		p.SetKeyMap(km)
 	}
@@ -424,11 +425,10 @@ var PreferencesProps = ki.Props{
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"StdKeyMap", ki.Props{
-			"desc": "Please enter standard key map name here -- will also set your default keymap settings to this",
+			"desc": "sets StdKeyMapName to selected standard keymap and installs it as the current custom keymap, as a starting point for further customization.",
 			"Args": ki.PropSlice{
 				{"Map Name", ki.Props{
 					"default-field": "StdKeyMapName",
-					"desc":          "name of standard keymap to use",
 				}},
 			}},
 		},

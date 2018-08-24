@@ -140,9 +140,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Tooltip = ad.Desc
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
-		if !kit.IfaceIsNil(ad.Default) {
-			ad.View.SetValue(ad.Default)
-		}
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)

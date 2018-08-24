@@ -113,6 +113,10 @@ var StdKeyMapNames = []string{
 	"ChromeKeyMap",
 }
 
+// KeyMapName has an associated ValueView for selecting from the list of
+// standard key map names, for use in preferences etc.
+type KeyMapName string
+
 // DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
 // depending on platform
 var DefaultKeyMap = &MacEmacsKeyMap

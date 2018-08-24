@@ -61,7 +61,8 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 		return
 	}
 	// cur := gi.FontName(kit.ToString(vvv.Value.Interface()))
-	FontChooserDialog(vp, "Select a Font", "", nil, vv.This, nil,
+	desc, _ := vv.Tag("desc")
+	FontChooserDialog(vp, "Select a Font", desc, nil, vv.This, nil,
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)

@@ -6,7 +6,6 @@ package giv
 
 import (
 	"reflect"
-	"strings"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
@@ -15,78 +14,66 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  IconValueView
+//  KeyMapValueView
 
-// IconValueView presents an action for displaying an IconName and selecting
-// icons from IconChooserDialog
-type IconValueView struct {
+// KeyMapValueView presents an action for displaying an KeyMapName and selecting
+// icons from KeyMapChooserDialog
+type KeyMapValueView struct {
 	ValueViewBase
 }
 
-var KiT_IconValueView = kit.Types.AddType(&IconValueView{}, nil)
+var KiT_KeyMapValueView = kit.Types.AddType(&KeyMapValueView{}, nil)
 
-func (vv *IconValueView) WidgetType() reflect.Type {
+func (vv *KeyMapValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.KiT_Action
 	return vv.WidgetTyp
 }
 
-func (vv *IconValueView) UpdateWidget() {
+func (vv *KeyMapValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
 	ac.SetFullReRender()
-	if gi.IconName(txt).IsNil() {
-		ac.SetIcon("blank")
-	} else {
-		ac.SetIcon(txt)
-	}
-	if sntag, ok := vv.Tag("view"); ok {
-		if strings.Contains(sntag, "show-name") {
-			if txt == "" {
-				txt = "none"
-			}
-			ac.SetText(txt)
-		}
-	}
+	ac.SetText(txt)
 }
 
-func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
+		vvv, _ := recv.Embed(KiT_KeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *IconValueView) HasAction() bool {
+func (vv *KeyMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
-	cur := gi.IconName(kit.ToString(vv.Value.Interface()))
+	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	IconChooserDialog(vp, cur, "Select an Icon", desc, nil, vv.This, nil,
+	SliceViewSelectDialog(vp, &gi.StdKeyMapNames, cur, "Select a Standard KeyMap", desc, -1, nil, vv.This, nil,
 		func(recv, send ki.Ki, sig int64, data interface{}) {
+			ddlg, _ := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)
 				if si >= 0 {
-					ic := gi.CurIconList[si]
-					vv.SetValue(ic)
+					km := gi.StdKeyMapNames[si]
+					vv.SetValue(km)
 					vv.UpdateWidget()
 				}
 			}
 			if dlgRecv != nil && dlgFunc != nil {
 				dlgFunc(dlgRecv, send, sig, data)
 			}
-		})
+		}, nil)
 }

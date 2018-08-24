@@ -330,7 +330,7 @@ func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
-	frame.AddNewChild(KiT_Stretch, "button-stretch")
+	frame.AddNewChild(KiT_Space, "button-space")
 	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
 	bb.Lay = LayoutHoriz
 	bb.SetProp("max-width", -1)
