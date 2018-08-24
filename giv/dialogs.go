@@ -14,14 +14,15 @@ import (
 // StructViewDialog is for editing fields of a structure using a StructView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
-func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_StructView, prIdx+1, "struct-view").(*StructView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetStruct(stru, tmpSave)
@@ -29,15 +30,14 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 	// todo: need to access main menu of window but not here yet..
 	// need a callback I guess..
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
-		sv.ConfigToolbar()
 	})
 	return dlg
 }
@@ -45,27 +45,27 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 // MapViewDialog is for editing elements of a map using a MapView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+1, "map-view").(*MapView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetMap(mp, tmpSave)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
-		sv.ConfigToolbar()
 	})
 	return dlg
 }
@@ -74,29 +74,29 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
-func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
+func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc, styleFunc SliceViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
-	sv.StyleFunc = stylefun
+	sv.StyleFunc = styleFunc
 	sv.SetSlice(slice, tmpSave)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
-		sv.ConfigToolbar()
 	})
 	return dlg
 }
@@ -105,7 +105,7 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, t
 // functions available for both the widget signal reporting selection events,
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
-func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc, stylefun SliceViewStyleFunc) *gi.Dialog {
+func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFunc ki.RecvFunc, dlgFunc ki.RecvFunc, styleFunc SliceViewStyleFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"textfield": ki.Props{
@@ -122,11 +122,12 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
 	sv.SelectedIdx = initRow
-	sv.StyleFunc = stylefun
+	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
 	sv.SetSlice(slice, nil)
 
@@ -138,11 +139,11 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 	})
 
 	if recv != nil {
-		if selFun != nil {
-			sv.WidgetSig.Connect(recv, selFun)
+		if selFunc != nil {
+			sv.WidgetSig.Connect(recv, selFunc)
 		}
-		if dlgFun != nil {
-			dlg.DialogSig.Connect(recv, dlgFun)
+		if dlgFunc != nil {
+			dlg.DialogSig.Connect(recv, dlgFunc)
 		}
 	}
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
@@ -167,39 +168,39 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // TableView -- optionally connects to given signal receiving object and
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
-func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc, stylefun TableViewStyleFunc) *gi.Dialog {
+func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc, styleFunc TableViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
-	sv.StyleFunc = stylefun
+	sv.StyleFunc = styleFunc
 	sv.SetSlice(slcOfStru, tmpSave)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
-		sv.ConfigToolbar()
 	})
 	return dlg
 }
 
 // TableViewSelectDialog is for selecting a row from a slice-of-struct using a
 // TableView -- optionally connects to given signal receiving object and
-// functions for signals (nil to ignore): selFun for the widget signal
-// reporting selection events, and dlgFun for the overall dialog signals.
+// functions for signals (nil to ignore): selFunc for the widget signal
+// reporting selection events, and dlgFunc for the overall dialog signals.
 // Also has an optional styling function for styling elements of the table.
-func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc, styleFun TableViewStyleFunc) *gi.Dialog {
+func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, prompt string, initRow int, css ki.Props, recv ki.Ki, selFunc ki.RecvFunc, dlgFunc ki.RecvFunc, styleFunc TableViewStyleFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"textfield": ki.Props{
@@ -216,10 +217,11 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
-	sv.StyleFunc = styleFun
+	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
 	sv.SetSlice(slcOfStru, nil)
 
@@ -231,11 +233,11 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	})
 
 	if recv != nil {
-		if selFun != nil {
-			sv.WidgetSig.Connect(recv, selFun)
+		if selFunc != nil {
+			sv.WidgetSig.Connect(recv, selFunc)
 		}
-		if dlgFun != nil {
-			dlg.DialogSig.Connect(recv, dlgFun)
+		if dlgFunc != nil {
+			dlg.DialogSig.Connect(recv, dlgFunc)
 		}
 	}
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
@@ -260,13 +262,13 @@ func TableViewSelectDialogValue(dlg *gi.Dialog) int {
 var FontChooserSize = 18
 var FontChooserSizeDots = 18
 
-// FontChooserDialog for choosing a font -- the recv and fun signal receivers
+// FontChooserDialog for choosing a font -- the recv and func signal receivers
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
-func FontChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
+func FontChooserDialog(avp *gi.Viewport2D, title, prompt string, css ki.Props, recv ki.Ki, selFunc ki.RecvFunc, dlgFunc ki.RecvFunc) *gi.Dialog {
 	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
 	gi.FontLibrary.LoadAllFonts(FontChooserSizeDots)
-	dlg := TableViewSelectDialog(avp, &gi.FontLibrary.FontInfo, title, prompt, -1, css, recv, selFun, dlgFun, FontInfoStyleFunc)
+	dlg := TableViewSelectDialog(avp, &gi.FontLibrary.FontInfo, title, prompt, -1, css, recv, selFunc, dlgFunc, FontInfoStyleFunc)
 	return dlg
 }
 
@@ -286,7 +288,7 @@ func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
+func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, title, prompt string, css ki.Props, recv ki.Ki, selFunc ki.RecvFunc, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
 			"icon": ki.Props{
@@ -295,7 +297,7 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, title, prompt stri
 			},
 		}
 	}
-	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, curIc, title, prompt, -1, css, recv, selFun, dlgFun, IconChooserStyleFunc)
+	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, curIc, title, prompt, -1, css, recv, selFunc, dlgFunc, IconChooserStyleFunc)
 	return dlg
 }
 
@@ -310,17 +312,18 @@ func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row 
 // ColorViewDialog for editing a color using a ColorView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("color-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_ColorView, prIdx+1, "color-view").(*ColorView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetColor(clr, tmpSave)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
@@ -329,18 +332,19 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 
 // FileViewDialog is for selecting / manipulating files -- ext is one or more
 // (comma separated) extensions -- files with those will be highighted
-// (include the . at the start of the extension).  recv and fun connect to the
+// (include the . at the start of the extension).  recv and dlgFunc connect to the
 // dialog signal: if signal value is gi.DialogAccepted use FileViewDialogValue
 // to get the resulting selected file.  The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt string, css ki.Props, filterFunc FileViewFilterFunc, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt string, css ki.Props, filterFunc FileViewFilterFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("file-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
 	fv := frame.InsertNewChild(KiT_FileView, prIdx+1, "file-view").(*FileView)
+	fv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
 	fv.FilterFunc = filterFunc
@@ -353,8 +357,8 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt stri
 		}
 	})
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	// dlg.SetMinPrefWidth(units.NewValue(40, units.Em))
 	// dlg.SetMinPrefHeight(units.NewValue(35, units.Em))
@@ -377,7 +381,7 @@ func FileViewDialogValue(dlg *gi.Dialog) string {
 }
 
 // ArgViewDialog for editing args for a method call in the MethView system
-func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
 	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
 
@@ -385,13 +389,14 @@ func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, title, prompt string, css
 	_, prIdx := dlg.PromptWidget(frame)
 
 	sv := frame.InsertNewChild(KiT_ArgView, prIdx+1, "arg-view").(*ArgView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
 	sv.SetArgs(args)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))

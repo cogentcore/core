@@ -68,6 +68,7 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "title")
+	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "struct-grid")
 	return config
 }
@@ -111,6 +112,15 @@ func (sv *StructView) StructGrid() (*gi.Frame, int) {
 		return nil, -1
 	}
 	return sv.KnownChild(idx).(*gi.Frame), idx
+}
+
+// ToolBar returns the toolbar widget
+func (sv *StructView) ToolBar() *gi.ToolBar {
+	idx, ok := sv.Children().IndexByName("toolbar", 0)
+	if !ok {
+		return nil
+	}
+	return sv.KnownChild(idx).(*gi.ToolBar)
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -209,33 +219,13 @@ func (sv *StructView) ConfigToolbar() {
 	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
-	win := sv.ParentWindow()
-	if win == nil {
-		return // not ready yet
-	}
 	if sv.ToolbarStru == sv.Struct {
 		return
 	}
+	tb := sv.ToolBar()
+	tb.DeleteChildren(true)
 	if HasToolBarView(sv.Struct) {
-		tb := &gi.ToolBar{}
-		tb.InitName(tb, "structview-tbar")
-		ok := ToolBarView(sv.Struct, win, tb)
-		if ok {
-			_, idx := sv.StructGrid()
-			sv.InsertChild(tb, idx)
-			sv.ToolbarStru = sv.Struct
-			return
-		}
-		sv.ToolbarStru = sv.Struct // prevent repeat error messages
+		ToolBarView(sv.Struct, sv.Viewport, tb)
 	}
-	sv.DeleteToolbar() // delete any old one
-}
-
-// DeleteToolbar deletes any existing toolbar
-func (sv *StructView) DeleteToolbar() {
-	_, idx := sv.StructGrid()
-	if _, ok := sv.KnownChild(idx - 1).(*gi.ToolBar); ok {
-		sv.DeleteChildAtIndex(idx-1, true)
-	}
-	sv.ToolbarStru = nil
+	sv.ToolbarStru = sv.Struct
 }

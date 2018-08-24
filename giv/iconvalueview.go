@@ -59,7 +59,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -68,7 +68,7 @@ func (vv *IconValueView) HasAction() bool {
 	return true
 }
 
-func (vv *IconValueView) Activate(vp *gi.Viewport2D) {
+func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
@@ -83,6 +83,9 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D) {
 					vv.SetValue(ic)
 					vv.UpdateWidget()
 				}
+			}
+			if dlgRecv != nil && dlgFunc != nil {
+				dlgFunc(dlgRecv, send, sig, data)
 			}
 		})
 }

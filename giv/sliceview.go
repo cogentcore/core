@@ -370,10 +370,6 @@ func (sv *SliceView) ConfigToolbar() {
 	if kit.IfaceIsNil(sv.Slice) || sv.IsInactive() {
 		return
 	}
-	win := sv.ParentWindow()
-	if win == nil {
-		return // not ready yet
-	}
 	if sv.ToolbarSlice == sv.Slice {
 		return
 	}
@@ -386,10 +382,14 @@ func (sv *SliceView) ConfigToolbar() {
 			svv.SliceNewAt(-1, true)
 		})
 	}
-	if HasToolBarView(sv.Slice) {
-		if len(*tb.Children()) == 1 {
-			ToolBarView(sv.Slice, win, tb)
+	sz := len(*tb.Children())
+	if sz > 1 {
+		for i := sz - 1; i >= 1; i-- {
+			tb.DeleteChildAtIndex(i, true)
 		}
+	}
+	if HasToolBarView(sv.Slice) {
+		ToolBarView(sv.Slice, sv.Viewport, tb)
 	}
 	sv.ToolbarSlice = sv.Slice
 }

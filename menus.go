@@ -134,7 +134,7 @@ func (m *Menu) AddAppMenu(win *Window) {
 	})
 	prsc := ActiveKeyMap.ChordForFun(KeyFunPrefs)
 	m.AddMenuText("GoGi Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		TheViewIFace.PrefsEditor(&Prefs)
+		TheViewIFace.PrefsView(&Prefs)
 	})
 	m.AddSeparator("sepq")
 	m.AddMenuText("Quit", "Command+Q", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {

@@ -92,6 +92,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* color dialog should always operate on a temp color value and then you get that when user presses ok.  and show the rgb values directly in it.
+
+* activate / inactivate menus should just be a simple callback fun attached to the menu item!  it can be called immediately before menu is rendered, every time.  not sure about when a toolbar would be updated.
+
 * getting irregular crash opening prefsview -- maybe due to conflicting update timing or something -- 
 
 github.com/srwiley/rasterx.(*Gradient).GetColorFunctionUS.func6(0x16e, 0x2, 0xffff0000dddd, 0xc42878c20c)
@@ -133,6 +137,8 @@ github.com/srwiley/rasterx.(*Gradient).GetColorFunctionUS.func6(0x16e, 0x2, 0xff
 * tab widget basic fix, and integrate with tree view editor? Popups show up in
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
+
+* need to be able to move content easily between a window and a tab.  should be simple as transferring trees but should test that -- the tab view should then provide this functionality of dragging a window in or a tab out to a window.   The main question is then whether a new popup item goes straight to a tab or not -- need that api in place..
 
 + TextArea -- go full editor..
 

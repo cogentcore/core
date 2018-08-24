@@ -26,7 +26,7 @@ import (
 type FileName string
 
 // ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
-// display zooming without changing prefs -- see SaveCurrentZoom to save prefs
+// display zooming without changing prefs -- see SaveZoom to save prefs
 // with this current factor.
 var ZoomFactor = float32(1.0)
 
@@ -282,18 +282,23 @@ func (p *Preferences) ScreenInfo() string {
 	return scinfo
 }
 
-// SaveScreenZoom saves the current LogicalDPI scaling to name of current screen.
-func (p *Preferences) SaveScreenZoom() {
+// SaveZoom saves the current LogicalDPI scaling, either as the overall
+// default or specific to the current screen.
+func (p *Preferences) SaveZoom(forCurrentScreen bool) {
 	sc := oswin.TheApp.Screen(0)
-	sp, ok := p.ScreenPrefs[sc.Name]
-	if !ok {
-		sp = ScreenPrefs{}
+	if forCurrentScreen {
+		sp, ok := p.ScreenPrefs[sc.Name]
+		if !ok {
+			sp = ScreenPrefs{}
+		}
+		sp.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
+		if p.ScreenPrefs == nil {
+			p.ScreenPrefs = make(map[string]ScreenPrefs)
+		}
+		p.ScreenPrefs[sc.Name] = sp
+	} else {
+		p.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
 	}
-	sp.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
-	if p.ScreenPrefs == nil {
-		p.ScreenPrefs = make(map[string]ScreenPrefs)
-	}
-	p.ScreenPrefs[sc.Name] = sp
 }
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
@@ -338,8 +343,7 @@ var PreferencesProps = ki.Props{
 				"shortcut": "Command+U",
 			}},
 			{"Load", ki.Props{
-				"shortcut":     "Command+O",
-				"update-after": true,
+				"shortcut": "Command+O",
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
@@ -362,7 +366,14 @@ var PreferencesProps = ki.Props{
 				},
 			}},
 			{"sep-misc", ki.BlankProp{}},
-			{"SaveScreenZoom", ki.BlankProp{}},
+			{"SaveZoom", ki.Props{
+				"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
+				"Args": ki.PropSlice{
+					{"For Current Screen Only?", ki.Props{
+						"desc": "click this to save zoom specifically for current screen",
+					}},
+				},
+			}},
 			{"DeleteSavedWindowGeoms", ki.Props{
 				"confirm": true,
 				"desc":    "Are you <i>sure</i>?  This deletes the file that saves the position and size of each window, by screen, and clear current in-memory cache.  You shouldn't generally need to do this but sometimes it is useful for testing or windows are showing up in bad places that you can't recover from.",
@@ -381,21 +392,35 @@ var PreferencesProps = ki.Props{
 			"shortcut": "Command+O",
 		}},
 		{"sep-color", ki.BlankProp{}},
-		{"LoadColors", ki.Props{
+		{"Colors", ki.PropSlice{ // sub-menu
+			{"LoadColors", ki.Props{
+				"Args": ki.PropSlice{
+					{"Color File Name", ki.Props{
+						"default-field": "ColorFilename",
+						"ext":           ".json",
+					}},
+				},
+			}},
+			{"SaveColors", ki.Props{
+				"Args": ki.PropSlice{
+					{"Color File Name", ki.Props{
+						"default-field": "ColorFilename",
+						"ext":           ".json",
+					}},
+				},
+			}},
+		}},
+		{"sep-scrn", ki.BlankProp{}},
+		{"SaveZoom", ki.Props{
+			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
-				{"Color File Name", ki.Props{
-					"default-field": "ColorFilename",
-					"ext":           ".json",
+				{"For Current Screen Only?", ki.Props{
+					"desc": "click this to save zoom specifically for current screen",
 				}},
 			},
 		}},
-		{"SaveColors", ki.Props{
-			"Args": ki.PropSlice{
-				{"Color File Name", ki.Props{
-					"default-field": "ColorFilename",
-					"ext":           ".json",
-				}},
-			},
+		{"ScreenInfo", ki.Props{
+			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"StdKeyMap", ki.Props{
@@ -407,9 +432,6 @@ var PreferencesProps = ki.Props{
 				}},
 			}},
 		},
-		{"ScreenInfo", ki.Props{
-			"show-return": true,
-		}},
 	},
 }
 

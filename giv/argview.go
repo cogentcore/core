@@ -17,10 +17,9 @@ import (
 // ArgView represents a slice of reflect.Value's and associated names, for the purpose of supplying arguments to methods called via the MethView framework.
 type ArgView struct {
 	gi.Frame
-	Args     []ArgData   `desc:"the args that we are a view onto"`
-	Title    string      `desc:"title / prompt to show above the editor fields"`
-	ArgViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	ViewSig  ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Args    []ArgData `desc:"the args that we are a view onto"`
+	Title   string    `desc:"title / prompt to show above the editor fields"`
+	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_ArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
@@ -113,21 +112,14 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
-	// always start fresh!
-	av.ArgViews = make([]ValueView, 0, len(av.Args))
-	for _, ad := range av.Args {
-		vv := ToValueView(ad.Val.Interface())
-		if vv == nil { // shouldn't happen
-			continue
-		}
-		vv.SetStandaloneValue(ad.Val)
-		vtyp := vv.WidgetType()
+	for i := range av.Args {
+		ad := &av.Args[i]
+		vtyp := ad.View.WidgetType()
 		knm := strcase.ToKebab(ad.Name)
 		labnm := fmt.Sprintf("label-%v", knm)
 		valnm := fmt.Sprintf("value-%v", knm)
 		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm)
-		av.ArgViews = append(av.ArgViews, vv)
 	}
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
@@ -135,10 +127,10 @@ func (av *ArgView) ConfigArgsGrid() {
 	} else {
 		updt = sg.UpdateStart()
 	}
-	for i, vv := range av.ArgViews {
-		ad := av.Args[i]
+	for i := range av.Args {
+		ad := &av.Args[i]
 		lbl := sg.KnownChild(i * 2).(*gi.Label)
-		vvb := vv.AsValueViewBase()
+		vvb := ad.View.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(av.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			avv, _ := recv.Embed(KiT_ArgView).(*ArgView)
 			// note: updating here is redundant -- relevant field will have already updated
@@ -149,9 +141,9 @@ func (av *ArgView) ConfigArgsGrid() {
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
 		if !kit.IfaceIsNil(ad.Default) {
-			vv.SetValue(ad.Default)
+			ad.View.SetValue(ad.Default)
 		}
-		vv.ConfigWidget(widg)
+		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
 }
@@ -168,8 +160,9 @@ func (av *ArgView) UpdateFromArgs() {
 // UpdateArgs updates each of the value-view widgets for the args
 func (av *ArgView) UpdateArgs() {
 	updt := av.UpdateStart()
-	for _, vv := range av.ArgViews {
-		vv.UpdateWidget()
+	for i := range av.Args {
+		ad := &av.Args[i]
+		ad.View.UpdateWidget()
 	}
 	av.UpdateEnd(updt)
 }

@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"log"
 	"reflect"
 
 	"github.com/goki/gi"
@@ -406,31 +407,52 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac.Tooltip = "color selection dialog"
 		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
-			clr, ok := svv.Struct.(*gi.Color)
-			if !ok {
-				clrp, ok := svv.Struct.(**gi.Color)
-				if !ok {
-					return
-				}
-				clr = *clrp
-			}
-			dlg := ColorViewDialog(svv.Viewport, clr, svv.TmpSave, "Color Value View", "", nil, nil, nil)
-			cvvvk, ok := dlg.Frame().Children().ElemByType(KiT_ColorView, true, 2)
-			if ok {
-				cvvv := cvvvk.(*ColorView)
-				cvvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					cvvvv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
-					cvvvv.ViewSig.Emit(cvvvv.This, 0, nil)
-				})
-			}
+			vv.Activate(svv.Viewport, nil, nil)
 		})
 	}
-
-	vv.UpdateWidget()
-
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_ColorValueView).(*ColorValueView)
 		vvv.UpdateWidget() // necessary in this case!
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *ColorValueView) HasAction() bool {
+	return true
+}
+
+func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+	if vv.IsInactive() {
+		return
+	}
+	clri := vv.Value.Interface()
+	var clr *gi.Color
+	switch c := clri.(type) {
+	case gi.Color:
+		clr = &c
+	case *gi.Color:
+		clr = c
+	case **gi.Color:
+		clr = *c
+	default:
+		log.Printf("color type is: %T val: %+v\n", c, c)
+	}
+	ColorViewDialog(vp, clr, vv.TmpSave, "Color Value View", "", nil, vv.This,
+		func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				cvvvk, ok := ddlg.Frame().Children().ElemByType(KiT_ColorView, true, 2)
+				if ok {
+					cvvv := cvvvk.(*ColorView)
+					cvvv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						cvvvv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
+						cvvvv.ViewSig.Emit(cvvvv.This, 0, nil)
+					})
+				}
+			}
+			if dlgRecv != nil && dlgFunc != nil {
+				dlgFunc(dlgRecv, send, sig, data)
+			}
+		})
 }

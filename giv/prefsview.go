@@ -12,8 +12,8 @@ import (
 	"github.com/goki/ki"
 )
 
-// PrefsEditor opens an editor of user preferences
-func PrefsEditor(p *gi.Preferences) {
+// PrefsView opens a view of user preferences
+func PrefsView(p *gi.Preferences) {
 	width := 800
 	height := 800
 	win := gi.NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
@@ -29,6 +29,7 @@ func PrefsEditor(p *gi.Preferences) {
 	mfr.Lay = gi.LayoutVert
 
 	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv.Viewport = vp
 	sv.SetStruct(p, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()

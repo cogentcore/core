@@ -292,10 +292,6 @@ func (mv *MapView) ConfigToolbar() {
 	if kit.IfaceIsNil(mv.Map) || mv.IsInactive() {
 		return
 	}
-	win := mv.ParentWindow()
-	if win == nil {
-		return // not ready yet
-	}
 	if mv.ToolbarMap == mv.Map {
 		return
 	}
@@ -308,10 +304,14 @@ func (mv *MapView) ConfigToolbar() {
 			mvv.MapAdd()
 		})
 	}
-	if HasToolBarView(mv.Map) {
-		if len(*tb.Children()) == 1 {
-			ToolBarView(mv.Map, win, tb)
+	sz := len(*tb.Children())
+	if sz > 1 {
+		for i := sz - 1; i >= 1; i-- {
+			tb.DeleteChildAtIndex(i, true)
 		}
+	}
+	if HasToolBarView(mv.Map) {
+		ToolBarView(mv.Map, mv.Viewport, tb)
 	}
 	mv.ToolbarMap = mv.Map
 }

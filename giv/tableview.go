@@ -710,10 +710,6 @@ func (tv *TableView) ConfigToolbar() {
 	if kit.IfaceIsNil(tv.Slice) || tv.IsInactive() {
 		return
 	}
-	win := tv.ParentWindow()
-	if win == nil {
-		return // not ready yet
-	}
 	if tv.ToolbarSlice == tv.Slice {
 		return
 	}
@@ -726,10 +722,14 @@ func (tv *TableView) ConfigToolbar() {
 			tvv.SliceNewAt(-1, true)
 		})
 	}
-	if HasToolBarView(tv.Slice) {
-		if len(*tb.Children()) == 1 {
-			ToolBarView(tv.Slice, win, tb)
+	sz := len(*tb.Children())
+	if sz > 1 {
+		for i := sz - 1; i >= 1; i-- {
+			tb.DeleteChildAtIndex(i, true)
 		}
+	}
+	if HasToolBarView(tv.Slice) {
+		ToolBarView(tv.Slice, tv.Viewport, tb)
 	}
 	tv.ToolbarSlice = tv.Slice
 }

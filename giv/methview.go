@@ -96,7 +96,7 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 				}
 			}
 		}
-		rv := ActionsView(val, vtyp, win, ma, mm.Value)
+		rv := ActionsView(val, vtyp, win.Viewport, ma, mm.Value)
 		if !rv {
 			rval = false
 		}
@@ -123,13 +123,18 @@ func HasToolBarView(val interface{}) bool {
 // registered on the type for given value element, through the kit.AddType
 // method.  See https://github.com/goki/gi/wiki/Views for full details on
 // formats and options for configuring the menu.  Returns false on errors.
-func ToolBarView(val interface{}, win *gi.Window, tb *gi.ToolBar) bool {
+func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
 	}
 	tp, ok := ki.SliceProps(tpp, "ToolBar")
 	if !ok {
+		return false
+	}
+
+	if vp == nil {
+		MethViewErr(vtyp, "Viewport is nil in ToolBarView config -- must set viewport in widget prior to calling this method!")
 		return false
 	}
 
@@ -141,7 +146,7 @@ func ToolBarView(val interface{}, win *gi.Window, tb *gi.ToolBar) bool {
 			continue
 		}
 		ac := tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
-		rv := ActionsView(val, vtyp, win, ac, te.Value)
+		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
 			rval = false
 		}
@@ -152,7 +157,7 @@ func ToolBarView(val interface{}, win *gi.Window, tb *gi.ToolBar) bool {
 // ActionsView processes properties for parent action pa for overall object
 // val of given type -- could have a sub-menu of further actions or might just
 // be a single action
-func ActionsView(val interface{}, vtyp reflect.Type, win *gi.Window, pa *gi.Action, pp interface{}) bool {
+func ActionsView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pa *gi.Action, pp interface{}) bool {
 	pa.Text = strings.Replace(strings.Join(camelcase.Split(pa.Nm), " "), "  ", " ", -1)
 	rval := true
 	switch pv := pp.(type) {
@@ -165,19 +170,19 @@ func ActionsView(val interface{}, vtyp reflect.Type, win *gi.Window, pa *gi.Acti
 				nac.InitName(nac, mm.Name)
 				nac.SetAsMenu()
 				pa.Menu = append(pa.Menu, nac.This.(gi.Node2D))
-				rv := ActionsView(val, vtyp, win, nac, mm.Value)
+				rv := ActionsView(val, vtyp, vp, nac, mm.Value)
 				if !rv {
 					rval = false
 				}
 			}
 		}
 	case ki.BlankProp:
-		rv := ActionView(val, vtyp, win, pa, nil)
+		rv := ActionView(val, vtyp, vp, pa, nil)
 		if !rv {
 			rval = false
 		}
 	case ki.Props:
-		rv := ActionView(val, vtyp, win, pa, pv)
+		rv := ActionView(val, vtyp, vp, pa, pv)
 		if !rv {
 			rval = false
 		}
@@ -186,13 +191,13 @@ func ActionsView(val interface{}, vtyp reflect.Type, win *gi.Window, pa *gi.Acti
 }
 
 // ActionView configures given action with given props
-func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Action, props ki.Props) bool {
+func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, props ki.Props) bool {
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
 		ac.Shortcut = "Command+W"
-		ac.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			win.OSWin.CloseReq()
+		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vp.Win.OSWin.CloseReq()
 		})
 		return true
 	}
@@ -211,18 +216,14 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 	}
 
 	rval := true
-	md := &MethViewData{Val: val, ValVal: valval, Win: win, Method: methNm, MethVal: methVal, MethTyp: methTyp}
+	md := &MethViewData{Val: val, ValVal: valval, Vp: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
 	ac.Data = md
 	if props == nil {
-		ac.ActionSig.Connect(win.This, MethViewCall)
+		ac.ActionSig.Connect(vp.This, MethViewCall)
 		return true
 	}
-	fv, hasfv := props["FileView"]
-	// sv, hassv := props["SliceViewSelect"]
 	for pk, pv := range props {
 		switch pk {
-		case "FileView":
-		case "SliceViewSelect":
 		case "shortcut":
 			ac.Shortcut = kit.ToString(pv)
 		case "label":
@@ -231,10 +232,6 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 			md.Desc = kit.ToString(pv)
 		case "confirm":
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewConfirm))
-		case "update-after":
-			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewUpdateAfter))
-		case "full-update-after":
-			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewFullUpdateAfter))
 		case "show-return":
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewShowReturn))
 		case "Args":
@@ -254,18 +251,7 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 	if !rval {
 		return false
 	}
-	if hasfv {
-		fvp, ok := fv.(ki.Props)
-		if !ok {
-			MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, FileView property must be of type ki.Props, containing params for the FileView dialog", methNm))
-			rval = false
-		} else {
-			md.SpecProps = fvp
-			ac.ActionSig.Connect(win.This, MethFileView)
-		}
-		return rval
-	}
-	ac.ActionSig.Connect(win.This, MethViewCall)
+	ac.ActionSig.Connect(vp.This, MethViewCall)
 	return true
 }
 
@@ -291,12 +277,6 @@ const (
 	// MethViewConfirm confirms action before proceeding
 	MethViewConfirm MethViewFlags = iota
 
-	// MethViewUpdateAfter does render after method is called
-	MethViewUpdateAfter
-
-	// MethViewFullUpdateAfter does full re-render after method is called
-	MethViewFullUpdateAfter
-
 	// MethViewShowReturn shows the return value from the method
 	MethViewShowReturn
 
@@ -312,7 +292,7 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "Me
 type MethViewData struct {
 	Val       interface{}
 	ValVal    reflect.Value
-	Win       *gi.Window
+	Vp        *gi.Viewport2D
 	Method    string
 	MethVal   reflect.Value
 	MethTyp   reflect.Method
@@ -329,7 +309,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	md := ac.Data.(*MethViewData)
 	if md.ArgProps == nil { // no args -- just call
 		if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-			gi.PromptDialog(md.Win.Viewport, ac.Text, md.Desc, true, true, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			gi.PromptDialog(md.Vp, ac.Text, md.Desc, true, true, nil, md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, nil)
 				}
@@ -340,11 +320,24 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 		return
 	}
 	// need to prompt for args
-	ad, args, ok := MethViewArgData(md)
+	ads, args, ok := MethViewArgData(md)
 	if !ok {
 		return
 	}
-	ArgViewDialog(md.Win.Viewport, ad, ac.Text, md.Desc, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	// check for single arg with action -- do action directly
+	if len(ads) == 1 {
+		ad := &ads[0]
+		if ad.View.HasAction() {
+			ad.View.Activate(md.Vp, ad.View, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					MethViewCallMeth(md, args)
+				}
+			})
+			return
+		}
+	}
+
+	ArgViewDialog(md.Vp, ads, ac.Text, md.Desc, nil, md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			MethViewCallMeth(md, args)
 		}
@@ -355,14 +348,9 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 // results as specified in the MethViewData.
 func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
-	if bitflag.Has32(int32(md.Flags), int(MethViewUpdateAfter)) {
-		// todo: only for ki types, or else do window I guess..
-	}
-	if bitflag.Has32(int32(md.Flags), int(MethViewFullUpdateAfter)) {
-		// todo: only for ki types
-	}
+	md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
 	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
-		gi.PromptDialog(md.Win.Viewport, md.Method+" Result", rv[0].String(), true, false, nil, nil, nil)
+		gi.PromptDialog(md.Vp, md.Method+" Result", rv[0].String(), true, false, nil, nil, nil)
 	}
 }
 
@@ -373,6 +361,7 @@ type ArgData struct {
 	Name    string
 	Desc    string
 	Default interface{}
+	View    ValueView
 }
 
 // MethViewArgData gets the arg data for the method args, returns false if errors
@@ -390,15 +379,15 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 
 		aps := &md.ArgProps[ai]
 		ad.Name = aps.Name
+
+		ad.View = ToValueView(ad.Val.Interface())
+		ad.View.SetStandaloneValue(ad.Val)
+
 		switch apv := aps.Value.(type) {
 		case ki.BlankProp:
 		case ki.Props:
-			// fv, hasfv := apv["FileView"]
-			// sv, hassv := props["SliceViewSelect"]
 			for pk, pv := range apv {
 				switch pk {
-				case "FileView":
-				case "SliceViewSelect":
 				case "desc":
 					ad.Desc = kit.ToString(pv)
 				case "default":
@@ -408,57 +397,15 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 					if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
 						ad.Default = flv.Interface()
 					}
+				default:
+					if str, ok := pv.(string); ok {
+						ad.View.SetTag(pk, str)
+					}
 				}
 			}
 		}
 	}
 	return ads, args, true
-}
-
-// MethFileView is the receiver func for MethView actions that open the
-// FileView dialog prior to calling the method.
-func MethFileView(recv, send ki.Ki, sig int64, data interface{}) {
-	ac := send.(*gi.Action)
-	md := ac.Data.(*MethViewData)
-	meth := md.ValVal.MethodByName(md.Method)
-	if kit.ValueIsZero(meth) || meth.IsNil() {
-		log.Printf("giv.MethViewCall: Method %v not found in type: %v\n", md.Method, md.ValVal.Type().String())
-		return
-	}
-
-	ext := ""
-	field := ""
-	def := ""
-	if ep, ok := md.SpecProps["ext"]; ok {
-		ext = ep.(string)
-	}
-	if fp, ok := md.SpecProps["field"]; ok {
-		field = fp.(string)
-	}
-	if dp, ok := md.SpecProps["default"]; ok {
-		def = dp.(string)
-	}
-
-	var fval *reflect.Value
-	if field != "" {
-		if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
-			fval = flv
-			def = kit.ToString(fval.Interface())
-		}
-	}
-
-	FileViewDialog(md.Win.Viewport, def, ext, ac.Text, "", nil, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			dlg, _ := send.(*gi.Dialog)
-			args := make([]reflect.Value, 1)
-			fn := FileViewDialogValue(dlg)
-			if fval != nil {
-				kit.SetRobust(kit.PtrValue(*fval).Interface(), fn)
-			}
-			args[0] = reflect.ValueOf(fn)
-			MethViewCallMeth(md, args)
-		}
-	})
 }
 
 // MethViewFieldValue returns a reflect.Value for the given field name,

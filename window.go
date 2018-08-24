@@ -217,6 +217,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 
 	win.AddChild(vp)
 	win.Viewport = vp
+	vp.Win = win
 	win.ConfigVLay()
 	WinNewCloseStamp()
 	return win
@@ -1524,7 +1525,7 @@ func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
 		w.ZoomDPI(-1)
 		e.SetProcessed()
 	case KeyFunPrefs:
-		TheViewIFace.PrefsEditor(&Prefs)
+		TheViewIFace.PrefsView(&Prefs)
 		e.SetProcessed()
 	case KeyFunRefresh:
 		fmt.Printf("Window: %v display refreshed\n", w.Nm)
@@ -2265,8 +2266,8 @@ type ViewIFace interface {
 	// GoGiEditor opens an interactive editor of given Ki tree, at its root
 	GoGiEditor(obj ki.Ki)
 
-	// PrefsEditor opens an interactive editor of given preferences object
-	PrefsEditor(prefs *Preferences)
+	// PrefsView opens an interactive view of given preferences object
+	PrefsView(prefs *Preferences)
 }
 
 // TheViewIFace is the implemenation of the interface, defined in giv package

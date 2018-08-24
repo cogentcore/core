@@ -413,7 +413,9 @@ func (vp *Viewport2D) Render2D() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 
-// each node calls this signal method to notify its parent viewport whenever it changes, causing a re-render
+// SignalViewport2D is called by each node in scenegraph through its UpdateSig
+// signal to notify its parent viewport whenever it changes, causing a
+// re-render.
 func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	vpni, ok := vpki.(Node2D)
 	if !ok {

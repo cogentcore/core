@@ -46,7 +46,7 @@ func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FileValueView).(*FileValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -55,7 +55,7 @@ func (vv *FileValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FileValueView) Activate(vp *gi.Viewport2D) {
+func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
@@ -67,6 +67,9 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D) {
 			fn := FileViewDialogValue(dlg)
 			vv.SetValue(fn)
 			vv.UpdateWidget()
+		}
+		if dlgRecv != nil && dlgFunc != nil {
+			dlgFunc(dlgRecv, send, sig, data)
 		}
 	})
 }

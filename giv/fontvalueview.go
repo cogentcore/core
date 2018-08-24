@@ -47,7 +47,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FontValueView).(*FontValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -56,7 +56,7 @@ func (vv *FontValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FontValueView) Activate(vp *gi.Viewport2D) {
+func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
@@ -71,6 +71,9 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D) {
 					vv.SetValue(fi.Name)
 					vv.UpdateWidget()
 				}
+			}
+			if dlgRecv != nil && dlgFunc != nil {
+				dlgFunc(dlgRecv, send, sig, data)
 			}
 		})
 }

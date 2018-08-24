@@ -324,8 +324,12 @@ type ValueView interface {
 	// Activate triggers any action associated with this value, such as
 	// pulling up a dialog or chooser for this value.  This is called by
 	// default for single-argument methods that have value representations
-	// with actions.  The viewport provides a context for opening other windows.
-	Activate(vp *gi.Viewport2D)
+	// with actions.  The viewport provides a context for opening other
+	// windows, and the receiver and dlgFunc should receive the DialogSig for
+	// the relevant dialog, or a pass-on call thereof, including the
+	// DialogAccepted or Canceled signal, so that the caller can execute its
+	// own actions based on the user hitting Ok or Cancel.
+	Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc)
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -505,7 +509,7 @@ func (vv *ValueViewBase) HasAction() bool {
 	return false
 }
 
-func (vv *ValueViewBase) Activate(vp *gi.Viewport2D) {
+func (vv *ValueViewBase) Activate(vp *gi.Viewport2D, recv ki.Ki, fun ki.RecvFunc) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -660,7 +664,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -669,9 +673,9 @@ func (vv *StructValueView) HasAction() bool {
 	return true
 }
 
-func (vv *StructValueView) Activate(vp *gi.Viewport2D) {
+func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
@@ -757,7 +761,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -766,10 +770,10 @@ func (vv *SliceValueView) HasAction() bool {
 	return true
 }
 
-func (vv *SliceValueView) Activate(vp *gi.Viewport2D) {
+func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := "Slice of " + kit.NonPtrType(vv.ElType).Name()
 	if vv.IsStruct {
-		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil, nil)
+		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc, nil)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
@@ -781,7 +785,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D) {
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil, nil)
+		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc, nil)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
@@ -835,7 +839,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport)
+		vvv.Activate(ac.Viewport, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -844,13 +848,13 @@ func (vv *MapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *MapValueView) Activate(vp *gi.Viewport2D) {
+func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tmptyp := kit.NonPtrType(vv.Value.Type())
 	tynm := tmptyp.Name()
 	if tynm == "" {
 		tynm = tmptyp.String()
 	}
-	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
@@ -964,7 +968,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		k := vvv.KiStruct()
 		if k != nil {
 			mb := vvv.Widget.(*gi.MenuButton)
-			vvv.Activate(mb.Viewport)
+			vvv.Activate(mb.Viewport, nil, nil)
 		}
 	})
 	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -981,13 +985,13 @@ func (vv *KiPtrValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D) {
+func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	k := vv.KiStruct()
 	if k == nil {
 		return
 	}
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, "", nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
@@ -1301,6 +1305,6 @@ func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
 	GoGiEditor(obj)
 }
 
-func (vi *ViewIFace) PrefsEditor(prefs *gi.Preferences) {
-	PrefsEditor(prefs)
+func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {
+	PrefsView(prefs)
 }
