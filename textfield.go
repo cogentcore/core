@@ -23,31 +23,38 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// CompletionData
+type CompleteData struct {
+	Func        complete.Func `desc:"function to get the list of possible completions"`
+	Context     interface{}   `desc:"the object that implements complete.Func"`
+	Completions []string
+	Seed        string `desc:"current completion seed"`
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // TextField
 
 // TextField is a widget for editing a line of text
 type TextField struct {
 	WidgetBase
-	Txt             string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Placeholder     string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Edited          bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	EditTxt         []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	MaxWidthReq     int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	StartPos        int                     `xml:"-" desc:"starting display position in the string"`
-	EndPos          int                     `xml:"-" desc:"ending display position in the string"`
-	CursorPos       int                     `xml:"-" desc:"current cursor position"`
-	CharWidth       int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart     int                     `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd       int                     `xml:"-" desc:"ending position of selection in the string"`
-	SelectMode      bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig    ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll       TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis       TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles     [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight      float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	CompleteFunc    complete.Func           `desc:"function to get the list of possible completions"`
-	CompleteContext interface{}             `desc:"the object that implements complete.Func"`
-	Seed            string                  `desc:"current completion seed"`
+	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
+	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
+	CursorPos    int                     `xml:"-" desc:"current cursor position"`
+	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	Completion   CompleteData            `desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -523,20 +530,19 @@ func (tf *TextField) OfferCompletions() {
 	if PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
 	}
-	if tf.CompleteFunc == nil {
+	if tf.Completion.Func == nil {
 		return
 	}
 
-	var completions []string
-	completions, tf.Seed = tf.CompleteFunc(string(tf.EditTxt[0:tf.CursorPos]))
-	count := len(completions)
+	tf.Completion.Completions, tf.Completion.Seed = tf.Completion.Func(string(tf.EditTxt[0:tf.CursorPos]))
+	count := len(tf.Completion.Completions)
 	if count > 0 {
-		if count == 1 && completions[0] == tf.Seed { // don't show if only one and it completions current text
+		if count == 1 && tf.Completion.Completions[0] == tf.Completion.Seed {
 			return
 		}
 		var m Menu
 		for i := 0; i < count; i++ {
-			s := completions[i]
+			s := tf.Completion.Completions[i]
 			m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Complete(s)
@@ -554,11 +560,11 @@ func (tf *TextField) OfferCompletions() {
 func (tf *TextField) Complete(str string) {
 	s1 := string(tf.EditTxt[0:tf.CursorPos])
 	s2 := string(tf.EditTxt[tf.CursorPos:len(tf.EditTxt)])
-	s1 = strings.TrimSuffix(s1, tf.Seed)
+	s1 = strings.TrimSuffix(s1, tf.Completion.Seed)
 	s1 += str
 	txt := s1 + s2
 	tf.EditTxt = []rune(txt)
-	tf.CursorForward(len(str) - len(tf.Seed))
+	tf.CursorForward(len(str) - len(tf.Completion.Seed))
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
@@ -633,34 +639,15 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 
 	if PopupIsCompleter(win.Popup) {
 		switch kf {
-		case KeyFunFocusNext: // tab will - complete if single item or try to extend if multiple
-			frame, found := win.Popup.Child(0) // should be the frame
-			if found && frame.TypeEmbeds(KiT_Frame) {
-				var matches []string
-				var child ki.Node
-				i := 0
-				valid := true
-				for valid {
-					if frame.Children().IsValidIndex(i) {
-						child, good := frame.Child(i)
-						if good && child.TypeEmbeds(KiT_ButtonBase) {
-							matches = append(matches, child.Name())
-						}
-						i++
-					} else {
-						valid = false
-					}
-				}
-				if len(matches) > 0 {
-					if len(matches) == 1 { // just complete
-						tf.Complete(child.Name())
-						win.ClosePopup(win.Popup)
-						return
-					}
-					// try to extend the seed
-					s := complete.ExtendSeed(matches, tf.Seed)
+		case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
+			count := len(tf.Completion.Completions)
+			if count > 0 {
+				if count == 1 { // just complete
+					tf.Complete(tf.Completion.Completions[0])
+					win.ClosePopup(win.Popup)
+				} else { // try to extend the seed
+					s := complete.ExtendSeed(tf.Completion.Completions, tf.Completion.Seed)
 					if s != "" {
-						// todo: get currently selected menu item and set selected when new menu is offered
 						win.ClosePopup(win.Popup)
 						tf.InsertAtCursor(s)
 						tf.OfferCompletions()
@@ -1113,6 +1100,6 @@ func (tf *TextField) SetCompleter(data interface{}, fun complete.Func) {
 	if fun == nil {
 		return
 	}
-	tf.CompleteContext = data
-	tf.CompleteFunc = fun
+	tf.Completion.Context = data
+	tf.Completion.Func = fun
 }
