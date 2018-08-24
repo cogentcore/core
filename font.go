@@ -45,6 +45,11 @@ import (
 // font.go contains all font and basic SVG-level text rendering styles, and the
 // font library.  see text.go for rendering code
 
+// FontName is used to specify an font -- just the unique name of the font
+// family -- automtically provides a chooser menu for fonts using ValueView
+// system
+type FontName string
+
 // FontStyle contains all font styling information, including everything that
 // is used in SVG text rendering -- used in Paint and in Style. Most of font
 // information is inherited.
@@ -1101,11 +1106,3 @@ func (fl *FontLib) GoFontsAvail() {
 		fl.FontInfo = append(fl.FontInfo, fi)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  FontName
-
-// FontName is used to specify an font -- just the unique name of the font
-// family -- automtically provides a chooser menu for fonts using ValueView
-// system
-type FontName string

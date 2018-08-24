@@ -101,6 +101,11 @@ func ToValueView(it interface{}) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
+	if nptyp == reflect.TypeOf(gi.FileName("")) {
+		vv := FileValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
@@ -266,60 +271,92 @@ type ValueView interface {
 	ki.Ki
 
 	// AsValueViewBase gives access to the basic data fields so that the
-	// interface doesn't need to provide accessors for them
+	// interface doesn't need to provide accessors for them.
 	AsValueViewBase() *ValueViewBase
 
-	// SetStructValue sets the value, owner and field information for a struct field
+	// SetStructValue sets the value, owner and field information for a struct field.
 	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView)
 
-	// SetMapKey sets the key value and owner for a map key
+	// SetMapKey sets the key value and owner for a map key.
 	SetMapKey(val reflect.Value, owner interface{}, tmpSave ValueView)
 
 	// SetMapValue sets the value, owner and map key information for a map
 	// element -- needs pointer to ValueView representation of key to track
-	// current key value
+	// current key value.
 	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView)
 
-	// SetSliceValue sets the value, owner and index information for a slice element
+	// SetSliceValue sets the value, owner and index information for a slice element.
 	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView)
 
+	// SetStandaloneValue sets the value for a singleton standalone value
+	// (e.g., for arg values).
+	SetStandaloneValue(val reflect.Value)
+
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
+	// (or Invalid for standalone values such as args).
 	OwnerKind() reflect.Kind
 
 	// IsInactive returns whether the value is inactive -- e.g., Map owners
 	// have Inactive values, and some fields can be marked as Inactive using a
-	// struct tag
+	// struct tag.
 	IsInactive() bool
 
-	// WidgetType returns an appropriate type of widget to represent the current value
+	// WidgetType returns an appropriate type of widget to represent the
+	// current value.
 	WidgetType() reflect.Type
 
-	// UpdateWidget updates the widget representation to reflect the current value
+	// UpdateWidget updates the widget representation to reflect the current
+	// value.  Must first check for a nil widget -- can be called in a
+	// no-widget context (e.g., for single-argument values with actions).
 	UpdateWidget()
 
 	// ConfigWidget configures a widget of WidgetType for representing the
 	// value, including setting up the signal connections to set the value
 	// when the user edits it (values are always set immediately when the
-	// widget is updated)
+	// widget is updated).
 	ConfigWidget(widg gi.Node2D)
 
-	// Val returns the reflect.Value representation for this item
+	// HasAction returns true if this value has an associated action, such as
+	// pulling up a dialog or chooser for this value.  Activate method will
+	// trigger this action.
+	HasAction() bool
+
+	// Activate triggers any action associated with this value, such as
+	// pulling up a dialog or chooser for this value.  This is called by
+	// default for single-argument methods that have value representations
+	// with actions.  The viewport provides a context for opening other windows.
+	Activate(vp *gi.Viewport2D)
+
+	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
 
-	// SetValue sets the value (if not Inactive), using Ki.SetField for Ki
-	// types and kit.SetRobust otherwise -- emits a ViewSig signal when set
+	// SetValue assigns given value to this item (if not Inactive), using
+	// Ki.SetField for Ki types and kit.SetRobust otherwise -- emits a ViewSig
+	// signal when set.
 	SetValue(val interface{}) bool
 
-	// ViewFieldTag returns tag associated with this field, if this is a field
-	// in a struct ("" otherwise or if tag not set)
-	ViewFieldTag(tagName string) string
+	// SetTags sets tags for this valueview, for non-struct values, to
+	// influence interface for this value -- see
+	// https://github.com/goki/gi/wiki/Tags for valid options.  Adds to
+	// existing tags if some are already set.
+	SetTags(tags map[string]string)
+
+	// SetTag sets given tag to given value for this valueview, for non-struct
+	// values, to influence interface for this value -- see
+	// https://github.com/goki/gi/wiki/Tags for valid options.
+	SetTag(tag, value string)
+
+	// Tag returns value for given tag -- looks first at tags set by
+	// SetTag(s) methods, and then at field tags if this is a field in a
+	// struct -- returns false if tag was not set.
+	Tag(tag string) (string, bool)
 
 	// SaveTmp saves a temporary copy of a struct to a map -- map values must
 	// be explicitly re-saved and cannot be directly written to by the value
 	// elements -- each ValueView has a pointer to any parent ValueView that
 	// might need to be saved after SetValue -- SaveTmp called automatically
 	// in SetValue but other cases that use something different need to call
-	// it explicitly
+	// it explicitly.
 	SaveTmp()
 }
 
@@ -334,7 +371,7 @@ type ValueView interface {
 // ValueViewBase provides the basis for implementations of the ValueView
 // interface, representing values in the interface -- it implements a generic
 // TextField representation of the string value, and provides the generic
-// fallback for everything that doesn't provide a specific ValueViewer type
+// fallback for everything that doesn't provide a specific ValueViewer type.
 type ValueViewBase struct {
 	ki.Node
 	ViewSig   ki.Signal            `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set"`
@@ -343,6 +380,7 @@ type ValueViewBase struct {
 	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
 	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
+	Tags      map[string]string    `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
 	Key       interface{}          `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
 	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`
@@ -367,6 +405,7 @@ func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, fi
 	vv.Owner = owner
 	vv.Field = field
 	vv.TmpSave = tmpSave
+	vv.SetName(field.Name)
 }
 
 func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave ValueView) {
@@ -375,6 +414,7 @@ func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave
 	vv.Value = key
 	vv.Owner = owner
 	vv.TmpSave = tmpSave
+	vv.SetName(kit.ToString(key.Interface()))
 }
 
 func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView) {
@@ -384,6 +424,7 @@ func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key i
 	vv.Key = key
 	vv.KeyView = keyView
 	vv.TmpSave = tmpSave
+	vv.SetName(kit.ToString(key))
 }
 
 func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView) {
@@ -392,6 +433,12 @@ func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx
 	vv.Owner = owner
 	vv.Idx = idx
 	vv.TmpSave = tmpSave
+	vv.SetName(fmt.Sprintf("%v", idx))
+}
+
+func (vv *ValueViewBase) SetStandaloneValue(val reflect.Value) {
+	vv.OwnKind = reflect.Invalid
+	vv.Value = val
 }
 
 // we have this one accessor b/c it is more useful for outside consumers vs. internal usage
@@ -401,8 +448,7 @@ func (vv *ValueViewBase) OwnerKind() reflect.Kind {
 
 func (vv *ValueViewBase) IsInactive() bool {
 	if vv.OwnKind == reflect.Struct {
-		rotag := vv.ViewFieldTag("inactive")
-		if rotag != "" {
+		if _, ok := vv.Tag("inactive"); ok {
 			return true
 		}
 	}
@@ -415,6 +461,9 @@ func (vv *ValueViewBase) WidgetType() reflect.Type {
 }
 
 func (vv *ValueViewBase) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	tf := vv.Widget.(*gi.TextField)
 	txt := kit.ToString(vv.Value.Interface())
 	tf.SetText(txt)
@@ -424,25 +473,22 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
-	tf.Tooltip = vv.ViewFieldTag("desc")
-	widthtag := vv.ViewFieldTag("width")
+	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
-	if widthtag != "" {
+	if widthtag, ok := vv.Tag("width"); ok {
 		width, err := strconv.ParseFloat(widthtag, 32)
 		if err == nil {
 			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
 		}
 	}
-	maxwidthtag := vv.ViewFieldTag("max-width")
-	if maxwidthtag != "" {
-		width, err := strconv.ParseFloat(widthtag, 32)
+	if maxwidthtag, ok := vv.Tag("max-width"); ok {
+		width, err := strconv.ParseFloat(maxwidthtag, 32)
 		if err == nil {
 			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
 		}
 	}
 
 	bitflag.SetState(tf.Flags(), vv.IsInactive(), int(gi.Inactive))
-	vv.UpdateWidget()
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			vvv, _ := recv.Embed(KiT_ValueViewBase).(*ValueViewBase)
@@ -452,6 +498,14 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 			}
 		}
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *ValueViewBase) HasAction() bool {
+	return false
+}
+
+func (vv *ValueViewBase) Activate(vp *gi.Viewport2D) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -542,17 +596,38 @@ func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
 	return false
 }
 
-func (vv *ValueViewBase) ViewFieldTag(tagName string) string {
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
-		return ""
+func (vv *ValueViewBase) SetTags(tags map[string]string) {
+	if vv.Tags == nil {
+		vv.Tags = make(map[string]string, len(tags))
 	}
-	return vv.Field.Tag.Get(tagName)
+	for tag, val := range tags {
+		vv.Tags[tag] = val
+	}
+}
+
+func (vv *ValueViewBase) SetTag(tag, value string) {
+	if vv.Tags == nil {
+		vv.Tags = make(map[string]string, 10)
+	}
+	vv.Tags[tag] = value
+}
+
+func (vv *ValueViewBase) Tag(tag string) (string, bool) {
+	if vv.Tags != nil {
+		if tv, ok := vv.Tags[tag]; ok {
+			return tv, ok
+		}
+	}
+	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+		return "", false
+	}
+	return vv.Field.Tag.Lookup(tag)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructValueView
 
-// StructValueView presents a button to edit slices
+// StructValueView presents a button to edit the struct
 type StructValueView struct {
 	ValueViewBase
 }
@@ -565,6 +640,9 @@ func (vv *StructValueView) WidgetType() reflect.Type {
 }
 
 func (vv *StructValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := fmt.Sprintf("%T", npv.Interface())
@@ -573,18 +651,28 @@ func (vv *StructValueView) UpdateWidget() {
 
 func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
-	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
+	ac.SetProp("border-radius", units.NewValue(4, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
-		tynm := kit.NonPtrType(vvv.Value.Type()).Name()
-		StructViewDialog(ac.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+		vvv.Activate(ac.Viewport)
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *StructValueView) HasAction() bool {
+	return true
+}
+
+func (vv *StructValueView) Activate(vp *gi.Viewport2D) {
+	tynm := kit.NonPtrType(vv.Value.Type()).Name()
+	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -603,15 +691,17 @@ func (vv *StructInlineValueView) WidgetType() reflect.Type {
 }
 
 func (vv *StructInlineValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sv := vv.Widget.(*StructViewInline)
 	sv.UpdateFields()
 }
 
 func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	sv := vv.Widget.(*StructViewInline)
-	sv.Tooltip = vv.ViewFieldTag("desc")
+	sv.Tooltip, _ = vv.Tag("desc")
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -619,6 +709,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 		// vvv.UpdateWidget() // prob not necc..
 		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -639,6 +730,9 @@ func (vv *SliceValueView) WidgetType() reflect.Type {
 }
 
 func (vv *SliceValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
@@ -655,39 +749,50 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	slci := vv.Value.Interface()
 	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
 	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
-	vv.UpdateWidget()
 	ac := vv.Widget.(*gi.Action)
-	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
+	ac.SetProp("border-radius", units.NewValue(4, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
-		tynm := "Slice of " + kit.NonPtrType(vvv.ElType).Name()
-		if vvv.IsStruct {
-			dlg := TableViewDialog(ac.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
-			svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
-			if ok {
-				sv := svk.(*TableView)
-				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					vvvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
-					vvvv.UpdateWidget()
-					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-				})
-			}
-		} else {
-			dlg := SliceViewDialog(ac.Viewport, vvv.Value.Interface(), vvv.TmpSave, tynm, "", nil, nil, nil, nil)
-			svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
-			if ok {
-				sv := svk.(*SliceView)
-				sv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					vvvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
-					vvvv.UpdateWidget()
-					vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-				})
-			}
-		}
+		vvv.Activate(ac.Viewport)
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *SliceValueView) HasAction() bool {
+	return true
+}
+
+func (vv *SliceValueView) Activate(vp *gi.Viewport2D) {
+	tynm := "Slice of " + kit.NonPtrType(vv.ElType).Name()
+	if vv.IsStruct {
+		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil, nil)
+		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
+		if ok {
+			sv := svk.(*TableView)
+			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
+				vv.UpdateWidget()
+				vv.ViewSig.Emit(vv.This, 0, nil)
+			})
+		}
+	} else {
+		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil, nil)
+		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
+		if ok {
+			sv := svk.(*SliceView)
+			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
+				vv.UpdateWidget()
+				vv.ViewSig.Emit(vv.This, 0, nil)
+			})
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -706,6 +811,9 @@ func (vv *MapValueView) WidgetType() reflect.Type {
 }
 
 func (vv *MapValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
@@ -719,30 +827,40 @@ func (vv *MapValueView) UpdateWidget() {
 
 func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	ac := vv.Widget.(*gi.Action)
-	ac.Tooltip = vv.ViewFieldTag("desc")
+	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
+	ac.SetProp("border-radius", units.NewValue(4, units.Px))
 	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		tmptyp := kit.NonPtrType(vvv.Value.Type())
-		tynm := tmptyp.Name()
-		if tynm == "" {
-			tynm = tmptyp.String()
-		}
-		dlg := MapViewDialog(ac.Viewport, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
-		mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
-		if ok {
-			mv := mvk.(*MapView)
-			mv.ViewSig.ConnectOnly(vvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				vvvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
-				vvvv.UpdateWidget()
-				vvvv.ViewSig.Emit(vvvv.This, 0, nil)
-			})
-		}
+		vvv.Activate(ac.Viewport)
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *MapValueView) HasAction() bool {
+	return true
+}
+
+func (vv *MapValueView) Activate(vp *gi.Viewport2D) {
+	tmptyp := kit.NonPtrType(vv.Value.Type())
+	tynm := tmptyp.Name()
+	if tynm == "" {
+		tynm = tmptyp.String()
+	}
+	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
+	if ok {
+		mv := mvk.(*MapView)
+		mv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
+			vv.UpdateWidget()
+			vv.ViewSig.Emit(vv.This, 0, nil)
+		})
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -761,16 +879,19 @@ func (vv *MapInlineValueView) WidgetType() reflect.Type {
 }
 
 func (vv *MapInlineValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sv := vv.Widget.(*MapViewInline)
 	sv.UpdateValues()
 }
 
 func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	sv := vv.Widget.(*MapViewInline)
-	sv.Tooltip = vv.ViewFieldTag("desc")
+	sv.Tooltip, _ = vv.Tag("desc")
 	// npv := vv.Value.Elem()
+	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapInlineValueView).(*MapInlineValueView)
@@ -819,6 +940,9 @@ func (vv *KiPtrValueView) KiStruct() ki.Ki {
 }
 
 func (vv *KiPtrValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	mb := vv.Widget.(*gi.MenuButton)
 	path := "nil"
 	k := vv.KiStruct()
@@ -830,9 +954,8 @@ func (vv *KiPtrValueView) UpdateWidget() {
 
 func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	mb := vv.Widget.(*gi.MenuButton)
-	mb.Tooltip = vv.ViewFieldTag("desc")
+	mb.Tooltip, _ = vv.Tag("desc")
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
@@ -841,8 +964,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		k := vvv.KiStruct()
 		if k != nil {
 			mb := vvv.Widget.(*gi.MenuButton)
-			tynm := kit.NonPtrType(vvv.Value.Type()).Name()
-			StructViewDialog(mb.Viewport, k, vv.TmpSave, tynm, "", nil, nil, nil)
+			vvv.Activate(mb.Viewport)
 		}
 	})
 	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -852,6 +974,21 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			GoGiEditor(k)
 		}
 	})
+	vv.UpdateWidget()
+}
+
+func (vv *KiPtrValueView) HasAction() bool {
+	return true
+}
+
+func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D) {
+	k := vv.KiStruct()
+	if k == nil {
+		return
+	}
+	tynm := kit.NonPtrType(vv.Value.Type()).Name()
+	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, "", nil, nil, nil)
+	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -870,6 +1007,9 @@ func (vv *BoolValueView) WidgetType() reflect.Type {
 }
 
 func (vv *BoolValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	cb := vv.Widget.(*gi.CheckBox)
 	npv := kit.NonPtrValue(vv.Value)
 	bv, _ := kit.ToBool(npv.Interface())
@@ -878,9 +1018,8 @@ func (vv *BoolValueView) UpdateWidget() {
 
 func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	cb := vv.Widget.(*gi.CheckBox)
-	cb.Tooltip = vv.ViewFieldTag("desc")
+	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
@@ -889,6 +1028,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.UpdateWidget() // always update after setting value..
 		}
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -907,6 +1047,9 @@ func (vv *IntValueView) WidgetType() reflect.Type {
 }
 
 func (vv *IntValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sb := vv.Widget.(*gi.SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat32(npv.Interface())
@@ -917,9 +1060,8 @@ func (vv *IntValueView) UpdateWidget() {
 
 func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	sb := vv.Widget.(*gi.SpinBox)
-	sb.Tooltip = vv.ViewFieldTag("desc")
+	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
@@ -931,22 +1073,19 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
 		sb.SetMin(0)
 	}
-	mintag := vv.ViewFieldTag("min")
-	if mintag != "" {
+	if mintag, ok := vv.Tag("min"); ok {
 		min, err := strconv.ParseFloat(mintag, 32)
 		if err == nil {
 			sb.SetMin(float32(min))
 		}
 	}
-	maxtag := vv.ViewFieldTag("max")
-	if maxtag != "" {
+	if maxtag, ok := vv.Tag("max"); ok {
 		max, err := strconv.ParseFloat(maxtag, 32)
 		if err == nil {
 			sb.SetMax(float32(max))
 		}
 	}
-	steptag := vv.ViewFieldTag("step")
-	if steptag != "" {
+	if steptag, ok := vv.Tag("step"); ok {
 		step, err := strconv.ParseFloat(steptag, 32)
 		if err == nil {
 			sb.Step = float32(step)
@@ -959,6 +1098,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.UpdateWidget()
 		}
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -977,6 +1117,9 @@ func (vv *FloatValueView) WidgetType() reflect.Type {
 }
 
 func (vv *FloatValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sb := vv.Widget.(*gi.SpinBox)
 	npv := kit.NonPtrValue(vv.Value)
 	fv, ok := kit.ToFloat32(npv.Interface())
@@ -987,32 +1130,27 @@ func (vv *FloatValueView) UpdateWidget() {
 
 func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	vv.UpdateWidget()
 	sb := vv.Widget.(*gi.SpinBox)
-	sb.Tooltip = vv.ViewFieldTag("desc")
+	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
-	// todo: make a utility for this kind of thing..
-	mintag := vv.ViewFieldTag("min")
-	if mintag != "" {
+	if mintag, ok := vv.Tag("min"); ok {
 		min, err := strconv.ParseFloat(mintag, 32)
 		if err == nil {
 			sb.HasMin = true
 			sb.Min = float32(min)
 		}
 	}
-	maxtag := vv.ViewFieldTag("max")
-	if maxtag != "" {
+	if maxtag, ok := vv.Tag("max"); ok {
 		max, err := strconv.ParseFloat(maxtag, 32)
 		if err == nil {
 			sb.HasMax = true
 			sb.Max = float32(max)
 		}
 	}
-	steptag := vv.ViewFieldTag("step")
-	if steptag != "" {
+	if steptag, ok := vv.Tag("step"); ok {
 		step, err := strconv.ParseFloat(steptag, 32)
 		if err == nil {
 			sb.Step = float32(step)
@@ -1026,6 +1164,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.UpdateWidget()
 		}
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1057,6 +1196,9 @@ func (vv *EnumValueView) SetEnumValueFromInt(ival int64) bool {
 }
 
 func (vv *EnumValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sb := vv.Widget.(*gi.ComboBox)
 	npv := kit.NonPtrValue(vv.Value)
 	iv, ok := kit.ToInt(npv.Interface())
@@ -1068,16 +1210,13 @@ func (vv *EnumValueView) UpdateWidget() {
 func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ComboBox)
-	cb.Tooltip = vv.ViewFieldTag("desc")
+	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.SetProp("padding", units.NewValue(2, units.Px))
 	cb.SetProp("margin", units.NewValue(2, units.Px))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
-
-	vv.UpdateWidget()
-
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_EnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
@@ -1086,6 +1225,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.UpdateWidget()
 		}
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1104,6 +1244,9 @@ func (vv *TypeValueView) WidgetType() reflect.Type {
 }
 
 func (vv *TypeValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
 	sb := vv.Widget.(*gi.ComboBox)
 	npv := kit.NonPtrValue(vv.Value)
 	typ, ok := npv.Interface().(reflect.Type)
@@ -1115,7 +1258,7 @@ func (vv *TypeValueView) UpdateWidget() {
 func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ComboBox)
-	cb.Tooltip = vv.ViewFieldTag("desc")
+	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 
 	typEmbeds := ki.KiT_Node
@@ -1126,9 +1269,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 			}
 		}
 	}
-
-	tetag := vv.ViewFieldTag("type-embeds")
-	if tetag != "" {
+	if tetag, ok := vv.Tag("type-embeds"); ok {
 		typ := kit.Types.Type(tetag)
 		if typ != nil {
 			typEmbeds = typ
@@ -1138,8 +1279,6 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	tl := kit.Types.AllEmbedsOf(typEmbeds, true, false)
 	cb.ItemsFromTypes(tl, false, true, 50)
 
-	vv.UpdateWidget()
-
 	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_TypeValueView).(*TypeValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
@@ -1148,6 +1287,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.UpdateWidget()
 		}
 	})
+	vv.UpdateWidget()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

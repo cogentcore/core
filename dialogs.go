@@ -50,9 +50,9 @@ const (
 
 //go:generate stringer -type=DialogState
 
-// standard vertical space between elements in a dialog, in Em units
-var StdDialogVSpace = float32(0.5)
-var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Em, Dots: 0}
+// standard vertical space between elements in a dialog, in Ex units
+var StdDialogVSpace = float32(1)
+var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Ex, Dots: 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either
 // be rendered in a separate window or on top of an existing one.
@@ -268,7 +268,7 @@ func (dlg *Dialog) SetFrame() *Frame {
 	dlg.SetProp("color", &Prefs.Colors.Font)
 	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
 	frame.Lay = LayoutVert
-	// dlg.StylePart(frame.This)
+	frame.SetProp("spacing", StdDialogVSpaceUnits)
 	return frame
 }
 
@@ -298,14 +298,11 @@ func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
 	return frame.KnownChild(idx).(*Label), idx
 }
 
-// SetPrompt sets the prompt and adds a Label named "prompt" to the given frame layout if passed, with the given amount of space before it, sized in "Em"'s (units of font size), if > 0
-func (dlg *Dialog) SetPrompt(prompt string, spaceBefore float32, frame *Frame) *Label {
+// SetPrompt sets the prompt and adds a Label named "prompt" to the given
+// frame layout if passed
+func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
-		if spaceBefore > 0 {
-			spc := frame.AddNewChild(KiT_Space, "prompt-space").(*Space)
-			spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
-		}
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
 		lab.SetProp("width", units.NewValue(30, units.Ch))
@@ -328,19 +325,12 @@ func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 }
 
 // AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
-// with optional fixed space and stretch elements before it
-func (dlg *Dialog) AddButtonBox(spaceBefore float32, stretchBefore bool, frame *Frame) *Layout {
+// with an extra space above it
+func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
-
-	if spaceBefore > 0 {
-		spc := frame.AddNewChild(KiT_Space, "button-space").(*Space)
-		spc.SetFixedHeight(units.NewValue(spaceBefore, units.Em))
-	}
-	if stretchBefore {
-		frame.AddNewChild(KiT_Stretch, "button-stretch")
-	}
+	frame.AddNewChild(KiT_Stretch, "button-stretch")
 	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
 	bb.Lay = LayoutHoriz
 	bb.SetProp("max-width", -1)
@@ -408,15 +398,13 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	dlg.SigVal = -1
 	frame := dlg.SetFrame()
-	pspc := float32(0.0)
 	if title != "" {
 		dlg.SetTitle(title, frame)
-		pspc = StdDialogVSpace
 	}
 	if prompt != "" {
-		dlg.SetPrompt(prompt, pspc, frame)
+		dlg.SetPrompt(prompt, frame)
 	}
-	bb := dlg.AddButtonBox(StdDialogVSpace, true, frame)
+	bb := dlg.AddButtonBox(frame)
 	bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
 	mods, updt := bb.ConfigChildren(bbc, false)   // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
@@ -526,9 +514,6 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "n-space").(*Space)
-	nspc.SetFixedHeight(StdDialogVSpaceUnits)
-
 	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
@@ -584,11 +569,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Pr
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
-
-	nspc := frame.InsertNewChild(KiT_Space, prIdx+1, "str-space").(*Space)
-	nspc.SetFixedHeight(StdDialogVSpaceUnits)
-
-	tf := frame.InsertNewChild(KiT_TextField, prIdx+2, "str-field").(*TextField)
+	tf := frame.InsertNewChild(KiT_TextField, prIdx+1, "str-field").(*TextField)
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
 	tf.SetMinPrefWidth(units.NewValue(20, units.Em))

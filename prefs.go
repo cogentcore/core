@@ -19,6 +19,12 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// FileName is used to specify an filename (including path) -- automtically
+// opens the FileView dialog using ValueView system.  Use this for any method
+// args that are filenames to trigger use of FileViewDialog under MethView
+// automatic method calling.
+type FileName string
+
 // ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
 // display zooming without changing prefs -- see SaveCurrentZoom to save prefs
 // with this current factor.
@@ -70,7 +76,7 @@ type Preferences struct {
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
 	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
-	ColorFilename   string                 `view:"-" desc:"filename for saving / loading colors"`
+	ColorFilename   FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
 }
 
 var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
@@ -166,7 +172,7 @@ func (p *Preferences) Save() error {
 }
 
 // LoadColors colors from a JSON-formatted file.
-func (p *Preferences) LoadColors(filename string) error {
+func (p *Preferences) LoadColors(filename FileName) error {
 	err := p.Colors.LoadJSON(filename)
 	if err == nil {
 		p.Update()
@@ -176,7 +182,7 @@ func (p *Preferences) LoadColors(filename string) error {
 
 // Save colors to a JSON-formatted file, for easy sharing of your favorite
 // palettes.
-func (p *Preferences) SaveColors(filename string) error {
+func (p *Preferences) SaveColors(filename FileName) error {
 	return p.Colors.SaveJSON(filename)
 }
 
@@ -298,8 +304,8 @@ func (p *Preferences) DeleteSavedWindowGeoms() {
 }
 
 // Load colors from a JSON-formatted file.
-func (p *ColorPrefs) LoadJSON(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+func (p *ColorPrefs) LoadJSON(filename FileName) error {
+	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		log.Println(err)
@@ -309,13 +315,13 @@ func (p *ColorPrefs) LoadJSON(filename string) error {
 }
 
 // Save colors to a JSON-formatted file.
-func (p *ColorPrefs) SaveJSON(filename string) error {
+func (p *ColorPrefs) SaveJSON(filename FileName) error {
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely
 		return err
 	}
-	err = ioutil.WriteFile(filename, b, 0644)
+	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
 		log.Println(err)
@@ -331,26 +337,28 @@ var PreferencesProps = ki.Props{
 			{"Update", ki.Props{
 				"shortcut": "Command+U",
 			}},
-			{"Files", ki.PropSlice{
-				{"Load", ki.Props{
-					"shortcut":     "Command+O",
-					"update-after": true,
-				}},
-				{"Save", ki.Props{
-					"shortcut": "Command+S",
-				}},
+			{"Load", ki.Props{
+				"shortcut":     "Command+O",
+				"update-after": true,
+			}},
+			{"Save", ki.Props{
+				"shortcut": "Command+S",
 			}},
 			{"sep-color", ki.BlankProp{}},
 			{"LoadColors", ki.Props{
-				"FileView": ki.Props{
-					"field": "ColorFilename",
-					"ext":   ".json",
+				"Args": ki.PropSlice{
+					{"Color File Name", ki.Props{
+						"default-field": "ColorFilename",
+						"ext":           ".json",
+					}},
 				},
 			}},
 			{"SaveColors", ki.Props{
-				"FileView": ki.Props{
-					"field": "ColorFilename",
-					"ext":   ".json",
+				"Args": ki.PropSlice{
+					{"Color File Name", ki.Props{
+						"default-field": "ColorFilename",
+						"ext":           ".json",
+					}},
 				},
 			}},
 			{"sep-misc", ki.BlankProp{}},
@@ -374,25 +382,31 @@ var PreferencesProps = ki.Props{
 		}},
 		{"sep-color", ki.BlankProp{}},
 		{"LoadColors", ki.Props{
-			"FileView": ki.Props{
-				"field": "ColorFilename",
-				"ext":   ".json",
+			"Args": ki.PropSlice{
+				{"Color File Name", ki.Props{
+					"default-field": "ColorFilename",
+					"ext":           ".json",
+				}},
 			},
 		}},
 		{"SaveColors", ki.Props{
-			"shortcut": "Command+S",
-			"FileView": ki.Props{
-				"field": "ColorFilename",
-				"ext":   ".json",
+			"Args": ki.PropSlice{
+				{"Color File Name", ki.Props{
+					"default-field": "ColorFilename",
+					"ext":           ".json",
+				}},
 			},
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"StdKeyMap", ki.Props{
-			"SliceViewSelect": ki.Props{
-				"slice": &StdKeyMapNames,
-				"field": "StdKeyMapName",
-			},
-		}},
+			"desc": "Please enter standard key map name here -- will also set your default keymap settings to this",
+			"Args": ki.PropSlice{
+				{"Map Name", ki.Props{
+					"default-field": "StdKeyMapName",
+					"desc":          "name of standard keymap to use",
+				}},
+			}},
+		},
 		{"ScreenInfo", ki.Props{
 			"show-return": true,
 		}},

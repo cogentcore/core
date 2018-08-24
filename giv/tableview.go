@@ -64,13 +64,14 @@ type TableView struct {
 	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
 	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
-	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice  interface{} `view:"-" json:"-" xml:"-" desc:"the built slice"`
-	BuiltSize   int
-	StruType    reflect.Type
-	NVisFields  int
-	VisFields   []reflect.StructField `view:"-" json:"-" xml:"-" desc:"the visible fields"`
-	inFocusGrab bool
+	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	BuiltSlice   interface{} `view:"-" json:"-" xml:"-" desc:"the built slice"`
+	BuiltSize    int
+	ToolbarSlice interface{} `desc:"the slice that we successfully set a toolbar for"`
+	StruType     reflect.Type
+	NVisFields   int
+	VisFields    []reflect.StructField `view:"-" json:"-" xml:"-" desc:"the visible fields"`
+	inFocusGrab  bool
 }
 
 var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
@@ -177,25 +178,20 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// SetFrame configures view as a frame
-func (tv *TableView) SetFrame() {
-	tv.Lay = gi.LayoutVert
-}
-
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (tv *TableView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "slice-frame")
-	config.Add(gi.KiT_Space, "grid-space")
-	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (tv *TableView) StdConfig() (mods, updt bool) {
-	tv.SetFrame()
+	tv.Lay = gi.LayoutVert
+	tv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := tv.StdFrameConfig()
 	mods, updt = tv.ConfigChildren(config, false)
 	return
@@ -221,13 +217,13 @@ func (tv *TableView) SliceGrid() *gi.Frame {
 	return sf.KnownChild(2).(*gi.Frame)
 }
 
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (tv *TableView) ButtonBox() (*gi.Layout, int) {
-	idx, ok := tv.Children().IndexByName("buttons", 0)
+// ToolBar returns the toolbar widget
+func (tv *TableView) ToolBar() *gi.ToolBar {
+	idx, ok := tv.Children().IndexByName("toolbar", 0)
 	if !ok {
-		return nil, -1
+		return nil
 	}
-	return tv.KnownChild(idx).(*gi.Layout), idx
+	return tv.KnownChild(idx).(*gi.ToolBar)
 }
 
 // StdSliceFrameConfig returns a TypeAndNameList for configuring the slice-frame
@@ -518,9 +514,6 @@ func (tv *TableView) ConfigSliceGridRows() {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end -- reconfig means call ConfigSliceGrid to update display
 func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
-	if idx < 0 {
-		return
-	}
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
@@ -712,29 +705,33 @@ func StructSliceSort(struSlice interface{}, fldIdx int, ascending bool) error {
 	return nil
 }
 
-// ConfigSliceButtons configures the buttons for map functions
-func (tv *TableView) ConfigSliceButtons() {
-	if kit.IfaceIsNil(tv.Slice) {
+// ConfigToolbar configures the toolbar actions
+func (tv *TableView) ConfigToolbar() {
+	if kit.IfaceIsNil(tv.Slice) || tv.IsInactive() {
 		return
 	}
-	if tv.IsInactive() {
+	win := tv.ParentWindow()
+	if win == nil {
+		return // not ready yet
+	}
+	if tv.ToolbarSlice == tv.Slice {
 		return
 	}
-	bb, _ := tv.ButtonBox()
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Button, "Add")
-	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
-	addb.SetText("Add")
-	addb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
+	tb := tv.ToolBar()
+	if len(*tb.Children()) == 0 {
+		addac := tb.AddNewChild(gi.KiT_Action, "Add").(*gi.Action)
+		addac.SetText("Add")
+		addac.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.SliceNewAt(-1, true)
-		}
-	})
-	if mods {
-		bb.UpdateEnd(updt)
+		})
 	}
+	if HasToolBarView(tv.Slice) {
+		if len(*tb.Children()) == 1 {
+			ToolBarView(tv.Slice, win, tb)
+		}
+	}
+	tv.ToolbarSlice = tv.Slice
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
@@ -777,7 +774,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 func (tv *TableView) UpdateFromSlice() {
 	mods, updt := tv.StdConfig()
 	tv.ConfigSliceGrid(false)
-	tv.ConfigSliceButtons()
+	tv.ConfigToolbar()
 	if mods {
 		tv.SetFullReRender()
 		tv.UpdateEnd(updt)

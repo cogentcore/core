@@ -51,6 +51,7 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 		sv.Struct = st
 		if k, ok := st.(ki.Ki); ok {
 			k.NodeSignal().Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				// todo: check for delete??
 				svv, _ := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()
 				svv.ViewSig.Emit(svv.This, 0, nil)
@@ -62,26 +63,20 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd(updt)
 }
 
-// SetFrame configures view as a frame
-func (sv *StructView) SetFrame() {
-	sv.Lay = gi.LayoutVert
-}
-
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_Space, "title-space")
 	config.Add(gi.KiT_Frame, "struct-grid")
-	config.Add(gi.KiT_Space, "grid-space")
 	return config
 }
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (sv *StructView) StdConfig() (mods, updt bool) {
-	sv.SetFrame()
+	sv.Lay = gi.LayoutVert
+	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := sv.StdFrameConfig()
 	mods, updt = sv.ConfigChildren(config, false)
 	return
@@ -221,14 +216,19 @@ func (sv *StructView) ConfigToolbar() {
 	if sv.ToolbarStru == sv.Struct {
 		return
 	}
-	tb, ok := ToolBarView(sv.Struct, win)
-	if !ok {
-		sv.DeleteToolbar() // delete any old one
-		return
+	if HasToolBarView(sv.Struct) {
+		tb := &gi.ToolBar{}
+		tb.InitName(tb, "structview-tbar")
+		ok := ToolBarView(sv.Struct, win, tb)
+		if ok {
+			_, idx := sv.StructGrid()
+			sv.InsertChild(tb, idx)
+			sv.ToolbarStru = sv.Struct
+			return
+		}
+		sv.ToolbarStru = sv.Struct // prevent repeat error messages
 	}
-	_, idx := sv.StructGrid()
-	sv.InsertChild(tb, idx)
-	sv.ToolbarStru = sv.Struct
+	sv.DeleteToolbar() // delete any old one
 }
 
 // DeleteToolbar deletes any existing toolbar

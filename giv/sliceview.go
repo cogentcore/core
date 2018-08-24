@@ -48,6 +48,7 @@ type SliceView struct {
 	TmpSave      ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	BuiltSlice   interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
 	BuiltSize    int
+	ToolbarSlice interface{} `desc:"the slice that we successfully set a toolbar for"`
 	inFocusGrab  bool
 }
 
@@ -108,25 +109,20 @@ const (
 
 //go:generate stringer -type=SliceViewSignals
 
-// SetFrame configures view as a frame
-func (sv *SliceView) SetFrame() {
-	sv.Lay = gi.LayoutVert
-}
-
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "slice-grid")
-	config.Add(gi.KiT_Space, "grid-space")
-	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (sv *SliceView) StdConfig() (mods, updt bool) {
-	sv.SetFrame()
+	sv.Lay = gi.LayoutVert
+	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := sv.StdFrameConfig()
 	mods, updt = sv.ConfigChildren(config, false)
 	return
@@ -142,13 +138,13 @@ func (sv *SliceView) SliceGrid() (*gi.Frame, int) {
 	return sv.KnownChild(idx).(*gi.Frame), idx
 }
 
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) ButtonBox() (*gi.Layout, int) {
-	idx, ok := sv.Children().IndexByName("buttons", 0)
+// ToolBar returns the toolbar widget
+func (sv *SliceView) ToolBar() *gi.ToolBar {
+	idx, ok := sv.Children().IndexByName("toolbar", 0)
 	if !ok {
-		return nil, -1
+		return nil
 	}
-	return sv.KnownChild(idx).(*gi.Layout), idx
+	return sv.KnownChild(idx).(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -369,32 +365,39 @@ func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
 	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
-// ConfigSliceButtons configures the buttons for map functions
-func (sv *SliceView) ConfigSliceButtons() {
-	if kit.IfaceIsNil(sv.Slice) {
+// ConfigToolbar configures the toolbar actions
+func (sv *SliceView) ConfigToolbar() {
+	if kit.IfaceIsNil(sv.Slice) || sv.IsInactive() {
 		return
 	}
-	bb, _ := sv.ButtonBox()
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Button, "Add")
-	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
-	addb.SetText("Add")
-	addb.ButtonSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
+	win := sv.ParentWindow()
+	if win == nil {
+		return // not ready yet
+	}
+	if sv.ToolbarSlice == sv.Slice {
+		return
+	}
+	tb := sv.ToolBar()
+	if len(*tb.Children()) == 0 {
+		addac := tb.AddNewChild(gi.KiT_Action, "Add").(*gi.Action)
+		addac.SetText("Add")
+		addac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
 			svv.SliceNewAt(-1, true)
-		}
-	})
-	if mods {
-		bb.UpdateEnd(updt)
+		})
 	}
+	if HasToolBarView(sv.Slice) {
+		if len(*tb.Children()) == 1 {
+			ToolBarView(sv.Slice, win, tb)
+		}
+	}
+	sv.ToolbarSlice = sv.Slice
 }
 
 func (sv *SliceView) UpdateFromSlice() {
 	mods, updt := sv.StdConfig()
 	sv.ConfigSliceGrid(false)
-	sv.ConfigSliceButtons()
+	sv.ConfigToolbar()
 	if mods {
 		sv.SetFullReRender()
 		sv.UpdateEnd(updt)

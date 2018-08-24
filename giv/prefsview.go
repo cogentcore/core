@@ -9,7 +9,6 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
 
@@ -29,43 +28,36 @@ func PrefsEditor(p *gi.Preferences) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
-	tbar.Lay = gi.LayoutHoriz
-	tbar.SetStretchMaxWidth()
-
-	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(0.5, units.Em))
-
 	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.SetStruct(p, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
-	stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
-	stdmap.SetText("Std KeyMap")
-	stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"
-	stdmap.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		mapName := p.StdKeyMapName
-		_, initRow := gi.StdKeyMapByName(mapName)
-		SliceViewSelectDialog(vp, &gi.StdKeyMapNames, mapName, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
-			func(recv, send ki.Ki, sig int64, data interface{}) {
-				svv, _ := send.(*SliceView)
-				si := svv.SelectedIdx
-				if si >= 0 {
-					mapName = gi.StdKeyMapNames[si]
-				}
-			},
-			func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.DialogAccepted) {
-					p.StdKeyMapName = mapName
-					km, _ := gi.StdKeyMapByName(mapName)
-					if km != nil {
-						p.SetKeyMap(km)
-						sv.UpdateFields()
-					}
-				}
-			}, nil)
-	})
+	// stdmap := tbar.AddNewChild(gi.KiT_Action, "stdmap").(*gi.Action)
+	// stdmap.SetText("Std KeyMap")
+	// stdmap.Tooltip = "select a standard KeyMap -- copies map into CustomKeyMap, and you can customize from there by editing CustomKeyMap"
+	// stdmap.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	mapName := p.StdKeyMapName
+	// 	_, initRow := gi.StdKeyMapByName(mapName)
+	// 	SliceViewSelectDialog(vp, &gi.StdKeyMapNames, mapName, "Select a Standard KeyMap", "Can then customize from there", initRow, nil, stdmap.This,
+	// 		func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 			svv, _ := send.(*SliceView)
+	// 			si := svv.SelectedIdx
+	// 			if si >= 0 {
+	// 				mapName = gi.StdKeyMapNames[si]
+	// 			}
+	// 		},
+	// 		func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 			if sig == int64(gi.DialogAccepted) {
+	// 				p.StdKeyMapName = mapName
+	// 				km, _ := gi.StdKeyMapByName(mapName)
+	// 				if km != nil {
+	// 					p.SetKeyMap(km)
+	// 					sv.UpdateFields()
+	// 				}
+	// 			}
+	// 		}, nil)
+	// })
 
 	mmen := win.MainMenu
 	MainMenuView(p, win, mmen)

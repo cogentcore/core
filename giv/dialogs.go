@@ -21,10 +21,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_StructView, prIdx+2, "struct-view").(*StructView)
+	sv := frame.InsertNewChild(KiT_StructView, prIdx+1, "struct-view").(*StructView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetStruct(stru, tmpSave)
@@ -55,10 +52,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_MapView, prIdx+2, "map-view").(*MapView)
+	sv := frame.InsertNewChild(KiT_MapView, prIdx+1, "map-view").(*MapView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetMap(mp, tmpSave)
@@ -69,7 +63,10 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
+	dlg.Open(0, 0, avp, func() {
+		MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
+		sv.ConfigToolbar()
+	})
 	return dlg
 }
 
@@ -84,10 +81,7 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, t
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
+	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
@@ -100,7 +94,10 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, t
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
+	dlg.Open(0, 0, avp, func() {
+		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
+		sv.ConfigToolbar()
+	})
 	return dlg
 }
 
@@ -124,10 +121,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+2, "slice-view").(*SliceView)
+	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
@@ -158,6 +152,17 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 	return dlg
 }
 
+// SliceViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
+func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
+	frame := dlg.Frame()
+	sv, ok := frame.ChildByName("slice-view", 0)
+	if ok {
+		svv := sv.(*SliceView)
+		return svv.SelectedIdx
+	}
+	return -1
+}
+
 // TableViewDialog is for editing fields of a slice-of-struct using a
 // TableView -- optionally connects to given signal receiving object and
 // function for dialog signals (nil to ignore).  Also has an optional styling
@@ -169,10 +174,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueVie
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "tableview").(*TableView)
+	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
@@ -185,7 +187,10 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueVie
 	dlg.SetProp("min-width", units.NewValue(50, units.Em))
 	dlg.SetProp("min-height", units.NewValue(30, units.Em))
 	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
+	dlg.Open(0, 0, avp, func() {
+		MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
+		sv.ConfigToolbar()
+	})
 	return dlg
 }
 
@@ -210,10 +215,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+2, "tableview").(*TableView)
+	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
 	sv.SetStretchMaxHeight()
 	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
@@ -241,6 +243,17 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
+}
+
+// TableViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
+func TableViewSelectDialogValue(dlg *gi.Dialog) int {
+	frame := dlg.Frame()
+	sv, ok := frame.ChildByName("tableview", 0)
+	if ok {
+		svv := sv.(*TableView)
+		return svv.SelectedIdx
+	}
+	return -1
 }
 
 // show fonts in a bigger size so you can actually see the differences
@@ -271,7 +284,8 @@ func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 }
 
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
-// if non-nil are connected to the selection signal for the slice view
+// if non-nil are connected to the selection signal for the slice view, and
+// the dialog signal.
 func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, title, prompt string, css ki.Props, recv ki.Ki, selFun ki.RecvFunc, dlgFun ki.RecvFunc) *gi.Dialog {
 	if css == nil {
 		css = ki.Props{
@@ -302,10 +316,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	sv := frame.InsertNewChild(KiT_ColorView, prIdx+2, "color-view").(*ColorView)
+	sv := frame.InsertNewChild(KiT_ColorView, prIdx+1, "color-view").(*ColorView)
 	sv.SetColor(clr, tmpSave)
 
 	if recv != nil && fun != nil {
@@ -329,10 +340,7 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt stri
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nspc := frame.InsertNewChild(gi.KiT_Space, prIdx+1, "view-space").(*gi.Space)
-	nspc.SetFixedHeight(gi.StdDialogVSpaceUnits)
-
-	fv := frame.InsertNewChild(KiT_FileView, prIdx+2, "file-view").(*FileView)
+	fv := frame.InsertNewChild(KiT_FileView, prIdx+1, "file-view").(*FileView)
 	fv.SetStretchMaxHeight()
 	fv.SetStretchMaxWidth()
 	fv.FilterFunc = filterFunc
@@ -366,4 +374,28 @@ func FileViewDialogValue(dlg *gi.Dialog) string {
 		return fv.SelectedFile()
 	}
 	return ""
+}
+
+// ArgViewDialog for editing args for a method call in the MethView system
+func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+	winm := strcase.ToKebab(title)
+	dlg := gi.NewStdDialog(winm, title, prompt, true, true, css)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	sv := frame.InsertNewChild(KiT_ArgView, prIdx+1, "arg-view").(*ArgView)
+	sv.SetStretchMaxHeight()
+	sv.SetStretchMaxWidth()
+	sv.SetInactiveState(false)
+	sv.SetArgs(args)
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.SetProp("min-width", units.NewValue(60, units.Em))
+	dlg.SetProp("min-height", units.NewValue(30, units.Em))
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp, nil)
+	return dlg
 }

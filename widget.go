@@ -587,6 +587,7 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 
 	pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 	sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+	rad := st.Border.Radius.Dots
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
@@ -595,12 +596,19 @@ func (g *WidgetBase) RenderStdBox(st *Style) {
 		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
 		// todo: this is not rendering a transparent gradient
 		// pc.FillStyle.Opacity = .5
-		g.RenderBoxImpl(spos, sz, st.Border.Radius.Dots)
+		g.RenderBoxImpl(spos, sz, rad)
 		// pc.FillStyle.Opacity = 1.0
 	}
-	// then draw the box over top of that -- note: won't work well for transparent! need to set clipping to box first..
+	// then draw the box over top of that -- note: won't work well for
+	// transparent! need to set clipping to box first..
 	if !st.Font.BgColor.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+		if rad == 0 {
+			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+		} else {
+			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+			pc.Fill(rs)
+		}
 	}
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)

@@ -1,0 +1,72 @@
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package giv
+
+import (
+	"reflect"
+
+	"github.com/goki/gi"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
+)
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  FileValueView
+
+// FileValueView presents an action for displaying an FileName and selecting
+// icons from FileChooserDialog
+type FileValueView struct {
+	ValueViewBase
+}
+
+var KiT_FileValueView = kit.Types.AddType(&FileValueView{}, nil)
+
+func (vv *FileValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_Action
+	return vv.WidgetTyp
+}
+
+func (vv *FileValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Action)
+	txt := kit.ToString(vv.Value.Interface())
+	ac.SetFullReRender()
+	ac.SetText(txt)
+}
+
+func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	ac := vv.Widget.(*gi.Action)
+	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_FileValueView).(*FileValueView)
+		ac := vvv.Widget.(*gi.Action)
+		vvv.Activate(ac.Viewport)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *FileValueView) HasAction() bool {
+	return true
+}
+
+func (vv *FileValueView) Activate(vp *gi.Viewport2D) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := kit.ToString(vv.Value.Interface())
+	ext, _ := vv.Tag("ext")
+	FileViewDialog(vp, cur, ext, vv.Name(), "", nil, nil, vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
+			dlg, _ := send.(*gi.Dialog)
+			fn := FileViewDialogValue(dlg)
+			vv.SetValue(fn)
+			vv.UpdateWidget()
+		}
+	})
+}

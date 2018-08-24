@@ -92,8 +92,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* use spacing instead of explicit space elements in all dialogs views etc -- much
-  simpler and easier to adjust.  need for new toolbar.
+* getting irregular crash opening prefsview -- maybe due to conflicting update timing or something -- 
+
+github.com/srwiley/rasterx.(*Gradient).GetColorFunctionUS.func6(0x16e, 0x2, 0xffff0000dddd, 0xc42878c20c)
+	/Users/oreilly/go/src/github.com/srwiley/rasterx/gradient.go:278 +0x12d
+
+
+* double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
 
 * map, slice have automatic toolbar element plus custom -- not sure about how to do that yet.
 

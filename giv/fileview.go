@@ -175,21 +175,13 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 	}
 }
 
-// SetFrame configures view as a frame
-func (fv *FileView) SetFrame() {
-	fv.Lay = gi.LayoutVert
-}
-
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "path-tbar")
-	config.Add(gi.KiT_Space, "path-space")
 	config.Add(gi.KiT_Layout, "files-row")
-	config.Add(gi.KiT_Space, "files-space")
 	config.Add(gi.KiT_Layout, "sel-row")
-	config.Add(gi.KiT_Space, "sel-space")
 	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
@@ -197,7 +189,8 @@ func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (fv *FileView) StdConfig() (mods, updt bool) {
-	fv.SetFrame()
+	fv.Lay = gi.LayoutVert
+	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := fv.StdFrameConfig()
 	mods, updt = fv.ConfigChildren(config, false)
 	if mods {

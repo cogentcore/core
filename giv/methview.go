@@ -19,18 +19,12 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// DebugMethView -- set this to true to get logged error feedback about
-// method view properties that otherwise would result in silent inaction.
-var DebugMethView = true
-
-// MethViewErr is error logging function for MethView system, dependent on DebugMethView flag
+// MethViewErr is error logging function for MethView system, showing the type info
 func MethViewErr(vtyp reflect.Type, msg string) {
-	if DebugMethView {
-		if vtyp != nil {
-			log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
-		} else {
-			log.Printf("giv.MethodView debug error: %v\n", msg)
-		}
+	if vtyp != nil {
+		log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
+	} else {
+		log.Printf("giv.MethodView debug error: %v\n", msg)
 	}
 }
 
@@ -38,22 +32,35 @@ func MethViewErr(vtyp reflect.Type, msg string) {
 // other err
 func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
 	if kit.IfaceIsNil(val) {
-		MethViewErr(nil, "val is nil -- no gui will be created")
 		return nil, nil, false
 	}
 	vtyp := reflect.TypeOf(val)
 	tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
 	if tpp == nil {
-		MethViewErr(vtyp, "no type properties registered -- must use kit. AddType and include a property list, or otherwise set using kit.Types methods")
 		return tpp, vtyp, false
 	}
 	return tpp, vtyp, true
 }
 
+// HasMainMenuView returns true if given val has a MainMenu type property
+// registered -- call this to check before then calling MainMenuView
+func HasMainMenuView(val interface{}) bool {
+	tpp, _, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	_, ok = ki.SliceProps(tpp, "MainMenu")
+	if !ok {
+		return false
+	}
+	return true
+}
+
 // MainMenuView configures the given MenuBar according to the "MainMenu"
 // properties registered on the type for given value element, through the
 // kit.AddType method.  See https://github.com/goki/gi/wiki/Views for full
-// details on formats and options for configuring the menu.
+// details on formats and options for configuring the menu.  Returns false on
+// errors.
 func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
@@ -61,7 +68,6 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	}
 	mp, ok := ki.SliceProps(tpp, "MainMenu")
 	if !ok {
-		MethViewErr(vtyp, "no MainMenu property or not a PropSlice")
 		return false
 	}
 
@@ -95,27 +101,37 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 			rval = false
 		}
 	}
+	win.MainMenuUpdated()
 	return rval
 }
 
-// ToolBarView returns a ToolBar configured according to the "ToolBar"
-// properties registered on the type for given value element, through the
-// kit.AddType method.  See https://github.com/goki/gi/wiki/Views for full
-// details on formats and options for configuring the menu.  If errors or no
-// toolbar specified, returns nil and false.
-func ToolBarView(val interface{}, win *gi.Window) (*gi.ToolBar, bool) {
+// HasToolBarView returns true if given val has a ToolBar type property
+// registered -- call this to check before then calling ToolBarView.
+func HasToolBarView(val interface{}) bool {
+	tpp, _, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	_, ok = ki.SliceProps(tpp, "ToolBar")
+	if !ok {
+		return false
+	}
+	return true
+}
+
+// ToolBarView configures ToolBar according to the "ToolBar" properties
+// registered on the type for given value element, through the kit.AddType
+// method.  See https://github.com/goki/gi/wiki/Views for full details on
+// formats and options for configuring the menu.  Returns false on errors.
+func ToolBarView(val interface{}, win *gi.Window, tb *gi.ToolBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
-		return nil, false
+		return false
 	}
 	tp, ok := ki.SliceProps(tpp, "ToolBar")
 	if !ok {
-		MethViewErr(vtyp, "no ToolBar property or not a PropSlice")
-		return nil, false
+		return false
 	}
-
-	tb := &gi.ToolBar{}
-	tb.InitName(tb, "methview-tbar")
 
 	rval := true
 	for _, te := range tp {
@@ -130,13 +146,14 @@ func ToolBarView(val interface{}, win *gi.Window) (*gi.ToolBar, bool) {
 			rval = false
 		}
 	}
-	return tb, rval
+	return rval
 }
 
 // ActionsView processes properties for parent action pa for overall object
 // val of given type -- could have a sub-menu of further actions or might just
 // be a single action
 func ActionsView(val interface{}, vtyp reflect.Type, win *gi.Window, pa *gi.Action, pp interface{}) bool {
+	pa.Text = strings.Replace(strings.Join(camelcase.Split(pa.Nm), " "), "  ", " ", -1)
 	rval := true
 	switch pv := pp.(type) {
 	case ki.PropSlice:
@@ -170,8 +187,6 @@ func ActionsView(val interface{}, vtyp reflect.Type, win *gi.Window, pa *gi.Acti
 
 // ActionView configures given action with given props
 func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Action, props ki.Props) bool {
-	ac.Text = strings.Replace(strings.Join(camelcase.Split(ac.Nm), " "), "  ", " ", -1)
-
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
@@ -182,14 +197,21 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 		return true
 	}
 
-	meth, hasmeth := vtyp.MethodByName(ac.Nm)
+	methNm := ac.Nm
+	methTyp, hasmeth := vtyp.MethodByName(methNm)
 	if !hasmeth {
-		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- not found on type: %v", ac.Nm, vtyp.String()))
+		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- not found in type", methNm))
+		return false
+	}
+	valval := reflect.ValueOf(val)
+	methVal := valval.MethodByName(methNm)
+	if kit.ValueIsZero(methVal) || methVal.IsNil() {
+		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- method value not valid", methNm))
 		return false
 	}
 
 	rval := true
-	md := &MethViewData{Val: val, Win: win, Method: ac.Nm}
+	md := &MethViewData{Val: val, ValVal: valval, Win: win, Method: methNm, MethVal: methVal, MethTyp: methTyp}
 	ac.Data = md
 	if props == nil {
 		ac.ActionSig.Connect(win.This, MethViewCall)
@@ -218,10 +240,10 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, Args property must be of type ki.PropSlice, containing names and other properties for each arg", ac.Nm))
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, Args property must be of type ki.PropSlice, containing names and other properties for each arg", methNm))
 				rval = false
 			} else {
-				if ActionViewArgsValidate(vtyp, meth, argv) {
+				if ActionViewArgsValidate(vtyp, methTyp, argv) {
 					md.ArgProps = argv
 				} else {
 					rval = false
@@ -235,7 +257,7 @@ func ActionView(val interface{}, vtyp reflect.Type, win *gi.Window, ac *gi.Actio
 	if hasfv {
 		fvp, ok := fv.(ki.Props)
 		if !ok {
-			MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, FileView property must be of type ki.Props, containing params for the FileView dialog", ac.Nm))
+			MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, FileView property must be of type ki.Props, containing params for the FileView dialog", methNm))
 			rval = false
 		} else {
 			md.SpecProps = fvp
@@ -289,8 +311,11 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "Me
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
 	Val       interface{}
+	ValVal    reflect.Value
 	Win       *gi.Window
 	Method    string
+	MethVal   reflect.Value
+	MethTyp   reflect.Method
 	ArgProps  ki.PropSlice `desc:"names and other properties of args, in one-to-one with method args"`
 	SpecProps ki.Props     `desc:"props for special action types, e.g., FileView"`
 	Desc      string
@@ -302,31 +327,34 @@ type MethViewData struct {
 func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	ac := send.(*gi.Action)
 	md := ac.Data.(*MethViewData)
-	vval := reflect.ValueOf(md.Val)
-	meth := vval.MethodByName(md.Method)
-	if kit.ValueIsZero(meth) || meth.IsNil() {
-		log.Printf("giv.MethViewCall: Method %v not found in type: %v\n", md.Method, vval.Type().String())
-		return
-	}
 	if md.ArgProps == nil { // no args -- just call
 		if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
 			gi.PromptDialog(md.Win.Viewport, ac.Text, md.Desc, true, true, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
-					MethViewCallMeth(md, meth, nil)
+					MethViewCallMeth(md, nil)
 				}
 			})
 		} else {
-			MethViewCallMeth(md, meth, nil)
+			MethViewCallMeth(md, nil)
 		}
 		return
 	}
-	// todo: arg dialog
+	// need to prompt for args
+	ad, args, ok := MethViewArgData(md)
+	if !ok {
+		return
+	}
+	ArgViewDialog(md.Win.Viewport, ad, ac.Text, md.Desc, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.DialogAccepted) {
+			MethViewCallMeth(md, args)
+		}
+	})
 }
 
 // MethViewCallMeth calls the method with given args, and processes the
 // results as specified in the MethViewData.
-func MethViewCallMeth(md *MethViewData, meth reflect.Value, args []reflect.Value) {
-	rv := meth.Call(args)
+func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
+	rv := md.MethVal.Call(args)
 	if bitflag.Has32(int32(md.Flags), int(MethViewUpdateAfter)) {
 		// todo: only for ki types, or else do window I guess..
 	}
@@ -338,15 +366,63 @@ func MethViewCallMeth(md *MethViewData, meth reflect.Value, args []reflect.Value
 	}
 }
 
+// ArgData contains the relevant data for each arg, including the
+// reflect.Value, name, optional description, and default value
+type ArgData struct {
+	Val     reflect.Value
+	Name    string
+	Desc    string
+	Default interface{}
+}
+
+// MethViewArgData gets the arg data for the method args, returns false if errors
+func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
+	mtyp := md.MethTyp.Type
+	narg := mtyp.NumIn() - 1
+	ads := make([]ArgData, narg)
+	args := make([]reflect.Value, narg)
+	for ai := 0; ai < narg; ai++ {
+		ad := &ads[ai]
+		atyp := mtyp.In(1 + ai)
+		av := reflect.New(atyp)
+		ad.Val = av
+		args[ai] = av.Elem()
+
+		aps := &md.ArgProps[ai]
+		ad.Name = aps.Name
+		switch apv := aps.Value.(type) {
+		case ki.BlankProp:
+		case ki.Props:
+			// fv, hasfv := apv["FileView"]
+			// sv, hassv := props["SliceViewSelect"]
+			for pk, pv := range apv {
+				switch pk {
+				case "FileView":
+				case "SliceViewSelect":
+				case "desc":
+					ad.Desc = kit.ToString(pv)
+				case "default":
+					ad.Default = pv
+				case "default-field":
+					field := pv.(string)
+					if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
+						ad.Default = flv.Interface()
+					}
+				}
+			}
+		}
+	}
+	return ads, args, true
+}
+
 // MethFileView is the receiver func for MethView actions that open the
 // FileView dialog prior to calling the method.
 func MethFileView(recv, send ki.Ki, sig int64, data interface{}) {
 	ac := send.(*gi.Action)
 	md := ac.Data.(*MethViewData)
-	vval := reflect.ValueOf(md.Val)
-	meth := vval.MethodByName(md.Method)
+	meth := md.ValVal.MethodByName(md.Method)
 	if kit.ValueIsZero(meth) || meth.IsNil() {
-		log.Printf("giv.MethViewCall: Method %v not found in type: %v\n", md.Method, vval.Type().String())
+		log.Printf("giv.MethViewCall: Method %v not found in type: %v\n", md.Method, md.ValVal.Type().String())
 		return
 	}
 
@@ -365,13 +441,13 @@ func MethFileView(recv, send ki.Ki, sig int64, data interface{}) {
 
 	var fval *reflect.Value
 	if field != "" {
-		if flv, ok := MethViewFieldValue(vval, field); ok {
+		if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
 			fval = flv
 			def = kit.ToString(fval.Interface())
 		}
 	}
 
-	FileViewDialog(md.Win.Viewport, def, ext, ac.Text, "", nil, nil, md.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+	FileViewDialog(md.Win.Viewport, def, ext, ac.Text, "", nil, nil, md.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.DialogAccepted) {
 			dlg, _ := send.(*gi.Dialog)
 			args := make([]reflect.Value, 1)
@@ -380,7 +456,7 @@ func MethFileView(recv, send ki.Ki, sig int64, data interface{}) {
 				kit.SetRobust(kit.PtrValue(*fval).Interface(), fn)
 			}
 			args[0] = reflect.ValueOf(fn)
-			MethViewCallMeth(md, meth, args)
+			MethViewCallMeth(md, args)
 		}
 	})
 }

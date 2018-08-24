@@ -20,11 +20,12 @@ import (
 // overall frame with a button box at the bottom where methods can be invoked.
 type MapView struct {
 	gi.Frame
-	Map     interface{} `desc:"the map that we are a view onto"`
-	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
-	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
-	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Map        interface{} `desc:"the map that we are a view onto"`
+	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
+	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ToolbarMap interface{} `desc:"the map that we successfully set a toolbar for"`
 }
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
@@ -46,25 +47,20 @@ var MapViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 }
 
-// SetFrame configures view as a frame
-func (mv *MapView) SetFrame() {
-	mv.Lay = gi.LayoutVert
-}
-
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (mv *MapView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "map-grid")
-	config.Add(gi.KiT_Space, "grid-space")
-	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (mv *MapView) StdConfig() (mods, updt bool) {
-	mv.SetFrame()
+	mv.Lay = gi.LayoutVert
+	mv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := mv.StdFrameConfig()
 	mods, updt = mv.ConfigChildren(config, false)
 	return
@@ -79,13 +75,13 @@ func (mv *MapView) MapGrid() (*gi.Frame, int) {
 	return mv.KnownChild(idx).(*gi.Frame), idx
 }
 
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) ButtonBox() (*gi.Layout, int) {
-	idx, ok := mv.Children().IndexByName("buttons", 0)
+// ToolBar returns the toolbar widget
+func (mv *MapView) ToolBar() *gi.ToolBar {
+	idx, ok := mv.Children().IndexByName("toolbar", 0)
 	if !ok {
-		return nil, -1
+		return nil
 	}
-	return mv.KnownChild(idx).(*gi.Layout), idx
+	return mv.KnownChild(idx).(*gi.ToolBar)
 }
 
 // ConfigMapGrid configures the MapGrid for the current map
@@ -291,32 +287,39 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
-// ConfigMapButtons configures the buttons for map functions
-func (mv *MapView) ConfigMapButtons() {
-	if kit.IfaceIsNil(mv.Map) {
+// ConfigToolbar configures the toolbar actions
+func (mv *MapView) ConfigToolbar() {
+	if kit.IfaceIsNil(mv.Map) || mv.IsInactive() {
 		return
 	}
-	bb, _ := mv.ButtonBox()
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Button, "Add")
-	mods, updt := bb.ConfigChildren(config, false)
-	addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*gi.Button)
-	addb.SetText("Add")
-	addb.ButtonSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
+	win := mv.ParentWindow()
+	if win == nil {
+		return // not ready yet
+	}
+	if mv.ToolbarMap == mv.Map {
+		return
+	}
+	tb := mv.ToolBar()
+	if len(*tb.Children()) == 0 {
+		addac := tb.AddNewChild(gi.KiT_Action, "Add").(*gi.Action)
+		addac.SetText("Add")
+		addac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv := recv.Embed(KiT_MapView).(*MapView)
 			mvv.MapAdd()
-		}
-	})
-	if mods {
-		bb.UpdateEnd(updt)
+		})
 	}
+	if HasToolBarView(mv.Map) {
+		if len(*tb.Children()) == 1 {
+			ToolBarView(mv.Map, win, tb)
+		}
+	}
+	mv.ToolbarMap = mv.Map
 }
 
 func (mv *MapView) UpdateFromMap() {
 	mods, updt := mv.StdConfig()
 	mv.ConfigMapGrid()
-	mv.ConfigMapButtons()
+	mv.ConfigToolbar()
 	if mods {
 		mv.UpdateEnd(updt)
 	}

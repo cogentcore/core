@@ -47,14 +47,9 @@ func (sv *ColorView) SetColor(color *gi.Color, tmpSave ValueView) {
 	sv.Update()
 }
 
-// SetFrame configures view as a frame
-func (sv *ColorView) SetFrame() {
-	sv.Lay = gi.LayoutVert
-}
-
 // Config configures a standard setup of entire view
 func (sv *ColorView) Config() {
-	sv.SetFrame()
+	sv.Lay = gi.LayoutVert
 	config := sv.StdFrameConfig()
 	mods, updt := sv.ConfigChildren(config, false)
 	if mods {
