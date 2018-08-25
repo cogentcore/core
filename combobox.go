@@ -113,10 +113,10 @@ func (g *ComboBox) ButtonRelease() {
 		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
 	}
 	g.UpdateEnd(updt)
-	pos := g.WinBBox.Max
+	pos := g.ObjBBox.Max
 	indic, ok := g.Parts.ChildByName("indicator", 3)
 	if ok {
-		pos = KiToNode2DBase(indic).WinBBox.Min
+		pos = KiToNode2DBase(indic).ObjBBox.Min
 	} else {
 		pos.Y -= 10
 		pos.X -= 10

@@ -387,6 +387,9 @@ func (vp *Viewport2D) PopBounds() {
 }
 
 func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
+	if vp == nil {
+		return
+	}
 	vp.Move2DBase(delta, parBBox)
 	vp.Move2DChildren(image.ZP) // reset delta here -- we absorb the delta in our placement relative to the parent
 }

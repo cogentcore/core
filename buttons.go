@@ -277,10 +277,10 @@ func (g *ButtonBase) OpenMenu() bool {
 	if g.MakeMenuFunc != nil {
 		g.MakeMenuFunc(&g.Menu)
 	}
-	pos := g.WinBBox.Max
+	pos := g.ObjBBox.Max
 	indic, ok := g.Parts.ChildByName("indicator", 3)
 	if ok {
-		pos = KiToNode2DBase(indic).WinBBox.Min
+		pos = KiToNode2DBase(indic).ObjBBox.Min
 	} else {
 		pos.X = g.WinBBox.Min.X
 	}
@@ -554,15 +554,19 @@ func (g *ButtonBase) Render2D() {
 	}
 }
 
-func (g *ButtonBase) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
+func (g *ButtonBase) FocusChanged2D(change FocusChanges) {
+	switch change {
+	case FocusLost:
+		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
+		g.UpdateSig()
+	case FocusGot:
 		g.ScrollToMe()
 		g.SetButtonState(ButtonFocus)
 		g.EmitFocusedSignal()
-	} else {
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
+		g.UpdateSig()
+	case FocusInactive: // don't care..
+	case FocusActive:
 	}
-	g.UpdateSig()
 }
 
 ///////////////////////////////////////////////////////////

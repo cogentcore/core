@@ -435,12 +435,16 @@ func (g *Splitter) Render2DDefaultStyle() {
 	}
 }
 
-func (g *Splitter) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
-		g.EmitFocusedSignal()
-		g.SetSliderState(SliderFocus)
-	} else {
+func (g *Splitter) FocusChanged2D(change FocusChanges) {
+	switch change {
+	case FocusLost:
 		g.SetSliderState(SliderActive) // lose any hover state but whatever..
+		g.UpdateSig()
+	case FocusGot:
+		g.SetSliderState(SliderFocus)
+		g.EmitFocusedSignal()
+		g.UpdateSig()
+	case FocusInactive: // don't care..
+	case FocusActive:
 	}
-	g.UpdateSig()
 }

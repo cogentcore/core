@@ -92,13 +92,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* text not stretching to max-width for auto-centering.  sizing is always overriding.
+
 * mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
 
 * activate / inactivate menus should just be a simple callback fun attached to the menu item!  it can be called immediately before menu is rendered, every time.  not sure about when a toolbar would be updated.
 
 * double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
-
-* TextField has an ActiveFocus bool -- window notifies if someone else clicks somewhere
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
 

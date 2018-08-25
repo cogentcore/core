@@ -1579,12 +1579,15 @@ func (tv *TreeView) Render2D() {
 	tv.Render2DChildren()
 }
 
-func (tv *TreeView) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
+func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+	switch change {
+	case gi.FocusLost:
+	case gi.FocusGot:
 		tv.ScrollToMe()
 		tv.EmitFocusedSignal()
+	case gi.FocusInactive: // don't care..
+	case gi.FocusActive:
 	}
-	tv.UpdateSig()
 }
 
 // TreeViewDefault is default obj that can be used when property specifies "default"

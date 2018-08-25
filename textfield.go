@@ -40,6 +40,7 @@ type TextField struct {
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	FocusActive  bool                    `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
@@ -728,9 +729,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.OfferCompletions()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
-			kt.SetProcessed()
-			tf.InsertAtCursor(string(kt.Rune))
-			tf.OfferCompletions()
+			if !kt.HasAnyModifier(key.Control, key.Meta) {
+				kt.SetProcessed()
+				tf.InsertAtCursor(string(kt.Rune))
+				tf.OfferCompletions()
+			}
 		}
 	}
 }
@@ -1053,7 +1056,11 @@ func (tf *TextField) Render2D() {
 				tf.Sty = tf.StateStyles[TextFieldInactive]
 			}
 		} else if tf.HasFocus() {
-			tf.Sty = tf.StateStyles[TextFieldFocus]
+			if tf.FocusActive {
+				tf.Sty = tf.StateStyles[TextFieldFocus]
+			} else {
+				tf.Sty = tf.StateStyles[TextFieldActive]
+			}
 		} else if tf.IsSelected() {
 			tf.Sty = tf.StateStyles[TextFieldSel]
 		} else {
@@ -1085,15 +1092,28 @@ func (tf *TextField) Render2D() {
 	}
 }
 
-func (tf *TextField) FocusChanged2D(gotFocus bool) {
-	if gotFocus {
+func (tf *TextField) FocusChanged2D(change FocusChanges) {
+	switch change {
+	case FocusLost:
+		tf.FocusActive = false
+		tf.EditDone()
+		tf.UpdateSig()
+	case FocusGot:
+		tf.FocusActive = true
 		tf.ScrollToMe()
 		tf.CursorEnd()
 		tf.EmitFocusedSignal()
-	} else if !tf.IsInactive() {
-		tf.EditDone() // lose focus
+		tf.UpdateSig()
+	case FocusInactive:
+		tf.FocusActive = false
+		tf.EditDone()
+		tf.UpdateSig()
+	case FocusActive:
+		tf.FocusActive = true
+		tf.ScrollToMe()
+		// tf.UpdateSig()
+		// todo: see about cursor
 	}
-	tf.UpdateSig()
 }
 
 func (tf *TextField) SetCompleter(data interface{}, fun complete.Func) {

@@ -166,9 +166,9 @@ type Node2D interface {
 	// disconnect if not.
 	Render2D()
 
-	// FocusChanged2D is called on node when it gets or loses focus -- focus
-	// flag has current state too.
-	FocusChanged2D(gotFocus bool)
+	// FocusChanged2D is called on node for changes in focus -- see the
+	// FocusChanges values.
+	FocusChanged2D(change FocusChanges)
 
 	// HasFocus2D returns true if this node has keyboard focus and should
 	// receive keyboard events -- typically this just returns HasFocus based
@@ -198,6 +198,36 @@ type Node2D interface {
 	// ContextMenuPos.
 	ContextMenu()
 }
+
+// FocusChanges are the kinds of changes that can be reported via
+// FocusChanged2D method
+type FocusChanges int32
+
+const (
+	// FocusLost means that keyboard focus is on a different widget
+	// (typically) and this one lost focus
+	FocusLost FocusChanges = iota
+
+	// FocusGot means that this widget just got keyboard focus
+	FocusGot
+
+	// FocusInactive means that although this widget retains keyboard focus
+	// (nobody else has it), the user has clicked on something else and
+	// therefore the focus should be considered inactive (distracted), and any
+	// changes should be applied as this other action could result in closing
+	// of a dialog etc.  Keyboard events will still be sent to the focus
+	// widget, but it is up to the widget if or how to process them (e.g., it
+	// could reactivate on its own).
+	FocusInactive
+
+	// FocusActive means that the user has moved the mouse back into the
+	// focused widget to resume active keyboard focus.
+	FocusActive
+
+	FocusChangesN
+)
+
+//go:generate stringer -type=FocusChanges
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D impl for Node2DBase (nil)
@@ -249,7 +279,7 @@ func (g *Node2DBase) Render2D() {
 func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
-func (g *Node2DBase) FocusChanged2D(gotFocus bool) {
+func (g *Node2DBase) FocusChanged2D(change FocusChanges) {
 }
 
 func (g *Node2DBase) HasFocus2D() bool {

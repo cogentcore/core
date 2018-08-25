@@ -111,6 +111,7 @@ type Window struct {
 	LastModBits   int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
 	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	FocusActive   bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
 	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
 	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
@@ -948,6 +949,7 @@ func (w *Window) EventLoop() {
 			if w.DNDData != nil && e.Action == mouse.Release {
 				w.DNDDropEvent(e)
 			}
+			w.FocusActiveClick(e)
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
@@ -1137,8 +1139,14 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 				if !w.IsInScope(ni, popup) {
 					continue
 				}
-				if evi.OnFocus() && !nii.HasFocus2D() {
-					continue
+				if evi.OnFocus() {
+					if !nii.HasFocus2D() {
+						continue
+					}
+					if !w.FocusActive { // reactivate on keyboard input
+						w.FocusActive = true
+						nii.FocusChanged2D(FocusActive)
+					}
 				} else if evi.HasPos() {
 					pos := evi.Pos()
 					switch evi.(type) {
@@ -1594,7 +1602,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		nii, ni := KiToNode2D(w.Focus)
 		if ni != nil {
 			bitflag.Clear(&ni.Flag, int(HasFocus))
-			nii.FocusChanged2D(false)
+			nii.FocusChanged2D(FocusLost)
 		}
 	}
 	w.Focus = k
@@ -1605,9 +1613,10 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	nii, ni := KiToNode2D(k)
 	if ni != nil {
 		bitflag.Set(&ni.Flag, int(HasFocus))
-		nii.FocusChanged2D(true)
+		w.FocusActive = true
+		nii.FocusChanged2D(FocusGot)
 	}
-	w.ClearNonFocus()
+	w.ClearNonFocus() // todo: maybe don't need this..
 	w.UpdateEnd(updt)
 	return true
 }
@@ -1773,7 +1782,7 @@ func (w *Window) ClearNonFocus() {
 				updt = w.UpdateStart()
 			}
 			bitflag.Clear(&ni.Flag, int(HasFocus))
-			nii.FocusChanged2D(false)
+			nii.FocusChanged2D(FocusLost)
 		}
 		return true
 	})
@@ -1801,6 +1810,28 @@ func (w *Window) PopFocus() {
 	sz := len(w.FocusStack)
 	w.Focus = w.FocusStack[sz-1]
 	w.FocusStack = w.FocusStack[:sz-1]
+}
+
+// FocusActiveClick updates the FocusActive status based on mouse clicks in
+// or out of the focused item
+func (w *Window) FocusActiveClick(e *mouse.Event) {
+	if w.Focus == nil || e.Button != mouse.Left {
+		return
+	}
+	nii, ni := KiToNode2D(w.Focus)
+	if ni != nil {
+		if e.Pos().In(ni.WinBBox) {
+			if !w.FocusActive {
+				w.FocusActive = true
+				nii.FocusChanged2D(FocusActive)
+			}
+		} else {
+			if w.FocusActive {
+				w.FocusActive = false
+				nii.FocusChanged2D(FocusInactive)
+			}
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
