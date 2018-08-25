@@ -17,7 +17,7 @@ import (
 // MenuBar
 
 // MenuBar is a Layout (typically LayoutHoriz) that renders a gradient
-// background and has convenience methods for adding menus
+// background and has convenience methods for adding menus.
 type MenuBar struct {
 	Layout
 	MainMenu    bool               `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
@@ -86,13 +86,24 @@ func (mb *MenuBar) Render2D() {
 	}
 }
 
+// UpdateActions calls UpdateFunc on all actions in menu -- individual menus
+// are automatically updated just prior to menu popup
+func (g *MenuBar) UpdateActions() {
+	for _, mi := range g.Kids {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			ac.UpdateActions()
+		}
+	}
+}
+
 // ConfigMenus configures Action items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
 // etc).  Access the resulting menus as .KnownChildByName("name").(*Action).
 func (mb *MenuBar) ConfigMenus(menus []string) {
 	sz := len(menus)
 	tnl := make(kit.TypeAndNameList, sz+1)
-	typ := KiT_Action
+	typ := KiT_Action // note: could pass in action type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ
 		tnl[i].Name = m
@@ -101,9 +112,12 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	tnl[sz].Name = "menstr"
 	_, updt := mb.ConfigChildren(tnl, false)
 	for i, m := range menus {
-		ma := mb.Kids[i].(*Action)
-		ma.SetText(m)
-		ma.SetAsMenu()
+		mi := mb.Kids[i]
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			ac.SetText(m)
+			ac.SetAsMenu()
+		}
 	}
 	mb.UpdateEnd(updt)
 }
@@ -136,44 +150,49 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 	if osmm == nil { // no OS main menu
 		return
 	}
+	mb.UpdateActions()
 	osmm.SetFunc(MainMenuFunc)
 	mm := osmm.Menu()
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)
-	for _, m := range mb.Kids {
-		if ma, ok := m.(*Action); ok {
-			subm := osmm.AddSubMenu(mm, ma.Text)
-			mb.SetMainMenuSub(osmm, subm, ma)
+	for _, mi := range mb.Kids {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			subm := osmm.AddSubMenu(mm, ac.Text)
+			mb.SetMainMenuSub(osmm, subm, ac)
 		}
 	}
 }
 
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
 func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
-	for i, m := range am.Menu {
-		if ma, ok := m.(*Action); ok {
-			if len(ma.Menu) > 0 {
-				ssubm := osmm.AddSubMenu(subm, ma.Text)
-				mb.SetMainMenuSub(osmm, ssubm, ma)
+	for i, mi := range am.Menu {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			if len(ac.Menu) > 0 {
+				ssubm := osmm.AddSubMenu(subm, ac.Text)
+				mb.SetMainMenuSub(osmm, ssubm, ac)
 			} else {
-				mid := osmm.AddItem(subm, ma.Text, ma.Shortcut, i, ma.IsActive())
-				mb.OSMainMenus[ma.Text] = ma
-				ma.SetProp("__OSMainMenuItemID", mid)
+				mid := osmm.AddItem(subm, ac.Text, ac.Shortcut, i, ac.IsActive())
+				mb.OSMainMenus[ac.Text] = ac
+				ac.SetProp("__OSMainMenuItemID", mid)
 			}
-		} else if _, ok := m.(*Separator); ok {
+		} else if _, ok := mi.(*Separator); ok {
 			osmm.AddSeparator(subm)
 		}
 	}
 }
 
 // MainMenuUpdateActives updates the active state of all menu items, based on
-// active state of corresponding Actions -- can be called by method of same
-// name on Window.
+// active state of corresponding Actions (action self-update functions are
+// called via UpdateActions) -- can be called by method of same name on
+// Window.
 func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 	osmm := win.OSWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
+	mb.UpdateActions()
 	if mb.OSMainMenus == nil {
 		return
 	}
@@ -231,5 +250,16 @@ func (tb *ToolBar) Render2D() {
 		tb.PopBounds()
 	} else {
 		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
+	}
+}
+
+// UpdateActions calls UpdateFunc on all actions in toolbar -- individual
+// menus are automatically updated just prior to menu popup
+func (g *ToolBar) UpdateActions() {
+	for _, mi := range g.Kids {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			ac.UpdateActions()
+		}
 	}
 }

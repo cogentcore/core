@@ -1808,14 +1808,18 @@ func (w *Window) PopFocus() {
 		return
 	}
 	sz := len(w.FocusStack)
-	w.Focus = w.FocusStack[sz-1]
+	w.Focus = nil
+	w.SetFocus(w.FocusStack[sz-1])
 	w.FocusStack = w.FocusStack[:sz-1]
 }
 
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
 func (w *Window) FocusActiveClick(e *mouse.Event) {
-	if w.Focus == nil || e.Button != mouse.Left {
+	if w.Focus == nil || e.Button != mouse.Left || e.Action != mouse.Press {
+		return
+	}
+	if w.Popup != nil { // no updating on popus
 		return
 	}
 	nii, ni := KiToNode2D(w.Focus)
@@ -1826,6 +1830,11 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 				nii.FocusChanged2D(FocusActive)
 			}
 		} else {
+			if w.MainMenu != nil {
+				if e.Pos().In(w.MainMenu.WinBBox) { // main menu is not inactivating!
+					return
+				}
+			}
 			if w.FocusActive {
 				w.FocusActive = false
 				nii.FocusChanged2D(FocusInactive)

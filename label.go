@@ -65,6 +65,7 @@ type Label struct {
 	LinkSig     ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, opens default browser"`
 	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
+	RenderPos   Vec2D               `xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
 	CurBgColor  Color               `xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
@@ -225,7 +226,7 @@ func (g *Label) LabelEvents() {
 		lb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
-			pos := lb.LayData.AllocPos.AddVal(lb.Sty.BoxSpace())
+			pos := g.RenderPos
 			for ti, _ := range lb.Render.Links {
 				tl := &lb.Render.Links[ti]
 				tlb := tl.Bounds(&lb.Render, pos)
@@ -247,7 +248,7 @@ func (g *Label) LabelEvents() {
 		me := d.(*mouse.Event)
 		lb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
-		pos := lb.LayData.AllocPos.AddVal(lb.Sty.BoxSpace())
+		pos := g.RenderPos
 		if lb.Selectable || hasLinks {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				if hasLinks {
@@ -280,7 +281,7 @@ func (g *Label) LabelEvents() {
 			me := d.(*mouse.MoveEvent)
 			me.SetProcessed()
 			lb := recv.Embed(KiT_Label).(*Label)
-			pos := lb.LayData.AllocPos.AddVal(lb.Sty.BoxSpace())
+			pos := g.RenderPos
 			inLink := false
 			for _, tl := range lb.Render.Links {
 				tlb := tl.Bounds(&lb.Render, pos)
@@ -339,9 +340,9 @@ func (g *Label) Render2D() {
 		g.SetStateStyle()
 		st := &g.Sty
 		rs := &g.Viewport.Render
-		pos := g.TextPos()
+		g.RenderPos = g.TextPos()
 		g.RenderStdBox(st)
-		g.Render.Render(rs, pos)
+		g.Render.Render(rs, g.RenderPos)
 		g.Render2DChildren()
 		g.PopBounds()
 	} else {

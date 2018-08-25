@@ -668,28 +668,28 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 }
 
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
-	m.AddMenuText("Add Child", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Add Child", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.SrcAddChild()
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		issc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsert)
-		m.AddMenuText("Insert Before", issc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert Before", issc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.SrcInsertBefore()
 		})
 		iasc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsertAfter)
-		m.AddMenuText("Insert After", iasc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert After", iasc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.SrcInsertAfter()
 		})
 		dpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDuplicate)
-		m.AddMenuText("Duplicate", dpsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Duplicate", dpsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.SrcDuplicate()
 		})
 		dlsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDelete)
-		m.AddMenuText("Delete", dlsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Delete", dlsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.SrcDelete()
 		})
@@ -698,28 +698,28 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
 	ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 	ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
-	m.AddMenuText("Copy", cpsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Copy", cpsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.Copy(true)
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Cut", ctsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Cut", ctsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.Cut()
 		})
 	}
-	m.AddMenuText("Paste", ptsc, tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Paste", ptsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.Paste()
 	})
 	m.AddSeparator("vwsep")
-	m.AddMenuText("Edit In Window", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Edit In Window", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tynm := kit.NonPtrType(tvv.SrcNode.Ptr.Type()).Name()
 		StructViewDialog(tv.Viewport, tvv.SrcNode.Ptr, nil, tynm, "", nil, nil, nil)
 		tvv.Paste()
 	})
-	m.AddMenuText("GoGiEditor", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("GoGiEditor", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		GoGiEditorDialog(tvv.SrcNode.Ptr)
 	})
@@ -932,25 +932,25 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Assign To", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteAssign(data.(mimedata.Mimes))
 	})
-	m.AddMenuText("Add to Children", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Add to Children", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert Before", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
 		})
-		m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert After", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 	}
-	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Cancel", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 	// todo: compare, etc..
 }
@@ -1117,26 +1117,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddMenuText("Assign To", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Assign To", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
-	m.AddMenuText("Add to Children", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Add to Children", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Insert Before", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert Before", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
-		m.AddMenuText("Insert After", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddMenuText("Insert After", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
-	m.AddMenuText("Cancel", "", tv.This, data, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Cancel", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropCancel()
 	})

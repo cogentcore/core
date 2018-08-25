@@ -114,7 +114,7 @@ func mainrun() {
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win, false)
+	emen.Menu.AddCopyCutPaste(win)
 
 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
 		go oswin.TheApp.Quit() // once main window is closed, quit

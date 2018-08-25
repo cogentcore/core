@@ -562,7 +562,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore).  Viewport is optional to properly contextualize dialog to
 // given master window.
-func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func StringPromptDialog(avp *Viewport2D, strval, placeholder, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	winm := strcase.ToKebab(title)
 	dlg := NewStdDialog(winm, title, prompt, true, true, css)
 	dlg.Modal = true
@@ -570,6 +570,7 @@ func StringPromptDialog(avp *Viewport2D, strval, title, prompt string, css ki.Pr
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 	tf := frame.InsertNewChild(KiT_TextField, prIdx+1, "str-field").(*TextField)
+	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
 	tf.SetMinPrefWidth(units.NewValue(20, units.Em))

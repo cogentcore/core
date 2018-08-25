@@ -20,6 +20,10 @@ import (
 // with any binary data text-encoded using base64
 type Board interface {
 
+	// IsEmpty returns true if there is nothing on the clipboard to read.  Can
+	// be used for inactivating a Paste menu.
+	IsEmpty() bool
+
 	// Read attempts to read data of the given MIME type(s), in preference
 	// order, from the clipboard, returning mimedata.Mimes which can
 	// potentially have multiple types / multiple items, etc -- if first type

@@ -124,7 +124,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
 			// vp.Win.Quit()
-			gi.StringPromptDialog(vp, "Enter value here..", "Button1 Dialog", "This is a string prompt dialog!  Various specific types of dialogs are available.", nil, rec.This,
+			gi.StringPromptDialog(vp, "", "Enter value here..", "Button1 Dialog", "This is a string prompt dialog!  Various specific types of dialogs are available.", nil, rec.This,
 				func(recv, send ki.Ki, sig int64, data interface{}) {
 					dlg := send.(*gi.Dialog)
 					if sig == int64(gi.DialogAccepted) {
@@ -152,19 +152,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// note: receiver for menut items with shortcuts must be a Node2D or Window
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
-	mb1.Menu.AddMenuText("Menu Item 1", "Shift+Control+1", win.This, 1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 1", "Shift+Control+1", win.This, 1, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
-	mi2 := mb1.Menu.AddMenuText("Menu Item 2", "", nil, 2, nil)
+	mi2 := mb1.Menu.AddMenuText("Menu Item 2", "", nil, 2, nil, nil)
 
-	mi2.Menu.AddMenuText("Sub Menu Item 2", "", win.This, 2.1, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mi2.Menu.AddMenuText("Sub Menu Item 2", "", win.This, 2.1, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
 	mb1.Menu.AddSeparator("sep1")
 
-	mb1.Menu.AddMenuText("Menu Item 3", "Control+3", win.This, 3, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb1.Menu.AddMenuText("Menu Item 3", "Control+3", win.This, 3, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 	})
 
@@ -287,26 +287,26 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
-	fmen.Menu.AddMenuText("New", "Command+N", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fmen.Menu.AddMenuText("New", "Command+N", rec.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:New menu action triggered\n")
 	})
-	fmen.Menu.AddMenuText("Open", "Command+O", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fmen.Menu.AddMenuText("Open", "Command+O", rec.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:Open menu action triggered\n")
 	})
-	fmen.Menu.AddMenuText("Save", "Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fmen.Menu.AddMenuText("Save", "Command+S", rec.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:Save menu action triggered\n")
 	})
-	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fmen.Menu.AddMenuText("Save As..", "Shift+Command+S", rec.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("File:SaveAs menu action triggered\n")
 	})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		win.OSWin.CloseReq()
 	})
 
 	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win, false)
+	emen.Menu.AddCopyCutPaste(win)
 
 	oswin.TheApp.SetQuitReqFunc(func() {
 		gi.PromptDialog(vp, "Really Quit?", "Are you <i>sure</i> you want to quit?", true, true, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {

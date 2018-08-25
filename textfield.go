@@ -507,21 +507,24 @@ func (tf *TextField) InsertAtCursor(str string) {
 
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	m.AddMenuText("Copy", cpsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac := m.AddMenuText("Copy", cpsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		tff.Copy(true)
 	})
+	ac.SetActiveState(tf.HasSelection())
 	if !tf.IsInactive() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		m.AddMenuText("Cut", ctsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac = m.AddMenuText("Cut", ctsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.Cut()
 		})
-		m.AddMenuText("Paste", ptsc, tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.SetActiveState(tf.HasSelection())
+		ac = m.AddMenuText("Paste", ptsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.Paste()
 		})
+		ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
 	}
 }
 
@@ -544,7 +547,7 @@ func (tf *TextField) OfferCompletions() {
 		var m Menu
 		for i := 0; i < count; i++ {
 			s := tf.Completion.Completions[i]
-			m.AddMenuText(s, "", tf.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			m.AddMenuText(s, "", tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Complete(s)
 			})

@@ -717,6 +717,14 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active) {
 
 static const char* mime_hdr = "MIME-Version: 1.0\nContent-type: ";
 
+// return true if empty
+bool pasteIsEmpty(NSPasteboard* pb) {
+    NSDictionary *options = [NSDictionary dictionary];
+    NSArray *classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+    bool has = [pb canReadObjectForClasses:classes options:options];
+    return !has;
+}
+
 // get all the regular text: NSString -- go-side deals with any further processing
 void pasteReadText(NSPasteboard* pb) {
     NSDictionary *options = [NSDictionary dictionary];
@@ -786,6 +794,11 @@ void pasteWrite(NSPasteboard* pb) {
 }	
 
 // clip just calls paste versions with generalPasteboard
+
+bool clipIsEmpty() {
+    NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    return pasteIsEmpty(pb);
+}
 
 void clipReadText() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];

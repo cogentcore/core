@@ -971,7 +971,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("Edit", "", vv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
@@ -979,7 +979,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			vvv.Activate(mb.Viewport, nil, nil)
 		}
 	})
-	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {

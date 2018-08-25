@@ -146,6 +146,12 @@ func (g *NodeBase) SetInactiveState(inact bool) {
 	bitflag.SetState(&g.Flag, inact, int(Inactive))
 }
 
+// SetActiveState set flag as active or not based on act arg -- positive logic
+// is easier to understand.
+func (g *NodeBase) SetActiveState(act bool) {
+	bitflag.SetState(&g.Flag, !act, int(Inactive))
+}
+
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (g *NodeBase) SetCanFocusIfActive() {

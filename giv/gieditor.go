@@ -271,6 +271,7 @@ var GiEditorProps = ki.Props{
 			{"Close Window", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
+		{"Window", "Windows"},
 	},
 }
 

@@ -75,7 +75,7 @@ type Preferences struct {
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
-	FileViewSort    string                 `desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
+	FileViewSort    string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 	ColorFilename   FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
 }
 
@@ -383,6 +383,7 @@ var PreferencesProps = ki.Props{
 			{"Close Window", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
+		{"Window", "Windows"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{

@@ -44,6 +44,7 @@ uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm);
 uintptr_t doMenuItemByTag(uintptr_t menuID, int tag);
 void doSetMenuItemActive(uintptr_t mitmID, bool active);
 void clipClear();
+bool clipIsEmpty();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
 void clipWrite();
@@ -611,6 +612,11 @@ var theClip = clipImpl{}
 
 // curpMimeData is the current mime data to write to from cocoa side
 var curMimeData *mimedata.Mimes
+
+func (ci *clipImpl) IsEmpty() bool {
+	ise := C.clipIsEmpty()
+	return bool(ise)
+}
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if len(types) == 0 {

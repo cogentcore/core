@@ -90,10 +90,21 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 		if mm.Name == "Edit" {
 			if ms, ok := mm.Value.(string); ok {
 				if ms == "Copy Cut Paste" {
-					ma.Menu.AddCopyCutPaste(win, true)
+					ma.Menu.AddCopyCutPaste(win)
 				} else {
 					MethViewErr(vtyp, fmt.Sprintf("Unrecognized Edit menu special string: %v -- `Copy Cut Paste` is standard", ms))
 				}
+				continue
+			}
+		}
+		if mm.Name == "Window" {
+			if ms, ok := mm.Value.(string); ok {
+				if ms == "Windows" {
+					// automatic
+				} else {
+					MethViewErr(vtyp, fmt.Sprintf("Unrecognized Window menu special string: %v -- `Windows` is standard", ms))
+				}
+				continue
 			}
 		}
 		rv := ActionsView(val, vtyp, win.Viewport, ma, mm.Value)

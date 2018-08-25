@@ -35,9 +35,11 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 type MakeMenuFunc func(m *Menu)
 
 // AddMenuText adds an action to the menu with a text label, shortcut, and
-// connects the action signal to given receiver object, along with given data
-// which is stored on the action and then passed in the action signal.
-func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, fun ki.RecvFunc) *Action {
+// connects the action signal to given receiver object and function, along
+// with given data which is stored on the action and then passed in the action
+// signal.  Optional updateFunc is a function called prior to showing the menu
+// to update the actions (enabled or not typically).
+func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, updateFunc func(act *Action), fun ki.RecvFunc) *Action {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
@@ -46,6 +48,7 @@ func (m *Menu) AddMenuText(txt, shortcut string, sigTo ki.Ki, data interface{}, 
 	ac.Text = txt
 	ac.Shortcut = OSShortcut(shortcut)
 	ac.Data = data
+	ac.UpdateFunc = updateFunc
 	ac.SetAsMenu()
 	*m = append(*m, ac.This.(Node2D))
 	if sigTo != nil && fun != nil {
@@ -90,8 +93,20 @@ func (m *Menu) SetShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if ac, ok := mi.(*Action); ok {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
+		}
+	}
+}
+
+// UpdateActions calls update function on all the actions in the menu, and any
+// of their sub-actions
+func (m *Menu) UpdateActions() {
+	for _, mi := range *m {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			ac.UpdateActions()
 		}
 	}
 }
@@ -100,58 +115,56 @@ func (m *Menu) SetShortcuts(win *Window) {
 // Standard menu elements
 
 // AddCopyCutPaste adds a Copy, Cut, Paste actions that just emit the
-// corresponding keyboard shortcut -- cutPasteActive determines whether Cut
-// and Paste are active, reflecting the modifiability of relevant element
-// (i.e., IsActive)
-func (m *Menu) AddCopyCutPaste(win *Window, cutPasteActive bool) {
+// corresponding keyboard shortcut.  Paste is automatically enabled by
+// clipboard having something in it.
+func (m *Menu) AddCopyCutPaste(win *Window) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 	ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-	m.AddMenuText("Copy", cpsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Copy", cpsc, win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 	})
-	cut := m.AddMenuText("Cut", ctsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Cut", ctsc, win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 	})
-	paste := m.AddMenuText("Paste", ptsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ww := recv.Embed(KiT_Window).(*Window)
-		ww.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
-	})
-	if !cutPasteActive {
-		cut.SetInactive()
-		paste.SetInactive()
-	}
+	m.AddMenuText("Paste", ptsc, win, nil, func(ac *Action) {
+		ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
+	},
+		func(recv, send ki.Ki, sig int64, data interface{}) {
+			ww := recv.Embed(KiT_Window).(*Window)
+			ww.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
+		})
 }
 
 // AddAppMenu adds a standard set of menu items for application-level control.
 func (m *Menu) AddAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()
-	m.AddMenuText(aboutitle, "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText(aboutitle, "", win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		PromptDialog(ww.Viewport, aboutitle, oswin.TheApp.About(), true, false, nil, nil, nil)
 	})
 	prsc := ActiveKeyMap.ChordForFun(KeyFunPrefs)
-	m.AddMenuText("GoGi Preferences", prsc, win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("GoGi Preferences", prsc, win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		TheViewIFace.PrefsView(&Prefs)
 	})
 	m.AddSeparator("sepq")
-	m.AddMenuText("Quit", "Command+Q", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Quit", "Command+Q", win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		oswin.TheApp.QuitReq()
 	})
 }
 
 // AddWindowsMenu adds menu items for current main and dialog windows.
 func (m *Menu) AddWindowsMenu(win *Window) {
-	m.AddMenuText("Minimize", "", win, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddMenuText("Minimize", "", win, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		ww.OSWin.Minimize()
 	})
 	m.AddSeparator("sepa")
 	for _, w := range MainWindows {
 		if w != nil {
-			m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+			m.AddMenuText(w.Title, "", w, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 				ww := recv.Embed(KiT_Window).(*Window)
 				ww.OSWin.Raise()
 			})
@@ -161,7 +174,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 		m.AddSeparator("sepw")
 		for _, w := range DialogWindows {
 			if w != nil {
-				m.AddMenuText(w.Title, "", w, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+				m.AddMenuText(w.Title, "", w, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 					ww := recv.Embed(KiT_Window).(*Window)
 					ww.OSWin.Raise()
 				})
@@ -194,6 +207,9 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
 	}
+
+	menu.UpdateActions()
+
 	pvp := Viewport2D{}
 	pvp.InitName(&pvp, name+"Menu")
 	pvp.Win = win
