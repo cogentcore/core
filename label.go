@@ -162,6 +162,11 @@ func (g *Label) SetStateStyle() {
 
 func (g *Label) Style2D() {
 	g.Style2DWidget()
+	if g.Sty.Text.Align != AlignLeft && g.Sty.Layout.AlignH == AlignLeft {
+		g.Sty.Layout.AlignH = g.Sty.Text.Align // keep them consistent -- this is what people expect
+	} else if g.Sty.Layout.AlignH != AlignLeft && g.Sty.Text.Align == AlignLeft {
+		g.Sty.Text.Align = g.Sty.Layout.AlignH // keep them consistent -- this is what people expect
+	}
 	pst := g.ParentStyle()
 	for i := 0; i < int(LabelStatesN); i++ {
 		g.StateStyles[i].CopyFrom(&g.Sty)
@@ -304,6 +309,26 @@ func (g *Label) GrabCurBgColor() {
 	g.CurBgColor.SetColor(clr)
 }
 
+func (g *Label) TextPos() Vec2D {
+	st := &g.Sty
+	pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
+	if g.LayData.AllocSize.X > g.Render.Size.X {
+		if IsAlignMiddle(st.Layout.AlignH) {
+			pos.X += 0.5 * (g.LayData.AllocSize.X - g.Render.Size.X)
+		} else if IsAlignEnd(st.Layout.AlignH) {
+			pos.X += (g.LayData.AllocSize.X - g.Render.Size.X)
+		}
+	}
+	if g.LayData.AllocSize.Y > g.Render.Size.Y {
+		if IsAlignMiddle(st.Layout.AlignV) {
+			pos.Y += 0.5 * (g.LayData.AllocSize.Y - g.Render.Size.Y)
+		} else if IsAlignEnd(st.Layout.AlignV) {
+			pos.Y += (g.LayData.AllocSize.Y - g.Render.Size.Y)
+		}
+	}
+	return pos
+}
+
 func (g *Label) Render2D() {
 	if g.FullReRenderIfNeeded() {
 		return
@@ -314,8 +339,8 @@ func (g *Label) Render2D() {
 		g.SetStateStyle()
 		st := &g.Sty
 		rs := &g.Viewport.Render
+		pos := g.TextPos()
 		g.RenderStdBox(st)
-		pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
 		g.Render.Render(rs, pos)
 		g.Render2DChildren()
 		g.PopBounds()

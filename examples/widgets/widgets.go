@@ -79,20 +79,20 @@ func mainrun() {
 	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
 	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
 
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = `This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <a href="https://github.com/goki/gi">GoGi</a> <i>Widgets</i><br>
 <large>Shortcuts: <kbd>` + prsc + `</kbd> = Preferences,
 <kbd>` + giedsc + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`
-	title.SetProp("text-align", gi.AlignCenter)
-	title.SetProp("vertical-align", gi.AlignTop)
+	title.SetProp("text-align", gi.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	title.SetProp("vertical-align", gi.AlignCenter)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("letter-spacing", 2)
 	title.SetProp("line-height", 1.5)
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
+	title.SetStretchMaxWidth()
+	title.SetStretchMaxHeight()
 
 	//////////////////////////////////////////
 	//      Buttons

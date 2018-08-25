@@ -716,6 +716,7 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	tb := tv.ToolBar()
 	if len(*tb.Children()) == 0 {
+		tb.SetStretchMaxWidth()
 		addac := tb.AddNewChild(gi.KiT_Action, "Add").(*gi.Action)
 		addac.SetText("Add")
 		addac.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {

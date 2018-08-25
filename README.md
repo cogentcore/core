@@ -92,22 +92,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* text not stretching to max-width for auto-centering.  sizing is always overriding.
-
 * mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
 
 * activate / inactivate menus should just be a simple callback fun attached to the menu item!  it can be called immediately before menu is rendered, every time.  not sure about when a toolbar would be updated.
+   + paste can check clipboard contents -- need a quick call that just checks if anything is in there..
+   + Add save-as in addition to plain save in gieditor, and plain save can be enabled by existing filename, and also change signal -- not sure it is reliable enough though..
 
 * double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
 
-* need key function for moving between panels, and an API to support that..
-  this is key in emacs for full mouseless functionality.  use in gieditor.  search it.
-  
-	  + emacs is C-x o and I've mapped C-x p to be the "previous" version -- need support for these extended key functions
-
-	  + https://code.visualstudio.com/docs/getstarted/keybindings -- Ctrl+1,2,3 etc -- seems pretty awkward though..
 
 * crash on quit:
 * cocoa.go:

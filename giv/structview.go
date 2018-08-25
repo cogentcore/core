@@ -125,6 +125,7 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
+	tb.SetStretchMaxWidth()
 	tb.DeleteChildren(true)
 	if HasToolBarView(sv.Struct) {
 		ToolBarView(sv.Struct, sv.Viewport, tb)

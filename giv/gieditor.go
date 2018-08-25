@@ -173,6 +173,7 @@ func (ge *GiEditor) ConfigToolbar() {
 	if tb.HasChildren() {
 		return
 	}
+	tb.SetStretchMaxWidth()
 	ToolBarView(ge, ge.Viewport, tb)
 }
 
