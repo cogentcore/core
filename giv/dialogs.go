@@ -16,7 +16,7 @@ import (
 // dialog signals (nil to ignore)
 func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
+	dlg := gi.NewStdDialog(winm, title, prompt, false, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -47,7 +47,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 // (nil to ignore)
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
+	dlg := gi.NewStdDialog(winm, title, prompt, false, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -76,7 +76,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 // function for styling elements of the table.
 func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc, styleFunc SliceViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
+	dlg := gi.NewStdDialog(winm, title, prompt, false, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -170,7 +170,7 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // function for styling elements of the table.
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc, styleFunc TableViewStyleFunc) *gi.Dialog {
 	winm := strcase.ToKebab(title)
-	dlg := gi.NewStdDialog(winm, title, prompt, true, false, css) // no cancel -- always live
+	dlg := gi.NewStdDialog(winm, title, prompt, false, false, css) // no cancel -- always live
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -312,7 +312,7 @@ func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row 
 // ColorViewDialog for editing a color using a ColorView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, tmpSave ValueView, title, prompt string, css ki.Props, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog("color-view", title, prompt, true, true, css)
 
 	frame := dlg.Frame()
@@ -328,6 +328,17 @@ func ColorViewDialog(avp *gi.Viewport2D, clr *gi.Color, tmpSave ValueView, title
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
+}
+
+// ColorViewDialogValue gets the color from the dialog
+func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
+	frame := dlg.Frame()
+	cvvvk, ok := frame.Children().ElemByType(KiT_ColorView, true, 2)
+	if ok {
+		cvvv := cvvvk.(*ColorView)
+		return cvvv.Color
+	}
+	return gi.Color{}
 }
 
 // FileViewDialog is for selecting / manipulating files -- ext is one or more

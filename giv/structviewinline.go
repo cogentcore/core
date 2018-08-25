@@ -103,6 +103,7 @@ func (sv *StructViewInline) ConfigParts() {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
+		lbl.Redrawable = true
 		lbl.SetProp("horizontal-align", gi.AlignLeft)
 		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)

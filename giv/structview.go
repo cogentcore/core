@@ -184,6 +184,7 @@ func (sv *StructView) ConfigStructGrid() {
 		} else {
 			lbl.Text = vvb.Field.Name
 		}
+		lbl.Redrawable = true
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)

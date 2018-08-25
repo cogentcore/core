@@ -94,11 +94,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * adding prompt with word-wrap is causing dialog contents with max-stretch to not stretch -- need some extra logic on the second pass!
 
-* add view desc tag to all dialog prompts.
-
 * mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
-
-* color dialog should always operate on a temp color value and then you get that when user presses ok.  and show the rgb values directly in it.
 
 * activate / inactivate menus should just be a simple callback fun attached to the menu item!  it can be called immediately before menu is rendered, every time.  not sure about when a toolbar would be updated.
 

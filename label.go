@@ -61,10 +61,11 @@ type Label struct {
 	WidgetBase
 	Text        string              `xml:"text" desc:"label to display"`
 	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+	Redrawable  bool                `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing"`
 	LinkSig     ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, opens default browser"`
 	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
-	CurBgColor  Color               `xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, to wipe out bg"`
+	CurBgColor  Color               `xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -146,11 +147,14 @@ func (g *Label) SetTextAction(txt string) {
 func (g *Label) SetStateStyle() {
 	if g.IsInactive() {
 		g.Sty = g.StateStyles[LabelInactive]
+		if g.Redrawable && !g.CurBgColor.IsNil() {
+			g.Sty.Font.BgColor.SetColor(g.CurBgColor)
+		}
 	} else if g.IsSelected() {
 		g.Sty = g.StateStyles[LabelSelected]
 	} else {
 		g.Sty = g.StateStyles[LabelActive]
-		if g.Selectable && !g.CurBgColor.IsNil() {
+		if (g.Selectable || g.Redrawable) && !g.CurBgColor.IsNil() {
 			g.Sty.Font.BgColor.SetColor(g.CurBgColor)
 		}
 	}

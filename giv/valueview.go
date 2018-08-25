@@ -680,7 +680,8 @@ func (vv *StructValueView) HasAction() bool {
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc)
+	desc, _ := vv.Tag("desc")
+	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
@@ -777,8 +778,9 @@ func (vv *SliceValueView) HasAction() bool {
 
 func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := "Slice of " + kit.NonPtrType(vv.ElType).Name()
+	desc, _ := vv.Tag("desc")
 	if vv.IsStruct {
-		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc, nil)
+		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc, nil)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
@@ -790,7 +792,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc, nil)
+		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc, nil)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
@@ -855,11 +857,12 @@ func (vv *MapValueView) HasAction() bool {
 
 func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tmptyp := kit.NonPtrType(vv.Value.Type())
+	desc, _ := vv.Tag("desc")
 	tynm := tmptyp.Name()
 	if tynm == "" {
 		tynm = tmptyp.String()
 	}
-	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, "", nil, recv, dlgFunc)
+	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
@@ -995,8 +998,9 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	if k == nil {
 		return
 	}
+	desc, _ := vv.Tag("desc")
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, "", nil, recv, dlgFunc)
+	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
