@@ -23,8 +23,6 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, tmpSave ValueView, t
 
 	sv := frame.InsertNewChild(KiT_StructView, prIdx+1, "struct-view").(*StructView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetStruct(stru, tmpSave)
 
 	// todo: need to access main menu of window but not here yet..
@@ -54,8 +52,6 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, tmpSave ValueView, title,
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+1, "map-view").(*MapView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetMap(mp, tmpSave)
 
 	if recv != nil && dlgFunc != nil {
@@ -83,8 +79,6 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, tmpSave ValueView, t
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
 	sv.StyleFunc = styleFunc
 	sv.SetSlice(slice, tmpSave)
@@ -123,8 +117,6 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, title,
 
 	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
 	sv.SelectedIdx = initRow
 	sv.StyleFunc = styleFunc
@@ -177,8 +169,6 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, tmpSave ValueVie
 
 	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
 	sv.StyleFunc = styleFunc
 	sv.SetSlice(slcOfStru, tmpSave)
@@ -218,8 +208,6 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, title, pro
 
 	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
@@ -356,8 +344,6 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, title, prompt stri
 
 	fv := frame.InsertNewChild(KiT_FileView, prIdx+1, "file-view").(*FileView)
 	fv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	fv.SetStretchMaxHeight()
-	fv.SetStretchMaxWidth()
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
@@ -401,8 +387,6 @@ func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, title, prompt string, css
 
 	sv := frame.InsertNewChild(KiT_ArgView, prIdx+1, "arg-view").(*ArgView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
 	sv.SetInactiveState(false)
 	sv.SetArgs(args)
 

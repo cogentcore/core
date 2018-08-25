@@ -38,14 +38,13 @@ import (
 var TableViewWaitCursorSize = 5000
 
 // TableView represents a slice-of-structs as a table, where the fields are
-// the columns, within an overall frame and a button box at the bottom where
-// methods can be invoked.  It has two modes, determined by Inactive flag: if
-// Inactive, it functions as a mutually-exclusive item selector, highlighting
-// the selected row and emitting a WidgetSig WidgetSelected signal, and
-// TableViewDoubleClick for double clicks (can be used for closing dialogs).
-// If !Inactive, it is a full-featured editor with multiple-selection,
-// cut-and-paste, and drag-and-drop, reporting each action taken using the
-// TableViewSig signals
+// the columns, within an overall frame.  It has two modes, determined by
+// Inactive flag: if Inactive, it functions as a mutually-exclusive item
+// selector, highlighting the selected row and emitting a WidgetSig
+// WidgetSelected signal, and TableViewDoubleClick for double clicks (can be
+// used for closing dialogs).  If !Inactive, it is a full-featured editor with
+// multiple-selection, cut-and-paste, and drag-and-drop, reporting each action
+// taken using the TableViewSig signals
 type TableView struct {
 	gi.Frame
 	Slice        interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
@@ -129,6 +128,8 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 var TableViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
+	"max-width":        -1,
+	"max-height":       -1,
 }
 
 // TableViewSignals are signals that tableview can send, mostly for editing

@@ -721,7 +721,7 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	})
 	m.AddMenuText("GoGiEditor", "", tv.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		GoGiEditor(tvv.SrcNode.Ptr)
+		GoGiEditorDialog(tvv.SrcNode.Ptr)
 	})
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)

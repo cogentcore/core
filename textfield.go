@@ -54,7 +54,7 @@ type TextField struct {
 	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	Completion   CompleteData            `desc:"functions and data for textfield completion"`
+	Completion   CompleteData            `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)

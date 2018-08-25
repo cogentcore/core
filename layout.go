@@ -1274,13 +1274,16 @@ func (ly *Layout) ScrollToBoxDim(dim Dims2D, st, minPos, maxPos int) bool {
 		sc.SetValueAction(trg)
 		return true
 	} else {
-		trg := sc.Value + float32(maxPos-ed) + h
-		if trg > scrange {
-			trg = scrange
+		if (maxPos - minPos) < int(vissz) {
+			trg := sc.Value + float32(maxPos-ed) + h
+			if trg > scrange {
+				trg = scrange
+			}
+			sc.SetValueAction(trg)
+			return true
 		}
-		sc.SetValueAction(trg)
-		return true
 	}
+	return false
 }
 
 // ScrollToBox scrolls the layout to ensure that given rect box is in view --

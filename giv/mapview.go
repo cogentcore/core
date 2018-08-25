@@ -17,7 +17,7 @@ import (
 
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
-// overall frame with a button box at the bottom where methods can be invoked.
+// overall frame.
 type MapView struct {
 	gi.Frame
 	Map        interface{} `desc:"the map that we are a view onto"`
@@ -45,6 +45,24 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 
 var MapViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
+	"max-width":        -1,
+	"max-height":       -1,
+}
+
+// UpdateFromMap does full updating from map
+func (mv *MapView) UpdateFromMap() {
+	mods, updt := mv.StdConfig()
+	mv.ConfigMapGrid()
+	mv.ConfigToolbar()
+	if mods {
+		mv.UpdateEnd(updt)
+	}
+}
+
+// UpdateValues updates the widget display of slice values, assuming same slice config
+func (mv *MapView) UpdateValues() {
+	// maps have to re-read their values -- can't get pointers
+	mv.ConfigMapGrid()
 }
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -314,18 +332,4 @@ func (mv *MapView) ConfigToolbar() {
 		ToolBarView(mv.Map, mv.Viewport, tb)
 	}
 	mv.ToolbarMap = mv.Map
-}
-
-func (mv *MapView) UpdateFromMap() {
-	mods, updt := mv.StdConfig()
-	mv.ConfigMapGrid()
-	mv.ConfigToolbar()
-	if mods {
-		mv.UpdateEnd(updt)
-	}
-}
-
-func (mv *MapView) UpdateValues() {
-	// maps have to re-read their values -- can't get pointers
-	mv.ConfigMapGrid()
 }

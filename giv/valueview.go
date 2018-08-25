@@ -983,7 +983,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 		k := vvv.KiStruct()
 		if k != nil {
-			GoGiEditor(k)
+			GoGiEditorDialog(k)
 		}
 	})
 	vv.UpdateWidget()
@@ -1311,7 +1311,7 @@ type ViewIFace struct {
 }
 
 func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
-	GoGiEditor(obj)
+	GoGiEditorDialog(obj)
 }
 
 func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {

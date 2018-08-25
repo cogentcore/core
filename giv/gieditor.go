@@ -9,32 +9,272 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 )
 
-func gieditSaveGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./"+obj.Name()+".json", ".json", "Save GUI to JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			dlg, _ := send.(*gi.Dialog)
-			fnm := FileViewDialogValue(dlg)
-			recv.SaveJSON(fnm)
-		}
+// GiEditor represents a struct, creating a property editor of the fields --
+// constructs Children widgets to show the field names and editor fields for
+// each field, within an overall frame with an optional title, and a button
+// box at the bottom where methods can be invoked
+type GiEditor struct {
+	gi.Frame
+	KiRoot   ki.Ki       `desc:"root of tree being edited"`
+	Changed  bool        `desc:"has the root changed?  we receive update signals from root for changes"`
+	Filename gi.FileName `desc:"current filename for saving / loading"`
+}
+
+var KiT_GiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
+
+// Update updates the objects being edited (e.g., updating display changes)
+func (ge *GiEditor) Update() {
+	if ge.KiRoot == nil {
+		return
+	}
+	ge.KiRoot.UpdateSig()
+}
+
+// Save saves tree to given filename, in a standard JSON-formatted file
+func (ge *GiEditor) Save(filename gi.FileName) {
+	if ge.KiRoot == nil {
+		return
+	}
+	ge.KiRoot.SaveJSON(string(filename))
+	ge.Changed = false
+}
+
+// Load saves tree from given filename, in a standard JSON-formatted file
+func (ge *GiEditor) Load(filename gi.FileName) {
+	if ge.KiRoot == nil {
+		return
+	}
+	ge.KiRoot.LoadJSON(string(filename))
+}
+
+// SetRoot sets the source root and ensures everything is configured
+func (ge *GiEditor) SetRoot(root ki.Ki) {
+	updt := false
+	if ge.KiRoot != root {
+		updt = ge.UpdateStart()
+		ge.KiRoot = root
+		ge.GetAllUpdates(root)
+	}
+	ge.UpdateFromRoot()
+	ge.UpdateEnd(updt)
+}
+
+// GetAllUpdates connects to all nodes in the tree to receive notification of changes
+func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
+	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d interface{}) bool {
+		k.NodeSignal().Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			gee := recv.Embed(KiT_GiEditor).(*GiEditor)
+			if !gee.Changed {
+				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
+				gee.Changed = true
+			}
+		})
+		return true
 	})
 }
 
-func gieditLoadGUI(vp *gi.Viewport2D, obj ki.Ki) {
-	FileViewDialog(vp, "./"+obj.Name()+".json", ".json", "Load GUI from JSON", "", nil, nil, obj, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			dlg, _ := send.(*gi.Dialog)
-			fnm := FileViewDialogValue(dlg)
-			recv.LoadJSON(fnm)
-		}
-	})
+// UpdateFromRoot updates full widget layout
+func (ge *GiEditor) UpdateFromRoot() {
+	if ge.KiRoot == nil {
+		return
+	}
+	mods, updt := ge.StdConfig()
+	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
+	ge.ConfigSplitView()
+	ge.ConfigToolbar()
+	if mods {
+		ge.UpdateEnd(updt)
+	}
 }
 
-// GoGiEditor opens an interactive editor of the given Ki tree, at its root
-func GoGiEditor(obj ki.Ki) {
+// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
+// -- can modify as desired before calling ConfigChildren on Frame using this
+func (ge *GiEditor) StdFrameConfig() kit.TypeAndNameList {
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_Label, "title")
+	config.Add(gi.KiT_ToolBar, "toolbar")
+	config.Add(gi.KiT_SplitView, "splitview")
+	return config
+}
+
+// StdConfig configures a standard setup of the overall Frame -- returns mods,
+// updt from ConfigChildren and does NOT call UpdateEnd
+func (ge *GiEditor) StdConfig() (mods, updt bool) {
+	ge.Lay = gi.LayoutVert
+	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	config := ge.StdFrameConfig()
+	mods, updt = ge.ConfigChildren(config, false)
+	return
+}
+
+// SetTitle sets the optional title and updates the Title label
+func (ge *GiEditor) SetTitle(title string) {
+	lab, _ := ge.TitleWidget()
+	if lab != nil {
+		lab.Text = title
+	}
+}
+
+// Title returns the title label widget, and its index, within frame -- nil,
+// -1 if not found
+func (ge *GiEditor) TitleWidget() (*gi.Label, int) {
+	idx, ok := ge.Children().IndexByName("title", 0)
+	if !ok {
+		return nil, -1
+	}
+	return ge.KnownChild(idx).(*gi.Label), idx
+}
+
+// SplitView returns the main SplitView
+func (ge *GiEditor) SplitView() (*gi.SplitView, int) {
+	idx, ok := ge.Children().IndexByName("splitview", 2)
+	if !ok {
+		return nil, -1
+	}
+	return ge.KnownChild(idx).(*gi.SplitView), idx
+}
+
+// TreeView returns the main TreeView
+func (ge *GiEditor) TreeView() *TreeView {
+	split, _ := ge.SplitView()
+	if split != nil {
+		tv := split.KnownChild(0).KnownChild(0).(*TreeView)
+		return tv
+	}
+	return nil
+}
+
+// StructView returns the main StructView
+func (ge *GiEditor) StructView() *StructView {
+	split, _ := ge.SplitView()
+	if split != nil {
+		sv := split.KnownChild(1).(*StructView)
+		return sv
+	}
+	return nil
+}
+
+// ToolBar returns the toolbar widget
+func (ge *GiEditor) ToolBar() *gi.ToolBar {
+	idx, ok := ge.Children().IndexByName("toolbar", 1)
+	if !ok {
+		return nil
+	}
+	return ge.KnownChild(idx).(*gi.ToolBar)
+}
+
+// ConfigToolbar adds a GiEditor toolbar.
+func (ge *GiEditor) ConfigToolbar() {
+	tb := ge.ToolBar()
+	if tb.HasChildren() {
+		return
+	}
+	ToolBarView(ge, ge.Viewport, tb)
+}
+
+// ConfigSplitView configures the SplitView.
+func (ge *GiEditor) ConfigSplitView() {
+	if ge.KiRoot == nil {
+		return
+	}
+	split, _ := ge.SplitView()
+	if split == nil {
+		return
+	}
+	split.Dim = gi.X
+
+	if len(split.Kids) == 0 {
+		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
+		tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
+		sv := split.AddNewChild(KiT_StructView, "sv").(*StructView)
+		sv.SetStretchMaxWidth()
+		sv.SetStretchMaxHeight()
+		tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if data == nil {
+				return
+			}
+			tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+			svr, _ := recv.Embed(KiT_StructView).(*StructView)
+			if sig == int64(TreeViewSelected) {
+				svr.SetStruct(tvn.SrcNode.Ptr, nil)
+			}
+		})
+		split.SetSplits(.3, .7)
+	}
+	tv := ge.TreeView()
+	tv.SetRootNode(ge.KiRoot)
+	sv := ge.StructView()
+	sv.SetStruct(ge.KiRoot, nil)
+}
+
+var GiEditorProps = ki.Props{
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
+	"max-width":        -1,
+	"max-height":       -1,
+	"#title": ki.Props{
+		"max-width":        -1,
+		"horizontal-align": gi.AlignCenter,
+		"vertical-align":   gi.AlignTop,
+	},
+	"ToolBar": ki.PropSlice{
+		{"Update", ki.BlankProp{}},
+		{"sep-file", ki.BlankProp{}},
+		{"Load", ki.Props{
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".json",
+				}},
+			},
+		}},
+		{"Save", ki.Props{
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".json",
+				}},
+			},
+		}},
+	},
+	"MainMenu": ki.PropSlice{
+		{"AppMenu", ki.BlankProp{}},
+		{"File", ki.PropSlice{
+			{"Update", ki.Props{
+				"shortcut": "Command+U",
+			}},
+			{"sep-file", ki.BlankProp{}},
+			{"Load", ki.Props{
+				"shortcut": "Command+O",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"default-field": "Filename",
+						"ext":           ".json",
+					}},
+				},
+			}},
+			{"Save", ki.Props{
+				"shortcut": "Command+S",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"default-field": "Filename",
+						"ext":           ".json",
+					}},
+				},
+			}},
+			{"sep-close", ki.BlankProp{}},
+			{"Close Window", ki.BlankProp{}},
+		}},
+		{"Edit", "Copy Cut Paste"},
+	},
+}
+
+// GoGiEditorDialog opens an interactive editor of the given Ki tree, at its root
+func GoGiEditorDialog(obj ki.Ki) {
 	width := 1280
 	height := 920
 	win := gi.NewWindow2D("gogi-editor", "GoGi Editor", width, height, true)
@@ -45,135 +285,29 @@ func GoGiEditor(obj ki.Ki) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
-	tbar.Lay = gi.LayoutHoriz
-	tbar.SetStretchMaxWidth()
+	ge := mfr.AddNewChild(KiT_GiEditor, "editor").(*GiEditor)
+	ge.Viewport = vp
+	ge.SetRoot(obj)
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
-	trow.SetStretchMaxWidth()
-
-	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
-	spc.SetFixedHeight(units.NewValue(0.5, units.Em))
-
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", obj.Name())
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
-
-	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
-	split.Dim = gi.X
-
-	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
-	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
-	split.SetSplits(.3, .7)
-
-	tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
-	tv.SetRootNode(obj)
-
-	sv := svfr.AddNewChild(KiT_StructView, "sv").(*StructView)
-	sv.SetStretchMaxWidth()
-	sv.SetStretchMaxHeight()
-	sv.SetStruct(obj, nil)
-
-	tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if data == nil {
-			return
-		}
-		tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
-		svr, _ := recv.Embed(KiT_StructView).(*StructView)
-		if sig == int64(TreeViewSelected) {
-			svr.SetStruct(tvn.SrcNode.Ptr, nil)
-		}
-	})
-
-	bspc := mfr.AddNewChild(gi.KiT_Space, "ButSpc").(*gi.Space)
-	bspc.SetFixedHeight(units.NewValue(1.0, units.Em))
-
-	updtobj := tbar.AddNewChild(gi.KiT_Action, "updtobj").(*gi.Action)
-	updtobj.SetText("Update")
-	updtobj.Tooltip = "Updates the source window based on changes made in the editor"
-	updtobj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		obj.UpdateSig()
-	})
-
-	savej := tbar.AddNewChild(gi.KiT_Action, "savejson").(*gi.Action)
-	savej.SetText("Save")
-	savej.Tooltip = "Save current scenegraph as a JSON-formatted file that can then be Loaded and will re-create the GUI display as it currently is (signal connections are not saved)"
-	savej.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		gieditSaveGUI(vp, obj)
-	})
-
-	loadj := tbar.AddNewChild(gi.KiT_Action, "loadjson").(*gi.Action)
-	loadj.SetText("Load")
-	loadj.Tooltip = "Load a previously-saved JSON-formatted scenegraph"
-	loadj.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		gieditLoadGUI(vp, obj)
-	})
-
-	fontsel := tbar.AddNewChild(gi.KiT_Action, "fontsel").(*gi.Action)
-	fontnm := tbar.AddNewChild(gi.KiT_TextField, "selfont").(*gi.TextField)
-	fontnm.SetMinPrefWidth(units.NewValue(20, units.Em))
-	fontnm.Tooltip = "shows the font name selected via Select Font"
-
-	fontsel.SetText("Select Font")
-	fontsel.Tooltip = "pulls up a font selection dialog -- font name will be copied to clipboard so you can paste it into any relevant fields"
-	fontsel.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FontChooserDialog(vp, "Select a Font", "", nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			sv, _ := send.(*TableView)
-			si := sv.SelectedIdx
-			if si >= 0 {
-				fi := gi.FontLibrary.FontInfo[si]
-				fontnm.SetText(fi.Name)
-				fontnm.SelectAll()
-				fontnm.Copy(false) // don't reset
-			}
-		}, nil)
-	})
-
-	// main menu
-	appnm := oswin.TheApp.Name()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
-
-	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
-	amen.Menu = make(gi.Menu, 0, 10)
-	amen.Menu.AddAppMenu(win)
-
-	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
-	fmen.Menu = make(gi.Menu, 0, 10)
-	fmen.Menu.AddMenuText("Update", "Command+U", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		obj.UpdateSig()
-	})
-	fmen.Menu.AddMenuText("Load", "Command+O", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		gieditLoadGUI(vp, obj)
-	})
-	fmen.Menu.AddMenuText("Save", "Command+S", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		gieditSaveGUI(vp, obj)
-	})
-	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		win.OSWin.CloseReq()
-	})
-
-	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
-	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win, false)
+	MainMenuView(ge, win, mmen)
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		gi.ChoiceDialog(vp, "Save Before Closing?", "Do you want to save to before closing?", []string{"Close Without Saving", "Save", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			switch sig {
-			case 0:
-				w.Close()
-			case 1:
-				gieditSaveGUI(vp, obj)
-			case 2:
-				// default is to do nothing, i.e., cancel
-			}
-		})
+		if ge.Changed {
+			gi.ChoiceDialog(vp, "Close Without Saving?", "Do you want to save your changes?  If so, Cancel and then Save", []string{"Close Without Saving", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					w.Close()
+				case 1:
+					ge.Save(ge.Filename)
+				case 2:
+					// default is to do nothing, i.e., cancel
+				}
+			})
+		} else {
+			w.Close()
+		}
 	})
-
-	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop() // in a separate goroutine

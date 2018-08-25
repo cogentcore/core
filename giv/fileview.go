@@ -116,6 +116,8 @@ func (fv *FileView) UpdateFromPath() {
 var FileViewProps = ki.Props{
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
+	"max-width":        -1,
+	"max-height":       -1,
 }
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
@@ -292,6 +294,7 @@ func (fv *FileView) ConfigFilesRow() {
 		},
 	}
 	sv.SetStretchMaxHeight()
+	sv.SetProp("max-width", 0) // no stretch
 	sv.SetProp("index", false)
 	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
 	sv.SetInactive()                   // select only

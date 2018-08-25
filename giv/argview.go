@@ -14,7 +14,9 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// ArgView represents a slice of reflect.Value's and associated names, for the purpose of supplying arguments to methods called via the MethView framework.
+// ArgView represents a slice of reflect.Value's and associated names, for the
+// purpose of supplying arguments to methods called via the MethView
+// framework.
 type ArgView struct {
 	gi.Frame
 	Args    []ArgData `desc:"the args that we are a view onto"`
@@ -27,8 +29,10 @@ var KiT_ArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 var ArgViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
+	"max-width":        -1,
+	"max-height":       -1,
 	"#title": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
+		"max-width":      -1,
 		"text-align":     gi.AlignCenter,
 		"vertical-align": gi.AlignTop,
 	},

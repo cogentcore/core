@@ -28,8 +28,7 @@ import (
 
 // SliceView represents a slice, creating a property editor of the values --
 // constructs Children widgets to show the index / value pairs, within an
-// overall frame with a button box at the bottom where methods can be invoked
-// -- set to Inactive for select-only mode, which emits WidgetSig
+// overall frame. Set to Inactive for select-only mode, which emits WidgetSig
 // WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
@@ -90,6 +89,8 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 
 var SliceViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
+	"max-width":        -1,
+	"max-height":       -1,
 }
 
 // SliceViewSignals are signals that sliceview can send, mostly for editing
@@ -108,6 +109,26 @@ const (
 )
 
 //go:generate stringer -type=SliceViewSignals
+
+// UpdateFromSlice performs overall configuration for given slice
+func (sv *SliceView) UpdateFromSlice() {
+	mods, updt := sv.StdConfig()
+	sv.ConfigSliceGrid(false)
+	sv.ConfigToolbar()
+	if mods {
+		sv.SetFullReRender()
+		sv.UpdateEnd(updt)
+	}
+}
+
+// UpdateValues updates the widget display of slice values, assuming same slice config
+func (sv *SliceView) UpdateValues() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.Values {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
+}
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
@@ -392,24 +413,6 @@ func (sv *SliceView) ConfigToolbar() {
 		ToolBarView(sv.Slice, sv.Viewport, tb)
 	}
 	sv.ToolbarSlice = sv.Slice
-}
-
-func (sv *SliceView) UpdateFromSlice() {
-	mods, updt := sv.StdConfig()
-	sv.ConfigSliceGrid(false)
-	sv.ConfigToolbar()
-	if mods {
-		sv.SetFullReRender()
-		sv.UpdateEnd(updt)
-	}
-}
-
-func (sv *SliceView) UpdateValues() {
-	updt := sv.UpdateStart()
-	for _, vv := range sv.Values {
-		vv.UpdateWidget()
-	}
-	sv.UpdateEnd(updt)
 }
 
 func (sv *SliceView) Render2D() {

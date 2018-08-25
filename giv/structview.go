@@ -16,12 +16,10 @@ import (
 
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
-// each field, within an overall frame with an optional title, and a button
-// box at the bottom where methods can be invoked
+// each field, within an overall frame.
 type StructView struct {
 	gi.Frame
 	Struct      interface{} `desc:"the struct that we are a view onto"`
-	Title       string      `desc:"title / prompt to show above the editor fields"`
 	FieldViews  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave     ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig     ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
@@ -33,17 +31,12 @@ var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 var StructViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
-	"#title": ki.Props{
-		"max-width":      units.NewValue(-1, units.Px),
-		"text-align":     gi.AlignCenter,
-		"vertical-align": gi.AlignTop,
-	},
+	"max-width":        -1,
+	"max-height":       -1,
 }
 
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
-
-// SetStruct sets the source struct that we are viewing -- rebuilds the children to represent this struct
+// SetStruct sets the source struct that we are viewing -- rebuilds the
+// children to represent this struct
 func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 	updt := false
 	if sv.Struct != st {
@@ -63,11 +56,30 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 	sv.UpdateEnd(updt)
 }
 
+// UpdateFromStruct updates full widget layout from structure
+func (sv *StructView) UpdateFromStruct() {
+	mods, updt := sv.StdConfig()
+	sv.ConfigStructGrid()
+	sv.ConfigToolbar()
+	if mods {
+		sv.UpdateEnd(updt)
+	}
+}
+
+// UpdateFields updates each of the value-view widgets for the fields --
+// called by the ViewSig update
+func (sv *StructView) UpdateFields() {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.FieldViews {
+		vv.UpdateWidget()
+	}
+	sv.UpdateEnd(updt)
+}
+
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "title")
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "struct-grid")
 	return config
@@ -83,31 +95,10 @@ func (sv *StructView) StdConfig() (mods, updt bool) {
 	return
 }
 
-// SetTitle sets the optional title and updates the Title label
-func (sv *StructView) SetTitle(title string) {
-	sv.Title = title
-	if sv.Title != "" {
-		lab, _ := sv.TitleWidget()
-		if lab != nil {
-			lab.Text = title
-		}
-	}
-}
-
-// Title returns the title label widget, and its index, within frame -- nil,
-// -1 if not found
-func (sv *StructView) TitleWidget() (*gi.Label, int) {
-	idx, ok := sv.Children().IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return sv.KnownChild(idx).(*gi.Label), idx
-}
-
 // StructGrid returns the grid layout widget, which contains all the fields
 // and values, and its index, within frame -- nil, -1 if not found
 func (sv *StructView) StructGrid() (*gi.Frame, int) {
-	idx, ok := sv.Children().IndexByName("struct-grid", 0)
+	idx, ok := sv.Children().IndexByName("struct-grid", 2)
 	if !ok {
 		return nil, -1
 	}
@@ -116,11 +107,29 @@ func (sv *StructView) StructGrid() (*gi.Frame, int) {
 
 // ToolBar returns the toolbar widget
 func (sv *StructView) ToolBar() *gi.ToolBar {
-	idx, ok := sv.Children().IndexByName("toolbar", 0)
+	idx, ok := sv.Children().IndexByName("toolbar", 1)
 	if !ok {
 		return nil
 	}
 	return sv.KnownChild(idx).(*gi.ToolBar)
+}
+
+// ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
+// one has been defined for this struct type through its registered type
+// properties.
+func (sv *StructView) ConfigToolbar() {
+	if kit.IfaceIsNil(sv.Struct) {
+		return
+	}
+	if sv.ToolbarStru == sv.Struct {
+		return
+	}
+	tb := sv.ToolBar()
+	tb.DeleteChildren(true)
+	if HasToolBarView(sv.Struct) {
+		ToolBarView(sv.Struct, sv.Viewport, tb)
+	}
+	sv.ToolbarStru = sv.Struct
 }
 
 // ConfigStructGrid configures the StructGrid for the current struct
@@ -188,45 +197,10 @@ func (sv *StructView) ConfigStructGrid() {
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
+		if sv.IsInactive() {
+			widg.AsNode2D().SetInactive()
+		}
 		vv.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
-}
-
-// UpdateFromStruct updates full widget layout from structure
-func (sv *StructView) UpdateFromStruct() {
-	mods, updt := sv.StdConfig()
-	sv.ConfigStructGrid()
-	sv.ConfigToolbar()
-	if mods {
-		sv.UpdateEnd(updt)
-	}
-}
-
-// UpdateFields updates each of the value-view widgets for the fields --
-// called by the ViewSig update
-func (sv *StructView) UpdateFields() {
-	updt := sv.UpdateStart()
-	for _, vv := range sv.FieldViews {
-		vv.UpdateWidget()
-	}
-	sv.UpdateEnd(updt)
-}
-
-// ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
-// one has been defined for this struct type through its registered type
-// properties.
-func (sv *StructView) ConfigToolbar() {
-	if kit.IfaceIsNil(sv.Struct) {
-		return
-	}
-	if sv.ToolbarStru == sv.Struct {
-		return
-	}
-	tb := sv.ToolBar()
-	tb.DeleteChildren(true)
-	if HasToolBarView(sv.Struct) {
-		ToolBarView(sv.Struct, sv.Viewport, tb)
-	}
-	sv.ToolbarStru = sv.Struct
 }

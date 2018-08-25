@@ -109,9 +109,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 	  + https://code.visualstudio.com/docs/getstarted/keybindings -- Ctrl+1,2,3 etc -- seems pretty awkward though..
 
-* gieditor remember last filename saved if any, instead of WinVp.json
-   + it should just be a Frame object itself, with Filename field.
-
 * crash on quit:
 * cocoa.go:
    272:	func closeWindow(id uintptr) {
@@ -129,7 +126,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
 
-* need to be able to move content easily between a window and a tab.  should be simple as transferring trees but should test that -- the tab view should then provide this functionality of dragging a window in or a tab out to a window.   The main question is then whether a new popup item goes straight to a tab or not -- need that api in place..
+* need to be able to move content easily between a window and a tab.  should
+  be simple as transferring trees but should test that -- the tab view should
+  then provide this functionality of dragging a window in or a tab out to a
+  window.  The main question is then whether a new popup item goes straight to
+  a tab or not -- need that api in place..
 
 + TextArea -- go full editor..
 
