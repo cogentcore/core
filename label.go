@@ -177,9 +177,13 @@ func (g *Label) Style2D() {
 	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
 }
 
-func (g *Label) Size2D() {
-	g.InitLayout2D()
-	g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
+func (g *Label) Size2D(iter int) {
+	if iter > 0 && g.Sty.Text.WordWrap {
+		return // already updated in previous iter, don't redo!
+	} else {
+		g.InitLayout2D()
+		g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
+	}
 }
 
 func (g *Label) Layout2D(parBBox image.Rectangle, iter int) bool {

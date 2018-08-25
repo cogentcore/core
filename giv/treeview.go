@@ -1452,12 +1452,12 @@ func (tv *TreeView) Style2D() {
 // TreeView is tricky for alloc because it is both a layout of its children but has to
 // maintain its own bbox for its own widget.
 
-func (tv *TreeView) Size2D() {
+func (tv *TreeView) Size2D(iter int) {
 	tv.InitLayout2D()
 	if tv.HasClosedParent() {
 		return // nothing
 	}
-	tv.SizeFromParts() // get our size from parts
+	tv.SizeFromParts(iter) // get our size from parts
 	tv.WidgetSize = tv.LayData.AllocSize
 	h := math32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X

@@ -82,7 +82,10 @@ func (ic *Icon) SVGIcon() *Viewport2D {
 	return sic
 }
 
-func (ic *Icon) Size2D() {
+func (ic *Icon) Size2D(iter int) {
+	if iter > 0 {
+		return
+	}
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm

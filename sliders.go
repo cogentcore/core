@@ -543,7 +543,7 @@ func (g *Slider) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *Slider) Size2D() {
+func (g *Slider) Size2D(iter int) {
 	g.InitLayout2D()
 	if g.ThSize == 0.0 {
 		g.Defaults()
@@ -723,7 +723,7 @@ func (g *ScrollBar) Style2D() {
 	SliderFields.ToDots(g, &g.Sty.UnContext)
 }
 
-func (g *ScrollBar) Size2D() {
+func (g *ScrollBar) Size2D(iter int) {
 	g.InitLayout2D()
 }
 

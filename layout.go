@@ -393,6 +393,14 @@ func (ly *Layout) SumDim(d Dims2D) bool {
 	return false
 }
 
+// SummedDim returns the dimension along which layout is summing.
+func (ly *Layout) SummedDim() Dims2D {
+	if ly.Lay == LayoutHoriz {
+		return X
+	}
+	return Y
+}
+
 // first depth-first Size2D pass: terminal concrete items compute their AllocSize
 // we focus on Need: Max(Min, AllocSize), and Want: Max(Pref, AllocSize) -- Max is
 // only used if we need to fill space, during final allocation
@@ -418,6 +426,10 @@ func (ly *Layout) GatherSizes() {
 		sumPref = sumPref.Add(ni.LayData.Size.Pref)
 		maxNeed = maxNeed.Max(ni.LayData.Size.Need)
 		maxPref = maxPref.Max(ni.LayData.Size.Pref)
+
+		if Layout2DTrace {
+			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, ni.LayData.Size.Need.Dim(ly.SummedDim()), ni.LayData.Size.Pref.Dim(ly.SummedDim()))
+		}
 	}
 
 	for d := X; d <= Y; d++ {
@@ -817,7 +829,7 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 		ni.LayData.AllocSize.SetDim(dim, size)
 		ni.LayData.AllocPosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size)
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayData.Size.Need.Dim(dim), ni.LayData.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
 	}
@@ -1129,7 +1141,7 @@ func (ly *Layout) LayoutScrolls() {
 		odim := OtherDim(d)
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
-			sc.Size2D()
+			sc.Size2D(0)
 			sc.LayData.AllocPosRel.SetDim(d, spc)
 			sc.LayData.AllocPosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
 			sc.LayData.AllocSize.SetDim(d, avail.Dim(d)-spc)
@@ -1551,7 +1563,7 @@ func (ly *Layout) Style2D() {
 	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
 }
 
-func (ly *Layout) Size2D() {
+func (ly *Layout) Size2D(iter int) {
 	ly.InitLayout2D()
 	if ly.Lay == LayoutGrid {
 		ly.GatherSizesGrid()
@@ -1562,12 +1574,8 @@ func (ly *Layout) Size2D() {
 
 func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if iter > 0 {
-		if ly.NeedsRedo {
-			if ly.Lay == LayoutGrid {
-				ly.GatherSizesGrid()
-			} else {
-				ly.GatherSizes()
-			}
+		if Layout2DTrace {
+			fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.PathUnique(), iter, ly.NeedsRedo)
 		}
 	}
 	ly.AllocFromParent()                 // in case we didn't get anything
@@ -1591,7 +1599,7 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ly.ManageOverflow()
 	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
 
-	if !ly.NeedsRedo {
+	if !ly.NeedsRedo || iter == 1 {
 		delta := ly.Move2DDelta(image.ZP)
 		if delta != image.ZP {
 			ly.Move2DChildren(delta) // move is a separate step

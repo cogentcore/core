@@ -282,7 +282,7 @@ func (vp *Viewport2D) Style2D() {
 	vp.Style2DWidget()
 }
 
-func (vp *Viewport2D) Size2D() {
+func (vp *Viewport2D) Size2D(iter int) {
 	vp.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
 	pos := vp.Sty.Layout.PosDots().ToPoint()

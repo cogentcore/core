@@ -853,7 +853,7 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-func (tf *TextField) Size2D() {
+func (tf *TextField) Size2D(iter int) {
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)

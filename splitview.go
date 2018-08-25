@@ -347,7 +347,7 @@ func (g *Splitter) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *Splitter) Size2D() {
+func (g *Splitter) Size2D(iter int) {
 	g.InitLayout2D()
 	if g.ThSize == 0.0 {
 		g.Defaults()

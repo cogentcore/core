@@ -119,7 +119,7 @@ type Node2D interface {
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
 	// Layout.
-	Size2D()
+	Size2D(iter int)
 
 	// Layout2D: MeFirst downward pass (each node calls on its children at
 	// appropriate point) with relevant parent BBox that the children are
@@ -225,7 +225,7 @@ func (g *Node2DBase) Init2D() {
 func (g *Node2DBase) Style2D() {
 }
 
-func (g *Node2DBase) Size2D() {
+func (g *Node2DBase) Size2D(iter int) {
 }
 
 func (g *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -437,7 +437,7 @@ func (g *Node2DBase) FullRender2DTree() {
 	updt := g.UpdateStart()
 	g.Init2DTree()
 	g.Style2DTree()
-	g.Size2DTree()
+	g.Size2DTree(0)
 	g.Layout2DTree()
 	g.Render2DTree()
 	g.UpdateEndNoSig(updt)
@@ -476,7 +476,7 @@ func (g *Node2DBase) Style2DTree() {
 }
 
 // Size2DTree does the sizing as a depth-first pass
-func (g *Node2DBase) Size2DTree() {
+func (g *Node2DBase) Size2DTree(iter int) {
 	pr := prof.Start("Node2D.Size2DTree")
 	g.FuncDownDepthFirst(0, g.This,
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
@@ -495,7 +495,7 @@ func (g *Node2DBase) Size2DTree() {
 			if ni == nil {
 				return false
 			}
-			nii.Size2D()
+			nii.Size2D(iter)
 			return true
 		})
 	pr.End()
@@ -516,6 +516,7 @@ func (g *Node2DBase) Layout2DTree() {
 	}
 	redo := g.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
+		g.Size2DTree(1)
 		g.This.(Node2D).Layout2D(parBBox, 1) // todo: multiple iters?
 	}
 	pr.End()

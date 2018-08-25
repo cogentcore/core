@@ -253,8 +253,8 @@ func (g *SpinBox) Style2D() {
 	g.ConfigParts()
 }
 
-func (g *SpinBox) Size2D() {
-	g.Size2DParts()
+func (g *SpinBox) Size2D(iter int) {
+	g.Size2DParts(iter)
 	g.ConfigParts()
 }
 

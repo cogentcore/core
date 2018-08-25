@@ -217,7 +217,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes
 	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree()                                 // collect sizes
+	frame.Size2DTree(0)                                // collect sizes
 	pvp.Win = nil
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
 	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..

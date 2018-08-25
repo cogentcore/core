@@ -74,7 +74,7 @@ func (svg *SVG) Init2D() {
 	svg.Pnt.FontStyle.BgColor.SetColor(color.White)
 }
 
-func (svg *SVG) Size2D() {
+func (svg *SVG) Size2D(iter int) {
 	svg.InitLayout2D()
 	if svg.ViewBox.Size != gi.Vec2DZero {
 		svg.LayData.AllocSize = svg.ViewBox.Size

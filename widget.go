@@ -206,12 +206,12 @@ func (g *WidgetBase) InitLayout2D() bool {
 	return false
 }
 
-func (g *WidgetBase) Size2DBase() {
+func (g *WidgetBase) Size2DBase(iter int) {
 	g.InitLayout2D()
 }
 
-func (g *WidgetBase) Size2D() {
-	g.Size2DBase()
+func (g *WidgetBase) Size2D(iter int) {
+	g.Size2DBase(iter)
 }
 
 // AddParentPos adds the position of our parent to our layout position --
@@ -357,7 +357,7 @@ func (g *WidgetBase) ReRender2DTree() {
 	updt := g.UpdateStart()
 	g.Init2DTree()
 	g.Style2DTree()
-	g.Size2DTree()
+	g.Size2DTree(0)
 	g.LayData = ld // restore
 	g.Layout2DTree()
 	g.Render2DTree()
@@ -460,7 +460,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.Init2DTree()
 	frame.Style2DTree()                                // sufficient to get sizes
 	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree()                                 // collect sizes
+	frame.Size2DTree(0)                                // collect sizes
 	pvp.Win = nil
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
 	x = kit.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
@@ -707,7 +707,7 @@ var PartsWidgetBaseProps = ki.Props{
 // Layout and Render
 
 // SizeFromParts sets our size from those of our parts -- default..
-func (g *PartsWidgetBase) SizeFromParts() {
+func (g *PartsWidgetBase) SizeFromParts(iter int) {
 	g.LayData.AllocSize = g.Parts.LayData.Size.Pref // get from parts
 	g.Size2DAddSpace()
 	if Layout2DTrace {
@@ -715,13 +715,13 @@ func (g *PartsWidgetBase) SizeFromParts() {
 	}
 }
 
-func (g *PartsWidgetBase) Size2DParts() {
+func (g *PartsWidgetBase) Size2DParts(iter int) {
 	g.InitLayout2D()
-	g.SizeFromParts() // get our size from parts
+	g.SizeFromParts(iter) // get our size from parts
 }
 
-func (g *PartsWidgetBase) Size2D() {
-	g.Size2DParts()
+func (g *PartsWidgetBase) Size2D(iter int) {
+	g.Size2DParts(iter)
 }
 
 func (g *PartsWidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
