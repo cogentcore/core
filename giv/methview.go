@@ -195,7 +195,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
-		ac.Shortcut = "Command+W"
+		ac.Shortcut = gi.OSShortcut("Command+W")
 		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			vp.Win.OSWin.CloseReq()
 		})
@@ -225,7 +225,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	for pk, pv := range props {
 		switch pk {
 		case "shortcut":
-			ac.Shortcut = kit.ToString(pv)
+			ac.Shortcut = gi.OSShortcut(kit.ToString(pv))
 		case "label":
 			ac.Text = kit.ToString(pv)
 		case "desc":

@@ -951,6 +951,11 @@ func (w *Window) EventLoop() {
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
+		case *key.ChordEvent:
+			keyDelPop := w.KeyChordEventHiPri(e)
+			if keyDelPop {
+				delPop = true
+			}
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -973,7 +978,7 @@ func (w *Window) EventLoop() {
 		if !evi.IsProcessed() {
 			switch e := evi.(type) {
 			case *key.ChordEvent:
-				keyDelPop := w.KeyChordEvent(e)
+				keyDelPop := w.KeyChordEventLowPri(e)
 				if keyDelPop {
 					delPop = true
 				}
@@ -1484,9 +1489,39 @@ func (w *Window) PopPopup(pop ki.Ki) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Key Events Handled by Window
 
-// KeyChordEvent handles all the window-specific key events, returning its
-// input on whether any existing popup should be deleted
-func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
+// KeyChordEventHiPri handles all the high-priority window-specific key
+// events, returning its input on whether any existing popup should be deleted
+func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
+	delPop := false
+	cs := e.ChordString()
+	kf := KeyFun(cs)
+	w.LastModBits = e.Modifiers
+	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
+	if e.IsProcessed() {
+		return false
+	}
+	switch kf {
+	case KeyFunAbort:
+		if w.Popup != nil {
+			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+				delPop = true
+				e.SetProcessed()
+			}
+		}
+	case KeyFunAccept:
+		if w.Popup != nil {
+			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
+				delPop = true
+			}
+		}
+	}
+	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+	return delPop
+}
+
+// KeyChordEventLowPri handles all the lower-priority window-specific key
+// events, returning its input on whether any existing popup should be deleted
+func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	delPop := false
 	cs := e.ChordString()
 	kf := KeyFun(cs)
@@ -1502,19 +1537,6 @@ func (w *Window) KeyChordEvent(e *key.ChordEvent) bool {
 	case KeyFunFocusPrev:
 		w.FocusPrev(w.Focus)
 		e.SetProcessed()
-	case KeyFunAbort:
-		if w.Popup != nil {
-			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-				delPop = true
-				e.SetProcessed()
-			}
-		}
-	case KeyFunAccept:
-		if w.Popup != nil {
-			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-				delPop = true
-			}
-		}
 	case KeyFunGoGiEditor:
 		TheViewIFace.GoGiEditor(w.Viewport.This)
 		e.SetProcessed()
@@ -1766,6 +1788,7 @@ func (w *Window) PushFocus(p ki.Ki) {
 		w.FocusStack = make([]ki.Ki, 0, 50)
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
+	w.Focus = nil // don't un-focus on prior item when pushing
 	w.FocusNext(p)
 }
 
