@@ -701,6 +701,7 @@ func (w *Window) EventLoop() {
 
 	var lastWinMenuUpdate time.Time
 
+mainloop:
 	for {
 		evi := w.OSWin.NextEvent()
 		if w.stopEventLoop {
@@ -931,6 +932,7 @@ func (w *Window) EventLoop() {
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
+				break mainloop
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				w.Publish()
@@ -1048,7 +1050,7 @@ func (w *Window) EventLoop() {
 			w.NextPopup = nil
 		}
 	}
-	fmt.Println("end of events")
+	// fmt.Println("end of event loop")
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -351,8 +351,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	win.StartEventLoop()
 
-	// note: never gets here..
-	fmt.Printf("ending\n")
+	// note: may eventually get down here on a well-behaved quit, but better
+	// to handle cleanup above using QuitCleanFunc, which happens before all
+	// windows are closed etc
+	fmt.Printf("main loop ended\n")
 }
 
 func Complete(text string) (matches []string, seed string) {

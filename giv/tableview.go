@@ -1096,14 +1096,16 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 // UpdateSelect updates the selection for the given index -- callback from widgetsig select
 func (tv *TableView) UpdateSelect(idx int, sel bool) {
 	if tv.IsInactive() {
+		if tv.SelectedIdx == idx { // never unselect
+			tv.SelectRowWidgets(tv.SelectedIdx, true)
+			return
+		}
 		if tv.SelectedIdx >= 0 { // unselect current
 			tv.SelectRowWidgets(tv.SelectedIdx, false)
 		}
 		if sel {
 			tv.SelectedIdx = idx
 			tv.SelectRowWidgets(tv.SelectedIdx, true)
-		} else {
-			tv.SelectedIdx = -1
 		}
 		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
 	} else {

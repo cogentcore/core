@@ -336,8 +336,12 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSNotification *)aNotification {
-    quitReq();
-    return NSTerminateCancel; // we never actually quit
+    bool qr = quitReq();
+    if (qr) {
+        return NSTerminateNow;
+    } else {
+        return NSTerminateCancel; // we never actually quit
+    }
 }
 
 - (void)applicationWillHide:(NSNotification *)aNotification {

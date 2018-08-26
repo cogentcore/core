@@ -342,6 +342,7 @@ func (fv *FileView) ConfigFilesRow() {
 					fv.UpdateFilesAction()
 					return
 				}
+				fmt.Printf("fv double click\n")
 				fv.FileSig.Emit(fv.This, int64(FileViewDoubleClicked), fv.SelectedFile())
 			}
 		}

@@ -92,22 +92,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
-
-   + Add save-as in addition to plain save in gieditor, and plain save can be enabled by existing filename, and also change signal -- not sure it is reliable enough though..
-
-* double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
+* other platforms need new quit / close window logic from mac, and clip IsEmpty() method
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
-
-
-* crash on quit:
-* cocoa.go:
-   272:	func closeWindow(id uintptr) {
-=> 273:		C.doCloseWindow(C.uintptr_t(id))
-   274:	}
-   
-   need to wait for close windows to go through..  
 
 * test cursor on windows, x11 getting stuck with close popup..
 

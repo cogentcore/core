@@ -657,14 +657,16 @@ func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 // UpdateSelect updates the selection for the given index -- callback from widgetsig select
 func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 	if sv.IsInactive() {
+		if sv.SelectedIdx == idx { // never unselect
+			sv.SelectRowWidgets(sv.SelectedIdx, true)
+			return
+		}
 		if sv.SelectedIdx >= 0 { // unselect current
 			sv.SelectRowWidgets(sv.SelectedIdx, false)
 		}
 		if sel {
 			sv.SelectedIdx = idx
 			sv.SelectRowWidgets(sv.SelectedIdx, true)
-		} else {
-			sv.SelectedIdx = -1
 		}
 		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {

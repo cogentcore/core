@@ -26,10 +26,11 @@ import (
 )
 
 var theApp = &appImpl{
-	windows: make(map[uintptr]*windowImpl),
-	winlist: make([]*windowImpl, 0),
-	screens: make([]*oswin.Screen, 0),
-	name:    "GoGi",
+	windows:      make(map[uintptr]*windowImpl),
+	winlist:      make([]*windowImpl, 0),
+	screens:      make([]*oswin.Screen, 0),
+	name:         "GoGi",
+	quitCloseCnt: make(chan struct{}),
 }
 
 type appImpl struct {
@@ -56,6 +57,8 @@ type appImpl struct {
 	screens       []*oswin.Screen
 	name          string
 	about         string
+	quitting      bool          // set to true when quitting and closing windows
+	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
 }
@@ -129,6 +132,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		app:         app,
 		id:          id,
 		publish:     make(chan struct{}),
+		winClose:    make(chan struct{}),
 		publishDone: make(chan oswin.PublishResult),
 		drawDone:    make(chan struct{}),
 	}
@@ -292,14 +296,18 @@ func (app *appImpl) QuitClean() {
 		app.quitCleanFunc()
 	}
 	nwin := len(app.winlist)
+	app.quitting = true
 	for i := nwin - 1; i >= 0; i-- {
 		win := app.winlist[i]
-		win.Close()
+		go win.Close()
+	}
+	for i := 0; i < nwin; i++ {
+		<-app.quitCloseCnt
+		// fmt.Printf("win closed: %v\n", i)
 	}
 }
 
 func (app *appImpl) Quit() {
-	// todo: could try to invoke NSApp terminate method instead
 	app.QuitClean()
-	os.Exit(0)
+	callStopDriver()
 }

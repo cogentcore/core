@@ -161,6 +161,10 @@ func driverStarted() {
 	}()
 }
 
+func callStopDriver() {
+	C.stopDriver()
+}
+
 //export drawgl
 func drawgl(id uintptr) {
 	theApp.mu.Lock()
@@ -283,11 +287,14 @@ func windowClosing(id uintptr) {
 		return
 	}
 	// note: this is the common final path of all window closes
-	// todo: following doesn't work even though drawLoop is stuck on the select for w.winClose
-	// w.winClose <- struct{}{} // break out of draw loop
+	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
 	theApp.DeleteWin(w.id)
+	if theApp.quitting {
+		// fmt.Printf("win: %v quit closing\n", w.Nm)
+		theApp.quitCloseCnt <- struct{}{}
+	}
 }
 
 //export windowMinimized
@@ -329,13 +336,20 @@ func windowDeFocused(id uintptr) {
 }
 
 //export quitReq
-func quitReq() {
-	go theApp.QuitReq()
+func quitReq() bool {
+	if theApp.quitting {
+		return true // yes go ahead and quit
+	} else {
+		go theApp.QuitReq()
+		return false // no don't quit
+	}
 }
 
 //export appQuitting
 func appQuitting() {
-	theApp.QuitClean()
+	if !theApp.quitting {
+		theApp.QuitClean()
+	}
 }
 
 //export resetScreens
