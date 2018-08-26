@@ -339,7 +339,7 @@ iterloop:
 
 // fontMetricsMu protects the font GlyphBounds calls, which are not
 // concurent-safe
-var metricsFontMu sync.Mutex
+var fontMetricsMu sync.Mutex
 
 // LoadFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
@@ -374,8 +374,8 @@ func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	if fs.Face == nil {
 		return
 	}
-	metricsFontMu.Lock()
-	defer metricsFontMu.Unlock()
+	fontMetricsMu.Lock()
+	defer fontMetricsMu.Unlock()
 	intDots := float32(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
 		intDots = 12

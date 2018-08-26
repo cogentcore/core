@@ -205,3 +205,11 @@ func (sv *StructView) ConfigStructGrid() {
 	}
 	sg.UpdateEnd(updt)
 }
+
+func (sv *StructView) Render2D() {
+	sv.ToolBar().UpdateActions()
+	if win := sv.ParentWindow(); win != nil {
+		win.MainMenuUpdateActives()
+	}
+	sv.Frame.Render2D()
+}

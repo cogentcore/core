@@ -34,13 +34,27 @@ func (ge *GiEditor) Update() {
 	ge.KiRoot.UpdateSig()
 }
 
-// Save saves tree to given filename, in a standard JSON-formatted file
-func (ge *GiEditor) Save(filename gi.FileName) {
+// Save saves tree to current filename, in a standard JSON-formatted file
+func (ge *GiEditor) Save() {
+	if ge.KiRoot == nil {
+		return
+	}
+	if ge.Filename == "" {
+		return
+	}
+	ge.KiRoot.SaveJSON(string(ge.Filename))
+	ge.Changed = false
+}
+
+// SaveAs saves tree to given filename, in a standard JSON-formatted file
+func (ge *GiEditor) SaveAs(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
 	}
 	ge.KiRoot.SaveJSON(string(filename))
 	ge.Changed = false
+	ge.Filename = filename
+	ge.UpdateSig() // notify our editor
 }
 
 // Load saves tree from given filename, in a standard JSON-formatted file
@@ -49,6 +63,9 @@ func (ge *GiEditor) Load(filename gi.FileName) {
 		return
 	}
 	ge.KiRoot.LoadJSON(string(filename))
+	ge.Filename = filename
+	ge.SetFullReRender()
+	ge.UpdateSig() // notify our editor
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -210,6 +227,14 @@ func (ge *GiEditor) ConfigSplitView() {
 	sv.SetStruct(ge.KiRoot, nil)
 }
 
+func (ge *GiEditor) Render2D() {
+	ge.ToolBar().UpdateActions()
+	if win := ge.ParentWindow(); win != nil {
+		win.MainMenuUpdateActives()
+	}
+	ge.Frame.Render2D()
+}
+
 var GiEditorProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
@@ -231,7 +256,9 @@ var GiEditorProps = ki.Props{
 				}},
 			},
 		}},
-		{"Save", ki.Props{
+		{"Save", ki.BlankProp{}},
+		{"SaveAs", ki.Props{
+			"label": "Save As...",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -258,6 +285,10 @@ var GiEditorProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
+			}},
+			{"SaveAs", ki.Props{
+				"shortcut": "Shift+Command+S",
+				"label":    "Save As...",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",
@@ -292,6 +323,20 @@ func GoGiEditorDialog(obj ki.Ki) {
 	mmen := win.MainMenu
 	MainMenuView(ge, win, mmen)
 
+	if asave, ok := mmen.FindActionByName("Save"); ok {
+		asave.UpdateFunc = func(act *gi.Action) {
+			act.SetActiveState(ge.Filename != "")
+		}
+	}
+
+	tb := ge.ToolBar()
+	if asave, ok := tb.FindActionByName("Save"); ok {
+		asave.UpdateFunc = func(act *gi.Action) {
+			act.SetActiveStateUpdt(ge.Filename != "") // note: use Updt version in toolbars
+		}
+	}
+	tb.UpdateActions()
+
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		if ge.Changed {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
@@ -302,8 +347,6 @@ func GoGiEditorDialog(obj ki.Ki) {
 					case 0:
 						w.Close()
 					case 1:
-						ge.Save(ge.Filename)
-					case 2:
 						// default is to do nothing, i.e., cancel
 					}
 				})

@@ -417,6 +417,10 @@ func (sv *SliceView) ConfigToolbar() {
 }
 
 func (sv *SliceView) Render2D() {
+	sv.ToolBar().UpdateActions()
+	if win := sv.ParentWindow(); win != nil {
+		win.MainMenuUpdateActives()
+	}
 	if sv.FullReRenderIfNeeded() {
 		return
 	}

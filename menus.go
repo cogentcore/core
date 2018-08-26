@@ -125,6 +125,27 @@ func (m *Menu) UpdateActions() {
 	}
 }
 
+// FindActionByName finds an action on the menu, or any sub-menu, with given
+// name (exact match) -- this is not the Text label but the Name of the
+// element (for AddAction items, this is the same as Label or Icon (if Label
+// is empty)) -- returns false if not found
+func (m *Menu) FindActionByName(name string) (*Action, bool) {
+	for _, mi := range *m {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			if ac.Name() == name {
+				return ac, true
+			}
+			if ac.Menu != nil {
+				if sac, ok := ac.Menu.FindActionByName(name); ok {
+					return sac, ok
+				}
+			}
+		}
+	}
+	return nil, false
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Standard menu elements
 

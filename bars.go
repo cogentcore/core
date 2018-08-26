@@ -6,8 +6,10 @@ package gi
 
 import (
 	"image"
+	"sync"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -97,6 +99,27 @@ func (g *MenuBar) UpdateActions() {
 	}
 }
 
+// FindActionByName finds an action on the menu, or any sub-menu, with given
+// name (exact match) -- this is not the Text label but the Name of the
+// element (for AddAction items, this is the same as Label or Icon (if Label
+// is empty)) -- returns false if not found
+func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
+	for _, mi := range m.Kids {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			if ac.Name() == name {
+				return ac, true
+			}
+			if ac.Menu != nil {
+				if sac, ok := ac.Menu.FindActionByName(name); ok {
+					return sac, ok
+				}
+			}
+		}
+	}
+	return nil, false
+}
+
 // ConfigMenus configures Action items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
 // etc).  Access the resulting menus as .KnownChildByName("name").(*Action).
@@ -143,6 +166,10 @@ func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	ma.Trigger()
 }
 
+// mainMenuMu protects updating of the central main menu, which is not
+// concurrent safe and different windows run on different threads
+var mainMenuMu sync.Mutex
+
 // SetMainMenu sets this menubar as the main menu of given window -- called by
 // Window.MainMenuUpdated.
 func (mb *MenuBar) SetMainMenu(win *Window) {
@@ -150,6 +177,10 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 	if osmm == nil { // no OS main menu
 		return
 	}
+
+	mainMenuMu.Lock()
+	defer mainMenuMu.Unlock()
+
 	mb.UpdateActions()
 	osmm.SetFunc(MainMenuFunc)
 	mm := osmm.Menu()
@@ -192,6 +223,10 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 	if osmm == nil { // no OS main menu
 		return
 	}
+
+	mainMenuMu.Lock()
+	defer mainMenuMu.Unlock()
+
 	mb.UpdateActions()
 	if mb.OSMainMenus == nil {
 		return
@@ -266,7 +301,7 @@ func (tb *ToolBar) Render2D() {
 	}
 	if tb.PushBounds() {
 		tb.ToolBarStdRender()
-		tb.LayoutEvents()
+		tb.ToolBarEvents()
 		tb.RenderScrolls()
 		tb.Render2DChildren()
 		tb.PopBounds()
@@ -275,13 +310,46 @@ func (tb *ToolBar) Render2D() {
 	}
 }
 
+func (tb *ToolBar) ToolBarEvents() {
+	tb.LayoutEvents()
+	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.FocusEvent)
+		if me.Action == mouse.Enter {
+			tbb := recv.Embed(KiT_ToolBar).(*ToolBar)
+			tbb.UpdateActions()
+			// do NOT mark as processed -- HiPri and not mutex
+		}
+	})
+}
+
 // UpdateActions calls UpdateFunc on all actions in toolbar -- individual
 // menus are automatically updated just prior to menu popup
-func (g *ToolBar) UpdateActions() {
-	for _, mi := range g.Kids {
+func (tb *ToolBar) UpdateActions() {
+	for _, mi := range tb.Kids {
 		if mi.TypeEmbeds(KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.UpdateActions()
 		}
 	}
+}
+
+// FindActionByName finds an action on the toolbar, or any sub-menu, with
+// given name (exact match) -- this is not the Text label but the Name of the
+// element (for AddAction items, this is the same as Label or Icon (if Label
+// is empty)) -- returns false if not found
+func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
+	for _, mi := range tb.Kids {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			if ac.Name() == name {
+				return ac, true
+			}
+			if ac.Menu != nil {
+				if sac, ok := ac.Menu.FindActionByName(name); ok {
+					return sac, ok
+				}
+			}
+		}
+	}
+	return nil, false
 }

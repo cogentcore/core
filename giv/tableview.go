@@ -820,6 +820,10 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tv *TableView) Render2D() {
+	tv.ToolBar().UpdateActions()
+	if win := tv.ParentWindow(); win != nil {
+		win.MainMenuUpdateActives()
+	}
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

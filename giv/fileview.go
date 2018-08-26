@@ -497,6 +497,7 @@ func (fv *FileView) UpdateFiles() {
 		} else {
 			ext := filepath.Ext(fn)
 			fi.Kind = mime.TypeByExtension(ext)
+			fi.Kind = strings.TrimPrefix(fi.Kind, "application/") // long and unnec
 		}
 		fi.Ic = FileKindToIcon(fi.Kind, fi.Name)
 		keep := true
