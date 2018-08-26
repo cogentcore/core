@@ -507,23 +507,26 @@ func (tf *TextField) InsertAtCursor(str string) {
 
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddMenuText("Copy", cpsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tff := recv.Embed(KiT_TextField).(*TextField)
-		tff.Copy(true)
-	})
+	ac := m.AddAction(ActOpts{Label: "Copy", Icon: "copy", Shortcut: cpsc},
+		tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff := recv.Embed(KiT_TextField).(*TextField)
+			tff.Copy(true)
+		})
 	ac.SetActiveState(tf.HasSelection())
 	if !tf.IsInactive() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddMenuText("Cut", ctsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tff := recv.Embed(KiT_TextField).(*TextField)
-			tff.Cut()
-		})
+		ac = m.AddAction(ActOpts{Label: "Cut", Icon: "cut", Shortcut: ctsc},
+			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tff := recv.Embed(KiT_TextField).(*TextField)
+				tff.Cut()
+			})
 		ac.SetActiveState(tf.HasSelection())
-		ac = m.AddMenuText("Paste", ptsc, tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tff := recv.Embed(KiT_TextField).(*TextField)
-			tff.Paste()
-		})
+		ac = m.AddAction(ActOpts{Label: "Paste", Icon: "paste", Shortcut: ptsc},
+			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tff := recv.Embed(KiT_TextField).(*TextField)
+				tff.Paste()
+			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
 	}
 }
@@ -547,10 +550,11 @@ func (tf *TextField) OfferCompletions() {
 		var m Menu
 		for i := 0; i < count; i++ {
 			s := tf.Completion.Completions[i]
-			m.AddMenuText(s, "", tf.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tff := recv.Embed(KiT_TextField).(*TextField)
-				tff.Complete(s)
-			})
+			m.AddAction(ActOpts{Label: s},
+				tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					tff := recv.Embed(KiT_TextField).(*TextField)
+					tff.Complete(s)
+				})
 		}
 		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height

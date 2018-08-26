@@ -313,7 +313,7 @@ func (p *Preferences) DeleteSavedWindowGeoms() {
 func (p *ColorPrefs) LoadJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
-		PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -329,7 +329,7 @@ func (p *ColorPrefs) SaveJSON(filename FileName) error {
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 	}
 	return err

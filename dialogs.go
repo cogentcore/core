@@ -414,27 +414,53 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	}
 }
 
-// NewStdDialog returns a basic standard dialog with a name, title, prompt,
-// and ok / cancel buttons -- any empty text will not be added -- returns with
-// UpdateStart started but NOT ended -- must call UpdateEnd(true) once done
-// configuring!
-func NewStdDialog(name, title, prompt string, ok, cancel bool, css ki.Props) *Dialog {
+// DlgOpts are the basic dialog options accepted by all dialog methods --
+// provides a named, optional way to specify these args
+type DlgOpts struct {
+	Title  string   `desc:"generally should be provided -- will also be used for setting name of dialog and associated window"`
+	Prompt string   `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
+	CSS    ki.Props `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+}
+
+// NewStdDialog returns a basic standard dialog with given options (title,
+// prompt, CSS styling) and whether ok, cancel buttons should be shown -- any
+// empty text will not be added -- returns with UpdateStart started but NOT
+// ended -- must call UpdateEnd(true) once done configuring!
+func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
+	title := opts.Title
+	nm := strcase.ToKebab(title)
+	if title == "" {
+		nm = "unnamed-dialog"
+	}
 	dlg := Dialog{}
-	dlg.InitName(&dlg, name)
+	dlg.InitName(&dlg, nm)
 	dlg.UpdateStart() // guaranteed to be true
-	dlg.CSS = css
-	dlg.StdDialog(title, prompt, ok, cancel)
+	dlg.CSS = opts.CSS
+	dlg.StdDialog(opts.Title, opts.Prompt, ok, cancel)
 	return &dlg
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Node2D interface
+
+func (dlg *Dialog) Init2D() {
+	dlg.Viewport2D.Init2D()
+}
+
+func (dlg *Dialog) HasFocus2D() bool {
+	return true // dialog ALWAYS gets all the events!
+}
+
+//////////////////////////////////////////////////////////////////////////
+//     Specific Dialogs
 
 // PromptDialog opens a basic standard dialog with a title, prompt, and ok /
 // cancel buttons -- any empty text will not be added -- optionally connects
 // to given signal receiving object and function for dialog signals (nil to
 // ignore).  Viewport is optional to properly contextualize dialog to given
 // master window.
-func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
-	winm := strcase.ToKebab(title)
-	dlg := NewStdDialog(winm, title, prompt, ok, cancel, css)
+func PromptDialog(avp *Viewport2D, opts DlgOpts, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
+	dlg := NewStdDialog(opts, ok, cancel)
 	dlg.Modal = true
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -443,14 +469,12 @@ func PromptDialog(avp *Viewport2D, title, prompt string, ok, cancel bool, css ki
 	dlg.Open(0, 0, avp, nil)
 }
 
-// ChoiceDialog opens a basic standard dialog with a title, prompt, and any
-// number of buttons with labels as given, for the user to choose among -- the
-// clicked button number (starting at 0) will be sent to the receiving object
-// and function for dialog signals.  Viewport is optional to properly
-// contextualize dialog to given master window.
-func ChoiceDialog(avp *Viewport2D, title, prompt string, choices []string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) {
-	winm := strcase.ToKebab(title)
-	dlg := NewStdDialog(winm, title, prompt, false, false, css) // no buttons
+// ChoiceDialog presents any number of buttons with labels as given, for the
+// user to choose among -- the clicked button number (starting at 0) will be
+// sent to the receiving object and function for dialog signals.  Viewport is
+// optional to properly contextualize dialog to given master window.
+func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, fun ki.RecvFunc) {
+	dlg := NewStdDialog(opts, false, false) // no buttons
 	dlg.Modal = true
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -488,27 +512,13 @@ func ChoiceDialog(avp *Viewport2D, title, prompt string, choices []string, css k
 	dlg.Open(0, 0, avp, nil)
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Node2D interface
-
-func (dlg *Dialog) Init2D() {
-	dlg.Viewport2D.Init2D()
-}
-
-func (dlg *Dialog) HasFocus2D() bool {
-	return true // dialog ALWAYS gets all the events!
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// more specialized types of dialogs
-
 // NewKiDialog prompts for creating new item(s) of a given type, showing types
 // that implement given interface -- use construct of form:
 // reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type.
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
-func NewKiDialog(avp *Viewport2D, iface reflect.Type, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog("new-ki", title, prompt, true, true, css)
+func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog(opts, true, true)
 	dlg.Modal = true
 
 	frame := dlg.Frame()
@@ -562,9 +572,8 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore).  Viewport is optional to properly contextualize dialog to
 // given master window.
-func StringPromptDialog(avp *Viewport2D, strval, placeholder, title, prompt string, css ki.Props, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	winm := strcase.ToKebab(title)
-	dlg := NewStdDialog(winm, title, prompt, true, true, css)
+func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+	dlg := NewStdDialog(opts, true, true)
 	dlg.Modal = true
 
 	frame := dlg.Frame()

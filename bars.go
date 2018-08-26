@@ -224,6 +224,28 @@ var ToolBarProps = ki.Props{
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
+// AddAction adds an action to the toolbar using given options, and connects
+// the action signal to given receiver object and function, along with given
+// data which is stored on the action and then passed in the action signal.
+// Optional updateFunc is a function called prior to showing the menu to
+// update the actions (enabled or not typically).
+func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+	nm := opts.Label
+	if nm == "" {
+		nm = opts.Icon
+	}
+	ac := tb.AddNewChild(KiT_Action, nm).(*Action)
+	ac.Text = opts.Label
+	ac.Icon = IconName(opts.Icon)
+	ac.Shortcut = OSShortcut(opts.Shortcut)
+	ac.Data = opts.Data
+	ac.UpdateFunc = opts.UpdateFunc
+	if sigTo != nil && fun != nil {
+		ac.ActionSig.Connect(sigTo, fun)
+	}
+	return ac
+}
+
 // ToolBarStdRender does the standard rendering of the bar
 func (tb *ToolBar) ToolBarStdRender() {
 	st := &tb.Sty

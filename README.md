@@ -95,7 +95,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * mac drawLoop is never being exited -- this is bad and should be fixed!  tried to send a signal but it isn't being received.. need to send via a different routine??
 
    + Add save-as in addition to plain save in gieditor, and plain save can be enabled by existing filename, and also change signal -- not sure it is reliable enough though..
-   + would need a global window-level selection flag for updating the copy and cut menus though -- not sure it is worth it.. 
 
 * double-click not activating dialog signal with accepted reliably.. sometimes, but not always.
 

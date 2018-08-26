@@ -74,8 +74,8 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	}
 	cur := gi.IconName(kit.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
-	IconChooserDialog(vp, cur, "Select an Icon", desc, nil, vv.This, nil,
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)

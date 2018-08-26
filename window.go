@@ -202,6 +202,10 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 		opts.Pos = wgp.Pos
 		opts.StdPixels = false
 		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
+		if _, found := AllWindows.FindName(name); found {
+			opts.Pos.X += 20
+			opts.Pos.Y += 20
+		}
 	}
 	win := NewWindow(name, title, opts)
 	if win == nil {
@@ -2159,6 +2163,17 @@ func (wl *WindowList) Delete(w *Window) bool {
 		}
 	}
 	return false
+}
+
+// FindName finds window with given name on list (case sensitive) -- returns
+// window and true if found, nil, false otherwise
+func (wl *WindowList) FindName(name string) (*Window, bool) {
+	for _, wi := range *wl {
+		if wi.Nm == name {
+			return wi, true
+		}
+	}
+	return nil, false
 }
 
 // AllWindows is the list of all windows that have been created (dialogs, main

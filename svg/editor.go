@@ -79,7 +79,7 @@ func (svg *Editor) EditorEvents() {
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
 			if obj != nil {
-				giv.StructViewDialog(ssvg.Viewport, obj, nil, "SVG Element View", "", nil, nil, nil)
+				giv.StructViewDialog(ssvg.Viewport, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
 			}
 		}
 	})

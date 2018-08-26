@@ -681,7 +681,7 @@ func (vv *StructValueView) HasAction() bool {
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
 	desc, _ := vv.Tag("desc")
-	dlg := StructViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
+	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 
@@ -780,7 +780,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	tynm := "Slice of " + kit.NonPtrType(vv.ElType).Name()
 	desc, _ := vv.Tag("desc")
 	if vv.IsStruct {
-		dlg := TableViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc, nil)
+		dlg := TableViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
@@ -792,7 +792,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc, nil)
+		dlg := SliceViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
@@ -862,7 +862,7 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	if tynm == "" {
 		tynm = tmptyp.String()
 	}
-	dlg := MapViewDialog(vp, vv.Value.Interface(), vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
+	dlg := MapViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
@@ -971,21 +971,23 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("padding", units.NewValue(2, units.Px))
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
-	mb.Menu.AddMenuText("Edit", "", vv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
-		k := vvv.KiStruct()
-		if k != nil {
-			mb := vvv.Widget.(*gi.MenuButton)
-			vvv.Activate(mb.Viewport, nil, nil)
-		}
-	})
-	mb.Menu.AddMenuText("GoGiEditor", "", vv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
-		k := vvv.KiStruct()
-		if k != nil {
-			GoGiEditorDialog(k)
-		}
-	})
+	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
+			k := vvv.KiStruct()
+			if k != nil {
+				mb := vvv.Widget.(*gi.MenuButton)
+				vvv.Activate(mb.Viewport, nil, nil)
+			}
+		})
+	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"},
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
+			k := vvv.KiStruct()
+			if k != nil {
+				GoGiEditorDialog(k)
+			}
+		})
 	vv.UpdateWidget()
 }
 
@@ -1000,7 +1002,7 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	}
 	desc, _ := vv.Tag("desc")
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	dlg := StructViewDialog(vp, k, vv.TmpSave, tynm, desc, nil, recv, dlgFunc)
+	dlg := StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 }
 

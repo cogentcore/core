@@ -61,8 +61,8 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 	}
 	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	SliceViewSelectDialog(vp, &gi.StdKeyMapNames, cur, "Select a Standard KeyMap", desc, -1, nil, vv.This, nil,
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+	SliceViewSelectDialog(vp, &gi.StdKeyMapNames, cur, DlgOpts{Title: "Select a Standard KeyMap", Prompt: desc}, nil,
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ddlg, _ := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
 				si := SliceViewSelectDialogValue(ddlg)
@@ -75,5 +75,5 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 			if dlgRecv != nil && dlgFunc != nil {
 				dlgFunc(dlgRecv, send, sig, data)
 			}
-		}, nil)
+		})
 }

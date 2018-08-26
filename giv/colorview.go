@@ -457,8 +457,8 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	ColorViewDialog(vp, dclr, vv.TmpSave, "Color Value View", desc, nil, vv.This,
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+	ColorViewDialog(vp, dclr, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave},
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				cclr := ColorViewDialogValue(ddlg)

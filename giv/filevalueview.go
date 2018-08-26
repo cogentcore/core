@@ -62,15 +62,16 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	cur := kit.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	desc, _ := vv.Tag("desc")
-	FileViewDialog(vp, cur, ext, vv.Name(), desc, nil, nil, vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			dlg, _ := send.(*gi.Dialog)
-			fn := FileViewDialogValue(dlg)
-			vv.SetValue(fn)
-			vv.UpdateWidget()
-		}
-		if dlgRecv != nil && dlgFunc != nil {
-			dlgFunc(dlgRecv, send, sig, data)
-		}
-	})
+	FileViewDialog(vp, cur, ext, DlgOpts{Title: vv.Name(), Prompt: desc}, nil,
+		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				fn := FileViewDialogValue(dlg)
+				vv.SetValue(fn)
+				vv.UpdateWidget()
+			}
+			if dlgRecv != nil && dlgFunc != nil {
+				dlgFunc(dlgRecv, send, sig, data)
+			}
+		})
 }

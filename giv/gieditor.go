@@ -192,8 +192,6 @@ func (ge *GiEditor) ConfigSplitView() {
 		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
 		tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
 		sv := split.AddNewChild(KiT_StructView, "sv").(*StructView)
-		sv.SetStretchMaxWidth()
-		sv.SetStretchMaxHeight()
 		tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if data == nil {
 				return
@@ -296,16 +294,19 @@ func GoGiEditorDialog(obj ki.Ki) {
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		if ge.Changed {
-			gi.ChoiceDialog(vp, "Close Without Saving?", "Do you want to save your changes?  If so, Cancel and then Save", []string{"Close Without Saving", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				switch sig {
-				case 0:
-					w.Close()
-				case 1:
-					ge.Save(ge.Filename)
-				case 2:
-					// default is to do nothing, i.e., cancel
-				}
-			})
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
+				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
+				[]string{"Close Without Saving", "Cancel"},
+				win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						w.Close()
+					case 1:
+						ge.Save(ge.Filename)
+					case 2:
+						// default is to do nothing, i.e., cancel
+					}
+				})
 		} else {
 			w.Close()
 		}

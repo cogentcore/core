@@ -56,12 +56,13 @@ func LoadSVG(fnm string) {
 }
 
 func FileViewLoadSVG(vp *gi.Viewport2D) {
-	giv.FileViewDialog(vp, CurFilename, ".svg", "Load SVG", "", nil, nil, vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			dlg, _ := send.(*gi.Dialog)
-			LoadSVG(giv.FileViewDialogValue(dlg))
-		}
-	})
+	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Load SVG"}, nil,
+		vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				dlg, _ := send.(*gi.Dialog)
+				LoadSVG(giv.FileViewDialogValue(dlg))
+			}
+		})
 }
 
 func mainrun() {
@@ -207,13 +208,15 @@ func mainrun() {
 	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
-	fmen.Menu.AddMenuText("Open", "Command+O", win.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewLoadSVG(vp)
-	})
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
+		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewLoadSVG(vp)
+		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddMenuText("Close Window", "Command+W", win.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		win.OSWin.Close()
-	})
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},
+		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.OSWin.Close()
+		})
 
 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
 		go oswin.TheApp.Quit() // once main window is closed, quit

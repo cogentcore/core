@@ -14,9 +14,15 @@ import (
 
 // PrefsView opens a view of user preferences
 func PrefsView(p *gi.Preferences) {
+	winm := "gogi-prefs"
+	if w, ok := gi.MainWindows.FindName(winm); ok {
+		w.OSWin.Raise()
+		return
+	}
+
 	width := 800
 	height := 800
-	win := gi.NewWindow2D("gogi-prefs", "GoGi Preferences", width, height, true)
+	win := gi.NewWindow2D(winm, "GoGi Preferences", width, height, true)
 
 	if p.StdKeyMapName == "" {
 		p.StdKeyMapName = gi.KeyMapName(gi.StdKeyMapName(gi.DefaultKeyMap))
@@ -38,18 +44,21 @@ func PrefsView(p *gi.Preferences) {
 	MainMenuView(p, win, mmen)
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		gi.ChoiceDialog(vp, "Save Prefs Before Closing?", "Do you want to save any changes to preferences before closing?", []string{"Save and Close", "Discard and Close", "Cancel"}, nil, win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			switch sig {
-			case 0:
-				p.Save()
-				fmt.Println("Preferences Saved to prefs.json")
-				w.Close()
-			case 1:
-				w.Close()
-			case 2:
-				// default is to do nothing, i.e., cancel
-			}
-		})
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
+			Prompt: "Do you want to save any changes to preferences before closing?"},
+			[]string{"Save and Close", "Discard and Close", "Cancel"},
+			win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					p.Save()
+					fmt.Println("Preferences Saved to prefs.json")
+					w.Close()
+				case 1:
+					w.Close()
+				case 2:
+					// default is to do nothing, i.e., cancel
+				}
+			})
 	})
 
 	win.MainMenuUpdated()

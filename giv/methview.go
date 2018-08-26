@@ -320,11 +320,12 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	md := ac.Data.(*MethViewData)
 	if md.ArgProps == nil { // no args -- just call
 		if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-			gi.PromptDialog(md.Vp, ac.Text, md.Desc, true, true, nil, md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.DialogAccepted) {
-					MethViewCallMeth(md, nil)
-				}
-			})
+			gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
+				md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.DialogAccepted) {
+						MethViewCallMeth(md, nil)
+					}
+				})
 		} else {
 			MethViewCallMeth(md, nil)
 		}
@@ -355,11 +356,12 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 		}
 	}
 
-	ArgViewDialog(md.Vp, ads, ac.Text, md.Desc, nil, md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			MethViewCallMeth(md, args)
-		}
-	})
+	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
+		md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				MethViewCallMeth(md, args)
+			}
+		})
 }
 
 // MethViewCallMeth calls the method with given args, and processes the
@@ -368,7 +370,7 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
 	md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
 	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
-		gi.PromptDialog(md.Vp, md.Method+" Result", rv[0].String(), true, false, nil, nil, nil)
+		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: md.Method + " Result", Prompt: rv[0].String()}, true, false, nil, nil)
 	}
 }
 

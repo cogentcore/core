@@ -572,7 +572,7 @@ func (fv *FileView) NewFolder() {
 	if err != nil {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
 		if fv.Viewport != nil {
-			gi.PromptDialog(fv.Viewport, "FileView Error", emsg, true, false, nil, nil, nil)
+			gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, true, false, nil, nil)
 		} else {
 			log.Printf("gi.FileView NewFolder error: %v\n", emsg)
 		}

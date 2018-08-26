@@ -668,61 +668,71 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 }
 
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
-	m.AddMenuText("Add Child", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		tvv.SrcAddChild()
-	})
+	m.AddAction(gi.ActOpts{Label: "Add Child"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv.SrcAddChild()
+		})
 	if !tv.IsField() && tv.RootView.This != tv.This {
 		issc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsert)
-		m.AddMenuText("Insert Before", issc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.SrcInsertBefore()
-		})
+		m.AddAction(gi.ActOpts{Label: "Insert Before", Shortcut: issc},
+			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv.SrcInsertBefore()
+			})
 		iasc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsertAfter)
-		m.AddMenuText("Insert After", iasc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.SrcInsertAfter()
-		})
+		m.AddAction(gi.ActOpts{Label: "Insert After", Shortcut: iasc},
+			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv.SrcInsertAfter()
+			})
 		dpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDuplicate)
-		m.AddMenuText("Duplicate", dpsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.SrcDuplicate()
-		})
+		m.AddAction(gi.ActOpts{Label: "Duplicate", Shortcut: dpsc},
+			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv.SrcDuplicate()
+			})
 		dlsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDelete)
-		m.AddMenuText("Delete", dlsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.SrcDelete()
-		})
+		m.AddAction(gi.ActOpts{Label: "Delete", Shortcut: dlsc},
+			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv.SrcDelete()
+			})
 	}
 	m.AddSeparator("esep")
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
 	ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 	ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
-	m.AddMenuText("Copy", cpsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		tvv.Copy(true)
-	})
-	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Cut", ctsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Copy", Icon: "copy", Shortcut: cpsc},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.Cut()
+			tvv.Copy(true)
 		})
+	if !tv.IsField() && tv.RootView.This != tv.This {
+		m.AddAction(gi.ActOpts{Label: "Cut", Icon: "cut", Shortcut: ctsc},
+			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv.Cut()
+			})
 	}
-	m.AddMenuText("Paste", ptsc, tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		tvv.Paste()
-	})
+	m.AddAction(gi.ActOpts{Label: "Paste", Icon: "paste", Shortcut: ptsc},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv.Paste()
+		})
 	m.AddSeparator("vwsep")
-	m.AddMenuText("Edit In Window", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		tynm := kit.NonPtrType(tvv.SrcNode.Ptr.Type()).Name()
-		StructViewDialog(tv.Viewport, tvv.SrcNode.Ptr, nil, tynm, "", nil, nil, nil)
-		tvv.Paste()
-	})
-	m.AddMenuText("GoGiEditor", "", tv.This, nil, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
-		GoGiEditorDialog(tvv.SrcNode.Ptr)
-	})
+	m.AddAction(gi.ActOpts{Label: "Edit In Window"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tynm := kit.NonPtrType(tvv.SrcNode.Ptr.Type()).Name()
+			StructViewDialog(tv.Viewport, tvv.SrcNode.Ptr, DlgOpts{Title: tynm}, nil, nil)
+			tvv.Paste()
+		})
+	m.AddAction(gi.ActOpts{Label: "GoGiEditor"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			GoGiEditorDialog(tvv.SrcNode.Ptr)
+		})
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)
 	}
@@ -733,34 +743,36 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 func (tv *TreeView) SrcInsertAfter() {
 	ttl := "TreeView Insert After"
 	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after fields", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after fields"}, true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
 	}
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", nil, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-			sk := tv.SrcNode.Ptr
-			par := sk.Parent()
-			dlg, _ := send.(*gi.Dialog)
-			n, typ := gi.NewKiDialogValues(dlg)
-			updt := par.UpdateStart()
-			for i := 0; i < n; i++ {
-				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
-				par.InsertNewChild(typ, myidx+1+i, nm)
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				sk := tv.SrcNode.Ptr
+				par := sk.Parent()
+				dlg, _ := send.(*gi.Dialog)
+				n, typ := gi.NewKiDialogValues(dlg)
+				updt := par.UpdateStart()
+				for i := 0; i < n; i++ {
+					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
+					par.InsertNewChild(typ, myidx+1+i, nm)
+				}
+				par.UpdateEnd(updt)
 			}
-			par.UpdateEnd(updt)
-		}
-	})
+		})
 }
 
 // SrcInsertBefore inserts a new node in the source tree before this node, at
@@ -768,64 +780,69 @@ func (tv *TreeView) SrcInsertAfter() {
 func (tv *TreeView) SrcInsertBefore() {
 	ttl := "TreeView Insert Before"
 	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before fields", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before fields"}, true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
 	}
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Insert:", nil, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-			sk := tv.SrcNode.Ptr
-			par := sk.Parent()
-			dlg, _ := send.(*gi.Dialog)
-			n, typ := gi.NewKiDialogValues(dlg)
-			updt := par.UpdateStart()
-			for i := 0; i < n; i++ {
-				nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
-				par.InsertNewChild(typ, myidx+i, nm)
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				sk := tv.SrcNode.Ptr
+				par := sk.Parent()
+				dlg, _ := send.(*gi.Dialog)
+				n, typ := gi.NewKiDialogValues(dlg)
+				updt := par.UpdateStart()
+				for i := 0; i < n; i++ {
+					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
+					par.InsertNewChild(typ, myidx+i, nm)
+				}
+				par.UpdateEnd(updt)
 			}
-			par.UpdateEnd(updt)
-		}
-	})
+		})
 }
 
 // SrcAddChild adds a new child node to this one in the source tree,
 // propmpting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
 	ttl := "TreeView Add Child"
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(), ttl, "Number and Type of Items to Add:", nil, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.DialogAccepted) {
-			tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-			sk := tv.SrcNode.Ptr
-			dlg, _ := send.(*gi.Dialog)
-			n, typ := gi.NewKiDialogValues(dlg)
-			updt := sk.UpdateStart()
-			for i := 0; i < n; i++ {
-				nm := fmt.Sprintf("New%v%v", typ.Name(), i)
-				sk.AddNewChild(typ, nm)
+	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				sk := tv.SrcNode.Ptr
+				dlg, _ := send.(*gi.Dialog)
+				n, typ := gi.NewKiDialogValues(dlg)
+				updt := sk.UpdateStart()
+				for i := 0; i < n; i++ {
+					nm := fmt.Sprintf("New%v%v", typ.Name(), i)
+					sk.AddNewChild(typ, nm)
+				}
+				sk.UpdateEnd(updt)
 			}
-			sk.UpdateEnd(updt)
-		}
-	})
+		})
 }
 
 // SrcDelete deletes the source node corresponding to this view node in the source tree
 func (tv *TreeView) SrcDelete() {
+	ttl := "TreeView Delete"
 	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete fields", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete fields"}, true, false, nil, nil)
 		return
 	}
 	if tv.RootView.This == tv.This {
-		gi.PromptDialog(tv.Viewport, "TreeView Delete", "Cannot delete the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	tv.MoveDown(mouse.NoSelectMode)
@@ -837,14 +854,15 @@ func (tv *TreeView) SrcDelete() {
 // the source tree, and inserts the duplicate after this node (as a new
 // sibling)
 func (tv *TreeView) SrcDuplicate() {
+	ttl := "TreeView Duplicate"
 	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot delete fields", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete fields"}, true, false, nil, nil)
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, "TreeView Duplicate", "Cannot duplicate the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot duplicate the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -932,25 +950,25 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddMenuText("Assign To", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteAssign(data.(mimedata.Mimes))
 	})
-	m.AddMenuText("Add to Children", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Insert Before", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
 		})
-		m.AddMenuText("Insert After", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 	}
-	m.AddMenuText("Cancel", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 	// todo: compare, etc..
 }
@@ -984,7 +1002,7 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert before the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -1010,7 +1028,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, ttl, "Cannot insert after the root of the tree", true, false, nil, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -1117,26 +1135,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddMenuText("Assign To", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
-	m.AddMenuText("Add to Children", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddMenuText("Insert Before", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
-		m.AddMenuText("Insert After", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
-	m.AddMenuText("Cancel", "", tv.This, data, nil, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropCancel()
 	})
