@@ -593,7 +593,7 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 
 	if theApp.quitting {
 		// fmt.Printf("win: %v quit closing\n", w.Nm)
-		theApp.quitCloseCnt <- struct{}{}
+		go func() { theApp.quitCloseCnt <- struct{}{} }() // can't send from thread 1 here
 	}
 	return 0
 }

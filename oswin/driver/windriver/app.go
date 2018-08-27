@@ -357,7 +357,7 @@ func (app *appImpl) QuitClean() {
 
 func (app *appImpl) Quit() {
 	app.QuitClean()
-	os.Exit(0)
+	SendAppMessage(msgQuit, 0, 0)
 }
 
 func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {

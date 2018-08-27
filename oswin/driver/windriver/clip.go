@@ -55,7 +55,7 @@ func (ci *clipImpl) IsEmpty() bool {
 	}
 	defer _CloseClipboard()
 
-	avail := _GetClipboardData(_CF_UNICODETEXT) // todo: only checking text now
+	avail := _IsClipboardFormatAvailable(_CF_UNICODETEXT) // todo: only checking text now
 	return !avail
 }
 
