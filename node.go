@@ -83,8 +83,8 @@ func (n *Node) Init(this Ki) {
 	}
 }
 
-func (n *Node) InitName(ki Ki, name string) {
-	n.Init(ki)
+func (n *Node) InitName(k Ki, name string) {
+	n.Init(k)
 	n.SetName(name)
 }
 
@@ -1645,7 +1645,7 @@ func (dm *Deleted) DestroyDeleted() {
 	copy(curdels, dm.Dels)
 	dm.Dels = dm.Dels[:0]
 	dm.Mu.Unlock()
-	for _, ki := range curdels {
-		ki.Destroy() // destroy will add to the dels so we need to do this outside of lock
+	for _, k := range curdels {
+		k.Destroy() // destroy will add to the dels so we need to do this outside of lock
 	}
 }
