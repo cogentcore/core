@@ -226,7 +226,7 @@ func (fv *FileView) ConfigPathRow() {
 	pf.ConfigParts()
 	pft, found := pf.TextField()
 	if found {
-		pft.SetCompleter(fv, fv.PathComplete)
+		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
 	}
 	tf, ok := pf.TextField()
 	if ok {
@@ -370,7 +370,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.SetCompleter(fv, fv.FileComplete)
+	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
@@ -815,4 +815,16 @@ func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
 		matches = complete.MatchSeed(dirs, seed)
 	}
 	return matches, seed
+}
+
+func (fv *FileView) PathCompleteEdit(text string, cursorPos int, completion string, seed string) (path string, delta int) {
+	path, delta = complete.EditBasic(text, cursorPos, completion, seed)
+	path = path + "/"
+	delta += 1
+	return path, delta
+}
+
+func (fv *FileView) FileCompleteEdit(text string, cursorPos int, completion string, seed string) (file string, delta int) {
+	file, delta = complete.EditBasic(text, cursorPos, completion, seed)
+	return file, delta
 }
