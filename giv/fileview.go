@@ -747,7 +747,7 @@ func (fv *FileView) FileComplete(text string) (matches []string, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
-		if unicode.IsSpace(r) || r == '/' {
+		if unicode.IsSpace(r) || r == filepath.Separator {
 			seedStart = i + 1
 			break
 		}
@@ -778,7 +778,6 @@ func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
 	var dirs = []string{}
 	for _, f := range files {
 		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
-			fmt.Println(f.Name())
 			dirs = append(dirs, f.Name())
 		}
 	}
@@ -792,7 +791,7 @@ func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
 
 func (fv *FileView) PathCompleteEdit(text string, cursorPos int, completion string, seed string) (path string, delta int) {
 	path, delta = complete.EditBasic(text, cursorPos, completion, seed)
-	path = path + "/"
+	path = path + string(filepath.Separator)
 	delta += 1
 	return path, delta
 }
