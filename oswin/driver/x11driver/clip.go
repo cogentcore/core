@@ -38,18 +38,16 @@ var ClipTransSize = uint32(1048576)
 var ClipTimeOut = 1 * time.Second
 
 func (ci *clipImpl) IsEmpty() bool {
-	useSel := theApp.atomClipboardSel
 	selown, err := xproto.GetSelectionOwner(theApp.xc, theApp.atomClipboardSel).Reply()
 	if err != nil {
 		log.Printf("X11 Clipboard Read error: %v\n", err)
-		return nil
+		return false
 	}
 	if selown.Owner == xproto.AtomNone {
-		useSel = theApp.atomPrimarySel
 		selown, err = xproto.GetSelectionOwner(theApp.xc, theApp.atomPrimarySel).Reply()
 		if err != nil {
 			log.Printf("X11 Clipboard Read error: %v\n", err)
-			return nil
+			return false
 		}
 	}
 	if selown.Owner == xproto.AtomNone { // nothing there..

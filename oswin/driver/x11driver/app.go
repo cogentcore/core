@@ -950,11 +950,10 @@ func (app *appImpl) Quit() {
 		Sequence: 0, // no idea what this is..
 		Format:   32,
 		Window:   app.window32,
-		Type:     w.app.atomUTF8String, // whatever
-		Data:     dat,
+		Type:     app.atomUTF8String, // whatever
 	}
 	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
 	// send to: x.xw
-	xproto.SendEvent(w.app.xc, true, app.window32, uint32(mask), string(minmsg.Bytes()))
+	xproto.SendEvent(app.xc, true, app.window32, uint32(mask), string(minmsg.Bytes()))
 
 }
