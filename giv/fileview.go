@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"mime"
 	"os"
@@ -221,6 +222,10 @@ func (fv *FileView) ConfigPathRow() {
 	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	pf.SetStretchMaxWidth()
 	pf.ConfigParts()
+	pft, found := pf.TextField()
+	if found {
+		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
+	}
 	tf, ok := pf.TextField()
 	if ok {
 		tf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -363,7 +368,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.SetCompleter(fv, fv.Complete)
+	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
@@ -739,7 +744,7 @@ func FileKindToIcon(kind, name string) gi.IconName {
 	return icn
 }
 
-func (fv *FileView) Complete(text string) (matches []string, seed string) {
+func (fv *FileView) FileComplete(text string) (matches []string, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -754,7 +759,46 @@ func (fv *FileView) Complete(text string) (matches []string, seed string) {
 	for _, f := range fv.Files {
 		files = append(files, f.Name)
 	}
-
-	matches = complete.MatchSeed(files, seed)
+	if len(seed) == 0 { // return all directories
+		matches = files
+	} else {
+		matches = complete.MatchSeed(files, seed)
+	}
 	return matches, seed
+}
+
+func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
+	dir, seed := filepath.Split(path)
+	d, err := os.Open(dir)
+	if err != nil {
+		return matches, seed
+	}
+	defer d.Close()
+
+	files, err := ioutil.ReadDir(dir)
+	var dirs = []string{}
+	for _, f := range files {
+		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
+			fmt.Println(f.Name())
+			dirs = append(dirs, f.Name())
+		}
+	}
+	if len(seed) == 0 { // return all directories
+		matches = dirs
+	} else {
+		matches = complete.MatchSeed(dirs, seed)
+	}
+	return matches, seed
+}
+
+func (fv *FileView) PathCompleteEdit(text string, cursorPos int, completion string, seed string) (path string, delta int) {
+	path, delta = complete.EditBasic(text, cursorPos, completion, seed)
+	path = path + "/"
+	delta += 1
+	return path, delta
+}
+
+func (fv *FileView) FileCompleteEdit(text string, cursorPos int, completion string, seed string) (file string, delta int) {
+	file, delta = complete.EditBasic(text, cursorPos, completion, seed)
+	return file, delta
 }

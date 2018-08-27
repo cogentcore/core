@@ -12,9 +12,13 @@ import (
 	"unicode"
 )
 
-// Func is the function called to get the list of possible completions
+// MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type Func func(text string) (matches []string, seed string)
+type MatchFunc func(text string) (matches []string, seed string)
+
+// EditFunc is passed the current text and the selected completion for text editing.
+// Allows for other editing, e.g. adding "()" or adding "/", etc.
+type EditFunc func(text string, cursorPos int, completion string, seed string) (newText string, delta int)
 
 // MatchSeed returns a list of matches given a list of possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.
@@ -93,4 +97,16 @@ func SeedWhiteSpace(text string) string {
 		}
 	}
 	return text[seedStart:]
+}
+
+// EditBasic replaces the completion seed with the actual completion selection
+// delta is the change in cursor position (cp)
+func EditBasic(text string, cp int, completion string, seed string) (newText string, delta int) {
+	s1 := string(text[0:cp])
+	s2 := string(text[cp:len(text)])
+	s1 = strings.TrimSuffix(s1, seed)
+	s1 += completion
+	t := s1 + s2
+	delta = len(completion) - len(seed)
+	return t, delta
 }

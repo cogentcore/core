@@ -256,7 +256,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
-	edit1.SetCompleter(nil, Complete) // gets us word demo completion
+	edit1.SetCompleter(nil, Complete, CompleteEdit) // gets us word demo completion
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
@@ -361,6 +361,11 @@ func Complete(text string) (matches []string, seed string) {
 	seed = complete.SeedWhiteSpace(text)
 	matches = complete.MatchSeed(words, seed)
 	return matches, seed
+}
+
+func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
+	s, delta = complete.EditBasic(text, cursorPos, selection, seed)
+	return s, delta
 }
 
 var words = []string{"a", "able", "about", "above", "act", "add", "afraid", "after", "again", "against", "age", "ago", "agree", "air", "all",

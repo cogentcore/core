@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"strings"
 	"unicode"
 
 	"github.com/chewxy/math32"
@@ -25,10 +24,11 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 // CompletionData
 type CompleteData struct {
-	Func        complete.Func `desc:"function to get the list of possible completions"`
-	Context     interface{}   `desc:"the object that implements complete.Func"`
-	Completions []string
-	Seed        string `desc:"current completion seed"`
+	MatchFunc   complete.MatchFunc `desc:"function to get the list of possible completions"`
+	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
+	Context     interface{}        `desc:"the object that implements complete.Func"`
+	Completions []string           `desc:"possible completions"`
+	Seed        string             `desc:"current completion seed"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -537,11 +537,11 @@ func (tf *TextField) OfferCompletions() {
 	if PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
 	}
-	if tf.Completion.Func == nil {
+	if tf.Completion.MatchFunc == nil {
 		return
 	}
 
-	tf.Completion.Completions, tf.Completion.Seed = tf.Completion.Func(string(tf.EditTxt[0:tf.CursorPos]))
+	tf.Completion.Completions, tf.Completion.Seed = tf.Completion.MatchFunc(string(tf.EditTxt[0:tf.CursorPos]))
 	count := len(tf.Completion.Completions)
 	if count > 0 {
 		if count == 1 && tf.Completion.Completions[0] == tf.Completion.Seed {
@@ -566,13 +566,9 @@ func (tf *TextField) OfferCompletions() {
 
 // Complete edits the text field using the string chosen from the completion menu
 func (tf *TextField) Complete(str string) {
-	s1 := string(tf.EditTxt[0:tf.CursorPos])
-	s2 := string(tf.EditTxt[tf.CursorPos:len(tf.EditTxt)])
-	s1 = strings.TrimSuffix(s1, tf.Completion.Seed)
-	s1 += str
-	txt := s1 + s2
-	tf.EditTxt = []rune(txt)
-	tf.CursorForward(len(str) - len(tf.Completion.Seed))
+	s, delta := tf.Completion.EditFunc(tf.Text(), tf.CursorPos, str, tf.Completion.Seed)
+	tf.EditTxt = []rune(s)
+	tf.CursorForward(delta)
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
@@ -1108,7 +1104,7 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusGot:
 		tf.FocusActive = true
 		tf.ScrollToMe()
-		tf.CursorEnd()
+		//tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
 	case FocusInactive:
@@ -1123,10 +1119,11 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	}
 }
 
-func (tf *TextField) SetCompleter(data interface{}, fun complete.Func) {
-	if fun == nil {
+func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+	if matchFun == nil || editFun == nil {
 		return
 	}
 	tf.Completion.Context = data
-	tf.Completion.Func = fun
+	tf.Completion.MatchFunc = matchFun
+	tf.Completion.EditFunc = editFun
 }
