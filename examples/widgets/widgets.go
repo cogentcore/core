@@ -376,7 +376,7 @@ func Complete(text string) (matches []string, seed string) {
 }
 
 func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditBasic(text, cursorPos, selection, seed)
+	s, delta = complete.EditWord(text, cursorPos, selection, seed)
 	return s, delta
 }
 
