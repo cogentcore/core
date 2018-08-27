@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"time"
 	"unicode"
 
 	"github.com/chewxy/math32"
@@ -20,6 +21,10 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
+
+// TextFieldCursorBlinkMSec is number of milliseconds that cursor blinks on
+// and off -- set to 0 to disable blinking
+var TextFieldCursorBlinkMSec = 500
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // CompletionData
@@ -55,13 +60,14 @@ type TextField struct {
 	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Completion   CompleteData            `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
 var TextFieldProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
+	"border-width":     units.NewValue(1, units.Px), // this also determines the cursor
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(4, units.Px),
@@ -566,7 +572,8 @@ func (tf *TextField) OfferCompletions() {
 
 // Complete edits the text field using the string chosen from the completion menu
 func (tf *TextField) Complete(str string) {
-	s, delta := tf.Completion.EditFunc(tf.Text(), tf.CursorPos, str, tf.Completion.Seed)
+	txt := string(tf.EditTxt) // John: do NOT call tf.Text() in an active editing context!!!
+	s, delta := tf.Completion.EditFunc(txt, tf.CursorPos, str, tf.Completion.Seed)
 	tf.EditTxt = []rune(s)
 	tf.CursorForward(delta)
 }
@@ -923,12 +930,79 @@ func (tf *TextField) CharStartPos(charidx int) Vec2D {
 	return Vec2D{pos.X + cpos, pos.Y}
 }
 
-func (tf *TextField) RenderCursor() {
-	cpos := tf.CharStartPos(tf.CursorPos)
-	rs := &tf.Viewport.Render
-	pc := &rs.Paint
-	pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tf.FontHeight)
-	pc.Stroke(rs)
+// TextFieldBlinker is the time.Ticker for blinking cursors for text fields,
+// only one of which can be active at at a time
+var TextFieldBlinker *time.Ticker
+
+// BlinkingTextField is the text field that is blinking
+var BlinkingTextField *TextField
+
+// TextFieldBlink is function that blinks text field cursor
+func TextFieldBlink() {
+	for {
+		if TextFieldBlinker == nil {
+			return // shutdown..
+		}
+		<-TextFieldBlinker.C
+		if BlinkingTextField == nil {
+			continue
+		}
+		if BlinkingTextField.IsDestroyed() || BlinkingTextField.IsDeleted() {
+			BlinkingTextField = nil
+			continue
+		}
+		tf := BlinkingTextField
+		if tf.Viewport == nil || !tf.HasFocus() || !tf.FocusActive || tf.VpBBox == image.ZR {
+			BlinkingTextField = nil
+			continue
+		}
+		tf.BlinkOn = !tf.BlinkOn
+		tf.RenderCursor(tf.BlinkOn)
+	}
+}
+
+func (tf *TextField) StartCursor() {
+	tf.BlinkOn = true
+	if TextFieldCursorBlinkMSec == 0 {
+		tf.RenderCursor(true)
+		return
+	}
+	if TextFieldBlinker == nil {
+		TextFieldBlinker = time.NewTicker(time.Duration(TextFieldCursorBlinkMSec) * time.Millisecond)
+		go TextFieldBlink()
+	}
+	tf.BlinkOn = true
+	tf.RenderCursor(true)
+	BlinkingTextField = tf
+}
+
+func (tf *TextField) StopCursor() {
+	if BlinkingTextField == tf {
+		BlinkingTextField = nil
+	}
+}
+
+func (tf *TextField) RenderCursor(on bool) {
+	if tf.PushBounds() {
+		st := &tf.Sty
+		cpos := tf.CharStartPos(tf.CursorPos)
+		rs := &tf.Viewport.Render
+		pc := &rs.Paint
+		if on {
+			pc.StrokeStyle.SetColor(&st.Font.Color)
+		} else {
+			pc.StrokeStyle.SetColor(&st.Font.BgColor.Color)
+		}
+		pc.StrokeStyle.Width = st.Border.Width
+		pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tf.FontHeight)
+		pc.Stroke(rs)
+		tf.PopBounds()
+
+		vp := tf.Viewport
+		updt := vp.Win.UpdateStart()
+		vp.Win.UploadVpRegion(vp, tf.VpBBox, tf.WinBBox) // bigger than necc.
+		vp.Win.UpdateEnd(updt)
+	}
 }
 
 func (tf *TextField) RenderSelect() {
@@ -1085,8 +1159,10 @@ func (tf *TextField) Render2D() {
 			tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 			tf.RenderVis.RenderTopPos(rs, pos)
 		}
-		if tf.HasFocus() {
-			tf.RenderCursor()
+		if tf.HasFocus() && tf.FocusActive {
+			tf.StartCursor()
+		} else {
+			tf.StopCursor()
 		}
 		tf.Render2DChildren()
 		tf.PopBounds()

@@ -91,6 +91,9 @@ func (mb *MenuBar) Render2D() {
 // UpdateActions calls UpdateFunc on all actions in menu -- individual menus
 // are automatically updated just prior to menu popup
 func (g *MenuBar) UpdateActions() {
+	if g == nil {
+		return
+	}
 	for _, mi := range g.Kids {
 		if mi.TypeEmbeds(KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
@@ -325,6 +328,9 @@ func (tb *ToolBar) ToolBarEvents() {
 // UpdateActions calls UpdateFunc on all actions in toolbar -- individual
 // menus are automatically updated just prior to menu popup
 func (tb *ToolBar) UpdateActions() {
+	if tb == nil {
+		return
+	}
 	for _, mi := range tb.Kids {
 		if mi.TypeEmbeds(KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)

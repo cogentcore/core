@@ -757,7 +757,7 @@ func (vv *SliceValueView) UpdateWidget() {
 func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	slci := vv.Value.Interface()
-	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem().Elem())
+	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem())
 	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")

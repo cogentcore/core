@@ -299,6 +299,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 
 	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgh.Lay = gi.LayoutHoriz
+	sgh.SetProp("overflow", "hidden") // no scrollbars!
 	// sgh.SetStretchMaxWidth()
 
 	sep := sg.KnownChild(1).(*gi.Separator)
@@ -807,7 +808,8 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sgh := sg.KnownChild(0).(*gi.ToolBar)
 	sgf := sg.KnownChild(2).(*gi.Frame)
 	if len(sgf.Kids) >= nfld {
-		sgh.SetProp("max-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
+		// sgh.SetProp("max-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
+		sgh.SetProp("min-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
 			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()
@@ -1718,16 +1720,18 @@ func (tv *TableView) TableViewEvents() {
 			}
 		})
 		sgf := tv.SliceGrid()
-		sgf.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			de := d.(*dnd.FocusEvent)
-			switch de.Action {
-			case dnd.Enter:
-				gi.DNDSetCursor(de.Mod)
-			case dnd.Exit:
-				gi.DNDNotCursor()
-			case dnd.Hover:
-				// nothing here?
-			}
-		})
+		if sgf != nil {
+			sgf.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+				de := d.(*dnd.FocusEvent)
+				switch de.Action {
+				case dnd.Enter:
+					gi.DNDSetCursor(de.Mod)
+				case dnd.Exit:
+					gi.DNDNotCursor()
+				case dnd.Hover:
+					// nothing here?
+				}
+			})
+		}
 	}
 }

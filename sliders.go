@@ -190,8 +190,14 @@ func (g *SliderBase) SizeFromAlloc() {
 	if g.LayData.AllocSize.IsZero() {
 		return
 	}
+	if g.Min == 0 && g.Max == 0 { // uninit
+		g.Defaults()
+	}
 	spc := g.Sty.BoxSpace()
 	g.Size = g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
+	if g.Size <= 0 {
+		return
+	}
 	if !g.ValThumb {
 		g.Size -= g.ThSize // half on each side
 	}

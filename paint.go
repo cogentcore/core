@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"sync"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
@@ -240,6 +241,7 @@ type RenderState struct {
 	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
 	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
+	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`
 }
 
 // Init initializes RenderState -- must be called whenever image size changes
@@ -521,6 +523,9 @@ func (pc *Paint) stroke(rs *RenderState) {
 			fmt.Printf("scale is zero\n")
 		}
 	}
+	rs.RasterMu.Lock()
+	defer rs.RasterMu.Unlock()
+
 	rs.Raster.SetStroke(
 		Float32ToFixed(pc.StrokeWidth(rs)),
 		Float32ToFixed(pc.StrokeStyle.MiterLimit),
@@ -542,6 +547,9 @@ func (pc *Paint) stroke(rs *RenderState) {
 
 func (pc *Paint) fill(rs *RenderState) {
 	pr := prof.Start("Paint.fill")
+
+	rs.RasterMu.Lock()
+	defer rs.RasterMu.Unlock()
 
 	rf := &rs.Raster.Filler
 	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)

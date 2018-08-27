@@ -1600,9 +1600,11 @@ func (tv *TreeView) Render2D() {
 func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
+		tv.UpdateSig()
 	case gi.FocusGot:
 		tv.ScrollToMe()
 		tv.EmitFocusedSignal()
+		tv.UpdateSig()
 	case gi.FocusInactive: // don't care..
 	case gi.FocusActive:
 	}

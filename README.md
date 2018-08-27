@@ -97,20 +97,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   
 * also that changed flag on prefs would be reassuring to know that save actually worked..
 
-* treeview key focus not working
-* getting "edit done" events from tab in completer again..
-
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 
 * maybe go ahead and add blinky cursor - not hard.
 
 * fileview should add extension to filename if only one extension provided, if
   user types in a new filename..
-
-* having menubar then toolbar seems potentially kind of confusing?  on X11,
-  top-menu uses same color as windowbar, so it merges in with that.  what does
-  windows do?  mac doesn't have that problem (unless you turn on local menus).
-  Also word, chrome etc don't use a gradient-styled toolbar.
 
 * fix text scroll rendering finally
 
@@ -123,11 +115,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
 
-* need to be able to move content easily between a window and a tab.  should
-  be simple as transferring trees but should test that -- the tab view should
-  then provide this functionality of dragging a window in or a tab out to a
-  window.  The main question is then whether a new popup item goes straight to
-  a tab or not -- need that api in place..
 
 + TextArea -- go full editor..
 

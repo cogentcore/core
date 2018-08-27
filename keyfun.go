@@ -101,6 +101,7 @@ var StdKeyMaps = []*KeyMap{
 	&MacEmacsKeyMap,
 	&LinuxKeyMap,
 	&LinuxEmacsKeyMap,
+	&WindowsKeyMap,
 	&ChromeKeyMap,
 }
 
@@ -110,6 +111,7 @@ var StdKeyMapNames = []string{
 	"MacEmacsKeyMap",
 	"LinuxKeyMap",
 	"LinuxEmacsKeyMap",
+	"WindowsKeyMap",
 	"ChromeKeyMap",
 }
 
