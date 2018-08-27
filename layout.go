@@ -1103,7 +1103,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
-		li, _ := KiToNode2D(recv) // note: avoid using closures
+		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
 		if !ls.IsUpdatingAtomic() {
 			ls.Move2DTree()
@@ -1162,6 +1162,14 @@ func (ly *Layout) RenderScrolls() {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
 			ly.Scrolls[d].Render2D()
+		}
+	}
+}
+
+func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
+	for d := X; d < Dims2DN; d++ {
+		if ly.HasScroll[d] {
+			ly.Scrolls[d].Move2D(delta, parBBox)
 		}
 	}
 }
@@ -1634,7 +1642,8 @@ func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
 
 func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 	ly.Move2DBase(delta, parBBox)
-	delta = ly.Move2DDelta(delta) // add our offset
+	ly.Move2DScrolls(delta, parBBox) // move scrolls BEFORE adding our own!
+	delta = ly.Move2DDelta(delta)    // add our offset
 	ly.Move2DChildren(delta)
 	ly.RenderScrolls()
 }

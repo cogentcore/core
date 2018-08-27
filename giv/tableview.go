@@ -215,7 +215,16 @@ func (tv *TableView) SliceGrid() *gi.Frame {
 	if sf == nil {
 		return nil
 	}
-	return sf.KnownChild(2).(*gi.Frame)
+	return sf.KnownChild(1).(*gi.Frame)
+}
+
+// SliceHeader returns the Toolbar header for slice grid
+func (tv *TableView) SliceHeader() *gi.ToolBar {
+	sf, _ := tv.SliceFrame()
+	if sf == nil {
+		return nil
+	}
+	return sf.KnownChild(0).(*gi.ToolBar)
 }
 
 // ToolBar returns the toolbar widget
@@ -231,7 +240,6 @@ func (tv *TableView) ToolBar() *gi.ToolBar {
 func (tv *TableView) StdSliceFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "header")
-	config.Add(gi.KiT_Separator, "head-sepe")
 	config.Add(gi.KiT_Frame, "grid")
 	return config
 }
@@ -297,16 +305,12 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		updtg = sg.UpdateStart()
 	}
 
-	sgh := sg.KnownChild(0).(*gi.ToolBar)
+	sgh := tv.SliceHeader()
 	sgh.Lay = gi.LayoutHoriz
 	sgh.SetProp("overflow", "hidden") // no scrollbars!
 	// sgh.SetStretchMaxWidth()
 
-	sep := sg.KnownChild(1).(*gi.Separator)
-	sep.Horiz = true
-	sep.SetStretchMaxWidth()
-
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
 
@@ -397,8 +401,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 	}
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg, _ := tv.SliceFrame()
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 
 	updt := sgf.UpdateStart()
 	defer sgf.UpdateEnd(updt)
@@ -571,8 +574,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	oswin.TheApp.Cursor().Push(cursor.Wait)
 	defer oswin.TheApp.Cursor().Pop()
 
-	sg, _ := tv.SliceFrame()
-	sgh := sg.KnownChild(0).(*gi.ToolBar)
+	sgh := tv.SliceHeader()
 	sgh.SetFullReRender()
 	idxOff := 1
 	if !tv.ShowIndex {
@@ -603,7 +605,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortIdx = fldIdx
 	rawIdx := tv.VisFields[fldIdx].Index[0]
 
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	sgf.SetFullReRender()
 
 	StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
@@ -805,8 +807,8 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 
 	nfld := tv.NVisFields + idxOff
-	sgh := sg.KnownChild(0).(*gi.ToolBar)
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgh := tv.SliceHeader()
+	sgf := tv.SliceGrid()
 	if len(sgf.Kids) >= nfld {
 		// sgh.SetProp("max-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
 		sgh.SetProp("min-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
@@ -877,7 +879,7 @@ func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	if sg == nil {
 		return nil, false
 	}
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	widg := sgf.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
 	return widg, true
 }
@@ -896,7 +898,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 		return nil
 	}
 	ridx := nWidgPerRow * row
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
@@ -943,8 +945,7 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (tv *TableView) ScrollToRow(row int) bool {
-	sg, _ := tv.SliceFrame()
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	if widg, ok := tv.RowFirstWidget(row); ok {
 		return sgf.ScrollToItem(widg)
 	}
@@ -1069,8 +1070,7 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	sg, _ := tv.SliceFrame()
-	sgf := sg.KnownChild(2).(*gi.Frame)
+	sgf := tv.SliceGrid()
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	ridx := idx * nWidgPerRow
 	for fli := 0; fli < tv.NVisFields; fli++ {

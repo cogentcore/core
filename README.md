@@ -92,7 +92,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* scrollbars disappear b/c viewbox for kids is not updated to exclude scrollbar, and they overwrite.  need to somehow pass an updated box down during move..
+* blinky cursor causes flicker on resize -- don't blink when resizing ??
+
+* specific to tableview: scrollbars disappear b/c viewbox for kids is not updated to exclude scrollbar, and they overwrite.  need to somehow pass an updated box down during move..
 
 * prefs steadfastly refusing to update contents after method update -- problem
   is that value-views aren't updating -- only re-rendering.

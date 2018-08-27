@@ -125,6 +125,7 @@ type Window struct {
 	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
 	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
 	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	stopEventLoop bool
 }
@@ -376,6 +377,12 @@ func (w *Window) WinViewport2D() *Viewport2D {
 // trigger a resize event and be processed that way when it occurs.
 func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
+}
+
+// Is resizing means the window is actively being resized by user -- don't try
+// to update otherwise
+func (w *Window) IsResizing() bool {
+	return w.Resizing
 }
 
 // Resized updates internal buffers after a window has been resized.
@@ -773,6 +780,7 @@ mainloop:
 					lastSkipped = false
 				}
 			case oswin.WindowResizeEvent:
+				w.Resizing = true
 				we := evi.(*window.Event)
 				// fmt.Printf("resize %v\n", we.Size)
 				if lagMs > EventSkipLagMSec {
@@ -802,6 +810,10 @@ mainloop:
 			w.Resized(w.OSWin.Size())
 			w.FullReRender()
 			skippedResize = nil
+		}
+
+		if et != oswin.WindowResizeEvent && et != oswin.WindowEvent {
+			w.Resizing = false
 		}
 
 		////////////////////////////////////////////////////////////////////////////

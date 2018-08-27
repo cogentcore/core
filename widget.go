@@ -383,9 +383,9 @@ func (g *WidgetBase) Move2DTree() {
 		return
 	}
 	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		parBBox = pg.VpBBox
+	pnii, pn := KiToNode2D(g.Par)
+	if pn != nil {
+		parBBox = pnii.ChildrenBBox2D()
 	}
 	delta := g.LayData.AllocPos.Sub(g.LayData.AllocPosOrig).ToPoint()
 	g.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!

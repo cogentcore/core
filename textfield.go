@@ -956,6 +956,10 @@ func TextFieldBlink() {
 			BlinkingTextField = nil
 			continue
 		}
+		win := tf.ParentWindow()
+		if win == nil || win.IsResizing() {
+			continue
+		}
 		tf.BlinkOn = !tf.BlinkOn
 		tf.RenderCursor(tf.BlinkOn)
 	}
@@ -972,7 +976,10 @@ func (tf *TextField) StartCursor() {
 		go TextFieldBlink()
 	}
 	tf.BlinkOn = true
-	tf.RenderCursor(true)
+	win := tf.ParentWindow()
+	if win != nil && !win.IsResizing() {
+		tf.RenderCursor(true)
+	}
 	BlinkingTextField = tf
 }
 
