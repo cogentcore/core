@@ -31,12 +31,13 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	WidgetBase
-	Fill    bool        `desc:"fill the viewport with background-color from style"`
-	Geom    Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
-	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
+	Fill            bool        `desc:"fill the viewport with background-color from style"`
+	Geom            Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Render          RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	Pixels          *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage         oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
+	Win             *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
+	DoingFullRender bool        `json:"-" xml:"-" desc:"flag that is set during FullRender2DTree, which can be used by elements to drive deep rebuild in case underlying data has changed"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
@@ -346,6 +347,16 @@ func (vp *Viewport2D) RenderViewport2D() {
 		}
 		vp.UploadMainToWin()
 	}
+}
+
+// FullRender2DTree is called by window and other places to completely
+// re-render -- we set our flag when doing this so valueview elements (and
+// anyone else) can do a deep re-build that is typically not otherwise needed
+// (e.g., after non-signaling structs have updated)
+func (vp *Viewport2D) FullRender2DTree() {
+	vp.DoingFullRender = true
+	vp.WidgetBase.FullRender2DTree()
+	vp.DoingFullRender = false
 }
 
 // we use our own render for these -- Viewport member is our parent!

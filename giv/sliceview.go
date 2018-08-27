@@ -415,10 +415,19 @@ func (sv *SliceView) ConfigToolbar() {
 	sv.ToolbarSlice = sv.Slice
 }
 
+func (sv *SliceView) Style2D() {
+	if sv.Viewport != nil && sv.Viewport.DoingFullRender {
+		sv.UpdateFromSlice()
+	}
+	sv.Frame.Style2D()
+}
+
 func (sv *SliceView) Render2D() {
 	sv.ToolBar().UpdateActions()
 	if win := sv.ParentWindow(); win != nil {
-		win.MainMenuUpdateActives()
+		if !win.IsResizing() {
+			win.MainMenuUpdateActives()
+		}
 	}
 	if sv.FullReRenderIfNeeded() {
 		return

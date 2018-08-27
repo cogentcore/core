@@ -206,10 +206,19 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.UpdateEnd(updt)
 }
 
+func (sv *StructView) Style2D() {
+	if sv.Viewport != nil && sv.Viewport.DoingFullRender {
+		sv.UpdateFromStruct()
+	}
+	sv.Frame.Style2D()
+}
+
 func (sv *StructView) Render2D() {
 	sv.ToolBar().UpdateActions()
 	if win := sv.ParentWindow(); win != nil {
-		win.MainMenuUpdateActives()
+		if !win.IsResizing() {
+			win.MainMenuUpdateActives()
+		}
 	}
 	sv.Frame.Render2D()
 }

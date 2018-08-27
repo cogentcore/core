@@ -227,10 +227,20 @@ func (ge *GiEditor) ConfigSplitView() {
 	sv.SetStruct(ge.KiRoot, nil)
 }
 
+// this is not necc and resets root pointer
+// func (ge *GiEditor) Style2D() {
+// 	if ge.Viewport != nil && ge.Viewport.DoingFullRender {
+// 		ge.UpdateFromRoot()
+// 	}
+// 	ge.Frame.Style2D()
+// }
+
 func (ge *GiEditor) Render2D() {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentWindow(); win != nil {
-		win.MainMenuUpdateActives()
+		if !win.IsResizing() {
+			win.MainMenuUpdateActives()
+		}
 	}
 	ge.Frame.Render2D()
 }

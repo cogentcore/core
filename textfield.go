@@ -1001,13 +1001,24 @@ func (tf *TextField) RenderCursor(on bool) {
 			pc.StrokeStyle.SetColor(&st.Font.BgColor.Color)
 		}
 		pc.StrokeStyle.Width = st.Border.Width
+		if on {
+			pc.StrokeStyle.Width.Dots -= .1 // try to get rid of halo
+		}
 		pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tf.FontHeight)
 		pc.Stroke(rs)
 		tf.PopBounds()
 
+		// compute bbox just for the cursor
+		cbmin := cpos.SubVal(st.Border.Width.Dots)
+		cbmax := cpos.AddVal(st.Border.Width.Dots)
+		cbmax.Y += tf.FontHeight
+		curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
+		vprel := curBBox.Min.Sub(tf.VpBBox.Min)
+		curWinBBox := tf.WinBBox.Add(vprel)
+
 		vp := tf.Viewport
 		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, tf.VpBBox, tf.WinBBox) // bigger than necc.
+		vp.Win.UploadVpRegion(vp, curBBox, curWinBBox) // bigger than necc.
 		vp.Win.UpdateEnd(updt)
 	}
 }

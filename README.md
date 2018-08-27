@@ -92,14 +92,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* blinky cursor causes flicker on resize -- don't blink when resizing ??
+* tom's checkbox bug!
 
-* specific to tableview: scrollbars disappear b/c viewbox for kids is not updated to exclude scrollbar, and they overwrite.  need to somehow pass an updated box down during move..
+* apply 2 digit precision on logical scale
 
-* prefs steadfastly refusing to update contents after method update -- problem
-  is that value-views aren't updating -- only re-rendering.
-  
-* also that changed flag on prefs would be reassuring to know that save actually worked..
+* that changed flag on prefs would be reassuring to know that save actually worked..
 
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 

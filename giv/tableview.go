@@ -149,6 +149,28 @@ const (
 
 //go:generate stringer -type=TableViewSignals
 
+// UpdateFromSlice does full update from current slice
+func (tv *TableView) UpdateFromSlice() {
+	mods, updt := tv.StdConfig()
+	tv.ConfigSliceGrid(false)
+	tv.ConfigToolbar()
+	if mods {
+		tv.SetFullReRender()
+		tv.UpdateEnd(updt)
+	}
+}
+
+// UpdateValues just updates rendered values
+func (tv *TableView) UpdateValues() {
+	updt := tv.UpdateStart()
+	for _, vv := range tv.Values {
+		for _, vvf := range vv {
+			vvf.UpdateWidget()
+		}
+	}
+	tv.UpdateEnd(updt)
+}
+
 // StructType returns the type of the struct within the slice, and the number
 // of visible fields
 func (tv *TableView) StructType() reflect.Type {
@@ -775,24 +797,11 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) UpdateFromSlice() {
-	mods, updt := tv.StdConfig()
-	tv.ConfigSliceGrid(false)
-	tv.ConfigToolbar()
-	if mods {
-		tv.SetFullReRender()
-		tv.UpdateEnd(updt)
+func (tv *TableView) Style2D() {
+	if tv.Viewport != nil && tv.Viewport.DoingFullRender {
+		tv.UpdateFromSlice()
 	}
-}
-
-func (tv *TableView) UpdateValues() {
-	updt := tv.UpdateStart()
-	for _, vv := range tv.Values {
-		for _, vvf := range vv {
-			vvf.UpdateWidget()
-		}
-	}
-	tv.UpdateEnd(updt)
+	tv.Frame.Style2D()
 }
 
 func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -825,7 +834,9 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 func (tv *TableView) Render2D() {
 	tv.ToolBar().UpdateActions()
 	if win := tv.ParentWindow(); win != nil {
-		win.MainMenuUpdateActives()
+		if !win.IsResizing() {
+			win.MainMenuUpdateActives()
+		}
 	}
 	if tv.FullReRenderIfNeeded() {
 		return

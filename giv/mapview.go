@@ -334,10 +334,19 @@ func (mv *MapView) ConfigToolbar() {
 	mv.ToolbarMap = mv.Map
 }
 
+func (mv *MapView) Style2D() {
+	if mv.Viewport != nil && mv.Viewport.DoingFullRender {
+		mv.UpdateFromMap()
+	}
+	mv.Frame.Style2D()
+}
+
 func (mv *MapView) Render2D() {
 	mv.ToolBar().UpdateActions()
 	if win := mv.ParentWindow(); win != nil {
-		win.MainMenuUpdateActives()
+		if !win.IsResizing() {
+			win.MainMenuUpdateActives()
+		}
 	}
 	mv.Frame.Render2D()
 }
