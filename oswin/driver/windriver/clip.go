@@ -49,6 +49,16 @@ func (ci *clipImpl) OpenClipboard() bool {
 	return false
 }
 
+func (ci *clipImpl) IsEmpty() bool {
+	if !ci.OpenClipboard() {
+		return false
+	}
+	defer _CloseClipboard()
+
+	avail := _GetClipboardData(_CF_UNICODETEXT) // todo: only checking text now
+	return !avail
+}
+
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if len(types) == 0 {
 		return nil

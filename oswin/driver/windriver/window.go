@@ -233,6 +233,7 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
+	// note: this is NOT the finally common pathway for window close: see "sendClose" below
 	DeleteWindow(w.hwnd)
 }
 
@@ -589,6 +590,11 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
 	theApp.DeleteWin(w.hwnd)
+
+	if theApp.quitting {
+		// fmt.Printf("win: %v quit closing\n", w.Nm)
+		theApp.quitCloseCnt <- struct{}{}
+	}
 	return 0
 }
 

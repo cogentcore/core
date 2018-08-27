@@ -940,9 +940,7 @@ func (app *appImpl) QuitClean() {
 }
 
 func (app *appImpl) Quit() {
-	// todo: could try to invoke quit call instead
 	app.QuitClean()
-	// os.Exit(0)
 	app.quitEndRun = true
 
 	// we just send ourselves a dummy message so the event loop gets something
@@ -953,7 +951,6 @@ func (app *appImpl) Quit() {
 		Type:     app.atomUTF8String, // whatever
 	}
 	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
-	// send to: x.xw
 	xproto.SendEvent(app.xc, true, app.window32, uint32(mask), string(minmsg.Bytes()))
 
 }

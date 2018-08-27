@@ -92,16 +92,29 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* prefs steadfastly refusing to update contents after method update -- problem
+  is that value-views aren't updating -- only re-rendering.
+  
+* also that changed flag on prefs would be reassuring to know that save actually worked..
+
+* treeview key focus not working
+* getting "edit done" events from tab in completer again..
+
+* textfield should scroll layout so that *cursor* is always in view, when editing..
+
+* maybe go ahead and add blinky cursor - not hard.
+
+* fileview should add extension to filename if only one extension provided, if
+  user types in a new filename..
+
+* having menubar then toolbar seems potentially kind of confusing?  on X11,
+  top-menu uses same color as windowbar, so it merges in with that.  what does
+  windows do?  mac doesn't have that problem (unless you turn on local menus).
+  Also word, chrome etc don't use a gradient-styled toolbar.
+
 * fix text scroll rendering finally
 
-* don't add icons to menus, but DO add to toolbar -- find open / save icons,
-  also update -- add to base guys
-
-* other platforms need new quit / close window logic from mac, and clip IsEmpty() method
-
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
-
-* test cursor on windows, x11 getting stuck with close popup..
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..
@@ -120,8 +133,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * add context menus for delete, rename to fileview -- would be a good test to
   make sure context menu api is sufficiently flexible.
-
-* update keymaps for each platform
 
 * update widgets README
 

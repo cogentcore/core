@@ -277,12 +277,21 @@ func (g *ButtonBase) OpenMenu() bool {
 	if g.MakeMenuFunc != nil {
 		g.MakeMenuFunc(&g.Menu)
 	}
-	pos := g.ObjBBox.Max
+	pos := g.WinBBox.Max
+	if pos.X == 0 && pos.Y == 0 { // offscreen
+		pos = g.ObjBBox.Max
+	}
 	indic, ok := g.Parts.ChildByName("indicator", 3)
 	if ok {
-		pos = KiToNode2DBase(indic).ObjBBox.Min
+		pos = KiToNode2DBase(indic).WinBBox.Min
+		if pos.X == 0 && pos.Y == 0 {
+			pos = KiToNode2DBase(indic).ObjBBox.Min
+		}
 	} else {
 		pos.X = g.WinBBox.Min.X
+		if pos.X == 0 {
+			pos.X = g.ObjBBox.Min.X
+		}
 	}
 	if g.Viewport != nil {
 		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)

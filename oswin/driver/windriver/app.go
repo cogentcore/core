@@ -39,6 +39,8 @@ type appImpl struct {
 	screens       []*oswin.Screen
 	name          string
 	about         string
+	quitting      bool          // set to true when quitting and closing windows
+	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
 }
@@ -342,14 +344,18 @@ func (app *appImpl) QuitClean() {
 		app.quitCleanFunc()
 	}
 	nwin := len(app.winlist)
+	app.quitting = true
 	for i := nwin - 1; i >= 0; i-- {
 		win := app.winlist[i]
-		win.Close()
+		go win.Close()
+	}
+	for i := 0; i < nwin; i++ {
+		<-app.quitCloseCnt
+		// fmt.Printf("win closed: %v\n", i)
 	}
 }
 
 func (app *appImpl) Quit() {
-	// todo: could try to invoke quit call instead
 	app.QuitClean()
 	os.Exit(0)
 }
