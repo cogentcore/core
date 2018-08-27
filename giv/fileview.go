@@ -184,7 +184,6 @@ func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
 	config.Add(gi.KiT_ToolBar, "path-tbar")
 	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Layout, "sel-row")
-	config.Add(gi.KiT_Layout, "buttons")
 	return config
 }
 
@@ -199,7 +198,6 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 		fv.ConfigPathRow()
 		fv.ConfigFilesRow()
 		fv.ConfigSelRow()
-		fv.ConfigButtons()
 	}
 	return
 }
@@ -422,15 +420,6 @@ func (fv *FileView) ExtField() *gi.TextField {
 	return sr.KnownChildByName("ext", 2).(*gi.TextField)
 }
 
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (fv *FileView) ButtonBox() (*gi.Layout, int) {
-	idx, ok := fv.Children().IndexByName("buttons", 0)
-	if !ok {
-		return nil, -1
-	}
-	return fv.KnownChild(idx).(*gi.Layout), idx
-}
-
 // UpdatePath ensures that path is in abs form and ready to be used..
 func (fv *FileView) UpdatePath() {
 	if fv.DirPath == "" {
@@ -545,6 +534,10 @@ func (fv *FileView) AddPathToFavs() {
 	if fnm == "" {
 		fnm = dp
 	}
+	if _, found := gi.Prefs.FavPaths.FindPath(dp); found {
+		gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp)}, true, false, nil, nil)
+		return
+	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
 	gi.Prefs.FavPaths = append(gi.Prefs.FavPaths, fi)
 	gi.Prefs.Save()
@@ -658,25 +651,6 @@ func (fv *FileView) SaveSortPrefs() {
 	gi.Prefs.FileViewSort = sv.SortFieldName()
 	// fmt.Printf("sort: %v\n", gi.Prefs.FileViewSort)
 	gi.Prefs.Save()
-}
-
-// ConfigButtons configures the buttons
-func (fv *FileView) ConfigButtons() {
-	// bb, _ := fv.ButtonBox()
-	// config := kit.TypeAndNameList{}
-	// config.Add(gi.KiT_Button, "Add")
-	// mods, updt := bb.ConfigChildren(config, false)
-	// addb := bb.KnownChildByName("Add", 0).Embed(gi.KiT_Button).(*Button)
-	// addb.SetText("Add")
-	// addb.ButtonSig.ConnectOnly(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(ButtonClicked) {
-	// 		fvv := recv.Embed(KiT_FileView).(*FileView)
-	// 		fvv.SliceNewAt(-1)
-	// 	}
-	// })
-	// if mods {
-	// 	bb.UpdateEnd(updt)
-	// }
 }
 
 func (fv *FileView) Style2D() {

@@ -92,6 +92,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* fix text scroll rendering finally
+
+* don't add icons to menus, but DO add to toolbar -- find open / save icons,
+  also update -- add to base guys
+
 * other platforms need new quit / close window logic from mac, and clip IsEmpty() method
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.

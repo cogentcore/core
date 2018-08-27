@@ -703,19 +703,19 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
 	ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 	ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
-	m.AddAction(gi.ActOpts{Label: "Copy", Icon: "copy", Shortcut: cpsc},
+	m.AddAction(gi.ActOpts{Label: "Copy", Shortcut: cpsc},
 		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.Copy(true)
 		})
 	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddAction(gi.ActOpts{Label: "Cut", Icon: "cut", Shortcut: ctsc},
+		m.AddAction(gi.ActOpts{Label: "Cut", Shortcut: ctsc},
 			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TreeView).(*TreeView)
 				tvv.Cut()
 			})
 	}
-	m.AddAction(gi.ActOpts{Label: "Paste", Icon: "paste", Shortcut: ptsc},
+	m.AddAction(gi.ActOpts{Label: "Paste", Shortcut: ptsc},
 		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.Paste()

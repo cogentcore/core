@@ -316,12 +316,11 @@ func (mv *MapView) ConfigToolbar() {
 	tb := mv.ToolBar()
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		addac := tb.AddNewChild(gi.KiT_Action, "Add").(*gi.Action)
-		addac.SetText("Add")
-		addac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			mvv := recv.Embed(KiT_MapView).(*MapView)
-			mvv.MapAdd()
-		})
+		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
+			mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv.MapAdd()
+			})
 	}
 	sz := len(*tb.Children())
 	if sz > 1 {

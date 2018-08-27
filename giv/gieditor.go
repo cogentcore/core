@@ -246,9 +246,13 @@ var GiEditorProps = ki.Props{
 		"vertical-align":   gi.AlignTop,
 	},
 	"ToolBar": ki.PropSlice{
-		{"Update", ki.BlankProp{}},
+		{"Update", ki.Props{
+			"icon": "update",
+		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Load", ki.Props{
+			"label": "Open",
+			"icon":  "file-open",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -256,9 +260,12 @@ var GiEditorProps = ki.Props{
 				}},
 			},
 		}},
-		{"Save", ki.BlankProp{}},
+		{"Save", ki.Props{
+			"icon": "file-save",
+		}},
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
+			"icon":  "file-save",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

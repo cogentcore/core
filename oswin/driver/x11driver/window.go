@@ -419,4 +419,9 @@ func (w *windowImpl) closed() {
 	}
 
 	w.app.DeleteWin(w.xw)
+
+	if theApp.quitting {
+		// fmt.Printf("win: %v quit closing\n", w.Nm)
+		theApp.quitCloseCnt <- struct{}{}
+	}
 }

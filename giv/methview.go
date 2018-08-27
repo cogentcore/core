@@ -239,6 +239,8 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			ac.Shortcut = gi.OSShortcut(kit.ToString(pv))
 		case "label":
 			ac.Text = kit.ToString(pv)
+		case "icon":
+			ac.Icon = gi.IconName(kit.ToString(pv))
 		case "desc":
 			md.Desc = kit.ToString(pv)
 		case "confirm":

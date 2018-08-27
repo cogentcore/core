@@ -351,6 +351,7 @@ var PreferencesProps = ki.Props{
 			}},
 			{"sep-color", ki.BlankProp{}},
 			{"LoadColors", ki.Props{
+				"label": "Open Colors", // open is more GUI-official than load
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -387,15 +388,17 @@ var PreferencesProps = ki.Props{
 	},
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
-			"shortcut": "Command+U",
+			"icon": "update",
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
-			"shortcut": "Command+O",
+			"icon": "file-save",
 		}},
 		{"sep-color", ki.BlankProp{}},
 		{"Colors", ki.PropSlice{ // sub-menu
 			{"LoadColors", ki.Props{
+				"label": "Open Colors",
+				"icon":  "file-open",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -404,6 +407,7 @@ var PreferencesProps = ki.Props{
 				},
 			}},
 			{"SaveColors", ki.Props{
+				"icon": "file-save",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -414,6 +418,7 @@ var PreferencesProps = ki.Props{
 		}},
 		{"sep-scrn", ki.BlankProp{}},
 		{"SaveZoom", ki.Props{
+			"icon": "zoom-in",
 			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
 				{"For Current Screen Only?", ki.Props{
@@ -422,10 +427,12 @@ var PreferencesProps = ki.Props{
 			},
 		}},
 		{"ScreenInfo", ki.Props{
+			"icon":        "info",
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"StdKeyMap", ki.Props{
+			"icon": "keyboard",
 			"desc": "sets StdKeyMapName to selected standard keymap and installs it as the current custom keymap, as a starting point for further customization.",
 			"Args": ki.PropSlice{
 				{"Map Name", ki.Props{
@@ -455,6 +462,16 @@ type FavPaths []FavPathItem
 func (p *FavPaths) SetToDefaults() {
 	*p = make(FavPaths, len(DefaultPaths))
 	copy(*p, DefaultPaths)
+}
+
+// FindPath returns index of path on list, or -1, false if not found
+func (p *FavPaths) FindPath(path string) (int, bool) {
+	for i, fi := range *p {
+		if fi.Path == path {
+			return i, true
+		}
+	}
+	return -1, false
 }
 
 // DefaultPaths are default favorite paths

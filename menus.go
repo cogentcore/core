@@ -156,17 +156,17 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 	ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-	m.AddAction(ActOpts{Label: "Copy", Icon: "copy", Shortcut: cpsc},
+	m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddAction(ActOpts{Label: "Cut", Icon: "cut", Shortcut: ctsc},
+	m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddAction(ActOpts{Label: "Paste", Icon: "paste", Shortcut: ptsc,
+	m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc,
 		UpdateFunc: func(ac *Action) {
 			ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data interface{}) {

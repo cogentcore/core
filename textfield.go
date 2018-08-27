@@ -507,7 +507,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddAction(ActOpts{Label: "Copy", Icon: "copy", Shortcut: cpsc},
+	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.Copy(true)
@@ -516,13 +516,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 	if !tf.IsInactive() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddAction(ActOpts{Label: "Cut", Icon: "cut", Shortcut: ctsc},
+		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
 			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Cut()
 			})
 		ac.SetActiveState(tf.HasSelection())
-		ac = m.AddAction(ActOpts{Label: "Paste", Icon: "paste", Shortcut: ptsc},
+		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Paste()

@@ -92,6 +92,9 @@ type appImpl struct {
 	selNotifyChan   chan xproto.SelectionNotifyEvent
 	name            string
 	about           string
+	quitting        bool // set to true when quitting and closing windows
+	quitEndRun      bool
+	quitCloseCnt    chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc     func()
 	quitCleanFunc   func()
 }
@@ -107,6 +110,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		windows:       map[xproto.Window]*windowImpl{},
 		winlist:       make([]*windowImpl, 0),
 		selNotifyChan: make(chan xproto.SelectionNotifyEvent, 100),
+		quitCloseCnt:  make(chan struct{}),
 		name:          "GoGi",
 	}
 	app.xsci = app.xsi.DefaultScreen(xc)
@@ -209,6 +213,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 }
 
 func (app *appImpl) run() {
+mainloop:
 	for {
 		// fmt.Printf("wait..\n")
 		ev, err := app.xc.WaitForEvent()
@@ -216,6 +221,10 @@ func (app *appImpl) run() {
 		if err != nil {
 			log.Printf("x11driver: xproto.WaitForEvent: %v", err)
 			continue
+		}
+
+		if app.quitEndRun {
+			break mainloop
 		}
 
 		noWindowFound := false
@@ -919,14 +928,33 @@ func (app *appImpl) QuitClean() {
 		app.quitCleanFunc()
 	}
 	nwin := len(app.winlist)
+	app.quitting = true
 	for i := nwin - 1; i >= 0; i-- {
 		win := app.winlist[i]
-		win.Close()
+		go win.Close()
+	}
+	for i := 0; i < nwin; i++ {
+		<-app.quitCloseCnt
+		// fmt.Printf("win closed: %v\n", i)
 	}
 }
 
 func (app *appImpl) Quit() {
 	// todo: could try to invoke quit call instead
 	app.QuitClean()
-	os.Exit(0)
+	// os.Exit(0)
+	app.quitEndRun = true
+
+	// we just send ourselves a dummy message so the event loop gets something
+	minmsg := xproto.ClientMessageEvent{
+		Sequence: 0, // no idea what this is..
+		Format:   32,
+		Window:   app.window32,
+		Type:     w.app.atomUTF8String, // whatever
+		Data:     dat,
+	}
+	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
+	// send to: x.xw
+	xproto.SendEvent(w.app.xc, true, app.window32, uint32(mask), string(minmsg.Bytes()))
+
 }
