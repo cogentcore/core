@@ -288,7 +288,10 @@ void menuSetAsMain(ScreenGLView* view);
     if (self.reallyClose == YES) {
         return YES;
     } else {
-        windowCloseReq((GoUintptr)self);
+        bool close = windowCloseReq((GoUintptr)self);
+        if (close) {
+            return YES;
+        }
         return NO;
     }
 }
@@ -485,6 +488,11 @@ void doCloseWindow(uintptr_t viewID) {
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performClose:view];
         });
+}
+
+void doWindowShouldClose(uintptr_t viewID) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    view.reallyClose = YES;
 }
 
 void doRaiseWindow(uintptr_t viewID) {

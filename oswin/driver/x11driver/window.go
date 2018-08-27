@@ -377,6 +377,10 @@ func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
 }
 
 func (w *windowImpl) CloseReq() {
+	if theApp.quitting {
+		w.Close()
+		return
+	}
 	if w.closeReqFunc != nil {
 		w.closeReqFunc(w)
 	} else {

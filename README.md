@@ -92,14 +92,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* scrollbars disappear b/c viewbox for kids is not updated to exclude scrollbar, and they overwrite.  need to somehow pass an updated box down during move..
+
 * prefs steadfastly refusing to update contents after method update -- problem
   is that value-views aren't updating -- only re-rendering.
   
 * also that changed flag on prefs would be reassuring to know that save actually worked..
 
 * textfield should scroll layout so that *cursor* is always in view, when editing..
-
-* maybe go ahead and add blinky cursor - not hard.
 
 * fileview should add extension to filename if only one extension provided, if
   user types in a new filename..

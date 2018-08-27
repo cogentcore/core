@@ -1166,28 +1166,38 @@ func (ly *Layout) RenderScrolls() {
 	}
 }
 
-// ScrollDelta processes a scroll event with given delta -- returns true if
-// scroll was processed
-func (ly *Layout) ScrollDelta(del image.Point) bool {
+// ScrollDelta processes a scroll event.  If only one dimension is processed,
+// and there is a non-zero in other, then the consumed dimension is reset to 0
+// and the event is left unprocessed, so a higher level can consume the
+// remainder.
+func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
+	del := me.Delta
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
 		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
-		return true
+		me.SetProcessed()
 	} else if ly.HasScroll[Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
-		return true
+		if del.X != 0 {
+			me.Delta.Y = 0
+		} else {
+			me.SetProcessed()
+		}
 	} else if ly.HasScroll[X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
-		d := del.X
-		if d == 0 { // often don't get X
-			d = del.Y
+		if del.X != 0 {
+			ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
+			if del.Y != 0 {
+				me.Delta.X = 0
+			} else {
+				me.SetProcessed()
+			}
+		} else { // use Y instead as mouse wheels typically on have this
+			ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.Y))
+			me.SetProcessed()
 		}
-		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(d))
-		return true
-	} else {
-		return false
 	}
 }
 
@@ -1500,9 +1510,7 @@ func (ly *Layout) LayoutScrollEvents() {
 	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
-		if li.ScrollDelta(me.Delta) {
-			me.SetProcessed()
-		}
+		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {

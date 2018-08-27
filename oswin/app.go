@@ -124,6 +124,11 @@ type App interface {
 	// Quit.
 	QuitReq()
 
+	// IsQuitting returns true when the app is actually quitting -- it is set
+	// to true just before the QuitClean function is called, and before all
+	// the windows are closed.
+	IsQuitting() bool
+
 	// QuitClean calls the function setup in SetQuitCleanFunc and does other
 	// app cleanup -- called on way to quitting.
 	QuitClean()

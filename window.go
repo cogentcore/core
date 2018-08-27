@@ -927,7 +927,6 @@ mainloop:
 			case window.Resize:
 				// fmt.Printf("doing resize for action %v \n", e.Action)
 				w.Resized(w.OSWin.Size())
-				w.MainMenuUpdateWindows()
 				w.FullReRender()
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)

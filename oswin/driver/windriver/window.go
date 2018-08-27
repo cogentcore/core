@@ -219,6 +219,10 @@ func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
 }
 
 func (w *windowImpl) CloseReq() {
+	if theApp.quitting {
+		w.Close()
+		return
+	}
 	if w.closeReqFunc != nil {
 		w.closeReqFunc(w)
 	} else {
@@ -575,7 +579,9 @@ func sendCloseReq(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 	theApp.mu.Lock()
 	w := theApp.windows[hwnd]
 	theApp.mu.Unlock()
-	go w.CloseReq()
+	if !theApp.quitting {
+		go w.CloseReq()
+	}
 	return 0 //
 }
 

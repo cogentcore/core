@@ -264,14 +264,18 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 }
 
 //export windowCloseReq
-func windowCloseReq(id uintptr) {
+func windowCloseReq(id uintptr) bool {
 	theApp.mu.Lock()
 	w := theApp.windows[id]
 	theApp.mu.Unlock()
 	if w == nil {
-		return
+		return true
+	}
+	if theApp.quitting {
+		return true
 	}
 	go w.CloseReq()
+	return false
 }
 
 func closeWindow(id uintptr) {

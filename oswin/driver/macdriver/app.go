@@ -286,6 +286,9 @@ func (app *appImpl) SetQuitCleanFunc(fun func()) {
 }
 
 func (app *appImpl) QuitReq() {
+	if app.quitting {
+		return
+	}
 	if app.quitReqFunc != nil {
 		app.quitReqFunc()
 	} else {
@@ -293,12 +296,16 @@ func (app *appImpl) QuitReq() {
 	}
 }
 
+func (app *appImpl) IsQuitting() bool {
+	return app.quitting
+}
+
 func (app *appImpl) QuitClean() {
+	app.quitting = true
 	if app.quitCleanFunc != nil {
 		app.quitCleanFunc()
 	}
 	nwin := len(app.winlist)
-	app.quitting = true
 	for i := nwin - 1; i >= 0; i-- {
 		win := app.winlist[i]
 		go win.Close()
