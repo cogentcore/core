@@ -202,7 +202,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 		opts.Size = wgp.Size
 		opts.Pos = wgp.Pos
 		opts.StdPixels = false
-		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
+		fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
 		if _, found := AllWindows.FindName(name); found {
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
@@ -2301,6 +2301,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		if scrn.LogicalDPI == wp.LogicalDPI {
 			return &wp
 		} else {
+			fmt.Printf("rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.LogicalDPI)
 			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
 			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
 			return &wp

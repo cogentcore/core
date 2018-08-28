@@ -507,7 +507,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	// todo: multiple screens..
 	sc := app.Screen(0)
 	dpi := sc.PhysicalDPI
-	ldpi := dpi
+	ldpi := sc.LogicalDPI
 
 	w := &windowImpl{
 		app:     app,
