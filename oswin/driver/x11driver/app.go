@@ -950,12 +950,16 @@ func (app *appImpl) Quit() {
 	app.QuitClean()
 	app.quitEndRun = true
 
+	vdat := []uint32{1, xproto.TimeCurrentTime, 0, 0, 0} // 1 = make it active somehow
+	dat := xproto.ClientMessageDataUnionData32New(vdat)
+
 	// we just send ourselves a dummy message so the event loop gets something
 	minmsg := xproto.ClientMessageEvent{
 		Sequence: 0, // no idea what this is..
 		Format:   32,
 		Window:   app.window32,
 		Type:     app.atomUTF8String, // whatever
+		Data:     dat,
 	}
 	mask := xproto.EventMaskSubstructureRedirect | xproto.EventMaskSubstructureNotify
 	xproto.SendEvent(app.xc, true, app.window32, uint32(mask), string(minmsg.Bytes()))
