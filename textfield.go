@@ -22,9 +22,9 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// TextFieldCursorBlinkMSec is number of milliseconds that cursor blinks on
+// CursorBlinkMSec is number of milliseconds that cursor blinks on
 // and off -- set to 0 to disable blinking
-var TextFieldCursorBlinkMSec = 500
+var CursorBlinkMSec = 500
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // CompletionData
@@ -173,6 +173,9 @@ func (tf *TextField) RevertEdit() {
 	tf.EndPos = tf.CharWidth
 	tf.SelectReset()
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//  Cursor Navigation
 
 // CursorForward moves the cursor forward
 func (tf *TextField) CursorForward(steps int) {
@@ -967,12 +970,12 @@ func TextFieldBlink() {
 
 func (tf *TextField) StartCursor() {
 	tf.BlinkOn = true
-	if TextFieldCursorBlinkMSec == 0 {
+	if CursorBlinkMSec == 0 {
 		tf.RenderCursor(true)
 		return
 	}
 	if TextFieldBlinker == nil {
-		TextFieldBlinker = time.NewTicker(time.Duration(TextFieldCursorBlinkMSec) * time.Millisecond)
+		TextFieldBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
 		go TextFieldBlink()
 	}
 	tf.BlinkOn = true

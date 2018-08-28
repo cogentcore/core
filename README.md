@@ -94,8 +94,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * tom's checkbox bug!
 
-* apply 2 digit precision on logical scale
-
 * that changed flag on prefs would be reassuring to know that save actually worked..
 
 * textfield should scroll layout so that *cursor* is always in view, when editing..

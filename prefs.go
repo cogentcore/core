@@ -34,7 +34,7 @@ var ZoomFactor = float32(1.0)
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
 type ScreenPrefs struct {
-	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
+	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
 }
 
 // ColorPrefs specify colors for all major categories of GUI elements, and are
@@ -292,13 +292,13 @@ func (p *Preferences) SaveZoom(forCurrentScreen bool) {
 		if !ok {
 			sp = ScreenPrefs{}
 		}
-		sp.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
+		sp.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
 		if p.ScreenPrefs == nil {
 			p.ScreenPrefs = make(map[string]ScreenPrefs)
 		}
 		p.ScreenPrefs[sc.Name] = sp
 	} else {
-		p.LogicalDPIScale = sc.LogicalDPI / sc.PhysicalDPI
+		p.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
 }
 

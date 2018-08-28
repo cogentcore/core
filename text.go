@@ -932,7 +932,7 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 // font, color, and decoration info, and strips out the tags it processes --
 // result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
-// special css styling of each element
+// special css styling of each element.
 func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, cssAgg ki.Props) {
 	sz := len(str)
 	if sz == 0 {
@@ -1065,9 +1065,18 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			if len(se.Attr) > 0 {
 				sprop := make(ki.Props, len(se.Attr))
 				for _, attr := range se.Attr {
-					if attr.Name.Local == "style" {
+					switch attr.Name.Local {
+					case "style":
 						SetStylePropsXML(attr.Value, &sprop)
-					} else {
+					case "class":
+						if cssAgg != nil {
+							clnm := "." + attr.Value
+							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
+								fs.SetStyleProps(nil, aggp)
+								fs.LoadFont(ctxt)
+							}
+						}
+					default:
 						sprop[attr.Name.Local] = attr.Value
 					}
 				}

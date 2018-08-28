@@ -118,7 +118,7 @@ var LabelSelectors = []string{":active", ":inactive", ":selected"}
 // SetText sets the text and updates the rendered version
 func (g *Label) SetText(txt string) {
 	g.Text = txt
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
+	g.Render.SetHTML(g.Text, &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
 	spc := g.Sty.BoxSpace()
 	sz := g.LayData.AllocSize
 	if sz.IsZero() {
@@ -127,7 +127,7 @@ func (g *Label) SetText(txt string) {
 	if !sz.IsZero() {
 		sz.SetSubVal(2 * spc)
 	}
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
+	g.Render.LayoutStdLR(&g.Sty.Text, &g.Sty.Font, &g.Sty.UnContext, sz)
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
