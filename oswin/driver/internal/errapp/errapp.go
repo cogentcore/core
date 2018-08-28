@@ -51,6 +51,7 @@ func (s stub) SetAbout(about string)       {}
 func (s stub) OpenURL(url string)          {}
 func (s stub) SetQuitReqFunc(fun func())   {}
 func (s stub) SetQuitCleanFunc(fun func()) {}
+func (s stub) IsQuitting() bool            { return false }
 func (s stub) QuitReq()                    {}
 func (s stub) QuitClean()                  {}
 func (s stub) Quit()                       {}
