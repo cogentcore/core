@@ -206,7 +206,8 @@ func (km *KeyMap) Update() {
 		}
 		mmi := kms[mi]
 		if dki.Fun < mmi.Fun {
-			addkm = append(addkm, dki)
+			fmt.Printf("warning - %v has no key mapping", dki.Fun)
+			//addkm = append(addkm, dki)
 		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
 			mi++
 		} else {
