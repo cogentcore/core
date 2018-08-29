@@ -79,7 +79,7 @@ var TextFieldProps = ki.Props{
 	},
 }
 
-// signals that buttons can send
+// TextFieldSignals are signals that that textfield can send
 type TextFieldSignals int64
 
 const (
@@ -118,7 +118,9 @@ const (
 // Style selector names for the different states
 var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 
-// Text returns the current text -- applies any unapplied changes first
+// Text returns the current text -- applies any unapplied changes first, and
+// sends a signal if so -- this is the end-user method to get the current
+// value of the field.
 func (tf *TextField) Text() string {
 	tf.EditDone()
 	return tf.Txt
@@ -130,7 +132,7 @@ func (tf *TextField) SetText(txt string) {
 		return
 	}
 	tf.Txt = txt
-	tf.RevertEdit()
+	tf.Revert()
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
@@ -152,8 +154,8 @@ func (tf *TextField) EditDone() {
 	tf.ClearSelected()
 }
 
-// RevertEdit aborts editing and reverts to last saved text
-func (tf *TextField) RevertEdit() {
+// Revert aborts editing and reverts to last saved text
+func (tf *TextField) Revert() {
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	tf.EditTxt = []rune(tf.Txt)
@@ -687,7 +689,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tf.FocusNext()
 	case KeyFunAbort: // esc
-		tf.RevertEdit()
+		tf.Revert()
 		kt.SetProcessed()
 		tf.FocusNext()
 	case KeyFunBackspace:
