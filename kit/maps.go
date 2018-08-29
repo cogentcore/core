@@ -12,6 +12,20 @@ import (
 // This file contains helpful functions for dealing with maps, in the reflect
 // system
 
+// MapValueType returns the type of the value for the given map (which can be
+// a pointer to a map or a direct map) -- just Elem() of map type, but using
+// this function makes it more explicit what is going on.
+func MapValueType(mp interface{}) reflect.Type {
+	return NonPtrType(reflect.TypeOf(mp)).Elem()
+}
+
+// MapKeyType returns the type of the key for the given map (which can be a
+// pointer to a map or a direct map) -- just Key() of map type, but using
+// this function makes it more explicit what is going on.
+func MapKeyType(mp interface{}) reflect.Type {
+	return NonPtrType(reflect.TypeOf(mp)).Key()
+}
+
 // MapElsValueFun calls a function on all the "basic" elements of given map --
 // iterates over maps within maps (but not structs, slices within maps).
 func MapElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.Type, key, val reflect.Value) bool) bool {
