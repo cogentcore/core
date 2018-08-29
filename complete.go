@@ -12,6 +12,9 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Complete
+
+// Complete holds the current completion data and functions to call for building
+// the list of possible completions and for editing text after a completion is selected
 type Complete struct {
 	MatchFunc   complete.MatchFunc `desc:"function to get the list of possible completions"`
 	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
@@ -20,6 +23,7 @@ type Complete struct {
 	Seed        string             `desc:"current completion seed"`
 }
 
+// ShowCompletions calls MatchFunc to get a list of completions and builds the completion popup menu
 func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int, f *TextField) {
 	if c.MatchFunc == nil {
 		return
