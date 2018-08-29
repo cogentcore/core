@@ -174,10 +174,10 @@ func (tv *TableView) UpdateValues() {
 	tv.UpdateEnd(updt)
 }
 
-// StructType returns the type of the struct within the slice, and the number
-// of visible fields
+// StructType sets the StruType and returns the type of the struct within the
+// slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = kit.NonPtrType(reflect.TypeOf(tv.Slice).Elem().Elem())
+	tv.StruType = kit.NonPtrType(kit.SliceElType(tv.Slice))
 	return tv.StruType
 }
 
@@ -333,6 +333,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sgh := tv.SliceHeader()
 	sgh.Lay = gi.LayoutHoriz
 	sgh.SetProp("overflow", "hidden") // no scrollbars!
+	sgh.SetProp("spacing", 0)
 	// sgh.SetStretchMaxWidth()
 
 	sgf := tv.SliceGrid()
@@ -544,27 +545,24 @@ func (tv *TableView) ConfigSliceGridRows() {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end -- reconfig means call ConfigSliceGrid to update display
 func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
-	if tv.Slice == nil || kit.IfaceIsNil(tv.Slice) {
-		return
-	}
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
+	sltyp := kit.SliceElType(tv.Slice) // has pointer if it is there
+	slptr := sltyp.Kind() == reflect.Ptr
+
 	tvl := reflect.ValueOf(tv.Slice)
-	sltyp := reflect.TypeOf(tv.Slice).Elem().Elem()
 	tvnp := kit.NonPtrValue(tvl)
 	styp := tv.StructType()
-	nval := reflect.New(styp)
-	fmt.Printf("elem: %v nval typ: %T  nval% v  sltyp: %v\n", styp.String(), nval, nval, sltyp.String())
-	sz := tvnp.Len()
-	if sltyp.Kind() == reflect.Ptr {
-		tvnp = reflect.Append(tvnp, nval)
-	} else {
-		tvnp = reflect.Append(tvnp, nval.Elem())
+	nval := reflect.New(styp) // pointer to non-pointer for sure
+	if !slptr {
+		nval = nval.Elem() // use concrete value
 	}
-	if idx >= 0 && idx < sz-1 {
+	sz := tvnp.Len()
+	tvnp = reflect.Append(tvnp, nval)
+	if idx >= 0 && idx < sz {
 		reflect.Copy(tvnp.Slice(idx+1, sz+1), tvnp.Slice(idx, sz))
-		tvnp.Index(idx).Set(nval.Elem())
+		tvnp.Index(idx).Set(nval)
 	}
 	tvl.Elem().Set(tvnp)
 	if tv.TmpSave != nil {
@@ -831,13 +829,15 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sgh := tv.SliceHeader()
 	sgf := tv.SliceGrid()
 	if len(sgf.Kids) >= nfld {
-		// sgh.SetProp("max-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
-		sgh.SetProp("min-width", units.NewValue(sgf.LayData.AllocSize.X, units.Dot))
+		sumwd := float32(0)
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
 			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()
-			lbl.SetProp("width", units.NewValue(widg.LayData.AllocSize.X, units.Dot))
+			wd := widg.LayData.AllocSize.X - sgf.Spacing.Dots
+			lbl.SetProp("width", units.NewValue(wd, units.Dot))
+			sumwd += wd
 		}
+		sgh.SetProp("min-width", sumwd)
 		sgh.Layout2D(parBBox, iter)
 	}
 	return redo

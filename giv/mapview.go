@@ -258,6 +258,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
+// MapAdd adds a new entry to the map
 func (mv *MapView) MapAdd() {
 	if kit.IfaceIsNil(mv.Map) {
 		return
@@ -268,12 +269,12 @@ func (mv *MapView) MapAdd() {
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := kit.NonPtrValue(mpv)
 	mvtyp := mpvnp.Type()
-	valtyp := kit.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
+	valtyp := kit.MapValueType(mv.Map)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		str := ""
 		valtyp = reflect.TypeOf(str)
 	}
-	nkey := reflect.New(mvtyp.Key())
+	nkey := reflect.New(kit.MapKeyType(mv.Map))
 	nval := reflect.New(valtyp)
 	if mpvnp.IsNil() { // make a new map
 		nmp := kit.MakeMap(mvtyp)
@@ -288,6 +289,7 @@ func (mv *MapView) MapAdd() {
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
+// MapDelete deletes a key-value from the map
 func (mv *MapView) MapDelete(key reflect.Value) {
 	if kit.IfaceIsNil(mv.Map) {
 		return

@@ -355,6 +355,9 @@ func (vp *Viewport2D) RenderViewport2D() {
 // (e.g., after non-signaling structs have updated)
 func (vp *Viewport2D) FullRender2DTree() {
 	vp.DoingFullRender = true
+	if Render2DTrace {
+		fmt.Printf("Render: %v doing full render\n", vp.PathUnique())
+	}
 	vp.WidgetBase.FullRender2DTree()
 	vp.DoingFullRender = false
 }

@@ -672,6 +672,9 @@ var CheckBoxProps = ki.Props{
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
+	"margin":           units.NewValue(1, units.Px),
+	"padding":          units.NewValue(1, units.Px),
+	"border-width":     units.NewValue(0, units.Px),
 	"#icon0": ki.Props{
 		"width":            units.NewValue(1, units.Em),
 		"height":           units.NewValue(1, units.Em),

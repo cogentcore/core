@@ -33,6 +33,7 @@ import (
 type SliceView struct {
 	gi.Frame
 	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	IsArray      bool               `desc:"whether the slice is actually an array -- no modifications"`
 	StyleFunc    SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	Values       []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
@@ -67,6 +68,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
+		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		if !sv.IsInactive() {
 			sv.SelectedIdx = -1
 		}
@@ -171,7 +173,7 @@ func (sv *SliceView) ToolBar() *gi.ToolBar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsInactive() {
+	if !sv.IsInactive() && !sv.IsArray {
 		nWidgPerRow += 2
 	}
 	idxOff = 1
@@ -302,29 +304,31 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				svv.UpdateSig()
 				svv.ViewSig.Emit(svv.This, 0, nil)
 			})
-			addnm := fmt.Sprintf("add-%v", idxtxt)
-			delnm := fmt.Sprintf("del-%v", idxtxt)
-			addact := gi.Action{}
-			delact := gi.Action{}
-			sg.SetChild(&addact, ridx+idxOff+1, addnm)
-			sg.SetChild(&delact, ridx+idxOff+2, delnm)
+			if !sv.IsArray {
+				addnm := fmt.Sprintf("add-%v", idxtxt)
+				delnm := fmt.Sprintf("del-%v", idxtxt)
+				addact := gi.Action{}
+				delact := gi.Action{}
+				sg.SetChild(&addact, ridx+idxOff+1, addnm)
+				sg.SetChild(&delact, ridx+idxOff+2, delnm)
 
-			addact.SetIcon("plus")
-			addact.Tooltip = "insert a new element at this index"
-			addact.Data = i
-			addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				act := send.(*gi.Action)
-				svv := recv.Embed(KiT_SliceView).(*SliceView)
-				svv.SliceNewAt(act.Data.(int)+1, true)
-			})
-			delact.SetIcon("minus")
-			delact.Tooltip = "delete this element"
-			delact.Data = i
-			delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				act := send.(*gi.Action)
-				svv := recv.Embed(KiT_SliceView).(*SliceView)
-				svv.SliceDelete(act.Data.(int), true)
-			})
+				addact.SetIcon("plus")
+				addact.Tooltip = "insert a new element at this index"
+				addact.Data = i
+				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					act := send.(*gi.Action)
+					svv := recv.Embed(KiT_SliceView).(*SliceView)
+					svv.SliceNewAt(act.Data.(int)+1, true)
+				})
+				delact.SetIcon("minus")
+				delact.Tooltip = "delete this element"
+				delact.Data = i
+				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					act := send.(*gi.Action)
+					svv := recv.Embed(KiT_SliceView).(*SliceView)
+					svv.SliceDelete(act.Data.(int), true)
+				})
+			}
 		}
 		if sv.StyleFunc != nil {
 			sv.StyleFunc(sv, mvnp.Interface(), widg, i, vv)
@@ -341,18 +345,28 @@ func (sv *SliceView) ConfigSliceGridRows() {
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
 func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
+	if sv.IsArray {
+		return
+	}
+
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
+	sltyp := kit.SliceElType(sv.Slice) // has pointer if it is there
+	slptr := sltyp.Kind() == reflect.Ptr
+
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
-	svtyp := svnp.Type()
-	nval := reflect.New(svtyp.Elem())
+
+	nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
+	if !slptr {
+		nval = nval.Elem() // use concrete value
+	}
 	sz := svnp.Len()
-	svnp = reflect.Append(svnp, nval.Elem())
-	if idx >= 0 && idx < sz-1 {
+	svnp = reflect.Append(svnp, nval)
+	if idx >= 0 && idx < sz {
 		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval.Elem())
+		svnp.Index(idx).Set(nval)
 	}
 	svl.Elem().Set(svnp)
 	if sv.TmpSave != nil {
@@ -366,6 +380,10 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 
 // SliceDelete deletes element at given index from slice
 func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
+	if sv.IsArray {
+		return
+	}
+
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
@@ -395,7 +413,11 @@ func (sv *SliceView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
-	if len(*tb.Children()) == 0 {
+	nact := 1
+	if sv.IsArray || sv.IsInactive() {
+		nact = 0
+	}
+	if len(*tb.Children()) < nact {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 			sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -404,8 +426,8 @@ func (sv *SliceView) ConfigToolbar() {
 			})
 	}
 	sz := len(*tb.Children())
-	if sz > 1 {
-		for i := sz - 1; i >= 1; i-- {
+	if sz > nact {
+		for i := sz - 1; i >= nact; i-- {
 			tb.DeleteChildAtIndex(i, true)
 		}
 	}

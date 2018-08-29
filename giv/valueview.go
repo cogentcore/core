@@ -728,8 +728,9 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 // SliceValueView presents a button to edit slices
 type SliceValueView struct {
 	ValueViewBase
-	ElType   reflect.Type
-	IsStruct bool
+	IsArray    bool         // is an array, not a slice
+	ElType     reflect.Type // type of element in the slice -- has pointer if slice has pointers
+	ElIsStruct bool         // whether non-pointer element type is a struct or not
 }
 
 var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
@@ -746,10 +747,10 @@ func (vv *SliceValueView) UpdateWidget() {
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
-	if npv.Kind() == reflect.Interface {
-		txt = fmt.Sprintf("Slice: %T", npv.Interface())
+	if vv.IsArray {
+		txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
 	} else {
-		txt = fmt.Sprintf("[%v] %T", npv.Len(), npv.Interface())
+		txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
 	}
 	ac.SetText(txt)
 }
@@ -757,8 +758,9 @@ func (vv *SliceValueView) UpdateWidget() {
 func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	slci := vv.Value.Interface()
-	vv.ElType = kit.NonPtrType(reflect.TypeOf(slci).Elem())
-	vv.IsStruct = (vv.ElType.Kind() == reflect.Struct)
+	vv.IsArray = kit.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
+	vv.ElType = kit.SliceElType(slci)
+	vv.ElIsStruct = (kit.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewValue(2, units.Px))
@@ -777,10 +779,17 @@ func (vv *SliceValueView) HasAction() bool {
 }
 
 func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	tynm := "Slice of " + kit.NonPtrType(vv.ElType).Name()
+	tynm := ""
+	if vv.IsArray {
+		tynm = "Array of "
+	} else {
+		tynm = "Slice of "
+	}
+	tynm += kit.NonPtrType(vv.ElType).String()
 	desc, _ := vv.Tag("desc")
-	if vv.IsStruct {
-		dlg := TableViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
+	slci := vv.Value.Interface()
+	if !vv.IsArray && vv.ElIsStruct {
+		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
@@ -792,7 +801,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
+		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
@@ -827,12 +836,8 @@ func (vv *MapValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
-	txt := ""
-	if npv.Kind() == reflect.Interface {
-		txt = fmt.Sprintf("Map: %T", npv.Interface())
-	} else {
-		txt = fmt.Sprintf("Map: [%v] %T", npv.Len(), npv.Interface())
-	}
+	mpi := vv.Value.Interface()
+	txt := fmt.Sprintf("Map: [%v %v]%v", npv.Len(), kit.MapKeyType(mpi).String(), kit.MapValueType(mpi).String())
 	ac.SetText(txt)
 }
 
@@ -858,11 +863,12 @@ func (vv *MapValueView) HasAction() bool {
 func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tmptyp := kit.NonPtrType(vv.Value.Type())
 	desc, _ := vv.Tag("desc")
+	mpi := vv.Value.Interface()
 	tynm := tmptyp.Name()
 	if tynm == "" {
 		tynm = tmptyp.String()
 	}
-	dlg := MapViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
+	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
