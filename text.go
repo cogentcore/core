@@ -1132,6 +1132,211 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 	}
 }
 
+// SetHTMLPre sets preformatted HTML-styled text by decoding all standard
+// inline HTML text style formatting tags in the string and sets the
+// per-character font information appropriately, using given font style info.
+// Only basic styling tags, including <span> elements with style parameters
+// (including class names) are decoded.  Whitespace is decoded as-is,
+// including CR \n etc.
+func (tr *TextRender) SetHTMLPre(str string, font *FontStyle, ctxt *units.Context, cssAgg ki.Props) {
+	sz := len(str)
+	if sz == 0 {
+		return
+	}
+	tr.Spans = make([]SpanRender, 1)
+	tr.Links = nil
+	curSp := &(tr.Spans[0])
+	initsz := kit.MinInt(sz, 1020)
+	curSp.Init(initsz)
+
+	bIn := []byte(str)
+
+	reader := bytes.NewReader(bIn)
+	decoder := xml.NewDecoder(reader)
+	decoder.Strict = false
+	decoder.AutoClose = xml.HTMLAutoClose
+	decoder.Entity = xml.HTMLEntity
+	decoder.CharsetReader = charset.NewReaderLabel
+
+	font.LoadFont(ctxt)
+
+	// set when a </p> is encountered
+	nextIsParaStart := false
+	curLinkIdx := -1 // if currently processing an <a> link element
+
+	fstack := make([]*FontStyle, 1, 10)
+	fstack[0] = font
+	for {
+		t, err := decoder.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Printf("gi.TextRender DecodeHTML parsing error: %v\n", err)
+			break
+		}
+		switch se := t.(type) {
+		case xml.StartElement:
+			curf := fstack[len(fstack)-1]
+			fs := *curf
+			nm := strings.ToLower(se.Name.Local)
+			curLinkIdx = -1
+			// https://www.w3schools.com/cssref/css_default_values.asp
+			switch nm {
+			case "b", "strong":
+				fs.Weight = WeightBold
+				fs.LoadFont(ctxt)
+			case "i", "em", "var", "cite":
+				fs.Style = FontItalic
+				fs.LoadFont(ctxt)
+			case "ins":
+				fallthrough
+			case "u":
+				fs.SetDeco(DecoUnderline)
+			case "a":
+				fs.Color.SetColor(Prefs.Colors.Link)
+				fs.SetDeco(DecoUnderline)
+				curLinkIdx = len(tr.Links)
+				tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
+				sprop := make(ki.Props, len(se.Attr))
+				tl.Props = sprop
+				for _, attr := range se.Attr {
+					if attr.Name.Local == "href" {
+						tl.URL = attr.Value
+					}
+					sprop[attr.Name.Local] = attr.Value
+				}
+				tr.Links = append(tr.Links, *tl)
+			case "s", "del", "strike":
+				fs.SetDeco(DecoLineThrough)
+			case "sup":
+				fs.SetDeco(DecoSuper)
+				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+				curpts -= 2
+				fs.Size = units.NewValue(float32(curpts), units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt)
+			case "sub":
+				fs.SetDeco(DecoSub)
+				fallthrough
+			case "small":
+				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+				curpts -= 2
+				fs.Size = units.NewValue(float32(curpts), units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt)
+			case "big":
+				curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+				curpts += 2
+				fs.Size = units.NewValue(float32(curpts), units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt)
+			case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
+				fs.Size = units.NewValue(FontSizePoints[nm], units.Pt)
+				fs.Size.ToDots(ctxt)
+				fs.LoadFont(ctxt)
+			case "mark":
+				fs.BgColor.SetColor(Prefs.Colors.Highlight)
+			case "abbr", "acronym":
+				fs.SetDeco(DecoDottedUnderline)
+			case "tt", "kbd", "samp", "code":
+				fs.Family = "monospace"
+				fs.LoadFont(ctxt)
+			case "span":
+				// just uses props
+			case "q":
+				curf := fstack[len(fstack)-1]
+				atStart := len(curSp.Text) == 0
+				curSp.AppendRune('“', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+				if nextIsParaStart && atStart {
+					curSp.SetNewPara()
+				}
+				nextIsParaStart = false
+			case "dfn":
+				// no default styling
+			case "bdo":
+				// bidirectional override..
+			case "p":
+				if len(curSp.Text) > 0 {
+					// fmt.Printf("para start: '%v'\n", string(curSp.Text))
+					tr.Spans = append(tr.Spans, SpanRender{})
+					curSp = &(tr.Spans[len(tr.Spans)-1])
+				}
+				nextIsParaStart = true
+			case "br":
+			default:
+				log.Printf("gi.TextRender SetHTML tag not recognized: %v\n", nm)
+			}
+			if len(se.Attr) > 0 {
+				sprop := make(ki.Props, len(se.Attr))
+				for _, attr := range se.Attr {
+					switch attr.Name.Local {
+					case "style":
+						SetStylePropsXML(attr.Value, &sprop)
+					case "class":
+						if cssAgg != nil {
+							clnm := "." + attr.Value
+							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
+								fs.SetStyleProps(nil, aggp)
+								fs.LoadFont(ctxt)
+							}
+						}
+					default:
+						sprop[attr.Name.Local] = attr.Value
+					}
+				}
+				fs.SetStyleProps(nil, sprop)
+				fs.LoadFont(ctxt)
+			}
+			if cssAgg != nil {
+				fs.StyleCSS(nm, cssAgg, ctxt)
+			}
+			fstack = append(fstack, &fs)
+		case xml.EndElement:
+			switch se.Name.Local {
+			case "p":
+				tr.Spans = append(tr.Spans, SpanRender{})
+				curSp = &(tr.Spans[len(tr.Spans)-1])
+				nextIsParaStart = true
+			case "br":
+				tr.Spans = append(tr.Spans, SpanRender{})
+				curSp = &(tr.Spans[len(tr.Spans)-1])
+			case "q":
+				curf := fstack[len(fstack)-1]
+				curSp.AppendRune('”', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+			case "a":
+				if curLinkIdx >= 0 {
+					tl := &tr.Links[curLinkIdx]
+					tl.EndSpan = len(tr.Spans) - 1
+					tl.EndIdx = len(curSp.Text) - 1
+					curLinkIdx = -1
+				}
+			}
+			if len(fstack) > 1 {
+				fstack = fstack[:len(fstack)-1]
+			}
+		case xml.CharData:
+			curf := fstack[len(fstack)-1]
+			atStart := len(curSp.Text) == 0
+			str := string(se)
+			if nextIsParaStart && atStart {
+				str = strings.TrimLeftFunc(str, func(r rune) bool {
+					return unicode.IsSpace(r)
+				})
+			}
+			curSp.AppendString(str, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+			if nextIsParaStart && atStart {
+				curSp.SetNewPara()
+			}
+			nextIsParaStart = false
+			if curLinkIdx >= 0 {
+				tl := &tr.Links[curLinkIdx]
+				tl.Label = str
+			}
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  TextStyle
 

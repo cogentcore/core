@@ -86,6 +86,9 @@ type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, r
 // to represent this slice
 func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false
+	if kit.IfaceIsNil(sl) {
+		return
+	}
 	if tv.Slice != sl {
 		if !tv.IsInactive() {
 			tv.SelectedIdx = -1
@@ -541,15 +544,24 @@ func (tv *TableView) ConfigSliceGridRows() {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end -- reconfig means call ConfigSliceGrid to update display
 func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
+	if tv.Slice == nil || kit.IfaceIsNil(tv.Slice) {
+		return
+	}
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
 	tvl := reflect.ValueOf(tv.Slice)
+	sltyp := reflect.TypeOf(tv.Slice).Elem().Elem()
 	tvnp := kit.NonPtrValue(tvl)
-	tvtyp := tvnp.Type()
-	nval := reflect.New(tvtyp.Elem())
+	styp := tv.StructType()
+	nval := reflect.New(styp)
+	fmt.Printf("elem: %v nval typ: %T  nval% v  sltyp: %v\n", styp.String(), nval, nval, sltyp.String())
 	sz := tvnp.Len()
-	tvnp = reflect.Append(tvnp, nval.Elem())
+	if sltyp.Kind() == reflect.Ptr {
+		tvnp = reflect.Append(tvnp, nval)
+	} else {
+		tvnp = reflect.Append(tvnp, nval.Elem())
+	}
 	if idx >= 0 && idx < sz-1 {
 		reflect.Copy(tvnp.Slice(idx+1, sz+1), tvnp.Slice(idx, sz))
 		tvnp.Index(idx).Set(nval.Elem())

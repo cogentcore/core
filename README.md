@@ -92,6 +92,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* favview not showing tableview
+
 * tom's checkbox bug!
 
 * that changed flag on prefs would be reassuring to know that save actually worked..

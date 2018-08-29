@@ -66,7 +66,7 @@ func mainrun() {
 	vp.CSS = css
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewValue(1, units.Px))
+	mfr.SetProp("spacing", units.NewValue(1, units.Ex))
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
