@@ -6,7 +6,6 @@ package gi
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"log"
 	"strings"
@@ -43,19 +42,21 @@ type TextPos struct {
 // works on in-memory strings.  Set the min
 type TextEdit struct {
 	WidgetBase
-	Txt         string `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Edited      bool   `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	TabWidth    int    `desc:"how many spaces is a tab"`
-	HiLang      string `desc:"language for syntax highlighting the code"`
-	HiStyle     string `desc:"syntax highlighting style"`
-	HiCSS       StyleSheet
-	FocusActive bool `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines      int
-	EditLines   [][]rune     `json:"-" xml:"-" desc:"the live text being edited, with latest modifications -- encoded as runes per line"`
-	EditTxt     []rune       `json:"-" xml:"-" desc:"the live text being edited, with latest modifications -- encoded as runes per line"`
-	MarkupTxt   [][]byte     `json:"-" xml:"-" desc:"marked-up version of the edit text, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	Render      []TextRender `json:"-" xml:"-" desc:"render of the text -- what is actually visible -- per line"`
+	Txt         string       `json:"-" xml:"text" desc:"the last saved value of the entire text string being edited"`
+	Placeholder string       `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Edited      bool         `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	TabWidth    int          `desc:"how many spaces is a tab"`
+	HiLang      string       `desc:"language for syntax highlighting the code"`
+	HiStyle     string       `desc:"syntax highlighting style"`
+	HiCSS       StyleSheet   `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
+	FocusActive bool         `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines      int          `json:"-" xml:"-" desc:"number of lines"`
+	Lines       [][]rune     `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
+	Markup      [][]byte     `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	Render      []TextRender `json:"-" xml:"-" desc:"render of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs        []float32    `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LinesSize   Vec2D        `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz    Vec2D        `json:"-" xml:"-" desc:"size params to use in render call"`
 	MaxWidthReq int          `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	CursorPos   int          `xml:"-" desc:"current cursor position"`
 	StartPos    int
@@ -70,6 +71,13 @@ type TextEdit struct {
 	FontHeight  float32                `json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn     bool                   `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Completion  Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	// chroma highlighting
+	lastHiLang  string
+	lastHiStyle string
+	lexer       chroma.Lexer
+	formatter   *html.Formatter
+	style       *chroma.Style
+	EditTxt     []rune
 }
 
 var KiT_TextEdit = kit.Types.AddType(&TextEdit{}, TextEditProps)
@@ -79,8 +87,9 @@ var TextEditProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px), // this also determines the cursor
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(4, units.Px),
-	"margin":           units.NewValue(1, units.Px),
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"vertical-align":   AlignTop,
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
@@ -180,52 +189,56 @@ func (tx *TextEdit) RevertEdit() {
 //////////////////////////////////////////////////////////////////////////////////////////
 //  Text formatting and rendering
 
-func (tx *TextEdit) RenderFullText() {
-	lns := strings.Split(tx.Txt, "\n")
-	tx.NLines = len(lns)
-	tx.EditLines = make([][]rune, tx.NLines)
-	for ln, txt := range lns {
-		tx.EditLines[ln] = []rune(txt)
+// HasHi returns true if there are highighting parameters set
+func (tx *TextEdit) HasHi() bool {
+	if tx.HiLang == "" || tx.HiStyle == "" {
+		return false
 	}
+	return true
+}
 
-	// syntax highlighting:
-	lexer := chroma.Coalesce(lexers.Get(tx.HiLang))
-	formatter := html.New(html.WithClasses(), html.WithLineNumbers(), html.TabWidth(tx.TabWidth))
-	style := styles.Get(tx.HiStyle)
-	if style == nil {
-		style = styles.Fallback
+// HiInit initializes the syntax highlighting for current Hi params
+func (tx *TextEdit) HiInit() {
+	if !tx.HasHi() {
+		return
+	}
+	if tx.HiLang == tx.lastHiLang && tx.HiStyle == tx.lastHiStyle {
+		return
+	}
+	tx.lexer = chroma.Coalesce(lexers.Get(tx.HiLang))
+	tx.formatter = html.New(html.WithClasses(), html.TabWidth(tx.TabWidth))
+	tx.style = styles.Get(tx.HiStyle)
+	if tx.style == nil {
+		tx.style = styles.Fallback
 	}
 	var cssBuf bytes.Buffer
-	err := formatter.WriteCSS(&cssBuf, style)
+	err := tx.formatter.WriteCSS(&cssBuf, tx.style)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	csstr := cssBuf.String()
-	csstr = strings.Replace(csstr, " .chroma", "", -1)
-	lnidx := strings.Index(csstr, "\n")
-	csstr = csstr[lnidx+1:]
-	// fmt.Printf("=================\nCSS:\n%v\n\n", csstr)
+	csstr = strings.Replace(csstr, " .chroma .", " .", -1)
+	// lnidx := strings.Index(csstr, "\n")
+	// csstr = csstr[lnidx+1:]
 	tx.HiCSS.ParseString(csstr)
 	tx.CSS = tx.HiCSS.CSSProps()
 
-	var htmlBuf bytes.Buffer
-	iterator, err := lexer.Tokenise(nil, tx.Txt)
-	err = formatter.Format(&htmlBuf, style, iterator)
-	if err != nil {
-		log.Println(err)
-		return
+	if chp, ok := ki.SubProps(tx.CSS, ".chroma"); ok {
+		for ky, vl := range chp { // apply to top level
+			tx.SetProp(ky, vl)
+		}
 	}
-	// htmlstr := htmlBuf.String()
-	// fmt.Printf("=================\nHTML:\n%v\n\n", htmlstr)
-	mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
 
-	tx.MarkupTxt = make([][]byte, tx.NLines)
-	tx.Render = make([]TextRender, tx.NLines)
+	tx.lastHiLang = tx.HiLang
+	tx.lastHiStyle = tx.HiStyle
+}
 
+// RenderSize is the size we should pass to text rendering, based on alloc
+func (tx *TextEdit) RenderSize() Vec2D {
 	st := &tx.Sty
 	st.Font.LoadFont(&st.UnContext)
-
+	tx.FontHeight = st.Font.Height
 	spc := tx.Sty.BoxSpace()
 	sz := tx.LayData.AllocSize
 	if sz.IsZero() {
@@ -234,22 +247,92 @@ func (tx *TextEdit) RenderFullText() {
 	if !sz.IsZero() {
 		sz.SetSubVal(2 * spc)
 	}
+	tx.RenderSz = sz
+	return sz
+}
 
-	exln := 4
-	maxln := len(mtlns) - exln
-	fmt.Printf("Nlines: %v  mkup lns: %v\n", tx.NLines, maxln)
-	for ln := 1; ln <= maxln; ln++ {
-		mt := mtlns[ln]
-		if ln == 1 {
-			mt = bytes.TrimPrefix(mt, []byte(`<pre class="chroma">`))
-		}
-		tx.MarkupTxt[ln-1] = mt
-
-		// todo: going to require a custom <span> parser just for this b/c
-		// the go xml parser does not preserve whitespace
-		tx.Render[ln-1].SetHTML(string(mt), &st.Font, &st.UnContext, tx.CSS)
-		tx.Render[ln-1].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
+// RenderLines splits the given text into Lines, and generates renders of
+// those through any highlighter that might be present
+func (tx *TextEdit) RenderLines(text string) {
+	if len(text) == 0 {
+		tx.NLines = 0
+		tx.LinesSize = Vec2DZero
+		return
 	}
+
+	tx.HiInit()
+
+	lns := strings.Split(text, "\n")
+	tx.NLines = len(lns)
+	tx.Lines = make([][]rune, tx.NLines)
+	tx.Markup = make([][]byte, tx.NLines)
+	tx.Render = make([]TextRender, tx.NLines)
+	tx.Offs = make([]float32, tx.NLines)
+	for ln, txt := range lns {
+		tx.Lines[ln] = []rune(txt)
+	}
+
+	if tx.HasHi() {
+		var htmlBuf bytes.Buffer
+		iterator, err := tx.lexer.Tokenise(nil, text)
+		err = tx.formatter.Format(&htmlBuf, tx.style, iterator)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
+
+		maxln := len(mtlns) - 1
+		for ln := 0; ln < maxln; ln++ {
+			mt := mtlns[ln]
+			if ln == 0 {
+				mt = bytes.TrimPrefix(mt, []byte(`<pre class="chroma">`))
+			}
+			mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
+			tx.Markup[ln] = mt
+		}
+	} else {
+		for ln := 0; ln < tx.NLines; ln++ {
+			tx.Markup[ln] = []byte(string(tx.Lines[ln]))
+		}
+	}
+
+	sz := tx.RenderSize()
+	st := &tx.Sty
+	off := float32(0)
+	mxwd := float32(0)
+	for ln := 0; ln < tx.NLines; ln++ {
+		tx.Render[ln].SetHTMLPre(tx.Markup[ln], &st.Font, &st.UnContext, tx.CSS)
+		tx.Render[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
+		tx.Offs[ln] = off
+		lsz := tx.Render[ln].Size.Y
+		if lsz < tx.FontHeight {
+			lsz = tx.FontHeight
+		}
+		off += lsz
+		mxwd = Max32(mxwd, tx.Render[ln].Size.X)
+	}
+	tx.LinesSize.Set(mxwd, off)
+}
+
+// RenderLine generates render of given line (including highlighting)
+func (tx *TextEdit) RenderLine(ln int) {
+	if tx.HasHi() {
+		var htmlBuf bytes.Buffer
+		iterator, err := tx.lexer.Tokenise(nil, string(tx.Lines[ln]))
+		err = tx.formatter.Format(&htmlBuf, tx.style, iterator)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		tx.Markup[ln] = htmlBuf.Bytes()
+	} else {
+		tx.Markup[ln] = []byte(string(tx.Lines[ln]))
+	}
+
+	st := &tx.Sty
+	tx.Render[ln].SetHTMLPre(tx.Markup[ln], &st.Font, &st.UnContext, tx.CSS)
+	tx.Render[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, tx.RenderSz)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -929,6 +1012,7 @@ func (tx *TextEdit) Init2D() {
 }
 
 func (tx *TextEdit) Style2D() {
+	tx.HiInit()
 	tx.SetCanFocusIfActive()
 	tx.Style2DWidget()
 	pst := &(tx.Par.(Node2D).AsWidget().Sty)
@@ -938,7 +1022,6 @@ func (tx *TextEdit) Style2D() {
 		tx.StateStyles[i].StyleCSS(tx.This.(Node2D), tx.CSSAgg, TextEditSelectors[i])
 		tx.StateStyles[i].CopyUnitContext(&tx.Sty.UnContext)
 	}
-	tx.RenderFullText()
 }
 
 func (tx *TextEdit) UpdateRenderAll() bool {
@@ -949,26 +1032,19 @@ func (tx *TextEdit) UpdateRenderAll() bool {
 }
 
 func (tx *TextEdit) Size2D(iter int) {
-	tmptxt := tx.EditTxt
+	text := ""
 	if len(tx.Txt) == 0 && len(tx.Placeholder) > 0 {
-		tx.EditTxt = []rune(tx.Placeholder)
+		text = tx.Placeholder
 	} else {
-		tx.EditTxt = []rune(tx.Txt)
+		text = tx.Txt
 	}
-	tx.Edited = false
-	tx.StartPos = 0
-	maxlen := tx.MaxWidthReq
-	if maxlen <= 0 {
-		maxlen = 50
-	}
-	tx.EndPos = kit.MinInt(len(tx.EditTxt), maxlen)
-	tx.UpdateRenderAll()
-	tx.FontHeight = tx.RenderAll.Size.Y
-	w := tx.TextWidth(tx.StartPos, tx.EndPos)
-	w += 2.0 // give some extra buffer
-	// fmt.Printx("fontheight: %v width: %v\n", tx.FontHeight, w)
-	tx.Size2DFromWH(w, tx.FontHeight)
-	tx.EditTxt = tmptxt
+	tx.RenderLines(text)
+	// tx.Edited = false
+	// maxlen := tx.MaxWidthReq
+	// if maxlen <= 0 {
+	// 	maxlen = 50
+	// }
+	tx.Size2DFromWH(tx.LinesSize.X, tx.LinesSize.Y)
 }
 
 func (tx *TextEdit) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -1219,6 +1295,27 @@ func (tx *TextEdit) AutoScroll() {
 	}
 }
 
+// RenderText displays the lines on the screen
+func (tx *TextEdit) RenderText() {
+	rs := &tx.Viewport.Render
+	st := &tx.Sty
+	pos := tx.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Layout.Padding.Dots)
+	pos.Y -= 0.5 * tx.FontHeight
+	for ln := 0; ln < tx.NLines; ln++ {
+		lst := pos.Y + tx.Offs[ln]
+		led := lst + tx.Render[ln].Size.Y
+		if int(math32.Ceil(led)) < tx.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tx.VpBBox.Max.Y {
+			continue
+		}
+		lp := pos
+		lp.Y = lst
+		tx.Render[ln].RenderTopPos(rs, lp)
+	}
+}
+
 func (tx *TextEdit) Render2D() {
 	if tx.FullReRenderIfNeeded() {
 		return
@@ -1244,13 +1341,14 @@ func (tx *TextEdit) Render2D() {
 		} else {
 			tx.Sty = tx.StateStyles[TextEditActive]
 		}
-		rs := &tx.Viewport.Render
+		// rs := &tx.Viewport.Render
 		st := &tx.Sty
 		st.Font.LoadFont(&st.UnContext)
 		tx.RenderStdBox(st)
 		// cur := tx.EditTxt[tx.StartPos:tx.EndPos]
 		// tx.RenderSelect()
-		pos := tx.LayData.AllocPos.AddVal(st.BoxSpace())
+		// pos := tx.LayData.AllocPos.AddVal(st.BoxSpace())
+		tx.RenderText()
 		// if len(tx.EditTxt) == 0 && len(tx.Placeholder) > 0 {
 		// 	st.Font.Color = st.Font.Color.Highlight(50)
 		// 	tx.RenderVis.SetString(tx.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
@@ -1265,15 +1363,6 @@ func (tx *TextEdit) Render2D() {
 		// } else {
 		// 	tx.StopCursor()
 		// }
-
-		for ln := 0; ln < tx.NLines; ln++ {
-			tx.Render[ln].RenderTopPos(rs, pos)
-			pos.Y += tx.Render[ln].Size.Y
-			if pos.Y > float32(tx.VpBBox.Max.Y) {
-				break
-			}
-		}
-
 		tx.Render2DChildren()
 		tx.PopBounds()
 	} else {

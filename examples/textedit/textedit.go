@@ -56,18 +56,23 @@ func mainrun() {
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	txed := mfr.AddNewChild(gi.KiT_TextEdit, "textedit").(*gi.TextEdit)
-	// txed.SetProp("word-wrap", true)
-	txed.SetStretchMaxWidth()
-	txed.SetStretchMaxHeight()
+	// generally need to put text edit within its own frame for scrolling
+	txfr := mfr.AddNewChild(gi.KiT_Frame, "edit-frame").(*gi.Frame)
+	txfr.SetStretchMaxWidth()
+	txfr.SetStretchMaxHeight()
+	txfr.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	txfr.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	txed := txfr.AddNewChild(gi.KiT_TextEdit, "textedit").(*gi.TextEdit)
+	txed.SetProp("word-wrap", true)
 	txed.SetProp("font-family", "Go Mono")
-	txed.SetProp("min-width", units.NewValue(80, units.Ch))
-	txed.SetProp("min-height", units.NewValue(40, units.Ch))
+	txed.SetProp("vertical-align", gi.AlignTop)
+
 	// txed.SetProp("line-height", 1.2)
 	// txed.SetProp("para-spacing", "1ex")
 	// txed.SetProp("text-indent", "20px")
 	txed.HiLang = "Go"
 	txed.HiStyle = "emacs"
+	txed.TabWidth = 4
 
 	fp, err := os.Open("sample.in")
 	if err != nil {

@@ -747,10 +747,14 @@ func (vv *SliceValueView) UpdateWidget() {
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	txt := ""
-	if vv.IsArray {
-		txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
+	if npv.Kind() == reflect.Interface {
+		txt = fmt.Sprintf("Slice: %T", npv.Interface())
 	} else {
-		txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
+		if vv.IsArray {
+			txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
+		} else {
+			txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
+		}
 	}
 	ac.SetText(txt)
 }
@@ -837,7 +841,12 @@ func (vv *MapValueView) UpdateWidget() {
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
 	mpi := vv.Value.Interface()
-	txt := fmt.Sprintf("Map: [%v %v]%v", npv.Len(), kit.MapKeyType(mpi).String(), kit.MapValueType(mpi).String())
+	txt := ""
+	if npv.Kind() == reflect.Interface {
+		txt = fmt.Sprintf("Map: %T", npv.Interface())
+	} else {
+		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), kit.MapKeyType(mpi).String(), kit.MapValueType(mpi).String())
+	}
 	ac.SetText(txt)
 }
 

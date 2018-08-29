@@ -92,6 +92,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* CSS class = x should bring in properties for that class into top-level CSS
+  for all below -- not sure it does that - nested classes.  need to figure that out really.
+
+* slice of ki: do proper add so it works directly by editing children
+
 * tom's checkbox bug!
 
 * that changed flag on prefs would be reassuring to know that save actually worked..
