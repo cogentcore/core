@@ -69,7 +69,7 @@ type TextEdit struct {
 	StateStyles [TextEditStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight  float32                `json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn     bool                   `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion  CompleteData           `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Completion  Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextEdit = kit.Types.AddType(&TextEdit{}, TextEditProps)

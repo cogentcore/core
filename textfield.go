@@ -18,23 +18,12 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
 // CursorBlinkMSec is number of milliseconds that cursor blinks on
 // and off -- set to 0 to disable blinking
 var CursorBlinkMSec = 500
-
-////////////////////////////////////////////////////////////////////////////////////////
-// CompletionData
-type CompleteData struct {
-	MatchFunc   complete.MatchFunc `desc:"function to get the list of possible completions"`
-	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
-	Context     interface{}        `desc:"the object that implements complete.Func"`
-	Completions []string           `desc:"possible completions"`
-	Seed        string             `desc:"current completion seed"`
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // TextField
@@ -61,7 +50,7 @@ type TextField struct {
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion   CompleteData            `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Completion   Complete                `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -546,31 +535,11 @@ func (tf *TextField) OfferCompletions() {
 	if PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
 	}
-	if tf.Completion.MatchFunc == nil {
-		return
-	}
 
-	tf.Completion.Completions, tf.Completion.Seed = tf.Completion.MatchFunc(string(tf.EditTxt[0:tf.CursorPos]))
-	count := len(tf.Completion.Completions)
-	if count > 0 {
-		if count == 1 && tf.Completion.Completions[0] == tf.Completion.Seed {
-			return
-		}
-		var m Menu
-		for i := 0; i < count; i++ {
-			s := tf.Completion.Completions[i]
-			m.AddAction(ActOpts{Label: s},
-				tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					tff := recv.Embed(KiT_TextField).(*TextField)
-					tff.Complete(s)
-				})
-		}
-		cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-		// todo: figure popup placement using font and line height
-		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tf.Viewport, "tf-completion-menu")
-		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
-		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	}
+	s := string(tf.EditTxt[0:tf.CursorPos])
+	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
+
+	tf.Completion.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10, tf)
 }
 
 // Complete edits the text field using the string chosen from the completion menu
