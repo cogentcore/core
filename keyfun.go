@@ -190,14 +190,25 @@ func (km *KeyMap) Update() {
 	dkms := DefaultKeyMap.ToSlice()
 	kms := km.ToSlice()
 
+	addkm := make([]KeyMapItem, 0)
+
+	if len(kms) == 0 {  // set custom to match default
+		for _, dki := range dkms {
+			addkm = append(addkm, dki)
+			fmt.Println(dki.Fun.String())
+		}
+		for _, ai := range addkm {
+			(*km)[ai.Key] = ai.Fun
+		}
+		return
+	}
+
 	sort.Slice(dkms, func(i, j int) bool {
 		return dkms[i].Fun < dkms[j].Fun
 	})
 	sort.Slice(kms, func(i, j int) bool {
 		return kms[i].Fun < kms[j].Fun
 	})
-
-	addkm := make([]KeyMapItem, 0)
 
 	mi := 0
 	for _, dki := range dkms {
@@ -207,7 +218,11 @@ func (km *KeyMap) Update() {
 		mmi := kms[mi]
 		if dki.Fun < mmi.Fun {
 			fmt.Printf("warning - %v has no key mapping", dki.Fun)
-			//addkm = append(addkm, dki)
+			addkm = append(addkm, dki)
+			s := dki.Fun.String()
+			s = strings.TrimPrefix(s, "KeyFun")
+			s = "- Not Set - " + s
+			addkm[len(addkm)-1].Key = s
 		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
 			mi++
 		} else {
