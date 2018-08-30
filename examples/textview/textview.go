@@ -5,12 +5,9 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
-
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
@@ -27,10 +24,10 @@ func mainrun() {
 
 	// gi.Layout2DTrace = true
 
-	oswin.TheApp.SetName("textedit")
-	oswin.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	oswin.TheApp.SetName("textview")
+	oswin.TheApp.SetAbout(`This is a demo of the TextView in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-textedit-test", "GoGi TextEdit Test", width, height, true) // true = pixel sizes
+	win := gi.NewWindow2D("gogi-textview-test", "GoGi TextView Test", width, height, true) // true = pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -50,19 +47,19 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	hdrText := `This is a <b>test</b> of the TextEdit`
+	hdrText := `This is a <b>test</b> of the TextView`
 	title.Text = hdrText
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	// generally need to put text edit within its own frame for scrolling
-	txfr := mfr.AddNewChild(gi.KiT_Frame, "edit-frame").(*gi.Frame)
+	// generally need to put text view within its own frame for scrolling
+	txfr := mfr.AddNewChild(gi.KiT_Frame, "view-frame").(*gi.Frame)
 	txfr.SetStretchMaxWidth()
 	txfr.SetStretchMaxHeight()
 	txfr.SetMinPrefWidth(units.NewValue(20, units.Ch))
 	txfr.SetMinPrefHeight(units.NewValue(10, units.Ch))
-	txed := txfr.AddNewChild(gi.KiT_TextEdit, "textedit").(*gi.TextEdit)
+	txed := txfr.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
 	txed.SetProp("word-wrap", true)
 	txed.SetProp("font-family", "Go Mono")
 	txed.SetProp("vertical-align", gi.AlignTop)
@@ -74,14 +71,9 @@ func mainrun() {
 	txed.HiStyle = "emacs"
 	txed.TabWidth = 4
 
-	fp, err := os.Open("sample.in")
-	if err != nil {
-		log.Println(err)
-		// return err
-	}
-	b, err := ioutil.ReadAll(fp)
-	txed.Txt = string(b)
-	fp.Close()
+	txbuf := giv.NewTextBuf()
+	txed.SetBuf(txbuf)
+	txbuf.Open("sample.in")
 
 	// main menu
 	appnm := oswin.TheApp.Name()

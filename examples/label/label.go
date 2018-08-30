@@ -24,10 +24,10 @@ func mainrun() {
 
 	// gi.Layout2DTrace = true
 
-	oswin.TheApp.SetName("text")
-	oswin.TheApp.SetAbout(`This is a demo of the text rendering in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	oswin.TheApp.SetName("label")
+	oswin.TheApp.SetAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-text-test", "GoGi Text Test", width, height, true) // true = pixel sizes
+	win := gi.NewWindow2D("gogi-label-test", "GoGi Label Test", width, height, true) // true = pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

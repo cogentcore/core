@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"bytes"
@@ -18,6 +18,7 @@ import (
 	"github.com/alecthomas/chroma/styles"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -30,47 +31,40 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// TextPos represents line, character positions within the TextEdit
-type TextPos struct {
-	Ln, Ch int
-}
-
-// TextEdit is a widget for editing multiple lines of text (as compared to
+// TextView is a widget for editing multiple lines of text (as compared to
 // TextField for a single line).  The underlying data model is just plain
 // simple lines (ended by \n) with any number of characters per line.  These
 // lines are displayed using wrap-around text into the editor.  Currently only
 // works on in-memory strings.  Set the min
-type TextEdit struct {
-	WidgetBase
-	Txt         string       `json:"-" xml:"text" desc:"the last saved value of the entire text string being edited"`
-	Placeholder string       `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Edited      bool         `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	TabWidth    int          `desc:"how many spaces is a tab"`
-	HiLang      string       `desc:"language for syntax highlighting the code"`
-	HiStyle     string       `desc:"syntax highlighting style"`
-	HiCSS       StyleSheet   `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
-	FocusActive bool         `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines      int          `json:"-" xml:"-" desc:"number of lines"`
-	Lines       [][]rune     `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
-	Markup      [][]byte     `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	Render      []TextRender `json:"-" xml:"-" desc:"render of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs        []float32    `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LinesSize   Vec2D        `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz    Vec2D        `json:"-" xml:"-" desc:"size params to use in render call"`
-	MaxWidthReq int          `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	CursorPos   int          `xml:"-" desc:"current cursor position"`
+type TextView struct {
+	gi.WidgetBase
+	Buf         *TextBuf        `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder string          `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	TabWidth    int             `desc:"how many spaces is a tab"`
+	HiLang      string          `desc:"language for syntax highlighting the code"`
+	HiStyle     string          `desc:"syntax highlighting style"`
+	HiCSS       gi.StyleSheet   `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
+	FocusActive bool            `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines      int             `json:"-" xml:"-" desc:"number of lines in the view"`
+	Markup      [][]byte        `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	Render      []gi.TextRender `json:"-" xml:"-" desc:"render of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs        []float32       `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LinesSize   gi.Vec2D        `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz    gi.Vec2D        `json:"-" xml:"-" desc:"size params to use in render call"`
+	MaxWidthReq int             `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	CursorPos   int             `xml:"-" desc:"current cursor position"`
 	StartPos    int
 	EndPos      int
-	RenderAll   TextRender
-	CharWidth   int                    `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart int                    `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd   int                    `xml:"-" desc:"ending position of selection in the string"`
-	SelectMode  bool                   `xml:"-" desc:"if true, select text as cursor moves"`
-	TextEditSig ki.Signal              `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextEditSignals for the types"`
-	StateStyles [TextEditStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight  float32                `json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn     bool                   `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion  Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	RenderAll   gi.TextRender
+	CharWidth   int                       `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart int                       `xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd   int                       `xml:"-" desc:"ending position of selection in the string"`
+	SelectMode  bool                      `xml:"-" desc:"if true, select text as cursor moves"`
+	TextViewSig ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	StateStyles [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight  float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn     bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Completion  gi.Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang  string
 	lastHiStyle string
@@ -78,119 +72,129 @@ type TextEdit struct {
 	formatter   *html.Formatter
 	style       *chroma.Style
 	EditTxt     []rune
+	Edited      bool `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 }
 
-var KiT_TextEdit = kit.Types.AddType(&TextEdit{}, TextEditProps)
+var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
-var TextEditProps = ki.Props{
+var TextViewProps = ki.Props{
 	"font-family":      "Go Mono",
 	"border-width":     units.NewValue(1, units.Px), // this also determines the cursor
-	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
+	"border-color":     &gi.Prefs.Colors.Border,
+	"border-style":     gi.BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"vertical-align":   AlignTop,
-	"text-align":       AlignLeft,
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Control,
-	TextEditSelectors[TextEditActive]: ki.Props{
+	"vertical-align":   gi.AlignTop,
+	"text-align":       gi.AlignLeft,
+	"color":            &gi.Prefs.Colors.Font,
+	"background-color": &gi.Prefs.Colors.Control,
+	TextViewSelectors[TextViewActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
-	TextEditSelectors[TextEditFocus]: ki.Props{
+	TextViewSelectors[TextViewFocus]: ki.Props{
 		"border-width":     units.NewValue(2, units.Px),
 		"background-color": "samelight-80",
 	},
-	TextEditSelectors[TextEditInactive]: ki.Props{
+	TextViewSelectors[TextViewInactive]: ki.Props{
 		"background-color": "highlight-10",
 	},
-	TextEditSelectors[TextEditSel]: ki.Props{
-		"background-color": &Prefs.Colors.Select,
+	TextViewSelectors[TextViewSel]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Select,
 	},
 }
 
-// signals that buttons can send
-type TextEditSignals int64
+// TextViewSignals are signals that text view can send
+type TextViewSignals int64
 
 const (
-	// main signal -- return was pressed and an edit was completed -- data is the text
-	TextEditDone TextEditSignals = iota
+	// return was pressed and an edit was completed -- data is the text
+	TextViewDone TextViewSignals = iota
 
 	// some text was selected (for Inactive state, selection is via WidgetSig)
-	TextEditSelected
+	TextViewSelected
 
-	TextEditSignalsN
+	TextViewSignalsN
 )
 
-//go:generate stringer -type=TextEditSignals
+//go:generate stringer -type=TextViewSignals
 
-// TextEditStates are mutually-exclusive textfield states -- determines appearance
-type TextEditStates int32
+// TextViewStates are mutually-exclusive textfield states -- determines appearance
+type TextViewStates int32
 
 const (
 	// normal state -- there but not being interacted with
-	TextEditActive TextEditStates = iota
+	TextViewActive TextViewStates = iota
 
 	// textfield is the focus -- will respond to keyboard input
-	TextEditFocus
+	TextViewFocus
 
 	// inactive -- not editable
-	TextEditInactive
+	TextViewInactive
 
 	// selected -- for inactive state, can select entire element
-	TextEditSel
+	TextViewSel
 
-	TextEditStatesN
+	TextViewStatesN
 )
 
-//go:generate stringer -type=TextEditStates
+//go:generate stringer -type=TextViewStates
 
 // Style selector names for the different states
-var TextEditSelectors = []string{":active", ":focus", ":inactive", ":selected"}
-
-// Text returns the current text -- applies any unapplied changes first
-func (tx *TextEdit) Text() string {
-	tx.EditDone()
-	return tx.Txt
-}
-
-// SetText sets the text to be edited and reverts any current edit to reflect this new text
-func (tx *TextEdit) SetText(txt string) {
-	tx.Txt = txt
-	tx.RevertEdit()
-}
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 
 // Label returns the display label for this node, satisfying the Labeler interface
-func (tx *TextEdit) Label() string {
+func (tx *TextView) Label() string {
 	return tx.Nm
 }
 
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
-func (tx *TextEdit) EditDone() {
-	if tx.Edited {
-		tx.Edited = false
-		// tx.Txt = string(tx.EditTxt)
-		tx.TextEditSig.Emit(tx.This, int64(TextEditDone), tx.Txt)
+func (tx *TextView) EditDone() {
+	if tx.Buf != nil {
+		tx.Buf.EditDone()
 	}
 	tx.ClearSelected()
 }
 
-// RevertEdit aborts editing and reverts to last saved text
-func (tx *TextEdit) RevertEdit() {
+// Revert aborts editing and reverts to last saved text
+func (tx *TextView) Revert() {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
-	// tx.EditTxt = []rune(tx.Txt)
-	tx.Edited = false
+	// tx.Edited = false
 	tx.StartPos = 0
 	tx.EndPos = tx.CharWidth
+	tx.LayoutLines()
+	// todo: signal buffer?
 	tx.SelectReset()
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//  Buffer communication
+
+// SetBuf sets the TextBuf that this is a view of, and interconnects their signals
+func (tx *TextView) SetBuf(buf *TextBuf) {
+	tx.Buf = buf
+	buf.AddView(tx)
+	tx.Revert()
+}
+
+// TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
+func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
+	tx := rvwki.Embed(KiT_TextView).(*TextView)
+	switch TextBufSignals(sig) {
+	case TextBufDone:
+	case TextBufNew:
+		tx.LayoutLines()
+	case TextBufInsert:
+	case TextBufDelete:
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //  Text formatting and rendering
 
 // HasHi returns true if there are highighting parameters set
-func (tx *TextEdit) HasHi() bool {
+func (tx *TextView) HasHi() bool {
 	if tx.HiLang == "" || tx.HiStyle == "" {
 		return false
 	}
@@ -198,7 +202,7 @@ func (tx *TextEdit) HasHi() bool {
 }
 
 // HiInit initializes the syntax highlighting for current Hi params
-func (tx *TextEdit) HiInit() {
+func (tx *TextView) HiInit() {
 	if !tx.HasHi() {
 		return
 	}
@@ -235,7 +239,7 @@ func (tx *TextEdit) HiInit() {
 }
 
 // RenderSize is the size we should pass to text rendering, based on alloc
-func (tx *TextEdit) RenderSize() Vec2D {
+func (tx *TextView) RenderSize() gi.Vec2D {
 	st := &tx.Sty
 	st.Font.LoadFont(&st.UnContext)
 	tx.FontHeight = st.Font.Height
@@ -251,30 +255,25 @@ func (tx *TextEdit) RenderSize() Vec2D {
 	return sz
 }
 
-// RenderLines splits the given text into Lines, and generates renders of
-// those through any highlighter that might be present
-func (tx *TextEdit) RenderLines(text string) {
-	if len(text) == 0 {
+// LayoutLines generates TextRenders of lines from our TextBuf, using any
+// highlighter that might be present
+func (tx *TextView) LayoutLines() {
+	if tx.Buf == nil || tx.Buf.NLines == 0 {
 		tx.NLines = 0
-		tx.LinesSize = Vec2DZero
+		tx.LinesSize = gi.Vec2DZero
 		return
 	}
 
 	tx.HiInit()
 
-	lns := strings.Split(text, "\n")
-	tx.NLines = len(lns)
-	tx.Lines = make([][]rune, tx.NLines)
+	tx.NLines = tx.Buf.NLines
 	tx.Markup = make([][]byte, tx.NLines)
-	tx.Render = make([]TextRender, tx.NLines)
+	tx.Render = make([]gi.TextRender, tx.NLines)
 	tx.Offs = make([]float32, tx.NLines)
-	for ln, txt := range lns {
-		tx.Lines[ln] = []rune(txt)
-	}
 
 	if tx.HasHi() {
 		var htmlBuf bytes.Buffer
-		iterator, err := tx.lexer.Tokenise(nil, text)
+		iterator, err := tx.lexer.Tokenise(nil, string(tx.Buf.Txt)) // todo: unfortunate conversion here..
 		err = tx.formatter.Format(&htmlBuf, tx.style, iterator)
 		if err != nil {
 			log.Println(err)
@@ -293,7 +292,7 @@ func (tx *TextEdit) RenderLines(text string) {
 		}
 	} else {
 		for ln := 0; ln < tx.NLines; ln++ {
-			tx.Markup[ln] = []byte(string(tx.Lines[ln]))
+			tx.Markup[ln] = []byte(string(tx.Buf.Lines[ln]))
 		}
 	}
 
@@ -310,16 +309,16 @@ func (tx *TextEdit) RenderLines(text string) {
 			lsz = tx.FontHeight
 		}
 		off += lsz
-		mxwd = Max32(mxwd, tx.Render[ln].Size.X)
+		mxwd = gi.Max32(mxwd, tx.Render[ln].Size.X)
 	}
 	tx.LinesSize.Set(mxwd, off)
 }
 
-// RenderLine generates render of given line (including highlighting)
-func (tx *TextEdit) RenderLine(ln int) {
+// LayoutLine generates render of given line (including highlighting)
+func (tx *TextView) LayoutLine(ln int) {
 	if tx.HasHi() {
 		var htmlBuf bytes.Buffer
-		iterator, err := tx.lexer.Tokenise(nil, string(tx.Lines[ln]))
+		iterator, err := tx.lexer.Tokenise(nil, string(tx.Buf.Lines[ln]))
 		err = tx.formatter.Format(&htmlBuf, tx.style, iterator)
 		if err != nil {
 			log.Println(err)
@@ -327,7 +326,7 @@ func (tx *TextEdit) RenderLine(ln int) {
 		}
 		tx.Markup[ln] = htmlBuf.Bytes()
 	} else {
-		tx.Markup[ln] = []byte(string(tx.Lines[ln]))
+		tx.Markup[ln] = []byte(string(tx.Buf.Lines[ln]))
 	}
 
 	st := &tx.Sty
@@ -339,7 +338,7 @@ func (tx *TextEdit) RenderLine(ln int) {
 //  Cursor Navigation
 
 // CursorForward moves the cursor forward
-func (tx *TextEdit) CursorForward(steps int) {
+func (tx *TextView) CursorForward(steps int) {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	tx.CursorPos += steps
@@ -363,7 +362,7 @@ func (tx *TextEdit) CursorForward(steps int) {
 }
 
 // CursorForward moves the cursor backward
-func (tx *TextEdit) CursorBackward(steps int) {
+func (tx *TextView) CursorBackward(steps int) {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	tx.CursorPos -= steps
@@ -388,7 +387,7 @@ func (tx *TextEdit) CursorBackward(steps int) {
 
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
-func (tx *TextEdit) CursorStart() {
+func (tx *TextView) CursorStart() {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	tx.CursorPos = 0
@@ -401,7 +400,7 @@ func (tx *TextEdit) CursorStart() {
 }
 
 // CursorEnd moves the cursor to the end of the text
-func (tx *TextEdit) CursorEnd() {
+func (tx *TextView) CursorEnd() {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	ed := len(tx.EditTxt)
@@ -419,7 +418,7 @@ func (tx *TextEdit) CursorEnd() {
 // uparrow = start / down = end
 
 // CursorBackspace deletes character(s) immediately before cursor
-func (tx *TextEdit) CursorBackspace(steps int) {
+func (tx *TextView) CursorBackspace(steps int) {
 	if tx.HasSelection() {
 		tx.DeleteSelection()
 		return
@@ -445,7 +444,7 @@ func (tx *TextEdit) CursorBackspace(steps int) {
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
-func (tx *TextEdit) CursorDelete(steps int) {
+func (tx *TextView) CursorDelete(steps int) {
 	if tx.HasSelection() {
 		tx.DeleteSelection()
 	}
@@ -469,19 +468,19 @@ func (tx *TextEdit) CursorDelete(steps int) {
 }
 
 // CursorKill deletes text from cursor to end of text
-func (tx *TextEdit) CursorKill() {
+func (tx *TextView) CursorKill() {
 	steps := len(tx.EditTxt) - tx.CursorPos
 	tx.CursorDelete(steps)
 }
 
 // ClearSelected resets both the global selected flag and any current selection
-func (tx *TextEdit) ClearSelected() {
+func (tx *TextView) ClearSelected() {
 	tx.WidgetBase.ClearSelected()
 	tx.SelectReset()
 }
 
 // HasSelection returns whether there is a selected region of text
-func (tx *TextEdit) HasSelection() bool {
+func (tx *TextView) HasSelection() bool {
 	tx.SelectUpdate()
 	if tx.SelectStart < tx.SelectEnd {
 		return true
@@ -490,7 +489,7 @@ func (tx *TextEdit) HasSelection() bool {
 }
 
 // Selection returns the currently selected text
-func (tx *TextEdit) Selection() string {
+func (tx *TextView) Selection() string {
 	if tx.HasSelection() {
 		// return string(tx.EditTxt[tx.SelectStart:tx.SelectEnd])
 	}
@@ -498,7 +497,7 @@ func (tx *TextEdit) Selection() string {
 }
 
 // SelectModeToggle toggles the SelectMode, updating selection with cursor movement
-func (tx *TextEdit) SelectModeToggle() {
+func (tx *TextView) SelectModeToggle() {
 	if tx.SelectMode {
 		tx.SelectMode = false
 	} else {
@@ -509,7 +508,7 @@ func (tx *TextEdit) SelectModeToggle() {
 }
 
 // SelectAll selects all the text
-func (tx *TextEdit) SelectAll() {
+func (tx *TextView) SelectAll() {
 	updt := tx.UpdateStart()
 	tx.SelectStart = 0
 	tx.SelectEnd = len(tx.EditTxt)
@@ -517,7 +516,7 @@ func (tx *TextEdit) SelectAll() {
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words
-func (tx *TextEdit) IsWordBreak(r rune) bool {
+func (tx *TextView) IsWordBreak(r rune) bool {
 	if unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) {
 		return true
 	}
@@ -525,7 +524,7 @@ func (tx *TextEdit) IsWordBreak(r rune) bool {
 }
 
 // SelectWord selects the word (whitespace delimited) that the cursor is on
-func (tx *TextEdit) SelectWord() {
+func (tx *TextView) SelectWord() {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	sz := len(tx.EditTxt)
@@ -569,7 +568,7 @@ func (tx *TextEdit) SelectWord() {
 }
 
 // SelectReset resets the selection
-func (tx *TextEdit) SelectReset() {
+func (tx *TextView) SelectReset() {
 	tx.SelectMode = false
 	if tx.SelectStart == 0 && tx.SelectEnd == 0 {
 		return
@@ -581,7 +580,7 @@ func (tx *TextEdit) SelectReset() {
 }
 
 // SelectUpdate updates the select region after any change to the text, to keep it in range
-func (tx *TextEdit) SelectUpdate() {
+func (tx *TextView) SelectUpdate() {
 	if tx.SelectStart < tx.SelectEnd {
 		ed := len(tx.EditTxt)
 		if tx.SelectStart < 0 {
@@ -596,7 +595,7 @@ func (tx *TextEdit) SelectUpdate() {
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (tx *TextEdit) Cut() string {
+func (tx *TextView) Cut() string {
 	cut := tx.DeleteSelection()
 	if cut != "" {
 		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut))
@@ -606,7 +605,7 @@ func (tx *TextEdit) Cut() string {
 
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted
-func (tx *TextEdit) DeleteSelection() string {
+func (tx *TextView) DeleteSelection() string {
 	tx.SelectUpdate()
 	if !tx.HasSelection() {
 		return ""
@@ -629,7 +628,7 @@ func (tx *TextEdit) DeleteSelection() string {
 
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionaly resetting the current selection
-func (tx *TextEdit) Copy(reset bool) string {
+func (tx *TextView) Copy(reset bool) string {
 	tx.SelectUpdate()
 	if !tx.HasSelection() {
 		return ""
@@ -644,7 +643,7 @@ func (tx *TextEdit) Copy(reset bool) string {
 
 // Paste inserts text from the clipboard at current cursor position -- if
 // cursor is within a current selection, that selection is
-func (tx *TextEdit) Paste() {
+func (tx *TextView) Paste() {
 	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tx.CursorPos >= tx.SelectStart && tx.CursorPos < tx.SelectEnd {
@@ -655,7 +654,7 @@ func (tx *TextEdit) Paste() {
 }
 
 // InsertAtCursor inserts given text at current cursor position
-func (tx *TextEdit) InsertAtCursor(str string) {
+func (tx *TextView) InsertAtCursor(str string) {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	if tx.HasSelection() {
@@ -675,26 +674,26 @@ func (tx *TextEdit) InsertAtCursor(str string) {
 
 // cpos := tx.CharStartPos(tx.CursorPos).ToPoint()
 
-func (tx *TextEdit) MakeContextMenu(m *Menu) {
-	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
+func (tx *TextView) MakeContextMenu(m *gi.Menu) {
+	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
+	ac := m.AddAction(gi.ActOpts{Label: "Copy", Shortcut: cpsc},
 		tx.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+			txf := recv.Embed(KiT_TextView).(*TextView)
 			txf.Copy(true)
 		})
 	ac.SetActiveState(tx.HasSelection())
 	if !tx.IsInactive() {
-		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
-		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
+		ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
+		ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
+		ac = m.AddAction(gi.ActOpts{Label: "Cut", Shortcut: ctsc},
 			tx.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Cut()
 			})
 		ac.SetActiveState(tx.HasSelection())
-		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
+		ac = m.AddAction(gi.ActOpts{Label: "Paste", Shortcut: ptsc},
 			tx.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
@@ -702,9 +701,9 @@ func (tx *TextEdit) MakeContextMenu(m *Menu) {
 }
 
 // OfferCompletions pops up a menu of possible completions
-func (tx *TextEdit) OfferCompletions() {
+func (tx *TextView) OfferCompletions() {
 	win := tx.ParentWindow()
-	if PopupIsCompleter(win.Popup) {
+	if gi.PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
 	}
 	if tx.Completion.MatchFunc == nil {
@@ -717,25 +716,25 @@ func (tx *TextEdit) OfferCompletions() {
 		if count == 1 && tx.Completion.Completions[0] == tx.Completion.Seed {
 			return
 		}
-		var m Menu
+		var m gi.Menu
 		for i := 0; i < count; i++ {
 			s := tx.Completion.Completions[i]
-			m.AddAction(ActOpts{Label: s},
+			m.AddAction(gi.ActOpts{Label: s},
 				tx.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+					txf := recv.Embed(KiT_TextView).(*TextView)
 					txf.Complete(s)
 				})
 		}
 		cpos := tx.CharStartPos(tx.CursorPos).ToPoint()
 		// todo: figure popup placement using font and line height
-		vp := PopupMenu(m, cpos.X+15, cpos.Y+50, tx.Viewport, "tx-completion-menu")
-		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
+		vp := gi.PopupMenu(m, cpos.X+15, cpos.Y+50, tx.Viewport, "tx-completion-menu")
+		bitflag.Set(&vp.Flag, int(gi.VpFlagCompleter))
 		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textxield!
 	}
 }
 
 // Complete edits the text field using the string chosen from the completion menu
-func (tx *TextEdit) Complete(str string) {
+func (tx *TextView) Complete(str string) {
 	txt := string(tx.EditTxt) // John: do NOT call tx.Text() in an active editing context!!!
 	s, delta := tx.Completion.EditFunc(txt, tx.CursorPos, str, tx.Completion.Seed)
 	tx.EditTxt = []rune(s)
@@ -743,7 +742,7 @@ func (tx *TextEdit) Complete(str string) {
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
-func (tx *TextEdit) PixelToCursor(pixOff float32) int {
+func (tx *TextView) PixelToCursor(pixOff float32) int {
 	st := &tx.Sty
 
 	spc := st.BoxSpace()
@@ -784,7 +783,7 @@ func (tx *TextEdit) PixelToCursor(pixOff float32) int {
 	return c
 }
 
-func (tx *TextEdit) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
+func (tx *TextView) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
 	updt := tx.UpdateStart()
 	defer tx.UpdateEnd(updt)
 	oldPos := tx.CursorPos
@@ -808,13 +807,13 @@ func (tx *TextEdit) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tx *TextEdit) KeyInput(kt *key.ChordEvent) {
-	kf := KeyFun(kt.ChordString())
+func (tx *TextView) KeyInput(kt *key.ChordEvent) {
+	kf := gi.KeyFun(kt.ChordString())
 	win := tx.ParentWindow()
 
-	if PopupIsCompleter(win.Popup) {
+	if gi.PopupIsCompleter(win.Popup) {
 		switch kf {
-		case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
+		case gi.KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
 			count := len(tx.Completion.Completions)
 			if count > 0 {
 				if count == 1 { // just complete
@@ -841,30 +840,30 @@ func (tx *TextEdit) KeyInput(kt *key.ChordEvent) {
 
 	// first all the keys that work for both inactive and active
 	switch kf {
-	case KeyFunMoveRight:
+	case gi.KeyFunMoveRight:
 		kt.SetProcessed()
 		tx.CursorForward(1)
 		tx.OfferCompletions()
-	case KeyFunMoveLeft:
+	case gi.KeyFunMoveLeft:
 		kt.SetProcessed()
 		tx.CursorBackward(1)
 		tx.OfferCompletions()
-	case KeyFunHome:
+	case gi.KeyFunHome:
 		kt.SetProcessed()
 		tx.CursorStart()
-	case KeyFunEnd:
+	case gi.KeyFunEnd:
 		kt.SetProcessed()
 		tx.CursorEnd()
-	case KeyFunSelectMode:
+	case gi.KeyFunSelectMode:
 		kt.SetProcessed()
 		tx.SelectModeToggle()
-	case KeyFunCancelSelect:
+	case gi.KeyFunCancelSelect:
 		kt.SetProcessed()
 		tx.SelectReset()
-	case KeyFunSelectAll:
+	case gi.KeyFunSelectAll:
 		kt.SetProcessed()
 		tx.SelectAll()
-	case KeyFunCopy:
+	case gi.KeyFunCopy:
 		kt.SetProcessed()
 		tx.Copy(true) // reset
 	}
@@ -872,36 +871,36 @@ func (tx *TextEdit) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
-	case KeyFunSelectItem: // enter
+	case gi.KeyFunSelectItem: // enter
 		fallthrough
-	case KeyFunAccept: // ctrl+enter
+	case gi.KeyFunAccept: // ctrl+enter
 		tx.EditDone()
 		kt.SetProcessed()
 		tx.FocusNext()
-	case KeyFunAbort: // esc
-		tx.RevertEdit()
+	case gi.KeyFunAbort: // esc
+		tx.Revert()
 		kt.SetProcessed()
 		tx.FocusNext()
-	case KeyFunBackspace:
+	case gi.KeyFunBackspace:
 		kt.SetProcessed()
 		tx.CursorBackspace(1)
 		tx.OfferCompletions()
-	case KeyFunKill:
+	case gi.KeyFunKill:
 		kt.SetProcessed()
 		tx.CursorKill()
-	case KeyFunDelete:
+	case gi.KeyFunDelete:
 		kt.SetProcessed()
 		tx.CursorDelete(1)
-	case KeyFunCut:
+	case gi.KeyFunCut:
 		kt.SetProcessed()
 		tx.Cut()
-	case KeyFunPaste:
+	case gi.KeyFunPaste:
 		kt.SetProcessed()
 		tx.Paste()
-	case KeyFunComplete:
+	case gi.KeyFunComplete:
 		kt.SetProcessed()
 		tx.OfferCompletions()
-	case KeyFunNil:
+	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
@@ -913,7 +912,7 @@ func (tx *TextEdit) KeyInput(kt *key.ChordEvent) {
 }
 
 // MouseEvent handles the mouse.Event
-func (tx *TextEdit) MouseEvent(me *mouse.Event) {
+func (tx *TextView) MouseEvent(me *mouse.Event) {
 	if !tx.IsInactive() && !tx.HasFocus() {
 		tx.GrabFocus()
 	}
@@ -952,30 +951,30 @@ func (tx *TextEdit) MouseEvent(me *mouse.Event) {
 		if me.Action == mouse.Press {
 			me.SetProcessed()
 			tx.EmitContextMenuSignal()
-			tx.This.(Node2D).ContextMenu()
+			tx.This.(gi.Node2D).ContextMenu()
 		}
 	}
 }
 
-func (tx *TextEdit) TextEditEvents() {
+func (tx *TextView) TextViewEvents() {
 	tx.HoverTooltipEvent()
-	tx.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tx.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		tx := recv.Embed(KiT_TextEdit).(*TextEdit)
+		tx := recv.Embed(KiT_TextView).(*TextView)
 		if !tx.SelectMode {
 			tx.SelectModeToggle()
 		}
 		pt := tx.PointToRelPos(me.Pos())
 		tx.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 	})
-	tx.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+	tx.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		txf := recv.Embed(KiT_TextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
 	})
-	tx.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+	tx.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		txf := recv.Embed(KiT_TextView).(*TextView)
 		if txf.IsInactive() {
 			return
 		}
@@ -987,15 +986,15 @@ func (tx *TextEdit) TextEditEvents() {
 			oswin.TheApp.Cursor().PopIf(cursor.IBeam)
 		}
 	})
-	tx.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		txf := recv.Embed(KiT_TextEdit).(*TextEdit)
+	tx.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		txf := recv.Embed(KiT_TextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
-	if dlg, ok := tx.Viewport.This.(*Dialog); ok {
+	if dlg, ok := tx.Viewport.This.(*gi.Dialog); ok {
 		dlg.DialogSig.Connect(tx.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			txf, _ := recv.Embed(KiT_TextEdit).(*TextEdit)
-			if sig == int64(DialogAccepted) {
+			txf, _ := recv.Embed(KiT_TextView).(*TextView)
+			if sig == int64(gi.DialogAccepted) {
 				txf.EditDone()
 			}
 		})
@@ -1005,40 +1004,39 @@ func (tx *TextEdit) TextEditEvents() {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (tx *TextEdit) Init2D() {
+func (tx *TextView) Init2D() {
 	tx.Init2DWidget()
-	tx.EditTxt = []rune(tx.Txt)
-	tx.Edited = false
+	// tx.EditTxt = []rune(tx.Txt)
+	// tx.Edited = false
 }
 
-func (tx *TextEdit) Style2D() {
+func (tx *TextView) Style2D() {
 	tx.HiInit()
 	tx.SetCanFocusIfActive()
 	tx.Style2DWidget()
-	pst := &(tx.Par.(Node2D).AsWidget().Sty)
-	for i := 0; i < int(TextEditStatesN); i++ {
+	pst := &(tx.Par.(gi.Node2D).AsWidget().Sty)
+	for i := 0; i < int(TextViewStatesN); i++ {
 		tx.StateStyles[i].CopyFrom(&tx.Sty)
-		tx.StateStyles[i].SetStyleProps(pst, tx.StyleProps(TextEditSelectors[i]))
-		tx.StateStyles[i].StyleCSS(tx.This.(Node2D), tx.CSSAgg, TextEditSelectors[i])
+		tx.StateStyles[i].SetStyleProps(pst, tx.StyleProps(TextViewSelectors[i]))
+		tx.StateStyles[i].StyleCSS(tx.This.(gi.Node2D), tx.CSSAgg, TextViewSelectors[i])
 		tx.StateStyles[i].CopyUnitContext(&tx.Sty.UnContext)
 	}
 }
 
-func (tx *TextEdit) UpdateRenderAll() bool {
+func (tx *TextView) UpdateRenderAll() bool {
 	st := &tx.Sty
 	st.Font.LoadFont(&st.UnContext)
 	tx.RenderAll.SetRunes(tx.EditTxt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
 
-func (tx *TextEdit) Size2D(iter int) {
-	text := ""
-	if len(tx.Txt) == 0 && len(tx.Placeholder) > 0 {
-		text = tx.Placeholder
-	} else {
-		text = tx.Txt
-	}
-	tx.RenderLines(text)
+func (tx *TextView) Size2D(iter int) {
+	// if len(tx.Txt) == 0 && len(tx.Placeholder) > 0 {
+	// 	text = tx.Placeholder
+	// } else {
+	// 	text = tx.Txt
+	// }
+	tx.LayoutLines()
 	// tx.Edited = false
 	// maxlen := tx.MaxWidthReq
 	// if maxlen <= 0 {
@@ -1047,16 +1045,16 @@ func (tx *TextEdit) Size2D(iter int) {
 	tx.Size2DFromWH(tx.LinesSize.X, tx.LinesSize.Y)
 }
 
-func (tx *TextEdit) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (tx *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tx.Layout2DBase(parBBox, true, iter) // init style
-	for i := 0; i < int(TextEditStatesN); i++ {
+	for i := 0; i < int(TextViewStatesN); i++ {
 		tx.StateStyles[i].CopyUnitContext(&tx.Sty.UnContext)
 	}
 	return tx.Layout2DChildren(iter)
 }
 
 // StartCharPos returns the starting position of the given rune
-func (tx *TextEdit) StartCharPos(idx int) float32 {
+func (tx *TextView) StartCharPos(idx int) float32 {
 	if idx <= 0 || len(tx.RenderAll.Spans) != 1 {
 		return 0.0
 	}
@@ -1073,45 +1071,45 @@ func (tx *TextEdit) StartCharPos(idx int) float32 {
 
 // TextWidth returns the text width in dots between the two text string
 // positions (ed is exclusive -- +1 beyond actual char)
-func (tx *TextEdit) TextWidth(st, ed int) float32 {
+func (tx *TextView) TextWidth(st, ed int) float32 {
 	return tx.StartCharPos(ed) - tx.StartCharPos(st)
 }
 
 // CharStartPos returns the starting render coords for the given character
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too)
-func (tx *TextEdit) CharStartPos(charidx int) Vec2D {
+func (tx *TextView) CharStartPos(charidx int) gi.Vec2D {
 	st := &tx.Sty
 	spc := st.BoxSpace()
 	pos := tx.LayData.AllocPos.AddVal(spc)
 	cpos := tx.TextWidth(tx.StartPos, charidx)
-	return Vec2D{pos.X + cpos, pos.Y}
+	return gi.Vec2D{pos.X + cpos, pos.Y}
 }
 
-// TextEditBlinker is the time.Ticker for blinking cursors for text fields,
+// TextViewBlinker is the time.Ticker for blinking cursors for text fields,
 // only one of which can be active at at a time
-var TextEditBlinker *time.Ticker
+var TextViewBlinker *time.Ticker
 
-// BlinkingTextEdit is the text field that is blinking
-var BlinkingTextEdit *TextEdit
+// BlinkingTextView is the text field that is blinking
+var BlinkingTextView *TextView
 
-// TextEditBlink is function that blinks text field cursor
-func TextEditBlink() {
+// TextViewBlink is function that blinks text field cursor
+func TextViewBlink() {
 	for {
-		if TextEditBlinker == nil {
+		if TextViewBlinker == nil {
 			return // shutdown..
 		}
-		<-TextEditBlinker.C
-		if BlinkingTextEdit == nil {
+		<-TextViewBlinker.C
+		if BlinkingTextView == nil {
 			continue
 		}
-		if BlinkingTextEdit.IsDestroyed() || BlinkingTextEdit.IsDeleted() {
-			BlinkingTextEdit = nil
+		if BlinkingTextView.IsDestroyed() || BlinkingTextView.IsDeleted() {
+			BlinkingTextView = nil
 			continue
 		}
-		tx := BlinkingTextEdit
+		tx := BlinkingTextView
 		if tx.Viewport == nil || !tx.HasFocus() || !tx.FocusActive || tx.VpBBox == image.ZR {
-			BlinkingTextEdit = nil
+			BlinkingTextView = nil
 			continue
 		}
 		win := tx.ParentWindow()
@@ -1123,31 +1121,31 @@ func TextEditBlink() {
 	}
 }
 
-func (tx *TextEdit) StartCursor() {
+func (tx *TextView) StartCursor() {
 	tx.BlinkOn = true
-	if CursorBlinkMSec == 0 {
+	if gi.CursorBlinkMSec == 0 {
 		tx.RenderCursor(true)
 		return
 	}
-	if TextEditBlinker == nil {
-		TextEditBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
-		go TextEditBlink()
+	if TextViewBlinker == nil {
+		TextViewBlinker = time.NewTicker(time.Duration(gi.CursorBlinkMSec) * time.Millisecond)
+		go TextViewBlink()
 	}
 	tx.BlinkOn = true
 	win := tx.ParentWindow()
 	if win != nil && !win.IsResizing() {
 		tx.RenderCursor(true)
 	}
-	BlinkingTextEdit = tx
+	BlinkingTextView = tx
 }
 
-func (tx *TextEdit) StopCursor() {
-	if BlinkingTextEdit == tx {
-		BlinkingTextEdit = nil
+func (tx *TextView) StopCursor() {
+	if BlinkingTextView == tx {
+		BlinkingTextView = nil
 	}
 }
 
-func (tx *TextEdit) RenderCursor(on bool) {
+func (tx *TextView) RenderCursor(on bool) {
 	if tx.PushBounds() {
 		st := &tx.Sty
 		cpos := tx.CharStartPos(tx.CursorPos)
@@ -1181,7 +1179,7 @@ func (tx *TextEdit) RenderCursor(on bool) {
 	}
 }
 
-func (tx *TextEdit) RenderSelect() {
+func (tx *TextView) RenderSelect() {
 	if tx.SelectEnd <= tx.SelectStart {
 		return
 	}
@@ -1201,13 +1199,13 @@ func (tx *TextEdit) RenderSelect() {
 
 	rs := &tx.Viewport.Render
 	pc := &rs.Paint
-	st := &tx.StateStyles[TextEditSel]
+	st := &tx.StateStyles[TextViewSel]
 	tsz := tx.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, Vec2D{tsz, tx.FontHeight}, &st.Font.BgColor)
+	pc.FillBox(rs, spos, gi.Vec2D{tsz, tx.FontHeight}, &st.Font.BgColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
-func (tx *TextEdit) AutoScroll() {
+func (tx *TextView) AutoScroll() {
 	st := &tx.Sty
 
 	tx.UpdateRenderAll()
@@ -1231,7 +1229,7 @@ func (tx *TextEdit) AutoScroll() {
 	if tx.StartPos >= tx.EndPos {
 		tx.StartPos = kit.MaxInt(0, tx.EndPos-tx.CharWidth)
 	}
-	tx.CursorPos = InRangeInt(tx.CursorPos, 0, sz)
+	tx.CursorPos = gi.InRangeInt(tx.CursorPos, 0, sz)
 
 	inc := int(math32.Ceil(.1 * float32(tx.CharWidth)))
 	inc = kit.MaxInt(4, inc)
@@ -1296,7 +1294,7 @@ func (tx *TextEdit) AutoScroll() {
 }
 
 // RenderText displays the lines on the screen
-func (tx *TextEdit) RenderText() {
+func (tx *TextView) RenderText() {
 	rs := &tx.Viewport.Render
 	st := &tx.Sty
 	pos := tx.LayData.AllocPos.AddVal(st.Layout.Margin.Dots + st.Layout.Padding.Dots)
@@ -1316,30 +1314,30 @@ func (tx *TextEdit) RenderText() {
 	}
 }
 
-func (tx *TextEdit) Render2D() {
+func (tx *TextView) Render2D() {
 	if tx.FullReRenderIfNeeded() {
 		return
 	}
 	if tx.PushBounds() {
-		// tx.TextEditEvents()
+		// tx.TextViewEvents()
 		// tx.AutoScroll() // inits paint with our style
 
 		if tx.IsInactive() {
 			if tx.IsSelected() {
-				tx.Sty = tx.StateStyles[TextEditSel]
+				tx.Sty = tx.StateStyles[TextViewSel]
 			} else {
-				tx.Sty = tx.StateStyles[TextEditInactive]
+				tx.Sty = tx.StateStyles[TextViewInactive]
 			}
 		} else if tx.HasFocus() {
 			if tx.FocusActive {
-				tx.Sty = tx.StateStyles[TextEditFocus]
+				tx.Sty = tx.StateStyles[TextViewFocus]
 			} else {
-				tx.Sty = tx.StateStyles[TextEditActive]
+				tx.Sty = tx.StateStyles[TextViewActive]
 			}
 		} else if tx.IsSelected() {
-			tx.Sty = tx.StateStyles[TextEditSel]
+			tx.Sty = tx.StateStyles[TextViewSel]
 		} else {
-			tx.Sty = tx.StateStyles[TextEditActive]
+			tx.Sty = tx.StateStyles[TextViewActive]
 		}
 		// rs := &tx.Viewport.Render
 		st := &tx.Sty
@@ -1366,27 +1364,27 @@ func (tx *TextEdit) Render2D() {
 		tx.Render2DChildren()
 		tx.PopBounds()
 	} else {
-		tx.DisconnectAllEvents(RegPri)
+		tx.DisconnectAllEvents(gi.RegPri)
 	}
 }
 
-func (tx *TextEdit) FocusChanged2D(change FocusChanges) {
+func (tx *TextView) FocusChanged2D(change gi.FocusChanges) {
 	switch change {
-	case FocusLost:
+	case gi.FocusLost:
 		tx.FocusActive = false
 		tx.EditDone()
 		tx.UpdateSig()
-	case FocusGot:
+	case gi.FocusGot:
 		tx.FocusActive = true
 		tx.ScrollToMe()
 		//tx.CursorEnd()
 		tx.EmitFocusedSignal()
 		tx.UpdateSig()
-	case FocusInactive:
+	case gi.FocusInactive:
 		tx.FocusActive = false
 		tx.EditDone()
 		tx.UpdateSig()
-	case FocusActive:
+	case gi.FocusActive:
 		tx.FocusActive = true
 		tx.ScrollToMe()
 		// tx.UpdateSig()
@@ -1394,7 +1392,7 @@ func (tx *TextEdit) FocusChanged2D(change FocusChanges) {
 	}
 }
 
-func (tx *TextEdit) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+func (tx *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		return
 	}
