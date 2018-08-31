@@ -155,7 +155,7 @@ const (
 // UpdateFromSlice does full update from current slice
 func (tv *TableView) UpdateFromSlice() {
 	mods, updt := tv.StdConfig()
-	tv.ConfigSliceGrid(false)
+	tv.ConfigSliceGrid(true)
 	tv.ConfigToolbar()
 	if mods {
 		tv.SetFullReRender()
