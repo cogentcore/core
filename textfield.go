@@ -528,9 +528,7 @@ func (tf *TextField) OfferCompletions() {
 
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-
-	c := tf.Completion
-	c.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
+	tf.Completion.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
 }
 
 // Complete edits the text field using the string chosen from the completion menu

@@ -714,8 +714,7 @@ func (tv *TextView) OfferCompletions() {
 	// s := string(tv.EditTxt[0:tv.CursorPos])
 	// cpos := tv.CharStartPos(tv.CursorPos).ToPoint()
 
-	// c := tv.Completion
-	// c.ShowCompletions(s, tv.Viewport, cpos.X+5, cpos.Y+10)
+	// tv.Completion.ShowCompletions(s, tv.Viewport, cpos.X+5, cpos.Y+10)
 }
 
 // Complete edits the text field using the string chosen from the completion menu
