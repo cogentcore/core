@@ -120,11 +120,10 @@ const (
 
 //go:generate stringer -type=TextBufSignals
 
-// EditDone completes editing and copies the active edited text to the text
+// EditDone is sent when file is saved
 func (tb *TextBuf) EditDone() {
 	if tb.Edited {
 		tb.Edited = false
-		tb.Txt = tb.LinesToBytes()
 		tb.TextBufSig.Emit(tb.This, int64(TextBufDone), tb.Txt)
 	}
 }
@@ -175,13 +174,17 @@ func (tb *TextBuf) SetMimetype(filename string) {
 	tb.Mimetype = mime.TypeByExtension(ext)
 }
 
-// LinesToBytes converts current Lines to a slice of bytes
-func (tb *TextBuf) LinesToBytes() []byte {
-	b := make([]byte, 0, tb.NLines*80)
-	for _, lr := range tb.Lines {
-		b = append(b, []byte(string(lr))...)
+// LinesToBytes converts current Lines back to the Txt slice of bytes
+func (tb *TextBuf) LinesToBytes() {
+	if tb.Txt != nil {
+		tb.Txt = tb.Txt[:0]
+	} else {
+		tb.Txt = make([]byte, 0, tb.NLines*40)
 	}
-	return b
+	for _, lr := range tb.Lines {
+		tb.Txt = append(tb.Txt, []byte(string(lr))...)
+		tb.Txt = append(tb.Txt, '\n')
+	}
 }
 
 // BytesToLines converts given text bytes into lines, and signals that new text is available
@@ -189,14 +192,14 @@ func (tb *TextBuf) BytesToLines(text []byte) {
 	if len(text) == 0 {
 		tb.NLines = 0
 		if tb.Lines != nil {
-			tb.Lines = tb.Lines[0:0]
+			tb.Lines = tb.Lines[:0]
 		}
 		return
 	}
 	lns := bytes.Split(text, []byte("\n")) // todo: other cr?
 	tb.NLines = len(lns)
 	if cap(tb.Lines) >= tb.NLines {
-		tb.Lines = tb.Lines[0:0]
+		tb.Lines = tb.Lines[:0]
 	} else {
 		tb.Lines = make([][]rune, tb.NLines)
 	}
@@ -243,6 +246,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 			tb.Lines = append(tb.Lines[:stln], tb.Lines[edln:]...)
 		}
 	}
+	tb.LinesToBytes()
 	tbe := &TextBufEdit{Start: st, End: ed, Delete: true}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
 	return tbe
@@ -290,6 +294,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)
 		}
 	}
+	tb.LinesToBytes()
 	tbe := tb.Region(st, ed)
 	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
 	return tbe

@@ -54,7 +54,7 @@ type RuneRender struct {
 	Face    font.Face       `desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
 	Color   color.Color     `desc:"color to draw characters in"`
 	BgColor color.Color     `desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
-	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., <P> vs <BR>)"`
+	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)"`
 	RelPos  Vec2D           `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
 	Size    Vec2D           `desc:"size of the rune itself, exclusive of spacing that might surround it"`
 	RotRad  float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
@@ -123,7 +123,7 @@ func (rr *RuneRender) RelPosAfterTB() float32 {
 type SpanRender struct {
 	Text    []rune          `desc:"text as runes"`
 	Render  []RuneRender    `desc:"render info for each rune in one-to-one correspondence"`
-	RelPos  Vec2D           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+	RelPos  Vec2D           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
 	LastPos Vec2D           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same TextRender relative coordinates"`
 	Dir     TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
 	HasDeco TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
@@ -1010,6 +1010,7 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
 func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, cssAgg ki.Props) {
+	errstr := "gi.TextRender SetHTML"
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -1043,7 +1044,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.TextRender DecodeHTML parsing error: %v\n", err)
+			log.Printf("%v parsing error: %v for string\n%v\n", errstr, err, str)
 			break
 		}
 		switch se := t.(type) {
@@ -1091,7 +1092,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 					nextIsParaStart = true
 				case "br":
 				default:
-					log.Printf("gi.TextRender SetHTML tag not recognized: %v\n", nm)
+					log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, nm, str)
 				}
 			}
 			if len(se.Attr) > 0 {
@@ -1205,7 +1206,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 				etag := strings.ToLower(ftag[1:])
 				// fmt.Printf("%v  etag: %v\n", bidx, etag)
 				if etag != curTag {
-					log.Printf("%v end tag: %v doesn't match current tag: %v\n", errstr, etag, curTag)
+					log.Printf("%v end tag: %v doesn't match current tag: %v for string\n%v\n", errstr, etag, curTag, string(str))
 				}
 				switch etag {
 				// case "p":
@@ -1275,7 +1276,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 					// 	nextIsParaStart = true
 					// case "br":
 					default:
-						log.Printf("%v tag not recognized: %v\n", errstr, stag)
+						log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, stag, string(str))
 					}
 				}
 				if len(parts) > 1 { // attr

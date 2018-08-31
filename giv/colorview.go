@@ -370,6 +370,10 @@ func (vv *ColorValueView) Color() (*gi.Color, bool) {
 		}
 	case color.Color:
 		vv.TmpColor.SetColor(c)
+	case *color.Color:
+		if c != nil {
+			vv.TmpColor.SetColor(*c)
+		}
 	default:
 		ok = false
 		log.Printf("ColorValueView: could not get color value from type: %T val: %+v\n", c, c)
@@ -390,6 +394,10 @@ func (vv *ColorValueView) SetColor(clr gi.Color) {
 		vv.SetValue(clr)
 	case color.Color:
 		vv.SetValue((color.Color)(clr))
+	case *color.Color:
+		if c != nil {
+			vv.SetValue((color.Color)(clr))
+		}
 	default:
 		log.Printf("ColorValueView: could not set color value from type: %T val: %+v\n", c, c)
 	}

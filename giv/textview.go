@@ -224,11 +224,11 @@ func (tv *TextView) HiInit() {
 	tv.HiCSS.ParseString(csstr)
 	tv.CSS = tv.HiCSS.CSSProps()
 
-	// if chp, ok := ki.SubProps(tv.CSS, ".chroma"); ok {
-	// 	for ky, vl := range chp { // apply to top level
-	// 		tv.SetProp(ky, vl)
-	// 	}
-	// }
+	if chp, ok := ki.SubProps(tv.CSS, ".chroma"); ok {
+		for ky, vl := range chp { // apply to top level
+			tv.SetProp(ky, vl)
+		}
+	}
 
 	tv.lastHiLang = tv.HiLang
 	tv.lastHiStyle = tv.HiStyle
@@ -355,9 +355,13 @@ func (tv *TextView) CursorForward(steps int) {
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch++
-		if tv.CursorPos.Ch > len(tv.Buf.Lines[tv.CursorPos.Ln]) && tv.CursorPos.Ln < tv.NLines-1 {
-			tv.CursorPos.Ch = 0
-			tv.CursorPos.Ln++
+		if tv.CursorPos.Ch > len(tv.Buf.Lines[tv.CursorPos.Ln]) {
+			if tv.CursorPos.Ln < tv.NLines-1 {
+				tv.CursorPos.Ch = 0
+				tv.CursorPos.Ln++
+			} else {
+				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+			}
 		}
 	}
 	tv.CursorCol = tv.CursorPos.Ch
@@ -384,9 +388,13 @@ func (tv *TextView) CursorBackward(steps int) {
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch--
-		if tv.CursorPos.Ch < 0 && tv.CursorPos.Ln > 0 {
-			tv.CursorPos.Ln--
-			tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+		if tv.CursorPos.Ch < 0 {
+			if tv.CursorPos.Ln > 0 {
+				tv.CursorPos.Ln--
+				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+			} else {
+				tv.CursorPos.Ch = 0
+			}
 		}
 	}
 	tv.CursorCol = tv.CursorPos.Ch
@@ -672,8 +680,6 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt)
 	tv.CursorPos = tbe.End
 }
-
-// cpos := tv.CharStartPos(tv.CursorPos).ToPoint()
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
@@ -1038,7 +1044,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
 	spos.Y += tv.Offs[pos.Ln]
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
-		spos = spos.Add(tv.Renders[pos.Ln].Spans[0].RuneRelPos(pos.Ch))
+		spos.X += tv.Renders[pos.Ln].Spans[0].RuneRelPos(pos.Ch).X
 	}
 	return spos
 }
@@ -1161,7 +1167,6 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 	st := &tv.Sty
 	spc := st.BoxSpace()
 	pos := tv.LayData.AllocPos.AddVal(spc)
-	pos.Y -= 0.5 * tv.FontHeight // why!?
 	return pos
 }
 
@@ -1180,7 +1185,7 @@ func (tv *TextView) RenderText() {
 		}
 		lp := pos
 		lp.Y = lst
-		tv.Renders[ln].RenderTopPos(rs, lp)
+		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 	}
 }
 

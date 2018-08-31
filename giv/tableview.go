@@ -383,7 +383,11 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 			}
 		}
 		hdr.Data = fli
-		hdr.Tooltip = "click to sort by this column -- toggles direction of sort too"
+		hdr.Tooltip = "click to sort / toggle sort direction by this column"
+		dsc := fld.Tag.Get("desc")
+		if dsc != "" {
+			hdr.Tooltip += ": " + dsc
+		}
 		hdr.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			act := send.(*gi.Action)
@@ -832,12 +836,19 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		sumwd := float32(0)
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
-			widg := sgf.KnownChild(fli).(gi.Node2D).AsWidget()
-			wd := widg.LayData.AllocSize.X - sgf.Spacing.Dots
-			lbl.SetProp("width", units.NewValue(wd, units.Dot))
+			wd := sgf.GridData[gi.Col][fli].AllocSize
+			lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
 			sumwd += wd
 		}
-		sgh.SetProp("min-width", sumwd)
+		if !tv.IsInactive() {
+			for fli := nfld; fli < nfld+2; fli++ {
+				lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
+				wd := sgf.GridData[gi.Col][fli].AllocSize
+				lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
+				sumwd += wd
+			}
+		}
+		sgh.SetMinPrefWidth(units.NewValue(sumwd, units.Dot))
 		sgh.Layout2D(parBBox, iter)
 	}
 	return redo
@@ -907,6 +918,32 @@ func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	return widg, true
 }
 
+// RowFirstVisWidget returns the first visible widget for given row (could be
+// index or not) -- false if out of range
+func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
+	if tv.RowStruct(row) == nil { // range check
+		return nil, false
+	}
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	sg, _ := tv.SliceFrame()
+	if sg == nil {
+		return nil, false
+	}
+	sgf := tv.SliceGrid()
+	widg := sgf.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
+	if widg.VpBBox != image.ZR {
+		return widg, true
+	}
+	ridx := nWidgPerRow * row
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		if widg.VpBBox != image.ZR {
+			return widg, true
+		}
+	}
+	return nil, false
+}
+
 // RowGrabFocus grabs the focus for the first focusable widget in given row --
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
@@ -944,7 +981,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 // RowPos returns center of window position of index label for row (ContextMenuPos)
 func (tv *TableView) RowPos(row int) image.Point {
 	var pos image.Point
-	widg, ok := tv.RowFirstWidget(row)
+	widg, ok := tv.RowFirstVisWidget(row)
 	if ok {
 		pos = widg.ContextMenuPos()
 	}
@@ -957,7 +994,7 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < tv.BuiltSize; rw++ {
 		widg, ok := tv.RowFirstWidget(rw)
 		if ok {
-			if widg.WinBBox.Min.Y < posY && posY < widg.WinBBox.Max.Y {
+			if widg.ObjBBox.Min.Y < posY && posY < widg.ObjBBox.Max.Y {
 				return rw, true
 			}
 		}
@@ -1491,11 +1528,14 @@ func (tv *TableView) DragNDropStart() {
 		tv.MimeDataRow(&md, r)
 	}
 	rws := tv.SelectedRowsList(true) // descending sort
-	widg, ok := tv.RowFirstWidget(rws[0])
+	widg, ok := tv.RowFirstVisWidget(rws[0])
 	if ok {
 		bi := &gi.Bitmap{}
 		bi.InitName(bi, tv.UniqueName())
-		bi.GrabRenderFrom(widg)
+		if !bi.GrabRenderFrom(widg) { // offscreen!
+			log.Printf("giv.TableView: unexpected failure in getting widget pixels -- cannot start DND\n")
+			return
+		}
 		gi.ImageClearer(bi.Pixels, 50.0)
 		tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
 	}

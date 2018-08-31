@@ -90,6 +90,7 @@ func ToValueView(it interface{}) ValueView {
 	nptyp := kit.NonPtrType(typ)
 	typrops := kit.Types.Properties(typ, false) // don't make
 	vk := typ.Kind()
+	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
 	if nptyp == reflect.TypeOf(gi.IconName("")) {
 		vv := IconValueView{}
@@ -461,6 +462,10 @@ func (vv *ValueViewBase) IsInactive() bool {
 			return true
 		}
 	}
+	npv := kit.NonPtrValue(vv.Value)
+	if npv.Kind() == reflect.Interface && kit.ValueIsZero(npv) {
+		return true
+	}
 	return false
 }
 
@@ -474,8 +479,14 @@ func (vv *ValueViewBase) UpdateWidget() {
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
-	txt := kit.ToString(vv.Value.Interface())
-	tf.SetText(txt)
+	npv := kit.NonPtrValue(vv.Value)
+	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
+	if npv.Kind() == reflect.Interface && kit.ValueIsZero(npv) {
+		tf.SetText("nil")
+	} else {
+		txt := kit.ToString(vv.Value.Interface())
+		tf.SetText(txt)
+	}
 }
 
 func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
