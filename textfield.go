@@ -50,7 +50,7 @@ type TextField struct {
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion   Complete                `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Completion   *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -192,7 +192,7 @@ func (tf *TextField) CursorForward(steps int) {
 	}
 }
 
-// CursorForward moves the cursor backward
+// CursorBackward moves the cursor backward
 func (tf *TextField) CursorBackward(steps int) {
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
@@ -265,13 +265,6 @@ func (tf *TextField) CursorBackspace(steps int) {
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos-steps], tf.EditTxt[tf.CursorPos:]...)
 	tf.CursorBackward(steps)
-	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
-		tf.SelectEnd -= steps
-	} else if tf.CursorPos < tf.SelectStart {
-		tf.SelectStart -= steps
-		tf.SelectEnd -= steps
-	}
-	tf.SelectUpdate()
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -289,13 +282,6 @@ func (tf *TextField) CursorDelete(steps int) {
 	defer tf.UpdateEnd(updt)
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
-	if tf.CursorPos > tf.SelectStart && tf.CursorPos <= tf.SelectEnd {
-		tf.SelectEnd -= steps
-	} else if tf.CursorPos < tf.SelectStart {
-		tf.SelectStart -= steps
-		tf.SelectEnd -= steps
-	}
-	tf.SelectUpdate()
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -494,10 +480,9 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.Edited = true
 	rs := []rune(str)
 	rsl := len(rs)
-	nt := make([]rune, 0, cap(tf.EditTxt)+cap(rs))
-	nt = append(nt, tf.EditTxt[:tf.CursorPos]...)
-	nt = append(nt, rs...)
-	nt = append(nt, tf.EditTxt[tf.CursorPos:]...)
+	nt := append(tf.EditTxt, rs...)                // first append to end
+	copy(nt[tf.CursorPos+rsl:], nt[tf.CursorPos:]) // move stuff to end
+	copy(nt[tf.CursorPos:], rs)                    // copy into position
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
@@ -533,6 +518,9 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 
 // OfferCompletions pops up a menu of possible completions
 func (tf *TextField) OfferCompletions() {
+	if tf.Completion == nil {
+		return
+	}
 	win := tf.ParentWindow()
 	if PopupIsCompleter(win.Popup) {
 		win.ClosePopup(win.Popup)
@@ -543,12 +531,6 @@ func (tf *TextField) OfferCompletions() {
 
 	c := tf.Completion
 	c.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
-	c.CompleteSig.Connect(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tff, _ := recv.Embed(KiT_TextField).(*TextField)
-		if sig == int64(CompleteSelect) {
-			tff.Complete(c.Completion)
-		}
-	})
 }
 
 // Complete edits the text field using the string chosen from the completion menu
@@ -629,7 +611,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.ChordString())
 	win := tf.ParentWindow()
 
-	if PopupIsCompleter(win.Popup) {
+	if tf.Completion != nil && PopupIsCompleter(win.Popup) {
 		switch kf {
 		case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
 			count := len(tf.Completion.Completions)
@@ -779,12 +761,12 @@ func (tf *TextField) TextFieldEvents() {
 	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		tf := recv.Embed(KiT_TextField).(*TextField)
-		if !tf.SelectMode {
-			tf.SelectModeToggle()
+		tff := recv.Embed(KiT_TextField).(*TextField)
+		if !tff.SelectMode {
+			tff.SelectModeToggle()
 		}
-		pt := tf.PointToRelPos(me.Pos())
-		tf.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
+		pt := tff.PointToRelPos(me.Pos())
+		tff.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 	})
 	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
@@ -1196,9 +1178,23 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 
 func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
+		if tf.Completion != nil {
+			tf.Completion.CompleteSig.Disconnect(tf.This)
+		}
+		tf.Completion.Destroy()
+		tf.Completion = nil
 		return
 	}
+	tf.Completion = &Complete{}
+	tf.Completion.InitName(tf.Completion, "tf-completion") // needed for standalone Ki's
 	tf.Completion.Context = data
 	tf.Completion.MatchFunc = matchFun
 	tf.Completion.EditFunc = editFun
+	// note: only need to connect once..
+	tf.Completion.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tff, _ := recv.Embed(KiT_TextField).(*TextField)
+		if sig == int64(CompleteSelect) {
+			tff.Complete(data.(string)) // always use data
+		}
+	})
 }

@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"github.com/goki/gi/complete"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -40,7 +39,8 @@ const (
 
 //go:generate stringer -type=CompleteSignals
 
-// ShowCompletions calls MatchFunc to get a list of completions and builds the completion popup menu
+// ShowCompletions calls MatchFunc to get a list of completions and builds the
+// completion popup menu
 func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 	if c.MatchFunc == nil {
 		return
@@ -55,10 +55,10 @@ func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 		var m Menu
 		for i := 0; i < count; i++ {
 			s := c.Completions[i]
-			m.AddAction(ActOpts{Label: s},
+			m.AddAction(ActOpts{Label: s, Data: s},
 				c, func(recv, send ki.Ki, sig int64, data interface{}) {
 					tff := recv.Embed(KiT_Complete).(*Complete)
-					tff.Complete(s)
+					tff.Complete(data.(string))
 				})
 		}
 		vp := PopupMenu(m, x, y, vp, "tf-completion-menu")
@@ -67,8 +67,9 @@ func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 	}
 }
 
-// Complete emits a signal to let subscribers know that the user has made a selection from the list of possible completions
+// Complete emits a signal to let subscribers know that the user has made a
+// selection from the list of possible completions
 func (c *Complete) Complete(s string) {
-	fmt.Println(s)
+	c.Completion = s
 	c.CompleteSig.Emit(c.This, int64(CompleteSelect), s)
 }

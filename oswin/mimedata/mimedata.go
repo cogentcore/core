@@ -101,6 +101,11 @@ func NewTextData(text string) *Data {
 	return &Data{TextPlain, []byte(text)}
 }
 
+// NewTextDataBytes returns a Data representation of the bytes string
+func NewTextDataBytes(text []byte) *Data {
+	return &Data{TextPlain, text}
+}
+
 // IsText returns true if type is any of the text/ types (literally looks for that at start of Type) or is another known text type (e.g., AppJSON, XML)
 func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
@@ -120,6 +125,14 @@ type Mimes []*Data
 // NewText returns a Mimes representation of the string as a single text/plain Data
 func NewText(text string) Mimes {
 	md := NewTextData(text)
+	mi := make(Mimes, 1)
+	mi[0] = md
+	return mi
+}
+
+// NewTextBytes returns a Mimes representation of the bytes string as a single text/plain Data
+func NewTextBytes(text []byte) Mimes {
+	md := NewTextDataBytes(text)
 	mi := make(Mimes, 1)
 	mi[0] = md
 	return mi

@@ -124,7 +124,7 @@ type SpanRender struct {
 	Text    []rune          `desc:"text as runes"`
 	Render  []RuneRender    `desc:"render info for each rune in one-to-one correspondence"`
 	RelPos  Vec2D           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
-	LastPos Vec2D           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations"`
+	LastPos Vec2D           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same TextRender relative coordinates"`
 	Dir     TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
 	HasDeco TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
 }
@@ -163,6 +163,15 @@ func (sr *SpanRender) SizeHV() Vec2D {
 		sz.Y = -sz.Y
 	}
 	return sz
+}
+
+// RunePos returns the relative position of the given rune index (adds Span
+// RelPos and rune RelPos) -- if index > length, then uses LastPos
+func (sr *SpanRender) RuneRelPos(idx int) Vec2D {
+	if idx >= len(sr.Render) {
+		return sr.LastPos
+	}
+	return sr.RelPos.Add(sr.Render[idx].RelPos)
 }
 
 // AppendRune adds one rune and associated formatting info
