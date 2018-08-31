@@ -462,6 +462,10 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
+	fv.FilterFunc = nil
+	if len(fv.Ext) > 0 {
+		fv.FilterFunc = FileViewExtOnlyFilter
+	}
 	oswin.TheApp.Cursor().Push(cursor.Wait)
 	defer oswin.TheApp.Cursor().Pop()
 
