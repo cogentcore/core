@@ -541,7 +541,14 @@ func (tf *TextField) OfferCompletions() {
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 
-	tf.Completion.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10, tf)
+	c := tf.Completion
+	c.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
+	c.CompleteSig.Connect(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tff, _ := recv.Embed(KiT_TextField).(*TextField)
+		if sig == int64(CompleteSelect) {
+			tff.Complete(c.Completion)
+		}
+	})
 }
 
 // Complete edits the text field using the string chosen from the completion menu
