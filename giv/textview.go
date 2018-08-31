@@ -179,10 +179,15 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.LayoutLines()
+		tv.UpdateSig()
 	case TextBufInsert:
+		tbe := data.(*TextBufEdit)
 		tv.LayoutLines() // todo: optimized!
+		tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
 	case TextBufDelete:
+		tbe := data.(*TextBufEdit)
 		tv.LayoutLines() // todo: optimized!
+		tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
 	}
 }
 
@@ -1170,8 +1175,9 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 	return pos
 }
 
-// RenderText displays the lines on the screen
-func (tv *TextView) RenderText() {
+// RenderAllLines displays all the visible lines on the screen -- called
+// during standard render
+func (tv *TextView) RenderAllLines() {
 	rs := &tv.Viewport.Render
 	pos := tv.RenderStartPos()
 	for ln := 0; ln < tv.NLines; ln++ {
@@ -1187,6 +1193,51 @@ func (tv *TextView) RenderText() {
 		lp.Y = lst
 		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 	}
+}
+
+// RenderLines displays a specific range of lines on the screen, also painting
+// selection.  end is *inclusive* line.  returns false if nothing visible.
+func (tv *TextView) RenderLines(st, ed int) bool {
+	sty := &tv.Sty
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	pos := tv.RenderStartPos()
+	var boxMin, boxMax gi.Vec2D
+	// first get the box to fill
+	visSt := -1
+	visEd := -1
+	for ln := st; ln <= ed; ln++ {
+		lst := pos.Y + tv.Offs[ln]
+		led := lst + tv.Renders[ln].Size.Y
+		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
+		lp := pos
+		if visSt < 0 {
+			visSt = ln
+			lp.Y = lst
+			boxMin = lp
+		}
+		visEd = ln // just keep updating
+		lp.Y = led
+		boxMax = lp
+	}
+	if visSt < 0 && visEd < 0 {
+		return false
+	}
+	boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
+	pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
+	// todo: selection!
+	for ln := visSt; ln <= visEd; ln++ {
+		lst := pos.Y + tv.Offs[ln]
+		lp := pos
+		lp.Y = lst
+		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+	}
+	return true
 }
 
 func (tv *TextView) Render2D() {
@@ -1212,12 +1263,11 @@ func (tv *TextView) Render2D() {
 		} else {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
-		// rs := &tv.Viewport.Render
 		st := &tv.Sty
 		st.Font.LoadFont(&st.UnContext)
 		tv.RenderStdBox(st)
 		tv.RenderSelect()
-		tv.RenderText()
+		tv.RenderAllLines()
 		if tv.HasFocus() && tv.FocusActive {
 			tv.StartCursor()
 		} else {

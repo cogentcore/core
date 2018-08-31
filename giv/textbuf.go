@@ -75,16 +75,18 @@ func (te *TextBufEdit) ToBytes() []byte {
 // multiple views.  Views always only view a single buffer, so they directly
 // call methods on the buffer to drive updates, which are then broadast.  It
 // also has methods for loading and saving buffers to files.  Unlike GUI
-// Widgets, all of its methods are generally signaling, without an explicit
-// Action suffix.
+// Widgets, its methods are generally signaling, without an explicit Action
+// suffix.  Internally, the buffer represents new lines using \n = LF, but
+// saving and loading can deal with Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt        []byte      `json:"-" xml:"text" desc:"the last saved value of the entire text being edited -- using []byte slice for greater efficiency"`
+	Txt        []byte      `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
 	Edited     bool        `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	Filename   gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Mimetype   string      `json:"-" xml:"-" desc:"mime type of the contents"`
 	NLines     int         `json:"-" xml:"-" desc:"number of lines"`
 	Lines      [][]rune    `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
+	ByteOffs   []int       `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
 	TextBufSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 }
@@ -128,6 +130,9 @@ func (tb *TextBuf) EditDone() {
 	}
 }
 
+// todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
+// internally just use lf = \n
+
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
 	fp, err := os.Open(string(filename))
@@ -141,7 +146,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.Filename = filename
 	tb.SetName(string(filename)) // todo: modify in any way?
 	tb.SetMimetype(string(filename))
-	tb.BytesToLines(tb.Txt)
+	tb.BytesToLines()
 	return nil
 }
 
@@ -181,30 +186,42 @@ func (tb *TextBuf) LinesToBytes() {
 	} else {
 		tb.Txt = make([]byte, 0, tb.NLines*40)
 	}
-	for _, lr := range tb.Lines {
+	bo := 0
+	for ln, lr := range tb.Lines {
+		tb.ByteOffs[ln] = bo
 		tb.Txt = append(tb.Txt, []byte(string(lr))...)
 		tb.Txt = append(tb.Txt, '\n')
+		bo += len(lr) + 1
 	}
 }
 
-// BytesToLines converts given text bytes into lines, and signals that new text is available
-func (tb *TextBuf) BytesToLines(text []byte) {
-	if len(text) == 0 {
+// BytesToLines converts current Txt bytes into lines, and signals that new text is available
+func (tb *TextBuf) BytesToLines() {
+	if len(tb.Txt) == 0 {
 		tb.NLines = 0
 		if tb.Lines != nil {
 			tb.Lines = tb.Lines[:0]
+			tb.ByteOffs = tb.ByteOffs[:0]
 		}
 		return
 	}
-	lns := bytes.Split(text, []byte("\n")) // todo: other cr?
+	lns := bytes.Split(tb.Txt, []byte("\n"))
 	tb.NLines = len(lns)
 	if cap(tb.Lines) >= tb.NLines {
 		tb.Lines = tb.Lines[:0]
 	} else {
 		tb.Lines = make([][]rune, tb.NLines)
 	}
+	if cap(tb.ByteOffs) >= tb.NLines {
+		tb.ByteOffs = tb.ByteOffs[:0]
+	} else {
+		tb.ByteOffs = make([]int, tb.NLines)
+	}
+	bo := 0
 	for ln, txt := range lns {
+		tb.ByteOffs[ln] = bo
 		tb.Lines[ln] = []rune(string(txt))
+		bo += len(txt) + 1 // lf
 	}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
 }
@@ -258,7 +275,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
 	}
-	lns := bytes.Split(text, []byte("\n")) // todo: other cr?
+	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := []rune(string(lns[0]))
 	rsz := len(rs)
