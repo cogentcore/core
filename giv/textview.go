@@ -330,10 +330,12 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 
 	sz := tv.RenderSize()
 	st := &tv.Sty
+	fst := st.Font
+	fst.BgColor.SetColor(nil)
 	off := float32(0)
 	mxwd := float32(0)
 	for ln := 0; ln < tv.NLines; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &st.Font, &st.UnContext, tv.CSS)
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
 		tv.Offs[ln] = off
 		lsz := tv.Renders[ln].Size.Y
@@ -360,6 +362,9 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 // highlighting). end is *inclusive* line.  if highlighter generates an error
 // on a line, then calls LayoutAllLines to do a full-reparse.
 func (tv *TextView) LayoutLines(st, ed int) {
+	sty := &tv.Sty
+	fst := sty.Font
+	fst.BgColor.SetColor(nil)
 	for ln := st; ln <= ed; ln++ {
 		if tv.HasHi() {
 			var htmlBuf bytes.Buffer
@@ -376,7 +381,7 @@ func (tv *TextView) LayoutLines(st, ed int) {
 		}
 
 		st := &tv.Sty
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &st.Font, &st.UnContext, tv.CSS)
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, tv.RenderSz)
 	}
 }
@@ -397,7 +402,7 @@ func (tv *TextView) CursorSelect(org TextPos) {
 	} else {
 		tv.SelectStart = tv.CursorPos
 	}
-	tv.SelectUpdate()
+	tv.SelectRender()
 }
 
 // CursorForward moves the cursor forward
@@ -591,6 +596,7 @@ func (tv *TextView) CursorBackspace(steps int) {
 func (tv *TextView) CursorDelete(steps int) {
 	if tv.HasSelection() {
 		tv.DeleteSelection()
+		return
 	}
 	// note: no update b/c signal from buf will drive update
 	org := tv.CursorPos
@@ -605,9 +611,12 @@ func (tv *TextView) CursorDelete(steps int) {
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
 	org := tv.CursorPos
+	tv.RenderCursor(false)
 	tv.CursorEndLine()
-	tv.ScrollCursorToCenterIfHidden()
 	tv.Buf.DeleteText(org, tv.CursorPos)
+	tv.CursorPos = org
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -621,7 +630,6 @@ func (tv *TextView) ClearSelected() {
 
 // HasSelection returns whether there is a selected region of text
 func (tv *TextView) HasSelection() bool {
-	tv.SelectUpdate()
 	if tv.SelectStart.IsLess(tv.SelectEnd) {
 		return true
 	}
@@ -715,25 +723,16 @@ func (tv *TextView) SelectReset() {
 	if tv.SelectStart == zp && tv.SelectEnd == zp {
 		return
 	}
-	updt := tv.UpdateStart()
+	stln := tv.SelectStart.Ln
+	edln := tv.SelectEnd.Ln
 	tv.SelectStart = zp
 	tv.SelectEnd = zp
-	tv.UpdateEnd(updt)
+	tv.RenderLines(stln, edln)
 }
 
-// SelectUpdate updates the select region after any change to the text, to keep it in range
-func (tv *TextView) SelectUpdate() {
-	// if tv.SelectStart < tv.SelectEnd {
-	// 	ed := len(tv.EditTxt)
-	// 	if tv.SelectStart < 0 {
-	// 		tv.SelectStart = 0
-	// 	}
-	// 	if tv.SelectEnd > ed {
-	// 		tv.SelectEnd = ed
-	// 	}
-	// } else {
-	// 	tv.SelectReset()
-	// }
+// SelectRender renders the currently selected text
+func (tv *TextView) SelectRender() {
+	tv.RenderLines(tv.SelectStart.Ln, tv.SelectEnd.Ln)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -982,22 +981,42 @@ func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
-
-	// fmt.Printf("select: %v -- %v\n", tv.SelectStart, tv.SelectEnd)
-
-	// todo: requires separate logic for start / end lines of select
-	spos := tv.CharStartPos(tv.SelectStart)
-	epos := tv.CharStartPos(tv.SelectEnd)
-	if epos.X < spos.X {
-		tmp := spos.X
-		spos.X = epos.X
-		epos.X = tmp
-	}
-
 	rs := &tv.Viewport.Render
 	pc := &rs.Paint
-	st := &tv.StateStyles[TextViewSel]
-	pc.FillBox(rs, spos, epos.Sub(spos), &st.Font.BgColor)
+	sty := &tv.StateStyles[TextViewSel]
+	spc := sty.BoxSpace()
+
+	st := tv.SelectStart
+	ed := tv.SelectEnd
+	spos := tv.CharStartPos(st)
+	epos := tv.CharEndPos(ed)
+
+	fmt.Printf("select: %v -- %v\n", st, ed)
+
+	if st.Ln == ed.Ln {
+		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+		return
+	}
+	if st.Ch > 0 {
+		se := tv.CharEndPos(st)
+		se.X = float32(tv.VpBBox.Max.X) - spc
+		pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
+		st.Ln++
+		st.Ch = 0
+		spos = tv.CharStartPos(st)
+	}
+	lm1 := ed
+	lm1.Ln--
+	be := tv.CharEndPos(lm1)
+	be.X = float32(tv.VpBBox.Max.X) - spc
+	pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
+	// now get anything on end
+	if ed.Ch > 0 {
+		els := ed
+		els.Ch = 0
+		elsp := tv.CharStartPos(els)
+		pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
+	}
 }
 
 // RenderStartPos is absolute rendering start position from our allocpos
@@ -1083,6 +1102,9 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 	// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 	// todo: selection!
+
+	tv.RenderSelect()
+
 	for ln := visSt; ln <= visEd; ln++ {
 		lst := pos.Y + tv.Offs[ln]
 		lp := pos
@@ -1180,11 +1202,12 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	tooBig := false
 	if cch < lnsz {
 		for c := cch; c < lnsz; c++ {
-			rp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
-			if rp < pt.X && rp+int(tv.Renders[cln].Spans[0].Render[c].Size.X) > pt.X {
+			rsp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
+			rep := int(tv.Renders[cln].Spans[0].RuneEndPos(c).X) - xscroll
+			if pt.X >= rsp && pt.X < rep {
 				cch = c
 				break
-			} else if rp > pt.X {
+			} else if pt.X >= rep {
 				tooBig = true
 				break
 			}
@@ -1195,8 +1218,9 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	}
 	if tooBig {
 		for c := cch; c >= 0; c-- {
-			rp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
-			if rp < pt.X && rp+int(tv.Renders[cln].Spans[0].Render[c].Size.X) > pt.X {
+			rsp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
+			rep := int(tv.Renders[cln].Spans[0].RuneEndPos(c).X) - xscroll
+			if pt.X >= rsp && pt.X < rep {
 				cch = c
 				break
 			}
@@ -1206,8 +1230,6 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 }
 
 func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
 	oldPos := tv.CursorPos
 	tv.CursorPos = tv.PixelToCursor(pt)
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
@@ -1222,7 +1244,7 @@ func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes
 		} else {
 			tv.SelectStart = tv.CursorPos
 		}
-		tv.SelectUpdate()
+		tv.SelectRender()
 	} else if tv.HasSelection() {
 		tv.SelectReset()
 	}
@@ -1489,15 +1511,30 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return tv.Layout2DChildren(iter)
 }
 
-// CharStartPos returns the starting render coords for the given position --
-// makes no attempt to rationalize that pos (i.e., if not in visible range,
-// position will be out of range too)
+// CharStartPos returns the starting (top left) render coords for the given
+// position -- makes no attempt to rationalize that pos (i.e., if not in
+// visible range, position will be out of range too)
 func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
-	spos.Y += tv.Offs[pos.Ln]
+	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
+		// note: Y from rune pos is baseline
 		spos.X += tv.Renders[pos.Ln].Spans[0].RuneRelPos(pos.Ch).X
 	}
+	return spos
+}
+
+// CharEndPos returns the ending (bottom right) render coords for the given
+// position -- makes no attempt to rationalize that pos (i.e., if not in
+// visible range, position will be out of range too)
+func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
+	spos := tv.RenderStartPos()
+	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	if len(tv.Renders[pos.Ln].Spans) > 0 {
+		// note: Y from rune pos is baseline
+		spos.X += tv.Renders[pos.Ln].Spans[0].RuneEndPos(pos.Ch).X
+	}
+	spos.Y += tv.LineHeight
 	return spos
 }
 

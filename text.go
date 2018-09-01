@@ -165,13 +165,27 @@ func (sr *SpanRender) SizeHV() Vec2D {
 	return sz
 }
 
-// RunePos returns the relative position of the given rune index (adds Span
-// RelPos and rune RelPos) -- if index > length, then uses LastPos
+// RuneRelPos returns the relative (starting) position of the given rune index
+// (adds Span RelPos and rune RelPos) -- this is typically the baseline
+// position where rendering will start, not the upper left corner. if index >
+// length, then uses LastPos
 func (sr *SpanRender) RuneRelPos(idx int) Vec2D {
 	if idx >= len(sr.Render) {
 		return sr.LastPos
 	}
 	return sr.RelPos.Add(sr.Render[idx].RelPos)
+}
+
+// RuneEndPos returns the relative ending position of the given rune index
+// (adds Span RelPos and rune RelPos + rune Size.X for LR writing). If index >
+// length, then uses LastPos
+func (sr *SpanRender) RuneEndPos(idx int) Vec2D {
+	if idx >= len(sr.Render) {
+		return sr.LastPos
+	}
+	spos := sr.RelPos.Add(sr.Render[idx].RelPos)
+	spos.X += sr.Render[idx].Size.X
+	return spos
 }
 
 // AppendRune adds one rune and associated formatting info

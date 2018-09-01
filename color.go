@@ -213,6 +213,10 @@ func (c *Color) SetToNil() {
 }
 
 func (c *Color) SetColor(ci color.Color) {
+	if ci == nil {
+		c.SetToNil()
+		return
+	}
 	var r, g, b, a uint32
 	r, g, b, a = ci.RGBA()
 	c.SetUInt32(r, g, b, a)

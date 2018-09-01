@@ -271,6 +271,7 @@ func (tf *TextField) CursorBackspace(steps int) {
 func (tf *TextField) CursorDelete(steps int) {
 	if tf.HasSelection() {
 		tf.DeleteSelection()
+		return
 	}
 	if tf.CursorPos+steps > len(tf.EditTxt) {
 		steps = len(tf.EditTxt) - tf.CursorPos
