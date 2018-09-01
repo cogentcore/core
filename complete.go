@@ -35,6 +35,10 @@ type CompleteSignals int64
 const (
 	// CompleteSelect means the user chose one of the possible completions
 	CompleteSelect CompleteSignals = iota
+
+	// CompleteExtend means user has requested that the seed extend if all
+	// completions have a common prefix longer than current seed
+	CompleteExtend
 )
 
 //go:generate stringer -type=CompleteSignals
@@ -72,4 +76,20 @@ func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 func (c *Complete) Complete(s string) {
 	c.Completion = s
 	c.CompleteSig.Emit(c.This, int64(CompleteSelect), s)
+}
+
+// KeyInput is the opportunity for completion to act on specific key inputs
+func (c *Complete) KeyInput(kf KeyFunctions) {
+	switch kf {
+	case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
+		count := len(c.Completions)
+		if count > 0 {
+			if count == 1 { // just complete
+				c.Complete(c.Completions[0])
+			} else { // try to extend the seed
+				s := complete.ExtendSeed(c.Completions, c.Seed)
+				c.CompleteSig.Emit(c.This, int64(CompleteExtend), s)
+			}
+		}
+	}
 }
