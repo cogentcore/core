@@ -532,11 +532,23 @@ func (tf *TextField) OfferCompletions() {
 }
 
 // Complete edits the text field using the string chosen from the completion menu
-func (tf *TextField) Complete(str string) {
-	txt := string(tf.EditTxt) // John: do NOT call tf.Text() in an active editing context!!!
-	s, delta := tf.Completion.EditFunc(txt, tf.CursorPos, str, tf.Completion.Seed)
-	tf.EditTxt = []rune(s)
+func (tf *TextField) Complete(s string) {
+	win := tf.ParentWindow()
+	win.ClosePopup(win.Popup)
+	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
+	ns, delta := tf.Completion.EditFunc(txt, tf.CursorPos, s, tf.Completion.Seed)
+	tf.EditTxt = []rune(ns)
 	tf.CursorForward(delta)
+}
+
+// CompleteExtend inserts the extended seed at the current cursor position
+func (tf *TextField) CompleteExtend(s string) {
+	if s != "" {
+		win := tf.ParentWindow()
+		win.ClosePopup(win.Popup)
+		tf.InsertAtCursor(s)
+		tf.OfferCompletions()
+	}
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
@@ -610,30 +622,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	win := tf.ParentWindow()
 
 	if tf.Completion != nil && PopupIsCompleter(win.Popup) {
-		switch kf {
-		case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
-			count := len(tf.Completion.Completions)
-			if count > 0 {
-				if count == 1 { // just complete
-					tf.Complete(tf.Completion.Completions[0])
-					win.ClosePopup(win.Popup)
-				} else { // try to extend the seed
-					s := complete.ExtendSeed(tf.Completion.Completions, tf.Completion.Seed)
-					if s != "" {
-						win.ClosePopup(win.Popup)
-						tf.InsertAtCursor(s)
-						tf.OfferCompletions()
-					}
-				}
-			}
-			kt.SetProcessed()
-		default:
-			//fmt.Printf("some char\n")
-		}
-	}
-
-	if kt.IsProcessed() {
-		return
+		tf.Completion.KeyInput(kf)
 	}
 
 	// first all the keys that work for both inactive and active
@@ -1193,6 +1182,8 @@ func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc,
 		tff, _ := recv.Embed(KiT_TextField).(*TextField)
 		if sig == int64(CompleteSelect) {
 			tff.Complete(data.(string)) // always use data
+		} else if sig == int64(CompleteExtend) {
+			tff.CompleteExtend(data.(string)) // always use data
 		}
 	})
 }
