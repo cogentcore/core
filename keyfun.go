@@ -61,6 +61,7 @@ const (
 	KeyFunZoomIn
 	KeyFunPrefs
 	KeyFunRefresh
+	KeyFunRecenter // Ctrl+L in emacs
 	KeyFunComplete
 	KeyFunctionsN
 )
@@ -192,7 +193,7 @@ func (km *KeyMap) Update() {
 
 	addkm := make([]KeyMapItem, 0)
 
-	if len(kms) == 0 {  // set custom to match default
+	if len(kms) == 0 { // set custom to match default
 		for _, dki := range dkms {
 			addkm = append(addkm, dki)
 			fmt.Println(dki.Fun.String())
@@ -352,6 +353,7 @@ var MacEmacsKeyMap = KeyMap{
 	"Shift+Control+_":     KeyFunZoomOut,
 	"Control+Alt+P":       KeyFunPrefs,
 	"F5":                  KeyFunRefresh,
+	"Control+L":           KeyFunRecenter,
 	"Control+.":           KeyFunComplete,
 }
 
@@ -440,6 +442,7 @@ var MacKeyMap = KeyMap{
 	"Shift+Control+_":     KeyFunZoomOut,
 	"Control+Alt+P":       KeyFunPrefs,
 	"F5":                  KeyFunRefresh,
+	"Control+L":           KeyFunRecenter,
 	"Control+.":           KeyFunComplete,
 }
 
@@ -498,6 +501,7 @@ var LinuxKeyMap = KeyMap{
 	"Shift+Control+P": KeyFunPrefs,
 	"Control+Alt+P":   KeyFunPrefs,
 	"F5":              KeyFunRefresh,
+	"Control+L":       KeyFunRecenter,
 	"Control+.":       KeyFunComplete,
 }
 
@@ -582,6 +586,7 @@ var LinuxEmacsKeyMap = KeyMap{
 	"Shift+Control+_":     KeyFunZoomOut,
 	"Control+Alt+P":       KeyFunPrefs,
 	"F5":                  KeyFunRefresh,
+	"Control+L":           KeyFunRecenter,
 	"Control+.":           KeyFunComplete,
 }
 
@@ -638,6 +643,7 @@ var WindowsKeyMap = KeyMap{
 	"Shift+Control+P": KeyFunPrefs,
 	"Control+Alt+P":   KeyFunPrefs,
 	"F5":              KeyFunRefresh,
+	"Control+L":       KeyFunRecenter,
 	"Control+.":       KeyFunComplete,
 }
 
@@ -694,5 +700,6 @@ var ChromeKeyMap = KeyMap{
 	"Shift+Control+P": KeyFunPrefs,
 	"Control+Alt+P":   KeyFunPrefs,
 	"F5":              KeyFunRefresh,
+	"Control+L":       KeyFunRecenter,
 	"Control+.":       KeyFunComplete,
 }

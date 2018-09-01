@@ -540,9 +540,9 @@ func (g *Node2DBase) Layout2DTree() {
 	}
 	pr := prof.Start("Node2D.Layout2DTree")
 	parBBox := image.ZR
-	_, pg := KiToNode2D(g.Par)
-	if pg != nil {
-		parBBox = pg.VpBBox
+	pni, _ := KiToNode2D(g.Par)
+	if pni != nil {
+		parBBox = pni.ChildrenBBox2D()
 	}
 	redo := g.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
@@ -695,22 +695,25 @@ func (g *Node2DBase) ParentLayout() *Layout {
 	return ly.Embed(KiT_Layout).(*Layout)
 }
 
+// ParentScrollLayout returns the parent layout that has active scrollbars
+func (g *Node2DBase) ParentScrollLayout() *Layout {
+	lyk, ok := g.ParentByType(KiT_Layout, true)
+	if !ok {
+		return nil
+	}
+	ly := lyk.Embed(KiT_Layout).(*Layout)
+	if ly.HasAnyScroll() {
+		return ly
+	}
+	return ly.ParentScrollLayout()
+}
+
 // ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
 // this widget in view -- returns true if scrolled
 func (g *Node2DBase) ScrollToMe() bool {
-	ly := g.ParentLayout()
+	ly := g.ParentScrollLayout()
 	if ly == nil {
 		return false
-	}
-	for {
-		if ly.HasScroll[X] || ly.HasScroll[Y] {
-			break
-		}
-		ply := ly.ParentLayout()
-		if ply == nil {
-			break
-		}
-		ly = ply
 	}
 	return ly.ScrollToItem(g.This.(Node2D))
 }

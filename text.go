@@ -334,7 +334,7 @@ var glyphAdvanceMu sync.Mutex
 // SetRunePosLR sets relative positions of each rune using a flat
 // left-to-right text layout, based on font size info and additional extra
 // letter and word spacing parameters (which can be negative)
-func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
+func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) {
 	if err := sr.IsValid(); err != nil {
 		// log.Println(err)
 		return
@@ -344,11 +344,26 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 	prevR := rune(-1)
 	lspc := letterSpace
 	wspc := wordSpace
+	if tabSize == 0 {
+		tabSize = 4
+	}
 	var fpos float32
 	curFace := sr.Render[0].Face
 	glyphAdvanceMu.Lock()
 	defer glyphAdvanceMu.Unlock()
+	col := 0 // current column position -- todo: does NOT deal with indent
 	for i, r := range sr.Text {
+		if r == '\t' {
+			curtab := col / tabSize
+			curtab++
+			col = curtab * tabSize
+			cpos := chsz * float32(col)
+			if cpos > fpos {
+				fpos = cpos
+			}
+			continue
+		}
+
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
 
@@ -377,6 +392,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace float32) {
 		a32 := FixedToFloat32(a)
 		rr.Size = Vec2D{a32, FixedToFloat32(fht)}
 		fpos += a32
+		col++
 		if i < sz-1 {
 			fpos += lspc
 			if unicode.IsSpace(r) {
@@ -657,6 +673,9 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 		}
 
 		for i, r := range sr.Text {
+			if r == '\t' {
+				continue
+			}
 			rr := &(sr.Render[i])
 			curFace = rr.CurFace(curFace)
 			dsc32 := FixedToFloat32(curFace.Metrics().Descent)
@@ -761,7 +780,10 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 	didLast := false
 	pc := &rs.Paint
 
-	for i := range sr.Text {
+	for i, r := range sr.Text {
+		if r == '\t' {
+			continue
+		}
 		rr := &(sr.Render[i])
 		if !bitflag.HasAny32(int32(rr.Deco), int(DecoUnderline), int(DecoDottedUnderline)) {
 			if didLast {
@@ -823,7 +845,10 @@ func (sr *SpanRender) RenderLine(rs *RenderState, tpos Vec2D, deco TextDecoratio
 	didLast := false
 	pc := &rs.Paint
 
-	for i := range sr.Text {
+	for i, r := range sr.Text {
+		if r == '\t' {
+			continue
+		}
 		rr := &(sr.Render[i])
 		if !bitflag.Has32(int32(rr.Deco), int(deco)) {
 			if didLast {
@@ -907,7 +932,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
-	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
@@ -928,7 +953,7 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetRunes(str, fontSty, ctxt, noBG, rot, scalex)
-	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
@@ -1205,6 +1230,9 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 			if ftag[0] == '/' {
 				etag := strings.ToLower(ftag[1:])
 				// fmt.Printf("%v  etag: %v\n", bidx, etag)
+				if etag == "pre" {
+					continue // ignore
+				}
 				if etag != curTag {
 					log.Printf("%v end tag: %v doesn't match current tag: %v for string\n%v\n", errstr, etag, curTag, string(str))
 				}
@@ -1275,6 +1303,8 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 					// 	}
 					// 	nextIsParaStart = true
 					// case "br":
+					case "pre":
+						continue // ignore
 					default:
 						log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, stag, string(str))
 					}
@@ -1330,9 +1360,6 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 					tr.Spans = append(tr.Spans, SpanRender{})
 					curSp = &(tr.Spans[len(tr.Spans)-1])
 					didNl = true
-				case '\t':
-					didNl = false
-					tmpbuf = append(tmpbuf, []byte("    ")...) //  todo: tmp
 				default:
 					didNl = false
 					tmpbuf = append(tmpbuf, nb)
@@ -1371,7 +1398,7 @@ type TextStyle struct {
 	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
 	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
 	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directy with para-spacing"`
-	TabSize          units.Value    `xml:"tab-size" inherit:"true" desc:"tab size"`
+	TabSize          int            `xml:"tab-size" inherit:"true" desc:"tab size, in number of characters"`
 	WordWrap         bool           `xml:"word-wrap" inherit:"true" desc:"wrap text within a given size"`
 	// todo:
 	// page-break options
@@ -1447,6 +1474,7 @@ func (ts *TextStyle) Defaults() {
 	ts.AlignV = AlignBaseline
 	ts.Direction = LTR
 	ts.OrientationVert = 90
+	ts.TabSize = 4
 }
 
 // SetStylePost applies any updates after generic xml-tag property setting
@@ -1542,7 +1570,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 			continue
 		}
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
-			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
+			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
 		}
 		if sr.IsNewPara() {
 			sr.RelPos.X = txtSty.Indent.Dots
@@ -1564,7 +1592,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					}
 					si++
 					sr = &(tr.Spans[si]) // keep going with nsr
-					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots)
+					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
 					ssz = sr.SizeHV()
 
 					// fixup links

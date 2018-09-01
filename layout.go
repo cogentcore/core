@@ -401,6 +401,9 @@ func (ly *Layout) SummedDim() Dims2D {
 	return Y
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//     Gather Sizes
+
 // first depth-first Size2D pass: terminal concrete items compute their AllocSize
 // we focus on Need: Max(Min, AllocSize), and Want: Max(Pref, AllocSize) -- Max is
 // only used if we need to fill space, during final allocation
@@ -625,8 +628,8 @@ func (ly *Layout) GatherSizesGrid() {
 	}
 }
 
-// if we are not a child of a layout, then get allocation from a parent obj that
-// has a layout size
+// AllocFromParent: if we are not a child of a layout, then get allocation
+// from a parent obj that has a layout size
 func (ly *Layout) AllocFromParent() {
 	if ly.Par == nil || !ly.LayData.AllocSize.IsZero() {
 		return
@@ -654,6 +657,9 @@ func (ly *Layout) AllocFromParent() {
 		})
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//     Layout children
 
 // LayoutSharedDim implements calculations to layout for the shared dimension
 // (i.e., Vertical for Horizontal layout). Returns pos and size.
@@ -937,6 +943,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 	}
 }
 
+// LayoutGrid manages overall grid layout of children
 func (ly *Layout) LayoutGrid() {
 	sz := len(ly.Kids)
 	if sz == 0 {
@@ -1005,7 +1012,8 @@ func (ly *Layout) LayoutGrid() {
 	}
 }
 
-// final pass through children to finalize the layout, computing summary size stats
+// FinalizeLayout is final pass through children to finalize the layout,
+// computing summary size stats
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
 	for _, c := range ly.Kids {
@@ -1035,6 +1043,9 @@ func (ly *Layout) AvailSize() Vec2D {
 	}
 	return avail
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//     Overflow: Scrolling mainly
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow() {
@@ -1066,10 +1077,12 @@ func (ly *Layout) ManageOverflow() {
 	}
 }
 
+// HasAnyScroll returns true if layout has
 func (ly *Layout) HasAnyScroll() bool {
 	return ly.HasScroll[X] || ly.HasScroll[Y]
 }
 
+// SetScroll sets a scrollbar along given dimension
 func (ly *Layout) SetScroll(d Dims2D) {
 	if ly.Scrolls[d] == nil {
 		ly.Scrolls[d] = &ScrollBar{}
@@ -1114,7 +1127,8 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	})
 }
 
-// todo: we are leaking the scrollbars -- move into a container Field
+// DeleteScroll deletes scrollbar along given dimesion.  todo: we are leaking
+// the scrollbars -- move into a container Field
 func (ly *Layout) DeleteScroll(d Dims2D) {
 	if ly.Scrolls[d] == nil {
 		return
@@ -1125,6 +1139,7 @@ func (ly *Layout) DeleteScroll(d Dims2D) {
 	ly.Scrolls[d] = nil
 }
 
+// DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
 func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 	sc.LayData.AllocPos = Vec2DZero
 	sc.LayData.AllocSize = Vec2DZero
@@ -1132,6 +1147,7 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 	sc.WinBBox = image.ZR
 }
 
+// LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls() {
 	sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 
@@ -1158,6 +1174,7 @@ func (ly *Layout) LayoutScrolls() {
 	}
 }
 
+// RenderScrolls draws the scrollbars
 func (ly *Layout) RenderScrolls() {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
@@ -1166,6 +1183,9 @@ func (ly *Layout) RenderScrolls() {
 	}
 }
 
+// Move2DScrolls moves scrollbars based on scrolling taking place in parent
+// layouts -- critical to call this BEFORE we add our own delta, which is
+// generated from these very same scrollbars.
 func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
@@ -1272,28 +1292,28 @@ func (ly *Layout) AutoScroll(pos image.Point) {
 
 // ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
 // in view -- returns true if scrolling was needed
-func (ly *Layout) ScrollToBoxDim(dim Dims2D, st, minPos, maxPos int) bool {
+func (ly *Layout) ScrollToBoxDim(dim Dims2D, vpMin, minBox, maxBox int) bool {
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
-	ed := st + int(vissz)
+	vpMax := vpMin + int(vissz)
 
-	if minPos >= st && maxPos <= ed {
+	if minBox >= vpMin && maxBox <= vpMax {
 		return false
 	}
 
 	h := ly.Sty.Font.Size.Dots
 
-	if minPos < st { // favors scrolling to start
-		trg := sc.Value + float32(minPos-st) - h
+	if minBox < vpMin { // favors scrolling to start
+		trg := sc.Value + float32(minBox-vpMin) - h
 		if trg < 0 {
 			trg = 0
 		}
 		sc.SetValueAction(trg)
 		return true
 	} else {
-		if (maxPos - minPos) < int(vissz) {
-			trg := sc.Value + float32(maxPos-ed) + h
+		if (maxBox - minBox) < int(vissz) {
+			trg := sc.Value + float32(maxBox-vpMax) + h
 			if trg > scrange {
 				trg = scrange
 			}
@@ -1309,12 +1329,12 @@ func (ly *Layout) ScrollToBoxDim(dim Dims2D, st, minPos, maxPos int) bool {
 func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 	did := false
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(Y, ly.WinBBox.Min.Y, box.Min.Y, box.Max.Y)
-		did = did || ly.ScrollToBoxDim(X, ly.WinBBox.Min.X, box.Min.X, box.Max.X)
+		did = ly.ScrollToBoxDim(Y, ly.VpBBox.Min.Y, box.Min.Y, box.Max.Y)
+		did = did || ly.ScrollToBoxDim(X, ly.VpBBox.Min.X, box.Min.X, box.Max.X)
 	} else if ly.HasScroll[Y] {
-		did = ly.ScrollToBoxDim(Y, ly.WinBBox.Min.Y, box.Min.Y, box.Max.Y)
+		did = ly.ScrollToBoxDim(Y, ly.VpBBox.Min.Y, box.Min.Y, box.Max.Y)
 	} else if ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(X, ly.WinBBox.Min.X, box.Min.X, box.Max.X)
+		did = ly.ScrollToBoxDim(X, ly.VpBBox.Min.X, box.Min.X, box.Max.X)
 	}
 	return did
 }
@@ -1323,6 +1343,89 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 // returns true if scrolling was needed
 func (ly *Layout) ScrollToItem(ni Node2D) bool {
 	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
+}
+
+// ScrollDimToStart scrolls to put the given child coordinate position (eg.,
+// top / left of a view box) at the start (top / left) of our scroll area, to
+// the extent possible -- returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToStart(dim Dims2D, pos int) bool {
+	vpMin := ly.VpBBox.Min.X
+	if dim == Y {
+		vpMin = ly.VpBBox.Min.Y
+	}
+	sc := ly.Scrolls[dim]
+	if pos == vpMin { // already at min
+		return false
+	}
+	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+
+	trg := sc.Value + float32(pos-vpMin)
+	if trg < 0 {
+		trg = 0
+	} else if trg > scrange {
+		trg = scrange
+	}
+	if sc.Value == trg {
+		return false
+	}
+	sc.SetValueAction(trg)
+	return true
+}
+
+// ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
+// bottom / right of a view box) at the end (bottom / right) of our scroll
+// area, to the extent possible -- returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
+	vpMin := ly.VpBBox.Min.X
+	if dim == Y {
+		vpMin = ly.VpBBox.Min.Y
+	}
+	sc := ly.Scrolls[dim]
+	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+	vissz := sc.ThumbVal            // amount visible
+	vpMax := vpMin + int(vissz)
+	if pos == vpMax { // already at max
+		return false
+	}
+	trg := sc.Value + float32(pos-vpMax)
+	if trg < 0 {
+		trg = 0
+	} else if trg > scrange {
+		trg = scrange
+	}
+	if sc.Value == trg {
+		return false
+	}
+	sc.SetValueAction(trg)
+	return true
+}
+
+// ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
+// middle of a view box) at the center of our scroll area, to the extent
+// possible -- returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToCenter(dim Dims2D, pos int) bool {
+	vpMin := ly.VpBBox.Min.X
+	if dim == Y {
+		vpMin = ly.VpBBox.Min.Y
+	}
+	sc := ly.Scrolls[dim]
+	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+	vissz := sc.ThumbVal            // amount visible
+	vpMid := vpMin + int(0.5*vissz)
+	if pos == vpMid { // already at mid
+		return false
+	}
+	trg := sc.Value + float32(pos-vpMid)
+	if trg < 0 {
+		trg = 0
+	} else if trg > scrange {
+		trg = scrange
+	}
+	if sc.Value == trg {
+		return false
+	}
+	sc.SetValueAction(trg)
+	return true
 }
 
 // ChildWithFocus returns a direct child of this layout that either is the

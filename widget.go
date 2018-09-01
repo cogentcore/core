@@ -376,7 +376,7 @@ func (g *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 // Move2DTree does move2d pass -- each node iterates over children for maximum
-// control -- this starts with parent VpBBox and current delta -- can be
+// control -- this starts with parent ChildrenBBox and current delta -- can be
 // called de novo
 func (g *WidgetBase) Move2DTree() {
 	if g.HasNoLayout() {

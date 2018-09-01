@@ -53,26 +53,40 @@ func mainrun() {
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	// generally need to put text view within its own frame for scrolling
-	txfr := mfr.AddNewChild(gi.KiT_Frame, "view-frame").(*gi.Frame)
-	txfr.SetStretchMaxWidth()
-	txfr.SetStretchMaxHeight()
-	txfr.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	txfr.SetMinPrefHeight(units.NewValue(10, units.Ch))
-	txed := txfr.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
-	txed.SetProp("word-wrap", true)
-	txed.SetProp("font-family", "Go Mono")
-	txed.SetProp("vertical-align", gi.AlignTop)
+	splt := mfr.AddNewChild(gi.KiT_SplitView, "split-view").(*gi.SplitView)
+	splt.SetSplits(.5, .5)
+	// these are all inherited so we can put them at the top "editor panel" level
+	// splt.SetProp("word-wrap", true)
+	splt.SetProp("tab-size", 4)
+	splt.SetProp("font-family", "Go Mono")
+	splt.SetProp("line-height", 1.2)
 
-	// txed.SetProp("line-height", 1.2)
-	// txed.SetProp("para-spacing", "1ex")
-	// txed.SetProp("text-indent", "20px")
-	txed.HiLang = "Go"
-	txed.HiStyle = "emacs"
-	txed.TabWidth = 4
+	// generally need to put text view within its own frame for scrolling
+	txfr1 := splt.AddNewChild(gi.KiT_Frame, "view-frame-1").(*gi.Frame)
+	txfr1.SetStretchMaxWidth()
+	txfr1.SetStretchMaxHeight()
+	txfr1.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	txfr1.SetMinPrefHeight(units.NewValue(10, units.Ch))
+
+	txed1 := txfr1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
+	txed1.HiLang = "Go"
+	txed1.HiStyle = "emacs"
+
+	// generally need to put text view within its own frame for scrolling
+	txfr2 := splt.AddNewChild(gi.KiT_Frame, "view-frame-2").(*gi.Frame)
+	txfr2.SetStretchMaxWidth()
+	txfr2.SetStretchMaxHeight()
+	txfr2.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	txfr2.SetMinPrefHeight(units.NewValue(10, units.Ch))
+
+	txed2 := txfr2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
+	txed2.HiLang = "Go"
+	txed2.HiStyle = "emacs"
 
 	txbuf := giv.NewTextBuf()
-	txed.SetBuf(txbuf)
+	txed1.SetBuf(txbuf)
+	txed2.SetBuf(txbuf)
+
 	txbuf.Open("sample.in")
 
 	// main menu

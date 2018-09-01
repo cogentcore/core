@@ -376,6 +376,43 @@ func (tb *TextBuf) EndPos() TextPos {
 	return ed
 }
 
+// LineIndent returns the number of tabs or spaces at start of given line --
+// if line starts with tabs, then those are counted, else spaces --
+// combinations of tabs and spaces won't necessarily produce sensible results
+func (tb *TextBuf) LineIndent(ln int) (n int, spc bool) {
+	sz := len(tb.Lines[ln])
+	if sz == 0 {
+		return
+	}
+	txt := tb.Lines[ln]
+	if txt[0] == ' ' {
+		spc = true
+		n = 1
+	} else if txt[0] != '\t' {
+		return
+	} else {
+		n = 1
+	}
+	if spc {
+		for i := 1; i < sz; i++ {
+			if txt[0] == ' ' {
+				n++
+			} else {
+				return
+			}
+		}
+	} else {
+		for i := 1; i < sz; i++ {
+			if txt[0] == '\t' {
+				n++
+			} else {
+				return
+			}
+		}
+	}
+	return
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 //   TextBufList, TextBufs
 

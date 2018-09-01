@@ -644,9 +644,10 @@ func (sf *StyledField) UnitsValue(objptr uintptr) *units.Value {
 
 // FromProps styles given field from property value val, with optional parent object obj
 func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool) {
+	errstr := "gi.StyledField FromProps:"
 	fi := fld.FieldIface(objptr)
 	if kit.IfaceIsNil(fi) {
-		fmt.Printf("StyleField %v of type %v has nil value\n", fld.Field.Name, fld.Field.Type.String())
+		fmt.Printf("%v %v of type %v has nil value\n", errstr, fld.Field.Name, fld.Field.Type.String())
 		return
 	}
 	switch valv := val.(type) {
@@ -654,15 +655,15 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 		if valv == "inherit" {
 			if hasPar {
 				val = fld.FieldIface(parptr)
-				// fmt.Printf("StyleField %v set to inherited value: %v\n", fld.Field.Name, val)
+				// fmt.Printf("%v %v set to inherited value: %v\n", errstr, fld.Field.Name, val)
 			} else {
-				// fmt.Printf("StyleField %v tried to inherit but par null: %v\n", fld.Field.Name, val)
+				// fmt.Printf("%v %v tried to inherit but par null: %v\n", errstr, fld.Field.Name, val)
 				return
 			}
 		}
 		if valv == "initial" {
 			val = fld.Default.Interface()
-			// fmt.Printf("StyleField set tag: %v to initial default value: %v\n", tag, df)
+			// fmt.Printf("%v set tag: %v to initial default value: %v\n", errstr, tag, df)
 		}
 	}
 	// todo: support keywords such as auto, normal, which should just set to 0
@@ -692,7 +693,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 					nclr, nok := vfld.FieldIface(objptr).(*Color)
 					if nok {
 						fiv.SetColor(nclr) // init from color
-						fmt.Printf("StyleField %v initialized to other color: %v val: %v\n", fld.Field.Name, oclr, fiv)
+						fmt.Printf("%v %v initialized to other color: %v val: %v\n", errstr, fld.Field.Name, oclr, fiv)
 					}
 				}
 			}
@@ -705,7 +706,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 		case color.Color:
 			fiv.SetColor(valv)
 		default:
-			fmt.Printf("StyleField %v could not set Color from prop: %v type: %T\n", fld.Field.Name, val, val)
+			fmt.Printf("%v %v could not set Color from prop: %v type: %T\n", errstr, fld.Field.Name, val, val)
 		}
 	case *units.Value:
 		switch valv := val.(type) {
@@ -720,7 +721,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 			if ok {
 				fiv.Set(float32(valflt), units.Px)
 			} else {
-				fmt.Printf("StyleField %v could not set units.Value from prop: %v type: %T\n", fld.Field.Name, val, val)
+				fmt.Printf("%v %v could not set units.Value from prop: %v type: %T\n", errstr, fld.Field.Name, val, val)
 			}
 		}
 	case *Matrix2D:
@@ -745,12 +746,12 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 				if kit.Enums.Enum(tn) != nil {
 					kit.Enums.SetAnyEnumIfaceFromString(fi, valv)
 				} else {
-					fmt.Printf("gi.StyleField: enum name not found %v for field %v\n", tn, fld.Field.Name)
+					fmt.Printf("%v enum name not found %v for field %v\n", errstr, tn, fld.Field.Name)
 				}
 			default:
 				ival, ok := kit.ToInt(val)
 				if !ok {
-					log.Printf("gi.StyledField.FromProps: for field: %v could not convert property to int: %v %T\n", fld.Field.Name, val, val)
+					log.Printf("%v for field: %v could not convert property to int: %v %T\n", errstr, fld.Field.Name, val, val)
 				} else {
 					kit.SetEnumIfaceFromInt64(fi, ival, npt)
 				}
