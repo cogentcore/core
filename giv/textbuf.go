@@ -186,6 +186,11 @@ func (tb *TextBuf) LinesToBytes() {
 	} else {
 		tb.Txt = make([]byte, 0, tb.NLines*40)
 	}
+	if cap(tb.ByteOffs) >= tb.NLines {
+		tb.ByteOffs = tb.ByteOffs[:tb.NLines]
+	} else {
+		tb.ByteOffs = make([]int, tb.NLines)
+	}
 	bo := 0
 	for ln, lr := range tb.Lines {
 		tb.ByteOffs[ln] = bo
@@ -208,12 +213,12 @@ func (tb *TextBuf) BytesToLines() {
 	lns := bytes.Split(tb.Txt, []byte("\n"))
 	tb.NLines = len(lns)
 	if cap(tb.Lines) >= tb.NLines {
-		tb.Lines = tb.Lines[:0]
+		tb.Lines = tb.Lines[:tb.NLines]
 	} else {
 		tb.Lines = make([][]rune, tb.NLines)
 	}
 	if cap(tb.ByteOffs) >= tb.NLines {
-		tb.ByteOffs = tb.ByteOffs[:0]
+		tb.ByteOffs = tb.ByteOffs[:tb.NLines]
 	} else {
 		tb.ByteOffs = make([]int, tb.NLines)
 	}
@@ -254,13 +259,15 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 			tb.Lines[st.Ln] = tb.Lines[st.Ln][:st.Ch]
 			stln++
 		}
-		edln := ed.Ln
-		if ed.Ch < len(tb.Lines[ed.Ln]) {
-			tb.Lines[ed.Ln] = tb.Lines[ed.Ln][ed.Ch:]
-			edln--
+		eoedl := len(tb.Lines[ed.Ln][ed.Ch:])
+		var eoed []rune
+		if eoedl > 0 { // save it
+			eoed = make([]rune, eoedl)
+			copy(eoed, tb.Lines[ed.Ln][ed.Ch:])
 		}
-		if edln > stln {
-			tb.Lines = append(tb.Lines[:stln], tb.Lines[edln:]...)
+		tb.Lines = append(tb.Lines[:stln], tb.Lines[ed.Ln+1:]...)
+		if eoed != nil {
+			tb.Lines[st.Ln] = append(tb.Lines[st.Ln], eoed...)
 		}
 	}
 	tb.LinesToBytes()
@@ -290,7 +297,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 		eostl := len(tb.Lines[st.Ln][st.Ch:]) // end of starting line
 		var eost []rune
 		if eostl > 0 { // save it
-			eost := make([]rune, eostl)
+			eost = make([]rune, eostl)
 			copy(eost, tb.Lines[st.Ln][st.Ch:])
 		}
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], rs...)
@@ -305,7 +312,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 		copy(nt[stln:], tmp)           // copy into position
 		tb.Lines = nt
 		tb.NLines = len(tb.Lines)
-		ed.Ln += sz
+		ed.Ln += nsz
 		ed.Ch = len(tb.Lines[ed.Ln])
 		if eost != nil {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)

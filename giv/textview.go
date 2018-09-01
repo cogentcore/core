@@ -182,12 +182,26 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tv.UpdateSig()
 	case TextBufInsert:
 		tbe := data.(*TextBufEdit)
-		tv.LayoutLines() // todo: optimized!
-		tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+		// fmt.Printf("ins: st: %v  ed: %v \n", tbe.Start, tbe.End)
+		if tbe.Start.Ln != tbe.End.Ln {
+			tv.LayoutLines()
+			tv.RenderAllLines()
+		} else {
+			tv.LayoutLines() // todo: optimized!
+			tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+		}
+		tv.CursorPos = tbe.End
+		tv.RenderCursor(true)
 	case TextBufDelete:
 		tbe := data.(*TextBufEdit)
-		tv.LayoutLines() // todo: optimized!
-		tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+		// fmt.Printf("del: st: %v  ed: %v \n", tbe.Start, tbe.End)
+		if tbe.Start.Ln != tbe.End.Ln {
+			tv.LayoutLines() // todo: optimized!
+			tv.RenderAllLines()
+		} else {
+			tv.LayoutLines() // todo: optimized!
+			tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+		}
 	}
 }
 
@@ -494,8 +508,9 @@ func (tv *TextView) CursorDelete(steps int) {
 	org := tv.CursorPos
 	tv.RenderCursor(false)
 	tv.CursorForward(steps)
-	tv.RenderCursor(true)
 	tv.Buf.DeleteText(org, tv.CursorPos)
+	tv.CursorPos = org
+	tv.RenderCursor(true)
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -677,13 +692,11 @@ func (tv *TextView) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tv *TextView) InsertAtCursor(txt []byte) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
 	if tv.HasSelection() {
 		tv.Cut()
 	}
-	tbe := tv.Buf.InsertText(tv.CursorPos, txt)
-	tv.CursorPos = tbe.End
+	tv.RenderCursor(false)
+	tv.Buf.InsertText(tv.CursorPos, txt)
 }
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
@@ -869,8 +882,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
-	case gi.KeyFunSelectItem: // enter
-		fallthrough
 	case gi.KeyFunAccept: // ctrl+enter
 		tv.EditDone()
 		kt.SetProcessed()
@@ -898,6 +909,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunComplete:
 		kt.SetProcessed()
 		tv.OfferCompletions()
+	case gi.KeyFunSelectItem: // enter
+		if !kt.HasAnyModifier(key.Control, key.Meta) {
+			kt.SetProcessed()
+			tv.InsertAtCursor([]byte("\n"))
+		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
@@ -1142,7 +1158,7 @@ func (tv *TextView) RenderCursor(on bool) {
 
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, curBBox, curWinBBox) // bigger than necc.
+		vp.Win.UploadVpRegion(vp, curBBox, curWinBBox)
 		vp.Win.UpdateEnd(updt)
 	}
 }
@@ -1178,6 +1194,10 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 // RenderAllLines displays all the visible lines on the screen -- called
 // during standard render
 func (tv *TextView) RenderAllLines() {
+	st := &tv.Sty
+	st.Font.LoadFont(&st.UnContext)
+	tv.RenderStdBox(st)
+	tv.RenderSelect()
 	rs := &tv.Viewport.Render
 	pos := tv.RenderStartPos()
 	for ln := 0; ln < tv.NLines; ln++ {
@@ -1193,6 +1213,11 @@ func (tv *TextView) RenderAllLines() {
 		lp.Y = lst
 		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 	}
+
+	vp := tv.Viewport
+	updt := vp.Win.UpdateStart()
+	vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
+	vp.Win.UpdateEnd(updt)
 }
 
 // RenderLines displays a specific range of lines on the screen, also painting
@@ -1230,6 +1255,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	}
 	boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
 	pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
+	// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 	// todo: selection!
 	for ln := visSt; ln <= visEd; ln++ {
 		lst := pos.Y + tv.Offs[ln]
@@ -1237,6 +1263,16 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		lp.Y = lst
 		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 	}
+
+	tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
+	vprel := tBBox.Min.Sub(tv.VpBBox.Min)
+	tWinBBox := tv.WinBBox.Add(vprel)
+
+	vp := tv.Viewport
+	updt := vp.Win.UpdateStart()
+	vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
+	vp.Win.UpdateEnd(updt)
+
 	return true
 }
 
@@ -1263,10 +1299,6 @@ func (tv *TextView) Render2D() {
 		} else {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
-		st := &tv.Sty
-		st.Font.LoadFont(&st.UnContext)
-		tv.RenderStdBox(st)
-		tv.RenderSelect()
 		tv.RenderAllLines()
 		if tv.HasFocus() && tv.FocusActive {
 			tv.StartCursor()
