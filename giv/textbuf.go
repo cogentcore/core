@@ -37,16 +37,23 @@ func (tp *TextPos) IsLess(cmp TextPos) bool {
 	}
 }
 
+// TextRegion represents a text region as a start / end position
+type TextRegion struct {
+	Start TextPos
+	End   TextPos
+}
+
+var TextRegionZero = TextRegion{}
+
 // TextBufEdit describes an edit action to a buffer -- this is the data passed
 // via signals to viewers of the buffer.  Actions are only deletions and
 // insertions (a change is a sequence of those, given normal editing
 // processes).  The TextBuf always reflects the current state *after* the
 // edit.
 type TextBufEdit struct {
-	Start  TextPos  `desc:"starting position for the edit (always same for previous and current)"`
-	End    TextPos  `desc:"ending position for the edit, in original lines data for a delete, and in new lines data for an insert"`
-	Delete bool     `desc:"action is either a deletion or an insertion"`
-	Text   [][]rune `desc:"text to be inserted"`
+	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert"`
+	Delete bool       `desc:"action is either a deletion or an insertion"`
+	Text   [][]rune   `desc:"text to be inserted"`
 }
 
 // ToBytes returns the Text of this edit record to a byte string, with
@@ -243,6 +250,9 @@ func (tb *TextBuf) AddView(vw *TextView) {
 // DeleteText deletes region of text between start and end positions, signaling
 // views after text lines have been updated
 func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
+	for ed.Ln >= len(tb.Lines) {
+		ed.Ln--
+	}
 	if st == ed {
 		return nil
 	}
@@ -255,7 +265,10 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 	} else {
 		// first get chars on start and end
 		stln := st.Ln
-		if st.Ch > 0 {
+		cpln := st.Ln
+		if st.Ch == len(tb.Lines[st.Ln]) {
+			stln++
+		} else if st.Ch > 0 {
 			tb.Lines[st.Ln] = tb.Lines[st.Ln][:st.Ch]
 			stln++
 		}
@@ -267,11 +280,12 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 		}
 		tb.Lines = append(tb.Lines[:stln], tb.Lines[ed.Ln+1:]...)
 		if eoed != nil {
-			tb.Lines[st.Ln] = append(tb.Lines[st.Ln], eoed...)
+			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
 	}
+	tb.NLines = len(tb.Lines)
 	tb.LinesToBytes()
-	tbe := &TextBufEdit{Start: st, End: ed, Delete: true}
+	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}, Delete: true}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
 	return tbe
 }
@@ -333,7 +347,7 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 		log.Printf("giv.TextBuf TextRegion: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tbe := &TextBufEdit{Start: st, End: ed}
+	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}}
 	if ed.Ln == st.Ln {
 		sz := ed.Ch - st.Ch
 		tbe.Text = make([][]rune, 1)

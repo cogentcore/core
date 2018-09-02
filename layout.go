@@ -1252,7 +1252,7 @@ func (ly *Layout) Render2DChildren() {
 var AutoScrollRate = float32(1.0)
 
 // AutoScrollDim auto-scrolls along one dimension
-func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
+func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) bool {
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
@@ -1268,31 +1268,40 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) {
 		if pct < .1 && sc.Value > 0 {
 			dst = Min32(dst, sc.Value)
 			sc.SetValueAction(sc.Value - dst)
+			return true
 		}
 	} else {
 		pct := float32(maxd) / float32(vissz)
 		if pct < .1 && sc.Value < scrange {
 			dst = Min32(dst, (scrange - sc.Value))
 			sc.SetValueAction(sc.Value + dst)
+			return true
 		}
 	}
+	return false
 }
 
 // AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
-func (ly *Layout) AutoScroll(pos image.Point) {
+func (ly *Layout) AutoScroll(pos image.Point) bool {
+	did := false
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
-		ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
+		did = did || ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
 	} else if ly.HasScroll[Y] {
-		ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
+		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
 	} else if ly.HasScroll[X] {
-		ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+		did = ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
 	}
+	return did
 }
 
 // ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
 // in view -- returns true if scrolling was needed
-func (ly *Layout) ScrollToBoxDim(dim Dims2D, vpMin, minBox, maxBox int) bool {
+func (ly *Layout) ScrollToBoxDim(dim Dims2D, minBox, maxBox int) bool {
+	vpMin := ly.VpBBox.Min.X
+	if dim == Y {
+		vpMin = ly.VpBBox.Min.Y
+	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
@@ -1329,12 +1338,12 @@ func (ly *Layout) ScrollToBoxDim(dim Dims2D, vpMin, minBox, maxBox int) bool {
 func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 	did := false
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(Y, ly.VpBBox.Min.Y, box.Min.Y, box.Max.Y)
-		did = did || ly.ScrollToBoxDim(X, ly.VpBBox.Min.X, box.Min.X, box.Max.X)
+		did = ly.ScrollToBoxDim(Y, box.Min.Y, box.Max.Y)
+		did = did || ly.ScrollToBoxDim(X, box.Min.X, box.Max.X)
 	} else if ly.HasScroll[Y] {
-		did = ly.ScrollToBoxDim(Y, ly.VpBBox.Min.Y, box.Min.Y, box.Max.Y)
+		did = ly.ScrollToBoxDim(Y, box.Min.Y, box.Max.Y)
 	} else if ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(X, ly.VpBBox.Min.X, box.Min.X, box.Max.X)
+		did = ly.ScrollToBoxDim(X, box.Min.X, box.Max.X)
 	}
 	return did
 }

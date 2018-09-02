@@ -691,6 +691,7 @@ func (w *Window) EventLoop() {
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
 	lastSkipped := false
+	lastKeyChord := ""
 
 	var startDrag *mouse.DragEvent
 	dragStarted := false
@@ -745,66 +746,79 @@ mainloop:
 		lagMs := int(lag / time.Millisecond)
 		// fmt.Printf("et %v lag %v\n", et, lag)
 
-		if et == lastEt || lastEt == oswin.WindowResizeEvent {
-			switch et {
-			case oswin.MouseScrollEvent:
-				me := evi.(*mouse.ScrollEvent)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					if !lastSkipped {
-						skipDelta = me.Delta
+		if et != oswin.KeyEvent {
+			if et == lastEt || lastEt == oswin.WindowResizeEvent {
+				switch et {
+				case oswin.MouseScrollEvent:
+					me := evi.(*mouse.ScrollEvent)
+					if lagMs > EventSkipLagMSec {
+						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						if !lastSkipped {
+							skipDelta = me.Delta
+						} else {
+							skipDelta = skipDelta.Add(me.Delta)
+						}
+						lastSkipped = true
+						continue
 					} else {
-						skipDelta = skipDelta.Add(me.Delta)
+						if lastSkipped {
+							me.Delta = skipDelta.Add(me.Delta)
+						}
+						lastSkipped = false
 					}
-					lastSkipped = true
-					continue
-				} else {
-					if lastSkipped {
-						me.Delta = skipDelta.Add(me.Delta)
+				case oswin.MouseDragEvent:
+					me := evi.(*mouse.DragEvent)
+					if lagMs > EventSkipLagMSec {
+						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						if !lastSkipped {
+							skipDelta = me.From
+						}
+						lastSkipped = true
+						continue
+					} else {
+						if lastSkipped {
+							me.From = skipDelta
+						}
+						lastSkipped = false
 					}
-					lastSkipped = false
-				}
-			case oswin.MouseDragEvent:
-				me := evi.(*mouse.DragEvent)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					if !lastSkipped {
-						skipDelta = me.From
+				case oswin.WindowResizeEvent:
+					w.Resizing = true
+					we := evi.(*window.Event)
+					// fmt.Printf("resize %v\n", we.Size)
+					if lagMs > EventSkipLagMSec {
+						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						lastSkipped = true
+						skippedResize = we
+						continue
+					} else {
+						w.Resized(w.OSWin.Size())
+						w.FullReRender()
+						// w.DoFullRender = true
+						lastSkipped = false
+						skippedResize = nil
+						continue
 					}
-					lastSkipped = true
-					continue
-				} else {
-					if lastSkipped {
-						me.From = skipDelta
+				case oswin.WindowEvent:
+					we := evi.(*window.Event)
+					if we.Action == window.Move {
+						WinGeomPrefs.RecordPref(w)
 					}
-					lastSkipped = false
-				}
-			case oswin.WindowResizeEvent:
-				w.Resizing = true
-				we := evi.(*window.Event)
-				// fmt.Printf("resize %v\n", we.Size)
-				if lagMs > EventSkipLagMSec {
-					// fmt.Printf("skipped et %v lag %v\n", et, lag)
-					lastSkipped = true
-					skippedResize = we
-					continue
-				} else {
-					w.Resized(w.OSWin.Size())
-					w.FullReRender()
-					// w.DoFullRender = true
-					lastSkipped = false
-					skippedResize = nil
-					continue
-				}
-			case oswin.WindowEvent:
-				we := evi.(*window.Event)
-				if we.Action == window.Move {
-					WinGeomPrefs.RecordPref(w)
+				case oswin.KeyChordEvent:
+					ke := evi.(*key.ChordEvent)
+					ks := ke.ChordString()
+					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
+						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						lastSkipped = true
+						continue
+					} else {
+						lastKeyChord = ks
+						lastSkipped = false
+					}
 				}
 			}
+			lastSkipped = false
+			lastEt = et
 		}
-		lastSkipped = false
-		lastEt = et
 
 		if skippedResize != nil {
 			w.Resized(w.OSWin.Size())

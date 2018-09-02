@@ -6,7 +6,6 @@ package giv
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"log"
 	"strings"
@@ -31,10 +30,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// TODO:
-// key trick: when you scroll up, you scroll up by 1/2 screen!  that way, you're not
-// constantly redrawing all the text - just the cursor..
-
 // TextViewOpts contains options for TextView editing
 type TextViewOpts struct {
 	AutoIndent bool `desc:"auto-indent on newline and decrease indent on } (todo: generalize)"`
@@ -47,33 +42,32 @@ type TextViewOpts struct {
 // works on in-memory strings.
 type TextView struct {
 	gi.WidgetBase
-	Buf         *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Opts        TextViewOpts              `desc:"options for how text editing / viewing works"`
-	HiLang      string                    `desc:"language for syntax highlighting the code"`
-	HiStyle     string                    `desc:"syntax highlighting style"`
-	HiCSS       gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
-	Edited      bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	FocusActive bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines      int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Markup      [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	Renders     []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs        []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LinesSize   gi.Vec2D                  `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz    gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos   TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol   int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	SelectStart TextPos                   `xml:"-" desc:"starting position of selection"`
-	SelectEnd   TextPos                   `xml:"-" desc:"ending position of selection"`
-	SelectMode  bool                      `xml:"-" desc:"if true, select text as cursor moves"`
-	TextViewSig ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	StateStyles [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight  float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight  float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisHeight   int                       `json:"-" xml:"-" desc:"height in lines of the visible area"`
-	VisWidth    int                       `json:"-" xml:"-" desc:"width in lines of the visible area"`
-	BlinkOn     bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion  *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Buf           *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Opts          TextViewOpts              `desc:"options for how text editing / viewing works"`
+	HiLang        string                    `desc:"language for syntax highlighting the code"`
+	HiStyle       string                    `desc:"syntax highlighting style"`
+	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
+	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Markup        [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LinesSize     gi.Vec2D                  `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol     int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	SelectReg     TextRegion                `xml:"-" desc:"current selection region"`
+	PrevSelectReg TextRegion                `xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	SelectMode    bool                      `xml:"-" desc:"if true, select text as cursor moves"`
+	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Completion    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  string
@@ -196,22 +190,22 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tv.UpdateSig()
 	case TextBufInsert:
 		tbe := data.(*TextBufEdit)
-		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Start)
-		if tbe.Start.Ln != tbe.End.Ln {
+		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
+		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
 		} else {
-			tv.LayoutLines(tbe.Start.Ln, tbe.End.Ln)
-			tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 		}
 	case TextBufDelete:
 		tbe := data.(*TextBufEdit)
-		if tbe.Start.Ln != tbe.End.Ln {
+		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
 		} else {
-			tv.LayoutLines(tbe.Start.Ln, tbe.End.Ln)
-			tv.RenderLines(tbe.Start.Ln, tbe.End.Ln)
+			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 		}
 	}
 }
@@ -271,8 +265,11 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	tv.FontHeight = st.Font.Height
 	tv.LineHeight = tv.FontHeight * st.Text.LineHeight
 	spc := tv.Sty.BoxSpace()
-	if tv.VpBBox != image.ZR {
-		tv.RenderSz.SetPoint(tv.VpBBox.Size())
+	par, _ := gi.KiToNode2D(tv.Par)
+	pbb := par.ChildrenBBox2D()
+	if pbb != image.ZR {
+		tv.RenderSz.SetPoint(pbb.Size())
+		// fmt.Printf("vp rendersz: %v\n", tv.RenderSz)
 	} else {
 		sz := tv.LayData.AllocSize
 		if sz.IsZero() {
@@ -282,6 +279,7 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 			sz.SetSubVal(2 * spc)
 		}
 		tv.RenderSz = sz
+		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	}
 	return tv.RenderSz
 }
@@ -338,10 +336,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
 		tv.Offs[ln] = off
-		lsz := tv.Renders[ln].Size.Y
-		if lsz < tv.LineHeight {
-			lsz = tv.LineHeight
-		}
+		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
@@ -389,20 +384,39 @@ func (tv *TextView) LayoutLines(st, ed int) {
 ///////////////////////////////////////////////////////////////////////////////
 //  Cursor Navigation
 
+// SetCursor sets a new cursor position, enforcing it in range
+func (tv *TextView) SetCursor(pos TextPos) {
+	if tv.NLines == 0 {
+		tv.CursorPos = TextPosZero
+		return
+	}
+	if pos.Ln >= len(tv.Buf.Lines) {
+		pos.Ln = len(tv.Buf.Lines) - 1
+	}
+	llen := len(tv.Buf.Lines[pos.Ln])
+	if pos.Ch >= llen {
+		pos.Ch = llen
+	}
+	if pos.Ch < 0 {
+		pos.Ch = 0
+	}
+	tv.CursorPos = pos
+}
+
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and tv.CursorPos is current
 func (tv *TextView) CursorSelect(org TextPos) {
 	if !tv.SelectMode {
 		return
 	}
-	if org.IsLess(tv.SelectStart) {
-		tv.SelectStart = tv.CursorPos
-	} else if !tv.CursorPos.IsLess(tv.SelectStart) { // >
-		tv.SelectEnd = tv.CursorPos
+	if org.IsLess(tv.SelectReg.Start) {
+		tv.SelectReg.Start = tv.CursorPos
+	} else if !tv.CursorPos.IsLess(tv.SelectReg.Start) { // >
+		tv.SelectReg.End = tv.CursorPos
 	} else {
-		tv.SelectStart = tv.CursorPos
+		tv.SelectReg.Start = tv.CursorPos
 	}
-	tv.SelectRender()
+	tv.RenderSelectLines()
 }
 
 // CursorForward moves the cursor forward
@@ -511,14 +525,11 @@ func (tv *TextView) CursorRecenter() {
 	cur := (tv.lastRecenter + 1) % 3
 	switch cur {
 	case 0:
-		fmt.Printf("to top\n")
-		tv.ScrollCursorToTop()
-	case 1:
-		fmt.Printf("to center\n")
-		tv.ScrollCursorToCenter()
-	case 2:
-		fmt.Printf("to bottom\n")
 		tv.ScrollCursorToBottom()
+	case 1:
+		tv.ScrollCursorToVertCenter()
+	case 2:
+		tv.ScrollCursorToTop()
 	}
 	tv.lastRecenter = cur
 }
@@ -530,6 +541,7 @@ func (tv *TextView) CursorStartLine() {
 	org := tv.CursorPos
 	tv.CursorPos.Ch = 0
 	tv.CursorCol = tv.CursorPos.Ch
+	tv.ScrollCursorToLeft()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
 }
@@ -553,7 +565,7 @@ func (tv *TextView) CursorEndLine() {
 	org := tv.CursorPos
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	tv.CursorCol = tv.CursorPos.Ch
-	// todo: horiz scroll
+	tv.ScrollCursorToRight()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
 }
@@ -568,7 +580,7 @@ func (tv *TextView) CursorEnd() {
 	tv.CursorPos.Ln = gi.MaxInt(tv.NLines-1, 0)
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	tv.CursorCol = tv.CursorPos.Ch
-	// todo: horiz scroll
+	tv.ScrollCursorToBottom()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
 }
@@ -603,7 +615,7 @@ func (tv *TextView) CursorDelete(steps int) {
 	tv.RenderCursor(false)
 	tv.CursorForward(steps)
 	tv.Buf.DeleteText(org, tv.CursorPos)
-	tv.CursorPos = org
+	tv.SetCursor(org)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 }
@@ -612,9 +624,13 @@ func (tv *TextView) CursorDelete(steps int) {
 func (tv *TextView) CursorKill() {
 	org := tv.CursorPos
 	tv.RenderCursor(false)
-	tv.CursorEndLine()
+	if tv.CursorPos.Ch == 0 && len(tv.Buf.Lines[tv.CursorPos.Ln]) == 0 {
+		tv.CursorForward(1)
+	} else {
+		tv.CursorEndLine()
+	}
 	tv.Buf.DeleteText(org, tv.CursorPos)
-	tv.CursorPos = org
+	tv.SetCursor(org)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 }
@@ -630,7 +646,7 @@ func (tv *TextView) ClearSelected() {
 
 // HasSelection returns whether there is a selected region of text
 func (tv *TextView) HasSelection() bool {
-	if tv.SelectStart.IsLess(tv.SelectEnd) {
+	if tv.SelectReg.Start.IsLess(tv.SelectReg.End) {
 		return true
 	}
 	return false
@@ -640,7 +656,7 @@ func (tv *TextView) HasSelection() bool {
 // captures start, end, and full lines in between -- nil if no selection
 func (tv *TextView) Selection() *TextBufEdit {
 	if tv.HasSelection() {
-		return tv.Buf.Region(tv.SelectStart, tv.SelectEnd)
+		return tv.Buf.Region(tv.SelectReg.Start, tv.SelectReg.End)
 	}
 	return nil
 }
@@ -651,16 +667,16 @@ func (tv *TextView) SelectModeToggle() {
 		tv.SelectMode = false
 	} else {
 		tv.SelectMode = true
-		tv.SelectStart = tv.CursorPos
-		tv.SelectEnd = tv.SelectStart
+		tv.SelectReg.Start = tv.CursorPos
+		tv.SelectReg.End = tv.SelectReg.Start
 	}
 }
 
 // SelectAll selects all the text
 func (tv *TextView) SelectAll() {
 	updt := tv.UpdateStart()
-	tv.SelectStart = TextPosZero
-	tv.SelectEnd = TextPos{tv.Buf.NLines - 1, len(tv.Buf.Lines[tv.Buf.NLines-1])}
+	tv.SelectReg.Start = TextPosZero
+	tv.SelectReg.End = TextPos{tv.Buf.NLines - 1, len(tv.Buf.Lines[tv.Buf.NLines-1])}
 	tv.UpdateEnd(updt)
 }
 
@@ -681,37 +697,37 @@ func (tv *TextView) SelectWord() {
 	// 	tv.SelectAll()
 	// 	return
 	// }
-	// tv.SelectStart = tv.CursorPos
-	// if tv.SelectStart >= sz {
-	// 	tv.SelectStart = sz - 2
+	// tv.SelectReg.Start = tv.CursorPos
+	// if tv.SelectReg.Start >= sz {
+	// 	tv.SelectReg.Start = sz - 2
 	// }
-	// if !tv.IsWordBreak(tv.EditTxt[tv.SelectStart]) {
-	// 	for tv.SelectStart > 0 {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectStart-1]) {
+	// if !tv.IsWordBreak(tv.EditTxt[tv.SelectReg.Start]) {
+	// 	for tv.SelectReg.Start > 0 {
+	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.Start-1]) {
 	// 			break
 	// 		}
-	// 		tv.SelectStart--
+	// 		tv.SelectReg.Start--
 	// 	}
-	// 	tv.SelectEnd = tv.CursorPos + 1
-	// 	for tv.SelectEnd < sz {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectEnd]) {
+	// 	tv.SelectReg.End = tv.CursorPos + 1
+	// 	for tv.SelectReg.End < sz {
+	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
 	// 			break
 	// 		}
-	// 		tv.SelectEnd++
+	// 		tv.SelectReg.End++
 	// 	}
 	// } else { // keep the space start -- go to next space..
-	// 	tv.SelectEnd = tv.CursorPos + 1
-	// 	for tv.SelectEnd < sz {
-	// 		if !tv.IsWordBreak(tv.EditTxt[tv.SelectEnd]) {
+	// 	tv.SelectReg.End = tv.CursorPos + 1
+	// 	for tv.SelectReg.End < sz {
+	// 		if !tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
 	// 			break
 	// 		}
-	// 		tv.SelectEnd++
+	// 		tv.SelectReg.End++
 	// 	}
-	// 	for tv.SelectEnd < sz {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectEnd]) {
+	// 	for tv.SelectReg.End < sz {
+	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
 	// 			break
 	// 		}
-	// 		tv.SelectEnd++
+	// 		tv.SelectReg.End++
 	// 	}
 	// }
 }
@@ -720,19 +736,26 @@ func (tv *TextView) SelectWord() {
 func (tv *TextView) SelectReset() {
 	tv.SelectMode = false
 	zp := TextPosZero
-	if tv.SelectStart == zp && tv.SelectEnd == zp {
+	if tv.SelectReg.Start == zp && tv.SelectReg.End == zp {
 		return
 	}
-	stln := tv.SelectStart.Ln
-	edln := tv.SelectEnd.Ln
-	tv.SelectStart = zp
-	tv.SelectEnd = zp
+	stln := tv.SelectReg.Start.Ln
+	edln := tv.SelectReg.End.Ln
+	tv.SelectReg = TextRegionZero
+	tv.PrevSelectReg = TextRegionZero
 	tv.RenderLines(stln, edln)
 }
 
-// SelectRender renders the currently selected text
-func (tv *TextView) SelectRender() {
-	tv.RenderLines(tv.SelectStart.Ln, tv.SelectEnd.Ln)
+// RenderSelectLines renders the lines within the current selection region
+func (tv *TextView) RenderSelectLines() {
+	if tv.PrevSelectReg == TextRegionZero {
+		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
+	} else {
+		stln := gi.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
+		edln := gi.MaxInt(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
+		tv.RenderLines(stln, edln)
+	}
+	tv.PrevSelectReg = tv.SelectReg
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -754,7 +777,7 @@ func (tv *TextView) DeleteSelection() *TextBufEdit {
 	if tbe == nil {
 		return nil
 	}
-	tv.Buf.DeleteText(tv.SelectStart, tv.SelectEnd)
+	tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End)
 	tv.SelectReset()
 	return tbe
 }
@@ -778,7 +801,7 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 func (tv *TextView) Paste() {
 	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
 	if data != nil {
-		if tv.SelectStart.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectEnd) {
+		if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
 			tv.DeleteSelection()
 		}
 		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
@@ -792,7 +815,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	}
 	tv.RenderCursor(false)
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt)
-	tv.CursorPos = tbe.End
+	tv.SetCursor(tbe.Reg.End)
 	tv.RenderCursor(true)
 }
 
@@ -850,18 +873,7 @@ func (tv *TextView) Complete(str string) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//    Rendering
-
-// CursorBBox returns a bounding-box for a cursor at given position
-func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
-	st := &tv.Sty
-	cpos := tv.CharStartPos(pos)
-	cbmin := cpos.SubVal(st.Border.Width.Dots)
-	cbmax := cpos.AddVal(st.Border.Width.Dots)
-	cbmax.Y += tv.FontHeight
-	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
-	return curBBox
-}
+//    Scrolling
 
 // ScrollInView tells any parent scroll layout to scroll to get given box
 // (e.g., cursor BBox) in view -- returns true if scrolled
@@ -879,6 +891,33 @@ func (tv *TextView) ScrollCursorInView() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollInView(curBBox)
 }
+
+// AutoScroll tells any parent scroll layout to scroll to do its autoscroll
+// based on given location -- for dragging
+func (tv *TextView) AutoScroll(pos image.Point) bool {
+	ly := tv.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	return ly.AutoScroll(pos)
+}
+
+// ScrollCursorToCenterIfHidden checks if the cursor is not visible, and if
+// so, scrolls to the center, along both dimensions.
+func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
+	curBBox := tv.CursorBBox(tv.CursorPos)
+	did := false
+	if curBBox.Max.Y < tv.VpBBox.Min.Y || curBBox.Min.Y > tv.VpBBox.Max.Y {
+		did = tv.ScrollCursorToVertCenter()
+	}
+	if curBBox.Max.X < tv.VpBBox.Min.X || curBBox.Min.X > tv.VpBBox.Max.X {
+		did = did || tv.ScrollCursorToHorizCenter()
+	}
+	return false
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Scrolling -- Vertical
 
 // ScrollToTop tells any parent scroll layout to scroll to get given vertical
 // coordinate at top of view to extent possible -- returns true if scrolled
@@ -915,10 +954,10 @@ func (tv *TextView) ScrollCursorToBottom() bool {
 	return tv.ScrollToBottom(curBBox.Max.Y)
 }
 
-// ScrollToCenter tells any parent scroll layout to scroll to get given
+// ScrollToVertCenter tells any parent scroll layout to scroll to get given
 // vertical coordinate to center of view to extent possible -- returns true if
 // scrolled
-func (tv *TextView) ScrollToCenter(pos int) bool {
+func (tv *TextView) ScrollToVertCenter(pos int) bool {
 	ly := tv.ParentScrollLayout()
 	if ly == nil {
 		return false
@@ -926,22 +965,89 @@ func (tv *TextView) ScrollToCenter(pos int) bool {
 	return ly.ScrollDimToCenter(gi.Y, pos)
 }
 
-// ScrollCursorToCenter tells any parent scroll layout to scroll to get cursor
-// at top of view to extent possible -- returns true if scrolled.
-func (tv *TextView) ScrollCursorToCenter() bool {
+// ScrollCursorToVertCenter tells any parent scroll layout to scroll to get
+// cursor at vert center of view to extent possible -- returns true if
+// scrolled.
+func (tv *TextView) ScrollCursorToVertCenter() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	mid := (curBBox.Min.Y + curBBox.Max.Y) / 2
-	return tv.ScrollToCenter(mid)
+	return tv.ScrollToVertCenter(mid)
 }
 
-// ScrollCursorToCenterIfHidden checks if the cursor is not visible, and if
-// so, scrolls to the center
-func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
-	curBBox := tv.CursorBBox(tv.CursorPos)
-	if curBBox.Max.Y < tv.VpBBox.Min.Y || curBBox.Min.Y > tv.VpBBox.Max.Y {
-		return tv.ScrollCursorToCenter()
+///////////////////////////////////////////////////////////////////////////////
+//    Scrolling -- Horizontal
+
+// ScrollToLeft tells any parent scroll layout to scroll to get given
+// horizontal coordinate at left of view to extent possible -- returns true if
+// scrolled
+func (tv *TextView) ScrollToLeft(pos int) bool {
+	ly := tv.ParentScrollLayout()
+	if ly == nil {
+		return false
 	}
-	return false
+	return ly.ScrollDimToStart(gi.X, pos)
+}
+
+// ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
+// at left of view to extent possible -- returns true if scrolled.
+func (tv *TextView) ScrollCursorToLeft() bool {
+	if tv.CursorPos.Ch == 0 {
+		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Sty.BoxSpace()) - 2)
+	}
+	curBBox := tv.CursorBBox(tv.CursorPos)
+	return tv.ScrollToLeft(curBBox.Min.X)
+}
+
+// ScrollToRight tells any parent scroll layout to scroll to get given
+// horizontal coordinate at right of view to extent possible -- returns true
+// if scrolled
+func (tv *TextView) ScrollToRight(pos int) bool {
+	ly := tv.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	return ly.ScrollDimToEnd(gi.X, pos)
+}
+
+// ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
+// at right of view to extent possible -- returns true if scrolled.
+func (tv *TextView) ScrollCursorToRight() bool {
+	curBBox := tv.CursorBBox(tv.CursorPos)
+	return tv.ScrollToRight(curBBox.Max.X)
+}
+
+// ScrollToHorizCenter tells any parent scroll layout to scroll to get given
+// horizontal coordinate to center of view to extent possible -- returns true if
+// scrolled
+func (tv *TextView) ScrollToHorizCenter(pos int) bool {
+	ly := tv.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	return ly.ScrollDimToCenter(gi.X, pos)
+}
+
+// ScrollCursorToHorizCenter tells any parent scroll layout to scroll to get
+// cursor at horiz center of view to extent possible -- returns true if
+// scrolled.
+func (tv *TextView) ScrollCursorToHorizCenter() bool {
+	curBBox := tv.CursorBBox(tv.CursorPos)
+	mid := (curBBox.Min.X + curBBox.Max.X) / 2
+	return tv.ScrollToHorizCenter(mid)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Rendering
+
+// CursorBBox returns a bounding-box for a cursor at given position
+func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
+	st := &tv.Sty
+	cpos := tv.CharStartPos(pos)
+	cbmin := cpos.SubVal(st.Border.Width.Dots)
+	cbmax := cpos.AddVal(st.Border.Width.Dots)
+	cbmax.Y += tv.FontHeight
+	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
+	return curBBox
 }
 
 // RenderCursor draws the cursor, either on or off (for blinking or moving) and
@@ -977,45 +1083,49 @@ func (tv *TextView) RenderCursor(on bool) {
 	}
 }
 
+// RenderSelect renders the selection region as a highlighted background color
 func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
-	rs := &tv.Viewport.Render
-	pc := &rs.Paint
-	sty := &tv.StateStyles[TextViewSel]
-	spc := sty.BoxSpace()
+	if tv.PushBounds() {
+		rs := &tv.Viewport.Render
+		pc := &rs.Paint
+		sty := &tv.StateStyles[TextViewSel]
+		spc := sty.BoxSpace()
 
-	st := tv.SelectStart
-	ed := tv.SelectEnd
-	spos := tv.CharStartPos(st)
-	epos := tv.CharEndPos(ed)
+		st := tv.SelectReg.Start
+		ed := tv.SelectReg.End
+		spos := tv.CharStartPos(st)
+		epos := tv.CharEndPos(ed)
 
-	fmt.Printf("select: %v -- %v\n", st, ed)
+		// fmt.Printf("select: %v -- %v\n", st, ed)
 
-	if st.Ln == ed.Ln {
-		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
-		return
-	}
-	if st.Ch > 0 {
-		se := tv.CharEndPos(st)
-		se.X = float32(tv.VpBBox.Max.X) - spc
-		pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
-		st.Ln++
-		st.Ch = 0
-		spos = tv.CharStartPos(st)
-	}
-	lm1 := ed
-	lm1.Ln--
-	be := tv.CharEndPos(lm1)
-	be.X = float32(tv.VpBBox.Max.X) - spc
-	pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
-	// now get anything on end
-	if ed.Ch > 0 {
-		els := ed
-		els.Ch = 0
-		elsp := tv.CharStartPos(els)
-		pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
+		if st.Ln == ed.Ln {
+			pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+		} else {
+			if st.Ch > 0 {
+				se := tv.CharEndPos(st)
+				se.X = float32(tv.VpBBox.Max.X) - spc
+				pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
+				st.Ln++
+				st.Ch = 0
+				spos = tv.CharStartPos(st)
+			}
+			lm1 := ed
+			lm1.Ln--
+			be := tv.CharEndPos(lm1)
+			be.X = float32(tv.VpBBox.Max.X) - spc
+			pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
+			// now get anything on end
+			if ed.Ch > 0 {
+				els := ed
+				els.Ch = 0
+				elsp := tv.CharStartPos(els)
+				pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
+			}
+		}
+		tv.PopBounds()
 	}
 }
 
@@ -1031,8 +1141,8 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 func (tv *TextView) VisSizes() {
 	st := &tv.Sty
 	sz := tv.VpBBox.Size()
-	tv.VisHeight = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
-	tv.VisWidth = int(math32.Floor(float32(sz.X) / st.Font.Ch))
+	tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
+	tv.VisSize.X = int(math32.Floor(float32(sz.X) / st.Font.Ch))
 }
 
 // RenderAllLines displays all the visible lines on the screen -- called
@@ -1077,8 +1187,8 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	visSt := -1
 	visEd := -1
 	for ln := st; ln <= ed; ln++ {
-		lst := pos.Y + tv.Offs[ln]
-		led := lst + tv.Renders[ln].Size.Y
+		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
+		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
 		}
@@ -1101,7 +1211,6 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
 	pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 	// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
-	// todo: selection!
 
 	tv.RenderSelect()
 
@@ -1178,15 +1287,15 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	if tv.NLines == 0 {
 		return TextPosZero
 	}
-	st := &tv.Sty
+	sty := &tv.Sty
 	stln := tv.FirstVisibleLine(0)
-	yscroll := tv.VpBBox.Min.Y - tv.ObjBBox.Min.Y
+	yoff := float32(tv.WinBBox.Min.Y)
 	cln := stln
 	for ln := stln; ln < tv.NLines; ln++ {
-		ls := tv.Offs[ln] - float32(yscroll)
+		ls := tv.CharStartPos(TextPos{Ln: ln}).Y - yoff
 		es := ls
-		es += tv.Renders[ln].Size.Y
-		if pt.Y >= int(ls) && pt.Y <= int(es) {
+		es += math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
 			cln = ln
 			break
 		}
@@ -1195,19 +1304,24 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	if lnsz == 0 {
 		return TextPos{Ln: cln, Ch: 0}
 	}
-	xscroll := tv.VpBBox.Min.X - tv.ObjBBox.Min.X
-	sc := int(float32(xscroll) / st.Font.Ch)
-	rc := int(float32(pt.X) / st.Font.Ch)
-	cch := sc + rc
+	xoff := float32(tv.WinBBox.Min.X)
+	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
+	sc := int(float32(pt.X+scrl) / sty.Font.Ch)
+	sc -= sc / 4
+	sc = gi.MaxInt(0, sc)
+	cch := sc
 	tooBig := false
 	if cch < lnsz {
 		for c := cch; c < lnsz; c++ {
-			rsp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
-			rep := int(tv.Renders[cln].Spans[0].RuneEndPos(c).X) - xscroll
-			if pt.X >= rsp && pt.X < rep {
+			rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			// fmt.Printf("trying c: %v for pt: %v xoff: %v rsp: %v, rep: %v\n", c, pt, xoff, rsp, rep)
+			if pt.X >= int(rsp) && pt.X < int(rep) {
 				cch = c
+				// fmt.Printf("got cch: %v for pt: %v rsp: %v, rep: %v\n", cch, pt, rsp, rep)
 				break
-			} else if pt.X >= rep {
+			} else if int(rep) > pt.X {
+				cch = c
 				tooBig = true
 				break
 			}
@@ -1218,10 +1332,12 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	}
 	if tooBig {
 		for c := cch; c >= 0; c-- {
-			rsp := int(tv.Renders[cln].Spans[0].RuneRelPos(c).X) - xscroll
-			rep := int(tv.Renders[cln].Spans[0].RuneEndPos(c).X) - xscroll
-			if pt.X >= rsp && pt.X < rep {
+			rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			// fmt.Printf("too big: trying c: %v for pt: %v rsp: %v, rep: %v\n", c, pt, rsp, rep)
+			if pt.X >= int(rsp) && pt.X < int(rep) {
 				cch = c
+				// fmt.Printf("got cch: %v for pt: %v rsp: %v, rep: %v\n", cch, pt, rsp, rep)
 				break
 			}
 		}
@@ -1231,23 +1347,30 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 
 func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes) {
 	oldPos := tv.CursorPos
-	tv.CursorPos = tv.PixelToCursor(pt)
+	tv.RenderCursor(false)
+	tv.SetCursor(tv.PixelToCursor(pt))
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
 		if !tv.SelectMode && selMode != mouse.NoSelectMode {
-			tv.SelectStart = oldPos
+			tv.SelectReg.Start = oldPos
 			tv.SelectMode = true
 		}
-		if !tv.IsDragging() && tv.SelectStart.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectEnd) {
+		if !tv.IsDragging() && tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
 			tv.SelectReset()
-		} else if tv.SelectStart.IsLess(tv.CursorPos) {
-			tv.SelectEnd = tv.CursorPos
+		} else if tv.SelectReg.Start.IsLess(tv.CursorPos) {
+			tv.SelectReg.End = tv.CursorPos
 		} else {
-			tv.SelectStart = tv.CursorPos
+			tv.SelectReg.Start = tv.CursorPos
 		}
-		tv.SelectRender()
+		if tv.IsDragging() {
+			tv.AutoScroll(pt.Add(tv.WinBBox.Min))
+		} else {
+			tv.ScrollCursorToCenterIfHidden()
+		}
+		tv.RenderSelectLines()
 	} else if tv.HasSelection() {
 		tv.SelectReset()
 	}
+	tv.RenderCursor(true)
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
@@ -1398,7 +1521,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
 			// if tv.HasSelection() {
-			// 	if tv.SelectStart == TextPosZero && tv.SelectEnd == tv.Buf.EndPos() {
+			// 	if tv.SelectReg.Start == TextPosZero && tv.SelectReg.End == tv.Buf.EndPos() {
 			// 		tv.SelectReset()
 			// 	} else {
 			// 		tv.SelectAll()
@@ -1519,7 +1642,9 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		spos.X += tv.Renders[pos.Ln].Spans[0].RuneRelPos(pos.Ch).X
+		rrp := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
+		spos.X += rrp.X
+		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}
 	return spos
 }
@@ -1532,9 +1657,11 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		spos.X += tv.Renders[pos.Ln].Spans[0].RuneEndPos(pos.Ch).X
+		rrp := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
+		spos.X += rrp.X
+		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}
-	spos.Y += tv.LineHeight
+	spos.Y += tv.LineHeight // end of that line
 	return spos
 }
 
@@ -1641,8 +1768,6 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		tv.UpdateSig()
 	case gi.FocusGot:
 		tv.FocusActive = true
-		tv.ScrollToMe()
-		//tv.CursorEnd()
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
 	case gi.FocusInactive:
@@ -1651,7 +1776,6 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		tv.UpdateSig()
 	case gi.FocusActive:
 		tv.FocusActive = true
-		tv.ScrollToMe()
 		// tv.UpdateSig()
 		// todo: see about cursor
 	}

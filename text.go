@@ -367,21 +367,10 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 	defer glyphAdvanceMu.Unlock()
 	col := 0 // current column position -- todo: does NOT deal with indent
 	for i, r := range sr.Text {
-		if r == '\t' {
-			curtab := col / tabSize
-			curtab++
-			col = curtab * tabSize
-			cpos := chsz * float32(col)
-			if cpos > fpos {
-				fpos = cpos
-			}
-			continue
-		}
-
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
 
-		fht := curFace.Metrics().Height
+		fht := FixedToFloat32(curFace.Metrics().Height)
 		if prevR >= 0 {
 			fpos += FixedToFloat32(curFace.Kern(prevR, r))
 		}
@@ -395,22 +384,30 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 			rr.RelPos.Y = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
 		}
 
-		a, ok := curFace.GlyphAdvance(r)
-
-		if !ok {
-			// TODO: is falling back on the U+FFFD glyph the responsibility of
-			// the Drawer or the Face?
-			// TODO: set prevC = '\ufffd'?
-			continue
-		}
+		// todo: could check for various types of special unicode space chars here
+		a, _ := curFace.GlyphAdvance(r)
 		a32 := FixedToFloat32(a)
-		rr.Size = Vec2D{a32, FixedToFloat32(fht)}
-		fpos += a32
-		col++
-		if i < sz-1 {
-			fpos += lspc
-			if unicode.IsSpace(r) {
-				fpos += wspc
+		if a32 == 0 {
+			a32 = .1 * fht // something..
+		}
+		rr.Size = Vec2D{a32, fht}
+
+		if r == '\t' {
+			curtab := col / tabSize
+			curtab++
+			col = curtab * tabSize
+			cpos := chsz * float32(col)
+			if cpos > fpos {
+				fpos = cpos
+			}
+		} else {
+			fpos += a32
+			col++
+			if i < sz-1 {
+				fpos += lspc
+				if unicode.IsSpace(r) {
+					fpos += wspc
+				}
 			}
 		}
 		prevR = r
@@ -687,7 +684,7 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 		}
 
 		for i, r := range sr.Text {
-			if r == '\t' {
+			if !unicode.IsPrint(r) {
 				continue
 			}
 			rr := &(sr.Render[i])
@@ -795,7 +792,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 	pc := &rs.Paint
 
 	for i, r := range sr.Text {
-		if r == '\t' {
+		if !unicode.IsPrint(r) {
 			continue
 		}
 		rr := &(sr.Render[i])
@@ -860,7 +857,7 @@ func (sr *SpanRender) RenderLine(rs *RenderState, tpos Vec2D, deco TextDecoratio
 	pc := &rs.Paint
 
 	for i, r := range sr.Text {
-		if r == '\t' {
+		if !unicode.IsPrint(r) {
 			continue
 		}
 		rr := &(sr.Render[i])
@@ -1392,6 +1389,47 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 	}
 }
 
+// RuneRelPos returns the relative (starting) position of the given rune
+// index, counting progressively through all spans present (adds Span RelPos
+// and rune RelPos) -- this is typically the baseline position where rendering
+// will start, not the upper left corner. if index > length, then uses LastPos
+func (tx *TextRender) RuneRelPos(idx int) Vec2D {
+	for si := range tx.Spans {
+		sr := &tx.Spans[si]
+		if idx >= len(sr.Render) {
+			idx -= len(sr.Render) // account for LF
+			continue
+		}
+		return sr.RelPos.Add(sr.Render[idx].RelPos)
+	}
+	nsp := len(tx.Spans)
+	if nsp > 0 {
+		return tx.Spans[nsp-1].LastPos
+	}
+	return Vec2DZero
+}
+
+// RuneEndPos returns the relative ending position of the given rune index,
+// counting progressively through all spans present(adds Span RelPos and rune
+// RelPos + rune Size.X for LR writing). If index > length, then uses LastPos
+func (tx *TextRender) RuneEndPos(idx int) Vec2D {
+	for si := range tx.Spans {
+		sr := &tx.Spans[si]
+		if idx >= len(sr.Render) {
+			idx -= len(sr.Render) // account for LF
+			continue
+		}
+		spos := sr.RelPos.Add(sr.Render[idx].RelPos)
+		spos.X += sr.Render[idx].Size.X
+		return spos
+	}
+	nsp := len(tx.Spans)
+	if nsp > 0 {
+		return tx.Spans[nsp-1].LastPos
+	}
+	return Vec2DZero
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  TextStyle
 
@@ -1706,6 +1744,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 			vpos += txtSty.ParaSpacing.Dots
 		}
 		sr.RelPos.Y = vpos
+		sr.LastPos.Y = vpos
 		ssz := sr.SizeHV()
 		ssz.X += sr.RelPos.X
 		hextra := size.X - ssz.X
