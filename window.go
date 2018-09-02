@@ -390,6 +390,12 @@ func (w *Window) Resized(sz image.Point) {
 	if w.IsInactive() || w.Viewport == nil {
 		return
 	}
+	curSz := w.Viewport.Geom.Size
+	if curSz == sz {
+		// fmt.Printf("skip same resize: %v\n", curSz)
+		return
+	}
+	// fmt.Printf("actual resized fun: %v\n", sz)
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
@@ -400,6 +406,7 @@ func (w *Window) Resized(sz image.Point) {
 	w.OverTex = nil // dynamically allocated when needed
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
+	w.FullReRender()
 }
 
 // Closed frees any resources after the window has been closed.
@@ -784,15 +791,15 @@ mainloop:
 				case oswin.WindowResizeEvent:
 					w.Resizing = true
 					we := evi.(*window.Event)
-					// fmt.Printf("resize %v\n", we.Size)
+					// fmt.Printf("resize\n")
 					if lagMs > EventSkipLagMSec {
 						// fmt.Printf("skipped et %v lag %v\n", et, lag)
 						lastSkipped = true
 						skippedResize = we
 						continue
 					} else {
+						we.SetProcessed()
 						w.Resized(w.OSWin.Size())
-						w.FullReRender()
 						// w.DoFullRender = true
 						lastSkipped = false
 						skippedResize = nil
@@ -801,6 +808,7 @@ mainloop:
 				case oswin.WindowEvent:
 					we := evi.(*window.Event)
 					if we.Action == window.Move {
+						we.SetProcessed()
 						WinGeomPrefs.RecordPref(w)
 					}
 				case oswin.KeyChordEvent:
@@ -822,7 +830,6 @@ mainloop:
 
 		if skippedResize != nil {
 			w.Resized(w.OSWin.Size())
-			w.FullReRender()
 			skippedResize = nil
 		}
 
@@ -950,10 +957,7 @@ mainloop:
 		switch e := evi.(type) {
 		case *window.Event:
 			switch e.Action {
-			case window.Resize:
-				// fmt.Printf("doing resize for action %v \n", e.Action)
-				w.Resized(w.OSWin.Size())
-				w.FullReRender()
+			// case window.Resize: // note: already handleed earlier in lag process
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()

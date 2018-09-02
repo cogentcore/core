@@ -54,7 +54,7 @@ type TextView struct {
 	Markup        [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LinesSize     gi.Vec2D                  `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	LinesSize     image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
 	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol     int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
@@ -195,8 +195,12 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
 		} else {
-			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
-			tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			if rerend {
+				tv.RenderAllLines()
+			} else {
+				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			}
 		}
 	case TextBufDelete:
 		tbe := data.(*TextBufEdit)
@@ -204,8 +208,12 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
 		} else {
-			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
-			tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			if rerend {
+				tv.RenderAllLines()
+			} else {
+				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			}
 		}
 	}
 }
@@ -292,17 +300,29 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 	}
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		tv.NLines = 0
-		tv.LinesSize = gi.Vec2DZero
-		// todo reset size..
+		tv.ResizeIfNeeded(image.ZP)
 		return
 	}
 
 	tv.HiInit()
 
 	tv.NLines = tv.Buf.NLines
-	tv.Markup = make([][]byte, tv.NLines)
-	tv.Renders = make([]gi.TextRender, tv.NLines)
-	tv.Offs = make([]float32, tv.NLines)
+	nln := tv.NLines
+	if cap(tv.Markup) >= nln {
+		tv.Markup = tv.Markup[:nln]
+	} else {
+		tv.Markup = make([][]byte, nln)
+	}
+	if cap(tv.Renders) >= nln {
+		tv.Renders = tv.Renders[:nln]
+	} else {
+		tv.Renders = make([]gi.TextRender, nln)
+	}
+	if cap(tv.Offs) >= nln {
+		tv.Offs = tv.Offs[:nln]
+	} else {
+		tv.Offs = make([]float32, nln)
+	}
 
 	if tv.HasHi() {
 		var htmlBuf bytes.Buffer
@@ -321,18 +341,19 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 			tv.Markup[ln] = mt
 		}
 	} else {
-		for ln := 0; ln < tv.NLines; ln++ {
+		for ln := 0; ln < nln; ln++ {
 			tv.Markup[ln] = []byte(string(tv.Buf.Lines[ln]))
 		}
 	}
 
 	sz := tv.RenderSize()
+	// fmt.Printf("rendersize: %v\n", sz)
 	st := &tv.Sty
 	fst := st.Font
 	fst.BgColor.SetColor(nil)
 	off := float32(0)
 	mxwd := float32(0)
-	for ln := 0; ln < tv.NLines; ln++ {
+	for ln := 0; ln < nln; ln++ {
 		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
 		tv.Offs[ln] = off
@@ -340,26 +361,45 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.LinesSize.Set(mxwd, off)
-	tv.Size2DFromWH(tv.LinesSize.X, tv.LinesSize.Y)
-	if !inLayout {
-		ly := tv.ParentScrollLayout()
-		if ly != nil {
-			tv.reLayout = true
-			ly.GatherSizes() // can't call Size2D b/c that resets layout
-			ly.Layout2DTree()
-			tv.reLayout = false
-		}
+	nwSz := gi.Vec2D{mxwd, off}.ToPointCeil()
+	if inLayout {
+		tv.LinesSize = nwSz
+		tv.Size2DFromWH(float32(tv.LinesSize.X), float32(tv.LinesSize.Y))
+	} else {
+		tv.ResizeIfNeeded(nwSz)
 	}
+}
+
+// ResizeIfNeeded resizes the edit area if different from current setting --
+// returns true if resizing was performed
+func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
+	if nwSz == tv.LinesSize {
+		return false
+	}
+	tv.LinesSize = nwSz
+	tv.Size2DFromWH(float32(tv.LinesSize.X), float32(tv.LinesSize.Y))
+	ly := tv.ParentScrollLayout()
+	if ly != nil {
+		tv.reLayout = true
+		ly.GatherSizes() // can't call Size2D b/c that resets layout
+		ly.Layout2DTree()
+		tv.reLayout = false
+	}
+	tv.SetFullReRender()
+	return true
 }
 
 // LayoutLines generates render of given range of lines (including
 // highlighting). end is *inclusive* line.  if highlighter generates an error
-// on a line, then calls LayoutAllLines to do a full-reparse.
-func (tv *TextView) LayoutLines(st, ed int) {
+// on a line, or word-wrap causes lines to increase in number of spans, then
+// calls LayoutAllLines to do a full-reparse, and returns true to indicate
+// need for a full re-render -- otherwise returns false and just these lines
+// need to be re-rendered.
+func (tv *TextView) LayoutLines(st, ed int) bool {
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
+	mxwd := float32(0)
 	for ln := st; ln <= ed; ln++ {
 		if tv.HasHi() {
 			var htmlBuf bytes.Buffer
@@ -367,18 +407,29 @@ func (tv *TextView) LayoutLines(st, ed int) {
 			err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
 			if err != nil {
 				log.Println(err)
+				tv.Buf.LinesToBytes() // need to update buffer -- todo: redundant across views
 				tv.LayoutAllLines(false)
-				return
+				return true
 			}
 			tv.Markup[ln] = htmlBuf.Bytes()
 		} else {
 			tv.Markup[ln] = []byte(string(tv.Buf.Lines[ln]))
 		}
-
-		st := &tv.Sty
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, tv.RenderSz)
+		curspans := len(tv.Renders[ln].Spans)
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
+		nwspans := len(tv.Renders[ln].Spans)
+		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
+			tv.Buf.LinesToBytes() // need to update buffer -- todo: redundant across views
+			tv.LayoutAllLines(false)
+			return true
+		}
+		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
+	nwSz := gi.Vec2D{mxwd, 0}.ToPointCeil()
+	nwSz.Y = tv.LinesSize.Y
+	tv.ResizeIfNeeded(nwSz)
+	return false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -735,8 +786,7 @@ func (tv *TextView) SelectWord() {
 // SelectReset resets the selection
 func (tv *TextView) SelectReset() {
 	tv.SelectMode = false
-	zp := TextPosZero
-	if tv.SelectReg.Start == zp && tv.SelectReg.End == zp {
+	if !tv.HasSelection() {
 		return
 	}
 	stln := tv.SelectReg.Start.Ln
@@ -1040,6 +1090,37 @@ func (tv *TextView) ScrollCursorToHorizCenter() bool {
 ///////////////////////////////////////////////////////////////////////////////
 //    Rendering
 
+// CharStartPos returns the starting (top left) render coords for the given
+// position -- makes no attempt to rationalize that pos (i.e., if not in
+// visible range, position will be out of range too)
+func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
+	spos := tv.RenderStartPos()
+	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	if len(tv.Renders[pos.Ln].Spans) > 0 {
+		// note: Y from rune pos is baseline
+		rrp, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
+		spos.X += rrp.X
+		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
+	}
+	return spos
+}
+
+// CharEndPos returns the ending (bottom right) render coords for the given
+// position -- makes no attempt to rationalize that pos (i.e., if not in
+// visible range, position will be out of range too)
+func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
+	spos := tv.RenderStartPos()
+	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	if len(tv.Renders[pos.Ln].Spans) > 0 {
+		// note: Y from rune pos is baseline
+		rrp, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
+		spos.X += rrp.X
+		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
+	}
+	spos.Y += tv.LineHeight // end of that line
+	return spos
+}
+
 // CursorBBox returns a bounding-box for a cursor at given position
 func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 	st := &tv.Sty
@@ -1085,6 +1166,7 @@ func (tv *TextView) RenderCursor(on bool) {
 }
 
 // RenderSelect renders the selection region as a highlighted background color
+// -- always called within context of outer RenderLines or RenderAllLines
 func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
@@ -1096,6 +1178,7 @@ func (tv *TextView) RenderSelect() {
 
 	st := tv.SelectReg.Start
 	ed := tv.SelectReg.End
+	ed.Ch-- // end is exclusive
 	spos := tv.CharStartPos(st)
 	epos := tv.CharEndPos(ed)
 
@@ -1147,6 +1230,9 @@ func (tv *TextView) VisSizes() {
 // during standard render
 func (tv *TextView) RenderAllLines() {
 	if tv.PushBounds() {
+		vp := tv.Viewport
+		updt := vp.Win.UpdateStart()
+
 		st := &tv.Sty
 		st.Font.LoadFont(&st.UnContext)
 		tv.VisSizes()
@@ -1169,9 +1255,6 @@ func (tv *TextView) RenderAllLines() {
 		}
 
 		tv.PopBounds()
-
-		vp := tv.Viewport
-		updt := vp.Win.UpdateStart()
 		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
 		vp.Win.UpdateEnd(updt)
 	}
@@ -1181,8 +1264,10 @@ func (tv *TextView) RenderAllLines() {
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
 	if tv.PushBounds() {
+		vp := tv.Viewport
+		updt := vp.Win.UpdateStart()
 		sty := &tv.Sty
-		rs := &tv.Viewport.Render
+		rs := &vp.Render
 		pc := &rs.Paint
 		pos := tv.RenderStartPos()
 		var boxMin, boxMax gi.Vec2D
@@ -1226,14 +1311,10 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
 			vprel := tBBox.Min.Sub(tv.VpBBox.Min)
 			tWinBBox := tv.WinBBox.Add(vprel)
-
-			tv.PopBounds()
-
-			vp := tv.Viewport
-			updt := vp.Win.UpdateStart()
 			vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
-			vp.Win.UpdateEnd(updt)
 		}
+		tv.PopBounds()
+		vp.Win.UpdateEnd(updt)
 	}
 	return true
 }
@@ -1246,15 +1327,14 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 // stln if nothing found above it.
 func (tv *TextView) FirstVisibleLine(stln int) int {
 	if stln == 0 {
-		perln := tv.LinesSize.Y / float32(tv.NLines)
+		perln := float32(tv.LinesSize.Y) / float32(tv.NLines)
 		stln = int(float32(tv.VpBBox.Min.Y-tv.ObjBBox.Min.Y)/perln) - 1
 		if stln < 0 {
 			stln = 0
 		}
 		for ln := stln; ln < tv.NLines; ln++ {
-			pos := TextPos{Ln: ln}
-			cpos := tv.CharStartPos(pos)
-			if int(math32.Floor(cpos.Y)) > tv.VpBBox.Min.Y { // top definitely on screen
+			cpos := tv.CharStartPos(TextPos{Ln: ln})
+			if int(math32.Floor(cpos.Y)) >= tv.VpBBox.Min.Y { // top definitely on screen
 				stln = ln
 				break
 			}
@@ -1262,8 +1342,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 	}
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
-		pos := TextPos{Ln: ln}
-		cpos := tv.CharStartPos(pos)
+		cpos := tv.CharStartPos(TextPos{Ln: ln})
 		if int(math32.Ceil(cpos.Y)) < tv.VpBBox.Min.Y { // top just offscreen
 			break
 		}
@@ -1287,24 +1366,39 @@ func (tv *TextView) LastVisibleLine(stln int) int {
 	return lastln
 }
 
-// PixelToCursor finds the cursor position that corresponds to the given pixel location
+// PixelToCursor finds the cursor position that corresponds to the given pixel
+// location (e.g., from mouse click) which has had WinBBox.Min subtracted from
+// it (i.e, relative to upper left of text area)
 func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	if tv.NLines == 0 {
 		return TextPosZero
 	}
 	sty := &tv.Sty
-	stln := tv.FirstVisibleLine(0)
 	yoff := float32(tv.WinBBox.Min.Y)
+	stln := tv.FirstVisibleLine(0)
 	cln := stln
-	for ln := stln; ln < tv.NLines; ln++ {
-		ls := tv.CharStartPos(TextPos{Ln: ln}).Y - yoff
-		es := ls
-		es += math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
-			cln = ln
-			break
+	fls := tv.CharStartPos(TextPos{Ln: stln}).Y - yoff
+	if pt.Y < int(math32.Floor(fls)) {
+		cln = stln
+	} else if pt.Y > tv.WinBBox.Max.Y {
+		cln = tv.NLines - 1
+	} else {
+		got := false
+		for ln := stln; ln < tv.NLines; ln++ {
+			ls := tv.CharStartPos(TextPos{Ln: ln}).Y - yoff
+			es := ls
+			es += math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
+				got = true
+				cln = ln
+				break
+			}
+		}
+		if !got {
+			cln = tv.NLines - 1
 		}
 	}
+	// fmt.Printf("cln: %v  pt: %v\n", cln, pt)
 	lnsz := len(tv.Buf.Lines[cln])
 	if lnsz == 0 {
 		return TextPos{Ln: cln, Ch: 0}
@@ -1315,6 +1409,19 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	sc -= sc / 4
 	sc = gi.MaxInt(0, sc)
 	cch := sc
+
+	si := 0
+	spoff := 0
+	nspan := len(tv.Renders[cln].Spans)
+	lstY := tv.CharStartPos(TextPos{Ln: cln}).Y - yoff
+	if nspan > 1 {
+		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
+		for i := 0; i < si; i++ {
+			spoff += len(tv.Renders[cln].Spans[i].Text) + 1
+		}
+	}
+	cch += spoff
+
 	tooBig := false
 	if cch < lnsz {
 		for c := cch; c < lnsz; c++ {
@@ -1350,10 +1457,16 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	return TextPos{Ln: cln, Ch: cch}
 }
 
+// SetCursorFromPixel sets cursor position from pixel location, e.g., from
+// mouse action -- handles the selection updating etc.
 func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes) {
 	oldPos := tv.CursorPos
+	newPos := tv.PixelToCursor(pt)
+	if newPos == oldPos {
+		return
+	}
 	tv.RenderCursor(false)
-	tv.SetCursor(tv.PixelToCursor(pt))
+	tv.SetCursor(newPos)
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
 		if !tv.SelectMode && selMode != mouse.NoSelectMode {
 			tv.SelectReg.Start = oldPos
@@ -1617,18 +1730,7 @@ func (tv *TextView) Style2D() {
 }
 
 func (tv *TextView) Size2D(iter int) {
-	// if len(tv.Txt) == 0 && len(tv.Placeholder) > 0 {
-	// 	text = tv.Placeholder
-	// } else {
-	// 	text = tv.Txt
-	// }
-	// tv.Edited = false
-	// maxlen := tv.MaxWidthReq
-	// if maxlen <= 0 {
-	// 	maxlen = 50
-	// }
-	tv.LayoutAllLines(true)
-	tv.Size2DFromWH(tv.LinesSize.X, tv.LinesSize.Y)
+	tv.LayoutAllLines(true) // already sets the size
 }
 
 func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -1637,37 +1739,6 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	return tv.Layout2DChildren(iter)
-}
-
-// CharStartPos returns the starting (top left) render coords for the given
-// position -- makes no attempt to rationalize that pos (i.e., if not in
-// visible range, position will be out of range too)
-func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
-	spos := tv.RenderStartPos()
-	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
-	if len(tv.Renders[pos.Ln].Spans) > 0 {
-		// note: Y from rune pos is baseline
-		rrp, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
-		spos.X += rrp.X
-		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
-	}
-	return spos
-}
-
-// CharEndPos returns the ending (bottom right) render coords for the given
-// position -- makes no attempt to rationalize that pos (i.e., if not in
-// visible range, position will be out of range too)
-func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
-	spos := tv.RenderStartPos()
-	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
-	if len(tv.Renders[pos.Ln].Spans) > 0 {
-		// note: Y from rune pos is baseline
-		rrp, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
-		spos.X += rrp.X
-		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
-	}
-	spos.Y += tv.LineHeight // end of that line
-	return spos
 }
 
 // TextViewBlinker is the time.Ticker for blinking cursors for text fields,

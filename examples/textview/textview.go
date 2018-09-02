@@ -56,7 +56,7 @@ func mainrun() {
 	splt := mfr.AddNewChild(gi.KiT_SplitView, "split-view").(*gi.SplitView)
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
-	// splt.SetProp("word-wrap", true)
+	splt.SetProp("word-wrap", true)
 	splt.SetProp("tab-size", 4)
 	splt.SetProp("font-family", "Go Mono")
 	splt.SetProp("line-height", 1.2)

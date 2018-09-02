@@ -684,11 +684,15 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 		}
 
 		for i, r := range sr.Text {
+			rr := &(sr.Render[i])
+			if rr.Color != nil {
+				curColor = rr.Color
+				d.Src = image.NewUniform(curColor)
+			}
+			curFace = rr.CurFace(curFace)
 			if !unicode.IsPrint(r) {
 				continue
 			}
-			rr := &(sr.Render[i])
-			curFace = rr.CurFace(curFace)
 			dsc32 := FixedToFloat32(curFace.Metrics().Descent)
 			rp := tpos.Add(rr.RelPos)
 			scx := float32(1)
@@ -701,10 +705,6 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 			if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
 				int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 				continue
-			}
-			if rr.Color != nil {
-				curColor = rr.Color
-				d.Src = image.NewUniform(curColor)
 			}
 			d.Face = curFace
 			d.Dot = rp.Fixed()
@@ -804,6 +804,9 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 			continue
 		}
 		curFace = rr.CurFace(curFace)
+		if rr.Color != nil {
+			curColor = rr.Color
+		}
 		dsc32 := FixedToFloat32(curFace.Metrics().Descent)
 		rp := tpos.Add(rr.RelPos)
 		scx := float32(1)
@@ -819,9 +822,6 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 				pc.Stroke(rs)
 			}
 			continue
-		}
-		if rr.Color != nil {
-			curColor = rr.Color
 		}
 		dw := .05 * rr.Size.Y
 		if !didLast {
@@ -1397,9 +1397,12 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 // spans at all)
 func (tx *TextRender) RuneRelPos(idx int) (Vec2D, int) {
 	for si := range tx.Spans {
+		if idx < 0 {
+			idx = 0
+		}
 		sr := &tx.Spans[si]
 		if idx >= len(sr.Render) {
-			idx -= len(sr.Render) // account for LF
+			idx -= (len(sr.Render) + 1) // account for LF
 			continue
 		}
 		return sr.RelPos.Add(sr.Render[idx].RelPos), si
@@ -1418,9 +1421,12 @@ func (tx *TextRender) RuneRelPos(idx int) (Vec2D, int) {
 // spans at all)
 func (tx *TextRender) RuneEndPos(idx int) (Vec2D, int) {
 	for si := range tx.Spans {
+		if idx < 0 {
+			idx = 0
+		}
 		sr := &tx.Spans[si]
 		if idx >= len(sr.Render) {
-			idx -= len(sr.Render) // account for LF
+			idx -= (len(sr.Render) + 1) // account for LF
 			continue
 		}
 		spos := sr.RelPos.Add(sr.Render[idx].RelPos)
