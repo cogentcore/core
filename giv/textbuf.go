@@ -129,12 +129,21 @@ const (
 
 //go:generate stringer -type=TextBufSignals
 
-// EditDone is sent when file is saved
+// EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
 	if tb.Edited {
 		tb.Edited = false
+		tb.LinesToBytes()
 		tb.TextBufSig.Emit(tb.This, int64(TextBufDone), tb.Txt)
 	}
+}
+
+// Text returns the current text as a []byte array, applying all current
+// changes -- calls EditDone and will generate that signal if there have been
+// changes
+func (tb *TextBuf) Text() []byte {
+	tb.EditDone()
+	return tb.Txt
 }
 
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
@@ -260,8 +269,10 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 		log.Printf("giv.TextBuf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
+	tb.Edited = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
+		// no lines to bytes for single-line ops
 	} else {
 		// first get chars on start and end
 		stln := st.Ln
@@ -282,9 +293,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 		if eoed != nil {
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
+		tb.NLines = len(tb.Lines)
+		tb.LinesToBytes()
 	}
-	tb.NLines = len(tb.Lines)
-	tb.LinesToBytes()
 	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}, Delete: true}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
 	return tbe
@@ -296,6 +307,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
 	}
+	tb.Edited = true
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := []rune(string(lns[0]))
@@ -307,6 +319,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 		copy(nt[st.Ch:], rs)                 // copy into position
 		tb.Lines[st.Ln] = nt
 		ed.Ch += rsz
+		// no lines to bytes
 	} else {
 		eostl := len(tb.Lines[st.Ln][st.Ch:]) // end of starting line
 		var eost []rune
@@ -331,8 +344,8 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 		if eost != nil {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)
 		}
+		tb.LinesToBytes()
 	}
-	tb.LinesToBytes()
 	tbe := tb.Region(st, ed)
 	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
 	return tbe

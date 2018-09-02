@@ -816,6 +816,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	tv.RenderCursor(false)
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt)
 	tv.SetCursor(tbe.Reg.End)
+	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 }
 
@@ -1088,44 +1089,41 @@ func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
-	if tv.PushBounds() {
-		rs := &tv.Viewport.Render
-		pc := &rs.Paint
-		sty := &tv.StateStyles[TextViewSel]
-		spc := sty.BoxSpace()
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	sty := &tv.StateStyles[TextViewSel]
+	spc := sty.BoxSpace()
 
-		st := tv.SelectReg.Start
-		ed := tv.SelectReg.End
-		spos := tv.CharStartPos(st)
-		epos := tv.CharEndPos(ed)
+	st := tv.SelectReg.Start
+	ed := tv.SelectReg.End
+	spos := tv.CharStartPos(st)
+	epos := tv.CharEndPos(ed)
 
-		// fmt.Printf("select: %v -- %v\n", st, ed)
+	// fmt.Printf("select: %v -- %v\n", st, ed)
 
-		if st.Ln == ed.Ln {
-			pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
-		} else {
-			if st.Ch > 0 {
-				se := tv.CharEndPos(st)
-				se.X = float32(tv.VpBBox.Max.X) - spc
-				pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
-				st.Ln++
-				st.Ch = 0
-				spos = tv.CharStartPos(st)
-			}
-			lm1 := ed
-			lm1.Ln--
-			be := tv.CharEndPos(lm1)
-			be.X = float32(tv.VpBBox.Max.X) - spc
-			pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
-			// now get anything on end
-			if ed.Ch > 0 {
-				els := ed
-				els.Ch = 0
-				elsp := tv.CharStartPos(els)
-				pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
-			}
+	if st.Ln == ed.Ln {
+		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+	} else {
+		if st.Ch > 0 {
+			se := tv.CharEndPos(st)
+			se.X = float32(tv.VpBBox.Max.X) - spc
+			pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
+			st.Ln++
+			st.Ch = 0
+			spos = tv.CharStartPos(st)
 		}
-		tv.PopBounds()
+		lm1 := ed
+		lm1.Ln--
+		be := tv.CharEndPos(lm1)
+		be.X = float32(tv.VpBBox.Max.X) - spc
+		pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
+		// now get anything on end
+		if ed.Ch > 0 {
+			els := ed
+			els.Ch = 0
+			elsp := tv.CharStartPos(els)
+			pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
+		}
 	}
 }
 
@@ -1148,88 +1146,95 @@ func (tv *TextView) VisSizes() {
 // RenderAllLines displays all the visible lines on the screen -- called
 // during standard render
 func (tv *TextView) RenderAllLines() {
-	st := &tv.Sty
-	st.Font.LoadFont(&st.UnContext)
-	tv.VisSizes()
-	tv.RenderStdBox(st)
-	tv.RenderSelect()
-	rs := &tv.Viewport.Render
-	pos := tv.RenderStartPos()
-	for ln := 0; ln < tv.NLines; ln++ {
-		lst := pos.Y + tv.Offs[ln]
-		led := lst + tv.Renders[ln].Size.Y
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
-			continue
+	if tv.PushBounds() {
+		st := &tv.Sty
+		st.Font.LoadFont(&st.UnContext)
+		tv.VisSizes()
+		tv.RenderStdBox(st)
+		tv.RenderSelect()
+		rs := &tv.Viewport.Render
+		pos := tv.RenderStartPos()
+		for ln := 0; ln < tv.NLines; ln++ {
+			lst := pos.Y + tv.Offs[ln]
+			led := lst + tv.Renders[ln].Size.Y
+			if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+				continue
+			}
+			if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+				continue
+			}
+			lp := pos
+			lp.Y = lst
+			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
-			continue
-		}
-		lp := pos
-		lp.Y = lst
-		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-	}
 
-	vp := tv.Viewport
-	updt := vp.Win.UpdateStart()
-	vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
-	vp.Win.UpdateEnd(updt)
+		tv.PopBounds()
+
+		vp := tv.Viewport
+		updt := vp.Win.UpdateStart()
+		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
+		vp.Win.UpdateEnd(updt)
+	}
 }
 
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
-	sty := &tv.Sty
-	rs := &tv.Viewport.Render
-	pc := &rs.Paint
-	pos := tv.RenderStartPos()
-	var boxMin, boxMax gi.Vec2D
-	// first get the box to fill
-	visSt := -1
-	visEd := -1
-	for ln := st; ln <= ed; ln++ {
-		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
-			continue
+	if tv.PushBounds() {
+		sty := &tv.Sty
+		rs := &tv.Viewport.Render
+		pc := &rs.Paint
+		pos := tv.RenderStartPos()
+		var boxMin, boxMax gi.Vec2D
+		// first get the box to fill
+		visSt := -1
+		visEd := -1
+		for ln := st; ln <= ed; ln++ {
+			lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
+			led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+			if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+				continue
+			}
+			if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+				continue
+			}
+			lp := pos
+			if visSt < 0 {
+				visSt = ln
+				lp.Y = lst
+				boxMin = lp
+			}
+			visEd = ln // just keep updating
+			lp.Y = led
+			boxMax = lp
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
-			continue
+		if visSt < 0 && visEd < 0 {
+		} else {
+			boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
+			pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
+			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
+
+			tv.RenderSelect()
+
+			for ln := visSt; ln <= visEd; ln++ {
+				lst := pos.Y + tv.Offs[ln]
+				lp := pos
+				lp.Y = lst
+				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+			}
+
+			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
+			vprel := tBBox.Min.Sub(tv.VpBBox.Min)
+			tWinBBox := tv.WinBBox.Add(vprel)
+
+			tv.PopBounds()
+
+			vp := tv.Viewport
+			updt := vp.Win.UpdateStart()
+			vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
+			vp.Win.UpdateEnd(updt)
 		}
-		lp := pos
-		if visSt < 0 {
-			visSt = ln
-			lp.Y = lst
-			boxMin = lp
-		}
-		visEd = ln // just keep updating
-		lp.Y = led
-		boxMax = lp
 	}
-	if visSt < 0 && visEd < 0 {
-		return false
-	}
-	boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
-	pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
-	// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
-
-	tv.RenderSelect()
-
-	for ln := visSt; ln <= visEd; ln++ {
-		lst := pos.Y + tv.Offs[ln]
-		lp := pos
-		lp.Y = lst
-		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-	}
-
-	tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-	vprel := tBBox.Min.Sub(tv.VpBBox.Min)
-	tWinBBox := tv.WinBBox.Add(vprel)
-
-	vp := tv.Viewport
-	updt := vp.Win.UpdateStart()
-	vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
-	vp.Win.UpdateEnd(updt)
-
 	return true
 }
 
@@ -1642,7 +1647,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		rrp := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
+		rrp, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
 		spos.X += rrp.X
 		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}
@@ -1657,7 +1662,7 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		rrp := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
+		rrp, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
 		spos.X += rrp.X
 		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}

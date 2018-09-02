@@ -1392,27 +1392,31 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 // RuneRelPos returns the relative (starting) position of the given rune
 // index, counting progressively through all spans present (adds Span RelPos
 // and rune RelPos) -- this is typically the baseline position where rendering
-// will start, not the upper left corner. if index > length, then uses LastPos
-func (tx *TextRender) RuneRelPos(idx int) Vec2D {
+// will start, not the upper left corner. if index > length, then uses
+// LastPos.  returns also the index of the span that holds that char (-1 = no
+// spans at all)
+func (tx *TextRender) RuneRelPos(idx int) (Vec2D, int) {
 	for si := range tx.Spans {
 		sr := &tx.Spans[si]
 		if idx >= len(sr.Render) {
 			idx -= len(sr.Render) // account for LF
 			continue
 		}
-		return sr.RelPos.Add(sr.Render[idx].RelPos)
+		return sr.RelPos.Add(sr.Render[idx].RelPos), si
 	}
 	nsp := len(tx.Spans)
 	if nsp > 0 {
-		return tx.Spans[nsp-1].LastPos
+		return tx.Spans[nsp-1].LastPos, nsp - 1
 	}
-	return Vec2DZero
+	return Vec2DZero, -1
 }
 
 // RuneEndPos returns the relative ending position of the given rune index,
 // counting progressively through all spans present(adds Span RelPos and rune
-// RelPos + rune Size.X for LR writing). If index > length, then uses LastPos
-func (tx *TextRender) RuneEndPos(idx int) Vec2D {
+// RelPos + rune Size.X for LR writing). If index > length, then uses
+// LastPos. returns also the index of the span that holds that char (-1 = no
+// spans at all)
+func (tx *TextRender) RuneEndPos(idx int) (Vec2D, int) {
 	for si := range tx.Spans {
 		sr := &tx.Spans[si]
 		if idx >= len(sr.Render) {
@@ -1421,13 +1425,13 @@ func (tx *TextRender) RuneEndPos(idx int) Vec2D {
 		}
 		spos := sr.RelPos.Add(sr.Render[idx].RelPos)
 		spos.X += sr.Render[idx].Size.X
-		return spos
+		return spos, si
 	}
 	nsp := len(tx.Spans)
 	if nsp > 0 {
-		return tx.Spans[nsp-1].LastPos
+		return tx.Spans[nsp-1].LastPos, nsp - 1
 	}
-	return Vec2DZero
+	return Vec2DZero, -1
 }
 
 //////////////////////////////////////////////////////////////////////////////////

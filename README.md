@@ -92,6 +92,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* TextView:
+    + resizing blinkfest -- fix it asap!
+	+ cursor is sprite (also textfield)
+	+ wraparound off-by-one (return span # in rel pos -- can adjust ch index somehow?) -- probably easier to just deal in rrp fun somehow -- not sure where err is
+	+ pixel to cursor: don't bail back up to start (why is it?)
+	+ and deal with wraparounds
+	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
+	+ line number bar?
+	+ start on gide and put lots of wrapper stuff in there -- maybe all multi-long sequences can go in there and not in base textview?
+
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
 
