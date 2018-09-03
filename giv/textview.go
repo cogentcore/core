@@ -74,7 +74,7 @@ type TextView struct {
 	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Completion    *gi.Complete                 `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  string
@@ -931,23 +931,76 @@ func (tv *TextView) OfferCompletions() {
 	if tv.Completion == nil {
 		return
 	}
-	// win := tv.ParentWindow()
-	// if gi.PopupIsCompleter(win.Popup) {
-	// 	win.ClosePopup(win.Popup)
-	// }
+	win := tv.ParentWindow()
+	if gi.PopupIsCompleter(win.Popup) {
+		win.ClosePopup(win.Popup)
+	}
 
-	// s := string(tv.EditTxt[0:tv.CursorPos])
-	// cpos := tv.CharStartPos(tv.CursorPos).ToPoint()
-
-	// tv.Completion.ShowCompletions(s, tv.Viewport, cpos.X+5, cpos.Y+10)
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	tbe := tv.Buf.Region(st, en)
+	if tbe != nil {
+		s := string(tbe.ToBytes())
+		s = strings.TrimLeft(s," \t")  // trim ' ' and '\t'
+		fmt.Println(s)
+		cp := tv.CharStartPos(tv.CursorPos)
+		tv.Completion.ShowCompletions(s, tv.Viewport, int(cp.X+5), int(cp.Y+10))
+	}
 }
 
-// Complete edits the text field using the string chosen from the completion menu
-func (tv *TextView) Complete(str string) {
-	// txt := string(tv.EditTxt) // John: do NOT call tv.Text() in an active editing context!!!
-	// s, delta := tv.Completion.EditFunc(txt, tv.CursorPos, str, tv.Completion.Seed)
-	// tv.EditTxt = []rune(s)
-	// tv.CursorForward(delta)
+// Complete edits the text using the string chosen from the completion menu
+func (tv *TextView) Complete(s string) {
+	win := tv.ParentWindow()
+	win.ClosePopup(win.Popup)
+
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	tbe := tv.Buf.Region(st, en)
+	tbes := string(tbe.ToBytes())
+
+	ns, _ := tv.Completion.EditFunc(tbes, tv.CursorPos.Ch, s, tv.Completion.Seed)
+	fmt.Println(ns)
+	tv.Buf.DeleteText(st, tv.CursorPos, true)
+	tv.CursorPos = st
+	tv.InsertAtCursor([]byte(ns))
+	//tv.CursorForward(delta)
+}
+
+// SetCompleter sets completion functions so that completions will
+// automatically be offered as the user types
+func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+	if matchFun == nil || editFun == nil {
+		if tv.Completion != nil {
+			tv.Completion.CompleteSig.Disconnect(tv.This)
+		}
+		tv.Completion.Destroy()
+		tv.Completion = nil
+		return
+	}
+	tv.Completion = &gi.Complete{}
+	tv.Completion.InitName(tv.Completion, "tv-completion") // needed for standalone Ki's
+	tv.Completion.Context = data
+	tv.Completion.MatchFunc = matchFun
+	tv.Completion.EditFunc = editFun
+	// note: only need to connect once..
+	tv.Completion.CompleteSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
+		if sig == int64(gi.CompleteSelect) {
+			tvf.Complete(data.(string)) // always use data
+		} else if sig == int64(gi.CompleteExtend) {
+			tvf.CompleteExtend(data.(string)) // always use data
+		}
+	})
+}
+
+// CompleteExtend inserts the extended seed at the current cursor position
+func (tv *TextView) CompleteExtend(s string) {
+	if s != "" {
+		win := tv.ParentWindow()
+		win.ClosePopup(win.Popup)
+		tv.InsertAtCursor([]byte(s))
+		tv.OfferCompletions()
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1940,26 +1993,4 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// tv.UpdateSig()
 		// todo: see about cursor
 	}
-}
-
-func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
-	if matchFun == nil || editFun == nil {
-		if tv.Completion != nil {
-			tv.Completion.CompleteSig.Disconnect(tv.This)
-		}
-		tv.Completion.Destroy()
-		tv.Completion = nil
-		return
-	}
-	tv.Completion = &gi.Complete{}
-	tv.Completion.InitName(tv.Completion, "tv-completion") // needed for standalone Ki's
-	tv.Completion.Context = data
-	tv.Completion.MatchFunc = matchFun
-	tv.Completion.EditFunc = editFun
-	tv.Completion.CompleteSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
-		if sig == int64(gi.CompleteSelect) {
-			tvf.Complete(data.(string))
-		}
-	})
 }
