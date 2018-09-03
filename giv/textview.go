@@ -48,7 +48,6 @@ type TextView struct {
 	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Opts          TextViewOpts              `desc:"options for how text editing / viewing works"`
 	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	HiLang        string                    `desc:"language for syntax highlighting the code"`
 	HiStyle       string                    `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
@@ -234,7 +233,10 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 
 // HasHi returns true if there are highighting parameters set
 func (tv *TextView) HasHi() bool {
-	if tv.HiLang == "" || tv.HiStyle == "" {
+	if tv.Buf == nil {
+		return false
+	}
+	if tv.Buf.HiLang == "" || tv.HiStyle == "" {
 		return false
 	}
 	return true
@@ -245,10 +247,10 @@ func (tv *TextView) HiInit() {
 	if !tv.HasHi() {
 		return
 	}
-	if tv.HiLang == tv.lastHiLang && tv.HiStyle == tv.lastHiStyle {
+	if tv.Buf.HiLang == tv.lastHiLang && tv.HiStyle == tv.lastHiStyle {
 		return
 	}
-	tv.lexer = chroma.Coalesce(lexers.Get(tv.HiLang))
+	tv.lexer = chroma.Coalesce(lexers.Get(tv.Buf.HiLang))
 	tv.formatter = html.New(html.WithClasses(), html.TabWidth(tv.Sty.Text.TabSize))
 	tv.style = styles.Get(tv.HiStyle)
 	if tv.style == nil {
@@ -273,7 +275,7 @@ func (tv *TextView) HiInit() {
 		}
 	}
 
-	tv.lastHiLang = tv.HiLang
+	tv.lastHiLang = tv.Buf.HiLang
 	tv.lastHiStyle = tv.HiStyle
 }
 

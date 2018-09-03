@@ -376,7 +376,6 @@ var PreferencesProps = ki.Props{
 			}},
 			{"sep-color", ki.BlankProp{}},
 			{"OpenColors", ki.Props{
-				"label": "Open Colors", // open is more GUI-official than load
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -422,8 +421,7 @@ var PreferencesProps = ki.Props{
 		{"sep-color", ki.BlankProp{}},
 		{"Colors", ki.PropSlice{ // sub-menu
 			{"OpenColors", ki.Props{
-				"label": "Open Colors",
-				"icon":  "file-open",
+				"icon": "file-open",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",

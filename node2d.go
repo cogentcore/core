@@ -512,7 +512,7 @@ func (g *Node2DBase) Size2DTree(iter int) {
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
-				fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", k, k.PathUnique())
+				// fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", k, k.PathUnique())
 				return false
 			}
 			if ni.HasNoLayout() {

@@ -194,7 +194,7 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 	fv.Lay = gi.LayoutVert
 	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := fv.StdFrameConfig()
-	mods, updt = fv.ConfigChildren(config, false)
+	mods, updt = fv.ConfigChildren(config, true)
 	if mods {
 		fv.ConfigPathRow()
 		fv.ConfigFilesRow()

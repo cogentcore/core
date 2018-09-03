@@ -1298,6 +1298,9 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 // ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
 // in view -- returns true if scrolling was needed
 func (ly *Layout) ScrollToBoxDim(dim Dims2D, minBox, maxBox int) bool {
+	if !ly.HasScroll[dim] {
+		return false
+	}
 	vpMin := ly.VpBBox.Min.X
 	if dim == Y {
 		vpMin = ly.VpBBox.Min.Y
@@ -1358,6 +1361,9 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 // top / left of a view box) at the start (top / left) of our scroll area, to
 // the extent possible -- returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToStart(dim Dims2D, pos int) bool {
+	if !ly.HasScroll[dim] {
+		return false
+	}
 	vpMin := ly.VpBBox.Min.X
 	if dim == Y {
 		vpMin = ly.VpBBox.Min.Y
@@ -1385,6 +1391,9 @@ func (ly *Layout) ScrollDimToStart(dim Dims2D, pos int) bool {
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible -- returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
+	if !ly.HasScroll[dim] {
+		return false
+	}
 	vpMin := ly.VpBBox.Min.X
 	if dim == Y {
 		vpMin = ly.VpBBox.Min.Y
@@ -1413,6 +1422,9 @@ func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
 // middle of a view box) at the center of our scroll area, to the extent
 // possible -- returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToCenter(dim Dims2D, pos int) bool {
+	if !ly.HasScroll[dim] {
+		return false
+	}
 	vpMin := ly.VpBBox.Min.X
 	if dim == Y {
 		vpMin = ly.VpBBox.Min.Y

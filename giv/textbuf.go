@@ -88,6 +88,7 @@ func (te *TextBufEdit) ToBytes() []byte {
 type TextBuf struct {
 	ki.Node
 	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+	HiLang     string         `desc:"language for syntax highlighting the code"`
 	Edited     bool           `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Mimetype   string         `json:"-" xml:"-" desc:"mime type of the contents"`
@@ -191,12 +192,6 @@ func (tb *TextBuf) Save() error {
 	return tb.SaveAs(tb.Filename)
 }
 
-// SetMimetype sets the Mimetype based on the given filename
-func (tb *TextBuf) SetMimetype(filename string) {
-	ext := filepath.Ext(filename)
-	tb.Mimetype = mime.TypeByExtension(ext)
-}
-
 // LinesToBytes converts current Lines back to the Txt slice of bytes
 func (tb *TextBuf) LinesToBytes() {
 	if tb.Txt != nil {
@@ -253,6 +248,19 @@ func (tb *TextBuf) BytesToLines() {
 func (tb *TextBuf) AddView(vw *TextView) {
 	tb.Views = append(tb.Views, vw)
 	tb.TextBufSig.Connect(vw.This, TextViewBufSigRecv)
+}
+
+// SetMimetype sets the Mimetype and HiLang based on the given filename
+func (tb *TextBuf) SetMimetype(filename string) {
+	ext := filepath.Ext(filename)
+	tb.Mimetype = mime.TypeByExtension(ext)
+	if hl, ok := ExtToHiLangMap[ext]; ok {
+		tb.HiLang = hl
+		fmt.Printf("set language to: %v for extension: %v\n", hl, ext)
+	} else {
+		fmt.Printf("failed to set language for extension: %v\n", ext)
+	}
+	// else try something else..
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -512,4 +520,19 @@ func init() {
 
 func NewTextBuf() *TextBuf {
 	return TextBufs.New()
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  extension to highighting style map
+
+var ExtToHiLangMap = map[string]string{
+	".go":   "Go",
+	".md":   "markdown",
+	".css":  "CSS",
+	".html": "HTML",
+	".htm":  "HTML",
+	".tex":  "TeX",
+	".cpp":  "C++",
+	".c":    "C",
+	".h":    "C++",
 }
