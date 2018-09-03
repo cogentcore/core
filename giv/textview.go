@@ -1686,26 +1686,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	win := tv.ParentWindow()
 
 	if gi.PopupIsCompleter(win.Popup) {
-		switch kf {
-		case gi.KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
-			count := len(tv.Completion.Completions)
-			if count > 0 {
-				if count == 1 { // just complete
-					tv.Complete(tv.Completion.Completions[0])
-					win.ClosePopup(win.Popup)
-				} else { // try to extend the seed
-					s := complete.ExtendSeed(tv.Completion.Completions, tv.Completion.Seed)
-					if s != "" {
-						win.ClosePopup(win.Popup)
-						tv.InsertAtCursor([]byte(s))
-						tv.OfferCompletions()
-					}
-				}
-			}
-			kt.SetProcessed()
-		default:
-			//fmt.Printx("some char\n")
-		}
+		tv.Completion.KeyInput(kf)
 	}
 
 	if kt.IsProcessed() {
