@@ -124,8 +124,6 @@ func (p *ColorPrefs) PrefColor(clrName string) *Color {
 	return nil
 }
 
-// todo: Save, Load colors separately!
-
 func (p *ParamPrefs) Defaults() {
 	p.DoubleClickMSec = 500
 	p.ScrollWheelRate = 20
@@ -145,8 +143,8 @@ func (p *Preferences) Defaults() {
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
 var PrefsFileName = "prefs.json"
 
-// Load preferences from GoGi standard prefs directory
-func (p *Preferences) Load() error {
+// Open preferences from GoGi standard prefs directory
+func (p *Preferences) Open() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
@@ -173,9 +171,9 @@ func (p *Preferences) Save() error {
 	return err
 }
 
-// LoadColors colors from a JSON-formatted file.
-func (p *Preferences) LoadColors(filename FileName) error {
-	err := p.Colors.LoadJSON(filename)
+// OpenColors colors from a JSON-formatted file.
+func (p *Preferences) OpenColors(filename FileName) error {
+	err := p.Colors.OpenJSON(filename)
 	if err == nil {
 		p.Update()
 	}
@@ -336,8 +334,8 @@ func (p *Preferences) DeleteSavedWindowGeoms() {
 	WinGeomPrefs.DeleteAll()
 }
 
-// Load colors from a JSON-formatted file.
-func (p *ColorPrefs) LoadJSON(filename FileName) error {
+// Open colors from a JSON-formatted file.
+func (p *ColorPrefs) OpenJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
@@ -370,14 +368,14 @@ var PreferencesProps = ki.Props{
 			{"Update", ki.Props{
 				"shortcut": "Command+U",
 			}},
-			{"Load", ki.Props{
+			{"Open", ki.Props{
 				"shortcut": "Command+O",
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
 			}},
 			{"sep-color", ki.BlankProp{}},
-			{"LoadColors", ki.Props{
+			{"OpenColors", ki.Props{
 				"label": "Open Colors", // open is more GUI-official than load
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
@@ -423,7 +421,7 @@ var PreferencesProps = ki.Props{
 		}},
 		{"sep-color", ki.BlankProp{}},
 		{"Colors", ki.PropSlice{ // sub-menu
-			{"LoadColors", ki.Props{
+			{"OpenColors", ki.Props{
 				"label": "Open Colors",
 				"icon":  "file-open",
 				"Args": ki.PropSlice{
@@ -523,8 +521,8 @@ type FilePaths []string
 
 var SavedPaths FilePaths
 
-// Load file paths from a JSON-formatted file.
-func (p *FilePaths) LoadJSON(filename string) error {
+// Open file paths from a JSON-formatted file.
+func (p *FilePaths) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -591,9 +589,9 @@ func SavePaths() {
 	SavedPaths.SaveJSON(pnm)
 }
 
-// LoadPaths loads the active SavedPaths from prefs dir
-func LoadPaths() {
+// OpenPaths loads the active SavedPaths from prefs dir
+func OpenPaths() {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.LoadJSON(pnm)
+	SavedPaths.OpenJSON(pnm)
 }

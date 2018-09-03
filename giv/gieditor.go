@@ -57,12 +57,12 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 	ge.UpdateSig() // notify our editor
 }
 
-// Load saves tree from given filename, in a standard JSON-formatted file
-func (ge *GiEditor) Load(filename gi.FileName) {
+// Open opens tree from given filename, in a standard JSON-formatted file
+func (ge *GiEditor) Open(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.KiRoot.LoadJSON(string(filename))
+	ge.KiRoot.OpenJSON(string(filename))
 	ge.Filename = filename
 	ge.SetFullReRender()
 	ge.UpdateSig() // notify our editor
@@ -260,7 +260,7 @@ var GiEditorProps = ki.Props{
 			"icon": "update",
 		}},
 		{"sep-file", ki.BlankProp{}},
-		{"Load", ki.Props{
+		{"Open", ki.Props{
 			"label": "Open",
 			"icon":  "file-open",
 			"Args": ki.PropSlice{
@@ -291,7 +291,7 @@ var GiEditorProps = ki.Props{
 				"shortcut": "Command+U",
 			}},
 			{"sep-file", ki.BlankProp{}},
-			{"Load", ki.Props{
+			{"Open", ki.Props{
 				"shortcut": "Command+O",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{

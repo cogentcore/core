@@ -459,9 +459,9 @@ func (w *Window) Closed() {
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
 		Prefs.Defaults()
-		Prefs.Load()
+		Prefs.Open()
 		Prefs.Apply()
-		WinGeomPrefs.Load()
+		WinGeomPrefs.Open()
 	}
 }
 
@@ -474,12 +474,14 @@ func Init() {
 // window is closed -- see GoStartEventLoop for a version that starts in a
 // separate goroutine and returns immediately.
 func (w *Window) StartEventLoop() {
+	w.DoFullRender = true
 	w.EventLoop()
 }
 
 // GoStartEventLoop starts the event processing loop for this window in a new
 // goroutine, and returns immediately.
 func (w *Window) GoStartEventLoop() {
+	w.DoFullRender = true
 	go w.EventLoop()
 }
 
@@ -2364,8 +2366,8 @@ type WindowGeomPrefs map[string]map[string]WindowGeom
 // WinGeomPrefsFileName is the name of the preferences file in GoGi prefs directory
 var WinGeomPrefsFileName = "win_geom_prefs.json"
 
-// Load Window Geom preferences from GoGi standard prefs directory
-func (wg *WindowGeomPrefs) Load() error {
+// Open Window Geom preferences from GoGi standard prefs directory
+func (wg *WindowGeomPrefs) Open() error {
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 1000)
 	}

@@ -452,7 +452,7 @@ func (fv *FileView) UpdateFiles() {
 	fv.UpdatePath()
 	pf := fv.PathField()
 	if len(gi.SavedPaths) == 0 {
-		gi.LoadPaths()
+		gi.OpenPaths()
 	}
 	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.SavedPathsMax)
 	gi.SavePaths()

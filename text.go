@@ -232,7 +232,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 		ucfont.Family = "Arial"
 	}
 	ucfont.Size = sty.Size
-	ucfont.LoadFont(ctxt)
+	ucfont.OpenFont(ctxt)
 
 	nwr := []rune(str)
 	sz := len(nwr)
@@ -281,7 +281,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 	ucfont := FontStyle{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
-	ucfont.LoadFont(ctxt)
+	ucfont.OpenFont(ctxt)
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
@@ -933,7 +933,7 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos Vec2D) {
 // SetHTML for tag-formatted text) -- configures a single SpanRender with the
 // entire string, and does standard layout (LR currently).  rot and scalex are
 // general rotation and x-scaling to apply to all chars -- alternatively can
-// apply these per character after.  Be sure that LoadFont has been run so a
+// apply these per character after.  Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
 func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
@@ -954,7 +954,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 // SetHTML for tag-formatted text) -- configures a single SpanRender with the
 // entire string, and does standard layout (LR currently).  rot and scalex are
 // general rotation and x-scaling to apply to all chars -- alternatively can
-// apply these per character after Be sure that LoadFont has been run so a
+// apply these per character after Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
 func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
@@ -978,11 +978,11 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 	switch tag {
 	case "b", "strong":
 		fs.Weight = WeightBold
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "i", "em", "var", "cite":
 		fs.Style = FontItalic
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "ins":
 		fallthrough
@@ -998,7 +998,7 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 		curpts -= 2
 		fs.Size = units.NewValue(float32(curpts), units.Pt)
 		fs.Size.ToDots(ctxt)
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "sub":
 		fs.SetDeco(DecoSub)
@@ -1008,19 +1008,19 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 		curpts -= 2
 		fs.Size = units.NewValue(float32(curpts), units.Pt)
 		fs.Size.ToDots(ctxt)
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "big":
 		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 		curpts += 2
 		fs.Size = units.NewValue(float32(curpts), units.Pt)
 		fs.Size.ToDots(ctxt)
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
 		fs.Size = units.NewValue(FontSizePoints[tag], units.Pt)
 		fs.Size.ToDots(ctxt)
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	case "mark":
 		fs.BgColor.SetColor(Prefs.Colors.Highlight)
@@ -1030,7 +1030,7 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 		did = true
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
-		fs.LoadFont(ctxt)
+		fs.OpenFont(ctxt)
 		did = true
 	}
 	return did
@@ -1066,7 +1066,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 
-	font.LoadFont(ctxt)
+	font.OpenFont(ctxt)
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
@@ -1142,7 +1142,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 							clnm := "." + attr.Value
 							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 								fs.SetStyleProps(nil, aggp)
-								fs.LoadFont(ctxt)
+								fs.OpenFont(ctxt)
 							}
 						}
 					default:
@@ -1150,7 +1150,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, ctxt *units.Context, 
 					}
 				}
 				fs.SetStyleProps(nil, sprop)
-				fs.LoadFont(ctxt)
+				fs.OpenFont(ctxt)
 			}
 			if cssAgg != nil {
 				fs.StyleCSS(nm, cssAgg, ctxt)
@@ -1220,7 +1220,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 	initsz := kit.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
-	font.LoadFont(ctxt)
+	font.OpenFont(ctxt)
 
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
@@ -1336,7 +1336,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 								clnm := "." + vl
 								if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 									fs.SetStyleProps(nil, aggp)
-									fs.LoadFont(ctxt)
+									fs.OpenFont(ctxt)
 								}
 							}
 						default:
@@ -1344,7 +1344,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 						}
 					}
 					fs.SetStyleProps(nil, sprop)
-					fs.LoadFont(ctxt)
+					fs.OpenFont(ctxt)
 				}
 				if cssAgg != nil {
 					fs.StyleCSS(stag, cssAgg, ctxt)
@@ -1614,7 +1614,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	defer pr.End()
 
 	tr.Dir = LRTB
-	fontSty.LoadFont(ctxt)
+	fontSty.OpenFont(ctxt)
 	fht := fontSty.Height
 	dsc := FixedToFloat32(fontSty.Face.Metrics().Descent)
 	lspc := fht * txtSty.EffLineHeight()

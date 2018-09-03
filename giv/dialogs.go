@@ -248,7 +248,7 @@ var FontChooserSizeDots = 18
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
-	gi.FontLibrary.LoadAllFonts(FontChooserSizeDots)
+	gi.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(avp, &gi.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg
 }

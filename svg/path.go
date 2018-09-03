@@ -726,7 +726,7 @@ func PathDataParse(d string) ([]PathData, error) {
 				p, err := strconv.ParseFloat(nstr, 32)
 				if err != nil {
 					log.Printf("gi.PathDataParse could not parse string: %v into float\n", nstr)
-					IconAutoLoad = false
+					IconAutoOpen = false
 					return nil, err
 				}
 				pd = append(pd, PathData(p))

@@ -36,15 +36,15 @@ var (
 	missingIdError      = errors.New("gi.SVG Parse: cannot find id")
 )
 
-// LoadXML Loads XML-formatted SVG input from given file
-func (svg *SVG) LoadXML(filename string) error {
+// OpenXML Opens XML-formatted SVG input from given file
+func (svg *SVG) OpenXML(filename string) error {
 	fi, err := os.Stat(filename)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 	if fi.IsDir() {
-		err := fmt.Errorf("svg.LoadXML: file is a directory: %v\n", filename)
+		err := fmt.Errorf("svg.OpenXML: file is a directory: %v\n", filename)
 		log.Println(err)
 		return err
 	}
@@ -626,7 +626,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			default:
 				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
-				IconAutoLoad = false
+				IconAutoOpen = false
 			}
 		case xml.EndElement:
 			switch se.Name.Local {

@@ -43,24 +43,24 @@ func SetTrans(xt, yt float32) {
 	TheSVG.SetTransform()
 }
 
-func LoadSVG(fnm string) {
+func OpenSVG(fnm string) {
 	CurFilename = fnm
 	TheFile.SetText(CurFilename)
 	updt := TheSVG.UpdateStart()
 	TheSVG.SetFullReRender()
-	fmt.Printf("Loading: %v\n", CurFilename)
-	TheSVG.LoadXML(CurFilename)
+	fmt.Printf("Opening: %v\n", CurFilename)
+	TheSVG.OpenXML(CurFilename)
 	SetZoom(TheSVG.Viewport.Win.LogicalDPI() / 96.0)
 	SetTrans(0, 0)
 	TheSVG.UpdateEnd(updt)
 }
 
-func FileViewLoadSVG(vp *gi.Viewport2D) {
-	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Load SVG"}, nil,
+func FileViewOpenSVG(vp *gi.Viewport2D) {
+	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Open SVG"}, nil,
 		vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
-				LoadSVG(giv.FileViewDialogValue(dlg))
+				OpenSVG(giv.FileViewDialogValue(dlg))
 			}
 		})
 }
@@ -102,7 +102,7 @@ func mainrun() {
 	svge.SetStretchMaxHeight()
 
 	loads := tbar.AddNewChild(gi.KiT_Action, "loadsvg").(*gi.Action)
-	loads.SetText("Load SVG")
+	loads.SetText("Open SVG")
 	loads.StartFocus()
 
 	fnm := tbar.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
@@ -156,14 +156,14 @@ func mainrun() {
 	TheTransY = try
 
 	loads.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewLoadSVG(vp)
+		FileViewOpenSVG(vp)
 	})
 
 	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
 			fn, _ := homedir.Expand(tf.Text())
-			LoadSVG(fn)
+			OpenSVG(fn)
 		}
 	})
 
@@ -210,7 +210,7 @@ func mainrun() {
 	fmen.Menu = make(gi.Menu, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
 		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			FileViewLoadSVG(vp)
+			FileViewOpenSVG(vp)
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},

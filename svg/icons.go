@@ -24,7 +24,7 @@ import (
 func init() {
 	gi.TheIconMgr = &IconMgr{}
 	DefaultIconSet = MakeDefaultIcons()
-	DefaultIconSet.LoadDefaultIcons()
+	DefaultIconSet.OpenDefaultIcons()
 	CurIconSet = DefaultIconSet
 	gi.CurIconList = gi.TheIconMgr.IconList(true)
 }
@@ -58,8 +58,8 @@ func (ic *Icon) CopyFromIcon(cp *Icon) {
 	ic.Rendered = false
 }
 
-// IconAutoLoad controls auto-loading of icons -- can turn this off for debugging etc
-var IconAutoLoad = true
+// IconAutoOpen controls auto-loading of icons -- can turn this off for debugging etc
+var IconAutoOpen = true
 
 func (ic *Icon) Init2D() {
 	ic.SVG.Init2D()
@@ -142,8 +142,8 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 	if !ok {
 		ic = (*DefaultIconSet)[name]
 	}
-	if ic.Filename != "" && !ic.HasChildren() && IconAutoLoad {
-		ic.LoadXML(ic.Filename)
+	if ic.Filename != "" && !ic.HasChildren() && IconAutoOpen {
+		ic.OpenXML(ic.Filename)
 	}
 	return ic, nil
 }
@@ -177,22 +177,22 @@ var DefaultIconSet *IconSet
 // changed to whatever you want
 var CurIconSet *IconSet
 
-func (iset *IconSet) LoadDefaultIcons() error {
+func (iset *IconSet) OpenDefaultIcons() error {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		gopath = build.Default.GOPATH
 	}
 	path := filepath.Join(gopath, "src/github.com/goki/gi/icons")
 	// fmt.Printf("loading default icons: %v\n", path)
-	rval := iset.LoadIconsFromPath(path)
+	rval := iset.OpenIconsFromPath(path)
 	// tstpath := filepath.Join(gopath, "src/github.com/goki/gi/icons_svg_test")
-	// rval = iset.LoadIconsFromPath(tstpath)
+	// rval = iset.OpenIconsFromPath(tstpath)
 	return rval
 }
 
-// LoadIconsFromPath scans for .svg icon files in given path, adding them to
+// OpenIconsFromPath scans for .svg icon files in given path, adding them to
 // the given IconSet, just storing the filename for later lazy loading
-func (iset *IconSet) LoadIconsFromPath(path string) error {
+func (iset *IconSet) OpenIconsFromPath(path string) error {
 	ext := ".svg"
 
 	err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {

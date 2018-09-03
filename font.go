@@ -341,14 +341,14 @@ iterloop:
 // concurent-safe
 var fontMetricsMu sync.Mutex
 
-// LoadFont loads the font specified by the font style from the font library.
+// OpenFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
 // fallback method to finding an appropriate font, and falls back on the
 // builtin Go font as a last resort.  The Face field will have the resulting
 // font.  The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func (fs *FontStyle) LoadFont(ctxt *units.Context) {
+func (fs *FontStyle) OpenFont(ctxt *units.Context) {
 	fs.FaceName = fs.FaceNm()
 	intDots := int(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
@@ -422,7 +422,7 @@ func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) 
 		return false
 	}
 	fs.SetStyleProps(nil, pmap)
-	fs.LoadFont(ctxt)
+	fs.OpenFont(ctxt)
 	return true
 }
 
@@ -744,7 +744,7 @@ func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 	if path := fl.FontsAvail[fontnm]; path != "" {
 		loadFontMu.Lock()
 		defer loadFontMu.Unlock()
-		face, err := LoadFontFace(path, size, 0)
+		face, err := OpenFontFace(path, size, 0)
 		if err != nil {
 			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
 			fl.DeleteFont(fontnm)
@@ -756,7 +756,7 @@ func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 			fl.Faces[fontnm] = facemap
 		}
 		facemap[size] = face
-		// fmt.Printf("Loaded font face: %v %v\n", fontnm, size)
+		// fmt.Printf("Opened font face: %v %v\n", fontnm, size)
 		return face, nil
 	}
 	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
@@ -774,9 +774,9 @@ func (fl *FontLib) DeleteFont(fontnm string) {
 	}
 }
 
-// LoadAllFonts attempts to load all fonts that were found -- call this before
+// OpenAllFonts attempts to load all fonts that were found -- call this before
 // displaying the font chooser to eliminate any bad fonts.
-func (fl *FontLib) LoadAllFonts(size int) {
+func (fl *FontLib) OpenAllFonts(size int) {
 	sz := len(fl.FontInfo)
 	for i := sz - 1; i > 0; i-- {
 		fi := fl.FontInfo[i]
@@ -1030,12 +1030,12 @@ var shortFontMods = map[string]string{
 	" BI": " Bold Italic",
 }
 
-// LoadFontFace loads a font file at given path, with given raw size in
+// OpenFontFace loads a font file at given path, with given raw size in
 // display dots, and if strokeWidth is > 0, the font is drawn in outline form
 // (stroked) instead of filled (supported in SVG).
-func LoadFontFace(path string, size int, strokeWidth int) (font.Face, error) {
+func OpenFontFace(path string, size int, strokeWidth int) (font.Face, error) {
 	if strings.HasPrefix(path, "gofont") {
-		return LoadGoFont(path, size, strokeWidth)
+		return OpenGoFont(path, size, strokeWidth)
 	}
 	fontBytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -1090,7 +1090,7 @@ var GoFonts = map[string]goFontInfo{
 	"gofont/gosmallcapsitalic": {"Go Small Caps Italic", gosmallcapsitalic.TTF},
 }
 
-func LoadGoFont(path string, size int, strokeWidth int) (font.Face, error) {
+func OpenGoFont(path string, size int, strokeWidth int) (font.Face, error) {
 	gf, ok := GoFonts[path]
 	if !ok {
 		return nil, fmt.Errorf("Go Font Path not found: %v", path)

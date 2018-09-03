@@ -68,7 +68,7 @@ func (bm *Bitmap) Render2D() {
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
 
-func LoadImage(path string) (image.Image, error) {
+func OpenImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func LoadImage(path string) (image.Image, error) {
 	return im, err
 }
 
-func LoadPNG(path string) (image.Image, error) {
+func OpenPNG(path string) (image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

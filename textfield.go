@@ -1114,7 +1114,7 @@ func (tf *TextField) Style2D() {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
-	st.Font.LoadFont(&st.UnContext)
+	st.Font.OpenFont(&st.UnContext)
 	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
@@ -1176,7 +1176,7 @@ func (tf *TextField) Render2D() {
 		}
 		rs := &tf.Viewport.Render
 		st := &tf.Sty
-		st.Font.LoadFont(&st.UnContext)
+		st.Font.OpenFont(&st.UnContext)
 		tf.RenderStdBox(st)
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()

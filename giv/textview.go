@@ -280,7 +280,7 @@ func (tv *TextView) HiInit() {
 // RenderSize is the size we should pass to text rendering, based on alloc
 func (tv *TextView) RenderSize() gi.Vec2D {
 	st := &tv.Sty
-	st.Font.LoadFont(&st.UnContext)
+	st.Font.OpenFont(&st.UnContext)
 	tv.FontHeight = st.Font.Height
 	tv.LineHeight = tv.FontHeight * st.Text.LineHeight
 	spc := tv.Sty.BoxSpace()
@@ -1340,7 +1340,7 @@ func (tv *TextView) RenderAllLines() {
 		updt := vp.Win.UpdateStart()
 
 		st := &tv.Sty
-		st.Font.LoadFont(&st.UnContext)
+		st.Font.OpenFont(&st.UnContext)
 		tv.VisSizes()
 		tv.RenderStdBox(st)
 		tv.RenderSelect()

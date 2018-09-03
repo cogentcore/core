@@ -50,7 +50,7 @@ func (g *Text) Render2D() {
 		if scalex == 1 {
 			scalex = 0
 		}
-		pc.FontStyle.LoadFont(&pc.UnContext) // use original size font
+		pc.FontStyle.OpenFont(&pc.UnContext) // use original size font
 		if !pc.FillStyle.Color.IsNil() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
@@ -62,7 +62,7 @@ func (g *Text) Render2D() {
 			pos.X -= g.Render.Size.X
 		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
-		pc.FontStyle.LoadFont(&pc.UnContext)
+		pc.FontStyle.OpenFont(&pc.UnContext)
 		sr := &(g.Render.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face // upscale
 		for i := range sr.Render {
