@@ -1,6 +1,6 @@
 # gi
 
-![alt tag](logo/gogi-logo.png)
+![alt tag](logo/gogi_	logo.png)
 
 GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = tree in Japanese)
 
@@ -136,3 +136,4 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * Reminder: grep all todo: in code
 
 	
+
