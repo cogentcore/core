@@ -1,6 +1,6 @@
 # gi
 
-![alt tag](logo/gogi_	logo.png)
+![alt tag](logo/gogi_logo.png)
 
 GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = tree in Japanese)
 
