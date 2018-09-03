@@ -734,6 +734,8 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 				tn := kit.FullTypeName(fld.Field.Type)
 				if kit.Enums.Enum(tn) != nil {
 					kit.Enums.SetAnyEnumIfaceFromString(fi, valv)
+				} else if tn == "..int" {
+					kit.SetRobust(fi, val)
 				} else {
 					fmt.Printf("%v enum name not found %v for field %v\n", errstr, tn, fld.Field.Name)
 				}

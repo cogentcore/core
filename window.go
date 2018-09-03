@@ -190,6 +190,8 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This)
 	win.NodeSig.Connect(win.This, SignalWindowPublish)
+	win.OverlayVp = &Viewport2D{}
+	win.OverlayVp.InitName(win.OverlayVp, "overlay-vp")
 	return win
 }
 
@@ -415,10 +417,6 @@ func (w *Window) Resized(sz image.Point) {
 	w.OverTexActive = false
 	w.OverlayVpCleared = false
 	w.Viewport.Resize(sz)
-	if w.OverlayVp == nil {
-		w.OverlayVp = &Viewport2D{}
-		w.OverlayVp.InitName(w.OverlayVp, "overlay-vp")
-	}
 	WinGeomPrefs.RecordPref(w)
 	w.FullReRender()
 }

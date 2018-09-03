@@ -535,4 +535,6 @@ var ExtToHiLangMap = map[string]string{
 	".cpp":  "C++",
 	".c":    "C",
 	".h":    "C++",
+	".sh":   "Bash",
 }
+

@@ -69,7 +69,6 @@ func mainrun() {
 	txfr1.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed1 := txfr1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
-	txed1.HiLang = "Go"
 	txed1.HiStyle = "emacs"
 	txed1.LineNos = true
 
@@ -81,7 +80,6 @@ func mainrun() {
 	txfr2.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed2 := txfr2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
-	txed2.HiLang = "Go"
 	txed2.HiStyle = "emacs"
 
 	txbuf := giv.NewTextBuf()
@@ -89,6 +87,7 @@ func mainrun() {
 	txed2.SetBuf(txbuf)
 
 	txbuf.Open("sample.in")
+	txbuf.HiLang = "Go"
 
 	// main menu
 	appnm := oswin.TheApp.Name()
