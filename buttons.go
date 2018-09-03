@@ -449,20 +449,6 @@ func ButtonEvents(bw ButtonWidget) {
 	})
 }
 
-// ButtonBaseDefault is default obj that can be used when property specifies "default"
-var ButtonBaseDefault ButtonBase
-
-// ButtonBaseFields contain the StyledFields for ButtonBase type
-var ButtonBaseFields = initButtonBase()
-
-func initButtonBase() *StyledFields {
-	ButtonBaseDefault = ButtonBase{}
-	sf := &StyledFields{}
-	sf.Default = &ButtonBaseDefault
-	sf.AddField(&ButtonBaseDefault, "Indicator")
-	return sf
-}
-
 ///////////////////////////////////////////////////////////
 // ButtonBase Node2D and ButtonwWidget interface
 
@@ -500,8 +486,10 @@ func (g *ButtonBase) ConfigPartsIfNeeded() {
 
 func (g *ButtonBase) Style2DWidget() {
 	g.WidgetBase.Style2DWidget()
-	ButtonBaseFields.Style(g, nil, g.Props)
-	ButtonBaseFields.ToDots(g, &g.Sty.UnContext)
+	if pv, ok := g.Prop("indicator"); ok {
+		pvs := kit.ToString(pv)
+		g.Indicator = IconName(pvs)
+	}
 }
 
 func (g *ButtonBase) Style2D() {

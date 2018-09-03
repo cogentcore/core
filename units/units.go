@@ -29,8 +29,6 @@ import (
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of css-based viewport-dependent factors
 
-//
-
 // standard conversion factors -- Px = DPI-independent pixel instead of actual "dot" raw pixel
 const (
 	PxPerInch = 96.0
@@ -256,6 +254,9 @@ func (uc *Context) DotsToPx(val float32) float32 {
 	return val / uc.ToDotsFactor(Px)
 }
 
+////////////////////////////////////////////////////////////////////////
+//   Value
+
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
 	Val  float32
@@ -339,8 +340,51 @@ func (v *Value) SetString(str string) {
 	v.Set(val, un)
 }
 
+// StringToValue converts a string to a value representation.
 func StringToValue(str string) Value {
 	var v Value
 	v.SetString(str)
 	return v
+}
+
+// SetIFace sets value from an interface value representation as from ki.Props
+func (v *Value) SetIFace(iface interface{}) error {
+	switch val := iface.(type) {
+	case string:
+		v.SetString(val)
+	case Value:
+		*v = val
+	case *Value:
+		*v = *val
+	default: // assume Px as an implicit default
+		valflt, ok := kit.ToFloat(iface)
+		if ok {
+			v.Set(float32(valflt), Px)
+		} else {
+			return fmt.Errorf("units.Value could not set from: %v type: %T", val, val)
+		}
+	}
+	return nil
+}
+
+// SetFmProp sets value from property of given key name in given list of properties
+// -- returns true if property found and set, error for any errors in setting
+// property
+func (v *Value) SetFmProp(key string, props ki.Props) (bool, error) {
+	pv, ok := props[key]
+	if !ok {
+		return false, nil
+	}
+	return true, v.SetIFace(pv)
+}
+
+// SetFmInheritProp sets value from property of given key name in inherited or
+// type properties from given Ki.ki type -- returns true if property found and
+// set, error for any errors in setting property
+func (v *Value) SetFmInheritProp(key string, k ki.Ki, inherit, typ bool) (bool, error) {
+	pv, ok := k.PropInherit(key, inherit, typ)
+	if !ok {
+		return false, nil
+	}
+	return true, v.SetIFace(pv)
 }

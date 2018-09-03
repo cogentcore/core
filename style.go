@@ -644,7 +644,7 @@ func (sf *StyledField) UnitsValue(objptr uintptr) *units.Value {
 
 // FromProps styles given field from property value val, with optional parent object obj
 func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool) {
-	errstr := "gi.StyledField FromProps:"
+	errstr := "gi.StyledField FromProps: Field:"
 	fi := fld.FieldIface(objptr)
 	if kit.IfaceIsNil(fi) {
 		fmt.Printf("%v %v of type %v has nil value\n", errstr, fld.Field.Name, fld.Field.Type.String())
@@ -709,20 +709,9 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 			fmt.Printf("%v %v could not set Color from prop: %v type: %T\n", errstr, fld.Field.Name, val, val)
 		}
 	case *units.Value:
-		switch valv := val.(type) {
-		case string:
-			fiv.SetString(valv)
-		case units.Value:
-			*fiv = valv
-		case *units.Value:
-			*fiv = *valv
-		default: // assume Px as an implicit default
-			valflt, ok := kit.ToFloat(val)
-			if ok {
-				fiv.Set(float32(valflt), units.Px)
-			} else {
-				fmt.Printf("%v %v could not set units.Value from prop: %v type: %T\n", errstr, fld.Field.Name, val, val)
-			}
+		err := fiv.SetIFace(val)
+		if err != nil {
+			fmt.Printf("%v %v %v\n", errstr, fld.Field.Name, err)
 		}
 	case *Matrix2D:
 		switch valv := val.(type) {

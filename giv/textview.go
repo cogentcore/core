@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/draw"
 	"log"
 	"strings"
 	"time"
@@ -46,6 +47,7 @@ type TextView struct {
 	Buf           *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
 	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Opts          TextViewOpts              `desc:"options for how text editing / viewing works"`
+	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	HiLang        string                    `desc:"language for syntax highlighting the code"`
 	HiStyle       string                    `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
@@ -88,7 +90,8 @@ var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
 var TextViewProps = ki.Props{
 	"font-family":      "Go Mono",
-	"border-width":     units.NewValue(1, units.Px), // this also determines the cursor
+	"border-width":     units.NewValue(1, units.Px),
+	"cursor-width":     units.NewValue(3, units.Px),
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gi.BorderSolid,
 	"padding":          units.NewValue(2, units.Px),
@@ -480,7 +483,6 @@ func (tv *TextView) CursorSelect(org TextPos) {
 
 // CursorForward moves the cursor forward
 func (tv *TextView) CursorForward(steps int) {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch++
@@ -501,7 +503,6 @@ func (tv *TextView) CursorForward(steps int) {
 
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ln += steps
 	if tv.CursorPos.Ln >= tv.NLines {
@@ -518,7 +519,6 @@ func (tv *TextView) CursorDown(steps int) {
 func (tv *TextView) CursorPageDown(steps int) {
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
-		tv.RenderCursor(false)
 		lvln := tv.LastVisibleLine(tv.CursorPos.Ln)
 		tv.CursorPos.Ln = lvln
 		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
@@ -530,7 +530,6 @@ func (tv *TextView) CursorPageDown(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tv *TextView) CursorBackward(steps int) {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch--
@@ -551,7 +550,6 @@ func (tv *TextView) CursorBackward(steps int) {
 
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ln -= steps
 	if tv.CursorPos.Ln < 0 {
@@ -568,7 +566,6 @@ func (tv *TextView) CursorUp(steps int) {
 func (tv *TextView) CursorPageUp(steps int) {
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
-		tv.RenderCursor(false)
 		lvln := tv.FirstVisibleLine(tv.CursorPos.Ln)
 		tv.CursorPos.Ln = lvln
 		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
@@ -596,7 +593,6 @@ func (tv *TextView) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartLine() {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ch = 0
 	tv.CursorCol = tv.CursorPos.Ch
@@ -608,7 +604,6 @@ func (tv *TextView) CursorStartLine() {
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tv *TextView) CursorStart() {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
 	tv.CursorPos.Ch = 0
@@ -620,7 +615,6 @@ func (tv *TextView) CursorStart() {
 
 // CursorEndLine moves the cursor to the end of the text
 func (tv *TextView) CursorEndLine() {
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	tv.CursorCol = tv.CursorPos.Ch
@@ -634,7 +628,6 @@ func (tv *TextView) CursorEndLine() {
 func (tv *TextView) CursorEnd() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
-	tv.RenderCursor(false)
 	org := tv.CursorPos
 	tv.CursorPos.Ln = gi.MaxInt(tv.NLines-1, 0)
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
@@ -656,7 +649,6 @@ func (tv *TextView) CursorBackspace(steps int) {
 	}
 	// note: no update b/c signal from buf will drive update
 	org := tv.CursorPos
-	tv.RenderCursor(false)
 	tv.CursorBackward(steps)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -671,7 +663,6 @@ func (tv *TextView) CursorDelete(steps int) {
 	}
 	// note: no update b/c signal from buf will drive update
 	org := tv.CursorPos
-	tv.RenderCursor(false)
 	tv.CursorForward(steps)
 	tv.Buf.DeleteText(org, tv.CursorPos, true)
 	tv.SetCursor(org)
@@ -682,7 +673,6 @@ func (tv *TextView) CursorDelete(steps int) {
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
 	org := tv.CursorPos
-	tv.RenderCursor(false)
 	if tv.CursorPos.Ch == 0 && len(tv.Buf.Lines[tv.CursorPos.Ln]) == 0 {
 		tv.CursorForward(1)
 	} else {
@@ -696,7 +686,6 @@ func (tv *TextView) CursorKill() {
 
 // Undo undoes previous action
 func (tv *TextView) Undo() {
-	tv.RenderCursor(false)
 	tbe := tv.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -711,7 +700,6 @@ func (tv *TextView) Undo() {
 
 // Redo redoes previously undone action
 func (tv *TextView) Redo() {
-	tv.RenderCursor(false)
 	tbe := tv.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -901,7 +889,6 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	if tv.HasSelection() {
 		tv.Cut()
 	}
-	tv.RenderCursor(false)
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
 	tv.SetCursor(tbe.Reg.End)
 	tv.ScrollCursorToCenterIfHidden()
@@ -1161,6 +1148,70 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	return spos
 }
 
+// TextViewBlinker is the time.Ticker for blinking cursors for text fields,
+// only one of which can be active at at a time
+var TextViewBlinker *time.Ticker
+
+// BlinkingTextView is the text field that is blinking
+var BlinkingTextView *TextView
+
+// TextViewSpriteName is the name of the window sprite used for the cursor
+var TextViewSpriteName = "giv.TextView.Cursor"
+
+// TextViewBlink is function that blinks text field cursor
+func TextViewBlink() {
+	for {
+		if TextViewBlinker == nil {
+			return // shutdown..
+		}
+		<-TextViewBlinker.C
+		if BlinkingTextView == nil {
+			continue
+		}
+		if BlinkingTextView.IsDestroyed() || BlinkingTextView.IsDeleted() {
+			BlinkingTextView = nil
+			continue
+		}
+		tv := BlinkingTextView
+		if tv.Viewport == nil || !tv.HasFocus() || !tv.FocusActive || tv.VpBBox == image.ZR {
+			BlinkingTextView = nil
+			continue
+		}
+		win := tv.ParentWindow()
+		if win == nil || win.IsResizing() {
+			continue
+		}
+		tv.BlinkOn = !tv.BlinkOn
+		tv.RenderCursor(tv.BlinkOn)
+	}
+}
+
+// StartCursor starts the cursor blinking and renders it
+func (tv *TextView) StartCursor() {
+	tv.BlinkOn = true
+	if gi.CursorBlinkMSec == 0 {
+		tv.RenderCursor(true)
+		return
+	}
+	if TextViewBlinker == nil {
+		TextViewBlinker = time.NewTicker(time.Duration(gi.CursorBlinkMSec) * time.Millisecond)
+		go TextViewBlink()
+	}
+	tv.BlinkOn = true
+	win := tv.ParentWindow()
+	if win != nil && !win.IsResizing() {
+		tv.RenderCursor(true)
+	}
+	BlinkingTextView = tv
+}
+
+// StopCursor stops the cursor from blinking
+func (tv *TextView) StopCursor() {
+	if BlinkingTextView == tv {
+		BlinkingTextView = nil
+	}
+}
+
 // CursorBBox returns a bounding-box for a cursor at given position
 func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 	st := &tv.Sty
@@ -1172,37 +1223,46 @@ func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 	return curBBox
 }
 
-// RenderCursor draws the cursor, either on or off (for blinking or moving) and
+// RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tv *TextView) RenderCursor(on bool) {
-	if tv.PushBounds() {
-		st := &tv.Sty
-		cpos := tv.CharStartPos(tv.CursorPos)
-		cbmin := cpos.SubVal(st.Border.Width.Dots)
-		cbmax := cpos.AddVal(st.Border.Width.Dots)
-		cbmax.Y += tv.FontHeight
-		curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
-		vprel := curBBox.Min.Sub(tv.VpBBox.Min)
-		curWinBBox := tv.WinBBox.Add(vprel)
-
-		rs := &tv.Viewport.Render
-		pc := &rs.Paint
-		pc.StrokeStyle.Width = st.Border.Width
-		if on {
-			pc.StrokeStyle.SetColor(&st.Font.Color)
-		} else {
-			pc.StrokeStyle.SetColor(&st.Font.BgColor.Color)
-		}
-		pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tv.FontHeight)
-		pc.Stroke(rs)
-		// } else { // this doesn't work: overwrites too much -- need sprite
-		// 	pc.FillBox(rs, cbmin, cbmax, &st.Font.BgColor)
-		tv.PopBounds()
-
-		vp := tv.Viewport
-		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, curBBox, curWinBBox)
-		vp.Win.UpdateEnd(updt)
+	win := tv.Viewport.Win
+	if win == nil {
+		return
 	}
+	if tv.PushBounds() {
+		sp := tv.CursorSprite()
+		if on {
+			win.ActivateSprite(sp.Nm)
+		} else {
+			win.InactivateSprite(sp.Nm)
+		}
+		sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
+		win.RenderOverlays() // needs an explicit call!
+		tv.PopBounds()
+		win.UpdateSig() // publish
+	}
+}
+
+// CursorSprite returns the sprite Viewport2D that holds the cursor (which is
+// only rendered once with a vertical bar, and just activated and inactivated
+// depending on render status)
+func (tv *TextView) CursorSprite() *gi.Viewport2D {
+	win := tv.Viewport.Win
+	if win == nil {
+		return nil
+	}
+	sty := &tv.StateStyles[TextViewActive]
+	spnm := fmt.Sprintf("%v-%v", TextViewSpriteName, tv.FontHeight)
+	sp, ok := win.Sprites[spnm]
+	if !ok {
+		bbsz := image.Point{int(math32.Ceil(tv.CursorWidth.Dots)), int(math32.Ceil(tv.FontHeight))}
+		if bbsz.X < 2 { // at least 2
+			bbsz.X = 2
+		}
+		sp = win.AddSprite(spnm, bbsz, image.ZP)
+		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+	}
+	return sp
 }
 
 // RenderSelect renders the selection region as a highlighted background color
@@ -1323,9 +1383,9 @@ func (tv *TextView) RenderLineNo(ln int) {
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent)
 	tv.LineNoRender.Render(rs, pos)
-	if ic, ok := tv.LineIcons[ln]; ok {
-		// todo: render icon!
-	}
+	// if ic, ok := tv.LineIcons[ln]; ok {
+	// 	// todo: render icon!
+	// }
 }
 
 // RenderLines displays a specific range of lines on the screen, also painting
@@ -1537,7 +1597,6 @@ func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes
 	if newPos == oldPos {
 		return
 	}
-	tv.RenderCursor(false)
 	tv.SetCursor(newPos)
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
 		if !tv.SelectMode && selMode != mouse.NoSelectMode {
@@ -1562,6 +1621,9 @@ func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes
 	}
 	tv.RenderCursor(true)
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//    KeyInput handling
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
@@ -1805,6 +1867,8 @@ func (tv *TextView) Style2D() {
 		tv.StateStyles[i].StyleCSS(tv.This.(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
+	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This, true, true) // get type defaults
+	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
 }
 
 func (tv *TextView) Size2D(iter int) {
@@ -1817,65 +1881,6 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	return tv.Layout2DChildren(iter)
-}
-
-// TextViewBlinker is the time.Ticker for blinking cursors for text fields,
-// only one of which can be active at at a time
-var TextViewBlinker *time.Ticker
-
-// BlinkingTextView is the text field that is blinking
-var BlinkingTextView *TextView
-
-// TextViewBlink is function that blinks text field cursor
-func TextViewBlink() {
-	for {
-		if TextViewBlinker == nil {
-			return // shutdown..
-		}
-		<-TextViewBlinker.C
-		if BlinkingTextView == nil {
-			continue
-		}
-		if BlinkingTextView.IsDestroyed() || BlinkingTextView.IsDeleted() {
-			BlinkingTextView = nil
-			continue
-		}
-		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.FocusActive || tv.VpBBox == image.ZR {
-			BlinkingTextView = nil
-			continue
-		}
-		win := tv.ParentWindow()
-		if win == nil || win.IsResizing() {
-			continue
-		}
-		tv.BlinkOn = !tv.BlinkOn
-		tv.RenderCursor(tv.BlinkOn)
-	}
-}
-
-func (tv *TextView) StartCursor() {
-	tv.BlinkOn = true
-	if gi.CursorBlinkMSec == 0 {
-		tv.RenderCursor(true)
-		return
-	}
-	if TextViewBlinker == nil {
-		TextViewBlinker = time.NewTicker(time.Duration(gi.CursorBlinkMSec) * time.Millisecond)
-		go TextViewBlink()
-	}
-	tv.BlinkOn = true
-	win := tv.ParentWindow()
-	if win != nil && !win.IsResizing() {
-		tv.RenderCursor(true)
-	}
-	BlinkingTextView = tv
-}
-
-func (tv *TextView) StopCursor() {
-	if BlinkingTextView == tv {
-		BlinkingTextView = nil
-	}
 }
 
 func (tv *TextView) Render2D() {

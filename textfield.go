@@ -5,7 +5,9 @@
 package gi
 
 import (
+	"fmt"
 	"image"
+	"image/draw"
 	"time"
 	"unicode"
 
@@ -33,6 +35,7 @@ type TextField struct {
 	WidgetBase
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	CursorWidth  units.Value             `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	FocusActive  bool                    `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
@@ -56,7 +59,8 @@ type TextField struct {
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
 var TextFieldProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px), // this also determines the cursor
+	"border-width":     units.NewValue(1, units.Px),
+	"cursor-width":     units.NewValue(3, units.Px),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"padding":          units.NewValue(4, units.Px),
@@ -291,6 +295,9 @@ func (tf *TextField) CursorKill() {
 	tf.CursorDelete(steps)
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//    Selection
+
 // ClearSelected resets both the global selected flag and any current selection
 func (tf *TextField) ClearSelected() {
 	tf.WidgetBase.ClearSelected()
@@ -517,6 +524,36 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//    Complete
+
+// SetCompleter sets completion functions so that completions will
+// automatically be offered as the user types
+func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+	if matchFun == nil || editFun == nil {
+		if tf.Completion != nil {
+			tf.Completion.CompleteSig.Disconnect(tf.This)
+		}
+		tf.Completion.Destroy()
+		tf.Completion = nil
+		return
+	}
+	tf.Completion = &Complete{}
+	tf.Completion.InitName(tf.Completion, "tf-completion") // needed for standalone Ki's
+	tf.Completion.Context = data
+	tf.Completion.MatchFunc = matchFun
+	tf.Completion.EditFunc = editFun
+	// note: only need to connect once..
+	tf.Completion.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tff, _ := recv.Embed(KiT_TextField).(*TextField)
+		if sig == int64(CompleteSelect) {
+			tff.Complete(data.(string)) // always use data
+		} else if sig == int64(CompleteExtend) {
+			tff.CompleteExtend(data.(string)) // always use data
+		}
+	})
+}
+
 // OfferCompletions pops up a menu of possible completions
 func (tf *TextField) OfferCompletions() {
 	if tf.Completion == nil {
@@ -549,6 +586,263 @@ func (tf *TextField) CompleteExtend(s string) {
 		win.ClosePopup(win.Popup)
 		tf.InsertAtCursor(s)
 		tf.OfferCompletions()
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Rendering
+
+// TextWidth returns the text width in dots between the two text string
+// positions (ed is exclusive -- +1 beyond actual char)
+func (tf *TextField) TextWidth(st, ed int) float32 {
+	return tf.StartCharPos(ed) - tf.StartCharPos(st)
+}
+
+// StartCharPos returns the starting position of the given rune
+func (tf *TextField) StartCharPos(idx int) float32 {
+	if idx <= 0 || len(tf.RenderAll.Spans) != 1 {
+		return 0.0
+	}
+	sr := &(tf.RenderAll.Spans[0])
+	sz := len(sr.Render)
+	if sz == 0 {
+		return 0.0
+	}
+	if idx >= sz {
+		return sr.LastPos.X
+	}
+	return sr.Render[idx].RelPos.X
+}
+
+// CharStartPos returns the starting render coords for the given character
+// position in string -- makes no attempt to rationalize that pos (i.e., if
+// not in visible range, position will be out of range too)
+func (tf *TextField) CharStartPos(charidx int) Vec2D {
+	st := &tf.Sty
+	spc := st.BoxSpace()
+	pos := tf.LayData.AllocPos.AddVal(spc)
+	cpos := tf.TextWidth(tf.StartPos, charidx)
+	return Vec2D{pos.X + cpos, pos.Y}
+}
+
+// TextFieldBlinker is the time.Ticker for blinking cursors for text fields,
+// only one of which can be active at at a time
+var TextFieldBlinker *time.Ticker
+
+// BlinkingTextField is the text field that is blinking
+var BlinkingTextField *TextField
+
+// TextFieldSpriteName is the name of the window sprite used for the cursor
+var TextFieldSpriteName = "gi.TextField.Cursor"
+
+// TextFieldBlink is function that blinks text field cursor
+func TextFieldBlink() {
+	for {
+		if TextFieldBlinker == nil {
+			return // shutdown..
+		}
+		<-TextFieldBlinker.C
+		if BlinkingTextField == nil {
+			continue
+		}
+		if BlinkingTextField.IsDestroyed() || BlinkingTextField.IsDeleted() {
+			BlinkingTextField = nil
+			continue
+		}
+		tf := BlinkingTextField
+		if tf.Viewport == nil || !tf.HasFocus() || !tf.FocusActive || tf.VpBBox == image.ZR {
+			BlinkingTextField = nil
+			continue
+		}
+		win := tf.ParentWindow()
+		if win == nil || win.IsResizing() {
+			continue
+		}
+		tf.BlinkOn = !tf.BlinkOn
+		tf.RenderCursor(tf.BlinkOn)
+	}
+}
+
+// StartCursor starts the cursor blinking and renders it
+func (tf *TextField) StartCursor() {
+	tf.BlinkOn = true
+	if CursorBlinkMSec == 0 {
+		tf.RenderCursor(true)
+		return
+	}
+	if TextFieldBlinker == nil {
+		TextFieldBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
+		go TextFieldBlink()
+	}
+	tf.BlinkOn = true
+	win := tf.ParentWindow()
+	if win != nil && !win.IsResizing() {
+		tf.RenderCursor(true)
+	}
+	BlinkingTextField = tf
+}
+
+// StopCursor stops the cursor from blinking
+func (tf *TextField) StopCursor() {
+	if BlinkingTextField == tf {
+		BlinkingTextField = nil
+	}
+}
+
+// RenderCursor renders the cursor on or off, as a sprite that is either on or off
+func (tf *TextField) RenderCursor(on bool) {
+	win := tf.Viewport.Win
+	if win == nil {
+		return
+	}
+	if tf.PushBounds() {
+		sp := tf.CursorSprite()
+		if on {
+			win.ActivateSprite(sp.Nm)
+		} else {
+			win.InactivateSprite(sp.Nm)
+		}
+		sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
+		win.RenderOverlays() // needs an explicit call!
+		tf.PopBounds()
+		win.UpdateSig() // publish
+	}
+}
+
+// CursorSprite returns the sprite Viewport2D that holds the cursor (which is
+// only rendered once with a vertical bar, and just activated and inactivated
+// depending on render status)
+func (tf *TextField) CursorSprite() *Viewport2D {
+	win := tf.Viewport.Win
+	if win == nil {
+		return nil
+	}
+	sty := &tf.StateStyles[TextFieldActive]
+	spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
+	sp, ok := win.Sprites[spnm]
+	if !ok {
+		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
+		if bbsz.X < 2 { // at least 2
+			bbsz.X = 2
+		}
+		sp = win.AddSprite(spnm, bbsz, image.ZP)
+		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+	}
+	return sp
+}
+
+// RenderSelect renders the selected region, if any, underneath the text
+func (tf *TextField) RenderSelect() {
+	if !tf.HasSelection() {
+		return
+	}
+	effst := kit.MaxInt(tf.StartPos, tf.SelectStart)
+	if effst >= tf.EndPos {
+		return
+	}
+	effed := kit.MinInt(tf.EndPos, tf.SelectEnd)
+	if effed < tf.StartPos {
+		return
+	}
+	if effed <= effst {
+		return
+	}
+
+	spos := tf.CharStartPos(effst)
+
+	rs := &tf.Viewport.Render
+	pc := &rs.Paint
+	st := &tf.StateStyles[TextFieldSel]
+	tsz := tf.TextWidth(effst, effed)
+	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Font.BgColor)
+}
+
+// AutoScroll scrolls the starting position to keep the cursor visible
+func (tf *TextField) AutoScroll() {
+	st := &tf.Sty
+
+	tf.UpdateRenderAll()
+
+	sz := len(tf.EditTxt)
+
+	if sz == 0 || tf.LayData.AllocSize.X <= 0 {
+		tf.CursorPos = 0
+		tf.EndPos = 0
+		tf.StartPos = 0
+		return
+	}
+	spc := st.BoxSpace()
+	maxw := tf.LayData.AllocSize.X - 2.0*spc
+	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
+
+	// first rationalize all the values
+	if tf.EndPos == 0 || tf.EndPos > sz { // not init
+		tf.EndPos = sz
+	}
+	if tf.StartPos >= tf.EndPos {
+		tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
+	}
+	tf.CursorPos = InRangeInt(tf.CursorPos, 0, sz)
+
+	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
+	inc = kit.MaxInt(4, inc)
+
+	// keep cursor in view with buffer
+	startIsAnchor := true
+	if tf.CursorPos < (tf.StartPos + inc) {
+		tf.StartPos -= inc
+		tf.StartPos = kit.MaxInt(tf.StartPos, 0)
+		tf.EndPos = tf.StartPos + tf.CharWidth
+		tf.EndPos = kit.MinInt(sz, tf.EndPos)
+	} else if tf.CursorPos > (tf.EndPos - inc) {
+		tf.EndPos += inc
+		tf.EndPos = kit.MinInt(tf.EndPos, sz)
+		tf.StartPos = tf.EndPos - tf.CharWidth
+		tf.StartPos = kit.MaxInt(0, tf.StartPos)
+		startIsAnchor = false
+	}
+
+	if startIsAnchor {
+		gotWidth := false
+		spos := tf.StartCharPos(tf.StartPos)
+		for {
+			w := tf.StartCharPos(tf.EndPos) - spos
+			if w < maxw {
+				if tf.EndPos == sz {
+					break
+				}
+				nw := tf.StartCharPos(tf.EndPos+1) - spos
+				if nw >= maxw {
+					gotWidth = true
+					break
+				}
+				tf.EndPos++
+			} else {
+				tf.EndPos--
+			}
+		}
+		if gotWidth || tf.StartPos == 0 {
+			return
+		}
+		// otherwise, try getting some more chars by moving up start..
+	}
+
+	// end is now anchor
+	epos := tf.StartCharPos(tf.EndPos)
+	for {
+		w := epos - tf.StartCharPos(tf.StartPos)
+		if w < maxw {
+			if tf.StartPos == 0 {
+				break
+			}
+			nw := epos - tf.StartCharPos(tf.StartPos-1)
+			if nw >= maxw {
+				break
+			}
+			tf.StartPos--
+		} else {
+			tf.StartPos++
+		}
 	}
 }
 
@@ -594,6 +888,9 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 	return c
 }
 
+// SetCursorFromPixel finds cursor location from pixel offset relative to
+// WinBBox of text field, and sets current cursor to it, updating selection as
+// well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
@@ -616,6 +913,9 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 		tf.SelectReset()
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//    KeyInput handling
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
@@ -808,6 +1108,8 @@ func (tf *TextField) Style2D() {
 		tf.StateStyles[i].StyleCSS(tf.This.(Node2D), tf.CSSAgg, TextFieldSelectors[i])
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
+	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This, true, true) // get type defaults
+	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
@@ -846,246 +1148,6 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
 	return tf.Layout2DChildren(iter)
-}
-
-// StartCharPos returns the starting position of the given rune
-func (tf *TextField) StartCharPos(idx int) float32 {
-	if idx <= 0 || len(tf.RenderAll.Spans) != 1 {
-		return 0.0
-	}
-	sr := &(tf.RenderAll.Spans[0])
-	sz := len(sr.Render)
-	if sz == 0 {
-		return 0.0
-	}
-	if idx >= sz {
-		return sr.LastPos.X
-	}
-	return sr.Render[idx].RelPos.X
-}
-
-// TextWidth returns the text width in dots between the two text string
-// positions (ed is exclusive -- +1 beyond actual char)
-func (tf *TextField) TextWidth(st, ed int) float32 {
-	return tf.StartCharPos(ed) - tf.StartCharPos(st)
-}
-
-// CharStartPos returns the starting render coords for the given character
-// position in string -- makes no attempt to rationalize that pos (i.e., if
-// not in visible range, position will be out of range too)
-func (tf *TextField) CharStartPos(charidx int) Vec2D {
-	st := &tf.Sty
-	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddVal(spc)
-	cpos := tf.TextWidth(tf.StartPos, charidx)
-	return Vec2D{pos.X + cpos, pos.Y}
-}
-
-// TextFieldBlinker is the time.Ticker for blinking cursors for text fields,
-// only one of which can be active at at a time
-var TextFieldBlinker *time.Ticker
-
-// BlinkingTextField is the text field that is blinking
-var BlinkingTextField *TextField
-
-// TextFieldBlink is function that blinks text field cursor
-func TextFieldBlink() {
-	for {
-		if TextFieldBlinker == nil {
-			return // shutdown..
-		}
-		<-TextFieldBlinker.C
-		if BlinkingTextField == nil {
-			continue
-		}
-		if BlinkingTextField.IsDestroyed() || BlinkingTextField.IsDeleted() {
-			BlinkingTextField = nil
-			continue
-		}
-		tf := BlinkingTextField
-		if tf.Viewport == nil || !tf.HasFocus() || !tf.FocusActive || tf.VpBBox == image.ZR {
-			BlinkingTextField = nil
-			continue
-		}
-		win := tf.ParentWindow()
-		if win == nil || win.IsResizing() {
-			continue
-		}
-		tf.BlinkOn = !tf.BlinkOn
-		tf.RenderCursor(tf.BlinkOn)
-	}
-}
-
-func (tf *TextField) StartCursor() {
-	tf.BlinkOn = true
-	if CursorBlinkMSec == 0 {
-		tf.RenderCursor(true)
-		return
-	}
-	if TextFieldBlinker == nil {
-		TextFieldBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
-		go TextFieldBlink()
-	}
-	tf.BlinkOn = true
-	win := tf.ParentWindow()
-	if win != nil && !win.IsResizing() {
-		tf.RenderCursor(true)
-	}
-	BlinkingTextField = tf
-}
-
-func (tf *TextField) StopCursor() {
-	if BlinkingTextField == tf {
-		BlinkingTextField = nil
-	}
-}
-
-func (tf *TextField) RenderCursor(on bool) {
-	if tf.PushBounds() {
-		st := &tf.Sty
-		cpos := tf.CharStartPos(tf.CursorPos)
-		rs := &tf.Viewport.Render
-		pc := &rs.Paint
-		if on {
-			pc.StrokeStyle.SetColor(&st.Font.Color)
-		} else {
-			pc.StrokeStyle.SetColor(&st.Font.BgColor.Color)
-		}
-		pc.StrokeStyle.Width = st.Border.Width
-		if on {
-			pc.StrokeStyle.Width.Dots -= .1 // try to get rid of halo
-		}
-		pc.DrawLine(rs, cpos.X, cpos.Y, cpos.X, cpos.Y+tf.FontHeight)
-		pc.Stroke(rs)
-		tf.PopBounds()
-
-		// compute bbox just for the cursor
-		cbmin := cpos.SubVal(st.Border.Width.Dots)
-		cbmax := cpos.AddVal(st.Border.Width.Dots)
-		cbmax.Y += tf.FontHeight
-		curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
-		vprel := curBBox.Min.Sub(tf.VpBBox.Min)
-		curWinBBox := tf.WinBBox.Add(vprel)
-
-		vp := tf.Viewport
-		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, curBBox, curWinBBox) // bigger than necc.
-		vp.Win.UpdateEnd(updt)
-	}
-}
-
-func (tf *TextField) RenderSelect() {
-	if tf.SelectEnd <= tf.SelectStart {
-		return
-	}
-	effst := kit.MaxInt(tf.StartPos, tf.SelectStart)
-	if effst >= tf.EndPos {
-		return
-	}
-	effed := kit.MinInt(tf.EndPos, tf.SelectEnd)
-	if effed < tf.StartPos {
-		return
-	}
-	if effed <= effst {
-		return
-	}
-
-	spos := tf.CharStartPos(effst)
-
-	rs := &tf.Viewport.Render
-	pc := &rs.Paint
-	st := &tf.StateStyles[TextFieldSel]
-	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Font.BgColor)
-}
-
-// AutoScroll scrolls the starting position to keep the cursor visible
-func (tf *TextField) AutoScroll() {
-	st := &tf.Sty
-
-	tf.UpdateRenderAll()
-
-	sz := len(tf.EditTxt)
-
-	if sz == 0 || tf.LayData.AllocSize.X <= 0 {
-		tf.CursorPos = 0
-		tf.EndPos = 0
-		tf.StartPos = 0
-		return
-	}
-	spc := st.BoxSpace()
-	maxw := tf.LayData.AllocSize.X - 2.0*spc
-	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
-
-	// first rationalize all the values
-	if tf.EndPos == 0 || tf.EndPos > sz { // not init
-		tf.EndPos = sz
-	}
-	if tf.StartPos >= tf.EndPos {
-		tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
-	}
-	tf.CursorPos = InRangeInt(tf.CursorPos, 0, sz)
-
-	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
-	inc = kit.MaxInt(4, inc)
-
-	// keep cursor in view with buffer
-	startIsAnchor := true
-	if tf.CursorPos < (tf.StartPos + inc) {
-		tf.StartPos -= inc
-		tf.StartPos = kit.MaxInt(tf.StartPos, 0)
-		tf.EndPos = tf.StartPos + tf.CharWidth
-		tf.EndPos = kit.MinInt(sz, tf.EndPos)
-	} else if tf.CursorPos > (tf.EndPos - inc) {
-		tf.EndPos += inc
-		tf.EndPos = kit.MinInt(tf.EndPos, sz)
-		tf.StartPos = tf.EndPos - tf.CharWidth
-		tf.StartPos = kit.MaxInt(0, tf.StartPos)
-		startIsAnchor = false
-	}
-
-	if startIsAnchor {
-		gotWidth := false
-		spos := tf.StartCharPos(tf.StartPos)
-		for {
-			w := tf.StartCharPos(tf.EndPos) - spos
-			if w < maxw {
-				if tf.EndPos == sz {
-					break
-				}
-				nw := tf.StartCharPos(tf.EndPos+1) - spos
-				if nw >= maxw {
-					gotWidth = true
-					break
-				}
-				tf.EndPos++
-			} else {
-				tf.EndPos--
-			}
-		}
-		if gotWidth || tf.StartPos == 0 {
-			return
-		}
-		// otherwise, try getting some more chars by moving up start..
-	}
-
-	// end is now anchor
-	epos := tf.StartCharPos(tf.EndPos)
-	for {
-		w := epos - tf.StartCharPos(tf.StartPos)
-		if w < maxw {
-			if tf.StartPos == 0 {
-				break
-			}
-			nw := epos - tf.StartCharPos(tf.StartPos-1)
-			if nw >= maxw {
-				break
-			}
-			tf.StartPos--
-		} else {
-			tf.StartPos++
-		}
-	}
 }
 
 func (tf *TextField) Render2D() {
@@ -1162,29 +1224,4 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
-}
-
-func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
-	if matchFun == nil || editFun == nil {
-		if tf.Completion != nil {
-			tf.Completion.CompleteSig.Disconnect(tf.This)
-		}
-		tf.Completion.Destroy()
-		tf.Completion = nil
-		return
-	}
-	tf.Completion = &Complete{}
-	tf.Completion.InitName(tf.Completion, "tf-completion") // needed for standalone Ki's
-	tf.Completion.Context = data
-	tf.Completion.MatchFunc = matchFun
-	tf.Completion.EditFunc = editFun
-	// note: only need to connect once..
-	tf.Completion.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tff, _ := recv.Embed(KiT_TextField).(*TextField)
-		if sig == int64(CompleteSelect) {
-			tff.Complete(data.(string)) // always use data
-		} else if sig == int64(CompleteExtend) {
-			tff.CompleteExtend(data.(string)) // always use data
-		}
-	})
 }

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
+	"image/draw"
 	"io/ioutil"
 	"log"
 	"os"
@@ -98,36 +100,40 @@ func WinNewCloseStamp() {
 // typically not directly visible, and instead updates the overall menubar.
 type Window struct {
 	NodeBase
-	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs  bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport      *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay    *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu      *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	OverlayVp     Viewport2D                              `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	LastModBits   int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	FocusActive   bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
-	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
-	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling     ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
-	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
-	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
-	stopEventLoop bool
+	Title            string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin            oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	HasGeomPrefs     bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
+	Viewport         *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay       *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu         *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	OverlayVp        *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	OverlayVpCleared bool                                    `json:"-" xml:"-" desc:"true if OverlayVp has no kids and has already been cleared -- no need to keep clearing."`
+	Sprites          map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
+	SpritesBg        map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
+	ActiveSprites    int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	WinTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	OverTexActive    bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
+	OverTex          oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	LastModBits      int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode      mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	Focus            ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	FocusActive      bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
+	StartFocus       ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
+	Shortcuts        Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	DNDData          mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource        ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent    *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Scrolling        ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
+	Popup            ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup        ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
+	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
+	stopEventLoop    bool
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -350,6 +356,7 @@ func (w *Window) LogicalDPI() float32 {
 // ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
 // in increments of 6 dots to keep fonts rendering clearly.
 func (w *Window) ZoomDPI(steps int) {
+	w.InactivateAllSprites()
 	sc := oswin.TheApp.Screen(0)
 	pdpi := sc.PhysicalDPI
 	// ldpi = pdpi * zoom * ldpi
@@ -396,6 +403,7 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	// fmt.Printf("actual resized fun: %v\n", sz)
+	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
@@ -404,7 +412,13 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
+	w.OverTexActive = false
+	w.OverlayVpCleared = false
 	w.Viewport.Resize(sz)
+	if w.OverlayVp == nil {
+		w.OverlayVp = &Viewport2D{}
+		w.OverlayVp.InitName(w.OverlayVp, "overlay-vp")
+	}
 	WinGeomPrefs.RecordPref(w)
 	w.FullReRender()
 }
@@ -425,6 +439,17 @@ func (w *Window) Closed() {
 	if w.OverTex != nil {
 		w.OverTex.Release()
 		w.OverTex = nil
+	}
+	if w.OverlayVp != nil {
+		w.OverlayVp.Destroy()
+		w.OverlayVp = nil
+	}
+	for _, sp := range w.Sprites {
+		sp.Destroy()
+	}
+	w.Sprites = nil
+	for _, sp := range w.SpritesBg {
+		sp.Release()
 	}
 }
 
@@ -598,28 +623,6 @@ func (w *Window) UploadAllViewports() {
 	w.UpdateEnd(updt) // drives the publish
 }
 
-// RenderOverlays -- clears overlay viewport to transparent, renders all
-// overlays, uploads result to OverTex
-func (w *Window) RenderOverlays() {
-	if !w.OverlayVp.HasChildren() {
-		w.OverTexActive = false
-		return
-	}
-	updt := w.UpdateStart()
-	wsz := w.WinTex.Bounds().Size()
-	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
-		if w.OverTex != nil {
-			w.OverTex.Release()
-		}
-		w.OverTex, _ = oswin.TheApp.NewTexture(w.OSWin, wsz)
-	}
-	w.OverlayVp.Win = w
-	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
-	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
-	w.OverTexActive = true
-	w.UpdateEnd(updt) // drives the publish
-}
-
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
@@ -647,6 +650,128 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 	win.Publish()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Overlays and Sprites
+
+// RenderOverlays renders overlays and sprites -- clears overlay viewport to
+// transparent, renders all overlays, uploads result to OverTex
+func (w *Window) RenderOverlays() {
+	if !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
+		w.OverTexActive = false
+		return
+	}
+	updt := w.UpdateStart()
+	wsz := w.WinTex.Bounds().Size()
+	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
+		if w.OverTex != nil {
+			w.OverTex.Release()
+		}
+		w.OverTex, _ = oswin.TheApp.NewTexture(w.OSWin, wsz)
+	}
+	w.OverlayVp.Win = w
+	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
+	if len(w.OverlayVp.Kids) == 0 {
+		if !w.OverlayVpCleared {
+			vp := w.OverlayVp
+			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
+			w.OverlayVpCleared = true
+		}
+	} else {
+		w.OverlayVpCleared = false
+	}
+	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+	if w.ActiveSprites > 0 {
+		for _, sp := range w.Sprites {
+			if sp.IsInactive() {
+				continue
+			}
+			w.RenderSprite(sp)
+		}
+	}
+	w.OverTexActive = true
+	w.UpdateEnd(updt) // drives the publish
+}
+
+// AddSprite adds a new sprite viewport with given name (which must remain
+// invariant and unique among all sprites in use, and is used for all access
+// -- prefix with package and type name to ensure uniqueness.  Starts out in
+// inactive state -- must call ActivateSprite.
+func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport2D {
+	if w.Sprites == nil {
+		w.Sprites = make(map[string]*Viewport2D)
+		w.SpritesBg = make(map[string]oswin.Image)
+	}
+	if _, has := w.Sprites[nm]; has {
+		log.Printf("gi.Window AddSprite -- name is already in use: %v\n", nm)
+		return nil
+	}
+	sp := &Viewport2D{}
+	sp.InitName(sp, nm)
+	sp.Win = w
+	sp.Resize(sz)
+	sp.Geom.Pos = pos
+	sp.SetAsOverlay()
+	sp.SetInactive() // sprites start inactive
+	w.Sprites[nm] = sp
+	return sp
+}
+
+// ActivateSprite clears the Inactive flag on the sprite, and increments
+// ActiveSprites, so that it will actualy be rendered
+func (w *Window) ActivateSprite(nm string) {
+	sp, ok := w.Sprites[nm]
+	if !ok {
+		return // not worth bothering about errs -- use a consistent string var!
+	}
+	if sp.IsInactive() {
+		sp.SetActiveState(true)
+		w.ActiveSprites++
+	}
+}
+
+// InactivateSprite sets the Inactive flag on the sprite, and decrements
+// ActiveSprites, so that it will not be rendered
+func (w *Window) InactivateSprite(nm string) {
+	sp, ok := w.Sprites[nm]
+	if !ok {
+		return // not worth bothering about errs -- use a consistent string var!
+	}
+	if sp.IsActive() {
+		sp.SetInactive()
+		w.ActiveSprites--
+	}
+}
+
+// InactivateAllSprites inactivates all sprites
+func (w *Window) InactivateAllSprites() {
+	for _, sp := range w.Sprites {
+		if sp.IsActive() {
+			sp.SetInactive()
+			w.ActiveSprites--
+		}
+	}
+}
+
+// RenderSprite renders the sprite onto OverTex
+func (w *Window) RenderSprite(sp *Viewport2D) {
+	sp.Render2D()
+	bg, ok := w.SpritesBg[sp.Nm]
+	if !ok {
+		bg, _ = oswin.TheApp.NewImage(sp.Geom.Size)
+		w.SpritesBg[sp.Nm] = bg
+	} else if bg.Size() != sp.Geom.Size {
+		bg.Release()
+		bg, _ = oswin.TheApp.NewImage(sp.Geom.Size)
+		w.SpritesBg[sp.Nm] = bg
+	}
+	bgi := bg.RGBA()
+	// grab source from viewport
+	draw.Draw(bgi, bgi.Bounds(), w.Viewport.Pixels, sp.Geom.Pos, draw.Src)
+	// draw sprite over
+	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
+	w.OverTex.Upload(sp.Geom.Pos, bg, bg.Bounds())
 }
 
 /////////////////////////////////////////////////////////////////////////////

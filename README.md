@@ -93,7 +93,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
-	+ cursor is sprite (also textfield)
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ multi-span RenderSelect
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc

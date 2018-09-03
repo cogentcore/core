@@ -55,7 +55,6 @@ func (bm *Bitmap) GrabRenderFrom(nii Node2D) bool {
 	sz := ni.VpBBox.Size()
 	bm.Resize(sz)
 	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), nivp.Pixels, ni.VpBBox.Min, draw.Src)
-	// todo: option to make it semi-transparent
 	return true
 }
 

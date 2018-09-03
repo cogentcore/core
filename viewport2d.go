@@ -516,22 +516,24 @@ func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 	vp.SetAsOverlay()
 	vp.Resize(wsz)
 
-	// fill to transparent
-	draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
+	if len(vp.Kids) > 0 {
+		// fill to transparent
+		draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
 
-	// just do top-level objects here
-	for _, k := range vp.Kids {
-		nii, ni := KiToNode2D(k)
-		if nii == nil {
-			continue
+		// just do top-level objects here
+		for _, k := range vp.Kids {
+			nii, ni := KiToNode2D(k)
+			if nii == nil {
+				continue
+			}
+			if !ni.IsOverlay() { // has not been initialized
+				ni.SetAsOverlay()
+				nii.Init2D()
+				nii.Style2D()
+			}
+			// note: skipping sizing, layout -- use simple elements here, esp Bitmap
+			nii.Render2D()
 		}
-		if !ni.IsOverlay() { // has not been initialized
-			ni.SetAsOverlay()
-			nii.Init2D()
-			nii.Style2D()
-		}
-		// note: skipping sizing, layout -- use simple elements here, esp Bitmap
-		nii.Render2D()
 	}
 }
 
