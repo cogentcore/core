@@ -655,9 +655,9 @@ type Ki interface {
 	// UnmarshalPost to recover pointers from paths.
 	ReadJSON(reader io.Reader) error
 
-	// LoadJSON loads over this tree from a JSON-encoded file -- see ReadJSON
-	// for details, and LoadNewJSON for loading an entirely new tree.
-	LoadJSON(filename string) error
+	// OpenJSON opens file over this tree from a JSON-encoded file -- see
+	// ReadJSON for details, and OpenNewJSON for opening an entirely new tree.
+	OpenJSON(filename string) error
 
 	// WriteXML writes the tree to an XML-encoded byte string over io.Writer
 	// using MarshalXML.

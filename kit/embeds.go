@@ -87,7 +87,7 @@ func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflec
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
+		// log.Printf("kit.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
 		return false
 	}
 	rval := true

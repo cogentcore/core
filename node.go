@@ -1502,7 +1502,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	return err
 }
 
-func (n *Node) LoadJSON(filename string) error {
+func (n *Node) OpenJSON(filename string) error {
 	fp, err := os.Open(filename)
 	defer fp.Close()
 	if err != nil {
@@ -1527,7 +1527,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
 		typ := kit.Types.Type(tn)
 		if typ == nil {
-			return nil, fmt.Errorf("ki.LoadNewJSON: kit.Types type name not found: %v", tn)
+			return nil, fmt.Errorf("ki.OpenNewJSON: kit.Types type name not found: %v", tn)
 		}
 		root := NewOfType(typ)
 		root.Init(root)
@@ -1541,13 +1541,13 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		root.UpdateEnd(updt)
 		return root, nil
 	} else {
-		return nil, fmt.Errorf("ki.LoadNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree\n")
+		return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree\n")
 	}
 }
 
-// LoadNewJSON loads a new Ki tree from a JSON-encoded file, using type
+// OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type
 // information at start of file to create an object of the proper type
-func LoadNewJSON(filename string) (Ki, error) {
+func OpenNewJSON(filename string) (Ki, error) {
 	fp, err := os.Open(filename)
 	defer fp.Close()
 	if err != nil {
