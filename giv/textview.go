@@ -190,6 +190,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tv.UpdateSig()
 	case TextBufInsert:
 		tbe := data.(*TextBufEdit)
+		tv.Edited = tv.Buf.Edited
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
@@ -204,6 +205,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		}
 	case TextBufDelete:
 		tbe := data.(*TextBufEdit)
+		tv.Edited = tv.Buf.Edited
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
@@ -652,7 +654,7 @@ func (tv *TextView) CursorBackspace(steps int) {
 	tv.CursorBackward(steps)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
-	tv.Buf.DeleteText(tv.CursorPos, org)
+	tv.Buf.DeleteText(tv.CursorPos, org, true)
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -665,7 +667,7 @@ func (tv *TextView) CursorDelete(steps int) {
 	org := tv.CursorPos
 	tv.RenderCursor(false)
 	tv.CursorForward(steps)
-	tv.Buf.DeleteText(org, tv.CursorPos)
+	tv.Buf.DeleteText(org, tv.CursorPos, true)
 	tv.SetCursor(org)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -680,8 +682,38 @@ func (tv *TextView) CursorKill() {
 	} else {
 		tv.CursorEndLine()
 	}
-	tv.Buf.DeleteText(org, tv.CursorPos)
+	tv.Buf.DeleteText(org, tv.CursorPos, true)
 	tv.SetCursor(org)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+}
+
+// Undo undoes previous action
+func (tv *TextView) Undo() {
+	tv.RenderCursor(false)
+	tbe := tv.Buf.Undo()
+	if tbe != nil {
+		if tbe.Delete { // now an insert
+			tv.SetCursor(tbe.Reg.End)
+		} else {
+			tv.SetCursor(tbe.Reg.Start)
+		}
+	}
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+}
+
+// Redo redoes previously undone action
+func (tv *TextView) Redo() {
+	tv.RenderCursor(false)
+	tbe := tv.Buf.Redo()
+	if tbe != nil {
+		if tbe.Delete {
+			tv.SetCursor(tbe.Reg.Start)
+		} else {
+			tv.SetCursor(tbe.Reg.End)
+		}
+	}
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 }
@@ -827,7 +859,7 @@ func (tv *TextView) DeleteSelection() *TextBufEdit {
 	if tbe == nil {
 		return nil
 	}
-	tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End)
+	tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, true)
 	tv.SelectReset()
 	return tbe
 }
@@ -864,7 +896,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 		tv.Cut()
 	}
 	tv.RenderCursor(false)
-	tbe := tv.Buf.InsertText(tv.CursorPos, txt)
+	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
 	tv.SetCursor(tbe.Reg.End)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -1242,7 +1274,7 @@ func (tv *TextView) RenderAllLines() {
 		pos := tv.RenderStartPos()
 		for ln := 0; ln < tv.NLines; ln++ {
 			lst := pos.Y + tv.Offs[ln]
-			led := lst + tv.Renders[ln].Size.Y
+			led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 			if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
 				continue
 			}
@@ -1592,6 +1624,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunPaste:
 		kt.SetProcessed()
 		tv.Paste()
+	case gi.KeyFunUndo:
+		kt.SetProcessed()
+		tv.Undo()
+	case gi.KeyFunRedo:
+		kt.SetProcessed()
+		tv.Redo()
 	case gi.KeyFunComplete:
 		kt.SetProcessed()
 		tv.OfferCompletions()

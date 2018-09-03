@@ -1211,11 +1211,11 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 	errstr := "gi.TextRender SetHTMLPre"
 
 	sz := len(str)
+	tr.Spans = make([]SpanRender, 1)
+	tr.Links = nil
 	if sz == 0 {
 		return
 	}
-	tr.Spans = make([]SpanRender, 1)
-	tr.Links = nil
 	curSp := &(tr.Spans[0])
 	initsz := kit.MinInt(sz, 1020)
 	curSp.Init(initsz)

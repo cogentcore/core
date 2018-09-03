@@ -94,6 +94,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * TextView:
 	+ cursor is sprite (also textfield)
+	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ multi-span RenderSelect
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
 	+ line number render -- just allocate space at left and render it directly -- can have a map of line number -- icon name too to put an icon at the line -- add one for wordwrap.

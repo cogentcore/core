@@ -87,15 +87,17 @@ func (te *TextBufEdit) ToBytes() []byte {
 // saving and loading can deal with Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt        []byte      `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
-	Edited     bool        `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	Filename   gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
-	Mimetype   string      `json:"-" xml:"-" desc:"mime type of the contents"`
-	NLines     int         `json:"-" xml:"-" desc:"number of lines"`
-	Lines      [][]rune    `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
-	ByteOffs   []int       `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
-	TextBufSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
-	Views      []*TextView `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+	Edited     bool           `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+	Mimetype   string         `json:"-" xml:"-" desc:"mime type of the contents"`
+	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
+	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
+	ByteOffs   []int          `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
+	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
+	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
+	UndoPos    int            `json:"-" xml:"-" desc:"undo position"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
@@ -256,9 +258,17 @@ func (tb *TextBuf) AddView(vw *TextView) {
 //////////////////////////////////////////////////////////////////////////////////////
 //   Edits
 
+func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
+	if tb.UndoPos < len(tb.Undos) {
+		tb.Undos = tb.Undos[:tb.UndoPos]
+	}
+	tb.Undos = append(tb.Undos, tbe)
+	tb.UndoPos = len(tb.Undos)
+}
+
 // DeleteText deletes region of text between start and end positions, signaling
-// views after text lines have been updated
-func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
+// views after text lines have been updated.
+func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 	for ed.Ln >= len(tb.Lines) {
 		ed.Ln--
 	}
@@ -270,6 +280,8 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 		return nil
 	}
 	tb.Edited = true
+	tbe := tb.Region(st, ed)
+	tbe.Delete = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
 		// no lines to bytes for single-line ops
@@ -296,14 +308,16 @@ func (tb *TextBuf) DeleteText(st, ed TextPos) *TextBufEdit {
 		tb.NLines = len(tb.Lines)
 		tb.LinesToBytes()
 	}
-	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}, Delete: true}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
+	if saveUndo {
+		tb.SaveUndo(tbe)
+	}
 	return tbe
 }
 
 // Insert inserts new text at given starting position, signaling views after
 // text has been inserted
-func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
+func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
 	}
@@ -348,6 +362,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte) *TextBufEdit {
 	}
 	tbe := tb.Region(st, ed)
 	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	if saveUndo {
+		tb.SaveUndo(tbe)
+	}
 	return tbe
 }
 
@@ -391,6 +408,38 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 			copy(tbe.Text[ti], tb.Lines[ln])
 		}
 	}
+	return tbe
+}
+
+// Undo undoes next item on the undo stack, and returns that record -- nil if no more
+func (tb *TextBuf) Undo() *TextBufEdit {
+	if tb.UndoPos == 0 {
+		return nil
+	}
+	tb.UndoPos--
+	tbe := tb.Undos[tb.UndoPos]
+	if tbe.Delete {
+		// fmt.Printf("undoing delete at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
+		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false)
+	} else {
+		// fmt.Printf("undoing insert at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
+		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false)
+	}
+	return tbe
+}
+
+// Redo redoes next item on the undo stack, and returns that record, nil if no more
+func (tb *TextBuf) Redo() *TextBufEdit {
+	if tb.UndoPos >= len(tb.Undos) {
+		return nil
+	}
+	tbe := tb.Undos[tb.UndoPos]
+	if tbe.Delete {
+		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false)
+	} else {
+		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false)
+	}
+	tb.UndoPos++
 	return tbe
 }
 
