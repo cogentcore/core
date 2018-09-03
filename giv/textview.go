@@ -6,6 +6,7 @@ package giv
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"log"
 	"strings"
@@ -49,11 +50,16 @@ type TextView struct {
 	HiStyle       string                    `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	LineNos       bool                      `desc:"show line numbers at left end of editor"`
+	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
 	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 	Markup        [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs    int                       `json:"-" xml:"-" number of line number digits needed"`
+	LineNoOff     float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender  gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
 	LinesSize     image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
 	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
@@ -1128,6 +1134,7 @@ func (tv *TextView) ScrollCursorToHorizCenter() bool {
 func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
 		rrp, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
@@ -1143,6 +1150,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
 		rrp, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
@@ -1256,6 +1264,12 @@ func (tv *TextView) VisSizes() {
 	sz := tv.VpBBox.Size()
 	tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
 	tv.VisSize.X = int(math32.Floor(float32(sz.X) / st.Font.Ch))
+	tv.LineNoDigs = gi.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
+	if tv.LineNos {
+		tv.LineNoOff = float32(tv.LineNoDigs+3) * st.Font.Ch // space for icon
+	} else {
+		tv.LineNoOff = 0
+	}
 }
 
 // RenderAllLines displays all the visible lines on the screen -- called
@@ -1283,12 +1297,34 @@ func (tv *TextView) RenderAllLines() {
 			}
 			lp := pos
 			lp.Y = lst
+			lp.X += tv.LineNoOff
 			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+			if tv.LineNos {
+				tv.RenderLineNo(ln)
+			}
 		}
 
 		tv.PopBounds()
 		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
 		vp.Win.UpdateEnd(updt)
+	}
+}
+
+// RenderLineNo renders given line number -- called within context of other render
+func (tv *TextView) RenderLineNo(ln int) {
+	vp := tv.Viewport
+	sty := &tv.Sty
+	rs := &vp.Render
+	lfmt := fmt.Sprintf("%v", tv.LineNoDigs)
+	lfmt = "%0" + lfmt + "d"
+	lnstr := fmt.Sprintf(lfmt, ln)
+	tv.LineNoRender.SetString(lnstr, &sty.Font, &sty.UnContext, &sty.Text, true, 0, 0)
+	pos := tv.RenderStartPos()
+	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
+	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent)
+	tv.LineNoRender.Render(rs, pos)
+	if ic, ok := tv.LineIcons[ln]; ok {
+		// todo: render icon!
 	}
 }
 
@@ -1337,7 +1373,11 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 				lst := pos.Y + tv.Offs[ln]
 				lp := pos
 				lp.Y = lst
+				lp.X += tv.LineNoOff
 				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+				if tv.LineNos {
+					tv.RenderLineNo(ln)
+				}
 			}
 
 			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}

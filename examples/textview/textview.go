@@ -71,6 +71,7 @@ func mainrun() {
 	txed1 := txfr1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiLang = "Go"
 	txed1.HiStyle = "emacs"
+	txed1.LineNos = true
 
 	// generally need to put text view within its own frame for scrolling
 	txfr2 := splt.AddNewChild(gi.KiT_Frame, "view-frame-2").(*gi.Frame)
