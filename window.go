@@ -133,6 +133,7 @@ type Window struct {
 	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
+	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
 	stopEventLoop    bool
 }
 
@@ -466,6 +467,12 @@ func Init() {
 /////////////////////////////////////////////////////////////////////////////
 //                   Event Loop
 
+// WinWait is a wait group for waiting for all the open window event
+// loops to finish -- this can be used for cases where the initial main run
+// uses a GoStartEventLoop for example.  It is incremented by GoStartEventLoop
+// and decremented when the event loop terminates.
+var WinWait sync.WaitGroup
+
 // StartEventLoop is the main startup method to call after the initial window
 // configuration is setup -- does any necessary final initialization and then
 // starts the event loop in this same goroutine, and does not return until the
@@ -477,9 +484,12 @@ func (w *Window) StartEventLoop() {
 }
 
 // GoStartEventLoop starts the event processing loop for this window in a new
-// goroutine, and returns immediately.
+// goroutine, and returns immediately.  Adds to WinWait waitgroup so a main
+// thread can wait on that for all windows to close.
 func (w *Window) GoStartEventLoop() {
+	WinWait.Add(1)
 	w.DoFullRender = true
+	w.GoLoop = true
 	go w.EventLoop()
 }
 
@@ -1205,6 +1215,9 @@ mainloop:
 		}
 	}
 	// fmt.Println("end of event loop")
+	if w.GoLoop {
+		WinWait.Done()
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

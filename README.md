@@ -98,7 +98,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ multi-span RenderSelect
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
-	+ start on gide and put lots of wrapper stuff in there -- maybe all multi-long sequences can go in there and not in base textview?
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
@@ -112,9 +111,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 
 * fileview should add extension to filename if only one extension provided, if
-  user types in a new filename..
+  user types in a new filename.. 
 
-* fix text scroll rendering finally
+* fix text scrolling-off-top rendering finally
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
 
@@ -125,11 +124,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
 
-
-+ TextArea -- go full editor..
-
 * add context menus for delete, rename to fileview -- would be a good test to
-  make sure context menu api is sufficiently flexible.
+  make sure context menu api is sufficiently flexible. (use new ContextMenu type properties?)
 
 * update widgets README
 

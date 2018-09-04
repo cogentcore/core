@@ -12,69 +12,12 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/goki/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
-
-// TextPos represents line, character positions within the TextBuf and TextView
-type TextPos struct {
-	Ln, Ch int
-}
-
-var TextPosZero = TextPos{}
-
-// IsLess returns true if receiver position is less than given comparison
-func (tp *TextPos) IsLess(cmp TextPos) bool {
-	switch {
-	case tp.Ln < cmp.Ln:
-		return true
-	case tp.Ln == cmp.Ln:
-		return tp.Ch < cmp.Ch
-	default:
-		return false
-	}
-}
-
-// TextRegion represents a text region as a start / end position
-type TextRegion struct {
-	Start TextPos
-	End   TextPos
-}
-
-var TextRegionZero = TextRegion{}
-
-// TextBufEdit describes an edit action to a buffer -- this is the data passed
-// via signals to viewers of the buffer.  Actions are only deletions and
-// insertions (a change is a sequence of those, given normal editing
-// processes).  The TextBuf always reflects the current state *after* the
-// edit.
-type TextBufEdit struct {
-	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert"`
-	Delete bool       `desc:"action is either a deletion or an insertion"`
-	Text   [][]rune   `desc:"text to be inserted"`
-}
-
-// ToBytes returns the Text of this edit record to a byte string, with
-// newlines at end of each line -- nil if Text is empty
-func (te *TextBufEdit) ToBytes() []byte {
-	sz := len(te.Text)
-	if sz == 0 {
-		return nil
-	}
-	if sz == 1 {
-		return []byte(string(te.Text[0]))
-	}
-	var b []byte
-	for i := range te.Text {
-		b = append(b, []byte(string(te.Text[i]))...)
-		if i < sz-1 {
-			b = append(b, '\n')
-		}
-	}
-	return b
-}
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It just
 // holds the raw text lines (in original string and rune formats), and sends
@@ -252,15 +195,79 @@ func (tb *TextBuf) AddView(vw *TextView) {
 
 // SetMimetype sets the Mimetype and HiLang based on the given filename
 func (tb *TextBuf) SetMimetype(filename string) {
-	ext := filepath.Ext(filename)
+	// todo: use chroma too
+	ext := strings.ToLower(filepath.Ext(filename))
 	tb.Mimetype = mime.TypeByExtension(ext)
 	if hl, ok := ExtToHiLangMap[ext]; ok {
 		tb.HiLang = hl
 		fmt.Printf("set language to: %v for extension: %v\n", hl, ext)
+	} else if strings.HasSuffix(filename, "Makefile") {
+		tb.HiLang = "Makefile"
 	} else {
 		fmt.Printf("failed to set language for extension: %v\n", ext)
 	}
 	// else try something else..
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//   TextPos, TextRegion, TextBufEdit
+
+// TextPos represents line, character positions within the TextBuf and TextView
+type TextPos struct {
+	Ln, Ch int
+}
+
+var TextPosZero = TextPos{}
+
+// IsLess returns true if receiver position is less than given comparison
+func (tp *TextPos) IsLess(cmp TextPos) bool {
+	switch {
+	case tp.Ln < cmp.Ln:
+		return true
+	case tp.Ln == cmp.Ln:
+		return tp.Ch < cmp.Ch
+	default:
+		return false
+	}
+}
+
+// TextRegion represents a text region as a start / end position
+type TextRegion struct {
+	Start TextPos
+	End   TextPos
+}
+
+var TextRegionZero = TextRegion{}
+
+// TextBufEdit describes an edit action to a buffer -- this is the data passed
+// via signals to viewers of the buffer.  Actions are only deletions and
+// insertions (a change is a sequence of those, given normal editing
+// processes).  The TextBuf always reflects the current state *after* the
+// edit.
+type TextBufEdit struct {
+	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert"`
+	Delete bool       `desc:"action is either a deletion or an insertion"`
+	Text   [][]rune   `desc:"text to be inserted"`
+}
+
+// ToBytes returns the Text of this edit record to a byte string, with
+// newlines at end of each line -- nil if Text is empty
+func (te *TextBufEdit) ToBytes() []byte {
+	sz := len(te.Text)
+	if sz == 0 {
+		return nil
+	}
+	if sz == 1 {
+		return []byte(string(te.Text[0]))
+	}
+	var b []byte
+	for i := range te.Text {
+		b = append(b, []byte(string(te.Text[i]))...)
+		if i < sz-1 {
+			b = append(b, '\n')
+		}
+	}
+	return b
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -526,15 +533,17 @@ func NewTextBuf() *TextBuf {
 //  extension to highighting style map
 
 var ExtToHiLangMap = map[string]string{
-	".go":   "Go",
-	".md":   "markdown",
-	".css":  "CSS",
-	".html": "HTML",
-	".htm":  "HTML",
-	".tex":  "TeX",
-	".cpp":  "C++",
-	".c":    "C",
-	".h":    "C++",
-	".sh":   "Bash",
+	".go":    "Go",
+	".md":    "markdown",
+	".css":   "CSS",
+	".html":  "HTML",
+	".htm":   "HTML",
+	".tex":   "TeX",
+	".cpp":   "C++",
+	".c":     "C",
+	".h":     "C++",
+	".sh":    "Bash",
+	".plist": "XML",
+	".svg": "XML",
 }
 

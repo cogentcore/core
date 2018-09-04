@@ -613,6 +613,11 @@ func (fv *FileView) FileSelectAction(idx int) {
 
 // SetExt updates the ext to given (list of, comma separated) extensions
 func (fv *FileView) SetExt(ext string) {
+	if ext == "" {
+		if fv.SelFile != "" {
+			ext = strings.ToLower(filepath.Ext(fv.SelFile))
+		}
+	}
 	fv.Ext = ext
 	exts := strings.Split(fv.Ext, ",")
 	fv.ExtMap = make(map[string]string, len(exts))
