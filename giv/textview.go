@@ -1402,6 +1402,9 @@ func (tv *TextView) RenderCursor(on bool) {
 	if win == nil {
 		return
 	}
+	if tv.Renders == nil {
+		return
+	}
 	if tv.PushBounds() {
 		sp := tv.CursorSprite()
 		if on {
