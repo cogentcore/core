@@ -41,7 +41,7 @@ type TreeView struct {
 	TreeViewSig ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize  gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon        *gi.Icon                  `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
+	Icon        gi.IconName               `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
 	RootView    *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
@@ -266,13 +266,6 @@ const (
 
 // TreeViewSelectors are Style selector names for the different states:
 var TreeViewSelectors = []string{":active", ":selected", ":focus"}
-
-// internal indexes for accessing elements of the widget -- todo: icon!
-const (
-	tvBranchIdx = iota
-	tvSpaceIdx
-	tvLabelIdx
-)
 
 // These are special properties established on the RootView for maintaining
 // overall tree state
@@ -1317,36 +1310,40 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.Open()
 		}
 	})
-	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
-	wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonToggled) {
-			tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.ToggleClose()
+	if tv.HasChildren() {
+		if wb, ok := tv.BranchPart(); ok {
+			wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.ButtonToggled) {
+					tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+					tvv.ToggleClose()
+				}
+			})
 		}
-	})
-	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
-	// HiPri is needed to override label's native processing
-	lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		lb, _ := recv.(*gi.Label)
-		tvv := lb.Parent().Parent().Embed(KiT_TreeView).(*TreeView)
-		me := d.(*mouse.Event)
-		switch me.Button {
-		case mouse.Left:
-			switch me.Action {
-			case mouse.DoubleClick:
-				tvv.ToggleClose()
-				me.SetProcessed()
-			case mouse.Release:
-				tvv.SelectAction(me.SelectMode())
-				me.SetProcessed()
+	}
+	if lbl, ok := tv.LabelPart(); ok {
+		// HiPri is needed to override label's native processing
+		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			lb, _ := recv.(*gi.Label)
+			tvv := lb.Parent().Parent().Embed(KiT_TreeView).(*TreeView)
+			me := d.(*mouse.Event)
+			switch me.Button {
+			case mouse.Left:
+				switch me.Action {
+				case mouse.DoubleClick:
+					tvv.ToggleClose()
+					me.SetProcessed()
+				case mouse.Release:
+					tvv.SelectAction(me.SelectMode())
+					me.SetProcessed()
+				}
+			case mouse.Right:
+				if me.Action == mouse.Release {
+					me.SetProcessed()
+					tvv.This.(gi.Node2D).ContextMenu()
+				}
 			}
-		case mouse.Right:
-			if me.Action == mouse.Release {
-				me.SetProcessed()
-				tvv.This.(gi.Node2D).ContextMenu()
-			}
-		}
-	})
+		})
+	}
 }
 
 ////////////////////////////////////////////////////
@@ -1360,28 +1357,83 @@ var TVBranchProps = ki.Props{
 	"stroke": &gi.Prefs.Colors.Font,
 }
 
+// BranchPart returns the branch in parts, if it exists
+func (tv *TreeView) BranchPart() (*gi.CheckBox, bool) {
+	if icc, ok := tv.Parts.ChildByName("branch", 0); ok {
+		return icc.(*gi.CheckBox), ok
+	}
+	return nil, false
+}
+
+// IconPart returns the icon in parts, if it exists
+func (tv *TreeView) IconPart() (*gi.Icon, bool) {
+	if icc, ok := tv.Parts.ChildByName("icon", 1); ok {
+		return icc.(*gi.Icon), ok
+	}
+	return nil, false
+}
+
+// LabelPart returns the label in parts, if it exists
+func (tv *TreeView) LabelPart() (*gi.Label, bool) {
+	if lbl, ok := tv.Parts.ChildByName("label", 1); ok {
+		return lbl.(*gi.Label), ok
+	}
+	return nil, false
+}
+
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_CheckBox, "branch")
-	config.Add(gi.KiT_Space, "space")
+	if tv.HasChildren() {
+		config.Add(gi.KiT_CheckBox, "branch")
+	}
+	if tv.Icon.IsValid() {
+		config.Add(gi.KiT_Icon, "icon")
+	}
 	config.Add(gi.KiT_Label, "label")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
-
-	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
-	wb.Icon = gi.IconName("widget-wedge-down") // todo: style
-	wb.IconOff = gi.IconName("widget-wedge-right")
 	if mods {
-		wb.SetProp("#icon0", TVBranchProps)
-		wb.SetProp("#icon1", TVBranchProps)
-		wb.SetProp("no-focus", true) // note: cannot be in compiled props
-		tv.StylePart(gi.Node2D(wb))
+		if tv.HasChildren() {
+			if wb, ok := tv.BranchPart(); ok {
+				wb.SetProp("#icon0", TVBranchProps)
+				wb.SetProp("#icon1", TVBranchProps)
+				wb.SetProp("no-focus", true) // note: cannot be in compiled props
+				tv.StylePart(gi.Node2D(wb))
+				// unfortunately StylePart only handles default Style obj -- not
+				// these special styles.. todo: fix this somehow
+				if bprpi, ok := tv.Prop("#branch"); ok {
+					switch pr := bprpi.(type) {
+					case map[string]interface{}:
+						wb.SetIconProps(ki.Props(pr))
+					case ki.Props:
+						wb.SetIconProps(pr)
+					}
+				} else {
+					tprops := kit.Types.Properties(tv.Type(), true) // true = makeNew
+					if bprpi, ok := tprops[gi.WidgetDefPropsKey+"#branch"]; ok {
+						switch pr := bprpi.(type) {
+						case map[string]interface{}:
+							wb.SetIconProps(ki.Props(pr))
+						case ki.Props:
+							wb.SetIconProps(pr)
+						}
+					}
+				}
+			}
+		}
 	}
-
-	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
-	lbl.SetText(tv.Label())
-	if mods {
-		tv.StylePart(gi.Node2D(lbl))
+	if tv.Icon.IsValid() {
+		if ic, ok := tv.IconPart(); ok {
+			if set, _ := ic.SetIcon(string(tv.Icon)); set || tv.NeedsFullReRender() || mods {
+				tv.StylePart(gi.Node2D(ic))
+			}
+		}
+	}
+	if lbl, ok := tv.LabelPart(); ok {
+		lbl.SetText(tv.Label())
+		if mods {
+			tv.StylePart(gi.Node2D(lbl))
+		}
 	}
 	tv.Parts.UpdateEnd(updt)
 }
@@ -1390,11 +1442,15 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	if !tv.Parts.HasChildren() {
 		tv.ConfigParts()
 	}
-	lbl := tv.Parts.KnownChild(tvLabelIdx).(*gi.Label)
-	lbl.SetText(tv.Label())
-	lbl.Sty.Font.Color = tv.Sty.Font.Color
-	wb := tv.Parts.KnownChild(tvBranchIdx).(*gi.CheckBox)
-	wb.SetChecked(!tv.IsClosed())
+	if lbl, ok := tv.LabelPart(); ok {
+		lbl.SetText(tv.Label())
+		lbl.Sty.Font.Color = tv.Sty.Font.Color
+	}
+	if tv.HasChildren() {
+		if wb, ok := tv.BranchPart(); ok {
+			wb.SetChecked(!tv.IsClosed())
+		}
+	}
 }
 
 func (tv *TreeView) Init2D() {
@@ -1412,6 +1468,7 @@ func (tv *TreeView) Init2D() {
 
 var TreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
+	"spacing":          units.NewValue(.5, units.Ch),
 	"border-width":     units.NewValue(0, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
 	"padding":          units.NewValue(0, units.Px),
@@ -1420,7 +1477,17 @@ var TreeViewProps = ki.Props{
 	"vertical-align":   gi.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": "inherit",
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &gi.Prefs.Colors.Icon,
+		"stroke":  &gi.Prefs.Colors.Font,
+	},
 	"#branch": ki.Props{
+		"icon":             "widget-wedge-down",
+		"icon-off":         "widget-wedge-right",
 		"margin":           units.NewValue(0, units.Px),
 		"padding":          units.NewValue(0, units.Px),
 		"background-color": color.Transparent,
@@ -1461,9 +1528,11 @@ func (tv *TreeView) Style2D() {
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.Indent = units.NewValue(2, units.Ch) // default
-	TreeViewFields.Style(tv, nil, tv.Props)
-	TreeViewFields.ToDots(tv, &tv.Sty.UnContext)
+	tv.Indent.SetFmInheritProp("indent", tv.This, false, true) // no inherit, yes type defaults
+	tv.Indent.ToDots(&tv.Sty.UnContext)
+	if spc, ok := tv.PropInherit("spacing", false, true); ok { // no inherit, yes type
+		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
+	}
 	tv.ConfigParts()
 }
 
@@ -1608,19 +1677,4 @@ func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
 	case gi.FocusInactive: // don't care..
 	case gi.FocusActive:
 	}
-}
-
-// TreeViewDefault is default obj that can be used when property specifies "default"
-var TreeViewDefault TreeView
-
-// TreeViewFields contain the StyledFields for TreeView type
-var TreeViewFields = initTreeView()
-
-func initTreeView() *gi.StyledFields {
-	TreeViewDefault = TreeView{}
-	TreeViewDefault.Indent = units.NewValue(2, units.Ch)
-	sf := &gi.StyledFields{}
-	sf.Default = &TreeViewDefault
-	sf.AddField(&TreeViewDefault, "Indent")
-	return sf
 }

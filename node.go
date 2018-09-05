@@ -141,6 +141,11 @@ func (g *NodeBase) SetInactive() {
 	bitflag.Set(&g.Flag, int(Inactive))
 }
 
+// ClearInactive clears the node as inactive
+func (g *NodeBase) ClearInactive() {
+	bitflag.Clear(&g.Flag, int(Inactive))
+}
+
 // SetInactiveState sets flag as inactive or not based on inact arg
 func (g *NodeBase) SetInactiveState(inact bool) {
 	bitflag.SetState(&g.Flag, inact, int(Inactive))

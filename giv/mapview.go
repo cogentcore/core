@@ -312,7 +312,7 @@ func (mv *MapView) ConfigToolbar() {
 	if kit.IfaceIsNil(mv.Map) || mv.IsInactive() {
 		return
 	}
-	if mv.ToolbarMap == mv.Map {
+	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
 	tb := mv.ToolBar()

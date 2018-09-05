@@ -366,7 +366,12 @@ type ButtonWidget interface {
 	// actually differ in functionality.
 	ButtonRelease()
 
-	// ConfigParts configures the parts of the button -- called during init and style.
+	// StyleParts is called during Style2D to handle stying associated with
+	// parts -- icons mainly.
+	StyleParts()
+
+	// ConfigParts configures the parts of the button -- called during init
+	// and style.
 	ConfigParts()
 
 	// ConfigPartsIfNeeded configures the parts of the button, only if needed
@@ -465,6 +470,17 @@ func (g *ButtonBase) ButtonRelease() {
 	g.ButtonReleased() // do base
 }
 
+func (g *ButtonBase) StyleParts() {
+	if pv, ok := g.PropInherit("indicator", false, true); ok { // no inh, yes type
+		pvs := kit.ToString(pv)
+		g.Indicator = IconName(pvs)
+	}
+	if pv, ok := g.PropInherit("icon", false, true); ok { // no inh, yes type
+		pvs := kit.ToString(pv)
+		g.Icon = IconName(pvs)
+	}
+}
+
 func (g *ButtonBase) ConfigParts() {
 	g.Parts.Lay = LayoutHoriz
 	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
@@ -486,10 +502,7 @@ func (g *ButtonBase) ConfigPartsIfNeeded() {
 
 func (g *ButtonBase) Style2DWidget() {
 	g.WidgetBase.Style2DWidget()
-	if pv, ok := g.Prop("indicator"); ok {
-		pvs := kit.ToString(pv)
-		g.Indicator = IconName(pvs)
-	}
+	g.This.(ButtonWidget).StyleParts()
 }
 
 func (g *ButtonBase) Style2D() {
@@ -657,6 +670,8 @@ type CheckBox struct {
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
 var CheckBoxProps = ki.Props{
+	"icon":             "widget-checked-box",
+	"icon-off":         "widget-unchecked-box",
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
@@ -731,16 +746,35 @@ func (g *CheckBox) SetIcons(icOn, icOff string) {
 	g.UpdateEnd(updt)
 }
 
+// SetIconProps sets the icon properties from given property list -- parent
+// types can use this to set different icon properties
+func (g *CheckBox) SetIconProps(props ki.Props) {
+	if icp, has := props["icon"]; has {
+		g.SetProp("icon", icp)
+	}
+	if icp, has := props["icon-off"]; has {
+		g.SetProp("icon-off", icp)
+	}
+}
+
 func (g *CheckBox) Init2D() {
 	g.SetCheckable(true)
 	g.Init2DWidget()
 	g.This.(ButtonWidget).ConfigParts()
 }
 
+func (g *CheckBox) StyleParts() {
+	g.ButtonBase.StyleParts()
+	if pv, ok := g.PropInherit("icon-off", false, true); ok { // no inh, yes type
+		pvs := kit.ToString(pv)
+		g.IconOff = IconName(pvs)
+	}
+}
+
 func (g *CheckBox) ConfigParts() {
 	g.SetCheckable(true)
-	if !g.Icon.IsValid() { // todo: just use style
-		g.Icon = "widget-checked-box"
+	if !g.Icon.IsValid() {
+		g.Icon = "widget-checked-box" // fallback
 	}
 	if !g.IconOff.IsValid() {
 		g.IconOff = "widget-unchecked-box"
@@ -792,6 +826,22 @@ func (g *CheckBox) ConfigPartsIfNeeded() {
 	}
 	icIdx := 0 // always there
 	ist := g.Parts.KnownChild(icIdx).(*Layout)
+	if g.Icon.IsValid() {
+		icon := ist.KnownChild(0).(*Icon)
+		if !icon.HasChildren() || icon.UniqueNm != string(g.Icon) || g.NeedsFullReRender() {
+			if set, _ := g.Icon.SetIcon(icon); set {
+				g.StylePart(Node2D(icon))
+			}
+		}
+	}
+	if g.IconOff.IsValid() {
+		icoff := ist.KnownChild(1).(*Icon)
+		if !icoff.HasChildren() || icoff.UniqueNm != string(g.IconOff) || g.NeedsFullReRender() {
+			if set, _ := g.IconOff.SetIcon(icoff); set {
+				g.StylePart(Node2D(icoff))
+			}
+		}
+	}
 	if g.IsChecked() {
 		ist.StackTop = 0
 	} else {

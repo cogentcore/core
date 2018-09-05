@@ -213,11 +213,12 @@ func (sp SizePrefs) CanStretchNeed(d Dims2D) bool {
 // within a layout -- includes computed values of style prefs -- everything is
 // concrete and specified here, whereas style may not be fully resolved
 type LayoutData struct {
-	Size         SizePrefs `desc:"size constraints for this item -- from layout style"`
-	AllocSize    Vec2D     `desc:"allocated size of this item, by the parent layout"`
-	AllocPos     Vec2D     `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
-	AllocPosRel  Vec2D     `desc:"allocated relative position of this item, computed by the parent layout"`
-	AllocPosOrig Vec2D     `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
+	Size          SizePrefs `desc:"size constraints for this item -- from layout style"`
+	AllocSize     Vec2D     `desc:"allocated size of this item, by the parent layout"`
+	AllocPos      Vec2D     `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
+	AllocPosRel   Vec2D     `desc:"allocated relative position of this item, computed by the parent layout"`
+	AllocSizeOrig Vec2D     `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
+	AllocPosOrig  Vec2D     `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
 }
 
 // todo: not using yet:
@@ -251,7 +252,6 @@ func (ld *LayoutData) Reset() {
 	ld.AllocSize = Vec2DZero
 	ld.AllocPos = Vec2DZero
 	ld.AllocPosRel = Vec2DZero
-	ld.AllocPosOrig = Vec2DZero
 }
 
 // UpdateSizes updates our sizes based on AllocSize and Max constraints, etc
@@ -1022,6 +1022,7 @@ func (ly *Layout) FinalizeLayout() {
 			continue
 		}
 		ly.ChildSize.SetMax(ni.LayData.AllocPosRel.Add(ni.LayData.AllocSize))
+		ni.LayData.AllocSizeOrig = ni.LayData.AllocSize
 	}
 }
 
@@ -1232,11 +1233,18 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 // render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {
+		for _, kid := range ly.Kids { // first mark everyone else as inactive
+			_, ni := KiToNode2D(kid)
+			if ni != nil {
+				ni.SetInactive()
+			}
+		}
 		sn, ok := ly.Child(ly.StackTop)
 		if !ok {
 			return
 		}
-		nii, _ := KiToNode2D(sn)
+		nii, ni := KiToNode2D(sn)
+		ni.ClearInactive()
 		nii.Render2D()
 		return
 	}
@@ -1819,7 +1827,8 @@ func (g *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return g.Layout2DChildren(iter)
 }
 
-// Space adds a fixed sized (1 em by default) blank space to a layout -- set width / height property to change
+// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
+// width / height property to change
 type Space struct {
 	WidgetBase
 }
@@ -1827,7 +1836,7 @@ type Space struct {
 var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
 
 var SpaceProps = ki.Props{
-	"width":  units.NewValue(1, units.Em),
+	"width":  units.NewValue(1, units.Ch),
 	"height": units.NewValue(1, units.Em),
 }
 

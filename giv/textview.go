@@ -74,7 +74,7 @@ type TextView struct {
 	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion    *gi.Complete                 `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Completion    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  string
@@ -941,7 +941,7 @@ func (tv *TextView) OfferCompletions() {
 	tbe := tv.Buf.Region(st, en)
 	if tbe != nil {
 		s := string(tbe.ToBytes())
-		s = strings.TrimLeft(s," \t")  // trim ' ' and '\t'
+		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 		fmt.Println(s)
 		cp := tv.CharStartPos(tv.CursorPos)
 		tv.Completion.ShowCompletions(s, tv.Viewport, int(cp.X+5), int(cp.Y+10))
@@ -1233,7 +1233,7 @@ func TextViewBlink() {
 			continue
 		}
 		win := tv.ParentWindow()
-		if win == nil || win.IsResizing() {
+		if win == nil || win.IsResizing() || win.IsClosed() {
 			continue
 		}
 		tv.BlinkOn = !tv.BlinkOn
@@ -1903,7 +1903,7 @@ func (tv *TextView) Style2D() {
 		tv.StateStyles[i].StyleCSS(tv.This.(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This, true, true) // get type defaults
+	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This, true, true) // inherit and get type defaults
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
 }
 

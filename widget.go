@@ -61,10 +61,22 @@ func (g *WidgetBase) Init2D() {
 	g.Init2DWidget()
 }
 
+// WidgetDefStyleKey is the key for accessing the default style stored in the
+// type-properties for a given type -- also ones with sub-selectors for parts
+// in there with selector appended to this key
+var WidgetDefStyleKey = "__DefStyle"
+
+// WidgetDefPropsKey is the key for accessing the default style properties
+// stored in the type-properties for a given type -- also ones with
+// sub-selectors for parts in there with selector appended to this key
+var WidgetDefPropsKey = "__DefProps"
+
 // DefaultStyle2DWidget retrieves default style object for the type, from type
 // properties -- selector is optional selector for state etc.  Property key is
-// "__DefStyle" + selector -- if part != nil, then use that obj for getting the
-// default style starting point when creating a new style
+// "__DefStyle" + selector -- if part != nil, then use that obj for getting
+// the default style starting point when creating a new style.  Also stores a
+// "__DefProps"+selector type property of the props used for styling here, for
+// accessing properties that are not compiled into standard Style object.
 func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *Style {
 	tprops := kit.Types.Properties(g.Type(), true) // true = makeNew
 	styprops := tprops
@@ -85,8 +97,9 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 	parSty := g.ParentStyle()
 
 	var dsty *Style
-	pnm := "__DefStyle" + selector
-	dstyi, ok := tprops[pnm]
+	stKey := WidgetDefStyleKey + selector
+	prKey := WidgetDefPropsKey + selector
+	dstyi, ok := tprops[stKey]
 	if !ok || RebuildDefaultStyles {
 		dsty = &Style{}
 		dsty.Defaults()
@@ -101,7 +114,8 @@ func (g *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *St
 		}
 		dsty.SetStyleProps(parSty, styprops)
 		dsty.IsSet = false // keep as non-set
-		tprops[pnm] = dsty
+		tprops[stKey] = dsty
+		tprops[prKey] = styprops
 	} else {
 		dsty, _ = dstyi.(*Style)
 	}
@@ -167,9 +181,9 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 	if pg == nil {
 		return
 	}
-	if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
-		return
-	}
+	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
+	// 	return
+	// }
 	stynm := "#" + strings.ToLower(pk.Name())
 	// this is called on US (the parent object) so we store the #partname
 	// default style within our type properties..  that's good -- HOWEVER we
@@ -194,6 +208,7 @@ func (g *WidgetBase) StylePart(pk Node2D) {
 				ic.SetProp(k, v)
 			}
 		}
+		ic.SetFullReRender()
 	}
 }
 

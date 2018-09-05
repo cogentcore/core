@@ -95,9 +95,20 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
+	+ impl auto-indent
+	+ Important: optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
+	+ multi-span click to locate cursor no longer working!
+	+ also select itself not rendering.  did something get lost?
+	+ also up / down really need to operate on the spans, not just the raw lines -- editing documents e.g., book and not just code is key test case.
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ multi-span RenderSelect
+	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
+
+
+* Splitview: add offset from prior splitters to splitter -- it isn't getting the offset properly, and also setup some lowpri keyfuns for collapsing and expanding  
+
+* Window SetName, title itself should actually rename windows, and regenerate lists of named windows.  overall gi.Window SetName should update OSWin.SetName, and we should have a wrapper SetTitle for OSWin's.
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
@@ -132,4 +143,5 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * Reminder: grep all todo: in code
 
 	
+
 

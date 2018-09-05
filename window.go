@@ -428,7 +428,7 @@ func (w *Window) Closed() {
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
 	WinNewCloseStamp()
-	if w.IsInactive() || w.Viewport == nil {
+	if w.Viewport == nil {
 		return
 	}
 	if w.WinTex != nil {
@@ -450,6 +450,14 @@ func (w *Window) Closed() {
 	for _, sp := range w.SpritesBg {
 		sp.Release()
 	}
+}
+
+// IsClosed reports if the window has been closed
+func (w *Window) IsClosed() bool {
+	if w.WinTex == nil || w.IsInactive() {
+		return true
+	}
+	return false
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
@@ -1218,6 +1226,8 @@ mainloop:
 	if w.GoLoop {
 		WinWait.Done()
 	}
+	// our last act must be self destruction!
+	w.Destroy()
 }
 
 /////////////////////////////////////////////////////////////////////////////

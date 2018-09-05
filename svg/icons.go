@@ -85,6 +85,10 @@ func (ic *Icon) NeedsReRender() bool {
 }
 
 func (ic *Icon) Render2D() {
+	if ic.Viewport == nil {
+		ic.FullRender2DTree()
+		return
+	}
 	if ic.PushBounds() {
 		if ic.NeedsReRender() {
 			rs := &ic.Render
