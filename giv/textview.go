@@ -284,15 +284,15 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	st := &tv.Sty
 	st.Font.OpenFont(&st.UnContext)
 	tv.FontHeight = st.Font.Height
-	tv.LineHeight = tv.FontHeight * st.Text.LineHeight
+	tv.LineHeight = tv.FontHeight * st.Text.EffLineHeight()
 	spc := tv.Sty.BoxSpace()
-	par, _ := gi.KiToNode2D(tv.Par)
-	pbb := par.ChildrenBBox2D()
-	if pbb != image.ZR {
-		tv.RenderSz.SetPoint(pbb.Size())
-		// fmt.Printf("vp rendersz: %v\n", tv.RenderSz)
+	pari, _ := gi.KiToNode2D(tv.Par)
+	parw := pari.AsLayout2D()
+	paloc := parw.LayData.AllocSizeOrig
+	if !paloc.IsZero() {
+		tv.RenderSz = paloc.Sub(parw.ExtraSize)
 	} else {
-		sz := tv.LayData.AllocSize
+		sz := tv.LayData.AllocSizeOrig
 		if sz.IsZero() {
 			sz = tv.LayData.SizePrefOrMax()
 		}
@@ -300,8 +300,10 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 			sz.SetSubVal(2 * spc)
 		}
 		tv.RenderSz = sz
-		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
+		fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	}
+	tv.RenderSz.X -= tv.LineNoOff
+	fmt.Printf("rendersz: %v\n", tv.RenderSz)
 	return tv.RenderSz
 }
 
@@ -390,7 +392,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		return false
 	}
 	tv.LinesSize = nwSz
-	tv.Size2DFromWH(float32(tv.LinesSize.X), float32(tv.LinesSize.Y))
+	tv.Size2DFromWH(float32(tv.LinesSize.X)+tv.LineNoOff, float32(tv.LinesSize.Y))
 	ly := tv.ParentScrollLayout()
 	if ly != nil {
 		tv.reLayout = true
@@ -497,20 +499,62 @@ func (tv *TextView) CursorForward(steps int) {
 			}
 		}
 	}
-	tv.CursorCol = tv.CursorPos.Ch
+	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
+		if ok && si > 0 {
+			tv.CursorCol = ri
+		} else {
+			tv.CursorCol = tv.CursorPos.Ch
+		}
+	}
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
 }
 
+// WrappedLines returns the number of wrapped lines (spans) for given line number
+func (tv *TextView) WrappedLines(ln int) int {
+	return len(tv.Renders[ln].Spans)
+}
+
+// WrappedLineNo returns the wrapped line number (span index) and rune index
+// within that span of the given character position within line in position,
+// and false if out of range
+func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
+	return tv.Renders[pos.Ln].RuneSpanPos(pos.Ch)
+}
+
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
 	org := tv.CursorPos
-	tv.CursorPos.Ln += steps
-	if tv.CursorPos.Ln >= tv.NLines {
-		tv.CursorPos.Ln = tv.NLines - 1
+	pos := tv.CursorPos
+	for i := 0; i < steps; i++ {
+		gotwrap := false
+		if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+			si, ri, ok := tv.WrappedLineNo(pos)
+			if ok && si < wln-1 {
+				nwc, ok := tv.Renders[pos.Ln].SpanPosToRuneIdx(si+1, ri)
+				if ok {
+					pos.Ch = nwc
+					gotwrap = true
+				}
+			}
+		}
+		if !gotwrap {
+			pos.Ln++
+			if pos.Ln >= tv.NLines {
+				pos.Ln = tv.NLines - 1
+				break
+			}
+			mxlen := gi.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+			if tv.CursorCol < mxlen {
+				pos.Ch = tv.CursorCol
+			} else {
+				pos.Ch = mxlen
+			}
+		}
 	}
-	tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+	tv.CursorPos = pos
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -523,6 +567,9 @@ func (tv *TextView) CursorPageDown(steps int) {
 	for i := 0; i < steps; i++ {
 		lvln := tv.LastVisibleLine(tv.CursorPos.Ln)
 		tv.CursorPos.Ln = lvln
+		if tv.CursorPos.Ln >= tv.NLines {
+			tv.CursorPos.Ln = tv.NLines - 1
+		}
 		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
@@ -544,7 +591,14 @@ func (tv *TextView) CursorBackward(steps int) {
 			}
 		}
 	}
-	tv.CursorCol = tv.CursorPos.Ch
+	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
+		if ok && si > 0 {
+			tv.CursorCol = ri
+		} else {
+			tv.CursorCol = tv.CursorPos.Ch
+		}
+	}
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -553,11 +607,40 @@ func (tv *TextView) CursorBackward(steps int) {
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
 	org := tv.CursorPos
-	tv.CursorPos.Ln -= steps
-	if tv.CursorPos.Ln < 0 {
-		tv.CursorPos.Ln = 0
+	pos := tv.CursorPos
+	for i := 0; i < steps; i++ {
+		gotwrap := false
+		if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+			si, ri, ok := tv.WrappedLineNo(pos)
+			if ok && si > 0 {
+				ri = tv.CursorCol
+				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
+				pos.Ch = nwc
+				gotwrap = true
+			}
+		}
+		if !gotwrap {
+			pos.Ln--
+			if pos.Ln < 0 {
+				pos.Ln = 0
+				break
+			}
+			if wln := tv.WrappedLines(pos.Ln); wln > 1 { // just entered end of wrapped line
+				si := wln - 1
+				ri := tv.CursorCol
+				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+				pos.Ch = nwc
+			} else {
+				mxlen := gi.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+				if tv.CursorCol < mxlen {
+					pos.Ch = tv.CursorCol
+				} else {
+					pos.Ch = mxlen
+				}
+			}
+		}
 	}
-	tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+	tv.CursorPos = pos
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -570,6 +653,9 @@ func (tv *TextView) CursorPageUp(steps int) {
 	for i := 0; i < steps; i++ {
 		lvln := tv.FirstVisibleLine(tv.CursorPos.Ln)
 		tv.CursorPos.Ln = lvln
+		if tv.CursorPos.Ln <= 0 {
+			tv.CursorPos.Ln = 0
+		}
 		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
@@ -619,7 +705,14 @@ func (tv *TextView) CursorStart() {
 func (tv *TextView) CursorEndLine() {
 	org := tv.CursorPos
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
-	tv.CursorCol = tv.CursorPos.Ch
+	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
+		if ok && si > 0 {
+			tv.CursorCol = ri
+		} else {
+			tv.CursorCol = tv.CursorPos.Ch
+		}
+	}
 	tv.ScrollCursorToRight()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -1179,7 +1272,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		rrp, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
+		rrp, _, _, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)
 		spos.X += rrp.X
 		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}
@@ -1195,7 +1288,7 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
-		rrp, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
+		rrp, _, _, _ := tv.Renders[pos.Ln].RuneEndPos(pos.Ch)
 		spos.X += rrp.X
 		spos.Y += rrp.Y - tv.Renders[pos.Ln].Spans[0].RelPos.Y // relative
 	}
@@ -1606,6 +1699,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text) + 1
 		}
+		// fmt.Printf("si: %v  spoff: %v\n", si, spoff)
 	}
 	cch += spoff
 

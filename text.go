@@ -1389,55 +1389,85 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 	}
 }
 
+// RuneSpanPos returns the position (span, rune index within span) within a
+// sequence of spans of a given absolute rune index, starting in the first
+// span -- returns false if index is out of range.
+func (tx *TextRender) RuneSpanPos(idx int) (si, ri int, ok bool) {
+	ri = idx
+	for si = range tx.Spans {
+		if ri < 0 {
+			ri = 0
+		}
+		sr := &tx.Spans[si]
+		if ri >= len(sr.Render) {
+			ri -= (len(sr.Render) + 1) // account for LF
+			continue
+		}
+		return si, ri, true
+	}
+	return 0, 0, false
+}
+
+// SpanPosToRuneIdx returns the absolute rune index for a given span, rune
+// index position -- i.e., the inverse of RuneSpanPos.  Returns false if given
+// input position is out of range, and returns last valid index in that case.
+func (tx *TextRender) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
+	idx = 0
+	for i := range tx.Spans {
+		sr := &tx.Spans[i]
+		if si > i {
+			idx += len(sr.Render) + 1 // account for LF
+			continue
+		}
+		if ri < len(sr.Render) {
+			return idx + ri, true
+		}
+		return idx + len(sr.Render) - 1, false
+	}
+	return 0, false
+}
+
 // RuneRelPos returns the relative (starting) position of the given rune
 // index, counting progressively through all spans present (adds Span RelPos
 // and rune RelPos) -- this is typically the baseline position where rendering
-// will start, not the upper left corner. if index > length, then uses
-// LastPos.  returns also the index of the span that holds that char (-1 = no
-// spans at all)
-func (tx *TextRender) RuneRelPos(idx int) (Vec2D, int) {
-	for si := range tx.Spans {
-		if idx < 0 {
-			idx = 0
-		}
+// will start, not the upper left corner. If index > length, then uses
+// LastPos.  Returns also the index of the span that holds that char (-1 = no
+// spans at all) and the rune index within that span, and false if index is
+// out of range.
+func (tx *TextRender) RuneRelPos(idx int) (pos Vec2D, si, ri int, ok bool) {
+	si, ri, ok = tx.RuneSpanPos(idx)
+	if ok {
 		sr := &tx.Spans[si]
-		if idx >= len(sr.Render) {
-			idx -= (len(sr.Render) + 1) // account for LF
-			continue
-		}
-		return sr.RelPos.Add(sr.Render[idx].RelPos), si
+		return sr.RelPos.Add(sr.Render[ri].RelPos), si, ri, true
 	}
 	nsp := len(tx.Spans)
 	if nsp > 0 {
-		return tx.Spans[nsp-1].LastPos, nsp - 1
+		sr := &tx.Spans[nsp-1]
+		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return Vec2DZero, -1
+	return Vec2DZero, -1, -1, false
 }
 
 // RuneEndPos returns the relative ending position of the given rune index,
 // counting progressively through all spans present(adds Span RelPos and rune
-// RelPos + rune Size.X for LR writing). If index > length, then uses
-// LastPos. returns also the index of the span that holds that char (-1 = no
-// spans at all)
-func (tx *TextRender) RuneEndPos(idx int) (Vec2D, int) {
-	for si := range tx.Spans {
-		if idx < 0 {
-			idx = 0
-		}
+// RelPos + rune Size.X for LR writing). If index > length, then uses LastPos.
+// Returns also the index of the span that holds that char (-1 = no spans at
+// all) and the rune index within that span, and false if index is out of
+// range.
+func (tx *TextRender) RuneEndPos(idx int) (pos Vec2D, si, ri int, ok bool) {
+	si, ri, ok = tx.RuneSpanPos(idx)
+	if ok {
 		sr := &tx.Spans[si]
-		if idx >= len(sr.Render) {
-			idx -= (len(sr.Render) + 1) // account for LF
-			continue
-		}
-		spos := sr.RelPos.Add(sr.Render[idx].RelPos)
-		spos.X += sr.Render[idx].Size.X
-		return spos, si
+		spos := sr.RelPos.Add(sr.Render[ri].RelPos)
+		spos.X += sr.Render[ri].Size.X
+		return spos, si, ri, true
 	}
 	nsp := len(tx.Spans)
 	if nsp > 0 {
-		return tx.Spans[nsp-1].LastPos, nsp - 1
+		sr := &tx.Spans[nsp-1]
+		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return Vec2DZero, -1
+	return Vec2DZero, -1, -1, false
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1532,6 +1562,7 @@ func (ev *TextAnchors) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJ
 
 func (ts *TextStyle) Defaults() {
 	ts.WordWrap = false
+	ts.LineHeight = 1
 	ts.Align = AlignLeft
 	ts.AlignV = AlignBaseline
 	ts.Direction = LTR

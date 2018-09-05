@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/goki/gi/units"
@@ -43,7 +44,8 @@ var SplitViewProps = ki.Props{
 	"padding":    0,
 }
 
-// UpdateSplits updates the splits to be same length as number of children, and normalized
+// UpdateSplits updates the splits to be same length as number of children,
+// and normalized
 func (g *SplitView) UpdateSplits() {
 	sz := len(g.Kids)
 	if sz == 0 {
@@ -69,7 +71,8 @@ func (g *SplitView) UpdateSplits() {
 	}
 }
 
-// SetSplits sets the split proportions -- can use 0 to hide / collapse a child entirely -- does an Update
+// SetSplits sets the split proportions -- can use 0 to hide / collapse a
+// child entirely -- does an Update
 func (g *SplitView) SetSplits(splits ...float32) {
 	updt := g.UpdateStart()
 	g.UpdateSplits()
@@ -104,7 +107,9 @@ func (g *SplitView) RestoreSplits() {
 	g.SetSplits(g.SavedSplits...)
 }
 
-// CollapseChild collapses given child(ren) (sets split proportion to 0), optionally saving the prior splits for later Restore function -- does an Update -- triggered by double-click of splitter
+// CollapseChild collapses given child(ren) (sets split proportion to 0),
+// optionally saving the prior splits for later Restore function -- does an
+// Update -- triggered by double-click of splitter
 func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 	updt := g.UpdateStart()
 	if save {
@@ -197,6 +202,7 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	pos := float32(0.0)
 	handval := 0.6 * handsz / size
 
+	spsum := float32(0)
 	for i, sp := range g.Splits {
 		gis := g.Kids[i].(Node2D).AsWidget()
 		if gis == nil {
@@ -208,13 +214,19 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		size := sp * avail
 		gis.LayData.AllocSize.SetDim(g.Dim, size)
 		gis.LayData.AllocSize.SetDim(odim, osz)
+		gis.LayData.AllocSizeOrig = gis.LayData.AllocSize
 		gis.LayData.AllocPosRel.SetDim(g.Dim, pos)
 		gis.LayData.AllocPosRel.SetDim(odim, 0)
+		gis.LayData.AllocPosOrig = gis.LayData.AllocPos
+
+		fmt.Printf("spl: %v sp: %v size: %v alloc: %v\n", i, sp, size, gis.LayData.AllocSizeOrig)
+
 		pos += size + handsz
 
+		spsum += sp
 		if i < sz-1 {
 			spl := g.Parts.KnownChild(i).(*Splitter)
-			spl.Value = sp + handval
+			spl.Value = spsum + handval // this is not right value
 			spl.UpdatePosFromValue()
 		}
 	}
@@ -228,13 +240,15 @@ func (g *SplitView) Render2D() {
 	}
 	if g.PushBounds() {
 		for i, kid := range g.Kids {
-			gii, _ := KiToNode2D(kid)
-			if gii != nil {
+			nii, ni := KiToNode2D(kid)
+			if nii != nil {
 				sp := g.Splits[i]
 				if sp <= 0 {
+					ni.SetInactive()
 					continue
 				}
-				gii.Render2D()
+				ni.ClearInactive()
+				nii.Render2D()
 			}
 		}
 		g.Parts.Render2DTree()

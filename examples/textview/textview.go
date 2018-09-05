@@ -62,26 +62,26 @@ func mainrun() {
 	splt.SetProp("font-family", "Go Mono")
 	splt.SetProp("line-height", 1.2)
 
-	// generally need to put text view within its own frame for scrolling
-	txfr1 := splt.AddNewChild(gi.KiT_Frame, "view-frame-1").(*gi.Frame)
-	txfr1.SetStretchMaxWidth()
-	txfr1.SetStretchMaxHeight()
-	txfr1.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	txfr1.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	// generally need to put text view within its own layout for scrolling
+	txly1 := splt.AddNewChild(gi.KiT_Layout, "view-layout-1").(*gi.Layout)
+	txly1.SetStretchMaxWidth()
+	txly1.SetStretchMaxHeight()
+	txly1.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	txly1.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
-	txed1 := txfr1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
+	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiStyle = "emacs"
 	txed1.LineNos = true
 	txed1.SetCompleter(nil, Complete, CompleteEdit)
 
-	// generally need to put text view within its own frame for scrolling
-	txfr2 := splt.AddNewChild(gi.KiT_Frame, "view-frame-2").(*gi.Frame)
-	txfr2.SetStretchMaxWidth()
-	txfr2.SetStretchMaxHeight()
-	txfr2.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	txfr2.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	// generally need to put text view within its own layout for scrolling
+	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
+	txly2.SetStretchMaxWidth()
+	txly2.SetStretchMaxHeight()
+	txly2.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	txly2.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
-	txed2 := txfr2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
+	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
 	txed2.HiStyle = "emacs"
 
 	txbuf := giv.NewTextBuf()

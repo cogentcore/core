@@ -95,13 +95,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
+	+ multi-span RenderSelect
+	+ fix resizing with word wrap -- getting a lot better but needs more work -- first try basic redo that we use in label.. after fixed, turn off border -- needs to do an initial re-render after getting full allocated size -- set a flag if initial size was not based on real data, and then when render or anything happens after that, redo layout with good size.. should be ok from there.
+	+ line numbers darker color
 	+ impl auto-indent
 	+ Important: optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
-	+ multi-span click to locate cursor no longer working!
-	+ also select itself not rendering.  did something get lost?
-	+ also up / down really need to operate on the spans, not just the raw lines -- editing documents e.g., book and not just code is key test case.
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
-	+ multi-span RenderSelect
 	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
 
