@@ -1237,10 +1237,15 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, ctxt *units.Contex
 	curTag := ""
 	for bidx < sz {
 		cb := str[bidx]
-		if cb == '<' {
+		ftag := ""
+		if cb == '<' && sz > bidx+1 {
 			eidx := bytes.Index(str[bidx+1:], []byte(">"))
-			ftag := string(str[bidx+1 : bidx+1+eidx])
-			bidx += eidx + 2
+			if eidx > 0 {
+				ftag = string(str[bidx+1 : bidx+1+eidx])
+				bidx += eidx + 2
+			}
+		}
+		if ftag != "" {
 			if ftag[0] == '/' {
 				etag := strings.ToLower(ftag[1:])
 				// fmt.Printf("%v  etag: %v\n", bidx, etag)

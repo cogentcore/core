@@ -441,6 +441,7 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 	fst.BgColor.SetColor(nil)
 	mxwd := float32(tv.LinesSize.X)
 	for ln := st; ln <= ed; ln++ {
+		curspans := len(tv.Renders[ln].Spans)
 		if tv.HasHi() {
 			var htmlBuf bytes.Buffer
 			iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Lines[ln]))
@@ -452,11 +453,10 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 				return true
 			}
 			tv.Markup[ln] = htmlBuf.Bytes()
+			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
 		} else {
-			tv.Markup[ln] = []byte(string(tv.Buf.Lines[ln]))
+			tv.Renders[ln].SetRunes(tv.Buf.Lines[ln], &fst, &sty.UnContext, &sty.Text, true, 0, 1)
 		}
-		curspans := len(tv.Renders[ln].Spans)
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
 		nwspans := len(tv.Renders[ln].Spans)
 		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
@@ -1309,6 +1309,11 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 // visible range, position will be out of range too)
 func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
+	if pos.Ln >= tv.NLines {
+		spos.Y += tv.LineHeight
+		spos.X += tv.LineNoOff
+		return spos
+	}
 	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {

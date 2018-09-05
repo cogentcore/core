@@ -95,6 +95,24 @@ func (tb *TextBuf) Text() []byte {
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
 // internally just use lf = \n
 
+// New initializes a new buffer with n blank lines
+func (tb *TextBuf) New(nlines int) {
+	if cap(tb.Lines) >= nlines {
+		tb.Lines = tb.Lines[:nlines]
+	} else {
+		tb.Lines = make([][]rune, nlines)
+		if nlines == 1 {
+			tb.Lines[0] = []rune("")
+		}
+	}
+	if cap(tb.ByteOffs) >= nlines {
+		tb.ByteOffs = tb.ByteOffs[:nlines]
+	} else {
+		tb.ByteOffs = make([]int, nlines)
+	}
+	tb.NLines = nlines
+}
+
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
 	fp, err := os.Open(string(filename))
@@ -159,25 +177,12 @@ func (tb *TextBuf) LinesToBytes() {
 // BytesToLines converts current Txt bytes into lines, and signals that new text is available
 func (tb *TextBuf) BytesToLines() {
 	if len(tb.Txt) == 0 {
-		tb.NLines = 0
-		if tb.Lines != nil {
-			tb.Lines = tb.Lines[:0]
-			tb.ByteOffs = tb.ByteOffs[:0]
-		}
+		tb.New(1)
 		return
 	}
 	lns := bytes.Split(tb.Txt, []byte("\n"))
 	tb.NLines = len(lns)
-	if cap(tb.Lines) >= tb.NLines {
-		tb.Lines = tb.Lines[:tb.NLines]
-	} else {
-		tb.Lines = make([][]rune, tb.NLines)
-	}
-	if cap(tb.ByteOffs) >= tb.NLines {
-		tb.ByteOffs = tb.ByteOffs[:tb.NLines]
-	} else {
-		tb.ByteOffs = make([]int, tb.NLines)
-	}
+	tb.New(tb.NLines)
 	bo := 0
 	for ln, txt := range lns {
 		tb.ByteOffs[ln] = bo
@@ -335,6 +340,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
+	}
+	if tb.Lines == nil {
+		tb.New(1)
 	}
 	tb.Edited = true
 	lns := bytes.Split(text, []byte("\n"))
@@ -544,6 +552,5 @@ var ExtToHiLangMap = map[string]string{
 	".h":     "C++",
 	".sh":    "Bash",
 	".plist": "XML",
-	".svg": "XML",
+	".svg":   "XML",
 }
-
