@@ -95,7 +95,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
-	+ multi-span RenderSelect
 	+ impl auto-indent
 	+ Important: optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..

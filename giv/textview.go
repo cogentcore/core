@@ -1454,31 +1454,57 @@ func (tv *TextView) RenderSelect() {
 	ed.Ch-- // end is exclusive
 	spos := tv.CharStartPos(st)
 	epos := tv.CharEndPos(ed)
+	rst := tv.RenderStartPos()
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
 
 	if st.Ln == ed.Ln {
-		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+		if wln := tv.WrappedLines(st.Ln); wln > 1 {
+			stsi, _, stok := tv.WrappedLineNo(st)
+			edsi, _, edok := tv.WrappedLineNo(ed)
+			if !stok || !edok {
+				return
+			}
+			if stsi == edsi {
+				pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+			} else {
+				if st.Ch > 0 {
+					se := tv.CharEndPos(st)
+					se.X = float32(tv.VpBBox.Max.X) - spc
+					pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
+				}
+				spos.Y += tv.LineHeight
+				spos.X = rst.X + tv.LineNoOff
+				nfull := edsi - stsi
+				sed := spos
+				if nfull >= 2 {
+					beb := spos
+					beb.Y += float32(nfull-1) * tv.LineHeight
+					beb.X = float32(tv.VpBBox.Max.X) - spc
+					pc.FillBox(rs, spos, beb.Sub(spos), &sty.Font.BgColor)
+					sed.Y = beb.Y
+				}
+				pc.FillBox(rs, sed, epos.Sub(sed), &sty.Font.BgColor)
+			}
+		} else {
+			pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
+		}
 	} else {
 		if st.Ch > 0 {
 			se := tv.CharEndPos(st)
 			se.X = float32(tv.VpBBox.Max.X) - spc
 			pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
-			st.Ln++
-			st.Ch = 0
-			spos = tv.CharStartPos(st)
+			spos.Y += tv.LineHeight
+			spos.X = rst.X + tv.LineNoOff
 		}
-		lm1 := ed
-		lm1.Ln--
-		be := tv.CharEndPos(lm1)
-		be.X = float32(tv.VpBBox.Max.X) - spc
-		pc.FillBox(rs, spos, be.Sub(spos), &sty.Font.BgColor)
+		beb := epos
+		beb.Y -= tv.LineHeight
+		beb.X = float32(tv.VpBBox.Max.X) - spc
+		pc.FillBox(rs, spos, beb.Sub(spos), &sty.Font.BgColor)
 		// now get anything on end
 		if ed.Ch > 0 {
-			els := ed
-			els.Ch = 0
-			elsp := tv.CharStartPos(els)
-			pc.FillBox(rs, elsp, epos.Sub(elsp), &sty.Font.BgColor)
+			beb.X = rst.X + tv.LineNoOff
+			pc.FillBox(rs, beb, epos.Sub(beb), &sty.Font.BgColor)
 		}
 	}
 }
@@ -1579,7 +1605,8 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	clr := sty.Font.BgColor.Color.Highlight(10)
 	spos := tv.CharStartPos(TextPos{Ln: st})
 	spos.X = float32(tv.VpBBox.Min.X) + spc
-	epos := tv.CharEndPos(TextPos{Ln: ed})
+	epos := tv.CharEndPos(TextPos{Ln: ed + 1})
+	epos.Y -= tv.LineHeight
 	epos.X = spos.X + tv.LineNoOff - spc
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
