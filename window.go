@@ -872,11 +872,6 @@ mainloop:
 			lastWinMenuUpdate = WinNewCloseTime
 			// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 		}
-		if w.DoFullRender {
-			// fmt.Printf("Doing full render\n")
-			w.DoFullRender = false
-			w.FullReRender()
-		}
 		if w.Focus == nil && w.StartFocus != nil {
 			w.SetFocus(w.StartFocus)
 		}
@@ -1107,6 +1102,11 @@ mainloop:
 				break mainloop
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
+				if w.DoFullRender {
+					fmt.Printf("Doing full render\n")
+					w.DoFullRender = false
+					w.FullReRender()
+				}
 				w.Publish()
 				// w.FullReRender()
 			}
