@@ -339,11 +339,11 @@ func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, 
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
 
-// glyphAdvanceMu mutex is required because multiple different goroutines
-// associated with different windows can (and often will be) call
-// curFace.GyphAdvance at the same time, on the same font face -- and that
-// turns out not to work!
-var glyphAdvanceMu sync.Mutex
+// TextFontRenderMu mutex is required because multiple different goroutines
+// associated with different windows can (and often will be) call font stuff
+// at the same time (curFace.GyphAdvance, rendering font) at the same time, on
+// the same font face -- and that turns out not to work!
+var TextFontRenderMu sync.Mutex
 
 // SetRunePosLR sets relative positions of each rune using a flat
 // left-to-right text layout, based on font size info and additional extra
@@ -363,8 +363,8 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 	}
 	var fpos float32
 	curFace := sr.Render[0].Face
-	glyphAdvanceMu.Lock()
-	defer glyphAdvanceMu.Unlock()
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
 	col := 0 // current column position -- todo: does NOT deal with indent
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
@@ -657,6 +657,9 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 	rs.PushXForm(Identity2D()) // needed for SVG
 	defer rs.PopXForm()
 	rs.XForm = Identity2D()
+
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
 
 	for _, sr := range tr.Spans {
 		if sr.IsValid() != nil {

@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 
 	"github.com/goki/gi/units"
@@ -219,7 +218,7 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		gis.LayData.AllocPosRel.SetDim(odim, 0)
 		gis.LayData.AllocPosOrig = gis.LayData.AllocPos
 
-		fmt.Printf("spl: %v sp: %v size: %v alloc: %v\n", i, sp, size, gis.LayData.AllocSizeOrig)
+		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v\n", i, sp, size, gis.LayData.AllocSizeOrig)
 
 		pos += size + handsz
 

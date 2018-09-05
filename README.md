@@ -96,8 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * TextView:
 	+ multi-span RenderSelect
-	+ fix resizing with word wrap -- getting a lot better but needs more work -- first try basic redo that we use in label.. after fixed, turn off border -- needs to do an initial re-render after getting full allocated size -- set a flag if initial size was not based on real data, and then when render or anything happens after that, redo layout with good size.. should be ok from there.
-	+ line numbers darker color
 	+ impl auto-indent
 	+ Important: optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..

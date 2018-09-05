@@ -89,7 +89,7 @@ var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
 var TextViewProps = ki.Props{
 	"font-family":      "Go Mono",
-	"border-width":     units.NewValue(1, units.Px),
+	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewValue(3, units.Px),
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gi.BorderSolid,
@@ -104,7 +104,6 @@ var TextViewProps = ki.Props{
 		"background-color": "lighter-0",
 	},
 	TextViewSelectors[TextViewFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
 		"background-color": "samelight-80",
 	},
 	TextViewSelectors[TextViewInactive]: ki.Props{
@@ -195,6 +194,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.LayoutAllLines(false)
+		tv.SetFullReRender()
 		tv.UpdateSig()
 	case TextBufInsert:
 		tbe := data.(*TextBufEdit)
@@ -281,16 +281,12 @@ func (tv *TextView) HiInit() {
 
 // RenderSize is the size we should pass to text rendering, based on alloc
 func (tv *TextView) RenderSize() gi.Vec2D {
-	st := &tv.Sty
-	st.Font.OpenFont(&st.UnContext)
-	tv.FontHeight = st.Font.Height
-	tv.LineHeight = tv.FontHeight * st.Text.EffLineHeight()
 	spc := tv.Sty.BoxSpace()
 	pari, _ := gi.KiToNode2D(tv.Par)
 	parw := pari.AsLayout2D()
 	paloc := parw.LayData.AllocSizeOrig
 	if !paloc.IsZero() {
-		tv.RenderSz = paloc.Sub(parw.ExtraSize)
+		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubVal(spc * 2)
 	} else {
 		sz := tv.LayData.AllocSizeOrig
 		if sz.IsZero() {
@@ -300,23 +296,23 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 			sz.SetSubVal(2 * spc)
 		}
 		tv.RenderSz = sz
-		fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
+		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	}
 	tv.RenderSz.X -= tv.LineNoOff
-	fmt.Printf("rendersz: %v\n", tv.RenderSz)
+	// fmt.Printf("rendersz: %v\n", tv.RenderSz)
 	return tv.RenderSz
 }
 
 // LayoutAllLines generates TextRenders of lines from our TextBuf, using any
-// highlighter that might be present
-func (tv *TextView) LayoutAllLines(inLayout bool) {
+// highlighter that might be present, and returns whether the current rendered
+// size is different from what it was previously
+func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if inLayout && tv.reLayout {
-		return
+		return false
 	}
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		tv.NLines = 0
-		tv.ResizeIfNeeded(image.ZP)
-		return
+		return tv.ResizeIfNeeded(image.ZP)
 	}
 
 	tv.HiInit()
@@ -345,7 +341,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 		err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
 		if err != nil {
 			log.Println(err)
-			return
+			return false
 		}
 		mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
 
@@ -361,28 +357,54 @@ func (tv *TextView) LayoutAllLines(inLayout bool) {
 		}
 	}
 
+	tv.VisSizes()
 	sz := tv.RenderSize()
 	// fmt.Printf("rendersize: %v\n", sz)
-	st := &tv.Sty
-	fst := st.Font
+	sty := &tv.Sty
+	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	off := float32(0)
 	mxwd := float32(0)
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &st.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&st.Text, &st.Font, &st.UnContext, sz)
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 		tv.Offs[ln] = off
 		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	nwSz := gi.Vec2D{mxwd, off}.ToPointCeil()
+	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
+	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
 	if inLayout {
 		tv.LinesSize = nwSz
-		tv.Size2DFromWH(float32(tv.LinesSize.X), float32(tv.LinesSize.Y))
+		return tv.SetSize()
 	} else {
-		tv.ResizeIfNeeded(nwSz)
+		return tv.ResizeIfNeeded(nwSz)
 	}
+}
+
+// SetSize updates our size only if larger than our allocation
+func (tv *TextView) SetSize() bool {
+	sty := &tv.Sty
+	spc := sty.BoxSpace()
+	rndsz := tv.RenderSz
+	rndsz.X += tv.LineNoOff
+	netsz := gi.Vec2D{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
+	cursz := tv.LayData.AllocSize.SubVal(2 * spc)
+	if cursz.X < 10 || cursz.Y < 10 {
+		nwsz := netsz.Max(rndsz)
+		tv.Size2DFromWH(nwsz.X, nwsz.Y)
+		return true
+	}
+	// fmt.Printf("netsz: %v  cursz: %v rndsz: %v\n", netsz, cursz, rndsz)
+	cursz = cursz.Max(rndsz)
+	if netsz.X > cursz.X || netsz.Y > cursz.Y {
+		nwsz := netsz.Max(cursz)
+		tv.Size2DFromWH(nwsz.X, nwsz.Y)
+		return true
+	}
+	return false
 }
 
 // ResizeIfNeeded resizes the edit area if different from current setting --
@@ -392,7 +414,10 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		return false
 	}
 	tv.LinesSize = nwSz
-	tv.Size2DFromWH(float32(tv.LinesSize.X)+tv.LineNoOff, float32(tv.LinesSize.Y))
+	diff := tv.SetSize()
+	if !diff {
+		return false
+	}
 	ly := tv.ParentScrollLayout()
 	if ly != nil {
 		tv.reLayout = true
@@ -414,7 +439,7 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
-	mxwd := float32(0)
+	mxwd := float32(tv.LinesSize.X)
 	for ln := st; ln <= ed; ln++ {
 		if tv.HasHi() {
 			var htmlBuf bytes.Buffer
@@ -1468,13 +1493,22 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 
 // VisSizes computes the visible size of view given current parameters
 func (tv *TextView) VisSizes() {
-	st := &tv.Sty
+	sty := &tv.Sty
+	spc := sty.BoxSpace()
+	sty.Font.OpenFont(&sty.UnContext)
+	tv.FontHeight = sty.Font.Height
+	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()
-	tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
-	tv.VisSize.X = int(math32.Floor(float32(sz.X) / st.Font.Ch))
+	if sz == image.ZP {
+		tv.VisSize.Y = 40
+		tv.VisSize.X = 80
+	} else {
+		tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
+		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Ch))
+	}
 	tv.LineNoDigs = gi.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
 	if tv.LineNos {
-		tv.LineNoOff = float32(tv.LineNoDigs+3) * st.Font.Ch // space for icon
+		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
 	} else {
 		tv.LineNoOff = 0
 	}
@@ -1487,10 +1521,11 @@ func (tv *TextView) RenderAllLines() {
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
 
-		st := &tv.Sty
-		st.Font.OpenFont(&st.UnContext)
+		sty := &tv.Sty
+		sty.Font.OpenFont(&sty.UnContext)
 		tv.VisSizes()
-		tv.RenderStdBox(st)
+		tv.RenderStdBox(sty)
+		tv.RenderLineNosBoxAll()
 		tv.RenderSelect()
 		rs := &tv.Viewport.Render
 		pos := tv.RenderStartPos()
@@ -1507,9 +1542,7 @@ func (tv *TextView) RenderAllLines() {
 			lp.Y = lst
 			lp.X += tv.LineNoOff
 			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-			if tv.LineNos {
-				tv.RenderLineNo(ln)
-			}
+			tv.RenderLineNo(ln)
 		}
 
 		tv.PopBounds()
@@ -1518,18 +1551,56 @@ func (tv *TextView) RenderAllLines() {
 	}
 }
 
+// RenderLineNosBoxAll renders the background for the line numbers in a darker shade
+func (tv *TextView) RenderLineNosBoxAll() {
+	if !tv.LineNos {
+		return
+	}
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	sty := &tv.Sty
+	spc := sty.BoxSpace()
+	clr := sty.Font.BgColor.Color.Highlight(10)
+	spos := gi.NewVec2DFmPoint(tv.VpBBox.Min).AddVal(spc)
+	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+	epos.X = spos.X + tv.LineNoOff - spc
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
+}
+
+// RenderLineNosBox renders the background for the line numbers in given range, in a darker shade
+func (tv *TextView) RenderLineNosBox(st, ed int) {
+	if !tv.LineNos {
+		return
+	}
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	sty := &tv.Sty
+	spc := sty.BoxSpace()
+	clr := sty.Font.BgColor.Color.Highlight(10)
+	spos := tv.CharStartPos(TextPos{Ln: st})
+	spos.X = float32(tv.VpBBox.Min.X) + spc
+	epos := tv.CharEndPos(TextPos{Ln: ed})
+	epos.X = spos.X + tv.LineNoOff - spc
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
+}
+
 // RenderLineNo renders given line number -- called within context of other render
 func (tv *TextView) RenderLineNo(ln int) {
+	if !tv.LineNos {
+		return
+	}
 	vp := tv.Viewport
 	sty := &tv.Sty
+	fst := sty.Font
+	fst.BgColor.SetColor(nil)
 	rs := &vp.Render
 	lfmt := fmt.Sprintf("%v", tv.LineNoDigs)
 	lfmt = "%0" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln)
-	tv.LineNoRender.SetString(lnstr, &sty.Font, &sty.UnContext, &sty.Text, true, 0, 0)
+	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := tv.RenderStartPos()
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent)
+	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent) - +gi.FixedToFloat32(sty.Font.Face.Metrics().Descent)
 	tv.LineNoRender.Render(rs, pos)
 	// if ic, ok := tv.LineIcons[ln]; ok {
 	// 	// todo: render icon!
@@ -1576,6 +1647,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
 			tv.RenderSelect()
+			tv.RenderLineNosBox(st, ed)
 
 			for ln := visSt; ln <= visEd; ln++ {
 				lst := pos.Y + tv.Offs[ln]
@@ -1583,9 +1655,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 				lp.Y = lst
 				lp.X += tv.LineNoOff
 				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-				if tv.LineNos {
-					tv.RenderLineNo(ln)
-				}
+				tv.RenderLineNo(ln)
 			}
 
 			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
@@ -2002,7 +2072,12 @@ func (tv *TextView) Style2D() {
 }
 
 func (tv *TextView) Size2D(iter int) {
-	tv.LayoutAllLines(true) // already sets the size
+	if iter > 0 {
+		return
+	} else {
+		tv.InitLayout2D()
+		tv.LayoutAllLines(true) // already sets the size
+	}
 }
 
 func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -2010,7 +2085,9 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	return tv.Layout2DChildren(iter)
+	tv.Layout2DChildren(iter)
+	redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
+	return redo
 }
 
 func (tv *TextView) Render2D() {
