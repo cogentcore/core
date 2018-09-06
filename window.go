@@ -984,12 +984,17 @@ mainloop:
 				if startDrag == nil {
 					startDrag = evi.(*mouse.DragEvent)
 				} else {
-					delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
-					if delayMs >= DragStartMSec {
-						dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
-						if dst >= DragStartPix {
-							dragStarted = true
-							startDrag = nil
+					if w.DoInstaDrag(startDrag, !PopupIsTooltip(w.Popup)) {
+						dragStarted = true
+						startDrag = nil
+					} else {
+						delayMs := int(now.Sub(startDrag.Time()) / time.Millisecond)
+						if delayMs >= DragStartMSec {
+							dst := int(math32.Hypot(float32(startDrag.Where.X-evi.Pos().X), float32(startDrag.Where.Y-evi.Pos().Y)))
+							if dst >= DragStartPix {
+								dragStarted = true
+								startDrag = nil
+							}
 						}
 					}
 				}
@@ -1467,6 +1472,39 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 		w.UpdateEnd(updt)
 	}
 	return updated
+}
+
+// DoInstaDrag tests whether the given mouse DragEvent is on a widget marked
+// with InstaDrag
+func (w *Window) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
+	et := me.Type()
+	for pri := HiPri; pri < EventPrisN; pri++ {
+		esig := w.EventSigs[et][pri]
+		for recv, _ := range esig.Cons {
+			if recv.IsDestroyed() {
+				delete(esig.Cons, recv)
+				continue
+			}
+			if recv.IsDeleted() {
+				continue
+			}
+			_, ni := KiToNode2D(recv)
+			if ni != nil {
+				if !w.IsInScope(ni, popup) {
+					continue
+				}
+				pos := me.Pos()
+				if pos.In(ni.WinBBox) {
+					if ni.IsInstaDrag() {
+						w.Dragging = ni.This
+						bitflag.Set(ni.Flags(), int(NodeDragging))
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 // SendHoverEvent sends mouse hover event, based on last mouse move event

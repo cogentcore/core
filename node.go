@@ -93,6 +93,12 @@ const (
 	// set to this node
 	NodeDragging
 
+	// InstaDrag indicates this node should start dragging immediately when
+	// clicked -- otherwise there is a time-and-distance threshold to the
+	// start of dragging -- use this for controls that are small and are
+	// primarily about dragging (e.g., the Splitter handle)
+	InstaDrag
+
 	// Overlay indicates this node is an overlay -- affects how it renders
 	Overlay
 
@@ -123,6 +129,11 @@ func (g *NodeBase) HasFocus() bool {
 // dragging events -- flag set by window
 func (g *NodeBase) IsDragging() bool {
 	return bitflag.Has(g.Flag, int(NodeDragging))
+}
+
+// IsInstaDrag tests if the current node has InstaDrag property set
+func (g *NodeBase) IsInstaDrag() bool {
+	return bitflag.Has(g.Flag, int(InstaDrag))
 }
 
 // IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,

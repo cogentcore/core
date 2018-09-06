@@ -317,7 +317,7 @@ type Splitter struct {
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"padding":          units.NewValue(8, units.Px),
+	"padding":          units.NewValue(6, units.Px),
 	"margin":           units.NewValue(0, units.Px),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
@@ -363,6 +363,7 @@ func (g *Splitter) Defaults() {
 	g.Max = 1.0
 	g.Snap = false
 	g.Prec = 4
+	bitflag.Set(&g.Flag, int(InstaDrag))
 }
 
 func (g *Splitter) Init2D() {
@@ -383,11 +384,6 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 		return
 	}
 	ic := ick.(*Icon)
-	// svk, ok := g.ParentByType(KiT_SplitView, false)
-	// if !ok { // undefined
-	// 	return
-	// }
-	// sv := svk.(*SplitView)
 	handsz := g.ThumbSize.Dots
 	spc := g.Sty.BoxSpace()
 	odim := OtherDim(g.Dim)
@@ -396,7 +392,7 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 
 	ic.LayData.AllocSize.SetDim(odim, 2*handsz)
 	ic.LayData.AllocSize.SetDim(g.Dim, handsz)
-	ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos-(spc+0.5*handsz))
+	ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos-(0.5*(handsz+spc)))
 	ic.LayData.AllocPosRel.SetDim(odim, 0)
 	if render {
 		ic.Layout2DTree()
@@ -441,9 +437,18 @@ func (g *Splitter) UpdateSplitterPos() {
 	spc := g.Sty.BoxSpace()
 	ispc := int(spc)
 	handsz := g.ThumbSize.Dots
-	sz := handsz // + spc*2
-	pos := int(g.Pos-0.5*sz) + 2*ispc
-	mxpos := int(g.Pos+0.5*sz) + 2*ispc
+	off := 0
+	if g.Dim == X {
+		off = g.OrigWinBBox.Min.X
+	} else {
+		off = g.OrigWinBBox.Min.Y
+	}
+	sz := handsz
+	if !g.IsDragging() {
+		sz += 2 * spc
+	}
+	pos := off + int(g.Pos-0.5*sz)
+	mxpos := off + int(g.Pos+0.5*sz)
 	if g.Dim == X {
 		g.VpBBox = image.Rect(pos, g.ObjBBox.Min.Y+ispc, mxpos, g.ObjBBox.Max.Y+ispc)
 		g.WinBBox = image.Rect(pos, g.ObjBBox.Min.Y+ispc, mxpos, g.ObjBBox.Max.Y+ispc)
@@ -465,6 +470,10 @@ func (g *Splitter) Render2D() {
 			return
 		}
 		ic := ick.(*Icon)
+		icvp, ok := ic.Children().ElemByType(KiT_Viewport2D, true, 0)
+		if !ok {
+			return
+		}
 		ovk, ok := win.OverlayVp.ChildByName(g.UniqueName(), 0)
 		var ovb *Bitmap
 		if !ok {
@@ -474,7 +483,7 @@ func (g *Splitter) Render2D() {
 			ovk = ovb.This
 		}
 		ovb = ovk.(*Bitmap)
-		ovb.GrabRenderFrom(ic)
+		ovb.GrabRenderFrom(icvp.(Node2D))
 		ovb.LayData = ic.LayData // copy
 		// ovb.LayData.AllocPos.SetDim(odim, ovb.LayData.AllocPos.Dim(odim)+spc)
 		g.UpdateSplitterPos()

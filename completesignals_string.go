@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _CompleteSignals_name = "CompleteSelect"
+const _CompleteSignals_name = "CompleteSelectCompleteExtend"
 
-var _CompleteSignals_index = [...]uint8{0, 14}
+var _CompleteSignals_index = [...]uint8{0, 14, 28}
 
 func (i CompleteSignals) String() string {
 	if i < 0 || i >= CompleteSignals(len(_CompleteSignals_index)-1) {

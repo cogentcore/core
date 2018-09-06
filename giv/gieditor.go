@@ -203,6 +203,7 @@ func (ge *GiEditor) ConfigSplitView() {
 	if split == nil {
 		return
 	}
+	// split.Dim = gi.Y
 	split.Dim = gi.X
 
 	if len(split.Kids) == 0 {
