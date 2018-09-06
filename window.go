@@ -1104,7 +1104,7 @@ mainloop:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				if w.DoFullRender {
 					fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-					if !w.Viewport.Geom.Size.IsZero() {
+					if w.Viewport.Geom.Size != image.ZP {
 						w.DoFullRender = false
 						w.FullReRender()
 					}
