@@ -1105,7 +1105,7 @@ mainloop:
 				if w.DoFullRender {
 					w.DoFullRender = false
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-					if w.Viewport.Geom.Size == image.ZP {
+					if w.Viewport.Geom.Size != w.OSWin.Size() {
 						w.Resized(w.OSWin.Size())
 					} else {
 						w.FullReRender()

@@ -1857,7 +1857,7 @@ func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes
 			tv.SelectReg.Start = oldPos
 			tv.SelectMode = true
 		}
-		if !tv.IsDragging() && tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
+		if !tv.IsDragging() && selMode == mouse.NoSelectMode {
 			tv.SelectReset()
 		} else if tv.SelectReg.Start.IsLess(tv.CursorPos) {
 			tv.SelectReg.End = tv.CursorPos
@@ -1890,6 +1890,15 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	if kt.IsProcessed() {
 		return
+	}
+
+	hasShift := kt.HasAnyModifier(key.Shift)
+	if hasShift {
+		if !tv.SelectMode {
+			tv.SelectMode = true
+			tv.SelectReg.Start = tv.CursorPos
+			tv.SelectReg.End = tv.CursorPos
+		}
 	}
 
 	// first all the keys that work for both inactive and active
