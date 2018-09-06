@@ -1103,7 +1103,7 @@ mainloop:
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				if w.DoFullRender {
-					fmt.Printf("Doing full render\n")
+					// fmt.Printf("Doing full render\n")
 					w.DoFullRender = false
 					w.FullReRender()
 				}
