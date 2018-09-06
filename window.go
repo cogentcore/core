@@ -402,10 +402,10 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
-		// fmt.Printf("skip same resize: %v\n", curSz)
+		fmt.Printf("skip same resize: %v\n", curSz)
 		return
 	}
-	// fmt.Printf("actual resized fun: %v\n", sz)
+	fmt.Printf("actual resized fun: %v\n", sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
@@ -929,9 +929,9 @@ mainloop:
 				case oswin.WindowResizeEvent:
 					w.Resizing = true
 					we := evi.(*window.Event)
-					// fmt.Printf("resize\n")
+					fmt.Printf("resize\n")
 					if lagMs > EventSkipLagMSec {
-						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						fmt.Printf("skipped et %v lag %v\n", et, lag)
 						lastSkipped = true
 						skippedResize = we
 						continue
@@ -1103,7 +1103,7 @@ mainloop:
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				if w.DoFullRender {
-					// fmt.Printf("Doing full render\n")
+					fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
 					w.DoFullRender = false
 					w.FullReRender()
 				}
