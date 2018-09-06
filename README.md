@@ -97,13 +97,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * X11 needs initial re-render..
 
 * TextView:
-	+ impl auto-indent
-	+ Important: optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
+	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
+	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
-	+ shift+downarrow select
-	+ ctrl+downarrow
 
 
 * Splitview: 

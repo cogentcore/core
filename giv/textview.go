@@ -34,7 +34,9 @@ import (
 
 // TextViewOpts contains options for TextView editing
 type TextViewOpts struct {
-	AutoIndent bool `desc:"auto-indent on newline and decrease indent on } (todo: generalize)"`
+	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
+	LineNos     bool `desc:"show line numbers at left end of editor"`
 }
 
 // TextView is a widget for editing multiple lines of text (as compared to
@@ -51,7 +53,6 @@ type TextView struct {
 	HiStyle       string                    `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	LineNos       bool                      `desc:"show line numbers at left end of editor"`
 	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
 	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
@@ -1541,7 +1542,7 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Ch))
 	}
 	tv.LineNoDigs = gi.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
-	if tv.LineNos {
+	if tv.Opts.LineNos {
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
 	} else {
 		tv.LineNoOff = 0
@@ -1587,7 +1588,7 @@ func (tv *TextView) RenderAllLines() {
 
 // RenderLineNosBoxAll renders the background for the line numbers in a darker shade
 func (tv *TextView) RenderLineNosBoxAll() {
-	if !tv.LineNos {
+	if !tv.Opts.LineNos {
 		return
 	}
 	rs := &tv.Viewport.Render
@@ -1603,7 +1604,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 
 // RenderLineNosBox renders the background for the line numbers in given range, in a darker shade
 func (tv *TextView) RenderLineNosBox(st, ed int) {
-	if !tv.LineNos {
+	if !tv.Opts.LineNos {
 		return
 	}
 	rs := &tv.Viewport.Render
@@ -1621,7 +1622,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 
 // RenderLineNo renders given line number -- called within context of other render
 func (tv *TextView) RenderLineNo(ln int) {
-	if !tv.LineNos {
+	if !tv.Opts.LineNos {
 		return
 	}
 	vp := tv.Viewport
@@ -1631,7 +1632,7 @@ func (tv *TextView) RenderLineNo(ln int) {
 	rs := &vp.Render
 	lfmt := fmt.Sprintf("%v", tv.LineNoDigs)
 	lfmt = "%0" + lfmt + "d"
-	lnstr := fmt.Sprintf(lfmt, ln)
+	lnstr := fmt.Sprintf(lfmt, ln+1)
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := tv.RenderStartPos()
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
@@ -1879,6 +1880,22 @@ func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
+var defaultIndentStrings = []string{"{"}
+var defaultUnindentStrings = []string{"}"}
+
+// ShiftSelect activates selection mode if shift key is also pressed -- called
+// along with cursor motion keys
+func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
+	hasShift := kt.HasAnyModifier(key.Shift)
+	if hasShift {
+		if !tv.SelectMode {
+			tv.SelectMode = true
+			tv.SelectReg.Start = tv.CursorPos
+			tv.SelectReg.End = tv.CursorPos
+		}
+	}
+}
+
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
@@ -1892,42 +1909,41 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 
-	hasShift := kt.HasAnyModifier(key.Shift)
-	if hasShift {
-		if !tv.SelectMode {
-			tv.SelectMode = true
-			tv.SelectReg.Start = tv.CursorPos
-			tv.SelectReg.End = tv.CursorPos
-		}
-	}
-
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case gi.KeyFunMoveRight:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
 		tv.OfferCompletions()
 	case gi.KeyFunMoveLeft:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
 		tv.OfferCompletions()
 	case gi.KeyFunMoveUp:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
 	case gi.KeyFunMoveDown:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
 	case gi.KeyFunPageUp:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
 	case gi.KeyFunPageDown:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
 	case gi.KeyFunHome:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorStartLine()
 	case gi.KeyFunEnd:
 		kt.SetProcessed()
+		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
 	case gi.KeyFunSelectMode:
 		kt.SetProcessed()
@@ -1986,11 +2002,25 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			tv.InsertAtCursor([]byte("\n"))
+			if tv.Opts.AutoIndent {
+				tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+				tv.CursorEndLine()
+			}
 		}
 	case gi.KeyFunFocusNext: // tab
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
-			tv.InsertAtCursor([]byte("\t"))
+			if tv.CursorPos.Ch == 0 && tv.Opts.AutoIndent { // todo: only at 1st pos now
+				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+				tv.CursorPos.Ch = cpos
+				tv.RenderCursor(true)
+			} else {
+				if tv.Opts.SpaceIndent {
+					tv.InsertAtCursor(IndentBytes(1, tv.Sty.Text.TabSize, true))
+				} else {
+					tv.InsertAtCursor([]byte("\t"))
+				}
+			}
 		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {

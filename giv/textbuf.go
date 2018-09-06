@@ -477,8 +477,8 @@ func (tb *TextBuf) EndPos() TextPos {
 
 // LineIndent returns the number of tabs or spaces at start of given line --
 // if line starts with tabs, then those are counted, else spaces --
-// combinations of tabs and spaces won't necessarily produce sensible results
-func (tb *TextBuf) LineIndent(ln int) (n int, spc bool) {
+// combinations of tabs and spaces won't produce sensible results
+func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, spc bool) {
 	sz := len(tb.Lines[ln])
 	if sz == 0 {
 		return
@@ -494,7 +494,7 @@ func (tb *TextBuf) LineIndent(ln int) (n int, spc bool) {
 	}
 	if spc {
 		for i := 1; i < sz; i++ {
-			if txt[0] == ' ' {
+			if txt[i] == ' ' {
 				n++
 			} else {
 				return
@@ -502,7 +502,7 @@ func (tb *TextBuf) LineIndent(ln int) (n int, spc bool) {
 		}
 	} else {
 		for i := 1; i < sz; i++ {
-			if txt[0] == '\t' {
+			if txt[i] == '\t' {
 				n++
 			} else {
 				return
@@ -510,6 +510,95 @@ func (tb *TextBuf) LineIndent(ln int) (n int, spc bool) {
 		}
 	}
 	return
+}
+
+// IndentBytes returns an indentation string of given number of tab stops,
+// using tabs or spaces, for given tab size (if using spaces)
+func IndentBytes(n, tabSz int, spc bool) []byte {
+	if spc {
+		b := make([]byte, n*tabSz)
+		for i := 0; i < n*tabSz; i++ {
+			b[i] = '\t'
+		}
+		return b
+	} else {
+		b := make([]byte, n)
+		for i := 0; i < n; i++ {
+			b[i] = '\t'
+		}
+		return b
+	}
+}
+
+// IndentCharPos returns character position for given level of indentation
+func IndentCharPos(n, tabSz int, spc bool) int {
+	if spc {
+		return n * tabSz
+	}
+	return n
+}
+
+// IndentLine indents line by given number of tab stops, using tabs or spaces,
+// for given tab size (if using spaces) -- either inserts or deletes to reach
+// target
+func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
+	curli, _ := tb.LineIndent(ln, tabSz)
+	if n > curli {
+		return tb.InsertText(TextPos{Ln: ln}, IndentBytes(n-curli, tabSz, spc), true)
+	} else if n < curli {
+		spos := IndentCharPos(n, tabSz, spc)
+		cpos := IndentCharPos(curli, tabSz, spc)
+		return tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true)
+	}
+	return nil
+}
+
+// AutoIndent indents given line to the level of the prior line, adjusted
+// appropriately if the current line starts with one of the given un-indent
+// strings, or the prior line ends with one of the given indent strings.  Will
+// have to be replaced with a smarter parsing-based mechanism for indent /
+// unindent but this will do for now.  Returns any edit that took place (could
+// be nil), along with the auto-indented level and character position for the
+// indent of the current line.
+func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
+	prvln := ""
+	li := 0
+	if ln > 0 {
+		prvln = strings.TrimSpace(string(tb.Lines[ln-1]))
+		li, _ = tb.LineIndent(ln-1, tabSz)
+	}
+	ind := false
+	und := false
+	if prvln != "" {
+		for _, us := range unindents {
+			if strings.HasPrefix(prvln, us) {
+				und = true
+				break
+			}
+		}
+		if !und {
+			for _, is := range indents {
+				if strings.HasSuffix(prvln, is) {
+					ind = true
+					break
+				}
+			}
+		}
+	}
+	switch {
+	case ind:
+		return tb.IndentLine(ln, li+1, tabSz, spc), li + 1, IndentCharPos(li+1, tabSz, spc)
+	case und: // operates on previous line and current one
+		if li-1 > 0 {
+			if ln > 0 {
+				tb.IndentLine(ln-1, li-1, tabSz, spc)
+			}
+			return tb.IndentLine(ln, li-1, tabSz, spc), li - 1, IndentCharPos(li-1, tabSz, spc)
+		}
+		return nil, 0, 0
+	default:
+		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
