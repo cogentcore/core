@@ -348,7 +348,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := Icon{}
-			ic.InitName(&ic, "widget-handle-circles")
+			ic.InitName(&ic, "widget-handle-circles-vert")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
 			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
@@ -361,6 +361,24 @@ func MakeDefaultIcons() *IconSet {
 			c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
 			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c2.Pos.Set(0.5, 0.85)
+			c2.Radius = 0.12
+			iset[ic.Nm] = &ic
+		}
+		{
+			ic := Icon{}
+			ic.InitName(&ic, "widget-handle-circles-horiz")
+			ic.ViewBox.Size = gi.Vec2D{1, 1}
+			c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
+			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
+			c0.Pos.Set(0.15, 0.5)
+			c0.Radius = 0.12
+			c1 := ic.AddNewChild(KiT_Circle, "c1").(*Circle)
+			c1.SetProp("stroke-width", units.NewValue(5, units.Pct))
+			c1.Pos.Set(0.5, 0.5)
+			c1.Radius = 0.12
+			c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
+			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
+			c2.Pos.Set(0.85, 0.5)
 			c2.Radius = 0.12
 			iset[ic.Nm] = &ic
 		}

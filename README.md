@@ -102,10 +102,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
-
+	+ clipboard history
+	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 
 * Splitview: 
-	+ bigger splitter grab area
 	+ some lowpri keyfuns for collapsing and expanding  
 
 * Window SetName, title itself should actually rename windows, and regenerate lists of named windows.  overall gi.Window SetName should update OSWin.SetName, and we should have a wrapper SetTitle for OSWin's.

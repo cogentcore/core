@@ -28,19 +28,21 @@ import (
 // displayed within each region.
 type SplitView struct {
 	PartsWidgetBase
-	Splits      []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
-	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
-	Dim         Dims2D    `desc:"dimension along which to split the space"`
+	HandleSize  units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"`
+	Splits      []float32   `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
+	SavedSplits []float32   `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
+	Dim         Dims2D      `desc:"dimension along which to split the space"`
 }
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
 // auto-max-stretch
 var SplitViewProps = ki.Props{
-	"max-width":  -1.0,
-	"max-height": -1.0,
-	"margin":     0,
-	"padding":    0,
+	"handle-size": units.NewValue(12, units.Px),
+	"max-width":   -1.0,
+	"max-height":  -1.0,
+	"margin":      0,
+	"padding":     0,
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -63,10 +65,11 @@ func (g *SplitView) UpdateSplits() {
 			g.Splits[i] = even
 		}
 		sum = 1.0
-	}
-	norm := 1.0 / sum
-	for i := range g.Splits {
-		g.Splits[i] *= norm
+	} else {
+		norm := 1.0 / sum
+		for i := range g.Splits {
+			g.Splits[i] *= norm
+		}
 	}
 }
 
@@ -124,12 +127,45 @@ func (g *SplitView) CollapseChild(save bool, idxs ...int) {
 	g.UpdateEnd(updt)
 }
 
+// SetSplitsAction sets the new splitter value, for given splitter -- new
+// value is 0..1 value of position of that splitter -- it is a sum of all the
+// positions up to that point.  Splitters are updated to ensure that selected
+// position is achieved, while dividing remainder appropriately.
 func (g *SplitView) SetSplitsAction(idx int, nwval float32) {
 	updt := g.UpdateStart()
 	g.SetFullReRender()
-	g.Splits[idx+1] = 1.0 - nwval
-	g.Splits[idx] = nwval
-	// fmt.Printf("splits: %v value: %v\n", idx, spl.Value)
+	sz := len(g.Splits)
+	oldsum := float32(0)
+	for i := 0; i <= idx; i++ {
+		oldsum += g.Splits[i]
+	}
+	delta := nwval - oldsum
+	oldval := g.Splits[idx]
+	uval := oldval + delta
+	if uval < 0 {
+		uval = 0
+		delta = -oldval
+		nwval = oldsum + delta
+	}
+	rmdr := 1 - nwval
+	if idx < sz-1 {
+		oldrmdr := 1 - oldsum
+		if oldrmdr <= 0 {
+			if rmdr > 0 {
+				dper := rmdr / float32((sz-1)-idx)
+				for i := idx + 1; i < sz; i++ {
+					g.Splits[i] = dper
+				}
+			}
+		} else {
+			for i := idx + 1; i < sz; i++ {
+				curval := g.Splits[i]
+				g.Splits[i] = rmdr * (curval / oldrmdr) // proportional
+			}
+		}
+	}
+	g.Splits[idx] = uval
+	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, g.Splits)
 	g.UpdateSplits()
 	// fmt.Printf("splits: %v\n", g.Splits)
 	g.UpdateEnd(updt)
@@ -147,29 +183,38 @@ func (g *SplitView) ConfigSplitters() {
 	mods, updt := g.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := OtherDim(g.Dim)
 	spc := g.Sty.BoxSpace()
-	size := g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
-	osz := float32(50.0)
-	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2.0*spc)
-	spicon := IconName("widget-handle-circles")
+	size := g.LayData.AllocSize.Dim(g.Dim) - 2*spc
+	handsz := g.HandleSize.Dots
+	mid := 0.5 * (g.LayData.AllocSize.Dim(odim) - 2*spc)
+	spicon := IconName("")
+	if g.Dim == X {
+		spicon = IconName("widget-handle-circles-vert")
+	} else {
+		spicon = IconName("widget-handle-circles-horiz")
+	}
 	for i, spk := range *g.Parts.Children() {
 		sp := spk.(*Splitter)
 		sp.Defaults()
+		sp.SplitterNo = i
 		sp.Icon = spicon
 		sp.Dim = g.Dim
 		sp.LayData.AllocSize.SetDim(g.Dim, size)
-		sp.LayData.AllocSize.SetDim(odim, osz)
+		sp.LayData.AllocSize.SetDim(odim, handsz*2)
+		sp.LayData.AllocSizeOrig = sp.LayData.AllocSize
 		sp.LayData.AllocPosRel.SetDim(g.Dim, 0)
-		sp.LayData.AllocPosRel.SetDim(odim, mid-0.5*osz)
+		sp.LayData.AllocPosRel.SetDim(odim, mid-handsz)
+		sp.LayData.AllocPosOrig = sp.LayData.AllocPosRel
 		sp.Min = 0.0
 		sp.Max = 1.0
 		sp.Snap = false
+		sp.SetProp("thumb-size", g.HandleSize)
+		sp.ThumbSize = g.HandleSize
 		if mods {
 			sp.SliderSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(SliderValueChanged) || sig == int64(SliderReleased) {
+				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
-					spr.SetSplitsAction(i, spl.Value)
-					spl.SetFullReRender()
+					spr.SetSplitsAction(spl.SplitterNo, spl.Value)
 				}
 			})
 		}
@@ -181,6 +226,8 @@ func (g *SplitView) ConfigSplitters() {
 
 func (g *SplitView) Style2D() {
 	g.Style2DWidget()
+	g.HandleSize.SetFmInheritProp("handle-size", g.This, false, true) // no inherit, yes type defaults
+	g.HandleSize.ToDots(&g.Sty.UnContext)
 	g.UpdateSplits()
 	g.ConfigSplitters()
 }
@@ -191,15 +238,16 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.Layout2DParts(parBBox, iter)
 	g.UpdateSplits()
 
-	handsz := float32(10.0)
-
+	handsz := g.HandleSize.Dots
+	// fmt.Printf("handsz: %v\n", handsz)
 	sz := len(g.Kids)
 	odim := OtherDim(g.Dim)
-	size := g.LayData.AllocSize.Dim(g.Dim)
+	spc := g.Sty.BoxSpace()
+	size := g.LayData.AllocSize.Dim(g.Dim) - 2*spc
 	avail := size - handsz*float32(sz-1)
-	osz := g.LayData.AllocSize.Dim(odim)
+	// fmt.Printf("avail: %v\n", avail)
+	osz := g.LayData.AllocSize.Dim(odim) - 2*spc
 	pos := float32(0.0)
-	handval := 0.6 * handsz / size
 
 	spsum := float32(0)
 	for i, sp := range g.Splits {
@@ -210,22 +258,22 @@ func (g *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		if gis.TypeEmbeds(KiT_Frame) {
 			gis.SetReRenderAnchor()
 		}
-		size := sp * avail
-		gis.LayData.AllocSize.SetDim(g.Dim, size)
+		isz := sp * avail
+		gis.LayData.AllocSize.SetDim(g.Dim, isz)
 		gis.LayData.AllocSize.SetDim(odim, osz)
 		gis.LayData.AllocSizeOrig = gis.LayData.AllocSize
 		gis.LayData.AllocPosRel.SetDim(g.Dim, pos)
-		gis.LayData.AllocPosRel.SetDim(odim, 0)
+		gis.LayData.AllocPosRel.SetDim(odim, spc)
 		gis.LayData.AllocPosOrig = gis.LayData.AllocPos
 
-		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v\n", i, sp, size, gis.LayData.AllocSizeOrig)
+		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayData.AllocSizeOrig, gis.LayData.AllocPosOrig)
 
-		pos += size + handsz
+		pos += isz + handsz
 
 		spsum += sp
 		if i < sz-1 {
 			spl := g.Parts.KnownChild(i).(*Splitter)
-			spl.Value = spsum + handval // this is not right value
+			spl.Value = spsum
 			spl.UpdatePosFromValue()
 		}
 	}
@@ -263,12 +311,13 @@ func (g *SplitView) Render2D() {
 // layout of the SplitView -- based on SliderBase
 type Splitter struct {
 	SliderBase
+	SplitterNo int `desc:"splitter number this one is"`
 }
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"padding":          units.NewValue(0, units.Px),
+	"padding":          units.NewValue(8, units.Px),
 	"margin":           units.NewValue(0, units.Px),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
@@ -306,9 +355,9 @@ var SplitterProps = ki.Props{
 	},
 }
 
-func (g *Splitter) Defaults() { // todo: should just get these from props
+func (g *Splitter) Defaults() {
 	g.ValThumb = false
-	g.ThumbSize = units.NewValue(1, units.Em)
+	g.ThumbSize = units.NewValue(10, units.Px) // will be replaced by parent HandleSize
 	g.Step = 0.01
 	g.PageStep = 0.1
 	g.Max = 1.0
@@ -326,22 +375,31 @@ func (g *Splitter) ConfigPartsIfNeeded(render bool) {
 	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
 		g.ConfigParts()
 	}
-	if g.Icon.IsValid() && g.Parts.HasChildren() {
-		ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
-		if ok {
-			ic := ick.(*Icon)
-			mrg := g.Sty.Layout.Margin.Dots
-			pad := g.Sty.Layout.Padding.Dots
-			spc := mrg + pad
-			odim := OtherDim(g.Dim)
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.45*g.ThSize)
-			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.SetDim(odim, 2.0*g.ThSize)
-			ic.LayData.AllocSize.SetDim(g.Dim, g.ThSize)
-			if render {
-				ic.Layout2DTree()
-			}
-		}
+	if !g.Icon.IsValid() || !g.Parts.HasChildren() {
+		return
+	}
+	ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
+	if !ok {
+		return
+	}
+	ic := ick.(*Icon)
+	// svk, ok := g.ParentByType(KiT_SplitView, false)
+	// if !ok { // undefined
+	// 	return
+	// }
+	// sv := svk.(*SplitView)
+	handsz := g.ThumbSize.Dots
+	spc := g.Sty.BoxSpace()
+	odim := OtherDim(g.Dim)
+	g.LayData.AllocSize.SetDim(odim, 2*(handsz+2*spc))
+	g.LayData.AllocSizeOrig = g.LayData.AllocSize
+
+	ic.LayData.AllocSize.SetDim(odim, 2*handsz)
+	ic.LayData.AllocSize.SetDim(g.Dim, handsz)
+	ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos-(spc+0.5*handsz))
+	ic.LayData.AllocPosRel.SetDim(odim, 0)
+	if render {
+		ic.Layout2DTree()
 	}
 }
 
@@ -371,19 +429,27 @@ func (g *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	g.ConfigPartsIfNeeded(false)
 	g.Layout2DBase(parBBox, true, iter) // init style
 	g.Layout2DParts(parBBox, iter)
-	g.SizeFromAlloc()
+	// g.SizeFromAlloc()
+	g.Size = g.LayData.AllocSize.Dim(g.Dim)
+	g.UpdatePosFromValue()
+	g.DragPos = g.Pos
 	g.OrigWinBBox = g.WinBBox
 	return g.Layout2DChildren(iter)
 }
 
 func (g *Splitter) UpdateSplitterPos() {
-	pos := int(g.Pos)
+	spc := g.Sty.BoxSpace()
+	ispc := int(spc)
+	handsz := g.ThumbSize.Dots
+	sz := handsz // + spc*2
+	pos := int(g.Pos-0.5*sz) + 2*ispc
+	mxpos := int(g.Pos+0.5*sz) + 2*ispc
 	if g.Dim == X {
-		g.VpBBox = image.Rect(pos, g.VpBBox.Min.Y, pos+10, g.VpBBox.Max.Y)
-		g.WinBBox = image.Rect(pos, g.WinBBox.Min.Y, pos+10, g.WinBBox.Max.Y)
+		g.VpBBox = image.Rect(pos, g.ObjBBox.Min.Y+ispc, mxpos, g.ObjBBox.Max.Y+ispc)
+		g.WinBBox = image.Rect(pos, g.ObjBBox.Min.Y+ispc, mxpos, g.ObjBBox.Max.Y+ispc)
 	} else {
-		g.VpBBox = image.Rect(g.VpBBox.Min.X, pos, g.VpBBox.Max.X, pos+10)
-		g.WinBBox = image.Rect(g.WinBBox.Min.X, pos, g.WinBBox.Max.X, pos+10)
+		g.VpBBox = image.Rect(g.ObjBBox.Min.X+ispc, pos, g.ObjBBox.Max.X+ispc, mxpos)
+		g.WinBBox = image.Rect(g.ObjBBox.Min.X+ispc, pos, g.ObjBBox.Max.X+ispc, mxpos)
 	}
 }
 
@@ -392,6 +458,8 @@ func (g *Splitter) Render2D() {
 	win := vp.Win
 	g.SliderEvents()
 	if g.IsDragging() {
+		// spc := g.Sty.BoxSpace()
+		// odim := OtherDim(g.Dim)
 		ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
 		if !ok {
 			return
@@ -408,6 +476,7 @@ func (g *Splitter) Render2D() {
 		ovb = ovk.(*Bitmap)
 		ovb.GrabRenderFrom(ic)
 		ovb.LayData = ic.LayData // copy
+		// ovb.LayData.AllocPos.SetDim(odim, ovb.LayData.AllocPos.Dim(odim)+spc)
 		g.UpdateSplitterPos()
 		ovb.LayData.AllocPos.SetPoint(g.VpBBox.Min)
 		win.RenderOverlays()
@@ -416,12 +485,15 @@ func (g *Splitter) Render2D() {
 		if ok {
 			win.OverlayVp.DeleteChildAtIndex(ovidx, true)
 			win.RenderOverlays()
-		} else {
-			if g.PushBounds() {
-				g.Render2DDefaultStyle()
-				g.Render2DChildren()
-				g.PopBounds()
-			}
+		}
+		// todo: still not rendering properly
+		if g.FullReRenderIfNeeded() {
+			return
+		}
+		if g.PushBounds() {
+			g.Render2DDefaultStyle()
+			g.Render2DChildren()
+			g.PopBounds()
 		}
 	}
 }
