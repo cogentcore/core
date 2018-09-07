@@ -132,6 +132,7 @@ type Window struct {
 	NextPopup        ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
 	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
+	GotPaint         bool                                    `json:"-" xml:"-" desc:"have we received our first paint event yet?  ignore other window events before this point"`
 	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
 	stopEventLoop    bool
@@ -917,9 +918,16 @@ mainloop:
 		now := time.Now()
 		lag := now.Sub(evi.Time())
 		lagMs := int(lag / time.Millisecond)
-		// fmt.Printf("et %v lag %v\n", et, lag)
+		if et != oswin.MouseMoveEvent {
+			// fmt.Printf("et %v lag %v\n", et, lag)
+		}
 
 		if et != oswin.KeyEvent {
+			if et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
+				// fmt.Printf("skipping paint after resize\n")
+				w.GotPaint = true
+				continue // X11 always sends a paint after a resize -- we just use resize
+			}
 			if et == lastEt || lastEt == oswin.WindowResizeEvent {
 				switch et {
 				case oswin.MouseScrollEvent:
@@ -971,12 +979,6 @@ mainloop:
 						skippedResize = nil
 						continue
 					}
-				case oswin.WindowEvent:
-					we := evi.(*window.Event)
-					if we.Action == window.Move {
-						we.SetProcessed()
-						WinGeomPrefs.RecordPref(w)
-					}
 				case oswin.KeyChordEvent:
 					ke := evi.(*key.ChordEvent)
 					ks := ke.ChordString()
@@ -999,7 +1001,7 @@ mainloop:
 			skippedResize = nil
 		}
 
-		if et != oswin.WindowResizeEvent && et != oswin.WindowEvent {
+		if et != oswin.WindowResizeEvent && et != oswin.WindowPaintEvent {
 			w.Resizing = false
 		}
 
@@ -1135,6 +1137,7 @@ mainloop:
 				break mainloop
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
+				w.GotPaint = true
 				if w.DoFullRender {
 					w.DoFullRender = false
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
@@ -1145,6 +1148,12 @@ mainloop:
 					}
 				}
 				w.Publish()
+			case window.Move:
+				e.SetProcessed()
+				if w.GotPaint { // moves before paint are not accurate on X11
+					// fmt.Printf("win move: %v\n", w.OSWin.Position())
+					WinGeomPrefs.RecordPref(w)
+				}
 			}
 			continue
 		case *mouse.DragEvent:

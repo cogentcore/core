@@ -128,7 +128,7 @@ func (w *windowImpl) getFrameSizes() [4]int {
 			w.frameSizes[i] = int(xgb.Get32(prop.Value[i*4:]))
 		}
 	} else {
-		log.Printf("X11 _NET_FRAME_EXTENTS Property values not as expected. fmt: %v, len: %v\n", prop.Format, prop.ValueLen)
+		// log.Printf("X11 _NET_FRAME_EXTENTS Property values not as expected. fmt: %v, len: %v\n", prop.Format, prop.ValueLen)
 	}
 	return w.frameSizes
 }
@@ -147,10 +147,17 @@ func (w *windowImpl) getCurGeom() (pos, size image.Point, err error) {
 		return
 	}
 	frext := w.getFrameSizes() // l,r,t,b
-	pos = image.Point{int(trpos.DstX) - frext[0], int(trpos.DstY) - frext[2]}
+	pos = image.Point{int(trpos.DstX) - frext[0] - 20, int(trpos.DstY) - frext[2] - 48}
 	size = image.Point{int(geo.Width), int(geo.Height)}
 	// fmt.Printf("computed geom, pos: %v size: %v  frext: %v\n", pos, size, frext)
 	return
+}
+
+func AbsInt(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
@@ -165,8 +172,18 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	ps.Y -= frext[2]
 	ps.X -= frext[0]
 
-	// fmt.Printf("event geom, pos: %v size: %v\n", ps, sz)
+	cpos, _, _ := w.getCurGeom()
+	posdif := ps.Sub(cpos)
+	// getting erroneous values from event for first event, which is then saved..
+	usecp := AbsInt(posdif.X) > 20 || AbsInt(posdif.Y) > 20
+	if usecp {
+		ps = cpos
+	}
 
+	ps.X += WindowBorderWidth
+	ps.Y += WindowBorderWidth
+
+	// fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v\n", ps, sz, cpos, posdif)
 	act := window.Resize
 
 	if w.Sz != sz || w.PhysDPI != dpi {
@@ -184,6 +201,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	w.Scrn = sc
 	// }
 
+	// fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
 	sendWindowEvent(w, act)
 }
 
@@ -303,7 +321,7 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 
 func (w *windowImpl) SetTitle(title string) {
 	w.Titl = title
-	xproto.ChangeProperty(w.app.xc, xproto.PropModeReplace, w.xw, app.atomNETWMName, app.atomUTF8String, 8, uint32(len(title)), title)
+	xproto.ChangeProperty(w.app.xc, xproto.PropModeReplace, w.xw, w.app.atomNETWMName, w.app.atomUTF8String, 8, uint32(len(title)), []byte(title))
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {

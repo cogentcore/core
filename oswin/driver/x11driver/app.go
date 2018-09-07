@@ -529,6 +529,13 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
+	if opts.Pos.X < 40 {
+		opts.Pos.X = 40
+	}
+	if opts.Pos.Y < 40 {
+		opts.Pos.Y = 40
+	}
+
 	xproto.CreateWindow(app.xc, app.xsci.RootDepth, xw, app.xsci.Root,
 		int16(opts.Pos.X), int16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), uint16(WindowBorderWidth),
 		xproto.WindowClassInputOutput, app.xsci.RootVisual,
@@ -559,8 +566,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	xproto.MapWindow(app.xc, xw)
 
 	if opts.Pos != image.ZP {
-		w.SetSize(opts.Size)
-		w.SetPos(opts.Pos)
+		w.SetGeom(opts.Pos, opts.Size)
 	}
 
 	return w, nil

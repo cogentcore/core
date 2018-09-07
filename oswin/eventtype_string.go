@@ -2,28 +2,15 @@
 
 package oswin
 
-import (
-	"fmt"
-	"strconv"
-)
+import "strconv"
 
-const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventMouseHoverEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventDNDEventDNDMoveEventDNDFocusEventEventTypeN"
+const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventMouseHoverEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventWindowPaintEventDNDEventDNDMoveEventDNDFocusEventEventTypeN"
 
-var _EventType_index = [...]uint8{0, 10, 24, 38, 54, 69, 84, 92, 105, 115, 127, 138, 149, 166, 174, 186, 199, 209}
+var _EventType_index = [...]uint8{0, 10, 24, 38, 54, 69, 84, 92, 105, 115, 127, 138, 149, 166, 182, 190, 202, 215, 225}
 
 func (i EventType) String() string {
 	if i < 0 || i >= EventType(len(_EventType_index)-1) {
 		return "EventType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _EventType_name[_EventType_index[i]:_EventType_index[i+1]]
-}
-
-func (i *EventType) FromString(s string) error {
-	for j := 0; j < len(_EventType_index)-1; j++ {
-		if s == _EventType_name[_EventType_index[j]:_EventType_index[j+1]] {
-			*i = EventType(j)
-			return nil
-		}
-	}
-	return fmt.Errorf("String %v is not a valid option for type EventType", s)
 }

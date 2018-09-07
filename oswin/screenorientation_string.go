@@ -2,10 +2,7 @@
 
 package oswin
 
-import (
-	"fmt"
-	"strconv"
-)
+import "strconv"
 
 const _ScreenOrientation_name = "OrientationUnknownPortraitLandscapeScreenOrientationN"
 
@@ -16,14 +13,4 @@ func (i ScreenOrientation) String() string {
 		return "ScreenOrientation(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _ScreenOrientation_name[_ScreenOrientation_index[i]:_ScreenOrientation_index[i+1]]
-}
-
-func (i *ScreenOrientation) FromString(s string) error {
-	for j := 0; j < len(_ScreenOrientation_index)-1; j++ {
-		if s == _ScreenOrientation_name[_ScreenOrientation_index[j]:_ScreenOrientation_index[j+1]] {
-			*i = ScreenOrientation(j)
-			return nil
-		}
-	}
-	return fmt.Errorf("String %v is not a valid option for type ScreenOrientation", s)
 }

@@ -96,6 +96,10 @@ const (
 	// special treatment
 	WindowResizeEvent
 
+	// WindowPaintEvent is specifically for window paint events which need
+	// special treatment
+	WindowPaintEvent
+
 	// DNDEvent is for the Drag-n-Drop (DND) drop event
 	DNDEvent
 	// DNDMoveEvent is when the DND position has changed

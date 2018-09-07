@@ -77,6 +77,8 @@ var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 func (ev Event) Type() oswin.EventType {
 	if ev.Action == Resize {
 		return oswin.WindowResizeEvent
+	} else if ev.Action == Paint {
+		return oswin.WindowPaintEvent
 	} else {
 		return oswin.WindowEvent
 	}

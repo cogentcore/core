@@ -16,6 +16,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+
 	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"
@@ -101,6 +102,13 @@ func MinInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func AbsInt(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 // MinPos returns the minimum of the two values, excluding any that are 0
