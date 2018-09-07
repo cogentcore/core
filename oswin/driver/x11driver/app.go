@@ -475,7 +475,8 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	}, nil
 }
 
-var WindowBorderWidth = 10
+// borderwidth doesn't seem to actually do anything in ubuntu or xfce
+var WindowBorderWidth = 0
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	if opts == nil {
