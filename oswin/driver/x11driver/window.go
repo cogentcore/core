@@ -14,7 +14,6 @@ package x11driver
 // TODO: implement a back buffer.
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -186,7 +185,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 		ps.Y += borderWidth
 	}
 
-	fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v  border: %v\n", orgPos, sz, cpos, posdif, borderWidth)
+	// fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v  border: %v\n", orgPos, sz, cpos, posdif, borderWidth)
 	act := window.Resize
 
 	if w.Sz != sz || w.PhysDPI != dpi {
