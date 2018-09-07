@@ -172,7 +172,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	frext := w.getFrameSizes() // l,r,t,b
 	ps.Y -= frext[2]
 	ps.X -= frext[0]
-	orgPos := ps
+	// orgPos := ps
 
 	cpos, _, borderWidth, _ := w.getCurGeom()
 	posdif := ps.Sub(cpos)
