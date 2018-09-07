@@ -136,7 +136,7 @@ func (w *windowImpl) getFrameSizes() [4]int {
 
 // note: this does NOT seem result in accurate results compared to event, but
 // frame sizes are accurate
-func (w *windowImpl) getCurGeom() (pos, size image.Point, int borderWidth, err error) {
+func (w *windowImpl) getCurGeom() (pos, size image.Point, borderWidth int, err error) {
 	geo, err := xproto.GetGeometry(w.app.xc, xproto.Drawable(w.xw)).Reply()
 	if err != nil {
 		log.Println(err)
