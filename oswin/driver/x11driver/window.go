@@ -14,6 +14,7 @@ package x11driver
 // TODO: implement a back buffer.
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -146,8 +147,9 @@ func (w *windowImpl) getCurGeom() (pos, size image.Point, int borderWidth, err e
 		log.Println(err)
 		return
 	}
+	borderWidth = int(geo.BorderWidth)
 	frext := w.getFrameSizes() // l,r,t,b
-	pos = image.Point{int(trpos.DstX) - frext[0] - 20 + geo.BorderWidth, int(trpos.DstY) - frext[2] - 48 + geo.BorderWidth}
+	pos = image.Point{int(trpos.DstX) - frext[0] - 20 + borderWidth, int(trpos.DstY) - frext[2] - 48 + borderWidth}
 	size = image.Point{int(geo.Width), int(geo.Height)}
 	// fmt.Printf("computed geom, pos: %v size: %v  frext: %v\n", pos, size, frext)
 	return
@@ -171,6 +173,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	frext := w.getFrameSizes() // l,r,t,b
 	ps.Y -= frext[2]
 	ps.X -= frext[0]
+	orgPos := ps
 
 	cpos, _, borderWidth, _ := w.getCurGeom()
 	posdif := ps.Sub(cpos)
@@ -178,12 +181,12 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	usecp := AbsInt(posdif.X) > 20 || AbsInt(posdif.Y) > 20
 	if usecp {
 		ps = cpos
+	} else {
+		ps.X += borderWidth
+		ps.Y += borderWidth
 	}
 
-	ps.X += borderWidth
-	ps.Y += borderWidth
-
-	// fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v\n", ps, sz, cpos, posdif)
+	fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v  border: %v\n", orgPos, sz, cpos, posdif, borderWidth)
 	act := window.Resize
 
 	if w.Sz != sz || w.PhysDPI != dpi {
