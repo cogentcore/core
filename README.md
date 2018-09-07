@@ -95,9 +95,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
+	+ losing line numbers when typing new text, in some select cases
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
-	+ losing line numbers in some select cases
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
@@ -106,10 +106,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * Splitview: 
 	+ some lowpri keyfuns for collapsing and expanding  
-
-* Window:
-	+ add SetGeom and SetTitle for other platforms
-
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.

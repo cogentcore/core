@@ -59,8 +59,9 @@ func HasMainMenuView(val interface{}) bool {
 // MainMenuView configures the given MenuBar according to the "MainMenu"
 // properties registered on the type for given value element, through the
 // kit.AddType method.  See https://github.com/goki/gi/wiki/Views for full
-// details on formats and options for configuring the menu.  Returns false on
-// errors.
+// details on formats and options for configuring the menu.  Returns false if
+// there is no main menu defined for this type, or on errors (which are
+// programmer errors sent to log).
 func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
@@ -133,7 +134,9 @@ func HasToolBarView(val interface{}) bool {
 // ToolBarView configures ToolBar according to the "ToolBar" properties
 // registered on the type for given value element, through the kit.AddType
 // method.  See https://github.com/goki/gi/wiki/Views for full details on
-// formats and options for configuring the menu.  Returns false on errors.
+// formats and options for configuring the menu.  Returns false if there is no
+// toolbar defined for this type, or on errors (which are programmer errors
+// sent to log).
 func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
@@ -157,6 +160,42 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 			continue
 		}
 		ac := tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
+		rv := ActionsView(val, vtyp, vp, ac, te.Value)
+		if !rv {
+			rval = false
+		}
+	}
+	return rval
+}
+
+// CtxtMenuView configures a popup context menu according to the "CtxtMenu"
+// properties registered on the type for given value element, through the
+// kit.AddType method.  See https://github.com/goki/gi/wiki/Views for full
+// details on formats and options for configuring the menu.  Returns false if
+// there is no context menu defined for this type, or on errors (which are
+// programmer errors sent to log).
+func CtxtMenuView(val interface{}, vp *gi.Viewport2D, menu *gi.Menu) bool {
+	tpp, vtyp, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	tp, ok := ki.SliceProps(tpp, "CtxtMenu")
+	if !ok {
+		return false
+	}
+
+	if vp == nil {
+		MethViewErr(vtyp, "Viewport is nil in CtxtMenuView config -- must set viewport in widget prior to calling this method!")
+		return false
+	}
+
+	rval := true
+	for _, te := range tp {
+		if strings.HasPrefix(te.Name, "sep-") {
+			menu.AddSeparator(te.Name)
+			continue
+		}
+		ac := menu.AddAction(gi.ActOpts{Label: te.Name}, nil, nil)
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
 			rval = false

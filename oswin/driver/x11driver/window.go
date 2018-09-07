@@ -135,7 +135,7 @@ func (w *windowImpl) getFrameSizes() [4]int {
 
 // note: this does NOT seem result in accurate results compared to event, but
 // frame sizes are accurate
-func (w *windowImpl) getCurGeom() (pos, size image.Point, err error) {
+func (w *windowImpl) getCurGeom() (pos, size image.Point, int borderWidth, err error) {
 	geo, err := xproto.GetGeometry(w.app.xc, xproto.Drawable(w.xw)).Reply()
 	if err != nil {
 		log.Println(err)
@@ -147,7 +147,7 @@ func (w *windowImpl) getCurGeom() (pos, size image.Point, err error) {
 		return
 	}
 	frext := w.getFrameSizes() // l,r,t,b
-	pos = image.Point{int(trpos.DstX) - frext[0] - 20, int(trpos.DstY) - frext[2] - 48}
+	pos = image.Point{int(trpos.DstX) - frext[0] - 20 + geo.BorderWidth, int(trpos.DstY) - frext[2] - 48 + geo.BorderWidth}
 	size = image.Point{int(geo.Width), int(geo.Height)}
 	// fmt.Printf("computed geom, pos: %v size: %v  frext: %v\n", pos, size, frext)
 	return
@@ -172,7 +172,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	ps.Y -= frext[2]
 	ps.X -= frext[0]
 
-	cpos, _, _ := w.getCurGeom()
+	cpos, _, borderWidth, _ := w.getCurGeom()
 	posdif := ps.Sub(cpos)
 	// getting erroneous values from event for first event, which is then saved..
 	usecp := AbsInt(posdif.X) > 20 || AbsInt(posdif.Y) > 20
@@ -180,8 +180,8 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 		ps = cpos
 	}
 
-	ps.X += WindowBorderWidth
-	ps.Y += WindowBorderWidth
+	ps.X += borderWidth
+	ps.Y += borderWidth
 
 	// fmt.Printf("event geom, pos: %v size: %v  cur: %v  posdif: %v\n", ps, sz, cpos, posdif)
 	act := window.Resize

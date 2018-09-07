@@ -432,6 +432,7 @@ func (g *WidgetBase) MakeContextMenu(m *Menu) {
 	if g.CtxtMenuFunc != nil {
 		g.CtxtMenuFunc(g.This.(Node2D), m)
 	}
+	TheViewIFace.CtxtMenuView(g.This, g.Viewport, m)
 }
 
 var TooltipFrameProps = ki.Props{

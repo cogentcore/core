@@ -1338,6 +1338,10 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 type ViewIFace struct {
 }
 
+func (vi *ViewIFace) CtxtMenuView(val interface{}, vp *gi.Viewport2D, menu *gi.Menu) bool {
+	return CtxtMenuView(val, vp, menu)
+}
+
 func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
 	GoGiEditorDialog(obj)
 }

@@ -896,18 +896,20 @@ mainloop:
 			fmt.Println("stop event loop")
 			break
 		}
+		et := evi.Type()
 		if lastWinMenuUpdate != WinNewCloseTime {
-			w.MainMenuUpdateWindows()
-			lastWinMenuUpdate = WinNewCloseTime
-			// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
+				et != oswin.WindowPaintEvent {
+				w.MainMenuUpdateWindows()
+				lastWinMenuUpdate = WinNewCloseTime
+				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+			}
 		}
 		if w.Focus == nil && w.StartFocus != nil {
 			w.SetFocus(w.StartFocus)
 		}
 
-		delPop := false // if true, delete this popup after event loop
-
-		et := evi.Type()
+		delPop := false                      // if true, delete this popup after event loop
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
 		}
@@ -2601,19 +2603,3 @@ func (wg *WindowGeomPrefs) DeleteAll() {
 	os.Remove(pnm)
 	*wg = make(WindowGeomPrefs, 1000)
 }
-
-//////////////////////////////////////////////////////////////////////////////
-//  ViewIFace
-
-// ViewIFace is an interface into the View GUI types in giv subpackage
-type ViewIFace interface {
-
-	// GoGiEditor opens an interactive editor of given Ki tree, at its root
-	GoGiEditor(obj ki.Ki)
-
-	// PrefsView opens an interactive view of given preferences object
-	PrefsView(prefs *Preferences)
-}
-
-// TheViewIFace is the implemenation of the interface, defined in giv package
-var TheViewIFace ViewIFace
