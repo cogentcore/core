@@ -923,7 +923,7 @@ mainloop:
 		}
 
 		if et != oswin.KeyEvent {
-			if et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
+			if w.GotPaint && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
 				// fmt.Printf("skipping paint after resize\n")
 				w.GotPaint = true
 				continue // X11 always sends a paint after a resize -- we just use resize

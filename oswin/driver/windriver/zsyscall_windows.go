@@ -52,6 +52,7 @@ var (
 	procDispatchMessageW           = moduser32.NewProc("DispatchMessageW")
 	procGetClientRect              = moduser32.NewProc("GetClientRect")
 	procGetWindowRect              = moduser32.NewProc("GetWindowRect")
+	procSetWindowTextW             = moduser32.NewProc("SetWindowTextW")
 	procGetKeyboardLayout          = moduser32.NewProc("GetKeyboardLayout")
 	procGetKeyboardState           = moduser32.NewProc("GetKeyboardState")
 	procGetKeyState                = moduser32.NewProc("GetKeyState")
@@ -194,6 +195,12 @@ func _GetWindowRect(hwnd syscall.Handle, rect *_RECT) (err error) {
 			err = syscall.EINVAL
 		}
 	}
+	return
+}
+
+func _SetWindowText(hwnd syscall.Handle, windowText *uint16) (ok bool) {
+	r0, _, _ := syscall.Syscall(procSetWindowTextW.Addr(), 2, uintptr(hwnd), uintptr(unsafe.Pointer(windowText)), 0)
+	ok = r0 != 0
 	return
 }
 

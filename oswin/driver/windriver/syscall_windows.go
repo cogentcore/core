@@ -285,7 +285,7 @@ func _HIWORD(l uintptr) uint16 {
 //sys	_DispatchMessage(msg *_MSG) (ret int32) = user32.DispatchMessageW
 //sys	_GetClientRect(hwnd syscall.Handle, rect *_RECT) (err error) = user32.GetClientRect
 //sys	_GetWindowRect(hwnd syscall.Handle, rect *_RECT) (err error) = user32.GetWindowRect
-//sys	_SetWindowText(hwnd syscall.Handle, windowText *uint16) (ok bool) = user32.SetWindowText
+//sys	_SetWindowText(hwnd syscall.Handle, windowText *uint16) (ok bool) = user32.SetWindowTextW
 //sys   _GetKeyboardLayout(threadID uint32) (locale syscall.Handle) = user32.GetKeyboardLayout
 //sys   _GetKeyboardState(lpKeyState *byte) (err error) = user32.GetKeyboardState
 //sys	_GetKeyState(virtkey int32) (keystatus int16) = user32.GetKeyState
