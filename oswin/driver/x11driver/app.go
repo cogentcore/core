@@ -475,6 +475,8 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	}, nil
 }
 
+var WindowBorderWidth = 10
+
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	if opts == nil {
 		opts = &oswin.NewWindowOptions{}
@@ -528,7 +530,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.mu.Unlock()
 
 	xproto.CreateWindow(app.xc, app.xsci.RootDepth, xw, app.xsci.Root,
-		int16(opts.Pos.X), int16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), 0,
+		int16(opts.Pos.X), int16(opts.Pos.Y), uint16(opts.Size.X), uint16(opts.Size.Y), uint16(WindowBorderWidth),
 		xproto.WindowClassInputOutput, app.xsci.RootVisual,
 		xproto.CwEventMask,
 		[]uint32{0 |

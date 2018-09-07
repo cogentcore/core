@@ -38,7 +38,7 @@ var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
 // auto-max-stretch
 var SplitViewProps = ki.Props{
-	"handle-size": units.NewValue(12, units.Px),
+	"handle-size": units.NewValue(10, units.Px),
 	"max-width":   -1.0,
 	"max-height":  -1.0,
 	"margin":      0,

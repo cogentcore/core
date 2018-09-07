@@ -94,11 +94,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* X11 needs initial re-render..
-
 * TextView:
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
+	+ losing line numbers in some select cases
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
 	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
 	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
@@ -106,10 +105,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 
 * Splitview: 
-	+ grab icon viewport bitmap directly - much cleaner.
 	+ some lowpri keyfuns for collapsing and expanding  
 
-* Window SetName, title itself should actually rename windows, and regenerate lists of named windows.  overall gi.Window SetName should update OSWin.SetName, and we should have a wrapper SetTitle for OSWin's.
+* Window:
+	+ add SetGeom and SetTitle for other platforms
+
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.

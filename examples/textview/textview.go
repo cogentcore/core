@@ -71,7 +71,7 @@ func mainrun() {
 
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiStyle = "emacs"
-	txed1.LineNos = true
+	txed1.Opts.LineNos = true
 	txed1.SetCompleter(nil, Complete, CompleteEdit)
 
 	// generally need to put text view within its own layout for scrolling

@@ -374,12 +374,21 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	return res
 }
 
+func (w *windowImpl) SetTitle(title string) {
+	w.Titl = title
+	updateTitle(w, title)
+}
+
 func (w *windowImpl) SetSize(sz image.Point) {
 	resizeWindow(w, sz)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
 	posWindow(w, pos)
+}
+
+func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
+	setGeomWindow(w, pos, sz)
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {

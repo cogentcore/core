@@ -337,10 +337,6 @@ iterloop:
 	return fnm
 }
 
-// fontMetricsMu protects the font GlyphBounds calls, which are not
-// concurent-safe
-var fontMetricsMu sync.Mutex
-
 // OpenFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
 // fallback method to finding an appropriate font, and falls back on the
@@ -374,8 +370,8 @@ func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	if fs.Face == nil {
 		return
 	}
-	fontMetricsMu.Lock()
-	defer fontMetricsMu.Unlock()
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
 	intDots := float32(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
 		intDots = 12

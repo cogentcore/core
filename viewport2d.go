@@ -31,13 +31,12 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	WidgetBase
-	Fill            bool        `desc:"fill the viewport with background-color from style"`
-	Geom            Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Render          RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
-	Pixels          *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage         oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
-	Win             *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
-	DoingFullRender bool        `json:"-" xml:"-" desc:"flag that is set during FullRender2DTree, which can be used by elements to drive deep rebuild in case underlying data has changed"`
+	Fill    bool        `desc:"fill the viewport with background-color from style"`
+	Geom    Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	Pixels  *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
+	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
@@ -92,7 +91,7 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
 }
 
-// these flags extend NodeBase NodeFlags to hold viewport state
+// VpFlag flags extend NodeBase NodeFlags to hold viewport state
 const (
 	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
 	// parent bounds (otherwise does)
@@ -115,9 +114,14 @@ const (
 	// manage those (typically these are reusable assets)
 	VpFlagPopupDestroyAll
 
-	// VpFlagSVG mans that this viewport is an SVG viewport -- SVG elements
+	// VpFlagSVG means that this viewport is an SVG viewport -- SVG elements
 	// look for this for re-rendering
 	VpFlagSVG
+
+	// VpFlagDoingFullRender means that this viewport is currently doing a
+	// full render -- can be used by elements to drive deep rebuild in case
+	// underlying data has changed.
+	VpFlagDoingFullRender
 )
 
 func (vp *Viewport2D) IsPopup() bool {
@@ -138,6 +142,10 @@ func (vp *Viewport2D) IsTooltip() bool {
 
 func (vp *Viewport2D) IsSVG() bool {
 	return bitflag.Has(vp.Flag, int(VpFlagSVG))
+}
+
+func (vp *Viewport2D) IsDoingFullRender() bool {
+	return bitflag.Has(vp.Flag, int(VpFlagDoingFullRender))
 }
 
 // set our window pointer to point to the current window we are under
@@ -354,12 +362,15 @@ func (vp *Viewport2D) RenderViewport2D() {
 // anyone else) can do a deep re-build that is typically not otherwise needed
 // (e.g., after non-signaling structs have updated)
 func (vp *Viewport2D) FullRender2DTree() {
-	vp.DoingFullRender = true
+	if vp.IsUpdatingAtomic() { // already in process!
+		return
+	}
+	bitflag.Set(&vp.Flag, int(VpFlagDoingFullRender))
 	if Render2DTrace {
 		fmt.Printf("Render: %v doing full render\n", vp.PathUnique())
 	}
 	vp.WidgetBase.FullRender2DTree()
-	vp.DoingFullRender = false
+	bitflag.Clear(&vp.Flag, int(VpFlagDoingFullRender))
 }
 
 // we use our own render for these -- Viewport member is our parent!

@@ -348,38 +348,40 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := Icon{}
+			rad := gi.Vec2D{0.25, 0.12}
 			ic.InitName(&ic, "widget-handle-circles-vert")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
+			c0 := ic.AddNewChild(KiT_Ellipse, "c0").(*Ellipse)
 			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c0.Pos.Set(0.5, 0.15)
-			c0.Radius = 0.12
-			c1 := ic.AddNewChild(KiT_Circle, "c1").(*Circle)
+			c0.Radii = rad
+			c1 := ic.AddNewChild(KiT_Ellipse, "c1").(*Ellipse)
 			c1.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c1.Pos.Set(0.5, 0.5)
-			c1.Radius = 0.12
-			c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
+			c1.Radii = rad
+			c2 := ic.AddNewChild(KiT_Ellipse, "c2").(*Ellipse)
 			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c2.Pos.Set(0.5, 0.85)
-			c2.Radius = 0.12
+			c2.Radii = rad
 			iset[ic.Nm] = &ic
 		}
 		{
 			ic := Icon{}
+			rad := gi.Vec2D{0.12, 0.25}
 			ic.InitName(&ic, "widget-handle-circles-horiz")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			c0 := ic.AddNewChild(KiT_Circle, "c0").(*Circle)
+			c0 := ic.AddNewChild(KiT_Ellipse, "c0").(*Ellipse)
 			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c0.Pos.Set(0.15, 0.5)
-			c0.Radius = 0.12
-			c1 := ic.AddNewChild(KiT_Circle, "c1").(*Circle)
+			c0.Radii = rad
+			c1 := ic.AddNewChild(KiT_Ellipse, "c1").(*Ellipse)
 			c1.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c1.Pos.Set(0.5, 0.5)
-			c1.Radius = 0.12
-			c2 := ic.AddNewChild(KiT_Circle, "c2").(*Circle)
+			c1.Radii = rad
+			c2 := ic.AddNewChild(KiT_Ellipse, "c2").(*Ellipse)
 			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			c2.Pos.Set(0.85, 0.5)
-			c2.Radius = 0.12
+			c2.Radii = rad
 			iset[ic.Nm] = &ic
 		}
 	}

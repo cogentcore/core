@@ -28,9 +28,11 @@ void stopDriver();
 void makeCurrentContext(uintptr_t ctx);
 void flushContext(uintptr_t ctx);
 uintptr_t doNewWindow(int width, int height, int left, int top, char* title, bool dialog, bool modal, bool tool, bool fullscreen);
+void doUpdateTitle(uintptr_t id, char* title);
 void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
 void doMoveWindow(uintptr_t id, int left, int top);
+void doGeomWindow(uintptr_t id, int left, int top, int width, int height);
 void doCloseWindow(uintptr_t id);
 void doRaiseWindow(uintptr_t id);
 void doMinimizeWindow(uintptr_t id);
@@ -119,12 +121,23 @@ func showWindow(w *windowImpl) {
 	C.doShowWindow(C.uintptr_t(w.id))
 }
 
+func updateTitle(w *windowImpl, titles string) {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	C.doUpdateTitle(C.uintptr_t(w.id), title)
+}
+
 func resizeWindow(w *windowImpl, sz image.Point) {
 	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
 }
 
 func posWindow(w *windowImpl, pos image.Point) {
 	C.doMoveWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y))
+}
+
+func setGeomWindow(w *windowImpl, pos image.Point, sz image.Point) {
+	C.doGeomWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y), C.int(sz.X), C.int(sz.Y))
 }
 
 func raiseWindow(w *windowImpl) {

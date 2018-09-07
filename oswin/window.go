@@ -39,13 +39,17 @@ type Window interface {
 	// Size returns the current size of the window, in raw underlying dots / pixels.
 	Size() image.Point
 
-	// SetSize attempts to set the size of the window to given size, in raw
-	// underlying dots / pixels.
+	// SetSize sets the size of the window, in raw underlying dots / pixels.
 	SetSize(sz image.Point)
 
-	// SetPos attempts to set the position of the window to given size, in raw
-	// underlying dots / pixels.
+	// SetPos sets the position of the window, in raw underlying dots /
+	// pixels.
 	SetPos(pos image.Point)
+
+	// SetGeom sets the position and size in one call -- use this if doing
+	// both because sequential calls to SetPos and SetSize might fail on some
+	// platforms
+	SetGeom(pos image.Point, sz image.Point)
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
@@ -181,10 +185,6 @@ func (w *WindowBase) SetName(name string) {
 
 func (w WindowBase) Title() string {
 	return w.Titl
-}
-
-func (w *WindowBase) SetTitle(title string) {
-	w.Titl = title
 }
 
 func (w WindowBase) Size() image.Point {

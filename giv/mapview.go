@@ -337,7 +337,7 @@ func (mv *MapView) ConfigToolbar() {
 }
 
 func (mv *MapView) Style2D() {
-	if mv.Viewport != nil && mv.Viewport.DoingFullRender {
+	if mv.Viewport != nil && mv.Viewport.IsDoingFullRender() {
 		mv.UpdateFromMap()
 	}
 	mv.Frame.Style2D()

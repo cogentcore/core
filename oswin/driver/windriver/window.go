@@ -185,12 +185,25 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	return oswin.PublishResult{}
 }
 
+func (w *windowImpl) SetTitle(title string) {
+	w.Titl = title
+	tit, err := syscall.UTF16PtrFromString(title)
+	if err != nil {
+		return
+	}
+	_SetWindowText(w.hwnd, tit)
+}
+
 func (w *windowImpl) SetSize(sz image.Point) {
 	ResizeClientRect(w.hwnd, sz)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
 	MoveWindowPos(w.hwnd, pos)
+}
+
+func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
+	ConfigWindowGeom(w.hwnd, pos, sz)
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {

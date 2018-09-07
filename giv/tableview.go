@@ -812,7 +812,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 }
 
 func (tv *TableView) Style2D() {
-	if tv.Viewport != nil && tv.Viewport.DoingFullRender {
+	if tv.Viewport != nil && tv.Viewport.IsDoingFullRender() {
 		tv.UpdateFromSlice()
 	}
 	tv.Frame.Style2D()

@@ -438,7 +438,7 @@ func (sv *SliceView) ConfigToolbar() {
 }
 
 func (sv *SliceView) Style2D() {
-	if sv.Viewport != nil && sv.Viewport.DoingFullRender {
+	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
 		sv.UpdateFromSlice()
 	}
 	sv.Frame.Style2D()

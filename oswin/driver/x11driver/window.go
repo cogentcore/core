@@ -301,6 +301,11 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 	w.Send(event)
 }
 
+func (w *windowImpl) SetTitle(title string) {
+	w.Titl = title
+	xproto.ChangeProperty(w.app.xc, xproto.PropModeReplace, w.xw, app.atomNETWMName, app.atomUTF8String, 8, uint32(len(title)), title)
+}
+
 func (w *windowImpl) SetSize(sz image.Point) {
 	// todo: could used checked
 
@@ -316,6 +321,13 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	valmask := uint16(xproto.ConfigWindowX + xproto.ConfigWindowY)
 	vallist := []uint32{uint32(pos.X), uint32(pos.Y)}
 
+	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
+}
+
+func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
+	// apparently order is x,y,w,h, then border width -- in numeric order according to xproto.go
+	valmask := uint16(xproto.ConfigWindowX + xproto.ConfigWindowY + xproto.ConfigWindowWidth + xproto.ConfigWindowHeight)
+	vallist := []uint32{uint32(pos.X), uint32(pos.Y), uint32(sz.X), uint32(sz.Y)}
 	xproto.ConfigureWindow(w.app.xc, w.xw, valmask, vallist)
 }
 

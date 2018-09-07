@@ -340,6 +340,34 @@ func (w *Window) SetMainLayout() *Layout {
 	return fr
 }
 
+// SetName sets name of this window and also the OSWin, and applies any window
+// geometry settings associated with the new name if it is different from before
+func (w *Window) SetName(name string) bool {
+	rval := w.NodeBase.SetName(name)
+	if w.OSWin != nil {
+		w.OSWin.SetName(name)
+	}
+	if rval && w.OSWin != nil {
+		wgp := WinGeomPrefs.Pref(name, nil)
+		if wgp != nil {
+			if w.OSWin.Size() != wgp.Size || w.OSWin.Position() != wgp.Pos {
+				// fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
+				w.OSWin.SetGeom(wgp.Pos, wgp.Size)
+			}
+		}
+	}
+	return rval
+}
+
+// SetTitle sets title of this window and also the OSWin
+func (w *Window) SetTitle(name string) {
+	w.Title = name
+	if w.OSWin != nil {
+		w.OSWin.SetTitle(name)
+	}
+	WinNewCloseStamp()
+}
+
 // MainWidget returns the main widget for this window -- 2nd element in
 // MasterVLay -- returns false if not yet set.
 func (w *Window) MainWidget() (ki.Ki, bool) {
@@ -1139,6 +1167,15 @@ mainloop:
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
+			if w.DoFullRender { // if we are getting mouse input, and still haven't done this, do it..
+				w.DoFullRender = false
+				// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
+				if w.Viewport.Geom.Size != w.OSWin.Size() {
+					w.Resized(w.OSWin.Size())
+				} else {
+					w.FullReRender()
+				}
+			}
 		case *key.ChordEvent:
 			keyDelPop := w.KeyChordEventHiPri(e)
 			if keyDelPop {

@@ -271,13 +271,17 @@ void menuSetAsMain(ScreenGLView* view);
     [self callSetGeom];
 }
 
+- (void)windowDidResize:(NSNotification *)notification {
+    [self callSetGeom];
+}
+
 - (void)windowDidMiniaturize:(NSNotification *)notification {
     windowMinimized((GoUintptr)self);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
     menuSetAsMain(self);
-   windowFocused((GoUintptr)self);
+    windowFocused((GoUintptr)self);
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
@@ -370,21 +374,6 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
 
     dispatch_sync(dispatch_get_main_queue(), ^{
             NSString* name = [[NSString alloc] initWithUTF8String:title];
-            // id menuBar = [NSMenu new];
-            // id menuItem = [NSMenuItem new];
-            // [menuBar addItem:menuItem];
-            // [NSApp setMainMenu:menuBar];
-
-            // id menu = [NSMenu new];
-
-            // id hideMenuItem = [[NSMenuItem alloc] initWithTitle:@"Hide"
-            //                                              action:@selector(hide:) keyEquivalent:@"h"];
-            // [menu addItem:hideMenuItem];
-
-            // id quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit"
-            //                                              action:@selector(terminate:) keyEquivalent:@"q"];
-            // [menu addItem:quitMenuItem];
-            // [menuItem setSubmenu:menu];
 
             NSRect rect = NSMakeRect(0, 0, w, h);
 		
@@ -448,6 +437,12 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
     return (uintptr_t)view;
 }
 
+void doUpdateTitle(uintptr_t viewID, char* title) {
+    NSString* nst = [[NSString alloc] initWithUTF8String:title];
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    [view.window setTitle:nst];
+}
+
 void doShowWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -478,7 +473,30 @@ void doMoveWindow(uintptr_t viewID, int left, int top) {
     fr.origin.x = l;
     fr.origin.y = b;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [view.window setFrame:fr display:YES animate:NO];
+            [view.window setFrame:fr display:YES animate:NO];
+    });
+}
+    
+void doGeomWindow(uintptr_t viewID, int left, int top, int width, int height) {
+    ScreenGLView* view = (ScreenGLView*)viewID;
+    NSScreen *screen = [view.window screen];
+    double pixratio = [screen backingScaleFactor];
+    double screenH = [screen frame].size.height;
+    NSRect fr = [view.window frame];
+    NSRect crect = [view.window contentRectForFrameRect: fr ];
+    // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
+
+    double frexw = fr.size.width - crect.size.width;
+    double frexh = fr.size.height - crect.size.height;
+    fr.size.width = width + frexw;
+    fr.size.height = height + frexw;
+
+    double l = (double)left / pixratio;
+    double b = (screenH - (top + fr.size.height)) * pixratio;
+    fr.origin.x = l;
+    fr.origin.y = b;
+    dispatch_async(dispatch_get_main_queue(), ^{
+            [view.window setFrame:fr display:YES animate:NO];
     });
 }
     

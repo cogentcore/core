@@ -247,6 +247,8 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewConfirm))
 		case "show-return":
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewShowReturn))
+		case "no-update-after":
+			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewNoUpdateAfter))
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
@@ -292,6 +294,9 @@ const (
 
 	// MethViewShowReturn shows the return value from the method
 	MethViewShowReturn
+
+	// MethViewNoUpdateAfter means do not update window after method runs (default is to do so)
+	MethViewNoUpdateAfter
 
 	MethViewFlagsN
 )
@@ -370,7 +375,9 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 // results as specified in the MethViewData.
 func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
-	md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
+	if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
+		md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
+	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
 		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: md.Method + " Result", Prompt: rv[0].String()}, true, false, nil, nil)
 	}

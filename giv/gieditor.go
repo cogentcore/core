@@ -230,7 +230,7 @@ func (ge *GiEditor) ConfigSplitView() {
 
 // this is not necc and resets root pointer
 // func (ge *GiEditor) Style2D() {
-// 	if ge.Viewport != nil && ge.Viewport.DoingFullRender {
+// 	if ge.Viewport != nil && ge.Viewport.IsDoingFullRender() {
 // 		ge.UpdateFromRoot()
 // 	}
 // 	ge.Frame.Style2D()
@@ -326,7 +326,14 @@ var GiEditorProps = ki.Props{
 func GoGiEditorDialog(obj ki.Ki) {
 	width := 1280
 	height := 920
-	win := gi.NewWindow2D("gogi-editor", "GoGi Editor", width, height, true)
+	wnm := "gogi-editor"
+	wti := "GoGi Editor"
+	if obj != nil {
+		wnm += "-" + obj.Name()
+		wti += ": " + obj.Name()
+	}
+
+	win := gi.NewWindow2D(wnm, wti, width, height, true)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
