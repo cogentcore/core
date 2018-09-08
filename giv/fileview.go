@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -33,7 +34,6 @@ import (
 // todo:
 
 // * search: use highlighting, not filtering -- < > arrows etc
-// * popup menu to operate on files: trash, delete, rename, move
 // * also simple search-while typing in grid?
 // * fileview selector DND is a file:/// url
 
@@ -211,71 +211,81 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Label, "path-lbl")
 	config.Add(gi.KiT_ComboBox, "path")
 	config.Add(gi.KiT_Action, "path-up")
+	config.Add(gi.KiT_Action, "path-ref")
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
-	pr.ConfigChildren(config, false) // already covered by parent update
-	pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
-	pl.Text = "Path:"
-	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
-	pf := fv.PathField()
-	pf.Editable = true
-	pf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
-	pf.SetStretchMaxWidth()
-	pf.ConfigParts()
-	pft, found := pf.TextField()
-	if found {
-		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-	}
-	tf, ok := pf.TextField()
-	if ok {
-		tf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.TextFieldDone) {
-				fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-				pff, _ := send.(*gi.TextField)
-				fvv.DirPath = pff.Text()
-				fvv.SetFullReRender()
+	mods, updt := pr.ConfigChildren(config, false) // already covered by parent update
+	if mods {
+		pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
+		pl.Text = "Path:"
+		pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
+		pf := fv.PathField()
+		pf.Editable = true
+		pf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
+		pf.SetStretchMaxWidth()
+		pf.ConfigParts()
+		pft, found := pf.TextField()
+		if found {
+			pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
+		}
+		tf, ok := pf.TextField()
+		if ok {
+			tf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.TextFieldDone) {
+					fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+					pff, _ := send.(*gi.TextField)
+					fvv.DirPath = pff.Text()
+					fvv.UpdateFilesAction()
+				}
+			})
+		}
+		pf.ComboSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
+			sp := data.(string)
+			if sp == fileViewResetPaths {
+				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
+				gi.SavedPaths[0] = fvv.DirPath
+				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			} else {
+				fvv.DirPath = sp
 				fvv.UpdateFilesAction()
 			}
 		})
-	}
-	pf.ComboSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
-		sp := data.(string)
-		if sp == fileViewResetPaths {
-			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
-			gi.SavedPaths[0] = fvv.DirPath
-			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
-		} else {
-			fvv.DirPath = sp
-			fvv.SetFullReRender()
+
+		pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
+		pu.Icon = gi.IconName("widget-wedge-up")
+		pu.Tooltip = "go up one level into the parent folder"
+		pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv.DirPathUp()
+		})
+
+		prf := pr.KnownChildByName("path-ref", 0).(*gi.Action)
+		prf.Icon = gi.IconName("update")
+		prf.Tooltip = "Update directory view -- in case files might have changed"
+		prf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.UpdateFilesAction()
-		}
-	})
+		})
 
-	pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
-	pu.Icon = gi.IconName("widget-wedge-up")
-	pu.Tooltip = "go up one level into the parent folder"
-	pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		fvv.DirPathUp()
-	})
+		pfv := pr.KnownChildByName("path-fav", 0).(*gi.Action)
+		pfv.Icon = gi.IconName("heart")
+		pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
+		pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv.AddPathToFavs()
+		})
 
-	pfv := pr.KnownChildByName("path-fav", 0).(*gi.Action)
-	pfv.Icon = gi.IconName("heart")
-	pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
-	pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		fvv.AddPathToFavs()
-	})
-
-	nf := pr.KnownChildByName("new-folder", 0).(*gi.Action)
-	nf.Icon = gi.IconName("folder-plus")
-	nf.Tooltip = "Create a new folder in this folder"
-	nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		fvv.NewFolder()
-	})
+		nf := pr.KnownChildByName("new-folder", 0).(*gi.Action)
+		nf.Icon = gi.IconName("folder-plus")
+		nf.Tooltip = "Create a new folder in this folder"
+		nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv.NewFolder()
+		})
+		pr.UpdateEnd(updt)
+	}
 }
 
 func (fv *FileView) ConfigFilesRow() {
@@ -341,7 +351,6 @@ func (fv *FileView) ConfigFilesRow() {
 			if fi, ok := fvv.SelectedFileInfo(); ok {
 				if fi.Kind == "Folder" {
 					fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
-					fv.SetFullReRender()
 					fv.UpdateFilesAction()
 					return
 				}
@@ -437,6 +446,7 @@ func (fv *FileView) UpdatePath() {
 // emitting FileSig signals around it -- this is for gui-generated actions only.
 func (fv *FileView) UpdateFilesAction() {
 	fv.FileSig.Emit(fv.This, int64(FileViewWillUpdate), fv.DirPath)
+	fv.SetFullReRender()
 	fv.UpdateFiles()
 	fv.FileSig.Emit(fv.This, int64(FileViewUpdated), fv.DirPath)
 }
@@ -448,7 +458,6 @@ func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
 
-	fv.SetFullReRender()
 	fv.UpdatePath()
 	pf := fv.PathField()
 	if len(gi.SavedPaths) == 0 {
@@ -485,6 +494,7 @@ func (fv *FileView) UpdateFiles() {
 			Size:    FileSize(info.Size()),
 			Mode:    info.Mode(),
 			ModTime: FileTime(info.ModTime()),
+			Path:    path,
 		}
 		if info.IsDir() {
 			fi.Kind = "Folder"
@@ -556,7 +566,6 @@ func (fv *FileView) DirPathUp() {
 		return
 	}
 	fv.DirPath = pdr
-	fv.SetFullReRender()
 	fv.UpdateFilesAction()
 }
 
@@ -579,7 +588,6 @@ func (fv *FileView) NewFolder() {
 		fmt.Printf("gi.FileView made new folder: %v\n", np)
 	}
 	fv.FileSig.Emit(fv.This, int64(FileViewNewFolder), fv.DirPath)
-	fv.SetFullReRender()
 	fv.UpdateFilesAction()
 }
 
@@ -647,7 +655,6 @@ func (fv *FileView) FavSelect(idx int) {
 	}
 	fi := gi.Prefs.FavPaths[idx]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
-	fv.SetFullReRender()
 	fv.UpdateFilesAction()
 }
 
@@ -666,87 +673,13 @@ func (fv *FileView) Style2D() {
 	fv.Frame.Style2D()
 	sf := fv.SelField()
 	sf.StartFocus() // need to call this when window is actually active
+	if fv.Viewport != nil && fv.Viewport.IsDoingFullRender() {
+		fv.UpdateFiles()
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  FileInfo
-
-type FileSize datasize.ByteSize
-
-func (fs FileSize) String() string {
-	return (datasize.ByteSize)(fs).HumanReadable()
-}
-
-// Note: can get all the detailed birth, access, change times from this package
-// 	"github.com/djherbis/times"
-
-type FileTime time.Time
-
-func (ft FileTime) String() string {
-	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
-}
-
-// note: rendering icons taking a fair amount of extra time
-
-// FileInfo represents the information about a given file / directory
-type FileInfo struct {
-	Ic      gi.IconName `desc:"icon for file"`
-	Name    string      `width:"40" desc:"name of the file"`
-	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- including MIME type"`
-	Mode    os.FileMode `desc:"file mode bits"`
-	ModTime FileTime    `desc:"time that contents (only) were last modified"`
-}
-
-// MimeToIconMap has special cases for mapping mime type to icon, for those that basic string doesn't work
-var MimeToIconMap = map[string]string{
-	"svg+xml": "svg",
-}
-
-// FileKindToIcon maps kinds to icon names, using extension directly from file as a last resort
-func FileKindToIcon(kind, name string) gi.IconName {
-	kind = strings.ToLower(kind)
-	icn := gi.IconName(kind)
-	if icn.IsValid() {
-		return icn
-	}
-	if strings.Contains(kind, "/") {
-		si := strings.IndexByte(kind, '/')
-		typ := kind[:si]
-		subtyp := kind[si+1:]
-		if icn = "file-" + gi.IconName(subtyp); icn.IsValid() {
-			return icn
-		}
-		if icn = gi.IconName(subtyp); icn.IsValid() {
-			return icn
-		}
-		if ms, ok := MimeToIconMap[string(subtyp)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn
-			}
-		}
-		if icn = "file-" + gi.IconName(typ); icn.IsValid() {
-			return icn
-		}
-		if icn = gi.IconName(typ); icn.IsValid() {
-			return icn
-		}
-		if ms, ok := MimeToIconMap[string(typ)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn
-			}
-		}
-	}
-	ext := filepath.Ext(name)
-	if ext != "" {
-		if icn = gi.IconName(ext[1:]); icn.IsValid() {
-			return icn
-		}
-	}
-
-	icn = gi.IconName("none")
-	return icn
-}
+//  Completion
 
 func (fv *FileView) FileComplete(text string) (matches []string, seed string) {
 	seedStart := 0
@@ -804,4 +737,185 @@ func (fv *FileView) PathCompleteEdit(text string, cursorPos int, completion stri
 func (fv *FileView) FileCompleteEdit(text string, cursorPos int, completion string, seed string) (file string, delta int) {
 	file, delta = complete.EditBasic(text, cursorPos, completion, seed)
 	return file, delta
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  FileInfo
+
+type FileSize datasize.ByteSize
+
+func (fs FileSize) String() string {
+	return (datasize.ByteSize)(fs).HumanReadable()
+}
+
+// Note: can get all the detailed birth, access, change times from this package
+// 	"github.com/djherbis/times"
+
+type FileTime time.Time
+
+func (ft FileTime) String() string {
+	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
+}
+
+// note: rendering icons taking a fair amount of extra time
+
+// FileInfo represents the information about a given file / directory
+type FileInfo struct {
+	Ic      gi.IconName `desc:"icon for file"`
+	Name    string      `width:"40" desc:"name of the file"`
+	Size    FileSize    `desc:"size of the file in bytes"`
+	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- including MIME type"`
+	Mode    os.FileMode `desc:"file mode bits"`
+	ModTime FileTime    `desc:"time that contents (only) were last modified"`
+	Path    string      `tableview:"-" desc:"full path to file -- for file functions"`
+}
+
+var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
+
+var FileInfoProps = ki.Props{
+	"CtxtMenu": ki.PropSlice{
+		{"Duplicate", ki.Props{}},
+		{"Delete", ki.Props{
+			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
+			"confirm": true,
+		}},
+		{"Rename", ki.Props{
+			"desc": "Rename file to new file name",
+			"Args": ki.PropSlice{
+				{"New Name", ki.Props{
+					"default-field": "Name",
+				}},
+			},
+		}},
+	},
+}
+
+// MimeToIconMap has special cases for mapping mime type to icon, for those that basic string doesn't work
+var MimeToIconMap = map[string]string{
+	"svg+xml": "svg",
+}
+
+// FileKindToIcon maps kinds to icon names, using extension directly from file as a last resort
+func FileKindToIcon(kind, name string) gi.IconName {
+	kind = strings.ToLower(kind)
+	icn := gi.IconName(kind)
+	if icn.IsValid() {
+		return icn
+	}
+	if strings.Contains(kind, "/") {
+		si := strings.IndexByte(kind, '/')
+		typ := kind[:si]
+		subtyp := kind[si+1:]
+		if icn = "file-" + gi.IconName(subtyp); icn.IsValid() {
+			return icn
+		}
+		if icn = gi.IconName(subtyp); icn.IsValid() {
+			return icn
+		}
+		if ms, ok := MimeToIconMap[string(subtyp)]; ok {
+			if icn = gi.IconName(ms); icn.IsValid() {
+				return icn
+			}
+		}
+		if icn = "file-" + gi.IconName(typ); icn.IsValid() {
+			return icn
+		}
+		if icn = gi.IconName(typ); icn.IsValid() {
+			return icn
+		}
+		if ms, ok := MimeToIconMap[string(typ)]; ok {
+			if icn = gi.IconName(ms); icn.IsValid() {
+				return icn
+			}
+		}
+	}
+	ext := filepath.Ext(name)
+	if ext != "" {
+		if icn = gi.IconName(ext[1:]); icn.IsValid() {
+			return icn
+		}
+	}
+
+	icn = gi.IconName("none")
+	return icn
+}
+
+// IsDir returns true if this is a directory
+func (fi *FileInfo) IsDir() bool {
+	return fi.Kind == "Folder"
+}
+
+// Duplicate creates a copy of given file -- only works for regular files, not directories
+func (fi *FileInfo) Duplicate() {
+	if fi.IsDir() {
+		log.Printf("giv.Duplicate: cannot copy directories\n")
+		return
+	}
+	ext := filepath.Ext(fi.Path)
+	noext := strings.TrimSuffix(fi.Path, ext)
+	dst := noext + "_Copy" + ext
+	CopyFile(dst, fi.Path, fi.Mode)
+}
+
+// Delete deletes this file
+func (fi *FileInfo) Delete() {
+	if fi.IsDir() {
+		log.Printf("giv.FileInfo Delete -- cannot delete directories!\n")
+		return
+	}
+	os.Remove(fi.Path)
+}
+
+// Rename renames file to new name
+func (fi *FileInfo) Rename(newpath string) {
+	if newpath == "" {
+		log.Printf("giv.FileInfo Rename: new name is empty!\n")
+		return
+	}
+	if newpath == fi.Path {
+		return
+	}
+	ndir, np := filepath.Split(newpath)
+	if ndir == "" {
+		if np == fi.Name {
+			return
+		}
+		dir, _ := filepath.Split(fi.Path)
+		newpath = filepath.Join(dir, newpath)
+	}
+	os.Rename(fi.Path, newpath)
+}
+
+// here's all the discussion about why CopyFile is not in std lib:
+// https://old.reddit.com/r/golang/comments/3lfqoh/why_golang_does_not_provide_a_copy_file_func/
+// https://github.com/golang/go/issues/8868
+
+// CopyFile copies the contents from src to dst atomically.
+// If dst does not exist, CopyFile creates it with permissions perm.
+// If the copy fails, CopyFile aborts and dst is preserved.
+func CopyFile(dst, src string, perm os.FileMode) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	tmp, err := ioutil.TempFile(filepath.Dir(dst), "")
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(tmp, in)
+	if err != nil {
+		tmp.Close()
+		os.Remove(tmp.Name())
+		return err
+	}
+	if err = tmp.Close(); err != nil {
+		os.Remove(tmp.Name())
+		return err
+	}
+	if err = os.Chmod(tmp.Name(), perm); err != nil {
+		os.Remove(tmp.Name())
+		return err
+	}
+	return os.Rename(tmp.Name(), dst)
 }

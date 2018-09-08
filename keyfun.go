@@ -14,14 +14,14 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// KeyFunctions are functions that keyboard events can perform in the GUI --
+// KeyFuns are functions that keyboard events can perform in the GUI --
 // seems possible to keep this flat and consistent across different contexts,
 // as long as the functions can be appropriately reinterpreted for each
 // context.
-type KeyFunctions int64
+type KeyFuns int64
 
 const (
-	KeyFunNil KeyFunctions = iota
+	KeyFunNil KeyFuns = iota
 	KeyFunMoveUp
 	KeyFunMoveDown
 	KeyFunMoveRight
@@ -63,20 +63,20 @@ const (
 	KeyFunRefresh
 	KeyFunRecenter // Ctrl+L in emacs
 	KeyFunComplete
-	KeyFunctionsN
+	KeyFunsN
 )
 
-//go:generate stringer -type=KeyFunctions
+//go:generate stringer -type=KeyFuns
 
-var KiT_KeyFunctions = kit.Enums.AddEnumAltLower(KeyFunctionsN, false, StylePropProps, "KeyFun")
+var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, false, StylePropProps, "KeyFun")
 
-func (ev KeyFunctions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *KeyFunctions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+func (ev KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // KeyMap is a map between a key sequence (chord) and a specific KeyFun
 // function.  This mapping must be unique, in that each chord has unique
 // KeyFun, but multiple chords can trigger the same function.
-type KeyMap map[string]KeyFunctions
+type KeyMap map[string]KeyFuns
 
 // SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
 // prior to setting it to ensure that it is a valid, complete map
@@ -87,7 +87,7 @@ func SetActiveKeyMap(km *KeyMap) {
 
 // KeyFun translates chord into keyboard function -- use oswin key.ChordString
 // to get chord
-func KeyFun(chord string) KeyFunctions {
+func KeyFun(chord string) KeyFuns {
 	kf := KeyFunNil
 	if chord != "" {
 		kf = (*ActiveKeyMap)[chord]
@@ -152,8 +152,8 @@ func StdKeyMapName(km *KeyMap) string {
 
 // KeyMapItem records one element of the key map -- used for organizing the map.
 type KeyMapItem struct {
-	Key string       `desc:"the key chord that activates a function"`
-	Fun KeyFunctions `desc:"the function of that key"`
+	Key string  `desc:"the key chord that activates a function"`
+	Fun KeyFuns `desc:"the function of that key"`
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
@@ -168,7 +168,7 @@ func (km *KeyMap) ToSlice() []KeyMapItem {
 }
 
 // ChordForFun returns first key chord trigger for given KeyFun in map
-func (km *KeyMap) ChordForFun(kf KeyFunctions) string {
+func (km *KeyMap) ChordForFun(kf KeyFuns) string {
 	for key, fun := range *km {
 		if fun == kf {
 			return key

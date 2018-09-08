@@ -1294,8 +1294,16 @@ func (tv *TextView) ScrollCursorToHorizCenter() bool {
 // visible range, position will be out of range too)
 func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
-	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
+	if pos.Ln >= len(tv.Offs) {
+		if len(tv.Offs) > 0 {
+			pos.Ln = len(tv.Offs) - 1
+		} else {
+			return spos
+		}
+	} else {
+		spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	}
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
 		rrp, _, _, _ := tv.Renders[pos.Ln].RuneRelPos(pos.Ch)

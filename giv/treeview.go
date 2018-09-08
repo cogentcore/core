@@ -35,14 +35,15 @@ import (
 // cut/copy/paste and menu actions.
 type TreeView struct {
 	gi.PartsWidgetBase
-	SrcNode     ki.Ptr                    `desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	ViewIdx     int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
-	Indent      units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
-	TreeViewSig ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
-	StateStyles [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize  gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon        gi.IconName               `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
-	RootView    *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
+	SrcNode          ki.Ptr                    `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	ShowViewCtxtMenu bool                      `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
+	ViewIdx          int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
+	Indent           units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
+	TreeViewSig      ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
+	StateStyles      [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	WidgetSize       gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	Icon             gi.IconName               `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
+	RootView         *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
@@ -661,90 +662,50 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 }
 
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
-	m.AddAction(gi.ActOpts{Label: "Add Child"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.SrcAddChild()
-		})
-	if !tv.IsField() && tv.RootView.This != tv.This {
-		issc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsert)
-		m.AddAction(gi.ActOpts{Label: "Insert Before", Shortcut: issc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TreeView).(*TreeView)
-				tvv.SrcInsertBefore()
-			})
-		iasc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunInsertAfter)
-		m.AddAction(gi.ActOpts{Label: "Insert After", Shortcut: iasc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TreeView).(*TreeView)
-				tvv.SrcInsertAfter()
-			})
-		dpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDuplicate)
-		m.AddAction(gi.ActOpts{Label: "Duplicate", Shortcut: dpsc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TreeView).(*TreeView)
-				tvv.SrcDuplicate()
-			})
-		dlsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunDelete)
-		m.AddAction(gi.ActOpts{Label: "Delete", Shortcut: dlsc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TreeView).(*TreeView)
-				tvv.SrcDelete()
-			})
-	}
-	m.AddSeparator("esep")
-	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
-	ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
-	ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
-	m.AddAction(gi.ActOpts{Label: "Copy", Shortcut: cpsc},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.Copy(true)
-		})
-	if !tv.IsField() && tv.RootView.This != tv.This {
-		m.AddAction(gi.ActOpts{Label: "Cut", Shortcut: ctsc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TreeView).(*TreeView)
-				tvv.Cut()
-			})
-	}
-	m.AddAction(gi.ActOpts{Label: "Paste", Shortcut: ptsc},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tvv.Paste()
-		})
-	m.AddSeparator("vwsep")
-	m.AddAction(gi.ActOpts{Label: "Edit In Window"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			tynm := kit.NonPtrType(tvv.SrcNode.Ptr.Type()).Name()
-			StructViewDialog(tv.Viewport, tvv.SrcNode.Ptr, DlgOpts{Title: tynm}, nil, nil)
-			tvv.Paste()
-		})
-	m.AddAction(gi.ActOpts{Label: "GoGiEditor"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
-			GoGiEditorDialog(tvv.SrcNode.Ptr)
-		})
+	// derived types put native menu code here
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)
 	}
+	if CtxtMenuView(tv.SrcNode.Ptr, tv.IsInactive(), tv.Viewport, m) { // our viewed obj's menu
+		if tv.ShowViewCtxtMenu {
+			m.AddSeparator("sep-tvmenu")
+			CtxtMenuView(tv.This, tv.IsInactive(), tv.Viewport, m)
+		}
+	} else {
+		CtxtMenuView(tv.This, tv.IsInactive(), tv.Viewport, m)
+	}
+}
+
+// IsRootOrField returns true if given node is either the root of the
+// tree or a field -- various operations can not be performed on these -- if
+// string is passed, then a prompt dialog is presented with that as the name
+// of the operation being attempted -- otherwise it silently returns (suitable
+// for context menu UpdateFunc).
+func (tv *TreeView) IsRootOrField(op string) bool {
+	sk := tv.SrcNode.Ptr
+	if sk.IsField() {
+		if op != "" {
+			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, true, false, nil, nil)
+		}
+		return true
+	}
+	if tv.This == tv.RootView.This {
+		if op != "" {
+			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, true, false, nil, nil)
+		}
+		return true
+	}
+	return false
 }
 
 // SrcInsertAfter inserts a new node in the source tree after this node, at
 // the same (sibling) level, propmting for the type of node to insert
 func (tv *TreeView) SrcInsertAfter() {
-	ttl := "TreeView Insert After"
-	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after fields"}, true, false, nil, nil)
+	ttl := "Insert After"
+	if tv.IsRootOrField(ttl) {
 		return
 	}
 	sk := tv.SrcNode.Ptr
-	par := sk.Parent()
-	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
-		return
-	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
@@ -771,17 +732,11 @@ func (tv *TreeView) SrcInsertAfter() {
 // SrcInsertBefore inserts a new node in the source tree before this node, at
 // the same (sibling) level, prompting for the type of node to insert
 func (tv *TreeView) SrcInsertBefore() {
-	ttl := "TreeView Insert Before"
-	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before fields"}, true, false, nil, nil)
+	ttl := "Insert Before"
+	if tv.IsRootOrField(ttl) {
 		return
 	}
 	sk := tv.SrcNode.Ptr
-	par := sk.Parent()
-	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before the root of the tree"}, true, false, nil, nil)
-		return
-	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
@@ -808,7 +763,7 @@ func (tv *TreeView) SrcInsertBefore() {
 // SrcAddChild adds a new child node to this one in the source tree,
 // propmpting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
-	ttl := "TreeView Add Child"
+	ttl := "Add Child"
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -829,16 +784,13 @@ func (tv *TreeView) SrcAddChild() {
 
 // SrcDelete deletes the source node corresponding to this view node in the source tree
 func (tv *TreeView) SrcDelete() {
-	ttl := "TreeView Delete"
-	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete fields"}, true, false, nil, nil)
+	ttl := "Delete"
+	if tv.IsRootOrField(ttl) {
 		return
 	}
-	if tv.RootView.This == tv.This {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete the root of the tree"}, true, false, nil, nil)
-		return
+	if tv.MoveDown(mouse.NoSelectMode) == nil {
+		tv.MoveUp(mouse.NoSelectMode)
 	}
-	tv.MoveDown(mouse.NoSelectMode)
 	sk := tv.SrcNode.Ptr
 	sk.Delete(true)
 }
@@ -848,16 +800,11 @@ func (tv *TreeView) SrcDelete() {
 // sibling)
 func (tv *TreeView) SrcDuplicate() {
 	ttl := "TreeView Duplicate"
-	if tv.IsField() {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot delete fields"}, true, false, nil, nil)
+	if tv.IsRootOrField(ttl) {
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	par := sk.Parent()
-	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot duplicate the root of the tree"}, true, false, nil, nil)
-		return
-	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
@@ -866,6 +813,17 @@ func (tv *TreeView) SrcDuplicate() {
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
 	par.InsertChild(nwkid, myidx+1)
+}
+
+// SrcEdit pulls up a StructViewDialog window on the source object viewed by this node
+func (tv *TreeView) SrcEdit() {
+	tynm := kit.NonPtrType(tv.SrcNode.Ptr.Type()).Name()
+	StructViewDialog(tv.Viewport, tv.SrcNode.Ptr, DlgOpts{Title: tynm}, nil, nil)
+}
+
+// SrcGoGiEditor pulls up a new GoGiEditor window on the source object viewed by this node
+func (tv *TreeView) SrcGoGiEditor() {
+	GoGiEditorDialog(tv.SrcNode.Ptr)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -922,6 +880,9 @@ func (tv *TreeView) Copy(reset bool) {
 
 // Cut copies to clip.Board and deletes selected items
 func (tv *TreeView) Cut() {
+	if tv.IsRootOrField("Cut") {
+		return
+	}
 	tv.Copy(false)
 	sels := tv.SelectedSrcNodes()
 	tv.UnselectAll()
@@ -951,7 +912,7 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
-	if !tv.IsField() && tv.RootView.This != tv.This {
+	if !tv.IsRootOrField("") && tv.RootView.This != tv.This {
 		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
@@ -1137,7 +1098,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
-	if !tv.IsField() && tv.RootView.This != tv.This {
+	if !tv.IsRootOrField("") && tv.RootView.This != tv.This {
 		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
@@ -1511,6 +1472,85 @@ var TreeViewProps = ki.Props{
 	},
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
 		"background-color": &gi.Prefs.Colors.Control,
+	},
+	"CtxtMenuActive": ki.PropSlice{
+		{"SrcAddChild", ki.Props{
+			"label": "Add Child",
+		}},
+		{"SrcInsertBefore", ki.Props{
+			"label":    "Insert Before",
+			"shortcut": gi.KeyFunInsert,
+			"updtfunc": func(tvi interface{}, act *gi.Action) {
+				tv := tvi.(*TreeView)
+				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
+			},
+		}},
+		{"SrcInsertAfter", ki.Props{
+			"label":    "Insert After",
+			"shortcut": gi.KeyFunInsertAfter,
+			"updtfunc": func(tvi interface{}, act *gi.Action) {
+				tv := tvi.(*TreeView)
+				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
+			},
+		}},
+		{"SrcDuplicate", ki.Props{
+			"label":    "Duplicate",
+			"shortcut": gi.KeyFunDuplicate,
+			"updtfunc": func(tvi interface{}, act *gi.Action) {
+				tv := tvi.(*TreeView)
+				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
+			},
+		}},
+		{"SrcDelete", ki.Props{
+			"label":    "Delete",
+			"shortcut": gi.KeyFunDelete,
+			"updtfunc": func(tvi interface{}, act *gi.Action) {
+				tv := tvi.(*TreeView)
+				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
+			},
+		}},
+		{"sep-edit", ki.BlankProp{}},
+		{"Copy", ki.Props{
+			"shortcut": gi.KeyFunCopy,
+			"Args": ki.PropSlice{
+				{"reset", ki.Props{
+					"value": true,
+				}},
+			},
+		}},
+		{"Cut", ki.Props{
+			"shortcut": gi.KeyFunCut,
+			"updtfunc": func(tvi interface{}, act *gi.Action) {
+				tv := tvi.(*TreeView)
+				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
+			},
+		}},
+		{"Paste", ki.Props{
+			"shortcut": gi.KeyFunPaste,
+		}},
+		{"sep-win", ki.BlankProp{}},
+		{"SrcEdit", ki.Props{
+			"label": "Edit",
+		}},
+		{"SrcGoGiEditor", ki.Props{
+			"label": "GoGi Editor",
+		}},
+	},
+	"CtxtMenuInactive": ki.PropSlice{
+		{"Copy", ki.Props{
+			"shortcut": gi.KeyFunCopy,
+			"Args": ki.PropSlice{
+				{"reset", ki.Props{
+					"value": true,
+				}},
+			},
+		}},
+		{"SrcEdit", ki.Props{
+			"label": "Edit",
+		}},
+		{"SrcGoGiEditor", ki.Props{
+			"label": "GoGi Editor",
+		}},
 	},
 }
 

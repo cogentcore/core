@@ -927,6 +927,7 @@ mainloop:
 		if et != oswin.KeyEvent {
 			if w.GotPaint && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
 				// fmt.Printf("skipping paint after resize\n")
+				w.Publish() // this is essential on mac for any paint event
 				w.GotPaint = true
 				continue // X11 always sends a paint after a resize -- we just use resize
 			}
@@ -1578,7 +1579,7 @@ func (w *Window) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
 // SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
 // If popup is true, then only items on popup are in scope, otherwise items
 // NOT on popup are in scope (if no popup, everything is in scope).
-func (w *Window) SendKeyFunEvent(kf KeyFunctions, popup bool) {
+func (w *Window) SendKeyFunEvent(kf KeyFuns, popup bool) {
 	chord := ActiveKeyMap.ChordForFun(kf)
 	if chord == "" {
 		return

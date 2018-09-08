@@ -95,6 +95,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * TextView:
+    + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
@@ -105,6 +106,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 
 * Splitview: 
+	+ gide resize textview not re-drawing 
 	+ some lowpri keyfuns for collapsing and expanding  
 
 * CSS class = x should bring in properties for that class into top-level CSS
@@ -131,9 +133,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * tab widget basic fix, and integrate with tree view editor? Popups show up in
   a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
   dnd..
-
-* add context menus for delete, rename to fileview -- would be a good test to
-  make sure context menu api is sufficiently flexible. (use new ContextMenu type properties?)
 
 * update widgets README
 

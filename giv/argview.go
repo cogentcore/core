@@ -118,6 +118,9 @@ func (av *ArgView) ConfigArgsGrid() {
 	config := kit.TypeAndNameList{}
 	for i := range av.Args {
 		ad := &av.Args[i]
+		if ad.HasValSet() {
+			continue
+		}
 		vtyp := ad.View.WidgetType()
 		knm := strcase.ToKebab(ad.Name)
 		labnm := fmt.Sprintf("label-%v", knm)
@@ -133,6 +136,9 @@ func (av *ArgView) ConfigArgsGrid() {
 	}
 	for i := range av.Args {
 		ad := &av.Args[i]
+		if ad.HasValSet() {
+			continue
+		}
 		lbl := sg.KnownChild(i * 2).(*gi.Label)
 		vvb := ad.View.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(av.This, func(recv, send ki.Ki, sig int64, data interface{}) {

@@ -1667,6 +1667,22 @@ func (tv *TableView) DropCancel() {
 	tv.DragNDropFinalize(dnd.DropIgnore)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//    Events
+
+func (tv *TableView) ItemCtxtMenu(idx int) {
+	stru := tv.RowStruct(idx)
+	if stru == nil {
+		return
+	}
+
+	var men gi.Menu
+	if CtxtMenuView(stru, tv.IsInactive(), tv.Viewport, &men) && len(men) > 0 {
+		pos := tv.RowPos(idx)
+		gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, tv.Nm+"-menu")
+	}
+}
+
 func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.ChordString())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
@@ -1761,6 +1777,10 @@ func (tv *TableView) TableViewEvents() {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
 				tvv.TableViewSig.Emit(tvv.This, int64(TableViewDoubleClicked), tvv.SelectedIdx)
+				me.SetProcessed()
+			}
+			if me.Button == mouse.Right && me.Action == mouse.Release {
+				tvv.ItemCtxtMenu(tvv.SelectedIdx)
 				me.SetProcessed()
 			}
 		})

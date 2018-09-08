@@ -171,16 +171,28 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 // CtxtMenuView configures a popup context menu according to the "CtxtMenu"
 // properties registered on the type for given value element, through the
 // kit.AddType method.  See https://github.com/goki/gi/wiki/Views for full
-// details on formats and options for configuring the menu.  Returns false if
-// there is no context menu defined for this type, or on errors (which are
-// programmer errors sent to log).
-func CtxtMenuView(val interface{}, vp *gi.Viewport2D, menu *gi.Menu) bool {
+// details on formats and options for configuring the menu.  It looks first
+// for "CtxtMenuActive" or "CtxtMenuInactive" depending on inactive flag
+// (which applies to the gui view), so you can have different menus in those
+// cases, and then falls back on "CtxtMenu".  Returns false if there is no
+// context menu defined for this type, or on errors (which are programmer
+// errors sent to log).
+func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
 	}
-	tp, ok := ki.SliceProps(tpp, "CtxtMenu")
-	if !ok {
+	var tp ki.PropSlice
+	got := false
+	if inactive {
+		tp, got = ki.SliceProps(tpp, "CtxtMenuInactive")
+	} else {
+		tp, got = ki.SliceProps(tpp, "CtxtMenuActive")
+	}
+	if !got {
+		tp, got = ki.SliceProps(tpp, "CtxtMenu")
+	}
+	if !got {
 		return false
 	}
 
@@ -275,7 +287,11 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	for pk, pv := range props {
 		switch pk {
 		case "shortcut":
-			ac.Shortcut = gi.OSShortcut(kit.ToString(pv))
+			if kf, ok := pv.(gi.KeyFuns); ok {
+				ac.Shortcut = gi.OSShortcut(gi.ActiveKeyMap.ChordForFun(kf))
+			} else {
+				ac.Shortcut = gi.OSShortcut(kit.ToString(pv))
+			}
 		case "label":
 			ac.Text = kit.ToString(pv)
 		case "icon":
@@ -288,6 +304,11 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewShowReturn))
 		case "no-update-after":
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewNoUpdateAfter))
+		case "updtfunc":
+			if uf, ok := pv.(func(interface{}, *gi.Action)); ok {
+				md.UpdateFunc = uf
+				ac.UpdateFunc = MethViewUpdateFunc
+			}
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
@@ -347,16 +368,17 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "Me
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
-	Val       interface{}
-	ValVal    reflect.Value
-	Vp        *gi.Viewport2D
-	Method    string
-	MethVal   reflect.Value
-	MethTyp   reflect.Method
-	ArgProps  ki.PropSlice `desc:"names and other properties of args, in one-to-one with method args"`
-	SpecProps ki.Props     `desc:"props for special action types, e.g., FileView"`
-	Desc      string
-	Flags     MethViewFlags
+	Val        interface{}
+	ValVal     reflect.Value
+	Vp         *gi.Viewport2D
+	Method     string
+	MethVal    reflect.Value
+	MethTyp    reflect.Method
+	ArgProps   ki.PropSlice                  `desc:"names and other properties of args, in one-to-one with method args"`
+	SpecProps  ki.Props                      `desc:"props for special action types, e.g., FileView"`
+	Desc       string                        `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+	UpdateFunc func(interface{}, *gi.Action) `desc:"update function defined in properties -- called by our wrapper update function"`
+	Flags      MethViewFlags
 }
 
 // MethViewCall is the receiver func for MethView actions that call a method
@@ -365,20 +387,11 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	ac := send.(*gi.Action)
 	md := ac.Data.(*MethViewData)
 	if md.ArgProps == nil { // no args -- just call
-		if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-			gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
-				md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.DialogAccepted) {
-						MethViewCallMeth(md, nil)
-					}
-				})
-		} else {
-			MethViewCallMeth(md, nil)
-		}
+		MethViewCallNoArgPrompt(ac, md, nil)
 		return
 	}
 	// need to prompt for args
-	ads, args, ok := MethViewArgData(md)
+	ads, args, nprompt, ok := MethViewArgData(md)
 	if !ok {
 		return
 	}
@@ -401,6 +414,10 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 			return
 		}
 	}
+	if nprompt == 0 {
+		MethViewCallNoArgPrompt(ac, md, args)
+		return
+	}
 
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
 		md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -408,6 +425,22 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 				MethViewCallMeth(md, args)
 			}
 		})
+}
+
+// MethViewCallNoArgPrompt calls the method in case where there is no
+// prompting otherwise of the user for arg values -- checks for Confirm case
+// or otherwise directly calls method
+func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
+	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
+		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
+			md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					MethViewCallMeth(md, args)
+				}
+			})
+	} else {
+		MethViewCallMeth(md, args)
+	}
 }
 
 // MethViewCallMeth calls the method with given args, and processes the
@@ -428,16 +461,53 @@ type ArgData struct {
 	Val     reflect.Value
 	Name    string
 	Desc    string
-	Default interface{}
 	View    ValueView
+	Default interface{}
+	Flags   ArgDataFlags
 }
 
-// MethViewArgData gets the arg data for the method args, returns false if errors
-func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
+// ArgDataFlags define bitflags for method view action options
+type ArgDataFlags int32
+
+const (
+	// ArgDataHasDef means that there was a Default value set
+	ArgDataHasDef ArgDataFlags = iota
+
+	// ArgDataValSet means that there is a fixed value for this arg, given in
+	// the config props and set in the Default, so it does not need to be
+	// prompted for
+	ArgDataValSet
+
+	ArgDataFlagsN
+)
+
+//go:generate stringer -type=ArgDataFlags
+
+var KiT_ArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, true, nil, "ArgData") // true = bitflags
+
+func (ad *ArgData) HasDef() bool {
+	return bitflag.Has32(int32(ad.Flags), int(ArgDataHasDef))
+}
+
+func (ad *ArgData) SetHasDef() {
+	bitflag.Set32((*int32)(&ad.Flags), int(ArgDataHasDef))
+}
+
+func (ad *ArgData) HasValSet() bool {
+	return bitflag.Has32(int32(ad.Flags), int(ArgDataValSet))
+}
+
+// MethViewArgData gets the arg data for the method args, returns false if
+// errors -- nprompt is the number of args that require prompting from the
+// user (minus any cases with value: set directly)
+func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, nprompt int, ok bool) {
 	mtyp := md.MethTyp.Type
 	narg := mtyp.NumIn() - 1
-	ads := make([]ArgData, narg)
-	args := make([]reflect.Value, narg)
+	ads = make([]ArgData, narg)
+	args = make([]reflect.Value, narg)
+	nprompt = 0
+	ok = true
+
 	for ai := 0; ai < narg; ai++ {
 		ad := &ads[ai]
 		atyp := mtyp.In(1 + ai)
@@ -450,6 +520,7 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 
 		ad.View = ToValueView(ad.Val.Interface())
 		ad.View.SetStandaloneValue(ad.Val)
+		nprompt++ // assume prompt
 
 		switch apv := aps.Value.(type) {
 		case ki.BlankProp:
@@ -461,10 +532,17 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 					ad.View.SetTag("desc", ad.Desc)
 				case "default":
 					ad.Default = pv
+					ad.SetHasDef()
+				case "value":
+					ad.Default = pv
+					ad.SetHasDef()
+					bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+					nprompt--
 				case "default-field":
 					field := pv.(string)
 					if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
 						ad.Default = flv.Interface()
+						ad.SetHasDef()
 					}
 				default:
 					if str, ok := pv.(string); ok {
@@ -473,11 +551,11 @@ func MethViewArgData(md *MethViewData) ([]ArgData, []reflect.Value, bool) {
 				}
 			}
 		}
-		if !kit.IfaceIsNil(ad.Default) {
+		if ad.HasDef() {
 			ad.View.SetValue(ad.Default)
 		}
 	}
-	return ads, args, true
+	return
 }
 
 // MethViewFieldValue returns a reflect.Value for the given field name,
@@ -491,4 +569,13 @@ func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool)
 	}
 	fv := kit.NonPtrValue(vval).FieldByName(field)
 	return &fv, true
+}
+
+// MethViewUpdateFunc is general Action.UpdateFunc that then calls any
+// MethViewData.UpdateFunc from its data
+func MethViewUpdateFunc(act *gi.Action) {
+	md := act.Data.(*MethViewData)
+	if md.UpdateFunc != nil {
+		md.UpdateFunc(md.Val, act)
+	}
 }

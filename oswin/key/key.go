@@ -182,6 +182,8 @@ func ChordShortcut(ch string) string {
 	default:
 		cs = strings.Replace(cs, "Meta+", "", 1)
 	}
+	cs = strings.Replace(cs, "DeleteBackspace", "⌫", 1)
+	cs = strings.Replace(cs, "DeleteForward", "⌦", 1)
 	return cs
 }
 

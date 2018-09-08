@@ -58,6 +58,11 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 
 // UpdateFromStruct updates full widget layout from structure
 func (sv *StructView) UpdateFromStruct() {
+	if ks, ok := sv.Struct.(ki.Ki); ok {
+		if ks.IsDeleted() || ks.IsDestroyed() {
+			return
+		}
+	}
 	mods, updt := sv.StdConfig()
 	sv.ConfigStructGrid()
 	sv.ConfigToolbar()
