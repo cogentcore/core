@@ -94,6 +94,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* continue keyfun reorg -- fix keymapnamemap etc.
+* editing keymap needs to check for conflicts -- general mapview issue -- if
+  you enter same key as already exists, it should prompt you etc.
+
+* fix icons disappearing on scrolling.. 
+
+* Convert everything over to ConnectEvents2D and modularize all the events functions
+
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases

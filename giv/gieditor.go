@@ -273,6 +273,10 @@ var GiEditorProps = ki.Props{
 		}},
 		{"Save", ki.Props{
 			"icon": "file-save",
+			"updtfunc": func(gei interface{}, act *gi.Action) {
+				ge := gei.(*GiEditor)
+				act.SetActiveState(ge.Filename != "")
+			},
 		}},
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
@@ -303,6 +307,10 @@ var GiEditorProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
+				"updtfunc": func(gei interface{}, act *gi.Action) {
+					ge := gei.(*GiEditor)
+					act.SetActiveState(ge.Filename != "")
+				},
 			}},
 			{"SaveAs", ki.Props{
 				"shortcut": "Shift+Command+S",
@@ -348,18 +356,7 @@ func GoGiEditorDialog(obj ki.Ki) {
 	mmen := win.MainMenu
 	MainMenuView(ge, win, mmen)
 
-	if asave, ok := mmen.FindActionByName("Save"); ok {
-		asave.UpdateFunc = func(act *gi.Action) {
-			act.SetActiveState(ge.Filename != "")
-		}
-	}
-
 	tb := ge.ToolBar()
-	if asave, ok := tb.FindActionByName("Save"); ok {
-		asave.UpdateFunc = func(act *gi.Action) {
-			act.SetActiveStateUpdt(ge.Filename != "") // note: use Updt version in toolbars
-		}
-	}
 	tb.UpdateActions()
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {

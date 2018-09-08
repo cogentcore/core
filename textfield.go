@@ -1211,7 +1211,7 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusGot:
 		tf.FocusActive = true
 		tf.ScrollToMe()
-		//tf.CursorEnd()
+		tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
 	case FocusInactive:

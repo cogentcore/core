@@ -161,10 +161,16 @@ type Node2D interface {
 	// calling Render2D on its own children, to provide maximum flexibility
 	// (see Render2DChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// VpBBox is empty and no rendering should occur.  Typically call a method
-	// that sets up connections to receive window events if visible, and
-	// disconnect if not.
+	// VpBBox is empty and no rendering should occur.  Typically call
+	// ConnectEvents2D to set up connections to receive window events if
+	// visible, and disconnect if not.
 	Render2D()
+
+	// ConnectEvents2D: setup connections to window events -- called in
+	// Render2D if in bounds.  It can be useful to create modular methods for
+	// different event types that can then be mix-and-matched in any more
+	// specialized types.
+	ConnectEvents2D()
 
 	// FocusChanged2D is called on node for changes in focus -- see the
 	// FocusChanges values.
@@ -274,6 +280,9 @@ func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
 }
 
 func (g *Node2DBase) Render2D() {
+}
+
+func (g *Node2DBase) ConnectEvents2D() {
 }
 
 func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {

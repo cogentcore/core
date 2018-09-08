@@ -77,3 +77,44 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 			}
 		})
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  KeyChordValueView
+
+// KeyChordValueView presents an KeyChordEdit for gi.KeyChord
+type KeyChordValueView struct {
+	ValueViewBase
+}
+
+var KiT_KeyChordValueView = kit.Types.AddType(&KeyChordValueView{}, nil)
+
+func (vv *KeyChordValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_KeyChordEdit
+	return vv.WidgetTyp
+}
+
+func (vv *KeyChordValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	kc := vv.Widget.(*gi.KeyChordEdit)
+	txt := kit.ToString(vv.Value.Interface())
+	kc.SetText(txt)
+}
+
+func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	kc := vv.Widget.(*gi.KeyChordEdit)
+	kc.KeyChordSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_KeyChordValueView).(*KeyChordValueView)
+		kcc := vvv.Widget.(*gi.KeyChordEdit)
+		if vvv.SetValue(gi.KeyChord(kcc.Text)) {
+			vvv.UpdateWidget()
+		}
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *KeyChordValueView) HasAction() bool {
+	return false
+}

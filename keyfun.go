@@ -11,6 +11,10 @@ import (
 	"strings"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -73,10 +77,15 @@ var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, false, StylePropProps, "Ke
 func (ev KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
+// KeyChord represents the key chord associated with a given key function --
+// it is linked to the KeyChordEdit in the giv ValueView system so you can
+// just type keys to set key chords.
+type KeyChord string
+
 // KeyMap is a map between a key sequence (chord) and a specific KeyFun
 // function.  This mapping must be unique, in that each chord has unique
 // KeyFun, but multiple chords can trigger the same function.
-type KeyMap map[string]KeyFuns
+type KeyMap map[KeyChord]KeyFuns
 
 // SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
 // prior to setting it to ensure that it is a valid, complete map
@@ -90,7 +99,7 @@ func SetActiveKeyMap(km *KeyMap) {
 func KeyFun(chord string) KeyFuns {
 	kf := KeyFunNil
 	if chord != "" {
-		kf = (*ActiveKeyMap)[chord]
+		kf = (*ActiveKeyMap)[KeyChord(chord)]
 		// fmt.Printf("chord: %v = %v\n", chord, kf)
 	}
 	return kf
@@ -152,8 +161,8 @@ func StdKeyMapName(km *KeyMap) string {
 
 // KeyMapItem records one element of the key map -- used for organizing the map.
 type KeyMapItem struct {
-	Key string  `desc:"the key chord that activates a function"`
-	Fun KeyFuns `desc:"the function of that key"`
+	Key KeyChord `desc:"the key chord that activates a function"`
+	Fun KeyFuns  `desc:"the function of that key"`
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
@@ -171,7 +180,7 @@ func (km *KeyMap) ToSlice() []KeyMapItem {
 func (km *KeyMap) ChordForFun(kf KeyFuns) string {
 	for key, fun := range *km {
 		if fun == kf {
-			return key
+			return string(key)
 		}
 	}
 	return ""
@@ -223,7 +232,7 @@ func (km *KeyMap) Update() {
 			s := dki.Fun.String()
 			s = strings.TrimPrefix(s, "KeyFun")
 			s = "- Not Set - " + s
-			addkm[len(addkm)-1].Key = s
+			addkm[len(addkm)-1].Key = KeyChord(s)
 		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
 			mi++
 		} else {
@@ -259,6 +268,108 @@ func OSShortcut(sc string) string {
 		sc = strings.Replace(sc, "Command+", "Control+", -1)
 	}
 	return sc
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// KeyChordEdit
+
+// KeyChordEdit is a label widget that shows a key chord string, and, when in
+// focus (after being clicked) will update to whatever key chord is typed --
+// used for representing and editing key chords.
+type KeyChordEdit struct {
+	Label
+	FocusActive bool      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
+}
+
+var KiT_KeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
+
+var KeyChordEditProps = ki.Props{
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"vertical-align":   AlignTop,
+	"color":            &Prefs.Colors.Font,
+	"background-color": &Prefs.Colors.Control,
+	"max-width":        -1,
+	LabelSelectors[LabelActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
+	LabelSelectors[LabelInactive]: ki.Props{
+		"color": "lighter-50",
+	},
+	LabelSelectors[LabelSelected]: ki.Props{
+		"background-color": &Prefs.Colors.Select,
+	},
+}
+
+// ChordUpdated emeits KeyChordSig when a new chord has been entered
+func (kc *KeyChordEdit) ChordUpdated() {
+	kc.KeyChordSig.Emit(kc.This, 0, kc.Text)
+}
+
+func (kc *KeyChordEdit) Style2D() {
+	kc.SetCanFocusIfActive()
+	kc.Selectable = true
+	kc.Redrawable = true
+	kc.Label.Style2D()
+}
+
+func (kc *KeyChordEdit) KeyChordEditMouseEvent() {
+	kc.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		lb := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+		if me.Action == mouse.Press && me.Button == mouse.Left {
+			if lb.Selectable {
+				lb.SetSelectedState(!lb.IsSelected())
+				if lb.IsSelected() {
+					lb.GrabFocus()
+				}
+				lb.EmitSelectedSignal()
+				lb.UpdateSig()
+			}
+		}
+		if me.Action == mouse.Release && me.Button == mouse.Right {
+			me.SetProcessed()
+			lb.EmitContextMenuSignal()
+			lb.This.(Node2D).ContextMenu()
+		}
+	})
+}
+
+func (kc *KeyChordEdit) KeyChordEditKeyChordEvent() {
+	kc.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+		kt := d.(*key.ChordEvent)
+		kcc.SetTextAction(kt.ChordString()) // that's easy!
+		kcc.ChordUpdated()
+	})
+}
+
+func (kc *KeyChordEdit) ConnectEvents2D() {
+	kc.LabelHoverEvent()
+	kc.KeyChordEditMouseEvent()
+	kc.KeyChordEditKeyChordEvent()
+}
+
+func (kc *KeyChordEdit) FocusChanged2D(change FocusChanges) {
+	switch change {
+	case FocusLost:
+		kc.FocusActive = false
+		kc.ChordUpdated()
+		kc.UpdateSig()
+	case FocusGot:
+		kc.FocusActive = true
+		kc.ScrollToMe()
+		kc.EmitFocusedSignal()
+		kc.UpdateSig()
+	case FocusInactive:
+		kc.FocusActive = false
+		kc.ChordUpdated()
+		kc.UpdateSig()
+	case FocusActive:
+		kc.FocusActive = true
+		kc.ScrollToMe()
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////

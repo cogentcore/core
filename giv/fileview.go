@@ -774,10 +774,19 @@ var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
 
 var FileInfoProps = ki.Props{
 	"CtxtMenu": ki.PropSlice{
-		{"Duplicate", ki.Props{}},
+		{"Duplicate", ki.Props{
+			"updtfunc": func(fii interface{}, act *gi.Action) {
+				fi := fii.(*FileInfo)
+				act.SetInactiveStateUpdt(fi.IsDir())
+			},
+		}},
 		{"Delete", ki.Props{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
+			"updtfunc": func(fii interface{}, act *gi.Action) {
+				fi := fii.(*FileInfo)
+				act.SetInactiveStateUpdt(fi.IsDir())
+			},
 		}},
 		{"Rename", ki.Props{
 			"desc": "Rename file to new file name",

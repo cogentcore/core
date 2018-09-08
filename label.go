@@ -220,7 +220,7 @@ func (g *Label) OpenLink(tl *TextLink) {
 	g.LinkSig.Emit(g.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-func (g *Label) LabelEvents() {
+func (g *Label) LabelHoverEvent() {
 	g.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
 		lb := recv.Embed(KiT_Label).(*Label)
@@ -244,6 +244,9 @@ func (g *Label) LabelEvents() {
 			PopupTooltip(lb.Tooltip, pos.X, pos.Y, g.Viewport, lb.Nm)
 		}
 	})
+}
+
+func (g *Label) LabelMouseEvent() {
 	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		lb := recv.Embed(KiT_Label).(*Label)
@@ -275,6 +278,9 @@ func (g *Label) LabelEvents() {
 			lb.This.(Node2D).ContextMenu()
 		}
 	})
+}
+
+func (g *Label) LabelMouseMoveEvent() {
 	hasLinks := len(g.Render.Links) > 0
 	if hasLinks {
 		g.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -296,6 +302,12 @@ func (g *Label) LabelEvents() {
 			}
 		})
 	}
+}
+
+func (g *Label) ConnectEvents2D() {
+	g.LabelHoverEvent()
+	g.LabelMouseEvent()
+	g.LabelMouseMoveEvent()
 }
 
 func (g *Label) GrabCurBgColor() {
@@ -335,7 +347,7 @@ func (g *Label) Render2D() {
 		return
 	}
 	if g.PushBounds() {
-		g.LabelEvents()
+		g.This.(Node2D).ConnectEvents2D()
 		g.GrabCurBgColor()
 		g.SetStateStyle()
 		st := &g.Sty
