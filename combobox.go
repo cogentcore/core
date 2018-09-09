@@ -96,28 +96,28 @@ var ComboBoxProps = ki.Props{
 
 // ButtonWidget interface
 
-func (g *ComboBox) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
+func (cb *ComboBox) ButtonAsBase() *ButtonBase {
+	return &(cb.ButtonBase)
 }
 
-func (g *ComboBox) ButtonRelease() {
-	if g.IsInactive() {
+func (cb *ComboBox) ButtonRelease() {
+	if cb.IsInactive() {
 		return
 	}
-	wasPressed := (g.State == ButtonDown)
-	updt := g.UpdateStart()
-	g.MakeItemsMenu()
-	g.SetButtonState(ButtonActive)
-	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	wasPressed := (cb.State == ButtonDown)
+	updt := cb.UpdateStart()
+	cb.MakeItemsMenu()
+	cb.SetButtonState(ButtonActive)
+	cb.ButtonSig.Emit(cb.This, int64(ButtonReleased), nil)
 	if wasPressed {
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
+		cb.ButtonSig.Emit(cb.This, int64(ButtonClicked), nil)
 	}
-	g.UpdateEnd(updt)
-	pos := g.WinBBox.Max
+	cb.UpdateEnd(updt)
+	pos := cb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen
-		pos = g.ObjBBox.Max
+		pos = cb.ObjBBox.Max
 	}
-	indic, ok := g.Parts.ChildByName("indicator", 3)
+	indic, ok := cb.Parts.ChildByName("indicator", 3)
 	if ok {
 		pos = KiToNode2DBase(indic).WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
@@ -127,12 +127,12 @@ func (g *ComboBox) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
-	PopupMenu(g.ItemsMenu, pos.X, pos.Y, g.Viewport, g.Text)
+	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Viewport, cb.Text)
 }
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
-func (g *ComboBox) ConfigPartsIconText(icnm string) (config kit.TypeAndNameList, icIdx, txIdx int) {
+func (cb *ComboBox) ConfigPartsIconText(icnm string) (config kit.TypeAndNameList, icIdx, txIdx int) {
 	// todo: add some styles for button layout
 	config = kit.TypeAndNameList{}
 	icIdx = -1
@@ -149,70 +149,70 @@ func (g *ComboBox) ConfigPartsIconText(icnm string) (config kit.TypeAndNameList,
 
 // ConfigPartsSetText sets part style props, using given props if not set in
 // object props
-func (g *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx int) {
+func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx int) {
 	if txIdx >= 0 {
-		tx := g.Parts.KnownChild(txIdx).(*TextField)
+		tx := cb.Parts.KnownChild(txIdx).(*TextField)
 		tx.SetText(txt)
 		if _, ok := tx.Prop("__comboInit"); !ok {
-			g.StylePart(Node2D(tx))
+			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
-				g.StylePart(g.Parts.KnownChild(txIdx - 1).(Node2D)) // also get the space
+				cb.StylePart(cb.Parts.KnownChild(txIdx - 1).(Node2D)) // also get the space
 			}
 			tx.SetProp("__comboInit", true)
-			if g.MaxLength > 0 {
-				tx.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ch))
+			if cb.MaxLength > 0 {
+				tx.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))
 			}
 		}
 	}
 }
 
-func (g *ComboBox) ConfigPartsIfNeeded() {
-	if g.Editable {
-		_, ok := g.Parts.ChildByName("text", 2)
-		if !g.PartsNeedUpdateIconLabel(string(g.Icon), "") && ok {
+func (cb *ComboBox) ConfigPartsIfNeeded() {
+	if cb.Editable {
+		_, ok := cb.Parts.ChildByName("text", 2)
+		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), "") && ok {
 			return
 		}
 
 	} else {
-		if !g.PartsNeedUpdateIconLabel(string(g.Icon), g.Text) {
+		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), cb.Text) {
 			return
 		}
 	}
-	g.This.(ButtonWidget).ConfigParts()
+	cb.This.(ButtonWidget).ConfigParts()
 }
 
-func (g *ComboBox) ConfigParts() {
-	if eb, ok := g.Prop("editable"); ok {
-		g.Editable = eb.(bool)
+func (cb *ComboBox) ConfigParts() {
+	if eb, ok := cb.Prop("editable"); ok {
+		cb.Editable = eb.(bool)
 	}
 	var config kit.TypeAndNameList
 	var icIdx, lbIdx, txIdx int
-	if g.Editable {
+	if cb.Editable {
 		lbIdx = -1
-		config, icIdx, txIdx = g.ConfigPartsIconText(string(g.Icon))
+		config, icIdx, txIdx = cb.ConfigPartsIconText(string(cb.Icon))
 	} else {
 		txIdx = -1
-		config, icIdx, lbIdx = g.ConfigPartsIconLabel(string(g.Icon), g.Text)
+		config, icIdx, lbIdx = cb.ConfigPartsIconLabel(string(cb.Icon), cb.Text)
 	}
-	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
+	indIdx := cb.ConfigPartsAddIndicator(&config, true)  // default on
+	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
+	cb.ConfigPartsSetIconLabel(string(cb.Icon), cb.Text, icIdx, lbIdx)
 	if txIdx >= 0 {
-		g.ConfigPartsSetText(g.Text, txIdx, icIdx)
+		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx)
 	}
-	g.ConfigPartsIndicator(indIdx)
-	if g.MaxLength > 0 && lbIdx >= 0 {
-		lbl := g.Parts.KnownChild(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewValue(float32(g.MaxLength), units.Ex))
+	cb.ConfigPartsIndicator(indIdx)
+	if cb.MaxLength > 0 && lbIdx >= 0 {
+		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
+		lbl.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ex))
 	}
 	if mods {
-		g.UpdateEnd(updt)
+		cb.UpdateEnd(updt)
 	}
 }
 
 // TextField returns the text field of an editable combobox, and false if not made
-func (g *ComboBox) TextField() (*TextField, bool) {
-	tff, ok := g.Parts.ChildByName("text", 2)
+func (cb *ComboBox) TextField() (*TextField, bool) {
+	tff, ok := cb.Parts.ChildByName("text", 2)
 	if !ok {
 		return nil, ok
 	}
@@ -221,19 +221,19 @@ func (g *ComboBox) TextField() (*TextField, bool) {
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,
 // creates one with the given capacity
-func (g *ComboBox) MakeItems(reset bool, capacity int) {
-	if g.Items == nil || reset {
-		g.Items = make([]interface{}, 0, capacity)
+func (cb *ComboBox) MakeItems(reset bool, capacity int) {
+	if cb.Items == nil || reset {
+		cb.Items = make([]interface{}, 0, capacity)
 	}
 }
 
 // SortItems sorts the items according to their labels
-func (g *ComboBox) SortItems(ascending bool) {
-	sort.Slice(g.Items, func(i, j int) bool {
+func (cb *ComboBox) SortItems(ascending bool) {
+	sort.Slice(cb.Items, func(i, j int) bool {
 		if ascending {
-			return ToLabel(g.Items[i]) < ToLabel(g.Items[j])
+			return ToLabel(cb.Items[i]) < ToLabel(cb.Items[j])
 		} else {
-			return ToLabel(g.Items[i]) > ToLabel(g.Items[j])
+			return ToLabel(cb.Items[i]) > ToLabel(cb.Items[j])
 		}
 	})
 }
@@ -242,15 +242,15 @@ func (g *ComboBox) SortItems(ascending bool) {
 // button label is automatically set according to the max length of all items
 // in the list -- if maxLen > 0 then it is used as an upper do-not-exceed
 // length
-func (g *ComboBox) SetToMaxLength(maxLen int) {
+func (cb *ComboBox) SetToMaxLength(maxLen int) {
 	ml := 0
-	for _, it := range g.Items {
+	for _, it := range cb.Items {
 		ml = kit.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
 	}
 	if maxLen > 0 {
 		ml = kit.MinInt(ml, maxLen)
 	}
-	g.MaxLength = ml
+	cb.MaxLength = ml
 }
 
 // ItemsFromTypes sets the Items list from a list of types -- see e.g.,
@@ -258,20 +258,20 @@ func (g *ComboBox) SetToMaxLength(maxLen int) {
 // set current item to the first item in the list, sort sorts the list in
 // ascending order, and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit
-func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
+func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
 	sz := len(tl)
-	g.Items = make([]interface{}, sz)
+	cb.Items = make([]interface{}, sz)
 	for i, typ := range tl {
-		g.Items[i] = typ
+		cb.Items[i] = typ
 	}
 	if sort {
-		g.SortItems(true)
+		cb.SortItems(true)
 	}
 	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
+		cb.SetToMaxLength(maxLen)
 	}
 	if setFirst {
-		g.SetCurIndex(0)
+		cb.SetCurIndex(0)
 	}
 }
 
@@ -279,17 +279,17 @@ func (g *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen
 // setFirst then set current item to the first item in the list, and maxLen if
 // > 0 auto-sets the width of the button to the contents, with the given upper
 // limit
-func (g *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
+func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
 	sz := len(el)
-	g.Items = make([]interface{}, sz)
+	cb.Items = make([]interface{}, sz)
 	for i, str := range el {
-		g.Items[i] = str
+		cb.Items[i] = str
 	}
 	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
+		cb.SetToMaxLength(maxLen)
 	}
 	if setFirst {
-		g.SetCurIndex(0)
+		cb.SetCurIndex(0)
 	}
 }
 
@@ -297,17 +297,17 @@ func (g *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
 // kit.EnumRegistry) -- if setFirst then set current item to the first item in
 // the list, and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit
-func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
+func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
 	sz := len(el)
-	g.Items = make([]interface{}, sz)
+	cb.Items = make([]interface{}, sz)
 	for i, enum := range el {
-		g.Items[i] = enum
+		cb.Items[i] = enum
 	}
 	if maxLen > 0 {
-		g.SetToMaxLength(maxLen)
+		cb.SetToMaxLength(maxLen)
 	}
 	if setFirst {
-		g.SetCurIndex(0)
+		cb.SetCurIndex(0)
 	}
 }
 
@@ -317,16 +317,16 @@ func (g *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen i
 // to the contents, with the given upper limit -- see kit.EnumRegistry, and
 // maxLen if > 0 auto-sets the width of the button to the contents, with the
 // given upper limit
-func (g *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
-	g.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
+func (cb *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
+	cb.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
 }
 
 // FindItem finds an item on list of items and returns its index
-func (g *ComboBox) FindItem(it interface{}) int {
-	if g.Items == nil {
+func (cb *ComboBox) FindItem(it interface{}) int {
+	if cb.Items == nil {
 		return -1
 	}
-	for i, v := range g.Items {
+	for i, v := range cb.Items {
 		if v == it {
 			return i
 		}
@@ -338,69 +338,69 @@ func (g *ComboBox) FindItem(it interface{}) int {
 // for that item on the current Items list (adds to items list if not found)
 // -- returns that index -- and sets the text to the string value of that
 // value (using standard Stringer string conversion)
-func (g *ComboBox) SetCurVal(it interface{}) int {
-	g.CurVal = it
-	g.CurIndex = g.FindItem(it)
-	if g.CurIndex < 0 { // add to list if not found..
-		g.CurIndex = len(g.Items)
-		g.Items = append(g.Items, it)
+func (cb *ComboBox) SetCurVal(it interface{}) int {
+	cb.CurVal = it
+	cb.CurIndex = cb.FindItem(it)
+	if cb.CurIndex < 0 { // add to list if not found..
+		cb.CurIndex = len(cb.Items)
+		cb.Items = append(cb.Items, it)
 	}
-	g.SetText(ToLabel(it))
-	return g.CurIndex
+	cb.SetText(ToLabel(it))
+	return cb.CurIndex
 }
 
 // SetCurIndex sets the current index (CurIndex) and the corresponding CurVal
 // for that item on the current Items list (-1 if not found) -- returns value
 // -- and sets the text to the string value of that value (using standard
 // Stringer string conversion)
-func (g *ComboBox) SetCurIndex(idx int) interface{} {
-	g.CurIndex = idx
-	if idx < 0 || idx >= len(g.Items) {
-		g.CurVal = nil
-		g.SetText(fmt.Sprintf("idx %v > len", idx))
+func (cb *ComboBox) SetCurIndex(idx int) interface{} {
+	cb.CurIndex = idx
+	if idx < 0 || idx >= len(cb.Items) {
+		cb.CurVal = nil
+		cb.SetText(fmt.Sprintf("idx %v > len", idx))
 	} else {
-		g.CurVal = g.Items[idx]
-		g.SetText(ToLabel(g.CurVal))
+		cb.CurVal = cb.Items[idx]
+		cb.SetText(ToLabel(cb.CurVal))
 	}
-	return g.CurVal
+	return cb.CurVal
 }
 
 // SelectItem selects a given item and emits the index as the ComboSig signal
 // and the selected item as the data
-func (g *ComboBox) SelectItem(idx int) {
-	updt := g.UpdateStart()
-	g.SetCurIndex(idx)
-	g.ComboSig.Emit(g.This, int64(g.CurIndex), g.CurVal)
-	g.UpdateEnd(updt)
+func (cb *ComboBox) SelectItem(idx int) {
+	updt := cb.UpdateStart()
+	cb.SetCurIndex(idx)
+	cb.ComboSig.Emit(cb.This, int64(cb.CurIndex), cb.CurVal)
+	cb.UpdateEnd(updt)
 }
 
 // MakeItemsMenu makes menu of all the items
-func (g *ComboBox) MakeItemsMenu() {
-	nitm := len(g.Items)
-	if g.ItemsMenu == nil {
-		g.ItemsMenu = make(Menu, 0, nitm)
+func (cb *ComboBox) MakeItemsMenu() {
+	nitm := len(cb.Items)
+	if cb.ItemsMenu == nil {
+		cb.ItemsMenu = make(Menu, 0, nitm)
 	}
-	sz := len(g.ItemsMenu)
+	sz := len(cb.ItemsMenu)
 	if nitm < sz {
-		g.ItemsMenu = g.ItemsMenu[0:nitm]
+		cb.ItemsMenu = cb.ItemsMenu[0:nitm]
 	}
-	for i, it := range g.Items {
+	for i, it := range cb.Items {
 		var ac *Action
 		if sz > i {
-			ac = g.ItemsMenu[i].(*Action)
+			ac = cb.ItemsMenu[i].(*Action)
 		} else {
 			ac = &Action{}
 			ac.Init(ac)
-			g.ItemsMenu = append(g.ItemsMenu, ac.This.(Node2D))
+			cb.ItemsMenu = append(cb.ItemsMenu, ac.This.(Node2D))
 		}
 		txt := ToLabel(it)
 		nm := fmt.Sprintf("Item_%v", i)
 		ac.SetName(nm)
 		ac.Text = txt
 		ac.Data = i // index is the data
-		ac.SetSelectedState(i == g.CurIndex)
+		ac.SetSelectedState(i == cb.CurIndex)
 		ac.SetAsMenu()
-		ac.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.ConnectOnly(cb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)
 			cb := recv.(*ComboBox)
 			cb.SelectItem(idx)

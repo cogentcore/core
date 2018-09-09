@@ -115,335 +115,355 @@ const (
 // SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
 
-func (g *SliderBase) Defaults() { // todo: should just get these from props
-	g.ThumbSize = units.NewValue(1, units.Em)
-	g.Step = 0.1
-	g.PageStep = 0.2
-	g.Max = 1.0
-	g.Prec = 9
+func (sb *SliderBase) Defaults() { // todo: should just get these from props
+	sb.ThumbSize = units.NewValue(1, units.Em)
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 9
 }
 
 // SnapValue snaps the value to step sizes if snap option is set
-func (g *SliderBase) SnapValue() {
-	if g.Snap {
-		g.Value = FloatMod32(g.Value, g.Step)
-		g.Value = Truncate32(g.Value, g.Prec)
+func (sb *SliderBase) SnapValue() {
+	if sb.Snap {
+		sb.Value = FloatMod32(sb.Value, sb.Step)
+		sb.Value = Truncate32(sb.Value, sb.Prec)
 	}
 }
 
 // SetSliderState sets the slider state to given state, updates style
-func (g *SliderBase) SetSliderState(state SliderStates) {
-	if state == SliderActive && g.HasFocus() {
+func (sb *SliderBase) SetSliderState(state SliderStates) {
+	if state == SliderActive && sb.HasFocus() {
 		state = SliderFocus
 	}
-	g.State = state
-	g.Sty = g.StateStyles[state] // get relevant styles
+	sb.State = state
+	sb.Sty = sb.StateStyles[state] // get relevant styles
 }
 
 // SliderPressed sets the slider in the down state -- mouse clicked down but
 // not yet up -- emits SliderPressed signal
-func (g *SliderBase) SliderPressed(pos float32) {
-	g.EmitValue = g.Min - 1.0 // invalid value
-	updt := g.UpdateStart()
-	g.SetSliderState(SliderDown)
-	g.SetSliderPos(pos)
-	g.SliderSig.Emit(g.This, int64(SliderPressed), g.Value)
-	// bitflag.Set(&g.Flag, int(SliderFlagDragging))
-	g.UpdateEnd(updt)
+func (sb *SliderBase) SliderPressed(pos float32) {
+	sb.EmitValue = sb.Min - 1.0 // invalid value
+	updt := sb.UpdateStart()
+	sb.SetSliderState(SliderDown)
+	sb.SetSliderPos(pos)
+	sb.SliderSig.Emit(sb.This, int64(SliderPressed), sb.Value)
+	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
+	sb.UpdateEnd(updt)
 }
 
 // SliderReleased called when the slider has just been released -- sends a
 // released signal and returns state to normal, and emits clicked signal if if
 // it was previously in pressed state
-func (g *SliderBase) SliderReleased() {
-	wasPressed := (g.State == SliderDown)
-	updt := g.UpdateStart()
-	g.SetSliderState(SliderActive)
-	g.SliderSig.Emit(g.This, int64(SliderReleased), g.Value)
-	if wasPressed && g.Value != g.EmitValue {
-		g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
-		g.EmitValue = g.Value
+func (sb *SliderBase) SliderReleased() {
+	wasPressed := (sb.State == SliderDown)
+	updt := sb.UpdateStart()
+	sb.SetSliderState(SliderActive)
+	sb.SliderSig.Emit(sb.This, int64(SliderReleased), sb.Value)
+	if wasPressed && sb.Value != sb.EmitValue {
+		sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
+		sb.EmitValue = sb.Value
 	}
-	g.UpdateEnd(updt)
+	sb.UpdateEnd(updt)
 }
 
 // SliderEnterHover slider starting hover
-func (g *SliderBase) SliderEnterHover() {
-	if g.State != SliderHover {
-		updt := g.UpdateStart()
-		g.SetSliderState(SliderHover)
-		g.UpdateEnd(updt)
+func (sb *SliderBase) SliderEnterHover() {
+	if sb.State != SliderHover {
+		updt := sb.UpdateStart()
+		sb.SetSliderState(SliderHover)
+		sb.UpdateEnd(updt)
 	}
 }
 
 // SliderExitHover called when slider exiting hover
-func (g *SliderBase) SliderExitHover() {
-	if g.State == SliderHover {
-		updt := g.UpdateStart()
-		g.SetSliderState(SliderActive)
-		g.UpdateEnd(updt)
+func (sb *SliderBase) SliderExitHover() {
+	if sb.State == SliderHover {
+		updt := sb.UpdateStart()
+		sb.SetSliderState(SliderActive)
+		sb.UpdateEnd(updt)
 	}
 }
 
 // SizeFromAlloc gets size from allocation
-func (g *SliderBase) SizeFromAlloc() {
-	if g.LayData.AllocSize.IsZero() {
+func (sb *SliderBase) SizeFromAlloc() {
+	if sb.LayData.AllocSize.IsZero() {
 		return
 	}
-	if g.Min == 0 && g.Max == 0 { // uninit
-		g.Defaults()
+	if sb.Min == 0 && sb.Max == 0 { // uninit
+		sb.Defaults()
 	}
-	spc := g.Sty.BoxSpace()
-	g.Size = g.LayData.AllocSize.Dim(g.Dim) - 2.0*spc
-	if g.Size <= 0 {
+	spc := sb.Sty.BoxSpace()
+	sb.Size = sb.LayData.AllocSize.Dim(sb.Dim) - 2.0*spc
+	if sb.Size <= 0 {
 		return
 	}
-	if !g.ValThumb {
-		g.Size -= g.ThSize // half on each side
+	if !sb.ValThumb {
+		sb.Size -= sb.ThSize // half on each side
 	}
-	g.UpdatePosFromValue()
-	g.DragPos = g.Pos
+	sb.UpdatePosFromValue()
+	sb.DragPos = sb.Pos
 }
 
 // SetSliderPos sets the position of the slider at the given position in
 // pixels -- updates the corresponding Value
-func (g *SliderBase) SetSliderPos(pos float32) {
-	updt := g.UpdateStart()
-	g.Pos = pos
-	g.Pos = Min32(g.Size, g.Pos)
-	if g.ValThumb {
-		g.UpdateThumbValSize()
-		g.Pos = Min32(g.Size-g.ThSize, g.Pos)
+func (sb *SliderBase) SetSliderPos(pos float32) {
+	updt := sb.UpdateStart()
+	sb.Pos = pos
+	sb.Pos = Min32(sb.Size, sb.Pos)
+	if sb.ValThumb {
+		sb.UpdateThumbValSize()
+		sb.Pos = Min32(sb.Size-sb.ThSize, sb.Pos)
 	}
-	g.Pos = Max32(0, g.Pos)
-	g.Value = Truncate32(g.Min+(g.Max-g.Min)*(g.Pos/g.Size), g.Prec)
-	g.DragPos = g.Pos
-	if g.Snap {
-		g.SnapValue()
-		g.UpdatePosFromValue()
+	sb.Pos = Max32(0, sb.Pos)
+	sb.Value = Truncate32(sb.Min+(sb.Max-sb.Min)*(sb.Pos/sb.Size), sb.Prec)
+	sb.DragPos = sb.Pos
+	if sb.Snap {
+		sb.SnapValue()
+		sb.UpdatePosFromValue()
 	}
-	if g.Tracking && g.Value != g.EmitValue {
-		if math32.Abs(g.Value-g.EmitValue) > g.TrackThr {
-			g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
-			g.EmitValue = g.Value
+	if sb.Tracking && sb.Value != sb.EmitValue {
+		if math32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
+			sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
+			sb.EmitValue = sb.Value
 		}
 	}
-	g.UpdateEnd(updt)
+	sb.UpdateEnd(updt)
 }
 
 // SliderMoved called when slider moved along relevant axis
-func (g *SliderBase) SliderMoved(start, end float32) {
+func (sb *SliderBase) SliderMoved(start, end float32) {
 	del := end - start
-	g.SetSliderPos(g.DragPos + del)
+	sb.SetSliderPos(sb.DragPos + del)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value
-func (g *SliderBase) UpdatePosFromValue() {
-	if g.Size == 0.0 {
+func (sb *SliderBase) UpdatePosFromValue() {
+	if sb.Size == 0.0 {
 		return
 	}
-	if g.ValThumb {
-		g.UpdateThumbValSize()
+	if sb.ValThumb {
+		sb.UpdateThumbValSize()
 	}
-	g.Pos = g.Size * (g.Value - g.Min) / (g.Max - g.Min)
+	sb.Pos = sb.Size * (sb.Value - sb.Min) / (sb.Max - sb.Min)
 }
 
 // SetValue sets the value and updates the slider position, but does not
 // emit an updated signal (see SetValueAction)
-func (g *SliderBase) SetValue(val float32) {
-	updt := g.UpdateStart()
-	val = Min32(val, g.Max)
-	if g.ValThumb {
-		val = Min32(val, g.Max-g.ThumbVal)
+func (sb *SliderBase) SetValue(val float32) {
+	updt := sb.UpdateStart()
+	val = Min32(val, sb.Max)
+	if sb.ValThumb {
+		val = Min32(val, sb.Max-sb.ThumbVal)
 	}
-	val = Max32(val, g.Min)
-	if g.Value != val {
-		g.Value = val
-		g.UpdatePosFromValue()
-		g.DragPos = g.Pos
+	val = Max32(val, sb.Min)
+	if sb.Value != val {
+		sb.Value = val
+		sb.UpdatePosFromValue()
+		sb.DragPos = sb.Pos
 	}
-	g.UpdateEnd(updt)
+	sb.UpdateEnd(updt)
 }
 
 // SetValueAction sets the value and updates the slider representation, and
 // emits a changed signal
-func (g *SliderBase) SetValueAction(val float32) {
-	if g.Value == val {
+func (sb *SliderBase) SetValueAction(val float32) {
+	if sb.Value == val {
 		return
 	}
-	g.SetValue(val)
-	g.SliderSig.Emit(g.This, int64(SliderValueChanged), g.Value)
+	sb.SetValue(val)
+	sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
 }
 
 // SetThumValue sets the thumb value to given value and updates the thumb size
 // -- for scrollbar-style sliders where the thumb size represents visible range
-func (g *SliderBase) SetThumbValue(val float32) {
-	updt := g.UpdateStart()
-	g.ThumbVal = Min32(val, g.Max)
-	g.ThumbVal = Max32(g.ThumbVal, g.Min)
-	g.UpdateThumbValSize()
-	g.UpdateEnd(updt)
+func (sb *SliderBase) SetThumbValue(val float32) {
+	updt := sb.UpdateStart()
+	sb.ThumbVal = Min32(val, sb.Max)
+	sb.ThumbVal = Max32(sb.ThumbVal, sb.Min)
+	sb.UpdateThumbValSize()
+	sb.UpdateEnd(updt)
 }
 
-// UpdateThumbValSize sets thumb size as proportion of min / max (e.g., amount
+// UpdateThumbValSize sets thumb size as proportion of min / max (e.sb., amount
 // visible in scrollbar) -- max's out to full size
-func (g *SliderBase) UpdateThumbValSize() {
-	g.ThSize = ((g.ThumbVal - g.Min) / (g.Max - g.Min))
-	g.ThSize = Min32(g.ThSize, 1.0)
-	g.ThSize = Max32(g.ThSize, 0.0)
-	g.ThSize *= g.Size
+func (sb *SliderBase) UpdateThumbValSize() {
+	sb.ThSize = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
+	sb.ThSize = Min32(sb.ThSize, 1.0)
+	sb.ThSize = Max32(sb.ThSize, 0.0)
+	sb.ThSize *= sb.Size
 }
 
-func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
+func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.Chord())
 	switch kf {
 	case KeyFunMoveUp:
-		g.SetValueAction(g.Value - g.Step)
+		sb.SetValueAction(sb.Value - sb.Step)
 		kt.SetProcessed()
 	case KeyFunMoveLeft:
-		g.SetValueAction(g.Value - g.Step)
+		sb.SetValueAction(sb.Value - sb.Step)
 		kt.SetProcessed()
 	case KeyFunMoveDown:
-		g.SetValueAction(g.Value + g.Step)
+		sb.SetValueAction(sb.Value + sb.Step)
 		kt.SetProcessed()
 	case KeyFunMoveRight:
-		g.SetValueAction(g.Value + g.Step)
+		sb.SetValueAction(sb.Value + sb.Step)
 		kt.SetProcessed()
 	case KeyFunPageUp:
-		g.SetValueAction(g.Value - g.PageStep)
+		sb.SetValueAction(sb.Value - sb.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageLeft:
-		g.SetValueAction(g.Value - g.PageStep)
+		sb.SetValueAction(sb.Value - sb.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageDown:
-		g.SetValueAction(g.Value + g.PageStep)
+		sb.SetValueAction(sb.Value + sb.PageStep)
 		kt.SetProcessed()
 	case KeyFunPageRight:
-		g.SetValueAction(g.Value + g.PageStep)
+		sb.SetValueAction(sb.Value + sb.PageStep)
 		kt.SetProcessed()
 	case KeyFunHome:
-		g.SetValueAction(g.Min)
+		sb.SetValueAction(sb.Min)
 		kt.SetProcessed()
 	case KeyFunEnd:
-		g.SetValueAction(g.Max)
+		sb.SetValueAction(sb.Max)
 		kt.SetProcessed()
 	}
 }
 
 // PointToRelPos translates a point in global pixel coords into relative
 // position within node
-func (g *SliderBase) PointToRelPos(pt image.Point) image.Point {
-	return pt.Sub(g.OrigWinBBox.Min)
+func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
+	return pt.Sub(sb.OrigWinBBox.Min)
 }
 
-func (g *SliderBase) SliderEvents() {
-	g.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (sb *SliderBase) MouseDragEvent() {
+	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
-		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
-		if sl.IsInactive() {
+		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		if sbb.IsInactive() {
 			return
 		}
 		me.SetProcessed()
-		st := sl.PointToRelPos(me.From)
-		ed := sl.PointToRelPos(me.Where)
-		if sl.Dim == X {
-			sl.SliderMoved(float32(st.X), float32(ed.X))
+		st := sbb.PointToRelPos(me.From)
+		ed := sbb.PointToRelPos(me.Where)
+		if sbb.Dim == X {
+			sbb.SliderMoved(float32(st.X), float32(ed.X))
 		} else {
-			sl.SliderMoved(float32(st.Y), float32(ed.Y))
+			sbb.SliderMoved(float32(st.Y), float32(ed.Y))
 		}
 	})
-	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+}
+
+func (sb *SliderBase) MouseEvent() {
+	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
-		if sl.IsInactive() {
+		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		if sbb.IsInactive() {
 			me.SetProcessed()
-			sl.SetSelectedState(!sl.IsSelected())
-			sl.EmitSelectedSignal()
-			sl.UpdateSig()
+			sbb.SetSelectedState(!sbb.IsSelected())
+			sbb.EmitSelectedSignal()
+			sbb.UpdateSig()
 		} else {
 			if me.Button == mouse.Left {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
-					ed := sl.PointToRelPos(me.Where)
-					st := &sl.Sty
-					spc := st.Layout.Margin.Dots + 0.5*g.ThSize
-					if sl.Dim == X {
-						sl.SliderPressed(float32(ed.X) - spc)
+					ed := sbb.PointToRelPos(me.Where)
+					st := &sbb.Sty
+					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSize
+					if sbb.Dim == X {
+						sbb.SliderPressed(float32(ed.X) - spc)
 					} else {
-						sl.SliderPressed(float32(ed.Y) - spc)
+						sbb.SliderPressed(float32(ed.Y) - spc)
 					}
 				} else {
-					sl.SliderReleased()
+					sbb.SliderReleased()
 				}
 			}
 		}
 	})
-	g.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
-		if sl.IsInactive() {
+}
+
+func (sb *SliderBase) MouseFocusEvent() {
+	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		if sbb.IsInactive() {
 			return
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		if me.Action == mouse.Enter {
-			sl.SliderEnterHover()
+			sbb.SliderEnterHover()
 		} else {
-			sl.SliderExitHover()
+			sbb.SliderExitHover()
 		}
 	})
-	g.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
-		if sl.IsInactive() {
+}
+
+func (sb *SliderBase) MouseScrollEvent() {
+	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		if sbb.IsInactive() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
-		cur := float32(sl.Pos)
-		if sl.Dim == X {
-			sl.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+		cur := float32(sbb.Pos)
+		if sbb.Dim == X {
+			sbb.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
 		} else {
-			sl.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+			sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
 		}
 	})
-	g.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sl := recv.Embed(KiT_SliderBase).(*SliderBase)
-		if sl.IsInactive() {
+}
+
+func (sb *SliderBase) KeyChordEvent() {
+	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		if sbb.IsInactive() {
 			return
 		}
-		sl.KeyInput(d.(*key.ChordEvent))
+		sbb.KeyInput(d.(*key.ChordEvent))
 	})
 }
 
-func (g *SliderBase) Init2DSlider() {
-	g.Init2DWidget()
+func (sb *SliderBase) SliderEvents() {
+	sb.MouseDragEvent()
+	sb.MouseEvent()
+	sb.MouseFocusEvent()
+	sb.MouseScrollEvent()
+	sb.KeyChordEvent()
 }
 
-func (g *SliderBase) ConfigParts() {
-	g.Parts.Lay = LayoutNil
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), "")
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), "", icIdx, lbIdx)
+func (sb *SliderBase) Init2DSlider() {
+	sb.Init2DWidget()
+}
+
+func (sb *SliderBase) ConfigParts() {
+	sb.Parts.Lay = LayoutNil
+	config, icIdx, lbIdx := sb.ConfigPartsIconLabel(string(sb.Icon), "")
+	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
+	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
 	if mods {
-		g.UpdateEnd(updt)
+		sb.UpdateEnd(updt)
 	}
 }
 
-func (g *SliderBase) ConfigPartsIfNeeded(render bool) {
-	if g.PartsNeedUpdateIconLabel(string(g.Icon), "") {
-		g.ConfigParts()
+func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
+	if sb.PartsNeedUpdateIconLabel(string(sb.Icon), "") {
+		sb.ConfigParts()
 	}
-	if g.Icon.IsValid() && g.Parts.HasChildren() {
-		ick, ok := g.Parts.Children().ElemByType(KiT_Icon, true, 0)
+	if sb.Icon.IsValid() && sb.Parts.HasChildren() {
+		ick, ok := sb.Parts.Children().ElemByType(KiT_Icon, true, 0)
 		if ok {
 			ic := ick.(*Icon)
-			mrg := g.Sty.Layout.Margin.Dots
-			pad := g.Sty.Layout.Padding.Dots
+			mrg := sb.Sty.Layout.Margin.Dots
+			pad := sb.Sty.Layout.Padding.Dots
 			spc := mrg + pad
-			odim := OtherDim(g.Dim)
-			ic.LayData.AllocPosRel.SetDim(g.Dim, g.Pos+spc-0.5*g.ThSize)
+			odim := OtherDim(sb.Dim)
+			ic.LayData.AllocPosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.X = g.ThSize
-			ic.LayData.AllocSize.Y = g.ThSize
+			ic.LayData.AllocSize.X = sb.ThSize
+			ic.LayData.AllocSize.Y = sb.ThSize
 			if render {
 				ic.Layout2DTree()
 			}
@@ -520,87 +540,87 @@ var SliderProps = ki.Props{
 	},
 }
 
-func (g *Slider) Defaults() {
-	g.ThumbSize = units.NewValue(1.5, units.Em)
-	g.ThSize = 25.0
-	g.Step = 0.1
-	g.PageStep = 0.2
-	g.Max = 1.0
-	g.Prec = 9
+func (sr *Slider) Defaults() {
+	sr.ThumbSize = units.NewValue(1.5, units.Em)
+	sr.ThSize = 25.0
+	sr.Step = 0.1
+	sr.PageStep = 0.2
+	sr.Max = 1.0
+	sr.Prec = 9
 }
 
-func (g *Slider) Init2D() {
-	g.Init2DSlider()
-	g.ConfigParts()
+func (sr *Slider) Init2D() {
+	sr.Init2DSlider()
+	sr.ConfigParts()
 }
 
-func (g *Slider) Style2D() {
-	g.SetCanFocusIfActive()
-	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Sty)
+func (sr *Slider) Style2D() {
+	sr.SetCanFocusIfActive()
+	sr.Style2DWidget()
+	pst := &(sr.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Sty)
-		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		sr.StateStyles[i].CopyFrom(&sr.Sty)
+		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]))
+		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
 	}
-	SliderFields.Style(g, nil, g.Props)
-	SliderFields.ToDots(g, &g.Sty.UnContext)
-	g.ThSize = g.ThumbSize.Dots
-	g.ConfigParts()
+	SliderFields.Style(sr, nil, sr.Props)
+	SliderFields.ToDots(sr, &sr.Sty.UnContext)
+	sr.ThSize = sr.ThumbSize.Dots
+	sr.ConfigParts()
 }
 
-func (g *Slider) Size2D(iter int) {
-	g.InitLayout2D()
-	if g.ThSize == 0.0 {
-		g.Defaults()
+func (sr *Slider) Size2D(iter int) {
+	sr.InitLayout2D()
+	if sr.ThSize == 0.0 {
+		sr.Defaults()
 	}
-	st := &g.Sty
+	st := &sr.Sty
 	// get at least thumbsize + margin + border.size
-	sz := g.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
-	g.LayData.AllocSize.SetDim(OtherDim(g.Dim), sz)
+	sz := sr.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
+	sr.LayData.AllocSize.SetDim(OtherDim(sr.Dim), sz)
 }
 
-func (g *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.ConfigPartsIfNeeded(false)
-	g.Layout2DBase(parBBox, true, iter) // init style
-	g.Layout2DParts(parBBox, iter)
+func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
+	sr.ConfigPartsIfNeeded(false)
+	sr.Layout2DBase(parBBox, true, iter) // init style
+	sr.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
 	}
-	g.SizeFromAlloc()
-	g.OrigWinBBox = g.WinBBox
-	return g.Layout2DChildren(iter)
+	sr.SizeFromAlloc()
+	sr.OrigWinBBox = sr.WinBBox
+	return sr.Layout2DChildren(iter)
 }
 
-func (g *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
-	g.SliderBase.Move2D(delta, parBBox)
-	g.OrigWinBBox = g.WinBBox
+func (sr *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
+	sr.SliderBase.Move2D(delta, parBBox)
+	sr.OrigWinBBox = sr.WinBBox
 }
 
-func (g *Slider) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (sr *Slider) Render2D() {
+	if sr.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		g.SliderEvents()
-		g.Render2DDefaultStyle()
-		g.Render2DChildren()
-		g.PopBounds()
+	if sr.PushBounds() {
+		sr.This.(Node2D).ConnectEvents2D()
+		sr.Render2DDefaultStyle()
+		sr.Render2DChildren()
+		sr.PopBounds()
 	} else {
-		g.DisconnectAllEvents(RegPri)
+		sr.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (g *Slider) Render2DDefaultStyle() {
-	st := &g.Sty
-	rs := &g.Viewport.Render
+func (sr *Slider) Render2DDefaultStyle() {
+	st := &sr.Sty
+	rs := &sr.Viewport.Render
 	pc := &rs.Paint
 
-	g.ConfigPartsIfNeeded(true)
+	sr.ConfigPartsIfNeeded(true)
 
 	// overall fill box
-	g.RenderStdBox(&g.StateStyles[SliderBox])
+	sr.RenderStdBox(&sr.StateStyles[SliderBox])
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
@@ -615,47 +635,51 @@ func (g *Slider) Render2DDefaultStyle() {
 	// for length: | spc | ht | <-start of slider
 
 	spc := st.BoxSpace()
-	pos := g.LayData.AllocPos
-	sz := g.LayData.AllocSize
+	pos := sr.LayData.AllocPos
+	sz := sr.LayData.AllocSize
 	bpos := pos // box pos
 	bsz := sz
 	tpos := pos // thumb pos
 
-	ht := 0.5 * g.ThSize
+	ht := 0.5 * sr.ThSize
 
-	odim := OtherDim(g.Dim)
+	odim := OtherDim(sr.Dim)
 	bpos.SetAddDim(odim, spc)
 	bsz.SetSubDim(odim, 2.0*spc)
-	bpos.SetAddDim(g.Dim, spc+ht)
-	bsz.SetSubDim(g.Dim, 2.0*(spc+ht))
-	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	bpos.SetAddDim(sr.Dim, spc+ht)
+	bsz.SetSubDim(sr.Dim, 2.0*(spc+ht))
+	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
-	bsz.SetDim(g.Dim, g.Pos)
-	pc.FillStyle.SetColorSpec(&g.StateStyles[SliderValue].Font.BgColor)
-	g.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	bsz.SetDim(sr.Dim, sr.Pos)
+	pc.FillStyle.SetColorSpec(&sr.StateStyles[SliderValue].Font.BgColor)
+	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
-	tpos.SetDim(g.Dim, bpos.Dim(g.Dim)+g.Pos)
+	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
-	if g.Icon.IsValid() && g.Parts.HasChildren() {
-		g.Parts.Render2DTree()
+	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+		sr.Parts.Render2DTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
 	}
 }
 
-func (g *Slider) FocusChanged2D(change FocusChanges) {
+func (sr *Slider) ConnectEvents2D() {
+	sr.SliderEvents()
+}
+
+func (sr *Slider) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		g.SetSliderState(SliderActive) // lose any hover state but whatever..
-		g.UpdateSig()
+		sr.SetSliderState(SliderActive) // lose any hover state but whatever..
+		sr.UpdateSig()
 	case FocusGot:
-		g.ScrollToMe()
-		g.SetSliderState(SliderFocus)
-		g.EmitFocusedSignal()
-		g.UpdateSig()
+		sr.ScrollToMe()
+		sr.SetSliderState(SliderFocus)
+		sr.EmitFocusedSignal()
+		sr.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
@@ -707,74 +731,74 @@ var ScrollBarProps = ki.Props{
 	},
 }
 
-func (g *ScrollBar) Defaults() { // todo: should just get these from props
-	g.ValThumb = true
-	g.ThumbSize = units.NewValue(1, units.Ex)
-	g.Step = 0.1
-	g.PageStep = 0.2
-	g.Max = 1.0
-	g.Prec = 9
+func (sb *ScrollBar) Defaults() { // todo: should just get these from props
+	sb.ValThumb = true
+	sb.ThumbSize = units.NewValue(1, units.Ex)
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 9
 }
 
-func (g *ScrollBar) Init2D() {
-	g.Init2DSlider()
+func (sb *ScrollBar) Init2D() {
+	sb.Init2DSlider()
 }
 
-func (g *ScrollBar) Style2D() {
-	g.SetCanFocusIfActive()
-	g.Style2DWidget()
-	pst := &(g.Par.(Node2D).AsWidget().Sty)
+func (sb *ScrollBar) Style2D() {
+	sb.SetCanFocusIfActive()
+	sb.Style2DWidget()
+	pst := &(sb.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Sty)
-		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(SliderSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		sb.StateStyles[i].CopyFrom(&sb.Sty)
+		sb.StateStyles[i].SetStyleProps(pst, sb.StyleProps(SliderSelectors[i]))
+		sb.StateStyles[i].CopyUnitContext(&sb.Sty.UnContext)
 	}
-	SliderFields.Style(g, nil, g.Props)
-	SliderFields.ToDots(g, &g.Sty.UnContext)
+	SliderFields.Style(sb, nil, sb.Props)
+	SliderFields.ToDots(sb, &sb.Sty.UnContext)
 }
 
-func (g *ScrollBar) Size2D(iter int) {
-	g.InitLayout2D()
+func (sb *ScrollBar) Size2D(iter int) {
+	sb.InitLayout2D()
 }
 
-func (g *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.Layout2DBase(parBBox, true, iter) // init style
-	g.Layout2DParts(parBBox, iter)
+func (sb *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
+	sb.Layout2DBase(parBBox, true, iter) // init style
+	sb.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		sb.StateStyles[i].CopyUnitContext(&sb.Sty.UnContext)
 	}
-	g.SizeFromAlloc()
-	g.OrigWinBBox = g.WinBBox
-	return g.Layout2DChildren(iter)
+	sb.SizeFromAlloc()
+	sb.OrigWinBBox = sb.WinBBox
+	return sb.Layout2DChildren(iter)
 }
 
-func (g *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
-	g.SliderBase.Move2D(delta, parBBox)
-	g.OrigWinBBox = g.WinBBox
+func (sb *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
+	sb.SliderBase.Move2D(delta, parBBox)
+	sb.OrigWinBBox = sb.WinBBox
 }
 
-func (g *ScrollBar) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (sb *ScrollBar) Render2D() {
+	if sb.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		g.SliderEvents()
-		g.Render2DDefaultStyle()
-		g.Render2DChildren()
-		g.PopBounds()
+	if sb.PushBounds() {
+		sb.This.(Node2D).ConnectEvents2D()
+		sb.Render2DDefaultStyle()
+		sb.Render2DChildren()
+		sb.PopBounds()
 	} else {
-		g.DisconnectAllEvents(RegPri)
+		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (g *ScrollBar) Render2DDefaultStyle() {
-	st := &g.Sty
-	rs := &g.Viewport.Render
+func (sb *ScrollBar) Render2DDefaultStyle() {
+	st := &sb.Sty
+	rs := &sb.Viewport.Render
 	pc := &rs.Paint
 
 	// overall fill box
-	g.RenderStdBox(&g.StateStyles[SliderBox])
+	sb.RenderStdBox(&sb.StateStyles[SliderBox])
 
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
@@ -782,25 +806,29 @@ func (g *ScrollBar) Render2DDefaultStyle() {
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
-	pos := g.LayData.AllocPos.AddVal(spc)
-	sz := g.LayData.AllocSize.SubVal(2.0 * spc)
+	pos := sb.LayData.AllocPos.AddVal(spc)
+	sz := sb.LayData.AllocSize.SubVal(2.0 * spc)
 
-	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
-	pos.SetAddDim(g.Dim, g.Pos)                     // start of thumb
-	sz.SetDim(g.Dim, g.ThSize)
-	pc.FillStyle.SetColorSpec(&g.StateStyles[SliderValue].Font.BgColor)
-	g.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
+	pos.SetAddDim(sb.Dim, sb.Pos)                    // start of thumb
+	sz.SetDim(sb.Dim, sb.ThSize)
+	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].Font.BgColor)
+	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
-func (g *ScrollBar) FocusChanged2D(change FocusChanges) {
+func (sb *ScrollBar) ConnectEvents2D() {
+	sb.SliderEvents()
+}
+
+func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		g.SetSliderState(SliderActive) // lose any hover state but whatever..
-		g.UpdateSig()
+		sb.SetSliderState(SliderActive) // lose any hover state but whatever..
+		sb.UpdateSig()
 	case FocusGot:
-		g.SetSliderState(SliderFocus)
-		g.EmitFocusedSignal()
-		g.UpdateSig()
+		sb.SetSliderState(SliderFocus)
+		sb.EmitFocusedSignal()
+		sb.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}

@@ -1667,11 +1667,8 @@ func (ly *Layout) LayoutScrollEvents() {
 	})
 }
 
-// LayoutEvents registers events processed by Layout -- most having to do with scrolling.
-func (ly *Layout) LayoutEvents() {
-	if ly.HasAnyScroll() {
-		ly.LayoutScrollEvents()
-	}
+// KeyChordEvent processes (lowpri) layout key events
+func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		li := recv.Embed(KiT_Layout).(*Layout)
@@ -1683,8 +1680,8 @@ func (ly *Layout) LayoutEvents() {
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
-func (g *Layout) AsLayout2D() *Layout {
-	return g
+func (ly *Layout) AsLayout2D() *Layout {
+	return ly
 }
 
 func (ly *Layout) Init2D() {
@@ -1785,7 +1782,7 @@ func (ly *Layout) Render2D() {
 		return
 	}
 	if ly.PushBounds() {
-		ly.LayoutEvents()
+		ly.This.(Node2D).ConnectEvents2D()
 		ly.RenderScrolls()
 		ly.Render2DChildren()
 		ly.PopBounds()
@@ -1794,11 +1791,18 @@ func (ly *Layout) Render2D() {
 	}
 }
 
-func (g *Layout) HasFocus2D() bool {
-	if g.IsInactive() {
+func (ly *Layout) ConnectEvents2D() {
+	if ly.HasAnyScroll() {
+		ly.LayoutScrollEvents()
+	}
+	ly.KeyChordEvent()
+}
+
+func (ly *Layout) HasFocus2D() bool {
+	if ly.IsInactive() {
 		return false
 	}
-	return g.ContainsFocus() // needed for getting key events
+	return ly.ContainsFocus() // needed for getting key events
 }
 
 ///////////////////////////////////////////////////////////
@@ -1818,13 +1822,13 @@ var StretchProps = ki.Props{
 	"max-height": -1.0,
 }
 
-func (g *Stretch) Style2D() {
-	g.Style2DWidget()
+func (st *Stretch) Style2D() {
+	st.Style2DWidget()
 }
 
-func (g *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.Layout2DBase(parBBox, true, iter) // init style
-	return g.Layout2DChildren(iter)
+func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
+	st.Layout2DBase(parBBox, true, iter) // init style
+	return st.Layout2DChildren(iter)
 }
 
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
@@ -1840,11 +1844,11 @@ var SpaceProps = ki.Props{
 	"height": units.NewValue(1, units.Em),
 }
 
-func (g *Space) Style2D() {
-	g.Style2DWidget()
+func (sp *Space) Style2D() {
+	sp.Style2DWidget()
 }
 
-func (g *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.Layout2DBase(parBBox, true, iter) // init style
-	return g.Layout2DChildren(iter)
+func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
+	sp.Layout2DBase(parBBox, true, iter) // init style
+	return sp.Layout2DChildren(iter)
 }

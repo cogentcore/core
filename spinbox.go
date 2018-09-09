@@ -71,66 +71,66 @@ var SpinBoxProps = ki.Props{
 	},
 }
 
-func (g *SpinBox) Defaults() { // todo: should just get these from props
-	g.Step = 0.1
-	g.PageStep = 0.2
-	g.Max = 1.0
-	g.Prec = 6
+func (sb *SpinBox) Defaults() { // todo: should just get these from props
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 6
 }
 
 // SetMin sets the min limits on the value
-func (g *SpinBox) SetMin(min float32) {
-	g.HasMin = true
-	g.Min = min
+func (sb *SpinBox) SetMin(min float32) {
+	sb.HasMin = true
+	sb.Min = min
 }
 
 // SetMax sets the max limits on the value
-func (g *SpinBox) SetMax(max float32) {
-	g.HasMax = true
-	g.Max = max
+func (sb *SpinBox) SetMax(max float32) {
+	sb.HasMax = true
+	sb.Max = max
 }
 
 // SetMinMax sets the min and max limits on the value
-func (g *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) {
-	g.HasMin = hasMin
-	g.Min = min
-	g.HasMax = hasMax
-	g.Max = max
-	if g.Max < g.Min {
+func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) {
+	sb.HasMin = hasMin
+	sb.Min = min
+	sb.HasMax = hasMax
+	sb.Max = max
+	if sb.Max < sb.Min {
 		log.Printf("gi.SpinBox SetMinMax: max was less than min -- disabling limits\n")
-		g.HasMax = false
-		g.HasMin = false
+		sb.HasMax = false
+		sb.HasMin = false
 	}
 }
 
 // SetValue sets the value, enforcing any limits, and updates the display
-func (g *SpinBox) SetValue(val float32) {
-	updt := g.UpdateStart()
-	defer g.UpdateEnd(updt)
-	if g.Prec == 0 {
-		g.Defaults()
+func (sb *SpinBox) SetValue(val float32) {
+	updt := sb.UpdateStart()
+	defer sb.UpdateEnd(updt)
+	if sb.Prec == 0 {
+		sb.Defaults()
 	}
-	g.Value = val
-	if g.HasMax {
-		g.Value = Min32(g.Value, g.Max)
+	sb.Value = val
+	if sb.HasMax {
+		sb.Value = Min32(sb.Value, sb.Max)
 	}
-	if g.HasMin {
-		g.Value = Max32(g.Value, g.Min)
+	if sb.HasMin {
+		sb.Value = Max32(sb.Value, sb.Min)
 	}
-	g.Value = Truncate32(g.Value, g.Prec)
+	sb.Value = Truncate32(sb.Value, sb.Prec)
 }
 
 // SetValueAction calls SetValue and also emits the signal
-func (g *SpinBox) SetValueAction(val float32) {
-	g.SetValue(val)
-	g.SpinBoxSig.Emit(g.This, 0, g.Value)
+func (sb *SpinBox) SetValueAction(val float32) {
+	sb.SetValue(val)
+	sb.SpinBoxSig.Emit(sb.This, 0, sb.Value)
 }
 
 // IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
-func (g *SpinBox) IncrValue(steps float32) {
-	val := g.Value + steps*g.Step
-	val = FloatMod32(val, g.Step)
-	g.SetValueAction(val)
+func (sb *SpinBox) IncrValue(steps float32) {
+	val := sb.Value + steps*sb.Step
+	val = FloatMod32(val, sb.Step)
+	sb.SetValueAction(val)
 }
 
 // internal indexes for accessing elements of the widget
@@ -140,61 +140,61 @@ const (
 	sbButtonsIdx
 )
 
-func (g *SpinBox) ConfigParts() {
-	if g.UpIcon.IsNil() {
-		g.UpIcon = IconName("widget-wedge-up")
+func (sb *SpinBox) ConfigParts() {
+	if sb.UpIcon.IsNil() {
+		sb.UpIcon = IconName("widget-wedge-up")
 	}
-	if g.DownIcon.IsNil() {
-		g.DownIcon = IconName("widget-wedge-down")
+	if sb.DownIcon.IsNil() {
+		sb.DownIcon = IconName("widget-wedge-down")
 	}
-	g.Parts.Lay = LayoutHoriz
-	g.Parts.SetProp("vertical-align", AlignMiddle)
+	sb.Parts.Lay = LayoutHoriz
+	sb.Parts.SetProp("vertical-align", AlignMiddle)
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
 	config.Add(KiT_Space, "space")
 	config.Add(KiT_Layout, "buttons")
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
 	if mods || RebuildDefaultStyles {
-		buts := g.Parts.KnownChild(sbButtonsIdx).(*Layout)
+		buts := sb.Parts.KnownChild(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutVert
-		g.StylePart(Node2D(buts))
+		sb.StylePart(Node2D(buts))
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
 		up := buts.KnownChild(0).(*Action)
 		up.SetName("up")
 		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
 		// not compiled into style prop
-		bitflag.SetState(up.Flags(), g.IsInactive(), int(Inactive))
-		up.Icon = g.UpIcon
-		g.StylePart(Node2D(up))
-		if !g.IsInactive() {
-			up.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		bitflag.SetState(up.Flags(), sb.IsInactive(), int(Inactive))
+		up.Icon = sb.UpIcon
+		sb.StylePart(Node2D(up))
+		if !sb.IsInactive() {
+			up.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(1.0)
 			})
 		}
 		// dn
 		dn := buts.KnownChild(1).(*Action)
-		bitflag.SetState(dn.Flags(), g.IsInactive(), int(Inactive))
+		bitflag.SetState(dn.Flags(), sb.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.SetProp("no-focus", true)
-		dn.Icon = g.DownIcon
-		g.StylePart(Node2D(dn))
-		if !g.IsInactive() {
-			dn.ActionSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		dn.Icon = sb.DownIcon
+		sb.StylePart(Node2D(dn))
+		if !sb.IsInactive() {
+			dn.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sb.IncrValue(-1.0)
 			})
 		}
 		// space
-		g.StylePart(g.Parts.KnownChild(sbSpaceIdx).(Node2D)) // also get the space
+		sb.StylePart(sb.Parts.KnownChild(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
-		tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-		bitflag.SetState(tf.Flags(), g.IsInactive(), int(Inactive))
-		g.StylePart(Node2D(tf))
-		tf.Txt = fmt.Sprintf("%g", g.Value)
-		if !g.IsInactive() {
-			tf.TextFieldSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+		bitflag.SetState(tf.Flags(), sb.IsInactive(), int(Inactive))
+		sb.StylePart(Node2D(tf))
+		tf.Txt = fmt.Sprintf("%g", sb.Value)
+		if !sb.IsInactive() {
+			tf.TextFieldSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) {
 					sb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
@@ -205,87 +205,100 @@ func (g *SpinBox) ConfigParts() {
 				}
 			})
 		}
-		g.UpdateEnd(updt)
+		sb.UpdateEnd(updt)
 	}
 }
 
-func (g *SpinBox) ConfigPartsIfNeeded() {
-	if !g.Parts.HasChildren() {
-		g.ConfigParts()
+func (sb *SpinBox) ConfigPartsIfNeeded() {
+	if !sb.Parts.HasChildren() {
+		sb.ConfigParts()
 	}
-	tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-	txt := fmt.Sprintf("%g", g.Value)
+	tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+	txt := fmt.Sprintf("%g", sb.Value)
 	if tf.Txt != txt {
 		tf.SetText(txt)
 	}
 }
 
-func (g *SpinBox) SpinBoxEvents() {
-	g.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
-		if sb.IsInactive() || !sb.HasFocus2D() {
+func (sb *SpinBox) MouseScrollEvent() {
+	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+		if sbb.IsInactive() || !sbb.HasFocus2D() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
-		sb.IncrValue(float32(me.NonZeroDelta(false)))
+		sbb.IncrValue(float32(me.NonZeroDelta(false)))
 	})
-	tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-	tf.WidgetSig.ConnectOnly(g.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		sb := recv.Embed(KiT_SpinBox).(*SpinBox)
+}
+
+func (sb *SpinBox) TextFieldEvent() {
+	tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+	tf.WidgetSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
-			sb.SetSelectedState(!sb.IsSelected())
+			sbb.SetSelectedState(!sbb.IsSelected())
 		}
-		sb.WidgetSig.Emit(sb.This, sig, data) // passthrough
+		sbb.WidgetSig.Emit(sbb.This, sig, data) // passthrough
 	})
 }
 
-func (g *SpinBox) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
+func (sb *SpinBox) SpinBoxEvents() {
+	sb.HoverTooltipEvent()
+	sb.MouseScrollEvent()
+	sb.TextFieldEvent()
 }
 
-func (g *SpinBox) Style2D() {
-	if g.Step == 0 {
-		g.Defaults()
+func (sb *SpinBox) Init2D() {
+	sb.Init2DWidget()
+	sb.ConfigParts()
+}
+
+func (sb *SpinBox) Style2D() {
+	if sb.Step == 0 {
+		sb.Defaults()
 	}
-	g.Style2DWidget()
-	g.ConfigParts()
+	sb.Style2DWidget()
+	sb.ConfigParts()
 }
 
-func (g *SpinBox) Size2D(iter int) {
-	g.Size2DParts(iter)
-	g.ConfigParts()
+func (sb *SpinBox) Size2D(iter int) {
+	sb.Size2DParts(iter)
+	sb.ConfigParts()
 }
 
-func (g *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.ConfigPartsIfNeeded()
-	g.Layout2DBase(parBBox, true, iter) // init style
-	g.Layout2DParts(parBBox, iter)
-	return g.Layout2DChildren(iter)
+func (sb *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
+	sb.ConfigPartsIfNeeded()
+	sb.Layout2DBase(parBBox, true, iter) // init style
+	sb.Layout2DParts(parBBox, iter)
+	return sb.Layout2DChildren(iter)
 }
 
-func (g *SpinBox) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (sb *SpinBox) Render2D() {
+	if sb.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		g.SpinBoxEvents()
-		// g.Sty = g.StateStyles[g.State] // get current styles
-		tf := g.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-		tf.SetSelectedState(g.IsSelected())
-		g.ConfigPartsIfNeeded()
-		g.Render2DChildren()
-		g.Render2DParts()
-		g.PopBounds()
+	if sb.PushBounds() {
+		sb.This.(Node2D).ConnectEvents2D()
+		// sb.Sty = sb.StateStyles[sb.State] // get current styles
+		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+		tf.SetSelectedState(sb.IsSelected())
+		sb.ConfigPartsIfNeeded()
+		sb.Render2DChildren()
+		sb.Render2DParts()
+		sb.PopBounds()
 	} else {
-		g.DisconnectAllEvents(RegPri)
+		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (g *SpinBox) HasFocus2D() bool {
-	if g.IsInactive() {
+func (sb *SpinBox) ConnectEvents2D() {
+	sb.SpinBoxEvents()
+}
+
+func (sb *SpinBox) HasFocus2D() bool {
+	if sb.IsInactive() {
 		return false
 	}
-	return g.ContainsFocus() // needed for getting key events
+	return sb.ContainsFocus() // needed for getting key events
 }

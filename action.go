@@ -150,140 +150,140 @@ var ActionProps = ki.Props{
 
 // ButtonWidget interface
 
-func (g *Action) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
+func (ac *Action) ButtonAsBase() *ButtonBase {
+	return &(ac.ButtonBase)
 }
 
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
-func (g *Action) Trigger() {
-	if g.IsInactive() {
+func (ac *Action) Trigger() {
+	if ac.IsInactive() {
 		return
 	}
-	g.ActionSig.Emit(g.This, 0, g.Data)
+	ac.ActionSig.Emit(ac.This, 0, ac.Data)
 }
 
 // trigger action signal
-func (g *Action) ButtonRelease() {
-	if g.IsInactive() {
+func (ac *Action) ButtonRelease() {
+	if ac.IsInactive() {
 		return
 	}
-	wasPressed := (g.State == ButtonDown)
-	updt := g.UpdateStart()
-	g.SetButtonState(ButtonActive)
-	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	wasPressed := (ac.State == ButtonDown)
+	updt := ac.UpdateStart()
+	ac.SetButtonState(ButtonActive)
+	ac.ButtonSig.Emit(ac.This, int64(ButtonReleased), nil)
 	menOpen := false
 	if wasPressed {
-		g.ActionSig.Emit(g.This, 0, g.Data)
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), g.Data)
-		menOpen = g.OpenMenu()
+		ac.ActionSig.Emit(ac.This, 0, ac.Data)
+		ac.ButtonSig.Emit(ac.This, int64(ButtonClicked), ac.Data)
+		menOpen = ac.OpenMenu()
 	}
-	if !menOpen && g.IsMenu() && g.Viewport != nil {
-		win := g.Viewport.Win
+	if !menOpen && ac.IsMenu() && ac.Viewport != nil {
+		win := ac.Viewport.Win
 		if win != nil {
-			win.ClosePopup(g.Viewport) // in case we are a menu popup -- no harm if not
+			win.ClosePopup(ac.Viewport) // in case we are a menu popup -- no harm if not
 		}
 	}
-	g.UpdateEnd(updt)
+	ac.UpdateEnd(updt)
 }
 
-func (g *Action) Init2D() {
-	g.Init2DWidget()
-	g.ConfigParts()
+func (ac *Action) Init2D() {
+	ac.Init2DWidget()
+	ac.ConfigParts()
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
-func (g *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
+func (ac *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
 	config.Add(KiT_Stretch, "sc-stretch")
 	scIdx := len(*config)
 	config.Add(KiT_Label, "shortcut")
 	return scIdx
 }
 
-func (g *Action) ConfigPartsShortcut(scIdx int) {
+func (ac *Action) ConfigPartsShortcut(scIdx int) {
 	if scIdx < 0 {
 		return
 	}
-	sc := g.Parts.KnownChild(scIdx).(*Label)
-	sclbl := g.Shortcut.Shortcut()
+	sc := ac.Parts.KnownChild(scIdx).(*Label)
+	sclbl := ac.Shortcut.Shortcut()
 	if sc.Text != sclbl {
 		sc.Text = sclbl
-		g.StylePart(Node2D(sc))
-		g.StylePart(g.Parts.KnownChild(scIdx - 1).(Node2D)) // also get the stretch
+		ac.StylePart(Node2D(sc))
+		ac.StylePart(ac.Parts.KnownChild(scIdx - 1).(Node2D)) // also get the stretch
 	}
 }
 
-func (g *Action) ConfigPartsButton() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
-	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
-	g.ConfigPartsIndicator(indIdx)
-	if g.Tooltip == "" {
-		if g.Shortcut != "" {
-			g.Tooltip = fmt.Sprintf("Shortcut: %v", g.Shortcut)
+func (ac *Action) ConfigPartsButton() {
+	config, icIdx, lbIdx := ac.ConfigPartsIconLabel(string(ac.Icon), ac.Text)
+	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
+	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
+	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsIndicator(indIdx)
+	if ac.Tooltip == "" {
+		if ac.Shortcut != "" {
+			ac.Tooltip = fmt.Sprintf("Shortcut: %v", ac.Shortcut)
 		}
 	}
 	if mods {
-		g.UpdateEnd(updt)
+		ac.UpdateEnd(updt)
 	}
 }
 
-func (g *Action) ConfigPartsMenuItem() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
-	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
+func (ac *Action) ConfigPartsMenuItem() {
+	config, icIdx, lbIdx := ac.ConfigPartsIconLabel(string(ac.Icon), ac.Text)
+	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
-	if indIdx < 0 && g.Shortcut != "" {
-		scIdx = g.ConfigPartsAddShortcut(&config)
-	} else if g.Shortcut != "" {
-		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", g.Text)
+	if indIdx < 0 && ac.Shortcut != "" {
+		scIdx = ac.ConfigPartsAddShortcut(&config)
+	} else if ac.Shortcut != "" {
+		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", ac.Text)
 	}
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
 	}
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
-	g.ConfigPartsIndicator(indIdx)
-	g.ConfigPartsShortcut(scIdx)
+	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsIndicator(indIdx)
+	ac.ConfigPartsShortcut(scIdx)
 	if mods {
-		g.UpdateEnd(updt)
+		ac.UpdateEnd(updt)
 	}
 }
 
-func (g *Action) ConfigParts() {
+func (ac *Action) ConfigParts() {
 	ismbar := false
 	istbar := false
-	if g.Par != nil {
-		_, ismbar = g.Par.(*MenuBar)
-		_, istbar = g.Par.(*ToolBar)
+	if ac.Par != nil {
+		_, ismbar = ac.Par.(*MenuBar)
+		_, istbar = ac.Par.(*ToolBar)
 	}
 	switch {
 	case ismbar:
-		g.Indicator = "none" // menu-bar specifically
+		ac.Indicator = "none" // menu-bar specifically
 		fallthrough
 	case istbar:
-		if g.Class == "" {
-			g.Class = "bar-action"
+		if ac.Class == "" {
+			ac.Class = "bar-action"
 		}
-		g.ConfigPartsButton()
-	case g.IsMenu():
-		if g.Class == "" {
-			g.Class = "menu-action"
+		ac.ConfigPartsButton()
+	case ac.IsMenu():
+		if ac.Class == "" {
+			ac.Class = "menu-action"
 		}
-		if g.Indicator == "" {
-			g.Indicator = "widget-wedge-right"
+		if ac.Indicator == "" {
+			ac.Indicator = "widget-wedge-right"
 		}
-		g.ConfigPartsMenuItem()
+		ac.ConfigPartsMenuItem()
 	default:
-		g.ConfigPartsButton()
+		ac.ConfigPartsButton()
 	}
 }
 
 // UpdateActions calls UpdateFunc on me and any of my menu items
-func (g *Action) UpdateActions() {
-	if g.UpdateFunc != nil {
-		g.UpdateFunc(g)
+func (ac *Action) UpdateActions() {
+	if ac.UpdateFunc != nil {
+		ac.UpdateFunc(ac)
 	}
-	if g.Menu != nil {
-		g.Menu.UpdateActions()
+	if ac.Menu != nil {
+		ac.Menu.UpdateActions()
 	}
 }

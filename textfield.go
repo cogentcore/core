@@ -999,8 +999,8 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-// MouseEvent handles the mouse.Event
-func (tf *TextField) MouseEvent(me *mouse.Event) {
+// HandleMouseEvent handles the mouse.Event
+func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	if !tf.IsInactive() && !tf.HasFocus() {
 		tf.GrabFocus()
 	}
@@ -1044,8 +1044,7 @@ func (tf *TextField) MouseEvent(me *mouse.Event) {
 	}
 }
 
-func (tf *TextField) TextFieldEvents() {
-	tf.HoverTooltipEvent()
+func (tf *TextField) MouseDragEvent() {
 	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
@@ -1056,11 +1055,17 @@ func (tf *TextField) TextFieldEvents() {
 		pt := tff.PointToRelPos(me.Pos())
 		tff.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
 	})
+}
+
+func (tf *TextField) MouseEvent() {
 	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
-		tff.MouseEvent(me)
+		tff.HandleMouseEvent(me)
 	})
+}
+
+func (tf *TextField) MouseFocusEvent() {
 	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		if tff.IsInactive() {
@@ -1074,6 +1079,9 @@ func (tf *TextField) TextFieldEvents() {
 			oswin.TheApp.Cursor().PopIf(cursor.IBeam)
 		}
 	})
+}
+
+func (tf *TextField) KeyChordEvent() {
 	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		kt := d.(*key.ChordEvent)
@@ -1087,6 +1095,14 @@ func (tf *TextField) TextFieldEvents() {
 			}
 		})
 	}
+}
+
+func (tf *TextField) TextFieldEvents() {
+	tf.HoverTooltipEvent()
+	tf.MouseDragEvent()
+	tf.MouseEvent()
+	tf.MouseFocusEvent()
+	tf.KeyChordEvent()
 }
 
 ////////////////////////////////////////////////////
@@ -1155,7 +1171,7 @@ func (tf *TextField) Render2D() {
 		return
 	}
 	if tf.PushBounds() {
-		tf.TextFieldEvents()
+		tf.This.(Node2D).ConnectEvents2D()
 		tf.AutoScroll() // inits paint with our style
 		if tf.IsInactive() {
 			if tf.IsSelected() {
@@ -1202,6 +1218,10 @@ func (tf *TextField) Render2D() {
 	}
 }
 
+func (tf *TextField) ConnectEvents2D() {
+	tf.TextFieldEvents()
+}
+
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
@@ -1211,7 +1231,7 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusGot:
 		tf.FocusActive = true
 		tf.ScrollToMe()
-		tf.CursorEnd()
+		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
 	case FocusInactive:

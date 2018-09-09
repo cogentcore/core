@@ -116,185 +116,137 @@ func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJ
 var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version
-func (g *Label) SetText(txt string) {
-	g.Text = txt
-	if g.Text == "" {
-		g.Render.SetHTML(" ", &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
+func (lb *Label) SetText(txt string) {
+	lb.Text = txt
+	if lb.Text == "" {
+		lb.Render.SetHTML(" ", &lb.Sty.Font, &lb.Sty.UnContext, lb.CSSAgg)
 	} else {
-		g.Render.SetHTML(g.Text, &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
+		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.UnContext, lb.CSSAgg)
 	}
-	spc := g.Sty.BoxSpace()
-	sz := g.LayData.AllocSize
+	spc := lb.Sty.BoxSpace()
+	sz := lb.LayData.AllocSize
 	if sz.IsZero() {
-		sz = g.LayData.SizePrefOrMax()
+		sz = lb.LayData.SizePrefOrMax()
 	}
 	if !sz.IsZero() {
 		sz.SetSubVal(2 * spc)
 	}
-	g.Render.LayoutStdLR(&g.Sty.Text, &g.Sty.Font, &g.Sty.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
-func (g *Label) Label() string {
-	if g.Text != "" {
-		return g.Text
+func (lb *Label) Label() string {
+	if lb.Text != "" {
+		return lb.Text
 	}
-	return g.Nm
+	return lb.Nm
 }
 
 // SetTextAction sets the text and triggers an update action
-func (g *Label) SetTextAction(txt string) {
-	g.SetText(txt)
-	g.UpdateSig()
+func (lb *Label) SetTextAction(txt string) {
+	lb.SetText(txt)
+	lb.UpdateSig()
 }
 
 // SetStateStyle sets the style based on the inactive, selected flags
-func (g *Label) SetStateStyle() {
-	if g.IsInactive() {
-		g.Sty = g.StateStyles[LabelInactive]
-		if g.Redrawable && !g.CurBgColor.IsNil() {
-			g.Sty.Font.BgColor.SetColor(g.CurBgColor)
+func (lb *Label) SetStateStyle() {
+	if lb.IsInactive() {
+		lb.Sty = lb.StateStyles[LabelInactive]
+		if lb.Redrawable && !lb.CurBgColor.IsNil() {
+			lb.Sty.Font.BgColor.SetColor(lb.CurBgColor)
 		}
-	} else if g.IsSelected() {
-		g.Sty = g.StateStyles[LabelSelected]
+	} else if lb.IsSelected() {
+		lb.Sty = lb.StateStyles[LabelSelected]
 	} else {
-		g.Sty = g.StateStyles[LabelActive]
-		if (g.Selectable || g.Redrawable) && !g.CurBgColor.IsNil() {
-			g.Sty.Font.BgColor.SetColor(g.CurBgColor)
+		lb.Sty = lb.StateStyles[LabelActive]
+		if (lb.Selectable || lb.Redrawable) && !lb.CurBgColor.IsNil() {
+			lb.Sty.Font.BgColor.SetColor(lb.CurBgColor)
 		}
 	}
-}
-
-func (g *Label) Style2D() {
-	g.Style2DWidget()
-	if g.Sty.Text.Align != AlignLeft && g.Sty.Layout.AlignH == AlignLeft {
-		g.Sty.Layout.AlignH = g.Sty.Text.Align // keep them consistent -- this is what people expect
-	} else if g.Sty.Layout.AlignH != AlignLeft && g.Sty.Text.Align == AlignLeft {
-		g.Sty.Text.Align = g.Sty.Layout.AlignH // keep them consistent -- this is what people expect
-	}
-	pst := g.ParentStyle()
-	for i := 0; i < int(LabelStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Sty)
-		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(LabelSelectors[i]))
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
-	}
-	g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-	spc := g.Sty.BoxSpace()
-	sz := g.LayData.SizePrefOrMax()
-	if !sz.IsZero() {
-		sz.SetSubVal(2 * spc)
-	}
-	g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
-}
-
-func (g *Label) Size2D(iter int) {
-	if iter > 0 && g.Sty.Text.WordWrap {
-		return // already updated in previous iter, don't redo!
-	} else {
-		g.InitLayout2D()
-		g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
-	}
-}
-
-func (g *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.Layout2DBase(parBBox, true, iter)
-	g.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
-	sz := g.Size2DSubSpace()
-	if g.Sty.Text.WordWrap {
-		g.Render.SetHTML(g.Text, &(g.Sty.Font), &(g.Sty.UnContext), g.CSSAgg)
-		g.Render.LayoutStdLR(&(g.Sty.Text), &(g.Sty.Font), &(g.Sty.UnContext), sz)
-		if g.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", g.Nm, g.Render.Size.Y, sz.Y)
-			g.LayData.SetFromStyle(&g.Sty.Layout)
-			g.Size2DFromWH(g.Render.Size.X, g.Render.Size.Y)
-			return true // needs a redo!
-		}
-	}
-	return false
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by opening in user's default browser (see oswin/App.OpenURL()
 // method for more info)
-func (g *Label) OpenLink(tl *TextLink) {
-	if len(g.LinkSig.Cons) == 0 {
+func (lb *Label) OpenLink(tl *TextLink) {
+	if len(lb.LinkSig.Cons) == 0 {
 		oswin.TheApp.OpenURL(tl.URL)
 		return
 	}
-	g.LinkSig.Emit(g.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	lb.LinkSig.Emit(lb.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-func (g *Label) LabelHoverEvent() {
-	g.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (lb *Label) HoverEvent() {
+	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
-		lb := recv.Embed(KiT_Label).(*Label)
+		llb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
-			pos := g.RenderPos
-			for ti, _ := range lb.Render.Links {
-				tl := &lb.Render.Links[ti]
-				tlb := tl.Bounds(&lb.Render, pos)
+			pos := llb.RenderPos
+			for ti, _ := range llb.Render.Links {
+				tl := &llb.Render.Links[ti]
+				tlb := tl.Bounds(&llb.Render, pos)
 				if me.Where.In(tlb) {
-					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, g.Viewport, lb.Nm)
+					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Viewport, llb.Nm)
 					me.SetProcessed()
 					return
 				}
 			}
 		}
-		if lb.Tooltip != "" {
+		if llb.Tooltip != "" {
 			me.SetProcessed()
-			pos := lb.WinBBox.Max
+			pos := llb.WinBBox.Max
 			pos.X -= 20
-			PopupTooltip(lb.Tooltip, pos.X, pos.Y, g.Viewport, lb.Nm)
+			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Viewport, llb.Nm)
 		}
 	})
 }
 
-func (g *Label) LabelMouseEvent() {
-	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+func (lb *Label) MouseEvent() {
+	lb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		lb := recv.Embed(KiT_Label).(*Label)
-		hasLinks := len(lb.Render.Links) > 0
-		pos := g.RenderPos
-		if lb.Selectable || hasLinks {
+		llb := recv.Embed(KiT_Label).(*Label)
+		hasLinks := len(llb.Render.Links) > 0
+		pos := llb.RenderPos
+		if llb.Selectable || hasLinks {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				if hasLinks {
-					for ti, _ := range lb.Render.Links {
-						tl := &lb.Render.Links[ti]
-						tlb := tl.Bounds(&lb.Render, pos)
+					for ti, _ := range llb.Render.Links {
+						tl := &llb.Render.Links[ti]
+						tlb := tl.Bounds(&llb.Render, pos)
 						if me.Where.In(tlb) {
-							lb.OpenLink(tl)
+							llb.OpenLink(tl)
 							me.SetProcessed()
 							return
 						}
 					}
 				}
-				if lb.Selectable {
-					lb.SetSelectedState(!lb.IsSelected())
-					lb.EmitSelectedSignal()
-					lb.UpdateSig()
+				if llb.Selectable {
+					llb.SetSelectedState(!llb.IsSelected())
+					llb.EmitSelectedSignal()
+					llb.UpdateSig()
 				}
 			}
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
-			lb.EmitContextMenuSignal()
-			lb.This.(Node2D).ContextMenu()
+			llb.EmitContextMenuSignal()
+			llb.This.(Node2D).ContextMenu()
 		}
 	})
 }
 
-func (g *Label) LabelMouseMoveEvent() {
-	hasLinks := len(g.Render.Links) > 0
+func (lb *Label) MouseMoveEvent() {
+	hasLinks := len(lb.Render.Links) > 0
 	if hasLinks {
-		g.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			me := d.(*mouse.MoveEvent)
 			me.SetProcessed()
-			lb := recv.Embed(KiT_Label).(*Label)
-			pos := g.RenderPos
+			llb := recv.Embed(KiT_Label).(*Label)
+			pos := llb.RenderPos
 			inLink := false
-			for _, tl := range lb.Render.Links {
-				tlb := tl.Bounds(&lb.Render, pos)
+			for _, tl := range llb.Render.Links {
+				tlb := tl.Bounds(&llb.Render, pos)
 				if me.Where.In(tlb) {
 					inLink = true
 				}
@@ -308,60 +260,112 @@ func (g *Label) LabelMouseMoveEvent() {
 	}
 }
 
-func (g *Label) ConnectEvents2D() {
-	g.LabelHoverEvent()
-	g.LabelMouseEvent()
-	g.LabelMouseMoveEvent()
+func (lb *Label) LabelEvents() {
+	lb.HoverEvent()
+	lb.MouseEvent()
+	lb.MouseMoveEvent()
 }
 
-func (g *Label) GrabCurBgColor() {
-	if g.Viewport == nil || g.IsSelected() {
+func (lb *Label) GrabCurBgColor() {
+	if lb.Viewport == nil || lb.IsSelected() {
 		return
 	}
-	if !RebuildDefaultStyles && !g.CurBgColor.IsNil() {
+	if !RebuildDefaultStyles && !lb.CurBgColor.IsNil() {
 		return
 	}
-	pos := g.ContextMenuPos()
-	clr := g.Viewport.Pixels.At(pos.X, pos.Y)
-	g.CurBgColor.SetColor(clr)
+	pos := lb.ContextMenuPos()
+	clr := lb.Viewport.Pixels.At(pos.X, pos.Y)
+	lb.CurBgColor.SetColor(clr)
 }
 
-func (g *Label) TextPos() Vec2D {
-	st := &g.Sty
-	pos := g.LayData.AllocPos.AddVal(st.BoxSpace())
-	if g.LayData.AllocSize.X > g.Render.Size.X {
+func (lb *Label) TextPos() Vec2D {
+	st := &lb.Sty
+	pos := lb.LayData.AllocPos.AddVal(st.BoxSpace())
+	if lb.LayData.AllocSize.X > lb.Render.Size.X {
 		if IsAlignMiddle(st.Layout.AlignH) {
-			pos.X += 0.5 * (g.LayData.AllocSize.X - g.Render.Size.X)
+			pos.X += 0.5 * (lb.LayData.AllocSize.X - lb.Render.Size.X)
 		} else if IsAlignEnd(st.Layout.AlignH) {
-			pos.X += (g.LayData.AllocSize.X - g.Render.Size.X)
+			pos.X += (lb.LayData.AllocSize.X - lb.Render.Size.X)
 		}
 	}
-	if g.LayData.AllocSize.Y > g.Render.Size.Y {
+	if lb.LayData.AllocSize.Y > lb.Render.Size.Y {
 		if IsAlignMiddle(st.Layout.AlignV) {
-			pos.Y += 0.5 * (g.LayData.AllocSize.Y - g.Render.Size.Y)
+			pos.Y += 0.5 * (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
 		} else if IsAlignEnd(st.Layout.AlignV) {
-			pos.Y += (g.LayData.AllocSize.Y - g.Render.Size.Y)
+			pos.Y += (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
 		}
 	}
 	return pos
 }
 
-func (g *Label) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (lb *Label) Style2D() {
+	lb.Style2DWidget()
+	if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
+		lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
+	} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {
+		lb.Sty.Text.Align = lb.Sty.Layout.AlignH // keep them consistent -- this is what people expect
+	}
+	pst := lb.ParentStyle()
+	for i := 0; i < int(LabelStatesN); i++ {
+		lb.StateStyles[i].CopyFrom(&lb.Sty)
+		lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]))
+		lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
+	}
+	lb.Render.SetHTML(lb.Text, &(lb.Sty.Font), &(lb.Sty.UnContext), lb.CSSAgg)
+	spc := lb.Sty.BoxSpace()
+	sz := lb.LayData.SizePrefOrMax()
+	if !sz.IsZero() {
+		sz.SetSubVal(2 * spc)
+	}
+	lb.Render.LayoutStdLR(&(lb.Sty.Text), &(lb.Sty.Font), &(lb.Sty.UnContext), sz)
+}
+
+func (lb *Label) Size2D(iter int) {
+	if iter > 0 && lb.Sty.Text.WordWrap {
+		return // already updated in previous iter, don't redo!
+	} else {
+		lb.InitLayout2D()
+		lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
+	}
+}
+
+func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
+	lb.Layout2DBase(parBBox, true, iter)
+	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
+	sz := lb.Size2DSubSpace()
+	if lb.Sty.Text.WordWrap {
+		lb.Render.SetHTML(lb.Text, &(lb.Sty.Font), &(lb.Sty.UnContext), lb.CSSAgg)
+		lb.Render.LayoutStdLR(&(lb.Sty.Text), &(lb.Sty.Font), &(lb.Sty.UnContext), sz)
+		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
+			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", lb.Nm, lb.Render.Size.Y, sz.Y)
+			lb.LayData.SetFromStyle(&lb.Sty.Layout)
+			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
+			return true // needs a redo!
+		}
+	}
+	return false
+}
+
+func (lb *Label) Render2D() {
+	if lb.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		g.This.(Node2D).ConnectEvents2D()
-		g.GrabCurBgColor()
-		g.SetStateStyle()
-		st := &g.Sty
-		rs := &g.Viewport.Render
-		g.RenderPos = g.TextPos()
-		g.RenderStdBox(st)
-		g.Render.Render(rs, g.RenderPos)
-		g.Render2DChildren()
-		g.PopBounds()
+	if lb.PushBounds() {
+		lb.This.(Node2D).ConnectEvents2D()
+		lb.GrabCurBgColor()
+		lb.SetStateStyle()
+		st := &lb.Sty
+		rs := &lb.Viewport.Render
+		lb.RenderPos = lb.TextPos()
+		lb.RenderStdBox(st)
+		lb.Render.Render(rs, lb.RenderPos)
+		lb.Render2DChildren()
+		lb.PopBounds()
 	} else {
-		g.DisconnectAllEvents(RegPri)
+		lb.DisconnectAllEvents(RegPri)
 	}
+}
+
+func (lb *Label) ConnectEvents2D() {
+	lb.LabelEvents()
 }

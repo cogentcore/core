@@ -80,7 +80,7 @@ func (mb *MenuBar) Render2D() {
 	}
 	if mb.PushBounds() {
 		mb.MenuBarStdRender()
-		mb.LayoutEvents()
+		mb.This.(Node2D).ConnectEvents2D()
 		mb.RenderScrolls()
 		mb.Render2DChildren()
 		mb.PopBounds()
@@ -91,11 +91,11 @@ func (mb *MenuBar) Render2D() {
 
 // UpdateActions calls UpdateFunc on all actions in menu -- individual menus
 // are automatically updated just prior to menu popup
-func (g *MenuBar) UpdateActions() {
-	if g == nil {
+func (mb *MenuBar) UpdateActions() {
+	if mb == nil {
 		return
 	}
-	for _, mi := range g.Kids {
+	for _, mi := range mb.Kids {
 		if mi.TypeEmbeds(KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.UpdateActions()
@@ -305,7 +305,7 @@ func (tb *ToolBar) Render2D() {
 	}
 	if tb.PushBounds() {
 		tb.ToolBarStdRender()
-		tb.ToolBarEvents()
+		tb.This.(Node2D).ConnectEvents2D()
 		tb.RenderScrolls()
 		tb.Render2DChildren()
 		tb.PopBounds()
@@ -314,8 +314,7 @@ func (tb *ToolBar) Render2D() {
 	}
 }
 
-func (tb *ToolBar) ToolBarEvents() {
-	tb.LayoutEvents()
+func (tb *ToolBar) MouseFocusEvent() {
 	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
@@ -324,6 +323,11 @@ func (tb *ToolBar) ToolBarEvents() {
 			// do NOT mark as processed -- HiPri and not mutex
 		}
 	})
+}
+
+func (tb *ToolBar) ConnectEvents2D() {
+	tb.Layout.ConnectEvents2D()
+	tb.MouseFocusEvent()
 }
 
 // UpdateActions calls UpdateFunc on all actions in toolbar -- individual

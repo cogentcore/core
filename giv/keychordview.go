@@ -94,41 +94,35 @@ var KeyChordEditProps = ki.Props{
 	},
 }
 
-// ChordUpdated emeits KeyChordSig when a new chord has been entered
+// ChordUpdated emits KeyChordSig when a new chord has been entered
 func (kc *KeyChordEdit) ChordUpdated() {
 	kc.KeyChordSig.Emit(kc.This, 0, kc.Text)
 }
 
-func (kc *KeyChordEdit) Style2D() {
-	kc.SetCanFocusIfActive()
-	kc.Selectable = true
-	kc.Redrawable = true
-	kc.Label.Style2D()
-}
-
-func (kc *KeyChordEdit) KeyChordEditMouseEvent() {
+func (kc *KeyChordEdit) MouseEvent() {
 	kc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		lb := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {
-			if lb.Selectable {
-				lb.SetSelectedState(!lb.IsSelected())
-				if lb.IsSelected() {
-					lb.GrabFocus()
+			if kcc.Selectable {
+				me.SetProcessed()
+				kcc.SetSelectedState(!kcc.IsSelected())
+				if kcc.IsSelected() {
+					kcc.GrabFocus()
 				}
-				lb.EmitSelectedSignal()
-				lb.UpdateSig()
+				kcc.EmitSelectedSignal()
+				kcc.UpdateSig()
 			}
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
-			lb.EmitContextMenuSignal()
-			lb.This.(gi.Node2D).ContextMenu()
+			kcc.EmitContextMenuSignal()
+			kcc.This.(gi.Node2D).ContextMenu()
 		}
 	})
 }
 
-func (kc *KeyChordEdit) KeyChordEditKeyChordEvent() {
+func (kc *KeyChordEdit) KeyChordEvent() {
 	kc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
 		if kcc.HasFocus() && kcc.FocusActive {
@@ -140,10 +134,17 @@ func (kc *KeyChordEdit) KeyChordEditKeyChordEvent() {
 	})
 }
 
+func (kc *KeyChordEdit) Style2D() {
+	kc.SetCanFocusIfActive()
+	kc.Selectable = true
+	kc.Redrawable = true
+	kc.Label.Style2D()
+}
+
 func (kc *KeyChordEdit) ConnectEvents2D() {
-	kc.LabelHoverEvent()
-	kc.KeyChordEditMouseEvent()
-	kc.KeyChordEditKeyChordEvent()
+	kc.HoverEvent()
+	kc.MouseEvent()
+	kc.KeyChordEvent()
 }
 
 func (kc *KeyChordEdit) FocusChanged2D(change gi.FocusChanges) {
@@ -165,8 +166,10 @@ func (kc *KeyChordEdit) FocusChanged2D(change gi.FocusChanges) {
 		kc.ChordUpdated()
 		kc.UpdateSig()
 	case gi.FocusActive:
-		kc.SetSelected()
-		kc.FocusActive = true
-		kc.ScrollToMe()
+		// we don't re-activate on keypress here, so that you don't end up stuck
+		// on a given keychord
+		// kc.SetSelected()
+		// kc.FocusActive = true
+		// kc.ScrollToMe()
 	}
 }

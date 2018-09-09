@@ -299,6 +299,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			ac.Icon = gi.IconName(kit.ToString(pv))
 		case "desc":
 			md.Desc = kit.ToString(pv)
+			ac.Tooltip = md.Desc
 		case "confirm":
 			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewConfirm))
 		case "show-return":

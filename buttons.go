@@ -121,188 +121,197 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 
 // IsCheckable returns if is this button checkable -- the Checked state is
 // independent of the generic widget selection state
-func (g *ButtonBase) IsCheckable() bool {
-	return bitflag.Has(g.Flag, int(ButtonFlagCheckable))
+func (bb *ButtonBase) IsCheckable() bool {
+	return bitflag.Has(bb.Flag, int(ButtonFlagCheckable))
 }
 
 // SetCheckable sets whether this button is checkable -- emits ButtonToggled
 // signals if so -- the Checked state is independent of the generic widget
 // selection state
-func (g *ButtonBase) SetCheckable(checkable bool) {
-	bitflag.SetState(&g.Flag, checkable, int(ButtonFlagCheckable))
+func (bb *ButtonBase) SetCheckable(checkable bool) {
+	bitflag.SetState(&bb.Flag, checkable, int(ButtonFlagCheckable))
 }
 
 // IsChecked checks if button is checked
-func (g *ButtonBase) IsChecked() bool {
-	return bitflag.Has(g.Flag, int(ButtonFlagChecked))
+func (bb *ButtonBase) IsChecked() bool {
+	return bitflag.Has(bb.Flag, int(ButtonFlagChecked))
 }
 
 // SetChecked sets the checked state of this button -- does not emit signal or
 // update
-func (g *ButtonBase) SetChecked(chk bool) {
-	bitflag.SetState(&g.Flag, chk, int(ButtonFlagChecked))
+func (bb *ButtonBase) SetChecked(chk bool) {
+	bitflag.SetState(&bb.Flag, chk, int(ButtonFlagChecked))
 }
 
 // ToggleChecked toggles the checked state of this button -- does not emit
 // signal or update
-func (g *ButtonBase) ToggleChecked() {
-	g.SetChecked(!g.IsChecked())
+func (bb *ButtonBase) ToggleChecked() {
+	bb.SetChecked(!bb.IsChecked())
 }
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
-func (g *ButtonBase) SetAsMenu() {
-	bitflag.Set(&g.Flag, int(ButtonFlagMenu))
+func (bb *ButtonBase) SetAsMenu() {
+	bitflag.Set(&bb.Flag, int(ButtonFlagMenu))
 }
 
 // SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
 // or a menu function then it will still behave as a menu
-func (g *ButtonBase) SetAsButton() {
-	bitflag.Clear(&g.Flag, int(ButtonFlagMenu))
+func (bb *ButtonBase) SetAsButton() {
+	bitflag.Clear(&bb.Flag, int(ButtonFlagMenu))
 }
 
 // SetText sets the text and updates the button
-func (g *ButtonBase) SetText(txt string) {
-	SetButtonText(g, txt)
+func (bb *ButtonBase) SetText(txt string) {
+	updt := bb.UpdateStart()
+	bb.Text = txt
+	bb.This.(ButtonWidget).ConfigParts()
+	bb.UpdateEnd(updt)
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
-func (g *ButtonBase) Label() string {
-	if g.Text != "" {
-		return g.Text
+func (bb *ButtonBase) Label() string {
+	if bb.Text != "" {
+		return bb.Text
 	}
-	return g.Nm
+	return bb.Nm
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button
-func (g *ButtonBase) SetIcon(iconName string) {
-	SetButtonIcon(g, iconName)
+func (bb *ButtonBase) SetIcon(iconName string) {
+	updt := bb.UpdateStart()
+	if bb.Icon != IconName(iconName) {
+		bb.SetFullReRender()
+	}
+	bb.Icon = IconName(iconName)
+	bb.This.(ButtonWidget).ConfigParts()
+	bb.UpdateEnd(updt)
 }
 
 // SetButtonState sets the button state
-func (g *ButtonBase) SetButtonState(state ButtonStates) {
-	if g.IsInactive() {
-		if g.IsSelected() {
+func (bb *ButtonBase) SetButtonState(state ButtonStates) {
+	if bb.IsInactive() {
+		if bb.IsSelected() {
 			state = ButtonSelected
 		} else {
 			state = ButtonInactive
 		}
 	} else {
-		if state == ButtonActive && g.IsSelected() {
+		if state == ButtonActive && bb.IsSelected() {
 			state = ButtonSelected
-		} else if state == ButtonActive && g.HasFocus() {
+		} else if state == ButtonActive && bb.HasFocus() {
 			state = ButtonFocus
 		}
 	}
-	g.State = state
-	g.Sty = g.StateStyles[state]
+	bb.State = state
+	bb.Sty = bb.StateStyles[state]
 }
 
 // UpdateButtonStyle sets the button style based on current state info
-func (g *ButtonBase) UpdateButtonStyle() {
-	if g.IsInactive() {
-		if g.IsSelected() {
-			g.State = ButtonSelected
+func (bb *ButtonBase) UpdateButtonStyle() {
+	if bb.IsInactive() {
+		if bb.IsSelected() {
+			bb.State = ButtonSelected
 		} else {
-			g.State = ButtonInactive
+			bb.State = ButtonInactive
 		}
 	} else {
-		if g.State == ButtonSelected && !g.IsSelected() {
-			g.State = ButtonActive
-		} else if g.State == ButtonActive && g.IsSelected() {
-			g.State = ButtonSelected
-		} else if g.State == ButtonActive && g.HasFocus() {
-			g.State = ButtonFocus
+		if bb.State == ButtonSelected && !bb.IsSelected() {
+			bb.State = ButtonActive
+		} else if bb.State == ButtonActive && bb.IsSelected() {
+			bb.State = ButtonSelected
+		} else if bb.State == ButtonActive && bb.HasFocus() {
+			bb.State = ButtonFocus
 		}
 	}
-	g.Sty = g.StateStyles[g.State]
+	bb.Sty = bb.StateStyles[bb.State]
 }
 
 // ButtonPressed sets the button in the down state -- mouse clicked down but
 // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
 // ButtonClicked is down and up
-func (g *ButtonBase) ButtonPressed() {
-	updt := g.UpdateStart()
-	if g.IsInactive() {
-		g.SetSelectedState(!g.IsSelected())
-		g.EmitSelectedSignal()
-		g.UpdateSig()
+func (bb *ButtonBase) ButtonPressed() {
+	updt := bb.UpdateStart()
+	if bb.IsInactive() {
+		bb.SetSelectedState(!bb.IsSelected())
+		bb.EmitSelectedSignal()
+		bb.UpdateSig()
 	} else {
-		g.SetButtonState(ButtonDown)
-		g.ButtonSig.Emit(g.This, int64(ButtonPressed), nil)
+		bb.SetButtonState(ButtonDown)
+		bb.ButtonSig.Emit(bb.This, int64(ButtonPressed), nil)
 	}
-	g.UpdateEnd(updt)
+	bb.UpdateEnd(updt)
 }
 
 // ButtonReleased action: the button has just been released -- sends a released
 // signal and returns state to normal, and emits clicked signal if if it was
 // previously in pressed state
-func (g *ButtonBase) ButtonReleased() {
-	if g.IsInactive() {
+func (bb *ButtonBase) ButtonReleased() {
+	if bb.IsInactive() {
 		return
 	}
-	wasPressed := (g.State == ButtonDown)
-	updt := g.UpdateStart()
-	g.SetButtonState(ButtonActive)
-	g.ButtonSig.Emit(g.This, int64(ButtonReleased), nil)
+	wasPressed := (bb.State == ButtonDown)
+	updt := bb.UpdateStart()
+	bb.SetButtonState(ButtonActive)
+	bb.ButtonSig.Emit(bb.This, int64(ButtonReleased), nil)
 	if wasPressed {
-		g.ButtonSig.Emit(g.This, int64(ButtonClicked), nil)
-		g.OpenMenu()
+		bb.ButtonSig.Emit(bb.This, int64(ButtonClicked), nil)
+		bb.OpenMenu()
 
-		if g.IsCheckable() {
-			g.ToggleChecked()
-			g.ButtonSig.Emit(g.This, int64(ButtonToggled), nil)
+		if bb.IsCheckable() {
+			bb.ToggleChecked()
+			bb.ButtonSig.Emit(bb.This, int64(ButtonToggled), nil)
 		}
 	}
-	g.UpdateEnd(updt)
+	bb.UpdateEnd(updt)
 }
 
 // IsMenu returns true this button is on a menu -- it is a menu item
-func (g *ButtonBase) IsMenu() bool {
-	return bitflag.Has(g.Flag, int(ButtonFlagMenu))
+func (bb *ButtonBase) IsMenu() bool {
+	return bitflag.Has(bb.Flag, int(ButtonFlagMenu))
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
 // explicit ButtonFlagMenu has been set
-func (g *ButtonBase) HasMenu() bool {
-	return g.MakeMenuFunc != nil || len(g.Menu) > 0
+func (bb *ButtonBase) HasMenu() bool {
+	return bb.MakeMenuFunc != nil || len(bb.Menu) > 0
 }
 
 // OpenMenu will open any menu associated with this element -- returns true if
 // menu opened, false if not
-func (g *ButtonBase) OpenMenu() bool {
-	if !g.HasMenu() {
+func (bb *ButtonBase) OpenMenu() bool {
+	if !bb.HasMenu() {
 		return false
 	}
-	if g.MakeMenuFunc != nil {
-		g.MakeMenuFunc(&g.Menu)
+	if bb.MakeMenuFunc != nil {
+		bb.MakeMenuFunc(&bb.Menu)
 	}
-	pos := g.WinBBox.Max
+	pos := bb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen
-		pos = g.ObjBBox.Max
+		pos = bb.ObjBBox.Max
 	}
-	indic, ok := g.Parts.ChildByName("indicator", 3)
+	indic, ok := bb.Parts.ChildByName("indicator", 3)
 	if ok {
 		pos = KiToNode2DBase(indic).WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
 			pos = KiToNode2DBase(indic).ObjBBox.Min
 		}
 	} else {
-		pos.X = g.WinBBox.Min.X
+		pos.X = bb.WinBBox.Min.X
 		if pos.X == 0 {
-			pos.X = g.ObjBBox.Min.X
+			pos.X = bb.ObjBBox.Min.X
 		}
 	}
-	if g.Viewport != nil {
-		PopupMenu(g.Menu, pos.X, pos.Y, g.Viewport, g.Text)
+	if bb.Viewport != nil {
+		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
 		return true
 	}
 	return false
 }
 
 // ResetMenu removes all items in the menu
-func (g *ButtonBase) ResetMenu() {
-	g.Menu = make(Menu, 0, 10)
+func (bb *ButtonBase) ResetMenu() {
+	bb.Menu = make(Menu, 0, 10)
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if there is a menu present,
@@ -310,8 +319,8 @@ func (g *ButtonBase) ResetMenu() {
 // adding the indicator even if no menu is yet present -- returns the index in
 // Parts of the indicator object, which is named "indicator" -- an
 // "ind-stretch" is added as well to put on the right by default.
-func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
-	needInd := (g.HasMenu() || defOn) && g.Indicator != "none"
+func (bb *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != "none"
 	if !needInd {
 		return -1
 	}
@@ -322,38 +331,107 @@ func (g *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn 
 	return indIdx
 }
 
-func (g *ButtonBase) ConfigPartsIndicator(indIdx int) {
+func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	if indIdx < 0 {
 		return
 	}
-	ic := g.Parts.KnownChild(indIdx).(*Icon)
-	icnm := string(g.Indicator)
+	ic := bb.Parts.KnownChild(indIdx).(*Icon)
+	icnm := string(bb.Indicator)
 	if IconName(icnm).IsNil() {
 		icnm = "widget-wedge-down"
 	}
 	if set, _ := IconName(icnm).SetIcon(ic); set {
-		g.StylePart(g.Parts.KnownChild(indIdx - 1).(Node2D)) // also get the stretch
-		g.StylePart(Node2D(ic))
+		bb.StylePart(bb.Parts.KnownChild(indIdx - 1).(Node2D)) // also get the stretch
+		bb.StylePart(Node2D(ic))
 	}
 }
 
 // ButtonEnterHover called when button starting hover
-func (g *ButtonBase) ButtonEnterHover() {
-	if g.State != ButtonHover {
-		updt := g.UpdateStart()
-		g.SetButtonState(ButtonHover)
-		g.UpdateEnd(updt)
+func (bb *ButtonBase) ButtonEnterHover() {
+	if bb.State != ButtonHover {
+		updt := bb.UpdateStart()
+		bb.SetButtonState(ButtonHover)
+		bb.UpdateEnd(updt)
 	}
 }
 
 // ButtonExitHover called when button exiting hover
-func (g *ButtonBase) ButtonExitHover() {
-	if g.State == ButtonHover {
-		updt := g.UpdateStart()
-		g.SetButtonState(ButtonActive)
-		g.UpdateEnd(updt)
+func (bb *ButtonBase) ButtonExitHover() {
+	if bb.State == ButtonHover {
+		updt := bb.UpdateStart()
+		bb.SetButtonState(ButtonActive)
+		bb.UpdateEnd(updt)
 	}
 }
+
+// MouseEvents handles button MouseEvent
+func (bb *ButtonBase) MouseEvent() {
+	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		bw := recv.(ButtonWidget)
+		bbb := bw.ButtonAsBase()
+		if me.Button == mouse.Left {
+			switch me.Action {
+			case mouse.DoubleClick: // we just count as a regular click
+				fallthrough
+			case mouse.Press:
+				me.SetProcessed()
+				bbb.ButtonPressed()
+			case mouse.Release:
+				me.SetProcessed()
+				bw.ButtonRelease()
+			}
+		}
+	})
+}
+
+// MouseFocusEvents handles button MouseFocusEvent
+func (bb *ButtonBase) MouseFocusEvent() {
+	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		bw := recv.(ButtonWidget)
+		bbb := bw.ButtonAsBase()
+		if bbb.IsInactive() {
+			return
+		}
+		me := d.(*mouse.FocusEvent)
+		me.SetProcessed()
+		if me.Action == mouse.Enter {
+			bbb.ButtonEnterHover()
+		} else {
+			bbb.ButtonExitHover()
+		}
+	})
+}
+
+// KeyChordEvent handles button KeyChord events
+func (bb *ButtonBase) KeyChordEvent() {
+	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		bw := recv.(ButtonWidget)
+		bbb := bw.ButtonAsBase()
+		if bbb.IsInactive() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
+		kf := KeyFun(kt.Chord())
+		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
+			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {
+				kt.SetProcessed()
+				bbb.ButtonPressed()
+				bw.ButtonRelease()
+			}
+		}
+	})
+}
+
+func (bb *ButtonBase) ButtonEvents() {
+	bb.HoverTooltipEvent()
+	bb.MouseEvent()
+	bb.MouseFocusEvent()
+	bb.KeyChordEvent()
+}
+
+///////////////////////////////////////////////////////////
+//   ButtonWidget
 
 // ButtonWidget is an interface for button widgets allowing ButtonBase
 // defaults to handle most cases.
@@ -379,201 +457,130 @@ type ButtonWidget interface {
 	ConfigPartsIfNeeded()
 }
 
-// SetButtonText set the text and update button
-func SetButtonText(bw ButtonWidget, txt string) {
-	g := bw.ButtonAsBase()
-	updt := g.UpdateStart()
-	g.Text = txt
-	g.This.(ButtonWidget).ConfigParts()
-	g.UpdateEnd(updt)
-}
-
-// SetButtonIcon sets the Icon (looked up by name) (could be empty or 'nil' or
-// 'none') and updates button
-func SetButtonIcon(bw ButtonWidget, iconName string) {
-	g := bw.ButtonAsBase()
-	updt := g.UpdateStart()
-	if g.Icon != IconName(iconName) {
-		g.SetFullReRender()
-	}
-	g.Icon = IconName(iconName)
-	g.This.(ButtonWidget).ConfigParts()
-	g.UpdateEnd(updt)
-}
-
-// ButtonEvents handles all the basic button events
-func ButtonEvents(bw ButtonWidget) {
-	g := bw.ButtonAsBase()
-	g.HoverTooltipEvent()
-	g.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.Event)
-		ab := recv.(ButtonWidget)
-		bb := ab.ButtonAsBase()
-		if me.Button == mouse.Left {
-			switch me.Action {
-			case mouse.DoubleClick: // we just count as a regular click
-				fallthrough
-			case mouse.Press:
-				me.SetProcessed()
-				bb.ButtonPressed()
-			case mouse.Release:
-				me.SetProcessed()
-				ab.ButtonRelease()
-			}
-		}
-	})
-	g.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.(ButtonWidget)
-		bb := ab.ButtonAsBase()
-		if bb.IsInactive() {
-			return
-		}
-		me := d.(*mouse.FocusEvent)
-		me.SetProcessed()
-		if me.Action == mouse.Enter {
-			bb.ButtonEnterHover()
-		} else {
-			bb.ButtonExitHover()
-		}
-	})
-	g.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		ab := recv.(ButtonWidget)
-		bb := ab.ButtonAsBase()
-		if bb.IsInactive() {
-			return
-		}
-		kt := d.(*key.ChordEvent)
-		kf := KeyFun(kt.Chord())
-		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
-			if !(kt.Rune == ' ' && bb.Viewport.IsCompleter()) {
-				kt.SetProcessed()
-				bb.ButtonPressed()
-				ab.ButtonRelease()
-			}
-		}
-	})
-}
-
 ///////////////////////////////////////////////////////////
 // ButtonBase Node2D and ButtonwWidget interface
 
-func (g *ButtonBase) ButtonAsBase() *ButtonBase {
-	return g
+func (bb *ButtonBase) ButtonAsBase() *ButtonBase {
+	return bb
 }
 
-func (g *ButtonBase) Init2D() {
-	g.Init2DWidget()
-	g.This.(ButtonWidget).ConfigParts()
+func (bb *ButtonBase) Init2D() {
+	bb.Init2DWidget()
+	bb.This.(ButtonWidget).ConfigParts()
 }
 
-func (g *ButtonBase) ButtonRelease() {
-	g.ButtonReleased() // do base
+func (bb *ButtonBase) ButtonRelease() {
+	bb.ButtonReleased() // do base
 }
 
-func (g *ButtonBase) StyleParts() {
-	if pv, ok := g.PropInherit("indicator", false, true); ok { // no inh, yes type
+func (bb *ButtonBase) StyleParts() {
+	if pv, ok := bb.PropInherit("indicator", false, true); ok { // no inh, yes type
 		pvs := kit.ToString(pv)
-		g.Indicator = IconName(pvs)
+		bb.Indicator = IconName(pvs)
 	}
-	if pv, ok := g.PropInherit("icon", false, true); ok { // no inh, yes type
+	if pv, ok := bb.PropInherit("icon", false, true); ok { // no inh, yes type
 		pvs := kit.ToString(pv)
-		g.Icon = IconName(pvs)
+		bb.Icon = IconName(pvs)
 	}
 }
 
-func (g *ButtonBase) ConfigParts() {
-	g.Parts.Lay = LayoutHoriz
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
-	indIdx := g.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
-	g.ConfigPartsIndicator(indIdx)
+func (bb *ButtonBase) ConfigParts() {
+	bb.Parts.Lay = LayoutHoriz
+	config, icIdx, lbIdx := bb.ConfigPartsIconLabel(string(bb.Icon), bb.Text)
+	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
+	mods, updt := bb.Parts.ConfigChildren(config, false) // not unique names
+	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
+	bb.ConfigPartsIndicator(indIdx)
 	if mods {
-		g.UpdateEnd(updt)
+		bb.UpdateEnd(updt)
 	}
 }
 
-func (g *ButtonBase) ConfigPartsIfNeeded() {
-	if !g.PartsNeedUpdateIconLabel(string(g.Icon), g.Text) {
+func (bb *ButtonBase) ConfigPartsIfNeeded() {
+	if !bb.PartsNeedUpdateIconLabel(string(bb.Icon), bb.Text) {
 		return
 	}
-	g.This.(ButtonWidget).ConfigParts()
+	bb.This.(ButtonWidget).ConfigParts()
 }
 
-func (g *ButtonBase) Style2DWidget() {
-	g.WidgetBase.Style2DWidget()
-	g.This.(ButtonWidget).StyleParts()
+func (bb *ButtonBase) Style2DWidget() {
+	bb.WidgetBase.Style2DWidget()
+	bb.This.(ButtonWidget).StyleParts()
 }
 
-func (g *ButtonBase) Style2D() {
-	if nf, ok := g.Prop("no-focus"); ok {
-		bitflag.SetState(&g.Flag, !g.IsInactive() && !nf.(bool), int(CanFocus))
+func (bb *ButtonBase) Style2D() {
+	if nf, ok := bb.Prop("no-focus"); ok {
+		bitflag.SetState(&bb.Flag, !bb.IsInactive() && !nf.(bool), int(CanFocus))
 	} else {
-		bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
+		bitflag.SetState(&bb.Flag, !bb.IsInactive(), int(CanFocus))
 	}
 
-	g.Style2DWidget()
-	pst := g.ParentStyle()
-	clsty := "." + g.Class
+	bb.Style2DWidget()
+	pst := bb.ParentStyle()
+	clsty := "." + bb.Class
 	var clsp ki.Props
-	if clspi, ok := g.PropInherit(clsty, false, true); ok {
+	if clspi, ok := bb.PropInherit(clsty, false, true); ok {
 		clsp, ok = clspi.(ki.Props)
 	}
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyFrom(&g.Sty)
-		g.StateStyles[i].SetStyleProps(pst, g.StyleProps(ButtonSelectors[i]))
+		bb.StateStyles[i].CopyFrom(&bb.Sty)
+		bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]))
 		if clsp != nil {
 			if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
-				g.StateStyles[i].SetStyleProps(pst, stclsp)
+				bb.StateStyles[i].SetStyleProps(pst, stclsp)
 			}
 		}
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
 	}
-	g.This.(ButtonWidget).ConfigParts()
-	g.SetButtonState(ButtonActive) // initial default
-	if g.Menu != nil {
-		g.Menu.SetShortcuts(g.ParentWindow())
+	bb.This.(ButtonWidget).ConfigParts()
+	bb.SetButtonState(ButtonActive) // initial default
+	if bb.Menu != nil {
+		bb.Menu.SetShortcuts(bb.ParentWindow())
 	}
 }
 
-func (g *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
-	g.This.(ButtonWidget).ConfigPartsIfNeeded()
-	g.Layout2DBase(parBBox, true, iter) // init style
-	g.Layout2DParts(parBBox, iter)
+func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	bb.This.(ButtonWidget).ConfigPartsIfNeeded()
+	bb.Layout2DBase(parBBox, true, iter) // init style
+	bb.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(ButtonStatesN); i++ {
-		g.StateStyles[i].CopyUnitContext(&g.Sty.UnContext)
+		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
 	}
-	return g.Layout2DChildren(iter)
+	return bb.Layout2DChildren(iter)
 }
 
-func (g *ButtonBase) Render2D() {
-	if g.FullReRenderIfNeeded() {
+func (bb *ButtonBase) Render2D() {
+	if bb.FullReRenderIfNeeded() {
 		return
 	}
-	if g.PushBounds() {
-		ButtonEvents(g)
-		g.UpdateButtonStyle()
-		g.This.(ButtonWidget).ConfigPartsIfNeeded()
-		st := &g.Sty
-		g.RenderStdBox(st)
-		g.Render2DParts()
-		g.Render2DChildren()
-		g.PopBounds()
+	if bb.PushBounds() {
+		bb.This.(Node2D).ConnectEvents2D()
+		bb.UpdateButtonStyle()
+		bb.This.(ButtonWidget).ConfigPartsIfNeeded()
+		st := &bb.Sty
+		bb.RenderStdBox(st)
+		bb.Render2DParts()
+		bb.Render2DChildren()
+		bb.PopBounds()
 	} else {
-		g.DisconnectAllEvents(RegPri)
+		bb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (g *ButtonBase) FocusChanged2D(change FocusChanges) {
+func (bb *ButtonBase) ConnectEvents2D() {
+	bb.ButtonEvents()
+}
+
+func (bb *ButtonBase) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		g.SetButtonState(ButtonActive) // lose any hover state but whatever..
-		g.UpdateSig()
+		bb.SetButtonState(ButtonActive) // lose any hover state but whatever..
+		bb.UpdateSig()
 	case FocusGot:
-		g.ScrollToMe()
-		g.SetButtonState(ButtonFocus)
-		g.EmitFocusedSignal()
-		g.UpdateSig()
+		bb.ScrollToMe()
+		bb.SetButtonState(ButtonFocus)
+		bb.EmitFocusedSignal()
+		bb.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
@@ -654,8 +661,8 @@ var ButtonProps = ki.Props{
 
 // ButtonWidget interface
 
-func (g *Button) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
+func (bb *Button) ButtonAsBase() *ButtonBase {
+	return &(bb.ButtonBase)
 }
 
 ///////////////////////////////////////////////////////////
@@ -728,121 +735,121 @@ var CheckBoxProps = ki.Props{
 
 // CheckBoxWidget interface
 
-func (g *CheckBox) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
+func (cb *CheckBox) ButtonAsBase() *ButtonBase {
+	return &(cb.ButtonBase)
 }
 
-func (g *CheckBox) ButtonRelease() {
-	g.ButtonReleased()
+func (cb *CheckBox) ButtonRelease() {
+	cb.ButtonReleased()
 }
 
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
 // states, and updates button
-func (g *CheckBox) SetIcons(icOn, icOff string) {
-	updt := g.UpdateStart()
-	g.Icon = IconName(icOn)
-	g.IconOff = IconName(icOff)
-	g.This.(ButtonWidget).ConfigParts()
-	g.UpdateEnd(updt)
+func (cb *CheckBox) SetIcons(icOn, icOff string) {
+	updt := cb.UpdateStart()
+	cb.Icon = IconName(icOn)
+	cb.IconOff = IconName(icOff)
+	cb.This.(ButtonWidget).ConfigParts()
+	cb.UpdateEnd(updt)
 }
 
 // SetIconProps sets the icon properties from given property list -- parent
 // types can use this to set different icon properties
-func (g *CheckBox) SetIconProps(props ki.Props) {
+func (cb *CheckBox) SetIconProps(props ki.Props) {
 	if icp, has := props["icon"]; has {
-		g.SetProp("icon", icp)
+		cb.SetProp("icon", icp)
 	}
 	if icp, has := props["icon-off"]; has {
-		g.SetProp("icon-off", icp)
+		cb.SetProp("icon-off", icp)
 	}
 }
 
-func (g *CheckBox) Init2D() {
-	g.SetCheckable(true)
-	g.Init2DWidget()
-	g.This.(ButtonWidget).ConfigParts()
+func (cb *CheckBox) Init2D() {
+	cb.SetCheckable(true)
+	cb.Init2DWidget()
+	cb.This.(ButtonWidget).ConfigParts()
 }
 
-func (g *CheckBox) StyleParts() {
-	g.ButtonBase.StyleParts()
-	if pv, ok := g.PropInherit("icon-off", false, true); ok { // no inh, yes type
+func (cb *CheckBox) StyleParts() {
+	cb.ButtonBase.StyleParts()
+	if pv, ok := cb.PropInherit("icon-off", false, true); ok { // no inh, yes type
 		pvs := kit.ToString(pv)
-		g.IconOff = IconName(pvs)
+		cb.IconOff = IconName(pvs)
 	}
 }
 
-func (g *CheckBox) ConfigParts() {
-	g.SetCheckable(true)
-	if !g.Icon.IsValid() {
-		g.Icon = "widget-checked-box" // fallback
+func (cb *CheckBox) ConfigParts() {
+	cb.SetCheckable(true)
+	if !cb.Icon.IsValid() {
+		cb.Icon = "widget-checked-box" // fallback
 	}
-	if !g.IconOff.IsValid() {
-		g.IconOff = "widget-unchecked-box"
+	if !cb.IconOff.IsValid() {
+		cb.IconOff = "widget-unchecked-box"
 	}
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
 	config.Add(KiT_Layout, "stack")
-	if g.Text != "" {
+	if cb.Text != "" {
 		config.Add(KiT_Space, "space")
 		lbIdx = len(config)
 		config.Add(KiT_Label, "label")
 	}
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	ist := g.Parts.KnownChild(icIdx).(*Layout)
+	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
+	ist := cb.Parts.KnownChild(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.KnownChild(0).(*Icon)
-		if set, _ := g.Icon.SetIcon(icon); set {
-			g.StylePart(Node2D(icon))
+		if set, _ := cb.Icon.SetIcon(icon); set {
+			cb.StylePart(Node2D(icon))
 		}
 		icoff := ist.KnownChild(1).(*Icon)
-		if set, _ := g.IconOff.SetIcon(icoff); set {
-			g.StylePart(Node2D(icoff))
+		if set, _ := cb.IconOff.SetIcon(icoff); set {
+			cb.StylePart(Node2D(icoff))
 		}
 	}
-	if g.IsChecked() {
+	if cb.IsChecked() {
 		ist.StackTop = 0
 	} else {
 		ist.StackTop = 1
 	}
 	if lbIdx >= 0 {
-		lbl := g.Parts.KnownChild(lbIdx).(*Label)
-		if lbl.Text != g.Text {
-			g.StylePart(g.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
-			g.StylePart(Node2D(lbl))
-			lbl.SetText(g.Text)
+		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
+		if lbl.Text != cb.Text {
+			cb.StylePart(cb.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
+			cb.StylePart(Node2D(lbl))
+			lbl.SetText(cb.Text)
 		}
 	}
 	if mods {
-		g.UpdateEnd(updt)
+		cb.UpdateEnd(updt)
 	}
 }
 
-func (g *CheckBox) ConfigPartsIfNeeded() {
-	if !g.Parts.HasChildren() {
-		g.This.(ButtonWidget).ConfigParts()
+func (cb *CheckBox) ConfigPartsIfNeeded() {
+	if !cb.Parts.HasChildren() {
+		cb.This.(ButtonWidget).ConfigParts()
 	}
 	icIdx := 0 // always there
-	ist := g.Parts.KnownChild(icIdx).(*Layout)
-	if g.Icon.IsValid() {
+	ist := cb.Parts.KnownChild(icIdx).(*Layout)
+	if cb.Icon.IsValid() {
 		icon := ist.KnownChild(0).(*Icon)
-		if !icon.HasChildren() || icon.UniqueNm != string(g.Icon) || g.NeedsFullReRender() {
-			if set, _ := g.Icon.SetIcon(icon); set {
-				g.StylePart(Node2D(icon))
+		if !icon.HasChildren() || icon.UniqueNm != string(cb.Icon) || cb.NeedsFullReRender() {
+			if set, _ := cb.Icon.SetIcon(icon); set {
+				cb.StylePart(Node2D(icon))
 			}
 		}
 	}
-	if g.IconOff.IsValid() {
+	if cb.IconOff.IsValid() {
 		icoff := ist.KnownChild(1).(*Icon)
-		if !icoff.HasChildren() || icoff.UniqueNm != string(g.IconOff) || g.NeedsFullReRender() {
-			if set, _ := g.IconOff.SetIcon(icoff); set {
-				g.StylePart(Node2D(icoff))
+		if !icoff.HasChildren() || icoff.UniqueNm != string(cb.IconOff) || cb.NeedsFullReRender() {
+			if set, _ := cb.IconOff.SetIcon(icoff); set {
+				cb.StylePart(Node2D(icoff))
 			}
 		}
 	}
-	if g.IsChecked() {
+	if cb.IsChecked() {
 		ist.StackTop = 0
 	} else {
 		ist.StackTop = 1

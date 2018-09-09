@@ -358,18 +358,18 @@ var MenuButtonProps = ki.Props{
 	},
 }
 
-func (g *MenuButton) ButtonAsBase() *ButtonBase {
-	return &(g.ButtonBase)
+func (mb *MenuButton) ButtonAsBase() *ButtonBase {
+	return &(mb.ButtonBase)
 }
 
-func (g *MenuButton) ConfigParts() {
-	config, icIdx, lbIdx := g.ConfigPartsIconLabel(string(g.Icon), g.Text)
-	indIdx := g.ConfigPartsAddIndicator(&config, true)  // default on
-	mods, updt := g.Parts.ConfigChildren(config, false) // not unique names
-	g.ConfigPartsSetIconLabel(string(g.Icon), g.Text, icIdx, lbIdx)
-	g.ConfigPartsIndicator(indIdx)
+func (mb *MenuButton) ConfigParts() {
+	config, icIdx, lbIdx := mb.ConfigPartsIconLabel(string(mb.Icon), mb.Text)
+	indIdx := mb.ConfigPartsAddIndicator(&config, true)  // default on
+	mods, updt := mb.Parts.ConfigChildren(config, false) // not unique names
+	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)
+	mb.ConfigPartsIndicator(indIdx)
 	if mods {
-		g.UpdateEnd(updt)
+		mb.UpdateEnd(updt)
 	}
 }
 
@@ -395,25 +395,25 @@ var SeparatorProps = ki.Props{
 	// todo: dotted
 }
 
-func (g *Separator) Style2D() {
-	if g.Horiz {
-		g.SetProp("max-width", -1)
-		g.SetProp("min-height", units.NewValue(0.5, units.Ex))
+func (sp *Separator) Style2D() {
+	if sp.Horiz {
+		sp.SetProp("max-width", -1)
+		sp.SetProp("min-height", units.NewValue(0.5, units.Ex))
 	} else {
-		g.SetProp("max-height", -1)
-		g.SetProp("min-width", units.NewValue(0.5, units.Ch))
+		sp.SetProp("max-height", -1)
+		sp.SetProp("min-width", units.NewValue(0.5, units.Ch))
 	}
-	g.WidgetBase.Style2D()
+	sp.WidgetBase.Style2D()
 }
 
-func (g *Separator) Render2D() {
-	if g.PushBounds() {
-		rs := &g.Viewport.Render
+func (sp *Separator) Render2D() {
+	if sp.PushBounds() {
+		rs := &sp.Viewport.Render
 		pc := &rs.Paint
-		st := &g.Sty
+		st := &sp.Sty
 
-		pos := g.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
-		sz := g.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		pos := sp.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
+		sz := sp.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 
 		if !st.Font.BgColor.IsNil() {
 			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
@@ -421,13 +421,13 @@ func (g *Separator) Render2D() {
 
 		pc.StrokeStyle.Width = st.Border.Width
 		pc.StrokeStyle.SetColor(&st.Border.Color)
-		if g.Horiz {
+		if sp.Horiz {
 			pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
 		} else {
 			pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
 		}
 		pc.FillStrokeClear(rs)
-		g.Render2DChildren()
-		g.PopBounds()
+		sp.Render2DChildren()
+		sp.PopBounds()
 	}
 }

@@ -234,7 +234,8 @@ func (p *Preferences) ApplyDPI() {
 	}
 }
 
-// Update everything with current preferences -- triggers rebuild of default styles.
+// Update updates all open windows with current preferences -- triggers
+// rebuild of default styles.
 func (p *Preferences) Update() {
 	ZoomFactor = 1 // reset so saved dpi is used
 	p.Apply()
@@ -376,10 +377,12 @@ var PreferencesProps = ki.Props{
 	},
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
+			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
 			"icon": "update",
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
+			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
 			"icon": "file-save",
 		}},
 		{"sep-color", ki.BlankProp{}},
@@ -414,13 +417,14 @@ var PreferencesProps = ki.Props{
 			},
 		}},
 		{"ScreenInfo", ki.Props{
+			"desc":        "shows parameters about all the active screens",
 			"icon":        "info",
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"EditKeyMaps", ki.Props{
 			"icon": "keyboard",
-			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current avail keymaps are saved and loaded with preferences automatically.",
+			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		},
 		},
 	},

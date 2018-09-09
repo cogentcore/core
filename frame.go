@@ -144,7 +144,7 @@ func (fr *Frame) Render2D() {
 	}
 	if fr.PushBounds() {
 		fr.FrameStdRender()
-		fr.LayoutEvents()
+		fr.This.(Node2D).ConnectEvents2D()
 		fr.RenderScrolls()
 		fr.Render2DChildren()
 		fr.PopBounds()
