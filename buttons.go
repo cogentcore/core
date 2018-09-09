@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"image/color"
+	"strings"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -222,9 +223,12 @@ func (bb *ButtonBase) UpdateButtonStyle() {
 			bb.State = ButtonSelected
 		} else if bb.State == ButtonActive && bb.HasFocus() {
 			bb.State = ButtonFocus
+		} else if bb.State == ButtonInactive {
+			bb.State = ButtonActive
 		}
 	}
 	bb.Sty = bb.StateStyles[bb.State]
+	// fmt.Printf("but style updt: %v to %v\n", bb.PathUnique(), bb.State)
 }
 
 // ButtonPressed sets the button in the down state -- mouse clicked down but
@@ -233,9 +237,11 @@ func (bb *ButtonBase) UpdateButtonStyle() {
 func (bb *ButtonBase) ButtonPressed() {
 	updt := bb.UpdateStart()
 	if bb.IsInactive() {
-		bb.SetSelectedState(!bb.IsSelected())
-		bb.EmitSelectedSignal()
-		bb.UpdateSig()
+		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
+			bb.SetSelectedState(!bb.IsSelected())
+			bb.EmitSelectedSignal()
+			bb.UpdateSig()
+		}
 	} else {
 		bb.SetButtonState(ButtonDown)
 		bb.ButtonSig.Emit(bb.This, int64(ButtonPressed), nil)

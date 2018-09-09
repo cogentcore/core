@@ -558,7 +558,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				nv := reflect.ValueOf(val)  // new key value
 				cv := ov.MapIndex(vv.Value) // get current value
 				curnv := ov.MapIndex(nv)    // see if new value there already
-				if !reflect.DeepEqual(val, vv.Value.Interface()) && !kit.ValueIsZero(curnv) {
+				if val != vv.Value.Interface() && !kit.ValueIsZero(curnv) {
 					var vp *gi.Viewport2D
 					if vv.Widget != nil {
 						widg := vv.Widget.AsNode2D()
@@ -1100,10 +1100,12 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
-		cbb := vvv.Widget.(*gi.CheckBox)
-		if vvv.SetValue(cbb.IsChecked()) {
-			vvv.UpdateWidget() // always update after setting value..
+		if sig == int64(gi.ButtonToggled) {
+			vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
+			cbb := vvv.Widget.(*gi.CheckBox)
+			if vvv.SetValue(cbb.IsChecked()) {
+				vvv.UpdateWidget() // always update after setting value..
+			}
 		}
 	})
 	vv.UpdateWidget()

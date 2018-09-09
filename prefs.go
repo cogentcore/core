@@ -77,6 +77,7 @@ type Preferences struct {
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
 	FileViewSort    string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 	ColorFilename   FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
+	Changed         bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
 var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
@@ -155,6 +156,7 @@ func (p *Preferences) Open() error {
 	if p.SaveKeyMaps {
 		AvailKeyMaps.OpenPrefs()
 	}
+	p.Changed = false
 	return err
 }
 
@@ -174,6 +176,7 @@ func (p *Preferences) Save() error {
 	if p.SaveKeyMaps {
 		AvailKeyMaps.SavePrefs()
 	}
+	p.Changed = false
 	return err
 }
 
@@ -183,12 +186,14 @@ func (p *Preferences) OpenColors(filename FileName) error {
 	if err == nil {
 		p.Update()
 	}
+	p.Changed = true
 	return err
 }
 
 // Save colors to a JSON-formatted file, for easy sharing of your favorite
 // palettes.
 func (p *Preferences) SaveColors(filename FileName) error {
+	p.Changed = true
 	return p.Colors.SaveJSON(filename)
 }
 
@@ -282,6 +287,7 @@ func (p *Preferences) SaveZoom(forCurrentScreen bool) {
 	} else {
 		p.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
+	p.Changed = true
 }
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
@@ -296,6 +302,7 @@ func (p *Preferences) DeleteSavedWindowGeoms() {
 // with preferences automatically.
 func (p *Preferences) EditKeyMaps() {
 	p.SaveKeyMaps = true
+	p.Changed = true
 	TheViewIFace.KeyMapsView(&AvailKeyMaps)
 }
 
@@ -332,12 +339,20 @@ var PreferencesProps = ki.Props{
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
 				"shortcut": "Command+U",
+				"updtfunc": func(pfi interface{}, act *Action) {
+					pf := pfi.(*Preferences)
+					act.SetActiveStateUpdt(pf.Changed)
+				},
 			}},
 			{"Open", ki.Props{
 				"shortcut": "Command+O",
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
+				"updtfunc": func(pfi interface{}, act *Action) {
+					pf := pfi.(*Preferences)
+					act.SetActiveStateUpdt(pf.Changed)
+				},
 			}},
 			{"sep-color", ki.BlankProp{}},
 			{"OpenColors", ki.Props{
@@ -379,11 +394,19 @@ var PreferencesProps = ki.Props{
 		{"Update", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
 			"icon": "update",
+			"updtfunc": func(pfi interface{}, act *Action) {
+				pf := pfi.(*Preferences)
+				act.SetActiveStateUpdt(pf.Changed)
+			},
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
 			"icon": "file-save",
+			"updtfunc": func(pfi interface{}, act *Action) {
+				pf := pfi.(*Preferences)
+				act.SetActiveStateUpdt(pf.Changed)
+			},
 		}},
 		{"sep-color", ki.BlankProp{}},
 		{"Colors", ki.PropSlice{ // sub-menu

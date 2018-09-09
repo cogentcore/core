@@ -94,6 +94,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* button not re-rendering text in response to state changes -- e.g., active -> inactive etc.
+* menu actions should be updating buttons already
+
 * fix icons disappearing on scrolling.. 
 
 * TextView:
@@ -118,8 +121,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * tom's checkbox bug!
 
-* that changed flag on prefs would be reassuring to know that save actually worked..
-
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 
 * fileview should add extension to filename if only one extension provided, if
@@ -127,7 +128,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * fix text scrolling-off-top rendering finally
 
-* fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.
+* fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.  in mapview proximally.
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..
