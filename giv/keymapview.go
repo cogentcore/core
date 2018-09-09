@@ -5,13 +5,65 @@
 package giv
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
+
+// KeyMapsView opens a view of user preferences
+func KeyMapsView(km *gi.KeyMaps) {
+	winm := "gogi-key-maps"
+	// if w, ok := gi.MainWindows.FindName(winm); ok {
+	// 	w.OSWin.Raise()
+	// 	return
+	// }
+	width := 800
+	height := 800
+	win := gi.NewWindow2D(winm, "GoGi Key Maps", width, height, true)
+
+	vp := win.WinViewport2D()
+	updt := vp.UpdateStart()
+
+	mfr := win.SetMainFrame()
+	mfr.Lay = gi.LayoutVert
+
+	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
+	tv.Viewport = vp
+	tv.SetSlice(km, nil)
+	tv.SetStretchMaxWidth()
+	tv.SetStretchMaxHeight()
+
+	mmen := win.MainMenu
+	MainMenuView(km, win, mmen)
+
+	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
+			Prompt: "Do you want to save any changes to std preferences to std keymaps file before closing, or Cancel the close and do a Save to a different file?"},
+			[]string{"Save and Close", "Discard and Close", "Cancel"},
+			win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					km.SavePrefs()
+					fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
+					w.Close()
+				case 1:
+					w.Close()
+				case 2:
+					// default is to do nothing, i.e., cancel
+				}
+			})
+	})
+
+	win.MainMenuUpdated()
+
+	vp.UpdateEndNoSig(updt)
+	win.GoStartEventLoop()
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  KeyMapValueView
@@ -60,15 +112,16 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 		return
 	}
 	cur := kit.ToString(vv.Value.Interface())
+	_, curRow, _ := gi.AvailKeyMaps.MapByName(gi.KeyMapName(cur))
 	desc, _ := vv.Tag("desc")
-	SliceViewSelectDialog(vp, &gi.StdKeyMapNames, cur, DlgOpts{Title: "Select a Standard KeyMap", Prompt: desc}, nil,
+	TableViewSelectDialog(vp, &gi.AvailKeyMaps, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, curRow, nil,
 		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			ddlg, _ := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
-				si := SliceViewSelectDialogValue(ddlg)
+				ddlg, _ := send.(*gi.Dialog)
+				si := TableViewSelectDialogValue(ddlg)
 				if si >= 0 {
-					km := gi.StdKeyMapNames[si]
-					vv.SetValue(km)
+					km := gi.AvailKeyMaps[si]
+					vv.SetValue(km.Name)
 					vv.UpdateWidget()
 				}
 			}
@@ -76,45 +129,4 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 				dlgFunc(dlgRecv, send, sig, data)
 			}
 		})
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  KeyChordValueView
-
-// KeyChordValueView presents an KeyChordEdit for gi.KeyChord
-type KeyChordValueView struct {
-	ValueViewBase
-}
-
-var KiT_KeyChordValueView = kit.Types.AddType(&KeyChordValueView{}, nil)
-
-func (vv *KeyChordValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_KeyChordEdit
-	return vv.WidgetTyp
-}
-
-func (vv *KeyChordValueView) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	kc := vv.Widget.(*gi.KeyChordEdit)
-	txt := kit.ToString(vv.Value.Interface())
-	kc.SetText(txt)
-}
-
-func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
-	vv.Widget = widg
-	kc := vv.Widget.(*gi.KeyChordEdit)
-	kc.KeyChordSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		vvv, _ := recv.Embed(KiT_KeyChordValueView).(*KeyChordValueView)
-		kcc := vvv.Widget.(*gi.KeyChordEdit)
-		if vvv.SetValue(gi.KeyChord(kcc.Text)) {
-			vvv.UpdateWidget()
-		}
-	})
-	vv.UpdateWidget()
-}
-
-func (vv *KeyChordValueView) HasAction() bool {
-	return false
 }

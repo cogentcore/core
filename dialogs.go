@@ -140,7 +140,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
-		kf := KeyFun(kt.ChordString())
+		kf := KeyFun(kt.Chord())
 		switch kf {
 		case KeyFunAbort:
 			ddlg.Cancel()
@@ -150,7 +150,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
-		kf := KeyFun(kt.ChordString())
+		kf := KeyFun(kt.Chord())
 		switch kf {
 		case KeyFunAccept:
 			ddlg.Accept()

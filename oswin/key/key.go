@@ -123,11 +123,16 @@ func (e *Event) HasAllModifier(mods ...Modifiers) bool {
 	return HasAllModifierBits(e.Modifiers, mods...)
 }
 
-// ChordString returns a string representation of the keyboard event suitable
-// for keyboard function maps, etc -- printable runes are sent directly, and
+// key.Chord represents the key chord associated with a given key function -- it
+// is linked to the KeyChordEdit in the giv ValueView system so you can just
+// type keys to set key chords.
+type Chord string
+
+// Chord returns a string representation of the keyboard event suitable for
+// keyboard function maps, etc -- printable runes are sent directly, and
 // non-printable ones are converted to their corresponding code names without
-// the "Code" prefix
-func (e *Event) ChordString() string {
+// the "Code" prefix.
+func (e *Event) Chord() Chord {
 	modstr := ""
 	for m := Shift; m < ModifiersN; m++ {
 		if e.Modifiers&(1<<uint32(m)) != 0 {
@@ -135,23 +140,23 @@ func (e *Event) ChordString() string {
 		}
 	}
 	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
-		return modstr + "Spacebar"
+		return Chord(modstr + "Spacebar")
 	}
 	if unicode.IsPrint(e.Rune) {
 		if len(modstr) > 0 {
-			return modstr + string(unicode.ToUpper(e.Rune)) // all modded keys are uppercase!
+			return Chord(modstr + string(unicode.ToUpper(e.Rune))) // all modded keys are uppercase!
 		} else {
-			return modstr + string(e.Rune)
+			return Chord(modstr + string(e.Rune))
 		}
 	}
 	// now convert code
 	codestr := strings.TrimPrefix(interface{}(e.Code).(fmt.Stringer).String(), "Code")
-	return modstr + codestr
+	return Chord(modstr + codestr)
 }
 
-// DecodeChord decodes a chord string into rune and modifiers (set as bit flags)
-func DecodeChord(ch string) (r rune, mods int32, err error) {
-	cs := ch
+// Decode decodes a chord string into rune and modifiers (set as bit flags)
+func (ch Chord) Decode() (r rune, mods int32, err error) {
+	cs := string(ch)
 	for m := Shift; m < ModifiersN; m++ {
 		mstr := interface{}(m).(fmt.Stringer).String() + "+"
 		if strings.HasPrefix(cs, mstr) {
@@ -168,9 +173,9 @@ func DecodeChord(ch string) (r rune, mods int32, err error) {
 	return
 }
 
-// ChordShortcut transforms chord string into short form suitable for display to users
-func ChordShortcut(ch string) string {
-	cs := strings.Replace(ch, "Control+", "^", 1) // ⌃ doesn't look as good
+// Shortcut transforms chord string into short form suitable for display to users
+func (ch Chord) Shortcut() string {
+	cs := strings.Replace(string(ch), "Control+", "^", 1) // ⌃ doesn't look as good
 	switch oswin.TheApp.Platform() {
 	case oswin.MacOS:
 		cs = strings.Replace(cs, "Shift+", "⇧", 1)
@@ -185,6 +190,17 @@ func ChordShortcut(ch string) string {
 	cs = strings.Replace(cs, "DeleteBackspace", "⌫", 1)
 	cs = strings.Replace(cs, "DeleteForward", "⌦", 1)
 	return cs
+}
+
+// OSShortcut translates Command into either Control or Meta depending on platform
+func (ch Chord) OSShortcut() Chord {
+	sc := string(ch)
+	if oswin.TheApp.Platform() == oswin.MacOS {
+		sc = strings.Replace(sc, "Command+", "Meta+", -1)
+	} else {
+		sc = strings.Replace(sc, "Command+", "Control+", -1)
+	}
+	return Chord(sc)
 }
 
 // CodeIsModifier returns true if given code is a modifier key

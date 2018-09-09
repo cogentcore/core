@@ -870,7 +870,7 @@ func (w *Window) EventLoop() {
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
 	lastSkipped := false
-	lastKeyChord := ""
+	lastKeyChord := key.Chord("")
 
 	var startDrag *mouse.DragEvent
 	dragStarted := false
@@ -984,7 +984,7 @@ mainloop:
 					}
 				case oswin.KeyChordEvent:
 					ke := evi.(*key.ChordEvent)
-					ks := ke.ChordString()
+					ks := ke.Chord()
 					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
 						// fmt.Printf("skipped et %v lag %v\n", et, lag)
 						lastSkipped = true
@@ -1263,7 +1263,7 @@ mainloop:
 
 		if !evi.IsProcessed() && et == oswin.KeyChordEvent {
 			ke := evi.(*key.ChordEvent)
-			kc := ke.ChordString()
+			kc := ke.Chord()
 			w.TriggerShortcut(kc)
 		}
 
@@ -1584,7 +1584,7 @@ func (w *Window) SendKeyFunEvent(kf KeyFuns, popup bool) {
 	if chord == "" {
 		return
 	}
-	r, mods, err := key.DecodeChord(chord)
+	r, mods, err := chord.Decode()
 	if err != nil {
 		return
 	}
@@ -1598,7 +1598,7 @@ func (w *Window) SendKeyFunEvent(kf KeyFuns, popup bool) {
 
 // AddShortcut adds given shortcut -- will issue warning about conflicting
 // shortcuts and use the most recent.
-func (w *Window) AddShortcut(chord string, act *Action) {
+func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
 	}
@@ -1615,7 +1615,7 @@ func (w *Window) AddShortcut(chord string, act *Action) {
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also elminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
-func (w *Window) TriggerShortcut(chord string) bool {
+func (w *Window) TriggerShortcut(chord key.Chord) bool {
 	// fmt.Printf("attempting shortcut chord: %v\n", chord)
 	if w.Shortcuts == nil {
 		return false
@@ -1774,7 +1774,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 // events, returning its input on whether any existing popup should be deleted
 func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	delPop := false
-	cs := e.ChordString()
+	cs := e.Chord()
 	kf := KeyFun(cs)
 	w.LastModBits = e.Modifiers
 	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
@@ -1796,7 +1796,7 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 			}
 		}
 	}
-	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
 	return delPop
 }
 
@@ -1804,7 +1804,7 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 // events, returning its input on whether any existing popup should be deleted
 func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	delPop := false
-	cs := e.ChordString()
+	cs := e.Chord()
 	kf := KeyFun(cs)
 	w.LastModBits = e.Modifiers
 	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
@@ -1853,7 +1853,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		w.BenchmarkReRender()
 		e.SetProcessed()
 	}
-	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.ChordString())
+	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
 	return delPop
 }
 

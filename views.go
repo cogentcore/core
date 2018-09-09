@@ -27,6 +27,9 @@ type ViewIFace interface {
 
 	// PrefsView opens an interactive view of given preferences object
 	PrefsView(prefs *Preferences)
+
+	// KeyMapsView opens an interactive view of KeyMaps object
+	KeyMapsView(maps *KeyMaps)
 }
 
 // TheViewIFace is the implemenation of the interface, defined in giv package

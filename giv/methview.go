@@ -14,6 +14,7 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
@@ -257,7 +258,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
-		ac.Shortcut = gi.OSShortcut("Command+W")
+		ac.Shortcut = key.Chord("Command+W").OSShortcut()
 		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			vp.Win.OSWin.CloseReq()
 		})
@@ -288,9 +289,9 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		switch pk {
 		case "shortcut":
 			if kf, ok := pv.(gi.KeyFuns); ok {
-				ac.Shortcut = gi.OSShortcut(gi.ActiveKeyMap.ChordForFun(kf))
+				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
 			} else {
-				ac.Shortcut = gi.OSShortcut(kit.ToString(pv))
+				ac.Shortcut = key.Chord(kit.ToString(pv)).OSShortcut()
 			}
 		case "label":
 			ac.Text = kit.ToString(pv)

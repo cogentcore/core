@@ -82,8 +82,8 @@ func mainrun() {
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = `This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <a href="https://github.com/goki/gi">GoGi</a> <i>Widgets</i><br>
-<large>Shortcuts: <kbd>` + prsc + `</kbd> = Preferences,
-<kbd>` + giedsc + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+<large>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
+<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`
 	title.SetProp("text-align", gi.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
 	title.SetProp("vertical-align", gi.AlignCenter)

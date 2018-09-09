@@ -67,9 +67,8 @@ type Preferences struct {
 	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	Colors          ColorPrefs             `desc:"color preferences"`
 	Params          ParamPrefs             `desc:"parameters controlling GUI behavior"`
-	KeyMapNameMaps  KeyMapNameMaps         `desc:"list of standard key map names paired with their key maps"`
-	StdKeyMapName   KeyMapName             `desc:"name of standard key map to use if no CustomKeyMap has been defined -- use InitCustomKeyMap button to set your CustomKeyMap to a standard keymap as a starting point for customization"`
-	CustomKeyMap    KeyMap                 `desc:"customized mapping from keys to interface function -- use StdKeyMap button to set your CustomKeyMap to a standard keymap as a starting point for customizations"`
+	KeyMap          KeyMapName             `desc:"name of key map to use, from among list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
+	SaveKeyMaps     bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	FontFamily      FontName               `desc:"default font family when otherwise not specified"`
@@ -137,7 +136,7 @@ func (p *Preferences) Defaults() {
 	p.FavPaths.SetToDefaults()
 	p.FontFamily = "Go"
 	p.SavedPathsMax = 20
-	p.SetKeyMapNameDefaults()
+	p.KeyMap = DefaultKeyMap
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
@@ -152,7 +151,11 @@ func (p *Preferences) Open() error {
 		// log.Println(err) // ok to be non-existant
 		return err
 	}
-	return json.Unmarshal(b, p)
+	err = json.Unmarshal(b, p)
+	if p.SaveKeyMaps {
+		AvailKeyMaps.OpenPrefs()
+	}
+	return err
 }
 
 // Save Preferences to GoGi standard prefs directory
@@ -167,6 +170,9 @@ func (p *Preferences) Save() error {
 	err = ioutil.WriteFile(pnm, b, 0644)
 	if err != nil {
 		log.Println(err)
+	}
+	if p.SaveKeyMaps {
+		AvailKeyMaps.SavePrefs()
 	}
 	return err
 }
@@ -199,14 +205,8 @@ func (p *Preferences) Apply() {
 	mouse.ScrollWheelRate = p.Params.ScrollWheelRate
 	LocalMainMenu = p.Params.LocalMainMenu
 
-	if p.StdKeyMapName != "" {
-		defmap, _ := StdKeyMapByName(string(p.StdKeyMapName))
-		if defmap != nil {
-			DefaultKeyMap = defmap
-		}
-	}
-	if p.CustomKeyMap != nil {
-		SetActiveKeyMap(&Prefs.CustomKeyMap) // fills in missing pieces
+	if p.KeyMap != "" {
+		SetActiveKeyMapName(p.KeyMap) // fills in missing pieces
 	}
 	if p.FontPaths != nil {
 		paths := append(p.FontPaths, oswin.TheApp.FontPaths()...)
@@ -250,50 +250,6 @@ func (p *Preferences) Update() {
 	}
 }
 
-// KeyMapNameMap represents one name/keymap pair, for display of std key maps.
-type KeyMapNameMap struct {
-	Name   string `width:"20" desc:"name of the keymap item"`
-	KeyMap KeyMap `the KeyMap associated with the name`
-}
-
-// KeyMapNameMaps is a list (slice) of structs of KeyMapNameMap
-type KeyMapNameMaps []KeyMapNameMap
-
-// SetKeyMapNameDefaults sets the KeyMapNameMap pairs to default values
-func (p *Preferences) SetKeyMapNameDefaults() {
-	for i := 0; i < len(StdKeyMapNames); i++ {
-		nm := KeyMapNameMap{StdKeyMapNames[i], *StdKeyMaps[i]}
-		p.KeyMapNameMaps = append(p.KeyMapNameMaps, nm)
-	}
-}
-
-// SetKeyMap installs the given keymap as the current CustomKeyMap, which can
-// then be customized.
-func (p *Preferences) SetKeyMap(kmap *KeyMap) {
-	p.CustomKeyMap = make(KeyMap, len(*kmap))
-	for key, val := range *kmap {
-		p.CustomKeyMap[key] = val
-	}
-}
-
-// InitCustomKeyMap sets StdKeyMapName to given standard keymap and installs it as
-// the current custom keymap, as a starting point for further customization.
-func (p *Preferences) InitCustomKeyMap(mapName KeyMapName) {
-	p.StdKeyMapName = mapName
-	km, _ := StdKeyMapByName(string(mapName))
-	if km != nil {
-		p.SetKeyMap(km)
-	}
-}
-
-// ClearCustomKeyMap removes all items from the custom key map
-// the current custom keymap, as a starting point for further customization.
-func (p *Preferences) ClearCustomKeyMap() {
-	for km := range p.CustomKeyMap {
-		delete(p.CustomKeyMap, km)
-	}
-}
-
 // ScreenInfo returns screen info for all screens on the console.
 func (p *Preferences) ScreenInfo() string {
 	ns := oswin.TheApp.NScreens()
@@ -334,7 +290,15 @@ func (p *Preferences) DeleteSavedWindowGeoms() {
 	WinGeomPrefs.DeleteAll()
 }
 
-// Open colors from a JSON-formatted file.
+// EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
+// load from other files, etc.  Current avail keymaps are saved and loaded
+// with preferences automatically.
+func (p *Preferences) EditKeyMaps() {
+	p.SaveKeyMaps = true
+	TheViewIFace.KeyMapsView(&AvailKeyMaps)
+}
+
+// OpenJSON opens colors from a JSON-formatted file.
 func (p *ColorPrefs) OpenJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
@@ -345,7 +309,7 @@ func (p *ColorPrefs) OpenJSON(filename FileName) error {
 	return json.Unmarshal(b, p)
 }
 
-// Save colors to a JSON-formatted file.
+// SaveJSON saves colors to a JSON-formatted file.
 func (p *ColorPrefs) SaveJSON(filename FileName) error {
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
@@ -454,19 +418,9 @@ var PreferencesProps = ki.Props{
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
-		{"InitCustomKeyMap", ki.Props{
+		{"EditKeyMaps", ki.Props{
 			"icon": "keyboard",
-			"desc": "sets StdKeyMapName to selected standard keymap and installs it as the current custom keymap, as a starting point for further customization.",
-			"Args": ki.PropSlice{
-				{"Map Name", ki.Props{
-					"default-field": "StdKeyMapName",
-				}},
-			}},
-		},
-		{"sep-key", ki.BlankProp{}},
-		{"ClearCustomKeyMap", ki.Props{
-			"icon": "keyboard",
-			"desc": "removes all key function pairs from the key map, does not change the name of the current std key map",
+			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current avail keymaps are saved and loaded with preferences automatically.",
 		},
 		},
 	},

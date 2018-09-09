@@ -118,7 +118,11 @@ var LabelSelectors = []string{":active", ":inactive", ":selected"}
 // SetText sets the text and updates the rendered version
 func (g *Label) SetText(txt string) {
 	g.Text = txt
-	g.Render.SetHTML(g.Text, &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
+	if g.Text == "" {
+		g.Render.SetHTML(" ", &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
+	} else {
+		g.Render.SetHTML(g.Text, &g.Sty.Font, &g.Sty.UnContext, g.CSSAgg)
+	}
 	spc := g.Sty.BoxSpace()
 	sz := g.LayData.AllocSize
 	if sz.IsZero() {

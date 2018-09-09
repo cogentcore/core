@@ -1906,7 +1906,7 @@ func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	win := tv.ParentWindow()
 
 	if gi.PopupIsCompleter(win.Popup) {

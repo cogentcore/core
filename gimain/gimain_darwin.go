@@ -9,6 +9,6 @@ package gimain
 import "github.com/goki/gi"
 
 func init() {
-	gi.DefaultKeyMap = &gi.MacKeyMap
-	gi.ActiveKeyMap = gi.DefaultKeyMap
+	gi.DefaultKeyMap = gi.KeyMapName("MacStd")
+	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
 }

@@ -24,10 +24,6 @@ func PrefsView(p *gi.Preferences) {
 	height := 800
 	win := gi.NewWindow2D(winm, "GoGi Preferences", width, height, true)
 
-	if p.StdKeyMapName == "" {
-		p.StdKeyMapName = gi.KeyMapName(gi.StdKeyMapName(gi.DefaultKeyMap))
-	}
-
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 

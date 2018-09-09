@@ -26,7 +26,7 @@ type ButtonBase struct {
 	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
 	Icon         IconName             `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName             `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
-	Shortcut     string               `xml:"shortcut" desc:"keyboard shortcut -- todo: need to figure out ctrl, alt etc"`
+	Shortcut     key.Chord            `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform"`
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
@@ -443,7 +443,7 @@ func ButtonEvents(bw ButtonWidget) {
 			return
 		}
 		kt := d.(*key.ChordEvent)
-		kf := KeyFun(kt.ChordString())
+		kf := KeyFun(kt.Chord())
 		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bb.Viewport.IsCompleter()) {
 				kt.SetProcessed()

@@ -5,15 +5,16 @@
 package gi
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -74,18 +75,17 @@ const (
 
 var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, false, StylePropProps, "KeyFun")
 
-func (ev KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// KeyChord represents the key chord associated with a given key function --
-// it is linked to the KeyChordEdit in the giv ValueView system so you can
-// just type keys to set key chords.
-type KeyChord string
+func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
+func (kf *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }
 
 // KeyMap is a map between a key sequence (chord) and a specific KeyFun
 // function.  This mapping must be unique, in that each chord has unique
 // KeyFun, but multiple chords can trigger the same function.
-type KeyMap map[KeyChord]KeyFuns
+type KeyMap map[key.Chord]KeyFuns
+
+// ActiveKeyMap points to the active map -- users can set this to an
+// alternative map in Prefs
+var ActiveKeyMap *KeyMap
 
 // SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
 // prior to setting it to ensure that it is a valid, complete map
@@ -94,75 +94,31 @@ func SetActiveKeyMap(km *KeyMap) {
 	ActiveKeyMap = km
 }
 
-// KeyFun translates chord into keyboard function -- use oswin key.ChordString
+// SetActiveKeyMapName sets the current ActiveKeyMap by name from those
+// defined in AvailKeyMaps, calling Update on the map prior to setting it to
+// ensure that it is a valid, complete map
+func SetActiveKeyMapName(mapnm KeyMapName) {
+	km, _, ok := AvailKeyMaps.MapByName(mapnm)
+	if ok {
+		SetActiveKeyMap(km)
+	}
+}
+
+// KeyFun translates chord into keyboard function -- use oswin key.Chord
 // to get chord
-func KeyFun(chord string) KeyFuns {
+func KeyFun(chord key.Chord) KeyFuns {
 	kf := KeyFunNil
 	if chord != "" {
-		kf = (*ActiveKeyMap)[KeyChord(chord)]
+		kf = (*ActiveKeyMap)[chord]
 		// fmt.Printf("chord: %v = %v\n", chord, kf)
 	}
 	return kf
 }
 
-// StdKeyMaps collects a list of standard keymap options
-var StdKeyMaps = []*KeyMap{
-	&MacKeyMap,
-	&MacEmacsKeyMap,
-	&LinuxKeyMap,
-	&LinuxEmacsKeyMap,
-	&WindowsKeyMap,
-	&ChromeKeyMap,
-}
-
-// StdKeyMapNames lists names of maps in same order as StdKeyMaps
-var StdKeyMapNames = []string{
-	"MacKeyMap",
-	"MacEmacsKeyMap",
-	"LinuxKeyMap",
-	"LinuxEmacsKeyMap",
-	"WindowsKeyMap",
-	"ChromeKeyMap",
-}
-
-// KeyMapName has an associated ValueView for selecting from the list of
-// standard key map names, for use in preferences etc.
-type KeyMapName string
-
-// DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
-// depending on platform
-var DefaultKeyMap = &MacEmacsKeyMap
-
-// ActiveKeyMap points to the active map -- users can set this to an
-// alternative map in Prefs
-var ActiveKeyMap = DefaultKeyMap
-
-// StdKeyMapByName returns a standard keymap and index within StdKeyMaps* tables by name.
-func StdKeyMapByName(name string) (*KeyMap, int) {
-	for i, nm := range StdKeyMapNames {
-		if nm == name {
-			return StdKeyMaps[i], i
-		}
-	}
-	fmt.Printf("gi.StdKeyMapByName key map named: %v not found\n", name)
-	return nil, -1
-}
-
-// StdKeyMapName returns name of a standard key map
-func StdKeyMapName(km *KeyMap) string {
-	for i, sk := range StdKeyMaps {
-		if sk == km {
-			return StdKeyMapNames[i]
-		}
-	}
-	fmt.Printf("gi.StdKeyMapName key map not found\n")
-	return ""
-}
-
 // KeyMapItem records one element of the key map -- used for organizing the map.
 type KeyMapItem struct {
-	Key KeyChord `desc:"the key chord that activates a function"`
-	Fun KeyFuns  `desc:"the function of that key"`
+	Key key.Chord `desc:"the key chord that activates a function"`
+	Fun KeyFuns   `desc:"the function of that key"`
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
@@ -177,10 +133,10 @@ func (km *KeyMap) ToSlice() []KeyMapItem {
 }
 
 // ChordForFun returns first key chord trigger for given KeyFun in map
-func (km *KeyMap) ChordForFun(kf KeyFuns) string {
+func (km *KeyMap) ChordForFun(kf KeyFuns) key.Chord {
 	for key, fun := range *km {
 		if fun == kf {
-			return string(key)
+			return key
 		}
 	}
 	return ""
@@ -196,8 +152,9 @@ func (km *KeyMap) Update() {
 			delete(*km, key)
 		}
 	}
+	dkm, _, _ := AvailKeyMaps.MapByName(DefaultKeyMap)
 
-	dkms := DefaultKeyMap.ToSlice()
+	dkms := dkm.ToSlice()
 	kms := km.ToSlice()
 
 	addkm := make([]KeyMapItem, 0)
@@ -232,7 +189,7 @@ func (km *KeyMap) Update() {
 			s := dki.Fun.String()
 			s = strings.TrimPrefix(s, "KeyFun")
 			s = "- Not Set - " + s
-			addkm[len(addkm)-1].Key = KeyChord(s)
+			addkm[len(addkm)-1].Key = key.Chord(s)
 		} else if dki.Fun > mmi.Fun { // shouldn't happen but..
 			mi++
 		} else {
@@ -248,132 +205,20 @@ func (km *KeyMap) Update() {
 /////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-// Shortcuts is a map between a key sequence (chord) and a specific Action
-// that can be triggered.  This mapping must be unique, in that each chord has
-// unique Action, and generally each Action only has a single chord as well,
-// though this is not strictly enforced.  Shortcuts are evaluated *after* the
+// Shortcuts is a map between a key chord and a specific Action that can be
+// triggered.  This mapping must be unique, in that each chord has unique
+// Action, and generally each Action only has a single chord as well, though
+// this is not strictly enforced.  Shortcuts are evaluated *after* the
 // standard KeyMap event processing, so any conflicts are resolved in favor of
 // the local widget's key event processing, with the shortcut only operating
 // when no conflicting widgets are in focus.  Shortcuts are always window-wide
 // and are intended for global window / toolbar actions.  Widget-specific key
 // functions should be be handeled directly within widget key event
 // processing.
-type Shortcuts map[string]*Action
-
-// OSShortcut translates Command into either Control or Meta depending on platform
-func OSShortcut(sc string) string {
-	if oswin.TheApp.Platform() == oswin.MacOS {
-		sc = strings.Replace(sc, "Command+", "Meta+", -1)
-	} else {
-		sc = strings.Replace(sc, "Command+", "Control+", -1)
-	}
-	return sc
-}
+type Shortcuts map[key.Chord]*Action
 
 /////////////////////////////////////////////////////////////////////////////////
-// KeyChordEdit
-
-// KeyChordEdit is a label widget that shows a key chord string, and, when in
-// focus (after being clicked) will update to whatever key chord is typed --
-// used for representing and editing key chords.
-type KeyChordEdit struct {
-	Label
-	FocusActive bool      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
-}
-
-var KiT_KeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
-
-var KeyChordEditProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
-	"vertical-align":   AlignTop,
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Control,
-	"max-width":        -1,
-	LabelSelectors[LabelActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	LabelSelectors[LabelInactive]: ki.Props{
-		"color": "lighter-50",
-	},
-	LabelSelectors[LabelSelected]: ki.Props{
-		"background-color": &Prefs.Colors.Select,
-	},
-}
-
-// ChordUpdated emeits KeyChordSig when a new chord has been entered
-func (kc *KeyChordEdit) ChordUpdated() {
-	kc.KeyChordSig.Emit(kc.This, 0, kc.Text)
-}
-
-func (kc *KeyChordEdit) Style2D() {
-	kc.SetCanFocusIfActive()
-	kc.Selectable = true
-	kc.Redrawable = true
-	kc.Label.Style2D()
-}
-
-func (kc *KeyChordEdit) KeyChordEditMouseEvent() {
-	kc.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.Event)
-		lb := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
-		if me.Action == mouse.Press && me.Button == mouse.Left {
-			if lb.Selectable {
-				lb.SetSelectedState(!lb.IsSelected())
-				if lb.IsSelected() {
-					lb.GrabFocus()
-				}
-				lb.EmitSelectedSignal()
-				lb.UpdateSig()
-			}
-		}
-		if me.Action == mouse.Release && me.Button == mouse.Right {
-			me.SetProcessed()
-			lb.EmitContextMenuSignal()
-			lb.This.(Node2D).ContextMenu()
-		}
-	})
-}
-
-func (kc *KeyChordEdit) KeyChordEditKeyChordEvent() {
-	kc.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
-		kt := d.(*key.ChordEvent)
-		kcc.SetTextAction(kt.ChordString()) // that's easy!
-		kcc.ChordUpdated()
-	})
-}
-
-func (kc *KeyChordEdit) ConnectEvents2D() {
-	kc.LabelHoverEvent()
-	kc.KeyChordEditMouseEvent()
-	kc.KeyChordEditKeyChordEvent()
-}
-
-func (kc *KeyChordEdit) FocusChanged2D(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		kc.FocusActive = false
-		kc.ChordUpdated()
-		kc.UpdateSig()
-	case FocusGot:
-		kc.FocusActive = true
-		kc.ScrollToMe()
-		kc.EmitFocusedSignal()
-		kc.UpdateSig()
-	case FocusInactive:
-		kc.FocusActive = false
-		kc.ChordUpdated()
-		kc.UpdateSig()
-	case FocusActive:
-		kc.FocusActive = true
-		kc.ScrollToMe()
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Std Keymaps
+// KeyMaps -- list of KeyMap's
 
 // note: shift and meta modifiers for navigation keys do select + move
 
@@ -381,436 +226,617 @@ func (kc *KeyChordEdit) FocusChanged2D(change FocusChanges) {
 // display of such items in menus will randomly display one of the
 // options. This can be considered a feature, not a bug!
 
-// MacEmacsKeyMap defines emacs-based navigation for mac
-var MacEmacsKeyMap = KeyMap{
-	"UpArrow":             KeyFunMoveUp,
-	"Shift+UpArrow":       KeyFunMoveUp,
-	"Meta+UpArrow":        KeyFunMoveUp,
-	"Control+P":           KeyFunMoveUp,
-	"Shift+Control+P":     KeyFunMoveUp,
-	"Meta+Control+P":      KeyFunMoveUp,
-	"DownArrow":           KeyFunMoveDown,
-	"Shift+DownArrow":     KeyFunMoveDown,
-	"Meta+DownArrow":      KeyFunMoveDown,
-	"Control+N":           KeyFunMoveDown,
-	"Shift+Control+N":     KeyFunMoveDown,
-	"Meta+Control+N":      KeyFunMoveDown,
-	"RightArrow":          KeyFunMoveRight,
-	"Shift+RightArrow":    KeyFunMoveRight,
-	"Meta+RightArrow":     KeyFunEnd,
-	"Control+F":           KeyFunMoveRight,
-	"Shift+Control+F":     KeyFunMoveRight,
-	"Meta+Control+F":      KeyFunMoveRight,
-	"LeftArrow":           KeyFunMoveLeft,
-	"Shift+LeftArrow":     KeyFunMoveLeft,
-	"Meta+LeftArrow":      KeyFunHome,
-	"Control+B":           KeyFunMoveLeft,
-	"Shift+Control+B":     KeyFunMoveLeft,
-	"Meta+Control+B":      KeyFunMoveLeft,
-	"Control+UpArrow":     KeyFunPageUp,
-	"Control+U":           KeyFunPageUp,
-	"Control+DownArrow":   KeyFunPageDown,
-	"Shift+Control+V":     KeyFunPageDown,
-	"Alt+V":               KeyFunPageDown,
-	"Control+RightArrow":  KeyFunPageRight,
-	"Control+LeftArrow":   KeyFunPageLeft,
-	"Home":                KeyFunHome,
-	"Control+A":           KeyFunHome,
-	"Alt+LeftArrow":       KeyFunHome,
-	"End":                 KeyFunEnd,
-	"Control+E":           KeyFunEnd,
-	"Alt+RightArrow":      KeyFunEnd,
-	"Tab":                 KeyFunFocusNext,
-	"Shift+Tab":           KeyFunFocusPrev,
-	"ReturnEnter":         KeyFunSelectItem,
-	"KeypadEnter":         KeyFunSelectItem,
-	"Shift+Control+A":     KeyFunSelectAll,
-	"Meta+A":              KeyFunSelectAll,
-	"Control+G":           KeyFunCancelSelect,
-	"Control+Spacebar":    KeyFunSelectMode,
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	"Control+D":           KeyFunDelete,
-	"Control+H":           KeyFunBackspace,
-	"Control+K":           KeyFunKill,
-	"Alt+W":               KeyFunCopy,
-	"Control+C":           KeyFunCopy,
-	"Meta+C":              KeyFunCopy,
-	"Control+W":           KeyFunCut,
-	"Control+X":           KeyFunCut,
-	"Meta+X":              KeyFunCut,
-	"Control+Y":           KeyFunPaste,
-	"Control+V":           KeyFunPaste,
-	"Meta+V":              KeyFunPaste,
-	"Control+M":           KeyFunDuplicate,
-	"Control+Z":           KeyFunUndo,
-	"Meta+Z":              KeyFunUndo,
-	"Control+/":           KeyFunUndo,
-	"Shift+Control+Z":     KeyFunRedo,
-	"Shift+Meta+Z":        KeyFunRedo,
-	"Control+I":           KeyFunInsert,
-	"Control+O":           KeyFunInsertAfter,
-	"Control+Alt+I":       KeyFunGoGiEditor,
-	"Shift+Control+I":     KeyFunGoGiEditor,
-	"Shift+Meta+=":        KeyFunZoomIn,
-	"Meta+=":              KeyFunZoomIn,
-	"Meta+-":              KeyFunZoomOut,
-	"Control+=":           KeyFunZoomIn,
-	"Shift+Control++":     KeyFunZoomIn,
-	"Shift+Meta+-":        KeyFunZoomOut,
-	"Control+-":           KeyFunZoomOut,
-	"Shift+Control+_":     KeyFunZoomOut,
-	"Control+Alt+P":       KeyFunPrefs,
-	"F5":                  KeyFunRefresh,
-	"Control+L":           KeyFunRecenter,
-	"Control+.":           KeyFunComplete,
+// KeyMapName has an associated ValueView for selecting from the list of
+// available key map names, for use in preferences etc.
+type KeyMapName string
+
+// DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
+// depending on platform
+var DefaultKeyMap = KeyMapName("MacEmacs")
+
+// KeyMapsItem is an entry in a KeyMaps list
+type KeyMapsItem struct {
+	Name string `width:"20" desc:"name of keymap"`
+	Desc string `desc:"description of keymap"`
+	Map  KeyMap `desc:keymap"`
 }
 
-// todo: following maps need work
+// KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create
+// a custom one, just duplicate an existing map, rename, and customize
+type KeyMaps []KeyMapsItem
 
-// MacKeyMap defines standard mac keys
-var MacKeyMap = KeyMap{
-	"UpArrow":             KeyFunMoveUp,
-	"Shift+UpArrow":       KeyFunMoveUp,
-	"Meta+UpArrow":        KeyFunMoveUp,
-	"Control+P":           KeyFunMoveUp,
-	"Shift+Control+P":     KeyFunMoveUp,
-	"Meta+Control+P":      KeyFunMoveUp,
-	"DownArrow":           KeyFunMoveDown,
-	"Shift+DownArrow":     KeyFunMoveDown,
-	"Meta+DownArrow":      KeyFunMoveDown,
-	"Control+N":           KeyFunMoveDown,
-	"Shift+Control+N":     KeyFunMoveDown,
-	"Meta+Control+N":      KeyFunMoveDown,
-	"RightArrow":          KeyFunMoveRight,
-	"Shift+RightArrow":    KeyFunMoveRight,
-	"Meta+RightArrow":     KeyFunEnd,
-	"Control+F":           KeyFunMoveRight,
-	"Shift+Control+F":     KeyFunMoveRight,
-	"Meta+Control+F":      KeyFunMoveRight,
-	"LeftArrow":           KeyFunMoveLeft,
-	"Shift+LeftArrow":     KeyFunMoveLeft,
-	"Meta+LeftArrow":      KeyFunHome,
-	"Control+B":           KeyFunMoveLeft,
-	"Shift+Control+B":     KeyFunMoveLeft,
-	"Meta+Control+B":      KeyFunMoveLeft,
-	"Control+UpArrow":     KeyFunPageUp,
-	"Control+U":           KeyFunPageUp,
-	"Control+DownArrow":   KeyFunPageDown,
-	"Shift+Control+V":     KeyFunPageDown,
-	"Alt+V":               KeyFunPageDown,
-	"Control+RightArrow":  KeyFunPageRight,
-	"Control+LeftArrow":   KeyFunPageLeft,
-	"Home":                KeyFunHome,
-	"Control+A":           KeyFunHome,
-	"Alt+LeftArrow":       KeyFunHome,
-	"End":                 KeyFunEnd,
-	"Control+E":           KeyFunEnd,
-	"Alt+RightArrow":      KeyFunEnd,
-	"Tab":                 KeyFunFocusNext,
-	"Shift+Tab":           KeyFunFocusPrev,
-	"ReturnEnter":         KeyFunSelectItem,
-	"KeypadEnter":         KeyFunSelectItem,
-	"Shift+Control+A":     KeyFunSelectAll,
-	"Meta+A":              KeyFunSelectAll,
-	"Control+G":           KeyFunCancelSelect,
-	"Control+Spacebar":    KeyFunSelectMode,
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	"Control+D":           KeyFunDelete,
-	"Control+H":           KeyFunBackspace,
-	"Control+K":           KeyFunKill,
-	"Alt+W":               KeyFunCopy,
-	"Control+C":           KeyFunCopy,
-	"Meta+C":              KeyFunCopy,
-	"Control+W":           KeyFunCut,
-	"Control+X":           KeyFunCut,
-	"Meta+X":              KeyFunCut,
-	"Control+Y":           KeyFunPaste,
-	"Control+V":           KeyFunPaste,
-	"Meta+V":              KeyFunPaste,
-	"Control+M":           KeyFunDuplicate,
-	"Control+Z":           KeyFunUndo,
-	"Meta+Z":              KeyFunUndo,
-	"Shift+Control+Z":     KeyFunRedo,
-	"Shift+Meta+Z":        KeyFunRedo,
-	"Control+I":           KeyFunInsert,
-	"Control+O":           KeyFunInsertAfter,
-	"Control+Alt+I":       KeyFunGoGiEditor,
-	"Control+Alt+E":       KeyFunGoGiEditor,
-	"Shift+Control+I":     KeyFunGoGiEditor,
-	"Shift+Meta+=":        KeyFunZoomIn,
-	"Meta+=":              KeyFunZoomIn,
-	"Meta+-":              KeyFunZoomOut,
-	"Control+=":           KeyFunZoomIn,
-	"Shift+Control++":     KeyFunZoomIn,
-	"Shift+Meta+-":        KeyFunZoomOut,
-	"Control+-":           KeyFunZoomOut,
-	"Shift+Control+_":     KeyFunZoomOut,
-	"Control+Alt+P":       KeyFunPrefs,
-	"F5":                  KeyFunRefresh,
-	"Control+L":           KeyFunRecenter,
-	"Control+.":           KeyFunComplete,
+var KiT_KeyMaps = kit.Types.AddType(&KeyMaps{}, KeyMapsProps)
+
+// AvailKeyMaps is the current list of available keymaps for use -- can be
+// loaded / saved / edited with preferences.  This is set to StdKeyMaps at
+// startup.
+var AvailKeyMaps KeyMaps
+
+func init() {
+	AvailKeyMaps.CopyFrom(StdKeyMaps)
 }
 
-// LinuxKeyMap is a standard key map for generic Linux style bindings
-var LinuxKeyMap = KeyMap{
-	"UpArrow": KeyFunMoveUp,
-	// "Control+P":           KeyFunMoveUp, // Print
-	"Shift+UpArrow": KeyFunMoveUp,
-	"DownArrow":     KeyFunMoveDown,
-	// "Control+N":           KeyFunMoveDown, // New
-	"Shift+DownArrow":  KeyFunMoveDown,
-	"RightArrow":       KeyFunMoveRight,
-	"Shift+RightArrow": KeyFunMoveRight,
-	// "Control+F":           KeyFunMoveRight, // Find
-	"LeftArrow":       KeyFunMoveLeft,
-	"Shift+LeftArrow": KeyFunMoveLeft,
-	// "Control+B":           KeyFunMoveLeft, // bold
-	"Control+UpArrow": KeyFunPageUp,
-	// "Control+U":           KeyFunPageUp, // Underline
-	"Control+DownArrow":  KeyFunPageDown,
-	"Control+RightArrow": KeyFunPageRight,
-	"Control+LeftArrow":  KeyFunPageLeft,
-	"Home":               KeyFunHome,
-	"Alt+LeftArrow":      KeyFunHome,
-	"End":                KeyFunEnd,
-	// "Control+E":           KeyFunEnd, // Search Google
-	"Alt+RightArrow":  KeyFunEnd,
-	"Tab":             KeyFunFocusNext,
-	"Shift+Tab":       KeyFunFocusPrev,
-	"ReturnEnter":     KeyFunSelectItem,
-	"KeypadEnter":     KeyFunSelectItem,
-	"Control+A":       KeyFunSelectAll,
-	"Shift+Control+A": KeyFunCancelSelect,
-	//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	// "Control+D":           KeyFunDelete, // Bookmark
-	// "Control+H":       KeyFunBackspace, // Help
-	"Control+K": KeyFunKill,
-	"Control+C": KeyFunCopy,
-	// "Control+W":       KeyFunCut, // Close Current Tab
-	"Control+X":       KeyFunCut,
-	"Control+V":       KeyFunPaste,
-	"Control+M":       KeyFunDuplicate,
-	"Control+Z":       KeyFunUndo,
-	"Shift+Control+Z": KeyFunRedo,
-	// "Control+I":       KeyFunInsert, // Italic
-	// "Control+O":       KeyFunInsertAfter, // Open
-	"Shift+Control+I": KeyFunGoGiEditor,
-	"Control+=":       KeyFunZoomIn,
-	"Shift+Control++": KeyFunZoomIn,
-	"Control+-":       KeyFunZoomOut,
-	"Shift+Control+_": KeyFunZoomOut,
-	"Shift+Control+P": KeyFunPrefs,
-	"Control+Alt+P":   KeyFunPrefs,
-	"F5":              KeyFunRefresh,
-	"Control+L":       KeyFunRecenter,
-	"Control+.":       KeyFunComplete,
+// MapByName returns a keymap and index by name -- returns false and emits a
+// message to stdout if not found
+func (km *KeyMaps) MapByName(name KeyMapName) (*KeyMap, int, bool) {
+	for i, it := range *km {
+		if it.Name == string(name) {
+			return &it.Map, i, true
+		}
+	}
+	fmt.Printf("gi.KeyMaps.MapByName: key map named: %v not found\n", name)
+	return nil, -1, false
 }
 
-// LinuxEmacsKeyMap defines standard emacs-based navigation for linux
-var LinuxEmacsKeyMap = KeyMap{
-	"UpArrow":            KeyFunMoveUp,
-	"Shift+UpArrow":      KeyFunMoveUp,
-	"Meta+UpArrow":       KeyFunMoveUp,
-	"Control+P":          KeyFunMoveUp,
-	"Shift+Control+P":    KeyFunMoveUp,
-	"Meta+Control+P":     KeyFunMoveUp,
-	"DownArrow":          KeyFunMoveDown,
-	"Shift+DownArrow":    KeyFunMoveDown,
-	"Meta+DownArrow":     KeyFunMoveDown,
-	"Control+N":          KeyFunMoveDown,
-	"Shift+Control+N":    KeyFunMoveDown,
-	"Meta+Control+N":     KeyFunMoveDown,
-	"RightArrow":         KeyFunMoveRight,
-	"Shift+RightArrow":   KeyFunMoveRight,
-	"Meta+RightArrow":    KeyFunEnd,
-	"Control+F":          KeyFunMoveRight,
-	"Shift+Control+F":    KeyFunMoveRight,
-	"Meta+Control+F":     KeyFunMoveRight,
-	"LeftArrow":          KeyFunMoveLeft,
-	"Shift+LeftArrow":    KeyFunMoveLeft,
-	"Meta+LeftArrow":     KeyFunHome,
-	"Control+B":          KeyFunMoveLeft,
-	"Shift+Control+B":    KeyFunMoveLeft,
-	"Meta+Control+B":     KeyFunMoveLeft,
-	"Control+UpArrow":    KeyFunPageUp,
-	"Control+U":          KeyFunPageUp,
-	"Control+DownArrow":  KeyFunPageDown,
-	"Shift+Control+V":    KeyFunPageDown,
-	"Alt+V":              KeyFunPageDown,
-	"Control+RightArrow": KeyFunPageRight,
-	"Control+LeftArrow":  KeyFunPageLeft,
-	"Home":               KeyFunHome,
-	"Control+A":          KeyFunHome,
-	"Shift+Control+A":    KeyFunHome,
-	"Alt+LeftArrow":      KeyFunHome,
-	"End":                KeyFunEnd,
-	"Control+E":          KeyFunEnd,
-	"Shift+Control+E":    KeyFunEnd,
-	"Alt+RightArrow":     KeyFunEnd,
-	"Tab":                KeyFunFocusNext,
-	"Shift+Tab":          KeyFunFocusPrev,
-	"ReturnEnter":        KeyFunSelectItem,
-	"KeypadEnter":        KeyFunSelectItem,
-	// "Shift+Control+A":     KeyFunSelectAll,
-	"Meta+A":              KeyFunSelectAll,
-	"Control+G":           KeyFunCancelSelect,
-	"Control+Spacebar":    KeyFunSelectMode,
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	"Control+D":           KeyFunDelete,
-	"Control+H":           KeyFunBackspace,
-	"Control+K":           KeyFunKill,
-	"Alt+W":               KeyFunCopy,
-	"Control+C":           KeyFunCopy,
-	"Meta+C":              KeyFunCopy,
-	"Control+W":           KeyFunCut,
-	"Control+X":           KeyFunCut,
-	"Meta+X":              KeyFunCut,
-	"Control+Y":           KeyFunPaste,
-	"Control+V":           KeyFunPaste,
-	"Meta+V":              KeyFunPaste,
-	"Control+M":           KeyFunDuplicate,
-	"Control+I":           KeyFunInsert,
-	"Control+O":           KeyFunInsertAfter,
-	"Control+Alt+I":       KeyFunGoGiEditor,
-	"Control+Alt+E":       KeyFunGoGiEditor,
-	"Shift+Control+I":     KeyFunGoGiEditor,
-	"Shift+Meta+=":        KeyFunZoomIn,
-	"Meta+=":              KeyFunZoomIn,
-	"Meta+-":              KeyFunZoomOut,
-	"Control+=":           KeyFunZoomIn,
-	"Shift+Control++":     KeyFunZoomIn,
-	"Shift+Meta+-":        KeyFunZoomOut,
-	"Control+-":           KeyFunZoomOut,
-	"Shift+Control+_":     KeyFunZoomOut,
-	"Control+Alt+P":       KeyFunPrefs,
-	"F5":                  KeyFunRefresh,
-	"Control+L":           KeyFunRecenter,
-	"Control+.":           KeyFunComplete,
+// func (km KeyMaps) MarshalJSON() ([]byte, error)  { return json.MarshalIndent(km, "", "  ") }
+// func (km *KeyMaps) UnmarshalJSON(b []byte) error { return json.Unmarshal(b, km) }
+
+// PrefsKeyMapsFileName is the name of the preferences file in GoGi prefs
+// directory for saving / loading the default AvailKeyMaps key maps list
+var PrefsKeyMapsFileName = "key_maps_prefs.json"
+
+// OpenJSON opens keymaps from a JSON-formatted file.
+func (km *KeyMaps) OpenJSON(filename FileName) error {
+	b, err := ioutil.ReadFile(string(filename))
+	if err != nil {
+		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, km)
 }
 
-// WindowsKeyMap is a standard key map for generic Windows style bindings
-var WindowsKeyMap = KeyMap{
-	"UpArrow": KeyFunMoveUp,
-	// "Control+P":           KeyFunMoveUp, // Print
-	"Shift+UpArrow": KeyFunMoveUp,
-	"DownArrow":     KeyFunMoveDown,
-	// "Control+N":           KeyFunMoveDown, // New
-	"Shift+DownArrow":  KeyFunMoveDown,
-	"RightArrow":       KeyFunMoveRight,
-	"Shift+RightArrow": KeyFunMoveRight,
-	// "Control+F":           KeyFunMoveRight, // Find
-	"LeftArrow":       KeyFunMoveLeft,
-	"Shift+LeftArrow": KeyFunMoveLeft,
-	// "Control+B":           KeyFunMoveLeft, // bold
-	"Control+UpArrow": KeyFunPageUp,
-	// "Control+U":           KeyFunPageUp, // Underline
-	"Control+DownArrow":  KeyFunPageDown,
-	"Control+RightArrow": KeyFunPageRight,
-	"Control+LeftArrow":  KeyFunPageLeft,
-	"Home":               KeyFunHome,
-	"Alt+LeftArrow":      KeyFunHome,
-	"End":                KeyFunEnd,
-	// "Control+E":           KeyFunEnd, // Search Google
-	"Alt+RightArrow":  KeyFunEnd,
-	"Tab":             KeyFunFocusNext,
-	"Shift+Tab":       KeyFunFocusPrev,
-	"ReturnEnter":     KeyFunSelectItem,
-	"KeypadEnter":     KeyFunSelectItem,
-	"Control+A":       KeyFunSelectAll,
-	"Shift+Control+A": KeyFunCancelSelect,
-	//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	// "Control+D":           KeyFunDelete, // Bookmark
-	// "Control+H":       KeyFunBackspace, // Help
-	"Control+K": KeyFunKill,
-	"Control+C": KeyFunCopy,
-	// "Control+W":       KeyFunCut, // Close Current Tab
-	"Control+X": KeyFunCut,
-	"Control+V": KeyFunPaste,
-	"Control+M": KeyFunDuplicate,
-	// "Control+I":       KeyFunInsert, // Italic
-	// "Control+O":       KeyFunInsertAfter, // Open
-	"Shift+Control+I": KeyFunGoGiEditor,
-	"Control+=":       KeyFunZoomIn,
-	"Shift+Control++": KeyFunZoomIn,
-	"Control+-":       KeyFunZoomOut,
-	"Shift+Control+_": KeyFunZoomOut,
-	"Shift+Control+P": KeyFunPrefs,
-	"Control+Alt+P":   KeyFunPrefs,
-	"F5":              KeyFunRefresh,
-	"Control+L":       KeyFunRecenter,
-	"Control+.":       KeyFunComplete,
+// SaveJSON saves keymaps to a JSON-formatted file.
+func (km *KeyMaps) SaveJSON(filename FileName) error {
+	b, err := json.MarshalIndent(km, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(string(filename), b, 0644)
+	if err != nil {
+		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		log.Println(err)
+	}
+	return err
 }
 
-// ChromeKeyMap is a standard key map for google / chrome style bindings
-var ChromeKeyMap = KeyMap{
-	"UpArrow": KeyFunMoveUp,
-	// "Control+P":           KeyFunMoveUp, // Print
-	"Shift+UpArrow": KeyFunMoveUp,
-	"DownArrow":     KeyFunMoveDown,
-	// "Control+N":           KeyFunMoveDown, // New
-	"Shift+DownArrow":  KeyFunMoveDown,
-	"RightArrow":       KeyFunMoveRight,
-	"Shift+RightArrow": KeyFunMoveRight,
-	// "Control+F":           KeyFunMoveRight, // Find
-	"LeftArrow":       KeyFunMoveLeft,
-	"Shift+LeftArrow": KeyFunMoveLeft,
-	// "Control+B":           KeyFunMoveLeft, // bold
-	"Control+UpArrow": KeyFunPageUp,
-	// "Control+U":           KeyFunPageUp, // Underline
-	"Control+DownArrow":  KeyFunPageDown,
-	"Control+RightArrow": KeyFunPageRight,
-	"Control+LeftArrow":  KeyFunPageLeft,
-	"Home":               KeyFunHome,
-	"Alt+LeftArrow":      KeyFunHome,
-	"End":                KeyFunEnd,
-	// "Control+E":           KeyFunEnd, // Search Google
-	"Alt+RightArrow":  KeyFunEnd,
-	"Tab":             KeyFunFocusNext,
-	"Shift+Tab":       KeyFunFocusPrev,
-	"ReturnEnter":     KeyFunSelectItem,
-	"KeypadEnter":     KeyFunSelectItem,
-	"Control+A":       KeyFunSelectAll,
-	"Shift+Control+A": KeyFunCancelSelect,
-	//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
-	"Control+ReturnEnter": KeyFunAccept,
-	"Escape":              KeyFunAbort,
-	"DeleteBackspace":     KeyFunBackspace,
-	"DeleteForward":       KeyFunDelete,
-	// "Control+D":           KeyFunDelete, // Bookmark
-	// "Control+H":       KeyFunBackspace, // Help
-	"Control+K": KeyFunKill,
-	"Control+C": KeyFunCopy,
-	// "Control+W":       KeyFunCut, // Close Current Tab
-	"Control+X": KeyFunCut,
-	"Control+V": KeyFunPaste,
-	"Control+M": KeyFunDuplicate,
-	// "Control+I":       KeyFunInsert, // Italic
-	// "Control+O":       KeyFunInsertAfter, // Open
-	"Shift+Control+I": KeyFunGoGiEditor,
-	"Control+=":       KeyFunZoomIn,
-	"Shift+Control++": KeyFunZoomIn,
-	"Control+-":       KeyFunZoomOut,
-	"Shift+Control+_": KeyFunZoomOut,
-	"Shift+Control+P": KeyFunPrefs,
-	"Control+Alt+P":   KeyFunPrefs,
-	"F5":              KeyFunRefresh,
-	"Control+L":       KeyFunRecenter,
-	"Control+.":       KeyFunComplete,
+// OpenPrefs opens KeyMaps from GoGi standard prefs directory, using PrefsKeyMapsFileName
+func (km *KeyMaps) OpenPrefs() error {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	return km.OpenJSON(FileName(pnm))
+}
+
+// SavePrefs saves KeyMaps to GoGi standard prefs directory, using PrefsKeyMapsFileName
+func (km *KeyMaps) SavePrefs() error {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	return km.SaveJSON(FileName(pnm))
+}
+
+// CopyFrom copies keymaps from given other map
+func (km *KeyMaps) CopyFrom(cp KeyMaps) {
+	b, _ := json.Marshal(cp)
+	json.Unmarshal(b, km)
+}
+
+// RevertToStd reverts this map to using the StdKeyMaps that are compiled into
+// the program and have all the lastest key functions bound to standard
+// values.
+func (km *KeyMaps) RevertToStd() {
+	km.CopyFrom(StdKeyMaps)
+}
+
+// ViewStd shows the standard maps that are compiled into the program and have
+// all the lastest key functions bound to standard values.  Useful for
+// comparing against custom maps.
+func (km *KeyMaps) ViewStd() {
+	TheViewIFace.KeyMapsView(&StdKeyMaps)
+}
+
+// KeyMapsProps define the ToolBar and MenuBar for TableView of KeyMaps, e.g., giv.KeyMapsView
+var KeyMapsProps = ki.Props{
+	"MainMenu": ki.PropSlice{
+		{"AppMenu", ki.BlankProp{}},
+		{"File", ki.PropSlice{
+			// {"Update", ki.Props{
+			// 	"shortcut": "Command+U",
+			// }},
+			{"OpenPrefs", ki.Props{}},
+			{"SavePrefs", ki.Props{
+				"shortcut": "Command+S",
+			}},
+			{"sep-file", ki.BlankProp{}},
+			{"OpenJSON", ki.Props{
+				"label":    "Open from file",
+				"desc":     "You can save and open key maps to / from files to share, experiment, transfer, etc",
+				"shortcut": "Command+O",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"ext": ".json",
+					}},
+				},
+			}},
+			{"SaveJSON", ki.Props{
+				"label": "Save to file",
+				"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"ext": ".json",
+					}},
+				},
+			}},
+			{"RevertToStd", ki.Props{
+				"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions defined.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
+				"confirm": true,
+			}},
+		}},
+		{"Edit", "Copy Cut Paste"},
+		{"Window", "Windows"},
+	},
+	"ToolBar": ki.PropSlice{
+		// {"Update", ki.Props{
+		// 	"icon": "update",
+		// }},
+		// {"sep-file", ki.BlankProp{}},
+		{"SavePrefs", ki.Props{
+			"icon": "file-save",
+		}},
+		{"sep-file", ki.BlankProp{}},
+		{"OpenJSON", ki.Props{
+			"label": "Open from file",
+			"icon":  "file-open",
+			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
+		}},
+		{"SaveJSON", ki.Props{
+			"label": "Save to file",
+			"icon":  "file-save",
+			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
+		}},
+		{"sep-std", ki.BlankProp{}},
+		{"ViewStd", ki.Props{
+			"desc":    "Shows the standard maps that are compiled into the program and have all the lastest key functions bound to standard key chords.  Useful for comparing against custom maps.",
+			"confirm": true,
+		}},
+		{"RevertToStd", ki.Props{
+			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
+			"confirm": true,
+		}},
+	},
+}
+
+// StdKeyMaps is the original compiled-in set of standard keymaps that have
+// the lastest key functions bound to standard key chords.
+var StdKeyMaps = KeyMaps{
+	{"MacStd", "Standard Mac KeyMap", KeyMap{
+		"UpArrow":             KeyFunMoveUp,
+		"Shift+UpArrow":       KeyFunMoveUp,
+		"Meta+UpArrow":        KeyFunMoveUp,
+		"Control+P":           KeyFunMoveUp,
+		"Shift+Control+P":     KeyFunMoveUp,
+		"Meta+Control+P":      KeyFunMoveUp,
+		"DownArrow":           KeyFunMoveDown,
+		"Shift+DownArrow":     KeyFunMoveDown,
+		"Meta+DownArrow":      KeyFunMoveDown,
+		"Control+N":           KeyFunMoveDown,
+		"Shift+Control+N":     KeyFunMoveDown,
+		"Meta+Control+N":      KeyFunMoveDown,
+		"RightArrow":          KeyFunMoveRight,
+		"Shift+RightArrow":    KeyFunMoveRight,
+		"Meta+RightArrow":     KeyFunEnd,
+		"Control+F":           KeyFunMoveRight,
+		"Shift+Control+F":     KeyFunMoveRight,
+		"Meta+Control+F":      KeyFunMoveRight,
+		"LeftArrow":           KeyFunMoveLeft,
+		"Shift+LeftArrow":     KeyFunMoveLeft,
+		"Meta+LeftArrow":      KeyFunHome,
+		"Control+B":           KeyFunMoveLeft,
+		"Shift+Control+B":     KeyFunMoveLeft,
+		"Meta+Control+B":      KeyFunMoveLeft,
+		"Control+UpArrow":     KeyFunPageUp,
+		"Control+U":           KeyFunPageUp,
+		"Control+DownArrow":   KeyFunPageDown,
+		"Shift+Control+V":     KeyFunPageDown,
+		"Alt+V":               KeyFunPageDown,
+		"Control+RightArrow":  KeyFunPageRight,
+		"Control+LeftArrow":   KeyFunPageLeft,
+		"Home":                KeyFunHome,
+		"Control+A":           KeyFunHome,
+		"Alt+LeftArrow":       KeyFunHome,
+		"End":                 KeyFunEnd,
+		"Control+E":           KeyFunEnd,
+		"Alt+RightArrow":      KeyFunEnd,
+		"Tab":                 KeyFunFocusNext,
+		"Shift+Tab":           KeyFunFocusPrev,
+		"ReturnEnter":         KeyFunSelectItem,
+		"KeypadEnter":         KeyFunSelectItem,
+		"Shift+Control+A":     KeyFunSelectAll,
+		"Meta+A":              KeyFunSelectAll,
+		"Control+G":           KeyFunCancelSelect,
+		"Control+Spacebar":    KeyFunSelectMode,
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		"Control+D":           KeyFunDelete,
+		"Control+H":           KeyFunBackspace,
+		"Control+K":           KeyFunKill,
+		"Alt+W":               KeyFunCopy,
+		"Control+C":           KeyFunCopy,
+		"Meta+C":              KeyFunCopy,
+		"Control+W":           KeyFunCut,
+		"Control+X":           KeyFunCut,
+		"Meta+X":              KeyFunCut,
+		"Control+Y":           KeyFunPaste,
+		"Control+V":           KeyFunPaste,
+		"Meta+V":              KeyFunPaste,
+		"Control+M":           KeyFunDuplicate,
+		"Control+Z":           KeyFunUndo,
+		"Meta+Z":              KeyFunUndo,
+		"Shift+Control+Z":     KeyFunRedo,
+		"Shift+Meta+Z":        KeyFunRedo,
+		"Control+I":           KeyFunInsert,
+		"Control+O":           KeyFunInsertAfter,
+		"Control+Alt+I":       KeyFunGoGiEditor,
+		"Control+Alt+E":       KeyFunGoGiEditor,
+		"Shift+Control+I":     KeyFunGoGiEditor,
+		"Shift+Meta+=":        KeyFunZoomIn,
+		"Meta+=":              KeyFunZoomIn,
+		"Meta+-":              KeyFunZoomOut,
+		"Control+=":           KeyFunZoomIn,
+		"Shift+Control++":     KeyFunZoomIn,
+		"Shift+Meta+-":        KeyFunZoomOut,
+		"Control+-":           KeyFunZoomOut,
+		"Shift+Control+_":     KeyFunZoomOut,
+		"Control+Alt+P":       KeyFunPrefs,
+		"F5":                  KeyFunRefresh,
+		"Control+L":           KeyFunRecenter,
+		"Control+.":           KeyFunComplete,
+	}},
+	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
+		"UpArrow":             KeyFunMoveUp,
+		"Shift+UpArrow":       KeyFunMoveUp,
+		"Meta+UpArrow":        KeyFunMoveUp,
+		"Control+P":           KeyFunMoveUp,
+		"Shift+Control+P":     KeyFunMoveUp,
+		"Meta+Control+P":      KeyFunMoveUp,
+		"DownArrow":           KeyFunMoveDown,
+		"Shift+DownArrow":     KeyFunMoveDown,
+		"Meta+DownArrow":      KeyFunMoveDown,
+		"Control+N":           KeyFunMoveDown,
+		"Shift+Control+N":     KeyFunMoveDown,
+		"Meta+Control+N":      KeyFunMoveDown,
+		"RightArrow":          KeyFunMoveRight,
+		"Shift+RightArrow":    KeyFunMoveRight,
+		"Meta+RightArrow":     KeyFunEnd,
+		"Control+F":           KeyFunMoveRight,
+		"Shift+Control+F":     KeyFunMoveRight,
+		"Meta+Control+F":      KeyFunMoveRight,
+		"LeftArrow":           KeyFunMoveLeft,
+		"Shift+LeftArrow":     KeyFunMoveLeft,
+		"Meta+LeftArrow":      KeyFunHome,
+		"Control+B":           KeyFunMoveLeft,
+		"Shift+Control+B":     KeyFunMoveLeft,
+		"Meta+Control+B":      KeyFunMoveLeft,
+		"Control+UpArrow":     KeyFunPageUp,
+		"Control+U":           KeyFunPageUp,
+		"Control+DownArrow":   KeyFunPageDown,
+		"Shift+Control+V":     KeyFunPageDown,
+		"Alt+V":               KeyFunPageDown,
+		"Control+RightArrow":  KeyFunPageRight,
+		"Control+LeftArrow":   KeyFunPageLeft,
+		"Home":                KeyFunHome,
+		"Control+A":           KeyFunHome,
+		"Alt+LeftArrow":       KeyFunHome,
+		"End":                 KeyFunEnd,
+		"Control+E":           KeyFunEnd,
+		"Alt+RightArrow":      KeyFunEnd,
+		"Tab":                 KeyFunFocusNext,
+		"Shift+Tab":           KeyFunFocusPrev,
+		"ReturnEnter":         KeyFunSelectItem,
+		"KeypadEnter":         KeyFunSelectItem,
+		"Shift+Control+A":     KeyFunSelectAll,
+		"Meta+A":              KeyFunSelectAll,
+		"Control+G":           KeyFunCancelSelect,
+		"Control+Spacebar":    KeyFunSelectMode,
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		"Control+D":           KeyFunDelete,
+		"Control+H":           KeyFunBackspace,
+		"Control+K":           KeyFunKill,
+		"Alt+W":               KeyFunCopy,
+		"Control+C":           KeyFunCopy,
+		"Meta+C":              KeyFunCopy,
+		"Control+W":           KeyFunCut,
+		"Control+X":           KeyFunCut,
+		"Meta+X":              KeyFunCut,
+		"Control+Y":           KeyFunPaste,
+		"Control+V":           KeyFunPaste,
+		"Meta+V":              KeyFunPaste,
+		"Control+M":           KeyFunDuplicate,
+		"Control+Z":           KeyFunUndo,
+		"Meta+Z":              KeyFunUndo,
+		"Control+/":           KeyFunUndo,
+		"Shift+Control+Z":     KeyFunRedo,
+		"Shift+Meta+Z":        KeyFunRedo,
+		"Control+I":           KeyFunInsert,
+		"Control+O":           KeyFunInsertAfter,
+		"Control+Alt+I":       KeyFunGoGiEditor,
+		"Shift+Control+I":     KeyFunGoGiEditor,
+		"Shift+Meta+=":        KeyFunZoomIn,
+		"Meta+=":              KeyFunZoomIn,
+		"Meta+-":              KeyFunZoomOut,
+		"Control+=":           KeyFunZoomIn,
+		"Shift+Control++":     KeyFunZoomIn,
+		"Shift+Meta+-":        KeyFunZoomOut,
+		"Control+-":           KeyFunZoomOut,
+		"Shift+Control+_":     KeyFunZoomOut,
+		"Control+Alt+P":       KeyFunPrefs,
+		"F5":                  KeyFunRefresh,
+		"Control+L":           KeyFunRecenter,
+		"Control+.":           KeyFunComplete,
+	}},
+	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
+		"UpArrow": KeyFunMoveUp,
+		// "Control+P":           KeyFunMoveUp, // Print
+		"Shift+UpArrow": KeyFunMoveUp,
+		"DownArrow":     KeyFunMoveDown,
+		// "Control+N":           KeyFunMoveDown, // New
+		"Shift+DownArrow":  KeyFunMoveDown,
+		"RightArrow":       KeyFunMoveRight,
+		"Shift+RightArrow": KeyFunMoveRight,
+		// "Control+F":           KeyFunMoveRight, // Find
+		"LeftArrow":       KeyFunMoveLeft,
+		"Shift+LeftArrow": KeyFunMoveLeft,
+		// "Control+B":           KeyFunMoveLeft, // bold
+		"Control+UpArrow": KeyFunPageUp,
+		// "Control+U":           KeyFunPageUp, // Underline
+		"Control+DownArrow":  KeyFunPageDown,
+		"Control+RightArrow": KeyFunPageRight,
+		"Control+LeftArrow":  KeyFunPageLeft,
+		"Home":               KeyFunHome,
+		"Alt+LeftArrow":      KeyFunHome,
+		"End":                KeyFunEnd,
+		// "Control+E":           KeyFunEnd, // Search Google
+		"Alt+RightArrow":  KeyFunEnd,
+		"Tab":             KeyFunFocusNext,
+		"Shift+Tab":       KeyFunFocusPrev,
+		"ReturnEnter":     KeyFunSelectItem,
+		"KeypadEnter":     KeyFunSelectItem,
+		"Control+A":       KeyFunSelectAll,
+		"Shift+Control+A": KeyFunCancelSelect,
+		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		// "Control+D":           KeyFunDelete, // Bookmark
+		// "Control+H":       KeyFunBackspace, // Help
+		"Control+K": KeyFunKill,
+		"Control+C": KeyFunCopy,
+		// "Control+W":       KeyFunCut, // Close Current Tab
+		"Control+X":       KeyFunCut,
+		"Control+V":       KeyFunPaste,
+		"Control+M":       KeyFunDuplicate,
+		"Control+Z":       KeyFunUndo,
+		"Shift+Control+Z": KeyFunRedo,
+		// "Control+I":       KeyFunInsert, // Italic
+		// "Control+O":       KeyFunInsertAfter, // Open
+		"Shift+Control+I": KeyFunGoGiEditor,
+		"Control+=":       KeyFunZoomIn,
+		"Shift+Control++": KeyFunZoomIn,
+		"Control+-":       KeyFunZoomOut,
+		"Shift+Control+_": KeyFunZoomOut,
+		"Shift+Control+P": KeyFunPrefs,
+		"Control+Alt+P":   KeyFunPrefs,
+		"F5":              KeyFunRefresh,
+		"Control+L":       KeyFunRecenter,
+		"Control+.":       KeyFunComplete,
+	}},
+	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
+		"UpArrow":            KeyFunMoveUp,
+		"Shift+UpArrow":      KeyFunMoveUp,
+		"Meta+UpArrow":       KeyFunMoveUp,
+		"Control+P":          KeyFunMoveUp,
+		"Shift+Control+P":    KeyFunMoveUp,
+		"Meta+Control+P":     KeyFunMoveUp,
+		"DownArrow":          KeyFunMoveDown,
+		"Shift+DownArrow":    KeyFunMoveDown,
+		"Meta+DownArrow":     KeyFunMoveDown,
+		"Control+N":          KeyFunMoveDown,
+		"Shift+Control+N":    KeyFunMoveDown,
+		"Meta+Control+N":     KeyFunMoveDown,
+		"RightArrow":         KeyFunMoveRight,
+		"Shift+RightArrow":   KeyFunMoveRight,
+		"Meta+RightArrow":    KeyFunEnd,
+		"Control+F":          KeyFunMoveRight,
+		"Shift+Control+F":    KeyFunMoveRight,
+		"Meta+Control+F":     KeyFunMoveRight,
+		"LeftArrow":          KeyFunMoveLeft,
+		"Shift+LeftArrow":    KeyFunMoveLeft,
+		"Meta+LeftArrow":     KeyFunHome,
+		"Control+B":          KeyFunMoveLeft,
+		"Shift+Control+B":    KeyFunMoveLeft,
+		"Meta+Control+B":     KeyFunMoveLeft,
+		"Control+UpArrow":    KeyFunPageUp,
+		"Control+U":          KeyFunPageUp,
+		"Control+DownArrow":  KeyFunPageDown,
+		"Shift+Control+V":    KeyFunPageDown,
+		"Alt+V":              KeyFunPageDown,
+		"Control+RightArrow": KeyFunPageRight,
+		"Control+LeftArrow":  KeyFunPageLeft,
+		"Home":               KeyFunHome,
+		"Control+A":          KeyFunHome,
+		"Shift+Control+A":    KeyFunHome,
+		"Alt+LeftArrow":      KeyFunHome,
+		"End":                KeyFunEnd,
+		"Control+E":          KeyFunEnd,
+		"Shift+Control+E":    KeyFunEnd,
+		"Alt+RightArrow":     KeyFunEnd,
+		"Tab":                KeyFunFocusNext,
+		"Shift+Tab":          KeyFunFocusPrev,
+		"ReturnEnter":        KeyFunSelectItem,
+		"KeypadEnter":        KeyFunSelectItem,
+		// "Shift+Control+A":     KeyFunSelectAll,
+		"Meta+A":              KeyFunSelectAll,
+		"Control+G":           KeyFunCancelSelect,
+		"Control+Spacebar":    KeyFunSelectMode,
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		"Control+D":           KeyFunDelete,
+		"Control+H":           KeyFunBackspace,
+		"Control+K":           KeyFunKill,
+		"Alt+W":               KeyFunCopy,
+		"Control+C":           KeyFunCopy,
+		"Meta+C":              KeyFunCopy,
+		"Control+W":           KeyFunCut,
+		"Control+X":           KeyFunCut,
+		"Meta+X":              KeyFunCut,
+		"Control+Y":           KeyFunPaste,
+		"Control+V":           KeyFunPaste,
+		"Meta+V":              KeyFunPaste,
+		"Control+M":           KeyFunDuplicate,
+		"Control+I":           KeyFunInsert,
+		"Control+O":           KeyFunInsertAfter,
+		"Control+Alt+I":       KeyFunGoGiEditor,
+		"Control+Alt+E":       KeyFunGoGiEditor,
+		"Shift+Control+I":     KeyFunGoGiEditor,
+		"Shift+Meta+=":        KeyFunZoomIn,
+		"Meta+=":              KeyFunZoomIn,
+		"Meta+-":              KeyFunZoomOut,
+		"Control+=":           KeyFunZoomIn,
+		"Shift+Control++":     KeyFunZoomIn,
+		"Shift+Meta+-":        KeyFunZoomOut,
+		"Control+-":           KeyFunZoomOut,
+		"Shift+Control+_":     KeyFunZoomOut,
+		"Control+Alt+P":       KeyFunPrefs,
+		"F5":                  KeyFunRefresh,
+		"Control+L":           KeyFunRecenter,
+		"Control+.":           KeyFunComplete,
+	}},
+	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
+		"UpArrow": KeyFunMoveUp,
+		// "Control+P":           KeyFunMoveUp, // Print
+		"Shift+UpArrow": KeyFunMoveUp,
+		"DownArrow":     KeyFunMoveDown,
+		// "Control+N":           KeyFunMoveDown, // New
+		"Shift+DownArrow":  KeyFunMoveDown,
+		"RightArrow":       KeyFunMoveRight,
+		"Shift+RightArrow": KeyFunMoveRight,
+		// "Control+F":           KeyFunMoveRight, // Find
+		"LeftArrow":       KeyFunMoveLeft,
+		"Shift+LeftArrow": KeyFunMoveLeft,
+		// "Control+B":           KeyFunMoveLeft, // bold
+		"Control+UpArrow": KeyFunPageUp,
+		// "Control+U":           KeyFunPageUp, // Underline
+		"Control+DownArrow":  KeyFunPageDown,
+		"Control+RightArrow": KeyFunPageRight,
+		"Control+LeftArrow":  KeyFunPageLeft,
+		"Home":               KeyFunHome,
+		"Alt+LeftArrow":      KeyFunHome,
+		"End":                KeyFunEnd,
+		// "Control+E":           KeyFunEnd, // Search Google
+		"Alt+RightArrow":  KeyFunEnd,
+		"Tab":             KeyFunFocusNext,
+		"Shift+Tab":       KeyFunFocusPrev,
+		"ReturnEnter":     KeyFunSelectItem,
+		"KeypadEnter":     KeyFunSelectItem,
+		"Control+A":       KeyFunSelectAll,
+		"Shift+Control+A": KeyFunCancelSelect,
+		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		// "Control+D":           KeyFunDelete, // Bookmark
+		// "Control+H":       KeyFunBackspace, // Help
+		"Control+K": KeyFunKill,
+		"Control+C": KeyFunCopy,
+		// "Control+W":       KeyFunCut, // Close Current Tab
+		"Control+X": KeyFunCut,
+		"Control+V": KeyFunPaste,
+		"Control+M": KeyFunDuplicate,
+		// "Control+I":       KeyFunInsert, // Italic
+		// "Control+O":       KeyFunInsertAfter, // Open
+		"Shift+Control+I": KeyFunGoGiEditor,
+		"Control+=":       KeyFunZoomIn,
+		"Shift+Control++": KeyFunZoomIn,
+		"Control+-":       KeyFunZoomOut,
+		"Shift+Control+_": KeyFunZoomOut,
+		"Shift+Control+P": KeyFunPrefs,
+		"Control+Alt+P":   KeyFunPrefs,
+		"F5":              KeyFunRefresh,
+		"Control+L":       KeyFunRecenter,
+		"Control+.":       KeyFunComplete,
+	}},
+	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", KeyMap{
+		"UpArrow": KeyFunMoveUp,
+		// "Control+P":           KeyFunMoveUp, // Print
+		"Shift+UpArrow": KeyFunMoveUp,
+		"DownArrow":     KeyFunMoveDown,
+		// "Control+N":           KeyFunMoveDown, // New
+		"Shift+DownArrow":  KeyFunMoveDown,
+		"RightArrow":       KeyFunMoveRight,
+		"Shift+RightArrow": KeyFunMoveRight,
+		// "Control+F":           KeyFunMoveRight, // Find
+		"LeftArrow":       KeyFunMoveLeft,
+		"Shift+LeftArrow": KeyFunMoveLeft,
+		// "Control+B":           KeyFunMoveLeft, // bold
+		"Control+UpArrow": KeyFunPageUp,
+		// "Control+U":           KeyFunPageUp, // Underline
+		"Control+DownArrow":  KeyFunPageDown,
+		"Control+RightArrow": KeyFunPageRight,
+		"Control+LeftArrow":  KeyFunPageLeft,
+		"Home":               KeyFunHome,
+		"Alt+LeftArrow":      KeyFunHome,
+		"End":                KeyFunEnd,
+		// "Control+E":           KeyFunEnd, // Search Google
+		"Alt+RightArrow":  KeyFunEnd,
+		"Tab":             KeyFunFocusNext,
+		"Shift+Tab":       KeyFunFocusPrev,
+		"ReturnEnter":     KeyFunSelectItem,
+		"KeypadEnter":     KeyFunSelectItem,
+		"Control+A":       KeyFunSelectAll,
+		"Shift+Control+A": KeyFunCancelSelect,
+		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+		"Control+ReturnEnter": KeyFunAccept,
+		"Escape":              KeyFunAbort,
+		"DeleteBackspace":     KeyFunBackspace,
+		"DeleteForward":       KeyFunDelete,
+		// "Control+D":           KeyFunDelete, // Bookmark
+		// "Control+H":       KeyFunBackspace, // Help
+		"Control+K": KeyFunKill,
+		"Control+C": KeyFunCopy,
+		// "Control+W":       KeyFunCut, // Close Current Tab
+		"Control+X": KeyFunCut,
+		"Control+V": KeyFunPaste,
+		"Control+M": KeyFunDuplicate,
+		// "Control+I":       KeyFunInsert, // Italic
+		// "Control+O":       KeyFunInsertAfter, // Open
+		"Shift+Control+I": KeyFunGoGiEditor,
+		"Control+=":       KeyFunZoomIn,
+		"Shift+Control++": KeyFunZoomIn,
+		"Control+-":       KeyFunZoomOut,
+		"Shift+Control+_": KeyFunZoomOut,
+		"Shift+Control+P": KeyFunPrefs,
+		"Control+Alt+P":   KeyFunPrefs,
+		"F5":              KeyFunRefresh,
+		"Control+L":       KeyFunRecenter,
+		"Control+.":       KeyFunComplete,
+	}},
 }

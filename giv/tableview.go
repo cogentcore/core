@@ -1684,7 +1684,7 @@ func (tv *TableView) ItemCtxtMenu(idx int) {
 }
 
 func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := tv.SelectedIdx
 	switch kf {
@@ -1740,7 +1740,7 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 }
 
 func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	row := tv.SelectedIdx
 	switch {
 	case kf == gi.KeyFunMoveDown:

@@ -584,7 +584,7 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	defer C.free(unsafe.Pointer(title))
 
 	sc := ""
-	r, mods, err := key.DecodeChord(shortcut)
+	r, mods, err := key.Chord(shortcut).Decode()
 	if err == nil {
 		sc = strings.ToLower(string(r))
 	}

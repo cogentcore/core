@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -22,7 +21,6 @@ import (
 // or bar-action.
 type Action struct {
 	ButtonBase
-	Shortcut   string            `view:"-" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform."`
 	Data       interface{}       `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
 	ActionSig  ki.Signal         `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
@@ -207,7 +205,7 @@ func (g *Action) ConfigPartsShortcut(scIdx int) {
 		return
 	}
 	sc := g.Parts.KnownChild(scIdx).(*Label)
-	sclbl := key.ChordShortcut(g.Shortcut)
+	sclbl := g.Shortcut.Shortcut()
 	if sc.Text != sclbl {
 		sc.Text = sclbl
 		g.StylePart(Node2D(sc))

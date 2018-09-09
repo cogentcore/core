@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -38,7 +39,7 @@ type MakeMenuFunc func(m *Menu)
 type ActOpts struct {
 	Label      string
 	Icon       string
-	Shortcut   string
+	Shortcut   key.Chord
 	Data       interface{}
 	UpdateFunc func(act *Action)
 }
@@ -60,7 +61,7 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	ac.InitName(&ac, nm)
 	ac.Text = opts.Label
 	ac.Icon = IconName(opts.Icon)
-	ac.Shortcut = OSShortcut(opts.Shortcut)
+	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	ac.SetAsMenu()

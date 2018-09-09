@@ -94,9 +94,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* continue keyfun reorg -- fix keymapnamemap etc.
 * editing keymap needs to check for conflicts -- general mapview issue -- if
-  you enter same key as already exists, it should prompt you etc.
+  you enter same key as already exists, it should prompt you etc.  also toggle sort by value instead of key
 
 * fix icons disappearing on scrolling.. 
 

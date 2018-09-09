@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -112,7 +113,7 @@ func ToValueView(it interface{}) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
-	if nptyp == reflect.TypeOf(gi.KeyChord("")) {
+	if nptyp == reflect.TypeOf(key.Chord("")) {
 		vv := KeyChordValueView{}
 		vv.Init(&vv)
 		return &vv
@@ -1353,4 +1354,8 @@ func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
 
 func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {
 	PrefsView(prefs)
+}
+
+func (vi *ViewIFace) KeyMapsView(maps *gi.KeyMaps) {
+	KeyMapsView(maps)
 }

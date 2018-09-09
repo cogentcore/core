@@ -1537,7 +1537,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
-	kf := KeyFun(kt.ChordString())
+	kf := KeyFun(kt.Chord())
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
 		switch kf {
 		case KeyFunMoveRight:
@@ -1576,7 +1576,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
-	kf := KeyFun(kt.ChordString())
+	kf := KeyFun(kt.Chord())
 	delayMs := int(kt.Time().Sub(ly.FocusNameTime) / time.Millisecond)
 	ly.FocusNameTime = kt.Time()
 	if kf == KeyFunFocusNext { // tab means go to next match -- don't worry about time

@@ -295,7 +295,7 @@ func (g *SliderBase) UpdateThumbValSize() {
 }
 
 func (g *SliderBase) KeyInput(kt *key.ChordEvent) {
-	kf := KeyFun(kt.ChordString())
+	kf := KeyFun(kt.Chord())
 	switch kf {
 	case KeyFunMoveUp:
 		g.SetValueAction(g.Value - g.Step)

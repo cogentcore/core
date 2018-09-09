@@ -1187,7 +1187,7 @@ func (tv *TreeView) RootTreeView() *TreeView {
 }
 
 func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 
 	// first all the keys that work for inactive and active

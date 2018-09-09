@@ -1195,7 +1195,7 @@ func (sv *SliceView) DropCancel() {
 }
 
 func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := sv.SelectedIdx
 	switch kf {
@@ -1251,7 +1251,7 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 }
 
 func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
-	kf := gi.KeyFun(kt.ChordString())
+	kf := gi.KeyFun(kt.Chord())
 	row := sv.SelectedIdx
 	switch kf {
 	case gi.KeyFunMoveDown:

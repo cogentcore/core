@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -207,7 +208,7 @@ func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Acti
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ac)
 			} else {
-				mid := osmm.AddItem(subm, ac.Text, ac.Shortcut, i, ac.IsActive())
+				mid := osmm.AddItem(subm, ac.Text, string(ac.Shortcut), i, ac.IsActive())
 				mb.OSMainMenus[ac.Text] = ac
 				ac.SetProp("__OSMainMenuItemID", mid)
 			}
@@ -275,7 +276,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	ac := tb.AddNewChild(KiT_Action, nm).(*Action)
 	ac.Text = opts.Label
 	ac.Icon = IconName(opts.Icon)
-	ac.Shortcut = OSShortcut(opts.Shortcut)
+	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	if sigTo != nil && fun != nil {
