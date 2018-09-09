@@ -181,7 +181,7 @@ func (sv *StructView) ConfigStructGrid() {
 	})
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
-		sv.SetFullReRender()
+		sg.SetFullReRender()
 	} else {
 		updt = sg.UpdateStart()
 	}

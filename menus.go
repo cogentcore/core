@@ -39,6 +39,7 @@ type MakeMenuFunc func(m *Menu)
 type ActOpts struct {
 	Label      string
 	Icon       string
+	Tooltip    string
 	Shortcut   key.Chord
 	Data       interface{}
 	UpdateFunc func(act *Action)
@@ -60,6 +61,7 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	}
 	ac.InitName(&ac, nm)
 	ac.Text = opts.Label
+	ac.Tooltip = opts.Tooltip
 	ac.Icon = IconName(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	ac.Data = opts.Data

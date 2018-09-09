@@ -277,6 +277,7 @@ var PrefsKeyMapsFileName = "key_maps_prefs.json"
 
 // OpenJSON opens keymaps from a JSON-formatted file.
 func (km *KeyMaps) OpenJSON(filename FileName) error {
+	*km = make(KeyMaps, 0, 10) // reset
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
@@ -317,6 +318,7 @@ func (km *KeyMaps) SavePrefs() error {
 
 // CopyFrom copies keymaps from given other map
 func (km *KeyMaps) CopyFrom(cp KeyMaps) {
+	*km = make(KeyMaps, 0, len(cp)) // reset
 	b, _ := json.Marshal(cp)
 	json.Unmarshal(b, km)
 }

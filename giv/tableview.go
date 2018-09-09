@@ -325,7 +325,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sgcfg := tv.StdSliceFrameConfig()
 	modsg, updtg := sg.ConfigChildren(sgcfg, false)
 	if modsg {
-		tv.SetFullReRender()
+		sg.SetFullReRender()
 	} else {
 		updtg = sg.UpdateStart()
 	}

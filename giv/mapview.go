@@ -23,6 +23,7 @@ type MapView struct {
 	Map        interface{} `desc:"the map that we are a view onto"`
 	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
+	SortVals   bool        `desc:"sort by values instead of keys"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ToolbarMap interface{} `desc:"the map that we successfully set a toolbar for"`
@@ -148,9 +149,17 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.SetProp("columns", ncol)
 
 	keys := mpvnp.MapKeys()
-	sort.Slice(keys, func(i, j int) bool {
-		return kit.ToString(keys[i]) < kit.ToString(keys[j])
-	})
+	if mv.SortVals {
+		sort.Slice(keys, func(i, j int) bool {
+			vi := mpvnp.MapIndex(keys[i])
+			vj := mpvnp.MapIndex(keys[j])
+			return kit.ToString(vi.Interface()) < kit.ToString(vj.Interface())
+		})
+	} else {
+		sort.Slice(keys, func(i, j int) bool {
+			return kit.ToString(keys[i]) < kit.ToString(keys[j])
+		})
+	}
 	for _, key := range keys {
 		kv := ToValueView(key.Interface())
 		if kv == nil { // shouldn't happen
@@ -182,7 +191,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
-		mv.SetFullReRender()
+		sg.SetFullReRender()
 	} else {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
@@ -258,6 +267,12 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	mv.ViewSig.Emit(mv.This, 0, nil)
 }
 
+// ToggleSort toggles sorting by values vs. keys
+func (mv *MapView) ToggleSort() {
+	mv.SortVals = !mv.SortVals
+	mv.ConfigMapGrid()
+}
+
 // MapAdd adds a new entry to the map
 func (mv *MapView) MapAdd() {
 	if kit.IfaceIsNil(mv.Map) {
@@ -315,6 +330,9 @@ func (mv *MapView) ConfigToolbar() {
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
+
+	nBuiltin := 2
+
 	tb := mv.ToolBar()
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
@@ -323,10 +341,15 @@ func (mv *MapView) ConfigToolbar() {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.MapAdd()
 			})
+		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
+			mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv.ToggleSort()
+			})
 	}
 	sz := len(*tb.Children())
-	if sz > 1 {
-		for i := sz - 1; i >= 1; i-- {
+	if sz > nBuiltin {
+		for i := sz - 1; i >= nBuiltin; i-- {
 			tb.DeleteChildAtIndex(i, true)
 		}
 	}

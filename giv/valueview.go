@@ -555,8 +555,39 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 		case reflect.Map:
 			ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
 			if vv.IsMapKey {
-				nv := reflect.ValueOf(val)                // new key value
-				cv := ov.MapIndex(vv.Value)               // get current value
+				nv := reflect.ValueOf(val)  // new key value
+				cv := ov.MapIndex(vv.Value) // get current value
+				curnv := ov.MapIndex(nv)    // see if new value there already
+				if !reflect.DeepEqual(val, vv.Value.Interface()) && !kit.ValueIsZero(curnv) {
+					var vp *gi.Viewport2D
+					if vv.Widget != nil {
+						widg := vv.Widget.AsNode2D()
+						vp = widg.Viewport
+					}
+					// actually new key and current exists
+					gi.ChoiceDialog(vp,
+						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
+						[]string{"Cancel Change", "Overwrite"},
+						vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+							switch sig {
+							case 0:
+								if vp != nil {
+									vp.FullRender2DTree()
+								}
+							case 1:
+								cv := ov.MapIndex(vv.Value)               // get current value
+								ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
+								ov.SetMapIndex(nv, cv)                    // set new key to current value
+								vv.Value = nv                             // update value to new key
+								vv.This.(ValueView).SaveTmp()
+								vv.ViewSig.Emit(vv.This, 0, nil)
+								if vp != nil {
+									vp.FullRender2DTree()
+								}
+							}
+						})
+					return false // abort this action right now
+				}
 				ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
 				ov.SetMapIndex(nv, cv)                    // set new key to current value
 				vv.Value = nv                             // update value to new key
