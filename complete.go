@@ -21,7 +21,7 @@ type Complete struct {
 	MatchFunc   complete.MatchFunc `desc:"function to get the list of possible completions"`
 	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
 	Context     interface{}        `desc:"the object that implements complete.Func"`
-	Completions []string           `desc:"possible completions"`
+	Completions complete.Completions
 	Seed        string             `desc:"current completion seed"`
 	CompleteSig ki.Signal          `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
 	Completion  string             `desc:"the user's completion selection'"`
@@ -53,13 +53,14 @@ func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 	c.Completions, c.Seed = c.MatchFunc(text)
 	count := len(c.Completions)
 	if count > 0 {
-		if count == 1 && c.Completions[0] == c.Seed {
+		if count == 1 && c.Completions[0].Text == c.Seed {
 			return
 		}
 		var m Menu
 		for i := 0; i < count; i++ {
-			s := c.Completions[i]
-			m.AddAction(ActOpts{Label: s, Data: s},
+			text := c.Completions[i].Text
+			icon := c.Completions[i].Icon
+			m.AddAction(ActOpts{Icon:icon, Label: text, Data: text},
 				c, func(recv, send ki.Ki, sig int64, data interface{}) {
 					tff := recv.Embed(KiT_Complete).(*Complete)
 					tff.Complete(data.(string))
@@ -85,7 +86,7 @@ func (c *Complete) KeyInput(kf KeyFuns) {
 		count := len(c.Completions)
 		if count > 0 {
 			if count == 1 { // just complete
-				c.Complete(c.Completions[0])
+				c.Complete(c.Completions[0].Text)
 			} else { // try to extend the seed
 				s := complete.ExtendSeed(c.Completions, c.Seed)
 				c.CompleteSig.Emit(c.This, int64(CompleteExtend), s)

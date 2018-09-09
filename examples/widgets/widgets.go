@@ -369,9 +369,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(text string) (matches []string, seed string) {
+func Complete(text string) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
-	matches = complete.MatchSeed(words, seed)
+	possibles := complete.MatchSeed(words, seed)
+	for _, p := range possibles {
+		m := complete.Completion{Text: p, Icon:""}
+		matches = append(matches, m)
+	}
 	return matches, seed
 }
 

@@ -70,12 +70,12 @@ type TextView struct {
 	PrevSelectReg TextRegion                `xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	SelectMode    bool                      `xml:"-" desc:"if true, select text as cursor moves"`
 	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	StateStyles [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight  float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight  float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize     image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn     bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  string
@@ -1045,9 +1045,9 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 ///////////////////////////////////////////////////////////////////////////////
 //    Complete
 
-// OfferCompletions pops up a menu of possible completions
-func (tv *TextView) OfferCompletions() {
-	if tv.Completion == nil {
+// OfferComplete pops up a menu of possible completions
+func (tv *TextView) OfferComplete() {
+	if tv.Complete == nil {
 		return
 	}
 	win := tv.ParentWindow()
@@ -1063,12 +1063,12 @@ func (tv *TextView) OfferCompletions() {
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 		fmt.Println(s)
 		cp := tv.CharStartPos(tv.CursorPos)
-		tv.Completion.ShowCompletions(s, tv.Viewport, int(cp.X+5), int(cp.Y+10))
+		tv.Complete.ShowCompletions(s, tv.Viewport, int(cp.X+5), int(cp.Y+10))
 	}
 }
 
-// Complete edits the text using the string chosen from the completion menu
-func (tv *TextView) Complete(s string) {
+// CompleteText edits the text using the string chosen from the completion menu
+func (tv *TextView) CompleteText(s string) {
 	win := tv.ParentWindow()
 	win.ClosePopup(win.Popup)
 
@@ -1077,7 +1077,7 @@ func (tv *TextView) Complete(s string) {
 	tbe := tv.Buf.Region(st, en)
 	tbes := string(tbe.ToBytes())
 
-	ns, _ := tv.Completion.EditFunc(tbes, tv.CursorPos.Ch, s, tv.Completion.Seed)
+	ns, _ := tv.Complete.EditFunc(tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
 	fmt.Println(ns)
 	tv.Buf.DeleteText(st, tv.CursorPos, true)
 	tv.CursorPos = st
@@ -1089,23 +1089,23 @@ func (tv *TextView) Complete(s string) {
 // automatically be offered as the user types
 func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
-		if tv.Completion != nil {
-			tv.Completion.CompleteSig.Disconnect(tv.This)
+		if tv.Complete != nil {
+			tv.Complete.CompleteSig.Disconnect(tv.This)
 		}
-		tv.Completion.Destroy()
-		tv.Completion = nil
+		tv.Complete.Destroy()
+		tv.Complete = nil
 		return
 	}
-	tv.Completion = &gi.Complete{}
-	tv.Completion.InitName(tv.Completion, "tv-completion") // needed for standalone Ki's
-	tv.Completion.Context = data
-	tv.Completion.MatchFunc = matchFun
-	tv.Completion.EditFunc = editFun
+	tv.Complete = &gi.Complete{}
+	tv.Complete.InitName(tv.Complete, "tv-completion") // needed for standalone Ki's
+	tv.Complete.Context = data
+	tv.Complete.MatchFunc = matchFun
+	tv.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tv.Completion.CompleteSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.Complete.CompleteSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
 		if sig == int64(gi.CompleteSelect) {
-			tvf.Complete(data.(string)) // always use data
+			tvf.CompleteText(data.(string)) // always use data
 		} else if sig == int64(gi.CompleteExtend) {
 			tvf.CompleteExtend(data.(string)) // always use data
 		}
@@ -1118,7 +1118,7 @@ func (tv *TextView) CompleteExtend(s string) {
 		win := tv.ParentWindow()
 		win.ClosePopup(win.Popup)
 		tv.InsertAtCursor([]byte(s))
-		tv.OfferCompletions()
+		tv.OfferComplete()
 	}
 }
 
@@ -1910,7 +1910,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	win := tv.ParentWindow()
 
 	if gi.PopupIsCompleter(win.Popup) {
-		tv.Completion.KeyInput(kf)
+		tv.Complete.KeyInput(kf)
 	}
 
 	if kt.IsProcessed() {
@@ -1923,12 +1923,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
-		tv.OfferCompletions()
+		tv.OfferComplete()
 	case gi.KeyFunMoveLeft:
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
-		tv.OfferCompletions()
+		tv.OfferComplete()
 	case gi.KeyFunMoveUp:
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
@@ -1981,7 +1981,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunBackspace:
 		kt.SetProcessed()
 		tv.CursorBackspace(1)
-		tv.OfferCompletions()
+		tv.OfferComplete()
 	case gi.KeyFunKill:
 		kt.SetProcessed()
 		tv.CursorKill()
@@ -2002,7 +2002,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.Redo()
 	case gi.KeyFunComplete:
 		kt.SetProcessed()
-		tv.OfferCompletions()
+		tv.OfferComplete()
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
 		tv.CursorRecenter()
@@ -2035,7 +2035,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
 				tv.InsertAtCursor([]byte(string(kt.Rune)))
-				tv.OfferCompletions()
+				tv.OfferComplete()
 			}
 		}
 	}

@@ -681,7 +681,7 @@ func (fv *FileView) Style2D() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion
 
-func (fv *FileView) FileComplete(text string) (matches []string, seed string) {
+func (fv *FileView) FileComplete(text string) (matches complete.Completions, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -696,15 +696,19 @@ func (fv *FileView) FileComplete(text string) (matches []string, seed string) {
 	for _, f := range fv.Files {
 		files = append(files, f.Name)
 	}
-	if len(seed) == 0 { // return all directories
-		matches = files
-	} else {
-		matches = complete.MatchSeed(files, seed)
+
+	if len(seed) > 0 { // return all directories
+		files = complete.MatchSeed(files, seed)
+	}
+
+	for _, d := range files {
+		m := complete.Completion{Text: d}
+		matches = append(matches, m)
 	}
 	return matches, seed
 }
 
-func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
+func (fv *FileView) PathComplete(path string) (matches complete.Completions, seed string) {
 	dir, seed := filepath.Split(path)
 	d, err := os.Open(dir)
 	if err != nil {
@@ -719,10 +723,14 @@ func (fv *FileView) PathComplete(path string) (matches []string, seed string) {
 			dirs = append(dirs, f.Name())
 		}
 	}
-	if len(seed) == 0 { // return all directories
-		matches = dirs
-	} else {
-		matches = complete.MatchSeed(dirs, seed)
+
+	if len(seed) > 0 { // return all directories
+		dirs = complete.MatchSeed(dirs, seed)
+	}
+
+	for _, d := range dirs {
+		m := complete.Completion{Text: d}
+		matches = append(matches, m)
 	}
 	return matches, seed
 }

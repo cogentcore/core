@@ -48,12 +48,12 @@ type TextField struct {
 	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Completion   *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	RenderAll   TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis   TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight  float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn     bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete    *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -531,32 +531,32 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 // automatically be offered as the user types
 func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
-		if tf.Completion != nil {
-			tf.Completion.CompleteSig.Disconnect(tf.This)
+		if tf.Complete != nil {
+			tf.Complete.CompleteSig.Disconnect(tf.This)
 		}
-		tf.Completion.Destroy()
-		tf.Completion = nil
+		tf.Complete.Destroy()
+		tf.Complete = nil
 		return
 	}
-	tf.Completion = &Complete{}
-	tf.Completion.InitName(tf.Completion, "tf-completion") // needed for standalone Ki's
-	tf.Completion.Context = data
-	tf.Completion.MatchFunc = matchFun
-	tf.Completion.EditFunc = editFun
+	tf.Complete = &Complete{}
+	tf.Complete.InitName(tf.Complete, "tf-completion") // needed for standalone Ki's
+	tf.Complete.Context = data
+	tf.Complete.MatchFunc = matchFun
+	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tf.Completion.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.Complete.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff, _ := recv.Embed(KiT_TextField).(*TextField)
 		if sig == int64(CompleteSelect) {
-			tff.Complete(data.(string)) // always use data
+			tff.CompleteText(data.(string)) // always use data
 		} else if sig == int64(CompleteExtend) {
 			tff.CompleteExtend(data.(string)) // always use data
 		}
 	})
 }
 
-// OfferCompletions pops up a menu of possible completions
-func (tf *TextField) OfferCompletions() {
-	if tf.Completion == nil {
+// OfferComplete pops up a menu of possible completions
+func (tf *TextField) OfferComplete() {
+	if tf.Complete == nil {
 		return
 	}
 	win := tf.ParentWindow()
@@ -566,15 +566,15 @@ func (tf *TextField) OfferCompletions() {
 
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-	tf.Completion.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
+	tf.Complete.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
 }
 
-// Complete edits the text field using the string chosen from the completion menu
-func (tf *TextField) Complete(s string) {
+// CompleteText edits the text field using the string chosen from the completion menu
+func (tf *TextField) CompleteText(s string) {
 	win := tf.ParentWindow()
 	win.ClosePopup(win.Popup)
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
-	ns, delta := tf.Completion.EditFunc(txt, tf.CursorPos, s, tf.Completion.Seed)
+	ns, delta := tf.Complete.EditFunc(txt, tf.CursorPos, s, tf.Complete.Seed)
 	tf.EditTxt = []rune(ns)
 	tf.CursorForward(delta)
 }
@@ -585,7 +585,7 @@ func (tf *TextField) CompleteExtend(s string) {
 		win := tf.ParentWindow()
 		win.ClosePopup(win.Popup)
 		tf.InsertAtCursor(s)
-		tf.OfferCompletions()
+		tf.OfferComplete()
 	}
 }
 
@@ -922,8 +922,8 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.Chord())
 	win := tf.ParentWindow()
 
-	if tf.Completion != nil && PopupIsCompleter(win.Popup) {
-		tf.Completion.KeyInput(kf)
+	if tf.Complete != nil && PopupIsCompleter(win.Popup) {
+		tf.Complete.KeyInput(kf)
 	}
 
 	// first all the keys that work for both inactive and active
@@ -931,11 +931,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunMoveRight:
 		kt.SetProcessed()
 		tf.CursorForward(1)
-		tf.OfferCompletions()
+		tf.OfferComplete()
 	case KeyFunMoveLeft:
 		kt.SetProcessed()
 		tf.CursorBackward(1)
-		tf.OfferCompletions()
+		tf.OfferComplete()
 	case KeyFunHome:
 		kt.SetProcessed()
 		tf.CursorStart()
@@ -972,7 +972,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)
-		tf.OfferCompletions()
+		tf.OfferComplete()
 	case KeyFunKill:
 		kt.SetProcessed()
 		tf.CursorKill()
@@ -987,13 +987,13 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.Paste()
 	case KeyFunComplete:
 		kt.SetProcessed()
-		tf.OfferCompletions()
+		tf.OfferComplete()
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
 				tf.InsertAtCursor(string(kt.Rune))
-				tf.OfferCompletions()
+				tf.OfferComplete()
 			}
 		}
 	}

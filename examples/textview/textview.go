@@ -88,7 +88,7 @@ func mainrun() {
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
-	txbuf.Open("sample.in")
+	txbuf.Open("/Users/rohrlich/go/src/github.com/goki/gi/examples/textview/sample.in")
 	txbuf.HiLang = "Go"
 
 	// main menu
@@ -115,9 +115,13 @@ func mainrun() {
 	win.StartEventLoop()
 }
 
-func Complete(text string) (matches []string, seed string) {
+func Complete(text string) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
-	matches = complete.MatchSeed(words, seed)
+	possibles := complete.MatchSeed(words, seed)
+	for _, p := range possibles {
+		m := complete.Completion{Text: p, Icon:""}
+		matches = append(matches, m)
+	}
 	return matches, seed
 }
 

@@ -12,9 +12,17 @@ import (
 	"unicode"
 )
 
+type Completion struct {
+	Text string  // completion text
+	Icon string  // icon name
+	Desc string  // possible extra information, e.g. type, arguments, etc. - not currently used
+}
+
+type Completions []Completion
+
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(text string) (matches []string, seed string)
+type MatchFunc func(text string) (matches Completions, seed string)
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
@@ -23,9 +31,6 @@ type EditFunc func(text string, cursorPos int, completion string, seed string) (
 // MatchSeed returns a list of matches given a list of possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.
 func MatchSeed(completions []string, seed string) (matches []string) {
-	completions = completions
-	seed = seed
-
 	matches = completions[0:0]
 	match_start := -1
 	match_end := -1
@@ -61,20 +66,20 @@ func MatchSeed(completions []string, seed string) (matches []string) {
 // ExtendSeed tries to extend the current seed checking possible completions for a longer common seed
 // e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
 // but if the possible completions are "abcde" and "abz" then Extend returns ""
-func ExtendSeed(matches []string, seed string) (extension string) {
+func ExtendSeed(matches Completions, seed string) (extension string) {
 	keep_looking := true
 	new_seed := seed
 	potential_seed := new_seed
 	first_match := matches[0]
 	for keep_looking {
-		if len(first_match) <= len(new_seed) {
+		if len(first_match.Text) <= len(new_seed) {
 			keep_looking = false // ran out of chars
 			break
 		}
 
-		potential_seed = first_match[0 : len(new_seed)+1]
+		potential_seed = first_match.Text[0 : len(new_seed)+1]
 		for _, s := range matches {
-			if !strings.HasPrefix(s, potential_seed) {
+			if !strings.HasPrefix(s.Text, potential_seed) {
 				keep_looking = false
 				break
 			}
@@ -103,7 +108,7 @@ func SeedWhiteSpace(text string) string {
 // delta is the change in cursor position (cp)
 func EditBasic(text string, cp int, completion string, seed string) (newText string, delta int) {
 	s1 := string(text[0:cp])
-	s2 := string(text[cp:len(text)])
+	s2 := string(text[cp:])
 	s1 = strings.TrimSuffix(s1, seed)
 	s1 += completion
 	t := s1 + s2
@@ -115,7 +120,7 @@ func EditBasic(text string, cp int, completion string, seed string) (newText str
 // delta is the change in cursor position (cp)
 func EditWord(text string, cp int, completion string, seed string) (newText string, delta int) {
 	s1 := string(text[0:cp])
-	s2 := string(text[cp:len(text)])
+	s2 := string(text[cp:])
 
 	if len(s2) > 0 {
 		r := rune(s2[0])
