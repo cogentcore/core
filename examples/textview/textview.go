@@ -88,7 +88,7 @@ func mainrun() {
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
-	txbuf.Open("/Users/rohrlich/go/src/github.com/goki/gi/examples/textview/sample.in")
+	txbuf.Open("sample.in")
 	txbuf.HiLang = "Go"
 
 	// main menu
