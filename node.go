@@ -726,12 +726,13 @@ func (n *Node) Destroy() {
 	})
 	DelMgr.DestroyDeleted() // then destroy all those kids
 	// extra step to delete all the slices and maps -- super friendly to GC :)
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
-			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
-		}
-		return true
-	})
+	// note: not safe at this point!
+	// FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	// 	if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
+	// 		fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
+	// 	}
+	// 	return true
+	// })
 	n.This = nil // last gasp: lose our own sense of self..
 }
 
@@ -925,7 +926,7 @@ func (n *Node) Fields() []uintptr {
 func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
-	if typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
+	if typ == nil || typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
 		return true
 	}
 	rval := true
