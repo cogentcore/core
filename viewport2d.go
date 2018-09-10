@@ -289,6 +289,7 @@ func (vp *Viewport2D) Init2D() {
 func (vp *Viewport2D) Style2D() {
 	vp.SetCurWin()
 	vp.Style2DWidget()
+	vp.LayData.SetFromStyle(&vp.Sty.Layout) // also does reset
 }
 
 func (vp *Viewport2D) Size2D(iter int) {

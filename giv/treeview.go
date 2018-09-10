@@ -1596,7 +1596,8 @@ func (tv *TreeView) Style2D() {
 		return
 	}
 	tv.SetCanFocusIfActive()
-	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
+	tv.Style2DWidget()                      // todo: maybe don't use CSS here, for big trees?
+	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TreeViewStatesN); i++ {

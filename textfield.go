@@ -48,12 +48,12 @@ type TextField struct {
 	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll   TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis   TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight  float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn     bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete    *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete     *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -1117,6 +1117,7 @@ func (tf *TextField) Init2D() {
 func (tf *TextField) Style2D() {
 	tf.SetCanFocusIfActive()
 	tf.Style2DWidget()
+	tf.LayData.SetFromStyle(&tf.Sty.Layout) // also does reset
 	pst := &(tf.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Sty)

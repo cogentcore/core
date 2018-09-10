@@ -203,7 +203,7 @@ func (cb *ComboBox) ConfigParts() {
 	cb.ConfigPartsIndicator(indIdx)
 	if cb.MaxLength > 0 && lbIdx >= 0 {
 		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ex))
+		lbl.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))
 	}
 	if mods {
 		cb.UpdateEnd(updt)

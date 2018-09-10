@@ -95,6 +95,7 @@ func (ic *Icon) Size2D(iter int) {
 
 func (ic *Icon) Style2D() {
 	ic.Style2DWidget()
+	ic.LayData.SetFromStyle(&ic.Sty.Layout) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm

@@ -747,6 +747,7 @@ func (sb *ScrollBar) Init2D() {
 func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.Style2DWidget()
+	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
 	pst := &(sb.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyFrom(&sb.Sty)

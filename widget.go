@@ -161,7 +161,6 @@ func (wb *WidgetBase) Style2DWidget() {
 	wb.Sty.StyleCSS(gii, wb.CSSAgg, "")
 
 	wb.Sty.SetUnitContext(wb.Viewport, Vec2DZero) // todo: test for use of el-relative
-	wb.LayData.SetFromStyle(&wb.Sty.Layout)       // also does reset
 	if wb.Sty.Inactive {                          // inactive can only set, not clear
 		wb.SetInactive()
 	}
@@ -214,6 +213,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 
 func (wb *WidgetBase) Style2D() {
 	wb.Style2DWidget()
+	wb.LayData.SetFromStyle(&wb.Sty.Layout) // also does reset
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
@@ -845,12 +845,13 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 		}
 	}
 	if txt != "" {
-		lbl, ok := wb.Parts.ChildByName("label", 2)
+		lblk, ok := wb.Parts.ChildByName("label", 2)
 		if !ok {
 			return true
 		}
-		lbl.(*Label).Sty.Font.Color = wb.Sty.Font.Color
-		if lbl.(*Label).Text != txt {
+		lbl := lblk.(*Label)
+		lbl.Sty.Font.Color = wb.Sty.Font.Color
+		if lbl.Text != txt {
 			return true
 		}
 	} else {
@@ -860,4 +861,18 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 		}
 	}
 	return false
+}
+
+// SetFullReRenderIconLabel sets the icon and label to be re-rendered, needed
+// when styles change
+func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
+	if ick, ok := wb.Parts.ChildByName("icon", 0); ok {
+		ic := ick.(*Icon)
+		ic.SetFullReRender()
+	}
+	if lblk, ok := wb.Parts.ChildByName("label", 2); ok {
+		lbl := lblk.(*Label)
+		lbl.SetFullReRender()
+	}
+	wb.Parts.Style2DWidget() // restyle parent so parts inherit
 }

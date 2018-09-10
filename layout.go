@@ -1705,6 +1705,7 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 
 func (ly *Layout) Style2D() {
 	ly.Style2DWidget()
+	ly.LayData.SetFromStyle(&ly.Sty.Layout)         // also does reset
 	tprops := kit.Types.Properties(ly.Type(), true) // true = makeNew
 	LayoutFields.Style(ly, nil, tprops)
 	LayoutFields.Style(ly, nil, ly.Props)
@@ -1846,6 +1847,7 @@ var SpaceProps = ki.Props{
 
 func (sp *Space) Style2D() {
 	sp.Style2DWidget()
+	sp.LayData.SetFromStyle(&sp.Sty.Layout) // also does reset
 }
 
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {

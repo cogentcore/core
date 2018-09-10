@@ -300,6 +300,7 @@ func (lb *Label) TextPos() Vec2D {
 
 func (lb *Label) Style2D() {
 	lb.Style2DWidget()
+	lb.LayData.SetFromStyle(&lb.Sty.Layout) // also does reset
 	if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
 		lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
 	} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {

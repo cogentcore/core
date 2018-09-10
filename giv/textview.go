@@ -70,12 +70,12 @@ type TextView struct {
 	PrevSelectReg TextRegion                `xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	SelectMode    bool                      `xml:"-" desc:"if true, select text as cursor moves"`
 	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	StateStyles [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight  float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight  float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize     image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn     bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete    *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  string
@@ -2142,6 +2142,7 @@ func (tv *TextView) Style2D() {
 	tv.HiInit()
 	tv.SetCanFocusIfActive()
 	tv.Style2DWidget()
+	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)

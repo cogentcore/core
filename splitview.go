@@ -226,6 +226,7 @@ func (sv *SplitView) ConfigSplitters() {
 
 func (sv *SplitView) Style2D() {
 	sv.Style2DWidget()
+	sv.LayData.SetFromStyle(&sv.Sty.Layout)                             // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This, false, true) // no inherit, yes type defaults
 	sv.HandleSize.ToDots(&sv.Sty.UnContext)
 	sv.UpdateSplits()
@@ -402,6 +403,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 func (sr *Splitter) Style2D() {
 	bitflag.Clear(&sr.Flag, int(CanFocus))
 	sr.Style2DWidget()
+	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
 	pst := &(sr.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sr.StateStyles[i].CopyFrom(&sr.Sty)

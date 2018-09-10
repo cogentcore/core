@@ -259,6 +259,7 @@ func (sb *SpinBox) Style2D() {
 		sb.Defaults()
 	}
 	sb.Style2DWidget()
+	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
 	sb.ConfigParts()
 }
 

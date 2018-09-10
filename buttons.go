@@ -208,7 +208,7 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 	bb.State = state
 	bb.Sty = bb.StateStyles[state]
 	if prev != bb.State {
-		bb.Parts.SetFullReRender() // needs full rerender to update text, icon
+		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
 		return true
 	}
 	return false
@@ -238,7 +238,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	bb.Sty = bb.StateStyles[bb.State]
 	bb.This.(ButtonWidget).ConfigPartsIfNeeded()
 	if prev != bb.State {
-		bb.Parts.SetFullReRender() // needs full rerender
+		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true
 	}
 	// fmt.Printf("but style updt: %v to %v\n", bb.PathUnique(), bb.State)
@@ -536,6 +536,7 @@ func (bb *ButtonBase) Style2D() {
 	}
 
 	bb.Style2DWidget()
+	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
 	pst := bb.ParentStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
