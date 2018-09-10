@@ -238,7 +238,7 @@ var DefaultKeyMap = KeyMapName("MacEmacs")
 type KeyMapsItem struct {
 	Name string `width:"20" desc:"name of keymap"`
 	Desc string `desc:"description of keymap -- good idea to include source it was derived from"`
-	Map  KeyMap `desc:"keymap -- click button to edit map, and duplicate existing map to create a new custom map based on one of the standards"`
+	Map  KeyMap `desc:"to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu"`
 }
 
 // KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create

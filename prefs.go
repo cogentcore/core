@@ -67,7 +67,7 @@ type Preferences struct {
 	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	Colors          ColorPrefs             `desc:"color preferences"`
 	Params          ParamPrefs             `desc:"parameters controlling GUI behavior"`
-	KeyMap          KeyMapName             `desc:"name of key map to use, from among list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
+	KeyMap          KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
 	SaveKeyMaps     bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
 	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
