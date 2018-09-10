@@ -95,6 +95,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * tableview: getting some weird header mis-alignments
+* keymap map edit -- combobox indicator showing up in weird place.  sometimes it is styled smaller consistent with location of indicator.. 
 
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there

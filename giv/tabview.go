@@ -5,214 +5,182 @@
 package giv
 
 import (
+	"log"
+	"reflect"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  Tab Widget
+// TabView switches among child widgets via tabs.  The selected widget gets
+// the full allocated space avail after the tabs are accounted for.  The
+// TabView is just a Vertical layout that manages two child widgets: a
+// HorizFlow Layout for the tabs (which can flow across multiple rows as
+// needed) and a Stacked Frame that actually contains all the children, and
+// provides scrollbars as needed to any content within.  Typically should have
+// max stretch and a set preferred size, so it expands.
+type TabView struct {
+	gi.Layout
+	TabViewSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
+}
 
-// todo: this is out-of-date and non-functional
+var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
 
-// signals that buttons can send
+var TabViewProps = ki.Props{
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
+	"max-width":        -1,
+	"max-height":       -1,
+}
+
+// AddTab adds a widget as a new tab, with given tab label, and returns the
+// index of that tab
+func (tv *TabView) AddTab(widg gi.Node2D, label string) int {
+	fr := tv.Frame()
+	idx := len(*fr.Children())
+	tv.InsertTab(widg, label, idx)
+	return idx
+}
+
+// InsertTab inserts a widget into given index position within list of tabs
+func (tv *TabView) InsertTab(widg gi.Node2D, label string, idx int) {
+	fr := tv.Frame()
+	tb := tv.Tabs()
+	fr.InsertChild(widg, idx)
+	tab := tb.InsertNewChild(gi.KiT_Action, idx, label).(*gi.Action)
+	tab.Data = idx
+	tab.SetText(label)
+	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.Embed(KiT_TabView).(*TabView)
+		act := send.(*gi.Action)
+		tabIdx := act.Data.(int)
+		tvv.SelectTabIndex(tabIdx)
+	})
+}
+
+// AddNewTab adds a new widget as a new tab of given widget type, with given
+// tab label, and returns the new widget
+func (tv *TabView) AddNewTab(typ reflect.Type, label string) gi.Node2D {
+	fr := tv.Frame()
+	idx := len(*fr.Children())
+	widg := tv.InsertNewTab(typ, label, idx)
+	return widg
+}
+
+// InsertNewTab inserts a new widget of given type into given index position
+// within list of tabs, and returns that new widget
+func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) gi.Node2D {
+	fr := tv.Frame()
+	tb := tv.Tabs()
+	widg := fr.InsertNewChild(typ, idx, label).(gi.Node2D)
+	tab := tb.InsertNewChild(gi.KiT_Action, idx, label).(*gi.Action)
+	tab.Data = idx
+	tab.SetText(label)
+	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvv := recv.Embed(KiT_TabView).(*TabView)
+		act := send.(*gi.Action)
+		tabIdx := act.Data.(int)
+		tvv.SelectTabIndex(tabIdx)
+	})
+	return widg
+}
+
+// SelectTabIndex selects tab at given index, returning it -- returns false if
+// index is invalid (emits log message)
+func (tv *TabView) SelectTabIndex(idx int) (gi.Node2D, bool) {
+	fr := tv.Frame()
+	tb := tv.Tabs()
+	sz := len(*fr.Children())
+	if idx < 0 || idx >= sz {
+		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
+		return nil, false
+	}
+	tab := tb.KnownChild(idx).(*gi.Action)
+	widg := fr.KnownChild(idx).(gi.Node2D)
+	updt := tv.UpdateStart()
+	tv.UnselectAllTabs()
+	tab.SetSelectedState(true)
+	fr.StackTop = idx
+	tv.UpdateEnd(updt)
+	return widg, true
+}
+
+// TabViewSignals are signals that the TabView can send
 type TabViewSignals int64
 
 const (
-	// node was selected -- data is the tab widget
+	// TabSelected indicates node was selected -- data is the tab widget
 	TabSelected TabViewSignals = iota
-
-	// tab widget unselected
-	TabUnselected
-
-	// collapsed tab widget was opened
-	TabOpened
-
-	// open tab widget was collapsed -- children not visible
-	TabCollapsed
 
 	TabViewSignalsN
 )
 
 //go:generate stringer -type=TabViewSignals
 
-// todo: could have different positioning of the tabs?
-
-// TabView represents children of a source node as tabs with a stacked
-// layout of Frame widgets for each child in the source -- we create a
-// LayoutVert with a LayoutHoriz of tab buttons and then the LayoutStacked of
-// Frames
-type TabView struct {
-	gi.WidgetBase
-	SrcNode    ki.Ptr    `desc:"Ki Node that this widget is viewing in the tree -- the source -- chilren of this node are tabs, and updates drive tab updates"`
-	TabViewSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
-}
-
-var KiT_TabView = kit.Types.AddType(&TabView{}, nil)
-
-// set the source Ki Node that generates our tabs
-func (g *TabView) SetSrcNode(k ki.Ki) {
-	g.SrcNode.Ptr = k
-	k.NodeSignal().Connect(g.This, SrcNodeSignal) // we recv signals from source
-	nm := "TabViewOf_" + k.UniqueName()
-	if g.Nm == "" {
-		g.SetName(nm)
+// InitTabView initializes the tab widget children if it hasn't been done yet
+func (tv *TabView) InitTabView() {
+	if len(tv.Kids) == 2 {
+		return
 	}
-	g.InitTabView()
+	updt := tv.UpdateStart()
+	tv.Lay = gi.LayoutVert
+
+	tabs := tv.AddNewChild(gi.KiT_Layout, "tabs").(*gi.Layout)
+	tabs.Lay = gi.LayoutHoriz
+	tabs.SetStretchMaxWidth()
+	tabs.SetStretchMaxHeight()
+	tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
+	tabs.SetProp("overflow", "hidden") // no scrollbars!
+
+	frame := tv.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
+	frame.Lay = gi.LayoutStacked
+	frame.SetMinPrefWidth(units.NewValue(10, units.Em))
+	frame.SetMinPrefHeight(units.NewValue(10, units.Em))
+	frame.SetStretchMaxWidth()
+	frame.SetStretchMaxHeight()
+
+	tv.UpdateEnd(updt)
 }
 
-// todo: various other ways of selecting tabs..
-
-// SelectTabIndex selects tab at given index, returning false if index is invalid
-func (g *TabView) SelectTabIndex(idx int) bool {
-	tabrow := g.TabRowLayout()
-	tbk, ok := tabrow.Child(idx)
-	if !ok {
-		return false
-	}
-	tb, ok := tbk.(*gi.Button)
-	if !ok {
-		return false
-	}
-	updt := g.UpdateStart()
-	g.UnselectAllTabButtons()
-	tb.SetSelectedState(true)
-	tabstack := g.TabStackLayout()
-	tabstack.StackTop = idx
-	g.UpdateEnd(updt)
-	return true
+// Tabs returns the layout containing the tabs -- the first element within us
+func (tv *TabView) Tabs() *gi.Layout {
+	tv.InitTabView()
+	return tv.KnownChild(0).(*gi.Layout)
 }
 
-// TabFrameAtIndex returns tab frame for given index
-func (g *TabView) TabFrameAtIndex(idx int) *gi.Frame {
-	tabstack := g.TabStackLayout()
-	tfk, ok := tabstack.Child(idx)
-	if !ok {
-		return nil
-	}
-	tf, ok := tfk.(*gi.Frame)
-	if !ok {
-		return nil
-	}
-	return tf
+// Frame returns the stacked frame layout -- the second element
+func (tv *TabView) Frame() *gi.Frame {
+	tv.InitTabView()
+	return tv.KnownChild(1).(*gi.Frame)
 }
 
-// get the overal column layout for the tab widget
-func (g *TabView) TabColLayout() *gi.Layout {
-	g.InitTabView()
-	return g.KnownChild(0).(*gi.Layout)
-}
-
-// get the row layout of tabs across the top of the tab widget
-func (g *TabView) TabRowLayout() *gi.Layout {
-	tabcol := g.TabColLayout()
-	return tabcol.KnownChild(0).(*gi.Layout)
-}
-
-// get the stacked layout of tab frames
-func (g *TabView) TabStackLayout() *gi.Layout {
-	tabcol := g.TabColLayout()
-	return tabcol.KnownChild(1).(*gi.Layout)
-}
-
-// unselect all tabs
-func (g *TabView) UnselectAllTabButtons() {
-	tabrow := g.TabRowLayout()
-	for _, tbk := range tabrow.Kids {
-		tb, ok := tbk.(*gi.Button)
+// UnselectAllTabs turns off all the tabs
+func (tv *TabView) UnselectAllTabs() {
+	tb := tv.Tabs()
+	for _, tbk := range tb.Kids {
+		tb, ok := tbk.(*gi.Action)
 		if !ok {
 			continue
 		}
 		if tb.IsSelected() {
-			updt := tb.UpdateStart()
 			tb.SetSelectedState(false)
-			tb.UpdateEnd(updt)
 		}
 	}
 }
 
-func TabButtonClicked(recv, send ki.Ki, sig int64, d interface{}) {
-	g, ok := recv.(*TabView)
-	if !ok {
-		return
-	}
-	if sig == int64(gi.ButtonClicked) {
-		tb, ok := send.(*gi.Button)
-		if !ok {
-			return
-		}
-		if !tb.IsSelected() {
-			tabrow := g.TabRowLayout()
-			butidx, ok := tabrow.Children().IndexOf(send, 0)
-			// fmt.Printf("selected tab: %v\n", butidx)
-			if ok {
-				g.SelectTabIndex(butidx)
-			}
-		}
-	}
-}
-
-var TabButtonProps = ki.Props{
-	"border-width":        units.NewValue(1, units.Px),
-	"border-radius":       units.NewValue(0, units.Px),
-	"border-color":        &gi.Prefs.Colors.Border,
-	"border-style":        gi.BorderSolid,
-	"padding":             units.NewValue(4, units.Px),
-	"margin":              units.NewValue(0, units.Px),
-	"background-color":    &gi.Prefs.Colors.Control,
-	"box-shadow.h-offset": units.NewValue(0, units.Px),
-	"box-shadow.v-offset": units.NewValue(0, units.Px),
-	"box-shadow.blur":     units.NewValue(0, units.Px),
-	"box-shadow.color":    &gi.Prefs.Colors.Shadow,
-	"text-align":          gi.AlignCenter,
-}
-
-// make the initial tab frames for src node
-func (g *TabView) InitTabs() {
-	tabrow := g.TabRowLayout()
-	tabstack := g.TabStackLayout()
-	if g.SrcNode.Ptr == nil {
-		return
-	}
-	skids := *g.SrcNode.Ptr.Children()
-	for _, sk := range skids {
-		nm := "TabFrameOf_" + sk.UniqueName()
-		tf := tabstack.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
-		tf.Lay = gi.LayoutVert
-		tf.SetProp("max-width", -1.0) // stretch flex
-		tf.SetProp("max-height", -1.0)
-		nm = "TabOf_" + sk.UniqueName()
-		tb := tabrow.AddNewChild(gi.KiT_Button, nm).(*gi.Button) // todo make tab button
-		tb.Text = sk.Name()
-		for key, val := range TabButtonProps {
-			tb.SetProp(key, val)
-		}
-		tb.ButtonSig.Connect(g.This, TabButtonClicked)
-	}
-	g.SelectTabIndex(0)
-}
-
-// todo: update tabs from changes
-
-// initialize the tab widget structure -- assumes it has been done if there is
-// already a child node
-func (g *TabView) InitTabView() {
-	if len(g.Kids) == 1 {
-		return
-	}
-	updt := g.UpdateStart()
-	tabcol := g.AddNewChild(gi.KiT_Layout, "TabCol").(*gi.Layout)
-	tabcol.Lay = gi.LayoutVert
-	tabrow := tabcol.AddNewChild(gi.KiT_Layout, "TabRow").(*gi.Layout)
-	tabrow.Lay = gi.LayoutHoriz
-	tabstack := tabcol.AddNewChild(gi.KiT_Layout, "TabStack").(*gi.Layout)
-	tabstack.Lay = gi.LayoutStacked
-	tabstack.SetProp("max-width", -1.0) // stretch flex
-	tabstack.SetProp("max-height", -1.0)
-	g.InitTabs()
-	g.UpdateEnd(updt)
-}
-
-////////////////////////////////////////////////////
-// Node2D interface
+// var TabButtonProps = ki.Props{
+// 	"border-width":        units.NewValue(1, units.Px),
+// 	"border-radius":       units.NewValue(0, units.Px),
+// 	"border-color":        &gi.Prefs.Colors.Border,
+// 	"border-style":        gi.BorderSolid,
+// 	"padding":             units.NewValue(4, units.Px),
+// 	"margin":              units.NewValue(0, units.Px),
+// 	"background-color":    &gi.Prefs.Colors.Control,
+// 	"box-shadow.h-offset": units.NewValue(0, units.Px),
+// 	"box-shadow.v-offset": units.NewValue(0, units.Px),
+// 	"box-shadow.blur":     units.NewValue(0, units.Px),
+// 	"box-shadow.color":    &gi.Prefs.Colors.Shadow,
+// 	"text-align":          gi.AlignCenter,
+// }

@@ -9,7 +9,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/ki"
+	"github.com/goki/gi/units"
 )
 
 func main() {
@@ -19,17 +19,6 @@ func main() {
 }
 
 func mainrun() {
-	// a source tree to view
-	srctree := ki.Node{}
-	srctree.InitName(&srctree, "par1")
-	// child1 :=
-	srctree.AddNewChild(nil, "child1")
-	child2 := srctree.AddNewChild(nil, "child2")
-	// child3 :=
-	srctree.AddNewChild(nil, "child3")
-	// schild2 :=
-	child2.AddNewChild(nil, "subchild1")
-
 	width := 1024
 	height := 768
 
@@ -40,17 +29,17 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tv1 := mfr.AddNewChild(giv.KiT_TabView, "tv1").(*giv.TabView)
-	tv1.SetSrcNode(&srctree)
+	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
+	tv.SetMinPrefWidth(units.NewValue(10, units.Em))
+	tv.SetMinPrefHeight(units.NewValue(10, units.Em))
 
-	for i, sk := range srctree.Kids {
-		tf := tv1.TabFrameAtIndex(i)
-		lbl := tf.AddNewChild(gi.KiT_Label, "tst").(*gi.Label)
-		lbl.Text = sk.UniqueName()
-		// note: these were set by default -- could override
-		// tf.SetProp("max-width", -1.0) // stretch flex
-		// tf.SetProp("max-height", -1.0)
-	}
+	lbl1 := tv.AddNewTab(gi.KiT_Label, "Label1").(*gi.Label)
+	lbl1.SetText("this is the contents of the first tab")
+	lbl1.SetProp("word-wrap", true)
+
+	lbl2 := tv.AddNewTab(gi.KiT_Label, "Label2").(*gi.Label)
+	lbl2.SetText("this is the contents of the second tab")
+	lbl2.SetProp("word-wrap", true)
 
 	// main menu
 	appnm := oswin.TheApp.Name()

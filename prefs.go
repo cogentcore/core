@@ -460,7 +460,7 @@ var PreferencesProps = ki.Props{
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
 type FavPathItem struct {
-	Ic   IconName `view:"show-name" desc:"icon for item"`
+	Ic   IconName `desc:"icon for item"`
 	Name string   `width:"20" desc:"name of the favorite item"`
 	Path string   `tableview:"-select"`
 }

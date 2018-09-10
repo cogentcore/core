@@ -330,7 +330,7 @@ func (km *KeyMaps) CopyFrom(cp KeyMaps) {
 // values.
 func (km *KeyMaps) RevertToStd() {
 	km.CopyFrom(StdKeyMaps)
-	AvailKeyMapsChanged = false
+	AvailKeyMapsChanged = true
 }
 
 // ViewStd shows the standard maps that are compiled into the program and have
@@ -545,6 +545,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+DownArrow":   KeyFunPageDown,
 		"Shift+Control+V":     KeyFunPageDown,
 		"Alt+√":               KeyFunPageDown,
+		"Control+V":           KeyFunPageDown,
 		"Control+RightArrow":  KeyFunPageRight,
 		"Control+LeftArrow":   KeyFunPageLeft,
 		"Home":                KeyFunHome,
@@ -575,7 +576,6 @@ var StdKeyMaps = KeyMaps{
 		"Control+X":           KeyFunCut,
 		"Meta+X":              KeyFunCut,
 		"Control+Y":           KeyFunPaste,
-		"Control+V":           KeyFunPaste,
 		"Meta+V":              KeyFunPaste,
 		"Control+M":           KeyFunDuplicate,
 		"Control+Z":           KeyFunUndo,
