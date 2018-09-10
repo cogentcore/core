@@ -32,31 +32,47 @@ func KeyMapsView(km *gi.KeyMaps) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
+	title := mfr.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
+	title.SetText("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	title.SetProp("word-wrap", true)
+
 	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
 	tv.Viewport = vp
 	tv.SetSlice(km, nil)
 	tv.SetStretchMaxWidth()
 	tv.SetStretchMaxHeight()
 
+	gi.AvailKeyMapsChanged = false
+	tv.ViewSig.Connect(mfr.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		gi.AvailKeyMapsChanged = true
+	})
+
 	mmen := win.MainMenu
 	MainMenuView(km, win, mmen)
 
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
-			Prompt: "Do you want to save any changes to std preferences to std keymaps file before closing, or Cancel the close and do a Save to a different file?"},
-			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				switch sig {
-				case 0:
-					km.SavePrefs()
-					fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
-					w.Close()
-				case 1:
-					w.Close()
-				case 2:
-					// default is to do nothing, i.e., cancel
-				}
-			})
+		if gi.AvailKeyMapsChanged { // only for main avail map..
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
+				Prompt: "Do you want to save any changes to std preferences to std keymaps file before closing, or Cancel the close and do a Save to a different file?"},
+				[]string{"Save and Close", "Discard and Close", "Cancel"},
+				win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						km.SavePrefs()
+						fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
+						w.Close()
+					case 1:
+						if km == &gi.AvailKeyMaps {
+							km.OpenPrefs() // revert
+						}
+						w.Close()
+					case 2:
+						// default is to do nothing, i.e., cancel
+					}
+				})
+		} else {
+			w.Close()
+		}
 	})
 
 	win.MainMenuUpdated()

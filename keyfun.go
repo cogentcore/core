@@ -237,8 +237,8 @@ var DefaultKeyMap = KeyMapName("MacEmacs")
 // KeyMapsItem is an entry in a KeyMaps list
 type KeyMapsItem struct {
 	Name string `width:"20" desc:"name of keymap"`
-	Desc string `desc:"description of keymap"`
-	Map  KeyMap `desc:keymap"`
+	Desc string `desc:"description of keymap -- good idea to include source it was derived from"`
+	Map  KeyMap `desc:"keymap -- click button to edit map, and duplicate existing map to create a new custom map based on one of the standards"`
 }
 
 // KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create
@@ -306,6 +306,7 @@ func (km *KeyMaps) SaveJSON(filename FileName) error {
 func (km *KeyMaps) OpenPrefs() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	AvailKeyMapsChanged = false
 	return km.OpenJSON(FileName(pnm))
 }
 
@@ -313,6 +314,7 @@ func (km *KeyMaps) OpenPrefs() error {
 func (km *KeyMaps) SavePrefs() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	AvailKeyMapsChanged = false
 	return km.SaveJSON(FileName(pnm))
 }
 
@@ -328,6 +330,7 @@ func (km *KeyMaps) CopyFrom(cp KeyMaps) {
 // values.
 func (km *KeyMaps) RevertToStd() {
 	km.CopyFrom(StdKeyMaps)
+	AvailKeyMapsChanged = false
 }
 
 // ViewStd shows the standard maps that are compiled into the program and have
@@ -337,17 +340,22 @@ func (km *KeyMaps) ViewStd() {
 	TheViewIFace.KeyMapsView(&StdKeyMaps)
 }
 
+// AvailKeyMapsChanged is used to update giv.KeyMapsView toolbars via
+// following menu, toolbar props update methods -- not accurate if editing any
+// other map but works for now..
+var AvailKeyMapsChanged = false
+
 // KeyMapsProps define the ToolBar and MenuBar for TableView of KeyMaps, e.g., giv.KeyMapsView
 var KeyMapsProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
-			// {"Update", ki.Props{
-			// 	"shortcut": "Command+U",
-			// }},
 			{"OpenPrefs", ki.Props{}},
 			{"SavePrefs", ki.Props{
 				"shortcut": "Command+S",
+				"updtfunc": func(kmi interface{}, act *Action) {
+					act.SetActiveState(AvailKeyMapsChanged)
+				},
 			}},
 			{"sep-file", ki.BlankProp{}},
 			{"OpenJSON", ki.Props{
@@ -374,17 +382,16 @@ var KeyMapsProps = ki.Props{
 				"confirm": true,
 			}},
 		}},
-		{"Edit", "Copy Cut Paste"},
+		{"Edit", "Copy Cut Paste Dupe"},
 		{"Window", "Windows"},
 	},
 	"ToolBar": ki.PropSlice{
-		// {"Update", ki.Props{
-		// 	"icon": "update",
-		// }},
-		// {"sep-file", ki.BlankProp{}},
 		{"SavePrefs", ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
 			"icon": "file-save",
+			"updtfunc": func(kmi interface{}, act *Action) {
+				act.SetActiveStateUpdt(AvailKeyMapsChanged)
+			},
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"OpenJSON", ki.Props{

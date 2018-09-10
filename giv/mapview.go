@@ -21,6 +21,7 @@ import (
 type MapView struct {
 	gi.Frame
 	Map        interface{} `desc:"the map that we are a view onto"`
+	Changed    bool        `desc:"has the map been edited?"`
 	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
 	SortVals   bool        `desc:"sort by values instead of keys"`
@@ -199,11 +200,16 @@ func (mv *MapView) ConfigMapGrid() {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
-			mvv.ViewSig.Emit(mvv.This, 0, nil)
+			mvv.SetChanged()
 		})
 		keyw := sg.KnownChild(i * ncol).(gi.Node2D)
 		widg := sg.KnownChild(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
+		kvb := kv.AsValueViewBase()
+		kvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
+			mvv.SetChanged()
+		})
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if ifaceType {
@@ -236,6 +242,16 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.UpdateEnd(updt)
 }
 
+// SetChanged sets the Changed flag and emits the ViewSig signal for the
+// SliceView, indicating that some kind of edit / change has taken place to
+// the table data.  It isn't really practical to record all the different
+// types of changes, so this is just generic.
+func (mv *MapView) SetChanged() {
+	mv.Changed = true
+	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.ToolBar().UpdateActions() // nil safe
+}
+
 // MapChangeValueType changes the type of the value for given map element at
 // idx -- for maps with interface{} values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
@@ -264,7 +280,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.ConfigMapGrid()
-	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.SetChanged()
 }
 
 // ToggleSort toggles sorting by values vs. keys
@@ -301,7 +317,7 @@ func (mv *MapView) MapAdd() {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.ConfigMapGrid()
-	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.SetChanged()
 }
 
 // MapDelete deletes a key-value from the map
@@ -319,7 +335,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.ConfigMapGrid()
-	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.SetChanged()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -367,7 +383,7 @@ func (mv *MapView) Style2D() {
 }
 
 func (mv *MapView) Render2D() {
-	mv.ToolBar().UpdateActions()
+	mv.ToolBar().UpdateActions() // nil safe..
 	if win := mv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()

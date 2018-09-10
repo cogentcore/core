@@ -341,7 +341,7 @@ var PreferencesProps = ki.Props{
 				"shortcut": "Command+U",
 				"updtfunc": func(pfi interface{}, act *Action) {
 					pf := pfi.(*Preferences)
-					act.SetActiveStateUpdt(pf.Changed)
+					act.SetActiveState(pf.Changed)
 				},
 			}},
 			{"Open", ki.Props{
@@ -351,7 +351,7 @@ var PreferencesProps = ki.Props{
 				"shortcut": "Command+S",
 				"updtfunc": func(pfi interface{}, act *Action) {
 					pf := pfi.(*Preferences)
-					act.SetActiveStateUpdt(pf.Changed)
+					act.SetActiveState(pf.Changed)
 				},
 			}},
 			{"sep-color", ki.BlankProp{}},
@@ -460,7 +460,7 @@ var PreferencesProps = ki.Props{
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
 type FavPathItem struct {
-	Ic   IconName `desc:"icon for item"`
+	Ic   IconName `view:"show-name" desc:"icon for item"`
 	Name string   `width:"20" desc:"name of the favorite item"`
 	Path string   `tableview:"-select"`
 }

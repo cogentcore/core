@@ -47,21 +47,23 @@ var TableViewWaitCursorSize = 5000
 // taken using the TableViewSig signals
 type TableView struct {
 	gi.Frame
-	Slice        interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	StyleFunc    TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
-	Values       [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	ShowIndex    bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
-	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelField     string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
-	SelVal       interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`
-	SelectedIdx  int                `json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedRows for full set of selected rows in active editing mode"`
-	SortIdx      int                `desc:"current sort index"`
-	SortDesc     bool               `desc:"whether current sort order is descending"`
-	SelectMode   bool               `desc:"editing-mode select rows mode"`
-	SelectedRows map[int]bool       `desc:"list of currently-selected rows"`
-	DraggedRows  []int              `desc:"list of currently-dragged rows"`
-	TableViewSig ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
-	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Slice            interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	StyleFunc        TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	ShowViewCtxtMenu bool               `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
+	Changed          bool               `desc:"has the table been edited?"`
+	Values           [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
+	ShowIndex        bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
+	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	SelField         string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
+	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`
+	SelectedIdx      int                `json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedRows for full set of selected rows in active editing mode"`
+	SortIdx          int                `desc:"current sort index"`
+	SortDesc         bool               `desc:"whether current sort order is descending"`
+	SelectMode       bool               `desc:"editing-mode select rows mode"`
+	SelectedRows     map[int]bool       `desc:"list of currently-selected rows"`
+	DraggedRows      []int              `desc:"list of currently-dragged rows"`
+	TableViewSig     ki.Signal          `json:"-" xml:"-" desc:"table view interactive editing signals"`
+	ViewSig          ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
 	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	BuiltSlice   interface{} `view:"-" json:"-" xml:"-" desc:"the built slice"`
@@ -505,8 +507,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				vvb.ViewSig.ConnectOnly(tv.This, // todo: do we need this?
 					func(recv, send ki.Ki, sig int64, data interface{}) {
 						tvv, _ := recv.Embed(KiT_TableView).(*TableView)
-						tvv.UpdateSig()
-						tvv.ViewSig.Emit(tvv.This, 0, nil)
+						tvv.SetChanged()
 					})
 
 				addnm := fmt.Sprintf("add-%v", idxtxt)
@@ -546,6 +547,16 @@ func (tv *TableView) ConfigSliceGridRows() {
 	}
 }
 
+// SetChanged sets the Changed flag and emits the ViewSig signal for the
+// TableView, indicating that some kind of edit / change has taken place to
+// the table data.  It isn't really practical to record all the different
+// types of changes, so this is just generic.
+func (tv *TableView) SetChanged() {
+	tv.Changed = true
+	tv.ViewSig.Emit(tv.This, 0, nil)
+	tv.ToolBar().UpdateActions() // nil safe
+}
+
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end -- reconfig means call ConfigSliceGrid to update display
 func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
@@ -572,6 +583,7 @@ func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.SetChanged()
 	if reconfig {
 		tv.ConfigSliceGrid(true)
 	}
@@ -598,6 +610,7 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.SetChanged()
 	if reconfig {
 		tv.ConfigSliceGrid(true)
 	}
@@ -1408,6 +1421,7 @@ func (tv *TableView) DeleteRows() {
 	for _, r := range rws {
 		tv.SliceDelete(r, false)
 	}
+	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
 }
@@ -1425,6 +1439,7 @@ func (tv *TableView) CutRows() {
 	for _, r := range rws {
 		tv.SliceDelete(r, false)
 	}
+	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
 	tv.SelectRowAction(row, mouse.NoSelectMode)
@@ -1484,6 +1499,7 @@ func (tv *TableView) PasteAssign(md mimedata.Mimes, row int) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
 }
@@ -1509,9 +1525,25 @@ func (tv *TableView) PasteAtRow(md mimedata.Mimes, row int) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
+	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
 	tv.SelectRowAction(row, mouse.NoSelectMode)
+}
+
+// Duplicate copies selected items and inserts them after current selection --
+// return row of start of duplicates if successful, else -1
+func (tv *TableView) Duplicate() int {
+	nitms := len(tv.SelectedRows)
+	if nitms == 0 {
+		return -1
+	}
+	rws := tv.SelectedRowsList(true) // descending sort -- last first
+	pasteAt := rws[0]
+	tv.CopyRows(true)
+	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	tv.PasteAtRow(md, pasteAt)
+	return pasteAt
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1670,15 +1702,46 @@ func (tv *TableView) DropCancel() {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (tv *TableView) ItemCtxtMenu(idx int) {
-	stru := tv.RowStruct(idx)
+func (tv *TableView) StdCtxtMenu(m *gi.Menu, row int) {
+	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.CopyRows(true)
+		})
+	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.CutRows()
+		})
+	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.Paste(data.(int))
+		})
+	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.Duplicate()
+		})
+}
+
+func (tv *TableView) ItemCtxtMenu(row int) {
+	stru := tv.RowStruct(row)
 	if stru == nil {
 		return
 	}
-
 	var men gi.Menu
-	if CtxtMenuView(stru, tv.IsInactive(), tv.Viewport, &men) && len(men) > 0 {
-		pos := tv.RowPos(idx)
+
+	if CtxtMenuView(stru, tv.IsInactive(), tv.Viewport, &men) {
+		if tv.ShowViewCtxtMenu {
+			men.AddSeparator("sep-tvmenu")
+			tv.StdCtxtMenu(&men, row)
+		}
+	} else {
+		tv.StdCtxtMenu(&men, row)
+	}
+	if len(men) > 0 {
+		pos := tv.RowPos(row)
 		gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, tv.Nm+"-menu")
 	}
 }
@@ -1710,9 +1773,13 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 		tv.SelectMode = false
 		tv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
-	// case gi.KeyFunDuplicate:
-	// 	tv.SrcDuplicate() // todo: dupe
-	// 	kt.SetProcessed()
+	case gi.KeyFunDuplicate:
+		nrow := tv.Duplicate()
+		tv.SelectMode = false
+		if nrow >= 0 {
+			tv.SelectRowAction(nrow, mouse.NoSelectMode)
+		}
+		kt.SetProcessed()
 	case gi.KeyFunInsert:
 		tv.SliceNewAt(row, true)
 		tv.SelectMode = false
@@ -1785,6 +1852,14 @@ func (tv *TableView) TableViewEvents() {
 			}
 		})
 	} else {
+		tv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.Event)
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			if me.Button == mouse.Right && me.Action == mouse.Release {
+				tvv.ItemCtxtMenu(tvv.SelectedIdx)
+				me.SetProcessed()
+			}
+		})
 		tv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			kt := d.(*key.ChordEvent)

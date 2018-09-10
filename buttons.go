@@ -690,7 +690,7 @@ func (bb *Button) ButtonAsBase() *ButtonBase {
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff IconName `desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state"`
+	IconOff IconName `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)

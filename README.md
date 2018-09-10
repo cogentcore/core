@@ -94,10 +94,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* gieditor: use changed flag from structview, accumulate
-* add changed to everything
-
-* tableview: have context menu and include duplicate
+* tableview: getting some weird header mis-alignments
 
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
@@ -117,7 +114,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
 
-* slice of ki: do proper add so it works directly by editing children
+* slice of ki: do proper add so it works directly by editing children --
+  requires accessing owner info from valueview recs -- that is what the
+  ki.Slice by itself does not have
 
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 

@@ -20,7 +20,7 @@ import (
 type GiEditor struct {
 	gi.Frame
 	KiRoot   ki.Ki       `desc:"root of tree being edited"`
-	Changed  bool        `desc:"has the root changed?  we receive update signals from root for changes"`
+	Changed  bool        `desc:"has the root changed via gui actions?  updated from treeview and structview for changes"`
 	Filename gi.FileName `desc:"current filename for saving / loading"`
 }
 
@@ -74,25 +74,25 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 	if ge.KiRoot != root {
 		updt = ge.UpdateStart()
 		ge.KiRoot = root
-		ge.GetAllUpdates(root)
+		// ge.GetAllUpdates(root)
 	}
 	ge.UpdateFromRoot()
 	ge.UpdateEnd(updt)
 }
 
-// GetAllUpdates connects to all nodes in the tree to receive notification of changes
-func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
-	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d interface{}) bool {
-		k.NodeSignal().Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			gee := recv.Embed(KiT_GiEditor).(*GiEditor)
-			if !gee.Changed {
-				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
-				gee.Changed = true
-			}
-		})
-		return true
-	})
-}
+// // GetAllUpdates connects to all nodes in the tree to receive notification of changes
+// func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
+// 	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d interface{}) bool {
+// 		k.NodeSignal().Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+// 			gee := recv.Embed(KiT_GiEditor).(*GiEditor)
+// 			if !gee.Changed {
+// 				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
+// 				gee.Changed = true
+// 			}
+// 		})
+// 		return true
+// 	})
+// }
 
 // UpdateFromRoot updates full widget layout
 func (ge *GiEditor) UpdateFromRoot() {
@@ -210,15 +210,22 @@ func (ge *GiEditor) ConfigSplitView() {
 		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
 		tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
 		sv := split.AddNewChild(KiT_StructView, "sv").(*StructView)
-		tv.TreeViewSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.TreeViewSig.Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if data == nil {
 				return
 			}
+			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
+			svr := gee.StructView()
 			tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
-			svr, _ := recv.Embed(KiT_StructView).(*StructView)
 			if sig == int64(TreeViewSelected) {
 				svr.SetStruct(tvn.SrcNode.Ptr, nil)
+			} else if sig == int64(TreeViewChanged) {
+				gee.SetChanged()
 			}
+		})
+		sv.ViewSig.Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
+			gee.SetChanged()
 		})
 		split.SetSplits(.3, .7)
 	}
@@ -228,13 +235,10 @@ func (ge *GiEditor) ConfigSplitView() {
 	sv.SetStruct(ge.KiRoot, nil)
 }
 
-// this is not necc and resets root pointer
-// func (ge *GiEditor) Style2D() {
-// 	if ge.Viewport != nil && ge.Viewport.IsDoingFullRender() {
-// 		ge.UpdateFromRoot()
-// 	}
-// 	ge.Frame.Style2D()
-// }
+func (ge *GiEditor) SetChanged() {
+	ge.Changed = true
+	ge.ToolBar().UpdateActions() // nil safe
+}
 
 func (ge *GiEditor) Render2D() {
 	ge.ToolBar().UpdateActions()
@@ -259,6 +263,10 @@ var GiEditorProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": "update",
+			"updtfunc": func(gei interface{}, act *gi.Action) {
+				ge := gei.(*GiEditor)
+				act.SetActiveStateUpdt(ge.Changed)
+			},
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Open", ki.Props{
@@ -275,12 +283,16 @@ var GiEditorProps = ki.Props{
 			"icon": "file-save",
 			"updtfunc": func(gei interface{}, act *gi.Action) {
 				ge := gei.(*GiEditor)
-				act.SetActiveState(ge.Filename != "")
+				act.SetActiveStateUpdt(ge.Changed && ge.Filename != "")
 			},
 		}},
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
 			"icon":  "file-save",
+			"updtfunc": func(gei interface{}, act *gi.Action) {
+				ge := gei.(*GiEditor)
+				act.SetActiveStateUpdt(ge.Changed)
+			},
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -294,6 +306,10 @@ var GiEditorProps = ki.Props{
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
 				"shortcut": "Command+U",
+				"updtfunc": func(gei interface{}, act *gi.Action) {
+					ge := gei.(*GiEditor)
+					act.SetActiveState(ge.Changed)
+				},
 			}},
 			{"sep-file", ki.BlankProp{}},
 			{"Open", ki.Props{
@@ -309,12 +325,16 @@ var GiEditorProps = ki.Props{
 				"shortcut": "Command+S",
 				"updtfunc": func(gei interface{}, act *gi.Action) {
 					ge := gei.(*GiEditor)
-					act.SetActiveState(ge.Filename != "")
+					act.SetActiveState(ge.Changed && ge.Filename != "")
 				},
 			}},
 			{"SaveAs", ki.Props{
 				"shortcut": "Shift+Command+S",
 				"label":    "Save As...",
+				"updtfunc": func(gei interface{}, act *gi.Action) {
+					ge := gei.(*GiEditor)
+					act.SetActiveState(ge.Changed)
+				},
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",
@@ -325,7 +345,7 @@ var GiEditorProps = ki.Props{
 			{"sep-close", ki.BlankProp{}},
 			{"Close Window", ki.BlankProp{}},
 		}},
-		{"Edit", "Copy Cut Paste"},
+		{"Edit", "Copy Cut Paste Dupe"},
 		{"Window", "Windows"},
 	},
 }

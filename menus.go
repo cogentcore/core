@@ -178,6 +178,19 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 	})
 }
 
+// AddCopyCutPasteDupe adds a Copy, Cut, Paste, and Duplicate actions that
+// just emit the corresponding keyboard shortcut.  Paste is automatically
+// enabled by clipboard having something in it.
+func (m *Menu) AddCopyCutPasteDupe(win *Window) {
+	m.AddCopyCutPaste(win)
+	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
+	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
+		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			ww := recv.Embed(KiT_Window).(*Window)
+			ww.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
+		})
+}
+
 // AddAppMenu adds a standard set of menu items for application-level control.
 func (m *Menu) AddAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()

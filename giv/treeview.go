@@ -42,7 +42,7 @@ type TreeView struct {
 	TreeViewSig      ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles      [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize       gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon             gi.IconName               `json:"-" xml:"-" desc:"optional icon, displayed to the the left of the text label"`
+	Icon             gi.IconName               `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 	RootView         *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
@@ -184,6 +184,22 @@ func (tv *TreeView) SetClosedState(closed bool) {
 	bitflag.SetState(&tv.Flag, closed, int(TreeViewFlagClosed))
 }
 
+// IsChanged returns whether this node has the changed flag set?  Only updated
+// on the root note by GUI actions.
+func (tv *TreeView) IsChanged() bool {
+	return bitflag.Has(tv.Flag, int(TreeViewFlagChanged))
+}
+
+// SetChanged is called whenever a gui action updates the tree -- sets Changed
+// flag on root node and emits signal
+func (tv *TreeView) SetChanged() {
+	if tv.RootView == nil {
+		return
+	}
+	bitflag.Set(&tv.RootView.Flag, int(TreeViewFlagChanged))
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewChanged), tv.This)
+}
+
 // HasClosedParent returns whether this node have a closed parent? if so, don't render!
 func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
@@ -236,6 +252,11 @@ const (
 	// open TreeView was closed -- children not visible
 	TreeViewClosed
 
+	// TreeViewChanged means that some kind of edit operation has taken place
+	// by the user via the gui -- we don't track the details, just that
+	// changes have happened
+	TreeViewChanged
+
 	TreeViewSignalsN
 )
 
@@ -243,8 +264,13 @@ const (
 
 // these extend NodeBase NodeFlags to hold TreeView state
 const (
-	// node is closed
+	// TreeViewFlagClosed means node is toggled closed (children not visible)
 	TreeViewFlagClosed gi.NodeFlags = gi.NodeFlagsN + iota
+
+	// TreeViewFlagChanged is updated on the root node whenever a gui edit is
+	// made through the tree view on the tree -- this does not track any other
+	// changes that might have occurred in the tree itself.  Also emits a TreeVi
+	TreeViewFlagChanged
 )
 
 // TreeViewStates are mutually-exclusive tree view states -- determines appearance
@@ -724,6 +750,7 @@ func (tv *TreeView) SrcInsertAfter() {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
 					par.InsertNewChild(typ, myidx+1+i, nm)
 				}
+				tv.SetChanged()
 				par.UpdateEnd(updt)
 			}
 		})
@@ -755,6 +782,7 @@ func (tv *TreeView) SrcInsertBefore() {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
 					par.InsertNewChild(typ, myidx+i, nm)
 				}
+				tv.SetChanged()
 				par.UpdateEnd(updt)
 			}
 		})
@@ -777,6 +805,7 @@ func (tv *TreeView) SrcAddChild() {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), i)
 					sk.AddNewChild(typ, nm)
 				}
+				tv.SetChanged()
 				sk.UpdateEnd(updt)
 			}
 		})
@@ -793,6 +822,7 @@ func (tv *TreeView) SrcDelete() {
 	}
 	sk := tv.SrcNode.Ptr
 	sk.Delete(true)
+	tv.SetChanged()
 }
 
 // SrcDuplicate duplicates the source node corresponding to this view node in
@@ -813,6 +843,7 @@ func (tv *TreeView) SrcDuplicate() {
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
 	par.InsertChild(nwkid, myidx+1)
+	tv.SetChanged()
 }
 
 // SrcEdit pulls up a StructViewDialog window on the source object viewed by this node
@@ -889,6 +920,7 @@ func (tv *TreeView) Cut() {
 	for _, sn := range sels {
 		sn.Delete(true)
 	}
+	tv.SetChanged()
 }
 
 // Paste pastes clipboard at given node
@@ -945,6 +977,7 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	}
 	sk := tv.SrcNode.Ptr
 	sk.CopyFrom(sl[0])
+	tv.SetChanged()
 }
 
 // PasteBefore inserts object(s) from mime data before this node -- mod =
@@ -971,6 +1004,7 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 		par.InsertChild(ns, myidx+i)
 	}
 	par.UpdateEnd(updt)
+	tv.SetChanged()
 }
 
 // PasteAfter inserts object(s) from mime data after this node -- mod =
@@ -997,6 +1031,7 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 		par.InsertChild(ns, myidx+1+i)
 	}
 	par.UpdateEnd(updt)
+	tv.SetChanged()
 }
 
 // PasteChildren inserts object(s) from mime data at end of children of this
@@ -1014,6 +1049,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 		sk.AddChild(ns)
 	}
 	sk.UpdateEnd(updt)
+	tv.SetChanged()
 }
 
 //////////////////////////////////////////////////////////////////////////////

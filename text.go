@@ -51,9 +51,9 @@ import (
 // those pointers -- float32 values used to support better accuracy when
 // transforming points
 type RuneRender struct {
-	Face    font.Face       `desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
-	Color   color.Color     `desc:"color to draw characters in"`
-	BgColor color.Color     `desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
+	Face    font.Face       `json:"-" xml:"-" desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
+	Color   color.Color     `json:"-" xml:"-" desc:"color to draw characters in"`
+	BgColor color.Color     `json:"-" xml:"-" desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
 	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)"`
 	RelPos  Vec2D           `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
 	Size    Vec2D           `desc:"size of the rune itself, exclusive of spacing that might surround it"`

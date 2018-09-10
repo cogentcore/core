@@ -93,6 +93,8 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 			if ms, ok := mm.Value.(string); ok {
 				if ms == "Copy Cut Paste" {
 					ma.Menu.AddCopyCutPaste(win)
+				} else if ms == "Copy Cut Paste Dupe" {
+					ma.Menu.AddCopyCutPasteDupe(win)
 				} else {
 					MethViewErr(vtyp, fmt.Sprintf("Unrecognized Edit menu special string: %v -- `Copy Cut Paste` is standard", ms))
 				}

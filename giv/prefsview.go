@@ -51,6 +51,7 @@ func PrefsView(p *gi.Preferences) {
 						fmt.Println("Preferences Saved to prefs.json")
 						w.Close()
 					case 1:
+						p.Open() // if we don't do this, then it actually remains in edited state
 						w.Close()
 					case 2:
 						// default is to do nothing, i.e., cancel

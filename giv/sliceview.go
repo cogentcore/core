@@ -32,24 +32,26 @@ import (
 // WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
-	Slice        interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	IsArray      bool               `desc:"whether the slice is actually an array -- no modifications"`
-	StyleFunc    SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
-	Values       []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	ShowIndex    bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
-	InactKeyNav  bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelVal       interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
-	SelectedIdx  int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
-	SelectMode   bool               `desc:"editing-mode select rows mode"`
-	SelectedRows map[int]struct{}   `desc:"list of currently-selected rows"`
-	DraggedRows  []int              `desc:"list of currently-dragged rows"`
-	SliceViewSig ki.Signal          `json:"-" xml:"-" desc:"slice view interactive editing signals"`
-	ViewSig      ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	TmpSave      ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice   interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
-	BuiltSize    int
-	ToolbarSlice interface{} `desc:"the slice that we successfully set a toolbar for"`
-	inFocusGrab  bool
+	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	IsArray          bool               `desc:"whether the slice is actually an array -- no modifications"`
+	StyleFunc        SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	ShowViewCtxtMenu bool               `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
+	Changed          bool               `desc:"has the slice been edited?"`
+	Values           []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	ShowIndex        bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
+	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
+	SelectedIdx      int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+	SelectMode       bool               `desc:"editing-mode select rows mode"`
+	SelectedRows     map[int]struct{}   `desc:"list of currently-selected rows"`
+	DraggedRows      []int              `desc:"list of currently-dragged rows"`
+	SliceViewSig     ki.Signal          `json:"-" xml:"-" desc:"slice view interactive editing signals"`
+	ViewSig          ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	TmpSave          ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	BuiltSlice       interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
+	BuiltSize        int
+	ToolbarSlice     interface{} `desc:"the slice that we successfully set a toolbar for"`
+	inFocusGrab      bool
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -301,8 +303,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			vvb := vv.AsValueViewBase()
 			vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
-				svv.UpdateSig()
-				svv.ViewSig.Emit(svv.This, 0, nil)
+				svv.SetChanged()
 			})
 			if !sv.IsArray {
 				addnm := fmt.Sprintf("add-%v", idxtxt)
@@ -343,7 +344,18 @@ func (sv *SliceView) ConfigSliceGridRows() {
 	}
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1 means the end
+// SetChanged sets the Changed flag and emits the ViewSig signal for the
+// SliceView, indicating that some kind of edit / change has taken place to
+// the table data.  It isn't really practical to record all the different
+// types of changes, so this is just generic.
+func (sv *SliceView) SetChanged() {
+	sv.Changed = true
+	sv.ViewSig.Emit(sv.This, 0, nil)
+	sv.ToolBar().UpdateActions() // nil safe
+}
+
+// SliceNewAt inserts a new blank element at given index in the slice -- -1
+// means the end
 func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	if sv.IsArray {
 		return
@@ -372,6 +384,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
+	sv.SetChanged()
 	if reconfig {
 		sv.ConfigSliceGrid(true)
 	}
@@ -398,6 +411,7 @@ func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
+	sv.SetChanged()
 	if reconfig {
 		sv.ConfigSliceGrid(true)
 	}
@@ -938,6 +952,7 @@ func (sv *SliceView) DeleteRows() {
 	for _, r := range rws {
 		sv.SliceDelete(r, false)
 	}
+	sv.SetChanged()
 	sv.ConfigSliceGrid(true)
 	sv.UpdateEnd(updt)
 }
@@ -955,6 +970,7 @@ func (sv *SliceView) CutRows() {
 	for _, r := range rws {
 		sv.SliceDelete(r, false)
 	}
+	sv.SetChanged()
 	sv.ConfigSliceGrid(true)
 	sv.UpdateEnd(updt)
 	sv.SelectRowAction(row, mouse.NoSelectMode)
@@ -1014,7 +1030,8 @@ func (sv *SliceView) PasteAssign(md mimedata.Mimes, row int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.ConfigSliceGridRows() // no change in length
+	sv.SetChanged()
+	sv.ConfigSliceGrid(true)
 	sv.UpdateEnd(updt)
 }
 
@@ -1039,9 +1056,25 @@ func (sv *SliceView) PasteAtRow(md mimedata.Mimes, row int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
+	sv.SetChanged()
 	sv.ConfigSliceGrid(true)
 	sv.UpdateEnd(updt)
 	sv.SelectRowAction(row, mouse.NoSelectMode)
+}
+
+// Duplicate copies selected items and inserts them after current selection --
+// return row of start of duplicates if successful, else -1
+func (sv *SliceView) Duplicate() int {
+	nitms := len(sv.SelectedRows)
+	if nitms == 0 {
+		return -1
+	}
+	rws := sv.SelectedRowsList(true) // descending sort -- last first
+	pasteAt := rws[0]
+	sv.CopyRows(true)
+	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	sv.PasteAtRow(md, pasteAt)
+	return pasteAt
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1194,6 +1227,56 @@ func (sv *SliceView) DropCancel() {
 	sv.DragNDropFinalize(dnd.DropIgnore)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//    Events
+
+func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
+	if sv.IsArray {
+		return
+	}
+	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
+		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.CopyRows(true)
+		})
+	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
+		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.CutRows()
+		})
+	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
+		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.Paste(data.(int))
+		})
+	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
+		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.Duplicate()
+		})
+}
+
+func (sv *SliceView) ItemCtxtMenu(row int) {
+	val := sv.RowVal(row)
+	if val == nil {
+		return
+	}
+	var men gi.Menu
+
+	if CtxtMenuView(val, sv.IsInactive(), sv.Viewport, &men) {
+		if sv.ShowViewCtxtMenu {
+			men.AddSeparator("sep-svmenu")
+			sv.StdCtxtMenu(&men, row)
+		}
+	} else {
+		sv.StdCtxtMenu(&men, row)
+	}
+	if len(men) > 0 {
+		pos := sv.RowPos(row)
+		gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, sv.Nm+"-menu")
+	}
+}
+
 func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
@@ -1221,9 +1304,13 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectMode = false
 		sv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
-	// case gi.KeyFunDuplicate:
-	// 	sv.SrcDuplicate() // todo: dupe
-	// 	kt.SetProcessed()
+	case gi.KeyFunDuplicate:
+		nrow := sv.Duplicate()
+		sv.SelectMode = false
+		if nrow >= 0 {
+			sv.SelectRowAction(nrow, mouse.NoSelectMode)
+		}
+		kt.SetProcessed()
 	case gi.KeyFunInsert:
 		sv.SliceNewAt(row, true)
 		sv.SelectMode = false
@@ -1287,8 +1374,20 @@ func (sv *SliceView) SliceViewEvents() {
 				svv.SliceViewSig.Emit(svv.This, int64(SliceViewDoubleClicked), svv.SelectedIdx)
 				me.SetProcessed()
 			}
+			if me.Button == mouse.Right && me.Action == mouse.Release {
+				svv.ItemCtxtMenu(svv.SelectedIdx)
+				me.SetProcessed()
+			}
 		})
 	} else {
+		sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			me := d.(*mouse.Event)
+			svv := recv.Embed(KiT_SliceView).(*SliceView)
+			if me.Button == mouse.Right && me.Action == mouse.Release {
+				svv.ItemCtxtMenu(svv.SelectedIdx)
+				me.SetProcessed()
+			}
+		})
 		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			kt := d.(*key.ChordEvent)
