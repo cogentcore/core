@@ -9,7 +9,6 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/units"
 )
 
 func main() {
@@ -30,8 +29,6 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
-	tv.SetMinPrefWidth(units.NewValue(10, units.Em))
-	tv.SetMinPrefHeight(units.NewValue(10, units.Em))
 
 	lbl1 := tv.AddNewTab(gi.KiT_Label, "Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
@@ -40,6 +37,8 @@ func mainrun() {
 	lbl2 := tv.AddNewTab(gi.KiT_Label, "Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
 	lbl2.SetProp("word-wrap", true)
+
+	tv.SelectTabIndex(0)
 
 	// main menu
 	appnm := oswin.TheApp.Name()

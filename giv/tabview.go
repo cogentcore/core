@@ -33,6 +33,8 @@ var TabViewProps = ki.Props{
 	"color":            &gi.Prefs.Colors.Font,
 	"max-width":        -1,
 	"max-height":       -1,
+	"width":            units.NewValue(10, units.Em),
+	"height":           units.NewValue(10, units.Em),
 }
 
 // AddTab adds a widget as a new tab, with given tab label, and returns the
@@ -130,14 +132,14 @@ func (tv *TabView) InitTabView() {
 	tabs := tv.AddNewChild(gi.KiT_Layout, "tabs").(*gi.Layout)
 	tabs.Lay = gi.LayoutHoriz
 	tabs.SetStretchMaxWidth()
-	tabs.SetStretchMaxHeight()
+	// tabs.SetStretchMaxHeight()
 	tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
 	tabs.SetProp("overflow", "hidden") // no scrollbars!
 
 	frame := tv.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
 	frame.Lay = gi.LayoutStacked
 	frame.SetMinPrefWidth(units.NewValue(10, units.Em))
-	frame.SetMinPrefHeight(units.NewValue(10, units.Em))
+	frame.SetMinPrefHeight(units.NewValue(7, units.Em))
 	frame.SetStretchMaxWidth()
 	frame.SetStretchMaxHeight()
 
