@@ -111,157 +111,157 @@ const (
 var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 
 // HasNoLayout checks if the current node is flagged as not needing layout
-func (g *NodeBase) HasNoLayout() bool {
-	return bitflag.Has(g.Flag, int(NoLayout))
+func (nb *NodeBase) HasNoLayout() bool {
+	return bitflag.Has(nb.Flag, int(NoLayout))
 }
 
 // CanFocus checks if this node can recieve keyboard focus
-func (g *NodeBase) CanFocus() bool {
-	return bitflag.Has(g.Flag, int(CanFocus))
+func (nb *NodeBase) CanFocus() bool {
+	return bitflag.Has(nb.Flag, int(CanFocus))
 }
 
 // HasFocus checks if the current node is flagged as having keyboard focus
-func (g *NodeBase) HasFocus() bool {
-	return bitflag.Has(g.Flag, int(HasFocus))
+func (nb *NodeBase) HasFocus() bool {
+	return bitflag.Has(nb.Flag, int(HasFocus))
 }
 
 // IsDragging tests if the current node is currently flagged as receiving
 // dragging events -- flag set by window
-func (g *NodeBase) IsDragging() bool {
-	return bitflag.Has(g.Flag, int(NodeDragging))
+func (nb *NodeBase) IsDragging() bool {
+	return bitflag.Has(nb.Flag, int(NodeDragging))
 }
 
 // IsInstaDrag tests if the current node has InstaDrag property set
-func (g *NodeBase) IsInstaDrag() bool {
-	return bitflag.Has(g.Flag, int(InstaDrag))
+func (nb *NodeBase) IsInstaDrag() bool {
+	return bitflag.Has(nb.Flag, int(InstaDrag))
 }
 
 // IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,
 // ignore events except select, context menu) and style appropriately
-func (g *NodeBase) IsInactive() bool {
-	return bitflag.Has(g.Flag, int(Inactive))
+func (nb *NodeBase) IsInactive() bool {
+	return bitflag.Has(nb.Flag, int(Inactive))
 }
 
 // IsActive tests if this node is NOT flagged as Inactive.
-func (g *NodeBase) IsActive() bool {
-	return !g.IsInactive()
+func (nb *NodeBase) IsActive() bool {
+	return !nb.IsInactive()
 }
 
 // SetInactive sets the node as inactive
-func (g *NodeBase) SetInactive() {
-	bitflag.Set(&g.Flag, int(Inactive))
+func (nb *NodeBase) SetInactive() {
+	bitflag.Set(&nb.Flag, int(Inactive))
 }
 
 // ClearInactive clears the node as inactive
-func (g *NodeBase) ClearInactive() {
-	bitflag.Clear(&g.Flag, int(Inactive))
+func (nb *NodeBase) ClearInactive() {
+	bitflag.Clear(&nb.Flag, int(Inactive))
 }
 
 // SetInactiveState sets flag as inactive or not based on inact arg
-func (g *NodeBase) SetInactiveState(inact bool) {
-	bitflag.SetState(&g.Flag, inact, int(Inactive))
+func (nb *NodeBase) SetInactiveState(inact bool) {
+	bitflag.SetState(&nb.Flag, inact, int(Inactive))
 }
 
 // SetActiveState sets flag as active or not based on act arg -- positive logic
 // is easier to understand.
-func (g *NodeBase) SetActiveState(act bool) {
-	bitflag.SetState(&g.Flag, !act, int(Inactive))
+func (nb *NodeBase) SetActiveState(act bool) {
+	bitflag.SetState(&nb.Flag, !act, int(Inactive))
 }
 
 // SetInactiveStateUpdt sets flag as inactive or not based on inact arg, and
 // does UpdateSig if state changed.
-func (g *NodeBase) SetInactiveStateUpdt(inact bool) {
-	cur := g.IsInactive()
-	bitflag.SetState(&g.Flag, inact, int(Inactive))
+func (nb *NodeBase) SetInactiveStateUpdt(inact bool) {
+	cur := nb.IsInactive()
+	bitflag.SetState(&nb.Flag, inact, int(Inactive))
 	if inact != cur {
-		g.UpdateSig()
+		nb.UpdateSig()
 	}
 }
 
 // SetActiveStateUpdt sets flag as active or not based on act arg -- positive logic
 // is easier to understand -- does UpdateSig if state changed.
-func (g *NodeBase) SetActiveStateUpdt(act bool) {
-	cur := g.IsActive()
-	bitflag.SetState(&g.Flag, !act, int(Inactive))
+func (nb *NodeBase) SetActiveStateUpdt(act bool) {
+	cur := nb.IsActive()
+	bitflag.SetState(&nb.Flag, !act, int(Inactive))
 	if act != cur {
-		g.UpdateSig()
+		nb.UpdateSig()
 	}
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
-func (g *NodeBase) SetCanFocusIfActive() {
-	bitflag.SetState(&g.Flag, !g.IsInactive(), int(CanFocus))
+func (nb *NodeBase) SetCanFocusIfActive() {
+	bitflag.SetState(&nb.Flag, !nb.IsInactive(), int(CanFocus))
 }
 
 // IsSelected tests if this node is flagged as Selected
-func (g *NodeBase) IsSelected() bool {
-	return bitflag.Has(g.Flag, int(Selected))
+func (nb *NodeBase) IsSelected() bool {
+	return bitflag.Has(nb.Flag, int(Selected))
 }
 
 // SetSelected sets the node as selected
-func (g *NodeBase) SetSelected() {
-	bitflag.Set(&g.Flag, int(Selected))
+func (nb *NodeBase) SetSelected() {
+	bitflag.Set(&nb.Flag, int(Selected))
 }
 
 // ClearSelected sets the node as not selected
-func (g *NodeBase) ClearSelected() {
-	bitflag.Clear(&g.Flag, int(Selected))
+func (nb *NodeBase) ClearSelected() {
+	bitflag.Clear(&nb.Flag, int(Selected))
 }
 
 // SetSelectedState set flag as selected or not based on sel arg
-func (g *NodeBase) SetSelectedState(sel bool) {
-	bitflag.SetState(&g.Flag, sel, int(Selected))
+func (nb *NodeBase) SetSelectedState(sel bool) {
+	bitflag.SetState(&nb.Flag, sel, int(Selected))
 }
 
 // NeedsFullReRender checks if node has said it needs full re-render
-func (g *NodeBase) NeedsFullReRender() bool {
-	return bitflag.Has(g.Flag, int(FullReRender))
+func (nb *NodeBase) NeedsFullReRender() bool {
+	return bitflag.Has(nb.Flag, int(FullReRender))
 }
 
 // SetFullReRender sets node as needing a full ReRender
-func (g *NodeBase) SetFullReRender() {
-	bitflag.Set(&g.Flag, int(FullReRender))
+func (nb *NodeBase) SetFullReRender() {
+	bitflag.Set(&nb.Flag, int(FullReRender))
 }
 
 // ClearFullReRender clears node as needing a full ReRender
-func (g *NodeBase) ClearFullReRender() {
-	bitflag.Clear(&g.Flag, int(FullReRender))
+func (nb *NodeBase) ClearFullReRender() {
+	bitflag.Clear(&nb.Flag, int(FullReRender))
 }
 
 // IsReRenderAnchor returns whethers the current node is a ReRenderAnchor
-func (g *NodeBase) IsReRenderAnchor() bool {
-	return bitflag.Has(g.Flag, int(ReRenderAnchor))
+func (nb *NodeBase) IsReRenderAnchor() bool {
+	return bitflag.Has(nb.Flag, int(ReRenderAnchor))
 }
 
 // SetReRenderAnchor sets node as a ReRenderAnchor
-func (g *NodeBase) SetReRenderAnchor() {
-	bitflag.Set(&g.Flag, int(ReRenderAnchor))
+func (nb *NodeBase) SetReRenderAnchor() {
+	bitflag.Set(&nb.Flag, int(ReRenderAnchor))
 }
 
 // IsOverlay returns whether node is an overlay -- lives in special viewport
 // and renders without bounds
-func (g *NodeBase) IsOverlay() bool {
-	return bitflag.Has(g.Flag, int(Overlay))
+func (nb *NodeBase) IsOverlay() bool {
+	return bitflag.Has(nb.Flag, int(Overlay))
 }
 
 // SetOverlay flags this node as an overlay -- lives in special viewport and
 // renders without bounds
-func (g *NodeBase) SetAsOverlay() {
-	bitflag.Set(&g.Flag, int(Overlay))
+func (nb *NodeBase) SetAsOverlay() {
+	bitflag.Set(&nb.Flag, int(Overlay))
 }
 
 // translate a point in global pixel coords into relative position within node
-func (g *NodeBase) PointToRelPos(pt image.Point) image.Point {
-	return pt.Sub(g.WinBBox.Min)
+func (nb *NodeBase) PointToRelPos(pt image.Point) image.Point {
+	return pt.Sub(nb.WinBBox.Min)
 }
 
 // StyleProps returns a property that contains another map of properties for a
 // given styling selector, such as :normal :active :hover etc -- the
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.
-func (g *NodeBase) StyleProps(selector string) ki.Props {
-	sp, ok := g.PropInherit(selector, false, true) // yeah, use type's
+func (nb *NodeBase) StyleProps(selector string) ki.Props {
+	sp, ok := nb.PropInherit(selector, false, true) // yeah, use type's
 	if !ok {
 		return nil
 	}
@@ -269,7 +269,7 @@ func (g *NodeBase) StyleProps(selector string) ki.Props {
 	if ok {
 		return spm
 	}
-	log.Printf("gi.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, g.PathUnique())
+	log.Printf("gi.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, nb.PathUnique())
 	return nil
 }
 
@@ -284,26 +284,26 @@ func AggCSS(agg *ki.Props, css ki.Props) {
 }
 
 // ParentCSSAgg returns parent's CSSAgg styles or nil if not avail
-func (g *NodeBase) ParentCSSAgg() *ki.Props {
-	if g.Par == nil {
+func (nb *NodeBase) ParentCSSAgg() *ki.Props {
+	if nb.Par == nil {
 		return nil
 	}
-	pn := g.Par.Embed(KiT_NodeBase).(*NodeBase)
+	pn := nb.Par.Embed(KiT_NodeBase).(*NodeBase)
 	return &pn.CSSAgg
 }
 
 // SetStdXMLAttr sets standard attributes of node given XML-style name /
 // attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
-func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
+func (nb *NodeBase) SetStdXMLAttr(name, val string) bool {
 	switch name {
 	case "id":
-		g.SetName(val)
+		nb.SetName(val)
 		return true
 	case "class":
-		g.Class = val
+		nb.Class = val
 		return true
 	case "style":
-		SetStylePropsXML(val, &g.Props)
+		SetStylePropsXML(val, &nb.Props)
 		return true
 	}
 	return false
@@ -312,10 +312,10 @@ func (g *NodeBase) SetStdXMLAttr(name, val string) bool {
 // FirstContainingPoint finds the first node whose WinBBox contains the given
 // point -- nil if none.  If leavesOnly is set then only nodes that have no
 // nodes (leaves, terminal nodes) will be considered
-func (g *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
+func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
-		if k == g.This {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+		if k == nb.This {
 			return true
 		}
 		if leavesOnly && k.HasChildren() {

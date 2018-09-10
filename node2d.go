@@ -238,141 +238,141 @@ const (
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D impl for Node2DBase (nil)
 
-func (g *Node2DBase) AsNode2D() *Node2DBase {
-	return g
+func (nb *Node2DBase) AsNode2D() *Node2DBase {
+	return nb
 }
 
-func (g *Node2DBase) AsViewport2D() *Viewport2D {
+func (nb *Node2DBase) AsViewport2D() *Viewport2D {
 	return nil
 }
 
-func (g *Node2DBase) AsLayout2D() *Layout {
+func (nb *Node2DBase) AsLayout2D() *Layout {
 	return nil
 }
 
-func (g *Node2DBase) AsWidget() *WidgetBase {
+func (nb *Node2DBase) AsWidget() *WidgetBase {
 	return nil
 }
 
-func (g *Node2DBase) Init2D() {
-	g.Viewport = g.ParentViewport()
+func (nb *Node2DBase) Init2D() {
+	nb.Viewport = nb.ParentViewport()
 }
 
-func (g *Node2DBase) Style2D() {
+func (nb *Node2DBase) Style2D() {
 }
 
-func (g *Node2DBase) Size2D(iter int) {
+func (nb *Node2DBase) Size2D(iter int) {
 }
 
-func (g *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (nb *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
-func (g *Node2DBase) BBox2D() image.Rectangle {
+func (nb *Node2DBase) BBox2D() image.Rectangle {
 	return image.ZR
 }
 
-func (g *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+func (nb *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
-func (g *Node2DBase) ChildrenBBox2D() image.Rectangle {
+func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
 	return image.ZR
 }
 
-func (g *Node2DBase) Render2D() {
+func (nb *Node2DBase) Render2D() {
 }
 
-func (g *Node2DBase) ConnectEvents2D() {
+func (nb *Node2DBase) ConnectEvents2D() {
 }
 
-func (g *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (nb *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
-func (g *Node2DBase) FocusChanged2D(change FocusChanges) {
+func (nb *Node2DBase) FocusChanged2D(change FocusChanges) {
 }
 
-func (g *Node2DBase) HasFocus2D() bool {
-	return g.HasFocus()
+func (nb *Node2DBase) HasFocus2D() bool {
+	return nb.HasFocus()
 }
 
 // GrabFocus grabs the keyboard input focus on this item
-func (g *Node2DBase) GrabFocus() {
-	win := g.ParentWindow()
+func (nb *Node2DBase) GrabFocus() {
+	win := nb.ParentWindow()
 	if win != nil {
-		win.SetFocus(g.This)
+		win.SetFocus(nb.This)
 	}
 }
 
 // FocusNext moves the focus onto the next item
-func (g *Node2DBase) FocusNext() {
-	win := g.ParentWindow()
+func (nb *Node2DBase) FocusNext() {
+	win := nb.ParentWindow()
 	if win != nil {
 		win.FocusNext(win.Focus)
 	}
 }
 
 // StartFocus specifies this widget to give focus to when the window opens
-func (g *Node2DBase) StartFocus() {
-	win := g.ParentWindow()
+func (nb *Node2DBase) StartFocus() {
+	win := nb.ParentWindow()
 	if win != nil {
-		win.SetStartFocus(g.This)
+		win.SetStartFocus(nb.This)
 	}
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the Window
-func (g *Node2DBase) ContainsFocus() bool {
-	win := g.ParentWindow()
+func (nb *Node2DBase) ContainsFocus() bool {
+	win := nb.ParentWindow()
 	if win == nil {
 		return false
 	}
 	if win.Focus == nil {
 		return false
 	}
-	if win.Focus == g.This {
+	if win.Focus == nb.This {
 		return true
 	}
-	plev := win.Focus.ParentLevel(g.This)
+	plev := win.Focus.ParentLevel(nb.This)
 	if plev < 0 {
 		return false
 	}
 	return true
 }
 
-func (g *Node2DBase) FindNamedElement(name string) Node2D {
-	if g.Nm == name {
-		return g.This.(Node2D)
+func (nb *Node2DBase) FindNamedElement(name string) Node2D {
+	if nb.Nm == name {
+		return nb.This.(Node2D)
 	}
-	if g.Par == nil {
+	if nb.Par == nil {
 		return nil
 	}
-	if ce, ok := g.Par.ChildByName(name, -1); ok {
+	if ce, ok := nb.Par.ChildByName(name, -1); ok {
 		return ce.(Node2D)
 	}
-	pni, _ := KiToNode2D(g.Par)
+	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
 		return pni.FindNamedElement(name)
 	}
 	return nil
 }
 
-func (g *Node2DBase) MakeContextMenu(m *Menu) {
+func (nb *Node2DBase) MakeContextMenu(m *Menu) {
 }
 
-func (g *Node2DBase) ContextMenuPos() (pos image.Point) {
-	pos.X = (g.WinBBox.Min.X + g.WinBBox.Max.X) / 2
-	pos.Y = (g.WinBBox.Min.Y + g.WinBBox.Max.Y) / 2
+func (nb *Node2DBase) ContextMenuPos() (pos image.Point) {
+	pos.X = (nb.WinBBox.Min.X + nb.WinBBox.Max.X) / 2
+	pos.Y = (nb.WinBBox.Min.Y + nb.WinBBox.Max.Y) / 2
 	return
 }
 
-func (g *Node2DBase) ContextMenu() {
+func (nb *Node2DBase) ContextMenu() {
 	var men Menu
-	g.This.(Node2D).MakeContextMenu(&men)
+	nb.This.(Node2D).MakeContextMenu(&men)
 	if len(men) == 0 {
 		return
 	}
-	pos := g.This.(Node2D).ContextMenuPos()
-	PopupMenu(men, pos.X, pos.Y, g.Viewport, g.Nm+"-menu")
+	pos := nb.This.(Node2D).ContextMenuPos()
+	PopupMenu(men, pos.X, pos.Y, nb.Viewport, nb.Nm+"-menu")
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -399,37 +399,37 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 // ConnectEvent connects this node to receive a given type of GUI event
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
-func (g *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
-	win := g.ParentWindow()
+func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
+	win := nb.ParentWindow()
 	if win != nil {
-		win.ConnectEvent(g.This, et, pri, fun)
+		win.ConnectEvent(nb.This, et, pri, fun)
 	}
 }
 
 // DisconnectEvent disconnects this receiver from receiving given event
 // type -- pri is priority -- pass AllPris for all priorities -- see also
 // DisconnectAllEvents
-func (g *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
-	win := g.ParentWindow()
+func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
+	win := nb.ParentWindow()
 	if win != nil {
-		win.DisconnectEvent(g.This, et, pri)
+		win.DisconnectEvent(nb.This, et, pri)
 	}
 }
 
 // DisconnectAllEvents disconnects node from all window events -- typically
 // disconnect when not visible -- pri is priority -- pass AllPris for all priorities
-func (g *Node2DBase) DisconnectAllEvents(pri EventPris) {
-	win := g.ParentWindow()
+func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
+	win := nb.ParentWindow()
 	if win != nil {
-		win.DisconnectAllEvents(g.This, pri)
+		win.DisconnectAllEvents(nb.This, pri)
 	}
 }
 
 // DisconnectAllEventsTree disconnect node and all of its children (and so on)
 // from all events -- call for to-be-destroyed nodes (will happen in Ki
 // destroy anyway, but more efficient here)
-func (g *Node2DBase) DisconnectAllEventsTree(win *Window) {
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+func (nb *Node2DBase) DisconnectAllEventsTree(win *Window) {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			return false // going into a different type of thing, bail
@@ -444,27 +444,27 @@ func (g *Node2DBase) DisconnectAllEventsTree(win *Window) {
 // a receiver, so that when the view is updated, it triggers the viewport to
 // re-render it -- this is automatically called in PushBounds, and
 // disconnected with DisconnectAllEvents, so it only occurs for rendered nodes
-func (g *Node2DBase) ConnectToViewport() {
-	if g.Viewport != nil {
-		g.NodeSig.Connect(g.Viewport.This, SignalViewport2D)
+func (nb *Node2DBase) ConnectToViewport() {
+	if nb.Viewport != nil {
+		nb.NodeSig.Connect(nb.Viewport.This, SignalViewport2D)
 	}
 }
 
 // set our window-level BBox from vp and our bbox
-func (g *Node2DBase) SetWinBBox() {
-	if g.Viewport != nil {
-		g.WinBBox = g.VpBBox.Add(g.Viewport.WinBBox.Min)
+func (nb *Node2DBase) SetWinBBox() {
+	if nb.Viewport != nil {
+		nb.WinBBox = nb.VpBBox.Add(nb.Viewport.WinBBox.Min)
 	} else {
-		g.WinBBox = g.VpBBox
+		nb.WinBBox = nb.VpBBox
 	}
 }
 
 // ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
 // whatever delta may be in effect
-func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
-	g.ObjBBox = g.BBox.Add(delta)
-	g.VpBBox = parBBox.Intersect(g.ObjBBox)
-	g.SetWinBBox()
+func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
+	nb.ObjBBox = nb.BBox.Add(delta)
+	nb.VpBBox = parBBox.Intersect(nb.ObjBBox)
+	nb.SetWinBBox()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -472,23 +472,23 @@ func (g *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poin
 //  typically called by Viewport but can be called by others
 
 // FullRender2DTree does a full render of the tree
-func (g *Node2DBase) FullRender2DTree() {
-	updt := g.UpdateStart()
-	g.Init2DTree()
-	g.Style2DTree()
-	g.Size2DTree(0)
-	g.Layout2DTree()
-	g.Render2DTree()
-	g.UpdateEndNoSig(updt)
+func (nb *Node2DBase) FullRender2DTree() {
+	updt := nb.UpdateStart()
+	nb.Init2DTree()
+	nb.Style2DTree()
+	nb.Size2DTree(0)
+	nb.Layout2DTree()
+	nb.Render2DTree()
+	nb.UpdateEndNoSig(updt)
 }
 
 // Init2DTree initializes scene graph tree from node it is called on -- only
 // needs to be done once but must be robust to repeated calls -- use a flag if
 // necessary -- needed after structural updates to ensure all nodes are
 // updated
-func (g *Node2DBase) Init2DTree() {
+func (nb *Node2DBase) Init2DTree() {
 	pr := prof.Start("Node2D.Init2DTree")
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -501,9 +501,9 @@ func (g *Node2DBase) Init2DTree() {
 
 // Style2DTree styles scene graph tree from node it is called on -- only needs
 // to be done after a structural update in case inherited options changed
-func (g *Node2DBase) Style2DTree() {
+func (nb *Node2DBase) Style2DTree() {
 	pr := prof.Start("Node2D.Style2DTree")
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -515,9 +515,9 @@ func (g *Node2DBase) Style2DTree() {
 }
 
 // Size2DTree does the sizing as a depth-first pass
-func (g *Node2DBase) Size2DTree(iter int) {
+func (nb *Node2DBase) Size2DTree(iter int) {
 	pr := prof.Start("Node2D.Size2DTree")
-	g.FuncDownDepthFirst(0, g.This,
+	nb.FuncDownDepthFirst(0, nb.This,
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
@@ -543,20 +543,20 @@ func (g *Node2DBase) Size2DTree(iter int) {
 // Layout2DTree does layout pass -- each node iterates over children for
 // maximum control -- this starts with parent VpBBox -- can be called de novo.
 // Handles multiple iterations if needed.
-func (g *Node2DBase) Layout2DTree() {
-	if g.HasNoLayout() {
+func (nb *Node2DBase) Layout2DTree() {
+	if nb.HasNoLayout() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree")
 	parBBox := image.ZR
-	pni, _ := KiToNode2D(g.Par)
+	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
-	redo := g.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
+	redo := nb.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
-		g.Size2DTree(1)
-		g.This.(Node2D).Layout2D(parBBox, 1) // todo: multiple iters?
+		nb.Size2DTree(1)
+		nb.This.(Node2D).Layout2D(parBBox, 1) // todo: multiple iters?
 	}
 	pr.End()
 }
@@ -564,9 +564,9 @@ func (g *Node2DBase) Layout2DTree() {
 // Render2DTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
-func (g *Node2DBase) Render2DTree() {
+func (nb *Node2DBase) Render2DTree() {
 	pr := prof.Start("Node2D.Render2DTree")
-	g.This.(Node2D).Render2D() // important to use interface version to get interface!
+	nb.This.(Node2D).Render2D() // important to use interface version to get interface!
 	pr.End()
 }
 
@@ -574,10 +574,10 @@ func (g *Node2DBase) Render2DTree() {
 // ChildrenBBox2D -- default call at end of Layout2D.  Passes along whether
 // any of the children need a re-layout -- typically Layout2D just returns
 // this.
-func (g *Node2DBase) Layout2DChildren(iter int) bool {
+func (nb *Node2DBase) Layout2DChildren(iter int) bool {
 	redo := false
-	cbb := g.This.(Node2D).ChildrenBBox2D()
-	for _, kid := range g.Kids {
+	cbb := nb.This.(Node2D).ChildrenBBox2D()
+	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
 			if nii.Layout2D(cbb, iter) {
@@ -590,9 +590,9 @@ func (g *Node2DBase) Layout2DChildren(iter int) bool {
 
 // Move2dChildren moves all of node's children, giving them the ChildrenBBox2D
 // -- default call at end of Move2D
-func (g *Node2DBase) Move2DChildren(delta image.Point) {
-	cbb := g.This.(Node2D).ChildrenBBox2D()
-	for _, kid := range g.Kids {
+func (nb *Node2DBase) Move2DChildren(delta image.Point) {
+	cbb := nb.This.(Node2D).ChildrenBBox2D()
+	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
 			nii.Move2D(delta, cbb)
@@ -601,8 +601,8 @@ func (g *Node2DBase) Move2DChildren(delta image.Point) {
 }
 
 // Render2DChildren renders all of node's children -- default call at end of Render2D()
-func (g *Node2DBase) Render2DChildren() {
-	for _, kid := range g.Kids {
+func (nb *Node2DBase) Render2DChildren() {
+	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
 			nii.Render2D()
@@ -611,9 +611,9 @@ func (g *Node2DBase) Render2DChildren() {
 }
 
 // BBoxReport reports on all the bboxes for everything in the tree
-func (g *Node2DBase) BBoxReport() string {
+func (nb *Node2DBase) BBoxReport() string {
 	rpt := ""
-	g.FuncDownMeFirst(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -625,11 +625,11 @@ func (g *Node2DBase) BBoxReport() string {
 }
 
 // ParentWindow returns the parent window for this node
-func (g *Node2DBase) ParentWindow() *Window {
-	if g.Viewport != nil && g.Viewport.Win != nil {
-		return g.Viewport.Win
+func (nb *Node2DBase) ParentWindow() *Window {
+	if nb.Viewport != nil && nb.Viewport.Win != nil {
+		return nb.Viewport.Win
 	}
-	wini, ok := g.ParentByType(KiT_Window, true)
+	wini, ok := nb.ParentByType(KiT_Window, true)
 	if !ok {
 		return nil
 	}
@@ -638,9 +638,9 @@ func (g *Node2DBase) ParentWindow() *Window {
 
 // ParentViewport returns the parent viewport -- uses AsViewport2D() method on
 // Node2D interface
-func (g *Node2DBase) ParentViewport() *Viewport2D {
+func (nb *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D
-	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUpParent(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
@@ -656,22 +656,22 @@ func (g *Node2DBase) ParentViewport() *Viewport2D {
 }
 
 // ParentStyle returns parent's style or nil if not avail
-func (g *Node2DBase) ParentStyle() *Style {
-	if g.Par == nil {
+func (nb *Node2DBase) ParentStyle() *Style {
+	if nb.Par == nil {
 		return nil
 	}
-	if ps, ok := g.Par.(Styler); ok {
+	if ps, ok := nb.Par.(Styler); ok {
 		return ps.Style()
 	}
 	return nil
 }
 
 // ParentPaint returns the Paint from parent, if available
-func (g *Node2DBase) ParentPaint() *Paint {
-	if g.Par == nil {
+func (nb *Node2DBase) ParentPaint() *Paint {
+	if nb.Par == nil {
 		return nil
 	}
-	if pp, ok := g.Par.(Painter); ok {
+	if pp, ok := nb.Par.(Painter); ok {
 		return pp.Paint()
 	}
 	return nil
@@ -679,9 +679,9 @@ func (g *Node2DBase) ParentPaint() *Paint {
 
 // ParentReRenderAnchor returns parent that is a ReRenderAnchor -- for
 // optimized re-rendering
-func (g *Node2DBase) ParentReRenderAnchor() Node2D {
+func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
-	g.FuncUpParent(0, g.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUpParent(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false // don't keep going up
@@ -696,8 +696,8 @@ func (g *Node2DBase) ParentReRenderAnchor() Node2D {
 }
 
 // ParentLayout returns the parent layout
-func (g *Node2DBase) ParentLayout() *Layout {
-	ly, ok := g.ParentByType(KiT_Layout, true)
+func (nb *Node2DBase) ParentLayout() *Layout {
+	ly, ok := nb.ParentByType(KiT_Layout, true)
 	if !ok {
 		return nil
 	}
@@ -705,8 +705,8 @@ func (g *Node2DBase) ParentLayout() *Layout {
 }
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
-func (g *Node2DBase) ParentScrollLayout() *Layout {
-	lyk, ok := g.ParentByType(KiT_Layout, true)
+func (nb *Node2DBase) ParentScrollLayout() *Layout {
+	lyk, ok := nb.ParentByType(KiT_Layout, true)
 	if !ok {
 		return nil
 	}
@@ -719,12 +719,12 @@ func (g *Node2DBase) ParentScrollLayout() *Layout {
 
 // ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
 // this widget in view -- returns true if scrolled
-func (g *Node2DBase) ScrollToMe() bool {
-	ly := g.ParentScrollLayout()
+func (nb *Node2DBase) ScrollToMe() bool {
+	ly := nb.ParentScrollLayout()
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollToItem(g.This.(Node2D))
+	return ly.ScrollToItem(nb.This.(Node2D))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -1414,19 +1414,6 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	}
 }
 
-func (tv *TreeView) Init2D() {
-	// // optimized init -- avoid tree walking
-	if tv.RootView != tv {
-		tv.Viewport = tv.RootView.Viewport
-	} else {
-		tv.Viewport = tv.ParentViewport()
-	}
-	tv.Sty.Defaults()
-	tv.LayData.Defaults() // doesn't overwrite
-	tv.ConfigParts()
-	tv.ConnectToViewport()
-}
-
 var TreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
@@ -1554,6 +1541,19 @@ var TreeViewProps = ki.Props{
 	},
 }
 
+func (tv *TreeView) Init2D() {
+	// // optimized init -- avoid tree walking
+	if tv.RootView != tv {
+		tv.Viewport = tv.RootView.Viewport
+	} else {
+		tv.Viewport = tv.ParentViewport()
+	}
+	tv.Sty.Defaults()
+	tv.LayData.Defaults() // doesn't overwrite
+	tv.ConfigParts()
+	tv.ConnectToViewport()
+}
+
 func (tv *TreeView) Style2D() {
 	if tv.HasClosedParent() {
 		bitflag.Clear(&tv.Flag, int(gi.CanFocus))
@@ -1607,6 +1607,7 @@ func (tv *TreeView) Size2D(iter int) {
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Sty.BoxSpace()
 	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddVal(spc)
+	tv.Parts.LayData.AllocPosOrig = tv.Parts.LayData.AllocPos
 	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddVal(-2.0 * spc)
 	tv.Parts.Layout2D(parBBox, iter)
 }
@@ -1652,7 +1653,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 func (tv *TreeView) BBox2D() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := tv.LayData.AllocPos.ToPointFloor()
+	tp := tv.LayData.AllocPosOrig.ToPointFloor()
 	ts := tv.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }

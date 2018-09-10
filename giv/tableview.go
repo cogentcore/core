@@ -1484,7 +1484,7 @@ func (tv *TableView) PasteAssign(md mimedata.Mimes, row int) {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
-	tv.ConfigSliceGridRows() // no change in length
+	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
 }
 

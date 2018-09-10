@@ -237,7 +237,7 @@ func (wb *WidgetBase) AddParentPos() Vec2D {
 	if pni, _ := KiToNode2D(wb.Par); pni != nil {
 		if pw := pni.AsWidget(); pw != nil {
 			if !wb.IsField() {
-				wb.LayData.AllocPos = pw.LayData.AllocPos.Add(wb.LayData.AllocPosRel)
+				wb.LayData.AllocPos = pw.LayData.AllocPosOrig.Add(wb.LayData.AllocPosRel)
 			}
 			return pw.LayData.AllocSize
 		}
@@ -366,8 +366,15 @@ func (wb *WidgetBase) Render2D() {
 }
 
 // ReRender2DTree does a re-render of the tree -- after it has already been
-// initialized and styled -- just does layout and render passes
+// initialized and styled -- redoes the full stack
 func (wb *WidgetBase) ReRender2DTree() {
+	parBBox := image.ZR
+	pni, _ := KiToNode2D(wb.Par)
+	if pni != nil {
+		parBBox = pni.ChildrenBBox2D()
+	}
+	delta := wb.LayData.AllocPos.Sub(wb.LayData.AllocPosOrig)
+	wb.LayData.AllocPos = wb.LayData.AllocPosOrig
 	ld := wb.LayData // save our current layout data
 	updt := wb.UpdateStart()
 	wb.Init2DTree()
@@ -375,6 +382,9 @@ func (wb *WidgetBase) ReRender2DTree() {
 	wb.Size2DTree(0)
 	wb.LayData = ld // restore
 	wb.Layout2DTree()
+	if !delta.IsZero() {
+		wb.Move2D(delta.ToPointFloor(), parBBox)
+	}
 	wb.Render2DTree()
 	wb.UpdateEndNoSig(updt)
 }

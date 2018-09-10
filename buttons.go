@@ -189,8 +189,9 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 	bb.UpdateEnd(updt)
 }
 
-// SetButtonState sets the button state
-func (bb *ButtonBase) SetButtonState(state ButtonStates) {
+// SetButtonState sets the button state -- returns true if state changed
+func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
+	prev := bb.State
 	if bb.IsInactive() {
 		if bb.IsSelected() {
 			state = ButtonSelected
@@ -206,10 +207,17 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) {
 	}
 	bb.State = state
 	bb.Sty = bb.StateStyles[state]
+	if prev != bb.State {
+		bb.Parts.SetFullReRender() // needs full rerender to update text, icon
+		return true
+	}
+	return false
 }
 
-// UpdateButtonStyle sets the button style based on current state info
-func (bb *ButtonBase) UpdateButtonStyle() {
+// UpdateButtonStyle sets the button style based on current state info --
+// returns true if changed -- restyles parts if so
+func (bb *ButtonBase) UpdateButtonStyle() bool {
+	prev := bb.State
 	if bb.IsInactive() {
 		if bb.IsSelected() {
 			bb.State = ButtonSelected
@@ -228,7 +236,13 @@ func (bb *ButtonBase) UpdateButtonStyle() {
 		}
 	}
 	bb.Sty = bb.StateStyles[bb.State]
+	bb.This.(ButtonWidget).ConfigPartsIfNeeded()
+	if prev != bb.State {
+		bb.Parts.SetFullReRender() // needs full rerender
+		return true
+	}
 	// fmt.Printf("but style updt: %v to %v\n", bb.PathUnique(), bb.State)
+	return false
 }
 
 // ButtonPressed sets the button in the down state -- mouse clicked down but
@@ -562,7 +576,6 @@ func (bb *ButtonBase) Render2D() {
 	if bb.PushBounds() {
 		bb.This.(Node2D).ConnectEvents2D()
 		bb.UpdateButtonStyle()
-		bb.This.(ButtonWidget).ConfigPartsIfNeeded()
 		st := &bb.Sty
 		bb.RenderStdBox(st)
 		bb.Render2DParts()

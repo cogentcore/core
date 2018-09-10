@@ -109,8 +109,8 @@ func (ic *Icon) Style2D() {
 }
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
-	ic.Layout2DBase(parBBox, true, iter)
 	sic := ic.SVGIcon()
+	ic.Layout2DBase(parBBox, true, iter)
 	if sic != nil {
 		sic.LayData = ic.LayData
 		sic.LayData.AllocPosRel = Vec2DZero
