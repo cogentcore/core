@@ -179,6 +179,12 @@ func (tv *TreeView) SetClosed() {
 	bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
 }
 
+// SetOpen clears the closed flag for this node -- call Open() method to open
+// a node and update view
+func (tv *TreeView) SetOpen() {
+	bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
+}
+
 // SetClosedState sets the closed state based on arg
 func (tv *TreeView) SetClosedState(closed bool) {
 	bitflag.SetState(&tv.Flag, closed, int(TreeViewFlagClosed))
@@ -650,7 +656,7 @@ func (tv *TreeView) Close() {
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
-		bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
+		tv.SetClosed()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewClosed), tv.This)
 		tv.UpdateEnd(updt)
 	}
@@ -663,7 +669,10 @@ func (tv *TreeView) Open() {
 		if tv.HasChildren() {
 			tv.SetFullReRender()
 		}
-		bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
+		if tv.HasChildren() {
+			tv.SetClosedState(false)
+		}
+		// send signal in any case -- dynamic trees can open a node here!
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewOpened), tv.This)
 		tv.UpdateEnd(updt)
 	}
@@ -1407,7 +1416,7 @@ func (tv *TreeView) ConfigParts() {
 					}
 				} else {
 					tprops := kit.Types.Properties(tv.Type(), true) // true = makeNew
-					if bprpi, ok := tprops[gi.WidgetDefPropsKey+"#branch"]; ok {
+					if bprpi, ok := (*tprops)[gi.WidgetDefPropsKey+"#branch"]; ok {
 						switch pr := bprpi.(type) {
 						case map[string]interface{}:
 							wb.SetIconProps(ki.Props(pr))
@@ -1591,6 +1600,9 @@ func (tv *TreeView) Init2D() {
 }
 
 func (tv *TreeView) StyleTreeView() {
+	if !tv.HasChildren() {
+		tv.SetClosed()
+	}
 	if tv.HasClosedParent() {
 		bitflag.Clear(&tv.Flag, int(gi.CanFocus))
 		return

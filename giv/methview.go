@@ -38,9 +38,9 @@ func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
 	vtyp := reflect.TypeOf(val)
 	tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
 	if tpp == nil {
-		return tpp, vtyp, false
+		return nil, vtyp, false
 	}
-	return tpp, vtyp, true
+	return *tpp, vtyp, true
 }
 
 // HasMainMenuView returns true if given val has a MainMenu type property

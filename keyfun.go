@@ -58,16 +58,14 @@ const (
 	KeyFunInsert
 	KeyFunInsertAfter
 	KeyFunGoGiEditor
-	// either shift key
-	KeyFunShift
-	// the control key: command for mac, ctrl for others?
-	KeyFunCtrl
 	KeyFunZoomOut
 	KeyFunZoomIn
 	KeyFunPrefs
 	KeyFunRefresh
 	KeyFunRecenter // Ctrl+L in emacs
 	KeyFunComplete
+	KeyFunCommand // Ctrl+C in emacs -- prefix for other actions
+	KeyFunExecute // Ctrl+X in emacs -- prefix for other actions
 	KeyFunsN
 )
 
@@ -484,10 +482,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+H":           KeyFunBackspace,
 		"Control+K":           KeyFunKill,
 		"Alt+∑":               KeyFunCopy,
-		"Control+C":           KeyFunCopy,
 		"Meta+C":              KeyFunCopy,
 		"Control+W":           KeyFunCut,
-		"Control+X":           KeyFunCut,
 		"Meta+X":              KeyFunCut,
 		"Control+Y":           KeyFunPaste,
 		"Control+V":           KeyFunPaste,
@@ -514,6 +510,8 @@ var StdKeyMaps = KeyMaps{
 		"F5":                  KeyFunRefresh,
 		"Control+L":           KeyFunRecenter,
 		"Control+.":           KeyFunComplete,
+		"Control+C":           KeyFunCommand,
+		"Control+X":           KeyFunExecute,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":             KeyFunMoveUp,
@@ -570,10 +568,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+H":           KeyFunBackspace,
 		"Control+K":           KeyFunKill,
 		"Alt+∑":               KeyFunCopy,
-		"Control+C":           KeyFunCopy,
 		"Meta+C":              KeyFunCopy,
 		"Control+W":           KeyFunCut,
-		"Control+X":           KeyFunCut,
 		"Meta+X":              KeyFunCut,
 		"Control+Y":           KeyFunPaste,
 		"Meta+V":              KeyFunPaste,
@@ -599,6 +595,8 @@ var StdKeyMaps = KeyMaps{
 		"F5":                  KeyFunRefresh,
 		"Control+L":           KeyFunRecenter,
 		"Control+.":           KeyFunComplete,
+		"Control+C":           KeyFunCommand,
+		"Control+X":           KeyFunExecute,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,

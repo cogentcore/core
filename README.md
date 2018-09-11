@@ -94,6 +94,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* MethView supports sub-menu that is list of args to a function -- list is
+  from a field on obj or just given directly -- must be of type of arg or convertable to -- 
+  use for recents list  -- open recent proj
+
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases
@@ -115,6 +119,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * slice of ki: do proper add so it works directly by editing children --
   requires accessing owner info from valueview recs -- that is what the
   ki.Slice by itself does not have
+
+* see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
+
+* windows: arialuni.ttf  https://docs.microsoft.com/en-us/typography/font-list/arial-unicode-ms
 
 * textfield should scroll layout so that *cursor* is always in view, when editing..
 

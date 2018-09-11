@@ -200,7 +200,7 @@ func ToValueView(it interface{}) ValueView {
 		}
 		inline := false
 		if typrops != nil {
-			inprop, ok := typrops["inline"]
+			inprop, ok := (*typrops)["inline"]
 			if ok {
 				inline, ok = kit.ToBool(inprop)
 			}

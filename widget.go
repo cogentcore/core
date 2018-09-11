@@ -81,7 +81,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	tprops := kit.Types.Properties(wb.Type(), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
-		sp, ok := tprops[selector]
+		sp, ok := (*tprops)[selector]
 		if !ok {
 			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, wb.Type().Name())
 		} else {
@@ -89,7 +89,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			if !ok {
 				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, wb.Type().Name())
 			} else {
-				styprops = spm
+				*styprops = spm
 			}
 		}
 	}
@@ -99,7 +99,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	var dsty *Style
 	stKey := WidgetDefStyleKey + selector
 	prKey := WidgetDefPropsKey + selector
-	dstyi, ok := tprops[stKey]
+	dstyi, ok := (*tprops)[stKey]
 	if !ok || RebuildDefaultStyles {
 		dsty = &Style{}
 		dsty.Defaults()
@@ -112,10 +112,10 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			}
 			*dsty = *baseStyle
 		}
-		dsty.SetStyleProps(parSty, styprops)
+		dsty.SetStyleProps(parSty, *styprops)
 		dsty.IsSet = false // keep as non-set
-		tprops[stKey] = dsty
-		tprops[prKey] = styprops
+		(*tprops)[stKey] = dsty
+		(*tprops)[prKey] = styprops
 	} else {
 		dsty, _ = dstyi.(*Style)
 	}
@@ -147,7 +147,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	// dynamically now -- cannot compile into default which is type-general
 	tprops := kit.Types.Properties(wb.Type(), true) // true = makeNew
 	clsty := "." + wb.Class
-	if sp, ok := ki.SubProps(tprops, clsty); ok {
+	if sp, ok := ki.SubProps(*tprops, clsty); ok {
 		wb.Sty.SetStyleProps(parSty, sp)
 	}
 
@@ -194,7 +194,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
 		styprops := kit.Types.Properties(wb.Type(), true)
-		if sp, ok := ki.SubProps(styprops, stynm); ok {
+		if sp, ok := ki.SubProps(*styprops, stynm); ok {
 			if fill, ok := sp["fill"]; ok {
 				ic.SetProp("fill", fill)
 			}
