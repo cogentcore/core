@@ -907,7 +907,7 @@ func (n *Node) Fields() []uintptr {
 	// we store the offsets for the fields in type properties
 	tprops := kit.Types.Properties(n.Type(), true) // true = makeNew
 	pnm := "__FieldOffs"
-	if foff, ok := tprops[pnm]; ok {
+	if foff, ok := (*tprops)[pnm]; ok {
 		return foff.([]uintptr)
 	}
 	foff := make([]uintptr, 0)
@@ -918,7 +918,7 @@ func (n *Node) Fields() []uintptr {
 		}
 		return true
 	})
-	tprops[pnm] = foff
+	(*tprops)[pnm] = foff
 	return foff
 }
 

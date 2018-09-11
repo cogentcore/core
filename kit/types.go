@@ -133,7 +133,7 @@ func (tr *TypeRegistry) Inst(typ reflect.Type) interface{} {
 // PropsByName returns properties for given type name -- optionally makes props map
 // if not already made -- can use this to register properties for types that
 // are not registered
-func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) map[string]interface{} {
+func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]interface{} {
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		if !makeNew {
@@ -142,13 +142,13 @@ func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) map[string]in
 		tp = make(map[string]interface{})
 		tr.Props[typeName] = tp
 	}
-	return tp
+	return &tp
 }
 
 // Properties returns properties for given type -- optionally makes props map
 // if not already made -- can use this to register properties for types that
 // are not registered
-func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) map[string]interface{} {
+func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]interface{} {
 	typeName := FullTypeName(typ)
 	return tr.PropsByName(typeName, makeNew)
 }
@@ -170,6 +170,12 @@ func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool)
 func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (interface{}, bool) {
 	typeName := FullTypeName(typ)
 	return tr.PropByName(typeName, propKey)
+}
+
+// SetProps sets the type props for given type
+func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]interface{}) {
+	typeName := FullTypeName(typ)
+	tr.Props[typeName] = props
 }
 
 // AllImplementersOf returns a list of all registered types that implement the
