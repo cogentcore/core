@@ -1703,13 +1703,17 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 	return nb
 }
 
-func (ly *Layout) Style2D() {
+func (ly *Layout) StyleLayout() {
 	ly.Style2DWidget()
-	ly.LayData.SetFromStyle(&ly.Sty.Layout)         // also does reset
 	tprops := kit.Types.Properties(ly.Type(), true) // true = makeNew
 	LayoutFields.Style(ly, nil, tprops)
 	LayoutFields.Style(ly, nil, ly.Props)
 	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
+}
+
+func (ly *Layout) Style2D() {
+	ly.StyleLayout()
+	ly.LayData.SetFromStyle(&ly.Sty.Layout) // also does reset
 }
 
 func (ly *Layout) Size2D(iter int) {

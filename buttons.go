@@ -164,6 +164,9 @@ func (bb *ButtonBase) SetAsButton() {
 // SetText sets the text and updates the button
 func (bb *ButtonBase) SetText(txt string) {
 	updt := bb.UpdateStart()
+	if bb.Sty.Font.Size.Val == 0 { // not yet styled
+		bb.StyleButton()
+	}
 	bb.Text = txt
 	bb.This.(ButtonWidget).ConfigParts()
 	bb.UpdateEnd(updt)
@@ -181,6 +184,9 @@ func (bb *ButtonBase) Label() string {
 // updates the button
 func (bb *ButtonBase) SetIcon(iconName string) {
 	updt := bb.UpdateStart()
+	if bb.Sty.Font.Size.Val == 0 { // not yet styled
+		bb.StyleButton()
+	}
 	if bb.Icon != IconName(iconName) {
 		bb.SetFullReRender()
 	}
@@ -523,20 +529,14 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 	bb.This.(ButtonWidget).ConfigParts()
 }
 
-func (bb *ButtonBase) Style2DWidget() {
-	bb.WidgetBase.Style2DWidget()
+func (bb *ButtonBase) StyleButton() {
+	bb.Style2DWidget()
 	bb.This.(ButtonWidget).StyleParts()
-}
-
-func (bb *ButtonBase) Style2D() {
 	if nf, ok := bb.Prop("no-focus"); ok {
 		bitflag.SetState(&bb.Flag, !bb.IsInactive() && !nf.(bool), int(CanFocus))
 	} else {
 		bitflag.SetState(&bb.Flag, !bb.IsInactive(), int(CanFocus))
 	}
-
-	bb.Style2DWidget()
-	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
 	pst := bb.ParentStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
@@ -553,6 +553,11 @@ func (bb *ButtonBase) Style2D() {
 		}
 		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
 	}
+}
+
+func (bb *ButtonBase) Style2D() {
+	bb.StyleButton()
+	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
 	bb.This.(ButtonWidget).ConfigParts()
 	bb.SetButtonState(ButtonActive) // initial default
 	if bb.Menu != nil {

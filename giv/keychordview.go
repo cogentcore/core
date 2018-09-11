@@ -138,7 +138,9 @@ func (kc *KeyChordEdit) Style2D() {
 	kc.SetCanFocusIfActive()
 	kc.Selectable = true
 	kc.Redrawable = true
-	kc.Label.Style2D()
+	kc.StyleLabel()
+	kc.LayData.SetFromStyle(&kc.Sty.Layout) // also does reset
+	kc.LayoutLabel()
 }
 
 func (kc *KeyChordEdit) ConnectEvents2D() {

@@ -254,11 +254,15 @@ func (sb *SpinBox) Init2D() {
 	sb.ConfigParts()
 }
 
-func (sb *SpinBox) Style2D() {
+func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
 	sb.Style2DWidget()
+}
+
+func (sb *SpinBox) Style2D() {
+	sb.StyleSpinBox()
 	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
 	sb.ConfigParts()
 }

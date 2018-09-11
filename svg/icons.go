@@ -71,6 +71,9 @@ func (ic *Icon) Size2D(iter int) {
 }
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
+	if ic.Sty.Font.Size.Val == 0 { // not yet styled
+		ic.StyleSVG()
+	}
 	redo := ic.SVG.Layout2D(parBBox, iter)
 	ic.SetNormXForm()
 	return redo

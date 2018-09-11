@@ -224,11 +224,16 @@ func (sv *SplitView) ConfigSplitters() {
 	}
 }
 
-func (sv *SplitView) Style2D() {
+func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
 	sv.LayData.SetFromStyle(&sv.Sty.Layout)                             // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This, false, true) // no inherit, yes type defaults
 	sv.HandleSize.ToDots(&sv.Sty.UnContext)
+}
+
+func (sv *SplitView) Style2D() {
+	sv.StyleSplitView()
+	sv.LayData.SetFromStyle(&sv.Sty.Layout) // also does reset
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
 }

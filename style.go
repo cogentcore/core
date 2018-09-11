@@ -283,7 +283,7 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 			s.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	s.Font.SetUnitContext(&s.UnContext)
+	s.Font.OpenFont(&s.UnContext) // calls SetUnContext after updating metrics
 
 	// skipping this doesn't seem to be good:
 	// if !(s.dotsSet && s.UnContext == s.lastUnCtxt && s.PropsNil) {

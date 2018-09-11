@@ -82,11 +82,16 @@ func (svg *SVG) Size2D(iter int) {
 	svg.Size2DAddSpace()
 }
 
-func (svg *SVG) Style2D() {
+func (svg *SVG) StyleSVG() {
 	svg.Style2DWidget()
 	svg.Pnt.Defaults()
 	StyleSVG(svg.This.(gi.Node2D))
 	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
+}
+
+func (svg *SVG) Style2D() {
+	svg.StyleSVG()
+	svg.LayData.SetFromStyle(&svg.Sty.Layout) // also does reset
 }
 
 func (svg *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {

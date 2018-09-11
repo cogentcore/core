@@ -346,8 +346,12 @@ iterloop:
 // unit.Context are updated based on the properties of the font.
 func (fs *FontStyle) OpenFont(ctxt *units.Context) {
 	fs.FaceName = fs.FaceNm()
+	if fs.Size.Dots == 0 {
+		fs.Size.ToDots(ctxt)
+	}
 	intDots := int(math.Round(float64(fs.Size.Dots)))
 	if intDots == 0 {
+		fmt.Printf("FontStyle Error: bad font size: %v or units context: %v\n", fs.Size, *ctxt)
 		intDots = 12
 	}
 	face, err := FontLibrary.Font(fs.FaceName, intDots)

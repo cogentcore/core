@@ -339,10 +339,6 @@ var PreferencesProps = ki.Props{
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
 				"shortcut": "Command+U",
-				"updtfunc": func(pfi interface{}, act *Action) {
-					pf := pfi.(*Preferences)
-					act.SetActiveState(pf.Changed)
-				},
 			}},
 			{"Open", ki.Props{
 				"shortcut": "Command+O",
@@ -394,10 +390,6 @@ var PreferencesProps = ki.Props{
 		{"Update", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
 			"icon": "update",
-			"updtfunc": func(pfi interface{}, act *Action) {
-				pf := pfi.(*Preferences)
-				act.SetActiveStateUpdt(pf.Changed)
-			},
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{

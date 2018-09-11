@@ -117,6 +117,9 @@ var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version
 func (lb *Label) SetText(txt string) {
+	if lb.Sty.Font.Size.Val == 0 { // not yet styled
+		lb.StyleLabel()
+	}
 	lb.Text = txt
 	if lb.Text == "" {
 		lb.Render.SetHTML(" ", &lb.Sty.Font, &lb.Sty.UnContext, lb.CSSAgg)
@@ -298,9 +301,8 @@ func (lb *Label) TextPos() Vec2D {
 	return pos
 }
 
-func (lb *Label) Style2D() {
+func (lb *Label) StyleLabel() {
 	lb.Style2DWidget()
-	lb.LayData.SetFromStyle(&lb.Sty.Layout) // also does reset
 	if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
 		lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
 	} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {
@@ -312,6 +314,9 @@ func (lb *Label) Style2D() {
 		lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]))
 		lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
 	}
+}
+
+func (lb *Label) LayoutLabel() {
 	lb.Render.SetHTML(lb.Text, &(lb.Sty.Font), &(lb.Sty.UnContext), lb.CSSAgg)
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.SizePrefOrMax()
@@ -319,6 +324,12 @@ func (lb *Label) Style2D() {
 		sz.SetSubVal(2 * spc)
 	}
 	lb.Render.LayoutStdLR(&(lb.Sty.Text), &(lb.Sty.Font), &(lb.Sty.UnContext), sz)
+}
+
+func (lb *Label) Style2D() {
+	lb.StyleLabel()
+	lb.LayData.SetFromStyle(&lb.Sty.Layout) // also does reset
+	lb.LayoutLabel()
 }
 
 func (lb *Label) Size2D(iter int) {
@@ -332,6 +343,9 @@ func (lb *Label) Size2D(iter int) {
 
 func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DBase(parBBox, true, iter)
+	for i := 0; i < int(LabelStatesN); i++ {
+		lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
+	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
 	if lb.Sty.Text.WordWrap {

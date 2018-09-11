@@ -1590,14 +1590,13 @@ func (tv *TreeView) Init2D() {
 	tv.ConnectToViewport()
 }
 
-func (tv *TreeView) Style2D() {
+func (tv *TreeView) StyleTreeView() {
 	if tv.HasClosedParent() {
 		bitflag.Clear(&tv.Flag, int(gi.CanFocus))
 		return
 	}
 	tv.SetCanFocusIfActive()
-	tv.Style2DWidget()                      // todo: maybe don't use CSS here, for big trees?
-	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
+	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
 
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TreeViewStatesN); i++ {
@@ -1611,6 +1610,12 @@ func (tv *TreeView) Style2D() {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
 	tv.ConfigParts()
+
+}
+
+func (tv *TreeView) Style2D() {
+	tv.StyleTreeView()
+	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -1664,7 +1669,10 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
 	tv.Sty.SetUnitContext(tv.Viewport, psize) // update units with final layout
-	tv.BBox = tv.This.(gi.Node2D).BBox2D()    // only compute once, at this point
+	for i := 0; i < int(TreeViewStatesN); i++ {
+		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
+	}
+	tv.BBox = tv.This.(gi.Node2D).BBox2D() // only compute once, at this point
 	tv.This.(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
 
 	if gi.Layout2DTrace {

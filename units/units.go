@@ -27,7 +27,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// borrows from golang.org/x/exp/shiny/unit/ but extends with full range of css-based viewport-dependent factors
+// borrows from golang.org/x/exp/shiny/unit/ but extends with full range of
+// css-based viewport-dependent factors
 
 // standard conversion factors -- Px = DPI-independent pixel instead of actual "dot" raw pixel
 const (
@@ -57,7 +58,7 @@ const (
 	// Em = font size of the element -- fallback to 12pt by default
 	Em
 
-	// Ex = x-height of the element's font -- fallback to 0.5em by default
+	// Ex = x-height of the element's font (size of 'x' glyph) -- fallback to 0.5em by default
 	Ex
 
 	// Ch = width of the '0' glyph in the element's font -- fallback to 0.5em by default
@@ -130,26 +131,36 @@ var UnitNames = [...]string{
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
 type Context struct {
-	// dots-per-inch of the display
+
+	// DPI is dots-per-inch of the display
 	DPI float32
-	// point size of font (in points)
+
+	// FontEm is the point size of the font in raw dots (not points)
 	FontEm float32
-	// x-height of font in points
+
+	// FontEx is the height x-height of font in points (size of 'x' glyph)
 	FontEx float32
-	// ch-size of font in points
+
+	// FontCh is the ch-size character size of font in points (width of '0' glyph)
 	FontCh float32
-	// rem-size of font in points
+
+	// FontRem is rem-size of font in points -- root Em size -- typically 12 point
 	FontRem float32
-	// viewport width in dots
+
+	// VpW is viewport width in dots
 	VpW float32
-	// viewport height in dots
+
+	// VpH is viewport height in dots
 	VpH float32
-	// width of surrounding contextual element in dots
+
+	// ElW is width of surrounding contextual element in dots
 	ElW float32
-	// height of surrounding contextual element in dots
+
+	// ElH is height of surrounding contextual element in dots
 	ElH float32
 }
 
+// Defaults are generic defaults
 func (uc *Context) Defaults() {
 	uc.DPI = PxPerInch
 	uc.FontEm = 12.0
@@ -162,13 +173,13 @@ func (uc *Context) Defaults() {
 	uc.ElH = uc.VpH
 }
 
-// set the context values
+// Set sets the context values
 func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float32) {
 	uc.SetSizes(vpw, vph, elw, elh)
 	uc.SetFont(em, ex, ch, rem)
 }
 
-// set the context values for non-font sizes -- el is ignored if zero
+// SetSizes sets the context values for non-font sizes -- el is ignored if zero
 func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
 	if vpw != 0 {
 		uc.VpW = vpw
@@ -184,7 +195,8 @@ func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
 	}
 }
 
-// set the context values for fonts
+// SetFont sets the context values for fonts: note these are already in raw
+// DPI dots, not points or anything else
 func (uc *Context) SetFont(em, ex, ch, rem float32) {
 	uc.FontEm = em
 	uc.FontEx = ex
@@ -192,7 +204,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float32) {
 	uc.FontRem = rem
 }
 
-// factor needed to convert given unit into raw pixels (dots in DPI)
+// ToDotsFact returns factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) ToDotsFactor(un Unit) float32 {
 	if uc.DPI == 0 {
 		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
@@ -202,13 +214,13 @@ func (uc *Context) ToDotsFactor(un Unit) float32 {
 	case Pct:
 		return 0.01 * uc.ElW // todo: height should be in terms of Elh.. but width is much more common
 	case Em:
-		return uc.DPI / (PtPerInch / uc.FontEm)
+		return uc.FontEm
 	case Ex:
-		return uc.DPI / (PtPerInch / uc.FontEx)
+		return uc.FontEx
 	case Ch:
-		return uc.DPI / (PtPerInch / uc.FontCh)
+		return uc.FontCh
 	case Rem:
-		return uc.DPI / (PtPerInch / uc.FontRem)
+		return uc.FontRem
 	case Vw:
 		return 0.01 * uc.VpW
 	case Vh:
@@ -239,7 +251,7 @@ func (uc *Context) ToDotsFactor(un Unit) float32 {
 	return uc.DPI
 }
 
-// convert value in given units into raw display pixels (dots in DPI)
+// ToDots converts value in given units into raw display pixels (dots in DPI)
 func (uc *Context) ToDots(val float32, un Unit) float32 {
 	return val * uc.ToDotsFactor(un)
 }
@@ -270,23 +282,26 @@ var ValueProps = ki.Props{
 	"style-prop": true,
 }
 
-// convenience for not having to specify the Dots member
+// NewValue creates a new value with given units
 func NewValue(val float32, un Unit) Value {
 	return Value{val, un, 0.0}
 }
 
+// Set sets value and units of an existing value
 func (v *Value) Set(val float32, un Unit) {
 	v.Val = val
 	v.Un = un
 }
 
-// Convert value to raw display pixels (dots as in DPI), setting also the Dots field
+// ToDots converts value to raw display pixels (dots as in DPI), setting also
+// the Dots field
 func (v *Value) ToDots(ctxt *Context) float32 {
 	v.Dots = ctxt.ToDots(v.Val, v.Un)
 	return v.Dots
 }
 
-// Convert value to raw display pixels (dots in DPI) in fixed-point 26.6 format for rendering
+// ToDotsFixed converts value to raw display pixels (dots in DPI) in
+// fixed-point 26.6 format for rendering
 func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
 	return fixed.Int26_6(v.ToDots(ctxt))
 }

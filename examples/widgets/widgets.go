@@ -100,7 +100,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	mfr.AddNewChild(gi.KiT_Space, "blspc")
 	blrow := mfr.AddNewChild(gi.KiT_Layout, "blrow").(*gi.Layout)
 	blab := blrow.AddNewChild(gi.KiT_Label, "blab").(*gi.Label)
-	blab.SetProp("font-family", "Arial Unicode")
 	blab.Text = "Buttons:"
 	blab.Selectable = true
 
@@ -373,7 +372,7 @@ func Complete(text string) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
 	possibles := complete.MatchSeed(words, seed)
 	for _, p := range possibles {
-		m := complete.Completion{Text: p, Icon:""}
+		m := complete.Completion{Text: p, Icon: ""}
 		matches = append(matches, m)
 	}
 	return matches, seed

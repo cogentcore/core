@@ -135,6 +135,9 @@ func (tf *TextField) SetText(txt string) {
 	if tf.Txt == txt && !tf.Edited {
 		return
 	}
+	if tf.Sty.Font.Size.Val == 0 { // not yet styled
+		tf.StyleTextField()
+	}
 	tf.Txt = txt
 	tf.Revert()
 }
@@ -1114,10 +1117,9 @@ func (tf *TextField) Init2D() {
 	tf.Edited = false
 }
 
-func (tf *TextField) Style2D() {
+func (tf *TextField) StyleTextField() {
 	tf.SetCanFocusIfActive()
 	tf.Style2DWidget()
-	tf.LayData.SetFromStyle(&tf.Sty.Layout) // also does reset
 	pst := &(tf.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Sty)
@@ -1127,6 +1129,11 @@ func (tf *TextField) Style2D() {
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This, true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
+}
+
+func (tf *TextField) Style2D() {
+	tf.StyleTextField()
+	tf.LayData.SetFromStyle(&tf.Sty.Layout) // also does reset
 }
 
 func (tf *TextField) UpdateRenderAll() bool {

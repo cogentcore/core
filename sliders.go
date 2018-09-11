@@ -554,8 +554,7 @@ func (sr *Slider) Init2D() {
 	sr.ConfigParts()
 }
 
-func (sr *Slider) Style2D() {
-	sr.SetCanFocusIfActive()
+func (sr *Slider) StyleSlider() {
 	sr.Style2DWidget()
 	pst := &(sr.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
@@ -566,6 +565,12 @@ func (sr *Slider) Style2D() {
 	SliderFields.Style(sr, nil, sr.Props)
 	SliderFields.ToDots(sr, &sr.Sty.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
+}
+
+func (sr *Slider) Style2D() {
+	sr.SetCanFocusIfActive()
+	sr.StyleSlider()
+	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
 	sr.ConfigParts()
 }
 
@@ -744,10 +749,8 @@ func (sb *ScrollBar) Init2D() {
 	sb.Init2DSlider()
 }
 
-func (sb *ScrollBar) Style2D() {
-	sb.SetCanFocusIfActive()
+func (sb *ScrollBar) StyleScrollBar() {
 	sb.Style2DWidget()
-	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
 	pst := &(sb.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyFrom(&sb.Sty)
@@ -756,6 +759,12 @@ func (sb *ScrollBar) Style2D() {
 	}
 	SliderFields.Style(sb, nil, sb.Props)
 	SliderFields.ToDots(sb, &sb.Sty.UnContext)
+}
+
+func (sb *ScrollBar) Style2D() {
+	sb.SetCanFocusIfActive()
+	sb.StyleScrollBar()
+	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
 }
 
 func (sb *ScrollBar) Size2D(iter int) {

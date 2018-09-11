@@ -94,8 +94,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* tableview: getting some weird header mis-alignments
-
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases
