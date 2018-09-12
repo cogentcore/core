@@ -24,6 +24,23 @@ import (
 // underlying types
 type Slice []Ki
 
+// NOTE: we have to define Slice* functions operating on a generic *[]Ki
+// element as the first (not receiver) argument, to be able to use these
+// functions in any other types that are based on ki.Slice or are other forms
+// of []Ki.  It doesn't seem like it would have been THAT hard to just grab
+// all the methods on Slice when you "inherit" from it -- unlike with structs,
+// where there are issues with the underlying representation, a simple "type A
+// B" kind of expression could easily have inherited the exact same code
+// because, underneath, it IS the same type.  Only for the receiver methods --
+// it does seem reasonable that other uses of different types should
+// differentiate them.  But there you still be able to directly cast!
+
+// SliceIsValidIndex checks whether the given index is a valid index into slice,
+// within range of 0..len-1.
+func SliceIsValidIndex(sl *[]Ki, idx int) bool {
+	return idx >= 0 && idx < len(*sl)
+}
+
 // IsValidIndex checks whether the given index is a valid index into slice,
 // within range of 0..len-1.
 func (sl Slice) IsValidIndex(idx int) bool {
@@ -48,12 +65,12 @@ func (sl *Slice) ElemFromEnd(idx int) (Ki, bool) {
 	return (*sl)[idx], true
 }
 
-// IndexByFunc finds index of item based on match function (which must return
-// true for a find match, false for not).  Returns false if not found.
+// SliceIndexByFunc finds index of item based on match function (which must
+// return true for a find match, false for not).  Returns false if not found.
 // startIdx arg allows for optimized bidirectional find if you have an idea
 // where it might be -- can be key speedup for large lists -- pass -1 to start
 // in the middle (good default)
-func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
+func SliceIndexByFunc(sl *[]Ki, startIdx int, match func(k Ki) bool) (int, bool) {
 	sz := len(*sl)
 	if sz == 0 {
 		return -1, false
@@ -96,6 +113,23 @@ func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
 	return -1, false
 }
 
+// IndexByFunc finds index of item based on match function (which must return
+// true for a find match, false for not).  Returns false if not found.
+// startIdx arg allows for optimized bidirectional find if you have an idea
+// where it might be -- can be key speedup for large lists -- pass -1 to start
+// in the middle (good default)
+func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
+	return SliceIndexByFunc((*[]Ki)(sl), startIdx, match)
+}
+
+// SliceIndexOf returns index of element in list, false if not there.  startIdx arg
+// allows for optimized bidirectional find if you have an idea where it might
+// be -- can be key speedup for large lists -- pass -1 to start in the middle
+// (good default).
+func SliceIndexOf(sl *[]Ki, kid Ki, startIdx int) (int, bool) {
+	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch == kid })
+}
+
 // IndexOf returns index of element in list, false if not there.  startIdx arg
 // allows for optimized bidirectional find if you have an idea where it might
 // be -- can be key speedup for large lists -- pass -1 to start in the middle
@@ -104,16 +138,38 @@ func (sl *Slice) IndexOf(kid Ki, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
 }
 
+// SliceIndexByName returns index of first element that has given name, false if
+// not found. See IndexOf for info on startIdx
+func SliceIndexByName(sl *[]Ki, name string, startIdx int) (int, bool) {
+	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Name() == name })
+}
+
 // IndexByName returns index of first element that has given name, false if
 // not found. See IndexOf for info on startIdx
 func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
+// SliceIndexByUniqueName returns index of first element that has given unique
+// name, false if not found. See IndexOf for info on startIdx.
+func SliceIndexByUniqueName(sl *[]Ki, name string, startIdx int) (int, bool) {
+	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
+}
+
 // IndexByUniqueName returns index of first element that has given unique
 // name, false if not found. See IndexOf for info on startIdx.
 func (sl *Slice) IndexByUniqueName(name string, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
+}
+
+// SliceIndexByType returns index of element that either is that type or embeds
+// that type, false if not found. See IndexOf for info on startIdx.
+func SliceIndexByType(sl *[]Ki, t reflect.Type, embeds bool, startIdx int) (int, bool) {
+	if embeds {
+		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+	} else {
+		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Type() == t })
+	}
 }
 
 // IndexByType returns index of element that either is that type or embeds
@@ -169,9 +225,9 @@ func (sl *Slice) ElemByType(t reflect.Type, embeds bool, startIdx int) (Ki, bool
 	return (*sl)[idx], true
 }
 
-// Insert item at index -- does not do any parent updating etc -- use Ki/Node
+// SliceInsert item at index -- does not do any parent updating etc -- use Ki/Node
 // method unless you know what you are doing.
-func (sl *Slice) Insert(k Ki, idx int) {
+func SliceInsert(sl *[]Ki, k Ki, idx int) {
 	kl := len(*sl)
 	if idx < 0 {
 		idx = kl + idx
@@ -190,11 +246,17 @@ func (sl *Slice) Insert(k Ki, idx int) {
 	(*sl)[idx] = k
 }
 
-// DeleteAtIndex deletes item at index -- does not do any further management
+// Insert item at index -- does not do any parent updating etc -- use Ki/Node
+// method unless you know what you are doing.
+func (sl *Slice) Insert(k Ki, idx int) {
+	SliceInsert((*[]Ki)(sl), k, idx)
+}
+
+// SliceDeleteAtIndex deletes item at index -- does not do any further management
 // deleted item -- optimized version for avoiding memory leaks.  returns false
 // if index is invalid.
-func (sl *Slice) DeleteAtIndex(idx int) bool {
-	if !sl.IsValidIndex(idx) {
+func SliceDeleteAtIndex(sl *[]Ki, idx int) bool {
+	if !SliceIsValidIndex(sl, idx) {
 		return false
 	}
 	// this copy makes sure there are no memory leaks
@@ -205,19 +267,32 @@ func (sl *Slice) DeleteAtIndex(idx int) bool {
 	return true
 }
 
-// Move element from one position to another.  Returns false if either index
-// is invalid.
-func (sl *Slice) Move(from, to int) bool {
-	if !sl.IsValidIndex(from) || !sl.IsValidIndex(to) {
+// DeleteAtIndex deletes item at index -- does not do any further management
+// deleted item -- optimized version for avoiding memory leaks.  returns false
+// if index is invalid.
+func (sl *Slice) DeleteAtIndex(idx int) bool {
+	return SliceDeleteAtIndex((*[]Ki)(sl), idx)
+}
+
+// SliceMove moves element from one position to another.  Returns false if
+// either index is invalid.
+func SliceMove(sl *[]Ki, from, to int) bool {
+	if !SliceIsValidIndex(sl, from) || !SliceIsValidIndex(sl, to) {
 		return false
 	}
 	if from == to {
 		return false
 	}
 	tmp := (*sl)[from]
-	sl.DeleteAtIndex(from)
-	sl.Insert(tmp, to)
+	SliceDeleteAtIndex(sl, from)
+	SliceInsert(sl, tmp, to)
 	return false
+}
+
+// Move element from one position to another.  Returns false if either index
+// is invalid.
+func (sl *Slice) Move(from, to int) bool {
+	return SliceMove((*[]Ki)(sl), from, to)
 }
 
 // TypeAndNames returns a kit.TypeAndNameList of elements in the slice --
