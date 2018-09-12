@@ -78,10 +78,10 @@ var WidgetDefPropsKey = "__DefProps"
 // "__DefProps"+selector type property of the props used for styling here, for
 // accessing properties that are not compiled into standard Style object.
 func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *Style {
-	tprops := kit.Types.Properties(wb.Type(), true) // true = makeNew
+	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
-		sp, ok := (*tprops)[selector]
+		sp, ok := tprops[selector]
 		if !ok {
 			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, wb.Type().Name())
 		} else {
@@ -89,7 +89,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			if !ok {
 				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, wb.Type().Name())
 			} else {
-				*styprops = spm
+				styprops = spm
 			}
 		}
 	}
@@ -99,7 +99,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	var dsty *Style
 	stKey := WidgetDefStyleKey + selector
 	prKey := WidgetDefPropsKey + selector
-	dstyi, ok := (*tprops)[stKey]
+	dstyi, ok := tprops[stKey]
 	if !ok || RebuildDefaultStyles {
 		dsty = &Style{}
 		dsty.Defaults()
@@ -112,10 +112,10 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			}
 			*dsty = *baseStyle
 		}
-		dsty.SetStyleProps(parSty, *styprops)
+		dsty.SetStyleProps(parSty, styprops)
 		dsty.IsSet = false // keep as non-set
-		(*tprops)[stKey] = dsty
-		(*tprops)[prKey] = styprops
+		tprops[stKey] = dsty
+		tprops[prKey] = styprops
 	} else {
 		dsty, _ = dstyi.(*Style)
 	}

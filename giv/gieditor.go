@@ -350,8 +350,9 @@ var GiEditorProps = ki.Props{
 	},
 }
 
-// GoGiEditorDialog opens an interactive editor of the given Ki tree, at its root
-func GoGiEditorDialog(obj ki.Ki) {
+// GoGiEditorDialog opens an interactive editor of the given Ki tree, at its
+// root, returns GiEditor and window
+func GoGiEditorDialog(obj ki.Ki) (*GiEditor, *gi.Window) {
 	width := 1280
 	height := 920
 	wnm := "gogi-editor"
@@ -399,4 +400,5 @@ func GoGiEditorDialog(obj ki.Ki) {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop() // in a separate goroutine
+	return ge, win
 }

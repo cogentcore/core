@@ -13,11 +13,11 @@ import (
 )
 
 // PrefsView opens a view of user preferences
-func PrefsView(p *gi.Preferences) {
+func PrefsView(pf *gi.Preferences) (*StructView, *gi.Window) {
 	winm := "gogi-prefs"
 	if w, ok := gi.MainWindows.FindName(winm); ok {
 		w.OSWin.Raise()
-		return
+		return nil, nil
 	}
 
 	width := 800
@@ -32,31 +32,35 @@ func PrefsView(p *gi.Preferences) {
 
 	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
 	sv.Viewport = vp
-	sv.SetStruct(p, nil)
+	sv.SetStruct(pf, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
 	mmen := win.MainMenu
-	MainMenuView(p, win, mmen)
+	MainMenuView(pf, win, mmen)
 
+	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		if p.Changed {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
-				Prompt: "Do you want to save any changes to preferences before closing?"},
-				[]string{"Save and Close", "Discard and Close", "Cancel"},
-				win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						p.Save()
-						fmt.Println("Preferences Saved to prefs.json")
-						w.Close()
-					case 1:
-						p.Open() // if we don't do this, then it actually remains in edited state
-						w.Close()
-					case 2:
-						// default is to do nothing, i.e., cancel
-					}
-				})
+		if pf.Changed {
+			if !inClosePrompt {
+				gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
+					Prompt: "Do you want to save any changes to preferences before closing?"},
+					[]string{"Save and Close", "Discard and Close", "Cancel"},
+					win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						switch sig {
+						case 0:
+							pf.Save()
+							fmt.Println("Preferences Saved to prefs.json")
+							w.Close()
+						case 1:
+							pf.Open() // if we don't do this, then it actually remains in edited state
+							w.Close()
+						case 2:
+							inClosePrompt = false
+							// default is to do nothing, i.e., cancel
+						}
+					})
+			}
 		} else {
 			w.Close()
 		}
@@ -66,4 +70,5 @@ func PrefsView(p *gi.Preferences) {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
+	return sv, win
 }

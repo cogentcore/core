@@ -303,23 +303,31 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			md.Desc = kit.ToString(pv)
 			ac.Tooltip = md.Desc
 		case "confirm":
-			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewConfirm))
+			bitflag.Set32((*int32)(&md.Flags), int(MethViewConfirm))
 		case "show-return":
-			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewShowReturn))
+			bitflag.Set32((*int32)(&md.Flags), int(MethViewShowReturn))
 		case "no-update-after":
-			bitflag.Set32((*int32)(&(md.Flags)), int(MethViewNoUpdateAfter))
+			bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 		case "updtfunc":
 			if uf, ok := pv.(func(interface{}, *gi.Action)); ok {
 				md.UpdateFunc = uf
 				ac.UpdateFunc = MethViewUpdateFunc
 			}
+		case "submenu":
+			ac.MakeMenuFunc = MethViewSubMenuFunc
+			if pvs, ok := pv.(string); ok { // field name
+				md.SubMenuField = pvs
+			} else {
+				md.SubMenuSlice = pv
+			}
+			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, Args property must be of type ki.PropSlice, containing names and other properties for each arg", methNm))
 				rval = false
 			} else {
-				if ActionViewArgsValidate(vtyp, methTyp, argv) {
+				if ActionViewArgsValidate(md, vtyp, methTyp, argv) {
 					md.ArgProps = argv
 				} else {
 					rval = false
@@ -330,12 +338,14 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	if !rval {
 		return false
 	}
-	ac.ActionSig.Connect(vp.This, MethViewCall)
+	if !bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) {
+		ac.ActionSig.Connect(vp.This, MethViewCall)
+	}
 	return true
 }
 
 // ActionViewArgsValidate validates the Args properties relative to number of args on type
-func ActionViewArgsValidate(vtyp reflect.Type, meth reflect.Method, argprops ki.PropSlice) bool {
+func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Method, argprops ki.PropSlice) bool {
 	mtyp := meth.Type
 	narg := mtyp.NumIn()
 	apsz := len(argprops)
@@ -343,6 +353,11 @@ func ActionViewArgsValidate(vtyp reflect.Type, meth reflect.Method, argprops ki.
 		MethViewErr(vtyp, fmt.Sprintf("Method: %v takes %v args (beyond the receiver), but Args properties only has %v", meth.Name, narg-1, apsz))
 		return false
 	}
+	if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) && apsz != 1 {
+		MethViewErr(vtyp, fmt.Sprintf("Method: %v has a submenu of values to use as the one arg for it, but it takes %v args (beyond the receiver) -- should only take 1", meth.Name, narg-1))
+		return false
+	}
+
 	return true
 }
 
@@ -362,6 +377,14 @@ const (
 	// MethViewNoUpdateAfter means do not update window after method runs (default is to do so)
 	MethViewNoUpdateAfter
 
+	// MethViewHasSubMenu means that this action has a submenu option --
+	// argument values will be selected from the auto-generated submenu
+	MethViewHasSubMenu
+
+	// MethViewHasSubMenuVal means that this action was called using a submenu
+	// and the SubMenuVal has the selected value
+	MethViewHasSubMenuVal
+
 	MethViewFlagsN
 )
 
@@ -372,17 +395,20 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "Me
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
-	Val        interface{}
-	ValVal     reflect.Value
-	Vp         *gi.Viewport2D
-	Method     string
-	MethVal    reflect.Value
-	MethTyp    reflect.Method
-	ArgProps   ki.PropSlice                  `desc:"names and other properties of args, in one-to-one with method args"`
-	SpecProps  ki.Props                      `desc:"props for special action types, e.g., FileView"`
-	Desc       string                        `desc:"prompt shown in arg dialog or confirm prompt dialog"`
-	UpdateFunc func(interface{}, *gi.Action) `desc:"update function defined in properties -- called by our wrapper update function"`
-	Flags      MethViewFlags
+	Val          interface{}
+	ValVal       reflect.Value
+	Vp           *gi.Viewport2D
+	Method       string
+	MethVal      reflect.Value
+	MethTyp      reflect.Method
+	ArgProps     ki.PropSlice                  `desc:"names and other properties of args, in one-to-one with method args"`
+	SpecProps    ki.Props                      `desc:"props for special action types, e.g., FileView"`
+	Desc         string                        `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+	UpdateFunc   func(interface{}, *gi.Action) `desc:"update function defined in properties -- called by our wrapper update function"`
+	SubMenuSlice interface{}                   `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+	SubMenuField string                        `desc:"value for submenu generation as name of field on obj"`
+	SubMenuVal   interface{}                   `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	Flags        MethViewFlags
 }
 
 // MethViewCall is the receiver func for MethView actions that call a method
@@ -397,6 +423,10 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	// need to prompt for args
 	ads, args, nprompt, ok := MethViewArgData(md)
 	if !ok {
+		return
+	}
+	if nprompt == 0 {
+		MethViewCallNoArgPrompt(ac, md, args)
 		return
 	}
 	// check for single arg with action -- do action directly
@@ -417,10 +447,6 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 			})
 			return
 		}
-	}
-	if nprompt == 0 {
-		MethViewCallNoArgPrompt(ac, md, args)
-		return
 	}
 
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
@@ -526,6 +552,13 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 		ad.View.SetStandaloneValue(ad.Val)
 		nprompt++ // assume prompt
 
+		if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenuVal)) {
+			ad.Default = md.SubMenuVal
+			ad.SetHasDef()
+			bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+			nprompt--
+		}
+
 		switch apv := aps.Value.(type) {
 		case ki.BlankProp:
 		case ki.Props:
@@ -581,5 +614,43 @@ func MethViewUpdateFunc(act *gi.Action) {
 	md := act.Data.(*MethViewData)
 	if md.UpdateFunc != nil {
 		md.UpdateFunc(md.Val, act)
+	}
+}
+
+// MethViewSubMenuFunc is a MakeMenuFunc for items that have submenus
+func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
+	ac := aki.(*gi.Action)
+	md := ac.Data.(*MethViewData)
+	smd := md.SubMenuSlice
+	if md.SubMenuField != "" {
+		if flv, ok := MethViewFieldValue(md.ValVal, md.SubMenuField); ok {
+			smd = flv.Interface()
+		}
+	}
+	if smd == nil {
+		return
+	}
+	sltp := kit.NonPtrType(reflect.TypeOf(smd))
+	if sltp.Kind() != reflect.Slice && sltp.Kind() != reflect.Array {
+		log.Printf("giv.MethViewSubMenuFunc: submenu data must be a slice or array, not: %v\n", sltp.String())
+		return
+	}
+	mv := reflect.ValueOf(smd)
+	mvnp := kit.NonPtrValue(mv)
+	sz := mvnp.Len()
+	*m = make(gi.Menu, sz)
+	for i := 0; i < sz; i++ {
+		val := mvnp.Index(i)
+		nm := kit.ToString(val)
+		nac := &gi.Action{}
+		nac.InitName(nac, nm)
+		nac.Text = nm
+		nac.SetAsMenu()
+		nac.ActionSig.Connect(md.Vp.This, MethViewCall)
+		nd := *md // copy
+		nd.SubMenuVal = val
+		bitflag.Set32((*int32)(&nd.Flags), int(MethViewHasSubMenuVal))
+		nac.Data = &nd
+		(*m)[i] = nac
 	}
 }

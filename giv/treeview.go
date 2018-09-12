@@ -1398,36 +1398,36 @@ func (tv *TreeView) ConfigParts() {
 	}
 	config.Add(gi.KiT_Label, "label")
 	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
-	if mods {
-		if tv.HasChildren() {
-			if wb, ok := tv.BranchPart(); ok {
-				wb.SetProp("#icon0", TVBranchProps)
-				wb.SetProp("#icon1", TVBranchProps)
-				wb.SetProp("no-focus", true) // note: cannot be in compiled props
-				tv.StylePart(gi.Node2D(wb))
-				// unfortunately StylePart only handles default Style obj -- not
-				// these special styles.. todo: fix this somehow
-				if bprpi, ok := tv.Prop("#branch"); ok {
+	// if mods {
+	if tv.HasChildren() {
+		if wb, ok := tv.BranchPart(); ok {
+			wb.SetProp("#icon0", TVBranchProps)
+			wb.SetProp("#icon1", TVBranchProps)
+			wb.SetProp("no-focus", true) // note: cannot be in compiled props
+			tv.StylePart(gi.Node2D(wb))
+			// unfortunately StylePart only handles default Style obj -- not
+			// these special styles.. todo: fix this somehow
+			if bprpi, ok := tv.Prop("#branch"); ok {
+				switch pr := bprpi.(type) {
+				case map[string]interface{}:
+					wb.SetIconProps(ki.Props(pr))
+				case ki.Props:
+					wb.SetIconProps(pr)
+				}
+			} else {
+				tprops := kit.Types.Properties(tv.Type(), true) // true = makeNew
+				if bprpi, ok := (*tprops)[gi.WidgetDefPropsKey+"#branch"]; ok {
 					switch pr := bprpi.(type) {
 					case map[string]interface{}:
 						wb.SetIconProps(ki.Props(pr))
 					case ki.Props:
 						wb.SetIconProps(pr)
 					}
-				} else {
-					tprops := kit.Types.Properties(tv.Type(), true) // true = makeNew
-					if bprpi, ok := (*tprops)[gi.WidgetDefPropsKey+"#branch"]; ok {
-						switch pr := bprpi.(type) {
-						case map[string]interface{}:
-							wb.SetIconProps(ki.Props(pr))
-						case ki.Props:
-							wb.SetIconProps(pr)
-						}
-					}
 				}
 			}
 		}
 	}
+	// }
 	if tv.Icon.IsValid() {
 		if ic, ok := tv.IconPart(); ok {
 			if set, _ := ic.SetIcon(string(tv.Icon)); set || tv.NeedsFullReRender() || mods {
@@ -1622,7 +1622,6 @@ func (tv *TreeView) StyleTreeView() {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
 	tv.ConfigParts()
-
 }
 
 func (tv *TreeView) Style2D() {
@@ -1670,7 +1669,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayData.AllocPosRel.X = -1000000 // put it very far off screen..
 	}
-	tv.ConfigParts()
+	tv.ConfigPartsIfNeeded()
 
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 

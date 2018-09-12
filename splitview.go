@@ -84,6 +84,7 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 		sv.Splits[i] = splits[i]
 	}
 	sv.UpdateSplits()
+	sv.SetFullReRender()
 	sv.UpdateEnd(updt)
 }
 

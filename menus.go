@@ -32,8 +32,9 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 	return ks.UnmarshalJSON(b)
 }
 
-// MakeMenuFunc is a callback for making a menu on demand
-type MakeMenuFunc func(m *Menu)
+// MakeMenuFunc is a callback for making a menu on demand, receives the object
+// calling this function (typically an Action or Button) and the menu
+type MakeMenuFunc func(obj ki.Ki, m *Menu)
 
 // ActOpts provides named and partial parameters for AddAction method
 type ActOpts struct {
@@ -45,6 +46,25 @@ type ActOpts struct {
 	UpdateFunc func(act *Action)
 }
 
+// SetAction sets properties of given action
+func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
+	nm := opts.Label
+	if nm == "" {
+		nm = opts.Icon
+	}
+	ac.InitName(ac, nm)
+	ac.Text = opts.Label
+	ac.Tooltip = opts.Tooltip
+	ac.Icon = IconName(opts.Icon)
+	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
+	ac.Data = opts.Data
+	ac.UpdateFunc = opts.UpdateFunc
+	ac.SetAsMenu()
+	if sigTo != nil && fun != nil {
+		ac.ActionSig.Connect(sigTo, fun)
+	}
+}
+
 // AddAction adds an action to the menu using given options, and connects the
 // action signal to given receiver object and function, along with given data
 // which is stored on the action and then passed in the action signal.
@@ -54,24 +74,46 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
-	ac := Action{}
-	nm := opts.Label
-	if nm == "" {
-		nm = opts.Icon
-	}
-	ac.InitName(&ac, nm)
-	ac.Text = opts.Label
-	ac.Tooltip = opts.Tooltip
-	ac.Icon = IconName(opts.Icon)
-	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
-	ac.Data = opts.Data
-	ac.UpdateFunc = opts.UpdateFunc
-	ac.SetAsMenu()
+	ac := &Action{}
+	m.SetAction(ac, opts, sigTo, fun)
 	*m = append(*m, ac.This.(Node2D))
-	if sigTo != nil && fun != nil {
-		ac.ActionSig.Connect(sigTo, fun)
+	return ac
+}
+
+// InsertActionBefore adds an action to the menu before existing item of given
+// name, using given options, and connects the action signal to given receiver
+// object and function, along with given data which is stored on the action
+// and then passed in the action signal.  Optional updateFunc is a function
+// called prior to showing the menu to update the actions (enabled or not
+// typically).  If name not found, adds to end of list..
+func (m *Menu) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+	sl := (*[]ki.Ki)(m)
+	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
+		ac := &Action{}
+		m.SetAction(ac, opts, sigTo, fun)
+		ki.SliceInsert(sl, ac.This, idx)
+		return ac
+	} else {
+		return m.AddAction(opts, sigTo, fun)
 	}
-	return &ac
+}
+
+// InsertActionAfter adds an action to the menu after existing item of given
+// name, using given options, and connects the action signal to given receiver
+// object and function, along with given data which is stored on the action
+// and then passed in the action signal.  Optional updateFunc is a function
+// called prior to showing the menu to update the actions (enabled or not
+// typically).  If name not found, adds to end of list..
+func (m *Menu) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+	sl := (*[]ki.Ki)(m)
+	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
+		ac := &Action{}
+		m.SetAction(ac, opts, sigTo, fun)
+		ki.SliceInsert(sl, ac.This, idx+1)
+		return ac
+	} else {
+		return m.AddAction(opts, sigTo, fun)
+	}
 }
 
 // AddSeparator adds a separator at the next point in the menu (name is just
@@ -191,8 +233,22 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 		})
 }
 
-// AddAppMenu adds a standard set of menu items for application-level control.
+// CustomAppMenuFunc is a function called by AddAppMenu after the
+// AddStdAppMenu is called -- apps can set this function to add / modify / etc
+// the menu
+var CustomAppMenuFunc = (func(m *Menu, win *Window))(nil)
+
+// AddAppMenu adds an "app" menu to the menu -- calls AddStdAppMenu and then
+// CustomAppMenuFunc if non-nil
 func (m *Menu) AddAppMenu(win *Window) {
+	m.AddStdAppMenu(win)
+	if CustomAppMenuFunc != nil {
+		CustomAppMenuFunc(m, win)
+	}
+}
+
+// AddStdAppMenu adds a standard set of menu items for application-level control.
+func (m *Menu) AddStdAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {

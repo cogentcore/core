@@ -310,7 +310,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 		return false
 	}
 	if bb.MakeMenuFunc != nil {
-		bb.MakeMenuFunc(&bb.Menu)
+		bb.MakeMenuFunc(bb.This, &bb.Menu)
 	}
 	pos := bb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen

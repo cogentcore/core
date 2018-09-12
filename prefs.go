@@ -85,66 +85,66 @@ var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
-func (p *ColorPrefs) Defaults() {
-	p.Font.SetColor(color.Black)
-	p.Border.SetString("#666", nil)
-	p.Background.SetColor(color.White)
-	p.Shadow.SetString("darker-10", &p.Background)
-	p.Control.SetString("#EEF", nil)
-	p.Icon.SetString("highlight-30", p.Control)
-	p.Select.SetString("#CFC", nil)
-	p.Highlight.SetString("#FFA", nil)
-	p.Link.SetString("#00F", nil)
+func (pf *ColorPrefs) Defaults() {
+	pf.Font.SetColor(color.Black)
+	pf.Border.SetString("#666", nil)
+	pf.Background.SetColor(color.White)
+	pf.Shadow.SetString("darker-10", &pf.Background)
+	pf.Control.SetString("#EEF", nil)
+	pf.Icon.SetString("highlight-30", pf.Control)
+	pf.Select.SetString("#CFC", nil)
+	pf.Highlight.SetString("#FFA", nil)
+	pf.Link.SetString("#00F", nil)
 }
 
 // PrefColor returns preference color of given name (case insensitive)
-func (p *ColorPrefs) PrefColor(clrName string) *Color {
+func (pf *ColorPrefs) PrefColor(clrName string) *Color {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {
 	case "font":
-		return &p.Font
+		return &pf.Font
 	case "background":
-		return &p.Background
+		return &pf.Background
 	case "shadow":
-		return &p.Shadow
+		return &pf.Shadow
 	case "border":
-		return &p.Border
+		return &pf.Border
 	case "control":
-		return &p.Control
+		return &pf.Control
 	case "icon":
-		return &p.Icon
+		return &pf.Icon
 	case "select":
-		return &p.Select
+		return &pf.Select
 	case "highlight":
-		return &p.Highlight
+		return &pf.Highlight
 	case "link":
-		return &p.Link
+		return &pf.Link
 	}
 	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
 	return nil
 }
 
-func (p *ParamPrefs) Defaults() {
-	p.DoubleClickMSec = 500
-	p.ScrollWheelRate = 20
-	p.LocalMainMenu = false
+func (pf *ParamPrefs) Defaults() {
+	pf.DoubleClickMSec = 500
+	pf.ScrollWheelRate = 20
+	pf.LocalMainMenu = false
 }
 
-func (p *Preferences) Defaults() {
-	p.LogicalDPIScale = 1.0
-	p.Colors.Defaults()
-	p.Params.Defaults()
-	p.FavPaths.SetToDefaults()
-	p.FontFamily = "Go"
-	p.SavedPathsMax = 20
-	p.KeyMap = DefaultKeyMap
+func (pf *Preferences) Defaults() {
+	pf.LogicalDPIScale = 1.0
+	pf.Colors.Defaults()
+	pf.Params.Defaults()
+	pf.FavPaths.SetToDefaults()
+	pf.FontFamily = "Go"
+	pf.SavedPathsMax = 20
+	pf.KeyMap = DefaultKeyMap
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
 var PrefsFileName = "prefs.json"
 
 // Open preferences from GoGi standard prefs directory
-func (p *Preferences) Open() error {
+func (pf *Preferences) Open() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
@@ -152,19 +152,19 @@ func (p *Preferences) Open() error {
 		// log.Println(err) // ok to be non-existant
 		return err
 	}
-	err = json.Unmarshal(b, p)
-	if p.SaveKeyMaps {
+	err = json.Unmarshal(b, pf)
+	if pf.SaveKeyMaps {
 		AvailKeyMaps.OpenPrefs()
 	}
-	p.Changed = false
+	pf.Changed = false
 	return err
 }
 
 // Save Preferences to GoGi standard prefs directory
-func (p *Preferences) Save() error {
+func (pf *Preferences) Save() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	b, err := json.MarshalIndent(p, "", "  ")
+	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
 		log.Println(err)
 		return err
@@ -173,65 +173,65 @@ func (p *Preferences) Save() error {
 	if err != nil {
 		log.Println(err)
 	}
-	if p.SaveKeyMaps {
+	if pf.SaveKeyMaps {
 		AvailKeyMaps.SavePrefs()
 	}
-	p.Changed = false
+	pf.Changed = false
 	return err
 }
 
 // OpenColors colors from a JSON-formatted file.
-func (p *Preferences) OpenColors(filename FileName) error {
-	err := p.Colors.OpenJSON(filename)
+func (pf *Preferences) OpenColors(filename FileName) error {
+	err := pf.Colors.OpenJSON(filename)
 	if err == nil {
-		p.Update()
+		pf.Update()
 	}
-	p.Changed = true
+	pf.Changed = true
 	return err
 }
 
 // Save colors to a JSON-formatted file, for easy sharing of your favorite
 // palettes.
-func (p *Preferences) SaveColors(filename FileName) error {
-	p.Changed = true
-	return p.Colors.SaveJSON(filename)
+func (pf *Preferences) SaveColors(filename FileName) error {
+	pf.Changed = true
+	return pf.Colors.SaveJSON(filename)
 }
 
 // Apply preferences to all the relevant settings.
-func (p *Preferences) Apply() {
-	np := len(p.FavPaths)
+func (pf *Preferences) Apply() {
+	np := len(pf.FavPaths)
 	for i := 0; i < np; i++ {
-		if p.FavPaths[i].Ic == "" {
-			p.FavPaths[i].Ic = "folder"
+		if pf.FavPaths[i].Ic == "" {
+			pf.FavPaths[i].Ic = "folder"
 		}
 	}
 
-	mouse.DoubleClickMSec = p.Params.DoubleClickMSec
-	mouse.ScrollWheelRate = p.Params.ScrollWheelRate
-	LocalMainMenu = p.Params.LocalMainMenu
+	mouse.DoubleClickMSec = pf.Params.DoubleClickMSec
+	mouse.ScrollWheelRate = pf.Params.ScrollWheelRate
+	LocalMainMenu = pf.Params.LocalMainMenu
 
-	if p.KeyMap != "" {
-		SetActiveKeyMapName(p.KeyMap) // fills in missing pieces
+	if pf.KeyMap != "" {
+		SetActiveKeyMapName(pf.KeyMap) // fills in missing pieces
 	}
-	if p.FontPaths != nil {
-		paths := append(p.FontPaths, oswin.TheApp.FontPaths()...)
+	if pf.FontPaths != nil {
+		paths := append(pf.FontPaths, oswin.TheApp.FontPaths()...)
 		FontLibrary.InitFontPaths(paths...)
 	} else {
 		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
 	}
-	p.ApplyDPI()
+	pf.ApplyDPI()
 }
 
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
-func (p *Preferences) ApplyDPI() {
+func (pf *Preferences) ApplyDPI() {
 	n := oswin.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := oswin.TheApp.Screen(i)
-		if scp, ok := p.ScreenPrefs[sc.Name]; ok {
+		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
 			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*scp.LogicalDPIScale, sc.PhysicalDPI)
 		} else {
-			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*p.LogicalDPIScale, sc.PhysicalDPI)
+			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*pf.LogicalDPIScale, sc.PhysicalDPI)
 		}
 	}
 	for _, w := range AllWindows {
@@ -241,9 +241,9 @@ func (p *Preferences) ApplyDPI() {
 
 // Update updates all open windows with current preferences -- triggers
 // rebuild of default styles.
-func (p *Preferences) Update() {
+func (pf *Preferences) Update() {
 	ZoomFactor = 1 // reset so saved dpi is used
-	p.Apply()
+	pf.Apply()
 
 	RebuildDefaultStyles = true
 	for _, w := range AllWindows {
@@ -257,7 +257,7 @@ func (p *Preferences) Update() {
 }
 
 // ScreenInfo returns screen info for all screens on the console.
-func (p *Preferences) ScreenInfo() string {
+func (pf *Preferences) ScreenInfo() string {
 	ns := oswin.TheApp.NScreens()
 	scinfo := ""
 	for i := 0; i < ns; i++ {
@@ -272,54 +272,54 @@ func (p *Preferences) ScreenInfo() string {
 
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
-func (p *Preferences) SaveZoom(forCurrentScreen bool) {
+func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	sc := oswin.TheApp.Screen(0)
 	if forCurrentScreen {
-		sp, ok := p.ScreenPrefs[sc.Name]
+		sp, ok := pf.ScreenPrefs[sc.Name]
 		if !ok {
 			sp = ScreenPrefs{}
 		}
 		sp.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
-		if p.ScreenPrefs == nil {
-			p.ScreenPrefs = make(map[string]ScreenPrefs)
+		if pf.ScreenPrefs == nil {
+			pf.ScreenPrefs = make(map[string]ScreenPrefs)
 		}
-		p.ScreenPrefs[sc.Name] = sp
+		pf.ScreenPrefs[sc.Name] = sp
 	} else {
-		p.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
+		pf.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
-	p.Changed = true
+	pf.Changed = true
 }
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache.  You shouldn't
 // need to use this but sometimes useful for testing.
-func (p *Preferences) DeleteSavedWindowGeoms() {
+func (pf *Preferences) DeleteSavedWindowGeoms() {
 	WinGeomPrefs.DeleteAll()
 }
 
 // EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
 // load from other files, etc.  Current avail keymaps are saved and loaded
 // with preferences automatically.
-func (p *Preferences) EditKeyMaps() {
-	p.SaveKeyMaps = true
-	p.Changed = true
+func (pf *Preferences) EditKeyMaps() {
+	pf.SaveKeyMaps = true
+	pf.Changed = true
 	TheViewIFace.KeyMapsView(&AvailKeyMaps)
 }
 
 // OpenJSON opens colors from a JSON-formatted file.
-func (p *ColorPrefs) OpenJSON(filename FileName) error {
+func (pf *ColorPrefs) OpenJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 		return err
 	}
-	return json.Unmarshal(b, p)
+	return json.Unmarshal(b, pf)
 }
 
 // SaveJSON saves colors to a JSON-formatted file.
-func (p *ColorPrefs) SaveJSON(filename FileName) error {
-	b, err := json.MarshalIndent(p, "", "  ")
+func (pf *ColorPrefs) SaveJSON(filename FileName) error {
+	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely
 		return err
@@ -461,14 +461,14 @@ type FavPathItem struct {
 type FavPaths []FavPathItem
 
 // SetToDefaults sets the paths to default values
-func (p *FavPaths) SetToDefaults() {
-	*p = make(FavPaths, len(DefaultPaths))
-	copy(*p, DefaultPaths)
+func (pf *FavPaths) SetToDefaults() {
+	*pf = make(FavPaths, len(DefaultPaths))
+	copy(*pf, DefaultPaths)
 }
 
 // FindPath returns index of path on list, or -1, false if not found
-func (p *FavPaths) FindPath(path string) (int, bool) {
-	for i, fi := range *p {
+func (pf *FavPaths) FindPath(path string) (int, bool) {
+	for i, fi := range *pf {
 		if fi.Path == path {
 			return i, true
 		}
@@ -493,19 +493,19 @@ type FilePaths []string
 var SavedPaths FilePaths
 
 // Open file paths from a JSON-formatted file.
-func (p *FilePaths) OpenJSON(filename string) error {
+func (pf *FilePaths) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		log.Println(err)
 		return err
 	}
-	return json.Unmarshal(b, p)
+	return json.Unmarshal(b, pf)
 }
 
 // Save file paths to a JSON-formatted file.
-func (p *FilePaths) SaveJSON(filename string) error {
-	b, err := json.MarshalIndent(p, "", "  ")
+func (pf *FilePaths) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely
 		return err
@@ -520,33 +520,33 @@ func (p *FilePaths) SaveJSON(filename string) error {
 
 // AddPath inserts a path to the file paths (at the start), subject to max
 // length -- if path is already on the list then it is moved to the start.
-func (p *FilePaths) AddPath(path string, max int) {
-	sz := len(*p)
+func (pf *FilePaths) AddPath(path string, max int) {
+	sz := len(*pf)
 
 	if sz > max {
-		*p = (*p)[:max]
+		*pf = (*pf)[:max]
 	}
 
-	for i, s := range *p {
+	for i, s := range *pf {
 		if s == path {
 			if i == 0 {
 				return
 			}
-			copy((*p)[1:i+1], (*p)[0:i])
-			(*p)[0] = path
+			copy((*pf)[1:i+1], (*pf)[0:i])
+			(*pf)[0] = path
 			return
 		}
 	}
 
 	if sz >= max {
-		copy((*p)[1:max], (*p)[0:max-1])
-		(*p)[0] = path
+		copy((*pf)[1:max], (*pf)[0:max-1])
+		(*pf)[0] = path
 	} else {
-		*p = append(*p, "")
+		*pf = append(*pf, "")
 		if sz > 0 {
-			copy((*p)[1:], (*p)[0:sz])
+			copy((*pf)[1:], (*pf)[0:sz])
 		}
-		(*p)[0] = path
+		(*pf)[0] = path
 	}
 }
 

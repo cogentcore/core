@@ -24,7 +24,7 @@ import (
 // interface into it.
 type FileTree struct {
 	FileNode
-	OpenDirs  DirOpenMap `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
+	OpenDirs  OpenDirMap `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool       `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
 }
 
@@ -373,22 +373,22 @@ var FileNodeProps = ki.Props{
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//    DirOpenMap
+//    OpenDirMap
 
-// DirOpenMap is a map for encoding directories that are open in the file
+// OpenDirMap is a map for encoding directories that are open in the file
 // tree.  The strings are typically relative paths.  The bool value is used to
 // mark active paths and inactive (unmarked) ones can be removed.
-type DirOpenMap map[string]bool
+type OpenDirMap map[string]bool
 
 // Init initializes the map
-func (dm *DirOpenMap) Init() {
+func (dm *OpenDirMap) Init() {
 	if *dm == nil {
-		*dm = make(DirOpenMap, 1000)
+		*dm = make(OpenDirMap, 1000)
 	}
 }
 
 // IsOpen returns true if path is listed on the open map
-func (dm *DirOpenMap) IsOpen(path string) bool {
+func (dm *OpenDirMap) IsOpen(path string) bool {
 	dm.Init()
 	if _, ok := (*dm)[path]; ok {
 		(*dm)[path] = true // mark
@@ -398,20 +398,20 @@ func (dm *DirOpenMap) IsOpen(path string) bool {
 }
 
 // SetOpen adds the given path to the open map
-func (dm *DirOpenMap) SetOpen(path string) {
+func (dm *OpenDirMap) SetOpen(path string) {
 	dm.Init()
 	(*dm)[path] = true
 }
 
 // SetClosed removes given path from the open map
-func (dm *DirOpenMap) SetClosed(path string) {
+func (dm *OpenDirMap) SetClosed(path string) {
 	dm.Init()
 	delete(*dm, path)
 }
 
 // ClearFlags sets all the bool flags to false -- do this prior to traversing
 // full set of active paths -- can then call RemoveStale to get rid of unused paths
-func (dm *DirOpenMap) ClearFlags() {
+func (dm *OpenDirMap) ClearFlags() {
 	dm.Init()
 	for key, _ := range *dm {
 		(*dm)[key] = false
@@ -420,7 +420,7 @@ func (dm *DirOpenMap) ClearFlags() {
 
 // RemoveStale removes all entries with a bool = false value indicating that
 // they have not been accessed since ClearFlags was called.
-func (dm *DirOpenMap) RemoveStale() {
+func (dm *OpenDirMap) RemoveStale() {
 	dm.Init()
 	for key, val := range *dm {
 		if !val {

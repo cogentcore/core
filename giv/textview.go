@@ -50,7 +50,7 @@ type TextView struct {
 	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Opts          TextViewOpts              `desc:"options for how text editing / viewing works"`
 	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	HiStyle       string                    `desc:"syntax highlighting style"`
+	HiStyle       HiStyleName               `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
@@ -78,7 +78,7 @@ type TextView struct {
 	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
-	lastHiStyle  string
+	lastHiStyle  HiStyleName
 	lexer        chroma.Lexer
 	formatter    *html.Formatter
 	style        *chroma.Style
@@ -253,7 +253,7 @@ func (tv *TextView) HiInit() {
 	}
 	tv.lexer = chroma.Coalesce(lexers.Get(tv.Buf.HiLang))
 	tv.formatter = html.New(html.WithClasses(), html.TabWidth(tv.Sty.Text.TabSize))
-	tv.style = styles.Get(tv.HiStyle)
+	tv.style = styles.Get(string(tv.HiStyle))
 	if tv.style == nil {
 		tv.style = styles.Fallback
 	}
