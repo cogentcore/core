@@ -20,6 +20,8 @@ import (
 type SliceViewInline struct {
 	gi.PartsWidgetBase
 	Slice   interface{} `desc:"the slice that we are a view onto"`
+	IsArray bool        `desc:"whether the slice is actually an array -- no modifications"`
+	Changed bool        `desc:"has the slice been edited?"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
@@ -33,6 +35,7 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
+		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
@@ -66,11 +69,12 @@ func (sv *SliceViewInline) ConfigParts() {
 		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
 		vtyp := vv.WidgetType()
 		idxtxt := fmt.Sprintf("%05d", i)
-		labnm := fmt.Sprintf("index-%v", idxtxt)
 		valnm := fmt.Sprintf("value-%v", idxtxt)
-		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm)
 		sv.Values = append(sv.Values, vv)
+	}
+	if !sv.IsArray {
+		config.Add(gi.KiT_Action, "AddAction")
 	}
 	config.Add(gi.KiT_Action, "EditAction")
 	mods, updt := sv.Parts.ConfigChildren(config, false)
@@ -81,14 +85,22 @@ func (sv *SliceViewInline) ConfigParts() {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
-			svv.UpdateSig()
-			svv.ViewSig.Emit(svv.This, 0, nil)
+			svv.SetChanged()
 		})
-		lbl := sv.Parts.KnownChild(i * 2).(*gi.Label)
-		idxtxt := fmt.Sprintf("%05d", i)
-		lbl.Text = idxtxt
-		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
+		widg := sv.Parts.KnownChild(i).(gi.Node2D)
 		vv.ConfigWidget(widg)
+	}
+	if !sv.IsArray {
+		adack, ok := sv.Parts.Children().ElemFromEnd(1)
+		if ok {
+			adac := adack.(*gi.Action)
+			adac.SetIcon("plus")
+			adac.Tooltip = "add an element to the slice"
+			adac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
+				svv.SliceNewAt(-1, true)
+			})
+		}
 	}
 	edack, ok := sv.Parts.Children().ElemFromEnd(0)
 	if ok {
@@ -111,6 +123,37 @@ func (sv *SliceViewInline) ConfigParts() {
 		})
 	}
 	sv.Parts.UpdateEnd(updt)
+}
+
+// SetChanged sets the Changed flag and emits the ViewSig signal for the
+// SliceView, indicating that some kind of edit / change has taken place to
+// the table data.  It isn't really practical to record all the different
+// types of changes, so this is just generic.
+func (sv *SliceViewInline) SetChanged() {
+	sv.Changed = true
+	sv.ViewSig.Emit(sv.This, 0, nil)
+}
+
+// SliceNewAt inserts a new blank element at given index in the slice -- -1
+// means the end
+func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
+	if sv.IsArray {
+		return
+	}
+
+	updt := sv.UpdateStart()
+	defer sv.UpdateEnd(updt)
+
+	kit.SliceNewAt(sv.Slice, idx)
+
+	if sv.TmpSave != nil {
+		sv.TmpSave.SaveTmp()
+	}
+	sv.SetChanged()
+	if reconfig {
+		sv.SetFullReRender()
+		sv.UpdateFromSlice()
+	}
 }
 
 func (sv *SliceViewInline) UpdateFromSlice() {

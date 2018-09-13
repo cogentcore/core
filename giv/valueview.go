@@ -31,6 +31,9 @@ var MapInlineLen = 6
 // representation of the struct will be presented -- more convenient for small structs
 var StructInlineLen = 6
 
+// SliceInlineLen is the number of slice elements below which inline will be used
+var SliceInlineLen = 6
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ValueView -- an interface for representing values (e.g., fields) in Views
 
@@ -175,14 +178,22 @@ func ToValueView(it interface{}) ValueView {
 		}
 	case nptyp == ki.KiT_Signal:
 		return nil
-	case vk == reflect.Slice:
-		vv := SliceValueView{}
-		vv.Init(&vv)
-		return &vv
 	case vk == reflect.Array:
-		vv := SliceValueView{} // probably works?
-		vv.Init(&vv)
-		return &vv
+		fallthrough
+	case vk == reflect.Slice:
+		v := reflect.ValueOf(it)
+		sz := v.Len()
+		eltyp := kit.SliceElType(it)
+		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
+		if !isstru && sz > 0 && sz <= SliceInlineLen {
+			vv := SliceInlineValueView{}
+			vv.Init(&vv)
+			return &vv
+		} else {
+			vv := SliceValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
 	case vk == reflect.Map:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
@@ -870,6 +881,43 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  SliceInlineValueView
+
+// SliceInlineValueView presents a SliceViewInline for a map
+type SliceInlineValueView struct {
+	ValueViewBase
+}
+
+var KiT_SliceInlineValueView = kit.Types.AddType(&SliceInlineValueView{}, nil)
+
+func (vv *SliceInlineValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = KiT_SliceViewInline
+	return vv.WidgetTyp
+}
+
+func (vv *SliceInlineValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	sv := vv.Widget.(*SliceViewInline)
+	sv.UpdateValues()
+}
+
+func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	sv := vv.Widget.(*SliceViewInline)
+	sv.Tooltip, _ = vv.Tag("desc")
+	// npv := vv.Value.Elem()
+	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
+	sv.SetSlice(vv.Value.Interface(), vv.TmpSave)
+	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_SliceInlineValueView).(*SliceInlineValueView)
+		vvv.UpdateWidget()
+		vvv.ViewSig.Emit(vvv.This, 0, nil)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

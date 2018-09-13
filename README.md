@@ -94,9 +94,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* MethView supports sub-menu that is list of args to a function -- list is
-  from a field on obj or just given directly -- must be of type of arg or convertable to -- 
-  use for recents list  -- open recent proj
+* All valueview *Name guys need a 1em min height / 1ch min width in case empty
+
+* label / text needs some way of rendering spaces -- add support for white-space and set the default to pre instead of "normal"!  https://www.w3schools.com/cssref/pr_text_white-space.asp 
 
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
@@ -110,8 +110,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 
 * Splitview: 
-	+ gide resize textview not re-drawing 
-	+ some lowpri keyfuns for collapsing and expanding  
+	+ gide resize textview not re-drawing  (still?)
+	+ some lowpri keyfuns for collapsing and expanding -- this goes in gide -- need multi-key.
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.

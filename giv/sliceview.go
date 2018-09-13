@@ -327,7 +327,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					svv := recv.Embed(KiT_SliceView).(*SliceView)
-					svv.SliceDelete(act.Data.(int), true)
+					svv.SliceDeleteAt(act.Data.(int), true)
 				})
 			}
 		}
@@ -388,11 +388,10 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	if reconfig {
 		sv.ConfigSliceGrid(true)
 	}
-	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
-// SliceDelete deletes element at given index from slice
-func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
+// SliceDeleteAt deletes element at given index from slice
+func (sv *SliceView) SliceDeleteAt(idx int, reconfig bool) {
 	if sv.IsArray {
 		return
 	}
@@ -400,14 +399,8 @@ func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
-	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
-	svtyp := svnp.Type()
-	nval := reflect.New(svtyp.Elem())
-	sz := svnp.Len()
-	reflect.Copy(svnp.Slice(idx, sz-1), svnp.Slice(idx+1, sz))
-	svnp.Index(sz - 1).Set(nval.Elem())
-	svl.Elem().Set(svnp.Slice(0, sz-1))
+	kit.SliceDeleteAt(sv.Slice, idx)
+
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
@@ -415,7 +408,6 @@ func (sv *SliceView) SliceDelete(idx int, reconfig bool) {
 	if reconfig {
 		sv.ConfigSliceGrid(true)
 	}
-	sv.ViewSig.Emit(sv.This, 0, nil)
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -950,7 +942,7 @@ func (sv *SliceView) DeleteRows() {
 	updt := sv.UpdateStart()
 	rws := sv.SelectedRowsList(true) // descending sort
 	for _, r := range rws {
-		sv.SliceDelete(r, false)
+		sv.SliceDeleteAt(r, false)
 	}
 	sv.SetChanged()
 	sv.ConfigSliceGrid(true)
@@ -968,7 +960,7 @@ func (sv *SliceView) CutRows() {
 	row := rws[0]
 	sv.UnselectAllRows()
 	for _, r := range rws {
-		sv.SliceDelete(r, false)
+		sv.SliceDeleteAt(r, false)
 	}
 	sv.SetChanged()
 	sv.ConfigSliceGrid(true)
@@ -1180,7 +1172,7 @@ func (sv *SliceView) DragNDropSource(de *dnd.Event) {
 	})
 	row := sv.DraggedRows[0]
 	for _, r := range sv.DraggedRows {
-		sv.SliceDelete(r, false)
+		sv.SliceDeleteAt(r, false)
 	}
 	sv.DraggedRows = nil
 	sv.ConfigSliceGrid(true)
@@ -1300,7 +1292,7 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectMode = false
 		kt.SetProcessed()
 	case gi.KeyFunDelete:
-		sv.SliceDelete(sv.SelectedIdx, true)
+		sv.SliceDeleteAt(sv.SelectedIdx, true)
 		sv.SelectMode = false
 		sv.SelectRowAction(row, mouse.NoSelectMode)
 		kt.SetProcessed()
