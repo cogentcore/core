@@ -440,8 +440,7 @@ var PreferencesProps = ki.Props{
 		{"EditKeyMaps", ki.Props{
 			"icon": "keyboard",
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
-		},
-		},
+		}},
 	},
 }
 

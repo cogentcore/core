@@ -20,41 +20,9 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// MethViewErr is error logging function for MethView system, showing the type info
-func MethViewErr(vtyp reflect.Type, msg string) {
-	if vtyp != nil {
-		log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
-	} else {
-		log.Printf("giv.MethodView debug error: %v\n", msg)
-	}
-}
-
-// MethViewTypeProps gets props, typ of val, returns false if not found or
-// other err
-func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
-	if kit.IfaceIsNil(val) {
-		return nil, nil, false
-	}
-	vtyp := reflect.TypeOf(val)
-	tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
-	if tpp == nil {
-		return nil, vtyp, false
-	}
-	return *tpp, vtyp, true
-}
-
-// HasMainMenuView returns true if given val has a MainMenu type property
-// registered -- call this to check before then calling MainMenuView
-func HasMainMenuView(val interface{}) bool {
-	tpp, _, ok := MethViewTypeProps(val)
-	if !ok {
-		return false
-	}
-	_, ok = ki.SliceProps(tpp, "MainMenu")
-	if !ok {
-		return false
-	}
-	return true
+// these are special menus that we ignore
+var specialMenus = map[string]struct{}{
+	"AppMenu": struct{}{}, "Copy Cut Paste": struct{}{}, "Copy Cut Paste Dupe": struct{}{}, "Windows": struct{}{},
 }
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
@@ -218,6 +186,151 @@ func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Me
 	}
 	return rval
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+//    CallMethod -- auto gui
+
+// CallMethod calls given method on given object val, using GUI interface to
+// prompt for args.  This only works for methods that have been configured
+// either on the CallMethods list or any of the ToolBar, MainMenu, or CtxtMenu
+// lists (in that order).  List of available methods is cached in type
+// properties after first call.
+func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
+	tpp, vtyp, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	cmp, ok := ki.SubProps(tpp, MethodViewCallMethsProp)
+	if !ok {
+		cmp = MethViewCompileMeths(val, vp)
+	} else {
+		fmt.Printf("using compiled methods\n")
+	}
+
+	acp, has := cmp[method]
+	if !has {
+		MethViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type propertis -- add to CallMethods to make available for CallMethod\n", method))
+		return false
+	}
+	ac, ok := acp.(*gi.Action)
+	if !ok {
+		MethViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Action -- should be!\n", method))
+		return false
+	}
+	ac.Trigger()
+	return true
+}
+
+var compileMethsOrder = []string{"CallMethods", "ToolBar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
+
+// MethViewCompileMeths gets all methods either on the CallMethods list or any
+// of the ToolBar, MainMenu, or CtxtMenu lists (in that order).  Returns
+// property list of them, which are just names -> Actions
+func MethViewCompileMeths(val interface{}, vp *gi.Viewport2D) ki.Props {
+	tpp, vtyp, ok := MethViewTypeProps(val)
+	if !ok {
+		return nil
+	}
+	var cmp ki.Props = make(ki.Props)
+	for _, lst := range compileMethsOrder {
+		tp, got := ki.SliceProps(tpp, lst)
+		if !got {
+			continue
+		}
+		MethViewCompileActions(cmp, val, vtyp, vp, "", tp)
+	}
+	tpp[MethodViewCallMethsProp] = cmp
+	return cmp
+}
+
+// MethViewCompileActions processes properties for parent action pa for
+// overall object val of given type -- could have a sub-menu of further
+// actions or might just be a single action
+func MethViewCompileActions(cmp ki.Props, val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pnm string, pp interface{}) bool {
+	rval := true
+	if pv, ok := pp.(ki.PropSlice); ok {
+		for _, mm := range pv {
+			_, isspec := specialMenus[mm.Name]
+			if strings.HasPrefix(mm.Name, "sep-") || isspec {
+				continue
+			} else {
+				rv := MethViewCompileActions(cmp, val, vtyp, vp, mm.Name, mm.Value)
+				if !rv {
+					rval = false
+				}
+			}
+		}
+	} else {
+		_, isspec := specialMenus[pnm]
+		if strings.HasPrefix(pnm, "sep-") || isspec {
+			return rval
+		}
+		if _, has := cmp[pnm]; has {
+			return rval
+		}
+		ac := &gi.Action{}
+		ac.InitName(ac, pnm)
+		ac.Text = strings.Replace(strings.Join(camelcase.Split(ac.Nm), " "), "  ", " ", -1)
+		cmp[pnm] = ac
+		rv := false
+		switch pv := pp.(type) {
+		case ki.BlankProp:
+			rv = ActionView(val, vtyp, vp, ac, nil)
+		case ki.Props:
+			rv = ActionView(val, vtyp, vp, ac, pv)
+		}
+		if !rv {
+			rval = false
+		}
+	}
+	return rval
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//    Utils
+
+// MethViewErr is error logging function for MethView system, showing the type info
+func MethViewErr(vtyp reflect.Type, msg string) {
+	if vtyp != nil {
+		log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
+	} else {
+		log.Printf("giv.MethodView debug error: %v\n", msg)
+	}
+}
+
+// MethViewTypeProps gets props, typ of val, returns false if not found or
+// other err
+func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
+	if kit.IfaceIsNil(val) {
+		return nil, nil, false
+	}
+	vtyp := reflect.TypeOf(val)
+	tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
+	if tpp == nil {
+		return nil, vtyp, false
+	}
+	return *tpp, vtyp, true
+}
+
+// HasMainMenuView returns true if given val has a MainMenu type property
+// registered -- call this to check before then calling MainMenuView
+func HasMainMenuView(val interface{}) bool {
+	tpp, _, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	_, ok = ki.SliceProps(tpp, "MainMenu")
+	if !ok {
+		return false
+	}
+	return true
+}
+
+// This is the name of the property that holds cached map of compiled callable methods
+var MethodViewCallMethsProp = "__MethViewCallMeths"
+
+//////////////////////////////////////////////////////////////////////////////////
+//    ActionsView
 
 // ActionsView processes properties for parent action pa for overall object
 // val of given type -- could have a sub-menu of further actions or might just

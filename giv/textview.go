@@ -125,6 +125,9 @@ const (
 	// some text was selected (for Inactive state, selection is via WidgetSig)
 	TextViewSelected
 
+	// cursor moved
+	TextViewCursorMoved
+
 	TextViewSignalsN
 )
 
@@ -476,6 +479,11 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 ///////////////////////////////////////////////////////////////////////////////
 //  Cursor Navigation
 
+// CursorMovedSig sends the signal that cursor has moved
+func (tv *TextView) CursorMovedSig() {
+	tv.TextViewSig.Emit(tv.This, int64(TextViewCursorMoved), tv.CursorPos)
+}
+
 // SetCursor sets a new cursor position, enforcing it in range
 func (tv *TextView) SetCursor(pos TextPos) {
 	if tv.NLines == 0 {
@@ -493,6 +501,7 @@ func (tv *TextView) SetCursor(pos TextPos) {
 		pos.Ch = 0
 	}
 	tv.CursorPos = pos
+	tv.CursorMovedSig()
 }
 
 // CursorSelect updates selection based on cursor movements, given starting
@@ -533,6 +542,7 @@ func (tv *TextView) CursorForward(steps int) {
 			tv.CursorCol = tv.CursorPos.Ch
 		}
 	}
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -580,7 +590,7 @@ func (tv *TextView) CursorDown(steps int) {
 			}
 		}
 	}
-	tv.CursorPos = pos
+	tv.SetCursor(pos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -600,6 +610,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
 	}
+	tv.SetCursor(tv.CursorPos)
 	tv.CursorSelect(org)
 }
 
@@ -625,6 +636,7 @@ func (tv *TextView) CursorBackward(steps int) {
 			tv.CursorCol = tv.CursorPos.Ch
 		}
 	}
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -666,7 +678,7 @@ func (tv *TextView) CursorUp(steps int) {
 			}
 		}
 	}
-	tv.CursorPos = pos
+	tv.SetCursor(pos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -686,6 +698,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
 	}
+	tv.SetCursor(tv.CursorPos)
 	tv.CursorSelect(org)
 }
 
@@ -710,6 +723,7 @@ func (tv *TextView) CursorStartLine() {
 	org := tv.CursorPos
 	tv.CursorPos.Ch = 0
 	tv.CursorCol = tv.CursorPos.Ch
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToLeft()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -722,6 +736,7 @@ func (tv *TextView) CursorStart() {
 	tv.CursorPos.Ln = 0
 	tv.CursorPos.Ch = 0
 	tv.CursorCol = tv.CursorPos.Ch
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToTop()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -739,6 +754,7 @@ func (tv *TextView) CursorEndLine() {
 			tv.CursorCol = tv.CursorPos.Ch
 		}
 	}
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToRight()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)
@@ -753,6 +769,7 @@ func (tv *TextView) CursorEnd() {
 	tv.CursorPos.Ln = gi.MaxInt(tv.NLines-1, 0)
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	tv.CursorCol = tv.CursorPos.Ch
+	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToBottom()
 	tv.RenderCursor(true)
 	tv.CursorSelect(org)

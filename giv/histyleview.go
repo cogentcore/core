@@ -16,6 +16,10 @@ import (
 // HiStyleName is a highlighting style name
 type HiStyleName string
 
+// todo: currently based on https://github.com/alecthomas/chroma styles, but we should
+// impl our own structured style obj with a list of categories and
+// corresponding colors, once we do the parsing etc
+
 // HiStyles are all the available highlighting styles
 var HiStyles = []string{
 	"abap",

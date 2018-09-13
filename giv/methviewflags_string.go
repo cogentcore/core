@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _MethViewFlags_name = "MethViewConfirmMethViewShowReturnMethViewNoUpdateAfterMethViewFlagsN"
+const _MethViewFlags_name = "MethViewConfirmMethViewShowReturnMethViewNoUpdateAfterMethViewHasSubMenuMethViewHasSubMenuValMethViewFlagsN"
 
-var _MethViewFlags_index = [...]uint8{0, 15, 33, 54, 68}
+var _MethViewFlags_index = [...]uint8{0, 15, 33, 54, 72, 93, 107}
 
 func (i MethViewFlags) String() string {
 	if i < 0 || i >= MethViewFlags(len(_MethViewFlags_index)-1) {

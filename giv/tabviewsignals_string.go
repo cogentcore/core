@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TabViewSignals_name = "TabSelectedTabUnselectedTabOpenedTabCollapsedTabViewSignalsN"
+const _TabViewSignals_name = "TabSelectedTabViewSignalsN"
 
-var _TabViewSignals_index = [...]uint8{0, 11, 24, 33, 45, 60}
+var _TabViewSignals_index = [...]uint8{0, 11, 26}
 
 func (i TabViewSignals) String() string {
 	if i < 0 || i >= TabViewSignals(len(_TabViewSignals_index)-1) {

@@ -15,13 +15,9 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// KeyMapsView opens a view of user preferences
+// KeyMapsView opens a view of a key maps table
 func KeyMapsView(km *gi.KeyMaps) {
 	winm := "gogi-key-maps"
-	// if w, ok := gi.MainWindows.FindName(winm); ok {
-	// 	w.OSWin.Raise()
-	// 	return
-	// }
 	width := 800
 	height := 800
 	win := gi.NewWindow2D(winm, "GoGi Key Maps", width, height, true)
