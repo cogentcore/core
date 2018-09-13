@@ -203,8 +203,6 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 	cmp, ok := ki.SubProps(tpp, MethodViewCallMethsProp)
 	if !ok {
 		cmp = MethViewCompileMeths(val, vp)
-	} else {
-		fmt.Printf("using compiled methods\n")
 	}
 
 	acp, has := cmp[method]

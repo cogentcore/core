@@ -550,6 +550,9 @@ func (tv *TextView) CursorForward(steps int) {
 
 // WrappedLines returns the number of wrapped lines (spans) for given line number
 func (tv *TextView) WrappedLines(ln int) int {
+	if ln >= len(tv.Renders) {
+		return 0
+	}
 	return len(tv.Renders[ln].Spans)
 }
 
@@ -557,6 +560,9 @@ func (tv *TextView) WrappedLines(ln int) int {
 // within that span of the given character position within line in position,
 // and false if out of range
 func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
+	if pos.Ln >= len(tv.Renders) {
+		return 0, 0, false
+	}
 	return tv.Renders[pos.Ln].RuneSpanPos(pos.Ch)
 }
 
