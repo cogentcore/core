@@ -168,6 +168,13 @@ func (sv *SliceViewInline) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
+func (sv *SliceViewInline) Style2D() {
+	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
+		sv.UpdateFromSlice()
+	}
+	sv.PartsWidgetBase.Style2D()
+}
+
 func (sv *SliceViewInline) Render2D() {
 	if sv.FullReRenderIfNeeded() {
 		return

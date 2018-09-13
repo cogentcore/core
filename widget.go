@@ -323,6 +323,9 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (wb *WidgetBase) PushBounds() bool {
+	if wb.This == nil || wb.Viewport == nil {
+		return false
+	}
 	if wb.IsOverlay() {
 		wb.ClearFullReRender()
 		if wb.Viewport != nil {
@@ -348,6 +351,9 @@ func (wb *WidgetBase) PushBounds() bool {
 // rendering children
 func (wb *WidgetBase) PopBounds() {
 	wb.ClearFullReRender()
+	if wb.This == nil || wb.Viewport == nil {
+		return
+	}
 	rs := &wb.Viewport.Render
 	rs.PopBounds()
 }

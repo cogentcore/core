@@ -487,6 +487,9 @@ func (nb *Node2DBase) FullRender2DTree() {
 // necessary -- needed after structural updates to ensure all nodes are
 // updated
 func (nb *Node2DBase) Init2DTree() {
+	if nb.This == nil {
+		return
+	}
 	pr := prof.Start("Node2D.Init2DTree")
 	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
@@ -502,6 +505,9 @@ func (nb *Node2DBase) Init2DTree() {
 // Style2DTree styles scene graph tree from node it is called on -- only needs
 // to be done after a structural update in case inherited options changed
 func (nb *Node2DBase) Style2DTree() {
+	if nb.This == nil {
+		return
+	}
 	pr := prof.Start("Node2D.Style2DTree")
 	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
@@ -516,6 +522,9 @@ func (nb *Node2DBase) Style2DTree() {
 
 // Size2DTree does the sizing as a depth-first pass
 func (nb *Node2DBase) Size2DTree(iter int) {
+	if nb.This == nil {
+		return
+	}
 	pr := prof.Start("Node2D.Size2DTree")
 	nb.FuncDownDepthFirst(0, nb.This,
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
@@ -544,7 +553,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 // maximum control -- this starts with parent VpBBox -- can be called de novo.
 // Handles multiple iterations if needed.
 func (nb *Node2DBase) Layout2DTree() {
-	if nb.HasNoLayout() {
+	if nb.This == nil || nb.HasNoLayout() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree")
@@ -565,6 +574,9 @@ func (nb *Node2DBase) Layout2DTree() {
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
 func (nb *Node2DBase) Render2DTree() {
+	if nb.This == nil {
+		return
+	}
 	pr := prof.Start("Node2D.Render2DTree")
 	nb.This.(Node2D).Render2D() // important to use interface version to get interface!
 	pr.End()
