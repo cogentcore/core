@@ -9,7 +9,7 @@ package gimain
 import "github.com/goki/gi"
 
 func init() {
-	gi.DefaultKeyMap = &gi.LinuxKeyMap
-	gi.ActiveKeyMap = gi.DefaultKeyMap
+	gi.DefaultKeyMap = gi.KeyMapName("LinuxStd")
+	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
 	gi.Prefs.FontFamily = "Liberation Sans"
 }
