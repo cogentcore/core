@@ -351,6 +351,8 @@ func (fv *FileView) ConfigFilesRow() {
 			if fi, ok := fvv.SelectedFileInfo(); ok {
 				if fi.Kind == "Folder" {
 					fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
+					fv.SelFile = ""
+					fv.SelectedIdx = -1
 					fv.UpdateFilesAction()
 					return
 				}

@@ -475,6 +475,12 @@ func (tb *TextBuf) EndPos() TextPos {
 	return ed
 }
 
+// AppendText appends new text to end of buffer, using insert, returns edit
+func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
+	ed := tb.EndPos()
+	return tb.InsertText(ed, text, true)
+}
+
 // LineIndent returns the number of tabs or spaces at start of given line --
 // if line starts with tabs, then those are counted, else spaces --
 // combinations of tabs and spaces won't produce sensible results
