@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"go/token"
 	"image"
 	"image/draw"
 	"time"
@@ -569,7 +570,10 @@ func (tf *TextField) OfferComplete() {
 
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-	tf.Complete.ShowCompletions(s, tf.Viewport, cpos.X+5, cpos.Y+10)
+	cpos.X += 5
+	cpos.Y += 10
+	position := token.Position{}
+	tf.Complete.ShowCompletions(s, position, tf.Viewport, cpos)
 }
 
 // CompleteText edits the text field using the string chosen from the completion menu

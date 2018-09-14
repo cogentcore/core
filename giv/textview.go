@@ -7,6 +7,7 @@ package giv
 import (
 	"bytes"
 	"fmt"
+	"go/token"
 	"image"
 	"image/draw"
 	"log"
@@ -1084,9 +1085,17 @@ func (tv *TextView) OfferComplete() {
 	if tbe != nil {
 		s := string(tbe.ToBytes())
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
-		fmt.Println(s)
-		cp := tv.CharStartPos(tv.CursorPos)
-		tv.Complete.ShowCompletions(s, tv.Viewport, int(cp.X+5), int(cp.Y+10))
+		tpos := token.Position{}       // text position
+		count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
+		fmt.Println(count)
+		tpos.Line = tv.CursorPos.Ln
+		tpos.Column = tv.CursorPos.Ch
+		tpos.Offset = count
+		tpos.Filename = ""
+		cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
+		cpos.X += 5
+		cpos.Y += 10
+		tv.Complete.ShowCompletions(s, tpos, tv.Viewport, cpos)
 	}
 }
 
