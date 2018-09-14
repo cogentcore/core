@@ -447,6 +447,8 @@ func (sv *SliceView) Style2D() {
 	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
 		sv.UpdateFromSlice()
 	}
+	sg, _ := sv.SliceGrid()
+	sg.StartFocus() // need to call this when window is actually active
 	sv.Frame.Style2D()
 }
 

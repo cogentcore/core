@@ -130,6 +130,18 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	return nil
 }
 
+// ReOpen re-opens text from current file, if filename set -- returns false if not
+func (tb *TextBuf) ReOpen() bool {
+	if tb.Filename == "" {
+		return false
+	}
+	err := tb.Open(tb.Filename)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 func (tb *TextBuf) SaveAs(filename gi.FileName) error {
 	tb.EditDone()
@@ -341,7 +353,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	if len(text) == 0 {
 		return nil
 	}
-	if tb.Lines == nil {
+	if len(tb.Lines) == 0 {
 		tb.New(1)
 	}
 	tb.Edited = true
@@ -358,6 +370,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 		ed.Ch += rsz
 		// no lines to bytes
 	} else {
+		if tb.Lines[st.Ln] == nil {
+			tb.Lines[st.Ln] = []rune("")
+		}
 		eostl := len(tb.Lines[st.Ln][st.Ch:]) // end of starting line
 		var eost []rune
 		if eostl > 0 { // save it
@@ -479,6 +494,16 @@ func (tb *TextBuf) EndPos() TextPos {
 func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
 	ed := tb.EndPos()
 	return tb.InsertText(ed, text, true)
+}
+
+// AppendTextLine appends one line of new text to end of buffer, using insert, returns edit
+func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
+	ed := tb.EndPos()
+	sz := len(text)
+	tcpy := make([]byte, sz+1)
+	copy(tcpy, text)
+	tcpy[sz] = '\n'
+	return tb.InsertText(ed, tcpy, true)
 }
 
 // LineIndent returns the number of tabs or spaces at start of given line --

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/goki/gi"
@@ -272,6 +273,63 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 		return true
 	})
 	return ffn, found
+}
+
+// FilesMatching returns list of all nodes whose file name contains given
+// string (no regexp) -- ignoreCase transforms everything into lowercase
+func (fn *FileNode) FilesMatching(match string, ignoreCase bool) []*FileNode {
+	mls := make([]*FileNode, 0)
+	if ignoreCase {
+		match = strings.ToLower(match)
+	}
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if ignoreCase {
+			nm := strings.ToLower(sfn.Nm)
+			if strings.Contains(nm, match) {
+				mls = append(mls, sfn)
+			}
+		} else {
+			if strings.Contains(sfn.Nm, match) {
+				mls = append(mls, sfn)
+			}
+		}
+		return true
+	})
+	return mls
+}
+
+// FileNodeNameCount is used to report counts of different string-based things
+// in the file tree
+type FileNodeNameCount struct {
+	Name  string
+	Count int
+}
+
+// FileExtCounts returns a count of all the different file extensions, sorted
+// from highest to lowest
+func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
+	cmap := make(map[string]int, 20)
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		ext := strings.ToLower(filepath.Ext(sfn.Nm))
+		if ec, has := cmap[ext]; has {
+			cmap[ext] = ec + 1
+		} else {
+			cmap[ext] = 1
+		}
+		return true
+	})
+	ecs := make([]FileNodeNameCount, len(cmap))
+	idx := 0
+	for key, val := range cmap {
+		ecs[idx] = FileNodeNameCount{key, val}
+		idx++
+	}
+	sort.Slice(ecs, func(i, j int) bool {
+		return ecs[i].Count > ecs[j].Count
+	})
+	return ecs
 }
 
 // DuplicateFile creates a copy of given file -- only works for regular files, not directories

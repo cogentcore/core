@@ -94,9 +94,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* All valueview *Name guys need a 1em min height / 1ch min width in case empty
+* drag on textview should prevent DND -- dnd not getting "processed"
 
-* generic StructViewWindow
+* All valueview *Name guys need a 1em min height / 1ch min width in case empty
 
 * inline / reg slice updating needs better coordination between two, as in map.  also map may be doing too many!   could add + to inline map too, and show both inline guys for 0 elements.
 

@@ -591,7 +591,7 @@ func (w *Window) FullReRender() {
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
-			w.SetFocus(w.StartFocus)
+			w.FocusNext(w.StartFocus)
 		} else {
 			w.FocusNext(w.Focus)
 		}
@@ -906,7 +906,7 @@ mainloop:
 			}
 		}
 		if w.Focus == nil && w.StartFocus != nil {
-			w.SetFocus(w.StartFocus)
+			w.FocusNext(w.StartFocus)
 		}
 
 		delPop := false                      // if true, delete this popup after event loop

@@ -563,23 +563,8 @@ func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
-	sltyp := kit.SliceElType(tv.Slice) // has pointer if it is there
-	slptr := sltyp.Kind() == reflect.Ptr
+	kit.SliceNewAt(tv.Slice, idx)
 
-	tvl := reflect.ValueOf(tv.Slice)
-	tvnp := kit.NonPtrValue(tvl)
-	styp := tv.StructType()
-	nval := reflect.New(styp) // pointer to non-pointer for sure
-	if !slptr {
-		nval = nval.Elem() // use concrete value
-	}
-	sz := tvnp.Len()
-	tvnp = reflect.Append(tvnp, nval)
-	if idx >= 0 && idx < sz {
-		reflect.Copy(tvnp.Slice(idx+1, sz+1), tvnp.Slice(idx, sz))
-		tvnp.Index(idx).Set(nval)
-	}
-	tvl.Elem().Set(tvnp)
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
@@ -599,14 +584,8 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
-	tvl := reflect.ValueOf(tv.Slice)
-	tvnp := kit.NonPtrValue(tvl)
-	tvtyp := tvnp.Type()
-	nval := reflect.New(tvtyp.Elem())
-	sz := tvnp.Len()
-	reflect.Copy(tvnp.Slice(idx, sz-1), tvnp.Slice(idx+1, sz))
-	tvnp.Index(sz - 1).Set(nval.Elem())
-	tvl.Elem().Set(tvnp.Slice(0, sz-1))
+	kit.SliceDeleteAt(tv.Slice, idx)
+
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
@@ -829,6 +808,8 @@ func (tv *TableView) Style2D() {
 		tv.UpdateFromSlice()
 	}
 	tv.Frame.Style2D()
+	sg := tv.SliceGrid()
+	sg.StartFocus() // need to call this when window is actually active
 }
 
 func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {

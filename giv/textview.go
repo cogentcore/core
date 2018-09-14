@@ -202,6 +202,9 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tv.SetFullReRender()
 		tv.UpdateSig()
 	case TextBufInsert:
+		if tv.Renders == nil { // not init yet
+			return
+		}
 		tbe := data.(*TextBufEdit)
 		tv.Edited = tv.Buf.Edited
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
@@ -217,6 +220,9 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 			}
 		}
 	case TextBufDelete:
+		if tv.Renders == nil { // not init yet
+			return
+		}
 		tbe := data.(*TextBufEdit)
 		tv.Edited = tv.Buf.Edited
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
