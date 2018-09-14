@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"go/token"
 	"reflect"
 
 	"github.com/goki/gi"
@@ -368,7 +369,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(text string) (matches complete.Completions, seed string) {
+func Complete(text string, pos token.Position) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
 	possibles := complete.MatchSeed(words, seed)
 	for _, p := range possibles {
