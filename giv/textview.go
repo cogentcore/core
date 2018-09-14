@@ -1082,21 +1082,22 @@ func (tv *TextView) OfferComplete() {
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
 	tbe := tv.Buf.Region(st, en)
+	var s string
 	if tbe != nil {
-		s := string(tbe.ToBytes())
+		s = string(tbe.ToBytes())
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
-		tpos := token.Position{}       // text position
-		count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
-		fmt.Println(count)
-		tpos.Line = tv.CursorPos.Ln
-		tpos.Column = tv.CursorPos.Ch
-		tpos.Offset = count
-		tpos.Filename = ""
-		cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
-		cpos.X += 5
-		cpos.Y += 10
-		tv.Complete.ShowCompletions(s, tpos, tv.Viewport, cpos)
 	}
+	tpos := token.Position{} // text position
+	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
+	//fmt.Println(count)
+	tpos.Line = tv.CursorPos.Ln
+	tpos.Column = tv.CursorPos.Ch
+	tpos.Offset = count
+	tpos.Filename = ""
+	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
+	cpos.X += 5
+	cpos.Y += 10
+	tv.Complete.ShowCompletions(s, tpos, tv.Viewport, cpos)
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
