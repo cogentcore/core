@@ -8,21 +8,22 @@
 package complete
 
 import (
+	"go/token"
 	"strings"
 	"unicode"
 )
 
 type Completion struct {
-	Text string  // completion text
-	Icon string  // icon name
-	Desc string  // possible extra information, e.g. type, arguments, etc. - not currently used
+	Text string // completion text
+	Icon string // icon name
+	Desc string // possible extra information, e.g. type, arguments, etc. - not currently used
 }
 
 type Completions []Completion
 
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(text string) (matches Completions, seed string)
+type MatchFunc func(text string, pos token.Position) (matches Completions, seed string)
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.

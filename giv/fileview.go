@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"go/token"
 	"io"
 	"io/ioutil"
 	"log"
@@ -683,7 +684,7 @@ func (fv *FileView) Style2D() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion
 
-func (fv *FileView) FileComplete(text string) (matches complete.Completions, seed string) {
+func (fv *FileView) FileComplete(text string, pos token.Position) (matches complete.Completions, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -710,7 +711,7 @@ func (fv *FileView) FileComplete(text string) (matches complete.Completions, see
 	return matches, seed
 }
 
-func (fv *FileView) PathComplete(path string) (matches complete.Completions, seed string) {
+func (fv *FileView) PathComplete(path string, pos token.Position) (matches complete.Completions, seed string) {
 	dir, seed := filepath.Split(path)
 	d, err := os.Open(dir)
 	if err != nil {

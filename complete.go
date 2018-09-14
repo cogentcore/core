@@ -9,6 +9,8 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
+	"go/token"
+	"image"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -22,9 +24,9 @@ type Complete struct {
 	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
 	Context     interface{}        `desc:"the object that implements complete.Func"`
 	Completions complete.Completions
-	Seed        string             `desc:"current completion seed"`
-	CompleteSig ki.Signal          `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
-	Completion  string             `desc:"the user's completion selection'"`
+	Seed        string    `desc:"current completion seed"`
+	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
+	Completion  string    `desc:"the user's completion selection'"`
 }
 
 var KiT_Complete = kit.Types.AddType(&Complete{}, nil)
@@ -45,12 +47,12 @@ const (
 
 // ShowCompletions calls MatchFunc to get a list of completions and builds the
 // completion popup menu
-func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
+func (c *Complete) ShowCompletions(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
 	if c.MatchFunc == nil {
 		return
 	}
 
-	c.Completions, c.Seed = c.MatchFunc(text)
+	c.Completions, c.Seed = c.MatchFunc(text, pos)
 	count := len(c.Completions)
 	if count > 0 {
 		if count == 1 && c.Completions[0].Text == c.Seed {
@@ -60,13 +62,13 @@ func (c *Complete) ShowCompletions(text string, vp *Viewport2D, x int, y int) {
 		for i := 0; i < count; i++ {
 			text := c.Completions[i].Text
 			icon := c.Completions[i].Icon
-			m.AddAction(ActOpts{Icon:icon, Label: text, Data: text},
+			m.AddAction(ActOpts{Icon: icon, Label: text, Data: text},
 				c, func(recv, send ki.Ki, sig int64, data interface{}) {
 					tff := recv.Embed(KiT_Complete).(*Complete)
 					tff.Complete(data.(string))
 				})
 		}
-		vp := PopupMenu(m, x, y, vp, "tf-completion-menu")
+		vp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
 		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	}
