@@ -169,8 +169,8 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(Node2D(up))
 		if !sb.IsInactive() {
 			up.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
-				sb.IncrValue(1.0)
+				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+				sbb.IncrValue(1.0)
 			})
 		}
 		// dn
@@ -182,8 +182,8 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(Node2D(dn))
 		if !sb.IsInactive() {
 			dn.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				sb := recv.Embed(KiT_SpinBox).(*SpinBox)
-				sb.IncrValue(-1.0)
+				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+				sbb.IncrValue(-1.0)
 			})
 		}
 		// space
@@ -196,11 +196,11 @@ func (sb *SpinBox) ConfigParts() {
 		if !sb.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) {
-					sb := recv.Embed(KiT_SpinBox).(*SpinBox)
+					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
 					vl, err := strconv.ParseFloat(tf.Text(), 32)
 					if err == nil {
-						sb.SetValueAction(float32(vl))
+						sbb.SetValueAction(float32(vl))
 					}
 				}
 			})

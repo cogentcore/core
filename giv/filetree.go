@@ -10,6 +10,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/goki/gi"
@@ -130,12 +131,14 @@ func (fn *FileNode) ReadDir(path string) {
 	fn.FPath = gi.FileName(filepath.Clean(path))
 	fn.SetOpen()
 
+	typ := fn.NodeType()
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, true) // unique names
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
 		sf.FRoot = fn.FRoot
+		sf.SetChildType(typ) // propagate
 		fp := filepath.Join(path, sf.Nm)
 		sf.SetNodePath(fp)
 	}
@@ -144,11 +147,21 @@ func (fn *FileNode) ReadDir(path string) {
 	}
 }
 
+// NodeType returns the type of nodes to create -- set ChildType property on
+// NodeTree to seed this -- otherwise always FileNode
+func (fn *FileNode) NodeType() reflect.Type {
+	if ntp, ok := fn.Prop("ChildType"); ok {
+		return ntp.(reflect.Type)
+	}
+	return KiT_FileNode
+}
+
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
 func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 	config1 := kit.TypeAndNameList{}
 	config2 := kit.TypeAndNameList{}
+	typ := fn.NodeType()
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("gide.FileNode ConfigFilesIn Path %q: Error: %v", path, err)
@@ -161,12 +174,12 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 		_, fnm := filepath.Split(pth)
 		if fn.FRoot.DirsOnTop {
 			if info.IsDir() {
-				config1.Add(KiT_FileNode, fnm)
+				config1.Add(typ, fnm)
 			} else {
-				config2.Add(KiT_FileNode, fnm)
+				config2.Add(typ, fnm)
 			}
 		} else {
-			config1.Add(KiT_FileNode, fnm)
+			config1.Add(typ, fnm)
 		}
 		if info.IsDir() {
 			return filepath.SkipDir

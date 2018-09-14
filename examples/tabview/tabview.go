@@ -30,11 +30,11 @@ func mainrun() {
 
 	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
 
-	lbl1 := tv.AddNewTab(gi.KiT_Label, "Label1").(*gi.Label)
+	lbl1 := tv.AddNewTab(gi.KiT_Label, "This is Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
 	lbl1.SetProp("word-wrap", true)
 
-	lbl2 := tv.AddNewTab(gi.KiT_Label, "Label2").(*gi.Label)
+	lbl2 := tv.AddNewTab(gi.KiT_Label, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
 	lbl2.SetProp("word-wrap", true)
 

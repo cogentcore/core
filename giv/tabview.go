@@ -23,6 +23,7 @@ import (
 // max stretch and a set preferred size, so it expands.
 type TabView struct {
 	gi.Layout
+	MaxChars   int       `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
 	TabViewSig ki.Signal `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 }
 
@@ -51,24 +52,24 @@ func (tv *TabView) InsertTab(widg gi.Node2D, label string, idx int) {
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	fr.InsertChild(widg, idx)
-	tab := tb.InsertNewChild(gi.KiT_Action, idx, label).(*gi.Action)
+	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
-		act := send.(*gi.Action)
+		act := send.Embed(KiT_TabButton).(*TabButton)
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndex(tabIdx)
 	})
 }
 
 // AddNewTab adds a new widget as a new tab of given widget type, with given
-// tab label, and returns the new widget
-func (tv *TabView) AddNewTab(typ reflect.Type, label string) gi.Node2D {
+// tab label, and returns the new widget and its tab index
+func (tv *TabView) AddNewTab(typ reflect.Type, label string) (gi.Node2D, int) {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	widg := tv.InsertNewTab(typ, label, idx)
-	return widg
+	return widg, idx
 }
 
 // InsertNewTab inserts a new widget of given type into given index position
@@ -77,30 +78,41 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) gi.Node
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	widg := fr.InsertNewChild(typ, idx, label).(gi.Node2D)
-	tab := tb.InsertNewChild(gi.KiT_Action, idx, label).(*gi.Action)
+	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
-		act := send.(*gi.Action)
+		act := send.Embed(KiT_TabButton).(*TabButton)
 		tabIdx := act.Data.(int)
-		tvv.SelectTabIndex(tabIdx)
+		tvv.SelectTabIndexAction(tabIdx)
 	})
 	return widg
 }
 
-// SelectTabIndex selects tab at given index, returning it -- returns false if
-// index is invalid (emits log message)
-func (tv *TabView) SelectTabIndex(idx int) (gi.Node2D, bool) {
+// TabAtIndex returns content widget and tab button at given index, false if
+// index out of range (emits log message)
+func (tv *TabView) TabAtIndex(idx int) (gi.Node2D, *TabButton, bool) {
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
 		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
+		return nil, nil, false
+	}
+	tab := tb.KnownChild(idx).Embed(KiT_TabButton).(*TabButton)
+	widg := fr.KnownChild(idx).(gi.Node2D)
+	return widg, tab, true
+}
+
+// SelectTabIndex selects tab at given index, returning it -- returns false if
+// index is invalid
+func (tv *TabView) SelectTabIndex(idx int) (gi.Node2D, bool) {
+	widg, tab, ok := tv.TabAtIndex(idx)
+	if !ok {
 		return nil, false
 	}
-	tab := tb.KnownChild(idx).(*gi.Action)
-	widg := fr.KnownChild(idx).(gi.Node2D)
+	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	tv.UnselectAllTabs()
 	tab.SetSelectedState(true)
@@ -109,12 +121,91 @@ func (tv *TabView) SelectTabIndex(idx int) (gi.Node2D, bool) {
 	return widg, true
 }
 
+// SelectTabIndexAction selects tab at given index and emits selected signal,
+// with the index of the selected tab -- this is what is called when a tab is
+// clicked
+func (tv *TabView) SelectTabIndexAction(idx int) {
+	_, ok := tv.SelectTabIndex(idx)
+	if ok {
+		tv.TabViewSig.Emit(tv.This, int64(TabSelected), idx)
+	}
+}
+
+// TabByName returns tab with given name, and its index -- returns false if
+// not found
+func (tv *TabView) TabByName(label string) (gi.Node2D, int, bool) {
+	tb := tv.Tabs()
+	idx, ok := tb.Children().IndexByName(label, 0)
+	if !ok {
+		return nil, -1, false
+	}
+	fr := tv.Frame()
+	widg := fr.KnownChild(idx).(gi.Node2D)
+	return widg, idx, true
+}
+
+// SelectTabName selects tab by name, returning it -- returns false if not
+// found
+func (tv *TabView) SelectTabByName(label string) (gi.Node2D, int, bool) {
+	widg, idx, ok := tv.TabByName(label)
+	if ok {
+		tv.SelectTabIndex(idx)
+	}
+	return widg, idx, ok
+}
+
+// DeleteTabIndex deletes tab at given index, optionally calling destroy on
+// tab contents -- returns widget if destroy == false and bool success
+func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (gi.Node2D, bool) {
+	widg, _, ok := tv.TabAtIndex(idx)
+	if !ok {
+		return nil, false
+	}
+	fr := tv.Frame()
+	sz := len(*fr.Children())
+	tb := tv.Tabs()
+	updt := tv.UpdateStart()
+	nxtidx := -1
+	if fr.StackTop == idx {
+		if idx > 0 {
+			nxtidx = idx - 1
+		} else if idx < sz-1 {
+			nxtidx = idx
+		}
+	}
+	fr.DeleteChildAtIndex(idx, destroy)
+	tb.DeleteChildAtIndex(idx, true) // always destroy -- we manage
+	tv.RenumberTabs()
+	if nxtidx >= 0 {
+		tv.SelectTabIndex(nxtidx)
+	}
+	tv.SetFullReRender()
+	tv.UpdateEnd(updt)
+	if destroy {
+		return nil, true
+	} else {
+		return widg, true
+	}
+}
+
+// DeleteTabIndexAction deletes tab at given index using destroy flag, and
+// emits TabDeleted signal -- this is called by the delete button on the tab
+func (tv *TabView) DeleteTabIndexAction(idx int) {
+	_, ok := tv.DeleteTabIndex(idx, true)
+	if ok {
+		tv.TabViewSig.Emit(tv.This, int64(TabDeleted), idx)
+	}
+}
+
 // TabViewSignals are signals that the TabView can send
 type TabViewSignals int64
 
 const (
-	// TabSelected indicates node was selected -- data is the tab widget
+	// TabSelected indicates tab was selected -- data is the tab index
 	TabSelected TabViewSignals = iota
+
+	// TabDeleted indicates tab was deleted -- data is the tab index
+	TabDeleted
 
 	TabViewSignalsN
 )
@@ -129,12 +220,16 @@ func (tv *TabView) InitTabView() {
 	updt := tv.UpdateStart()
 	tv.Lay = gi.LayoutVert
 
-	tabs := tv.AddNewChild(gi.KiT_Layout, "tabs").(*gi.Layout)
+	tabs := tv.AddNewChild(gi.KiT_Frame, "tabs").(*gi.Frame)
 	tabs.Lay = gi.LayoutHoriz
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
 	tabs.SetProp("overflow", "hidden") // no scrollbars!
+	tabs.SetProp("padding", units.NewValue(0, units.Px))
+	tabs.SetProp("margin", units.NewValue(0, units.Px))
+	tabs.SetProp("spacing", units.NewValue(4, units.Px))
+	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := tv.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
 	frame.Lay = gi.LayoutStacked
@@ -147,9 +242,9 @@ func (tv *TabView) InitTabView() {
 }
 
 // Tabs returns the layout containing the tabs -- the first element within us
-func (tv *TabView) Tabs() *gi.Layout {
+func (tv *TabView) Tabs() *gi.Frame {
 	tv.InitTabView()
-	return tv.KnownChild(0).(*gi.Layout)
+	return tv.KnownChild(0).(*gi.Frame)
 }
 
 // Frame returns the stacked frame layout -- the second element
@@ -162,27 +257,135 @@ func (tv *TabView) Frame() *gi.Frame {
 func (tv *TabView) UnselectAllTabs() {
 	tb := tv.Tabs()
 	for _, tbk := range tb.Kids {
-		tb, ok := tbk.(*gi.Action)
-		if !ok {
-			continue
-		}
+		tb := tbk.Embed(KiT_TabButton).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelectedState(false)
 		}
 	}
 }
 
-// var TabButtonProps = ki.Props{
-// 	"border-width":        units.NewValue(1, units.Px),
-// 	"border-radius":       units.NewValue(0, units.Px),
-// 	"border-color":        &gi.Prefs.Colors.Border,
-// 	"border-style":        gi.BorderSolid,
-// 	"padding":             units.NewValue(4, units.Px),
-// 	"margin":              units.NewValue(0, units.Px),
-// 	"background-color":    &gi.Prefs.Colors.Control,
-// 	"box-shadow.h-offset": units.NewValue(0, units.Px),
-// 	"box-shadow.v-offset": units.NewValue(0, units.Px),
-// 	"box-shadow.blur":     units.NewValue(0, units.Px),
-// 	"box-shadow.color":    &gi.Prefs.Colors.Shadow,
-// 	"text-align":          gi.AlignCenter,
-// }
+// RenumberTabs assigns proper index numbers to each tab
+func (tv *TabView) RenumberTabs() {
+	tb := tv.Tabs()
+	for idx, tbk := range tb.Kids {
+		tb := tbk.Embed(KiT_TabButton).(*TabButton)
+		tb.Data = idx
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// TabButton
+
+// TabButton is a larger select action and a small close action. Indicator
+// icon is used for close icon.
+type TabButton struct {
+	gi.Action
+}
+
+var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
+
+var TabButtonProps = ki.Props{
+	"border-width":     units.NewValue(0, units.Px),
+	"border-radius":    units.NewValue(0, units.Px),
+	"border-color":     &gi.Prefs.Colors.Border,
+	"border-style":     gi.BorderSolid,
+	"box-shadow.color": &gi.Prefs.Colors.Shadow,
+	"text-align":       gi.AlignCenter,
+	"background-color": &gi.Prefs.Colors.Control,
+	"color":            &gi.Prefs.Colors.Font,
+	"padding":          units.NewValue(4, units.Px), // we go to edge of bar
+	"margin":           units.NewValue(0, units.Px),
+	"indicator":        "close",
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &gi.Prefs.Colors.Icon,
+		"stroke":  &gi.Prefs.Colors.Font,
+	},
+	"#label": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	"#close-stretch": ki.Props{
+		"width": units.NewValue(1, units.Ch),
+	},
+	"#close": ki.Props{
+		"width":          units.NewValue(.5, units.Ex),
+		"height":         units.NewValue(.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": gi.AlignBottom,
+	},
+	"#shortcut": ki.Props{
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+	},
+	"#sc-stretch": ki.Props{
+		"min-width": units.NewValue(2, units.Em),
+	},
+	gi.ButtonSelectors[gi.ButtonActive]: ki.Props{
+		"background-color": "linear-gradient(lighter-0, highlight-10)",
+	},
+	gi.ButtonSelectors[gi.ButtonInactive]: ki.Props{
+		"border-color": "lighter-50",
+		"color":        "lighter-50",
+	},
+	gi.ButtonSelectors[gi.ButtonHover]: ki.Props{
+		"background-color": "linear-gradient(highlight-10, highlight-10)",
+	},
+	gi.ButtonSelectors[gi.ButtonFocus]: ki.Props{
+		"border-width":     units.NewValue(2, units.Px),
+		"background-color": "linear-gradient(samelight-50, highlight-10)",
+	},
+	gi.ButtonSelectors[gi.ButtonDown]: ki.Props{
+		"color":            "lighter-90",
+		"background-color": "linear-gradient(highlight-30, highlight-10)",
+	},
+	gi.ButtonSelectors[gi.ButtonSelected]: ki.Props{
+		"background-color": "linear-gradient(pref(Select), highlight-10)",
+	},
+}
+
+func (tb *TabButton) ButtonAsBase() *gi.ButtonBase {
+	return &(tb.ButtonBase)
+}
+
+func (tb *TabButton) TabView() *TabView {
+	tv, ok := tb.ParentByType(KiT_TabView, true)
+	if !ok {
+		return nil
+	}
+	return tv.Embed(KiT_TabView).(*TabView)
+}
+
+func (tb *TabButton) ConfigParts() {
+	config, icIdx, lbIdx := tb.ConfigPartsIconLabel(string(tb.Icon), tb.Text)
+	config.Add(gi.KiT_Stretch, "close-stretch")
+	clsIdx := len(config)
+	config.Add(gi.KiT_Action, "close")
+	mods, updt := tb.Parts.ConfigChildren(config, false) // not unique names
+	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
+
+	cls := tb.Parts.KnownChild(clsIdx).(*gi.Action)
+	if tb.Indicator.IsNil() {
+		tb.Indicator = "close"
+	}
+	tb.StylePart(gi.Node2D(cls))
+
+	icnm := string(tb.Indicator)
+	cls.SetIcon(icnm)
+	cls.SetProp("no-focus", true)
+	cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tbb := recv.Embed(KiT_TabButton).(*TabButton)
+		tabIdx := tbb.Data.(int)
+		tvv := tb.TabView()
+		if tvv != nil {
+			tvv.DeleteTabIndexAction(tabIdx)
+		}
+	})
+	if mods {
+		tb.UpdateEnd(updt)
+	}
+}
