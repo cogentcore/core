@@ -83,11 +83,20 @@ func CompleteGo(bytes []byte, pos token.Position) (matches []string, seed string
 		switch n := n.(type) {
 		case *ast.BadDecl:
 			fmt.Printf("\t%T.Doc\n", n)
+			if i+1 < len(path) {
+				n2 := path[i+1]
+				switch n2.(type) {
+				case *ast.File:
+					matches = append(matches, decls...)
+					next = false
+				}
+			}
 			if strings.Contains(lineUpToPos, ":=") { // must be a better way
 				matches = append(matches, Locals()...)
 				matches = append(matches, Funcs()...)
 				next = false
 			}
+
 		case *ast.Ident:
 			fmt.Printf("\t%T.Doc: %q\n", n, n.Name)
 			matches = append(matches, Locals()...)
