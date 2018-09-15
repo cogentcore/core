@@ -843,7 +843,9 @@ void clipWrite() {
 void clipClear() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
     [pb clearContents];
-    [pasteWriteItems removeAllObjects];
+    if(pasteWriteItems != NULL) {
+        [pasteWriteItems removeAllObjects];
+    }
 }
 
 

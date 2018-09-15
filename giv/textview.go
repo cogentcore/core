@@ -515,6 +515,14 @@ func (tv *TextView) SetCursor(pos TextPos) {
 	tv.CursorMovedSig()
 }
 
+// SetCursorShow sets a new cursor position, enforcing it in range, and shows
+// the cursor (scroll to if hidden, render)
+func (tv *TextView) SetCursorShow(pos TextPos) {
+	tv.SetCursor(pos)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+}
+
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and tv.CursorPos is current
 func (tv *TextView) CursorSelect(org TextPos) {
@@ -553,9 +561,7 @@ func (tv *TextView) CursorForward(steps int) {
 			tv.CursorCol = tv.CursorPos.Ch
 		}
 	}
-	tv.SetCursor(tv.CursorPos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(tv.CursorPos)
 	tv.CursorSelect(org)
 }
 
@@ -607,9 +613,7 @@ func (tv *TextView) CursorDown(steps int) {
 			}
 		}
 	}
-	tv.SetCursor(pos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(pos)
 	tv.CursorSelect(org)
 }
 
@@ -653,9 +657,7 @@ func (tv *TextView) CursorBackward(steps int) {
 			tv.CursorCol = tv.CursorPos.Ch
 		}
 	}
-	tv.SetCursor(tv.CursorPos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(tv.CursorPos)
 	tv.CursorSelect(org)
 }
 
@@ -695,9 +697,7 @@ func (tv *TextView) CursorUp(steps int) {
 			}
 		}
 	}
-	tv.SetCursor(pos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(pos)
 	tv.CursorSelect(org)
 }
 
@@ -798,12 +798,13 @@ func (tv *TextView) CursorEnd() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tv *TextView) CursorBackspace(steps int) {
+	org := tv.CursorPos
 	if tv.HasSelection() {
 		tv.DeleteSelection()
+		tv.SetCursorShow(org)
 		return
 	}
 	// note: no update b/c signal from buf will drive update
-	org := tv.CursorPos
 	tv.CursorBackward(steps)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -820,9 +821,7 @@ func (tv *TextView) CursorDelete(steps int) {
 	org := tv.CursorPos
 	tv.CursorForward(steps)
 	tv.Buf.DeleteText(org, tv.CursorPos, true)
-	tv.SetCursor(org)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(org)
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -834,9 +833,7 @@ func (tv *TextView) CursorKill() {
 		tv.CursorEndLine()
 	}
 	tv.Buf.DeleteText(org, tv.CursorPos, true)
-	tv.SetCursor(org)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(org)
 }
 
 // Undo undoes previous action
@@ -994,21 +991,19 @@ func (tv *TextView) RenderSelectLines() {
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tv *TextView) Cut() *TextBufEdit {
+	org := tv.SelectReg.Start
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		oswin.TheApp.ClipBoard().Write(mimedata.NewTextBytes(cut.ToBytes()))
 	}
+	tv.SetCursorShow(org)
 	return cut
 }
 
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as TextBufEdit (nil if none)
 func (tv *TextView) DeleteSelection() *TextBufEdit {
-	tbe := tv.Selection()
-	if tbe == nil {
-		return nil
-	}
-	tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, true)
+	tbe := tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, true)
 	tv.SelectReset()
 	return tbe
 }
@@ -1045,9 +1040,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 		tv.Cut()
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
-	tv.SetCursor(tbe.Reg.End)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.RenderCursor(true)
+	tv.SetCursorShow(tbe.Reg.End)
 }
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {

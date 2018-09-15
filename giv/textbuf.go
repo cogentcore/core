@@ -319,14 +319,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 		// no lines to bytes for single-line ops
 	} else {
 		// first get chars on start and end
-		stln := st.Ln
+		stln := st.Ln + 1
 		cpln := st.Ln
-		if st.Ch == len(tb.Lines[st.Ln]) {
-			stln++
-		} else if st.Ch > 0 {
-			tb.Lines[st.Ln] = tb.Lines[st.Ln][:st.Ch]
-			stln++
-		}
+		tb.Lines[st.Ln] = tb.Lines[st.Ln][:st.Ch]
 		eoedl := len(tb.Lines[ed.Ln][ed.Ch:])
 		var eoed []rune
 		if eoedl > 0 { // save it
@@ -334,6 +329,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 			copy(eoed, tb.Lines[ed.Ln][ed.Ch:])
 		}
 		tb.Lines = append(tb.Lines[:stln], tb.Lines[ed.Ln+1:]...)
+		fmt.Printf("collapsing stln: %v to %v\n", stln, ed.Ln+1)
 		if eoed != nil {
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
@@ -446,6 +442,7 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 			copy(tbe.Text[ti], tb.Lines[ln])
 		}
 	}
+	fmt.Printf("reg: %v txt:\n%v\n", tbe.Reg, string(tbe.ToBytes()))
 	return tbe
 }
 
