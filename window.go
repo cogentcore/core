@@ -130,6 +130,7 @@ type Window struct {
 	PopupStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
 	NextPopup        ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	PopupFocus       ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
 	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	GotPaint         bool                                    `json:"-" xml:"-" desc:"have we received our first paint event yet?  ignore other window events before this point"`
@@ -591,7 +592,7 @@ func (w *Window) FullReRender() {
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
-			w.FocusNext(w.StartFocus)
+			w.FocusOnOrNext(w.StartFocus)
 		} else {
 			w.FocusNext(w.Focus)
 		}
@@ -906,7 +907,7 @@ mainloop:
 			}
 		}
 		if w.Focus == nil && w.StartFocus != nil {
-			w.FocusNext(w.StartFocus)
+			w.FocusOnOrNext(w.StartFocus)
 		}
 
 		delPop := false                      // if true, delete this popup after event loop
@@ -1704,7 +1705,7 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	return true
 }
 
-// PusPopup pushes current popup onto stack and set new popup.
+// PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
@@ -1716,7 +1717,12 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	if ni != nil {
 		ni.FullRender2DTree()
 	}
-	w.PushFocus(pop)
+	if w.PopupFocus != nil {
+		w.PushFocus(w.PopupFocus)
+		w.PopupFocus = nil
+	} else {
+		w.PushFocus(pop)
+	}
 }
 
 // DisconnectPopup disconnects given popup -- typically the current one.
@@ -2071,7 +2077,7 @@ func (w *Window) PushFocus(p ki.Ki) {
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
 	w.Focus = nil // don't un-focus on prior item when pushing
-	w.FocusNext(p)
+	w.FocusOnOrNext(p)
 }
 
 // PopFocus pops off the focus stack and sets prev to current focus.

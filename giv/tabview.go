@@ -51,6 +51,7 @@ func (tv *TabView) AddTab(widg gi.Node2D, label string) int {
 func (tv *TabView) InsertTab(widg gi.Node2D, label string, idx int) {
 	fr := tv.Frame()
 	tb := tv.Tabs()
+	updt := tv.UpdateStart()
 	fr.InsertChild(widg, idx)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
@@ -61,6 +62,7 @@ func (tv *TabView) InsertTab(widg gi.Node2D, label string, idx int) {
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndex(tabIdx)
 	})
+	tv.UpdateEnd(updt)
 }
 
 // AddNewTab adds a new widget as a new tab of given widget type, with given
@@ -77,6 +79,7 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) (gi.Node2D, int) {
 func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) gi.Node2D {
 	fr := tv.Frame()
 	tb := tv.Tabs()
+	updt := tv.UpdateStart()
 	widg := fr.InsertNewChild(typ, idx, label).(gi.Node2D)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
@@ -87,6 +90,7 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) gi.Node
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndexAction(tabIdx)
 	})
+	tv.UpdateEnd(updt)
 	return widg
 }
 

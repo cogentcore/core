@@ -338,10 +338,14 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
 	frame.SetProps(MenuFrameProps, false)
+	var focus ki.Ki
 	for _, ac := range menu {
-		acn, _ := KiToNode2D(ac)
+		acn, ac := KiToNode2D(ac)
 		if acn != nil {
 			frame.AddChild(acn)
+			if ac.IsSelected() {
+				focus = acn
+			}
 		}
 	}
 	frame.Init2DTree()
@@ -359,7 +363,29 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.UpdateEndNoSig(updt)
 
 	win.NextPopup = pvp.This
+	win.PopupFocus = focus
 	return &pvp
+}
+
+// StringsChooserPopup creates a menu of the strings in the given string
+// slice, and calls the given function on receiver when the user selects --
+// this is the ActionSig signal, coming from the Action for the given menu
+// item -- the name of the Action is the string value, and the data will be
+// the index in the slice.  A string equal to curSel will be marked as
+// selected.  Location is from the ContextMenuPos of recv node.
+func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport2D {
+	var menu Menu
+	for i, it := range strs {
+		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
+		ac.SetSelectedState(it == curSel)
+	}
+	nb := recv.AsNode2D()
+	pos := recv.ContextMenuPos()
+	vp := nb.Viewport
+	if vp == nil {
+		vp = recv.AsViewport2D()
+	}
+	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
