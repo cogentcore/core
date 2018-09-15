@@ -174,3 +174,38 @@ func MapStructElsN(mp interface{}) int {
 	}
 	return n
 }
+
+// MapAdd adds a new blank entry to the map
+func MapAdd(mv interface{}) {
+	mpv := reflect.ValueOf(mv)
+	mpvnp := NonPtrValue(mpv)
+	mvtyp := mpvnp.Type()
+	valtyp := MapValueType(mv)
+	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
+		str := ""
+		valtyp = reflect.TypeOf(str)
+	}
+	nkey := reflect.New(MapKeyType(mv))
+	nval := reflect.New(valtyp)
+	if mpvnp.IsNil() { // make a new map
+		nmp := MakeMap(mvtyp)
+		mpv.Elem().Set(nmp.Elem())
+		mpvnp = NonPtrValue(mpv)
+	}
+	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
+}
+
+// MapDelete deletes a key-value from the map (set key to a zero value)
+func MapDelete(mv interface{}, key interface{}) {
+	mpv := reflect.ValueOf(mv)
+	mpvnp := NonPtrValue(mpv)
+	mpvnp.SetMapIndex(reflect.ValueOf(key), reflect.Value{}) // delete
+}
+
+// MapDeleteValue deletes a key-value from the map (set key to a zero value)
+// -- key is already a reflect.Value
+func MapDeleteValue(mv interface{}, key reflect.Value) {
+	mpv := reflect.ValueOf(mv)
+	mpvnp := NonPtrValue(mpv)
+	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
+}
