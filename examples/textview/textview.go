@@ -5,13 +5,14 @@
 package main
 
 import (
+	"go/token"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
-	"go/token"
 )
 
 func main() {
@@ -58,10 +59,10 @@ func mainrun() {
 	splt := mfr.AddNewChild(gi.KiT_SplitView, "split-view").(*gi.SplitView)
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
-	splt.SetProp("word-wrap", true)
+	splt.SetProp("white-space", gi.WhiteSpacePreWrap)
 	splt.SetProp("tab-size", 4)
 	splt.SetProp("font-family", "Go Mono")
-	splt.SetProp("line-height", 1.2)
+	splt.SetProp("line-height", 1.1)
 
 	// generally need to put text view within its own layout for scrolling
 	txly1 := splt.AddNewChild(gi.KiT_Layout, "view-layout-1").(*gi.Layout)

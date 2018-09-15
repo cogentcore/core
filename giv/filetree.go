@@ -110,7 +110,7 @@ func (fn *FileNode) IsDir() bool {
 
 // IsSymLink returns true if file is a symlink
 func (fn *FileNode) IsSymLink() bool {
-	return bitflag.Has(fn.Flag, int(FileNodeOpen))
+	return bitflag.Has(fn.Flag, int(FileNodeSymLink))
 }
 
 // IsOpen returns true if file is flagged as open
@@ -165,7 +165,7 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 	typ := fn.NodeType()
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
-			emsg := fmt.Sprintf("gide.FileNode ConfigFilesIn Path %q: Error: %v", path, err)
+			emsg := fmt.Sprintf("giv.FileNode ConfigFilesIn Path %q: Error: %v", path, err)
 			log.Println(emsg)
 			return nil // ignore
 		}
@@ -206,7 +206,7 @@ func (fn *FileNode) UpdateNode() error {
 	path := string(fn.FPath)
 	info, err := os.Lstat(path)
 	if err != nil {
-		emsg := fmt.Errorf("gide.FileNode UpdateNode Path %q: Error: %v", path, err)
+		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", path, err)
 		log.Println(emsg)
 		return emsg
 	}
@@ -243,12 +243,15 @@ func (fn *FileNode) CloseDir() {
 	// todo: do anything with open files within directory??
 }
 
-// OpenBuf opens the file in its buffer
+// OpenBuf opens the file in its buffer if it is not already open
 func (fn *FileNode) OpenBuf() error {
 	if fn.IsDir() {
-		err := fmt.Errorf("gide.FileNode cannot open directory in editor: %v", fn.FPath)
+		err := fmt.Errorf("giv.FileNode cannot open directory in editor: %v", fn.FPath)
 		log.Println(err.Error())
 		return err
+	}
+	if fn.Buf != nil {
+		return nil
 	}
 	fn.Buf = &TextBuf{}
 	fn.Buf.InitName(fn.Buf, fn.Nm)

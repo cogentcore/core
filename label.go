@@ -56,7 +56,8 @@ func ToLabel(it interface{}) string {
 // Label is a widget for rendering text labels -- supports full widget model
 // including box rendering, and full HTML styling, including links -- LinkSig
 // emits link with data of URL -- opens default browser if nobody receiving
-// signal.
+// signal.  The default white-space option is 'pre' -- set to 'normal' or
+// other options to get word-wrapping etc.
 type Label struct {
 	WidgetBase
 	Text        string              `xml:"text" desc:"label to display"`
@@ -72,6 +73,7 @@ type Label struct {
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
 var LabelProps = ki.Props{
+	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
 	"vertical-align":   AlignTop,
@@ -122,9 +124,9 @@ func (lb *Label) SetText(txt string) {
 	}
 	lb.Text = txt
 	if lb.Text == "" {
-		lb.Render.SetHTML(" ", &lb.Sty.Font, &lb.Sty.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(" ", &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	} else {
-		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	}
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.AllocSize
@@ -282,20 +284,22 @@ func (lb *Label) GrabCurBgColor() {
 }
 
 func (lb *Label) TextPos() Vec2D {
-	st := &lb.Sty
-	pos := lb.LayData.AllocPos.AddVal(st.BoxSpace())
-	if lb.LayData.AllocSize.X > lb.Render.Size.X {
-		if IsAlignMiddle(st.Layout.AlignH) {
-			pos.X += 0.5 * (lb.LayData.AllocSize.X - lb.Render.Size.X)
-		} else if IsAlignEnd(st.Layout.AlignH) {
-			pos.X += (lb.LayData.AllocSize.X - lb.Render.Size.X)
+	sty := &lb.Sty
+	pos := lb.LayData.AllocPos.AddVal(sty.BoxSpace())
+	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
+		if lb.LayData.AllocSize.X > lb.Render.Size.X {
+			if IsAlignMiddle(sty.Layout.AlignH) {
+				pos.X += 0.5 * (lb.LayData.AllocSize.X - lb.Render.Size.X)
+			} else if IsAlignEnd(sty.Layout.AlignH) {
+				pos.X += (lb.LayData.AllocSize.X - lb.Render.Size.X)
+			}
 		}
-	}
-	if lb.LayData.AllocSize.Y > lb.Render.Size.Y {
-		if IsAlignMiddle(st.Layout.AlignV) {
-			pos.Y += 0.5 * (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
-		} else if IsAlignEnd(st.Layout.AlignV) {
-			pos.Y += (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
+		if lb.LayData.AllocSize.Y > lb.Render.Size.Y {
+			if IsAlignMiddle(sty.Layout.AlignV) {
+				pos.Y += 0.5 * (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
+			} else if IsAlignEnd(sty.Layout.AlignV) {
+				pos.Y += (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
+			}
 		}
 	}
 	return pos
@@ -317,13 +321,13 @@ func (lb *Label) StyleLabel() {
 }
 
 func (lb *Label) LayoutLabel() {
-	lb.Render.SetHTML(lb.Text, &(lb.Sty.Font), &(lb.Sty.UnContext), lb.CSSAgg)
+	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.SizePrefOrMax()
 	if !sz.IsZero() {
 		sz.SetSubVal(2 * spc)
 	}
-	lb.Render.LayoutStdLR(&(lb.Sty.Text), &(lb.Sty.Font), &(lb.Sty.UnContext), sz)
+	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 }
 
 func (lb *Label) Style2D() {
@@ -333,7 +337,7 @@ func (lb *Label) Style2D() {
 }
 
 func (lb *Label) Size2D(iter int) {
-	if iter > 0 && lb.Sty.Text.WordWrap {
+	if iter > 0 && lb.Sty.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
 		lb.InitLayout2D()
@@ -348,9 +352,9 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
-	if lb.Sty.Text.WordWrap {
-		lb.Render.SetHTML(lb.Text, &(lb.Sty.Font), &(lb.Sty.UnContext), lb.CSSAgg)
-		lb.Render.LayoutStdLR(&(lb.Sty.Text), &(lb.Sty.Font), &(lb.Sty.UnContext), sz)
+	if lb.Sty.Text.HasWordWrap() {
+		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
+		lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", lb.Nm, lb.Render.Size.Y, sz.Y)
 			lb.LayData.SetFromStyle(&lb.Sty.Layout)

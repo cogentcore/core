@@ -56,6 +56,7 @@ func mainrun() {
 	 and Sub<sub>script</sub> and Super<sup>script</sup>`
 	title.Text = hdrText
 	// title.Text = "header" // use this to test word wrapping
+	title.SetProp("white-space", gi.WhiteSpaceNormal)
 	title.SetProp("text-align", gi.AlignRight)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
@@ -67,7 +68,7 @@ func mainrun() {
 	rtxt.Text = "this is to test right margin"
 
 	wrlab := mfr.AddNewChild(gi.KiT_Label, "wrlab").(*gi.Label)
-	wrlab.SetProp("word-wrap", true)
+	wrlab.SetProp("white-space", gi.WhiteSpaceNormal)
 	wrlab.SetProp("width", "20em")
 	wrlab.SetProp("max-width", -1)
 	wrlab.SetProp("line-height", 1.2)

@@ -316,7 +316,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	split.Dim = gi.X
 	//	split.Dim = gi.Y
 
-	split.SetProp("word-wrap", true)
+	split.SetProp("white-space", gi.WhiteSpacePreWrap)
 	split.SetProp("tab-size", 4)
 	split.SetProp("font-family", "Go Mono")
 

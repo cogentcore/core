@@ -96,8 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * drag on textview should prevent DND -- dnd not getting "processed"
 
-* label / text needs some way of rendering spaces -- add support for white-space and set the default to pre instead of "normal"!  https://www.w3schools.com/cssref/pr_text_white-space.asp 
-
 * TextView:
     + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases

@@ -90,6 +90,7 @@ type TextView struct {
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
 var TextViewProps = ki.Props{
+	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewValue(3, units.Px),
@@ -325,6 +326,9 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		tv.NLines = 0
 		return tv.ResizeIfNeeded(image.ZP)
 	}
+	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+		tv.StyleTextView()
+	}
 
 	tv.HiInit()
 
@@ -377,7 +381,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	off := float32(0)
 	mxwd := float32(0)
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 		tv.Offs[ln] = off
 		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
@@ -464,7 +468,7 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 				return true
 			}
 			tv.Markup[ln] = htmlBuf.Bytes()
-			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.UnContext, tv.CSS)
+			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		} else {
 			tv.Renders[ln].SetRunes(tv.Buf.Lines[ln], &fst, &sty.UnContext, &sty.Text, true, 0, 1)
 		}
@@ -2177,11 +2181,9 @@ func (tv *TextView) Init2D() {
 	tv.Init2DWidget()
 }
 
-func (tv *TextView) Style2D() {
+func (tv *TextView) StyleTextView() {
 	tv.HiInit()
-	tv.SetCanFocusIfActive()
 	tv.Style2DWidget()
-	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
@@ -2191,6 +2193,12 @@ func (tv *TextView) Style2D() {
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This, true, true) // inherit and get type defaults
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
+}
+
+func (tv *TextView) Style2D() {
+	tv.SetCanFocusIfActive()
+	tv.StyleTextView()
+	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 }
 
 func (tv *TextView) Size2D(iter int) {

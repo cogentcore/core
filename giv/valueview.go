@@ -185,7 +185,7 @@ func ToValueView(it interface{}) ValueView {
 		sz := v.Len()
 		eltyp := kit.SliceElType(it)
 		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !isstru && sz <= SliceInlineLen {
+		if !isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp) {
 			vv := SliceInlineValueView{}
 			vv.Init(&vv)
 			return &vv
