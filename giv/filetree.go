@@ -123,6 +123,14 @@ func (fn *FileNode) SetOpen() {
 	bitflag.Set(&fn.Flag, int(FileNodeOpen))
 }
 
+// IsChanged returns true if the file is open and has been changed (edited) since last save
+func (fn *FileNode) IsChanged() bool {
+	if fn.Buf != nil && fn.Buf.Changed {
+		return true
+	}
+	return false
+}
+
 // ReadDir reads all the files at given directory into this directory node --
 // uses config children to preserve extra info already stored about files. The
 // root node represents the directory at the given path.

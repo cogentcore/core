@@ -53,7 +53,6 @@ type TextView struct {
 	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	HiStyle       HiStyleName               `desc:"syntax highlighting style"`
 	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
-	Edited        bool                      `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
 	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
@@ -177,10 +176,15 @@ func (tv *TextView) EditDone() {
 func (tv *TextView) Revert() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
-	tv.Edited = false
-	tv.LayoutAllLines(false)
-	// todo: signal buffer?
 	tv.SelectReset()
+	tv.Buf.ReOpen()
+}
+
+func (tv *TextView) IsChanged() bool {
+	if tv.Buf != nil && tv.Buf.Changed {
+		return true
+	}
+	return false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,7 +211,6 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 			return
 		}
 		tbe := data.(*TextBufEdit)
-		tv.Edited = tv.Buf.Edited
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
@@ -225,7 +228,6 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 			return
 		}
 		tbe := data.(*TextBufEdit)
-		tv.Edited = tv.Buf.Edited
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LayoutAllLines(false)
 			tv.RenderAllLines()
@@ -2007,7 +2009,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	}
 	switch kf {
 	case gi.KeyFunAccept: // ctrl+enter
-		tv.EditDone()
+		// tv.EditDone()
 		kt.SetProcessed()
 		tv.FocusNext()
 	case gi.KeyFunAbort: // esc
@@ -2253,7 +2255,7 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
 		tv.FocusActive = false
-		tv.EditDone()
+		// tv.EditDone()
 		tv.UpdateSig()
 	case gi.FocusGot:
 		tv.FocusActive = true
@@ -2261,7 +2263,7 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		tv.UpdateSig()
 	case gi.FocusInactive:
 		tv.FocusActive = false
-		tv.EditDone()
+		// tv.EditDone()
 		tv.UpdateSig()
 	case gi.FocusActive:
 		tv.FocusActive = true

@@ -32,7 +32,8 @@ type TextBuf struct {
 	ki.Node
 	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
 	HiLang     string         `desc:"language for syntax highlighting the code"`
-	Edited     bool           `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
+	Changed    bool           `json:"-" xml:"-" desc:"true if the text has been changed (edited) relative to the original, since last save"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Mimetype   string         `json:"-" xml:"-" desc:"mime type of the contents"`
 	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
@@ -77,8 +78,9 @@ const (
 
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
-	if tb.Edited {
-		tb.Edited = false
+	if tb.Changed {
+		tb.AutoSaveDelete()
+		tb.Changed = false
 		tb.LinesToBytes()
 		tb.TextBufSig.Emit(tb.This, int64(TextBufDone), tb.Txt)
 	}
@@ -132,6 +134,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 
 // ReOpen re-opens text from current file, if filename set -- returns false if not
 func (tb *TextBuf) ReOpen() bool {
+	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
 		return false
 	}
@@ -165,6 +168,43 @@ func (tb *TextBuf) Save() error {
 	return tb.SaveAs(tb.Filename)
 }
 
+// AutoSaveFilename returns the autosave filename
+func (tb *TextBuf) AutoSaveFilename() string {
+	path, fn := filepath.Split(string(tb.Filename))
+	if fn == "" {
+		fn = "new_file_" + tb.Nm
+	}
+	asfn := filepath.Join(path, "#"+fn+"#")
+	return asfn
+}
+
+// AutoSave does the autosave -- safe to call in a separate goroutine
+func (tb *TextBuf) AutoSave() error {
+	asfn := tb.AutoSaveFilename()
+	b := tb.LinesToBytesCopy()
+	err := ioutil.WriteFile(asfn, b, 0644)
+	if err != nil {
+		log.Printf("giv.TextBuf: Could not AutoSave file: %v, error: %v\n", asfn, err)
+	}
+	return err
+}
+
+// AutoSaveDelete deletes any existing autosave file
+func (tb *TextBuf) AutoSaveDelete() {
+	asfn := tb.AutoSaveFilename()
+	os.Remove(asfn)
+}
+
+// AutoSaveCheck checks if an autosave file exists -- logic for dealing with
+// it is left to larger app -- call this before opening a file
+func (tb *TextBuf) AutoSaveCheck() bool {
+	asfn := tb.AutoSaveFilename()
+	if _, err := os.Stat(asfn); os.IsNotExist(err) {
+		return false // does not exist
+	}
+	return true
+}
+
 // LinesToBytes converts current Lines back to the Txt slice of bytes
 func (tb *TextBuf) LinesToBytes() {
 	if tb.Txt != nil {
@@ -184,6 +224,18 @@ func (tb *TextBuf) LinesToBytes() {
 		tb.Txt = append(tb.Txt, '\n')
 		bo += len(lr) + 1
 	}
+}
+
+// LinesToBytesCopy converts current Lines into a separate text byte copy --
+// e.g., for autosave or other "offline" uses of the text -- doesn't affect
+// byte offsets etc
+func (tb *TextBuf) LinesToBytesCopy() []byte {
+	b := make([]byte, 0, tb.NLines*40)
+	for _, lr := range tb.Lines {
+		b = append(b, []byte(string(lr))...)
+		b = append(b, '\n')
+	}
+	return b
 }
 
 // BytesToLines converts current Txt bytes into lines, and signals that new text is available
@@ -217,7 +269,7 @@ func (tb *TextBuf) SetMimetype(filename string) {
 	tb.Mimetype = mime.TypeByExtension(ext)
 	if hl, ok := ExtToHiLangMap[ext]; ok {
 		tb.HiLang = hl
-		fmt.Printf("set language to: %v for extension: %v\n", hl, ext)
+		// fmt.Printf("set language to: %v for extension: %v\n", hl, ext)
 	} else if strings.HasSuffix(filename, "Makefile") {
 		tb.HiLang = "Makefile"
 	} else {
@@ -311,7 +363,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 		log.Printf("giv.TextBuf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tb.Edited = true
+	tb.Changed = true
 	tbe := tb.Region(st, ed)
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
@@ -329,7 +381,6 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 			copy(eoed, tb.Lines[ed.Ln][ed.Ch:])
 		}
 		tb.Lines = append(tb.Lines[:stln], tb.Lines[ed.Ln+1:]...)
-		fmt.Printf("collapsing stln: %v to %v\n", stln, ed.Ln+1)
 		if eoed != nil {
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
@@ -337,6 +388,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 		tb.LinesToBytes()
 	}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
 	if saveUndo {
 		tb.SaveUndo(tbe)
 	}
@@ -352,7 +406,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	if len(tb.Lines) == 0 {
 		tb.New(1)
 	}
-	tb.Edited = true
+	tb.Changed = true
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := []rune(string(lns[0]))
@@ -396,6 +450,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	}
 	tbe := tb.Region(st, ed)
 	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
 	if saveUndo {
 		tb.SaveUndo(tbe)
 	}
@@ -442,13 +499,14 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 			copy(tbe.Text[ti], tb.Lines[ln])
 		}
 	}
-	fmt.Printf("reg: %v txt:\n%v\n", tbe.Reg, string(tbe.ToBytes()))
 	return tbe
 }
 
 // Undo undoes next item on the undo stack, and returns that record -- nil if no more
 func (tb *TextBuf) Undo() *TextBufEdit {
 	if tb.UndoPos == 0 {
+		tb.Changed = false // should be!
+		tb.AutoSaveDelete()
 		return nil
 	}
 	tb.UndoPos--
