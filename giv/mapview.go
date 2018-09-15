@@ -297,22 +297,8 @@ func (mv *MapView) MapAdd() {
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := kit.NonPtrValue(mpv)
-	mvtyp := mpvnp.Type()
-	valtyp := kit.MapValueType(mv.Map)
-	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		str := ""
-		valtyp = reflect.TypeOf(str)
-	}
-	nkey := reflect.New(kit.MapKeyType(mv.Map))
-	nval := reflect.New(valtyp)
-	if mpvnp.IsNil() { // make a new map
-		nmp := kit.MakeMap(mvtyp)
-		mpv.Elem().Set(nmp.Elem())
-		mpvnp = kit.NonPtrValue(mpv)
-	}
-	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
+	kit.MapAdd(mv.Map)
+
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
@@ -328,9 +314,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := kit.NonPtrValue(mpv)
-	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
+	kit.MapDeleteValue(mv.Map, key)
+
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}

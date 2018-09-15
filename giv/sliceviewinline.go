@@ -74,9 +74,9 @@ func (sv *SliceViewInline) ConfigParts() {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray {
-		config.Add(gi.KiT_Action, "AddAction")
+		config.Add(gi.KiT_Action, "add-action")
 	}
-	config.Add(gi.KiT_Action, "EditAction")
+	config.Add(gi.KiT_Action, "edit-action")
 	mods, updt := sv.Parts.ConfigChildren(config, false)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
@@ -169,9 +169,7 @@ func (sv *SliceViewInline) UpdateValues() {
 }
 
 func (sv *SliceViewInline) Style2D() {
-	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-		sv.UpdateFromSlice()
-	}
+	sv.ConfigParts()
 	sv.PartsWidgetBase.Style2D()
 }
 

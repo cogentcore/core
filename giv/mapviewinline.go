@@ -21,6 +21,7 @@ import (
 type MapViewInline struct {
 	gi.PartsWidgetBase
 	Map     interface{} `desc:"the map that we are a view onto"`
+	Changed bool        `desc:"has the map been edited?"`
 	Keys    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -85,6 +86,7 @@ func (mv *MapViewInline) ConfigParts() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
+	config.Add(gi.KiT_Action, "add-action")
 	config.Add(gi.KiT_Action, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config, false)
 	if !mods {
@@ -94,13 +96,23 @@ func (mv *MapViewInline) ConfigParts() {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
-			mvv.ViewSig.Emit(mvv.This, 0, nil)
+			mvv.SetChanged()
 		})
 		keyw := mv.Parts.KnownChild(i * 2).(gi.Node2D)
 		widg := mv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
+	}
+	adack, ok := mv.Parts.Children().ElemFromEnd(1)
+	if ok {
+		adac := adack.(*gi.Action)
+		adac.SetIcon("plus")
+		adac.Tooltip = "add an entry to the map"
+		adac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
+			mvv.MapAdd()
+		})
 	}
 	edack, ok := mv.Parts.Children().ElemFromEnd(0)
 	if ok {
@@ -128,6 +140,33 @@ func (mv *MapViewInline) ConfigParts() {
 	mv.Parts.UpdateEnd(updt)
 }
 
+// SetChanged sets the Changed flag and emits the ViewSig signal for the
+// SliceView, indicating that some kind of edit / change has taken place to
+// the table data.  It isn't really practical to record all the different
+// types of changes, so this is just generic.
+func (mv *MapViewInline) SetChanged() {
+	mv.Changed = true
+	mv.ViewSig.Emit(mv.This, 0, nil)
+}
+
+// MapAdd adds a new entry to the map
+func (mv *MapViewInline) MapAdd() {
+	if kit.IfaceIsNil(mv.Map) {
+		return
+	}
+	updt := mv.UpdateStart()
+	defer mv.UpdateEnd(updt)
+
+	kit.MapAdd(mv.Map)
+
+	if mv.TmpSave != nil {
+		mv.TmpSave.SaveTmp()
+	}
+	mv.SetChanged()
+	mv.SetFullReRender()
+	mv.UpdateFromMap()
+}
+
 func (mv *MapViewInline) UpdateFromMap() {
 	mv.ConfigParts()
 }
@@ -139,7 +178,7 @@ func (mv *MapViewInline) UpdateValues() {
 
 func (mv *MapViewInline) Style2D() {
 	mv.ConfigParts()
-	mv.WidgetBase.Style2D()
+	mv.PartsWidgetBase.Style2D()
 }
 
 func (mv *MapViewInline) Render2D() {

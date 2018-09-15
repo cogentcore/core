@@ -96,10 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * drag on textview should prevent DND -- dnd not getting "processed"
 
-* All valueview *Name guys need a 1em min height / 1ch min width in case empty
-
-* inline / reg slice updating needs better coordination between two, as in map.  also map may be doing too many!   could add + to inline map too, and show both inline guys for 0 elements.
-
 * label / text needs some way of rendering spaces -- add support for white-space and set the default to pre instead of "normal"!  https://www.w3schools.com/cssref/pr_text_white-space.asp 
 
 * TextView:
