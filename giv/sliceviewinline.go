@@ -59,7 +59,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 
-	sz := mvnp.Len()
+	sz := gi.MinInt(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())

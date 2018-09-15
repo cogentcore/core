@@ -256,7 +256,9 @@ var DialogProps = ki.Props{
 		"background-color": "none",
 	},
 	"#prompt": ki.Props{
-		"max-width":        units.NewValue(-1, units.Px),
+		"white-space":      WhiteSpaceNormal, // wrap etc
+		"max-width":        -1,
+		"width":            units.NewValue(30, units.Ch),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
@@ -305,8 +307,6 @@ func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	if frame != nil {
 		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
 		lab.Text = prompt
-		lab.SetProp("width", units.NewValue(30, units.Ch))
-		lab.SetProp("max-width", -1)
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}

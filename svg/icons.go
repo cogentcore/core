@@ -67,7 +67,7 @@ func (ic *Icon) Init2D() {
 }
 
 func (ic *Icon) Size2D(iter int) {
-	ic.Viewport.Size2D(iter)
+	ic.Viewport2D.Size2D(iter)
 }
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {

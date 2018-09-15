@@ -63,7 +63,10 @@ func (mv *MapViewInline) ConfigParts() {
 	sort.Slice(keys, func(i, j int) bool {
 		return kit.ToString(keys[i]) < kit.ToString(keys[j])
 	})
-	for _, key := range keys {
+	for i, key := range keys {
+		if i >= MapInlineLen {
+			break
+		}
 		kv := ToValueView(key.Interface())
 		if kv == nil { // shouldn't happen
 			continue
