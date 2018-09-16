@@ -907,8 +907,12 @@ func (tv *TextView) ISearch() {
 					tv.ISearchPos = 0
 				}
 				pos := tv.ISearchMatches[tv.ISearchPos]
+				tv.SelectReg.Start = pos
+				tv.SelectReg.End = tv.SelectReg.Start
+				tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
 				tv.SetCursor(pos)
 				tv.ScrollCursorToCenterIfHidden()
+				tv.RenderSelectLines()
 				tv.ISearchSig()
 			}
 		} else { // restore prev
@@ -952,8 +956,12 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 	for i, pos := range tv.ISearchMatches {
 		if pos.Ln >= tv.CursorPos.Ln {
 			tv.ISearchPos = i
+			tv.SelectReg.Start = pos
+			tv.SelectReg.End = tv.SelectReg.Start
+			tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
 			tv.SetCursor(pos)
 			tv.ScrollCursorToCenterIfHidden()
+			tv.RenderSelectLines()
 			tv.ISearchSig()
 			got = true
 			break
@@ -962,8 +970,12 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 	if !got {
 		tv.ISearchPos = 0
 		pos := tv.ISearchMatches[0]
+		tv.SelectReg.Start = pos
+		tv.SelectReg.End = tv.SelectReg.Start
+		tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
 		tv.SetCursor(pos)
 		tv.ScrollCursorToCenterIfHidden()
+		tv.RenderSelectLines()
 		tv.ISearchSig()
 	}
 }
