@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextViewStates_name = "TextViewActiveTextViewFocusTextViewInactiveTextViewSelTextViewStatesN"
+const _TextViewStates_name = "TextViewActiveTextViewFocusTextViewInactiveTextViewSelTextViewHighlightTextViewStatesN"
 
-var _TextViewStates_index = [...]uint8{0, 14, 27, 43, 54, 69}
+var _TextViewStates_index = [...]uint8{0, 14, 27, 43, 54, 71, 86}
 
 func (i TextViewStates) String() string {
 	if i < 0 || i >= TextViewStates(len(_TextViewStates_index)-1) {

@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextViewSignals_name = "TextViewDoneTextViewSelectedTextViewCursorMovedTextViewSignalsN"
+const _TextViewSignals_name = "TextViewDoneTextViewSelectedTextViewCursorMovedTextViewISearchTextViewSignalsN"
 
-var _TextViewSignals_index = [...]uint8{0, 12, 28, 47, 63}
+var _TextViewSignals_index = [...]uint8{0, 12, 28, 47, 62, 78}
 
 func (i TextViewSignals) String() string {
 	if i < 0 || i >= TextViewSignals(len(_TextViewSignals_index)-1) {

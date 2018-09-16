@@ -68,12 +68,13 @@ type TextView struct {
 	CursorCol         int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
 	SelectReg         TextRegion                `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg     TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	Highlights        []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
 	SelectMode        bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 	ISearchMode       bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
 	ISearchString     string                    `json:"-" xml:"-" desc:"current interactive search string"`
 	ISearchCase       bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	ISearchMatches    []TextPos                 `json:"-" xml:"-" desc:"current i-search matches"`
-	ISearchPos        int                       `json:"-" xml:"-" desc:"position within isearch matches"`
+	SearchMatches     []TextPos                 `json:"-" xml:"-" desc:"current search matches"`
+	SearchPos         int                       `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
 	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
 	TextViewSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
@@ -121,6 +122,9 @@ var TextViewProps = ki.Props{
 	TextViewSelectors[TextViewSel]: ki.Props{
 		"background-color": &gi.Prefs.Colors.Select,
 	},
+	TextViewSelectors[TextViewHighlight]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Highlight,
+	},
 }
 
 // TextViewSignals are signals that text view can send
@@ -158,8 +162,11 @@ const (
 	// inactive -- not editable
 	TextViewInactive
 
-	// selected -- for inactive state, can select entire element
+	// selected
 	TextViewSel
+
+	// highlighted
+	TextViewHighlight
 
 	TextViewStatesN
 )
@@ -167,7 +174,7 @@ const (
 //go:generate stringer -type=TextViewStates
 
 // Style selector names for the different states
-var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected"}
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TextView) Label() string {
@@ -185,10 +192,8 @@ func (tv *TextView) EditDone() {
 
 // Refresh re-displays everything anew from the buffer
 func (tv *TextView) Refresh() {
-	tv.SelectReset()
 	tv.LayoutAllLines(false)
-	tv.SetFullReRender()
-	tv.UpdateSig()
+	tv.RenderAllLines()
 }
 
 func (tv *TextView) IsChanged() bool {
@@ -205,7 +210,11 @@ func (tv *TextView) IsChanged() bool {
 func (tv *TextView) SetBuf(buf *TextBuf) {
 	tv.Buf = buf
 	buf.AddView(tv)
-	tv.Refresh()
+	tv.SelectReset()
+	tv.Highlights = nil
+	tv.LayoutAllLines(false)
+	tv.SetFullReRender()
+	tv.UpdateSig()
 }
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
@@ -386,7 +395,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	}
 
 	tv.VisSizes()
-	sz := tv.RenderSize()
+	sz := tv.RenderSz
 	// fmt.Printf("rendersize: %v\n", sz)
 	sty := &tv.Sty
 	fst := sty.Font
@@ -880,18 +889,42 @@ func (tv *TextView) Redo() {
 ///////////////////////////////////////////////////////////////////////////////
 //    Search / Find
 
+// FindMatches finds the matches with given search string (literal, not regex)
+// and case sensitivity, updates highlights for all.  returns false if none
+// found
+func (tv *TextView) FindMatches(find string, useCase bool) bool {
+	fsz := len(find)
+	if fsz == 0 {
+		tv.Highlights = nil
+		return false
+	}
+	if useCase {
+		_, tv.SearchMatches = tv.Buf.Search(find)
+	} else {
+		_, tv.SearchMatches = tv.Buf.SearchCI(find)
+	}
+	matches := tv.SearchMatches
+	if len(matches) == 0 {
+		tv.Highlights = nil
+		return false
+	}
+	hi := make([]TextRegion, len(matches))
+	for i, m := range matches {
+		hi[i] = NewTextRegionLen(m, fsz)
+	}
+	tv.Highlights = hi
+	tv.Refresh()
+	return true
+}
+
+// ISearchMatches finds ISearch matches -- returns true if there are any
+func (tv *TextView) ISearchMatches() bool {
+	return tv.FindMatches(tv.ISearchString, tv.ISearchCase)
+}
+
 // ISearchSig sends the signal that ISearch is updated
 func (tv *TextView) ISearchSig() {
 	tv.TextViewSig.Emit(tv.This, int64(TextViewISearch), tv.CursorPos)
-}
-
-// ISearchFindMatches finds the matches with current search string
-func (tv *TextView) ISearchFindMatches() {
-	if tv.ISearchCase {
-		_, tv.ISearchMatches = tv.Buf.Search(tv.ISearchString)
-	} else {
-		_, tv.ISearchMatches = tv.Buf.SearchCI(tv.ISearchString)
-	}
 }
 
 // ISearch is an emacs-style interactive search mode -- this is called when
@@ -899,17 +932,15 @@ func (tv *TextView) ISearchFindMatches() {
 func (tv *TextView) ISearch() {
 	if tv.ISearchMode {
 		if tv.ISearchString != "" { // already searching -- find next
-			sz := len(tv.ISearchMatches)
+			sz := len(tv.SearchMatches)
 			if sz > 0 {
-				if tv.ISearchPos < sz-1 {
-					tv.ISearchPos++
+				if tv.SearchPos < sz-1 {
+					tv.SearchPos++
 				} else {
-					tv.ISearchPos = 0
+					tv.SearchPos = 0
 				}
-				pos := tv.ISearchMatches[tv.ISearchPos]
-				tv.SelectReg.Start = pos
-				tv.SelectReg.End = tv.SelectReg.Start
-				tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
+				pos := tv.SearchMatches[tv.SearchPos]
+				tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
 				tv.SetCursor(pos)
 				tv.ScrollCursorToCenterIfHidden()
 				tv.RenderSelectLines()
@@ -920,8 +951,8 @@ func (tv *TextView) ISearch() {
 				tv.ISearchString = tv.PrevISearchString
 				tv.ISearchCase = tv.PrevISearchCase
 				tv.PrevISearchString = "" // prevents future resets
-				tv.ISearchPos = -1
-				tv.ISearchFindMatches()
+				tv.SearchPos = -1
+				tv.ISearchMatches()
 				tv.ISearch()
 			}
 			// nothing..
@@ -929,8 +960,8 @@ func (tv *TextView) ISearch() {
 	} else {
 		tv.ISearchMode = true
 		tv.ISearchCase = false
-		tv.ISearchMatches = nil
-		tv.ISearchPos = -1
+		tv.SearchMatches = nil
+		tv.SearchPos = -1
 		tv.ISearchSig()
 	}
 }
@@ -945,20 +976,18 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 		tv.ISearchCase = true
 	}
 	tv.ISearchString += string(r)
-	tv.ISearchFindMatches()
-	sz := len(tv.ISearchMatches)
+	tv.ISearchMatches()
+	sz := len(tv.SearchMatches)
 	if sz == 0 {
-		tv.ISearchPos = -1
+		tv.SearchPos = -1
 		tv.ISearchSig()
 		return
 	}
 	got := false
-	for i, pos := range tv.ISearchMatches {
+	for i, pos := range tv.SearchMatches {
 		if pos.Ln >= tv.CursorPos.Ln {
-			tv.ISearchPos = i
-			tv.SelectReg.Start = pos
-			tv.SelectReg.End = tv.SelectReg.Start
-			tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
+			tv.SearchPos = i
+			tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
 			tv.SetCursor(pos)
 			tv.ScrollCursorToCenterIfHidden()
 			tv.RenderSelectLines()
@@ -968,11 +997,9 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 		}
 	}
 	if !got {
-		tv.ISearchPos = 0
-		pos := tv.ISearchMatches[0]
-		tv.SelectReg.Start = pos
-		tv.SelectReg.End = tv.SelectReg.Start
-		tv.SelectReg.End.Ch += len(tv.ISearchString) // todo: select all!
+		tv.SearchPos = 0
+		pos := tv.SearchMatches[0]
+		tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
 		tv.SetCursor(pos)
 		tv.ScrollCursorToCenterIfHidden()
 		tv.RenderSelectLines()
@@ -984,8 +1011,8 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 func (tv *TextView) ISearchBackspace() {
 	if tv.ISearchString == tv.PrevISearchString { // undo starting point
 		tv.ISearchString = ""
-		tv.ISearchMatches = nil
-		tv.ISearchPos = -1
+		tv.SearchMatches = nil
+		tv.SearchPos = -1
 		tv.ISearchSig()
 	}
 	if len(tv.ISearchString) <= 1 {
@@ -994,17 +1021,17 @@ func (tv *TextView) ISearchBackspace() {
 		return
 	}
 	tv.ISearchString = tv.ISearchString[:len(tv.ISearchString)-1]
-	tv.ISearchFindMatches()
-	sz := len(tv.ISearchMatches)
+	tv.ISearchMatches()
+	sz := len(tv.SearchMatches)
 	if sz == 0 {
-		tv.ISearchPos = -1
+		tv.SearchPos = -1
 		tv.ISearchSig()
 		return
 	}
 	got := false
-	for i, pos := range tv.ISearchMatches {
+	for i, pos := range tv.SearchMatches {
 		if pos.Ln >= tv.CursorPos.Ln {
-			tv.ISearchPos = i
+			tv.SearchPos = i
 			tv.SetCursor(pos)
 			tv.ScrollCursorToCenterIfHidden()
 			tv.ISearchSig()
@@ -1013,8 +1040,8 @@ func (tv *TextView) ISearchBackspace() {
 		}
 	}
 	if !got {
-		tv.ISearchPos = 0
-		pos := tv.ISearchMatches[0]
+		tv.SearchPos = 0
+		pos := tv.SearchMatches[0]
 		tv.SetCursor(pos)
 		tv.ScrollCursorToCenterIfHidden()
 		tv.ISearchSig()
@@ -1031,8 +1058,10 @@ func (tv *TextView) ISearchCancel() {
 	tv.ISearchString = ""
 	tv.ISearchCase = false
 	tv.ISearchMode = false
-	tv.ISearchPos = -1
-	tv.ISearchMatches = nil
+	tv.SearchPos = -1
+	tv.SearchMatches = nil
+	tv.Highlights = nil
+	tv.Refresh()
 	tv.ISearchSig()
 }
 
@@ -1673,22 +1702,43 @@ func (tv *TextView) CursorSprite() *gi.Viewport2D {
 	return sp
 }
 
-// RenderSelect renders the selection region as a highlighted background color
+// RenderSelect renders the selection region as a selected background color
 // -- always called within context of outer RenderLines or RenderAllLines
 func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
-	rs := &tv.Viewport.Render
-	pc := &rs.Paint
-	sty := &tv.StateStyles[TextViewSel]
-	spc := sty.BoxSpace()
+	tv.RenderRegionBox(tv.SelectReg, TextViewSel)
+}
 
-	st := tv.SelectReg.Start
-	ed := tv.SelectReg.End
-	ed.Ch-- // end is exclusive
+// RenderHighlights renders the highlight regions as a highlighted background
+// color -- always called within context of outer RenderLines or
+// RenderAllLines
+func (tv *TextView) RenderHighlights(stln, edln int) {
+	for _, reg := range tv.Highlights {
+		if stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln) {
+			continue
+		}
+		tv.RenderRegionBox(reg, TextViewHighlight)
+	}
+}
+
+// RenderRegionBox renders a region in background color according to given state style
+func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
+	st := reg.Start
+	ed := reg.End
 	spos := tv.CharStartPos(st)
 	epos := tv.CharEndPos(ed)
+	if int(math32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(math32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+		return
+	}
+
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	sty := &tv.StateStyles[state]
+	spc := sty.BoxSpace()
+
+	ed.Ch-- // end is exclusive
 	rst := tv.RenderStartPos()
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
@@ -1754,6 +1804,9 @@ func (tv *TextView) RenderStartPos() gi.Vec2D {
 
 // VisSizes computes the visible size of view given current parameters
 func (tv *TextView) VisSizes() {
+	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+		tv.StyleTextView()
+	}
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	sty.Font.OpenFont(&sty.UnContext)
@@ -1773,42 +1826,55 @@ func (tv *TextView) VisSizes() {
 	} else {
 		tv.LineNoOff = 0
 	}
+	tv.RenderSize()
 }
 
-// RenderAllLines displays all the visible lines on the screen -- called
-// during standard render
+// RenderAllLines displays all the visible lines on the screen -- this is
+// called outside of update process and has its own bounds check and updating
 func (tv *TextView) RenderAllLines() {
 	if tv.PushBounds() {
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
-
-		sty := &tv.Sty
-		sty.Font.OpenFont(&sty.UnContext)
-		tv.VisSizes()
-		tv.RenderStdBox(sty)
-		tv.RenderLineNosBoxAll()
-		tv.RenderSelect()
-		rs := &tv.Viewport.Render
-		pos := tv.RenderStartPos()
-		for ln := 0; ln < tv.NLines; ln++ {
-			lst := pos.Y + tv.Offs[ln]
-			led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-			if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
-				continue
-			}
-			if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
-				continue
-			}
-			lp := pos
-			lp.Y = lst
-			lp.X += tv.LineNoOff
-			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-			tv.RenderLineNo(ln)
-		}
-
+		tv.RenderAllLinesInBounds()
 		tv.PopBounds()
 		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
 		vp.Win.UpdateEnd(updt)
+	}
+}
+
+// RenderAllLinesInBounds displays all the visible lines on the screen --
+// after PushBounds has already been called
+func (tv *TextView) RenderAllLinesInBounds() {
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	sty := &tv.Sty
+	tv.VisSizes()
+	if tv.NLines == 0 {
+		pos := tv.RenderStartPos()
+		pos.X += tv.LineNoOff
+		sz := tv.RenderSz
+		pc.FillBox(rs, pos, sz, &sty.Font.BgColor)
+	} else {
+		tv.RenderStdBox(sty)
+	}
+	tv.RenderLineNosBoxAll()
+	tv.RenderHighlights(-1, -1) // all
+	tv.RenderSelect()
+	pos := tv.RenderStartPos()
+	for ln := 0; ln < tv.NLines; ln++ {
+		lst := pos.Y + tv.Offs[ln]
+		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
+		lp := pos
+		lp.Y = lst
+		lp.X += tv.LineNoOff
+		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+		tv.RenderLineNo(ln)
 	}
 }
 
@@ -1908,6 +1974,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
+			tv.RenderHighlights(st, ed)
 			tv.RenderSelect()
 			tv.RenderLineNosBox(st, ed)
 
@@ -2309,14 +2376,8 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
-			if tv.IsInactive() {
-				tv.SetSelectedState(!tv.IsSelected())
-				tv.EmitSelectedSignal()
-				tv.UpdateSig()
-			} else {
-				pt := tv.PointToRelPos(me.Pos())
-				tv.SetCursorFromPixel(pt, me.SelectMode())
-			}
+			pt := tv.PointToRelPos(me.Pos())
+			tv.SetCursorFromPixel(pt, me.SelectMode())
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
 			// if tv.HasSelection() {
@@ -2440,6 +2501,12 @@ func (tv *TextView) Render2D() {
 	if tv.FullReRenderIfNeeded() {
 		return
 	}
+	tv.VisSizes()
+	if tv.NLines == 0 {
+		sz := tv.RenderSz.ToPointCeil()
+		tv.VpBBox.Max = tv.VpBBox.Min.Add(sz)
+		tv.WinBBox.Max = tv.WinBBox.Min.Add(sz)
+	}
 	if tv.PushBounds() {
 		tv.TextViewEvents()
 		if tv.IsInactive() {
@@ -2448,6 +2515,8 @@ func (tv *TextView) Render2D() {
 			} else {
 				tv.Sty = tv.StateStyles[TextViewInactive]
 			}
+		} else if tv.NLines == 0 {
+			tv.Sty = tv.StateStyles[TextViewInactive]
 		} else if tv.HasFocus() {
 			if tv.FocusActive {
 				tv.Sty = tv.StateStyles[TextViewFocus]
@@ -2459,7 +2528,7 @@ func (tv *TextView) Render2D() {
 		} else {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
-		tv.RenderAllLines()
+		tv.RenderAllLinesInBounds()
 		if tv.HasFocus() && tv.FocusActive {
 			tv.StartCursor()
 		} else {

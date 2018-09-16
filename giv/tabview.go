@@ -38,6 +38,15 @@ var TabViewProps = ki.Props{
 	"height":           units.NewValue(10, units.Em),
 }
 
+// NTabs returns number of tabs
+func (tv *TabView) NTabs() int {
+	fr := tv.Frame()
+	if fr == nil {
+		return 0
+	}
+	return len(fr.Kids)
+}
+
 // AddTab adds a widget as a new tab, with given tab label, and returns the
 // index of that tab
 func (tv *TabView) AddTab(widg gi.Node2D, label string) int {
@@ -221,6 +230,9 @@ func (tv *TabView) InitTabView() {
 	if len(tv.Kids) == 2 {
 		return
 	}
+	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+		tv.StyleLayout()
+	}
 	updt := tv.UpdateStart()
 	tv.Lay = gi.LayoutVert
 
@@ -229,6 +241,7 @@ func (tv *TabView) InitTabView() {
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
+	tabs.SetProp("height", units.NewValue(1.8, units.Em))
 	tabs.SetProp("overflow", "hidden") // no scrollbars!
 	tabs.SetProp("padding", units.NewValue(0, units.Px))
 	tabs.SetProp("margin", units.NewValue(0, units.Px))
@@ -275,6 +288,11 @@ func (tv *TabView) RenumberTabs() {
 		tb := tbk.Embed(KiT_TabButton).(*TabButton)
 		tb.Data = idx
 	}
+}
+
+func (tv *TabView) Style2D() {
+	tv.InitTabView()
+	tv.Layout.Style2D()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

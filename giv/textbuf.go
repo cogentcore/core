@@ -94,18 +94,19 @@ func (tb *TextBuf) Text() []byte {
 	return tb.Txt
 }
 
+// Refresh signals any views to refresh views
+func (tb *TextBuf) Refresh() {
+	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
+}
+
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
 // internally just use lf = \n
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
-	if cap(tb.Lines) >= nlines {
-		tb.Lines = tb.Lines[:nlines]
-	} else {
-		tb.Lines = make([][]rune, nlines)
-		if nlines == 1 {
-			tb.Lines[0] = []rune("")
-		}
+	tb.Lines = make([][]rune, nlines)
+	if nlines == 1 {
+		tb.Lines[0] = []rune("")
 	}
 	if cap(tb.ByteOffs) >= nlines {
 		tb.ByteOffs = tb.ByteOffs[:nlines]
@@ -113,6 +114,7 @@ func (tb *TextBuf) New(nlines int) {
 		tb.ByteOffs = make([]int, nlines)
 	}
 	tb.NLines = nlines
+	tb.Refresh()
 }
 
 // Open loads text from a file into the buffer
@@ -365,6 +367,16 @@ func (tp *TextPos) IsLess(cmp TextPos) bool {
 type TextRegion struct {
 	Start TextPos
 	End   TextPos
+}
+
+// NewTextRegionLen makes a new TextRegion from a starting point and a length
+// along same line
+func NewTextRegionLen(start TextPos, len int) TextRegion {
+	reg := TextRegion{}
+	reg.Start = start
+	reg.End = start
+	reg.End.Ch += len
+	return reg
 }
 
 var TextRegionZero = TextRegion{}
