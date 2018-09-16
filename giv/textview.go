@@ -172,12 +172,12 @@ func (tv *TextView) EditDone() {
 	tv.ClearSelected()
 }
 
-// Revert aborts editing and reverts to last saved text
-func (tv *TextView) Revert() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
+// Refresh re-displays everything anew from the buffer
+func (tv *TextView) Refresh() {
 	tv.SelectReset()
-	tv.Buf.ReOpen()
+	tv.LayoutAllLines(false)
+	tv.SetFullReRender()
+	tv.UpdateSig()
 }
 
 func (tv *TextView) IsChanged() bool {
@@ -194,7 +194,7 @@ func (tv *TextView) IsChanged() bool {
 func (tv *TextView) SetBuf(buf *TextBuf) {
 	tv.Buf = buf
 	buf.AddView(tv)
-	tv.Revert()
+	tv.Refresh()
 }
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
@@ -2012,10 +2012,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		// tv.EditDone()
 		kt.SetProcessed()
 		tv.FocusNext()
-	case gi.KeyFunAbort: // esc
-		tv.Revert()
+	case gi.KeyFunAbort: // esc -- maybe for searching?
 		kt.SetProcessed()
-		tv.FocusNext()
 	case gi.KeyFunBackspace:
 		kt.SetProcessed()
 		tv.CursorBackspace(1)

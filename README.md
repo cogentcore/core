@@ -97,13 +97,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * drag on textview should prevent DND -- dnd not getting "processed"
 
 * TextView:
+	+ basic interactive-search Ctrl+s
     + draw bg at least even when empty -- blank proj should look like something is there
 	+ losing line numbers when typing new text, in some select cases
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
-	+ can lose focusactive and not get it back despite being able to type -- reactivate on key input?  should be happening already but maybe missing.
-	+ command keys in keyfuns (C-x, C-c, M-x), sequences, etc
 	+ clipboard history
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 
@@ -133,10 +132,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..
-
-* tab widget basic fix, and integrate with tree view editor? Popups show up in
-  a separate tab? ultimately want multi-row super-tabs -- flow layout..  with
-  dnd..
 
 * update widgets README
 

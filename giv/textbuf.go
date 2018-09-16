@@ -266,6 +266,7 @@ func (tb *TextBuf) AddView(vw *TextView) {
 func (tb *TextBuf) SetMimetype(filename string) {
 	// todo: use chroma too
 	ext := strings.ToLower(filepath.Ext(filename))
+	strings.TrimSuffix(ext, "#") // autosave
 	tb.Mimetype = mime.TypeByExtension(ext)
 	if hl, ok := ExtToHiLangMap[ext]; ok {
 		tb.HiLang = hl

@@ -1264,6 +1264,10 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 			if eidx > 0 {
 				ftag = string(str[bidx+1 : bidx+1+eidx])
 				bidx += eidx + 2
+			} else { // get past <
+				curf := fstack[len(fstack)-1]
+				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+				bidx++
 			}
 		}
 		if ftag != "" {
@@ -1390,7 +1394,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 			tmpbuf := tmpbuf[0:0]
 			didNl := false
 		aggloop:
-			for bidx = bidx; bidx < sz; bidx++ {
+			for ; bidx < sz; bidx++ {
 				nb := str[bidx] // re-gets cb so it can be processed here..
 				switch nb {
 				case '<':
