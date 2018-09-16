@@ -47,35 +47,42 @@ type TextViewOpts struct {
 // works on in-memory strings.
 type TextView struct {
 	gi.WidgetBase
-	Buf           *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Opts          TextViewOpts              `desc:"options for how text editing / viewing works"`
-	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	HiStyle       HiStyleName               `desc:"syntax highlighting style"`
-	HiCSS         gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
-	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
-	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Markup        [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs    int                       `json:"-" xml:"-" number of line number digits needed"`
-	LineNoOff     float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender  gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize     image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol     int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	SelectReg     TextRegion                `xml:"-" desc:"current selection region"`
-	PrevSelectReg TextRegion                `xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	SelectMode    bool                      `xml:"-" desc:"if true, select text as cursor moves"`
-	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Buf               *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder       string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Opts              TextViewOpts              `desc:"options for how text editing / viewing works"`
+	CursorWidth       units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	HiStyle           HiStyleName               `desc:"syntax highlighting style"`
+	HiCSS             gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
+	LineIcons         map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+	FocusActive       bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines            int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Markup            [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	Renders           []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs              []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs        int                       `json:"-" xml:"-" number of line number digits needed"`
+	LineNoOff         float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender      gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
+	LinesSize         image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz          gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos         TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol         int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	SelectReg         TextRegion                `json:"-" xml:"-" desc:"current selection region"`
+	PrevSelectReg     TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	SelectMode        bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ISearchMode       bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	ISearchString     string                    `json:"-" xml:"-" desc:"current interactive search string"`
+	ISearchCase       bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	ISearchMatches    []TextPos                 `json:"-" xml:"-" desc:"current i-search matches"`
+	ISearchPos        int                       `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
+	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	TextViewSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	StateStyles       [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight        float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight        float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize           image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn           bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete          *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	// chroma highlighting
 	lastHiLang   string
 	lastHiStyle  HiStyleName
@@ -126,8 +133,12 @@ const (
 	// some text was selected (for Inactive state, selection is via WidgetSig)
 	TextViewSelected
 
-	// cursor moved
+	// cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos
 	TextViewCursorMoved
+
+	// ISearch emitted for every update of interactive search process -- see
+	// ISearch* members for current state
+	TextViewISearch
 
 	TextViewSignalsN
 )
@@ -748,9 +759,9 @@ func (tv *TextView) CursorStartLine() {
 	tv.CursorSelect(org)
 }
 
-// CursorStart moves the cursor to the start of the text, updating selection
+// CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
-func (tv *TextView) CursorStart() {
+func (tv *TextView) CursorStartDoc() {
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
 	tv.CursorPos.Ch = 0
@@ -779,9 +790,9 @@ func (tv *TextView) CursorEndLine() {
 	tv.CursorSelect(org)
 }
 
-// CursorEnd moves the cursor to the end of the text, updating selection if
+// CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
-func (tv *TextView) CursorEnd() {
+func (tv *TextView) CursorEndDoc() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 	org := tv.CursorPos
@@ -864,6 +875,163 @@ func (tv *TextView) Redo() {
 	}
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Search / Find
+
+// ISearchSig sends the signal that ISearch is updated
+func (tv *TextView) ISearchSig() {
+	tv.TextViewSig.Emit(tv.This, int64(TextViewISearch), tv.CursorPos)
+}
+
+// ISearchFindMatches finds the matches with current search string
+func (tv *TextView) ISearchFindMatches() {
+	if tv.ISearchCase {
+		_, tv.ISearchMatches = tv.Buf.Search(tv.ISearchString)
+	} else {
+		_, tv.ISearchMatches = tv.Buf.SearchCI(tv.ISearchString)
+	}
+}
+
+// ISearch is an emacs-style interactive search mode -- this is called when
+// the search command itself is entered
+func (tv *TextView) ISearch() {
+	if tv.ISearchMode {
+		if tv.ISearchString != "" { // already searching -- find next
+			sz := len(tv.ISearchMatches)
+			if sz > 0 {
+				if tv.ISearchPos < sz-1 {
+					tv.ISearchPos++
+				} else {
+					tv.ISearchPos = 0
+				}
+				pos := tv.ISearchMatches[tv.ISearchPos]
+				tv.SetCursor(pos)
+				tv.ScrollCursorToCenterIfHidden()
+				tv.ISearchSig()
+			}
+		} else { // restore prev
+			if tv.PrevISearchString != "" {
+				tv.ISearchString = tv.PrevISearchString
+				tv.ISearchCase = tv.PrevISearchCase
+				tv.PrevISearchString = "" // prevents future resets
+				tv.ISearchPos = -1
+				tv.ISearchFindMatches()
+				tv.ISearch()
+			}
+			// nothing..
+		}
+	} else {
+		tv.ISearchMode = true
+		tv.ISearchCase = false
+		tv.ISearchMatches = nil
+		tv.ISearchPos = -1
+		tv.ISearchSig()
+	}
+}
+
+// ISearchKeyInput is an emacs-style interactive search mode -- this is called
+// when keys are typed while in search mode
+func (tv *TextView) ISearchKeyInput(r rune) {
+	if tv.ISearchString == tv.PrevISearchString { // undo starting point
+		tv.ISearchString = ""
+	}
+	if unicode.IsUpper(r) { // todo: more complex
+		tv.ISearchCase = true
+	}
+	tv.ISearchString += string(r)
+	tv.ISearchFindMatches()
+	sz := len(tv.ISearchMatches)
+	if sz == 0 {
+		tv.ISearchPos = -1
+		tv.ISearchSig()
+		return
+	}
+	got := false
+	for i, pos := range tv.ISearchMatches {
+		if pos.Ln >= tv.CursorPos.Ln {
+			tv.ISearchPos = i
+			tv.SetCursor(pos)
+			tv.ScrollCursorToCenterIfHidden()
+			tv.ISearchSig()
+			got = true
+			break
+		}
+	}
+	if !got {
+		tv.ISearchPos = 0
+		pos := tv.ISearchMatches[0]
+		tv.SetCursor(pos)
+		tv.ScrollCursorToCenterIfHidden()
+		tv.ISearchSig()
+	}
+}
+
+// ISearchBackspace gets rid of one item in search string
+func (tv *TextView) ISearchBackspace() {
+	if tv.ISearchString == tv.PrevISearchString { // undo starting point
+		tv.ISearchString = ""
+		tv.ISearchMatches = nil
+		tv.ISearchPos = -1
+		tv.ISearchSig()
+	}
+	if len(tv.ISearchString) <= 1 {
+		tv.ISearchString = ""
+		tv.ISearchCase = false
+		return
+	}
+	tv.ISearchString = tv.ISearchString[:len(tv.ISearchString)-1]
+	tv.ISearchFindMatches()
+	sz := len(tv.ISearchMatches)
+	if sz == 0 {
+		tv.ISearchPos = -1
+		tv.ISearchSig()
+		return
+	}
+	got := false
+	for i, pos := range tv.ISearchMatches {
+		if pos.Ln >= tv.CursorPos.Ln {
+			tv.ISearchPos = i
+			tv.SetCursor(pos)
+			tv.ScrollCursorToCenterIfHidden()
+			tv.ISearchSig()
+			got = true
+			break
+		}
+	}
+	if !got {
+		tv.ISearchPos = 0
+		pos := tv.ISearchMatches[0]
+		tv.SetCursor(pos)
+		tv.ScrollCursorToCenterIfHidden()
+		tv.ISearchSig()
+	}
+}
+
+// ISearchCancel cancels ISearch mode
+func (tv *TextView) ISearchCancel() {
+	if !tv.ISearchMode {
+		return
+	}
+	tv.PrevISearchString = tv.ISearchString
+	tv.PrevISearchCase = tv.ISearchCase
+	tv.ISearchString = ""
+	tv.ISearchCase = false
+	tv.ISearchMode = false
+	tv.ISearchPos = -1
+	tv.ISearchMatches = nil
+	tv.ISearchSig()
+}
+
+// EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
+func (tv *TextView) EscPressed() {
+	switch {
+	case tv.ISearchMode:
+		tv.ISearchCancel()
+	case tv.HasSelection():
+		tv.SelectReset()
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1958,91 +2126,129 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case gi.KeyFunMoveRight:
+		tv.ISearchCancel() // note: may need to generalize to cancel more stuff
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
 		tv.OfferComplete()
 	case gi.KeyFunMoveLeft:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
 		tv.OfferComplete()
 	case gi.KeyFunMoveUp:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
 	case gi.KeyFunMoveDown:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
 	case gi.KeyFunPageUp:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
 	case gi.KeyFunPageDown:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
 	case gi.KeyFunHome:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartLine()
 	case gi.KeyFunEnd:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
+	case gi.KeyFunDocHome:
+		tv.ISearchCancel()
+		kt.SetProcessed()
+		tv.ShiftSelect(kt)
+		tv.CursorStartDoc()
+	case gi.KeyFunDocEnd:
+		tv.ISearchCancel()
+		kt.SetProcessed()
+		tv.ShiftSelect(kt)
+		tv.CursorEndDoc()
 	case gi.KeyFunSelectMode:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.SelectModeToggle()
 	case gi.KeyFunCancelSelect:
 		kt.SetProcessed()
-		tv.SelectReset()
+		tv.EscPressed() // generic cancel
 	case gi.KeyFunSelectAll:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.SelectAll()
 	case gi.KeyFunCopy:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Copy(true) // reset
+	case gi.KeyFunSearch:
+		kt.SetProcessed()
+		tv.ISearch()
+	case gi.KeyFunAbort:
+		kt.SetProcessed()
+		tv.EscPressed()
 	}
 	if tv.IsInactive() || kt.IsProcessed() {
 		return
 	}
 	switch kf {
 	case gi.KeyFunAccept: // ctrl+enter
+		tv.ISearchCancel()
 		// tv.EditDone()
 		kt.SetProcessed()
 		tv.FocusNext()
-	case gi.KeyFunAbort: // esc -- maybe for searching?
-		kt.SetProcessed()
 	case gi.KeyFunBackspace:
-		kt.SetProcessed()
-		tv.CursorBackspace(1)
-		tv.OfferComplete()
+		if tv.ISearchMode {
+			tv.ISearchBackspace()
+		} else {
+			kt.SetProcessed()
+			tv.CursorBackspace(1)
+			tv.OfferComplete()
+		}
 	case gi.KeyFunKill:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.CursorKill()
 	case gi.KeyFunDelete:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
 	case gi.KeyFunCut:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Cut()
 	case gi.KeyFunPaste:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Paste()
 	case gi.KeyFunUndo:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Undo()
 	case gi.KeyFunRedo:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Redo()
 	case gi.KeyFunComplete:
+		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.OfferComplete()
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
 		tv.CursorRecenter()
 	case gi.KeyFunSelectItem: // enter
+		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			tv.InsertAtCursor([]byte("\n"))
@@ -2052,6 +2258,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			}
 		}
 	case gi.KeyFunFocusNext: // tab
+		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			if tv.CursorPos.Ch == 0 && tv.Opts.AutoIndent { // todo: only at 1st pos now
@@ -2070,7 +2277,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
-				tv.InsertAtCursor([]byte(string(kt.Rune)))
+				if tv.ISearchMode { // todo: need this in non-interactive mode
+					tv.ISearchKeyInput(kt.Rune)
+				} else {
+					tv.InsertAtCursor([]byte(string(kt.Rune)))
+				}
 				tv.OfferComplete()
 			}
 		}

@@ -5,7 +5,10 @@
 package giv
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"mime"
 	"os"
@@ -393,6 +396,102 @@ func (fn *FileNode) RenameFile(newpath string) {
 	fn.FPath = gi.FileName(filepath.Clean(newpath))
 	fn.SetName(nfn)
 	fn.UpdateSig()
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Search
+
+// FileSearch looks for a string (no regexp) within a file, in a
+// case-sensitive way, returning number of occurences and specific match
+// position list -- column positions are in bytes, not runes...
+func FileSearch(filename string, find []byte) (int, []TextPos) {
+	fp, err := os.Open(filename)
+	if err != nil {
+		log.Printf("gide.FileSearch file open error: %v\n", err)
+		return 0, nil
+	}
+	defer fp.Close()
+	return BufSearch(fp, find)
+}
+
+// BufSearch looks for a string (no regexp) within a byte buffer, in a
+// case-sensitive way, returning number of occurences and specific match
+// position list -- column positions are in bytes, not runes...
+func BufSearch(reader io.Reader, find []byte) (int, []TextPos) {
+	fsz := len(find)
+	if fsz == 0 {
+		return 0, nil
+	}
+	cnt := 0
+	var matches []TextPos
+	scan := bufio.NewScanner(reader)
+	ln := 0
+	for scan.Scan() {
+		b := scan.Bytes()
+		sz := len(b)
+		ci := 0
+		for ci < sz {
+			i := bytes.Index(b[ci:], find)
+			if i < 0 {
+				break
+			}
+			i += ci
+			ci = i + fsz
+			matches = append(matches, TextPos{ln, i})
+			cnt++
+		}
+	}
+	if err := scan.Err(); err != nil {
+		log.Printf("gide.FileSearch error: %v\n", err)
+	}
+	return cnt, matches
+}
+
+// FileSearchCI looks for a string (no regexp) within a file, in a
+// case-INsensitive way, returning number of occurences -- column positions
+// are in bytes, not runes...
+func FileSearchCI(filename string, find []byte) (int, []TextPos) {
+	fp, err := os.Open(filename)
+	if err != nil {
+		log.Printf("gide.FileSearch file open error: %v\n", err)
+		return 0, nil
+	}
+	defer fp.Close()
+	return BufSearchCI(fp, find)
+}
+
+// BufSearchCI looks for a string (no regexp) within byte stream, in a
+// case-INsensitive way, returning number of occurences -- column positions
+// are in bytes, not runes...
+func BufSearchCI(reader io.Reader, find []byte) (int, []TextPos) {
+	fsz := len(find)
+	if fsz == 0 {
+		return 0, nil
+	}
+	find = bytes.ToLower(find)
+	cnt := 0
+	var matches []TextPos
+	scan := bufio.NewScanner(reader)
+	ln := 0
+	for scan.Scan() {
+		b := bytes.ToLower(scan.Bytes())
+		sz := len(b)
+		ci := 0
+		for ci < sz {
+			i := bytes.Index(b[ci:], find)
+			if i < 0 {
+				break
+			}
+			i += ci
+			ci = i + fsz
+			matches = append(matches, TextPos{ln, i})
+			cnt++
+		}
+	}
+	if err := scan.Err(); err != nil {
+		log.Printf("gide.FileSearch error: %v\n", err)
+	}
+	return cnt, matches
 }
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags

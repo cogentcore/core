@@ -250,7 +250,7 @@ func (tb *TextBuf) BytesToLines() {
 	bo := 0
 	for ln, txt := range lns {
 		tb.ByteOffs[ln] = bo
-		tb.Lines[ln] = []rune(string(txt))
+		tb.Lines[ln] = bytes.Runes(txt)
 		bo += len(txt) + 1 // lf
 	}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
@@ -277,6 +277,66 @@ func (tb *TextBuf) SetMimetype(filename string) {
 		fmt.Printf("failed to set language for extension: %v\n", ext)
 	}
 	// else try something else..
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//   Search
+
+// Search looks for a string (no regexp) within buffer, in a case-sensitive
+// way, returning number of occurences and specific match position list.
+// Currently ONLY returning byte char positions, not rune ones..
+func (tb *TextBuf) Search(find string) (int, []TextPos) {
+	fsz := len(find)
+	if fsz == 0 {
+		return 0, nil
+	}
+	cnt := 0
+	var matches []TextPos
+	for ln, lr := range tb.Lines {
+		lstr := string(lr)
+		sz := len(lstr)
+		ci := 0
+		for ci < sz {
+			i := strings.Index(lstr[ci:], find)
+			if i < 0 {
+				break
+			}
+			i += ci
+			ci = i + fsz
+			matches = append(matches, TextPos{ln, i})
+			cnt++
+		}
+	}
+	return cnt, matches
+}
+
+// SearchCI looks for a string (no regexp) within buffer, in a
+// case-INsensitive way, returning number of occurences.  Currently ONLY
+// returning byte char positions, not rune ones..
+func (tb *TextBuf) SearchCI(find string) (int, []TextPos) {
+	fsz := len(find)
+	if fsz == 0 {
+		return 0, nil
+	}
+	find = strings.ToLower(find)
+	cnt := 0
+	var matches []TextPos
+	for ln, lr := range tb.Lines {
+		lstr := strings.ToLower(string(lr))
+		sz := len(lstr)
+		ci := 0
+		for ci < sz {
+			i := strings.Index(lstr[ci:], find)
+			if i < 0 {
+				break
+			}
+			i += ci
+			ci = i + fsz
+			matches = append(matches, TextPos{ln, i})
+			cnt++
+		}
+	}
+	return cnt, matches
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +470,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	tb.Changed = true
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
-	rs := []rune(string(lns[0]))
+	rs := bytes.Runes(lns[0])
 	rsz := len(rs)
 	ed := st
 	if sz == 1 {
@@ -434,7 +494,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 		nsz := sz - 1
 		tmp := make([][]rune, nsz)
 		for i := 1; i < sz; i++ {
-			tmp[i-1] = []rune(string(lns[i]))
+			tmp[i-1] = bytes.Runes(lns[i])
 		}
 		stln := st.Ln + 1
 		nt := append(tb.Lines, tmp...) // first append to end to extend capacity

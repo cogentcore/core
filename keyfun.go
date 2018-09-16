@@ -37,8 +37,10 @@ const (
 	KeyFunPageDown
 	KeyFunPageRight
 	KeyFunPageLeft
-	KeyFunHome
-	KeyFunEnd
+	KeyFunHome    // start-of-line
+	KeyFunEnd     // end-of-line
+	KeyFunDocHome // start-of-doc -- Control / Alt / Shift +Home
+	KeyFunDocEnd  // end-of-doc Control / Alt / Shift +End
 	KeyFunWordRight
 	KeyFunWordLeft
 	KeyFunFocusNext  // tab
@@ -70,6 +72,8 @@ const (
 	KeyFunRefresh
 	KeyFunRecenter // Ctrl+L in emacs
 	KeyFunComplete
+	KeyFunSearch // Ctrl+S in emacs -- more interactive type of search
+	KeyFunFind   // Command+F full-dialog find
 	KeyFunsN
 )
 
@@ -221,12 +225,6 @@ type Shortcuts map[key.Chord]*Action
 
 /////////////////////////////////////////////////////////////////////////////////
 // KeyMaps -- list of KeyMap's
-
-// note: shift and meta modifiers for navigation keys do select + move
-
-// note: where multiple shortcuts exist for a given function, any shortcut
-// display of such items in menus will randomly display one of the
-// options. This can be considered a feature, not a bug!
 
 // KeyMapName has an associated ValueView for selecting from the list of
 // available key map names, for use in preferences etc.
@@ -426,6 +424,12 @@ var KeyMapsProps = ki.Props{
 	},
 }
 
+// note: shift and meta modifiers for navigation keys do select + move
+
+// note: where multiple shortcuts exist for a given function, any shortcut
+// display of such items in menus will randomly display one of the
+// options. This can be considered a feature, not a bug!
+
 // StdKeyMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.
 var StdKeyMaps = KeyMaps{
@@ -555,6 +559,10 @@ var StdKeyMaps = KeyMaps{
 		"Control+A":               KeyFunHome,
 		"End":                     KeyFunEnd,
 		"Control+E":               KeyFunEnd,
+		"Meta+Home":               KeyFunDocHome,
+		"Control+Alt+A":           KeyFunDocHome,
+		"Meta+End":                KeyFunDocEnd,
+		"Control+Alt+E":           KeyFunDocEnd,
 		"Alt+F":                   KeyFunWordRight,
 		"Alt+B":                   KeyFunWordLeft,
 		"Tab":                     KeyFunFocusNext,
@@ -604,6 +612,8 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Control+S":               KeyFunSearch,
+		"Meta+F":                  KeyFunFind,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,
