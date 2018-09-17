@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"go/token"
+	"os/exec"
 	"sort"
 )
 
@@ -115,6 +116,11 @@ func mainrun() {
 
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)
+
+	// todo: find a place for this code perhaps in SetCompleter
+	cmd := exec.Command("gocode", "close")
+	defer cmd.Run()
+
 	win.StartEventLoop()
 }
 
