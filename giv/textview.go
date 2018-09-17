@@ -81,6 +81,7 @@ type TextView struct {
 	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
 	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
 	TextViewSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	LinkSig           ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles       [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight        float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
 	LineHeight        float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
@@ -212,9 +213,11 @@ func (tv *TextView) IsChanged() bool {
 // ResetState resets all the random state variables, when opening a new buffer etc
 func (tv *TextView) ResetState() {
 	tv.SelectReset()
-	tv.CursorPos = TextPos{}
 	tv.Highlights = nil
 	tv.ISearchMode = false
+	if tv.Buf == nil || tv.NLines != tv.Buf.NLines { // don't reset if reopening..
+		tv.CursorPos = TextPos{}
+	}
 }
 
 // SetBuf sets the TextBuf that this is a view of, and interconnects their signals
@@ -2270,11 +2273,10 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	return TextPos{Ln: cln, Ch: cch}
 }
 
-// SetCursorFromPixel sets cursor position from pixel location, e.g., from
-// mouse action -- handles the selection updating etc.
-func (tv *TextView) SetCursorFromPixel(pt image.Point, selMode mouse.SelectModes) {
+// SetCursorFromMouse sets cursor position from mouse mouse action -- handles
+// the selection updating etc.
+func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode mouse.SelectModes) {
 	oldPos := tv.CursorPos
-	newPos := tv.PixelToCursor(pt)
 	if newPos == oldPos {
 		return
 	}
@@ -2500,17 +2502,51 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
+// OpenLink opens given link, either by sending LinkSig signal if there are
+// receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
+// non-nil (which by default opens user's default browser via
+// oswin/App.OpenURL())
+func (tv *TextView) OpenLink(tl *gi.TextLink) {
+	fmt.Printf("opening link: %v\n", tl.URL)
+	if len(tv.LinkSig.Cons) == 0 {
+		if gi.TextLinkHandler != nil {
+			if gi.TextLinkHandler(*tl) {
+				return
+			}
+			if gi.URLHandler != nil {
+				gi.URLHandler(tl.URL)
+			}
+		}
+		return
+	}
+	tv.LinkSig.Emit(tv.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+}
+
 // MouseEvent handles the mouse.Event
 func (tv *TextView) MouseEvent(me *mouse.Event) {
 	if !tv.IsInactive() && !tv.HasFocus() {
 		tv.GrabFocus()
 	}
 	me.SetProcessed()
+	pt := tv.PointToRelPos(me.Pos())
+	newPos := tv.PixelToCursor(pt)
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
-			pt := tv.PointToRelPos(me.Pos())
-			tv.SetCursorFromPixel(pt, me.SelectMode())
+			me.SetProcessed()
+			if newPos.Ln < len(tv.Renders) && len(tv.Renders[newPos.Ln].Links) > 0 {
+				lpos := tv.CharStartPos(TextPos{Ln: newPos.Ln})
+				rend := &tv.Renders[newPos.Ln]
+				for ti, _ := range rend.Links {
+					tl := &rend.Links[ti]
+					tlb := tl.Bounds(rend, lpos)
+					if me.Where.In(tlb) {
+						tv.OpenLink(tl)
+						return
+					}
+				}
+			}
+			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
 			// if tv.HasSelection() {
@@ -2526,8 +2562,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Middle:
 		if !tv.IsInactive() && me.Action == mouse.Press {
 			me.SetProcessed()
-			pt := tv.PointToRelPos(me.Pos())
-			tv.SetCursorFromPixel(pt, me.SelectMode())
+			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.Paste()
 		}
 	case mouse.Right:
@@ -2549,7 +2584,8 @@ func (tv *TextView) TextViewEvents() {
 			txf.SelectModeToggle()
 		}
 		pt := txf.PointToRelPos(me.Pos())
-		txf.SetCursorFromPixel(pt, mouse.NoSelectMode)
+		newPos := txf.PixelToCursor(pt)
+		txf.SetCursorFromMouse(pt, newPos, mouse.NoSelectMode)
 	})
 	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		txf := recv.Embed(KiT_TextView).(*TextView)

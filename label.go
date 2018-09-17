@@ -63,7 +63,7 @@ type Label struct {
 	Text        string              `xml:"text" desc:"label to display"`
 	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
 	Redrawable  bool                `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing"`
-	LinkSig     ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, opens default browser"`
+	LinkSig     ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
 	RenderPos   Vec2D               `xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
@@ -171,11 +171,19 @@ func (lb *Label) SetStateStyle() {
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
-// receivers, or by opening in user's default browser (see oswin/App.OpenURL()
-// method for more info)
+// receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
+// non-nil (which by default opens user's default browser via
+// oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *TextLink) {
 	if len(lb.LinkSig.Cons) == 0 {
-		oswin.TheApp.OpenURL(tl.URL)
+		if TextLinkHandler != nil {
+			if TextLinkHandler(*tl) {
+				return
+			}
+			if URLHandler != nil {
+				URLHandler(tl.URL)
+			}
+		}
 		return
 	}
 	lb.LinkSig.Emit(lb.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig

@@ -616,6 +616,32 @@ func (tl *TextLink) Bounds(tr *TextRender, pos Vec2D) image.Rectangle {
 	return image.Rectangle{Min: sp.ToPointFloor(), Max: ep.ToPointCeil()}
 }
 
+// TextLinkHandlerFunc is a function that handles TextLink links -- returns
+// true if the link was handled, false if not (in which case it might be
+// passed along to someone else)
+type TextLinkHandlerFunc func(tl TextLink) bool
+
+// TextLinkHandler is used to handle TextLink links, if non-nil -- set this to
+// your own handler to get first crack at all the text link clicks -- if this
+// function returns false (or is nil) then the URL is sent to URLHandler (the
+// default one just calls oswin.TheApp.OpenURL)
+var TextLinkHandler TextLinkHandlerFunc
+
+// URLHandlerFunc is a function that handles URL links -- returns
+// true if the link was handled, false if not (in which case it might be
+// passed along to someone else).
+type URLHandlerFunc func(url string) bool
+
+// URLHandler is used to handle URL links, if non-nil -- set this to your own
+// handler to process URL's, depending on TextLinkHandler -- the default
+// version of this function just calls oswin.TheApp.OpenURL -- setting this to
+// nil will prevent any links from being open that way, and your own function
+// will have full responsibility for links if set (i.e., the return value is ignored)
+var URLHandler = func(url string) bool {
+	oswin.TheApp.OpenURL(url)
+	return true
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  TextRender
 
@@ -1306,6 +1332,9 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				parts := strings.Split(ftag, " ")
 				stag := strings.ToLower(strings.TrimSpace(parts[0]))
 				// fmt.Printf("%v  stag: %v\n", bidx, stag)
+				attrs := parts[1:]
+				attr := strings.Split(strings.Join(attrs, " "), "=")
+				nattr := len(attr) / 2
 				curf := fstack[len(fstack)-1]
 				fs := *curf
 				curLinkIdx = -1
@@ -1316,14 +1345,18 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 						fs.SetDeco(DecoUnderline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
-						// sprop := make(ki.Props, len(se.Attr))
-						// tl.Props = sprop
-						// for _, attr := range se.Attr {
-						// 	if attr.Name.Local == "href" {
-						// 		tl.URL = attr.Value
-						// 	}
-						// 	sprop[attr.Name.Local] = attr.Value
-						// }
+						if nattr > 0 {
+							sprop := make(ki.Props, len(parts)-1)
+							tl.Props = sprop
+							for ai := 0; ai < nattr; ai++ {
+								nm := strings.TrimSpace(attr[ai*2])
+								vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
+								if nm == "href" {
+									tl.URL = vl
+								}
+								sprop[nm] = vl
+							}
+						}
 						tr.Links = append(tr.Links, *tl)
 					case "span":
 						// just uses props
@@ -1355,9 +1388,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 						// todo: need to include
 					}
 				}
-				if len(parts) > 1 { // attr
-					attr := strings.Split(strings.Join(parts[1:], " "), "=")
-					nattr := len(attr) / 2
+				if nattr > 0 { // attr
 					sprop := make(ki.Props, nattr)
 					for ai := 0; ai < nattr; ai++ {
 						nm := strings.TrimSpace(attr[ai*2])
