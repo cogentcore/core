@@ -435,7 +435,7 @@ func (tv *TextView) HiAllLines() {
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 
-	tv.MarkupMu.Lock()
+	// tv.MarkupMu.Lock() // todo: turn these on if using goroutine
 	maxln := len(mtlns) - 1
 	for ln := 0; ln < maxln; ln++ {
 		if len(tv.Markup) != tv.NLines { // update happend!
@@ -448,8 +448,8 @@ func (tv *TextView) HiAllLines() {
 		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 	}
-	tv.MarkupMu.Unlock()
-	tv.UpdateSig()
+	// tv.MarkupMu.Unlock()
+	// tv.UpdateSig() // turn this on if using goroutine
 }
 
 // LayoutAllLines generates TextRenders of lines from our TextBuf, using any
@@ -502,7 +502,8 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	sz := tv.RenderSz
 
 	if tv.HasHi() {
-		go tv.HiAllLines()
+		//		go tv.HiAllLines() // this is not sufficiently reliable right now - just do it
+		tv.HiAllLines()
 	}
 
 	// fmt.Printf("rendersize: %v\n", sz)
