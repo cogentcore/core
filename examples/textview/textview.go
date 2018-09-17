@@ -121,8 +121,14 @@ func mainrun() {
 // CompleteGocode uses github.com/mdempsky/gocode to do code completion
 func CompleteGocode(text string, pos token.Position) (matches complete.Completions, seed string) {
 	pos.Filename = string(samplefile)
-	seed = complete.SeedWhiteSpace(text)
-	results := complete.GetCompletions(pos)
+	seed = complete.SeedGolang(text)
+
+	textbytes := make([]byte, 0, txbuf.NLines*40)
+	for _, lr := range txbuf.Lines {
+		textbytes = append(textbytes, []byte(string(lr))...)
+		textbytes = append(textbytes, '\n')
+	}
+	results := complete.GetCompletions(textbytes, pos)
 
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Text < results[j].Text {

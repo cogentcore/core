@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 type candidate struct {
@@ -15,13 +16,13 @@ type candidate struct {
 	Pkg   string `json:"package"`
 }
 
-func GetCompletions(pos token.Position) []Completion {
+func GetCompletions(bytes []byte, pos token.Position) []Completion {
 	var completions []Completion
 
 	offset := pos.Offset
 	offsetString := strconv.Itoa(offset)
-	fileStr := "--in=" + string(pos.Filename)
-	cmd := exec.Command("gocode", "-f=json", fileStr, "autocomplete", offsetString)
+	cmd := exec.Command("gocode", "-builtin", "-f=json", "autocomplete", offsetString)
+	cmd.Stdin = strings.NewReader(string(bytes))
 	result, _ := cmd.Output()
 	var skip int = -1
 	for i := 0; i < len(result); i++ {

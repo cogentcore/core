@@ -140,6 +140,22 @@ func SeedWhiteSpace(text string) string {
 	return text[seedStart:]
 }
 
+// SeedGolang returns the seed that makes sense for the go language
+// e.g. strip [] or . prefix before matching text
+func SeedGolang(text string) string {
+	seedStart := 0
+	for i := len(text) - 1; i >= 0; i-- {
+		r := rune(text[i])
+		if unicode.IsSpace(r) {
+			seedStart = i + 1
+			break
+		}
+	}
+	seed := text[seedStart:]
+	seed = strings.TrimPrefix(seed, "[]")
+	return seed
+}
+
 // EditBasic replaces the completion seed with the completion
 // delta is the change in cursor position (cp)
 func EditBasic(text string, cp int, completion string, seed string) (newText string, delta int) {
