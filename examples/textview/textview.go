@@ -5,14 +5,14 @@
 package main
 
 import (
-	"go/token"
-
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
+	"go/token"
+	"sort"
 )
 
 var samplefile gi.FileName = "sample.in"
@@ -77,7 +77,7 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiStyle = "emacs"
 	txed1.Opts.LineNos = true
-	txed1.SetCompleter(nil, CompleteGo, CompleteEdit)
+	txed1.SetCompleter(nil, CompleteGocode, CompleteEdit)
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -118,6 +118,34 @@ func mainrun() {
 	win.StartEventLoop()
 }
 
+// CompleteGocode uses github.com/mdempsky/gocode to do code completion
+func CompleteGocode(text string, pos token.Position) (matches complete.Completions, seed string) {
+	pos.Filename = string(samplefile)
+	seed = complete.SeedWhiteSpace(text)
+	results := complete.GetCompletions(pos)
+
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].Text < results[j].Text {
+			return true
+		}
+		if results[i].Text > results[j].Text {
+			return false
+		}
+		return results[i].Text < results[j].Text
+	})
+
+	matches = complete.MatchSeedCompletion(results, seed)
+	return matches, seed
+}
+
+// CompleteEdit uses the selected completion to edit the text
+func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
+	s, delta = complete.EditWord(text, cursorPos, selection, seed)
+	return s, delta
+}
+
+// CompleteGo is not being used - it calls a new code completer that was started but is not
+// under development at this time
 func CompleteGo(text string, pos token.Position) (matches complete.Completions, seed string) {
 	pos.Filename = string(samplefile)
 	textbytes := make([]byte, 0, txbuf.NLines*40)
@@ -127,16 +155,11 @@ func CompleteGo(text string, pos token.Position) (matches complete.Completions, 
 	}
 	results, seed := complete.CompleteGo(textbytes, pos)
 	if len(seed) > 0 {
-		results = complete.MatchSeed(results, seed)
+		results = complete.MatchSeedString(results, seed)
 	}
 	for _, lv := range results {
 		m := complete.Completion{Text: lv}
 		matches = append(matches, m)
 	}
 	return matches, seed
-}
-
-func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditWord(text, cursorPos, selection, seed)
-	return s, delta
 }

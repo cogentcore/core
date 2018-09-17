@@ -69,8 +69,8 @@ func CompleteGo(bytes []byte, pos token.Position) (matches []string, seed string
 	if err != nil {
 		log.Printf("could not parse %s: %v\n", f, err)
 	}
-	ast.Walk(v, f)
 
+	ast.Walk(v, f)
 	start := token.Pos(pos.Offset)
 	end := start
 	path, _ := astutil.PathEnclosingInterval(f, start, end)
@@ -122,6 +122,15 @@ func CompleteGo(bytes []byte, pos token.Position) (matches []string, seed string
 				matches = append(matches, Funcs()...)
 			}
 			next = false
+		case *ast.SelectorExpr:
+			path, _ := astutil.PathEnclosingInterval(f, start-1, end)
+			n2 := path[0]
+			fmt.Printf("\t%T.Doc: %q\n", n2)
+			zType := reflect.TypeOf(n2)
+			switch zType.Kind() {
+			case reflect.Struct:
+				fmt.Println("dog")
+			}
 		case *ast.File:
 			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
 			matches = append(matches, decls...)

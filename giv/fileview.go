@@ -701,7 +701,7 @@ func (fv *FileView) FileComplete(text string, pos token.Position) (matches compl
 	}
 
 	if len(seed) > 0 { // return all directories
-		files = complete.MatchSeed(files, seed)
+		files = complete.MatchSeedString(files, seed)
 	}
 
 	for _, d := range files {
@@ -728,7 +728,7 @@ func (fv *FileView) PathComplete(path string, pos token.Position) (matches compl
 	}
 
 	if len(seed) > 0 { // return all directories
-		dirs = complete.MatchSeed(dirs, seed)
+		dirs = complete.MatchSeedString(dirs, seed)
 	}
 
 	for _, d := range dirs {

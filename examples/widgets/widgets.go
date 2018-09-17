@@ -372,7 +372,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 func Complete(text string, pos token.Position) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
-	possibles := complete.MatchSeed(words, seed)
+	possibles := complete.MatchSeedString(words, seed)
 	for _, p := range possibles {
 		m := complete.Completion{Text: p, Icon: ""}
 		matches = append(matches, m)

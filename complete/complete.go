@@ -29,9 +29,9 @@ type MatchFunc func(text string, pos token.Position) (matches Completions, seed 
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
 type EditFunc func(text string, cursorPos int, completion string, seed string) (newText string, delta int)
 
-// MatchSeed returns a list of matches given a list of possibilities and a seed.
+// MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.
-func MatchSeed(completions []string, seed string) (matches []string) {
+func MatchSeedString(completions []string, seed string) (matches []string) {
 	matches = completions[0:0]
 	match_start := -1
 	match_end := -1
@@ -48,6 +48,41 @@ func MatchSeed(completions []string, seed string) (matches []string) {
 			}
 			if match_start > -1 {
 				if strings.HasPrefix(s, seed) == false {
+					match_end = i
+				}
+			}
+		}
+		if match_start > -1 && match_end == -1 { // everything possible was a match!
+			match_end = len(completions)
+		}
+	}
+
+	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
+	if match_start > -1 && match_end > -1 {
+		matches = completions[match_start:match_end]
+	}
+	return matches
+}
+
+// MatchSeedCompletion returns a list of matching completion structs given a list of possibilities and a seed.
+// The list must be presorted. The seed is basically a prefix.
+func MatchSeedCompletion(completions []Completion, seed string) (matches []Completion) {
+	matches = completions[0:0]
+	match_start := -1
+	match_end := -1
+	if len(seed) > 0 {
+		for i, c := range completions {
+			if match_end > -1 {
+				break
+			}
+			if match_start == -1 {
+				if strings.HasPrefix(c.Text, seed) {
+					match_start = i // first match in sorted list
+				}
+				continue
+			}
+			if match_start > -1 {
+				if strings.HasPrefix(c.Text, seed) == false {
 					match_end = i
 				}
 			}
