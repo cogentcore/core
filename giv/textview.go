@@ -12,6 +12,7 @@ import (
 	"image/draw"
 	"log"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -57,6 +58,8 @@ type TextView struct {
 	FocusActive       bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines            int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 	Markup            [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	HasMarkup         []bool                    `json:"-" xml:"-" desc:"is markup version available?  for each line of text"`
+	MarkupMu          sync.Mutex                `json:"-" xml:"-" desc:"mutex for accessing HasMarkup -- markup routine and main routine use this to coordinate"`
 	Renders           []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs              []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
 	LineNoDigs        int                       `json:"-" xml:"-" number of line number digits needed"`
@@ -109,7 +112,7 @@ var TextViewProps = ki.Props{
 	"text-align":       gi.AlignLeft,
 	"tab-size":         4,
 	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Control,
+	"background-color": &gi.Prefs.Colors.Background,
 	TextViewSelectors[TextViewActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
@@ -206,15 +209,84 @@ func (tv *TextView) IsChanged() bool {
 ///////////////////////////////////////////////////////////////////////////////
 //  Buffer communication
 
+// ResetState resets all the random state variables, when opening a new buffer etc
+func (tv *TextView) ResetState() {
+	tv.SelectReset()
+	tv.CursorPos = TextPos{}
+	tv.Highlights = nil
+	tv.ISearchMode = false
+}
+
 // SetBuf sets the TextBuf that this is a view of, and interconnects their signals
 func (tv *TextView) SetBuf(buf *TextBuf) {
+	tv.ResetState()
 	tv.Buf = buf
 	buf.AddView(tv)
-	tv.SelectReset()
-	tv.Highlights = nil
 	tv.LayoutAllLines(false)
 	tv.SetFullReRender()
 	tv.UpdateSig()
+}
+
+// InsertLines inserts new lines of text and reformats them
+func (tv *TextView) InsertLines(tbe *TextBufEdit) {
+	tv.MarkupMu.Lock()
+
+	stln := tbe.Reg.Start.Ln + 1
+	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+
+	// Markup
+	tmpmu := make([][]byte, nsz)
+	nmu := append(tv.Markup, tmpmu...) // first append to end to extend capacity
+	copy(nmu[stln+nsz:], nmu[stln:])   // move stuff to end
+	copy(nmu[stln:], tmpmu)            // copy into position
+	tv.Markup = nmu
+
+	// HasMarkup
+	tmphm := make([]bool, nsz)
+	nhm := append(tv.HasMarkup, tmphm...)
+	copy(nhm[stln+nsz:], nhm[stln:])
+	copy(nhm[stln:], tmphm)
+	tv.HasMarkup = nhm
+
+	// Renders
+	tmprn := make([]gi.TextRender, nsz)
+	nrn := append(tv.Renders, tmprn...)
+	copy(nrn[stln+nsz:], nrn[stln:])
+	copy(nrn[stln:], tmprn)
+	tv.Renders = nrn
+
+	// Offs
+	tmpof := make([]float32, nsz)
+	nof := append(tv.Offs, tmpof...)
+	copy(nof[stln+nsz:], nof[stln:])
+	copy(nof[stln:], tmpof)
+	tv.Offs = nof
+
+	tv.NLines += nsz
+	tv.MarkupMu.Unlock()
+
+	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+	tv.RenderAllLines()
+}
+
+// DeleteLines deletes lines of text and reformats remaining one
+func (tv *TextView) DeleteLines(tbe *TextBufEdit) {
+	tv.MarkupMu.Lock()
+
+	stln := tbe.Reg.Start.Ln
+	edln := tbe.Reg.End.Ln
+	dsz := edln - stln
+
+	tv.Markup = append(tv.Markup[:stln], tv.Markup[edln:]...)
+	tv.HasMarkup = append(tv.HasMarkup[:stln], tv.HasMarkup[edln:]...)
+	tv.Renders = append(tv.Renders[:stln], tv.Renders[edln:]...)
+	tv.Offs = append(tv.Offs[:stln], tv.Offs[edln:]...)
+
+	tv.NLines -= dsz
+	tv.MarkupMu.Unlock()
+
+	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln)
+	tv.RenderAllLines()
 }
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
@@ -223,6 +295,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	switch TextBufSignals(sig) {
 	case TextBufDone:
 	case TextBufNew:
+		tv.ResetState()
 		tv.LayoutAllLines(false)
 		tv.SetFullReRender()
 		tv.UpdateSig()
@@ -233,8 +306,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tbe := data.(*TextBufEdit)
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.LayoutAllLines(false)
-			tv.RenderAllLines()
+			tv.InsertLines(tbe)
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 			if rerend {
@@ -249,8 +321,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		}
 		tbe := data.(*TextBufEdit)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.LayoutAllLines(false)
-			tv.RenderAllLines()
+			tv.DeleteLines(tbe)
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 			if rerend {
@@ -316,8 +387,16 @@ func (tv *TextView) HiInit() {
 // RenderSize is the size we should pass to text rendering, based on alloc
 func (tv *TextView) RenderSize() gi.Vec2D {
 	spc := tv.Sty.BoxSpace()
+	if tv.Par == nil {
+		return gi.Vec2DZero
+	}
 	pari, _ := gi.KiToNode2D(tv.Par)
 	parw := pari.AsLayout2D()
+	if parw == nil {
+		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", pari.Type(), tv.PathUnique())
+		return gi.Vec2DZero
+	}
+	parw.SetReRenderAnchor()
 	paloc := parw.LayData.AllocSizeOrig
 	if !paloc.IsZero() {
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubVal(spc * 2)
@@ -337,6 +416,39 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	return tv.RenderSz
 }
 
+// HiAllLines does highlighting of all lines, in a separate goroutine because it is slow
+func (tv *TextView) HiAllLines() {
+	var htmlBuf bytes.Buffer
+	iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Txt)) // todo: unfortunate conversion here..
+	err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
+
+	sz := tv.RenderSz
+	sty := &tv.Sty
+	fst := sty.Font
+	fst.BgColor.SetColor(nil)
+
+	tv.MarkupMu.Lock()
+	maxln := len(mtlns) - 1
+	for ln := 0; ln < maxln; ln++ {
+		if len(tv.Markup) != tv.NLines { // update happend!
+			break
+		}
+		mt := mtlns[ln]
+		mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
+		tv.Markup[ln] = mt
+		tv.HasMarkup[ln] = true
+		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
+	}
+	tv.MarkupMu.Unlock()
+	tv.UpdateSig()
+}
+
 // LayoutAllLines generates TextRenders of lines from our TextBuf, using any
 // highlighter that might be present, and returns whether the current rendered
 // size is different from what it was previously
@@ -352,7 +464,10 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		tv.StyleTextView()
 	}
 
+	tv.MarkupMu.Lock() // wait for prior markup if it is still happening
 	tv.HiInit()
+
+	// fmt.Printf("layout all: %v\n", tv.Nm)
 
 	tv.NLines = tv.Buf.NLines
 	nln := tv.NLines
@@ -360,6 +475,14 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		tv.Markup = tv.Markup[:nln]
 	} else {
 		tv.Markup = make([][]byte, nln)
+	}
+	if cap(tv.HasMarkup) >= nln {
+		tv.HasMarkup = tv.HasMarkup[:nln]
+		for i := range tv.HasMarkup {
+			tv.HasMarkup[i] = false
+		}
+	} else {
+		tv.HasMarkup = make([]bool, nln)
 	}
 	if cap(tv.Renders) >= nln {
 		tv.Renders = tv.Renders[:nln]
@@ -372,44 +495,33 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		tv.Offs = make([]float32, nln)
 	}
 
-	if tv.HasHi() {
-		var htmlBuf bytes.Buffer
-		iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Txt)) // todo: unfortunate conversion here..
-		err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
-		if err != nil {
-			log.Println(err)
-			return false
-		}
-		mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
-
-		maxln := len(mtlns) - 1
-		for ln := 0; ln < maxln; ln++ {
-			mt := mtlns[ln]
-			mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
-			tv.Markup[ln] = mt
-		}
-	} else {
-		for ln := 0; ln < nln; ln++ {
-			tv.Markup[ln] = []byte(string(tv.Buf.Lines[ln]))
-		}
-	}
-
 	tv.VisSizes()
 	sz := tv.RenderSz
+
+	if tv.HasHi() {
+		go tv.HiAllLines()
+	}
+
 	// fmt.Printf("rendersize: %v\n", sz)
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	off := float32(0)
 	mxwd := float32(0)
+
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		if tv.HasMarkup[ln] {
+			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		} else {
+			tv.Renders[ln].SetHTMLPre([]byte(string(tv.Buf.Lines[ln])), &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		}
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 		tv.Offs[ln] = off
 		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
+	tv.MarkupMu.Unlock()
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
 	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
 	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
@@ -450,6 +562,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	if nwSz == tv.LinesSize {
 		return false
 	}
+	// fmt.Printf("needs resize: %v\n", nwSz)
 	tv.LinesSize = nwSz
 	diff := tv.SetSize()
 	if !diff {
@@ -462,7 +575,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		ly.Layout2DTree()
 		tv.reLayout = false
 	}
-	tv.SetFullReRender()
+	// tv.SetFullReRender()
 	return true
 }
 
@@ -473,15 +586,18 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 // need for a full re-render -- otherwise returns false and just these lines
 // need to be re-rendered.
 func (tv *TextView) LayoutLines(st, ed int) bool {
+	tv.MarkupMu.Lock()
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	mxwd := float32(tv.LinesSize.X)
+	rerend := false
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
 		if tv.HasHi() {
 			var htmlBuf bytes.Buffer
-			iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Lines[ln]))
+			iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Lines[ln])+"\n")
+			// add \n b/c it needs to see that for comments..
 			err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
 			if err != nil {
 				log.Println(err)
@@ -489,24 +605,39 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 				tv.LayoutAllLines(false)
 				return true
 			}
-			tv.Markup[ln] = htmlBuf.Bytes()
+			b := bytes.TrimSuffix(htmlBuf.Bytes(), []byte(`
+</span><span class="c1"></span></pre>`)) // comments
+			b = bytes.TrimSuffix(b, []byte("\n</pre>")) // other stuff
+			tv.Markup[ln] = b
+			tv.HasMarkup[ln] = true
 			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		} else {
-			tv.Renders[ln].SetRunes(tv.Buf.Lines[ln], &fst, &sty.UnContext, &sty.Text, true, 0, 1)
+			tv.Renders[ln].SetHTMLPre([]byte(string(tv.Buf.Lines[ln])), &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		}
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
 		nwspans := len(tv.Renders[ln].Spans)
 		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
-			tv.Buf.LinesToBytes() // need to update buffer -- todo: redundant across views
-			tv.LayoutAllLines(false)
-			return true
+			rerend = true
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	nwSz := gi.Vec2D{mxwd, 0}.ToPointCeil()
-	nwSz.Y = tv.LinesSize.Y
+	tv.MarkupMu.Unlock()
+
+	// update all offsets to end of text
+	ofst := st - 1
+	if ofst < 0 {
+		ofst = 0
+	}
+	off := tv.Offs[ofst]
+	for ln := ofst; ln < tv.NLines; ln++ {
+		tv.Offs[ln] = off
+		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
+		off += lsz
+	}
+	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
+	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
 	tv.ResizeIfNeeded(nwSz)
-	return false
+	return rerend
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1566,7 +1697,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	spos := tv.RenderStartPos()
 	if pos.Ln >= tv.NLines {
-		spos.Y += tv.LineHeight
+		spos.Y += float32(tv.LinesSize.Y)
 		spos.X += tv.LineNoOff
 		return spos
 	}
@@ -1845,6 +1976,7 @@ func (tv *TextView) RenderAllLines() {
 // RenderAllLinesInBounds displays all the visible lines on the screen --
 // after PushBounds has already been called
 func (tv *TextView) RenderAllLinesInBounds() {
+	// fmt.Printf("render all: %v\n", tv.Nm)
 	rs := &tv.Viewport.Render
 	pc := &rs.Paint
 	sty := &tv.Sty
@@ -1909,6 +2041,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	epos := tv.CharEndPos(TextPos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
 	epos.X = spos.X + tv.LineNoOff - spc
+	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
 
@@ -1974,9 +2107,9 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
-			tv.RenderHighlights(st, ed)
+			tv.RenderHighlights(visSt, visEd)
 			tv.RenderSelect()
-			tv.RenderLineNosBox(st, ed)
+			tv.RenderLineNosBox(visSt, visEd)
 
 			for ln := visSt; ln <= visEd; ln++ {
 				lst := pos.Y + tv.Offs[ln]
@@ -2498,6 +2631,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tv *TextView) Render2D() {
+	// fmt.Printf("textview render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

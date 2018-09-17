@@ -271,9 +271,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		gis.LayData.AllocSizeOrig = gis.LayData.AllocSize
 		gis.LayData.AllocPosRel.SetDim(sv.Dim, pos)
 		gis.LayData.AllocPosRel.SetDim(odim, spc)
-		gis.LayData.AllocPosOrig = gis.LayData.AllocPos
-
-		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayData.AllocSizeOrig, gis.LayData.AllocPosOrig)
+		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayData.AllocSizeOrig, gis.LayData.AllocPosRel)
 
 		pos += isz + handsz
 

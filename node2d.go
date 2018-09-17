@@ -562,10 +562,18 @@ func (nb *Node2DBase) Layout2DTree() {
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
-	redo := nb.This.(Node2D).Layout2D(parBBox, 0) // important to use interface version to get interface!
+	nbi := nb.This.(Node2D)
+	redo := nbi.Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
-		nb.Size2DTree(1)
-		nb.This.(Node2D).Layout2D(parBBox, 1) // todo: multiple iters?
+		wb := nbi.AsWidget()
+		if wb != nil {
+			ld := wb.LayData
+			wb.Size2DTree(1)
+			wb.LayData = ld
+		} else {
+			nb.Size2DTree(1)
+		}
+		nbi.Layout2D(parBBox, 1) // todo: multiple iters?
 	}
 	pr.End()
 }

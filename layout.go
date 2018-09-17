@@ -634,6 +634,10 @@ func (ly *Layout) AllocFromParent() {
 	if ly.Par == nil || !ly.LayData.AllocSize.IsZero() {
 		return
 	}
+	if ly.Par != ly.Viewport.This {
+		fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayData)
+		return
+	}
 	pni, _ := KiToNode2D(ly.Par)
 	lyp := pni.AsLayout2D()
 	if lyp == nil {

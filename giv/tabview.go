@@ -61,6 +61,7 @@ func (tv *TabView) InsertTab(widg gi.Node2D, label string, idx int) {
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	fr.InsertChild(widg, idx)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
@@ -89,6 +90,7 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) gi.Node
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	widg := fr.InsertNewChild(typ, idx, label).(gi.Node2D)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
@@ -178,6 +180,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (gi.Node2D, bool) {
 	sz := len(*fr.Children())
 	tb := tv.Tabs()
 	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	nxtidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
@@ -192,7 +195,6 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (gi.Node2D, bool) {
 	if nxtidx >= 0 {
 		tv.SelectTabIndex(nxtidx)
 	}
-	tv.SetFullReRender()
 	tv.UpdateEnd(updt)
 	if destroy {
 		return nil, true
@@ -235,6 +237,7 @@ func (tv *TabView) InitTabView() {
 	}
 	updt := tv.UpdateStart()
 	tv.Lay = gi.LayoutVert
+	tv.SetReRenderAnchor()
 
 	tabs := tv.AddNewChild(gi.KiT_Frame, "tabs").(*gi.Frame)
 	tabs.Lay = gi.LayoutHoriz
@@ -293,6 +296,10 @@ func (tv *TabView) RenumberTabs() {
 func (tv *TabView) Style2D() {
 	tv.InitTabView()
 	tv.Layout.Style2D()
+}
+
+func (tv *TabView) Render2D() {
+	tv.Layout.Render2D()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -389,25 +396,24 @@ func (tb *TabButton) ConfigParts() {
 	config.Add(gi.KiT_Action, "close")
 	mods, updt := tb.Parts.ConfigChildren(config, false) // not unique names
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
-
-	cls := tb.Parts.KnownChild(clsIdx).(*gi.Action)
-	if tb.Indicator.IsNil() {
-		tb.Indicator = "close"
-	}
-	tb.StylePart(gi.Node2D(cls))
-
-	icnm := string(tb.Indicator)
-	cls.SetIcon(icnm)
-	cls.SetProp("no-focus", true)
-	cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tbb := recv.Embed(KiT_TabButton).(*TabButton)
-		tabIdx := tbb.Data.(int)
-		tvv := tb.TabView()
-		if tvv != nil {
-			tvv.DeleteTabIndexAction(tabIdx)
-		}
-	})
 	if mods {
+		cls := tb.Parts.KnownChild(clsIdx).(*gi.Action)
+		if tb.Indicator.IsNil() {
+			tb.Indicator = "close"
+		}
+		tb.StylePart(gi.Node2D(cls))
+
+		icnm := string(tb.Indicator)
+		cls.SetIcon(icnm)
+		cls.SetProp("no-focus", true)
+		cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tbb := recv.Embed(KiT_TabButton).(*TabButton)
+			tabIdx := tbb.Data.(int)
+			tvv := tb.TabView()
+			if tvv != nil {
+				tvv.DeleteTabIndexAction(tabIdx)
+			}
+		})
 		tb.UpdateEnd(updt)
 	}
 }
