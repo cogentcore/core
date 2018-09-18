@@ -136,6 +136,7 @@ func CompleteGocode(text string, pos token.Position) (matches complete.Completio
 	}
 	results := complete.GetCompletions(textbytes, pos)
 
+	// MatchSeed assumes a sorted list
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Text < results[j].Text {
 			return true
@@ -145,8 +146,11 @@ func CompleteGocode(text string, pos token.Position) (matches complete.Completio
 		}
 		return results[i].Text < results[j].Text
 	})
-
-	matches = complete.MatchSeedCompletion(results, seed)
+	if len(seed) > 0 {
+		matches = complete.MatchSeedCompletion(results, seed)
+	} else {
+		matches = results
+	}
 	return matches, seed
 }
 
@@ -169,8 +173,8 @@ func CompleteGo(text string, pos token.Position) (matches complete.Completions, 
 	if len(seed) > 0 {
 		results = complete.MatchSeedString(results, seed)
 	}
-	for _, lv := range results {
-		m := complete.Completion{Text: lv}
+	for _, r := range results {
+		m := complete.Completion{Text: r}
 		matches = append(matches, m)
 	}
 	return matches, seed
