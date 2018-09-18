@@ -52,7 +52,7 @@ func (c *Complete) ShowCompletions(text string, pos token.Position, vp *Viewport
 		return
 	}
 
-	c.Completions, c.Seed = c.MatchFunc(text, pos)
+	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
 	count := len(c.Completions)
 	if count > 0 {
 		if count == 1 && c.Completions[0].Text == c.Seed {

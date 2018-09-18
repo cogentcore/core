@@ -23,11 +23,11 @@ type Completions []Completion
 
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(text string, pos token.Position) (matches Completions, seed string)
+type MatchFunc func(data interface{}, text string, pos token.Position) (matches Completions, seed string)
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
-type EditFunc func(text string, cursorPos int, completion string, seed string) (newText string, delta int)
+type EditFunc func(data interface{}, text string, cursorPos int, completion string, seed string) (newText string, delta int)
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The list must be presorted. The seed is basically a prefix.

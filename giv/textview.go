@@ -1529,7 +1529,7 @@ func (tv *TextView) CompleteText(s string) {
 	tbe := tv.Buf.Region(st, en)
 	tbes := string(tbe.ToBytes())
 
-	ns, _ := tv.Complete.EditFunc(tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
+	ns, _ := tv.Complete.EditFunc(tv.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
 	fmt.Println(ns)
 	tv.Buf.DeleteText(st, tv.CursorPos, true)
 	tv.CursorPos = st

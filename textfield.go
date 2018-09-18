@@ -582,7 +582,7 @@ func (tf *TextField) CompleteText(s string) {
 	win := tf.ParentWindow()
 	win.ClosePopup(win.Popup)
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
-	ns, delta := tf.Complete.EditFunc(txt, tf.CursorPos, s, tf.Complete.Seed)
+	ns, delta := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, s, tf.Complete.Seed)
 	tf.EditTxt = []rune(ns)
 	tf.CursorForward(delta)
 }

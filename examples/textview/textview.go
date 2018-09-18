@@ -12,12 +12,12 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"go/token"
+	"log"
 	"os/exec"
 	"sort"
 )
 
 var samplefile gi.FileName = "sample.in"
-var txbuf *giv.TextBuf
 
 func main() {
 	gimain.Main(func() {
@@ -78,7 +78,7 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiStyle = "emacs"
 	txed1.Opts.LineNos = true
-	txed1.SetCompleter(nil, CompleteGocode, CompleteEdit)
+	txed1.SetCompleter(txed1, CompleteGocode, CompleteEdit)
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -90,7 +90,7 @@ func mainrun() {
 	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
 	txed2.HiStyle = "emacs"
 
-	txbuf = giv.NewTextBuf()
+	txbuf := giv.NewTextBuf()
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
@@ -125,10 +125,18 @@ func mainrun() {
 }
 
 // CompleteGocode uses github.com/mdempsky/gocode to do code completion
-func CompleteGocode(text string, pos token.Position) (matches complete.Completions, seed string) {
-	pos.Filename = string(samplefile)
-	seed = complete.SeedGolang(text)
+func CompleteGocode(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+	var txbuf *giv.TextBuf
+	switch t := data.(type) {
+	case *giv.TextView:
+		txbuf = t.Buf
+	}
+	if txbuf == nil {
+		log.Printf("complete.CompleteGocode: txbuf is nil - can't do code completion\n")
+		return
+	}
 
+	seed = complete.SeedGolang(text)
 	textbytes := make([]byte, 0, txbuf.NLines*40)
 	for _, lr := range txbuf.Lines {
 		textbytes = append(textbytes, []byte(string(lr))...)
@@ -136,7 +144,7 @@ func CompleteGocode(text string, pos token.Position) (matches complete.Completio
 	}
 	results := complete.GetCompletions(textbytes, pos)
 
-	// MatchSeed assumes a sorted list
+	// MatchSeed requires a sorted list - maybe MatchSeed should do sorting?
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Text < results[j].Text {
 			return true
@@ -155,15 +163,24 @@ func CompleteGocode(text string, pos token.Position) (matches complete.Completio
 }
 
 // CompleteEdit uses the selected completion to edit the text
-func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
+func CompleteEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
 	s, delta = complete.EditWord(text, cursorPos, selection, seed)
 	return s, delta
 }
 
 // CompleteGo is not being used - it calls a new code completer that was started but is not
 // under development at this time
-func CompleteGo(text string, pos token.Position) (matches complete.Completions, seed string) {
-	pos.Filename = string(samplefile)
+func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+	var txbuf *giv.TextBuf
+	switch t := data.(type) {
+	case *giv.TextView:
+		txbuf = t.Buf
+	}
+	if txbuf == nil {
+		log.Printf("complete.CompleteGo: txbuf is nil - can't do code completion\n")
+		return
+	}
+
 	textbytes := make([]byte, 0, txbuf.NLines*40)
 	for _, lr := range txbuf.Lines {
 		textbytes = append(textbytes, []byte(string(lr))...)

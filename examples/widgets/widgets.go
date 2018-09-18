@@ -257,7 +257,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
-	edit1.SetCompleter(nil, Complete, CompleteEdit) // gets us word demo completion
+	edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
 	edit1.TextFieldSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
 	})
@@ -370,7 +370,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(text string, pos token.Position) (matches complete.Completions, seed string) {
+func Complete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
 	seed = complete.SeedWhiteSpace(text)
 	possibles := complete.MatchSeedString(words, seed)
 	for _, p := range possibles {
@@ -380,7 +380,7 @@ func Complete(text string, pos token.Position) (matches complete.Completions, se
 	return matches, seed
 }
 
-func CompleteEdit(text string, cursorPos int, selection string, seed string) (s string, delta int) {
+func CompleteEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
 	s, delta = complete.EditWord(text, cursorPos, selection, seed)
 	return s, delta
 }

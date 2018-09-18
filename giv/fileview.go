@@ -684,7 +684,7 @@ func (fv *FileView) Style2D() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion
 
-func (fv *FileView) FileComplete(text string, pos token.Position) (matches complete.Completions, seed string) {
+func (fv *FileView) FileComplete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -711,7 +711,7 @@ func (fv *FileView) FileComplete(text string, pos token.Position) (matches compl
 	return matches, seed
 }
 
-func (fv *FileView) PathComplete(path string, pos token.Position) (matches complete.Completions, seed string) {
+func (fv *FileView) PathComplete(data interface{}, path string, pos token.Position) (matches complete.Completions, seed string) {
 	dir, seed := filepath.Split(path)
 	d, err := os.Open(dir)
 	if err != nil {
@@ -738,14 +738,14 @@ func (fv *FileView) PathComplete(path string, pos token.Position) (matches compl
 	return matches, seed
 }
 
-func (fv *FileView) PathCompleteEdit(text string, cursorPos int, completion string, seed string) (path string, delta int) {
+func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (path string, delta int) {
 	path, delta = complete.EditBasic(text, cursorPos, completion, seed)
 	path = path + string(filepath.Separator)
 	delta += 1
 	return path, delta
 }
 
-func (fv *FileView) FileCompleteEdit(text string, cursorPos int, completion string, seed string) (file string, delta int) {
+func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (file string, delta int) {
 	file, delta = complete.EditBasic(text, cursorPos, completion, seed)
 	return file, delta
 }
