@@ -34,6 +34,9 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+const force = true
+const dontforce = false
+
 // TextViewOpts contains options for TextView editing
 type TextViewOpts struct {
 	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
@@ -1489,7 +1492,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 //    Complete
 
 // OfferComplete pops up a menu of possible completions
-func (tv *TextView) OfferComplete() {
+func (tv *TextView) OfferComplete(forcecomplete bool) {
 	if tv.Complete == nil {
 		return
 	}
@@ -1506,9 +1509,12 @@ func (tv *TextView) OfferComplete() {
 		s = string(tbe.ToBytes())
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
+	if len(s) == 0 && !forcecomplete {
+		return
+	}
+
 	tpos := token.Position{} // text position
 	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
-	//fmt.Println(count)
 	tpos.Line = tv.CursorPos.Ln
 	tpos.Column = tv.CursorPos.Ch
 	tpos.Offset = count
@@ -1570,7 +1576,7 @@ func (tv *TextView) CompleteExtend(s string) {
 		win := tv.ParentWindow()
 		win.ClosePopup(win.Popup)
 		tv.InsertAtCursor([]byte(s))
-		tv.OfferComplete()
+		tv.OfferComplete(dontforce)
 	}
 }
 
@@ -2415,13 +2421,13 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
-		tv.OfferComplete()
+		tv.OfferComplete(dontforce)
 	case gi.KeyFunMoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
-		tv.OfferComplete()
+		tv.OfferComplete(dontforce)
 	case gi.KeyFunMoveUp:
 		tv.ISearchCancel()
 		kt.SetProcessed()
@@ -2502,7 +2508,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		} else {
 			kt.SetProcessed()
 			tv.CursorBackspace(1)
-			tv.OfferComplete()
+			tv.OfferComplete(dontforce)
 		}
 	case gi.KeyFunKill:
 		tv.ISearchCancel()
@@ -2531,7 +2537,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunComplete:
 		tv.ISearchCancel()
 		kt.SetProcessed()
-		tv.OfferComplete()
+		tv.OfferComplete(force)
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
 		tv.CursorRecenter()
@@ -2570,7 +2576,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
 				}
-				tv.OfferComplete()
+				tv.OfferComplete(dontforce)
 			}
 		}
 	}
