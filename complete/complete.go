@@ -146,13 +146,17 @@ func SeedGolang(text string) string {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
-		if unicode.IsSpace(r) {
+		if unicode.IsSpace(r) || r == '.' {
 			seedStart = i + 1
 			break
 		}
 	}
 	seed := text[seedStart:]
-	seed = strings.TrimPrefix(seed, "[]")
+	if strings.HasPrefix(seed, "[]") {
+		seed = strings.TrimPrefix(seed, "[]")
+		return seed
+	}
+
 	return seed
 }
 
