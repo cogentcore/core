@@ -101,6 +101,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * TextBuf: update start / end for multi-line updates -- cache and send full update to views
 
 * TextView:
+   + select / space / return on links in inactive mode shoudl activate link, and why
+			is typing working on inactive mode anyway!?
    + see Gide for misc other updates -- isearch too slow, etc
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
