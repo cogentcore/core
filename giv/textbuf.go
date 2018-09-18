@@ -264,6 +264,17 @@ func (tb *TextBuf) AddView(vw *TextView) {
 	tb.TextBufSig.Connect(vw.This, TextViewBufSigRecv)
 }
 
+// DeleteView removes given viewer from our buffer
+func (tb *TextBuf) DeleteView(vw *TextView) {
+	for i, tve := range tb.Views {
+		if tve == vw {
+			tb.Views = append(tb.Views[:i], tb.Views[i+1:]...)
+			break
+		}
+	}
+	tb.TextBufSig.Disconnect(vw.This)
+}
+
 // SetMimetype sets the Mimetype and HiLang based on the given filename
 func (tb *TextBuf) SetMimetype(filename string) {
 	// todo: use chroma too
@@ -361,6 +372,29 @@ func (tp *TextPos) IsLess(cmp TextPos) bool {
 	default:
 		return false
 	}
+}
+
+// FromString decodes text position from a string representation of form:
+// [#]LxxCxx -- used in e.g., URL links -- returns true if successful
+func (tp *TextPos) FromString(link string) bool {
+	link = strings.TrimPrefix(link, "#")
+	lidx := strings.Index(link, "L")
+	cidx := strings.Index(link, "C")
+
+	switch {
+	case lidx >= 0 && cidx >= 0:
+		fmt.Sscanf(link, "L%dC%d", &tp.Ln, &tp.Ch)
+		tp.Ln-- // link is 1-based, we use 0-based
+	case lidx >= 0:
+		fmt.Sscanf(link, "L%d", &tp.Ln)
+		tp.Ln-- // link is 1-based, we use 0-based
+	case cidx >= 0:
+		fmt.Sscanf(link, "C%d", &tp.Ch)
+	default:
+		// todo: could support other formats
+		return false
+	}
+	return true
 }
 
 // TextRegion represents a text region as a start / end position

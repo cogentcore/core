@@ -571,6 +571,7 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (sv *SliceView) ScrollToRow(row int) bool {
+	row = gi.MinInt(row, sv.BuiltSize-1)
 	sg, _ := sv.SliceGrid()
 	if widg, ok := sv.RowFirstWidget(row); ok {
 		return sg.ScrollToItem(widg)
@@ -798,9 +799,7 @@ func (sv *SliceView) SelectAllRows() {
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
 func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
-	if row >= sv.BuiltSize {
-		row = sv.BuiltSize - 1
-	}
+	row = gi.MinInt(row, sv.BuiltSize-1)
 	if row < 0 {
 		row = 0
 	}

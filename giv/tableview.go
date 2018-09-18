@@ -186,23 +186,25 @@ func (tv *TableView) StructType() reflect.Type {
 // CacheVisFields computes the number of visible fields in nVisFields and
 // caches those to skip in fieldSkip
 func (tv *TableView) CacheVisFields() {
-	tv.StructType()
-	nfld := tv.StruType.NumField()
-	tv.VisFields = make([]reflect.StructField, 0, nfld)
-	for fli := 0; fli < nfld; fli++ {
-		fld := tv.StruType.Field(fli)
+	styp := tv.StructType()
+	tv.VisFields = make([]reflect.StructField, 0, 20)
+	kit.FlatFieldsTypeFunc(styp, func(typ reflect.Type, fld reflect.StructField) bool {
 		tvtag := fld.Tag.Get("tableview")
+		add := true
 		if tvtag != "" {
 			if tvtag == "-" {
-				continue
+				add = false
 			} else if tvtag == "-select" && tv.IsInactive() {
-				continue
+				add = false
 			} else if tvtag == "-edit" && !tv.IsInactive() {
-				continue
+				add = false
 			}
 		}
-		tv.VisFields = append(tv.VisFields, fld)
-	}
+		if add {
+			tv.VisFields = append(tv.VisFields, fld)
+		}
+		return true
+	})
 	tv.NVisFields = len(tv.VisFields)
 }
 
@@ -999,6 +1001,7 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (tv *TableView) ScrollToRow(row int) bool {
+	row = gi.MinInt(row, tv.BuiltSize-1)
 	sgf := tv.SliceGrid()
 	if widg, ok := tv.RowFirstWidget(row); ok {
 		return sgf.ScrollToItem(widg)
@@ -1254,9 +1257,7 @@ func (tv *TableView) SelectAllRows() {
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
 func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
-	if row >= tv.BuiltSize {
-		row = tv.BuiltSize - 1
-	}
+	row = gi.MinInt(row, tv.BuiltSize-1)
 	if row < 0 {
 		row = 0
 	}

@@ -630,7 +630,7 @@ var ButtonProps = ki.Props{
 	"border-style":  BorderSolid,
 	"padding":       units.NewValue(4, units.Px),
 	"margin":        units.NewValue(2, units.Px),
-	"min-width":     units.NewValue(1, units.Ch),
+	"min-width":     units.NewValue(1, units.Em),
 	"min-height":    units.NewValue(1, units.Em),
 	// "box-shadow.h-offset": units.NewValue(10, units.Px),
 	// "box-shadow.v-offset": units.NewValue(10, units.Px),

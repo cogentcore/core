@@ -160,6 +160,7 @@ func (tf *TextField) EditDone() {
 		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Txt)
 	}
 	tf.ClearSelected()
+	tf.ClearCursor()
 }
 
 // Revert aborts editing and reverts to last saved text
@@ -687,6 +688,12 @@ func (tf *TextField) StartCursor() {
 		tf.RenderCursor(true)
 	}
 	BlinkingTextField = tf
+}
+
+// ClearCursor turns off cursor and stops it from blinking
+func (tf *TextField) ClearCursor() {
+	tf.StopCursor()
+	tf.RenderCursor(false)
 }
 
 // StopCursor stops the cursor from blinking

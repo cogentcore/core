@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
+	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -58,6 +59,12 @@ type ParamPrefs struct {
 	LocalMainMenu   bool `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
 }
 
+// User basic user information that might be needed for different apps
+type User struct {
+	user.User
+	Email string `desc:"default email address -- e.g., for recording changes in a version control system"`
+}
+
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
@@ -73,6 +80,7 @@ type Preferences struct {
 	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	FontFamily      FontName               `desc:"default font family when otherwise not specified"`
 	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
+	User            User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
 	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
 	FileViewSort    string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
@@ -138,6 +146,7 @@ func (pf *Preferences) Defaults() {
 	pf.FontFamily = "Go"
 	pf.SavedPathsMax = 20
 	pf.KeyMap = DefaultKeyMap
+	pf.UpdateUser()
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
@@ -156,6 +165,11 @@ func (pf *Preferences) Open() error {
 	if pf.SaveKeyMaps {
 		AvailKeyMaps.OpenPrefs()
 	}
+
+	if pf.User.Username == "" {
+		pf.UpdateUser()
+	}
+
 	pf.Changed = false
 	return err
 }
@@ -183,9 +197,9 @@ func (pf *Preferences) Save() error {
 // OpenColors colors from a JSON-formatted file.
 func (pf *Preferences) OpenColors(filename FileName) error {
 	err := pf.Colors.OpenJSON(filename)
-	if err == nil {
-		pf.Update()
-	}
+	// if err == nil {
+	// 	pf.Update() // no!  this recolors the dialog as it is closing!  do it separately
+	// }
 	pf.Changed = true
 	return err
 }
@@ -304,6 +318,14 @@ func (pf *Preferences) EditKeyMaps() {
 	pf.SaveKeyMaps = true
 	pf.Changed = true
 	TheViewIFace.KeyMapsView(&AvailKeyMaps)
+}
+
+// UpdateUser gets the user info from the OS
+func (pf *Preferences) UpdateUser() {
+	usr, err := user.Current()
+	if err == nil {
+		pf.User.User = *usr
+	}
 }
 
 // OpenJSON opens colors from a JSON-formatted file.

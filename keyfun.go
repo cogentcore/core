@@ -74,6 +74,7 @@ const (
 	KeyFunComplete
 	KeyFunSearch // Ctrl+S in emacs -- more interactive type of search
 	KeyFunFind   // Command+F full-dialog find
+	KeyFunJump
 	KeyFunsN
 )
 
@@ -625,6 +626,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+.":               KeyFunComplete,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
+		"Control+J":               KeyFunJump,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -767,6 +769,9 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Control+S":               KeyFunSearch,
+		"Meta+F":                  KeyFunFind,
+		"Control+J":               KeyFunJump,
 	}},
 	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,

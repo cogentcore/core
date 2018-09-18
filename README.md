@@ -94,10 +94,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* getting mysterious crashes in clearClip and closewindow on mac in cocoa.m -- hard to debug what is going on.. :(
+
 * drag on textview should prevent DND -- dnd not getting "processed"
 
+* TextBuf: update start / end for multi-line updates -- cache and send full update to views
+
 * TextView:
-	+ losing line numbers when typing new text, in some select cases
+   + see Gide for misc other updates -- isearch too slow, etc
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ optimize wraparound multi-span rendering -- if no change in start of line, don't re render!
 	+ cache keys if typing faster than can be processed -- need to check lag on new key?  later..
@@ -136,5 +140,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * Reminder: grep all todo: in code
 
 	
+
 
 

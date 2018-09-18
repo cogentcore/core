@@ -80,6 +80,7 @@ type TextView struct {
 	SearchPos         int                       `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
 	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	ISearchStartPos   TextPos                   `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 	TextViewSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
 	LinkSig           ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles       [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
@@ -222,9 +223,17 @@ func (tv *TextView) ResetState() {
 
 // SetBuf sets the TextBuf that this is a view of, and interconnects their signals
 func (tv *TextView) SetBuf(buf *TextBuf) {
-	tv.ResetState()
+	if buf != nil && tv.Buf == buf {
+		return
+	}
+	if tv.Buf != nil {
+		tv.Buf.DeleteView(tv)
+	}
 	tv.Buf = buf
-	buf.AddView(tv)
+	tv.ResetState()
+	if buf != nil {
+		buf.AddView(tv)
+	}
 	tv.LayoutAllLines(false)
 	tv.SetFullReRender()
 	tv.UpdateSig()
@@ -609,9 +618,11 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 				tv.LayoutAllLines(false)
 				return true
 			}
-			b := bytes.TrimSuffix(htmlBuf.Bytes(), []byte(`
-</span><span class="c1"></span></pre>`)) // comments
-			b = bytes.TrimSuffix(b, []byte("\n</pre>")) // other stuff
+			b := htmlBuf.Bytes()
+			lfidx := bytes.Index(b, []byte("\n"))
+			if lfidx > 0 {
+				b = b[:lfidx]
+			}
 			tv.Markup[ln] = b
 			tv.HasMarkup[ln] = true
 			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
@@ -652,23 +663,35 @@ func (tv *TextView) CursorMovedSig() {
 	tv.TextViewSig.Emit(tv.This, int64(TextViewCursorMoved), tv.CursorPos)
 }
 
+// ValidCursor returns a cursor that is in a valid range
+func (tv *TextView) ValidCursor(pos TextPos) TextPos {
+	if tv.NLines == 0 {
+		return TextPosZero
+	}
+	if pos.Ln < 0 {
+		pos.Ln = 0
+	}
+	pos.Ln = gi.MinInt(pos.Ln, len(tv.Buf.Lines)-1)
+	llen := len(tv.Buf.Lines[pos.Ln])
+	pos.Ch = gi.MinInt(pos.Ch, llen)
+	if pos.Ch < 0 {
+		pos.Ch = 0
+	}
+	return pos
+}
+
+// ValidateCursor sets current cursor to a valid cursor position
+func (tv *TextView) ValidateCursor() {
+	tv.CursorPos = tv.ValidCursor(tv.CursorPos)
+}
+
 // SetCursor sets a new cursor position, enforcing it in range
 func (tv *TextView) SetCursor(pos TextPos) {
 	if tv.NLines == 0 {
 		tv.CursorPos = TextPosZero
 		return
 	}
-	if pos.Ln >= len(tv.Buf.Lines) {
-		pos.Ln = len(tv.Buf.Lines) - 1
-	}
-	llen := len(tv.Buf.Lines[pos.Ln])
-	if pos.Ch >= llen {
-		pos.Ch = llen
-	}
-	if pos.Ch < 0 {
-		pos.Ch = 0
-	}
-	tv.CursorPos = pos
+	tv.CursorPos = tv.ValidCursor(pos)
 	tv.CursorMovedSig()
 }
 
@@ -698,6 +721,7 @@ func (tv *TextView) CursorSelect(org TextPos) {
 
 // CursorForward moves the cursor forward
 func (tv *TextView) CursorForward(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch++
@@ -742,6 +766,7 @@ func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
 
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -777,6 +802,7 @@ func (tv *TextView) CursorDown(steps int) {
 // CursorPageDown moves the cursor down page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageDown(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		lvln := tv.LastVisibleLine(tv.CursorPos.Ln)
@@ -794,6 +820,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tv *TextView) CursorBackward(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch--
@@ -820,6 +847,7 @@ func (tv *TextView) CursorBackward(steps int) {
 
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -861,6 +889,7 @@ func (tv *TextView) CursorUp(steps int) {
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageUp(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		lvln := tv.FirstVisibleLine(tv.CursorPos.Ln)
@@ -879,6 +908,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 // CursorRecenter re-centers the view around the cursor position, toggling
 // between putting cursor in middle, top, and bottom of view
 func (tv *TextView) CursorRecenter() {
+	tv.ValidateCursor()
 	cur := (tv.lastRecenter + 1) % 3
 	switch cur {
 	case 0:
@@ -894,6 +924,7 @@ func (tv *TextView) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartLine() {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ch = 0
 	tv.CursorCol = tv.CursorPos.Ch
@@ -906,6 +937,7 @@ func (tv *TextView) CursorStartLine() {
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartDoc() {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
 	tv.CursorPos.Ch = 0
@@ -918,6 +950,7 @@ func (tv *TextView) CursorStartDoc() {
 
 // CursorEndLine moves the cursor to the end of the text
 func (tv *TextView) CursorEndLine() {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
@@ -937,6 +970,7 @@ func (tv *TextView) CursorEndLine() {
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (tv *TextView) CursorEndDoc() {
+	tv.ValidateCursor()
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 	org := tv.CursorPos
@@ -955,6 +989,7 @@ func (tv *TextView) CursorEndDoc() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tv *TextView) CursorBackspace(steps int) {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -970,6 +1005,7 @@ func (tv *TextView) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tv *TextView) CursorDelete(steps int) {
+	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
 		return
@@ -983,6 +1019,7 @@ func (tv *TextView) CursorDelete(steps int) {
 
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
+	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.CursorPos.Ch == 0 && len(tv.Buf.Lines[tv.CursorPos.Ln]) == 0 {
 		tv.CursorForward(1)
@@ -992,6 +1029,31 @@ func (tv *TextView) CursorKill() {
 	tv.Buf.DeleteText(org, tv.CursorPos, true)
 	tv.SetCursorShow(org)
 }
+
+// JumpToLinePrompt jumps to given line number (minus 1) from prompt
+func (tv *TextView) JumpToLinePrompt() {
+	gi.StringPromptDialog(tv.Viewport, "", "Line no..",
+		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
+		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			dlg := send.(*gi.Dialog)
+			if sig == int64(gi.DialogAccepted) {
+				val := gi.StringPromptDialogValue(dlg)
+				ln, ok := kit.ToInt(val)
+				if ok {
+					tv.JumpToLine(int(ln))
+				}
+			}
+		})
+
+}
+
+// JumpToLine jumps to given line number (minus 1)
+func (tv *TextView) JumpToLine(ln int) {
+	tv.SetCursorShow(TextPos{Ln: ln})
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Undo / Redo
 
 // Undo undoes previous action
 func (tv *TextView) Undo() {
@@ -1024,6 +1086,9 @@ func (tv *TextView) Redo() {
 ///////////////////////////////////////////////////////////////////////////////
 //    Search / Find
 
+// TextViewMaxFindHighlights is the maximum number of regions to highlight on find
+var TextViewMaxFindHighlights = 50
+
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
@@ -1046,6 +1111,9 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 	hi := make([]TextRegion, len(matches))
 	for i, m := range matches {
 		hi[i] = NewTextRegionLen(m, fsz)
+		if i > TextViewMaxFindHighlights {
+			break
+		}
 	}
 	tv.Highlights = hi
 	tv.Refresh()
@@ -1094,6 +1162,7 @@ func (tv *TextView) ISearch() {
 		}
 	} else {
 		tv.ISearchMode = true
+		tv.ISearchStartPos = tv.CursorPos
 		tv.ISearchCase = false
 		tv.SearchMatches = nil
 		tv.SearchPos = -1
@@ -1120,7 +1189,7 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 	}
 	got := false
 	for i, pos := range tv.SearchMatches {
-		if pos.Ln >= tv.CursorPos.Ln {
+		if tv.CursorPos.IsLess(pos) {
 			tv.SearchPos = i
 			tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
 			tv.SetCursor(pos)
@@ -1205,6 +1274,7 @@ func (tv *TextView) EscPressed() {
 	switch {
 	case tv.ISearchMode:
 		tv.ISearchCancel()
+		tv.SetCursorShow(tv.ISearchStartPos)
 	case tv.HasSelection():
 		tv.SelectReset()
 	}
@@ -2413,6 +2483,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunAbort:
 		kt.SetProcessed()
 		tv.EscPressed()
+	case gi.KeyFunJump:
+		kt.SetProcessed()
+		tv.JumpToLinePrompt()
 	}
 	if tv.IsInactive() || kt.IsProcessed() {
 		return
@@ -2508,7 +2581,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (tv *TextView) OpenLink(tl *gi.TextLink) {
-	fmt.Printf("opening link: %v\n", tl.URL)
+	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
 		if gi.TextLinkHandler != nil {
 			if gi.TextLinkHandler(*tl) {

@@ -706,7 +706,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
-	if !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
+	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
 		w.OverTexActive = false
 		return
 	}
@@ -1879,7 +1879,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	updt := w.UpdateStart()
 	if w.Focus != nil {
 		nii, ni := KiToNode2D(w.Focus)
-		if ni != nil {
+		if ni != nil && ni.This != nil {
 			bitflag.Clear(&ni.Flag, int(HasFocus))
 			nii.FocusChanged2D(FocusLost)
 		}
@@ -1890,12 +1890,14 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		return true
 	}
 	nii, ni := KiToNode2D(k)
-	if ni != nil {
-		bitflag.Set(&ni.Flag, int(HasFocus))
-		w.FocusActive = true
-		nii.FocusChanged2D(FocusGot)
+	if ni == nil || ni.This == nil { // only 2d for now
+		w.Focus = nil
+		return false
 	}
-	w.ClearNonFocus() // todo: maybe don't need this..
+	bitflag.Set(&ni.Flag, int(HasFocus))
+	w.FocusActive = true
+	nii.FocusChanged2D(FocusGot)
+	// w.ClearNonFocus() // todo: maybe don't need this..
 	w.UpdateEnd(updt)
 	return true
 }
@@ -1920,7 +1922,7 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 				return false
 			}
 			_, ni := KiToNode2D(k)
-			if ni == nil {
+			if ni == nil || ni.This == nil {
 				return true
 			}
 			if foc == k { // current focus can be a non-can-focus item
@@ -1952,7 +1954,7 @@ func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
 		return true
 	}
 	_, ni := KiToNode2D(foc)
-	if ni == nil {
+	if ni == nil || ni.This == nil {
 		return false
 	}
 	if ni.CanFocus() {
@@ -1983,7 +1985,7 @@ func (w *Window) FocusPrev(foc ki.Ki) bool {
 		}
 		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
-		if ni == nil {
+		if ni == nil || ni.This == nil {
 			return true
 		}
 		if foc == k {
@@ -2017,7 +2019,7 @@ func (w *Window) FocusLast() bool {
 	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
 		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
-		if ni == nil {
+		if ni == nil || ni.This == nil {
 			return true
 		}
 		if !ni.CanFocus() {
@@ -2049,7 +2051,7 @@ func (w *Window) ClearNonFocus() {
 		}
 		// todo: see about 3D guys
 		nii, ni := KiToNode2D(k)
-		if ni == nil {
+		if ni == nil || ni.This == nil {
 			return true
 		}
 		if w.Focus == k {
@@ -2088,7 +2090,11 @@ func (w *Window) PopFocus() {
 	}
 	sz := len(w.FocusStack)
 	w.Focus = nil
-	w.SetFocus(w.FocusStack[sz-1])
+	nxtf := w.FocusStack[sz-1]
+	_, ni := KiToNode2D(nxtf)
+	if ni != nil && ni.This != nil {
+		w.SetFocus(nxtf)
+	}
 	w.FocusStack = w.FocusStack[:sz-1]
 }
 
@@ -2102,7 +2108,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 		return
 	}
 	nii, ni := KiToNode2D(w.Focus)
-	if ni != nil {
+	if ni != nil && ni.This != nil {
 		if e.Pos().In(ni.WinBBox) {
 			if !w.FocusActive {
 				w.FocusActive = true
