@@ -255,7 +255,7 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: oswin.TheApp.About()}, true, false, nil, nil)
 		})
-	m.AddAction(ActOpts{Label: "GoGi Preferences", Shortcut: "Command+P"},
+	m.AddAction(ActOpts{Label: "GoGi Preferences…", Shortcut: "Command+P"},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			TheViewIFace.PrefsView(&Prefs)
 		})
