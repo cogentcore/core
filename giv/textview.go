@@ -326,7 +326,6 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 			if rerend {
-				fmt.Printf("rend all\n")
 				tv.RenderAllLines()
 			} else {
 				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
@@ -733,6 +732,8 @@ func (tv *TextView) CursorSelect(org TextPos) {
 
 // CursorForward moves the cursor forward
 func (tv *TextView) CursorForward(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -778,6 +779,8 @@ func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
 
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -814,6 +817,8 @@ func (tv *TextView) CursorDown(steps int) {
 // CursorPageDown moves the cursor down page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageDown(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -832,6 +837,8 @@ func (tv *TextView) CursorPageDown(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tv *TextView) CursorBackward(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -859,6 +866,8 @@ func (tv *TextView) CursorBackward(steps int) {
 
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -901,6 +910,8 @@ func (tv *TextView) CursorUp(steps int) {
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageUp(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -936,6 +947,8 @@ func (tv *TextView) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartLine() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ch = 0
@@ -949,6 +962,8 @@ func (tv *TextView) CursorStartLine() {
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartDoc() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
@@ -962,6 +977,8 @@ func (tv *TextView) CursorStartDoc() {
 
 // CursorEndLine moves the cursor to the end of the text
 func (tv *TextView) CursorEndLine() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
@@ -982,9 +999,9 @@ func (tv *TextView) CursorEndLine() {
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (tv *TextView) CursorEndDoc() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
 	org := tv.CursorPos
 	tv.CursorPos.Ln = gi.MaxInt(tv.NLines-1, 0)
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
@@ -1001,6 +1018,8 @@ func (tv *TextView) CursorEndDoc() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tv *TextView) CursorBackspace(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
@@ -1017,6 +1036,8 @@ func (tv *TextView) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tv *TextView) CursorDelete(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -1031,6 +1052,8 @@ func (tv *TextView) CursorDelete(steps int) {
 
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.CursorPos.Ch == 0 && len(tv.Buf.Lines[tv.CursorPos.Ln]) == 0 {
@@ -1061,7 +1084,9 @@ func (tv *TextView) JumpToLinePrompt() {
 
 // JumpToLine jumps to given line number (minus 1)
 func (tv *TextView) JumpToLine(ln int) {
+	updt := tv.Viewport.Win.UpdateStart()
 	tv.SetCursorShow(TextPos{Ln: ln})
+	tv.Viewport.Win.UpdateEnd(updt)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1069,6 +1094,8 @@ func (tv *TextView) JumpToLine(ln int) {
 
 // Undo undoes previous action
 func (tv *TextView) Undo() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tbe := tv.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -1083,6 +1110,8 @@ func (tv *TextView) Undo() {
 
 // Redo redoes previously undone action
 func (tv *TextView) Redo() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tbe := tv.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -1145,6 +1174,8 @@ func (tv *TextView) ISearchSig() {
 // ISearch is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
 func (tv *TextView) ISearch() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.ISearchMode {
 		if tv.ISearchString != "" { // already searching -- find next
 			sz := len(tv.SearchMatches)
@@ -1185,6 +1216,8 @@ func (tv *TextView) ISearch() {
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (tv *TextView) ISearchKeyInput(r rune) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.ISearchString == tv.PrevISearchString { // undo starting point
 		tv.ISearchString = ""
 	}
@@ -1225,6 +1258,8 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 
 // ISearchBackspace gets rid of one item in search string
 func (tv *TextView) ISearchBackspace() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.ISearchString == tv.PrevISearchString { // undo starting point
 		tv.ISearchString = ""
 		tv.SearchMatches = nil
@@ -1269,6 +1304,8 @@ func (tv *TextView) ISearchCancel() {
 	if !tv.ISearchMode {
 		return
 	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.PrevISearchString = tv.ISearchString
 	tv.PrevISearchCase = tv.ISearchCase
 	tv.ISearchString = ""
@@ -1277,12 +1314,14 @@ func (tv *TextView) ISearchCancel() {
 	tv.SearchPos = -1
 	tv.SearchMatches = nil
 	tv.Highlights = nil
-	tv.Refresh()
+	tv.RenderAllLines()
 	tv.ISearchSig()
 }
 
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
 func (tv *TextView) EscPressed() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	switch {
 	case tv.ISearchMode:
 		tv.ISearchCancel()
@@ -1331,10 +1370,11 @@ func (tv *TextView) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (tv *TextView) SelectAll() {
-	updt := tv.UpdateStart()
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.SelectReg.Start = TextPosZero
-	tv.SelectReg.End = TextPos{tv.Buf.NLines - 1, len(tv.Buf.Lines[tv.Buf.NLines-1])}
-	tv.UpdateEnd(updt)
+	tv.SelectReg.End = tv.Buf.EndPos()
+	tv.RenderAllLines()
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words
@@ -1419,6 +1459,8 @@ func (tv *TextView) RenderSelectLines() {
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tv *TextView) Cut() *TextBufEdit {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	org := tv.SelectReg.Start
 	cut := tv.DeleteSelection()
 	if cut != nil {
@@ -1439,6 +1481,8 @@ func (tv *TextView) DeleteSelection() *TextBufEdit {
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionaly resetting the current selection
 func (tv *TextView) Copy(reset bool) *TextBufEdit {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tbe := tv.Selection()
 	if tbe == nil {
 		return nil
@@ -1453,6 +1497,8 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 // Paste inserts text from the clipboard at current cursor position -- if
 // cursor is within a current selection, that selection is
 func (tv *TextView) Paste() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
@@ -1464,6 +1510,8 @@ func (tv *TextView) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tv *TextView) InsertAtCursor(txt []byte) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.HasSelection() {
 		tv.Cut()
 	}
@@ -1472,12 +1520,10 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 		npos := tv.CursorPos
 		npos.Ch++
 		tv.SetCursorShow(npos)
-		// tv.SetCursor(npos)
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
 	if tv.CursorPos != tbe.Reg.End {
 		tv.SetCursorShow(tbe.Reg.End)
-		// tv.SetCursor(tbe.Reg.End)
 	}
 }
 
@@ -2223,6 +2269,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			vprel := tBBox.Min.Sub(tv.VpBBox.Min)
 			tWinBBox := tv.WinBBox.Add(vprel)
 			vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
+			// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
 		}
 		tv.PopBounds()
 		vp.Win.UpdateEnd(updt)
@@ -2376,6 +2423,8 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 	if newPos == oldPos {
 		return
 	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.SetCursor(newPos)
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
 		if !tv.SelectMode && selMode != mouse.NoSelectMode {
