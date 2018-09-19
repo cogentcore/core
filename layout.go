@@ -631,7 +631,7 @@ func (ly *Layout) GatherSizesGrid() {
 // AllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Par == nil || !ly.LayData.AllocSize.IsZero() {
+	if ly.Par == nil || ly.Viewport == nil || !ly.LayData.AllocSize.IsZero() {
 		return
 	}
 	if ly.Par != ly.Viewport.This {
@@ -1730,11 +1730,11 @@ func (ly *Layout) Size2D(iter int) {
 }
 
 func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
-	if iter > 0 {
-		if Layout2DTrace {
-			fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.PathUnique(), iter, ly.NeedsRedo)
-		}
-	}
+	//if iter > 0 {
+	//	if Layout2DTrace {
+	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.PathUnique(), iter, ly.NeedsRedo)
+	//	}
+	//}
 	ly.AllocFromParent()                 // in case we didn't get anything
 	ly.Layout2DBase(parBBox, true, iter) // init style
 	switch ly.Lay {
