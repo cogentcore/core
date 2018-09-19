@@ -1512,7 +1512,10 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forcecomplete bool) {
-	if tv.Complete == nil || !tv.Opts.Completion || tv.ISearchMode {
+	if tv.Complete == nil || tv.ISearchMode {
+		return
+	}
+	if !tv.Opts.Completion && !forcecomplete {
 		return
 	}
 	win := tv.ParentWindow()
