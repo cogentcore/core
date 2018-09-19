@@ -746,7 +746,7 @@ func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos in
 }
 
 func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (file string, delta int) {
-	file, delta = complete.EditBasic(text, cursorPos, completion, seed)
+	file, delta = complete.EditWord(text, cursorPos, completion, seed)
 	return file, delta
 }
 
