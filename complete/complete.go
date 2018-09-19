@@ -181,11 +181,11 @@ func EditWord(text string, cp int, completion string, seed string) (newText stri
 	if len(s2) > 0 {
 		r := rune(s2[0])
 		// find the next whitespace or end of text
-		if !(unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)) {
+		if !(unicode.IsSpace(r)) {
 			count := len(s2)
 			for i, c := range s2 {
 				r = rune(c)
-				if unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) {
+				if unicode.IsSpace(r) {
 					s2 = s2[i:]
 					break
 				}
