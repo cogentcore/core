@@ -901,7 +901,7 @@ mainloop:
 		if lastWinMenuUpdate != WinNewCloseTime {
 			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
 				et != oswin.WindowPaintEvent {
-				w.MainMenuUpdateWindows()
+				// w.MainMenuUpdateWindows()
 				lastWinMenuUpdate = WinNewCloseTime
 				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 			}
@@ -987,7 +987,7 @@ mainloop:
 					ke := evi.(*key.ChordEvent)
 					ks := ke.Chord()
 					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
-						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						fmt.Printf("skipped %v key: %v lag %v\n", et, ks, lag)
 						lastSkipped = true
 						continue
 					} else {

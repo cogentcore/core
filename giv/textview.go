@@ -42,6 +42,7 @@ type TextViewOpts struct {
 	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
 	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
 	LineNos     bool `desc:"show line numbers at left end of editor"`
+	Completion  bool `desc:"use the completion system to suggest options while typing"`
 }
 
 // TextView is a widget for editing multiple lines of text (as compared to
@@ -280,7 +281,7 @@ func (tv *TextView) InsertLines(tbe *TextBufEdit) {
 	tv.NLines += nsz
 	tv.MarkupMu.Unlock()
 
-	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 	tv.RenderAllLines()
 }
 
@@ -300,7 +301,7 @@ func (tv *TextView) DeleteLines(tbe *TextBufEdit) {
 	tv.NLines -= dsz
 	tv.MarkupMu.Unlock()
 
-	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln)
+	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
 	tv.RenderAllLines()
 }
 
@@ -323,8 +324,9 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.InsertLines(tbe)
 		} else {
-			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 			if rerend {
+				fmt.Printf("rend all\n")
 				tv.RenderAllLines()
 			} else {
 				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
@@ -338,7 +340,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.DeleteLines(tbe)
 		} else {
-			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
+			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, true)
 			if rerend {
 				tv.RenderAllLines()
 			} else {
@@ -600,9 +602,10 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 // on a line, or word-wrap causes lines to increase in number of spans, then
 // calls LayoutAllLines to do a full-reparse, and returns true to indicate
 // need for a full re-render -- otherwise returns false and just these lines
-// need to be re-rendered.
-func (tv *TextView) LayoutLines(st, ed int) bool {
-	tv.MarkupMu.Lock()
+// need to be re-rendered..  isDel means this is a delete and thus offsets for all
+// higher lines need to be recomputed
+func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
+	// tv.MarkupMu.Lock()
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
@@ -639,22 +642,28 @@ func (tv *TextView) LayoutLines(st, ed int) bool {
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.MarkupMu.Unlock()
+	// tv.MarkupMu.Unlock()
 
 	// update all offsets to end of text
-	ofst := st - 1
-	if ofst < 0 {
-		ofst = 0
+	if rerend || isDel || st != ed {
+		ofst := st - 1
+		if ofst < 0 {
+			ofst = 0
+		}
+		off := tv.Offs[ofst]
+		for ln := ofst; ln < tv.NLines; ln++ {
+			tv.Offs[ln] = off
+			lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
+			off += lsz
+		}
+		extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
+		nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+		tv.ResizeIfNeeded(nwSz)
+	} else {
+		nwSz := gi.Vec2D{mxwd, 0}.ToPointCeil()
+		nwSz.Y = tv.LinesSize.Y
+		tv.ResizeIfNeeded(nwSz)
 	}
-	off := tv.Offs[ofst]
-	for ln := ofst; ln < tv.NLines; ln++ {
-		tv.Offs[ln] = off
-		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
-		off += lsz
-	}
-	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
-	tv.ResizeIfNeeded(nwSz)
 	return rerend
 }
 
@@ -1119,7 +1128,7 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 		}
 	}
 	tv.Highlights = hi
-	tv.Refresh()
+	tv.RenderAllLines()
 	return true
 }
 
@@ -1458,8 +1467,18 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	if tv.HasSelection() {
 		tv.Cut()
 	}
+	sz := len(txt)
+	if sz == 1 {
+		npos := tv.CursorPos
+		npos.Ch++
+		tv.SetCursorShow(npos)
+		// tv.SetCursor(npos)
+	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
-	tv.SetCursorShow(tbe.Reg.End)
+	if tv.CursorPos != tbe.Reg.End {
+		tv.SetCursorShow(tbe.Reg.End)
+		// tv.SetCursor(tbe.Reg.End)
+	}
 }
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
@@ -1493,7 +1512,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forcecomplete bool) {
-	if tv.Complete == nil {
+	if tv.Complete == nil || !tv.Opts.Completion || tv.ISearchMode {
 		return
 	}
 	win := tv.ParentWindow()
@@ -2571,7 +2590,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
-				if tv.ISearchMode { // todo: need this in non-interactive mode
+				if tv.ISearchMode { // todo: need this in inactive mode
 					tv.ISearchKeyInput(kt.Rune)
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
