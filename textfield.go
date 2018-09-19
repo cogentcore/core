@@ -179,6 +179,8 @@ func (tf *TextField) Revert() {
 
 // CursorForward moves the cursor forward
 func (tf *TextField) CursorForward(steps int) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	tf.CursorPos += steps
@@ -203,6 +205,8 @@ func (tf *TextField) CursorForward(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tf *TextField) CursorBackward(steps int) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	tf.CursorPos -= steps
@@ -228,6 +232,8 @@ func (tf *TextField) CursorBackward(steps int) {
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tf *TextField) CursorStart() {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	tf.CursorPos = 0
@@ -241,6 +247,8 @@ func (tf *TextField) CursorStart() {
 
 // CursorEnd moves the cursor to the end of the text
 func (tf *TextField) CursorEnd() {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	ed := len(tf.EditTxt)
@@ -259,6 +267,8 @@ func (tf *TextField) CursorEnd() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tf *TextField) CursorBackspace(steps int) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	if tf.HasSelection() {
 		tf.DeleteSelection()
 		return
@@ -278,6 +288,8 @@ func (tf *TextField) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tf *TextField) CursorDelete(steps int) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	if tf.HasSelection() {
 		tf.DeleteSelection()
 		return
@@ -296,6 +308,8 @@ func (tf *TextField) CursorDelete(steps int) {
 
 // CursorKill deletes text from cursor to end of text
 func (tf *TextField) CursorKill() {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	steps := len(tf.EditTxt) - tf.CursorPos
 	tf.CursorDelete(steps)
 }
@@ -426,6 +440,8 @@ func (tf *TextField) SelectUpdate() {
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tf *TextField) Cut() string {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
 	if cut != "" {
 		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut))
@@ -459,6 +475,8 @@ func (tf *TextField) DeleteSelection() string {
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionaly resetting the current selection
 func (tf *TextField) Copy(reset bool) string {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	tf.SelectUpdate()
 	if !tf.HasSelection() {
 		return ""
@@ -474,6 +492,8 @@ func (tf *TextField) Copy(reset bool) string {
 // Paste inserts text from the clipboard at current cursor position -- if
 // cursor is within a current selection, that selection is
 func (tf *TextField) Paste() {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
@@ -485,6 +505,8 @@ func (tf *TextField) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tf *TextField) InsertAtCursor(str string) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	if tf.HasSelection() {
@@ -906,6 +928,8 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
+	wupdt := tf.Viewport.Win.UpdateStart()
+	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
 	oldPos := tf.CursorPos

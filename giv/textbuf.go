@@ -279,7 +279,7 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 func (tb *TextBuf) SetMimetype(filename string) {
 	// todo: use chroma too
 	ext := strings.ToLower(filepath.Ext(filename))
-	strings.TrimSuffix(ext, "#") // autosave
+	ext = strings.TrimSuffix(ext, "#") // autosave
 	tb.Mimetype = mime.TypeByExtension(ext)
 	if hl, ok := ExtToHiLangMap[ext]; ok {
 		tb.HiLang = hl
@@ -658,14 +658,37 @@ func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
 	return tb.InsertText(ed, text, true)
 }
 
-// AppendTextLine appends one line of new text to end of buffer, using insert, returns edit
+// AppendTextLine appends one line of new text to end of buffer, using insert,
+// and appending a LF at the end of the line if it doesn't already have one.
+// Returns the edit region.
 func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
 	ed := tb.EndPos()
 	sz := len(text)
-	tcpy := make([]byte, sz+1)
-	copy(tcpy, text)
-	tcpy[sz] = '\n'
-	return tb.InsertText(ed, tcpy, true)
+	addLF := false
+	if sz > 0 {
+		if text[sz-1] != '\n' {
+			addLF = true
+		}
+	} else {
+		addLF = true
+	}
+	efft := text
+	if addLF {
+		tcpy := make([]byte, sz+1)
+		copy(tcpy, text)
+		tcpy[sz] = '\n'
+		efft = tcpy
+	}
+	tbe := tb.InsertText(ed, efft, true)
+	return tbe
+}
+
+// AutoscrollViews ensures that views are always viewing the end of the buffer
+func (tb *TextBuf) AutoScrollViews() {
+	for _, tv := range tb.Views {
+		tv.CursorPos = tb.EndPos()
+		tv.ScrollCursorInView()
+	}
 }
 
 // LineIndent returns the number of tabs or spaces at start of given line --

@@ -579,18 +579,20 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	if nwSz == tv.LinesSize {
 		return false
 	}
-	// fmt.Printf("needs resize: %v\n", nwSz)
+	// fmt.Printf("%v needs resize: %v\n", tv.Nm, nwSz)
 	tv.LinesSize = nwSz
 	diff := tv.SetSize()
 	if !diff {
+		// fmt.Printf("%v resize no setsize: %v\n", tv.Nm, nwSz)
 		return false
 	}
-	ly := tv.ParentScrollLayout()
+	ly := tv.ParentLayout()
 	if ly != nil {
 		tv.reLayout = true
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
 		tv.reLayout = false
+		// ly.RenderScrolls()
 	}
 	// tv.SetFullReRender()
 	return true
@@ -1515,16 +1517,8 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	if tv.HasSelection() {
 		tv.Cut()
 	}
-	sz := len(txt)
-	if sz == 1 {
-		npos := tv.CursorPos
-		npos.Ch++
-		tv.SetCursorShow(npos)
-	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
-	if tv.CursorPos != tbe.Reg.End {
-		tv.SetCursorShow(tbe.Reg.End)
-	}
+	tv.SetCursorShow(tbe.Reg.End)
 }
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
