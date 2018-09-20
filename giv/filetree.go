@@ -42,6 +42,7 @@ var FileTreeProps = ki.Props{}
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
+	ft.Kind = "Folder"
 	ft.OpenDirs.ClearFlags()
 	ft.ReadDir(path)
 }
