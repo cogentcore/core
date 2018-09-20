@@ -198,7 +198,7 @@ func FirstPassComplete(bytes []byte, pos token.Position) []Completion {
 		//fmt.Printf("%d\t%T\n", i, n)
 		switch n.(type) {
 		case *ast.BadDecl:
-			fmt.Printf("\t%T.Doc\n", n)
+			//fmt.Printf("\t%T.Doc\n", n)
 			if i+1 < len(path) {
 				n2 := path[i+1]
 				switch n2.(type) {
