@@ -1216,6 +1216,7 @@ func (tv *TextView) ISearch() {
 		tv.ISearchStartPos = tv.CursorPos
 		tv.ISearchCase = false
 		tv.SearchMatches = nil
+		tv.SelectReset()
 		tv.SearchPos = -1
 		tv.ISearchSig()
 	}
@@ -1271,10 +1272,12 @@ func (tv *TextView) ISearchBackspace() {
 	if tv.ISearchString == tv.PrevISearchString { // undo starting point
 		tv.ISearchString = ""
 		tv.SearchMatches = nil
+		tv.SelectReset()
 		tv.SearchPos = -1
 		tv.ISearchSig()
 	}
 	if len(tv.ISearchString) <= 1 {
+		tv.SelectReset()
 		tv.ISearchString = ""
 		tv.ISearchCase = false
 		return
@@ -1323,6 +1326,7 @@ func (tv *TextView) ISearchCancel() {
 	tv.SearchMatches = nil
 	tv.Highlights = nil
 	tv.RenderAllLines()
+	tv.SelectReset()
 	tv.ISearchSig()
 }
 
@@ -2279,6 +2283,15 @@ func (tv *TextView) RenderLineNo(ln int) {
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
+	if st >= tv.NLines {
+		st = tv.NLines - 1
+	}
+	if ed >= tv.NLines {
+		ed = tv.NLines - 1
+	}
+	if st > ed {
+		return false
+	}
 	if tv.PushBounds() {
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
@@ -2437,6 +2450,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	lstY := tv.CharStartPos(TextPos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
+		si = gi.MinInt(si, nspan)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text) + 1
 		}

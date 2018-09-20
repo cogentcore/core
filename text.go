@@ -494,11 +494,13 @@ func (sr *SpanRender) TrimSpaceLeftLR() {
 		if unicode.IsSpace(sr.Text[0]) {
 			sr.Text = sr.Text[1:]
 			sr.Render = sr.Render[1:]
-			if sr.Render[0].Face == nil {
-				sr.Render[0].Face = srr0.Face
-			}
-			if sr.Render[0].Color == nil {
-				sr.Render[0].Color = srr0.Color
+			if len(sr.Render) > 0 {
+				if sr.Render[0].Face == nil {
+					sr.Render[0].Face = srr0.Face
+				}
+				if sr.Render[0].Color == nil {
+					sr.Render[0].Color = srr0.Color
+				}
 			}
 		} else {
 			break
@@ -546,15 +548,17 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 	sr.Render = sr.Render[:idx]
 	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
 	// sr.TrimSpaceLR()
-	nsr.TrimSpaceLR()
+	nsr.TrimSpaceLeftLR() // don't trim right!
 	// go back and find latest face and color -- each sr must start with valid one
-	nrr0 := &(nsr.Render[0])
-	face, color := sr.LastFont()
-	if nrr0.Face == nil {
-		nrr0.Face = face
-	}
-	if nrr0.Color == nil {
-		nrr0.Color = color
+	if len(nsr.Render) > 0 {
+		nrr0 := &(nsr.Render[0])
+		face, color := sr.LastFont()
+		if nrr0.Face == nil {
+			nrr0.Face = face
+		}
+		if nrr0.Color == nil {
+			nrr0.Color = color
+		}
 	}
 	return &nsr
 }
