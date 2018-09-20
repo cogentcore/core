@@ -170,6 +170,46 @@ func (tb *TextBuf) Save() error {
 	return tb.SaveAs(tb.Filename)
 }
 
+// Close closes the buffer -- prompts to save if changes, and disconnects from views
+func (tb *TextBuf) Close() bool {
+	if tb.Changed {
+		if tb.Filename != "" {
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Close Without Saving?",
+				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
+				[]string{"Save", "Close Without Saving", "Cancel"},
+				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						tb.Save()
+						tb.Close() // 2nd time through won't prompt
+					case 1:
+						tb.Changed = false
+						tb.AutoSaveDelete()
+						tb.Close()
+					}
+				})
+		} else {
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Close Without Saving?",
+				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
+				[]string{"Close Without Saving", "Cancel"},
+				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						tb.Changed = false
+						tb.AutoSaveDelete()
+						tb.Close()
+					case 1:
+					}
+				})
+		}
+		return false // awaiting decisions..
+	}
+	for _, tve := range tb.Views {
+		tve.SetBuf(nil) // automatically disconnects signals, views
+	}
+	return true
+}
+
 // AutoSaveFilename returns the autosave filename
 func (tb *TextBuf) AutoSaveFilename() string {
 	path, fn := filepath.Split(string(tb.Filename))

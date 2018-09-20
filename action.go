@@ -39,7 +39,7 @@ var ActionProps = ki.Props{
 	"color":            &Prefs.Colors.Font,
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(2, units.Px),
-	"min-width":        units.NewValue(1, units.Ch),
+	"min-width":        units.NewValue(1, units.Em),
 	"min-height":       units.NewValue(1, units.Em),
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),

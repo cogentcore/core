@@ -31,7 +31,8 @@ func KeyMapsView(km *gi.KeyMaps) {
 	title := mfr.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.SetText("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	title.SetProp("width", units.NewValue(30, units.Ch)) // need for wrap
-	title.SetProp("white-space", gi.WhiteSpaceNormal)    // wrap
+	title.SetStretchMaxWidth()
+	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 
 	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
 	tv.Viewport = vp

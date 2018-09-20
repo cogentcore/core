@@ -102,6 +102,7 @@ type TextView struct {
 	style        *chroma.Style
 	reLayout     bool
 	lastRecenter int
+	lastFilename gi.FileName
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -221,7 +222,7 @@ func (tv *TextView) ResetState() {
 	tv.SelectReset()
 	tv.Highlights = nil
 	tv.ISearchMode = false
-	if tv.Buf == nil || tv.NLines != tv.Buf.NLines { // don't reset if reopening..
+	if tv.Buf == nil || tv.lastFilename != tv.Buf.Filename { // don't reset if reopening..
 		tv.CursorPos = TextPos{}
 	}
 }
@@ -480,6 +481,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if tv.Sty.Font.Size.Val == 0 { // not yet styled
 		tv.StyleTextView()
 	}
+	tv.lastFilename = tv.Buf.Filename
 
 	tv.MarkupMu.Lock() // wait for prior markup if it is still happening
 	tv.HiInit()
@@ -607,6 +609,9 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 // need to be re-rendered..  isDel means this is a delete and thus offsets for all
 // higher lines need to be recomputed
 func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
+	if tv.Buf == nil || tv.Buf.NLines == 0 {
+		return false
+	}
 	// tv.MarkupMu.Lock()
 	sty := &tv.Sty
 	fst := sty.Font
@@ -679,7 +684,7 @@ func (tv *TextView) CursorMovedSig() {
 
 // ValidCursor returns a cursor that is in a valid range
 func (tv *TextView) ValidCursor(pos TextPos) TextPos {
-	if tv.NLines == 0 {
+	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		return TextPosZero
 	}
 	if pos.Ln < 0 {
@@ -1164,7 +1169,7 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 	return true
 }
 
-// ISearchMatches finds ISearch matches -- returns true if there are any
+// Matches finds ISearch matches -- returns true if there are any
 func (tv *TextView) ISearchMatches() bool {
 	return tv.FindMatches(tv.ISearchString, tv.ISearchCase)
 }
@@ -1237,7 +1242,7 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 	}
 	got := false
 	for i, pos := range tv.SearchMatches {
-		if tv.CursorPos.IsLess(pos) {
+		if pos == tv.CursorPos || tv.CursorPos.IsLess(pos) {
 			tv.SearchPos = i
 			tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
 			tv.SetCursor(pos)
@@ -2539,7 +2544,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	if kt.IsProcessed() {
 		return
 	}
-
+	if tv.Buf == nil || tv.Buf.NLines == 0 {
+		return
+	}
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case gi.KeyFunMoveRight:
@@ -2734,6 +2741,9 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 		tv.GrabFocus()
 	}
 	me.SetProcessed()
+	if tv.Buf == nil || tv.Buf.NLines == 0 {
+		return
+	}
 	pt := tv.PointToRelPos(me.Pos())
 	newPos := tv.PixelToCursor(pt)
 	switch me.Button {

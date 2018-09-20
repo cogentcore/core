@@ -764,4 +764,5 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac.Data = &nd
 		(*m)[i] = nac
 	}
+	md.Vp.Win.MainMenuUpdated()
 }

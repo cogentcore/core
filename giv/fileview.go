@@ -768,6 +768,30 @@ func (ft FileTime) String() string {
 	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
 }
 
+func (ft FileTime) MarshalBinary() ([]byte, error) {
+	return time.Time(ft).MarshalBinary()
+}
+
+func (ft FileTime) MarshalJSON() ([]byte, error) {
+	return time.Time(ft).MarshalJSON()
+}
+
+func (ft FileTime) MarshalText() ([]byte, error) {
+	return time.Time(ft).MarshalText()
+}
+
+func (ft *FileTime) UnmarshalBinary(data []byte) error {
+	return (*time.Time)(ft).UnmarshalBinary(data)
+}
+
+func (ft *FileTime) UnmarshalJSON(data []byte) error {
+	return (*time.Time)(ft).UnmarshalJSON(data)
+}
+
+func (ft *FileTime) UnmarshalText(data []byte) error {
+	return (*time.Time)(ft).UnmarshalText(data)
+}
+
 // note: rendering icons taking a fair amount of extra time
 
 // FileInfo represents the information about a given file / directory

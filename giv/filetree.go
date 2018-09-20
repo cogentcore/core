@@ -270,6 +270,16 @@ func (fn *FileNode) OpenBuf() error {
 	return fn.Buf.Open(fn.FPath)
 }
 
+// CloseBuf closes the file in its buffer if it is open -- returns true if closed
+func (fn *FileNode) CloseBuf() bool {
+	if fn.Buf == nil {
+		return false
+	}
+	fn.Buf.Close()
+	fn.Buf = nil
+	return true
+}
+
 // FindFile finds first node representing given file (false if not found) --
 // looks for full path names that have the given string as their suffix, so
 // you can include as much of the path (including whole thing) as is relevant
@@ -338,7 +348,7 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 	ecs := make([]FileNodeNameCount, len(cmap))
 	idx := 0
 	for key, val := range cmap {
-		ecs[idx] = FileNodeNameCount{key, val}
+		ecs[idx] = FileNodeNameCount{Name: key, Count: val}
 		idx++
 	}
 	sort.Slice(ecs, func(i, j int) bool {
