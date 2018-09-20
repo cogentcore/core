@@ -14,7 +14,6 @@ import (
 	"go/token"
 	"log"
 	"os/exec"
-	"sort"
 )
 
 var samplefile gi.FileName = "sample.in"
@@ -153,21 +152,7 @@ func CompleteGocode(data interface{}, text string, pos token.Position) (matches 
 		results = complete.GetCompletions(textbytes, pos)
 	}
 
-	// MatchSeed requires a sorted list - maybe MatchSeed should do sorting?
-	sort.Slice(results, func(i, j int) bool {
-		if results[i].Text < results[j].Text {
-			return true
-		}
-		if results[i].Text > results[j].Text {
-			return false
-		}
-		return results[i].Text < results[j].Text
-	})
-	if len(seed) > 0 {
-		matches = complete.MatchSeedCompletion(results, seed)
-	} else {
-		matches = results
-	}
+	matches = complete.MatchSeedCompletion(results, seed)
 	return matches, seed
 }
 
@@ -176,32 +161,3 @@ func CompleteEdit(data interface{}, text string, cursorPos int, selection string
 	s, delta = complete.EditWord(text, cursorPos, selection, seed)
 	return s, delta
 }
-
-// CompleteGo is not being used - it calls a new code completer that was started but is not
-// under development at this time
-//func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
-//	var txbuf *giv.TextBuf
-//	switch t := data.(type) {
-//	case *giv.TextView:
-//		txbuf = t.Buf
-//	}
-//	if txbuf == nil {
-//		log.Printf("complete.CompleteGo: txbuf is nil - can't do code completion\n")
-//		return
-//	}
-//
-//	textbytes := make([]byte, 0, txbuf.NLines*40)
-//	for _, lr := range txbuf.Lines {
-//		textbytes = append(textbytes, []byte(string(lr))...)
-//		textbytes = append(textbytes, '\n')
-//	}
-//	results, seed := complete.CompleteGo(textbytes, pos)
-//	if len(seed) > 0 {
-//		results = complete.MatchSeedString(results, seed)
-//	}
-//	for _, r := range results {
-//		m := complete.Completion{Text: r}
-//		matches = append(matches, m)
-//	}
-//	return matches, seed
-//}

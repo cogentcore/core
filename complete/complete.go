@@ -9,6 +9,7 @@ package complete
 
 import (
 	"go/token"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -30,31 +31,36 @@ type MatchFunc func(data interface{}, text string, pos token.Position) (matches 
 type EditFunc func(data interface{}, text string, cursorPos int, completion string, seed string) (newText string, delta int)
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
-// The list must be presorted. The seed is basically a prefix.
+// The seed is basically a prefix.
 func MatchSeedString(completions []string, seed string) (matches []string) {
 	matches = completions[0:0]
 	match_start := -1
 	match_end := -1
-	if len(seed) > 0 {
-		for i, s := range completions {
-			if match_end > -1 {
-				break
+	sort.Strings(completions)
+
+	if len(seed) == 0 {
+		matches = completions
+		return matches
+	}
+
+	for i, s := range completions {
+		if match_end > -1 {
+			break
+		}
+		if match_start == -1 {
+			if strings.HasPrefix(s, seed) {
+				match_start = i // first match in sorted list
 			}
-			if match_start == -1 {
-				if strings.HasPrefix(s, seed) {
-					match_start = i // first match in sorted list
-				}
-				continue
-			}
-			if match_start > -1 {
-				if strings.HasPrefix(s, seed) == false {
-					match_end = i
-				}
+			continue
+		}
+		if match_start > -1 {
+			if strings.HasPrefix(s, seed) == false {
+				match_end = i
 			}
 		}
-		if match_start > -1 && match_end == -1 { // everything possible was a match!
-			match_end = len(completions)
-		}
+	}
+	if match_start > -1 && match_end == -1 { // everything possible was a match!
+		match_end = len(completions)
 	}
 
 	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
@@ -65,31 +71,45 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 }
 
 // MatchSeedCompletion returns a list of matching completion structs given a list of possibilities and a seed.
-// The list must be presorted. The seed is basically a prefix.
+// The seed is basically a prefix.
 func MatchSeedCompletion(completions []Completion, seed string) (matches []Completion) {
 	matches = completions[0:0]
 	match_start := -1
 	match_end := -1
-	if len(seed) > 0 {
-		for i, c := range completions {
-			if match_end > -1 {
-				break
+
+	sort.Slice(completions, func(i, j int) bool {
+		if completions[i].Text < completions[j].Text {
+			return true
+		}
+		if completions[i].Text > completions[j].Text {
+			return false
+		}
+		return completions[i].Text < completions[j].Text
+	})
+
+	if len(seed) == 0 {
+		matches = completions
+		return matches
+	}
+
+	for i, c := range completions {
+		if match_end > -1 {
+			break
+		}
+		if match_start == -1 {
+			if strings.HasPrefix(c.Text, seed) {
+				match_start = i // first match in sorted list
 			}
-			if match_start == -1 {
-				if strings.HasPrefix(c.Text, seed) {
-					match_start = i // first match in sorted list
-				}
-				continue
-			}
-			if match_start > -1 {
-				if strings.HasPrefix(c.Text, seed) == false {
-					match_end = i
-				}
+			continue
+		}
+		if match_start > -1 {
+			if strings.HasPrefix(c.Text, seed) == false {
+				match_end = i
 			}
 		}
-		if match_start > -1 && match_end == -1 { // everything possible was a match!
-			match_end = len(completions)
-		}
+	}
+	if match_start > -1 && match_end == -1 { // everything possible was a match!
+		match_end = len(completions)
 	}
 
 	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
