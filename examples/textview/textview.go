@@ -78,6 +78,7 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.HiStyle = "emacs"
 	txed1.Opts.LineNos = true
+	txed1.Opts.Completion = true
 	txed1.SetCompleter(txed1, CompleteGocode, CompleteEdit)
 
 	// generally need to put text view within its own layout for scrolling
@@ -137,12 +138,20 @@ func CompleteGocode(data interface{}, text string, pos token.Position) (matches 
 	}
 
 	seed = complete.SeedGolang(text)
+
 	textbytes := make([]byte, 0, txbuf.NLines*40)
 	for _, lr := range txbuf.Lines {
 		textbytes = append(textbytes, []byte(string(lr))...)
 		textbytes = append(textbytes, '\n')
 	}
-	results := complete.GetCompletions(textbytes, pos)
+
+	// check first for file level declarations, import, const, type, var, func
+	// by parsing the file to create AST - if none returned let gocode have a try
+	var results []complete.Completion
+	results = complete.FirstPassComplete(textbytes, pos)
+	if len(results) == 0 { // no, continue on with gocode parsing which doesn't handle the file level decls
+		results = complete.GetCompletions(textbytes, pos)
+	}
 
 	// MatchSeed requires a sorted list - maybe MatchSeed should do sorting?
 	sort.Slice(results, func(i, j int) bool {
@@ -170,29 +179,29 @@ func CompleteEdit(data interface{}, text string, cursorPos int, selection string
 
 // CompleteGo is not being used - it calls a new code completer that was started but is not
 // under development at this time
-func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
-	var txbuf *giv.TextBuf
-	switch t := data.(type) {
-	case *giv.TextView:
-		txbuf = t.Buf
-	}
-	if txbuf == nil {
-		log.Printf("complete.CompleteGo: txbuf is nil - can't do code completion\n")
-		return
-	}
-
-	textbytes := make([]byte, 0, txbuf.NLines*40)
-	for _, lr := range txbuf.Lines {
-		textbytes = append(textbytes, []byte(string(lr))...)
-		textbytes = append(textbytes, '\n')
-	}
-	results, seed := complete.CompleteGo(textbytes, pos)
-	if len(seed) > 0 {
-		results = complete.MatchSeedString(results, seed)
-	}
-	for _, r := range results {
-		m := complete.Completion{Text: r}
-		matches = append(matches, m)
-	}
-	return matches, seed
-}
+//func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+//	var txbuf *giv.TextBuf
+//	switch t := data.(type) {
+//	case *giv.TextView:
+//		txbuf = t.Buf
+//	}
+//	if txbuf == nil {
+//		log.Printf("complete.CompleteGo: txbuf is nil - can't do code completion\n")
+//		return
+//	}
+//
+//	textbytes := make([]byte, 0, txbuf.NLines*40)
+//	for _, lr := range txbuf.Lines {
+//		textbytes = append(textbytes, []byte(string(lr))...)
+//		textbytes = append(textbytes, '\n')
+//	}
+//	results, seed := complete.CompleteGo(textbytes, pos)
+//	if len(seed) > 0 {
+//		results = complete.MatchSeedString(results, seed)
+//	}
+//	for _, r := range results {
+//		m := complete.Completion{Text: r}
+//		matches = append(matches, m)
+//	}
+//	return matches, seed
+//}

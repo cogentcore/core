@@ -175,3 +175,51 @@ func Funcs() []string {
 	sort.Strings(funcs)
 	return funcs
 }
+
+// FirstPassComplete handles some cases of completion that gocode either
+// doesn't handle or doesn't do well - this will be expanded to more cases
+func FirstPassComplete(bytes []byte, pos token.Position) []Completion {
+	var completions []Completion
+
+	src := string(bytes)
+	fs := token.NewFileSet()
+	f, _ := parser.ParseFile(fs, "src.go", src, parser.AllErrors)
+	//if err != nil {
+	//	log.Printf("could not parse %s: %v\n", f, err)
+	//}
+
+	start := token.Pos(pos.Offset)
+	end := start
+	path, _ := astutil.PathEnclosingInterval(f, start, end)
+
+	next := true
+	for i := 0; i < len(path) && next == true; i++ {
+		n := path[i]
+		//fmt.Printf("%d\t%T\n", i, n)
+		switch n.(type) {
+		case *ast.BadDecl:
+			fmt.Printf("\t%T.Doc\n", n)
+			if i+1 < len(path) {
+				n2 := path[i+1]
+				switch n2.(type) {
+				case *ast.File:
+					for _, aCandidate := range decls {
+						comp := Completion{Text: aCandidate}
+						completions = append(completions, comp)
+					}
+				}
+			}
+			next = false
+		case *ast.File:
+			//fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
+			for _, aCandidate := range decls {
+				comp := Completion{Text: aCandidate}
+				completions = append(completions, comp)
+			}
+			next = false
+		default:
+			next = false
+		}
+	}
+	return completions
+}
