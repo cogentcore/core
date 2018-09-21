@@ -34,7 +34,6 @@ func (vv *FontValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	ac.SetFullReRender()
 	txt := kit.ToString(vv.Value.Interface())
 	ac.SetProp("font-family", txt)
 	ac.SetText(txt)

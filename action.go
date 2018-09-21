@@ -50,8 +50,8 @@ var ActionProps = ki.Props{
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width":     units.NewValue(1, units.Ch),
-		"min-width": units.NewValue(1, units.Ch),
+		"width":     units.NewValue(.5, units.Ch),
+		"min-width": units.NewValue(.5, units.Ch),
 	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),

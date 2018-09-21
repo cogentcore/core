@@ -1806,7 +1806,7 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
-	case kf == gi.KeyFunSelectItem || kf == gi.KeyFunAccept || kt.Rune == ' ':
+	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
 		tv.TableViewSig.Emit(tv.This, int64(TableViewDoubleClicked), tv.SelectedIdx)
 		kt.SetProcessed()
 	}

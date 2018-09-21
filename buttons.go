@@ -442,7 +442,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kt := d.(*key.ChordEvent)
 		kf := KeyFun(kt.Chord())
-		if kf == KeyFunSelectItem || kf == KeyFunAccept || kt.Rune == ' ' {
+		if kf == KeyFunEnter || kf == KeyFunAccept || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {
 				kt.SetProcessed()
 				bbb.ButtonPressed()
@@ -643,8 +643,8 @@ var ButtonProps = ki.Props{
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#space": ki.Props{
-		"width":     units.NewValue(1, units.Ch),
-		"min-width": units.NewValue(1, units.Ch),
+		"width":     units.NewValue(.5, units.Ch),
+		"min-width": units.NewValue(.5, units.Ch),
 	},
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),

@@ -315,7 +315,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.ResetState()
-		tv.LayoutAllLines(false)
+		// tv.LayoutAllLines(false)
 		tv.SetFullReRender()
 		tv.UpdateSig()
 	case TextBufInsert:
@@ -419,6 +419,7 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	paloc := parw.LayData.AllocSizeOrig
 	if !paloc.IsZero() {
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubVal(spc * 2)
+		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
 		sz := tv.LayData.AllocSizeOrig
 		if sz.IsZero() {
@@ -528,7 +529,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	off := float32(0)
-	mxwd := float32(0)
+	mxwd := sz.X // always start with our render size
 
 	for ln := 0; ln < nln; ln++ {
 		if tv.HasMarkup[ln] {
@@ -596,9 +597,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
 		tv.reLayout = false
-		// ly.RenderScrolls()
 	}
-	// tv.SetFullReRender()
 	return true
 }
 
@@ -2717,14 +2716,16 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
 		tv.CursorRecenter()
-	case gi.KeyFunSelectItem: // enter
+	case gi.KeyFunEnter:
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			tv.InsertAtCursor([]byte("\n"))
 			if tv.Opts.AutoIndent {
-				tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
-				tv.CursorEndLine()
+				tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+				if tbe != nil {
+					tv.SetCursorShow(tbe.Reg.End)
+				}
 			}
 		}
 	case gi.KeyFunFocusNext: // tab

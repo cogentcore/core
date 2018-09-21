@@ -36,7 +36,6 @@ func (vv *IconValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
-	ac.SetFullReRender()
 	if gi.IconName(txt).IsNil() {
 		ac.SetIcon("blank")
 	} else {

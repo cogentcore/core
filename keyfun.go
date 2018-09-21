@@ -43,13 +43,13 @@ const (
 	KeyFunDocEnd  // end-of-doc Control / Alt / Shift +End
 	KeyFunWordRight
 	KeyFunWordLeft
-	KeyFunFocusNext  // tab
-	KeyFunFocusPrev  // shift-tab
-	KeyFunSelectItem // enter
+	KeyFunFocusNext // Tab
+	KeyFunFocusPrev // Shift-Tab
+	KeyFunEnter     // Enter / return key -- has various special functions
+	KeyFunAccept    // Ctrl+Enter = accept any changes and close dialog / move to next
 	KeyFunCancelSelect
 	KeyFunSelectMode
 	KeyFunSelectAll
-	KeyFunAccept // accept any changes and close dialog / move to next
 	KeyFunAbort
 	KeyFunEditItem
 	KeyFunCopy
@@ -485,8 +485,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+E":               KeyFunEnd,
 		"Tab":                     KeyFunFocusNext,
 		"Shift+Tab":               KeyFunFocusPrev,
-		"ReturnEnter":             KeyFunSelectItem,
-		"KeypadEnter":             KeyFunSelectItem,
+		"ReturnEnter":             KeyFunEnter,
+		"KeypadEnter":             KeyFunEnter,
 		"Shift+Control+A":         KeyFunSelectAll,
 		"Meta+A":                  KeyFunSelectAll,
 		"Control+G":               KeyFunCancelSelect,
@@ -579,8 +579,8 @@ var StdKeyMaps = KeyMaps{
 		"Alt+B":                   KeyFunWordLeft,
 		"Tab":                     KeyFunFocusNext,
 		"Shift+Tab":               KeyFunFocusPrev,
-		"ReturnEnter":             KeyFunSelectItem,
-		"KeypadEnter":             KeyFunSelectItem,
+		"ReturnEnter":             KeyFunEnter,
+		"KeypadEnter":             KeyFunEnter,
 		"Shift+Control+A":         KeyFunSelectAll,
 		"Meta+A":                  KeyFunSelectAll,
 		"Control+G":               KeyFunCancelSelect,
@@ -653,8 +653,8 @@ var StdKeyMaps = KeyMaps{
 		"Alt+RightArrow":  KeyFunEnd,
 		"Tab":             KeyFunFocusNext,
 		"Shift+Tab":       KeyFunFocusPrev,
-		"ReturnEnter":     KeyFunSelectItem,
-		"KeypadEnter":     KeyFunSelectItem,
+		"ReturnEnter":     KeyFunEnter,
+		"KeypadEnter":     KeyFunEnter,
 		"Control+A":       KeyFunSelectAll,
 		"Shift+Control+A": KeyFunCancelSelect,
 		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
@@ -728,8 +728,8 @@ var StdKeyMaps = KeyMaps{
 		"Alt+RightArrow":     KeyFunEnd,
 		"Tab":                KeyFunFocusNext,
 		"Shift+Tab":          KeyFunFocusPrev,
-		"ReturnEnter":        KeyFunSelectItem,
-		"KeypadEnter":        KeyFunSelectItem,
+		"ReturnEnter":        KeyFunEnter,
+		"KeypadEnter":        KeyFunEnter,
 		// "Shift+Control+A":     KeyFunSelectAll,
 		"Meta+A":                  KeyFunSelectAll,
 		"Control+G":               KeyFunCancelSelect,
@@ -798,8 +798,8 @@ var StdKeyMaps = KeyMaps{
 		"Alt+RightArrow":  KeyFunEnd,
 		"Tab":             KeyFunFocusNext,
 		"Shift+Tab":       KeyFunFocusPrev,
-		"ReturnEnter":     KeyFunSelectItem,
-		"KeypadEnter":     KeyFunSelectItem,
+		"ReturnEnter":     KeyFunEnter,
+		"KeypadEnter":     KeyFunEnter,
 		"Control+A":       KeyFunSelectAll,
 		"Shift+Control+A": KeyFunCancelSelect,
 		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
@@ -854,8 +854,8 @@ var StdKeyMaps = KeyMaps{
 		"Alt+RightArrow":  KeyFunEnd,
 		"Tab":             KeyFunFocusNext,
 		"Shift+Tab":       KeyFunFocusPrev,
-		"ReturnEnter":     KeyFunSelectItem,
-		"KeypadEnter":     KeyFunSelectItem,
+		"ReturnEnter":     KeyFunEnter,
+		"KeypadEnter":     KeyFunEnter,
 		"Control+A":       KeyFunSelectAll,
 		"Shift+Control+A": KeyFunCancelSelect,
 		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard

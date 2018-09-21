@@ -996,7 +996,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
-	case KeyFunSelectItem: // enter
+	case KeyFunEnter:
 		fallthrough
 	case KeyFunAccept: // ctrl+enter
 		tf.EditDone()

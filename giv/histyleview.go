@@ -83,7 +83,6 @@ func (vv *HiStyleValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
-	ac.SetFullReRender()
 	ac.SetText(txt)
 }
 

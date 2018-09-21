@@ -94,7 +94,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* entering newlines in *middle of* existing wrapped line mode not re-rendering properly, e.g., in .md files.  Just go to "line" in above line and hit enter to reproduce..
+* closing a buffer, and more generally sometimes, renders too-narrow box width.
 
 * scrolling in tabview is reverting to first tab -- tried fixing move2d but didn't work?
 
@@ -102,7 +102,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * select highlight on first line of multi-line not showing until you get to char1 -- also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
 
-* bold in **Markdown** causing a repeat of last two letters!  really throws things off.  
+* bold in **Markdown** causing a repeat of last two letters!  really throws things off -- this is coming from the chroma markup system!  need to do a fix and PR there..
 
 * fix embedded tags in pre html parser -- just need a simple stack..
 
