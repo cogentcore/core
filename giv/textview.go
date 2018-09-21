@@ -2773,6 +2773,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (tv *TextView) OpenLink(tl *gi.TextLink) {
+	tl.Widget = tv.This.(gi.Node2D)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
 		if gi.TextLinkHandler != nil {

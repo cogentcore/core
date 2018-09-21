@@ -175,6 +175,7 @@ func (lb *Label) SetStateStyle() {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *TextLink) {
+	tl.Widget = lb.This.(Node2D)
 	if len(lb.LinkSig.Cons) == 0 {
 		if TextLinkHandler != nil {
 			if TextLinkHandler(*tl) {

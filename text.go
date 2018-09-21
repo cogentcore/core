@@ -598,6 +598,7 @@ type TextLink struct {
 	StartIdx  int      `desc:"index in StartSpan where link starts"`
 	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`
 	EndIdx    int      `desc:"index in EndSpan where link ends (index of last rune in label)"`
+	Widget    Node2D   `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
 }
 
 // Bounds returns the bounds of the link
