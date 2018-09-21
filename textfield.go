@@ -731,7 +731,7 @@ func (tf *TextField) RenderCursor(on bool) {
 	if win == nil {
 		return
 	}
-	if tf.PushBounds() {
+	if tf.InBounds() {
 		sp := tf.CursorSprite()
 		if on {
 			win.ActivateSprite(sp.Nm)
@@ -740,8 +740,7 @@ func (tf *TextField) RenderCursor(on bool) {
 		}
 		sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
 		win.RenderOverlays() // needs an explicit call!
-		tf.PopBounds()
-		win.UpdateSig() // publish
+		win.UpdateSig()      // publish
 	}
 }
 

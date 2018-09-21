@@ -103,6 +103,7 @@ type TextView struct {
 	reLayout     bool
 	lastRecenter int
 	lastFilename gi.FileName
+	lastWasTab   bool
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -959,8 +960,24 @@ func (tv *TextView) CursorStartLine() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	tv.CursorPos.Ch = 0
-	tv.CursorCol = tv.CursorPos.Ch
+	pos := tv.CursorPos
+
+	gotwrap := false
+	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(pos)
+		if ok && si > 0 {
+			ri = 0
+			nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+			pos.Ch = nwc
+			tv.CursorPos = pos
+			tv.CursorCol = ri
+			gotwrap = true
+		}
+	}
+	if !gotwrap {
+		tv.CursorPos.Ch = 0
+		tv.CursorCol = tv.CursorPos.Ch
+	}
 	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToLeft()
 	tv.RenderCursor(true)
@@ -989,14 +1006,24 @@ func (tv *TextView) CursorEndLine() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
-	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
-		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
-		if ok && si > 0 {
+	pos := tv.CursorPos
+
+	gotwrap := false
+	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(pos)
+		if ok {
+			// todo: don't have a good way to put cursor at end of wrapped line..
+			ri = len(tv.Renders[pos.Ln].Spans[si].Text)
 			tv.CursorCol = ri
-		} else {
-			tv.CursorCol = tv.CursorPos.Ch
+			nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+			pos.Ch = nwc
+			tv.CursorPos = pos
+			gotwrap = true
 		}
+	}
+	if !gotwrap {
+		tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+		tv.CursorCol = tv.CursorPos.Ch
 	}
 	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToRight()
@@ -2009,7 +2036,7 @@ func (tv *TextView) RenderCursor(on bool) {
 	if tv.Renders == nil {
 		return
 	}
-	if tv.PushBounds() {
+	if tv.InBounds() {
 		sp := tv.CursorSprite()
 		if on {
 			win.ActivateSprite(sp.Nm)
@@ -2018,8 +2045,7 @@ func (tv *TextView) RenderCursor(on bool) {
 		}
 		sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
 		win.RenderOverlays() // needs an explicit call!
-		tv.PopBounds()
-		win.UpdateSig() // publish
+		win.UpdateSig()      // publish
 	}
 }
 
@@ -2175,7 +2201,9 @@ func (tv *TextView) VisSizes() {
 // RenderAllLines displays all the visible lines on the screen -- this is
 // called outside of update process and has its own bounds check and updating
 func (tv *TextView) RenderAllLines() {
-	if tv.PushBounds() {
+	if tv.InBounds() {
+		rs := &tv.Viewport.Render
+		rs.PushBounds(tv.VpBBox)
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
 		tv.RenderAllLinesInBounds()
@@ -2292,7 +2320,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	if st > ed {
 		return false
 	}
-	if tv.PushBounds() {
+	if tv.InBounds() {
 		vp := tv.Viewport
 		updt := vp.Win.UpdateStart()
 		sty := &tv.Sty
@@ -2300,6 +2328,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		pc := &rs.Paint
 		pos := tv.RenderStartPos()
 		var boxMin, boxMax gi.Vec2D
+		rs.PushBounds(tv.VpBBox)
 		// first get the box to fill
 		visSt := -1
 		visEd := -1

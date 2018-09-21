@@ -318,6 +318,14 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 	return false
 }
 
+// InBounds returns true if our VpBBox is non-empty (and other stuff is non-nil)
+func (wb *WidgetBase) InBounds() bool {
+	if wb.This == nil || wb.Viewport == nil {
+		return false
+	}
+	return !wb.VpBBox.Empty()
+}
+
 // PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
 // -- this limits our drawing to our own bounding box, automatically -- must
 // be called as first step in Render2D returns whether the new bounds are

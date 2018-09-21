@@ -94,15 +94,17 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* entering newlines in *middle of* existing wrapped line mode not re-rendering properly, e.g., in .md files.  Just go to "line" in above line and hit enter to reproduce..
+
 * scrolling in tabview is reverting to first tab -- tried fixing move2d but didn't work?
 
 * would be a lot faster if textbuf held the markup text and views just read off of that -- then switching buffers would be instant.  might make it easier to protect the updating too -- views don't get a crack at anything until it is updated.. -- also ideally do a diff for re-open, and only re-highlight areas that are changed.  as a first pass, at least testing for identity would save a lot of time for most post-save actions.
 
-* Ctrl+A start of line should go to start of wrapped line, not overall start of line, for multi-line editing.
-
 * select highlight on first line of multi-line not showing until you get to char1 -- also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
 
 * bold in **Markdown** causing a repeat of last two letters!  really throws things off.  
+
+* fix embedded tags in pre html parser -- just need a simple stack..
 
 * getting mysterious crashes in clearClip and closewindow on mac in cocoa.m -- hard to debug what is going on.. :(
 
@@ -147,6 +149,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * Reminder: grep all todo: in code
 
 	
+
+
 
 
 
