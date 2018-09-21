@@ -436,6 +436,15 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	return tv.RenderSz
 }
 
+// FixMarkupLine fixes the output of chroma markup
+func (tv *TextView) FixMarkupLine(mt []byte) []byte {
+	mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
+	mt = bytes.TrimPrefix(mt, []byte(`<span class="err">`))
+	mt = bytes.Replace(mt, []byte(`**</span>**`), []byte(`**</span>`), -1)
+	mt = bytes.Replace(mt, []byte(`__</span>__`), []byte(`__</span>`), -1)
+	return mt
+}
+
 // HiAllLines does highlighting of all lines, in a separate goroutine because it is slow
 func (tv *TextView) HiAllLines() {
 	var htmlBuf bytes.Buffer
@@ -459,7 +468,7 @@ func (tv *TextView) HiAllLines() {
 			break
 		}
 		mt := mtlns[ln]
-		mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
+		mt = tv.FixMarkupLine(mt)
 		tv.Markup[ln] = mt
 		tv.HasMarkup[ln] = true
 		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
@@ -636,7 +645,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 			if lfidx > 0 {
 				b = b[:lfidx]
 			}
-			tv.Markup[ln] = b
+			tv.Markup[ln] = tv.FixMarkupLine(b)
 			tv.HasMarkup[ln] = true
 			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		} else {

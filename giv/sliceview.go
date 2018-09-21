@@ -1381,7 +1381,7 @@ func (sv *SliceView) SliceViewEvents() {
 				me.SetProcessed()
 			}
 		})
-		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)

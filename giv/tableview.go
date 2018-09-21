@@ -1842,7 +1842,7 @@ func (tv *TableView) TableViewEvents() {
 				me.SetProcessed()
 			}
 		})
-		tv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			kt := d.(*key.ChordEvent)
 			tvv.KeyInputActive(kt)
