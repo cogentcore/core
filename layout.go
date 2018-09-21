@@ -1262,6 +1262,25 @@ func (ly *Layout) Render2DChildren() {
 	}
 }
 
+func (ly *Layout) Move2DChildren(delta image.Point) {
+	cbb := ly.This.(Node2D).ChildrenBBox2D()
+	if ly.Lay == LayoutStacked {
+		sn, ok := ly.Child(ly.StackTop)
+		if !ok {
+			return
+		}
+		nii, _ := KiToNode2D(sn)
+		nii.Move2D(delta, cbb)
+	} else {
+		for _, kid := range ly.Kids {
+			nii, _ := KiToNode2D(kid)
+			if nii != nil {
+				nii.Move2D(delta, cbb)
+			}
+		}
+	}
+}
+
 // AutoScrollRate determines the rate of auto-scrolling of layouts
 var AutoScrollRate = float32(1.0)
 

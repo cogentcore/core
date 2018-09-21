@@ -794,7 +794,7 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 // ConfigPartsIconLabel returns a standard config for creating parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
 func (wb *PartsWidgetBase) ConfigPartsIconLabel(icnm string, txt string) (config kit.TypeAndNameList, icIdx, lbIdx int) {
-	// todo: add some styles for button layout
+	wb.Parts.SetProp("overflow", "hidden") // no scrollbars!
 	config = kit.TypeAndNameList{}
 	icIdx = -1
 	lbIdx = -1

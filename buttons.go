@@ -167,7 +167,10 @@ func (bb *ButtonBase) SetText(txt string) {
 	if bb.Sty.Font.Size.Val == 0 { // not yet styled
 		bb.StyleButton()
 	}
-	bb.Text = txt
+	if bb.Text != txt {
+		bb.SetFullReRender() // needed for resize
+		bb.Text = txt
+	}
 	bb.This.(ButtonWidget).ConfigParts()
 	bb.UpdateEnd(updt)
 }
@@ -639,6 +642,10 @@ var ButtonProps = ki.Props{
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
+	"#space": ki.Props{
+		"width":     units.NewValue(1, units.Ch),
+		"min-width": units.NewValue(1, units.Ch),
+	},
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -731,7 +738,7 @@ var CheckBoxProps = ki.Props{
 		"stroke":           &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width": units.NewValue(1, units.Ex),
+		"width": units.NewValue(.1, units.Ch),
 	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),

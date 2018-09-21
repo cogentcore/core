@@ -49,6 +49,10 @@ var ActionProps = ki.Props{
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
+	"#space": ki.Props{
+		"width":     units.NewValue(1, units.Ch),
+		"min-width": units.NewValue(1, units.Ch),
+	},
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),

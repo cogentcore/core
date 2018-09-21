@@ -61,7 +61,7 @@ var SpinBoxProps = ki.Props{
 		"stroke":     &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width": units.NewValue(.1, units.Ex),
+		"width": units.NewValue(.1, units.Ch),
 	},
 	"#text-field": ki.Props{
 		"min-width": units.NewValue(4, units.Ch),

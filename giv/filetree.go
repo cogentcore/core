@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"image/color"
 	"io"
 	"log"
 	"mime"
@@ -18,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
@@ -109,12 +111,17 @@ func init() {
 
 // IsDir returns true if file is a directory (folder)
 func (fn *FileNode) IsDir() bool {
-	return fn.Kind == "Folder"
+	return fn.Mode.IsDir()
 }
 
 // IsSymLink returns true if file is a symlink
 func (fn *FileNode) IsSymLink() bool {
 	return bitflag.Has(fn.Flag, int(FileNodeSymLink))
+}
+
+// IsExec returns true if file is an executable file
+func (fn *FileNode) IsExec() bool {
+	return fn.Mode&0111 != 0
 }
 
 // IsOpen returns true if file is flagged as open
@@ -629,7 +636,58 @@ type FileTreeView struct {
 	TreeView
 }
 
-var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, TreeViewProps)
+var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, FileTreeViewProps)
+
+var FileTreeViewProps = ki.Props{
+	"indent":           units.NewValue(2, units.Ch),
+	"spacing":          units.NewValue(.5, units.Ch),
+	"border-width":     units.NewValue(0, units.Px),
+	"border-radius":    units.NewValue(0, units.Px),
+	"padding":          units.NewValue(0, units.Px),
+	"margin":           units.NewValue(1, units.Px),
+	"text-align":       gi.AlignLeft,
+	"vertical-align":   gi.AlignTop,
+	"color":            &gi.Prefs.Colors.Font,
+	"background-color": "inherit",
+	".exec": ki.Props{
+		"font-weight": gi.WeightBold,
+	},
+	"#icon": ki.Props{
+		"width":   units.NewValue(1, units.Em),
+		"height":  units.NewValue(1, units.Em),
+		"margin":  units.NewValue(0, units.Px),
+		"padding": units.NewValue(0, units.Px),
+		"fill":    &gi.Prefs.Colors.Icon,
+		"stroke":  &gi.Prefs.Colors.Font,
+	},
+	"#branch": ki.Props{
+		"icon":             "widget-wedge-down",
+		"icon-off":         "widget-wedge-right",
+		"margin":           units.NewValue(0, units.Px),
+		"padding":          units.NewValue(0, units.Px),
+		"background-color": color.Transparent,
+		"max-width":        units.NewValue(.8, units.Em),
+		"max-height":       units.NewValue(.8, units.Em),
+	},
+	"#space": ki.Props{
+		"width": units.NewValue(.5, units.Em),
+	},
+	"#label": ki.Props{
+		"margin":    units.NewValue(0, units.Px),
+		"padding":   units.NewValue(0, units.Px),
+		"min-width": units.NewValue(16, units.Ch),
+	},
+	"#menu": ki.Props{
+		"indicator": "none",
+	},
+	TreeViewSelectors[TreeViewActive]: ki.Props{},
+	TreeViewSelectors[TreeViewSel]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Select,
+	},
+	TreeViewSelectors[TreeViewFocus]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Control,
+	},
+}
 
 var fnFolderProps = ki.Props{
 	"icon":     "folder-open",
@@ -645,6 +703,9 @@ func (tv *FileTreeView) Style2D() {
 			tv.Icon = gi.IconName("folder")
 		}
 		tv.SetProp("#branch", fnFolderProps)
+		tv.Class = "folder"
+	} else if fn.IsExec() {
+		tv.Class = "exec"
 	} else {
 		tv.Icon = fn.Ic
 	}
