@@ -230,8 +230,14 @@ func ToString(it interface{}) string {
 		cv := v.Complex()
 		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		return rv
-	case vk == reflect.String: // todo: what about []byte?
+	case vk == reflect.String:
 		return v.String()
+	case vk == reflect.Slice:
+		eltyp := SliceElType(it)
+		if eltyp.Kind() == reflect.Uint8 { // []byte
+			return string(it.([]byte))
+		}
+		fallthrough
 	default:
 		return fmt.Sprintf("%v", it)
 	}
