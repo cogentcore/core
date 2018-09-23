@@ -31,6 +31,8 @@ type TabView struct {
 var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
 
 var TabViewProps = ki.Props{
+	"border-color":     &Prefs.Colors.Border,
+	"border-width":     units.NewValue(2, units.Px),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
 	"max-width":        -1,
@@ -308,9 +310,9 @@ func (tv *TabView) Frame() *Frame {
 // UnselectAllTabs turns off all the tabs
 func (tv *TabView) UnselectAllTabs() {
 	sz := tv.NTabs()
-	tb := tv.Tabs()
+	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tb.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelectedState(false)
 		}
@@ -320,9 +322,9 @@ func (tv *TabView) UnselectAllTabs() {
 // RenumberTabs assigns proper index numbers to each tab
 func (tv *TabView) RenumberTabs() {
 	sz := tv.NTabs()
-	tb := tv.Tabs()
+	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tb.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
 		tb.Data = i
 	}
 }
@@ -332,8 +334,41 @@ func (tv *TabView) Style2D() {
 	tv.Layout.Style2D()
 }
 
+// RenderTabSeps renders the separators between tabs
+func (tv *TabView) RenderTabSeps() {
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+	st := &tv.Sty
+	pc.StrokeStyle.Width = st.Border.Width
+	pc.StrokeStyle.SetColor(&st.Border.Color)
+	bw := st.Border.Width.Dots
+
+	tbs := tv.Tabs()
+	sz := len(tbs.Kids)
+	for i := 1; i < sz; i++ {
+		tb := tbs.KnownChild(i).(Node2D)
+		ni := tb.AsWidget()
+
+		pos := ni.LayData.AllocPos
+		sz := ni.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		pc.DrawLine(rs, pos.X-bw, pos.Y, pos.X-bw, pos.Y+sz.Y)
+	}
+	pc.FillStrokeClear(rs)
+}
+
 func (tv *TabView) Render2D() {
-	tv.Layout.Render2D()
+	if tv.FullReRenderIfNeeded() {
+		return
+	}
+	if tv.PushBounds() {
+		tv.This.(Node2D).ConnectEvents2D()
+		tv.RenderScrolls()
+		tv.Render2DChildren()
+		tv.RenderTabSeps()
+		tv.PopBounds()
+	} else {
+		tv.DisconnectAllEvents(AllPris) // uses both Low and Hi
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
