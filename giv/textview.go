@@ -713,6 +713,24 @@ func (tv *TextView) ValidateCursor() {
 	tv.CursorPos = tv.ValidCursor(tv.CursorPos)
 }
 
+// WrappedLines returns the number of wrapped lines (spans) for given line number
+func (tv *TextView) WrappedLines(ln int) int {
+	if ln >= len(tv.Renders) {
+		return 0
+	}
+	return len(tv.Renders[ln].Spans)
+}
+
+// WrappedLineNo returns the wrapped line number (span index) and rune index
+// within that span of the given character position within line in position,
+// and false if out of range
+func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
+	if pos.Ln >= len(tv.Renders) {
+		return 0, 0, false
+	}
+	return tv.Renders[pos.Ln].RuneSpanPos(pos.Ch)
+}
+
 // SetCursor sets a new cursor position, enforcing it in range
 func (tv *TextView) SetCursor(pos TextPos) {
 	if tv.NLines == 0 {
@@ -729,6 +747,21 @@ func (tv *TextView) SetCursorShow(pos TextPos) {
 	tv.SetCursor(pos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
+}
+
+// SetCursorCol sets the current target cursor column (CursorCol) to that
+// of the given position
+func (tv *TextView) SetCursorCol(pos TextPos) {
+	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+		si, ri, ok := tv.WrappedLineNo(pos)
+		if ok && si > 0 {
+			tv.CursorCol = ri
+		} else {
+			tv.CursorCol = pos.Ch
+		}
+	} else {
+		tv.CursorCol = pos.Ch
+	}
 }
 
 // CursorSelect updates selection based on cursor movements, given starting
@@ -764,34 +797,9 @@ func (tv *TextView) CursorForward(steps int) {
 			}
 		}
 	}
-	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
-		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
-		if ok && si > 0 {
-			tv.CursorCol = ri
-		} else {
-			tv.CursorCol = tv.CursorPos.Ch
-		}
-	}
+	tv.SetCursorCol(tv.CursorPos)
 	tv.SetCursorShow(tv.CursorPos)
 	tv.CursorSelect(org)
-}
-
-// WrappedLines returns the number of wrapped lines (spans) for given line number
-func (tv *TextView) WrappedLines(ln int) int {
-	if ln >= len(tv.Renders) {
-		return 0
-	}
-	return len(tv.Renders[ln].Spans)
-}
-
-// WrappedLineNo returns the wrapped line number (span index) and rune index
-// within that span of the given character position within line in position,
-// and false if out of range
-func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
-	if pos.Ln >= len(tv.Renders) {
-		return 0, 0, false
-	}
-	return tv.Renders[pos.Ln].RuneSpanPos(pos.Ch)
 }
 
 // CursorDown moves the cursor down line(s)
@@ -869,14 +877,7 @@ func (tv *TextView) CursorBackward(steps int) {
 			}
 		}
 	}
-	if wln := tv.WrappedLines(tv.CursorPos.Ln); wln > 1 {
-		si, ri, ok := tv.WrappedLineNo(tv.CursorPos)
-		if ok && si > 0 {
-			tv.CursorCol = ri
-		} else {
-			tv.CursorCol = tv.CursorPos.Ch
-		}
-	}
+	tv.SetCursorCol(tv.CursorPos)
 	tv.SetCursorShow(tv.CursorPos)
 	tv.CursorSelect(org)
 }
@@ -1564,6 +1565,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
 	tv.SetCursorShow(tbe.Reg.End)
+	tv.SetCursorCol(tv.CursorPos)
 }
 
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {

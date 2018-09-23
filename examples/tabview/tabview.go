@@ -7,7 +7,6 @@ package main
 import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 )
 
@@ -28,7 +27,8 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
+	tv := mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
+	tv.NewTabButton = true
 
 	lbl1k, _ := tv.AddNewTab(gi.KiT_Label, "This is Label1")
 	lbl1 := lbl1k.(*gi.Label)

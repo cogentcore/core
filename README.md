@@ -94,6 +94,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* close window signal and connection in structviewdialog etc.
+
+* + button in tabs with default type
+
+* focus issues in tableview: real!
+
 * closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
 
 * scrolling in tabview is reverting to first tab -- tried fixing move2d but didn't work?

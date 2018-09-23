@@ -17,6 +17,8 @@ type DlgOpts struct {
 	Prompt  string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
 	CSS     ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Ok      bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	Cancel  bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -28,7 +30,7 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), false, false) // no buttons -- always live
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -53,7 +55,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), false, false) // no buttons -- always live
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -79,7 +81,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
 func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), false, false) // no buttons -- always live
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -161,7 +163,7 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), false, false) // no buttons -- always live
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
