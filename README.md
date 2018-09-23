@@ -94,23 +94,18 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* close window signal and connection in structviewdialog etc.
+* would be a lot faster if textbuf held the markup text and views just read off of that -- then switching buffers would be instant.  might make it easier to protect the updating too -- views don't get a crack at anything until it is updated.. -- also ideally do a diff for re-open, and only re-highlight areas that are changed.  as a first pass, at least testing for identity would save a lot of time for most post-save actions.
 
-* + button in tabs with default type
-
-* focus issues in tableview: real!
+* focus issues in tableview: real!  but very hard to reproduce!
 
 * closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
 
-* scrolling in tabview is reverting to first tab -- tried fixing move2d but didn't work?
-
-* would be a lot faster if textbuf held the markup text and views just read off of that -- then switching buffers would be instant.  might make it easier to protect the updating too -- views don't get a crack at anything until it is updated.. -- also ideally do a diff for re-open, and only re-highlight areas that are changed.  as a first pass, at least testing for identity would save a lot of time for most post-save actions.
-
-* select highlight on first line of multi-line not showing until you get to char1 -- also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
+* also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
 
 * fix embedded tags in pre html parser -- just need a simple stack..
 
-* getting mysterious crashes in clearClip and closewindow on mac in cocoa.m -- hard to debug what is going on.. :(
+* NOT getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
+  once I turned off mainmenu updating -- will try to re-activate and debug..
 
 * drag on textview should prevent DND -- dnd not getting "processed"
 

@@ -2107,7 +2107,8 @@ func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
-	epos := tv.CharEndPos(ed)
+	epos := tv.CharStartPos(ed)
+	epos.Y += tv.LineHeight
 	if int(math32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(math32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
 		return
 	}
@@ -2119,58 +2120,34 @@ func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 
 	ed.Ch-- // end is exclusive
 	rst := tv.RenderStartPos()
+	ex := float32(tv.VpBBox.Max.X) - spc
+	sx := rst.X + tv.LineNoOff
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
 
-	if st.Ln == ed.Ln {
-		if wln := tv.WrappedLines(st.Ln); wln > 1 {
-			stsi, _, stok := tv.WrappedLineNo(st)
-			edsi, _, edok := tv.WrappedLineNo(ed)
-			if !stok || !edok {
-				return
-			}
-			if stsi == edsi {
-				pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
-			} else {
-				if st.Ch > 0 {
-					se := tv.CharEndPos(st)
-					se.X = float32(tv.VpBBox.Max.X) - spc
-					pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
-				}
-				spos.Y += tv.LineHeight
-				spos.X = rst.X + tv.LineNoOff
-				nfull := edsi - stsi
-				sed := spos
-				if nfull >= 2 {
-					beb := spos
-					beb.Y += float32(nfull-1) * tv.LineHeight
-					beb.X = float32(tv.VpBBox.Max.X) - spc
-					pc.FillBox(rs, spos, beb.Sub(spos), &sty.Font.BgColor)
-					sed.Y = beb.Y
-				}
-				pc.FillBox(rs, sed, epos.Sub(sed), &sty.Font.BgColor)
-			}
-		} else {
-			pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor)
-		}
-	} else {
-		if st.Ch > 0 {
-			se := tv.CharEndPos(st)
-			se.X = float32(tv.VpBBox.Max.X) - spc
-			pc.FillBox(rs, spos, se.Sub(spos), &sty.Font.BgColor)
-			spos.Y += tv.LineHeight
-			spos.X = rst.X + tv.LineNoOff
-		}
-		beb := epos
-		beb.Y -= tv.LineHeight
-		beb.X = float32(tv.VpBBox.Max.X) - spc
-		pc.FillBox(rs, spos, beb.Sub(spos), &sty.Font.BgColor)
-		// now get anything on end
-		if ed.Ch > 0 {
-			beb.X = rst.X + tv.LineNoOff
-			pc.FillBox(rs, beb, epos.Sub(beb), &sty.Font.BgColor)
-		}
+	stsi, _, _ := tv.WrappedLineNo(st)
+	edsi, _, _ := tv.WrappedLineNo(ed)
+	if st.Ln == ed.Ln && stsi == edsi {
+		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor) // same line, done
+		return
 	}
+	// on diff lines: fill to end of stln
+	seb := spos
+	seb.Y += tv.LineHeight
+	seb.X = ex
+	pc.FillBox(rs, spos, seb.Sub(spos), &sty.Font.BgColor)
+	sfb := seb
+	sfb.X = sx
+	if sfb.Y < epos.Y { // has some full box
+		efb := epos
+		efb.Y -= tv.LineHeight
+		efb.X = ex
+		pc.FillBox(rs, sfb, efb.Sub(sfb), &sty.Font.BgColor)
+	}
+	sed := epos
+	sed.Y -= tv.LineHeight
+	sed.X = sx
+	pc.FillBox(rs, sed, epos.Sub(sed), &sty.Font.BgColor)
 }
 
 // RenderStartPos is absolute rendering start position from our allocpos
@@ -2234,8 +2211,8 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	if tv.NLines == 0 {
 		pos := tv.RenderStartPos()
 		pos.X += tv.LineNoOff
-		sz := tv.RenderSz
-		pc.FillBox(rs, pos, sz, &sty.Font.BgColor)
+		epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+		pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 	} else {
 		tv.RenderStdBox(sty)
 	}

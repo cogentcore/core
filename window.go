@@ -1386,6 +1386,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					}
 					if !w.FocusActive { // reactivate on keyboard input
 						w.FocusActive = true
+						// fmt.Printf("set foc active: %v\n", ni.PathUnique())
 						nii.FocusChanged2D(FocusActive)
 					}
 				} else if evi.HasPos() {
@@ -1881,6 +1882,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		nii, ni := KiToNode2D(w.Focus)
 		if ni != nil && ni.This != nil {
 			bitflag.Clear(&ni.Flag, int(HasFocus))
+			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
 			nii.FocusChanged2D(FocusLost)
 		}
 	}
@@ -1896,8 +1898,8 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	}
 	bitflag.Set(&ni.Flag, int(HasFocus))
 	w.FocusActive = true
+	// fmt.Printf("set foc: %v\n", ni.PathUnique())
 	nii.FocusChanged2D(FocusGot)
-	// w.ClearNonFocus() // todo: maybe don't need this..
 	w.UpdateEnd(updt)
 	return true
 }

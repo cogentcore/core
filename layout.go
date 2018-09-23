@@ -635,7 +635,8 @@ func (ly *Layout) AllocFromParent() {
 		return
 	}
 	if ly.Par != ly.Viewport.This {
-		fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayData)
+		// note: zero alloc size happens all the time with non-visible tabs!
+		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayData)
 		return
 	}
 	pni, _ := KiToNode2D(ly.Par)
@@ -1242,17 +1243,16 @@ func (ly *Layout) Render2DChildren() {
 		for _, kid := range ly.Kids { // first mark everyone else as inactive
 			_, ni := KiToNode2D(kid)
 			if ni != nil {
-				ni.SetInactive()
+				ni.VpBBox = image.ZR  // negate
+				ni.WinBBox = image.ZR // negate
 			}
 		}
-		sn, ok := ly.Child(ly.StackTop)
-		if !ok {
-			return
+		if sn, ok := ly.Child(ly.StackTop); ok {
+			_, ni := KiToNode2D(sn)
+			ni.VpBBox = ly.VpBBox // todo: sub space, etc
+			ni.WinBBox = ly.WinBBox
 		}
-		nii, ni := KiToNode2D(sn)
-		ni.ClearInactive()
-		nii.Render2D()
-		return
+		// note: all nodes need to render to disconnect b/c of nil VpBBox
 	}
 	for _, kid := range ly.Kids {
 		nii, _ := KiToNode2D(kid)

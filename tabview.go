@@ -68,6 +68,7 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 	fr.InsertChild(widg, idx)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
+	tab.Tooltip = label
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
