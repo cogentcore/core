@@ -691,6 +691,11 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
 		}
 	}
+	if completetag, ok := vv.Tag("complete"); ok {
+		in := []reflect.Value{reflect.ValueOf(tf)}
+		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
+		reflect.ValueOf(vv.Owner).MethodByName("SetCompleter").Call(in)
+	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
