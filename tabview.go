@@ -262,7 +262,7 @@ const (
 
 // InitTabView initializes the tab widget children if it hasn't been done yet
 func (tv *TabView) InitTabView() {
-	if len(tv.Kids) == 2 {
+	if len(tv.Kids) != 0 {
 		return
 	}
 	if tv.Sty.Font.Size.Val == 0 { // not yet styled
