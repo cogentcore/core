@@ -560,8 +560,8 @@ func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc,
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
 			tf.Complete.CompleteSig.Disconnect(tf.This)
+			tf.Complete.Destroy()
 		}
-		tf.Complete.Destroy()
 		tf.Complete = nil
 		return
 	}
