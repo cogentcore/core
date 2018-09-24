@@ -82,7 +82,7 @@ func (c *Complete) Complete(s string) {
 }
 
 // KeyInput is the opportunity for completion to act on specific key inputs
-func (c *Complete) KeyInput(kf KeyFuns) bool {
+func (c *Complete) KeyInput(kf KeyFuns) bool { // true - caller should set key processed
 	count := len(c.Completions)
 	switch kf {
 	case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items

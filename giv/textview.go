@@ -2728,6 +2728,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.OfferComplete(force)
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
+		tv.CloseCompleter()
 		tv.CursorRecenter()
 	case gi.KeyFunEnter:
 		tv.ISearchCancel()
