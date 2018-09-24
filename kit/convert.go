@@ -12,6 +12,18 @@ import (
 	"strconv"
 )
 
+// Floater converts a type to a float64, used in kit.ToFloat function and in
+// sorting comparisons -- tried first in sorting
+type Floater interface {
+	Float() float64
+}
+
+// Inter converts a type to an int64, used in kit.ToInt and in sorting comparisons --
+// tried second in sorting
+type Inter interface {
+	Int() int64
+}
+
 // Sel implements the "mute" function from here
 // http://blog.vladimirvivien.com/2014/03/hacking-go-filter-values-from-multi.html
 // provides a way to select a particular return value in a single expression,
@@ -108,10 +120,14 @@ func ToBool(it interface{}) (bool, bool) {
 	}
 }
 
-// ToInt robustlys converts anything to an int64
+// ToInt robustlys converts anything to an int64 -- uses the Inter ToInt
+// interface first if available
 func ToInt(it interface{}) (int64, bool) {
 	if IfaceIsNil(it) {
 		return 0, false
+	}
+	if inter, ok := it.(Inter); ok {
+		return inter.Int(), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
@@ -140,10 +156,14 @@ func ToInt(it interface{}) (int64, bool) {
 	}
 }
 
-// ToFloat robustly converts anything to a Float64
+// ToFloat robustly converts anything to a Float64 -- uses the Floater Float()
+// interface first if available
 func ToFloat(it interface{}) (float64, bool) {
 	if IfaceIsNil(it) {
 		return 0.0, false
+	}
+	if floater, ok := it.(Floater); ok {
+		return floater.Float(), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
@@ -172,10 +192,14 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// ToFloat32 robustly converts anything to a Float64
+// ToFloat32 robustly converts anything to a Float64 -- uses the Floater Float()
+// interface first if available
 func ToFloat32(it interface{}) (float32, bool) {
 	if IfaceIsNil(it) {
 		return float32(0.0), false
+	}
+	if floater, ok := it.(Floater); ok {
+		return float32(floater.Float()), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
@@ -211,12 +235,11 @@ func ToString(it interface{}) string {
 	if IfaceIsNil(it) {
 		return "nil"
 	}
+	if stringer, ok := it.(fmt.Stringer); ok {
+		return stringer.String()
+	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
-
-	if strer, ok := it.(fmt.Stringer); ok {
-		return strer.String()
-	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		return strconv.FormatInt(v.Int(), 10)
