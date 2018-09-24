@@ -11,7 +11,6 @@ import (
 	"image/color"
 	"io"
 	"log"
-	"mime"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -44,7 +43,6 @@ var FileTreeProps = ki.Props{}
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
-	ft.Kind = "Folder"
 	ft.OpenDirs.ClearFlags()
 	ft.ReadDir(path)
 }
@@ -93,14 +91,10 @@ func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
 	ki.Node
-	Ic      gi.IconName `desc:"icon for this file"`
-	FPath   gi.FileName `desc:"full path to this file"`
-	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- including MIME type"`
-	Mode    os.FileMode `desc:"file mode bits"`
-	ModTime FileTime    `desc:"time that contents (only) were last modified"`
-	Buf     *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
-	FRoot   *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
+	FPath gi.FileName `desc:"full path to this file"`
+	Info  FileInfo    `desc:"full standard file info about this file"`
+	Buf   *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
+	FRoot *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
 }
 
 var KiT_FileNode = kit.Types.AddType(&FileNode{}, nil)
@@ -111,7 +105,7 @@ func init() {
 
 // IsDir returns true if file is a directory (folder)
 func (fn *FileNode) IsDir() bool {
-	return fn.Mode.IsDir()
+	return fn.Info.IsDir()
 }
 
 // IsSymLink returns true if file is a symlink
@@ -121,7 +115,7 @@ func (fn *FileNode) IsSymLink() bool {
 
 // IsExec returns true if file is an executable file
 func (fn *FileNode) IsExec() bool {
-	return fn.Mode&0111 != 0
+	return fn.Info.IsExec()
 }
 
 // IsOpen returns true if file is flagged as open
@@ -144,11 +138,21 @@ func (fn *FileNode) IsChanged() bool {
 
 // ReadDir reads all the files at given directory into this directory node --
 // uses config children to preserve extra info already stored about files. The
-// root node represents the directory at the given path.
-func (fn *FileNode) ReadDir(path string) {
+// root node represents the directory at the given path.  Returns os.Stat
+// error if path cannot be accessed.
+func (fn *FileNode) ReadDir(path string) error {
 	_, fnm := filepath.Split(path)
 	fn.SetName(fnm)
-	fn.FPath = gi.FileName(filepath.Clean(path))
+	pth, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	fn.FPath = gi.FileName(pth)
+	err = fn.Info.InitFile(string(fn.FPath))
+	if err != nil {
+		log.Printf("giv.FileTree: could not read directory: %v err: %v\n", fn.FPath, err)
+		return err
+	}
 	fn.SetOpen()
 
 	typ := fn.NodeType()
@@ -165,6 +169,7 @@ func (fn *FileNode) ReadDir(path string) {
 	if mods {
 		fn.UpdateEnd(updt)
 	}
+	return nil
 }
 
 // NodeType returns the type of nodes to create -- set ChildType property on
@@ -216,35 +221,25 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 
 // SetNodePath sets the path for given node and updates it based on associated file
 func (fn *FileNode) SetNodePath(path string) error {
-	fn.FPath = gi.FileName(filepath.Clean(path))
+	pth, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	fn.FPath = gi.FileName(pth)
 	return fn.UpdateNode()
 }
 
 // UpdateNode updates information in node based on its associated file in FPath
 func (fn *FileNode) UpdateNode() error {
-	path := string(fn.FPath)
-	info, err := os.Lstat(path)
+	err := fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", path, err)
+		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", fn.FPath, err)
 		log.Println(emsg)
 		return emsg
 	}
-	fn.Size = FileSize(info.Size())
-	fn.Mode = info.Mode()
-	fn.ModTime = FileTime(info.ModTime())
-
-	if info.IsDir() {
-		fn.Kind = "Folder"
-	} else {
-		ext := filepath.Ext(fn.Nm)
-		fn.Kind = mime.TypeByExtension(ext)
-		fn.Kind = strings.TrimPrefix(fn.Kind, "application/") // long and unnec
-	}
-	fn.Ic = FileKindToIcon(fn.Kind, fn.Nm)
-
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
-			fn.ReadDir(path) // keep going down..
+			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
 	}
 	return nil
@@ -364,56 +359,38 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 	return ecs
 }
 
-// DuplicateFile creates a copy of given file -- only works for regular files, not directories
-func (fn *FileNode) DuplicateFile() {
-	if fn.IsDir() {
-		log.Printf("Duplicate: cannot copy directories\n")
-		return
-	}
-	path := string(fn.FPath)
-	ext := filepath.Ext(path)
-	noext := strings.TrimSuffix(path, ext)
-	dst := noext + "_Copy" + ext
-	CopyFile(dst, path, fn.Mode)
-	if fn.Par != nil {
+//////////////////////////////////////////////////////////////////////////////
+//    File ops
+
+// Duplicate creates a copy of given file -- only works for regular files, not
+// directories
+func (fn *FileNode) DuplicateFile() error {
+	err := fn.Info.Duplicate()
+	if err == nil && fn.Par != nil {
 		fnp := fn.Par.Embed(KiT_FileNode).(*FileNode)
 		fnp.UpdateNode()
 	}
+	return err
 }
 
 // DeleteFile deletes this file
-func (fn *FileNode) DeleteFile() {
-	if fn.IsDir() {
-		log.Printf("FileNode Delete -- cannot delete directories!\n")
-		return
+func (fn *FileNode) DeleteFile() error {
+	err := fn.Info.Delete()
+	if err == nil {
+		fn.Delete(true) // we're done
 	}
-	path := string(fn.FPath)
-	os.Remove(path)
-	fn.Delete(true) // we're done
+	return err
 }
 
 // RenameFile renames file to new name
-func (fn *FileNode) RenameFile(newpath string) {
-	if newpath == "" {
-		log.Printf("FileNode Rename: new name is empty!\n")
-		return
+func (fn *FileNode) RenameFile(newpath string) error {
+	err := fn.Info.Rename(newpath)
+	if err == nil {
+		fn.FPath = gi.FileName(fn.Info.Path)
+		fn.SetName(fn.Info.Name)
+		fn.UpdateSig()
 	}
-	path := string(fn.FPath)
-	if newpath == path {
-		return
-	}
-	ndir, nfn := filepath.Split(newpath)
-	if ndir == "" {
-		if nfn == fn.Nm {
-			return
-		}
-		dir, _ := filepath.Split(path)
-		newpath = filepath.Join(dir, newpath)
-	}
-	os.Rename(path, newpath)
-	fn.FPath = gi.FileName(filepath.Clean(newpath))
-	fn.SetName(nfn)
-	fn.UpdateSig()
+	return err
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -652,6 +629,9 @@ var FileTreeViewProps = ki.Props{
 	".exec": ki.Props{
 		"font-weight": gi.WeightBold,
 	},
+	".open": ki.Props{
+		"font-style": gi.FontItalic,
+	},
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -706,8 +686,11 @@ func (tv *FileTreeView) Style2D() {
 		tv.Class = "folder"
 	} else if fn.IsExec() {
 		tv.Class = "exec"
+	} else if fn.IsOpen() {
+		tv.Class = "open"
 	} else {
-		tv.Icon = fn.Ic
+		tv.Class = ""
+		tv.Icon = fn.Info.Ic
 	}
 	tv.StyleTreeView()
 	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset

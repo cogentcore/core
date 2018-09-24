@@ -7,18 +7,14 @@ package giv
 import (
 	"fmt"
 	"go/token"
-	"io"
 	"io/ioutil"
 	"log"
-	"mime"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"unicode"
 
-	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
@@ -491,28 +487,13 @@ func (fv *FileView) UpdateFiles() {
 		if path == fv.DirPath { // proceed..
 			return nil
 		}
-		_, fn := filepath.Split(path)
-		fi := FileInfo{
-			Name:    fn,
-			Size:    FileSize(info.Size()),
-			Mode:    info.Mode(),
-			ModTime: FileTime(info.ModTime()),
-			Path:    path,
-		}
-		if info.IsDir() {
-			fi.Kind = "Folder"
-		} else {
-			ext := filepath.Ext(fn)
-			fi.Kind = mime.TypeByExtension(ext)
-			fi.Kind = strings.TrimPrefix(fi.Kind, "application/") // long and unnec
-		}
-		fi.Ic = FileKindToIcon(fi.Kind, fi.Name)
-		keep := true
+		fi, ferr := NewFileInfo(path)
+		keep := ferr == nil
 		if fv.FilterFunc != nil {
-			keep = fv.FilterFunc(fv, &fi)
+			keep = fv.FilterFunc(fv, fi)
 		}
 		if keep {
-			fv.Files = append(fv.Files, &fi)
+			fv.Files = append(fv.Files, fi)
 		}
 		if info.IsDir() {
 			return filepath.SkipDir
@@ -748,218 +729,4 @@ func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos in
 func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (file string, delta int) {
 	file, delta = complete.EditWord(text, cursorPos, completion, seed)
 	return file, delta
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//  FileInfo
-
-type FileSize datasize.ByteSize
-
-func (fs FileSize) String() string {
-	return (datasize.ByteSize)(fs).HumanReadable()
-}
-
-// Note: can get all the detailed birth, access, change times from this package
-// 	"github.com/djherbis/times"
-
-type FileTime time.Time
-
-func (ft FileTime) String() string {
-	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
-}
-
-func (ft FileTime) MarshalBinary() ([]byte, error) {
-	return time.Time(ft).MarshalBinary()
-}
-
-func (ft FileTime) MarshalJSON() ([]byte, error) {
-	return time.Time(ft).MarshalJSON()
-}
-
-func (ft FileTime) MarshalText() ([]byte, error) {
-	return time.Time(ft).MarshalText()
-}
-
-func (ft *FileTime) UnmarshalBinary(data []byte) error {
-	return (*time.Time)(ft).UnmarshalBinary(data)
-}
-
-func (ft *FileTime) UnmarshalJSON(data []byte) error {
-	return (*time.Time)(ft).UnmarshalJSON(data)
-}
-
-func (ft *FileTime) UnmarshalText(data []byte) error {
-	return (*time.Time)(ft).UnmarshalText(data)
-}
-
-// note: rendering icons taking a fair amount of extra time
-
-// FileInfo represents the information about a given file / directory
-type FileInfo struct {
-	Ic      gi.IconName `desc:"icon for file"`
-	Name    string      `width:"40" desc:"name of the file"`
-	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- including MIME type"`
-	Mode    os.FileMode `desc:"file mode bits"`
-	ModTime FileTime    `desc:"time that contents (only) were last modified"`
-	Path    string      `tableview:"-" desc:"full path to file -- for file functions"`
-}
-
-var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
-
-var FileInfoProps = ki.Props{
-	"CtxtMenu": ki.PropSlice{
-		{"Duplicate", ki.Props{
-			"updtfunc": func(fii interface{}, act *gi.Action) {
-				fi := fii.(*FileInfo)
-				act.SetInactiveStateUpdt(fi.IsDir())
-			},
-		}},
-		{"Delete", ki.Props{
-			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
-			"confirm": true,
-			"updtfunc": func(fii interface{}, act *gi.Action) {
-				fi := fii.(*FileInfo)
-				act.SetInactiveStateUpdt(fi.IsDir())
-			},
-		}},
-		{"Rename", ki.Props{
-			"desc": "Rename file to new file name",
-			"Args": ki.PropSlice{
-				{"New Name", ki.Props{
-					"default-field": "Name",
-				}},
-			},
-		}},
-	},
-}
-
-// MimeToIconMap has special cases for mapping mime type to icon, for those that basic string doesn't work
-var MimeToIconMap = map[string]string{
-	"svg+xml": "svg",
-}
-
-// FileKindToIcon maps kinds to icon names, using extension directly from file as a last resort
-func FileKindToIcon(kind, name string) gi.IconName {
-	kind = strings.ToLower(kind)
-	icn := gi.IconName(kind)
-	if icn.IsValid() {
-		return icn
-	}
-	if strings.Contains(kind, "/") {
-		si := strings.IndexByte(kind, '/')
-		typ := kind[:si]
-		subtyp := kind[si+1:]
-		if icn = "file-" + gi.IconName(subtyp); icn.IsValid() {
-			return icn
-		}
-		if icn = gi.IconName(subtyp); icn.IsValid() {
-			return icn
-		}
-		if ms, ok := MimeToIconMap[string(subtyp)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn
-			}
-		}
-		if icn = "file-" + gi.IconName(typ); icn.IsValid() {
-			return icn
-		}
-		if icn = gi.IconName(typ); icn.IsValid() {
-			return icn
-		}
-		if ms, ok := MimeToIconMap[string(typ)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn
-			}
-		}
-	}
-	ext := filepath.Ext(name)
-	if ext != "" {
-		if icn = gi.IconName(ext[1:]); icn.IsValid() {
-			return icn
-		}
-	}
-
-	icn = gi.IconName("none")
-	return icn
-}
-
-// IsDir returns true if this is a directory
-func (fi *FileInfo) IsDir() bool {
-	return fi.Kind == "Folder"
-}
-
-// Duplicate creates a copy of given file -- only works for regular files, not directories
-func (fi *FileInfo) Duplicate() {
-	if fi.IsDir() {
-		log.Printf("giv.Duplicate: cannot copy directories\n")
-		return
-	}
-	ext := filepath.Ext(fi.Path)
-	noext := strings.TrimSuffix(fi.Path, ext)
-	dst := noext + "_Copy" + ext
-	CopyFile(dst, fi.Path, fi.Mode)
-}
-
-// Delete deletes this file
-func (fi *FileInfo) Delete() {
-	if fi.IsDir() {
-		log.Printf("giv.FileInfo Delete -- cannot delete directories!\n")
-		return
-	}
-	os.Remove(fi.Path)
-}
-
-// Rename renames file to new name
-func (fi *FileInfo) Rename(newpath string) {
-	if newpath == "" {
-		log.Printf("giv.FileInfo Rename: new name is empty!\n")
-		return
-	}
-	if newpath == fi.Path {
-		return
-	}
-	ndir, np := filepath.Split(newpath)
-	if ndir == "" {
-		if np == fi.Name {
-			return
-		}
-		dir, _ := filepath.Split(fi.Path)
-		newpath = filepath.Join(dir, newpath)
-	}
-	os.Rename(fi.Path, newpath)
-}
-
-// here's all the discussion about why CopyFile is not in std lib:
-// https://old.reddit.com/r/golang/comments/3lfqoh/why_golang_does_not_provide_a_copy_file_func/
-// https://github.com/golang/go/issues/8868
-
-// CopyFile copies the contents from src to dst atomically.
-// If dst does not exist, CopyFile creates it with permissions perm.
-// If the copy fails, CopyFile aborts and dst is preserved.
-func CopyFile(dst, src string, perm os.FileMode) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	tmp, err := ioutil.TempFile(filepath.Dir(dst), "")
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(tmp, in)
-	if err != nil {
-		tmp.Close()
-		os.Remove(tmp.Name())
-		return err
-	}
-	if err = tmp.Close(); err != nil {
-		os.Remove(tmp.Name())
-		return err
-	}
-	if err = os.Chmod(tmp.Name(), perm); err != nil {
-		os.Remove(tmp.Name())
-		return err
-	}
-	return os.Rename(tmp.Name(), dst)
 }

@@ -9,14 +9,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"mime"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/pmezard/go-difflib/difflib"
 )
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It just
@@ -35,7 +37,7 @@ type TextBuf struct {
 	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
 	Changed    bool           `json:"-" xml:"-" desc:"true if the text has been changed (edited) relative to the original, since last save"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
-	Mimetype   string         `json:"-" xml:"-" desc:"mime type of the contents"`
+	Info       FileInfo       `desc:"full info about file"`
 	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
 	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
 	ByteOffs   []int          `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
@@ -43,11 +45,22 @@ type TextBuf struct {
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
 	UndoPos    int            `json:"-" xml:"-" desc:"undo position"`
+	FileModOk  bool           `json:"-" xml:"-" desc:"have already asked about fact that file has changed since being opened, user is ok"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 
-var TextBufProps = ki.Props{}
+var TextBufProps = ki.Props{
+	"CallMethods": ki.PropSlice{
+		{"SaveAs", ki.Props{
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+				}},
+			},
+		}},
+	},
+}
 
 // TextBufSignals are signals that text buffer can send
 type TextBufSignals int64
@@ -117,11 +130,72 @@ func (tb *TextBuf) New(nlines int) {
 	tb.Refresh()
 }
 
+// Stat gets info about the file, including highlighting language
+func (tb *TextBuf) Stat() error {
+	tb.FileModOk = false
+	err := tb.Info.InitFile(string(tb.Filename))
+	if err != nil {
+		return err
+	}
+	lexer := lexers.Match(tb.Info.Name)
+	if lexer == nil && tb.NLines > 0 {
+		lexer = lexers.Analyse(string(tb.Txt))
+	}
+	if lexer != nil {
+		tb.HiLang = lexer.Config().Name
+	}
+	return nil
+}
+
+// FileModCheck checks if the underlying file has been modified since last
+// Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
+// that this is OK
+func (tb *TextBuf) FileModCheck() {
+	if tb.FileModOk {
+		return
+	}
+	info, err := os.Stat(string(tb.Filename))
+	if err != nil {
+		return
+	}
+	if info.ModTime() != time.Time(tb.Info.ModTime) {
+		vp := tb.ViewportFromView()
+		if tb.Changed {
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
+				Prompt: fmt.Sprintf("File: %v has changed on disk since being opened or saved by you, but you have already made changes -- what do you want to do?", tb.Filename)},
+				[]string{"Save To Different File", "Open From Disk, Losing Changes", "Ignore and Proceed"},
+				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						CallMethod(tb, "SaveAs", vp)
+					case 1:
+						tb.ReOpen()
+					case 2:
+						tb.FileModOk = true
+					}
+				})
+		} else {
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
+				Prompt: fmt.Sprintf("File: %v has changed on disk since being opened or saved by you (and you haven't made any changes since) open from disk?", tb.Filename)},
+				[]string{"Open From Disk", "Ignore and Prodeed"},
+				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						tb.ReOpen()
+					case 1:
+						tb.FileModOk = true
+					}
+				})
+		}
+	}
+}
+
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
 	fp, err := os.Open(string(filename))
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		vp := tb.ViewportFromView()
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -129,7 +203,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	fp.Close()
 	tb.Filename = filename
 	tb.SetName(string(filename)) // todo: modify in any way?
-	tb.SetMimetype(string(filename))
+	tb.Stat()
 	tb.BytesToLines()
 	return nil
 }
@@ -140,6 +214,7 @@ func (tb *TextBuf) ReOpen() bool {
 	if tb.Filename == "" {
 		return false
 	}
+	// todo: use diff!
 	err := tb.Open(tb.Filename)
 	if err != nil {
 		return false
@@ -149,15 +224,38 @@ func (tb *TextBuf) ReOpen() bool {
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 func (tb *TextBuf) SaveAs(filename gi.FileName) error {
+	// todo: filemodcheck!
 	tb.EditDone()
+	if _, err := os.Stat(string(filename)); !os.IsNotExist(err) {
+		vp := tb.ViewportFromView()
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
+			Prompt: fmt.Sprintf("File: %v already exists, overwrite?", filename)},
+			[]string{"Cancel", "Overwrite"},
+			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					// do nothing
+				case 1:
+					tb.SaveToFile(filename)
+				}
+			})
+		return nil
+	} else {
+		return tb.SaveToFile(filename)
+	}
+}
+
+// SaveToFile writes current buffer to file, with no prompting, etc
+func (tb *TextBuf) SaveToFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
+	} else {
+		tb.Filename = filename
+		tb.SetName(string(filename)) // todo: modify in any way?
+		tb.Stat()
 	}
-	tb.Filename = filename
-	tb.SetName(string(filename)) // todo: modify in any way?
-	tb.SetMimetype(string(filename))
 	return err
 }
 
@@ -173,8 +271,9 @@ func (tb *TextBuf) Save() error {
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
 func (tb *TextBuf) Close() bool {
 	if tb.Changed {
+		vp := tb.ViewportFromView()
 		if tb.Filename != "" {
-			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Close Without Saving?",
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
 				[]string{"Save", "Close Without Saving", "Cancel"},
 				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -189,7 +288,7 @@ func (tb *TextBuf) Close() bool {
 					}
 				})
 		} else {
-			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Close Without Saving?",
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
 				[]string{"Close Without Saving", "Cancel"},
 				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -313,23 +412,6 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 		}
 	}
 	tb.TextBufSig.Disconnect(vw.This)
-}
-
-// SetMimetype sets the Mimetype and HiLang based on the given filename
-func (tb *TextBuf) SetMimetype(filename string) {
-	// todo: use chroma too
-	ext := strings.ToLower(filepath.Ext(filename))
-	ext = strings.TrimSuffix(ext, "#") // autosave
-	tb.Mimetype = mime.TypeByExtension(ext)
-	if hl, ok := ExtToHiLangMap[ext]; ok {
-		tb.HiLang = hl
-		// fmt.Printf("set language to: %v for extension: %v\n", hl, ext)
-	} else if strings.HasSuffix(filename, "Makefile") {
-		tb.HiLang = "Makefile"
-	} else {
-		fmt.Printf("failed to set language for extension: %v\n", ext)
-	}
-	// else try something else..
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -510,6 +592,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 		log.Printf("giv.TextBuf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
+	tb.FileModCheck()
 	tb.Changed = true
 	tbe := tb.Region(st, ed)
 	tbe.Delete = true
@@ -553,6 +636,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	if len(tb.Lines) == 0 {
 		tb.New(1)
 	}
+	tb.FileModCheck()
 	tb.Changed = true
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
@@ -723,6 +807,14 @@ func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
 	return tbe
 }
 
+// ViewportFromView returns Viewport from textview, if avail
+func (tb *TextBuf) ViewportFromView() *gi.Viewport2D {
+	if len(tb.Views) > 0 {
+		return tb.Views[0].Viewport
+	}
+	return nil
+}
+
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *TextBuf) AutoScrollViews() {
 	for _, tv := range tb.Views {
@@ -858,6 +950,67 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+//   Diffs
+
+// TextDiffs are raw differences between text, in terms of lines, reporting a
+// sequence of operations that would convert one buffer (a) into the other
+// buffer (b).  Each operation is either an 'r' (replace), 'd' (delete), 'i'
+// (insert) or 'e' (equal).
+type TextDiffs []difflib.OpCode
+
+// DiffBufs computes the diff between this buffer and the other buffer,
+// reporting a sequence of operations that would convert this buffer (a) into
+// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
+func (tb *TextBuf) DiffBufs(ob *TextBuf) TextDiffs {
+	if tb.NLines == 0 || ob.NLines == 0 {
+		return nil
+	}
+	astr := make([]string, tb.NLines)
+	bstr := make([]string, ob.NLines)
+
+	for ai, al := range tb.Lines {
+		astr[ai] = string(al)
+	}
+	for bi, bl := range ob.Lines {
+		bstr[bi] = string(bl)
+	}
+
+	m := difflib.NewMatcher(astr, bstr)
+	return m.GetOpCodes()
+}
+
+// DiffBufsUnified computes the diff between this buffer and the other buffer,
+// returning a unified diff with given amount of context (default of 3 will be
+// used if -1)
+func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
+	if tb.NLines == 0 || ob.NLines == 0 {
+		return nil
+	}
+	astr := make([]string, tb.NLines)
+	bstr := make([]string, ob.NLines)
+
+	for ai, al := range tb.Lines {
+		astr[ai] = string(al)
+	}
+	for bi, bl := range ob.Lines {
+		bstr[bi] = string(bl)
+	}
+
+	ud := difflib.UnifiedDiff{A: astr, FromFile: string(tb.Filename), FromDate: tb.Info.ModTime.String(),
+		B: bstr, ToFile: string(ob.Filename), ToDate: ob.Info.ModTime.String(), Context: context}
+	var buf bytes.Buffer
+	difflib.WriteUnifiedDiff(&buf, ud)
+	return buf.Bytes()
+}
+
+// PatchFromBuf patches (edits) this buffer using content from other buffer,
+// according to diff operations (e.g., as generated from DiffBufs)
+func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs) bool {
+	return false
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 //   TextBufList, TextBufs
 
 // TextBufList is a list of text buffers, as a ki.Node, with buffers as children
@@ -880,22 +1033,4 @@ func init() {
 
 func NewTextBuf() *TextBuf {
 	return TextBufs.New()
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//  extension to highighting style map
-
-var ExtToHiLangMap = map[string]string{
-	".go":    "Go",
-	".md":    "markdown",
-	".css":   "CSS",
-	".html":  "HTML",
-	".htm":   "HTML",
-	".tex":   "TeX",
-	".cpp":   "C++",
-	".c":     "C",
-	".h":     "C++",
-	".sh":    "Bash",
-	".plist": "XML",
-	".svg":   "XML",
 }
