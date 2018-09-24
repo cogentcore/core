@@ -1749,6 +1749,13 @@ func (tv *TextView) CompleteExtend(s string) {
 	}
 }
 
+func (tv *TextView) CloseCompleter() {
+	win := tv.ParentWindow()
+	if gi.PopupIsCompleter(win.Popup) {
+		win.ClosePopup(win.Popup)
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //    Scrolling
 
@@ -2568,7 +2575,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	win := tv.ParentWindow()
 
 	if gi.PopupIsCompleter(win.Popup) {
-		tv.Complete.KeyInput(kf)
+		setprocessed := tv.Complete.KeyInput(kf)
+		if setprocessed {
+			kt.SetProcessed()
+		}
 	}
 
 	if kt.IsProcessed() {
@@ -2603,11 +2613,13 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CursorDown(1)
 	case gi.KeyFunPageUp:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
 	case gi.KeyFunPageDown:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
@@ -2623,31 +2635,38 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CursorEndLine()
 	case gi.KeyFunDocHome:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartDoc()
 	case gi.KeyFunDocEnd:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
 	case gi.KeyFunSelectMode:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.SelectModeToggle()
 	case gi.KeyFunCancelSelect:
 		kt.SetProcessed()
+		tv.CloseCompleter()
 		tv.EscPressed() // generic cancel
 	case gi.KeyFunSelectAll:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.SelectAll()
 	case gi.KeyFunCopy:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.Copy(true) // reset
 	case gi.KeyFunSearch:
 		kt.SetProcessed()
+		tv.CloseCompleter()
 		tv.ISearch()
 	case gi.KeyFunAbort:
 		kt.SetProcessed()
@@ -2675,26 +2694,32 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		}
 	case gi.KeyFunKill:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.CursorKill()
 	case gi.KeyFunDelete:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
 	case gi.KeyFunCut:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.Cut()
 	case gi.KeyFunPaste:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.Paste()
 	case gi.KeyFunUndo:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.Undo()
 	case gi.KeyFunRedo:
 		tv.ISearchCancel()
+		tv.CloseCompleter()
 		kt.SetProcessed()
 		tv.Redo()
 	case gi.KeyFunComplete:
