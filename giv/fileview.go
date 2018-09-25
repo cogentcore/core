@@ -58,13 +58,13 @@ type FileViewFilterFunc func(fv *FileView, fi *FileInfo) bool
 
 // FileViewDirOnlyFilter is a FileViewFilterFunc that only shows directories (folders).
 func FileViewDirOnlyFilter(fv *FileView, fi *FileInfo) bool {
-	return fi.Kind == "Folder"
+	return fi.IsDir()
 }
 
 // FileViewExtOnlyFilter is a FileViewFilterFunc that only shows files that
 // match the target extensions, and directories.
 func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
-	if fi.Kind == "Folder" {
+	if fi.IsDir() {
 		return true
 	}
 	ext := strings.ToLower(filepath.Ext(fi.Name))
@@ -120,7 +120,7 @@ var FileViewProps = ki.Props{
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
 var FileViewKindColorMap = map[string]string{
-	"Folder": "pref(link)",
+	"folder": "pref(link)",
 }
 
 // FileViewSignals are signals that fileview sends based on user actions.
@@ -346,7 +346,7 @@ func (fv *FileView) ConfigFilesRow() {
 		if sig == int64(TableViewDoubleClicked) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			if fi, ok := fvv.SelectedFileInfo(); ok {
-				if fi.Kind == "Folder" {
+				if fi.IsDir() {
 					fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
 					fv.SelFile = ""
 					fv.SelectedIdx = -1

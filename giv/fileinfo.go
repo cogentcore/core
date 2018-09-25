@@ -17,10 +17,11 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/c2h5oh/datasize"
-	"github.com/gabriel-vasile/mimetype"
+	//	"github.com/gabriel-vasile/mimetype" // too slow.
 	"github.com/goki/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/h2non/filetype"
 )
 
 // FileInfo represents the information about a given file / directory,
@@ -74,7 +75,7 @@ func (fi *FileInfo) Stat() error {
 	fi.Mode = info.Mode()
 	fi.ModTime = FileTime(info.ModTime())
 	if info.IsDir() {
-		fi.Kind = "Folder"
+		fi.Kind = "folder"
 	} else {
 		mtyp, _, err := MimeFromFile(fi.Path)
 		if err == nil {
@@ -157,24 +158,34 @@ func (fi *FileInfo) Rename(newpath string) error {
 // set CustomExtMimeMap to your own map or call AddCustomExtMime for
 // extension-based ones.
 func MimeFromFile(fname string) (mtype, ext string, err error) {
-	mtyp, ext, err := mimetype.DetectFile(fname)
+	//	mtyp, ext, err := mimetype.DetectFile(fname) // too slow
+	mtypt, err := filetype.MatchFile(fname)
+	ptyp := ""
+	isplain := false
 	if err == nil {
-		// todo: may have custom overrides / specializations here
-		return mtyp, ext, err
+		mtyp := mtypt.MIME.Value
+		ext = mtypt.Extension
+		if strings.HasPrefix(mtyp, "text/plain") {
+			isplain = true
+			ptyp = mtyp
+		} else if mtyp != "" {
+			return mtyp, ext, err
+		}
 	}
 	ext = filepath.Ext(fname)
-	mtyp = mime.TypeByExtension(ext)
+	mtyp := mime.TypeByExtension(ext)
 	if mtyp != "" {
 		return mtyp, strings.ToLower(ext), nil
 	}
 	lexer := lexers.Match(fname) // todo: could get start of file and pass to
 	// Analyze, but might be too slow..
 	if lexer != nil {
-		if len(lexer.Config().MimeTypes) > 0 {
-			mtyp = lexer.Config().MimeTypes[0]
+		config := lexer.Config()
+		if len(config.MimeTypes) > 0 {
+			mtyp = config.MimeTypes[0]
 			return mtyp, ext, nil
 		}
-		mtyp := "application/" + strings.ToLower(lexer.Config().Name)
+		mtyp := "application/" + strings.ToLower(config.Name)
 		return mtyp, ext, nil
 	}
 	ext = strings.ToLower(ext)
@@ -186,17 +197,53 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if mtyp, ok := FileExtMimeMap[ext]; ok {
 		return mtyp, ext, nil
 	}
+	if isplain {
+		return ptyp, ext, nil
+	}
 	return "", ext, fmt.Errorf("giv.MimeFromFile could not find mime type for ext: %v file: %v", ext, fname)
 }
 
 // FileKindFromMime returns simplfied Kind description based on the given full
-// mime type string.  Strips out application/ prefix for example.
+// mime type string.  Strips out application/ prefix, and converts all the
+// chroma-based mime-types to their basic names
 func FileKindFromMime(mime string) string {
+	if CustomMimeToKindMap != nil {
+		if kind, ok := CustomMimeToKindMap[mime]; ok {
+			return kind
+		}
+	}
+	MimeToKindMapInit()
+	if kind, ok := MimeToKindMap[mime]; ok {
+		return kind
+	}
+	// todo: get rid of charset
+	if csidx := strings.Index(mime, "; charset="); csidx > 0 {
+		mime = mime[:csidx]
+	}
 	switch {
 	case strings.HasPrefix(mime, "application/"):
 		return strings.TrimPrefix(mime, "application/")
 	}
 	return mime
+}
+
+// MimeToKindMapInit makes sure the MimeToKindMap is initialized from
+// InitMimeToKindMap plus chroma lexer types.
+func MimeToKindMapInit() {
+	if MimeToKindMap != nil {
+		return
+	}
+	MimeToKindMap = InitMimeToKindMap
+	for _, l := range lexers.Registry.Lexers {
+		config := l.Config()
+		nm := strings.ToLower(config.Name)
+		if len(config.MimeTypes) > 0 {
+			mtyp := config.MimeTypes[0]
+			MimeToKindMap[mtyp] = nm
+		} else {
+			MimeToKindMap["application/"+nm] = nm
+		}
+	}
 }
 
 // FindIcon uses file info to find an appropriate icon for this file -- uses
@@ -215,6 +262,14 @@ func (fi *FileInfo) FindIcon() (gi.IconName, bool) {
 	}
 	if fi.IsDir() {
 		return gi.IconName("folder"), true
+	}
+	if icn = "file-" + gi.IconName(kind); icn.IsValid() {
+		return icn, true
+	}
+	if ms, ok := KindToIconMap[kind]; ok {
+		if icn = gi.IconName(ms); icn.IsValid() {
+			return icn, true
+		}
 	}
 	if strings.Contains(kind, "/") {
 		si := strings.IndexByte(kind, '/')
@@ -291,6 +346,11 @@ var FileInfoProps = ki.Props{
 // other useful methods -- will plug into ValueView with date / time editor.
 type FileTime time.Time
 
+// Int satisfies the kit.Inter interface for sorting etc
+func (ft FileTime) Int() int64 {
+	return (time.Time(ft)).Unix()
+}
+
 func (ft FileTime) String() string {
 	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
 }
@@ -320,6 +380,11 @@ func (ft *FileTime) UnmarshalText(data []byte) error {
 }
 
 type FileSize datasize.ByteSize
+
+// Int satisfies the kit.Inter interface for sorting etc
+func (fs FileSize) Int() int64 {
+	return int64(fs) // note: is actually uint64
+}
 
 func (fs FileSize) String() string {
 	return (datasize.ByteSize)(fs).HumanReadable()
@@ -369,9 +434,7 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 // -- used as a last resort when everything else fails!
 var FileExtMimeMap = map[string]string{
 	".gide": "application/gide",
-	".go":   "application/go",
-	".py":   "application/python",
-	".cpp":  "application/python",
+	".dmg":  "application/x-apple-diskimage",
 }
 
 // CustomExtMimeMap can be set to your own map of extensions (lowercase) to
@@ -385,8 +448,29 @@ func AddCustomExtMime(ext, mime string) {
 	FileExtMimeMap[ext] = mime
 }
 
+// MimeToKindMap maps from mime type names to kind names.  Add any standard
+// manual cases to InitMimeToKindMap, which will be used here along with the
+// chroma lexer mime to name mapping.
+var MimeToKindMap map[string]string
+
+// InitMimeToKindMap maps from mime type names to kind names.  Add any
+// standard manual cases here -- will be used as start of MimeToKindMap, which
+// is kept empty as trigger for initialization.
+var InitMimeToKindMap = map[string]string{}
+
+// CustomMimeToKindMap maps from mime type names to kind names, and can be set
+// by user for any special cases.  This is used before the standard one.
+var CustomMimeToKindMap map[string]string
+
 // KindToIconMap has special cases for mapping mime type to icon, for those
 // that basic string doesn't work
 var KindToIconMap = map[string]string{
-	"svg+xml": "svg",
+	"svg+xml":           "svg",
+	"msword":            "file-word",
+	"postscript":        "file-pdf",
+	"vnd.ms-excel":      "file-excel",
+	"vnd.ms-powerpoint": "file-powerpoint",
+	"x-apple-diskimage": "file-zip",
+	"octet-stream":      "file-binary",
+	"gzip":              "file-zip",
 }
