@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
@@ -412,7 +411,8 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sgf.Kids = make(ki.Slice, nWidgPerRow*sz)
 
 	if tv.SortIdx >= 0 {
-		StructSliceSort(tv.Slice, tv.SortIdx, !tv.SortDesc)
+		rawIdx := tv.VisFields[tv.SortIdx].Index
+		kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 	}
 	tv.ConfigSliceGridRows()
 
@@ -633,110 +633,13 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	}
 
 	tv.SortIdx = fldIdx
-	rawIdx := tv.VisFields[fldIdx].Index[0]
+	rawIdx := tv.VisFields[fldIdx].Index
 
 	sgf := tv.SliceGrid()
 	sgf.SetFullReRender()
 
-	StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 	tv.ConfigSliceGridRows()
-}
-
-// StructSliceSort sorts a slice of a struct according to the given field
-// (specified by first-order index) and sort direction, using int, float,
-// string kind conversions through reflect, and supporting time.Time as well
-// -- todo: could extend with a function that handles specific fields
-func StructSliceSort(struSlice interface{}, fldIdx int, ascending bool) error {
-	mv := reflect.ValueOf(struSlice)
-	mvnp := kit.NonPtrValue(mv)
-	struTyp := kit.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
-	if fldIdx < 0 || fldIdx >= struTyp.NumField() {
-		err := fmt.Errorf("gi.StructSliceSort: field index out of range: %v must be < %v\n", fldIdx, struTyp.NumField())
-		log.Println(err)
-		return err
-	}
-	fld := struTyp.Field(fldIdx)
-	vk := fld.Type.Kind()
-
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := ival.Elem().Field(fldIdx).Int()
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := jval.Elem().Field(fldIdx).Int()
-			if ascending {
-				return iv < jv
-			} else {
-				return iv > jv
-			}
-		})
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := ival.Elem().Field(fldIdx).Uint()
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := jval.Elem().Field(fldIdx).Uint()
-			if ascending {
-				return iv < jv
-			} else {
-				return iv > jv
-			}
-		})
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := ival.Elem().Field(fldIdx).Float()
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := jval.Elem().Field(fldIdx).Float()
-			if ascending {
-				return iv < jv
-			} else {
-				return iv > jv
-			}
-		})
-	case vk == reflect.String:
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := ival.Elem().Field(fldIdx).String()
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := jval.Elem().Field(fldIdx).String()
-			if ascending {
-				return strings.ToLower(iv) < strings.ToLower(jv)
-			} else {
-				return strings.ToLower(iv) > strings.ToLower(jv)
-			}
-		})
-	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "giv.FileTime":
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := (time.Time)(ival.Elem().Field(fldIdx).Interface().(FileTime))
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := (time.Time)(jval.Elem().Field(fldIdx).Interface().(FileTime))
-			if ascending {
-				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
-			}
-		})
-	case vk == reflect.Struct && kit.FullTypeName(fld.Type) == "time.Time":
-		sort.Slice(mvnp.Interface(), func(i, j int) bool {
-			ival := kit.OnePtrValue(mvnp.Index(i))
-			iv := ival.Elem().Field(fldIdx).Interface().(time.Time)
-			jval := kit.OnePtrValue(mvnp.Index(j))
-			jv := jval.Elem().Field(fldIdx).Interface().(time.Time)
-			if ascending {
-				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
-			}
-		})
-	default:
-		err := fmt.Errorf("SortStructSlice: unable to sort on field of type: %v\n", fld.Type.String())
-		log.Println(err)
-		return err
-	}
-	return nil
 }
 
 // ConfigToolbar configures the toolbar actions

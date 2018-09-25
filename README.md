@@ -94,6 +94,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* initial sorting not working in fileview
+
 * would be a lot faster if textbuf held the markup text and views just read off of that -- then switching buffers would be instant.  might make it easier to protect the updating too -- views don't get a crack at anything until it is updated.. -- also ideally do a diff for re-open, and only re-highlight areas that are changed.  as a first pass, at least testing for identity would save a lot of time for most post-save actions.
 
 * focus issues in tableview: real!  but very hard to reproduce!

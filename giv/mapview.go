@@ -149,7 +149,8 @@ func (mv *MapView) ConfigMapGrid() {
 
 	sg.SetProp("columns", ncol)
 
-	keys := mpvnp.MapKeys()
+	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!
+	// todo: add these methods to kit.maps.go and use slice.go logic to sort..
 	if mv.SortVals {
 		sort.Slice(keys, func(i, j int) bool {
 			vi := mpvnp.MapIndex(keys[i])
